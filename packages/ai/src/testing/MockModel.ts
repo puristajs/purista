@@ -8,18 +8,18 @@ import type {
 	ProviderStream,
 } from '../providers/runtime/ModelProvider.js'
 
-type TextMatcher = string | RegExp | ((request: ProviderRequest) => boolean)
-type JsonMatcher =
+export type MockTextMatcher = string | RegExp | ((request: ProviderRequest) => boolean)
+export type MockJsonMatcher =
 	| string
 	| RegExp
 	| ((request: ProviderJsonRequest) => boolean)
 	| Record<string, unknown>
 	| Array<unknown>
 
-type TextReply = string | ((request: ProviderRequest) => string | Promise<string>)
-type JsonReply = unknown | ((request: ProviderJsonRequest) => unknown | Promise<unknown>)
+export type MockTextReply = string | ((request: ProviderRequest) => string | Promise<string>)
+export type MockJsonReply = unknown | ((request: ProviderJsonRequest) => unknown | Promise<unknown>)
 
-const matchesText = (matcher: TextMatcher, request: ProviderRequest): boolean => {
+const matchesText = (matcher: MockTextMatcher, request: ProviderRequest): boolean => {
 	if (typeof matcher === 'string') {
 		return request.prompt.includes(matcher)
 	}
@@ -29,7 +29,7 @@ const matchesText = (matcher: TextMatcher, request: ProviderRequest): boolean =>
 	return matcher(request)
 }
 
-const matchesJson = (matcher: JsonMatcher, request: ProviderJsonRequest): boolean => {
+const matchesJson = (matcher: MockJsonMatcher, request: ProviderJsonRequest): boolean => {
 	if (typeof matcher === 'function') {
 		return matcher(request)
 	}
@@ -58,21 +58,21 @@ export class MockModel implements ModelProvider {
 		json: true,
 	}
 
-	private readonly textRules: Array<{ matcher: TextMatcher; reply: TextReply }> = []
-	private readonly jsonRules: Array<{ matcher: JsonMatcher; reply: JsonReply }> = []
+	private readonly textRules: Array<{ matcher: MockTextMatcher; reply: MockTextReply }> = []
+	private readonly jsonRules: Array<{ matcher: MockJsonMatcher; reply: MockJsonReply }> = []
 
-	on(matcher: TextMatcher): { reply: (reply: TextReply) => MockModel } {
+	on(matcher: MockTextMatcher): { reply: (reply: MockTextReply) => MockModel } {
 		return {
-			reply: (reply: TextReply) => {
+			reply: (reply: MockTextReply) => {
 				this.textRules.push({ matcher, reply })
 				return this
 			},
 		}
 	}
 
-	onJson(matcher: JsonMatcher): { reply: (reply: JsonReply) => MockModel } {
+	onJson(matcher: MockJsonMatcher): { reply: (reply: MockJsonReply) => MockModel } {
 		return {
-			reply: (reply: JsonReply) => {
+			reply: (reply: MockJsonReply) => {
 				this.jsonRules.push({ matcher, reply })
 				return this
 			},

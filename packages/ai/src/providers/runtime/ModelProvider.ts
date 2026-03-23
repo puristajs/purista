@@ -1,3 +1,6 @@
+import type { ExternalBinding, ExternalBindingSet } from '../../bridge/externalRuntime.js'
+import type { SkillDocument, SkillReferenceDocument } from '../../skills/fileSystem.js'
+
 /**
  * Payload sent to a model provider.
  */
@@ -9,6 +12,29 @@ export type ProviderRequest = {
 	 * Providers may map these to dedicated instruction roles when supported.
 	 */
 	developerInstruction?: string | string[]
+	/**
+	 * Optional skill documents that shape reasoning and prompt context.
+	 *
+	 * In normal PURISTA handler code you can usually omit this field when calling
+	 * `context.models['alias'].generateText(...)`. The agent runtime automatically
+	 * loads the skills declared via `builder.useSkills([...])` and fills them in.
+	 */
+	skills?: Array<Pick<SkillDocument, 'name' | 'content'>>
+	/**
+	 * Optional reference documents belonging to already selected skills.
+	 *
+	 * References are not auto-loaded because they are usually a more deliberate,
+	 * skill-specific choice made by the handler.
+	 */
+	references?: Array<Pick<SkillReferenceDocument, 'skillName' | 'relativePath' | 'content'>>
+	/**
+	 * Optional executable bindings for allowlisted PURISTA commands and child agents.
+	 *
+	 * In normal PURISTA handler code you can usually omit this field when calling
+	 * `context.models['alias'].generateText(...)`. The agent runtime automatically
+	 * exposes the allowlisted commands and agents declared in the builder.
+	 */
+	bindings?: ExternalBindingSet | ExternalBinding[]
 	metadata?: Record<string, unknown>
 }
 
@@ -166,6 +192,18 @@ export interface ModelProvider {
 	/**
 	 * High-level helper that yields one final text output while automatically
 	 * preferring `stream()` and falling back to `generate()`.
+	 *
+	 * @example
+	 * ```ts
+	 * const answer = await context.models['openai:primary'].generateText({
+	 *   developerInstruction: 'Use the available tools before answering.',
+	 *   prompt: payload.prompt,
+	 *   onTextDelta: delta => context.stream.sendChunk(delta),
+	 * })
+	 * ```
+	 *
+	 * In normal handler code the PURISTA runtime fills in declared skills and
+	 * allowlisted bindings automatically when you omit them.
 	 */
 	generateText?(request: ProviderGenerateTextRequest): Promise<string>
 	generateJson?<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>>

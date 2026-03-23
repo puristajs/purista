@@ -9,8 +9,8 @@
 		"test": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@purista/core": "*",
-		"@purista/sandbox": "file:../../packages/sandbox-service"
+		"@purista/ai": "*",
+		"@purista/core": "*"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.1",

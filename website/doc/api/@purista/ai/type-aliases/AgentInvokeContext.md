@@ -8,7 +8,7 @@
 
 > **AgentInvokeContext** = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:85](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L85)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:86](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L86)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:85](https://github.com/pur
 
 > `optional` **stream**: [`AgentStreamResponder`](AgentStreamResponder.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:86](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L86)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:87](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L87)

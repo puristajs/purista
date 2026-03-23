@@ -18,6 +18,7 @@ import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
+import { createInlineSkillResource, type SkillResource, type SkillSourceMap } from '../skills/fileSystem.js'
 import type {
 	AgentInfo,
 	AgentRuntimeInstance as AgentInstanceContract,
@@ -41,7 +42,7 @@ export type AgentInstanceDependencies = {
 	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
 }
 
-export type AgentRuntimeDependencies = AgentInstanceOptions
+export type AgentRuntimeDependencies<SkillNames extends string = string> = AgentInstanceOptions<SkillNames>
 
 type ResolvedAgentRuntimeDependencies = {
 	eventBridge: EventBridge
@@ -109,6 +110,25 @@ const supportsCapability = (
 	}
 }
 
+const isSkillResource = (value: unknown): value is SkillResource =>
+	typeof value === 'object' &&
+	value !== null &&
+	typeof (value as SkillResource).list === 'function' &&
+	typeof (value as SkillResource).load === 'function' &&
+	typeof (value as SkillResource).search === 'function'
+
+const resolveSkillResource = <SkillNames extends string>(
+	skills: SkillResource | SkillSourceMap<SkillNames> | undefined,
+): SkillResource | undefined => {
+	if (!skills) {
+		return undefined
+	}
+	if (isSkillResource(skills)) {
+		return skills
+	}
+	return createInlineSkillResource(skills)
+}
+
 export class AgentInstance implements AgentInstanceContract {
 	private service: any
 	private readonly dependencies: AgentInstanceDependencies
@@ -118,6 +138,8 @@ export class AgentInstance implements AgentInstanceContract {
 		this.dependencies = deps
 		const poolId = runtime.poolConfig?.poolId ?? `agent:${deps.info.agentName}`
 		const maxConcurrencyPerInstance = runtime.poolConfig?.maxConcurrencyPerInstance ?? 1
+
+		const skillResource = resolveSkillResource(runtime.skills)
 
 		this.runtime = {
 			eventBridge,
@@ -132,7 +154,10 @@ export class AgentInstance implements AgentInstanceContract {
 			conversationStore: runtime.conversationStore ?? new InMemoryConversationStore(),
 			poolManager: runtime.poolManager ?? new PoolManager(),
 			models: runtime.models ?? {},
-			resources: runtime.resources ?? {},
+			resources: {
+				...(runtime.resources ?? {}),
+				...(skillResource ? { skills: skillResource } : {}),
+			},
 			poolId,
 			maxConcurrencyPerInstance,
 			concurrencyHints: runtime.concurrencyHints,

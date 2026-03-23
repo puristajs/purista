@@ -41,12 +41,12 @@ export type HttpExposureOptions = {
 	mode?: 'sync' | 'async'
 }
 
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+export type CommandAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
 }
 
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
+const isAgentInvokeConfig = (value: unknown): value is CommandAgentInvokeConfig<Schema, Schema> => {
 	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 }
 
@@ -374,7 +374,7 @@ export class CommandDefinitionBuilder<
 	>(
 		agentName: SName,
 		agentVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
+		invokeConfigOrParameterSchema?: Parameter | CommandAgentInvokeConfig<Payload, Parameter>,
 	) {
 		if (agentName.trim() === '' || agentVersion.trim() === '') {
 			throw new Error('canInvokeAgent requires non-empty agent name and version')

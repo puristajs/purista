@@ -6,6 +6,52 @@ import { generateSidebar } from 'vitepress-sidebar'
 
 const hostname: string = 'https://purista.dev'
 
+type SidebarGroup = {
+	text: string
+	link?: string
+	items?: SidebarGroup[]
+	collapsed?: boolean
+}
+
+const handbookSidebarConfig = generateSidebar([
+	{
+		documentRootPath: 'doc',
+		scanStartPath: 'handbook',
+		resolvePath: '/handbook/',
+		useTitleFromFileHeading: true,
+		hyphenToSpace: true,
+		capitalizeFirst: true,
+		underscoreToSpace: true,
+		useTitleFromFrontmatter: true,
+		useFolderTitleFromIndexFile: true,
+		useFolderLinkFromIndexFile: true,
+		sortMenusByFrontmatterOrder: true,
+		includeRootIndexFile: true,
+		includeEmptyFolder: true,
+		capitalizeEachWords: true,
+		collapseDepth: 1,
+	},
+])['/handbook/'] as { base: string; items: SidebarGroup[] }
+
+const aiAgentsSection = handbookSidebarConfig.items.find(
+	item => item.link === '2_building_business-logic/agent/index.md',
+)
+if (aiAgentsSection) {
+	aiAgentsSection.text = 'AI Agents'
+	aiAgentsSection.items = [
+		...(aiAgentsSection.items ?? []),
+		{
+			text: 'Sandbox Runtime',
+			link: '3_eco_system/sandbox',
+		},
+	]
+}
+
+const ecosystemSection = handbookSidebarConfig.items.find(item => item.link === '3_eco_system/index.md')
+if (ecosystemSection?.items) {
+	ecosystemSection.items = ecosystemSection.items.filter(item => item.link !== '3_eco_system/sandbox')
+}
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
 	outDir: '../../docs',
@@ -85,24 +131,8 @@ export default defineConfig({
 		],
 
 		sidebar: {
+			'/handbook/': handbookSidebarConfig,
 			...generateSidebar([
-				{
-					documentRootPath: 'doc',
-					scanStartPath: 'handbook',
-					resolvePath: '/handbook/',
-					useTitleFromFileHeading: true,
-					hyphenToSpace: true,
-					capitalizeFirst: true,
-					underscoreToSpace: true,
-					useTitleFromFrontmatter: true,
-					useFolderTitleFromIndexFile: true,
-					useFolderLinkFromIndexFile: true,
-					sortMenusByFrontmatterOrder: true,
-					includeRootIndexFile: true,
-					includeEmptyFolder: true,
-					capitalizeEachWords: true,
-					collapseDepth: 1,
-				},
 				{
 					documentRootPath: 'doc',
 					scanStartPath: 'article',
@@ -141,6 +171,15 @@ export default defineConfig({
 			]),
 			api: [
 				{
+					text: 'AI',
+					items: [
+						{
+							text: 'AI Agents (@purista/ai)',
+							link: '/api/@purista/ai/README.md',
+						},
+					],
+				},
+				{
 					text: 'Core',
 					items: [
 						{
@@ -158,10 +197,6 @@ export default defineConfig({
 						{
 							text: '@purista/httpserver',
 							link: '/api/@purista/httpserver/README.md',
-						},
-						{
-							text: '@purista/sandbox-service',
-							link: '/api/@purista/sandbox-service/README.md',
 						},
 					],
 				},

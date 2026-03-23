@@ -11,12 +11,18 @@ describe('createAgentContextMock', () => {
 					name: 'purista-architecture',
 					description: 'Architecture guidance',
 					path: '/skills/purista-architecture/SKILL.md',
+					references: ['decision-matrix.md'],
+					scripts: [],
+					assets: [],
 				},
 			],
 			load: async () => ({
 				name: 'purista-architecture',
 				description: 'Architecture guidance',
 				path: '/skills/purista-architecture/SKILL.md',
+				references: ['decision-matrix.md'],
+				scripts: [],
+				assets: [],
 				content: 'Use services and queues.',
 			}),
 			loadMany: async () => [
@@ -24,14 +30,46 @@ describe('createAgentContextMock', () => {
 					name: 'purista-architecture',
 					description: 'Architecture guidance',
 					path: '/skills/purista-architecture/SKILL.md',
+					references: ['decision-matrix.md'],
+					scripts: [],
+					assets: [],
 					content: 'Use services and queues.',
 				},
 			],
+			loadReferences: async () => [
+				{
+					skillName: 'purista-architecture',
+					path: '/skills/purista-architecture/references/decision-matrix.md',
+					relativePath: 'references/decision-matrix.md',
+					content: 'Pick queues for durable work.',
+				},
+			],
+			loadBundle: async () => ({
+				skill: {
+					name: 'purista-architecture',
+					description: 'Architecture guidance',
+					path: '/skills/purista-architecture/SKILL.md',
+					references: ['decision-matrix.md'],
+					scripts: [],
+					assets: [],
+				},
+				files: [
+					{
+						skillName: 'purista-architecture',
+						path: '/skills/purista-architecture/SKILL.md',
+						relativePath: 'SKILL.md',
+						content: Buffer.from('Use services and queues.', 'utf8'),
+					},
+				],
+			}),
 			search: async () => [
 				{
 					name: 'purista-architecture',
 					description: 'Architecture guidance',
 					path: '/skills/purista-architecture/SKILL.md',
+					references: ['decision-matrix.md'],
+					scripts: [],
+					assets: [],
 					content: 'Use services and queues.',
 				},
 			],
@@ -40,6 +78,14 @@ describe('createAgentContextMock', () => {
 		const mock = createAgentContextMock({
 			payload: { prompt: 'reset password' },
 			parameter: { locale: 'en' },
+			manifest: {
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				skills: {
+					resourceName: 'skills',
+					names: ['purista-architecture'],
+				},
+			},
 			commands: {
 				support: {
 					'1': {
@@ -92,6 +138,7 @@ describe('createAgentContextMock', () => {
 		})
 		expect(mock.context.expose.metadata().agents[0]?.payloadSchema).toBeDefined()
 		expect(mock.context.resources.search).toEqual({ enabled: true })
+		expect(mock.context.skills.names).toEqual(['purista-architecture'])
 		await expect(mock.context.skills.list()).resolves.toEqual([
 			expect.objectContaining({
 				name: 'purista-architecture',
@@ -100,6 +147,11 @@ describe('createAgentContextMock', () => {
 		await expect(mock.context.skills.search({ queries: ['architecture'] })).resolves.toEqual([
 			expect.objectContaining({
 				name: 'purista-architecture',
+			}),
+		])
+		await expect(mock.context.skills.loadReferences('purista-architecture')).resolves.toEqual([
+			expect.objectContaining({
+				relativePath: 'references/decision-matrix.md',
 			}),
 		])
 		await expect(mock.context.secrets.getSecret('OPENAI_API_KEY')).resolves.toBe('secret')
@@ -127,7 +179,7 @@ describe('createAgentContextMock', () => {
 
 		expect(mock.context.skills.available).toBe(false)
 		expect(() => mock.context.resources.missing).toThrow('Resource missing is not stubbed')
-		await expect(mock.context.skills.list()).rejects.toThrow('No skill resource is configured')
+		await expect(mock.context.skills.list()).rejects.toThrow('No declared skills are configured')
 		await expect(mock.context.secrets.getSecret('NOPE')).rejects.toThrow('Secret NOPE is not stubbed')
 	})
 })

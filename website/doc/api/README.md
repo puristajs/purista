@@ -23,6 +23,9 @@ All notable changes to this project will be documented in this file.
 - Add @purista/ai package ([#250](https://github.com/orhun/git-cliff/issues/250))
 - Forward nested agent streams
 - Add nested agent forwarding helper
+- Feat sandbox runtime diagnostics and preflight
+- Feat ai filesystem skills and sandbox contract
+- Feat ai skill metadata selection helpers
 
 ### Refactor
 

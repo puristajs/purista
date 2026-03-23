@@ -6,18 +6,31 @@ import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { type AgentHandlerContext, createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
-import {
-	createDefaultMessage,
-	createResolvedAsyncSpy,
-	createTestSpy,
-	envelopesToAsyncIterator,
-	type TestSpy,
-} from './shared.js'
+import { createDefaultMessage, createResolvedAsyncSpy, createTestSpy, envelopesToAsyncIterator } from './shared.js'
 
-type CommandImplementation = (payload: unknown, parameter?: unknown) => Promise<unknown> | unknown
-type CommandMap = Record<string, Record<string, Record<string, CommandImplementation>>>
+export type AgentContextMockSpy<Args extends unknown[] = unknown[], Return = unknown> = ((...args: Args) => Return) & {
+	calls: Args[]
+	setImplementation(implementation: (...args: Args) => Return): AgentContextMockSpy<Args, Return>
+	reset(): AgentContextMockSpy<Args, Return>
+}
 
-type AgentBindingConfig = {
+export type CreateAgentContextMockMessage = {
+	id: string
+	correlationId: string
+	principalId?: string
+	tenantId?: string
+	sender: {
+		serviceName: string
+		serviceVersion: string
+		serviceTarget: string
+		instanceId: string
+	}
+}
+
+export type CommandImplementation = (payload: unknown, parameter?: unknown) => Promise<unknown> | unknown
+export type CommandMap = Record<string, Record<string, Record<string, CommandImplementation>>>
+
+export type AgentBindingConfig = {
 	call?: (payload: unknown, parameter?: unknown) => Promise<AgentProtocolEnvelope[]> | AgentProtocolEnvelope[]
 	text?: string | ((payload: unknown, parameter?: unknown) => string | Promise<string>)
 	object?: unknown | ((payload: unknown, parameter?: unknown) => unknown | Promise<unknown>)
@@ -28,7 +41,7 @@ type AgentBindingConfig = {
 	parameterSchema?: Schema
 }
 
-type AgentMap = Record<string, Record<string, AgentBindingConfig>>
+export type AgentMap = Record<string, Record<string, AgentBindingConfig>>
 
 export type CreateAgentContextMockInput<
 	Payload = unknown,
@@ -44,22 +57,28 @@ export type CreateAgentContextMockInput<
 	resources?: Partial<Resources>
 	models?: Models
 	conversationStore?: ConversationStore
-	message?: Partial<ReturnType<typeof createDefaultMessage>>
+	message?: Partial<CreateAgentContextMockMessage>
 	onEnvelope?: (envelope: AgentProtocolEnvelope) => void | Promise<void>
 	secrets?: Record<string, unknown>
 	configs?: Record<string, unknown>
 	initialStates?: Record<string, unknown>
 }
 
-type NestedSpyMap = Record<string, Record<string, Record<string, TestSpy<[unknown, unknown?], Promise<unknown>>>>>
-type NestedAgentSpyMap = Record<string, Record<string, TestSpy<[unknown, unknown?], Promise<AgentProtocolEnvelope[]>>>>
-type TestSpan = {
-	setAttribute: TestSpy<[string, unknown], void>
-	setAttributes: TestSpy<[Record<string, unknown>], void>
-	addEvent: TestSpy<[string, Record<string, unknown>?], void>
-	setStatus: TestSpy<[unknown], void>
-	recordException: TestSpy<[unknown], void>
-	end: TestSpy<[], void>
+export type NestedSpyMap = Record<
+	string,
+	Record<string, Record<string, AgentContextMockSpy<[unknown, unknown?], Promise<unknown>>>>
+>
+export type NestedAgentSpyMap = Record<
+	string,
+	Record<string, AgentContextMockSpy<[unknown, unknown?], Promise<AgentProtocolEnvelope[]>>>
+>
+export type TestSpan = {
+	setAttribute: AgentContextMockSpy<[string, unknown], void>
+	setAttributes: AgentContextMockSpy<[Record<string, unknown>], void>
+	addEvent: AgentContextMockSpy<[string, Record<string, unknown>?], void>
+	setStatus: AgentContextMockSpy<[unknown], void>
+	recordException: AgentContextMockSpy<[unknown], void>
+	end: AgentContextMockSpy<[], void>
 	spanContext(): { traceId: string; spanId: string; traceFlags: number }
 }
 
@@ -72,28 +91,31 @@ export type AgentContextMockResult<
 	context: AgentHandlerContext<Payload, Parameter, Resources, Models>
 	protocol: ReturnType<typeof createProtocolBuffer>
 	stubs: {
-		logger: Record<'error' | 'warn' | 'info' | 'debug' | 'trace' | 'fatal', TestSpy<[unknown, ...unknown[]], void>>
-		emit: TestSpy<[string, unknown], Promise<void>>
-		startActiveSpan: TestSpy<
+		logger: Record<
+			'error' | 'warn' | 'info' | 'debug' | 'trace' | 'fatal',
+			AgentContextMockSpy<[unknown, ...unknown[]], void>
+		>
+		emit: AgentContextMockSpy<[string, unknown], Promise<void>>
+		startActiveSpan: AgentContextMockSpy<
 			[string, unknown, unknown, (span: TestSpan) => unknown | Promise<unknown>],
 			Promise<unknown>
 		>
 		commands: NestedSpyMap
 		agents: NestedAgentSpyMap
 		secrets: {
-			getSecret: TestSpy<[string], Promise<unknown>>
-			setSecret: TestSpy<[string, unknown], Promise<void>>
-			removeSecret: TestSpy<[string], Promise<void>>
+			getSecret: AgentContextMockSpy<[string], Promise<unknown>>
+			setSecret: AgentContextMockSpy<[string, unknown], Promise<void>>
+			removeSecret: AgentContextMockSpy<[string], Promise<void>>
 		}
 		configs: {
-			getConfig: TestSpy<[string], Promise<unknown>>
-			setConfig: TestSpy<[string, unknown], Promise<void>>
-			removeConfig: TestSpy<[string], Promise<void>>
+			getConfig: AgentContextMockSpy<[string], Promise<unknown>>
+			setConfig: AgentContextMockSpy<[string, unknown], Promise<void>>
+			removeConfig: AgentContextMockSpy<[string], Promise<void>>
 		}
 		states: {
-			getState: TestSpy<[...string[]], Promise<Record<string, unknown>>>
-			setState: TestSpy<[string, unknown], Promise<void>>
-			removeState: TestSpy<[string], Promise<void>>
+			getState: AgentContextMockSpy<[...string[]], Promise<Record<string, unknown>>>
+			setState: AgentContextMockSpy<[string, unknown], Promise<void>>
+			removeState: AgentContextMockSpy<[string], Promise<void>>
 		}
 	}
 	frames(): ReturnType<ReturnType<typeof createProtocolBuffer>['frames']>
@@ -209,7 +231,7 @@ export const createAgentContextMock = <
 	}
 
 	const emit = createResolvedAsyncSpy<[string, unknown], void>(undefined)
-	const startActiveSpan: TestSpy<
+	const startActiveSpan: AgentContextMockSpy<
 		[string, unknown, unknown, (span: TestSpan) => unknown | Promise<unknown>],
 		Promise<unknown>
 	> = createTestSpy(

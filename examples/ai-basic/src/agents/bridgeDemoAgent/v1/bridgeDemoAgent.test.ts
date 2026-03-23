@@ -1,7 +1,13 @@
-import { createAgentTestHarness, getFinalAssistantText, getRunStateArtifacts, ScriptedModel } from '@purista/ai'
+import {
+	createAgentTestHarness,
+	getFinalAssistantText,
+	getRunStateArtifacts,
+	ScriptedModel,
+} from '@purista/ai'
 import { DefaultEventBridge, DefaultQueueBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
+import { exampleSkills } from '../../../skills.js'
 import { supportV1Service } from '../../../service/support/v1/index.js'
 import { bridgeDemoAgent } from './bridgeDemoAgent.js'
 
@@ -14,19 +20,14 @@ describe('bridgeDemoAgent', () => {
 		const logger = initLogger('error')
 		const queueBridge = new DefaultQueueBridge()
 		const provider = new ScriptedModel().nextStream(async request => {
-			const aiSdk = request.metadata?.aiSdk as
-				| {
-						tools?: Record<string, { execute?: (input: unknown, options: unknown) => Promise<unknown> }>
-				  }
-				| undefined
-			const lookupFaq = aiSdk?.tools?.['support.1.lookupFaq']
+			const bindings = Array.isArray(request.bindings) ? request.bindings : Object.values(request.bindings ?? {})
+			const lookupFaq = bindings.find(binding => binding.name === 'support.1.lookupFaq')
 			if (!lookupFaq?.execute) {
 				return ['Missing bridged tools.']
 			}
-			const faq = (await lookupFaq.execute(
-				{ question: 'urgent refund request after duplicate charge' },
-				{} as never,
-			)) as { answer?: string }
+			const faq = (await lookupFaq.execute({
+				question: 'urgent refund request after duplicate charge',
+			})) as { answer?: string }
 			return [`Bridge answer: ${String(faq.answer ?? '')}`]
 		})
 		const eventBridge = new DefaultEventBridge({ logger })
@@ -38,6 +39,7 @@ describe('bridgeDemoAgent', () => {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
 			queueBridge,
+			skills: exampleSkills,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -51,9 +53,14 @@ describe('bridgeDemoAgent', () => {
 				},
 			})
 
-			expect(
-				Object.keys((provider.calls[0]?.request.metadata?.aiSdk as { tools?: object } | undefined)?.tools ?? {}),
-			).toEqual(expect.arrayContaining(['support.1.lookupFaq']))
+			const firstCall = provider.calls[0]
+			const firstCallBindings = firstCall?.method === 'generateText' || firstCall?.method === 'generate' || firstCall?.method === 'stream'
+				? firstCall.request.bindings
+				: undefined
+			const bindingNames = Array.isArray(firstCallBindings)
+				? firstCallBindings.map(binding => binding.name)
+				: Object.keys(firstCallBindings ?? {})
+			expect(bindingNames).toEqual(expect.arrayContaining(['support.1.lookupFaq']))
 			expect(getFinalAssistantText(result.envelopes)).toContain('Bridge answer:')
 			expect(getRunStateArtifacts(result.envelopes).length).toBeGreaterThan(0)
 		} finally {
@@ -68,16 +75,11 @@ describe('bridgeDemoAgent', () => {
 		const logger = initLogger('error')
 		const queueBridge = new DefaultQueueBridge()
 		const provider = new ScriptedModel().nextText(async request => {
-			const aiSdk = request.metadata?.aiSdk as
-				| {
-						tools?: Record<string, { execute?: (input: unknown, options: unknown) => Promise<unknown> }>
-				  }
-				| undefined
-			const lookupFaq = aiSdk?.tools?.['support.1.lookupFaq']
-			const faq = (await lookupFaq?.execute?.(
-				{ question: 'urgent refund request after duplicate charge' },
-				{} as never,
-			)) as { answer?: string } | undefined
+			const bindings = Array.isArray(request.bindings) ? request.bindings : Object.values(request.bindings ?? {})
+			const lookupFaq = bindings.find(binding => binding.name === 'support.1.lookupFaq')
+			const faq = (await lookupFaq?.execute?.({
+				question: 'urgent refund request after duplicate charge',
+			})) as { answer?: string } | undefined
 			return `Bridge answer: ${String(faq?.answer ?? '')}`
 		})
 		const eventBridge = new DefaultEventBridge({ logger })
@@ -89,6 +91,7 @@ describe('bridgeDemoAgent', () => {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
 			queueBridge,
+			skills: exampleSkills,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 

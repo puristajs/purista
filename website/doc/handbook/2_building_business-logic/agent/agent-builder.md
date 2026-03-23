@@ -1,134 +1,190 @@
 ---
 title: Builder
-description: Fluent API to define agent workloads, execution mode, and exposure.
+description: Define the agent contract with AgentBuilder before you think about runtime wiring or SDK adapters.
 order: 203702
 ---
 
 # Builder
 
-`AgentBuilder` defines what an agent can do and how it runs. Keep the definition small and push runtime concerns into injected providers, stores, and queue bridges.
+`AgentBuilder` is the definition phase of a PURISTA agent.
 
-## 1. Minimal Setup
+Use it to declare:
+
+- the agent identity
+- payload and output schemas
+- execution mode
+- model aliases
+- allowlisted commands
+- allowlisted child agents
+- declared skills
+- transport exposure
+
+Do not use it to provide concrete runtime dependencies. That belongs in `getInstance(...)`.
+
+## The Right Mental Model
+
+The builder should answer only this question:
+
+> What is this agent allowed to do?
+
+It should not answer:
+
+- which real provider instance is used
+- where skills come from
+- which queue bridge is active
+- whether a sandbox image exists
+
+Those are runtime concerns.
+
+## A Good Builder Definition
 
 ```ts
+import { AgentBuilder } from '@purista/ai'
+import { z } from 'zod'
+
 export const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
-  description: 'Answers support questions',
+  description: 'Queued durable support assistant',
 })
-  .addPayloadSchema(z.object({ prompt: z.string() }))
-  .defineModel('openai:gpt-4o-mini')
+  .setExecutionMode('queued')
+  .setExecutionPolicy({
+    httpBehavior: 'attach-and-stream',
+    recovery: 'resume-from-checkpoints',
+    scopeFromPayload: ['sessionId'],
+  })
+  .addPayloadSchema(
+    z.object({
+      prompt: z.string().min(1),
+      sessionId: z.string().optional(),
+    }),
+  )
+  .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+  .useSkills(['spec-elicitation', 'support-workflow'])
+  .canInvoke('support', '1', 'lookupFaq')
+  .canInvokeAgent('triageAgent', '1')
+  .persistConversation('user', { maxFrames: 20 })
+  .persistConversation('agent', { maxFrames: 20 })
+  .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
+  .setSseProtocol('ai-sdk-ui-message')
+  .setHandler(async (context, payload) => {
+    // implementation goes here
+    return { message: '...' }
+  })
+  .build()
 ```
 
-## 2. Execution Mode
+## Builder Areas
 
-Choose the execution model explicitly:
+### 1. Identity and schemas
 
-- `inline`: executes immediately in the current request/turn
-- `queued`: converts the request into a queue-backed durable run
+Use these first:
+
+- `agentName`
+- `agentVersion`
+- `addPayloadSchema(...)`
+- `addParameterSchema(...)`
+- `addOutputSchema(...)`
+
+These make the workload explicit and testable.
+
+### 2. Execution mode
+
+Use:
+
+- `setExecutionMode('inline')`
+- `setExecutionMode('queued')`
+
+Rule:
+
+- `inline` for short, immediate work
+- `queued` for long-running, streaming, resumable, or failure-sensitive work
+
+Queued durable agents should usually also define:
+
+- `setExecutionPolicy(...)`
+- `context.runState` usage in the handler
+
+### 3. Models
+
+Use `defineModel(alias, capabilities)` to declare model aliases.
 
 ```ts
-.setExecutionMode('queued')
-.setExecutionPolicy({
-  httpBehavior: 'attach-and-stream',
-  recovery: 'resume-from-checkpoints',
-  scopeFromPayload: ['sessionId'],
-  maxAttempts: 3,
-  leaseTtlMs: 60_000,
-  maxLeaseExtensions: 20,
-})
+.defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+.defineModel('openai:classifier', { capabilities: ['json'] })
 ```
 
-Queued durable agents should use:
+The builder should declare aliases, not provider objects. Real providers are bound later at instance creation.
 
-- a `queueBridge` at runtime
-- `context.runState` for plans, tasks, checkpoints, and locks
-- attach-and-stream HTTP behavior so the caller can keep observing progress
+### 4. Commands and child agents
 
-If you omit `maxLeaseExtensions`, PURISTA derives it from `maxDurationMs / leaseTtlMs` with a small safety margin so long-running queued agents do not silently expire after the core queue default.
+Use:
 
-## 3. Model Capabilities
+- `canInvoke(serviceName, serviceVersion, commandName)`
+- `canInvokeAgent(agentName, agentVersion)`
+
+These declarations feed both:
+
+- direct handler APIs like `context.tools` and `context.agents`
+- external runtime binding helpers like `context.expose.tools(...)`
+
+### 5. Skills
+
+Use:
 
 ```ts
-.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json', 'embedding', 'rerank'] })
+.useSkills(['spec-elicitation', 'support-workflow'])
 ```
 
-Supported capabilities:
+This means:
 
-- `text` / `stream`: conversational text and deltas
-- `json`: structured output
-- `embedding`: vector generation
-- `rerank`: scoring and sorting candidate results
+- the agent may only access these skill names
+- the runtime must provide implementations for those names
+- `context.skills` is scoped to that declared set
 
-## 4. Tool Access
+It does not mean:
 
-Use `.canInvoke(...)` to allow an agent to call a PURISTA command as a tool.
+- automatically load a global catalog
+- automatically inject PURISTA’s own skills
+- search arbitrary skills outside the declared boundary
 
-```ts
-.canInvoke('ticketing', '1', 'createTicket')
-```
+### 6. Transport
 
-Use `.canInvokeAgent(...)` when an external tool loop should be able to delegate into another PURISTA agent through the external runtime bindings.
+Use:
 
-```ts
-.canInvokeAgent('triageAgent', '1')
-```
+- `exposeAsHttpEndpoint(...)`
+- `setSseProtocol(...)`
 
-These declarations are the allowlist for both:
+These are still builder concerns because transport exposure is part of the public contract of the workload.
 
-- native `context.tools` / `context.agents` usage
-- external runtime helpers such as `context.expose.tools(...)`
+## What Should Not Live In The Builder
 
-You can inspect the exported external runtime metadata from the built definition:
+Do not put these concerns into the builder:
 
-```ts
-const metadata = supportAgent.getExternalRuntimeMetadata()
-```
+- model provider instances
+- concrete skill catalogs
+- conversation store instances
+- queue bridge instances
+- sandbox runtime drivers
 
-## 5. Event-Driven Logic
+Those belong in `getInstance(...)`.
 
-```ts
-.canEmit('ticket.classified', z.object({ urgency: z.enum(['high', 'low']) }))
-```
+## Decision Rules
 
-## 6. Conversation Memory
+- If you can explain the setting as part of the agent contract, it belongs in the builder.
+- If it depends on environment, infrastructure, or deployment, it belongs in instance creation.
+- If it is actual business logic, it belongs in the handler.
 
-Use `persistConversation` for LLM-visible chat history, not operational state.
+## Common Mistakes
 
-```ts
-.persistConversation('user')
-.persistConversation('agent', { maxFrames: 20 })
-```
+- Putting runtime dependency wiring into the builder discussion.
+- Thinking `.useSkills([...])` provides skills by itself.
+- Using queued execution without planning for `context.runState`.
+- Jumping to SDK adapters before the agent contract is clear.
 
-## 7. HTTP Exposure
+## Related Guides
 
-```ts
-.exposeAsHttpEndpoint('POST', 'agents/support')
-.setSseProtocol('ai-sdk-ui-message')
-```
-
-For queued durable agents, `ai-sdk-ui-message` maps `run-state` to `data-run-state`, so the frontend can render live progress and lock input while the run is active.
-
-Unary mode is still available when you want a final JSON response:
-
-```ts
-.exposeAsHttpEndpoint('POST', 'agents/support')
-.setStreamingMode('aggregate')
-```
-
-## 8. Builder Method Map
-
-| Area | Methods |
-| :--- | :--- |
-| Schema | `addPayloadSchema`, `addParameterSchema`, `addOutputSchema`, `addContextSchema` |
-| Execution | `setExecutionMode`, `setExecutionPolicy` |
-| Capabilities | `defineModel`, `canInvoke`, `canEmit`, `canInvokeAgent` |
-| Memory / Retrieval | `persistConversation` |
-| Transport | `exposeAsHttpEndpoint`, `setSseProtocol`, `setStreamingMode` |
-| Behavior | `setRetryPolicy`, `setSuccessEventName`, `setRuntime` |
-
-## Why This Pattern?
-
-The builder keeps definition separate from runtime wiring. That makes the same agent easy to run inline in tests and queued in production without changing business logic.
-
-It also keeps external SDK integration honest: PURISTA remains the execution and observability layer, while the external runtime stays just a reasoning loop.
+- [Quick Start](./getting-started.md)
+- [Context](./handler-context.md)
+- [Runtime](./runtime.md)
+- [Skills](./skills.md)

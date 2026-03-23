@@ -1,13 +1,13 @@
 # Sandbox Example
 
-This example shows how to wire `@purista/sandbox` into a PURISTA service runtime.
+This example shows how to wire the sandbox runtime from `@purista/ai` into a PURISTA service runtime.
 
 ## Build sandbox image
 
 Use the package Dockerfile directly:
 
 ```bash
-docker build -t purista-sandbox-agent:latest -f ../../packages/sandbox-service/Dockerfile.sandbox ../../
+docker build -t purista-sandbox-agent:latest -f ../../packages/ai/Dockerfile.sandbox ../../
 ```
 
 ## Run example

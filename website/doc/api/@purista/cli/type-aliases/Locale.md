@@ -8,7 +8,7 @@
 
 > **Locale** = `string`[] \| `string` \| `false` \| `undefined`
 
-Defined in: [change-case.ts:27](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/change-case.ts#L27)
+Defined in: [change-case.ts:27](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/change-case.ts#L27)
 
 Supported locale values. Use `false` to ignore locale.
 Defaults to `undefined`, which uses the host environment.

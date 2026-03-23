@@ -1,11 +1,24 @@
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 
-type SpyImplementation<Args extends unknown[], Return> = (...args: Args) => Return
+export type SpyImplementation<Args extends unknown[], Return> = (...args: Args) => Return
 
 export type TestSpy<Args extends unknown[] = unknown[], Return = unknown> = ((...args: Args) => Return) & {
 	calls: Args[]
 	setImplementation(implementation: SpyImplementation<Args, Return>): TestSpy<Args, Return>
 	reset(): TestSpy<Args, Return>
+}
+
+export type DefaultTestMessage = {
+	id: string
+	correlationId: string
+	principalId?: string
+	tenantId?: string
+	sender: {
+		serviceName: string
+		serviceVersion: string
+		serviceTarget: string
+		instanceId: string
+	}
 }
 
 export const createTestSpy = <Args extends unknown[], Return>(
@@ -39,20 +52,7 @@ export const createStrictAsyncSpy = <Args extends unknown[], Return>(name: strin
 export const createResolvedAsyncSpy = <Args extends unknown[], Return>(value: Return): TestSpy<Args, Promise<Return>> =>
 	createTestSpy(async (..._args: Args) => value)
 
-export const createDefaultMessage = (
-	overrides?: Partial<{
-		id: string
-		correlationId: string
-		principalId?: string
-		tenantId?: string
-		sender: {
-			serviceName: string
-			serviceVersion: string
-			serviceTarget: string
-			instanceId: string
-		}
-	}>,
-) => ({
+export const createDefaultMessage = (overrides?: Partial<DefaultTestMessage>): DefaultTestMessage => ({
 	id: overrides?.id ?? 'test-message',
 	correlationId: overrides?.correlationId ?? 'test-correlation',
 	principalId: overrides?.principalId ?? 'test-principal',

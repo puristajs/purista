@@ -6,7 +6,7 @@
 
 # Class: AgentInstance
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:112](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L112)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:132](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L132)
 
 ## Implements
 
@@ -18,7 +18,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:112](https://github.com/pu
 
 > **new AgentInstance**(`deps`, `eventBridge`, `runtime?`): `AgentInstance`
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:117](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L117)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:137](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L137)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:117](https://github.com/pu
 
 ##### runtime?
 
-`BaseAgentInstanceOptions` = `{}`
+[`AgentRuntimeDependencies`](../type-aliases/AgentRuntimeDependencies.md) = `{}`
 
 #### Returns
 
@@ -44,7 +44,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:117](https://github.com/pu
 
 > **getExternalRuntimeMetadata**(): `object`
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:231](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L231)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:256](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L256)
 
 #### Returns
 
@@ -68,7 +68,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:231](https://github.com/pu
 
 > **getStatus**(): [`AgentRuntimeStatus`](../type-aliases/AgentRuntimeStatus.md)
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:206](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L206)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:231](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L231)
 
 #### Returns
 
@@ -84,7 +84,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:206](https://github.com/pu
 
 > **invoke**(`request`, `contextOverrides?`): `Promise`\<[`AgentInvokeResult`](../type-aliases/AgentInvokeResult.md)\>
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:252](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L252)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:277](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L277)
 
 #### Parameters
 
@@ -110,7 +110,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:252](https://github.com/pu
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:156](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L156)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:181](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L181)
 
 #### Returns
 
@@ -126,7 +126,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:156](https://github.com/pu
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:198](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/AgentInstance.ts#L198)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:223](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L223)
 
 #### Returns
 

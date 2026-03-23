@@ -1,5 +1,6 @@
 import type { LanguageModel } from 'ai'
 import { describe, expect, it, vi } from 'vitest'
+import { createCommandBinding } from '../../bridge/externalRuntime.js'
 
 import { AiSdkProvider } from './AiSdkProvider.js'
 
@@ -10,6 +11,7 @@ const embedMock = vi.fn()
 const embedManyMock = vi.fn()
 const rerankMock = vi.fn()
 const wrapLanguageModelMock = vi.fn()
+const toolMock = vi.fn((definition: unknown) => definition)
 
 vi.mock('ai', () => ({
 	generateText: (...args: unknown[]) => generateTextMock(...args),
@@ -19,6 +21,7 @@ vi.mock('ai', () => ({
 	embedMany: (...args: unknown[]) => embedManyMock(...args),
 	rerank: (...args: unknown[]) => rerankMock(...args),
 	wrapLanguageModel: (...args: unknown[]) => wrapLanguageModelMock(...args),
+	tool: (...args: unknown[]) => toolMock(...args),
 }))
 
 const mockModel = {} as LanguageModel
@@ -273,6 +276,55 @@ describe('AiSdkProvider', () => {
 				toolChoice: 'required',
 				maxSteps: 20,
 				temperature: 0.1,
+			}),
+		)
+	})
+
+	it('maps skills, references, and bindings from provider requests into the AI SDK call', async () => {
+		generateTextMock.mockResolvedValueOnce({
+			text: 'with-runtime-context',
+			usage: { inputTokens: 3, outputTokens: 2 },
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: {},
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const binding = createCommandBinding({
+			command: {
+				serviceName: 'support',
+				serviceVersion: '1',
+				commandName: 'lookupFaq',
+			},
+			execute: async () => ({ answer: 'ok' }),
+		})
+
+		await provider.generate({
+			prompt: 'Customer prompt',
+			developerInstruction: 'Use tools before answering.',
+			skills: [{ name: 'spec-elicitation', content: 'Ask clarifying questions first.' }],
+			references: [{ skillName: 'spec-elicitation', relativePath: 'references/checklist.md', content: 'Checklist' }],
+			bindings: [binding],
+			metadata: {
+				aiSdk: {
+					toolChoice: 'required',
+				},
+			},
+		})
+
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				prompt: expect.stringContaining('spec-elicitation'),
+				tools: expect.objectContaining({
+					'support.1.lookupFaq': expect.any(Object),
+				}),
+				toolChoice: 'required',
+				system: expect.arrayContaining([
+					expect.objectContaining({
+						content: 'Use tools before answering.',
+						providerOptions: { openai: { systemMessageMode: 'developer' } },
+					}),
+				]),
 			}),
 		)
 	})

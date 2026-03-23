@@ -17,6 +17,7 @@ import { honoV1Service } from '@purista/hono-http-server'
 import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
 import { triageAgent } from './agents/triageAgent/v1/triageAgent.js'
 import { supportV1Service } from './service/support/v1/index.js'
+import { exampleSkills } from './skills.js'
 
 const buildOpenAiProvider = (apiKey: string) => {
 	const openai = createOpenAI({ apiKey })
@@ -60,6 +61,7 @@ export async function main() {
 		models: {
 			'openai:gpt-4o-mini': provider,
 		},
+		skills: exampleSkills,
 		poolConfig: {
 			poolId: 'support',
 			maxConcurrencyPerInstance: 2,

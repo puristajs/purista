@@ -4,10 +4,27 @@ import { generateText } from './generateText.js'
 import type { ModelProvider } from './ModelProvider.js'
 
 describe('generateText', () => {
+	it('prefers the provider-native generateText helper when available', async () => {
+		const generateTextFn = vi.fn(async () => 'provider-native')
+		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
+			generateText: generateTextFn,
+			stream: vi.fn(),
+			generate: vi.fn(),
+		}
+
+		const result = await generateText({
+			model,
+			request: { prompt: 'x' },
+		})
+
+		expect(result).toBe('provider-native')
+		expect(generateTextFn).toHaveBeenCalledOnce()
+	})
+
 	it('prefers stream and emits callbacks', async () => {
 		const onReasoning = vi.fn()
 		const onTextDelta = vi.fn()
-		const model: Pick<ModelProvider, 'stream' | 'generate'> = {
+		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
 			stream: () => ({
 				async final() {
 					return {
@@ -35,7 +52,7 @@ describe('generateText', () => {
 	})
 
 	it('falls back to generate when stream is missing', async () => {
-		const model: Pick<ModelProvider, 'stream' | 'generate'> = {
+		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
 			generate: async () => ({
 				output: 'fallback',
 			}),
@@ -48,7 +65,7 @@ describe('generateText', () => {
 	})
 
 	it('throws UnhandledError when neither stream nor generate is available', async () => {
-		const model: Pick<ModelProvider, 'stream' | 'generate'> = {}
+		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {}
 		await expect(
 			generateText({
 				model,

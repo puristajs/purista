@@ -1,7 +1,11 @@
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { HandledError, StatusCode } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { createArtifactFrame, createProtocolEnvelope } from '../protocol/helpers.js'
+import { FileSkillResource } from '../skills/fileSystem.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createAgentHandlerContext, createProtocolBuffer } from './context.js'
 
@@ -1036,6 +1040,77 @@ describe('runtime context helpers', () => {
 		await expect(tenantBContext.session.load()).resolves.toMatchObject({
 			conversationId: 'shared',
 			data: { owner: 'tenant-b' },
+		})
+	})
+
+	it('selects generic skills from manifest defaults and required entries', async () => {
+		const skillRoot = await mkdtemp(join(tmpdir(), 'purista-context-skills-'))
+		await mkdir(join(skillRoot, 'spec-elicitation'), { recursive: true })
+		await writeFile(
+			join(skillRoot, 'spec-elicitation', 'SKILL.md'),
+			`---
+name: spec-elicitation
+description: Ask focused clarification questions.
+topics:
+  - elicitation
+phases:
+  - spec
+---
+
+Clarify missing constraints.`,
+			'utf8',
+		)
+		await mkdir(join(skillRoot, 'architecture-synthesis'), { recursive: true })
+		await writeFile(
+			join(skillRoot, 'architecture-synthesis', 'SKILL.md'),
+			`---
+name: architecture-synthesis
+description: Turn requirements into architecture.
+topics:
+  - architecture
+  - services
+phases:
+  - architecture
+---
+
+Map requirements to services and queues.`,
+			'utf8',
+		)
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {
+				skills: new FileSkillResource({ roots: [skillRoot] }),
+			},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest: {
+				...manifest,
+				skills: {
+					resourceName: 'skills',
+					names: ['spec-elicitation', 'architecture-synthesis'],
+				},
+			},
+		})
+
+		await expect(context.skills.loadAvailable()).resolves.toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: 'spec-elicitation' }),
+				expect.objectContaining({ name: 'architecture-synthesis' }),
+			]),
+		)
+		await expect(context.skills.search({ queries: ['services'] })).resolves.toEqual([
+			expect.objectContaining({ name: 'architecture-synthesis' }),
+		])
+		expect(context.skills.config).toEqual({
+			resourceName: 'skills',
+			names: ['spec-elicitation', 'architecture-synthesis'],
 		})
 	})
 })

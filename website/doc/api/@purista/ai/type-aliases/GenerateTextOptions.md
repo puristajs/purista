@@ -8,15 +8,15 @@
 
 > **GenerateTextOptions** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/generateText.ts:5](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/generateText.ts#L5)
+Defined in: [packages/ai/src/providers/runtime/generateText.ts:5](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/generateText.ts#L5)
 
 ## Properties
 
 ### model
 
-> **model**: `Pick`\<[`ModelProvider`](../interfaces/ModelProvider.md), `"generate"` \| `"stream"`\>
+> **model**: `Pick`\<[`ModelProvider`](../interfaces/ModelProvider.md), `"generate"` \| `"stream"` \| `"generateText"`\>
 
-Defined in: [packages/ai/src/providers/runtime/generateText.ts:6](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/generateText.ts#L6)
+Defined in: [packages/ai/src/providers/runtime/generateText.ts:6](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/generateText.ts#L6)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/providers/runtime/generateText.ts:6](https://github
 
 > `optional` **onReasoning**: (`text`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/providers/runtime/generateText.ts:8](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/generateText.ts#L8)
+Defined in: [packages/ai/src/providers/runtime/generateText.ts:8](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/generateText.ts#L8)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/providers/runtime/generateText.ts:8](https://github
 
 > `optional` **onTextDelta**: (`delta`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/providers/runtime/generateText.ts:9](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/generateText.ts#L9)
+Defined in: [packages/ai/src/providers/runtime/generateText.ts:9](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/generateText.ts#L9)
 
 #### Parameters
 
@@ -60,4 +60,4 @@ Defined in: [packages/ai/src/providers/runtime/generateText.ts:9](https://github
 
 > **request**: [`ProviderRequest`](ProviderRequest.md)
 
-Defined in: [packages/ai/src/providers/runtime/generateText.ts:7](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/generateText.ts#L7)
+Defined in: [packages/ai/src/providers/runtime/generateText.ts:7](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/generateText.ts#L7)

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
-import { toAiSdkTool, toAiSdkTools } from './aiSdk.js'
+import { createAiSdkRequest, toAiSdkTool, toAiSdkTools } from './aiSdk.js'
 import {
 	createAgentBinding,
 	createBindingsMetadata,
@@ -412,5 +412,59 @@ describe('external runtime bindings', () => {
 		})
 
 		expect(() => toAiSdkTools([first, second])).toThrow('Duplicate AI SDK tool name "shared"')
+	})
+
+	it('builds AI SDK requests with rendered skills and explicit tool bindings', () => {
+		const bindings = createExternalBindings({
+			commands: [
+				{
+					command: {
+						serviceName: 'support',
+						serviceVersion: '1',
+						commandName: 'lookupFaq',
+					},
+					execute: async () => 'ok',
+				},
+			],
+		})
+
+		const request = createAiSdkRequest({
+			instructions: 'Use the provided tools before answering.',
+			skills: [{ name: 'spec-elicitation', content: 'Ask for missing requirements first.' }],
+			prompt: 'Customer prompt: design a support workflow',
+			bindings,
+			aiSdk: {
+				toolChoice: 'required',
+			},
+		})
+
+		expect(request.prompt).toContain('Relevant skills')
+		expect(request.prompt).toContain('spec-elicitation')
+		expect(request.prompt).toContain('Customer prompt: design a support workflow')
+		expect((request.metadata?.aiSdk as { tools?: Record<string, unknown>; toolChoice?: string }).toolChoice).toBe(
+			'required',
+		)
+		expect(Object.keys((request.metadata?.aiSdk as { tools: Record<string, unknown> }).tools)).toEqual([
+			'support.1.lookupFaq',
+		])
+	})
+
+	it('merges existing AI SDK metadata with rendered binding metadata', () => {
+		const request = createAiSdkRequest({
+			prompt: 'Customer prompt',
+			metadata: {
+				aiSdk: {
+					toolChoice: 'required',
+					parallelToolCalls: false,
+				},
+			},
+		})
+
+		expect((request.metadata?.aiSdk as { toolChoice?: string; parallelToolCalls?: boolean }).toolChoice).toBe(
+			'required',
+		)
+		expect((request.metadata?.aiSdk as { toolChoice?: string; parallelToolCalls?: boolean }).parallelToolCalls).toBe(
+			false,
+		)
 	})
 })

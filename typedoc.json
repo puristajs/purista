@@ -20,13 +20,17 @@
 		"./packages/nats-config-store",
 		"./packages/nats-state-store",
 		"./packages/natsbridge",
-		"./packages/sandbox-service",
 		"./packages/redis-queue-bridge",
 		"./packages/redis-config-store",
 		"./packages/redis-state-store",
 		"./packages/vault-secret-store"
 	],
 	"plugin": ["typedoc-plugin-markdown"],
+	"externalSymbolLinkMappings": {
+		"ai": {
+			"LanguageModel": "https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text"
+		}
+	},
 	"out": "website/doc/api",
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,

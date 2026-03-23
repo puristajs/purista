@@ -8,7 +8,7 @@
 
 > **ProviderStream** = `AsyncIterable`\<[`ProviderStreamChunk`](ProviderStreamChunk.md)\> & `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:154](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/ModelProvider.ts#L154)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:160](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L160)
 
 Stream handle returned by [ModelProvider.stream](../interfaces/ModelProvider.md#stream).
 Consumers iterate chunks and call `final()` to obtain usage/metadata.

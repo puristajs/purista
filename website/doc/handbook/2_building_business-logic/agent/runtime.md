@@ -1,104 +1,233 @@
 ---
 title: Runtime
-description: Starting agent instances, wiring providers, and managing concurrency.
+description: Create running agent instances by binding models, skills, stores, queues, and sandbox runtime at getInstance(...).
 order: 203704
 ---
 
 # Runtime
 
-An agent definition (`AgentBuilder`) is inert. To run it, you must create an **instance** and provide it with concrete runtime dependencies (Model Providers, Databases, etc.).
+`AgentBuilder` definitions are inert. They become real workloads only when you
+call `getInstance(eventBridge, options)`.
 
-## 1. Bootstrapping the Instance
+This is the instance-creation phase of the PURISTA lifecycle.
 
-`getInstance(eventBridge, options)` is where you inject your production-ready tools.
+## What Belongs In `getInstance(...)`
+
+Provide concrete runtime dependencies here:
+
+- model providers
+- queue bridge
+- stores
+- resources
+- skills
+- pool configuration
+- sandbox-backed execution resources
+
+This is where environment and infrastructure meet the builder definition.
+
+## The Common Example
 
 ```ts
-import { DefaultQueueBridge } from '@purista/core'
+import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
+import { AiSdkProvider, createLayeredFileSkillResource } from '@purista/ai'
+
+const eventBridge = new DefaultEventBridge()
+const queueBridge = new DefaultQueueBridge()
+
+await eventBridge.start()
+
+const supportSkills = createLayeredFileSkillResource({
+  canonicalRoots: [new URL('../../skills', import.meta.url).pathname],
+  overlayRoots: [new URL('./skills', import.meta.url).pathname],
+})
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+  queueBridge,
   models: {
-    'openai:gpt-4o-mini': new AiSdkProvider({ model: openai('gpt-4o-mini') })
+    'openai:primary': new AiSdkProvider({
+      model: openai('gpt-4o-mini'),
+    }),
   },
-  conversationStore: new RedisConversationStore(),
+  conversationStore: conversationStore,
   resources: {
-    supportFaq: new SupportFaqResource(),
+    supportFaq: supportFaqResource,
   },
-  queueBridge: new DefaultQueueBridge(),
+  skills: supportSkills,
   poolConfig: {
     poolId: 'support',
-    maxConcurrencyPerInstance: 5
-  }
+    maxConcurrencyPerInstance: 4,
+  },
 })
 
 await supportAgentInstance.start()
 ```
 
-## 2. Managing Concurrency (Pools)
+## Models
 
-LLM calls are expensive and can be slow. To protect your application and manage rate limits, PURISTA uses **Worker Pools**.
-
-- **`poolId`**: Groups multiple agent instances into a shared concurrency limit.
-- **`maxConcurrencyPerInstance`**: Limits how many agent runs can happen in parallel within a single process.
-
-### Why use Pools?
-- **Avoid Resource Exhaustion**: Prevents one agent from hogging all event-loop resources or memory.
-- **Rate Limit Protection**: Keeps your outgoing LLM requests within your provider's quota.
-- **Fairness**: Ensures that high-priority agents still have "slots" to run even during peak traffic.
-
-Queued durable agents also need a `queueBridge`. The queue bridge decides which worker owns the job, and the pool decides how many jobs a process may execute at once. Inline agents do not need a queue bridge.
-
-## 3. External Runtime Bindings
-
-If you want to keep the reasoning loop in Vercel AI SDK but execute tools through PURISTA, create neutral bindings inside the handler and adapt them at the SDK boundary:
+The builder declares aliases. `getInstance(...)` binds those aliases to real providers.
 
 ```ts
-import { generateText, toAiSdkTools } from '@purista/ai'
-
-const bindings = context.expose.tools({
-  commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
-  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
+const instance = await supportAgent.getInstance(eventBridge, {
+  models: {
+    'openai:primary': provider,
+  },
 })
+```
 
-await generateText({
-  model: context.models['openai:gpt-4o-mini'],
-  request: {
-    prompt: payload.prompt,
-    metadata: {
-      aiSdk: {
-        tools: toAiSdkTools(bindings),
-      },
+Think about models in two steps:
+
+1. the builder says which aliases exist
+2. instance creation says what those aliases really use
+
+That keeps the handler simple, because the handler only needs `context.models['alias']`.
+
+## Skills
+
+`getInstance(...)` is also where you provide the actual skill implementations.
+
+Two common paths:
+
+### Inline typed skills
+
+```ts
+const instance = await supportAgent.getInstance(eventBridge, {
+  models: {
+    'openai:primary': provider,
+  },
+  skills: {
+    'spec-elicitation': {
+      content: 'Ask for missing constraints before committing to architecture.',
+    },
+    'support-workflow': {
+      content: 'Triage first, then gather facts, then answer.',
     },
   },
 })
 ```
 
-For queued durable runs, keep the bindings limited to PURISTA commands and child agents. In-memory closures are not part of the durable contract.
-
-## 4. Deployment Patterns
-
-### Pattern A: In-Process (Monolith/Service)
-Run the agent in the same process as your API or Service. Good for low-to-medium volume or real-time streaming needs.
-
-### Pattern B: Isolated Workers (Microservice)
-Deploy a dedicated process that only runs agents. This allows you to scale AI workloads independently from your web traffic.
-
-### Pattern C: Queued Durable Workers
-Expose the agent over HTTP or SSE, but execute heavy work through queue workers. This is the preferred pattern for architecture synthesis, simulation, planning, and validation because it supports attach-and-stream frontends and recovery after restarts.
-
-## 5. Health & Monitoring
-
-Every agent instance provides a read-only status snapshot:
+### File-based skill catalogs
 
 ```ts
-const status = supportAgentInstance.getStatus()
-/*
-{
-  poolId: 'support',
-  activeWorkers: 2,
-  waitingWorkers: 1,
-  maxConcurrencyPerInstance: 5
-}
-*/
+const instance = await supportAgent.getInstance(eventBridge, {
+  models: {
+    'openai:primary': provider,
+  },
+  skills: createLayeredFileSkillResource({
+    canonicalRoots: [canonicalRoot],
+    overlayRoots: [appRoot],
+  }),
+})
 ```
 
-This data is automatically included in PURISTA's health checks and telemetry frames, allowing you to alert on pool congestion.
+Use inline skills for tests or tiny agents. Use file-based catalogs when you want reusable application skills.
+
+## Queue Bridge
+
+Queued durable agents need a `queueBridge`.
+
+```ts
+const instance = await supportAgent.getInstance(eventBridge, {
+  queueBridge,
+  models: {
+    'openai:primary': provider,
+  },
+})
+```
+
+Inline agents do not need one.
+
+Rule:
+
+- if the builder uses `setExecutionMode('queued')`, plan to provide a queue bridge
+
+## Stores and resources
+
+Conversation stores, resources, configs, states, and secrets are normal PURISTA runtime dependencies.
+
+```ts
+const instance = await supportAgent.getInstance(eventBridge, {
+  models: {
+    'openai:primary': provider,
+  },
+  conversationStore,
+  resources: {
+    supportFaq: supportFaqResource,
+  },
+})
+```
+
+This keeps runtime dependencies explicit. The instance tells the agent what infrastructure really exists.
+
+## Pools
+
+Use pool config to constrain concurrency.
+
+```ts
+poolConfig: {
+  poolId: 'support',
+  maxConcurrencyPerInstance: 4,
+}
+```
+
+Use pools when:
+
+- model calls are expensive
+- you need fairness across workloads
+- queued workers should not run unbounded parallel work
+
+## Sandbox Runtime
+
+If the agent needs a real workspace for:
+
+- shell execution
+- repository work
+- skill scripts
+- generated files
+
+then instance creation is where you provide the sandbox-backed execution resource.
+
+The canonical sandbox layout is:
+
+```text
+/workspace/
+  repo/
+  skills/
+  tmp/
+  outputs/
+```
+
+Rules:
+
+- repo files belong in `/workspace/repo`
+- materialized skill bundles belong in `/workspace/skills/<skill-name>`
+- scratch data belongs in `/workspace/tmp`
+- generated non-repo outputs belong in `/workspace/outputs`
+
+You do not need sandbox for every agent. Add it only when the agent really needs workspace execution.
+
+## Instance Creation Checklist
+
+When `getInstance(...)` feels unclear, ask:
+
+1. Which model aliases must be bound?
+2. Is the agent inline or queued?
+3. Does it need declared skills, and where do those skills come from?
+4. Does the chosen model provider need to drive an external tool loop?
+5. Does it need stores or resources?
+6. Does it need a real sandbox workspace?
+
+That checklist covers almost all runtime confusion.
+
+## Common Mistakes
+
+- Expecting `.useSkills([...])` to provide skills by itself.
+- Forgetting the queue bridge for queued agents.
+- Mixing provider creation into the builder instead of instance creation.
+- Introducing sandbox complexity for agents that only need models and commands.
+
+## Related Guides
+
+- [Quick Start](./getting-started.md)
+- [Context](./handler-context.md)
+- [Skills](./skills.md)
+- [Sandbox Runtime](../../3_eco_system/sandbox.md)

@@ -8,7 +8,7 @@
 
 > **getQueueWorkerTestFileContent**(`input`): `string`
 
-Defined in: [content/queueWorker/getQueueWorkerTestFileContent.ts:7](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/content/queueWorker/getQueueWorkerTestFileContent.ts#L7)
+Defined in: [content/queueWorker/getQueueWorkerTestFileContent.ts:7](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/content/queueWorker/getQueueWorkerTestFileContent.ts#L7)
 
 ## Parameters
 

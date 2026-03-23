@@ -6,9 +6,9 @@
 
 # Class: AiSdkProvider
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:197](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L197)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:198](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L198)
 
-Wraps any Vercel AI SDK LanguageModel and exposes it through the lightweight [ModelProvider](../interfaces/ModelProvider.md) interface
+Wraps any Vercel AI SDK [LanguageModel](https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text) and exposes it through the lightweight [ModelProvider](../interfaces/ModelProvider.md) interface
 consumed by the PURISTA agent runtime.
 
 ## Example
@@ -36,7 +36,7 @@ console.log(result.output)
 
 > **new AiSdkProvider**(`options`): `AiSdkProvider`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:211](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L211)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:212](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L212)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:211](https://git
 
 > `readonly` **capabilities**: [`ModelProviderCapabilities`](../type-aliases/ModelProviderCapabilities.md)
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:199](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L199)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:200](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L200)
 
 #### Implementation of
 
@@ -66,7 +66,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:199](https://git
 
 > `readonly` **name**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:198](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L198)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:199](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L199)
 
 #### Implementation of
 
@@ -78,7 +78,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:198](https://git
 
 > **embed**(`request`): `Promise`\<[`ProviderEmbedResponse`](../type-aliases/ProviderEmbedResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:530](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L530)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:544](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L544)
 
 #### Parameters
 
@@ -100,7 +100,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:530](https://git
 
 > **embedMany**(`request`): `Promise`\<[`ProviderEmbedManyResponse`](../type-aliases/ProviderEmbedManyResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:545](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L545)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:559](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L559)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:545](https://git
 
 > **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:381](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L381)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:389](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L389)
 
 #### Parameters
 
@@ -144,7 +144,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:381](https://git
 
 > **generateJson**\<`T`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:402](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L402)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:410](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L410)
 
 #### Type Parameters
 
@@ -172,7 +172,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:402](https://git
 
 > **generateText**(`request`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:516](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L516)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:524](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L524)
 
 High-level helper that yields one final text output while automatically
 preferring `stream()` and falling back to `generate()`.
@@ -197,7 +197,7 @@ preferring `stream()` and falling back to `generate()`.
 
 > **rerank**\<`Document`\>(`request`): `Promise`\<[`ProviderRerankResponse`](../type-aliases/ProviderRerankResponse.md)\<`Document`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:560](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L560)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:574](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L574)
 
 #### Type Parameters
 
@@ -225,7 +225,7 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:560](https://git
 
 > **stream**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:461](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L461)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:469](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L469)
 
 #### Parameters
 

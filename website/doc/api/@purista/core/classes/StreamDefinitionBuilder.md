@@ -479,7 +479,7 @@ Optional invoke configuration:
 - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
 - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
 
-`Parameter` | `AgentInvokeConfig`\<`Payload`, `Parameter`\>
+`Parameter` | [`StreamAgentInvokeConfig`](../type-aliases/StreamAgentInvokeConfig.md)\<`Payload`, `Parameter`\>
 
 #### Returns
 

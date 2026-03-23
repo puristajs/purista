@@ -1,34 +1,44 @@
 ---
 title: Testing
-description: How to ensure your agents are reliable, deterministic, and high-quality.
-order: 203708
+description: Choose the right testing level for PURISTA agents and keep tests deterministic through provider doubles and runtime harnesses.
+order: 203709
 ---
 
 # Testing
 
-Testing LLM-based applications is notoriously difficult because of their non-deterministic nature. PURISTA provides tools to make your agent tests **reliable**, **fast**, and **deterministic**.
+The most important testing question is not “which helper exists?”
 
-## 1. Testing Levels
+It is:
 
-Use three layers depending on what you want to verify:
+> What exactly am I trying to verify?
 
-- `@purista/core` mocks for service-level command, subscription, event bridge, and queue bridge tests.
-- `createAgentContextMock(...)` for agent handler unit tests.
-- `createAgentTestHarness(...)` for inline and queued runtime tests.
+Once that is clear, the right PURISTA testing helper becomes obvious.
 
-### Service-level Tests
+## The Three Levels
 
-Keep pure service tests on the core helper layer:
+### 1. Service-level tests
 
-- `getCommandContextMock(...)`
-- `getEventBridgeMock()`
-- `getQueueBridgeMock()`
+Use normal `@purista/core` mocks when you are testing service logic and do not need a real agent runtime.
 
-These are the right choice when you do not need a real agent runtime.
+Use this when:
 
-### Agent Handler Unit Tests
+- a command invokes an agent
+- a subscription emits events
+- a service handler wires dependencies correctly
 
-Use `createAgentContextMock(...)` when you want a real `AgentHandlerContext` without booting an agent instance:
+This is still the right level for pure service behavior.
+
+### 2. Handler tests
+
+Use `createAgentContextMock(...)` when you want to test the handler logic directly without booting a whole agent instance.
+
+Use this when:
+
+- you want to test prompt construction
+- you want to test how the handler reacts to tool or child-agent results
+- you want deterministic unit tests around branching logic
+
+Example:
 
 ```ts
 import { createAgentContextMock } from '@purista/ai'
@@ -38,7 +48,7 @@ const mock = createAgentContextMock({
   commands: {
     support: {
       '1': {
-        lookupFaq: async (payload) => ({ answer: `FAQ:${payload.question}` }),
+        lookupFaq: async payload => ({ answer: `FAQ:${payload.question}` }),
       },
     },
   },
@@ -59,17 +69,20 @@ expect(result.answer).toContain('FAQ:')
 expect(mock.stubs.commands.support['1'].lookupFaq.calls).toHaveLength(1)
 ```
 
-The mock context includes:
+This is the best starting point for handler-only behavior.
 
-- `context.tools`
-- `context.agents`
-- `context.expose`
-- `context.runState`
-- protocol collection through `frames()`, `envelopes()`, and `flush()`
+### 3. Runtime tests
 
-### Agent Runtime Tests
+Use `createAgentTestHarness(...)` when you want to boot a real agent instance and verify the actual runtime behavior.
 
-Use `createAgentTestHarness(...)` when you want to boot a real agent instance and assert normalized results:
+Use this when:
+
+- you want to test inline vs queued execution
+- you want to assert streamed frames
+- you want to verify run-state artifacts
+- you want to test real instance creation wiring
+
+Example:
 
 ```ts
 import { ScriptedModel, createAgentTestHarness } from '@purista/ai'
@@ -89,18 +102,26 @@ expect(result.toolFrames).toEqual([])
 await harness.destroy()
 ```
 
-The harness normalizes:
+This is the right level when the runtime itself is part of what you are testing.
 
-- `finalMessage`
-- `frames`
-- `toolFrames`
-- `artifactFrames`
-- `telemetryFrames`
-- `runStateArtifacts`
+## Which Level Should I Pick?
 
-## 2. Provider Doubles
+- “I am testing a service command that happens to call an agent.”
+  Use service-level tests.
+- “I am testing the handler logic of one agent.”
+  Use `createAgentContextMock(...)`.
+- “I am testing how the built agent actually runs.”
+  Use `createAgentTestHarness(...)`.
 
-`ScriptedModel` is the default model double for multi-step tests because it is ordered and explicit.
+That decision is more useful than memorizing helper names.
+
+## Provider Doubles
+
+Keep provider behavior deterministic.
+
+### `ScriptedModel`
+
+Use `ScriptedModel` for ordered, step-by-step model behavior:
 
 ```ts
 const model = new ScriptedModel()
@@ -108,64 +129,77 @@ const model = new ScriptedModel()
   .nextStream(['Working ', 'on it'])
 ```
 
-Use `MockModel` when matcher-based scripting is more convenient:
+Use this when:
 
-- `.on(string | RegExp).reply(string | fn)`
-- `.onJson(matcher).reply(object | fn)`
+- the sequence matters
+- the test should read like a script
 
-## 3. Protocol Assertions
+### `MockModel`
 
-Use the protocol helpers instead of scanning envelopes manually:
+Use `MockModel` when matcher-based replies are easier than an ordered script.
 
-- `getFinalAssistantText(...)`
-- `getToolFrames(...)`
-- `getArtifactFrames(...)`
-- `getRunStateArtifacts(...)`
-- `getTelemetryFrames(...)`
+Use this when:
 
-These helpers are read-only and keep assertions short without hiding the raw envelopes.
+- the prompt shape matters more than the exact call order
+- one test needs several branching prompt matches
 
-## 4. Strategies for Reliable Tests
+## What To Assert
 
-### A. Schema Validation
-Verify that your agent correctly handles malformed input. Because you've defined `addPayloadSchema`, PURISTA will automatically throw a `HandledError` before the agent even starts.
+### Final result only
 
-### B. State/History Checks
-If your agent uses `persistConversation`, you can verify the history state after a run:
+If only the final assistant message matters:
 
 ```ts
-const state = await harness.instance.invoke({
-  payload: { prompt: 'hello', sessionId: 'test-session' },
-})
-expect(state.envelopes.length).toBeGreaterThan(0)
+expect(result.finalMessage).toContain('Resolved')
 ```
 
-### C. Deterministic Output
-Use `ScriptedModel` or `MockModel` to verify how your agent handler processes model output, including JSON extraction, streaming, reasoning, and fallback behavior.
+### Tool execution
 
-### D. Queued Durable Runs
-When the agent uses `setExecutionMode('queued')`, `createAgentTestHarness(...)` automatically accepts or provisions a queue bridge. Assert `run-state` artifacts or final messages directly:
+If the agent should call commands or child agents:
 
 ```ts
-const harness = await createAgentTestHarness(supportAgent, {
-  models: { 'openai:gpt-4o-mini': model },
-})
+expect(result.toolFrames.length).toBeGreaterThan(0)
+```
 
-const result = await harness.run({
-  payload: { prompt: 'Create architecture draft', sessionId: 's-1' },
-})
+### Durable progress
 
+If the agent is queued durable:
+
+```ts
 expect(result.runStateArtifacts.length).toBeGreaterThan(0)
-await harness.destroy()
 ```
 
-## 5. Evaluation Datasets (Advanced)
+### Full envelopes
 
-For production-ready agents, unit tests are not enough. You need to evaluate the **quality** of the LLM responses.
+If you truly need protocol details, assert on `result.frames` or raw envelopes, but keep that as the advanced path.
 
-PURISTA supports an "Evaluation Mode" where you can run your agent against a dataset of "Golden Questions" and "Expected Answers."
+## Common Testing Scenarios
 
-- **Metrics**: BLEU, ROUGE, or LLM-as-a-judge scoring.
-- **CI/CD**: Block deployments if the evaluation score drops below a certain threshold.
+### Validate branching logic
 
-See the [AI Basic Example](https://github.com/purista-js/purista/tree/main/examples/ai-basic) for a complete reference on evaluation datasets.
+Use `createAgentContextMock(...)`.
+
+### Validate queued durable progress
+
+Use `createAgentTestHarness(...)` and assert `runStateArtifacts`.
+
+### Validate tool-loop integration
+
+Use `createAgentTestHarness(...)` with `ScriptedModel` and assert `toolFrames`.
+
+### Validate input schema rejection
+
+Use the runtime harness and pass invalid payloads, or test the builder/service boundary that owns the schema.
+
+## Common Mistakes
+
+- Using the full runtime harness for simple handler branching tests.
+- Asserting raw envelopes when `finalMessage`, `toolFrames`, or `runStateArtifacts` would be clearer.
+- Letting provider behavior stay non-deterministic.
+- Treating service-level tests and agent runtime tests as interchangeable.
+
+## Related Guides
+
+- [Quick Start](./getting-started.md)
+- [Context](./handler-context.md)
+- [Durable Run State](./run-state.md)

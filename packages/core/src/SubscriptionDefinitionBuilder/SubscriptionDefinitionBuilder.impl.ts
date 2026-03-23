@@ -34,12 +34,12 @@ import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
 
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+export type SubscriptionAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
 }
 
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
+const isAgentInvokeConfig = (value: unknown): value is SubscriptionAgentInvokeConfig<Schema, Schema> => {
 	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 }
 
@@ -318,7 +318,7 @@ export class SubscriptionDefinitionBuilder<
 	>(
 		agentName: SName,
 		agentVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
+		invokeConfigOrParameterSchema?: Parameter | SubscriptionAgentInvokeConfig<Payload, Parameter>,
 	) {
 		if (agentName.trim() === '' || agentVersion.trim() === '') {
 			throw new Error('canInvokeAgent requires non-empty agent name and version')

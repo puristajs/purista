@@ -4,11 +4,17 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentDefinition
 
-# Type Alias: AgentDefinition
+# Type Alias: AgentDefinition\<SkillNames\>
 
-> **AgentDefinition** = `object`
+> **AgentDefinition**\<`SkillNames`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:52](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L52)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:53](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L53)
+
+## Type Parameters
+
+### SkillNames
+
+`SkillNames` *extends* `string` = `string`
 
 ## Properties
 
@@ -16,7 +22,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:52](https://github.com/pur
 
 > **info**: [`AgentInfo`](AgentInfo.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:53](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L53)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:54](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L54)
 
 ***
 
@@ -24,7 +30,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:53](https://github.com/pur
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:54](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L54)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:55](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L55)
 
 ***
 
@@ -32,7 +38,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:54](https://github.com/pur
 
 > **schemas**: `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:55](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L55)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:56](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L56)
 
 #### context?
 
@@ -56,7 +62,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:55](https://github.com/pur
 
 > **getExternalRuntimeMetadata**(): [`ExternalRuntimeMetadata`](ExternalRuntimeMetadata.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:62](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L62)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:63](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L63)
 
 #### Returns
 
@@ -68,7 +74,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:62](https://github.com/pur
 
 > **getInstance**(`eventBridge`, `options?`): `Promise`\<[`AgentRuntimeInstance`](AgentRuntimeInstance.md)\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:63](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L63)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:64](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L64)
 
 #### Parameters
 
@@ -78,7 +84,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:63](https://github.com/pur
 
 ##### options?
 
-`BaseAgentInstanceOptions`
+[`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`\>
 
 #### Returns
 
@@ -90,7 +96,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:63](https://github.com/pur
 
 > **getManifest**(): [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:61](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L61)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:62](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L62)
 
 #### Returns
 

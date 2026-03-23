@@ -8,7 +8,7 @@
 
 > **AgentStreamEmitter** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:98](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L98)
+Defined in: [packages/ai/src/runtime/context.ts:105](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L105)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:98](https://github.com/puristajs
 
 > **sendArtifact**(`input`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:102](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L102)
+Defined in: [packages/ai/src/runtime/context.ts:109](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L109)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/runtime/context.ts:102](https://github.com/puristaj
 
 > **sendChunk**(`content`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:99](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L99)
+Defined in: [packages/ai/src/runtime/context.ts:106](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L106)
 
 #### Parameters
 
@@ -74,7 +74,7 @@ Defined in: [packages/ai/src/runtime/context.ts:99](https://github.com/puristajs
 
 > **sendError**(`error`, `overrides?`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:110](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L110)
+Defined in: [packages/ai/src/runtime/context.ts:117](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L117)
 
 #### Parameters
 
@@ -102,7 +102,7 @@ Defined in: [packages/ai/src/runtime/context.ts:110](https://github.com/puristaj
 
 > **sendFinal**(`content`, `options?`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:100](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L100)
+Defined in: [packages/ai/src/runtime/context.ts:107](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L107)
 
 #### Parameters
 
@@ -126,7 +126,7 @@ Defined in: [packages/ai/src/runtime/context.ts:100](https://github.com/puristaj
 
 > **sendReasoning**(`content`, `options?`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:101](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L101)
+Defined in: [packages/ai/src/runtime/context.ts:108](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L108)
 
 #### Parameters
 

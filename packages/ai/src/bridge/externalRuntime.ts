@@ -13,7 +13,7 @@ import type {
 export type ExternalBindingKind = 'command' | 'agent'
 export type ExternalResultMode = 'text' | 'object' | 'protocol'
 
-type BindingDescriptor = AllowedToolDefinition | AllowedAgentDefinition
+export type BindingDescriptor = AllowedToolDefinition | AllowedAgentDefinition
 
 export type ExternalBindingMetadata = {
 	kind: ExternalBindingKind
@@ -22,7 +22,7 @@ export type ExternalBindingMetadata = {
 	}
 }
 
-type BaseBinding = {
+export type BaseBinding = {
 	name: string
 	description?: string
 	inputSchema?: Schema
@@ -44,7 +44,7 @@ export type ExternalAgentBinding = BaseBinding & {
 export type ExternalBinding = ExternalCommandBinding | ExternalAgentBinding
 export type ExternalBindingSet = Record<string, ExternalBinding>
 
-type BaseBindingFactoryInput = {
+export type BaseBindingFactoryInput = {
 	name?: string
 	description?: string
 }
@@ -65,13 +65,13 @@ export type CreateExternalBindingsInput = {
 	agents?: CreateAgentBindingInput[]
 }
 
-type ExposedCommandInput = AllowedToolDefinition & {
+export type ExposedCommandInput = AllowedToolDefinition & {
 	parameter?: unknown
 	name?: string
 	description?: string
 }
 
-type ExposedAgentInput = AllowedAgentDefinition & {
+export type ExposedAgentInput = AllowedAgentDefinition & {
 	parameter?: unknown
 	name?: string
 	resultMode?: ExternalResultMode
@@ -96,7 +96,7 @@ export type ExposeHelpers = {
 	metadata(): ExternalRuntimeMetadata
 }
 
-type AgentContextLike = Pick<
+export type AgentContextLike = Pick<
 	AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>,
 	'manifest' | 'tools' | 'agents' | 'protocol'
 >

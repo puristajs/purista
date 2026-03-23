@@ -1,249 +1,278 @@
 ---
 title: Context
-description: The complete toolbox available to an agent handler.
+description: Implement agent behavior through the handler context after the builder has declared the contract.
 order: 203703
 ---
 
 # Context
 
-The `context` object passed to an agent handler is your primary gateway to the PURISTA ecosystem. It is more specialized than a standard service context.
+The handler is the implementation phase of a PURISTA agent.
 
-## 1. Streaming (context.stream)
+Once the builder has declared what the agent may do, the handler uses `context`
+to perform that work.
 
-Use the streaming helpers to send incremental updates to the client. This is essential for a "responsive" UX.
+The important shift is:
 
-- `sendChunk(delta)`: Sends a text delta to the client.
-- `sendReasoning(text)`: Sends reasoning or "thinking" frames.
-- `sendArtifact(input)`: Sends custom structured artifacts (e.g., UI components, code blocks).
-- `sendFinal(content, options)`: Sends the final answer and closes the turn.
-- `sendError(error)`: Sends a protocol error frame.
+- the builder declares capability
+- the handler uses those capabilities
+
+## The Example
+
+Assume the builder already declared:
+
+- `.defineModel('openai:primary')`
+- `.useSkills(['spec-elicitation', 'support-workflow'])`
+- `.canInvoke('support', '1', 'lookupFaq')`
+- `.canInvokeAgent('triageAgent', '1')`
+
+Then the handler can use the corresponding `context` APIs directly.
 
 ```ts
-setHandler(async (context, payload) => {
-  context.stream.sendReasoning('I am looking up your order...')
-  // ... LLM call
-  context.stream.sendChunk('Your order #123 is on its way.')
-  context.stream.sendFinal('Done.')
+.setHandler(async (context, payload) => {
+  const run = await context.runState.start({
+    title: 'Support response',
+    extraScope: { sessionId: payload.sessionId ?? context.message.id },
+  })
+
+  await context.conversation.addUser(payload.prompt)
+  await run.plan([
+    { id: 'triage', title: 'Classify urgency' },
+    { id: 'faq', title: 'Load FAQ guidance' },
+    { id: 'answer', title: 'Write final answer' },
+  ])
+
+  const skills = await context.skills.loadAvailable()
+  const triage = await context.agents.runText({
+    agentName: 'triageAgent',
+    agentVersion: '1',
+    payload: { prompt: payload.prompt },
+  })
+  const faq = await context.tools.invoke.support['1'].lookupFaq({
+    question: payload.prompt,
+  })
+
+  const answer = await generateText({
+    model: context.models['openai:primary'],
+    request: {
+      prompt: [
+        renderSkillDocuments('Relevant skills', skills),
+        `Customer request: ${payload.prompt}`,
+        `Triage result: ${triage}`,
+        `FAQ answer: ${String(faq.answer ?? '')}`,
+      ].filter(Boolean).join('\n\n'),
+    },
+    onTextDelta: delta => context.stream.sendChunk(delta),
+  })
+
+  await context.conversation.addAssistant(answer)
+  await run.finishSuccess(answer)
+  context.stream.sendFinal(answer)
+  return { message: answer }
 })
 ```
 
-## 2. Models & Providers (context.models)
+That one handler already shows the main context groups.
 
-Typed access to the models you declared in the builder.
+## The Context Groups
 
-- `context.models[alias].generate({ prompt })`: Direct generate text call.
-- `context.models[alias].generateJson({ prompt, schema })`: Generate structured JSON.
-- `context.models[alias].stream({ prompt })`: Low-level stream handle.
+### 1. `context.models`
 
-### Helper: generateText
-For most use cases, use the exported `generateText` helper which normalizes streaming and reasoning:
+Use the model aliases declared in the builder.
+
+```ts
+const answer = await context.models['openai:primary'].generate({
+  prompt: payload.prompt,
+})
+```
+
+Or use the higher-level helper:
 
 ```ts
 import { generateText } from '@purista/ai'
 
 const answer = await generateText({
-  model: context.models['myModel'],
+  model: context.models['openai:primary'],
   request: { prompt: payload.prompt },
-  onTextDelta: (delta) => context.stream.sendChunk(delta),
-  onReasoning: (reasoning) => context.stream.sendReasoning(reasoning)
+  onTextDelta: delta => context.stream.sendChunk(delta),
 })
 ```
 
-## 3. Tool Invocations (context.tools)
+Use `context.models` when the handler itself owns the reasoning loop.
 
-Typed access to the commands you allowlisted via `.canInvoke(...)`.
+### 2. `context.tools`
+
+Use commands that were allowlisted with `.canInvoke(...)`.
 
 ```ts
-const result = await context.tools.invoke.ticketing['1'].createTicket({
-  reason: 'Broken laptop'
+const faq = await context.tools.invoke.support['1'].lookupFaq({
+  question: payload.prompt,
 })
 ```
 
-Note: Tool events (invoked/success/error) are automatically emitted as protocol frames.
+This is the normal handler path for command-backed tool usage.
 
-## 4. Orchestration (context.agents)
+### 3. `context.agents`
 
-Easily call other agents. All metadata (`tenantId`, `principalId`, `sessionId`) is automatically forwarded.
+Use child agents that were allowlisted with `.canInvokeAgent(...)`.
 
-Declare agent dependencies in the builder first:
+Common helpers:
 
-```ts
-.canInvokeAgent('triageAgent', '1')
-```
+- `runText(...)`
+- `runObject<T>(...)`
+- `forward(...)`
+- `invoke(...)`
 
-Then choose the level you need in the handler:
-
-- `context.agents.invoke(...)`: Returns full protocol envelopes.
-- `context.agents.invoke.triageAgent['1'].call(...)`: Uses the same typed chained invocation style as regular PURISTA service-to-service agent calls.
-- `context.agents.runText(...)`: Simplified helper that returns the final text result.
-- `context.agents.forward(...)`: Simplified helper for nested orchestration that forwards the child agent stream into the current stream.
-- `context.agents.runObject<T>(...)`: Parses final assistant text as JSON and returns typed object `T`.
-- `forwardToCurrentStream`: Optional invocation flag that forwards a child agent's assistant/reasoning/artifact/error frames into the current stream.
-- `emitInvocationToolEvents`: Optional invocation flag to suppress synthetic `agent.run` tool telemetry for internal orchestration calls.
-
-Choose them like this:
-
-- `runText(...)`: child agent is an internal classifier, planner, or summarizer
-- `runObject<T>(...)`: child agent returns structured JSON in its final assistant message
-- `forward(...)`: child agent should be visible to the current end user
-- `invoke(...)`: you need raw envelopes or custom stream merging
+Example:
 
 ```ts
-const triageResult = await context.agents.runText({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: payload.prompt }
-})
-
-const triageJson = await context.agents.runObject<{ urgency: 'low' | 'medium' | 'high' }>({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: payload.prompt }
-})
-
-await context.agents.invoke({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: payload.prompt },
-  forwardToCurrentStream: true,
-  emitInvocationToolEvents: false,
-})
-
-await context.agents.forward({
+const triage = await context.agents.runText({
   agentName: 'triageAgent',
   agentVersion: '1',
   payload: { prompt: payload.prompt },
 })
 ```
 
-If you want to expose another agent to the model as a tool, keep the same AI SDK `tool(...)` pattern you already use for command-backed tools:
+Use:
+
+- `runText(...)` when only the final text matters
+- `runObject<T>(...)` when the child returns JSON in its final message
+- `forward(...)` when the child stream should be visible to the current user
+- `invoke(...)` when you need raw envelopes or full control
+
+### 4. `context.skills`
+
+Use only the skills declared by `.useSkills([...])`.
+
+Common path:
 
 ```ts
-import { tool } from 'ai'
-import { z } from 'zod'
+const skills = await context.skills.loadAvailable()
+```
 
-const triageTool = tool({
-  description: 'Classify urgency for a support request',
-  inputSchema: z.object({
-    prompt: z.string().min(1).describe('The user request to classify'),
-  }),
-  execute: async input =>
-    await context.agents.runText({
-      agentName: 'triageAgent',
-      agentVersion: '1',
-      payload: input,
-    }),
+Narrow within the declared set:
+
+```ts
+const skills = await context.skills.search({
+  queries: [payload.prompt],
+  limit: 1,
 })
 ```
 
-That keeps agent-backed tools and command-backed tools structurally identical: define `tool(...)`, then call the typed PURISTA context inside `execute`.
+Load references when needed:
 
-## 5. Persistence (context.conversation & context.session)
+```ts
+const references = await context.skills.loadReferences('support-workflow')
+```
 
-- `context.conversation`: High-level API for chat history (`addUser`, `addAssistant`, `buildPromptInput`). It respects the `persistConversation` settings from the builder.
-- `context.session`: Low-level access to the conversation store (`load`, `save`, `delete`).
+Rule:
+
+- builder declares allowed names
+- instance creation provides the real skill implementations
+- handler loads and uses them
+
+### 5. `context.stream`
+
+Use streaming helpers to keep the client responsive.
+
+- `sendChunk(...)`
+- `sendReasoning(...)`
+- `sendArtifact(...)`
+- `sendFinal(...)`
+- `sendError(...)`
+
+For most agents:
+
+- stream deltas during long generation
+- send the final answer once
+
+### 6. `context.conversation`
+
+Use conversation history for LLM-visible chat state.
 
 ```ts
 await context.conversation.addUser(payload.prompt)
-const messages = await context.conversation.getMessages()
+await context.conversation.addAssistant(answer)
 ```
 
-## 5.1 Durable Execution State (`context.runState`)
+This is for chat memory, not for operational workflow state.
 
-Use `context.runState` for long-running agent execution state such as plans, task lists, checkpoints, locks, and resumable status. It is backed by `context.states`, so it survives beyond the current in-memory instance and can be read again after reconnects or handoffs.
+### 7. `context.runState`
 
-Use it for:
+Use run state for durable execution:
 
-- planner/todo state
-- active run locks
-- checkpoints for resumed work
-- UI-facing execution status
+- plans
+- tasks
+- checkpoints
+- statuses
+- locks
 
-Do not use conversation memory for this. Conversation memory is for LLM context. Run state is operational workflow state.
+Example:
 
 ```ts
 const run = await context.runState.start({
   title: 'Architecture synthesis',
   extraScope: { projectId: payload.projectId },
-  lock: { key: 'architecture' },
 })
 
 await run.plan([
-  { id: 'review-spec', title: 'Review specification' },
-  { id: 'write-files', title: 'Write architecture artifacts' },
-  { id: 'verify', title: 'Verify persisted outputs' },
+  { id: 'review', title: 'Review inputs' },
+  { id: 'write', title: 'Write outputs' },
+  { id: 'verify', title: 'Verify outputs' },
 ])
-
-await run.checkpoint('spec-snapshot', { projectId: payload.projectId }, { completed: true })
-await run.update({ phase: 'running', status: 'running' })
-
-await run.step('write-files', async () => {
-  // write files here
-  return 'Architecture artifacts are ready.'
-}, { checkpoint: 'write-files-summary' })
-
-await run.finishSuccess('Architecture artifacts are ready.')
 ```
 
-Every persisted update emits a standard `run-state` artifact. In `ai-sdk-ui-message` mode this becomes a `data-run-state` part for the frontend. That is the contract that lets the UI render live progress and lock the composer while a queued durable agent is active.
+Rule:
 
-## 6. Skills (context.skills)
+- `context.conversation` is for LLM-visible history
+- `context.runState` is for durable operational state
 
-When your app provides a skill registry resource, agent handlers can use the
-shared skill helpers directly from `context.skills`.
+### 8. `context.expose`
 
-The recommended filesystem convention is:
+Use `context.expose.*` only when adapting to an external tool/runtime loop.
 
-```text
-skills/
-  skill-name/
-    SKILL.md
-    references/
-    scripts/
-    assets/
-```
-
-`SKILL.md` is the only required file. Optional frontmatter may provide metadata
-such as `name`, `description`, `topics`, `phases`, and `requires_sandbox`.
+Example:
 
 ```ts
-import { renderSkillDocuments } from '@purista/ai'
-
-const relevantSkills = await context.skills.search({
-  phases: ['architecture'],
-  topics: ['queues', 'services'],
-  queries: [payload.prompt, 'durable background work'],
-  limit: 3,
-})
-
-const contextBlock = renderSkillDocuments('Relevant skills', relevantSkills)
-```
-
-If no skill resource is configured, `context.skills.*` throws with a clear
-runtime error instead of silently inventing behavior.
-
-## 7. Resources for Retrieval, Skills, and External Data
-
-Retrieval and skill loading are application concerns, so they live behind normal resources instead of a special AI-only knowledge API.
-
-```ts
-const docs = await context.resources.supportFaq.search({
-  query: payload.prompt,
-  limit: 3,
+const bindings = context.expose.tools({
+  commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
+  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
 })
 ```
 
-Keep the boundary explicit:
+This is the bridge from PURISTA declarations to SDK adapters. It is not the normal direct handler path.
 
-- `context.conversation` for chat history
-- `context.runState` for durable execution state
-- `context.resources` for retrieval systems, skill registries, vector stores, or document indexes
-- `context.tools` when the model should call retrieval through an allowlisted command
+## How To Think About The Handler
 
-## 8. Telemetry & Embeddings
+Keep the handler focused on:
 
-- `context.embeddings`: Access to embedding models for manual vectorization.
-- `context.rerankers`: Access to reranking models for precision search.
-- `context.logger`: Standard PURISTA logger with pre-bound agent metadata.
-- `context.emit(...)`: Emit custom domain events.
-- `context.secrets` / `context.configs` / `context.states`: Structured store channels (`get*`, `set*`, `remove*`) from service context.
+- orchestration
+- prompt construction
+- command and child-agent calls
+- durable progress updates
+- streaming
+
+Do not bury environment bootstrapping or provider construction in the handler.
+
+## Decision Rules
+
+- Use `context.tools` for command-backed operations.
+- Use `context.agents` for child-agent orchestration.
+- Use `context.skills` for declared instruction bundles.
+- Use `context.runState` for durable long-running workflow state.
+- Use `context.models` for provider-owned adapters such as `AiSdkProvider`.
+- Use `context.expose` only when you are crossing into an adapter boundary such as the AI SDK.
+
+## Common Mistakes
+
+- Treating `context.skills` as a global registry instead of a declared per-agent scope.
+- Using conversation history to store workflow checkpoints.
+- Re-implementing tool exposure manually instead of using `context.expose`.
+- Mixing runtime bootstrapping into the handler.
+
+## Related Guides
+
+- [Builder](./agent-builder.md)
+- [Runtime](./runtime.md)
+- [Skills](./skills.md)
+- [AI SDK Adapter](./ai-sdk-adapter.md)
+- [Durable Run State](./run-state.md)

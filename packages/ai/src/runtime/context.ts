@@ -39,8 +39,14 @@ import type {
 	ProviderRerankRequest,
 	ProviderRerankResponse,
 } from '../providers/runtime/ModelProvider.js'
-import type { SkillDocument, SkillMetadata, SkillResource, SkillSearchInput } from '../skills/fileSystem.js'
-import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
+import type {
+	SkillDocument,
+	SkillMetadata,
+	SkillReferenceDocument,
+	SkillResource,
+	SkillSearchInput,
+} from '../skills/fileSystem.js'
+import type { AgentManifest, AgentSkillConfig, AllowedToolDefinition } from '../types/AgentManifest.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import { invokeAgent } from './invokeAgent.js'
 import { type AgentRunStateHelpers, createAgentRunStateHelpers } from './runState.js'
@@ -157,11 +163,11 @@ const stringifyResult = (result: unknown): string => {
 	}
 }
 
-type ProtocolBufferOptions = {
+export type ProtocolBufferOptions = {
 	onEnvelope?: (envelope: AgentProtocolEnvelope) => void | Promise<void>
 }
 
-type ProtocolContext = CommandFunctionContext | StreamFunctionContext
+export type ProtocolContext = CommandFunctionContext | StreamFunctionContext
 
 export const createProtocolBuffer = (
 	context: ProtocolContext,
@@ -285,7 +291,7 @@ export const createProtocolBuffer = (
 	}
 }
 
-type ToolInvoker = {
+export type ToolInvoker = {
 	list(): AllowedToolDefinition[]
 	invoke: Record<string, Record<string, Record<string, (payload: unknown, parameter?: unknown) => Promise<unknown>>>>
 }
@@ -507,10 +513,14 @@ export type AgentHandlerContext<
 	expose: ExposeHelpers
 	skills: {
 		available: boolean
+		names: string[]
+		config?: AgentSkillConfig
 		list(): Promise<SkillMetadata[]>
+		loadAvailable(): Promise<SkillDocument[]>
 		load(skillName: string): Promise<SkillDocument>
 		loadMany(skillNames: string[]): Promise<SkillDocument[]>
-		search(input: SkillSearchInput): Promise<SkillDocument[]>
+		loadReferences(skillName: string): Promise<SkillReferenceDocument[]>
+		search(input?: SkillSearchInput): Promise<SkillDocument[]>
 	}
 	resources: Resources
 	models: Models
@@ -1075,25 +1085,66 @@ const getOptionalSkillResource = (resources: Record<string, unknown>): SkillReso
 	}
 }
 
-const createSkillHelpers = (resources: Record<string, unknown>) => {
+const uniqueSkillStrings = (values: string[] | undefined): string[] => [
+	...new Set((values ?? []).map(entry => entry.trim()).filter(Boolean)),
+]
+
+const createSkillHelpers = (resources: Record<string, unknown>, manifest: AgentManifest) => {
+	const declaredNames = uniqueSkillStrings(manifest.skills?.names)
 	const ensureSkillResource = () => {
 		const skillResource = getOptionalSkillResource(resources)
 
-		if (!skillResource) {
+		if (!skillResource || declaredNames.length === 0) {
 			throw new HandledError(
 				StatusCode.InternalServerError,
-				'No skill resource is configured. Add a resources.skills implementation such as FileSkillResource.',
+				'No declared skills are configured. Use builder.useSkills([...]) and provide skills at getInstance(...).',
 			)
 		}
 		return skillResource
 	}
 
+	const ensureDeclared = (skillNames: string[]) => {
+		for (const skillName of skillNames) {
+			if (!declaredNames.includes(skillName)) {
+				throw new HandledError(
+					StatusCode.BadRequest,
+					`Skill ${skillName} is not declared for this agent. Use builder.useSkills([...]) to expose it.`,
+				)
+			}
+		}
+	}
+
+	const loadAvailable = async () => await ensureSkillResource().loadMany(declaredNames)
+
 	return {
-		available: getOptionalSkillResource(resources) !== undefined,
-		list: async () => await ensureSkillResource().list(),
-		load: async (skillName: string) => await ensureSkillResource().load(skillName),
-		loadMany: async (skillNames: string[]) => await ensureSkillResource().loadMany(skillNames),
-		search: async (input: SkillSearchInput) => await ensureSkillResource().search(input),
+		available: getOptionalSkillResource(resources) !== undefined && declaredNames.length > 0,
+		names: declaredNames,
+		config: manifest.skills,
+		list: async () => (await loadAvailable()).map(({ content: _content, ...metadata }) => metadata),
+		loadAvailable,
+		load: async (skillName: string) => {
+			ensureDeclared([skillName.trim()])
+			return await ensureSkillResource().load(skillName)
+		},
+		loadMany: async (skillNames: string[]) => {
+			const normalized = uniqueSkillStrings(skillNames)
+			ensureDeclared(normalized)
+			return await ensureSkillResource().loadMany(normalized)
+		},
+		loadReferences: async (skillName: string) => {
+			ensureDeclared([skillName.trim()])
+			return await ensureSkillResource().loadReferences(skillName)
+		},
+		search: async (input: SkillSearchInput = {}) => {
+			const requestedNames = uniqueSkillStrings(input.skillNames)
+			if (requestedNames.length > 0) {
+				ensureDeclared(requestedNames)
+			}
+			return await ensureSkillResource().search({
+				...input,
+				skillNames: requestedNames.length > 0 ? requestedNames : declaredNames,
+			})
+		},
 	}
 }
 
@@ -1137,7 +1188,7 @@ export const createAgentHandlerContext = <
 			agents,
 			protocol: input.protocol,
 		}),
-		skills: createSkillHelpers(input.resources),
+		skills: createSkillHelpers(input.resources, input.manifest),
 		resources: input.resources,
 		models: input.models,
 		agents,

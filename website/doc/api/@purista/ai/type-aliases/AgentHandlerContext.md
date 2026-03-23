@@ -8,7 +8,7 @@
 
 > **AgentHandlerContext**\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`\> = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:489](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L489)
+Defined in: [packages/ai/src/runtime/context.ts:496](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L496)
 
 ## Type Parameters
 
@@ -38,7 +38,7 @@ Defined in: [packages/ai/src/runtime/context.ts:489](https://github.com/puristaj
 
 > **agents**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:509](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L509)
+Defined in: [packages/ai/src/runtime/context.ts:527](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L527)
 
 #### invoke
 
@@ -109,9 +109,9 @@ Invokes another agent and extracts a best-effort assistant text output from mess
 
 ### configs
 
-> **configs**: `ProtocolContext`\[`"configs"`\]
+> **configs**: [`ProtocolContext`](ProtocolContext.md)\[`"configs"`\]
 
-Defined in: [packages/ai/src/runtime/context.ts:549](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L549)
+Defined in: [packages/ai/src/runtime/context.ts:567](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L567)
 
 ***
 
@@ -119,7 +119,7 @@ Defined in: [packages/ai/src/runtime/context.ts:549](https://github.com/puristaj
 
 > **conversation**: [`ConversationHelpers`](ConversationHelpers.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:501](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L501)
+Defined in: [packages/ai/src/runtime/context.ts:508](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L508)
 
 ***
 
@@ -127,15 +127,15 @@ Defined in: [packages/ai/src/runtime/context.ts:501](https://github.com/puristaj
 
 > **embeddings**: `{ [Alias in keyof Models as Models[Alias] extends { embed: (args: any[]) => any } ? Alias : never]: { name: string; embed: any; embedMany?: any } }`
 
-Defined in: [packages/ai/src/runtime/context.ts:532](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L532)
+Defined in: [packages/ai/src/runtime/context.ts:550](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L550)
 
 ***
 
 ### emit
 
-> **emit**: `ProtocolContext`\[`"emit"`\]
+> **emit**: [`ProtocolContext`](ProtocolContext.md)\[`"emit"`\]
 
-Defined in: [packages/ai/src/runtime/context.ts:500](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L500)
+Defined in: [packages/ai/src/runtime/context.ts:507](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L507)
 
 ***
 
@@ -143,7 +143,7 @@ Defined in: [packages/ai/src/runtime/context.ts:500](https://github.com/puristaj
 
 > **expose**: [`ExposeHelpers`](ExposeHelpers.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:506](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L506)
+Defined in: [packages/ai/src/runtime/context.ts:513](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L513)
 
 ***
 
@@ -151,7 +151,7 @@ Defined in: [packages/ai/src/runtime/context.ts:506](https://github.com/puristaj
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:496](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L496)
+Defined in: [packages/ai/src/runtime/context.ts:503](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L503)
 
 ***
 
@@ -159,15 +159,15 @@ Defined in: [packages/ai/src/runtime/context.ts:496](https://github.com/puristaj
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:552](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L552)
+Defined in: [packages/ai/src/runtime/context.ts:570](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L570)
 
 ***
 
 ### message
 
-> **message**: `ProtocolContext`\[`"message"`\]
+> **message**: [`ProtocolContext`](ProtocolContext.md)\[`"message"`\]
 
-Defined in: [packages/ai/src/runtime/context.ts:499](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L499)
+Defined in: [packages/ai/src/runtime/context.ts:506](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L506)
 
 ***
 
@@ -175,7 +175,7 @@ Defined in: [packages/ai/src/runtime/context.ts:499](https://github.com/puristaj
 
 > **models**: `Models`
 
-Defined in: [packages/ai/src/runtime/context.ts:508](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L508)
+Defined in: [packages/ai/src/runtime/context.ts:526](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L526)
 
 ***
 
@@ -183,7 +183,7 @@ Defined in: [packages/ai/src/runtime/context.ts:508](https://github.com/puristaj
 
 > **parameter**: `Parameter`
 
-Defined in: [packages/ai/src/runtime/context.ts:498](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L498)
+Defined in: [packages/ai/src/runtime/context.ts:505](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L505)
 
 ***
 
@@ -191,7 +191,7 @@ Defined in: [packages/ai/src/runtime/context.ts:498](https://github.com/puristaj
 
 > **payload**: `Payload`
 
-Defined in: [packages/ai/src/runtime/context.ts:497](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L497)
+Defined in: [packages/ai/src/runtime/context.ts:504](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L504)
 
 ***
 
@@ -199,7 +199,7 @@ Defined in: [packages/ai/src/runtime/context.ts:497](https://github.com/puristaj
 
 > **protocol**: [`ProtocolEmitter`](ProtocolEmitter.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:504](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L504)
+Defined in: [packages/ai/src/runtime/context.ts:511](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L511)
 
 ***
 
@@ -207,7 +207,7 @@ Defined in: [packages/ai/src/runtime/context.ts:504](https://github.com/puristaj
 
 > **rerankers**: `{ [Alias in keyof Models as Models[Alias] extends { rerank: (args: any[]) => any } ? Alias : never]: { name: string; rerank: any } }`
 
-Defined in: [packages/ai/src/runtime/context.ts:539](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L539)
+Defined in: [packages/ai/src/runtime/context.ts:557](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L557)
 
 ***
 
@@ -215,7 +215,7 @@ Defined in: [packages/ai/src/runtime/context.ts:539](https://github.com/puristaj
 
 > **resources**: `Resources`
 
-Defined in: [packages/ai/src/runtime/context.ts:507](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L507)
+Defined in: [packages/ai/src/runtime/context.ts:525](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L525)
 
 ***
 
@@ -223,23 +223,23 @@ Defined in: [packages/ai/src/runtime/context.ts:507](https://github.com/puristaj
 
 > **runState**: [`AgentRunStateHelpers`](AgentRunStateHelpers.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:551](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L551)
+Defined in: [packages/ai/src/runtime/context.ts:569](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L569)
 
 ***
 
 ### secrets
 
-> **secrets**: `ProtocolContext`\[`"secrets"`\]
+> **secrets**: [`ProtocolContext`](ProtocolContext.md)\[`"secrets"`\]
 
-Defined in: [packages/ai/src/runtime/context.ts:548](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L548)
+Defined in: [packages/ai/src/runtime/context.ts:566](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L566)
 
 ***
 
 ### serviceContext
 
-> **serviceContext**: `ProtocolContext`
+> **serviceContext**: [`ProtocolContext`](ProtocolContext.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:547](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L547)
+Defined in: [packages/ai/src/runtime/context.ts:565](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L565)
 
 ***
 
@@ -247,15 +247,107 @@ Defined in: [packages/ai/src/runtime/context.ts:547](https://github.com/puristaj
 
 > **session**: [`SessionHelpers`](SessionHelpers.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:502](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L502)
+Defined in: [packages/ai/src/runtime/context.ts:509](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L509)
+
+***
+
+### skills
+
+> **skills**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:514](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L514)
+
+#### available
+
+> **available**: `boolean`
+
+#### config?
+
+> `optional` **config**: [`AgentSkillConfig`](AgentSkillConfig.md)
+
+#### names
+
+> **names**: `string`[]
+
+#### list()
+
+> **list**(): `Promise`\<[`SkillMetadata`](SkillMetadata.md)[]\>
+
+##### Returns
+
+`Promise`\<[`SkillMetadata`](SkillMetadata.md)[]\>
+
+#### load()
+
+> **load**(`skillName`): `Promise`\<[`SkillDocument`](SkillDocument.md)\>
+
+##### Parameters
+
+###### skillName
+
+`string`
+
+##### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)\>
+
+#### loadAvailable()
+
+> **loadAvailable**(): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+##### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+#### loadMany()
+
+> **loadMany**(`skillNames`): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+##### Parameters
+
+###### skillNames
+
+`string`[]
+
+##### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+#### loadReferences()
+
+> **loadReferences**(`skillName`): `Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
+
+##### Parameters
+
+###### skillName
+
+`string`
+
+##### Returns
+
+`Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
+
+#### search()
+
+> **search**(`input?`): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+##### Parameters
+
+###### input?
+
+[`SkillSearchInput`](SkillSearchInput.md)
+
+##### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
 
 ***
 
 ### states
 
-> **states**: `ProtocolContext`\[`"states"`\]
+> **states**: [`ProtocolContext`](ProtocolContext.md)\[`"states"`\]
 
-Defined in: [packages/ai/src/runtime/context.ts:550](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L550)
+Defined in: [packages/ai/src/runtime/context.ts:568](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L568)
 
 ***
 
@@ -263,12 +355,12 @@ Defined in: [packages/ai/src/runtime/context.ts:550](https://github.com/puristaj
 
 > **stream**: [`AgentStreamEmitter`](AgentStreamEmitter.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:503](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L503)
+Defined in: [packages/ai/src/runtime/context.ts:510](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L510)
 
 ***
 
 ### tools
 
-> **tools**: `ToolInvoker`
+> **tools**: [`ToolInvoker`](ToolInvoker.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:505](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/context.ts#L505)
+Defined in: [packages/ai/src/runtime/context.ts:512](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/context.ts#L512)

@@ -6,6 +6,6 @@
 
 # Type Alias: AiSdkEmbedManyOverrides
 
-> **AiSdkEmbedManyOverrides** = `Partial`\<`Omit`\<`EmbedManyArgs`, `"model"` \| `"values"`\>\>
+> **AiSdkEmbedManyOverrides** = `Partial`\<`Omit`\<[`EmbedManyArgs`](EmbedManyArgs.md), `"model"` \| `"values"`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:108](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/providers/runtime/AiSdkProvider.ts#L108)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:109](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/AiSdkProvider.ts#L109)

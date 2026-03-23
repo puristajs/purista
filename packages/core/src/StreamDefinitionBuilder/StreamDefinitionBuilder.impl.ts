@@ -26,12 +26,12 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
 
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+export type StreamAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
 }
 
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
+const isAgentInvokeConfig = (value: unknown): value is StreamAgentInvokeConfig<Schema, Schema> => {
 	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 }
 
@@ -296,7 +296,7 @@ export class StreamDefinitionBuilder<
 	>(
 		agentName: SName,
 		agentVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
+		invokeConfigOrParameterSchema?: Parameter | StreamAgentInvokeConfig<Payload, Parameter>,
 	) {
 		if (agentName.trim() === '' || agentVersion.trim() === '') {
 			throw new Error('canInvokeAgent requires non-empty agent name and version')

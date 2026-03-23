@@ -1,6 +1,7 @@
 import { createAgentTestHarness, ScriptedModel } from '@purista/ai'
 import { DefaultQueueBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
+import { exampleSkills } from '../../../skills.js'
 import { supportV1Service } from '../../../service/support/v1/index.js'
 import { triageAgent } from '../../triageAgent/v1/triageAgent.js'
 import { supportAgent } from './supportAgent.js'
@@ -29,6 +30,7 @@ describe('supportAgent', () => {
 			logger,
 			models: { 'openai:gpt-4o-mini': supportModel },
 			queueBridge,
+			skills: exampleSkills,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -72,6 +74,7 @@ describe('supportAgent', () => {
 			logger,
 			models: { 'openai:gpt-4o-mini': supportModel },
 			queueBridge,
+			skills: exampleSkills,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 

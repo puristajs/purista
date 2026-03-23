@@ -25,9 +25,7 @@
 		"types": ["vitest/globals", "node"],
 		"noFallthroughCasesInSwitch": true,
 		"useUnknownInCatchVariables": true,
-		"paths": {
-			"@purista/sandbox": ["./packages/sandbox-service/src/index.ts"]
-		}
+		"paths": {}
 	},
 	"exclude": ["node_modules", "dist"]
 }

@@ -62,32 +62,93 @@ await run.update({ phase: 'summarizing', status: 'summarizing' })
 await run.finishSuccess(summary)
 ```
 
-Available operations:
+Read the lifecycle in phases instead of as a method list:
 
-- `context.runState.start(input)`
-- `context.runState.get(runId?)`
-- `context.runState.update(patch)`
-- `context.runState.replaceTasks(tasks)`
-- `context.runState.startTask(taskId, detail?)`
-- `context.runState.completeTask(taskId, detail?)`
-- `context.runState.failTask(taskId, detail?)`
-- `context.runState.checkpoint(name, value?, options?)`
-- `context.runState.getCheckpoint(name)`
-- `context.runState.finish({ summary, status, finalMessage, error })`
-- `context.runState.emit()`
-- `context.runState.lock(...)`
+### 1. Start or resume the run
 
-The handle returned by `start(...)` adds convenience helpers:
+Use `context.runState.start(...)` when the handler begins a new durable workflow and needs:
 
-- `run.plan(tasks)`
-- `run.update(patch)`
-- `run.phase(phase, status?)`
-- `run.task(taskId, async () => ...)`
-- `run.step(id, async () => ..., { checkpoint })`
-- `run.checkpoint(name, value, { completed })`
-- `run.finishSuccess(summary)`
-- `run.finishFailure(summary, error)`
-- `run.setFinalMessage(message)`
+- a title
+- scope metadata
+- an optional lock
+
+Use `context.runState.get(...)` when you need to reopen an existing run or inspect previously persisted state.
+
+### 2. Describe the work
+
+Use `run.plan(...)` or `replaceTasks(...)` when you want the UI and recovery state to show an ordered list of steps such as:
+
+- review inputs
+- write files
+- verify outputs
+
+This is the right place to express the workflow the user should see.
+
+### 3. Mark progress while work happens
+
+Use:
+
+- `run.update(...)` when the overall phase or status changes
+- `run.step(...)` when one task should wrap a block of work
+- `run.task(...)` when you want a simpler task wrapper
+
+Use `run.step(...)` for the common path because it keeps the task status and checkpoint close to the work itself.
+
+Example:
+
+```ts
+const summary = await run.step(
+  'write-files',
+  async () => {
+    // write files here
+    return 'Architecture artifacts written'
+  },
+  { checkpoint: 'write-files-summary' },
+)
+```
+
+### 4. Persist recovery data
+
+Use checkpoints when the next retry or reconnect should be able to recover from a known point.
+
+Good checkpoint examples:
+
+- normalized input snapshot
+- generated file manifest
+- final summary from a completed step
+
+Example:
+
+```ts
+await run.checkpoint('spec-snapshot', { projectId: payload.projectId }, { completed: true })
+```
+
+### 5. Finish the run
+
+Use:
+
+- `run.finishSuccess(summary)` when the workflow completed normally
+- `run.finishFailure(summary, error)` when it failed
+- `run.setFinalMessage(message)` when the frontend should keep a specific final assistant message
+
+The finish step should happen only after the outputs are truly persisted or verified.
+
+## Which Helper To Reach For
+
+When you are unsure which helper to use, this is the practical guide:
+
+- “I need a durable run record for this workflow.”
+  Use `start(...)`.
+- “I want the UI to show the ordered work items.”
+  Use `plan(...)`.
+- “I want to wrap one real unit of work and record success or failure.”
+  Use `step(...)`.
+- “I need resumable data for retries or reconnects.”
+  Use `checkpoint(...)`.
+- “I want to move the overall workflow from planning to running to completed.”
+  Use `update(...)` or `phase(...)`.
+- “I am done.”
+  Use `finishSuccess(...)` or `finishFailure(...)`.
 
 ## Locking and Recovery
 
@@ -176,4 +237,4 @@ Bad:
 - [Context](./handler-context.md)
 - [Invocation](./invocation.md)
 - [Web & SDK](./frontend.md)
-- [Memory & Knowledge](./memory-and-knowledge.md)
+- [Memory & Retrieval](./memory-and-retrieval.md)

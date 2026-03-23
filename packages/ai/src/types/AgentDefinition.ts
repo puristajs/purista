@@ -1,11 +1,11 @@
 import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { ConfigStore, EventBridge, Logger, QueueBridge, Schema, SecretStore, StateStore } from '@purista/core'
-
 import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
+import type { SkillResource, SkillSourceMap } from '../skills/fileSystem.js'
 import type { AgentManifest, ExternalRuntimeMetadata } from './AgentManifest.js'
 
 export type AgentInfo = {
@@ -15,7 +15,7 @@ export type AgentInfo = {
 	successEventName?: string
 }
 
-type BaseAgentInstanceOptions = {
+export type BaseAgentInstanceOptions<SkillNames extends string = string> = {
 	logger?: Logger
 	spanProcessor?: SpanProcessor
 	tracer?: Tracer
@@ -26,6 +26,14 @@ type BaseAgentInstanceOptions = {
 	conversationStore?: ConversationStore
 	poolManager?: PoolManager
 	models?: Record<string, ModelProvider>
+	/**
+	 * Provide the skill implementations for names declared via `builder.useSkills([...])`.
+	 *
+	 * The common paths are:
+	 * - inline typed skill maps for tests and small agents
+	 * - file-based skill resources for reusable application catalogs
+	 */
+	skills?: SkillResource | SkillSourceMap<SkillNames>
 	/** @deprecated use `models` */
 	resources?: Record<string, unknown>
 	poolConfig?: {
@@ -47,9 +55,9 @@ type BaseAgentInstanceOptions = {
 	config?: Record<string, unknown>
 }
 
-export type AgentInstanceOptions = BaseAgentInstanceOptions
+export type AgentInstanceOptions<SkillNames extends string = string> = BaseAgentInstanceOptions<SkillNames>
 
-export type AgentDefinition = {
+export type AgentDefinition<SkillNames extends string = string> = {
 	info: AgentInfo
 	manifest: AgentManifest
 	schemas: {
@@ -60,7 +68,7 @@ export type AgentDefinition = {
 	}
 	getManifest(): AgentManifest
 	getExternalRuntimeMetadata(): ExternalRuntimeMetadata
-	getInstance(eventBridge: EventBridge, options?: AgentInstanceOptions): Promise<AgentRuntimeInstance>
+	getInstance(eventBridge: EventBridge, options?: AgentInstanceOptions<SkillNames>): Promise<AgentRuntimeInstance>
 }
 
 export type AgentRuntimeInstance = {

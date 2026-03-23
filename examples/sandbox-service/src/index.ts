@@ -1,5 +1,5 @@
 import { DefaultEventBridge, DefaultStateStore, initLogger } from '@purista/core'
-import { DockerSandboxDriver, SandboxRegistry, sandboxServiceBuilder } from '@purista/sandbox'
+import { DockerSandboxDriver, SandboxRegistry, sandboxServiceBuilder } from '@purista/ai'
 
 const logger = initLogger()
 const eventBridge = new DefaultEventBridge()

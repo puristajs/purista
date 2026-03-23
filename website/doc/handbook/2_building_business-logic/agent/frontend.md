@@ -1,31 +1,42 @@
 ---
 title: Web & SDK
-description: Connecting your agent to a React/Next.js frontend.
-order: 203706
+description: Connect a PURISTA agent to a frontend by exposing the agent over HTTP/SSE and rendering run-state separately from chat content.
+order: 203710
 ---
 
 # Web & SDK
 
-PURISTA agents can speak the Vercel AI SDK wire format while still using PURISTA's transport, queue, and run-state model under the hood.
+This page answers the frontend question:
 
-## 1. Expose The Agent
+> How do I expose a PURISTA agent to a chat UI without losing durable progress?
 
-```ts title="src/agents/supportAgent/v1/supportAgent.ts"
-export const supportAgent = new AgentBuilder({ ... })
+The default answer is:
+
+1. expose the agent over HTTP
+2. use `ai-sdk-ui-message` as the SSE protocol
+3. render `data-run-state` in a side panel
+4. keep the chat transcript for user-visible conversation only
+
+## Step 1: Expose The Agent
+
+```ts
+export const supportAgent = new AgentBuilder({
+  agentName: 'supportAgent',
+  agentVersion: '1',
+  description: 'Queued durable support assistant',
+})
   .exposeAsHttpEndpoint('POST', 'agents/support')
   .setSseProtocol('ai-sdk-ui-message')
   .build()
 ```
 
-`ai-sdk-ui-message` is the best default for frontend chat UIs because it maps PURISTA frames into the `useChat` stream protocol.
+This is the best default for chat UIs because `ai-sdk-ui-message` maps PURISTA frames into the format expected by `useChat`.
 
-Queued durable agents still use the same endpoint, but the transport attaches to the live run instead of assuming the work finishes in the request itself.
+If the agent is queued durable, the same endpoint still works. The transport attaches to the live run instead of assuming the work finishes in one request.
 
-If the handler uses external runtime bindings plus an adapter such as `toAiSdkTools(...)`, the frontend does not change. Tool events, `run-state`, and final assistant messages are still mapped into the same SSE protocol.
+## Step 2: Render The Stream In The Frontend
 
-## 2. Frontend Integration
-
-```tsx title="frontend/ChatComponent.tsx"
+```tsx
 import { useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import type { AgentRunState } from '@purista/ai'
@@ -35,6 +46,7 @@ const isRunBlocking = (status?: string) =>
 
 export const ChatComponent = () => {
   const [runState, setRunState] = useState<AgentRunState | null>(null)
+
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: '/api/v1/agents/support',
     onData: part => {
@@ -55,10 +67,10 @@ export const ChatComponent = () => {
         </section>
       ) : null}
 
-      {messages.map(m => (
-        <div key={m.id}>
-          <b>{m.role === 'user' ? 'User: ' : 'AI: '}</b>
-          {m.content}
+      {messages.map(message => (
+        <div key={message.id}>
+          <b>{message.role === 'user' ? 'User: ' : 'AI: '}</b>
+          {message.content}
         </div>
       ))}
 
@@ -71,30 +83,76 @@ export const ChatComponent = () => {
 }
 ```
 
-The execution panel should stay separate from the chat transcript. Keep:
+## The Important UI Rule
 
-- progress tasks and checkpoints in a run panel
-- final human-facing answers in chat
-- the composer locked while a durable run is active
+Keep these concerns separate:
 
-## 3. Supported SSE Protocols
+- run panel:
+  progress, tasks, checkpoints, durable state
+- chat transcript:
+  user messages and final assistant-facing content
 
-- `purista`: native PURISTA protocol
-- `ai-sdk-ui-message`: Vercel AI SDK chat protocol
-- `ai-sdk-responses`: OpenAI Responses-style protocol
-- `ai-sdk-data`: data-only stream alias
-- `ai-sdk-json-render`: JSON render helper
-- `agent2agent`: Agent-to-Agent reference protocol
-- `mcp`: MCP reference tool protocol
+This is the biggest practical UI lesson for queued durable agents.
 
-## 4. Why Use This Instead Of A Custom Controller?
+## Which Protocol Should I Use?
 
-1. PURISTA maps rich agent frames into the client protocol for you.
-2. The exposed endpoint is included in OpenAPI generation.
-3. Tracing, logs, queue ownership, and run state stay connected end to end.
-4. The composer can be locked using durable run state instead of local UI-only flags.
-5. External AI SDK loops still inherit PURISTA tool telemetry and durable progress updates.
+### Default chat UI
 
-## 5. Practical Rule
+Use:
 
-If the agent is short and interactive, keep it inline. If the agent should survive restarts, expose progress, or resume from checkpoints, make it queued and render `data-run-state` in the UI.
+- `ai-sdk-ui-message`
+
+This should be the default recommendation for most frontend chat applications.
+
+### When to look beyond that
+
+Use another protocol only when you have a specific reason:
+
+- `purista` if you want the native PURISTA frame stream
+- `agent2agent` for reference-message integrations
+- `mcp` for MCP reference tool flows
+
+Most frontend developers do not need to choose among all protocols. They need the default first.
+
+## Why PURISTA Transport Is Useful
+
+Using the built-in transport instead of a custom controller gives you:
+
+- mapped agent frames
+- OpenAPI visibility
+- run-state delivery
+- queue-aware streaming
+- tracing and logs that still align with the backend execution path
+
+## If You Also Use An External SDK Loop
+
+If the handler internally uses external runtime bindings plus the AI SDK adapter, the frontend does not change. The important point is:
+
+- the frontend still receives the same stream protocol
+- `data-run-state` still reflects durable progress
+- tool events and final assistant output still flow through PURISTA transport
+
+So the SDK adapter is a handler/runtime concern, not a frontend integration rewrite.
+
+## Decision Rules
+
+- Standard chat UI:
+  use `ai-sdk-ui-message`
+- Long-running queued agent:
+  render `data-run-state` and lock the composer while active
+- Inline short agent:
+  same transport can still work, just with less run-state usage
+- Only switch protocols if you have a concrete interoperability need
+
+## Common Mistakes
+
+- Mixing execution progress into the chat transcript.
+- Building custom frontend state when `data-run-state` already expresses the workflow.
+- Treating all SSE protocols as equal choices for a normal chat UI.
+- Rewriting the frontend because the handler uses an external SDK loop internally.
+
+## Related Guides
+
+- [Quick Start](./getting-started.md)
+- [Durable Run State](./run-state.md)
+- [AI SDK Adapter](./ai-sdk-adapter.md)

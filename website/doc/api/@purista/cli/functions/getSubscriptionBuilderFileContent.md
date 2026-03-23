@@ -8,7 +8,7 @@
 
 > **getSubscriptionBuilderFileContent**(`input`): `string`
 
-Defined in: [content/subscription/getSubscriptionBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/content/subscription/getSubscriptionBuilderFileContent.ts#L9)
+Defined in: [content/subscription/getSubscriptionBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/content/subscription/getSubscriptionBuilderFileContent.ts#L9)
 
 ## Parameters
 

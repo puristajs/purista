@@ -7,6 +7,13 @@ This example shows the two agent execution styles side by side:
 
 The React UI renders `data-run-state` separately from chat so the composer can be locked while a durable run is active.
 
+It also demonstrates the PURISTA AI flow:
+
+- define agent behavior in the builder
+- provide models and skills at `getInstance(...)`
+- use skills from the handler context
+- adapt tools for AI SDK only at the external runtime boundary
+
 ## Quick Start
 
 Install dependencies:
@@ -53,9 +60,16 @@ Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
 
 - `src/agents/supportAgent/v1/supportAgent.ts`
   - queued durable execution
+  - `.useSkills(['spec-elicitation', 'support-workflow'])`
   - `context.runState` planning, checkpoints, and task updates
+  - `context.skills.loadAvailable()` and `context.skills.loadReferences(...)`
   - attach-and-stream HTTP behavior
   - optional delegation to `triageAgent`
+
+- `src/agents/bridgeDemoAgent/v1/bridgeDemoAgent.ts`
+  - `.useSkills(['spec-elicitation', 'tool-loop-discipline'])`
+  - `context.models['openai:gpt-4o-mini'].generateText(...)` for the model-owned adapter path
+  - explicit `context.expose.tools(...)` bindings for commands
 
 ### Frontend
 

@@ -23,7 +23,7 @@ export type ConversationState = {
 	metadata?: Record<string, unknown>
 }
 
-type ConversationSessionHelpers = {
+export type ConversationSessionHelpers = {
 	load(sessionId?: string): Promise<ConversationStoreRecord | undefined>
 	save(record: { conversationId?: string; data: ConversationStoreRecordData; updatedAt?: number }): Promise<void>
 }

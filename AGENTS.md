@@ -62,4 +62,5 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 - Start with repository-level context in `llms.txt`.
 - Public published files are under `website/doc/public/llms/`.
 - For sandbox implementation work, also load `website/doc/public/llms/sandbox.txt`.
-- Sandbox skills are available under `skills/sandbox/` and should be used selectively (load only what is required for the current task).
+- Canonical framework skills are available under `skills/` and should be loaded selectively.
+- Prefer the shared layered catalog there over app-local copies.

@@ -1,14 +1,23 @@
 ---
-title: Sandbox
-description: Multi-tenant sandbox runtime for secure agent and tool execution
+title: Sandbox Runtime
+description: Sandbox-backed execution in @purista/ai for secure agent and tool workloads
 order: 303500
 ---
 
 # Sandbox
 
-`@purista/sandbox` provides isolated execution environments for agent and tool workloads.
+`@purista/ai` provides the sandbox runtime for isolated agent and tool workloads.
 
-It adds:
+Read this page only when your agent needs a real workspace. For many agents, sandbox is unnecessary.
+
+The default PURISTA AI flow stays:
+
+1. define with the builder
+2. implement with the handler context
+3. create the instance
+4. add sandbox only if the agent must execute in an isolated filesystem/runtime
+
+Sandbox adds:
 
 - tenant-aware sandbox lifecycle (`tenantId` + `principalId` from PURISTA message metadata, plus `projectId`)
 - optional scope-based sandbox isolation for parallel runs
@@ -25,6 +34,15 @@ Use sandbox when:
 - parallel agents may need either a shared workspace or isolated sandboxes per run
 - you want one execution abstraction while switching infra backends
 - you need audit-friendly metadata around runtime ownership
+
+Do not use sandbox just because the workload is “AI”.
+
+Use it only when the agent needs:
+
+- shell commands
+- repository operations
+- skill scripts
+- isolated generated files
 
 ## Runtime Backends
 
@@ -50,18 +68,25 @@ Related runtimes often used with Docker driver:
 
 ## Quick Start
 
+The simplest sandbox adoption path is:
+
+1. build a sandbox image
+2. start the sandbox service
+3. ensure one sandbox for the workload scope
+4. execute commands or sync files inside that sandbox
+
 ### 1. Build a sandbox image
 
 Use a hardened image with `bash`, `git`, `gh`, and tooling required by your agents.
 
 ```bash
-docker build -t purista-sandbox-agent:latest -f packages/sandbox-service/Dockerfile.sandbox .
+docker build -t purista-sandbox-agent:latest -f packages/ai/Dockerfile.sandbox .
 ```
 
 Optional Alpine variant:
 
 ```bash
-docker build -t purista-sandbox-agent:alpine -f packages/sandbox-service/Dockerfile.sandbox.alpine .
+docker build -t purista-sandbox-agent:alpine -f packages/ai/Dockerfile.sandbox.alpine .
 ```
 
 Keep the image startup contract compatible with the PURISTA drivers:
@@ -72,11 +97,42 @@ Keep the image startup contract compatible with the PURISTA drivers:
 The drivers start a long-running container first and then execute commands via
 `docker exec` / equivalent runtime APIs.
 
+## Canonical Workspace Layout
+
+Sandboxed applications and agents should use one stable filesystem contract so
+scripts, skills, and repo operations remain portable across apps:
+
+```text
+/workspace/
+  repo/
+  skills/
+    <skill-name>/
+  tmp/
+  outputs/
+```
+
+Semantics:
+
+- `/workspace/repo` is the checked-out or synchronized project repository
+- `/workspace/skills/<skill-name>` is the materialized filesystem skill bundle
+- `/workspace/tmp` is scratch space for ephemeral work
+- `/workspace/outputs` is for generated artifacts that should not live inside the repo tree
+
+This layout is exposed by `@purista/ai` through the workspace layout helper
+APIs and should be treated as the canonical default for PURISTA apps.
+
+Why this matters:
+
+- repo files and skills do not collide
+- scripts can reliably reference repo and skill roots
+- apps can switch between shared and isolated sandboxes without changing paths
+- local app code does not need to reinvent its own sandbox layout
+
 ### 2. Wire the service into PURISTA
 
 ```ts
 import { DefaultEventBridge, DefaultStateStore, initLogger } from '@purista/core'
-import { DockerSandboxDriver, SandboxRegistry, sandboxServiceBuilder } from '@purista/sandbox'
+import { DockerSandboxDriver, SandboxRegistry, sandboxServiceBuilder } from '@purista/ai'
 
 const logger = initLogger()
 const eventBridge = new DefaultEventBridge()
@@ -101,7 +157,7 @@ await sandboxService.start()
 For fast local or test setups, you can also use the built-in in-memory registry helper:
 
 ```ts
-import { createInMemorySandboxRegistry } from '@purista/sandbox'
+import { createInMemorySandboxRegistry } from '@purista/ai'
 
 const registry = createInMemorySandboxRegistry()
 ```
@@ -109,7 +165,7 @@ const registry = createInMemorySandboxRegistry()
 For Apple local development (OrbStack/Colima), use the macOS-focused adapter:
 
 ```ts
-import { AppleContainerSandboxDriver } from '@purista/sandbox'
+import { AppleContainerSandboxDriver } from '@purista/ai'
 
 const driver = new AppleContainerSandboxDriver({
   imageName: 'purista-sandbox-agent:latest',
@@ -123,7 +179,7 @@ You can preflight the local runtime and image before starting your app:
 import {
   AppleContainerSandboxDriver,
   assertSandboxRuntimeAvailable,
-} from '@purista/sandbox'
+} from '@purista/ai'
 
 const driver = new AppleContainerSandboxDriver({
   imageName: 'purista-sandbox-agent:latest',
@@ -144,6 +200,12 @@ Typical flow:
 2. Run one or more commands (`executeBash`)
 3. Read/write generated artifacts
 4. Destroy sandbox on completion or idle timeout
+
+If you are wiring this from an AI application, keep the concern split clear:
+
+- builder declares that the agent may use sandbox-backed resources or scripts
+- instance creation provides the sandbox runtime dependencies
+- handler or adapter triggers the actual work
 
 ## Configuration Model
 
@@ -286,7 +348,7 @@ In sandbox, a runtime adapter is implemented as a `SandboxDriver`.
 If you want to support a new backend, implement the `SandboxDriver` interface and inject it into the service resources.
 
 ```ts
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '@purista/sandbox'
+import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '@purista/ai'
 import type { z } from 'zod'
 
 type BashResult = z.infer<typeof BashResultSchema>

@@ -119,6 +119,20 @@ class RecordingProvider implements ModelProvider {
 	}
 }
 
+class AutomaticDefaultsProvider implements ModelProvider {
+	readonly name = 'automatic-defaults-provider'
+	readonly capabilities = { text: true, stream: true }
+	lastRequest?: ProviderRequest
+
+	async generate(request: ProviderRequest) {
+		this.lastRequest = request
+		return {
+			output: 'ok',
+			tokens: { prompt: 1, completion: 1 },
+		}
+	}
+}
+
 const bridges: DefaultEventBridge[] = []
 
 afterEach(async () => {
@@ -163,6 +177,7 @@ describe('AgentBuilder', () => {
 			.setModelResource({ resourceName: 'modelResource', variant: 'mini' })
 			.setRetryPolicy({ maxAttempts: 2, strategy: 'fixed', delayMs: 100 })
 			.setMemory({ storeName: 'memoryStore', maxFrames: 10 })
+			.useSkills(['spec-elicitation', 'architecture-synthesis'])
 			.canInvoke('Ticketing', '1', 'createTicket')
 			.canInvokeAgent('triageAgent', '1')
 			.setTelemetry({ attributes: { team: 'support' } })
@@ -184,8 +199,13 @@ describe('AgentBuilder', () => {
 		expect(manifest.description).toBe('helper description')
 		expect(manifest.eventBridge).toBe('customBridge')
 		expect(manifest.resources?.llm?.resourceName).toBe('model')
+		expect(manifest.resources?.skills?.resourceName).toBe('skills')
 		expect(manifest.session?.storeName).toBe('memoryStore')
 		expect(manifest.modelResource?.variant).toBe('mini')
+		expect(manifest.skills).toEqual({
+			resourceName: 'skills',
+			names: ['spec-elicitation', 'architecture-synthesis'],
+		})
 		expect(manifest.allowedTools).toHaveLength(1)
 		expect(
 			manifest.allowedTools.some(
@@ -203,6 +223,60 @@ describe('AgentBuilder', () => {
 		expect(manifest.httpExposure?.sseProtocol).toBe('ai-sdk-responses')
 		expect(manifest.httpExposure?.path).toBe('agents/helperAgent')
 		expect(manifest.httpExposure?.streamingMode).toBe('stream')
+	})
+
+	it('automatically injects declared skills and allowlisted bindings into model text calls', async () => {
+		const provider = new AutomaticDefaultsProvider()
+		const definition = new AgentBuilder({
+			agentName: 'autoDefaultsAgent',
+			agentVersion: '1',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string() }))
+			.defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+			.useSkills(['spec-elicitation'])
+			.canInvoke('support', '1', 'lookupFaq')
+			.canInvokeAgent('triageAgent', '1')
+			.setHandler(async (context, payload) => {
+				const answer = await context.models['openai:primary'].generateText({
+					prompt: payload.prompt,
+				})
+				return { message: answer }
+			})
+			.build()
+
+		const bridge = new DefaultEventBridge()
+		bridges.push(bridge)
+		await bridge.start()
+
+		const instance = await definition.getInstance(bridge, {
+			models: { 'openai:primary': provider },
+			skills: {
+				'spec-elicitation': {
+					content: 'Ask clarifying questions first.',
+				},
+			},
+		})
+
+		await instance.start()
+		try {
+			await instance.invoke({
+				payload: { prompt: 'Help' },
+			})
+			expect(provider.lastRequest?.skills).toEqual([
+				expect.objectContaining({
+					name: 'spec-elicitation',
+					content: 'Ask clarifying questions first.',
+				}),
+			])
+			const bindings = Array.isArray(provider.lastRequest?.bindings)
+				? provider.lastRequest?.bindings
+				: Object.values(provider.lastRequest?.bindings ?? {})
+			expect(bindings.map(binding => binding.name)).toEqual(
+				expect.arrayContaining(['support.1.lookupFaq', 'triageAgent.1.run']),
+			)
+		} finally {
+			await instance.stop()
+		}
 	})
 
 	it('supports aggregate streaming mode for unary HTTP responses', () => {

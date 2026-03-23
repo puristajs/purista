@@ -9,6 +9,7 @@ import {
 	streamText,
 	wrapLanguageModel,
 } from 'ai'
+import { createAiSdkRequest } from '../../bridge/aiSdk.js'
 import { generateText as generateTextWithFallback } from './generateText.js'
 import type {
 	ModelProvider,
@@ -98,11 +99,11 @@ export type AiSdkProviderMetadata = {
 /**
  * Supported overrides extracted from the AI SDK `generateText` call signature.
  */
-type GenerateTextArgs = Parameters<typeof aiGenerateText>[0]
+export type GenerateTextArgs = Parameters<typeof aiGenerateText>[0]
 export type AiSdkProviderOverrides = Partial<Omit<GenerateTextArgs, 'model' | 'prompt' | 'system' | 'messages'>>
-type EmbedArgs = Parameters<typeof embed>[0]
-type EmbedManyArgs = Parameters<typeof embedMany>[0]
-type RerankArgs = Parameters<typeof rerank>[0]
+export type EmbedArgs = Parameters<typeof embed>[0]
+export type EmbedManyArgs = Parameters<typeof embedMany>[0]
+export type RerankArgs = Parameters<typeof rerank>[0]
 
 export type AiSdkEmbedOverrides = Partial<Omit<EmbedArgs, 'model' | 'value'>>
 export type AiSdkEmbedManyOverrides = Partial<Omit<EmbedManyArgs, 'model' | 'values'>>
@@ -303,12 +304,19 @@ export class AiSdkProvider implements ModelProvider {
 	}
 
 	private getCallInput(request: ProviderRequest): GenerateTextArgs {
-		const metadataOverrides = this.getTextOverrides(request.metadata)
+		const adaptedRequest = createAiSdkRequest({
+			prompt: request.prompt,
+			skills: request.skills,
+			references: request.references,
+			bindings: request.bindings,
+			metadata: request.metadata,
+		})
+		const metadataOverrides = this.getTextOverrides(adaptedRequest.metadata)
 		return {
 			...this.defaults,
 			...metadataOverrides,
 			model: this.model,
-			prompt: request.prompt,
+			prompt: adaptedRequest.prompt,
 			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
 			experimental_telemetry: {
 				isEnabled: true,
@@ -515,11 +523,17 @@ export class AiSdkProvider implements ModelProvider {
 
 	async generateText(request: ProviderGenerateTextRequest): Promise<string> {
 		return await generateTextWithFallback({
-			model: this,
+			model: {
+				generate: this.generate.bind(this),
+				stream: this.stream.bind(this),
+			},
 			request: {
 				prompt: request.prompt,
 				context: request.context,
 				developerInstruction: request.developerInstruction,
+				skills: request.skills,
+				references: request.references,
+				bindings: request.bindings,
 				metadata: request.metadata,
 			},
 			onReasoning: request.onReasoning,

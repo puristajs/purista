@@ -7,9 +7,9 @@ export const aiWorkloadQueuePayloadSchema = extendApi(
 		prompt: extendApi(z.string().min(1), { title: 'Prompt to process' }),
 		sessionId: extendApi(z.string().min(1), { title: 'Session identifier' }),
 		context: extendApi(z.string().optional(), { title: 'Additional context' }),
-		tenantId: extendApi(z.string().optional(), { title: 'Optional tenant scope for memory and knowledge isolation' }),
+		tenantId: extendApi(z.string().optional(), { title: 'Optional tenant scope for memory and runtime isolation' }),
 		principalId: extendApi(z.string().optional(), {
-			title: 'Optional principal scope for memory and knowledge isolation',
+			title: 'Optional principal scope for memory and runtime isolation',
 		}),
 		metadata: extendApi(z.record(z.string(), z.unknown()).optional(), {
 			title: 'Provider metadata (e.g., aiSdk overrides)',

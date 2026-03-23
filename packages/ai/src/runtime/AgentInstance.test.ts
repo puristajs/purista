@@ -191,4 +191,49 @@ describe('AgentInstance', () => {
 			agents: [],
 		})
 	})
+
+	it('converts inline typed skills into a runtime skill resource at getInstance()', async () => {
+		const service = {
+			start: vi.fn().mockResolvedValue(undefined),
+			destroy: vi.fn().mockResolvedValue(undefined),
+		}
+		const getInstance = vi.fn().mockResolvedValue(service)
+
+		const instance = new AgentInstance(
+			{
+				...baseDependencies,
+				manifest: {
+					...baseManifest,
+					skills: {
+						resourceName: 'skills',
+						names: ['spec-elicitation'],
+					},
+				},
+				serviceBuilder: {
+					...baseDependencies.serviceBuilder,
+					getInstance,
+				},
+			},
+			{ instanceId: 'bridge-1' } as any,
+			{
+				models: {},
+				skills: {
+					'spec-elicitation': {
+						content: 'Ask for missing requirements first.',
+					},
+				},
+			},
+		)
+
+		await instance.start()
+
+		const call = getInstance.mock.calls[0]?.[1]
+		const skillResource = call?.serviceConfig?.runtime?.resources?.skills
+		await expect(skillResource.load('spec-elicitation')).resolves.toEqual(
+			expect.objectContaining({
+				name: 'spec-elicitation',
+				content: 'Ask for missing requirements first.',
+			}),
+		)
+	})
 })

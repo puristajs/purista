@@ -1,26 +1,36 @@
 ---
 title: Quick Start
-description: Build one inline agent and one queued durable agent.
+description: "Build one complete PURISTA agent through the real lifecycle: define, implement, create an instance, and adapt."
 order: 203701
 ---
 
 # Quick Start
 
-This guide shows the decision boundary:
+This guide builds one small but realistic PURISTA setup:
 
-- use an **inline** agent for a short classification or answer step
-- use a **queued durable** agent when the work should survive restarts, expose progress, and support checkpoints
-- use **external runtime bindings** when you want a Vercel AI SDK loop but the tools must still execute as PURISTA commands or child agents
+- an inline `triageAgent`
+- a queued durable `supportAgent`
+- one support command used as a tool
+- two skills provided at instance creation
+- one optional Vercel AI SDK adapter call
 
-## 1. Scaffold
+The goal is not to show every feature. The goal is that you finish the page with one mental model that actually works.
 
-```bash
-purista add agent SupportAgent
+## What You Will Build
+
+```text
+src/
+  agents/
+    triageAgent/v1/triageAgent.ts
+    supportAgent/v1/supportAgent.ts
+  service/support/v1/command/lookupFaq/lookupFaqCommandBuilder.ts
+  skills.ts
+  index.ts
 ```
 
-## 2. Define An Inline Agent
+## Step 1: Define The Fast Inline Agent
 
-This agent classifies a request and returns a small JSON result. It is fast enough to run inline.
+The triage agent is a small classifier. It is fast, so inline execution is enough.
 
 ```ts title="src/agents/triageAgent/v1/triageAgent.ts"
 import { AgentBuilder } from '@purista/ai'
@@ -29,14 +39,14 @@ import { z } from 'zod'
 export const triageAgent = new AgentBuilder({
   agentName: 'triageAgent',
   agentVersion: '1',
-  description: 'Classifies requests quickly',
+  description: 'Classifies support urgency',
 })
   .setExecutionMode('inline')
-  .addPayloadSchema(z.object({ prompt: z.string() }))
-  .defineModel('openai:gpt-4o-mini', { capabilities: ['json'] })
+  .addPayloadSchema(z.object({ prompt: z.string().min(1) }))
+  .defineModel('openai:fast', { capabilities: ['json'] })
   .setHandler(async (context, payload) => {
-    const result = await context.models['openai:gpt-4o-mini'].generateJson({
-      prompt: `Classify this request: ${payload.prompt}`,
+    const result = await context.models['openai:fast'].generateJson({
+      prompt: `Classify the urgency of this support request: ${payload.prompt}`,
       schema: z.object({
         urgency: z.enum(['low', 'medium', 'high']),
       }),
@@ -47,133 +57,368 @@ export const triageAgent = new AgentBuilder({
   .build()
 ```
 
-## 3. Define A Queued Durable Agent
+What to notice:
 
-This agent performs longer work, keeps a task list in `context.runState`, and uses checkpoints so it can resume after interruption.
+- the builder declares the execution mode
+- the builder declares the model alias
+- the handler only implements logic
+
+## Step 2: Define The Queued Durable Agent
+
+Before looking at the code, start with the intent.
+
+We want a `supportAgent` that:
+
+1. survives restarts
+2. streams visible progress to the user
+3. can resume after interruptions
+4. can call one support command and one child agent
+5. uses declared skills to shape the answer
+
+That combination is exactly why queued durable execution exists in PURISTA.
+
+The code below is the same agent, but this time with inline comments showing why each declaration exists.
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
-import { AgentBuilder, generateText } from '@purista/ai'
+import { AgentBuilder, generateText, renderSkillDocuments } from '@purista/ai'
 import { z } from 'zod'
 
 export const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
-  description: 'Support assistant with durable progress tracking',
+  description: 'Queued durable support assistant',
 })
+  // This work should survive restarts and stream progress.
   .setExecutionMode('queued')
   .setExecutionPolicy({
+    // The caller attaches to the active durable run and receives updates.
     httpBehavior: 'attach-and-stream',
+    // PURISTA should resume from checkpoints after interruption.
     recovery: 'resume-from-checkpoints',
+    // Runs for the same sessionId reuse the same durable scope.
     scopeFromPayload: ['sessionId'],
   })
-  .addPayloadSchema(z.object({ prompt: z.string(), sessionId: z.string().optional() }))
-  .defineModel('openai:gpt-4o-mini')
+  .addPayloadSchema(
+    z.object({
+      prompt: z.string().min(1),
+      sessionId: z.string().optional(),
+    }),
+  )
+  // The builder only declares model aliases and capabilities.
+  .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+  // Only these skills are visible through context.skills.
+  .useSkills(['spec-elicitation', 'support-workflow'])
+  // Allow one command-backed tool.
   .canInvoke('support', '1', 'lookupFaq')
+  // Allow one child agent.
+  .canInvokeAgent('triageAgent', '1')
+  // Expose the agent through the normal PURISTA HTTP/SSE path.
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setSseProtocol('ai-sdk-ui-message')
   .setHandler(async (context, payload) => {
-    if (!(await context.runState.get())) {
-      throw new Error('Queued support run state is not initialized')
-    }
+    // 1. Start durable workflow state for progress, checkpoints, and recovery.
+    const run = await context.runState.start({
+      title: 'Support response',
+      extraScope: { sessionId: payload.sessionId ?? context.message.id },
+    })
 
-    await context.runState.replaceTasks([
-      { id: 'faq', title: 'Check knowledge base' },
+    // Keep user-visible conversation history separate from workflow state.
+    await context.conversation.addUser(payload.prompt)
+    await run.plan([
+      { id: 'triage', title: 'Classify urgency' },
+      { id: 'faq', title: 'Load FAQ guidance' },
       { id: 'answer', title: 'Write final answer' },
     ])
-    await context.runState.checkpoint('request', { prompt: payload.prompt }, { completed: true })
-    await context.runState.update({ phase: 'running', status: 'running' })
+    await run.update({ phase: 'running', status: 'running' })
 
-    const faqAnswer = await context.runState.step(
-      'faq',
-      async () => {
-        const lookup = await context.tools.invoke.support['1'].lookupFaq({ question: payload.prompt })
-        return typeof lookup === 'object' && lookup && 'answer' in lookup ? String(lookup.answer) : ''
-      },
-      { detail: 'Searching the knowledge base', checkpoint: 'faq-answer' },
-    )
+    // 2. Gather the factual inputs needed for the final answer.
+    // Call the allowlisted child agent.
+    const triage = await context.agents.runText({
+      agentName: 'triageAgent',
+      agentVersion: '1',
+      payload: { prompt: payload.prompt },
+    })
 
-    await context.runState.update({ phase: 'summarizing', status: 'summarizing' })
-    const answer = await context.runState.step(
+    // Call the allowlisted PURISTA command as a tool.
+    const faq = await context.tools.invoke.support['1'].lookupFaq({
+      question: payload.prompt,
+    })
+
+    // 3. Load the declared skills exactly where they are needed:
+    // right before prompt construction for the final answer.
+    const skills = await context.skills.loadAvailable()
+    const skillBlock = renderSkillDocuments('Relevant skills', skills)
+
+    // 4. Generate the final answer while streaming deltas to the client.
+    const answer = await run.step(
       'answer',
       async () =>
         await generateText({
-          model: context.models['openai:gpt-4o-mini'],
+          model: context.models['openai:primary'],
           request: {
-            prompt: `Question: ${payload.prompt}\nKnowledge base: ${faqAnswer}`,
+            prompt: [
+              skillBlock,
+              `Customer request: ${payload.prompt}`,
+              `Triage result: ${triage}`,
+              `FAQ answer: ${String(faq.answer ?? '')}`,
+            ]
+              .filter(Boolean)
+              .join('\n\n'),
           },
-      }),
+          onTextDelta: delta => context.stream.sendChunk(delta),
+        }),
       { checkpoint: 'final-answer' },
     )
 
-    await context.runState.finish({
-      status: 'completed',
-      summary: answer,
-      finalMessage: answer,
-    })
+    // 5. Persist the assistant message and finish the durable run.
+    await context.conversation.addAssistant(answer)
+    await run.finishSuccess(answer)
     context.stream.sendFinal(answer)
     return { message: answer }
   })
   .build()
 ```
 
-## 4. Bootstrap
+Read that code in two passes:
 
-Queued durable agents need a `queueBridge` at runtime.
+### Builder declarations
+
+These define the contract:
+
+- queued execution mode
+- execution policy
+- payload schema
+- model aliases
+- declared skill names
+- allowlisted commands
+- allowlisted child agents
+- transport exposure
+
+More detail:
+
+- [Builder](./agent-builder.md)
+- [Durable Run State](./run-state.md)
+
+### Handler implementation
+
+These use that contract:
+
+- `context.runState`
+- `context.conversation`
+- `context.skills`
+- `context.agents`
+- `context.tools`
+- `context.models`
+- `context.stream`
+
+More detail:
+
+- [Context](./handler-context.md)
+- [Invocation](./invocation.md)
+
+Inside the handler, try to keep the code grouped by execution phase:
+
+1. start and describe the durable run
+2. gather facts and child results
+3. load skills where prompt construction actually happens
+4. generate and stream the answer
+5. persist and finish
+
+That is easier to understand than collecting all variables at the top and using them much later.
+
+## Step 3: Provide The Skills
+
+In real applications, the usual path is not inline string content. The common path is:
+
+1. create a `skills/` directory in your application
+2. put one `SKILL.md` per skill there
+3. load that directory as a skill catalog at instance creation
+
+Inline skill content is useful for tests and tiny examples, but it is not the main real-world path.
+
+### A normal application skill layout
+
+```text
+src/
+  skills/
+    spec-elicitation/
+      SKILL.md
+    support-workflow/
+      SKILL.md
+      references/
+        fallbacks.md
+```
+
+Example `SKILL.md`:
+
+```md title="src/skills/spec-elicitation/SKILL.md"
+# Spec Elicitation
+
+Before answering, identify any missing business context, constraints, or user role assumptions.
+```
+
+```md title="src/skills/support-workflow/SKILL.md"
+# Support Workflow
+
+Use triage first, then gather factual guidance, then answer clearly and briefly.
+```
+
+### Load the skill directory
+
+```ts title="src/skills.ts"
+import { createLayeredFileSkillResource } from '@purista/ai'
+
+export const supportSkills = createLayeredFileSkillResource({
+  overlayRoots: [new URL('./skills', import.meta.url).pathname],
+})
+```
+
+If you want to merge your local skills with a shared catalog, add `canonicalRoots` too.
+
+More detail:
+
+- [Skills](./skills.md)
+
+## Step 4: Create Real Instances
+
+Now the inert definitions become running workloads.
+
+This is also where the real model adapter/provider enters the picture. The builder only declared aliases like `openai:fast` and `openai:primary`. `getInstance(...)` binds those aliases to real providers.
 
 ```ts title="src/index.ts"
+import { AiSdkProvider } from '@purista/ai'
 import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
+import { openai } from '@ai-sdk/openai'
 
 const eventBridge = new DefaultEventBridge()
 const queueBridge = new DefaultQueueBridge()
 
-const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
-  queueBridge,
-  models: { 'openai:gpt-4o-mini': provider },
-})
-```
+await eventBridge.start()
 
-For queued agents, PURISTA creates the durable run record before the handler starts. The handler should update the existing run with `context.runState.get()`, `update()`, `replaceTasks()`, `step()`, and `finish(...)` instead of starting a second run manually.
-
-## 5. Invoke Via Command
-
-Use the normal PURISTA dependency pattern for both inline and queued agents.
-
-```ts title="src/services/support/v1/command/ask.ts"
-export const askCommand = supportServiceBuilder
-  .getCommandBuilder('ask', 'Asks the agent')
-  .canInvokeAgent('supportAgent', '1')
-  .setCommandFunction(async (context, payload) => {
-    const result = await context.invokeAgent.supportAgent['1']
-      .call({ prompt: payload.prompt, sessionId: payload.sessionId })
-      .final()
-
-    return result.message
-  })
-```
-
-When `supportAgent` is queued, the HTTP/SSE endpoint attaches to the active run, streams `data-run-state`, and keeps the composer locked until the run finishes.
-
-## 6. Add An External Runtime Loop
-
-If you want the reasoning loop in Vercel AI SDK while keeping execution inside PURISTA, create provider-neutral bindings first and adapt them at the AI SDK boundary:
-
-```ts
-const bindings = context.expose.tools({
-  commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
-  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
-})
-
-await generateText({
-  model: context.models['openai:gpt-4o-mini'],
-  request: {
-    prompt: payload.prompt,
-    metadata: {
-      aiSdk: {
-        tools: toAiSdkTools(bindings),
-      },
-    },
+const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
+  models: {
+    // Bind the builder alias to a real provider adapter.
+    'openai:fast': new AiSdkProvider({
+      model: openai('gpt-4o-mini'),
+    }),
   },
 })
+
+const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+  // Queued durable agents need a queue bridge.
+  queueBridge,
+  models: {
+    // This is the real provider used by context.models['openai:primary'].
+    'openai:primary': new AiSdkProvider({
+      model: openai('gpt-4o'),
+    }),
+  },
+  // Provide the declared skills here.
+  skills: supportSkills,
+})
+
+await triageAgentInstance.start()
+await supportAgentInstance.start()
 ```
 
-This keeps PURISTA framework-agnostic: the external SDK handles reasoning, PURISTA handles commands, agent invocation, tracing, and queue-backed execution through one neutral binding contract.
+This is the key PURISTA pattern:
+
+- builder declares intent
+- `getInstance(...)` provides the real dependencies
+
+More detail:
+
+- [Runtime](./runtime.md)
+- [AI SDK Adapter](./ai-sdk-adapter.md)
+
+## Step 5: Invoke The Agent From PURISTA
+
+The normal path is still a normal PURISTA call.
+
+```ts
+const result = await context.invokeAgent.supportAgent['1']
+  .call({
+    prompt: 'A customer was charged twice and needs help.',
+    sessionId: 'support-thread-1',
+  })
+  .final()
+```
+
+That works whether the agent is inline or queued. The difference is internal execution and streaming behavior, not the conceptual call shape.
+
+## Step 6: Adapt At The AI SDK Boundary
+
+If you want to use Vercel AI SDK, bind it as the concrete provider for the model alias you already declared.
+
+First bind the concrete provider for the declared alias at instance creation:
+
+```ts
+import { createOpenAI } from '@ai-sdk/openai'
+import { AiSdkProvider } from '@purista/ai'
+
+const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+
+const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+  queueBridge,
+  models: {
+    'openai:primary': new AiSdkProvider({
+      model: openai('gpt-4o-mini'),
+      systemPrompt: 'You are a concise support engineer.',
+    }),
+  },
+  skills: supportSkills,
+})
+```
+
+Then keep the handler in the same PURISTA style and talk only to the alias:
+
+```ts
+const answer = await context.models['openai:primary'].generateText({
+  developerInstruction: 'Use tools before answering.',
+  prompt: payload.prompt,
+  metadata: {
+    aiSdk: {
+      toolChoice: 'required',
+      parallelToolCalls: false,
+    },
+  },
+  onTextDelta: delta => context.stream.sendChunk(delta),
+})
+```
+
+What matters here:
+
+- the builder still only declares the alias
+- the instance binds the real provider
+- the handler still uses `context.models['openai:primary']`
+- the provider handles the Vercel-specific mapping internally, including default skills and allowlisted bindings
+
+If you later replace `AiSdkProvider` with another `ModelProvider`, the handler should not need to change.
+
+## When To Add Sandbox
+
+Add the sandbox runtime only when the agent needs a real workspace:
+
+- shell execution
+- repository operations
+- skill scripts
+- generated files that should not touch the host directly
+
+If the agent only needs models, commands, child agents, and skills as text, do not add sandbox complexity yet.
+
+## What You Should Remember
+
+- Define with `AgentBuilder`.
+- Implement with `context`.
+- Provide dependencies at `getInstance(...)`.
+- Adapt at the SDK boundary, not earlier.
+- Skills are declared in the builder and provided at instance creation.
+- Queued durable agents need `queueBridge` and should use `context.runState`.
+
+## Where To Go Next
+
+- [Builder](./agent-builder.md) for a cleaner breakdown of what belongs in the definition.
+- [Context](./handler-context.md) for a structured tour of the handler API.
+- [Runtime](./runtime.md) for instance creation, pools, and sandbox runtime wiring.
+- [Skills](./skills.md) for inline vs filesystem skills and skill references.
+- [AI SDK Adapter](./ai-sdk-adapter.md) for the Vercel AI SDK boundary in more detail.

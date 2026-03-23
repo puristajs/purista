@@ -4,13 +4,13 @@ import { z } from 'zod'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { getPayloadSessionId } from './sessionIdentity.js'
 
-type StateStoreHelpers = {
+export type StateStoreHelpers = {
 	getState: (...stateNames: string[]) => Promise<Record<string, unknown>>
 	setState: (stateName: string, value: unknown) => Promise<void>
 	removeState: (stateName: string) => Promise<void>
 }
 
-type ProtocolEmitter = {
+export type RunStateProtocolEmitter = {
 	emitArtifact(input: {
 		artifactId: string
 		content: string | Record<string, unknown>
@@ -21,9 +21,9 @@ type ProtocolEmitter = {
 	}): void
 }
 
-type RunStateContext = {
+export type RunStateContext = {
 	states: StateStoreHelpers
-	protocol: ProtocolEmitter
+	protocol: RunStateProtocolEmitter
 	manifest: AgentManifest
 	payload: unknown
 	message: {
@@ -386,7 +386,7 @@ const getStoredString = async (states: StateStoreHelpers, key: string) => {
 	return typeof result[key] === 'string' ? result[key] : undefined
 }
 
-const emitRunState = (protocol: ProtocolEmitter, state: AgentRunState) => {
+const emitRunState = (protocol: RunStateProtocolEmitter, state: AgentRunState) => {
 	protocol.emitArtifact({
 		artifactId: RUN_STATE_ARTIFACT_ID,
 		content: state,

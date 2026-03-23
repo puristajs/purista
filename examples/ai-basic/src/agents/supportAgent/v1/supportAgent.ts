@@ -1,4 +1,4 @@
-import { AgentBuilder, generateText } from '@purista/ai'
+import { AgentBuilder, renderSkillDocuments, renderSkillReferences } from '@purista/ai'
 import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
@@ -34,6 +34,7 @@ export const supportAgent = new AgentBuilder({
 })
 	.addPayloadSchema(supportAgentInputSchema)
 	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json'] })
+	.useSkills(['spec-elicitation', 'support-workflow'])
 	.persistConversation('user', { maxFrames: 20 })
 	.setExecutionMode('queued')
 	.setExecutionPolicy({
@@ -180,7 +181,12 @@ export const supportAgent = new AgentBuilder({
 			},
 		)
 
+		const skills = await context.skills.loadAvailable()
+		const skillReferences = await context.skills.loadReferences('support-workflow').catch(() => [])
+
 		const prompt = [
+			renderSkillDocuments('Relevant skills', skills),
+			renderSkillReferences('Relevant references', skillReferences),
 			await context.conversation.buildPromptInput(),
 			`Customer prompt: ${userPrompt}`,
 			`Knowledge base answer: ${faqAnswer}`,
@@ -217,18 +223,15 @@ export const supportAgent = new AgentBuilder({
 						return jsonResult.data.answer
 					}
 
-					if (!model.generate && !model.stream) {
+					if (!model.generateText) {
 						throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
 					}
 
 					context.stream.sendChunk('Generating final answer...')
-					const answer = await generateText({
-						model,
-						request: {
-							prompt,
-							context: payload.context,
-							metadata: { aiSdk: { temperature: 0.2 } },
-						},
+					const answer = await model.generateText({
+						prompt,
+						context: payload.context,
+						metadata: { aiSdk: { temperature: 0.2 } },
 						onReasoning: text => context.stream.sendReasoning(text),
 						onTextDelta: delta => {
 							if (delta.length > 0) {

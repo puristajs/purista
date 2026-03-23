@@ -1,0 +1,37 @@
+[**PURISTA API**](../../../README.md)
+
+***
+
+[PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamAgentInvokeConfig
+
+# Type Alias: StreamAgentInvokeConfig\<Payload, Parameter\>
+
+> **StreamAgentInvokeConfig**\<`Payload`, `Parameter`\> = `object`
+
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L29)
+
+## Type Parameters
+
+### Payload
+
+`Payload` *extends* [`Schema`](Schema.md)
+
+### Parameter
+
+`Parameter` *extends* [`Schema`](Schema.md)
+
+## Properties
+
+### parameterSchema?
+
+> `optional` **parameterSchema**: `Parameter`
+
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L31)
+
+***
+
+### payloadSchema?
+
+> `optional` **payloadSchema**: `Payload`
+
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L30)

@@ -43,7 +43,7 @@ import type {
 	RetryPolicy,
 } from '../types/AgentManifest.js'
 
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+export type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
 }
@@ -106,7 +106,7 @@ export type AgentPrepareCallHook = (
  */
 export type AgentPrepareStepHook = AgentPrepareCallHook
 
-type AgentHandlerResultObject = {
+export type AgentHandlerResultObject = {
 	message: string
 	summary?: string
 	usage?: {
@@ -277,7 +277,7 @@ const isTerminalProtocolEvent = (event: { event: string; data: unknown }): boole
 	return false
 }
 
-type ResolveCapability<
+export type ResolveCapability<
 	Caps extends readonly AgentModelCapability[] | undefined,
 	Capability extends AgentModelCapability,
 > = Caps extends readonly AgentModelCapability[]
@@ -292,7 +292,7 @@ type ResolveCapability<
 		? true
 		: false
 
-type DeclaredModelAliasApi<
+export type DeclaredModelAliasApi<
 	Alias extends string,
 	TextAliases extends string,
 	StreamAliases extends string,
@@ -305,6 +305,11 @@ type DeclaredModelAliasApi<
 				generate: NonNullable<ModelProvider['generate']>
 			}
 		: Record<never, never>) &
+	(Alias extends TextAliases | StreamAliases
+		? {
+				generateText: NonNullable<ModelProvider['generateText']>
+			}
+		: Record<never, never>) &
 	(Alias extends ObjectAliases ? { generateJson: NonNullable<ModelProvider['generateJson']> } : Record<never, never>) &
 	(Alias extends StreamAliases ? { stream: NonNullable<ModelProvider['stream']> } : Record<never, never>) &
 	(Alias extends EmbeddingAliases
@@ -315,7 +320,7 @@ type DeclaredModelAliasApi<
 		: Record<never, never>) &
 	(Alias extends RerankAliases ? { rerank: NonNullable<ModelProvider['rerank']> } : Record<never, never>)
 
-type DeclaredModelMap<
+export type DeclaredModelMap<
 	ModelAliases extends string,
 	TextAliases extends string,
 	StreamAliases extends string,
@@ -341,6 +346,7 @@ export class AgentBuilder<
 	RerankAliases extends string = never,
 	ObjectAliases extends string = never,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	SkillNames extends string = never,
 > {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
@@ -414,7 +420,9 @@ export class AgentBuilder<
 		StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
 		EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
 		RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
-		ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never)
+		ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never),
+		AgentInvokes,
+		SkillNames
 	> {
 		if (!alias.trim()) {
 			throw new Error('Model alias must not be empty')
@@ -444,13 +452,52 @@ export class AgentBuilder<
 			StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
 			EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
 			RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
-			ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never)
+			ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never),
+			AgentInvokes,
+			SkillNames
 		>
 	}
 
 	useConversationStore(config: AgentSessionConfig) {
 		this.manifest.session = config
 		return this
+	}
+
+	useSkills<const Names extends readonly string[]>(
+		skillNames: Names,
+	): AgentBuilder<
+		ModelAliases,
+		TextAliases,
+		StreamAliases,
+		EmbeddingAliases,
+		RerankAliases,
+		ObjectAliases,
+		AgentInvokes,
+		SkillNames | Names[number]
+	> {
+		const names = [...new Set(skillNames.map(entry => entry.trim()).filter(Boolean))]
+		this.manifest.skills = {
+			resourceName: this.manifest.skills?.resourceName ?? 'skills',
+			names,
+		}
+
+		this.manifest.resources = {
+			...(this.manifest.resources ?? {}),
+			skills: {
+				resourceName: this.manifest.resources?.skills?.resourceName || 'skills',
+			},
+		}
+
+		return this as unknown as AgentBuilder<
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases,
+			ObjectAliases,
+			AgentInvokes,
+			SkillNames | Names[number]
+		>
 	}
 
 	/**
@@ -582,7 +629,8 @@ export class AgentBuilder<
 						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
 					}
 				>
-			>
+			>,
+		SkillNames
 	> {
 		this.commandBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
 		this.streamBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
@@ -634,7 +682,8 @@ export class AgentBuilder<
 							) => AgentInvocation<AgentProtocolResponse>
 						}
 					>
-				>
+				>,
+			SkillNames
 		>
 	}
 
@@ -1132,6 +1181,59 @@ export class AgentBuilder<
 					return mergeMetadata(mergeMetadata(input.requestMetadata, preparedCall), preparedStep)
 				}
 
+				let currentAgentContext:
+					| Pick<
+							AgentHandlerContext<
+								unknown,
+								unknown,
+								Record<string, unknown>,
+								Record<string, ModelProvider>,
+								AgentInvokes
+							>,
+							'skills' | 'expose' | 'manifest'
+					  >
+					| undefined
+
+				const applyAutomaticModelRequestDefaults = async <
+					Request extends {
+						skills?: unknown
+						bindings?: unknown
+					},
+				>(
+					request: Request,
+				): Promise<Request> => {
+					if (!currentAgentContext) {
+						return request
+					}
+
+					const nextRequest = { ...request }
+
+					if (request.skills === undefined && currentAgentContext.skills.available) {
+						nextRequest.skills = await currentAgentContext.skills.loadAvailable()
+					}
+
+					if (request.bindings === undefined) {
+						const commands = currentAgentContext.manifest.allowedTools.map(command => ({
+							serviceName: command.serviceName,
+							serviceVersion: command.serviceVersion,
+							commandName: command.commandName,
+							name: command.toolName,
+							description: command.description,
+						}))
+						const agents = (currentAgentContext.manifest.allowedAgents ?? []).map(agent => ({
+							agentName: agent.agentName,
+							agentVersion: agent.agentVersion,
+							name: agent.toolName,
+							description: agent.description,
+						}))
+						if (commands.length > 0 || agents.length > 0) {
+							nextRequest.bindings = currentAgentContext.expose.tools({ commands, agents })
+						}
+					}
+
+					return nextRequest
+				}
+
 				for (const [alias, provider] of Object.entries(runtime.models)) {
 					const modelApi: ModelProvider = {
 						name: provider.name,
@@ -1139,26 +1241,22 @@ export class AgentBuilder<
 					}
 
 					if (provider.generate) {
-						modelApi.generate = async (request: {
-							prompt: string
-							context?: string
-							developerInstruction?: string | string[]
-							metadata?: Record<string, unknown>
-						}) => {
+						modelApi.generate = async request => {
 							const requestStartedAt = Date.now()
 							try {
+								const preparedRequest = await applyAutomaticModelRequestDefaults(request)
 								const metadata = addAiSdkTelemetry(
 									await resolvePreparedMetadata({
 										alias,
 										callKind: 'generate',
-										requestMetadata: request.metadata,
+										requestMetadata: preparedRequest.metadata,
 									}),
 									'generate',
 									alias,
 								)
 
 								const result = await provider.generate?.({
-									...request,
+									...preparedRequest,
 									metadata,
 								})
 								if (!result) {
@@ -1235,28 +1333,24 @@ export class AgentBuilder<
 
 					if (provider.stream) {
 						const streamProvider = provider.stream.bind(provider)
-						modelApi.stream = (request: {
-							prompt: string
-							context?: string
-							developerInstruction?: string | string[]
-							metadata?: Record<string, unknown>
-						}) => {
+						modelApi.stream = request => {
 							const requestStartedAt = Date.now()
 							let streamHandlePromise: Promise<ReturnType<NonNullable<ModelProvider['stream']>>> | undefined
 							const resolveStream = async () => {
 								streamHandlePromise ??= (async () => {
 									try {
+										const preparedRequest = await applyAutomaticModelRequestDefaults(request)
 										const metadata = addAiSdkTelemetry(
 											await resolvePreparedMetadata({
 												alias,
 												callKind: 'stream',
-												requestMetadata: request.metadata,
+												requestMetadata: preparedRequest.metadata,
 											}),
 											'stream',
 											alias,
 										)
 										const streamHandle = streamProvider({
-											...request,
+											...preparedRequest,
 											metadata,
 										})
 										if (!streamHandle) {
@@ -1384,18 +1478,50 @@ export class AgentBuilder<
 					}
 
 					if (modelApi.generate || modelApi.stream) {
-						modelApi.generateText = async request =>
-							await generateText({
-								model: modelApi,
+						modelApi.generateText = async request => {
+							if (typeof provider.generateText === 'function') {
+								const requestStartedAt = Date.now()
+								try {
+									const preparedRequest = await applyAutomaticModelRequestDefaults(request)
+									const metadata = addAiSdkTelemetry(
+										await resolvePreparedMetadata({
+											alias,
+											callKind: 'generate',
+											requestMetadata: preparedRequest.metadata,
+										}),
+										'generate',
+										alias,
+									)
+									return await provider.generateText({
+										...preparedRequest,
+										metadata,
+									})
+								} catch (error) {
+									logProviderFailure('generate', alias, provider.name, requestStartedAt, error)
+									throw error
+								}
+							}
+
+							const preparedRequest = await applyAutomaticModelRequestDefaults(request)
+							return await generateText({
+								model: provider,
 								request: {
-									prompt: request.prompt,
-									context: request.context,
-									developerInstruction: request.developerInstruction,
-									metadata: request.metadata,
+									prompt: preparedRequest.prompt,
+									context: preparedRequest.context,
+									developerInstruction: preparedRequest.developerInstruction,
+									skills: preparedRequest.skills,
+									references: preparedRequest.references,
+									bindings: preparedRequest.bindings,
+									metadata: await resolvePreparedMetadata({
+										alias,
+										callKind: 'generate',
+										requestMetadata: preparedRequest.metadata,
+									}),
 								},
 								onReasoning: request.onReasoning,
 								onTextDelta: request.onTextDelta,
 							})
+						}
 					}
 
 					if (modelApi.generate || modelApi.stream) {
@@ -1416,6 +1542,7 @@ export class AgentBuilder<
 					rerankers: instrumentedRerankers,
 					manifest: runtime.manifest,
 				})
+				currentAgentContext = agentContext
 
 				const result = await runtime.handler(
 					agentContext as AgentHandlerContext<
@@ -1833,11 +1960,12 @@ export class AgentBuilder<
 			EmbeddingAliases,
 			RerankAliases,
 			ObjectAliases,
-			AgentInvokes
+			AgentInvokes,
+			SkillNames
 		>
 	}
 
-	build(): AgentDefinition {
+	build(): AgentDefinition<SkillNames> {
 		if (!this.handler) {
 			throw new Error('Agent handler is required. Call setHandler() before build().')
 		}
@@ -1881,7 +2009,7 @@ export class AgentBuilder<
 				commands: manifest.allowedTools,
 				agents: manifest.allowedAgents ?? [],
 			}),
-			getInstance: async (eventBridge, options?: AgentInstanceOptions) => {
+			getInstance: async (eventBridge, options?: AgentInstanceOptions<SkillNames>) => {
 				const runtimeOptions = options
 				const instance = new AgentInstance(dependencies, eventBridge, runtimeOptions)
 				return instance

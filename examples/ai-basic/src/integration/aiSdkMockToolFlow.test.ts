@@ -5,6 +5,7 @@ import { MockLanguageModelV3 } from 'ai/test'
 import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../agents/supportAgent/v1/supportAgent.js'
+import { exampleSkills } from '../skills.js'
 import { supportV1Service } from '../service/support/v1/index.js'
 
 const waitForRegistration = async () => {
@@ -62,6 +63,7 @@ describe('ai-basic integration with ai/test mock model', () => {
 			models: {
 				'openai:gpt-4o-mini': provider,
 			},
+			skills: exampleSkills,
 			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})

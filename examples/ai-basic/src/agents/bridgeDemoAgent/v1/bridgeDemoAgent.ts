@@ -1,4 +1,4 @@
-import { AgentBuilder, generateText, toAiSdkTools } from '@purista/ai'
+import { AgentBuilder } from '@purista/ai'
 import { type BridgeDemoAgentInput, bridgeDemoAgentInputSchema } from './schema.js'
 
 export const bridgeDemoAgent = new AgentBuilder({
@@ -8,6 +8,7 @@ export const bridgeDemoAgent = new AgentBuilder({
 })
 	.addPayloadSchema(bridgeDemoAgentInputSchema)
 	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream'] })
+	.useSkills(['spec-elicitation', 'tool-loop-discipline'])
 	.setExecutionMode('queued')
 	.setExecutionPolicy({
 		httpBehavior: 'attach-and-stream',
@@ -37,28 +38,15 @@ export const bridgeDemoAgent = new AgentBuilder({
 		const answer = await run.step(
 			'answer',
 			async () =>
-				await generateText({
-					model: context.models['openai:gpt-4o-mini'],
-					request: {
-						prompt: [
-							'Use the provided tools before answering.',
-							`Customer request: ${payload.prompt}`,
-							'Use support.1.lookupFaq to retrieve the relevant guidance.',
-							'Return one concise answer that includes the FAQ guidance and a short urgency recommendation.',
-						].join('\n'),
-						metadata: {
-							aiSdk: {
-								tools: toAiSdkTools(
-									context.expose.tools({
-										commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
-									}),
-								),
-								toolChoice: 'required',
-								parallelToolCalls: false,
-								maxSteps: 6,
-							},
-						},
-					},
+				await context.models['openai:gpt-4o-mini'].generateText({
+					developerInstruction: [
+						'Use the provided tools before answering.',
+						'Return one concise answer that includes the FAQ guidance and a short urgency recommendation.',
+					],
+					prompt: [
+						`Customer request: ${payload.prompt}`,
+						'Use support.1.lookupFaq to retrieve the relevant guidance.',
+					].join('\n'),
 					onTextDelta: delta => context.stream.sendChunk(delta),
 				}),
 			{ detail: 'Running external bridge tool loop', checkpoint: 'bridge-answer' },

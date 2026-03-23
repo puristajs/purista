@@ -107,6 +107,11 @@ export type AgentModelBinding = {
 	capabilities?: AgentModelCapability[]
 }
 
+export type AgentSkillConfig = {
+	resourceName?: string
+	names: string[]
+}
+
 export type AgentManifest = {
 	agentName: string
 	agentVersion: string
@@ -116,6 +121,7 @@ export type AgentManifest = {
 	executionPolicy?: AgentExecutionPolicy
 	models?: AgentModelBinding[]
 	modelResource?: { resourceName: string; variant?: string }
+	skills?: AgentSkillConfig
 	session?: AgentSessionConfig
 	retryPolicy?: RetryPolicy
 	telemetry?: { attributes?: Record<string, string | number | boolean> }

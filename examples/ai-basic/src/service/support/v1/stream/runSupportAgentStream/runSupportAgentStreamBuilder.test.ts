@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../../../../../agents/supportAgent/v1/supportAgent.js'
 import { triageAgent } from '../../../../../agents/triageAgent/v1/triageAgent.js'
+import { exampleSkills } from '../../../../../skills.js'
 import { supportV1Service } from '../../index.js'
 
 class DeterministicProvider implements ModelProvider {
@@ -78,6 +79,7 @@ describe('runSupportAgentStreamBuilder', () => {
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
+			skills: exampleSkills,
 			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})

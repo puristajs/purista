@@ -8,27 +8,27 @@ import type {
 	ProviderStream,
 } from '../providers/runtime/ModelProvider.js'
 
-type TextReply = string | ((request: ProviderRequest) => string | Promise<string>)
-type JsonReply = unknown | ((request: ProviderJsonRequest) => unknown | Promise<unknown>)
-type ErrorReply = Error | ((request: ProviderRequest | ProviderJsonRequest) => Error | Promise<Error>)
-type ChunksReply = string[] | ((request: ProviderRequest) => string[] | Promise<string[]>)
-type ReasoningReply = string[] | ((request: ProviderRequest) => string[] | Promise<string[]>)
+export type ScriptedTextReply = string | ((request: ProviderRequest) => string | Promise<string>)
+export type ScriptedJsonReply = unknown | ((request: ProviderJsonRequest) => unknown | Promise<unknown>)
+export type ScriptedErrorReply = Error | ((request: ProviderRequest | ProviderJsonRequest) => Error | Promise<Error>)
+export type ScriptedChunksReply = string[] | ((request: ProviderRequest) => string[] | Promise<string[]>)
+export type ScriptedReasoningReply = string[] | ((request: ProviderRequest) => string[] | Promise<string[]>)
 
 type TextStep = {
 	kind: 'text'
-	reply: TextReply
-	chunks?: ChunksReply
-	reasoning?: ReasoningReply
+	reply: ScriptedTextReply
+	chunks?: ScriptedChunksReply
+	reasoning?: ScriptedReasoningReply
 }
 
 type JsonStep = {
 	kind: 'json'
-	reply: JsonReply
+	reply: ScriptedJsonReply
 }
 
 type ErrorStep = {
 	kind: 'error'
-	error: ErrorReply
+	error: ScriptedErrorReply
 }
 
 type ScriptedStep = TextStep | JsonStep | ErrorStep
@@ -48,12 +48,12 @@ export class ScriptedModel implements ModelProvider {
 	private readonly steps: ScriptedStep[] = []
 	private cursor = 0
 
-	nextText(reply: TextReply, options?: { chunks?: ChunksReply; reasoning?: ReasoningReply }) {
+	nextText(reply: ScriptedTextReply, options?: { chunks?: ScriptedChunksReply; reasoning?: ScriptedReasoningReply }) {
 		this.steps.push({ kind: 'text', reply, chunks: options?.chunks, reasoning: options?.reasoning })
 		return this
 	}
 
-	nextStream(chunks: ChunksReply, options?: { final?: TextReply; reasoning?: ReasoningReply }) {
+	nextStream(chunks: ScriptedChunksReply, options?: { final?: ScriptedTextReply; reasoning?: ScriptedReasoningReply }) {
 		this.steps.push({
 			kind: 'text',
 			reply: options?.final ?? (async request => (await resolveChunks(chunks, request)).join('')),
@@ -63,12 +63,12 @@ export class ScriptedModel implements ModelProvider {
 		return this
 	}
 
-	nextJson(reply: JsonReply) {
+	nextJson(reply: ScriptedJsonReply) {
 		this.steps.push({ kind: 'json', reply })
 		return this
 	}
 
-	nextError(error: ErrorReply) {
+	nextError(error: ScriptedErrorReply) {
 		this.steps.push({ kind: 'error', error })
 		return this
 	}
@@ -202,17 +202,17 @@ const toProviderResponse = (output: string): ProviderResponse => ({
 	},
 })
 
-const resolveText = async (reply: TextReply, request: ProviderRequest) =>
+const resolveText = async (reply: ScriptedTextReply, request: ProviderRequest) =>
 	typeof reply === 'function' ? await reply(request) : reply
 
-const resolveJson = async (reply: JsonReply, request: ProviderJsonRequest) =>
+const resolveJson = async (reply: ScriptedJsonReply, request: ProviderJsonRequest) =>
 	typeof reply === 'function' ? await reply(request) : reply
 
-const resolveError = async (reply: ErrorReply, request: ProviderRequest | ProviderJsonRequest) =>
+const resolveError = async (reply: ScriptedErrorReply, request: ProviderRequest | ProviderJsonRequest) =>
 	typeof reply === 'function' ? await reply(request) : reply
 
-const resolveChunks = async (reply: ChunksReply, request: ProviderRequest) =>
+const resolveChunks = async (reply: ScriptedChunksReply, request: ProviderRequest) =>
 	typeof reply === 'function' ? await reply(request) : reply
 
-const resolveReasoning = async (reply: ReasoningReply, request: ProviderRequest) =>
+const resolveReasoning = async (reply: ScriptedReasoningReply, request: ProviderRequest) =>
 	typeof reply === 'function' ? await reply(request) : reply

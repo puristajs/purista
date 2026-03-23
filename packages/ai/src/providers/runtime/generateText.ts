@@ -3,7 +3,7 @@ import type { ModelProvider, ProviderRequest } from './ModelProvider.js'
 import { collectStreamText } from './streamNormalization.js'
 
 export type GenerateTextOptions = {
-	model: Pick<ModelProvider, 'generate' | 'stream'>
+	model: Pick<ModelProvider, 'generate' | 'stream' | 'generateText'>
 	request: ProviderRequest
 	onReasoning?: (text: string) => void | Promise<void>
 	onTextDelta?: (delta: string) => void | Promise<void>
@@ -18,6 +18,14 @@ export type GenerateTextOptions = {
  */
 export const generateText = async (input: GenerateTextOptions): Promise<string> => {
 	const { model, request, onReasoning, onTextDelta } = input
+
+	if (typeof model.generateText === 'function') {
+		return await model.generateText({
+			...request,
+			onReasoning,
+			onTextDelta,
+		})
+	}
 
 	if (typeof model.stream === 'function') {
 		const final = await collectStreamText(model.stream(request), {
