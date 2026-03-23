@@ -8,7 +8,7 @@
 
 > **StreamAgentInvokeConfig**\<`Payload`, `Parameter`\> = `object`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L29)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L39)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:29](https:/
 
 > `optional` **parameterSchema**: `Parameter`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L31)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L41)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:31](https:/
 
 > `optional` **payloadSchema**: `Payload`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L30)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L40)

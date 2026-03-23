@@ -20,6 +20,7 @@ import {
 	StatusCode,
 	type StreamFunctionContext,
 	type StreamWriter,
+	validate,
 } from '@purista/core'
 import { z } from 'zod'
 import type { ConversationStore } from '../memory/conversationStore.js'
@@ -45,6 +46,16 @@ import type {
 	RetryPolicy,
 } from '../types/AgentManifest.js'
 import { deriveExecutionExtraScope, resolveAgentExecutionPolicy } from './agentExecutionPolicy.js'
+import {
+	getSseProtocolDocumentationUrl,
+	isTerminalProtocolEvent,
+	sseProtocolEventSchema,
+} from './agentProtocolHelpers.js'
+import {
+	type DurableAgentQueuePayload,
+	type DurableAgentQueueResult,
+	durableAgentQueuePayloadSchema,
+} from './agentQueuedExecution.js'
 
 /**
  * Builder-time map of named runtime resources declared via {@link AgentBuilder.defineResource}.
@@ -183,51 +194,12 @@ type AgentRuntimeConfig = {
 	}
 }
 
-type DurableAgentQueuePayload = {
-	runId: string
-	sessionId?: string
-	payload: unknown
-	parameter: unknown
-	correlationId?: string
-	principalId?: string
-	tenantId?: string
-	extraScope?: Record<string, string>
-}
-
-type DurableAgentQueueResult = {
-	runId: string
-	status: 'completed' | 'failed' | 'cancelled'
-	finalMessage?: string
-}
-
-const durableAgentQueuePayloadSchema = extendApi(
-	z.object({
-		runId: z.string().min(1),
-		sessionId: z.string().optional(),
-		payload: z.unknown(),
-		parameter: z.unknown().optional(),
-		correlationId: z.string().optional(),
-		principalId: z.string().optional(),
-		tenantId: z.string().optional(),
-		extraScope: z.record(z.string(), z.string()).optional(),
-	}),
-	{ title: 'DurableAgentQueuePayload' },
-)
-
 const agentRuntimeConfigSchema = extendApi(
 	z.object({
 		runtime: z.record(z.string(), z.any()).optional(),
 		__agentRuntime: z.any().optional(),
 	}),
 	{ title: 'AgentRuntimeConfig' },
-)
-
-const sseProtocolEventSchema = extendApi(
-	z.object({
-		event: z.string(),
-		data: z.unknown(),
-	}),
-	{ title: 'AgentSseProtocolEvent' },
 )
 
 const normalizeInfo = (info: AgentInfo): AgentInfo => {
@@ -276,39 +248,6 @@ const getProviderWarnings = (metadata: Record<string, unknown> | undefined): unk
 	}
 	const warnings = (metadata as { warnings?: unknown }).warnings
 	return Array.isArray(warnings) ? warnings : []
-}
-
-const getSseProtocolDocumentationUrl = (protocol: AgentSseProtocol): string | undefined => {
-	if (protocol === 'ai-sdk-responses') {
-		return 'https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol#openai-compatible-stream'
-	}
-	if (protocol === 'ai-sdk-ui-message' || protocol === 'ai-sdk-data' || protocol === 'ai-sdk-json-render') {
-		return 'https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol'
-	}
-	if (protocol === 'agent2agent') {
-		return 'https://google.github.io/A2A/'
-	}
-	if (protocol === 'mcp') {
-		return 'https://modelcontextprotocol.io/specification/2025-06-18/'
-	}
-	return undefined
-}
-
-const isTerminalProtocolEvent = (event: { event: string; data: unknown }): boolean => {
-	if (event.event === 'data') {
-		if (event.data === '[DONE]') {
-			return true
-		}
-		if (event.data && typeof event.data === 'object') {
-			const maybeType = (event.data as { type?: unknown }).type
-			return maybeType === 'finish' || maybeType === 'abort'
-		}
-		return false
-	}
-	if (event.event === 'response.completed' || event.event === 'response.error') {
-		return true
-	}
-	return false
 }
 
 export type ResolveCapability<
@@ -407,8 +346,9 @@ export class AgentBuilder<
 	private handler?: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>>
 	private runtimeConfigSchema?: Schema
 	private defaultRuntimeConfig?: Complete<ConfigType>
-	private beforeGuardHooks: Record<string, AgentBeforeGuardHook<any, any>> = {}
-	private afterGuardHooks: Record<string, AgentAfterGuardHook<any, any>> = {}
+	private declaredBeforeGuardHooks: Record<string, AgentBeforeGuardHook<any, any>> = {}
+	private declaredAfterGuardHooks: Record<string, AgentAfterGuardHook<any, any>> = {}
+	private declaredEmitSchemas: Record<string, Schema> = {}
 
 	private payloadSchema?: Schema
 	private parameterSchema?: Schema
@@ -444,33 +384,6 @@ export class AgentBuilder<
 			allowedTools: [],
 			allowedAgents: [],
 		}
-	}
-
-	private async runBeforeGuards(
-		context: CommandFunctionContext | StreamFunctionContext,
-		payload: unknown,
-		parameter: unknown,
-	) {
-		await Promise.all(
-			Object.entries(this.beforeGuardHooks).map(async ([name, hook]) => {
-				await hook(context, payload, parameter)
-				return name
-			}),
-		)
-	}
-
-	private async runAfterGuards(
-		context: CommandFunctionContext | StreamFunctionContext,
-		payload: unknown,
-		parameter: unknown,
-		result: AgentHandlerResult,
-	) {
-		await Promise.all(
-			Object.entries(this.afterGuardHooks).map(async ([name, hook]) => {
-				await hook(context, payload, parameter, result)
-				return name
-			}),
-		)
 	}
 
 	setDescription(description: string) {
@@ -874,6 +787,7 @@ export class AgentBuilder<
 	}
 
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
+		this.declaredEmitSchemas[eventName] = schema
 		this.commandBuilder.canEmit(eventName, schema)
 		this.streamBuilder.canEmit(eventName, schema)
 		return this
@@ -886,30 +800,106 @@ export class AgentBuilder<
 	 * Keep business logic in the handler itself.
 	 */
 	setBeforeGuardHooks(hooks: Record<string, AgentBeforeGuardHook<unknown, unknown>>) {
-		this.beforeGuardHooks = {
-			...this.beforeGuardHooks,
+		const builder = this
+		this.declaredBeforeGuardHooks = {
+			...this.declaredBeforeGuardHooks,
 			...hooks,
 		}
+		this.commandBuilder.setBeforeGuardHooks(
+			Object.fromEntries(
+				Object.entries(hooks).map(([name, hook]) => [
+					name,
+					async function agentCommandBeforeGuard(
+						this: CommandFunctionContext,
+						context: CommandFunctionContext,
+						payload: unknown,
+						parameter: unknown,
+					) {
+						if (builder.manifest.executionMode === 'queued') {
+							return
+						}
+						await hook(context, payload, parameter)
+					},
+				]),
+			) as Record<string, never>,
+		)
+		this.streamBuilder.setBeforeGuardHooks(
+			Object.fromEntries(
+				Object.entries(hooks).map(([name, hook]) => [
+					name,
+					async function agentStreamBeforeGuard(
+						this: StreamFunctionContext,
+						context: StreamFunctionContext,
+						payload: unknown,
+						parameter: unknown,
+					) {
+						if (builder.manifest.executionMode === 'queued') {
+							return
+						}
+						await hook(context, payload, parameter)
+					},
+				]),
+			) as Record<string, never>,
+		)
 		return this
 	}
 
-	getBeforeGuardHook(name: keyof typeof this.beforeGuardHooks) {
-		return this.beforeGuardHooks[name]
+	getBeforeGuardHook(name: keyof typeof this.declaredBeforeGuardHooks) {
+		return this.declaredBeforeGuardHooks[name]
 	}
 
 	/**
 	 * Register one or more guard hooks that run after the agent handler logic completed successfully.
 	 */
 	setAfterGuardHooks(hooks: Record<string, AgentAfterGuardHook<unknown, unknown>>) {
-		this.afterGuardHooks = {
-			...this.afterGuardHooks,
+		const builder = this
+		this.declaredAfterGuardHooks = {
+			...this.declaredAfterGuardHooks,
 			...hooks,
 		}
+		this.commandBuilder.setAfterGuardHooks(
+			Object.fromEntries(
+				Object.entries(hooks).map(([name, hook]) => [
+					name,
+					async function agentCommandAfterGuard(
+						this: CommandFunctionContext,
+						context: CommandFunctionContext,
+						result: unknown,
+						payload: unknown,
+						parameter: unknown,
+					) {
+						if (builder.manifest.executionMode === 'queued') {
+							return
+						}
+						await hook(context, payload, parameter, result as AgentHandlerResult)
+					},
+				]),
+			) as Record<string, never>,
+		)
+		this.streamBuilder.setAfterGuardHooks(
+			Object.fromEntries(
+				Object.entries(hooks).map(([name, hook]) => [
+					name,
+					async function agentStreamAfterGuard(
+						this: StreamFunctionContext,
+						context: StreamFunctionContext,
+						result: unknown,
+						payload: unknown,
+						parameter: unknown,
+					) {
+						if (builder.manifest.executionMode === 'queued') {
+							return
+						}
+						await hook(context, payload, parameter, result as AgentHandlerResult)
+					},
+				]),
+			) as Record<string, never>,
+		)
 		return this
 	}
 
-	getAfterGuardHook(name: keyof typeof this.afterGuardHooks) {
-		return this.afterGuardHooks[name]
+	getAfterGuardHook(name: keyof typeof this.declaredAfterGuardHooks) {
+		return this.declaredAfterGuardHooks[name]
 	}
 
 	setSuccessEventName(eventName: string) {
@@ -1133,6 +1123,42 @@ export class AgentBuilder<
 						instanceId: `queued-worker:${process.pid}`,
 					},
 				},
+				emit: (async (
+					eventName: string,
+					eventPayload?: unknown,
+					contentType = 'application/json',
+					contentEncoding = 'utf-8',
+				) => {
+					const schema = this.declaredEmitSchemas[eventName]
+					if (!schema) {
+						throw new HandledError(StatusCode.InternalServerError, `No schema for ${eventName} found`)
+					}
+					const validation = await validate(schema, eventPayload)
+					if (!validation.success) {
+						throw new HandledError(
+							StatusCode.InternalServerError,
+							`Payload validation for event ${eventName} failed`,
+							validation.issues,
+						)
+					}
+
+					await runtime.eventBridge.emitMessage({
+						messageType: EBMessageType.CustomMessage,
+						eventName,
+						payload: validation.data,
+						contentType,
+						contentEncoding,
+						traceId: message.traceId,
+						principalId: message.payload.principalId,
+						tenantId: message.payload.tenantId,
+						sender: {
+							serviceName: runtime.manifest.agentName,
+							serviceVersion: runtime.manifest.agentVersion,
+							serviceTarget: 'run',
+							instanceId: `queued-worker:${process.pid}`,
+						},
+					})
+				}) as CommandFunctionContext['emit'],
 				invokeAgent: (context as { invokeAgent?: EmptyObject }).invokeAgent ?? ({} as EmptyObject),
 			}) as unknown as CommandFunctionContext
 		const executeAgent = async (
@@ -1737,7 +1763,6 @@ export class AgentBuilder<
 				})
 				currentAgentContext = agentContext
 
-				await this.runBeforeGuards(context, payload, parameter)
 				const result = await runtime.handler(
 					agentContext as AgentHandlerContext<
 						unknown,
@@ -1749,8 +1774,6 @@ export class AgentBuilder<
 					payload,
 					parameter,
 				)
-				await this.runAfterGuards(context, payload, parameter, result)
-
 				const resultObject =
 					typeof result === 'object' && result && 'message' in result ? (result as AgentHandlerResultObject) : undefined
 
@@ -2029,6 +2052,59 @@ export class AgentBuilder<
 			workerBuilder
 				.setMode('continuous')
 				.setMaxParallelHandlers(1)
+				.setBeforeGuardHooks(
+					Object.fromEntries(
+						Object.entries(this.declaredBeforeGuardHooks).map(([name, hook]) => [
+							name,
+							async function queuedAgentBeforeGuard(
+								this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+								context: QueueJobContext,
+								message: QueueMessage<DurableAgentQueuePayload>,
+							) {
+								const runtime = this.config?.__agentRuntime
+								if (!runtime) {
+									throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
+								}
+								const serviceContext = createQueuedProtocolContext(
+									runtime,
+									context as QueueJobContext<DurableAgentQueuePayload>,
+									message,
+								)
+								await hook(serviceContext, message.payload.payload, message.payload.parameter)
+							},
+						]),
+					) as Record<string, never>,
+				)
+				.setAfterGuardHooks(
+					Object.fromEntries(
+						Object.entries(this.declaredAfterGuardHooks).map(([name, hook]) => [
+							name,
+							async function queuedAgentAfterGuard(
+								this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+								context: QueueJobContext,
+								result: DurableAgentQueueResult,
+								message: QueueMessage<DurableAgentQueuePayload>,
+							) {
+								const runtime = this.config?.__agentRuntime
+								if (!runtime) {
+									throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
+								}
+								const serviceContext = createQueuedProtocolContext(
+									runtime,
+									context as QueueJobContext<DurableAgentQueuePayload>,
+									message,
+								)
+								const finalMessage =
+									result && typeof result === 'object' && 'output' in result
+										? ((result as { output?: { finalMessage?: unknown } }).output?.finalMessage as
+												| AgentHandlerResult
+												| undefined)
+										: undefined
+								await hook(serviceContext, message.payload.payload, message.payload.parameter, finalMessage)
+							},
+						]),
+					) as Record<string, never>,
+				)
 				.setHandler(async function durableWorker(
 					this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 					context: QueueJobContext<DurableAgentQueuePayload>,
@@ -2124,7 +2200,7 @@ export class AgentBuilder<
 							status: 'completed',
 							finalMessage,
 						} satisfies DurableAgentQueueResult)
-						return { status: 'success' as const }
+						return { status: 'success' as const, output: { finalMessage } }
 					} catch (error) {
 						const normalizedError = normalizeAgentError(error)
 						await run.finish({

@@ -51,8 +51,15 @@ export const supportAgent = new AgentBuilder({
 	.canInvoke('support', '1', 'calculate')
 	.canInvoke('support', '1', 'fetchWebsite')
 	.canInvokeAgent('triageAgent', '1')
+	.canEmit(
+		'support.agent.completed',
+		z.object({
+			sessionId: z.string(),
+			escalated: z.boolean(),
+		}),
+	)
 	.setBeforeGuardHooks({
-		requirePrompt: async (_context, payload) => {
+		requirePrompt: async function requirePrompt(_context, payload) {
 			const prompt = typeof payload === 'object' && payload !== null ? (payload as { prompt?: string }).prompt : undefined
 			if (!prompt?.trim()) {
 				throw new HandledError(StatusCode.BadRequest, 'prompt is required')
@@ -257,6 +264,12 @@ export const supportAgent = new AgentBuilder({
 
 			await run.setFinalMessage(answer)
 			await run.finishSuccess(answer)
+			await (
+				context.emit as (eventName: 'support.agent.completed', payload: { sessionId: string; escalated: boolean }) => Promise<void>
+			)('support.agent.completed', {
+				sessionId,
+				escalated: escalationPattern.test(userPrompt),
+			})
 			context.stream.sendFinal(answer)
 			return { message: answer }
 		} catch (error) {

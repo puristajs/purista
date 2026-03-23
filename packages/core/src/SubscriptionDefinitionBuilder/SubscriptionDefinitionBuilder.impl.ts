@@ -1,6 +1,13 @@
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import {
+	mergeNamedHooks,
+	registerAgentInvokeCapability,
+	registerEmitSchema,
+	registerInvokeCapability,
+	registerStreamInvokeCapability,
+} from '../core/helper/builderRegistry.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type {
@@ -158,20 +165,16 @@ export class SubscriptionDefinitionBuilder<
 			throw new Error('canInvoke requires non-empty service name, version and target')
 		}
 
-		const existingInvokes = this.invokes as Record<
-			string,
-			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
-		>
-
-		const f = {
-			[serviceName]: {
-				...existingInvokes[serviceName],
-				[serviceVersion]: {
-					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
-				},
-			},
-		} as unknown as C['Invokes'] &
+		const f = registerInvokeCapability(
+			this.invokes as Record<
+				string,
+				Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ outputSchema, payloadSchema, parameterSchema },
+		) as unknown as C['Invokes'] &
 			Record<
 				SName,
 				Record<
@@ -228,38 +231,29 @@ export class SubscriptionDefinitionBuilder<
 		validateChunk = true,
 		validateFinal = true,
 	) {
-		if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
-			throw new Error('canConsumeStream requires non-empty service name, version and target')
-		}
-
-		const existingStreams = this.streamInvokes as Record<
-			string,
-			Record<
+		this.streamInvokes = registerStreamInvokeCapability(
+			this.streamInvokes as Record<
 				string,
 				Record<
 					string,
-					{
-						chunkSchema?: Schema
-						finalSchema?: Schema
-						payloadSchema?: Schema
-						parameterSchema?: Schema
-						validateChunk?: boolean
-						validateFinal?: boolean
-					}
+					Record<
+						string,
+						{
+							chunkSchema?: Schema
+							finalSchema?: Schema
+							payloadSchema?: Schema
+							parameterSchema?: Schema
+							validateChunk?: boolean
+							validateFinal?: boolean
+						}
+					>
 				>
-			>
-		>
-
-		this.streamInvokes = {
-			...this.streamInvokes,
-			[serviceName]: {
-				...existingStreams[serviceName],
-				[serviceVersion]: {
-					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
-				},
-			},
-		}
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+		) as C['StreamInvokes']
 
 		return this as unknown as SubscriptionDefinitionBuilder<
 			S,
@@ -331,16 +325,12 @@ export class SubscriptionDefinitionBuilder<
 			? invokeConfigOrParameterSchema.parameterSchema
 			: invokeConfigOrParameterSchema
 
-		this.agentInvokes = {
-			...this.agentInvokes,
-			[agentName]: {
-				...(this.agentInvokes[agentName] as Record<string, any>),
-				[agentVersion]: {
-					payloadSchema,
-					parameterSchema,
-				},
-			},
-		} as unknown as C['AgentInvokes'] &
+		this.agentInvokes = registerAgentInvokeCapability(
+			this.agentInvokes as Record<string, Record<string, { payloadSchema?: Schema; parameterSchema?: Schema }>>,
+			agentName,
+			agentVersion,
+			{ payloadSchema, parameterSchema },
+		) as unknown as C['AgentInvokes'] &
 			Record<
 				SName,
 				Record<
@@ -433,11 +423,7 @@ export class SubscriptionDefinitionBuilder<
 	 * @returns
 	 */
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
-		if (eventName.trim() === '') {
-			throw new Error('canEmit requires non-empty event name')
-		}
-
-		this.emitList = { ...this.emitList, [eventName]: schema }
+		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 
 		return this as unknown as SubscriptionDefinitionBuilder<
 			S,
@@ -871,10 +857,7 @@ export class SubscriptionDefinitionBuilder<
 			>
 		>,
 	) {
-		for (const [name, hook] of Object.entries(beforeGuards)) {
-			assertNonArrowFunction(hook, `setBeforeGuardHooks.${name}`)
-		}
-		this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
+		this.hooks.beforeGuard = mergeNamedHooks(this.hooks.beforeGuard, beforeGuards, 'setBeforeGuardHooks')
 		return this
 	}
 
@@ -899,10 +882,7 @@ export class SubscriptionDefinitionBuilder<
 			>
 		>,
 	) {
-		for (const [name, hook] of Object.entries(afterGuards)) {
-			assertNonArrowFunction(hook, `setAfterGuardHooks.${name}`)
-		}
-		this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
+		this.hooks.afterGuard = mergeNamedHooks(this.hooks.afterGuard, afterGuards, 'setAfterGuardHooks')
 		return this
 	}
 

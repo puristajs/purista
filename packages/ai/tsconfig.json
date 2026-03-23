@@ -6,6 +6,7 @@
 		"sourceMap": false,
 		"declarationMap": true,
 		"baseUrl": ".",
+		"moduleResolution": "Bundler",
 		"paths": {
 			"@purista/ai": ["./src/index.ts"]
 		},

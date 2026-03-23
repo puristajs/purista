@@ -4,6 +4,14 @@ import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExpose
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import {
+	getNamedHook,
+	mergeNamedHooks,
+	registerAgentInvokeCapability,
+	registerEmitSchema,
+	registerInvokeCapability,
+	registerStreamInvokeCapability,
+} from '../core/helper/builderRegistry.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type {
@@ -17,6 +25,8 @@ import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventB
 import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { StreamAfterGuardHook } from '../core/types/stream/StreamAfterGuardHook.js'
+import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGuardHook.js'
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
@@ -71,6 +81,32 @@ export class StreamDefinitionBuilder<
 	private durable = false
 	private autoacknowledge = true
 	private deprecated = false
+	private hooks: {
+		beforeGuard: Record<
+			string,
+			StreamBeforeGuardHook<S, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
+		>
+		afterGuard: Record<
+			string,
+			StreamAfterGuardHook<
+				S,
+				any,
+				any,
+				any,
+				any,
+				any,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'],
+				C['AgentInvokes']
+			>
+		>
+	} = {
+		beforeGuard: {},
+		afterGuard: {},
+	}
 
 	private fn?: StreamFunction<
 		S,
@@ -153,21 +189,16 @@ export class StreamDefinitionBuilder<
 		payloadSchema?: Payload,
 		parameterSchema?: Parameter,
 	) {
-		const existingInvokes = this.invokes as Record<
-			string,
-			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
-		>
-
-		this.invokes = {
-			...this.invokes,
-			[serviceName]: {
-				...existingInvokes[serviceName],
-				[serviceVersion]: {
-					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
-				},
-			},
-		}
+		this.invokes = registerInvokeCapability(
+			this.invokes as Record<
+				string,
+				Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ outputSchema, payloadSchema, parameterSchema },
+		) as C['Invokes']
 
 		return this as unknown as StreamDefinitionBuilder<
 			S,
@@ -211,34 +242,29 @@ export class StreamDefinitionBuilder<
 		validateChunk = true,
 		validateFinal = true,
 	) {
-		const existingStreams = this.streamInvokes as Record<
-			string,
-			Record<
+		this.streamInvokes = registerStreamInvokeCapability(
+			this.streamInvokes as Record<
 				string,
 				Record<
 					string,
-					{
-						chunkSchema?: Schema
-						finalSchema?: Schema
-						payloadSchema?: Schema
-						parameterSchema?: Schema
-						validateChunk?: boolean
-						validateFinal?: boolean
-					}
+					Record<
+						string,
+						{
+							chunkSchema?: Schema
+							finalSchema?: Schema
+							payloadSchema?: Schema
+							parameterSchema?: Schema
+							validateChunk?: boolean
+							validateFinal?: boolean
+						}
+					>
 				>
-			>
-		>
-
-		this.streamInvokes = {
-			...this.streamInvokes,
-			[serviceName]: {
-				...existingStreams[serviceName],
-				[serviceVersion]: {
-					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
-				},
-			},
-		}
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+		) as C['StreamInvokes']
 
 		return this as unknown as StreamDefinitionBuilder<
 			S,
@@ -309,16 +335,12 @@ export class StreamDefinitionBuilder<
 			? invokeConfigOrParameterSchema.parameterSchema
 			: invokeConfigOrParameterSchema
 
-		this.agentInvokes = {
-			...this.agentInvokes,
-			[agentName]: {
-				...(this.agentInvokes[agentName] as Record<string, any>),
-				[agentVersion]: {
-					payloadSchema,
-					parameterSchema,
-				},
-			},
-		} as unknown as C['AgentInvokes'] &
+		this.agentInvokes = registerAgentInvokeCapability(
+			this.agentInvokes as Record<string, Record<string, { payloadSchema?: Schema; parameterSchema?: Schema }>>,
+			agentName,
+			agentVersion,
+			{ payloadSchema, parameterSchema },
+		) as unknown as C['AgentInvokes'] &
 			Record<
 				SName,
 				Record<
@@ -359,7 +381,7 @@ export class StreamDefinitionBuilder<
 	}
 
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
-		this.emitList = { ...this.emitList, [eventName]: schema }
+		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 		return this as unknown as StreamDefinitionBuilder<
 			S,
 			StreamDefinitionBuilderTypes<
@@ -373,6 +395,137 @@ export class StreamDefinitionBuilder<
 				C['EmitList'] & Record<EventName, InferIn<typeof schema>>,
 				C['QueueInvokes']
 			>
+		>
+	}
+
+	/**
+	 * Set one or more before guard hook(s).
+	 * If there are multiple before guard hooks, they are executed in parallel.
+	 */
+	setBeforeGuardHooks(
+		beforeGuards: Record<
+			string,
+			StreamBeforeGuardHook<
+				S,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'],
+				C['AgentInvokes']
+			>
+		>,
+	) {
+		this.hooks.beforeGuard = mergeNamedHooks(
+			this.hooks.beforeGuard,
+			beforeGuards as Record<
+				string,
+				StreamBeforeGuardHook<
+					S,
+					any,
+					any,
+					any,
+					any,
+					C['Resources'],
+					C['Invokes'],
+					C['StreamInvokes'],
+					C['EmitList'],
+					C['QueueInvokes'],
+					C['AgentInvokes']
+				>
+			>,
+			'setBeforeGuardHooks',
+		)
+		return this
+	}
+
+	/**
+	 * Return a previously registered before-guard hook by name.
+	 */
+	getBeforeGuardHook(name: keyof typeof this.hooks.beforeGuard) {
+		return getNamedHook(this.hooks.beforeGuard, name) as StreamBeforeGuardHook<
+			S,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['StreamInvokes'],
+			C['EmitList'],
+			C['QueueInvokes'],
+			C['AgentInvokes']
+		>
+	}
+
+	/**
+	 * Set one or more after guard hook(s).
+	 * If there are multiple after guard hooks, they are executed in parallel.
+	 */
+	setAfterGuardHooks(
+		afterGuards: Record<
+			string,
+			StreamAfterGuardHook<
+				S,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				InferIn<C['FinalSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'],
+				C['AgentInvokes']
+			>
+		>,
+	) {
+		this.hooks.afterGuard = mergeNamedHooks(
+			this.hooks.afterGuard,
+			afterGuards as Record<
+				string,
+				StreamAfterGuardHook<
+					S,
+					any,
+					any,
+					any,
+					any,
+					any,
+					C['Resources'],
+					C['Invokes'],
+					C['StreamInvokes'],
+					C['EmitList'],
+					C['QueueInvokes'],
+					C['AgentInvokes']
+				>
+			>,
+			'setAfterGuardHooks',
+		)
+		return this
+	}
+
+	/**
+	 * Return a previously registered after-guard hook by name.
+	 */
+	getAfterGuardHook(name: keyof typeof this.hooks.afterGuard) {
+		return getNamedHook(this.hooks.afterGuard, name) as StreamAfterGuardHook<
+			S,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			InferIn<C['FinalSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['StreamInvokes'],
+			C['EmitList'],
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>
 	}
 
@@ -699,6 +852,7 @@ export class StreamDefinitionBuilder<
 			finalSchema: this.finalSchema,
 			call: this.getStreamFunction(),
 			finalEventName: this.finalEventName,
+			hooks: this.hooks,
 			chunkValidationEnabled: this.validateChunk,
 			finalValidationEnabled: this.validateFinal,
 			aggregateChunks: this.aggregateChunks,

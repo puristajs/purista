@@ -8,7 +8,7 @@
 
 > **StreamDefinition**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `ChunkType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\> = `object`
 
-Defined in: [core/types/stream/StreamDefinition.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L11)
+Defined in: [core/types/stream/StreamDefinition.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L13)
 
 ## Type Parameters
 
@@ -74,7 +74,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:11](https://github.com/purist
 
 > **agentInvokes**: `AgentInvokes`
 
-Defined in: [core/types/stream/StreamDefinition.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L54)
+Defined in: [core/types/stream/StreamDefinition.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L91)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:54](https://github.com/purist
 
 > **aggregateChunks**: `boolean`
 
-Defined in: [core/types/stream/StreamDefinition.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L51)
+Defined in: [core/types/stream/StreamDefinition.ts:88](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L88)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:51](https://github.com/purist
 
 > **call**: [`StreamFunction`](StreamFunction.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `ChunkType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
 
-Defined in: [core/types/stream/StreamDefinition.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L33)
+Defined in: [core/types/stream/StreamDefinition.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L35)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:33](https://github.com/purist
 
 > `optional` **chunkSchema**: [`Schema`](Schema.md)
 
-Defined in: [core/types/stream/StreamDefinition.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L31)
+Defined in: [core/types/stream/StreamDefinition.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L33)
 
 ***
 
@@ -106,7 +106,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:31](https://github.com/purist
 
 > **chunkValidationEnabled**: `boolean`
 
-Defined in: [core/types/stream/StreamDefinition.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L49)
+Defined in: [core/types/stream/StreamDefinition.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L86)
 
 ***
 
@@ -114,7 +114,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:49](https://github.com/purist
 
 > **emitList**: `EmitList`
 
-Defined in: [core/types/stream/StreamDefinition.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L55)
+Defined in: [core/types/stream/StreamDefinition.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L92)
 
 ***
 
@@ -122,7 +122,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:55](https://github.com/purist
 
 > **eventBridgeConfig**: [`DefinitionEventBridgeConfig`](DefinitionEventBridgeConfig.md)
 
-Defined in: [core/types/stream/StreamDefinition.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L30)
+Defined in: [core/types/stream/StreamDefinition.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L32)
 
 ***
 
@@ -130,7 +130,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:30](https://github.com/purist
 
 > `optional` **finalEventName**: `string`
 
-Defined in: [core/types/stream/StreamDefinition.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L48)
+Defined in: [core/types/stream/StreamDefinition.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L50)
 
 ***
 
@@ -138,7 +138,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:48](https://github.com/purist
 
 > `optional` **finalSchema**: [`Schema`](Schema.md)
 
-Defined in: [core/types/stream/StreamDefinition.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L32)
+Defined in: [core/types/stream/StreamDefinition.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L34)
 
 ***
 
@@ -146,7 +146,23 @@ Defined in: [core/types/stream/StreamDefinition.ts:32](https://github.com/purist
 
 > **finalValidationEnabled**: `boolean`
 
-Defined in: [core/types/stream/StreamDefinition.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L50)
+Defined in: [core/types/stream/StreamDefinition.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L87)
+
+***
+
+### hooks
+
+> **hooks**: `object`
+
+Defined in: [core/types/stream/StreamDefinition.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L51)
+
+#### afterGuard?
+
+> `optional` **afterGuard**: `Record`\<`string`, [`StreamAfterGuardHook`](StreamAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>\>
+
+#### beforeGuard?
+
+> `optional` **beforeGuard**: `Record`\<`string`, [`StreamBeforeGuardHook`](StreamBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>\>
 
 ***
 
@@ -154,7 +170,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:50](https://github.com/purist
 
 > **invokes**: `Invokes`
 
-Defined in: [core/types/stream/StreamDefinition.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L52)
+Defined in: [core/types/stream/StreamDefinition.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L89)
 
 ***
 
@@ -162,7 +178,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:52](https://github.com/purist
 
 > **metadata**: `MetadataType`
 
-Defined in: [core/types/stream/StreamDefinition.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L29)
+Defined in: [core/types/stream/StreamDefinition.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L31)
 
 ***
 
@@ -170,7 +186,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:29](https://github.com/purist
 
 > **queueInvokes**: `QueueInvokes`
 
-Defined in: [core/types/stream/StreamDefinition.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L56)
+Defined in: [core/types/stream/StreamDefinition.ts:93](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L93)
 
 ***
 
@@ -178,7 +194,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:56](https://github.com/purist
 
 > **streamDescription**: `string`
 
-Defined in: [core/types/stream/StreamDefinition.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L28)
+Defined in: [core/types/stream/StreamDefinition.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L30)
 
 ***
 
@@ -186,7 +202,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:28](https://github.com/purist
 
 > **streamInvokes**: `StreamInvokes`
 
-Defined in: [core/types/stream/StreamDefinition.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L53)
+Defined in: [core/types/stream/StreamDefinition.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L90)
 
 ***
 
@@ -194,4 +210,4 @@ Defined in: [core/types/stream/StreamDefinition.ts:53](https://github.com/purist
 
 > **streamName**: `string`
 
-Defined in: [core/types/stream/StreamDefinition.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L27)
+Defined in: [core/types/stream/StreamDefinition.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L29)

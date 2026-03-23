@@ -85,6 +85,7 @@ import { isStreamOpenRequest } from '../types/stream/isStreamOpenRequest.impl.js
 import type { StreamDefinition } from '../types/stream/StreamDefinition.js'
 import type { StreamDefinitionListResolved } from '../types/stream/StreamDefinitionList.js'
 import type { StreamFrame } from '../types/stream/StreamFrame.js'
+import type { StreamFunctionContext } from '../types/stream/StreamFunctionContext.js'
 import type { StreamMessage } from '../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
 import type { StreamWriter } from '../types/stream/StreamWriter.js'
@@ -985,6 +986,47 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			const guards = Object.entries(afterGuards).map(([name, hook]) =>
 				context.startActiveSpan(`${worker.name}.afterGuard.${name}`, {}, undefined, () =>
 					hook.call(this, context, result, message),
+				),
+			)
+			await Promise.all(guards)
+		})
+	}
+
+	private async runStreamBeforeGuards(
+		stream: StreamDefinition<any, any, any, any, any, any, any, any, any, any, any, any, any, any>,
+		context: StreamFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+	) {
+		const beforeGuards = stream.hooks.beforeGuard
+		if (!beforeGuards || Object.keys(beforeGuards).length === 0) {
+			return
+		}
+		await context.startActiveSpan(`${stream.streamName}.beforeGuardHooks`, {}, undefined, async () => {
+			const guards = Object.entries(beforeGuards).map(([name, hook]) =>
+				context.startActiveSpan(`${stream.streamName}.beforeGuard.${name}`, {}, undefined, () =>
+					hook.call(this, context, payload as never, parameter as never),
+				),
+			)
+			await Promise.all(guards)
+		})
+	}
+
+	private async runStreamAfterGuards(
+		stream: StreamDefinition<any, any, any, any, any, any, any, any, any, any, any, any, any, any>,
+		context: StreamFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+		result: unknown,
+	) {
+		const afterGuards = stream.hooks.afterGuard
+		if (!afterGuards || Object.keys(afterGuards).length === 0) {
+			return
+		}
+		await context.startActiveSpan(`${stream.streamName}.afterGuardHooks`, {}, undefined, async () => {
+			const guards = Object.entries(afterGuards).map(([name, hook]) =>
+				context.startActiveSpan(`${stream.streamName}.afterGuard.${name}`, {}, undefined, () =>
+					hook.call(this, context, result as never, payload as never, parameter as never),
 				),
 			)
 			await Promise.all(guards)
@@ -2096,6 +2138,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 			let sequence = 0
 			const chunks: unknown[] = []
+			let finalPayload: unknown
+			let streamClosed = false
 
 			const publishFrame = async (frame: StreamFrame['payload']) => {
 				const streamFrame: Omit<StreamFrame, 'id' | 'timestamp'> = {
@@ -2147,16 +2191,19 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					})
 				},
 				close: async final => {
-					let finalPayload = final
-					if (stream.aggregateChunks && finalPayload === undefined) {
-						finalPayload = {
+					if (streamClosed) {
+						return
+					}
+					let resolvedFinalPayload = final
+					if (stream.aggregateChunks && resolvedFinalPayload === undefined) {
+						resolvedFinalPayload = {
 							chunkCount: chunks.length,
 							chunks,
 						}
 					}
 
 					if (stream.finalValidationEnabled && stream.finalSchema) {
-						const finalValidationResult = await validate(stream.finalSchema, finalPayload)
+						const finalValidationResult = await validate(stream.finalSchema, resolvedFinalPayload)
 						if (!finalValidationResult.success) {
 							throw new UnhandledError(StatusCode.InternalServerError, 'stream final output validation failed', {
 								issues: finalValidationResult.issues,
@@ -2165,30 +2212,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						}
 					}
 
-					if (stream.finalEventName && finalPayload !== undefined) {
-						await this.eventBridge.emitMessage({
-							messageType: EBMessageType.CustomMessage,
-							contentType: 'application/json',
-							contentEncoding: 'utf-8',
-							traceId: message.traceId,
-							principalId: message.principalId,
-							tenantId: message.tenantId,
-							sender: {
-								serviceName: this.info.serviceName,
-								serviceVersion: this.info.serviceVersion,
-								serviceTarget: stream.streamName,
-								instanceId: this.eventBridge.instanceId,
-							},
-							eventName: stream.finalEventName,
-							payload: finalPayload,
-						} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
-					}
-
-					await publishFrame({
-						frameType: 'complete',
-						sequence: sequence++,
-						final: finalPayload,
-					})
+					finalPayload = resolvedFinalPayload
+					streamClosed = true
 				},
 				fail: async error => {
 					const err = error instanceof HandledError ? error : UnhandledError.fromError(error)
@@ -2256,6 +2281,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					resources: this.resources,
 				}
 
+				await this.runStreamBeforeGuards(stream, streamContext as StreamFunctionContext, payload, parameter)
 				await call(streamContext as any, payload as any, parameter as any, writer)
 
 				if (activeSession.cancelled) {
@@ -2270,6 +2296,39 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				// If producer did not close explicitly, auto-complete.
 				if (sequence <= 1 || chunks.length > 0) {
 					await writer.close()
+				}
+
+				if (streamClosed) {
+					await this.runStreamAfterGuards(
+						stream,
+						streamContext as StreamFunctionContext,
+						payload,
+						parameter,
+						finalPayload,
+					)
+					if (stream.finalEventName && finalPayload !== undefined) {
+						await this.eventBridge.emitMessage({
+							messageType: EBMessageType.CustomMessage,
+							contentType: 'application/json',
+							contentEncoding: 'utf-8',
+							traceId: message.traceId,
+							principalId: message.principalId,
+							tenantId: message.tenantId,
+							sender: {
+								serviceName: this.info.serviceName,
+								serviceVersion: this.info.serviceVersion,
+								serviceTarget: stream.streamName,
+								instanceId: this.eventBridge.instanceId,
+							},
+							eventName: stream.finalEventName,
+							payload: finalPayload,
+						} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+					}
+					await publishFrame({
+						frameType: 'complete',
+						sequence: sequence++,
+						final: finalPayload,
+					})
 				}
 			} catch (error) {
 				await writer.fail(error)

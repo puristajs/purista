@@ -256,9 +256,9 @@ export class AgentInstance implements AgentInstanceContract {
 			configStore: this.runtime.configStore,
 			stateStore: this.runtime.stateStore,
 			queueBridge: this.runtime.queueBridge,
-			resources: instanceResources,
 			serviceConfig,
-		})
+			...(instanceResources ? { resources: instanceResources } : {}),
+		} as never)
 
 		await this.service.start()
 	}

@@ -14,7 +14,7 @@ Defined in: [natsbridge/src/getDefaultNatsBridgeConfig.ts:4](https://github.com/
 
 ### commandResponsePublishTwice
 
-> **commandResponsePublishTwice**: `"always"` \| `"eventOnly"` \| `"eventAndError"` \| `"never"`
+> **commandResponsePublishTwice**: `"never"` \| `"always"` \| `"eventOnly"` \| `"eventAndError"`
 
 Indicates if a command response should be published a second time.
 If the command response gets published, it will be published to the regular topic pattern.

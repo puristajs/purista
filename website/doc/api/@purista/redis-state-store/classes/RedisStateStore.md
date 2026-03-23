@@ -140,7 +140,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:53](https://github.co
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
+Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
 
 #### cacheTtl?
 
@@ -198,7 +198,7 @@ A log level for new logger if logger is not set
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L21)
 
 #### Inherited from
 
@@ -210,7 +210,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
+Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
 
 #### Inherited from
 
@@ -250,7 +250,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:61](https://github.co
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L45)
 
 #### Type Parameters
 
@@ -306,7 +306,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:68](https://github.co
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L60)
 
 #### Parameters
 
@@ -350,7 +350,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:87](https://github.co
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
+Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L74)
 
 #### Parameters
 

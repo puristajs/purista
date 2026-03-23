@@ -404,6 +404,11 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [StateGetterFunction](type-aliases/StateGetterFunction.md)
 - [StateSetterFunction](type-aliases/StateSetterFunction.md)
 
+## Stream
+
+- [StreamAfterGuardHook](type-aliases/StreamAfterGuardHook.md)
+- [StreamBeforeGuardHook](type-aliases/StreamBeforeGuardHook.md)
+
 ## Subscription
 
 - [SubscriptionDefinitionBuilder](classes/SubscriptionDefinitionBuilder.md)

@@ -8,11 +8,14 @@ order: 204000
 
 To be able to build real world systems, you will need to send events, which will be consumed by subscriptions or third party providers. The sender does/should not need to know, who is consuming this information.
 
-To define a custom event, an event name and a event schema must be set. The command and subscription builders provide the `canEmit` method, which should be used.
+To define a custom event, an event name and payload schema must be set. Commands,
+subscriptions, streams, and AI agents all expose `canEmit(...)` so the event is
+declared at builder time and emitted from the handler with a typed `context.emit(...)`.
 
-Emitting custom events is quite easy. The function context and the subscription context containing a helper function `emit`.
-This async `emit` function has two parameters. The event name and the optional payload to be sent.  
-The event name and type is automatically inherited by the definition done with `canEmit`.
+Emitting custom events is quite easy. The command, subscription, stream, and
+agent handler contexts all contain an async `emit(...)` function. It takes the
+event name and the payload to send. The event type is inherited automatically
+from the earlier `canEmit(...)` declaration.
 
 Example:
 
@@ -23,6 +26,16 @@ Example:
   await emit('MyEventName', { some: 'Payload' })
 }
 
+```
+
+The same pattern works in streams and agents:
+
+```typescript
+.canEmit('support.agent.completed', z.object({ sessionId: z.string() }))
+.setHandler(async function (context, payload) {
+  await context.emit('support.agent.completed', { sessionId: payload.sessionId })
+  return { message: 'done' }
+})
 ```
 
 The emitted message will have the current service (name & version & function/subscription-name) as sender address.

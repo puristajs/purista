@@ -73,8 +73,15 @@ export const supportAgent = new AgentBuilder({
   .useSkills(['spec-elicitation', 'support-workflow'])
   .canInvoke('support', '1', 'lookupFaq')
   .canInvokeAgent('triageAgent', '1')
+  .canEmit(
+    'support.agent.completed',
+    z.object({
+      sessionId: z.string(),
+      escalated: z.boolean(),
+    }),
+  )
   .setBeforeGuardHooks({
-    requirePrompt: async (_context, payload) => {
+    requirePrompt: async function requirePrompt(_context, payload) {
       if (!payload.prompt.trim()) {
         throw new Error('prompt is required')
       }
@@ -202,6 +209,9 @@ These declarations feed both:
 - direct handler APIs like `context.tools` and `context.agents`
 - external runtime binding helpers like `context.expose.tools(...)`
 
+`canEmit(...)` belongs in the same contract area. It declares which custom
+PURISTA events the agent may emit from the handler with `context.emit(...)`.
+
 ### 7. Skills
 
 Use:
@@ -229,7 +239,7 @@ handler body.
 
 ```ts
 .setBeforeGuardHooks({
-  requirePrompt: async (_context, payload) => {
+  requirePrompt: async function requirePrompt(_context, payload) {
     if (!payload.prompt.trim()) {
       throw new Error('prompt is required')
     }
@@ -252,6 +262,32 @@ Bad guard use cases:
 
 Keep guards short and deterministic. They are part of the agent contract, not
 the handler workflow.
+
+Use normal function syntax for guard hooks so PURISTA can bind `this` the same
+way it does for commands, streams, subscriptions, and queue workers.
+
+### 8a. Custom events
+
+Agents can emit normal PURISTA custom events just like commands and streams.
+
+```ts
+.canEmit(
+  'support.agent.completed',
+  z.object({
+    sessionId: z.string(),
+    escalated: z.boolean(),
+  }),
+)
+```
+
+Then in the handler:
+
+```ts
+await context.emit('support.agent.completed', {
+  sessionId: payload.sessionId ?? context.message.id,
+  escalated: false,
+})
+```
 
 ### 9. Transport
 

@@ -25,7 +25,10 @@
 		"types": ["vitest/globals", "node"],
 		"noFallthroughCasesInSwitch": true,
 		"useUnknownInCatchVariables": true,
-		"paths": {}
+		"paths": {
+			"@purista/core": ["packages/core/src/index.ts"],
+			"@purista/ai": ["packages/ai/src/index.ts"]
+		}
 	},
 	"exclude": ["node_modules", "dist"]
 }

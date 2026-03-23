@@ -122,9 +122,17 @@ export const supportAgent = new AgentBuilder({
   .canInvoke('support', '1', 'lookupFaq')
   // Allow one child agent.
   .canInvokeAgent('triageAgent', '1')
+  // Declare custom PURISTA events the agent may emit.
+  .canEmit(
+    'support.agent.completed',
+    z.object({
+      sessionId: z.string(),
+      escalated: z.boolean(),
+    }),
+  )
   // Guard hooks are for short request policy checks, not business logic.
   .setBeforeGuardHooks({
-    requirePrompt: async (_context, requestPayload) => {
+    requirePrompt: async function requirePrompt(_context, requestPayload) {
       if (!requestPayload.prompt.trim()) {
         throw HandledError.fromMessage(StatusCode.BadRequest, 'prompt is required')
       }
@@ -190,6 +198,10 @@ export const supportAgent = new AgentBuilder({
     // 5. Persist the assistant message and finish the durable run.
     await context.conversation.addAssistant(answer)
     await run.finishSuccess(answer)
+    await context.emit('support.agent.completed', {
+      sessionId: payload.sessionId ?? context.message.id,
+      escalated: /urgent|incident|legal/i.test(payload.prompt),
+    })
     context.stream.sendFinal(answer)
     return { message: answer }
   })
@@ -210,6 +222,7 @@ These define the contract:
 - declared skill names
 - allowlisted commands
 - allowlisted child agents
+- custom PURISTA events
 - guard hooks
 - transport exposure
 

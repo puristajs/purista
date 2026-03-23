@@ -5,6 +5,8 @@ import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
+import type { StreamAfterGuardHook } from './StreamAfterGuardHook.js'
+import type { StreamBeforeGuardHook } from './StreamBeforeGuardHook.js'
 import type { StreamDefinitionMetadataBase } from './StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from './StreamFunction.js'
 
@@ -46,6 +48,41 @@ export type StreamDefinition<
 		AgentInvokes
 	>
 	finalEventName?: string
+	hooks: {
+		beforeGuard?: Record<
+			string,
+			StreamBeforeGuardHook<
+				S,
+				MessagePayloadType,
+				MessageParamsType,
+				FunctionPayloadType,
+				FunctionParamsType,
+				Resources,
+				Invokes,
+				StreamInvokes,
+				EmitList,
+				QueueInvokes,
+				AgentInvokes
+			>
+		>
+		afterGuard?: Record<
+			string,
+			StreamAfterGuardHook<
+				S,
+				MessagePayloadType,
+				MessageParamsType,
+				FunctionPayloadType,
+				FunctionParamsType,
+				FinalType,
+				Resources,
+				Invokes,
+				StreamInvokes,
+				EmitList,
+				QueueInvokes,
+				AgentInvokes
+			>
+		>
+	}
 	chunkValidationEnabled: boolean
 	finalValidationEnabled: boolean
 	aggregateChunks: boolean

@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - Refactor ai external runtime dx
 - Refactor ai runtime and testing foundations
 - Refactor ai runtime defaults and docs
+- Refactor ai agent builder parity and docs
 
 ### Styling
 

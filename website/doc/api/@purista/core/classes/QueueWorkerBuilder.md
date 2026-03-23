@@ -32,11 +32,51 @@ Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:18](https://github.co
 
 ## Methods
 
+### getAfterGuardHook()
+
+> **getAfterGuardHook**(`name`): [`QueueWorkerAfterGuardHook`](../type-aliases/QueueWorkerAfterGuardHook.md)
+
+Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L63)
+
+Return a previously registered after-guard hook by name.
+
+#### Parameters
+
+##### name
+
+`string`
+
+#### Returns
+
+[`QueueWorkerAfterGuardHook`](../type-aliases/QueueWorkerAfterGuardHook.md)
+
+***
+
+### getBeforeGuardHook()
+
+> **getBeforeGuardHook**(`name`): [`QueueWorkerBeforeGuardHook`](../type-aliases/QueueWorkerBeforeGuardHook.md)
+
+Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L51)
+
+Return a previously registered before-guard hook by name.
+
+#### Parameters
+
+##### name
+
+`string`
+
+#### Returns
+
+[`QueueWorkerBeforeGuardHook`](../type-aliases/QueueWorkerBeforeGuardHook.md)
+
+***
+
 ### getDefinition()
 
 > **getDefinition**(): `Promise`\<[`QueueWorkerDefinition`](../type-aliases/QueueWorkerDefinition.md)\>
 
-Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L59)
+Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L67)
 
 #### Returns
 
@@ -48,7 +88,7 @@ Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:59](https://github.co
 
 > **setAfterGuardHooks**(`hooks`): `QueueWorkerBuilder`
 
-Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L51)
+Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L55)
 
 #### Parameters
 

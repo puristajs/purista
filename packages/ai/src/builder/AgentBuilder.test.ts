@@ -319,12 +319,12 @@ describe('AgentBuilder', () => {
 			agentVersion: '1',
 		})
 			.setBeforeGuardHooks({
-				before: async () => {
+				before: async function before() {
 					order.push('before')
 				},
 			})
 			.setAfterGuardHooks({
-				after: async () => {
+				after: async function after() {
 					order.push('after')
 				},
 			})
@@ -355,12 +355,12 @@ describe('AgentBuilder', () => {
 			agentVersion: '1',
 		})
 			.setBeforeGuardHooks({
-				before: async () => {
+				before: async function before() {
 					order.push('before')
 				},
 			})
 			.setAfterGuardHooks({
-				after: async () => {
+				after: async function after() {
 					order.push('after')
 				},
 			})
@@ -510,6 +510,55 @@ describe('AgentBuilder', () => {
 			await instance.stop()
 			await queueBridge.destroy()
 		}
+	})
+
+	it('executes declared guard hooks for queued durable agents', async () => {
+		const order: string[] = []
+		const bridge = new DefaultEventBridge()
+		bridges.push(bridge)
+		await bridge.start()
+		const queueBridge = new DefaultQueueBridge()
+
+		const definition = new AgentBuilder({
+			agentName: 'guardedQueuedAgent',
+			agentVersion: '1',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string(), projectId: z.string() }))
+			.setExecutionMode('queued')
+			.setExecutionPolicy({
+				maxDurationMs: 3_000,
+				leaseTtlMs: 100,
+				heartbeatIntervalMs: 10,
+				scopeFromPayload: ['projectId'],
+			})
+			.setBeforeGuardHooks({
+				before: async function before(_context, payload) {
+					order.push(`before:${String((payload as { prompt: string }).prompt)}`)
+				},
+			})
+			.setAfterGuardHooks({
+				after: async function after(_context, _payload, _parameter, result) {
+					order.push(`after:${typeof result === 'string' ? result : String(result?.message ?? '')}`)
+				},
+			})
+			.setHandler(async (_context, payload) => {
+				order.push(`handler:${payload.prompt}`)
+				return { message: `queued:${payload.prompt}` }
+			})
+			.build()
+
+		const instance = await definition.getInstance(bridge, { queueBridge })
+		await instance.start()
+		try {
+			await instance.invoke({
+				payload: { prompt: 'hello', projectId: 'voyage' },
+			})
+		} finally {
+			await instance.stop()
+			await queueBridge.destroy()
+		}
+
+		expect(order).toEqual(['before:hello', 'handler:hello', 'after:queued:hello'])
 	})
 
 	it('derives queue lease extensions from agent execution policy for queued agents', async () => {

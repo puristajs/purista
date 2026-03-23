@@ -68,6 +68,34 @@ A stream function receives:
 - `context.resources`: typed service resources
 - `writer`: stream writer (`write`, `close`, `fail`, `onCancel`)
 
+## Guards
+
+Streams now follow the same guard philosophy as commands:
+
+```ts
+.setBeforeGuardHooks({
+  requirePrompt: async (_context, payload) => {
+    if (!payload.prompt.trim()) {
+      throw new Error('prompt is required')
+    }
+  },
+})
+.setAfterGuardHooks({
+  audit: async (_context, final) => {
+    console.log('stream completed with final payload', final)
+  },
+})
+```
+
+Use guard hooks for short request-policy work:
+
+- auth and tenant checks
+- quota and rate policy checks
+- cheap audit side effects
+
+Do not put long-running business logic into stream guards. Keep that in the
+stream handler itself.
+
 ## Validation and aggregation
 
 - `addChunkSchema(schema, validateChunks = true)` validates each `writer.write(...)` payload.
@@ -134,6 +162,18 @@ By using `.canInvokeAgent(...)`, you get:
 - **Traceability**: Traces and correlation IDs flow automatically into the agent.
 - **Metadata**: `principalId` and `tenantId` are forwarded to the agent.
 - **Session**: `sessionId` is managed for conversation history.
+
+## Custom events
+
+Streams can emit normal PURISTA custom events:
+
+```ts
+.canEmit('search.completed', z.object({ chunkCount: z.number() }))
+.setStreamFunction(async function (context, payload, parameter, writer) {
+  await writer.close({ chunkCount: 3 })
+  await context.emit('search.completed', { chunkCount: 3 })
+})
+```
 ## Testing streams
 
 For unit tests, bind the stream function to the service instance and provide a writer stub:
