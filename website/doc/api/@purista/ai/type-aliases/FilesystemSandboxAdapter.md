@@ -8,7 +8,7 @@
 
 > **FilesystemSandboxAdapter** = `object`
 
-Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:6](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L6)
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:6](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L6)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxA
 
 > **executeCommand**: (`command`) => `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:7](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L7)
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:7](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L7)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxA
 
 > **readFile**: (`path`) => `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:8](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L8)
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:8](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L8)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxA
 
 > **writeFiles**: (`files`) => `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:9](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L9)
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:9](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L9)
 
 #### Parameters
 

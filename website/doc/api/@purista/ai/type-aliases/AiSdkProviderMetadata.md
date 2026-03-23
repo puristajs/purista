@@ -8,7 +8,7 @@
 
 > **AiSdkProviderMetadata** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:87](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/AiSdkProvider.ts#L87)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:87](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L87)
 
 Request metadata field understood by [AiSdkProvider](../classes/AiSdkProvider.md). Attach it to [ProviderRequest.metadata](ProviderRequest.md#metadata)
 to override call settings per invocation.
@@ -33,7 +33,7 @@ await provider.generate({
 
 > `optional` **aiSdk**: [`AiSdkProviderOverrides`](AiSdkProviderOverrides.md) & `object`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:88](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/AiSdkProvider.ts#L88)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:88](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L88)
 
 #### Type Declaration
 

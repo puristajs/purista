@@ -58,12 +58,16 @@ Workers share the same service resources defined through the `ServiceBuilder`. I
 
 ## Testing workers
 
-- The CLI scaffolds Vitest suites that instantiate the worker handler with the default queue bridge.
-- Use `DefaultQueueBridge` for deterministic tests (no external dependencies).
-- Simulate retries by throwing from the handler and asserting that the queue metrics increment.
+Use the same testing split as the rest of PURISTA:
+
+- `createQueueWorkerContextMock(...)` for direct handler tests
+- `createQueueWorkerTestHarness(...)` for one real worker cycle through the runtime
+
+Use the runtime harness when you need to verify acknowledgements, retries, or dead-letter behavior instead of only the handler logic.
 
 ## Related docs
 
 - [Queue builder](./the-queue-builder.md)
+- [Test a queue worker](./test-a-queue-worker.md)
 - [Async HTTP exposure](./queue-http-exposure.md)
 - [Queue bridges](../../3_eco_system/queue_bridges/index.md)

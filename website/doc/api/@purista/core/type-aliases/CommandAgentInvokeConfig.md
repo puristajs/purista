@@ -8,7 +8,7 @@
 
 > **CommandAgentInvokeConfig**\<`Payload`, `Parameter`\> = `object`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L52)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L51)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:52](https
 
 > `optional` **parameterSchema**: `Parameter`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L54)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L53)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:54](https
 
 > `optional` **payloadSchema**: `Payload`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L53)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L52)

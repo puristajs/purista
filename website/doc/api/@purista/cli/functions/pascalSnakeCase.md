@@ -8,7 +8,7 @@
 
 > **pascalSnakeCase**(`input`, `options?`): `string`
 
-Defined in: [change-case.ts:132](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/cli/src/api/change-case.ts#L132)
+Defined in: [change-case.ts:132](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/cli/src/api/change-case.ts#L132)
 
 Convert a string to pascal snake case (`Foo_Bar`).
 

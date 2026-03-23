@@ -6,7 +6,7 @@
 
 # Class: InlineSkillResource\<SkillNames\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:414](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L414)
+Defined in: [packages/ai/src/skills/fileSystem.ts:414](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L414)
 
 ## Type Parameters
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:414](https://github.com/purist
 
 > **new InlineSkillResource**\<`SkillNames`\>(`sources`): `InlineSkillResource`\<`SkillNames`\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:415](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L415)
+Defined in: [packages/ai/src/skills/fileSystem.ts:415](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L415)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:415](https://github.com/purist
 
 > **list**(): `Promise`\<[`SkillMetadata`](../type-aliases/SkillMetadata.md)[]\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:445](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L445)
+Defined in: [packages/ai/src/skills/fileSystem.ts:445](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L445)
 
 #### Returns
 
@@ -58,7 +58,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:445](https://github.com/purist
 
 > **load**(`skillName`): `Promise`\<[`SkillDocument`](../type-aliases/SkillDocument.md)\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:452](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L452)
+Defined in: [packages/ai/src/skills/fileSystem.ts:452](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L452)
 
 #### Parameters
 
@@ -80,7 +80,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:452](https://github.com/purist
 
 > **loadBundle**(`skillName`): `Promise`\<[`SkillBundle`](../type-aliases/SkillBundle.md)\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:474](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L474)
+Defined in: [packages/ai/src/skills/fileSystem.ts:474](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L474)
 
 #### Parameters
 
@@ -102,7 +102,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:474](https://github.com/purist
 
 > **loadMany**(`skillNames`): `Promise`\<[`SkillDocument`](../type-aliases/SkillDocument.md)[]\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:456](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L456)
+Defined in: [packages/ai/src/skills/fileSystem.ts:456](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L456)
 
 #### Parameters
 
@@ -124,7 +124,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:456](https://github.com/purist
 
 > **loadReferences**(`skillName`): `Promise`\<[`SkillReferenceDocument`](../type-aliases/SkillReferenceDocument.md)[]\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:462](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L462)
+Defined in: [packages/ai/src/skills/fileSystem.ts:462](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L462)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:462](https://github.com/purist
 
 > **search**(`input`): `Promise`\<[`SkillDocument`](../type-aliases/SkillDocument.md)[]\>
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:513](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L513)
+Defined in: [packages/ai/src/skills/fileSystem.ts:513](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L513)
 
 #### Parameters
 

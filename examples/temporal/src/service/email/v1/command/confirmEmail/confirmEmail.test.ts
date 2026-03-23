@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { vi } from 'vitest'
 
@@ -47,7 +47,7 @@ describe('service Email version 1 - command confirmEmail', () => {
 
 		const parameter: EmailV1ConfirmEmailInputParameter = {}
 
-		const context = confirmEmailCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+		const context = createCommandContextMock(confirmEmailCommandBuilder, { payload, parameter, sandbox })
 
 		context.stubs.getState.resolves({ 'john@example.com': 'john@example.com' })
 

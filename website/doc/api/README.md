@@ -34,6 +34,9 @@ All notable changes to this project will be documented in this file.
 - Refactor ai runtime defaults and docs
 - Refactor ai agent builder parity and docs
 - Refactor builder parity across core and ai
+- Refactor ai dx typing and api docs
+- Reframe purista skills as builder memory
+- Refactor ai expose typed agent service handle
 
 ### Styling
 

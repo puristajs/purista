@@ -8,7 +8,7 @@
 
 > **AgentForwardInvocationOptions** = `Omit`\<[`AgentInvocationOptions`](AgentInvocationOptions.md), `"forwardToCurrentStream"`\> & `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:665](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/runtime/context.ts#L665)
+Defined in: [packages/ai/src/runtime/context.ts:665](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L665)
 
 ## Type Declaration
 

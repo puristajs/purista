@@ -50,7 +50,13 @@ This will create a new service named "user"
 purista add command user
 ```
 
-Generated agent tests use the public `@purista/ai` testing helpers such as `createAgentTestHarness(...)` and `ScriptedModel`, so new blueprints follow the current framework testing style by default.
+Generated tests follow the public testing helpers:
+
+- `createCommandContextMock(...)` for command handler tests
+- `createSubscriptionContextMock(...)` for subscription handler tests
+- `createStreamTestHarness(...)` for runtime stream tests
+- `createQueueWorkerTestHarness(...)` for runtime queue worker tests
+- `createAgentTestHarness(...)` and `ScriptedModel` for agent runtime tests
 
 **Visit [purista.dev](https://purista.dev)**
 

@@ -8,7 +8,7 @@
 
 > **CreateInMemorySandboxRegistryOptions** = `object`
 
-Defined in: [packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:5](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts#L5)
+Defined in: [packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:5](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts#L5)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:
 
 > `optional` **stateStoreConfig**: [`StoreBaseConfig`](../../core/type-aliases/StoreBaseConfig.md)\<`Record`\<`string`, `unknown`\>\>
 
-Defined in: [packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:6](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts#L6)
+Defined in: [packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:6](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts#L6)

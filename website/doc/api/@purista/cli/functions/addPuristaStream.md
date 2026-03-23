@@ -8,7 +8,7 @@
 
 > **addPuristaStream**(`input`): `Promise`\<`void`\>
 
-Defined in: [addPuristaStream.ts:17](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/cli/src/api/addPuristaStream.ts#L17)
+Defined in: [addPuristaStream.ts:17](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/cli/src/api/addPuristaStream.ts#L17)
 
 Add all folders and files for a new stream to an existing PURISTA service.
 

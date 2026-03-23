@@ -8,7 +8,7 @@
 
 > **AgentRunLockHandle** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:224](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/runtime/runState.ts#L224)
+Defined in: [packages/ai/src/runtime/runState.ts:224](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/runState.ts#L224)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:224](https://github.com/purista
 
 > **lock**: [`AgentRunLock`](AgentRunLock.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:225](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/runtime/runState.ts#L225)
+Defined in: [packages/ai/src/runtime/runState.ts:225](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/runState.ts#L225)
 
 ## Methods
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:225](https://github.com/purista
 
 > **heartbeat**(`ttlMs?`): `Promise`\<\{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:226](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/runtime/runState.ts#L226)
+Defined in: [packages/ai/src/runtime/runState.ts:226](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/runState.ts#L226)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:226](https://github.com/purista
 
 > **release**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:227](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/runtime/runState.ts#L227)
+Defined in: [packages/ai/src/runtime/runState.ts:227](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/runState.ts#L227)
 
 #### Returns
 

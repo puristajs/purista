@@ -8,7 +8,7 @@
 
 > **SandboxWorkspaceLayout** = `object`
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:5](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/workspaceLayout.ts#L5)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:5](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/workspaceLayout.ts#L5)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:5](https://github.com/pu
 
 > **outputsRoot**: `string`
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:10](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/workspaceLayout.ts#L10)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:10](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/workspaceLayout.ts#L10)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:10](https://github.com/p
 
 > **repoRoot**: `string`
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:7](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/workspaceLayout.ts#L7)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:7](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/workspaceLayout.ts#L7)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:7](https://github.com/pu
 
 > **root**: `string`
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:6](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/workspaceLayout.ts#L6)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:6](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/workspaceLayout.ts#L6)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:6](https://github.com/pu
 
 > **skillsRoot**: `string`
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:8](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/workspaceLayout.ts#L8)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:8](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/workspaceLayout.ts#L8)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:8](https://github.com/pu
 
 > **tmpRoot**: `string`
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:9](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/sandbox/workspaceLayout.ts#L9)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:9](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/workspaceLayout.ts#L9)

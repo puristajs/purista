@@ -33,6 +33,7 @@ export * from './ServiceBuilder/index.js'
 export * from './StreamDefinitionBuilder/index.js'
 export * from './SubscriptionDefinitionBuilder/index.js'
 export * from './schema/index.js'
+export * from './testing/index.js'
 export * from './version.js'
 export * from './zodOpenApi/index.js'
 

@@ -8,7 +8,7 @@
 
 > **PoolStats** = `object`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:7](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/pools/PoolManager.ts#L7)
+Defined in: [packages/ai/src/pools/PoolManager.ts:7](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/pools/PoolManager.ts#L7)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:7](https://github.com/puristaj
 
 > **activeWorkers**: `number`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:9](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/pools/PoolManager.ts#L9)
+Defined in: [packages/ai/src/pools/PoolManager.ts:9](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/pools/PoolManager.ts#L9)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:9](https://github.com/puristaj
 
 > **id**: `string`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:8](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/pools/PoolManager.ts#L8)
+Defined in: [packages/ai/src/pools/PoolManager.ts:8](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/pools/PoolManager.ts#L8)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:8](https://github.com/puristaj
 
 > **maxConcurrencyPerInstance**: `number`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:11](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/pools/PoolManager.ts#L11)
+Defined in: [packages/ai/src/pools/PoolManager.ts:11](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/pools/PoolManager.ts#L11)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:11](https://github.com/purista
 
 > **waitingWorkers**: `number`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:10](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/pools/PoolManager.ts#L10)
+Defined in: [packages/ai/src/pools/PoolManager.ts:10](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/pools/PoolManager.ts#L10)

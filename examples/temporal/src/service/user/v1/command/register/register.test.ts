@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { vi } from 'vitest'
 
@@ -51,7 +51,7 @@ describe('service User version 1 - command register', () => {
 
 		const parameter: UserV1RegisterInputParameter = {}
 
-		const context = registerCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+		const context = createCommandContextMock(registerCommandBuilder, { payload, parameter, sandbox })
 
 		context.stubs.getState.resolves({})
 		context.stubs.setState.resolves()

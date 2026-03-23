@@ -8,7 +8,7 @@
 
 > **AgentRuntimeInstance**\<`EmitPayloads`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:101](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L101)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:102](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L102)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:101](https://github.com/pu
 
 > **getExternalRuntimeMetadata**(): [`ExternalRuntimeMetadata`](ExternalRuntimeMetadata.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:109](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L109)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:127](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L127)
 
 #### Returns
 
@@ -30,11 +30,39 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:109](https://github.com/pu
 
 ***
 
+### getService()
+
+> **getService**(): [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> \| `undefined`
+
+Defined in: [packages/ai/src/types/AgentDefinition.ts:121](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L121)
+
+Return the underlying PURISTA service instance backing this agent runtime.
+
+This is mainly useful for HTTP/bootstrap integration where services need to be
+registered with another PURISTA-aware runtime, for example an HTTP server.
+
+#### Returns
+
+[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> \| `undefined`
+
+#### Example
+
+```ts
+const instance = await supportAgent.getInstance(eventBridge, { models })
+await instance.start()
+const service = instance.getService()
+if (service) {
+  httpService.registerService(service)
+}
+```
+
+***
+
 ### getStatus()
 
 > **getStatus**(): [`AgentRuntimeStatus`](AgentRuntimeStatus.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:108](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L108)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:126](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L126)
 
 #### Returns
 
@@ -46,7 +74,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:108](https://github.com/pu
 
 > **invoke**(`request`, `contextOverrides?`): `Promise`\<[`AgentInvokeResult`](AgentInvokeResult.md)\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:104](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L104)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:122](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L122)
 
 #### Parameters
 
@@ -68,7 +96,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:104](https://github.com/pu
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:102](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L102)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:103](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L103)
 
 #### Returns
 
@@ -80,7 +108,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:102](https://github.com/pu
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:103](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L103)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:104](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L104)
 
 #### Returns
 

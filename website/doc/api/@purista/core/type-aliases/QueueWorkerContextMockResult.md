@@ -1,0 +1,133 @@
+[**PURISTA API**](../../../README.md)
+
+***
+
+[PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueWorkerContextMockResult
+
+# Type Alias: QueueWorkerContextMockResult\<Payload, Parameter, Resources\>
+
+> **QueueWorkerContextMockResult**\<`Payload`, `Parameter`, `Resources`\> = `object`
+
+Defined in: testing/createQueueWorkerContextMock.ts:24
+
+## Type Parameters
+
+### Payload
+
+`Payload` = `unknown`
+
+### Parameter
+
+`Parameter` = `unknown`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = `Record`\<`string`, `unknown`\>
+
+## Properties
+
+### context
+
+> **context**: [`QueueJobContext`](QueueJobContext.md)\<`Payload`, `Parameter`, `Resources`\>
+
+Defined in: testing/createQueueWorkerContextMock.ts:29
+
+***
+
+### message
+
+> **message**: [`QueueMessage`](QueueMessage.md)\<`Payload`, `Parameter`\>
+
+Defined in: testing/createQueueWorkerContextMock.ts:30
+
+***
+
+### stubs
+
+> **stubs**: `object`
+
+Defined in: testing/createQueueWorkerContextMock.ts:31
+
+#### emit
+
+> **emit**: `SinonStub`
+
+#### getConfig
+
+> **getConfig**: `SinonStub`
+
+#### getSecret
+
+> **getSecret**: `SinonStub`
+
+#### getState
+
+> **getState**: `SinonStub`
+
+#### job
+
+> **job**: `object`
+
+##### job.complete
+
+> **complete**: `SinonStub`
+
+##### job.extendLease
+
+> **extendLease**: `SinonStub`
+
+##### job.fail
+
+> **fail**: `SinonStub`
+
+##### job.retry
+
+> **retry**: `SinonStub`
+
+#### logger
+
+> **logger**: `Record`\<`string`, `SinonStub`\>
+
+#### removeConfig
+
+> **removeConfig**: `SinonStub`
+
+#### removeSecret
+
+> **removeSecret**: `SinonStub`
+
+#### removeState
+
+> **removeState**: `SinonStub`
+
+#### resources
+
+> **resources**: `Partial`\<`Resources`\>
+
+#### service
+
+> **service**: [`QueueJobContext`](QueueJobContext.md)\<`Payload`, `Parameter`, `Resources`\>\[`"service"`\]
+
+#### setConfig
+
+> **setConfig**: `SinonStub`
+
+#### setSecret
+
+> **setSecret**: `SinonStub`
+
+#### setState
+
+> **setState**: `SinonStub`
+
+#### startActiveSpan
+
+> **startActiveSpan**: `SinonStub`
+
+#### stream
+
+> **stream**: [`QueueJobContext`](QueueJobContext.md)\<`Payload`, `Parameter`, `Resources`\>\[`"stream"`\]
+
+#### wrapInSpan
+
+> **wrapInSpan**: `SinonStub`

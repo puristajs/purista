@@ -78,6 +78,7 @@ export const pingStreamBuilder = pingV1ServiceBuilder
 ## What to read next
 
 - [The stream builder](./the-stream-builder.md)
+- [Test a stream](./test-a-stream.md)
 - [Expose REST endpoints](../exposing_endpoints/rest_api_http_endpoints.md)
 - [Subscription builder](../subscription/the-subscription-builder.md)
 - [AI Agents](../agent/index.md)

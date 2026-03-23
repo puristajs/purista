@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import type { User } from '../../../../../types/index.js'
@@ -27,7 +27,7 @@ describe('service User version 1 - command getAllUsers', () => {
 
 		const parameter: Parameters<typeof getAllUsers>[2] = {}
 
-		const context = getAllUsersCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+		const context = createCommandContextMock(getAllUsersCommandBuilder, { payload, parameter, sandbox })
 
 		const userMock: User = {
 			email: 'email@example.com',

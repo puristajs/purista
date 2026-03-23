@@ -8,7 +8,7 @@
 
 > **SkillBundleFile** = `object`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:30](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L30)
+Defined in: [packages/ai/src/skills/fileSystem.ts:30](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L30)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:30](https://github.com/purista
 
 > **content**: `Buffer`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:34](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L34)
+Defined in: [packages/ai/src/skills/fileSystem.ts:34](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L34)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:34](https://github.com/purista
 
 > **path**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:32](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L32)
+Defined in: [packages/ai/src/skills/fileSystem.ts:32](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L32)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:32](https://github.com/purista
 
 > **relativePath**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:33](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L33)
+Defined in: [packages/ai/src/skills/fileSystem.ts:33](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L33)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:33](https://github.com/purista
 
 > **skillName**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:31](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/skills/fileSystem.ts#L31)
+Defined in: [packages/ai/src/skills/fileSystem.ts:31](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L31)

@@ -8,7 +8,7 @@
 
 > **AgentRuntimeStatus** = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:137](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L137)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:155](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L155)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:137](https://github.com/pu
 
 > **activeWorkers**: `number`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:144](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L144)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:162](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L162)
 
 Current number of running agent executions in this process/replica.
 
@@ -26,7 +26,7 @@ Current number of running agent executions in this process/replica.
 
 > **agentName**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:138](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L138)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:156](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L156)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:138](https://github.com/pu
 
 > **agentVersion**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:139](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L139)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:157](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L157)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:139](https://github.com/pu
 
 > `optional` **concurrencyHints**: `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:147](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L147)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:165](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L165)
 
 #### effectiveMaxConcurrencyHint?
 
@@ -62,7 +62,7 @@ Optional host-provided replica count hint for observability only.
 
 > **maxConcurrencyPerInstance**: `number`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:142](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L142)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:160](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L160)
 
 Per-process/per-replica execution cap for this pool.
 
@@ -72,7 +72,7 @@ Per-process/per-replica execution cap for this pool.
 
 > **poolId**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:140](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L140)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:158](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L158)
 
 ***
 
@@ -80,6 +80,6 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:140](https://github.com/pu
 
 > **waitingWorkers**: `number`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:146](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/types/AgentDefinition.ts#L146)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:164](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L164)
 
 Current number of queued executions waiting for a local pool slot.

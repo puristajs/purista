@@ -1,4 +1,3 @@
-import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
@@ -30,7 +29,6 @@ import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGua
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
-import type { StreamWriter } from '../core/types/stream/StreamWriter.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -738,16 +736,6 @@ export class StreamDefinitionBuilder<
 			C['QueueInvokes'],
 			C['AgentInvokes']
 		>
-	}
-
-	getStreamContextMock(_input: {
-		sandbox?: SinonSandbox
-		resources?: Partial<C['Resources']>
-		writer?: Partial<StreamWriter>
-	}) {
-		return {
-			// currently no dedicated stream context mock helper
-		}
 	}
 
 	async getDefinition() {

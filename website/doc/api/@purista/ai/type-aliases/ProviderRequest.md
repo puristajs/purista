@@ -8,7 +8,7 @@
 
 > **ProviderRequest** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L7)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L7)
 
 Payload sent to a model provider.
 
@@ -18,7 +18,7 @@ Payload sent to a model provider.
 
 > `optional` **bindings**: [`ExternalBindingSet`](ExternalBindingSet.md) \| [`ExternalBinding`](ExternalBinding.md)[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:37](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L37)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:37](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L37)
 
 Optional executable bindings for allowlisted PURISTA commands and child agents.
 
@@ -32,7 +32,7 @@ exposes the allowlisted commands and agents declared in the builder.
 
 > `optional` **context**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:9](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L9)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:9](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L9)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:9](https://githu
 
 > `optional` **developerInstruction**: `string` \| `string`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:14](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L14)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:14](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L14)
 
 Optional high-priority app/developer instruction(s) injected on every call.
 Providers may map these to dedicated instruction roles when supported.
@@ -51,7 +51,7 @@ Providers may map these to dedicated instruction roles when supported.
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:38](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L38)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:38](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L38)
 
 ***
 
@@ -59,7 +59,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:38](https://gith
 
 > **prompt**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:8](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L8)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:8](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L8)
 
 ***
 
@@ -67,7 +67,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:8](https://githu
 
 > `optional` **references**: `Pick`\<[`SkillReferenceDocument`](SkillReferenceDocument.md), `"skillName"` \| `"relativePath"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:29](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L29)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:29](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L29)
 
 Optional reference documents belonging to already selected skills.
 
@@ -80,7 +80,7 @@ skill-specific choice made by the handler.
 
 > `optional` **skills**: `Pick`\<[`SkillDocument`](SkillDocument.md), `"name"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:22](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/runtime/ModelProvider.ts#L22)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:22](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L22)
 
 Optional skill documents that shape reasoning and prompt context.
 

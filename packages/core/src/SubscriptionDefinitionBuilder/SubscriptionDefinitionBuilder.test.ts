@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { createSubscriptionContextMock } from '../testing/createSubscriptionContextMock.js'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl.js'
 
 describe('SubscriptionDefinitionBuilder', () => {
@@ -191,11 +192,11 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({
+		const { context, stubs } = createSubscriptionContextMock(builder, {
 			message: msg,
 			sandbox,
 		})
-		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
+		stubs.service.OtherService[2].testSubscription.callsFake(async (payload: any, parameter: any) => {
 			return {
 				result: {
 					payload: { ...payload, other: 'added by invoke' },
@@ -205,7 +206,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			}
 		})
 
-		const result = await subscriptionFunction(context.mock, payload, parameter)
+		const result = await subscriptionFunction(context, payload, parameter)
 
 		expect(result).toStrictEqual({
 			result: {
@@ -214,7 +215,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		expect(context.stubs.emit.some.called).toBeTruthy()
+		expect(stubs.emit.some.called).toBeTruthy()
 	})
 
 	it('executes the plain function without hooks and schema validation', async () => {
@@ -226,11 +227,11 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({
+		const { context, stubs } = createSubscriptionContextMock(builder, {
 			message: msg,
 			sandbox,
 		})
-		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
+		stubs.service.OtherService[2].testSubscription.callsFake(async (payload: any, parameter: any) => {
 			return {
 				result: {
 					payload: { ...payload, other: 'added by invoke' },
@@ -241,7 +242,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 		})
 
 		const result = await subscriptionFunction(
-			context.mock,
+			context,
 			{ ...payload, def: 'default_value' },
 			{ ...parameter, def: 'default_param' },
 		)
@@ -376,9 +377,9 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = b.getSubscriptionContextMock({ message: msg, sandbox })
+		const { context } = createSubscriptionContextMock(b, { message: msg, sandbox })
 
-		const result = await theFunction(context.mock, 'y', 'x')
+		const result = await theFunction(context, 'y', 'x')
 
 		expect(result).toStrictEqual({
 			payload: 'y',

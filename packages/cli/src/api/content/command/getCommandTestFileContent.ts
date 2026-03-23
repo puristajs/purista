@@ -26,7 +26,9 @@ export const getCommandTestFileContent = (input: {
 
 	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
 
-	writer.writeLine(`import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`)
+	writer.writeLine(
+		`import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`,
+	)
 	writer.writeLine(`import { createSandbox } from 'sinon'`)
 	writer.blankLine()
 	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
@@ -75,11 +77,16 @@ export const getCommandTestFileContent = (input: {
 					writer.blankLine()
 					writer.writeLine(`const parameter: ${typePrefix}InputParameter = {}`)
 					writer.blankLine()
-					writer.writeLine(
-						`const context = ${commandBuilderName}.getCommandContextMock({ payload, parameter, sandbox, resources: { ...service.resources } })`,
-					)
+					writer.writeLine(`const { context } = createCommandContextMock(${commandBuilderName}, {`)
+					writer.withIndentationLevel(1, () => {
+						writer.writeLine('payload,')
+						writer.writeLine('parameter,')
+						writer.writeLine('sandbox,')
+						writer.writeLine('resources: { ...service.resources },')
+					})
+					writer.writeLine('})')
 					writer.blankLine()
-					writer.writeLine(`const result = await ${camelCase(input.commandName)}(context.mock, payload, parameter)`)
+					writer.writeLine(`const result = await ${camelCase(input.commandName)}(context, payload, parameter)`)
 					writer.blankLine()
 					writer.writeLine('expect(result).toBe(undefined)')
 				})

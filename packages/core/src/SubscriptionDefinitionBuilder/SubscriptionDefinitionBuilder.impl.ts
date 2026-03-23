@@ -34,7 +34,6 @@ import type { SubscriptionTransformInputHook } from '../core/types/subscription/
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
-import { getSubscriptionContextMock } from '../mocks/getSubscriptionContext.mock.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -1060,34 +1059,6 @@ export class SubscriptionDefinitionBuilder<
 		}
 
 		return subscription
-	}
-
-	/**
-	 * Returns a mocked command function context, which can be used in unit tests.
-	 *
-	 * @param input Options to create the context mock (message/resources/sandbox)
-	 * @returns a mocked command function context
-	 */
-	getSubscriptionContextMock(input: {
-		message: EBMessage
-		resources?: Partial<C['Resources']>
-		sandbox?: SinonSandbox
-	}) {
-		return getSubscriptionContextMock<
-			C['Resources'],
-			C['Invokes'],
-			C['StreamInvokes'],
-			C['EmitList'],
-			SubscriptionDefinitionMetadataBase,
-			C['QueueInvokes'],
-			C['AgentInvokes']
-		>({
-			...input,
-			invokes: this.invokes,
-			streamInvokes: this.streamInvokes,
-			emitList: this.emitList,
-			agentInvokes: this.agentInvokes,
-		})
 	}
 
 	/**

@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service.js'
@@ -25,7 +25,7 @@ describe('service User version 1 - command ping', () => {
 
 		const parameter: Parameters<typeof ping>[2] = {}
 
-		const context = pingCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+		const context = createCommandContextMock(pingCommandBuilder, { payload, parameter, sandbox })
 
 		context.stubs.service.User[1].computeData.resolves('invoke response')
 

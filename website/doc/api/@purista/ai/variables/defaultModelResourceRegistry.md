@@ -8,7 +8,7 @@
 
 > `const` **defaultModelResourceRegistry**: [`ModelResourceRegistry`](../classes/ModelResourceRegistry.md)
 
-Defined in: [packages/ai/src/providers/resources/ModelResourceRegistry.ts:34](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L34)
+Defined in: [packages/ai/src/providers/resources/ModelResourceRegistry.ts:34](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L34)
 
 Default shared registry used by helper services and queue workers.
 Applications can register additional providers (for example [AiSdkProvider](../classes/AiSdkProvider.md))

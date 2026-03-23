@@ -38,7 +38,6 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
-import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -1249,48 +1248,6 @@ export class CommandDefinitionBuilder<
 			C['EmitList'],
 			C['AgentInvokes']
 		>
-	}
-
-	/**
-	 *
-	 * @param input
-	 * @returns a mocked command context
-	 */
-	getCommandContextMock<
-		MessagePayloadType = GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
-		MessageParamsType = GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
-		FunctionPayloadType = InferIn<C['PayloadSchema']>,
-		FunctionParamsType = InferIn<C['ParamsSchema']>,
-	>(input: {
-		payload: FunctionPayloadType
-		parameter: FunctionParamsType
-		resources?: Partial<C['Resources']>
-		sandbox?: SinonSandbox
-		message?: {
-			payload: MessagePayloadType
-			parameter: MessageParamsType
-		}
-	}) {
-		return getCommandContextMock<
-			MessagePayloadType,
-			MessageParamsType,
-			FunctionPayloadType,
-			FunctionParamsType,
-			C['Resources'],
-			C['Invokes'],
-			C['StreamInvokes'],
-			C['EmitList'],
-			CommandDefinitionMetadataBase,
-			C['QueueInvokes'],
-			C['AgentInvokes']
-		>({
-			...input,
-			invokes: this.invokes,
-			streamInvokes: this.streamInvokes,
-			emitList: this.emitList,
-			queueInvokes: this.queueInvokes,
-			agentInvokes: this.agentInvokes,
-		})
 	}
 
 	/**

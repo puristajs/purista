@@ -1,5 +1,5 @@
-import { getCommandMessageMock, HandledError, StatusCode } from '@purista/core'
-import { createSandbox as createSinonSandbox, type SinonSandbox } from 'sinon'
+import { createCommandContextMock } from '@purista/core'
+import { createSandbox as createSinonSandbox } from 'sinon'
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 import { createSandboxCommandBuilder } from './createSandbox/createSandboxCommandBuilder.js'
 import { destroySandboxCommandBuilder } from './destroySandbox/destroySandboxCommandBuilder.js'
@@ -9,14 +9,7 @@ import { readFileCommandBuilder } from './readFile/readFileCommandBuilder.js'
 import { writeFilesCommandBuilder } from './writeFiles/writeFilesCommandBuilder.js'
 
 const createContext = <TPayload>(
-	builder: {
-		getCommandContextMock: (input: {
-			payload: TPayload
-			parameter: Record<string, never>
-			sandbox: SinonSandbox
-			resources: any
-		}) => any
-	},
+	builder: any,
 	payload: TPayload,
 	resources: Record<string, unknown>,
 	identity: { tenantId?: string; principalId?: string } = {
@@ -24,13 +17,13 @@ const createContext = <TPayload>(
 		principalId: 'user-1',
 	},
 ) => {
-	const context = builder.getCommandContextMock({
+	const context = createCommandContextMock(builder, {
 		payload,
 		parameter: {},
 		sandbox,
 		resources,
 	})
-	context.mock.message = getCommandMessageMock({
+	context.context.message = getCommandMessageMock({
 		tenantId: identity.tenantId,
 		principalId: identity.principalId,
 		payload: {
@@ -69,7 +62,7 @@ describe('sandbox command ownership', () => {
 		)
 		const fn = createSandboxCommandBuilder.getCommandFunction()
 
-		const result = await fn(context.mock, { projectId: 'project-1' }, {})
+		const result = await fn(context.context, { projectId: 'project-1' }, {})
 		expect(result.status).toBe('starting')
 		expect(result.sandboxId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
 		expect(
@@ -82,7 +75,7 @@ describe('sandbox command ownership', () => {
 		).toBe(true)
 		expect(registry.register.calledOnce).toBe(true)
 
-		await expect(fn(context.mock, { projectId: 'project-1' }, {})).rejects.toMatchObject({
+		await expect(fn(context.context, { projectId: 'project-1' }, {})).rejects.toMatchObject({
 			errorCode: StatusCode.Conflict,
 		})
 	})
@@ -109,7 +102,7 @@ describe('sandbox command ownership', () => {
 		const context = createContext(ensureSandboxCommandBuilder, { projectId: 'project-1' }, { driver, registry })
 		const fn = ensureSandboxCommandBuilder.getCommandFunction()
 
-		const result = await fn(context.mock, { projectId: 'project-1' }, {})
+		const result = await fn(context.context, { projectId: 'project-1' }, {})
 
 		expect(driver.destroySandbox.calledWith({ sandboxId: 'old-sb' })).toBe(true)
 		expect(registry.unregister.calledWith('old-sb')).toBe(true)
@@ -142,8 +135,8 @@ describe('sandbox command ownership', () => {
 		const context = createContext(ensureSandboxCommandBuilder, { projectId: 'project-1' }, { driver, registry })
 		const fn = ensureSandboxCommandBuilder.getCommandFunction()
 
-		await fn(context.mock, { projectId: 'project-1', scope: { kind: 'agent-run', key: 'run-1' } }, {})
-		await fn(context.mock, { projectId: 'project-1', scope: { kind: 'agent-run', key: 'run-2' } }, {})
+		await fn(context.context, { projectId: 'project-1', scope: { kind: 'agent-run', key: 'run-1' } }, {})
+		await fn(context.context, { projectId: 'project-1', scope: { kind: 'agent-run', key: 'run-2' } }, {})
 
 		expect(registry.findByOwner.firstCall.args[0]).toMatchObject({
 			organizationId: 'tenant-1',
@@ -192,7 +185,7 @@ describe('sandbox command ownership', () => {
 		)
 		const fn = builder.getCommandFunction()
 
-		await expect(fn(context.mock, payload, {})).rejects.toBeInstanceOf(HandledError)
+		await expect(fn(context.context, payload, {})).rejects.toBeInstanceOf(HandledError)
 		expect(driver[driverMethod].called).toBe(false)
 	})
 
@@ -219,7 +212,7 @@ describe('sandbox command ownership', () => {
 		)
 
 		await expect(
-			executeBashCommandBuilder.getCommandFunction()(context.mock, { sandboxId: 'sb-1', command: 'pwd' }, {}),
+			executeBashCommandBuilder.getCommandFunction()(context.context, { sandboxId: 'sb-1', command: 'pwd' }, {}),
 		).rejects.toMatchObject({ errorCode: StatusCode.Unauthorized })
 	})
 })

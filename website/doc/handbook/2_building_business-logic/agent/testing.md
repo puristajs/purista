@@ -18,13 +18,20 @@ Once that is clear, the right PURISTA testing helper becomes obvious.
 
 ### 1. Service-level tests
 
-Use normal `@purista/core` mocks when you are testing service logic and do not need a real agent runtime.
+Use the shared `@purista/core` testing helpers when you are testing service logic and do not need a real agent runtime.
 
 Use this when:
 
 - a command invokes an agent
 - a subscription emits events
 - a service handler wires dependencies correctly
+
+Typical helpers at this level are:
+
+- `createCommandContextMock(...)`
+- `createSubscriptionContextMock(...)`
+- `createStreamTestHarness(...)`
+- `createQueueWorkerTestHarness(...)`
 
 This is still the right level for pure service behavior.
 

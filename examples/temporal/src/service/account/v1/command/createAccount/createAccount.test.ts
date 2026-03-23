@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { accountV1Service } from '../../accountV1Service.js'
@@ -25,7 +25,7 @@ describe('service Account version 1 - command createAccount', () => {
 
 		const parameter: Parameters<typeof createAccount>[2] = {}
 
-		const context = createAccountCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+		const context = createCommandContextMock(createAccountCommandBuilder, { payload, parameter, sandbox })
 
 		const result = await createAccount(context.mock, payload, parameter)
 

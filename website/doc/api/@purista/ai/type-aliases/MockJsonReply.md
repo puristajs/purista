@@ -8,4 +8,4 @@
 
 > **MockJsonReply** = `unknown` \| (`request`) => `unknown` \| `Promise`\<`unknown`\>
 
-Defined in: [packages/ai/src/testing/MockModel.ts:20](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/ai/src/testing/MockModel.ts#L20)
+Defined in: [packages/ai/src/testing/MockModel.ts:20](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/testing/MockModel.ts#L20)

@@ -56,7 +56,7 @@ import { type Infer, type InferIn, type Schema, validate } from '../schema/index
 
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
-type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
+export type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 	{
 		logLevel?: LogLevelName
 		logger?: Logger

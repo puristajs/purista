@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { Service } from '../core/index.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { createCommandContextMock } from '../testing/createCommandContextMock.js'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl.js'
 
 describe('CommandDefinitionBuilder Agent Integration', () => {
@@ -62,12 +63,12 @@ describe('CommandDefinitionBuilder Agent Integration', () => {
 		// Service.executeCommand usually handles this.
 		// For a unit test of the builder, we can check the context mock too.
 
-		const contextMock = builder.getCommandContextMock({
+		const contextMock = createCommandContextMock(builder, {
 			payload: {},
 			parameter: {},
 			sandbox,
 		})
 
-		expect(contextMock.mock.invokeAgent).toBeDefined()
+		expect(contextMock.context.invokeAgent).toBeDefined()
 	})
 })
