@@ -8,7 +8,7 @@
 
 > **ProviderRerankRequest**\<`Document`\> = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:60](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L60)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:80](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L80)
 
 Payload sent to reranking-capable providers.
 
@@ -24,7 +24,7 @@ Payload sent to reranking-capable providers.
 
 > **documents**: `Document`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:62](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L62)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:82](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L82)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:62](https://gith
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:64](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L64)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:84](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L84)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:64](https://gith
 
 > **query**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:61](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L61)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:81](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L81)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:61](https://gith
 
 > `optional` **topN**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:63](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L63)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:83](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L83)

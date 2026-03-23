@@ -8,7 +8,7 @@
 
 > **ProviderRequest** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L7)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L7)
 
 Payload sent to a model provider.
 
@@ -18,7 +18,13 @@ Payload sent to a model provider.
 
 > `optional` **bindings**: [`ExternalBindingSet`](ExternalBindingSet.md) \| [`ExternalBinding`](ExternalBinding.md)[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:17](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L17)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:37](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L37)
+
+Optional executable bindings for allowlisted PURISTA commands and child agents.
+
+In normal PURISTA handler code you can usually omit this field when calling
+`context.models['alias'].generateText(...)`. The agent runtime automatically
+exposes the allowlisted commands and agents declared in the builder.
 
 ***
 
@@ -26,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:17](https://gith
 
 > `optional` **context**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:9](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L9)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:9](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L9)
 
 ***
 
@@ -34,7 +40,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:9](https://githu
 
 > `optional` **developerInstruction**: `string` \| `string`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:14](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L14)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:14](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L14)
 
 Optional high-priority app/developer instruction(s) injected on every call.
 Providers may map these to dedicated instruction roles when supported.
@@ -45,7 +51,7 @@ Providers may map these to dedicated instruction roles when supported.
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:18](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L18)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:38](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L38)
 
 ***
 
@@ -53,7 +59,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:18](https://gith
 
 > **prompt**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:8](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L8)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:8](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L8)
 
 ***
 
@@ -61,7 +67,12 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:8](https://githu
 
 > `optional` **references**: `Pick`\<[`SkillReferenceDocument`](SkillReferenceDocument.md), `"skillName"` \| `"relativePath"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:16](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L16)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:29](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L29)
+
+Optional reference documents belonging to already selected skills.
+
+References are not auto-loaded because they are usually a more deliberate,
+skill-specific choice made by the handler.
 
 ***
 
@@ -69,4 +80,10 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:16](https://gith
 
 > `optional` **skills**: `Pick`\<[`SkillDocument`](SkillDocument.md), `"name"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:15](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L15)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:22](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L22)
+
+Optional skill documents that shape reasoning and prompt context.
+
+In normal PURISTA handler code you can usually omit this field when calling
+`context.models['alias'].generateText(...)`. The agent runtime automatically
+loads the skills declared via `builder.useSkills([...])` and fills them in.

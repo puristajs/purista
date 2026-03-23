@@ -8,7 +8,7 @@
 
 > **ConversationFrame** = `object`
 
-Defined in: [packages/ai/src/memory/historyHelpers.ts:4](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/memory/historyHelpers.ts#L4)
+Defined in: [packages/ai/src/memory/historyHelpers.ts:4](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/memory/historyHelpers.ts#L4)
 
 A single frame in a conversation history.
 
@@ -18,7 +18,7 @@ A single frame in a conversation history.
 
 > **content**: `string`
 
-Defined in: [packages/ai/src/memory/historyHelpers.ts:6](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/memory/historyHelpers.ts#L6)
+Defined in: [packages/ai/src/memory/historyHelpers.ts:6](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/memory/historyHelpers.ts#L6)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/memory/historyHelpers.ts:6](https://github.com/puri
 
 > **role**: `"user"` \| `"assistant"` \| `"system"` \| `"developer"`
 
-Defined in: [packages/ai/src/memory/historyHelpers.ts:5](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/memory/historyHelpers.ts#L5)
+Defined in: [packages/ai/src/memory/historyHelpers.ts:5](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/memory/historyHelpers.ts#L5)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [packages/ai/src/memory/historyHelpers.ts:5](https://github.com/puri
 
 > **timestamp**: `number`
 
-Defined in: [packages/ai/src/memory/historyHelpers.ts:7](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/memory/historyHelpers.ts#L7)
+Defined in: [packages/ai/src/memory/historyHelpers.ts:7](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/memory/historyHelpers.ts#L7)

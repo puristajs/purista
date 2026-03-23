@@ -8,7 +8,7 @@
 
 > **createExposeHelpers**(`context`): [`ExposeHelpers`](../type-aliases/ExposeHelpers.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:266](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/externalRuntime.ts#L266)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:266](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/externalRuntime.ts#L266)
 
 ## Parameters
 

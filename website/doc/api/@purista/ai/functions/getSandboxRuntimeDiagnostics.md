@@ -8,7 +8,7 @@
 
 > **getSandboxRuntimeDiagnostics**(`driver`, `commandRunner?`): `Promise`\<[`SandboxRuntimeDiagnostics`](../type-aliases/SandboxRuntimeDiagnostics.md)\>
 
-Defined in: packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:38
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:38](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L38)
 
 ## Parameters
 

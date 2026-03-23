@@ -116,6 +116,7 @@ export type AgentManifest = {
 	agentName: string
 	agentVersion: string
 	description?: string
+	deprecated?: boolean
 	eventBridge: string
 	executionMode?: AgentExecutionMode
 	executionPolicy?: AgentExecutionPolicy

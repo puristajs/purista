@@ -8,7 +8,7 @@
 
 > **SandboxAdapterIdentity** = `object`
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:10
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:10](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L10)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter
 
 > **principalId**: `string`
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:13
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:13](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L13)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter
 
 > **sandboxId**: `string`
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:11
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:11](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L11)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter
 
 > **tenantId**: `string`
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:12
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:12](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L12)

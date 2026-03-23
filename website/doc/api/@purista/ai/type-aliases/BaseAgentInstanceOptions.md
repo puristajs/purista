@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / BaseAgentInstanceOptions
 
-# Type Alias: BaseAgentInstanceOptions\<SkillNames\>
+# Type Alias: BaseAgentInstanceOptions\<SkillNames, Resources, ConfigInput\>
 
-> **BaseAgentInstanceOptions**\<`SkillNames`\> = `object`
+> **BaseAgentInstanceOptions**\<`SkillNames`, `Resources`, `ConfigInput`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:18](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L18)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:28](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L28)
 
 ## Type Parameters
 
@@ -16,13 +16,21 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:18](https://github.com/pur
 
 `SkillNames` *extends* `string` = `string`
 
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+
+### ConfigInput
+
+`ConfigInput` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+
 ## Properties
 
 ### concurrencyHints?
 
 > `optional` **concurrencyHints**: `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:45](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L45)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:65](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L65)
 
 Optional host-provided hints for dashboards and alerts.
 These values are informational only and never used for runtime admission control.
@@ -35,9 +43,9 @@ These values are informational only and never used for runtime admission control
 
 ### config?
 
-> `optional` **config**: `Record`\<`string`, `unknown`\>
+> `optional` **config**: keyof `ConfigInput` *extends* `never` ? `never` : `ConfigInput`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:48](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L48)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:68](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L68)
 
 ***
 
@@ -45,7 +53,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:48](https://github.com/pur
 
 > `optional` **configStore**: [`ConfigStore`](../../core/interfaces/ConfigStore.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:23](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L23)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:37](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L37)
 
 ***
 
@@ -53,7 +61,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:23](https://github.com/pur
 
 > `optional` **conversationStore**: [`ConversationStore`](../interfaces/ConversationStore.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:26](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L26)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:40](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L40)
 
 ***
 
@@ -61,7 +69,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:26](https://github.com/pur
 
 > `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:19](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L19)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:33](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L33)
 
 ***
 
@@ -69,7 +77,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:19](https://github.com/pur
 
 > `optional` **models**: `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:28](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L28)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:42](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L42)
 
 ***
 
@@ -77,7 +85,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:28](https://github.com/pur
 
 > `optional` **poolConfig**: `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:32](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L32)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:52](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L52)
 
 #### maxConcurrencyPerInstance?
 
@@ -97,7 +105,7 @@ Total system throughput is derived by deployment replicas:
 
 > `optional` **poolManager**: [`PoolManager`](../classes/PoolManager.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:27](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L27)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:41](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L41)
 
 ***
 
@@ -105,19 +113,15 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:27](https://github.com/pur
 
 > `optional` **queueBridge**: [`QueueBridge`](../../core/interfaces/QueueBridge.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:25](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L25)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:39](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L39)
 
 ***
 
-### ~~resources?~~
+### resources?
 
-> `optional` **resources**: `Record`\<`string`, `unknown`\>
+> `optional` **resources**: keyof `Resources` *extends* `never` ? `never` : `Resources`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:31](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L31)
-
-#### Deprecated
-
-use `models`
+Defined in: [packages/ai/src/types/AgentDefinition.ts:51](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L51)
 
 ***
 
@@ -125,7 +129,7 @@ use `models`
 
 > `optional` **secretStore**: [`SecretStore`](../../core/interfaces/SecretStore.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:22](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L22)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:36](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L36)
 
 ***
 
@@ -133,7 +137,13 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:22](https://github.com/pur
 
 > `optional` **skills**: [`SkillResource`](SkillResource.md) \| [`SkillSourceMap`](SkillSourceMap.md)\<`SkillNames`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:29](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L29)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:50](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L50)
+
+Provide the skill implementations for names declared via `builder.useSkills([...])`.
+
+The common paths are:
+- inline typed skill maps for tests and small agents
+- file-based skill resources for reusable application catalogs
 
 ***
 
@@ -141,7 +151,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:29](https://github.com/pur
 
 > `optional` **spanProcessor**: `SpanProcessor`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:20](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L20)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:34](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L34)
 
 ***
 
@@ -149,7 +159,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:20](https://github.com/pur
 
 > `optional` **stateStore**: [`StateStore`](../../core/interfaces/StateStore.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:24](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L24)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:38](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L38)
 
 ***
 
@@ -157,4 +167,4 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:24](https://github.com/pur
 
 > `optional` **tracer**: `Tracer`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:21](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L21)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:35](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L35)

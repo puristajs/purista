@@ -8,7 +8,7 @@
 
 > **QueueProducerOptions** = `object`
 
-Defined in: [addPuristaQueue.ts:20](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/addPuristaQueue.ts#L20)
+Defined in: [addPuristaQueue.ts:20](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/cli/src/api/addPuristaQueue.ts#L20)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [addPuristaQueue.ts:20](https://github.com/puristajs/purista/blob/1d
 
 > **commandDescription**: `string`
 
-Defined in: [addPuristaQueue.ts:22](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/addPuristaQueue.ts#L22)
+Defined in: [addPuristaQueue.ts:22](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/cli/src/api/addPuristaQueue.ts#L22)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [addPuristaQueue.ts:22](https://github.com/puristajs/purista/blob/1d
 
 > **commandName**: `string`
 
-Defined in: [addPuristaQueue.ts:21](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/addPuristaQueue.ts#L21)
+Defined in: [addPuristaQueue.ts:21](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/cli/src/api/addPuristaQueue.ts#L21)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [addPuristaQueue.ts:21](https://github.com/puristajs/purista/blob/1d
 
 > `optional` **responseEventName**: `string`
 
-Defined in: [addPuristaQueue.ts:23](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/cli/src/api/addPuristaQueue.ts#L23)
+Defined in: [addPuristaQueue.ts:23](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/cli/src/api/addPuristaQueue.ts#L23)

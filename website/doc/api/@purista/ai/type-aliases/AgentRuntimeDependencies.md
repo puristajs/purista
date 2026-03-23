@@ -6,9 +6,9 @@
 
 # Type Alias: AgentRuntimeDependencies\<SkillNames\>
 
-> **AgentRuntimeDependencies**\<`SkillNames`\> = [`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`\>
+> **AgentRuntimeDependencies**\<`SkillNames`\> = [`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `unknown`\>\>
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:45](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/AgentInstance.ts#L45)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:58](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/AgentInstance.ts#L58)
 
 ## Type Parameters
 

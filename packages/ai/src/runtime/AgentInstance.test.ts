@@ -228,7 +228,7 @@ describe('AgentInstance', () => {
 		await instance.start()
 
 		const call = getInstance.mock.calls[0]?.[1]
-		const skillResource = call?.serviceConfig?.runtime?.resources?.skills
+		const skillResource = call?.serviceConfig?.__agentRuntime?.resources?.skills
 		await expect(skillResource.load('spec-elicitation')).resolves.toEqual(
 			expect.objectContaining({
 				name: 'spec-elicitation',

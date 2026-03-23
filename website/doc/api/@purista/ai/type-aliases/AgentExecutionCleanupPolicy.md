@@ -8,7 +8,7 @@
 
 > **AgentExecutionCleanupPolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:22](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentManifest.ts#L22)
+Defined in: [packages/ai/src/types/AgentManifest.ts:22](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentManifest.ts#L22)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:22](https://github.com/puris
 
 > `optional` **finalRunRecordTtlMs**: `number`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:25](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentManifest.ts#L25)
+Defined in: [packages/ai/src/types/AgentManifest.ts:25](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentManifest.ts#L25)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:25](https://github.com/puris
 
 > `optional` **keepFinalRunRecord**: `boolean`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:24](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentManifest.ts#L24)
+Defined in: [packages/ai/src/types/AgentManifest.ts:24](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentManifest.ts#L24)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:24](https://github.com/puris
 
 > `optional` **transientStateTtlMs**: `number`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:23](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentManifest.ts#L23)
+Defined in: [packages/ai/src/types/AgentManifest.ts:23](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentManifest.ts#L23)

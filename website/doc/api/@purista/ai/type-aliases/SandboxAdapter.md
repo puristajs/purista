@@ -8,7 +8,7 @@
 
 > **SandboxAdapter** = `object`
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:4
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:4](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L4)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter
 
 > **executeCommand**: (`command`) => `Promise`\<[`ExecuteBashOutput`](ExecuteBashOutput.md)\>
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:5
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:5](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L5)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter
 
 > **readFile**: (`path`) => `Promise`\<`string`\>
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:6
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:6](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L6)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter
 
 > **writeFiles**: (`files`) => `Promise`\<`void`\>
 
-Defined in: packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:7
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:7](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L7)
 
 #### Parameters
 

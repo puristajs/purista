@@ -1,14 +1,22 @@
-import type { EventBridge } from '@purista/core'
+import type { EmptyObject, EventBridge } from '@purista/core'
 import { DefaultEventBridge } from '@purista/core'
 import type { AgentDefinition, AgentInstanceOptions, AgentRuntimeInstance } from '../types/AgentDefinition.js'
 
-type TestAgentOptions = AgentInstanceOptions & {
+type TestAgentOptions<
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+> = AgentInstanceOptions<SkillNames, Resources, ConfigInput> & {
 	eventBridge?: EventBridge
 }
 
-export const testAgent = async (
-	definition: AgentDefinition,
-	options: TestAgentOptions = {},
+export const testAgent = async <
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+>(
+	definition: AgentDefinition<SkillNames, Resources, ConfigInput>,
+	options: TestAgentOptions<SkillNames, Resources, ConfigInput> = {},
 ): Promise<{
 	instance: AgentRuntimeInstance
 	eventBridge: EventBridge

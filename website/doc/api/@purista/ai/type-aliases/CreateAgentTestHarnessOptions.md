@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / CreateAgentTestHarnessOptions
 
-# Type Alias: CreateAgentTestHarnessOptions
+# Type Alias: CreateAgentTestHarnessOptions\<SkillNames, Resources, ConfigInput\>
 
-> **CreateAgentTestHarnessOptions** = [`AgentInstanceOptions`](AgentInstanceOptions.md) & `object`
+> **CreateAgentTestHarnessOptions**\<`SkillNames`, `Resources`, `ConfigInput`\> = [`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`, `Resources`, `ConfigInput`\> & `object`
 
-Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:31](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/testing/createAgentTestHarness.ts#L31)
+Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:31](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/testing/createAgentTestHarness.ts#L31)
 
 ## Type Declaration
 
@@ -19,3 +19,17 @@ Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:31](https://githu
 ### queueBridge?
 
 > `optional` **queueBridge**: [`QueueBridge`](../../core/interfaces/QueueBridge.md)
+
+## Type Parameters
+
+### SkillNames
+
+`SkillNames` *extends* `string` = `string`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+
+### ConfigInput
+
+`ConfigInput` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)

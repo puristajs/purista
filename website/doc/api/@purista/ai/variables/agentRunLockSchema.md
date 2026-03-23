@@ -8,4 +8,4 @@
 
 > `const` **agentRunLockSchema**: `ZodObject`\<\{ `acquiredAt`: `ZodString`; `expiresAt`: `ZodString`; `heartbeatAt`: `ZodString`; `key`: `ZodString`; `lockId`: `ZodString`; `runId`: `ZodOptional`\<`ZodString`\>; `scopeKey`: `ZodString`; \}, `$strip`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:68](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L68)
+Defined in: [packages/ai/src/runtime/runState.ts:68](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L68)

@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentDefinition
 
-# Type Alias: AgentDefinition\<SkillNames\>
+# Type Alias: AgentDefinition\<SkillNames, Resources, ConfigInput, Config\>
 
-> **AgentDefinition**\<`SkillNames`\> = `object`
+> **AgentDefinition**\<`SkillNames`, `Resources`, `ConfigInput`, `Config`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:53](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L53)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:77](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L77)
 
 ## Type Parameters
 
@@ -16,13 +16,25 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:53](https://github.com/pur
 
 `SkillNames` *extends* `string` = `string`
 
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+
+### ConfigInput
+
+`ConfigInput` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+
+### Config
+
+`Config` *extends* `Record`\<`string`, `unknown`\> = `ConfigInput`
+
 ## Properties
 
 ### info
 
 > **info**: [`AgentInfo`](AgentInfo.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:54](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L54)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:83](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L83)
 
 ***
 
@@ -30,7 +42,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:54](https://github.com/pur
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:55](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L55)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:84](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L84)
 
 ***
 
@@ -38,7 +50,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:55](https://github.com/pur
 
 > **schemas**: `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:56](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L56)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:85](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L85)
 
 #### context?
 
@@ -58,11 +70,23 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:56](https://github.com/pur
 
 ## Methods
 
+### getDefaultConfig()
+
+> **getDefaultConfig**(): [`Complete`](../../core/type-aliases/Complete.md)\<`Config`\> \| `undefined`
+
+Defined in: [packages/ai/src/types/AgentDefinition.ts:97](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L97)
+
+#### Returns
+
+[`Complete`](../../core/type-aliases/Complete.md)\<`Config`\> \| `undefined`
+
+***
+
 ### getExternalRuntimeMetadata()
 
 > **getExternalRuntimeMetadata**(): [`ExternalRuntimeMetadata`](ExternalRuntimeMetadata.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:63](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L63)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:92](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L92)
 
 #### Returns
 
@@ -74,7 +98,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:63](https://github.com/pur
 
 > **getInstance**(`eventBridge`, `options?`): `Promise`\<[`AgentRuntimeInstance`](AgentRuntimeInstance.md)\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:64](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L64)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:93](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L93)
 
 #### Parameters
 
@@ -84,7 +108,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:64](https://github.com/pur
 
 ##### options?
 
-[`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`\>
+[`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`, `Resources`, `ConfigInput`\>
 
 #### Returns
 
@@ -96,7 +120,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:64](https://github.com/pur
 
 > **getManifest**(): [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:62](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/types/AgentDefinition.ts#L62)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:91](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/types/AgentDefinition.ts#L91)
 
 #### Returns
 

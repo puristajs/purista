@@ -18,8 +18,9 @@ Provide concrete runtime dependencies here:
 - model providers
 - queue bridge
 - stores
-- resources
+- resource implementations
 - skills
+- runtime config values
 - pool configuration
 - sandbox-backed execution resources
 
@@ -50,9 +51,14 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   },
   conversationStore: conversationStore,
   resources: {
-    supportFaq: supportFaqResource,
+    supportPolicy: {
+      developerInstruction: 'Answer concisely and always include next steps.',
+    },
   },
   skills: supportSkills,
+  config: {
+    locale: 'en',
+  },
   poolConfig: {
     poolId: 'support',
     maxConcurrencyPerInstance: 4,
@@ -121,6 +127,33 @@ const instance = await supportAgent.getInstance(eventBridge, {
 
 Use inline skills for tests or tiny agents. Use file-based catalogs when you want reusable application skills.
 
+## Runtime config
+
+Use runtime config for small host-controlled values declared earlier with
+`setConfigSchema(...)` and optionally `setDefaultConfig(...)`.
+
+```ts
+const instance = await supportAgent.getInstance(eventBridge, {
+  models: {
+    'openai:primary': provider,
+  },
+  config: {
+    locale: 'en',
+  },
+})
+```
+
+Read the resolved values in the handler through:
+
+```ts
+context.config.runtime.locale
+```
+
+Rule:
+
+- use resources for runtime objects or richer dependencies
+- use config for simple validated values
+
 ## Queue Bridge
 
 Queued durable agents need a `queueBridge`.
@@ -140,23 +173,27 @@ Rule:
 
 - if the builder uses `setExecutionMode('queued')`, plan to provide a queue bridge
 
-## Stores and resources
+## Resources and stores
 
-Conversation stores, resources, configs, states, and secrets are normal PURISTA runtime dependencies.
+Declare resources in the builder with `defineResource(...)`, then provide the
+real implementation at instance creation.
 
 ```ts
 const instance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:primary': provider,
   },
-  conversationStore,
   resources: {
-    supportFaq: supportFaqResource,
+    supportPolicy: {
+      developerInstruction: 'Be concise and operational.',
+    },
   },
+  conversationStore,
 })
 ```
 
-This keeps runtime dependencies explicit. The instance tells the agent what infrastructure really exists.
+This keeps runtime dependencies explicit. The builder says which resources are
+required; the instance says what concrete implementation exists.
 
 ## Pools
 
@@ -212,9 +249,10 @@ When `getInstance(...)` feels unclear, ask:
 1. Which model aliases must be bound?
 2. Is the agent inline or queued?
 3. Does it need declared skills, and where do those skills come from?
-4. Does the chosen model provider need to drive an external tool loop?
+4. Does it need runtime config values?
 5. Does it need stores or resources?
-6. Does it need a real sandbox workspace?
+6. Does the chosen model provider need to drive an external tool loop?
+7. Does it need a real sandbox workspace?
 
 That checklist covers almost all runtime confusion.
 
@@ -223,11 +261,15 @@ That checklist covers almost all runtime confusion.
 - Expecting `.useSkills([...])` to provide skills by itself.
 - Forgetting the queue bridge for queued agents.
 - Mixing provider creation into the builder instead of instance creation.
+- Forgetting to provide resources declared with `defineResource(...)`.
+- Putting object-style runtime dependencies into `config` when they should be resources.
 - Introducing sandbox complexity for agents that only need models and commands.
 
 ## Related Guides
 
 - [Quick Start](./getting-started.md)
 - [Context](./handler-context.md)
+- [Builder](./agent-builder.md)
 - [Skills](./skills.md)
+- [AI SDK Adapter](./ai-sdk-adapter.md)
 - [Sandbox Runtime](../../3_eco_system/sandbox.md)

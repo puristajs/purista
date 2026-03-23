@@ -8,7 +8,7 @@
 
 > **AgentRunHandle** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:230](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L230)
+Defined in: [packages/ai/src/runtime/runState.ts:230](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L230)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:230](https://github.com/purista
 
 > `readonly` **state**: [`AgentRunState`](AgentRunState.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:231](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L231)
+Defined in: [packages/ai/src/runtime/runState.ts:231](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L231)
 
 ## Methods
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:231](https://github.com/purista
 
 > **checkpoint**\<`T`\>(`name`, `value?`, `options?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:242](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L242)
+Defined in: [packages/ai/src/runtime/runState.ts:242](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L242)
 
 #### Type Parameters
 
@@ -58,7 +58,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:242](https://github.com/purista
 
 > **completeTask**(`taskId`, `detail?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:240](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L240)
+Defined in: [packages/ai/src/runtime/runState.ts:240](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L240)
 
 #### Parameters
 
@@ -80,7 +80,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:240](https://github.com/purista
 
 > **emit**(): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:232](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L232)
+Defined in: [packages/ai/src/runtime/runState.ts:232](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L232)
 
 #### Returns
 
@@ -92,7 +92,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:232](https://github.com/purista
 
 > **failTask**(`taskId`, `detail?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:241](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L241)
+Defined in: [packages/ai/src/runtime/runState.ts:241](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L241)
 
 #### Parameters
 
@@ -114,7 +114,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:241](https://github.com/purista
 
 > **finish**(`input`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:246](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L246)
+Defined in: [packages/ai/src/runtime/runState.ts:246](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L246)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:246](https://github.com/purista
 
 > **finishFailure**(`summary?`, `error?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:253](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L253)
+Defined in: [packages/ai/src/runtime/runState.ts:253](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L253)
 
 #### Parameters
 
@@ -178,7 +178,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:253](https://github.com/purista
 
 > **finishSuccess**(`summary?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:252](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L252)
+Defined in: [packages/ai/src/runtime/runState.ts:252](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L252)
 
 #### Parameters
 
@@ -196,7 +196,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:252](https://github.com/purista
 
 > **getCheckpoint**\<`T`\>(`name`): `Promise`\<`T` \| `undefined`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:243](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L243)
+Defined in: [packages/ai/src/runtime/runState.ts:243](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L243)
 
 #### Type Parameters
 
@@ -220,7 +220,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:243](https://github.com/purista
 
 > **phase**(`phase`, `status?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:234](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L234)
+Defined in: [packages/ai/src/runtime/runState.ts:234](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L234)
 
 #### Parameters
 
@@ -242,7 +242,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:234](https://github.com/purista
 
 > **plan**(`tasks`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:238](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L238)
+Defined in: [packages/ai/src/runtime/runState.ts:238](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L238)
 
 #### Parameters
 
@@ -260,7 +260,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:238](https://github.com/purista
 
 > **release**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:254](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L254)
+Defined in: [packages/ai/src/runtime/runState.ts:254](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L254)
 
 #### Returns
 
@@ -272,7 +272,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:254](https://github.com/purista
 
 > **replaceTasks**(`tasks`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:237](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L237)
+Defined in: [packages/ai/src/runtime/runState.ts:237](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L237)
 
 #### Parameters
 
@@ -290,7 +290,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:237](https://github.com/purista
 
 > **setFinalMessage**(`message`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:236](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L236)
+Defined in: [packages/ai/src/runtime/runState.ts:236](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L236)
 
 #### Parameters
 
@@ -308,7 +308,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:236](https://github.com/purista
 
 > **startTask**(`taskId`, `detail?`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:239](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L239)
+Defined in: [packages/ai/src/runtime/runState.ts:239](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L239)
 
 #### Parameters
 
@@ -330,7 +330,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:239](https://github.com/purista
 
 > **step**\<`T`\>(`id`, `fn`, `options?`): `Promise`\<`T`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:244](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L244)
+Defined in: [packages/ai/src/runtime/runState.ts:244](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L244)
 
 #### Type Parameters
 
@@ -368,7 +368,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:244](https://github.com/purista
 
 > **summary**(`summary`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:235](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L235)
+Defined in: [packages/ai/src/runtime/runState.ts:235](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L235)
 
 #### Parameters
 
@@ -386,7 +386,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:235](https://github.com/purista
 
 > **task**\<`T`\>(`taskId`, `fn`, `detail?`): `Promise`\<`T`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:245](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L245)
+Defined in: [packages/ai/src/runtime/runState.ts:245](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L245)
 
 #### Type Parameters
 
@@ -418,7 +418,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:245](https://github.com/purista
 
 > **update**(`patch`): `Promise`\<\{ `agentName`: `string`; `agentVersion`: `string`; `attempt`: `number`; `checkpoints`: `Record`\<`string`, \{ `completed`: `boolean`; `name`: `string`; `updatedAt`: `string`; `value?`: `unknown`; \}\>; `completedAt?`: `string`; `error?`: \{ `code`: `string`; `handled`: `boolean`; `message`: `string`; \}; `finalMessage?`: `string`; `heartbeatAt?`: `string`; `lock?`: \{ `acquiredAt`: `string`; `expiresAt`: `string`; `heartbeatAt`: `string`; `key`: `string`; `lockId`: `string`; `runId?`: `string`; `scopeKey`: `string`; \}; `metadata?`: `Record`\<`string`, `unknown`\>; `owner?`: \{ `attachedAt`: `string`; `leaseId?`: `string`; `queueName?`: `string`; `workerId`: `string`; \}; `phase`: `string`; `recovery?`: \{ `checkpoint?`: `string`; `reason?`: `string`; `resumedAt?`: `string`; `status`: `"retrying"` \| `"fresh"` \| `"resumed"` \| `"recovered-stale"`; \}; `retention?`: \{ `finalRunRecordTtlMs?`: `number`; `keepFinalRunRecord?`: `boolean`; `transientStateTtlMs?`: `number`; \}; `runId`: `string`; `scope`: \{ `agentName`: `string`; `agentVersion`: `string`; `conversationId?`: `string`; `extra`: `Record`\<`string`, `string`\>; `principalId?`: `string`; `tenantId?`: `string`; \}; `startedAt`: `string`; `status`: `"completed"` \| `"queued"` \| `"running"` \| `"failed"` \| `"idle"` \| `"planning"` \| `"recovering"` \| `"retrying"` \| `"summarizing"` \| `"cancelled"`; `summary?`: `string`; `tasks`: `object`[]; `title`: `string`; `updatedAt`: `string`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:233](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/runtime/runState.ts#L233)
+Defined in: [packages/ai/src/runtime/runState.ts:233](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/runtime/runState.ts#L233)
 
 #### Parameters
 

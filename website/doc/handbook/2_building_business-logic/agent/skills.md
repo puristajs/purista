@@ -73,11 +73,21 @@ export const supportAgent = new AgentBuilder({
   agentVersion: '1',
 })
   .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+  .defineResource<'supportPolicy', { developerInstruction: string }>()
   .useSkills(['spec-elicitation', 'support-workflow'])
   .setHandler(async (context, payload) => {
     const skills = await context.skills.loadAvailable()
-    // use them here
-    return { message: '...' }
+    const prompt = [
+      context.resources.supportPolicy.developerInstruction,
+      ...skills.map(skill => skill.content),
+      payload.prompt,
+    ].join('\n\n')
+
+    const answer = await context.models['openai:primary'].generateText({
+      prompt,
+    })
+
+    return { message: answer }
   })
   .build()
 ```
@@ -106,6 +116,11 @@ This is the smallest and clearest setup.
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:primary': provider,
+  },
+  resources: {
+    supportPolicy: {
+      developerInstruction: 'Clarify missing details before answering.',
+    },
   },
   skills: {
     'spec-elicitation': {
@@ -142,6 +157,11 @@ const supportSkills = createLayeredFileSkillResource({
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:primary': provider,
+  },
+  resources: {
+    supportPolicy: {
+      developerInstruction: 'Clarify missing details before answering.',
+    },
   },
   skills: supportSkills,
 })
@@ -237,6 +257,10 @@ skills: {
 
 ```ts
 const skills = await context.skills.loadAvailable()
+const answer = await context.models['openai:primary'].generateText({
+  developerInstruction: context.resources.supportPolicy.developerInstruction,
+  prompt: [payload.prompt, ...skills.map(skill => skill.content)].join('\n\n'),
+})
 ```
 
 That is the PURISTA story:

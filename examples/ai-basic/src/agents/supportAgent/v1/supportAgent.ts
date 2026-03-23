@@ -33,6 +33,7 @@ export const supportAgent = new AgentBuilder({
 	description: 'Queued durable support agent with checkpoints and optional delegation to triageAgent',
 })
 	.addPayloadSchema(supportAgentInputSchema)
+	.defineResource<'supportPolicy', { developerInstruction: string }>()
 	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json'] })
 	.useSkills(['spec-elicitation', 'support-workflow'])
 	.persistConversation('user', { maxFrames: 20 })
@@ -50,6 +51,14 @@ export const supportAgent = new AgentBuilder({
 	.canInvoke('support', '1', 'calculate')
 	.canInvoke('support', '1', 'fetchWebsite')
 	.canInvokeAgent('triageAgent', '1')
+	.setBeforeGuardHooks({
+		requirePrompt: async (_context, payload) => {
+			const prompt = typeof payload === 'object' && payload !== null ? (payload as { prompt?: string }).prompt : undefined
+			if (!prompt?.trim()) {
+				throw new HandledError(StatusCode.BadRequest, 'prompt is required')
+			}
+		},
+	})
 	.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 	.setSseProtocol('ai-sdk-ui-message')
 	.setHandler<SupportAgentInput>(async function (context, payload) {
@@ -187,6 +196,7 @@ export const supportAgent = new AgentBuilder({
 		const prompt = [
 			renderSkillDocuments('Relevant skills', skills),
 			renderSkillReferences('Relevant references', skillReferences),
+			context.resources.supportPolicy.developerInstruction,
 			await context.conversation.buildPromptInput(),
 			`Customer prompt: ${userPrompt}`,
 			`Knowledge base answer: ${faqAnswer}`,

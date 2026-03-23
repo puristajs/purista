@@ -61,6 +61,12 @@ export async function main() {
 		models: {
 			'openai:gpt-4o-mini': provider,
 		},
+		resources: {
+			supportPolicy: {
+				developerInstruction:
+					'Keep answers short, operational, and grounded in the retrieved support facts and tool outputs.',
+			},
+		},
 		skills: exampleSkills,
 		poolConfig: {
 			poolId: 'support',

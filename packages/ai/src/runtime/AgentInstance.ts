@@ -2,15 +2,24 @@ import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import {
 	type Command,
+	type Complete,
 	type ConfigStore,
 	EBMessageType,
+	type EmptyObject,
 	type EventBridge,
 	getNewEBMessageId,
 	getNewTraceId,
+	HandledError,
 	type Logger,
 	type QueueBridge,
+	type Schema,
 	type SecretStore,
+	type Service,
+	type ServiceBuilder,
+	type ServiceBuilderTypes,
 	type StateStore,
+	StatusCode,
+	validate,
 } from '@purista/core'
 import type { AgentHandler } from '../builder/AgentBuilder.js'
 import type { ConversationStore } from '../memory/conversationStore.js'
@@ -35,14 +44,27 @@ import { withSessionIdInPayload } from './sessionPayload.js'
 export type AgentInstanceDependencies = {
 	info: AgentInfo
 	manifest: AgentManifest
-	serviceBuilder: any
+	serviceBuilder: ServiceBuilder<
+		ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
+	>
 	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
 	callOptionsSchema?: import('zod').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
 	prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
 	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
+	configSchema?: Schema
+	defaultConfig?: Complete<Record<string, unknown>>
 }
 
-export type AgentRuntimeDependencies<SkillNames extends string = string> = AgentInstanceOptions<SkillNames>
+export type AgentRuntimeDependencies<SkillNames extends string = string> = AgentInstanceOptions<
+	SkillNames,
+	Record<string, unknown>,
+	Record<string, unknown>
+>
+export type AgentRuntimeDependenciesTyped<
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+> = AgentInstanceOptions<SkillNames, Resources, ConfigInput>
 
 type ResolvedAgentRuntimeDependencies = {
 	eventBridge: EventBridge
@@ -66,7 +88,8 @@ type ResolvedAgentRuntimeDependencies = {
 }
 
 type AgentServiceConfig = {
-	runtime: {
+	runtime?: Record<string, unknown>
+	__agentRuntime: {
 		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
 		manifest: AgentManifest
 		conversationStore: ConversationStore
@@ -130,7 +153,7 @@ const resolveSkillResource = <SkillNames extends string>(
 }
 
 export class AgentInstance implements AgentInstanceContract {
-	private service: any
+	private service?: Service
 	private readonly dependencies: AgentInstanceDependencies
 	private readonly runtime: ResolvedAgentRuntimeDependencies
 
@@ -188,8 +211,26 @@ export class AgentInstance implements AgentInstanceContract {
 			)
 		}
 
+		const runtimeConfigInput = {
+			...(this.dependencies.defaultConfig ?? {}),
+			...(this.runtime.config ?? {}),
+		}
+		let resolvedRuntimeConfig = runtimeConfigInput
+		if (this.dependencies.configSchema) {
+			const validationResult = await validate(this.dependencies.configSchema, runtimeConfigInput)
+			if (!validationResult.success) {
+				throw new HandledError(
+					StatusCode.InternalServerError,
+					'The given agent runtime configuration is invalid',
+					validationResult.issues,
+				)
+			}
+			resolvedRuntimeConfig = validationResult.data as Record<string, unknown>
+		}
+
 		const serviceConfig: AgentServiceConfig = {
-			runtime: {
+			runtime: resolvedRuntimeConfig,
+			__agentRuntime: {
 				handler: this.dependencies.handler,
 				manifest: this.dependencies.manifest,
 				conversationStore: this.runtime.conversationStore,
@@ -206,6 +247,7 @@ export class AgentInstance implements AgentInstanceContract {
 				concurrencyHints: this.runtime.concurrencyHints,
 			},
 		}
+		const instanceResources = Object.keys(this.runtime.resources).length > 0 ? this.runtime.resources : undefined
 
 		this.service = await this.dependencies.serviceBuilder.getInstance(this.runtime.eventBridge, {
 			logger: this.runtime.logger,
@@ -214,6 +256,7 @@ export class AgentInstance implements AgentInstanceContract {
 			configStore: this.runtime.configStore,
 			stateStore: this.runtime.stateStore,
 			queueBridge: this.runtime.queueBridge,
+			resources: instanceResources,
 			serviceConfig,
 		})
 

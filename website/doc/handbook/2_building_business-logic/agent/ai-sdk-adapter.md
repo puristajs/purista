@@ -20,6 +20,12 @@ The normal PURISTA flow stays the same:
 
 This page shows that full flow with one working example.
 
+The important boundary is this:
+
+- the builder stays provider-agnostic
+- the handler stays provider-agnostic
+- `getInstance(...)` decides which concrete provider adapter backs each model alias
+
 ## What You Usually Want
 
 In most projects, you want this:
@@ -54,7 +60,7 @@ Use explicit `skills` or `bindings` only when you want to narrow or override the
 
 ## Example: Support Agent With One Tool Loop
 
-### 1. Define the agent
+### 1. Define the agent contract
 
 ```ts
 import { AgentBuilder } from '@purista/ai'
@@ -64,14 +70,15 @@ export const supportAgent = new AgentBuilder({
   agentVersion: '1',
 })
   .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+  .defineResource<'supportPolicy', { developerInstruction: string }>()
   .useSkills(['spec-elicitation', 'support-workflow'])
   .canInvoke('support', '1', 'lookupFaq')
   .canInvokeAgent('triageAgent', '1')
   .setHandler(async (context, payload) => {
     const answer = await context.models['openai:primary'].generateText({
       developerInstruction: [
+        context.resources.supportPolicy.developerInstruction,
         'Use the available tools before answering.',
-        'Keep the answer concise and operational.',
       ],
       prompt: payload.prompt,
       metadata: {
@@ -90,7 +97,7 @@ export const supportAgent = new AgentBuilder({
   .build()
 ```
 
-### 2. Bind the real provider
+### 2. Bind the real provider at instance creation
 
 ```ts
 import { createOpenAI } from '@ai-sdk/openai'
@@ -107,6 +114,11 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
       defaults: { temperature: 0.2 },
     }),
   },
+  resources: {
+    supportPolicy: {
+      developerInstruction: 'Keep answers concise and operational.',
+    },
+  },
   skills: supportSkills,
 })
 ```
@@ -122,6 +134,8 @@ You work with normal PURISTA concepts:
 - `developerInstruction`
 - `prompt`
 - `metadata`
+- `context.resources`
+- `context.skills`
 
 The provider fills in default skills and bindings when you do not pass them, and translates the final request into AI SDK inputs.
 
@@ -222,6 +236,12 @@ const instance = await supportAgent.getInstance(eventBridge, {
 ```
 
 The goal is that the handler can stay the same as long as the new provider implements the same `ModelProvider` contract.
+
+That is the PURISTA intention:
+
+- define aliases in the builder
+- implement against `context.models[...]`
+- choose the concrete adapter only at `getInstance(...)`
 
 ## Common Mistakes
 

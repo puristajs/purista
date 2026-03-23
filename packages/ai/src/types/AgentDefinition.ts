@@ -1,6 +1,16 @@
 import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import type { ConfigStore, EventBridge, Logger, QueueBridge, Schema, SecretStore, StateStore } from '@purista/core'
+import type {
+	Complete,
+	ConfigStore,
+	EmptyObject,
+	EventBridge,
+	Logger,
+	QueueBridge,
+	Schema,
+	SecretStore,
+	StateStore,
+} from '@purista/core'
 import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
@@ -15,7 +25,11 @@ export type AgentInfo = {
 	successEventName?: string
 }
 
-export type BaseAgentInstanceOptions<SkillNames extends string = string> = {
+export type BaseAgentInstanceOptions<
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+> = {
 	logger?: Logger
 	spanProcessor?: SpanProcessor
 	tracer?: Tracer
@@ -34,8 +48,7 @@ export type BaseAgentInstanceOptions<SkillNames extends string = string> = {
 	 * - file-based skill resources for reusable application catalogs
 	 */
 	skills?: SkillResource | SkillSourceMap<SkillNames>
-	/** @deprecated use `models` */
-	resources?: Record<string, unknown>
+	resources?: keyof Resources extends never ? never : Resources
 	poolConfig?: {
 		poolId?: string
 		/**
@@ -52,12 +65,21 @@ export type BaseAgentInstanceOptions<SkillNames extends string = string> = {
 	concurrencyHints?: {
 		replicaCountHint?: number
 	}
-	config?: Record<string, unknown>
+	config?: keyof ConfigInput extends never ? never : ConfigInput
 }
 
-export type AgentInstanceOptions<SkillNames extends string = string> = BaseAgentInstanceOptions<SkillNames>
+export type AgentInstanceOptions<
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+> = BaseAgentInstanceOptions<SkillNames, Resources, ConfigInput>
 
-export type AgentDefinition<SkillNames extends string = string> = {
+export type AgentDefinition<
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+	Config extends Record<string, unknown> = ConfigInput,
+> = {
 	info: AgentInfo
 	manifest: AgentManifest
 	schemas: {
@@ -68,7 +90,11 @@ export type AgentDefinition<SkillNames extends string = string> = {
 	}
 	getManifest(): AgentManifest
 	getExternalRuntimeMetadata(): ExternalRuntimeMetadata
-	getInstance(eventBridge: EventBridge, options?: AgentInstanceOptions<SkillNames>): Promise<AgentRuntimeInstance>
+	getInstance(
+		eventBridge: EventBridge,
+		options?: AgentInstanceOptions<SkillNames, Resources, ConfigInput>,
+	): Promise<AgentRuntimeInstance>
+	getDefaultConfig(): Complete<Config> | undefined
 }
 
 export type AgentRuntimeInstance = {

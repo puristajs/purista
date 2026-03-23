@@ -80,7 +80,8 @@ That combination is exactly why queued durable execution exists in PURISTA.
 The code below is the same agent, but this time with inline comments showing why each declaration exists.
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
-import { AgentBuilder, generateText, renderSkillDocuments } from '@purista/ai'
+import { AgentBuilder, renderSkillDocuments } from '@purista/ai'
+import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
 export const supportAgent = new AgentBuilder({
@@ -90,6 +91,13 @@ export const supportAgent = new AgentBuilder({
 })
   // This work should survive restarts and stream progress.
   .setExecutionMode('queued')
+  // Declare small validated runtime config values separately from resources.
+  .setConfigSchema(
+    z.object({
+      locale: z.string().min(2).default('en'),
+    }),
+  )
+  .setDefaultConfig({ locale: 'en' })
   .setExecutionPolicy({
     // The caller attaches to the active durable run and receives updates.
     httpBehavior: 'attach-and-stream',
@@ -104,6 +112,8 @@ export const supportAgent = new AgentBuilder({
       sessionId: z.string().optional(),
     }),
   )
+  // Declare one runtime resource that the host must provide.
+  .defineResource<'supportPolicy', { developerInstruction: string }>()
   // The builder only declares model aliases and capabilities.
   .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
   // Only these skills are visible through context.skills.
@@ -112,6 +122,14 @@ export const supportAgent = new AgentBuilder({
   .canInvoke('support', '1', 'lookupFaq')
   // Allow one child agent.
   .canInvokeAgent('triageAgent', '1')
+  // Guard hooks are for short request policy checks, not business logic.
+  .setBeforeGuardHooks({
+    requirePrompt: async (_context, requestPayload) => {
+      if (!requestPayload.prompt.trim()) {
+        throw HandledError.fromMessage(StatusCode.BadRequest, 'prompt is required')
+      }
+    },
+  })
   // Expose the agent through the normal PURISTA HTTP/SSE path.
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setSseProtocol('ai-sdk-ui-message')
@@ -153,18 +171,17 @@ export const supportAgent = new AgentBuilder({
     const answer = await run.step(
       'answer',
       async () =>
-        await generateText({
-          model: context.models['openai:primary'],
-          request: {
-            prompt: [
-              skillBlock,
-              `Customer request: ${payload.prompt}`,
-              `Triage result: ${triage}`,
-              `FAQ answer: ${String(faq.answer ?? '')}`,
-            ]
-              .filter(Boolean)
-              .join('\n\n'),
-          },
+        await context.models['openai:primary'].generateText({
+          developerInstruction: context.resources.supportPolicy.developerInstruction,
+          prompt: [
+            skillBlock,
+            `Locale: ${context.config.runtime.locale}`,
+            `Customer request: ${payload.prompt}`,
+            `Triage result: ${triage}`,
+            `FAQ answer: ${String(faq.answer ?? '')}`,
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
           onTextDelta: delta => context.stream.sendChunk(delta),
         }),
       { checkpoint: 'final-answer' },
@@ -188,15 +205,18 @@ These define the contract:
 - queued execution mode
 - execution policy
 - payload schema
+- declared resources
 - model aliases
 - declared skill names
 - allowlisted commands
 - allowlisted child agents
+- guard hooks
 - transport exposure
 
 More detail:
 
 - [Builder](./agent-builder.md)
+- [Runtime](./runtime.md)
 - [Durable Run State](./run-state.md)
 
 ### Handler implementation
@@ -205,6 +225,7 @@ These use that contract:
 
 - `context.runState`
 - `context.conversation`
+- `context.resources`
 - `context.skills`
 - `context.agents`
 - `context.tools`
@@ -225,6 +246,11 @@ Inside the handler, try to keep the code grouped by execution phase:
 5. persist and finish
 
 That is easier to understand than collecting all variables at the top and using them much later.
+
+One more rule:
+
+- use guards for short request policy checks
+- use the handler for the real workflow
 
 ## Step 3: Provide The Skills
 
@@ -313,8 +339,18 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
       model: openai('gpt-4o'),
     }),
   },
+  // Provide the resource declared with defineResource(...).
+  resources: {
+    supportPolicy: {
+      developerInstruction: 'Answer concisely and include next steps.',
+    },
+  },
   // Provide the declared skills here.
   skills: supportSkills,
+  // Runtime config is the right place for environment-controlled values.
+  config: {
+    locale: 'en',
+  },
 })
 
 await triageAgentInstance.start()
@@ -324,7 +360,7 @@ await supportAgentInstance.start()
 This is the key PURISTA pattern:
 
 - builder declares intent
-- `getInstance(...)` provides the real dependencies
+- `getInstance(...)` provides the real dependencies and runtime values
 
 More detail:
 
@@ -392,6 +428,7 @@ What matters here:
 - the instance binds the real provider
 - the handler still uses `context.models['openai:primary']`
 - the provider handles the Vercel-specific mapping internally, including default skills and allowlisted bindings
+- the provider path does not change how resources, skills, or guards work
 
 If you later replace `AiSdkProvider` with another `ModelProvider`, the handler should not need to change.
 
@@ -411,6 +448,8 @@ If the agent only needs models, commands, child agents, and skills as text, do n
 - Define with `AgentBuilder`.
 - Implement with `context`.
 - Provide dependencies at `getInstance(...)`.
+- Declare resources with `defineResource(...)` and provide them at instance creation.
+- Use guards for short policy checks, not for workflow logic.
 - Adapt at the SDK boundary, not earlier.
 - Skills are declared in the builder and provided at instance creation.
 - Queued durable agents need `queueBridge` and should use `context.runState`.

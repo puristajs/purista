@@ -8,7 +8,7 @@
 
 > **AgentStreamHarnessResult** = [`AgentHarnessResult`](AgentHarnessResult.md) & `object`
 
-Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:36](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/testing/createAgentTestHarness.ts#L36)
+Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:40](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/testing/createAgentTestHarness.ts#L40)
 
 ## Type Declaration
 

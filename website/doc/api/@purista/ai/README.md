@@ -39,10 +39,13 @@
 ## Type Aliases
 
 - [Agent2AgentReferenceMessage](type-aliases/Agent2AgentReferenceMessage.md)
+- [AgentAfterGuardHook](type-aliases/AgentAfterGuardHook.md)
+- [AgentBeforeGuardHook](type-aliases/AgentBeforeGuardHook.md)
 - [AgentBindingConfig](type-aliases/AgentBindingConfig.md)
 - [AgentContextLike](type-aliases/AgentContextLike.md)
 - [AgentContextMockResult](type-aliases/AgentContextMockResult.md)
 - [AgentContextMockSpy](type-aliases/AgentContextMockSpy.md)
+- [AgentDeclaredResourceMap](type-aliases/AgentDeclaredResourceMap.md)
 - [AgentDefinition](type-aliases/AgentDefinition.md)
 - [AgentExecutionCleanupPolicy](type-aliases/AgentExecutionCleanupPolicy.md)
 - [AgentExecutionHttpBehavior](type-aliases/AgentExecutionHttpBehavior.md)
@@ -102,6 +105,7 @@
 - [AgentRunTaskInput](type-aliases/AgentRunTaskInput.md)
 - [AgentRunTaskStatus](type-aliases/AgentRunTaskStatus.md)
 - [AgentRuntimeDependencies](type-aliases/AgentRuntimeDependencies.md)
+- [AgentRuntimeDependenciesTyped](type-aliases/AgentRuntimeDependenciesTyped.md)
 - [AgentRuntimeInstance](type-aliases/AgentRuntimeInstance.md)
 - [AgentRuntimeStatus](type-aliases/AgentRuntimeStatus.md)
 - [AgentRunUpdateInput](type-aliases/AgentRunUpdateInput.md)

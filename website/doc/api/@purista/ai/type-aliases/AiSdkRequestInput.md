@@ -8,7 +8,7 @@
 
 > **AiSdkRequestInput** = `object`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:16](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L16)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:16](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L16)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:16](https://github.com/puristajs/pu
 
 > `optional` **aiSdk**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:23](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L23)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:23](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L23)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:23](https://github.com/puristajs/pu
 
 > `optional` **bindings**: [`ExternalBindingSet`](ExternalBindingSet.md) \| [`ExternalBinding`](ExternalBinding.md)[]
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:18](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L18)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:18](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L18)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:18](https://github.com/puristajs/pu
 
 > `optional` **instructions**: `string` \| `string`[]
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:21](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L21)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:21](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L21)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:21](https://github.com/puristajs/pu
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:22](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L22)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:22](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L22)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:22](https://github.com/puristajs/pu
 
 > **prompt**: `string` \| `string`[]
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:17](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L17)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:17](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L17)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:17](https://github.com/puristajs/pu
 
 > `optional` **referenceLabel**: `string`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:25](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L25)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:25](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L25)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:25](https://github.com/puristajs/pu
 
 > `optional` **references**: `Pick`\<[`SkillReferenceDocument`](SkillReferenceDocument.md), `"skillName"` \| `"relativePath"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:20](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L20)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:20](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L20)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:20](https://github.com/puristajs/pu
 
 > `optional` **skillLabel**: `string`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:24](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L24)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:24](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L24)
 
 ***
 
@@ -80,4 +80,4 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:24](https://github.com/puristajs/pu
 
 > `optional` **skills**: `Pick`\<[`SkillDocument`](SkillDocument.md), `"name"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:19](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/bridge/aiSdk.ts#L19)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:19](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/bridge/aiSdk.ts#L19)

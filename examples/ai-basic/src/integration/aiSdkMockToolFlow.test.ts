@@ -63,6 +63,11 @@ describe('ai-basic integration with ai/test mock model', () => {
 			models: {
 				'openai:gpt-4o-mini': provider,
 			},
+			resources: {
+				supportPolicy: {
+					developerInstruction: 'Keep answers concise and actionable.',
+				},
+			},
 			skills: exampleSkills,
 			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },

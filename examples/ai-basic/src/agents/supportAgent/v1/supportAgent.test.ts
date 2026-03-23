@@ -30,6 +30,11 @@ describe('supportAgent', () => {
 			logger,
 			models: { 'openai:gpt-4o-mini': supportModel },
 			queueBridge,
+			resources: {
+				supportPolicy: {
+					developerInstruction: 'Keep answers concise and actionable.',
+				},
+			},
 			skills: exampleSkills,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
@@ -74,6 +79,11 @@ describe('supportAgent', () => {
 			logger,
 			models: { 'openai:gpt-4o-mini': supportModel },
 			queueBridge,
+			resources: {
+				supportPolicy: {
+					developerInstruction: 'Keep answers concise and actionable.',
+				},
+			},
 			skills: exampleSkills,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})

@@ -457,6 +457,11 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	markAsDeprecated() {
+		this.deprecated = true
+		return this
+	}
+
 	enableChunkAggregation(enabled = true) {
 		this.aggregateChunks = enabled
 		return this

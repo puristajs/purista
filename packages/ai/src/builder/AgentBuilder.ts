@@ -4,22 +4,24 @@ import {
 	type AgentProtocolResponse,
 	type agentProtocolPayloadSchema,
 	type CommandFunctionContext,
+	type Complete,
 	EBMessageType,
 	type EmptyObject,
 	type EventBridge,
 	extendApi,
 	HandledError,
+	type Infer,
 	type InferIn,
 	type QueueJobContext,
 	type QueueMessage,
 	type Schema,
 	ServiceBuilder,
+	type ServiceBuilderTypes,
 	StatusCode,
 	type StreamFunctionContext,
 	type StreamWriter,
 } from '@purista/core'
 import { z } from 'zod'
-
 import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import { toProtocolSseEvents } from '../protocol/sse.js'
@@ -42,6 +44,37 @@ import type {
 	AgentSseProtocol,
 	RetryPolicy,
 } from '../types/AgentManifest.js'
+import { deriveExecutionExtraScope, resolveAgentExecutionPolicy } from './agentExecutionPolicy.js'
+
+/**
+ * Builder-time map of named runtime resources declared via {@link AgentBuilder.defineResource}.
+ */
+export type AgentDeclaredResourceMap = Record<string, unknown>
+
+/**
+ * Guard hook that runs before the agent handler executes.
+ *
+ * Use before-guards for short request policy checks such as auth, quota, or
+ * lightweight validation that is more specific than payload schema validation.
+ */
+export type AgentBeforeGuardHook<Payload = unknown, Parameter = unknown> = (
+	context: CommandFunctionContext | StreamFunctionContext,
+	payload: Payload,
+	parameter: Parameter,
+) => Promise<void> | void
+
+/**
+ * Guard hook that runs after the agent handler completes successfully.
+ *
+ * Use after-guards for cheap audit or policy side effects. Keep them small and
+ * deterministic, just like command and stream guard hooks in core builders.
+ */
+export type AgentAfterGuardHook<Payload = unknown, Parameter = unknown> = (
+	context: CommandFunctionContext | StreamFunctionContext,
+	payload: Payload,
+	parameter: Parameter,
+	result: AgentHandlerResult,
+) => Promise<void> | void
 
 export type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
@@ -184,6 +217,7 @@ const durableAgentQueuePayloadSchema = extendApi(
 const agentRuntimeConfigSchema = extendApi(
 	z.object({
 		runtime: z.record(z.string(), z.any()).optional(),
+		__agentRuntime: z.any().optional(),
 	}),
 	{ title: 'AgentRuntimeConfig' },
 )
@@ -347,17 +381,34 @@ export class AgentBuilder<
 	ObjectAliases extends string = never,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 	SkillNames extends string = never,
+	Resources extends AgentDeclaredResourceMap = EmptyObject,
+	ConfigType extends Record<string, unknown> = EmptyObject,
+	ConfigInputType extends Record<string, unknown> = EmptyObject,
 > {
 	private readonly info: AgentInfo
-	private readonly serviceBuilder: ServiceBuilder
-	private readonly commandBuilder: ReturnType<ServiceBuilder['getCommandBuilder']>
-	private readonly streamBuilder: ReturnType<ServiceBuilder['getStreamBuilder']>
+	private readonly serviceBuilder: ServiceBuilder<
+		ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
+	>
+	private readonly commandBuilder: ReturnType<
+		ServiceBuilder<
+			ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
+		>['getCommandBuilder']
+	>
+	private readonly streamBuilder: ReturnType<
+		ServiceBuilder<
+			ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
+		>['getStreamBuilder']
+	>
 	private queueDefinitionAdded = false
 	private queueWorkerDefinitionAdded = false
 	private commandDefinitionAdded = false
 	private streamDefinitionAdded = false
 	private manifest: AgentManifest
 	private handler?: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>>
+	private runtimeConfigSchema?: Schema
+	private defaultRuntimeConfig?: Complete<ConfigType>
+	private beforeGuardHooks: Record<string, AgentBeforeGuardHook<any, any>> = {}
+	private afterGuardHooks: Record<string, AgentAfterGuardHook<any, any>> = {}
 
 	private payloadSchema?: Schema
 	private parameterSchema?: Schema
@@ -369,7 +420,9 @@ export class AgentBuilder<
 
 	constructor(info: AgentInfo) {
 		this.info = normalizeInfo(info)
-		this.serviceBuilder = new ServiceBuilder({
+		this.serviceBuilder = new ServiceBuilder<
+			ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
+		>({
 			serviceName: this.info.agentName,
 			serviceVersion: this.info.agentVersion,
 			serviceDescription: this.info.description ?? `Agent ${this.info.agentName}`,
@@ -393,9 +446,121 @@ export class AgentBuilder<
 		}
 	}
 
+	private async runBeforeGuards(
+		context: CommandFunctionContext | StreamFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+	) {
+		await Promise.all(
+			Object.entries(this.beforeGuardHooks).map(async ([name, hook]) => {
+				await hook(context, payload, parameter)
+				return name
+			}),
+		)
+	}
+
+	private async runAfterGuards(
+		context: CommandFunctionContext | StreamFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+		result: AgentHandlerResult,
+	) {
+		await Promise.all(
+			Object.entries(this.afterGuardHooks).map(async ([name, hook]) => {
+				await hook(context, payload, parameter, result)
+				return name
+			}),
+		)
+	}
+
 	setDescription(description: string) {
 		this.manifest.description = description
 		return this
+	}
+
+	/**
+	 * Declare the shape of host-provided runtime config passed through `getInstance(..., { config })`.
+	 *
+	 * Use this for agent-specific configuration that varies by environment, deployment, or tenant.
+	 * Do not use it for concrete runtime dependencies like model providers or queue bridges.
+	 *
+	 * @example
+	 * ```ts
+	 * const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+	 *   .setConfigSchema(z.object({ locale: z.string().default('en') }))
+	 * ```
+	 */
+	setConfigSchema<T extends Schema>(schema: T) {
+		this.runtimeConfigSchema = schema
+		return this as unknown as AgentBuilder<
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases,
+			ObjectAliases,
+			AgentInvokes,
+			SkillNames,
+			Resources,
+			Infer<T> extends Record<string, unknown> ? Infer<T> : EmptyObject,
+			InferIn<T> extends Record<string, unknown> ? InferIn<T> : EmptyObject
+		>
+	}
+
+	/**
+	 * Provide default values for the runtime config declared via {@link setConfigSchema}.
+	 *
+	 * These defaults are merged before validation and can still be overridden via `getInstance(..., { config })`.
+	 */
+	setDefaultConfig(config: Complete<ConfigType>) {
+		this.defaultRuntimeConfig = config
+		return this
+	}
+
+	/**
+	 * Mark the agent endpoints as deprecated.
+	 *
+	 * This mirrors the core builder behavior and propagates deprecation metadata to the underlying run command and stream.
+	 */
+	markAsDeprecated() {
+		this.commandBuilder.markAsDeprecated()
+		if ('markAsDeprecated' in this.streamBuilder && typeof this.streamBuilder.markAsDeprecated === 'function') {
+			this.streamBuilder.markAsDeprecated()
+		}
+		this.manifest.deprecated = true
+		this.manifest.metadata = {
+			...(this.manifest.metadata ?? {}),
+			deprecated: true,
+		}
+		return this
+	}
+
+	/**
+	 * Declare that the agent requires a runtime resource passed through `getInstance(..., { resources })`.
+	 *
+	 * This follows the same builder-time declaration pattern as services.
+	 *
+	 * @example
+	 * ```ts
+	 * new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+	 *   .defineResource<'sandbox', SandboxExecutionResource>()
+	 * ```
+	 */
+	defineResource<ResourceName extends string, ResourceType>() {
+		this.serviceBuilder.defineResource<ResourceName, ResourceType>()
+		return this as unknown as AgentBuilder<
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases,
+			ObjectAliases,
+			AgentInvokes,
+			SkillNames,
+			Resources & { [K in ResourceName]: ResourceType },
+			ConfigType,
+			ConfigInputType
+		>
 	}
 
 	useEventBridge(name: string) {
@@ -403,6 +568,9 @@ export class AgentBuilder<
 		return this
 	}
 
+	/**
+	 * @deprecated Use defineResource<ResourceName, ResourceType>() and provide the concrete instance via getInstance(..., { resources }).
+	 */
 	useResource(alias: string, resource: { resourceName: string }) {
 		this.manifest.resources = {
 			...(this.manifest.resources ?? {}),
@@ -422,7 +590,10 @@ export class AgentBuilder<
 		RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
 		ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never),
 		AgentInvokes,
-		SkillNames
+		SkillNames,
+		Resources,
+		ConfigType,
+		ConfigInputType
 	> {
 		if (!alias.trim()) {
 			throw new Error('Model alias must not be empty')
@@ -454,7 +625,10 @@ export class AgentBuilder<
 			RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
 			ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never),
 			AgentInvokes,
-			SkillNames
+			SkillNames,
+			Resources,
+			ConfigType,
+			ConfigInputType
 		>
 	}
 
@@ -473,7 +647,10 @@ export class AgentBuilder<
 		RerankAliases,
 		ObjectAliases,
 		AgentInvokes,
-		SkillNames | Names[number]
+		SkillNames | Names[number],
+		Resources,
+		ConfigType,
+		ConfigInputType
 	> {
 		const names = [...new Set(skillNames.map(entry => entry.trim()).filter(Boolean))]
 		this.manifest.skills = {
@@ -496,7 +673,10 @@ export class AgentBuilder<
 			RerankAliases,
 			ObjectAliases,
 			AgentInvokes,
-			SkillNames | Names[number]
+			SkillNames | Names[number],
+			Resources,
+			ConfigType,
+			ConfigInputType
 		>
 	}
 
@@ -630,7 +810,10 @@ export class AgentBuilder<
 					}
 				>
 			>,
-		SkillNames
+		SkillNames,
+		Resources,
+		ConfigType,
+		ConfigInputType
 	> {
 		this.commandBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
 		this.streamBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
@@ -683,7 +866,10 @@ export class AgentBuilder<
 						}
 					>
 				>,
-			SkillNames
+			SkillNames,
+			Resources,
+			ConfigType,
+			ConfigInputType
 		>
 	}
 
@@ -691,6 +877,39 @@ export class AgentBuilder<
 		this.commandBuilder.canEmit(eventName, schema)
 		this.streamBuilder.canEmit(eventName, schema)
 		return this
+	}
+
+	/**
+	 * Register one or more guard hooks that run before the agent handler logic executes.
+	 *
+	 * Use before guards for request-policy concerns like auth, quota checks, or tenant validation.
+	 * Keep business logic in the handler itself.
+	 */
+	setBeforeGuardHooks(hooks: Record<string, AgentBeforeGuardHook<unknown, unknown>>) {
+		this.beforeGuardHooks = {
+			...this.beforeGuardHooks,
+			...hooks,
+		}
+		return this
+	}
+
+	getBeforeGuardHook(name: keyof typeof this.beforeGuardHooks) {
+		return this.beforeGuardHooks[name]
+	}
+
+	/**
+	 * Register one or more guard hooks that run after the agent handler logic completed successfully.
+	 */
+	setAfterGuardHooks(hooks: Record<string, AgentAfterGuardHook<unknown, unknown>>) {
+		this.afterGuardHooks = {
+			...this.afterGuardHooks,
+			...hooks,
+		}
+		return this
+	}
+
+	getAfterGuardHook(name: keyof typeof this.afterGuardHooks) {
+		return this.afterGuardHooks[name]
 	}
 
 	setSuccessEventName(eventName: string) {
@@ -839,7 +1058,7 @@ export class AgentBuilder<
 	setHandler<
 		Payload = unknown,
 		Parameter = unknown,
-		Resources extends Record<string, unknown> = Record<string, unknown>,
+		HandlerResources extends Record<string, unknown> = Resources,
 		Models extends Record<string, ModelProvider> = DeclaredModelMap<
 			ModelAliases,
 			TextAliases,
@@ -848,7 +1067,7 @@ export class AgentBuilder<
 			RerankAliases,
 			ObjectAliases
 		>,
-	>(fn: AgentHandler<Payload, Parameter, Resources, Models, AgentInvokes>) {
+	>(fn: AgentHandler<Payload, Parameter, HandlerResources, Models, AgentInvokes>) {
 		this.handler = fn as AgentHandler<
 			unknown,
 			unknown,
@@ -860,35 +1079,9 @@ export class AgentBuilder<
 		const workerName = 'execute'
 		this.commandBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
 		this.streamBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
-		const resolveExecutionPolicy = () => {
-			const leaseTtlMs = this.manifest.executionPolicy?.leaseTtlMs ?? 30_000
-			const maxDurationMs = this.manifest.executionPolicy?.maxDurationMs ?? 15 * 60_000
-			const derivedMaxLeaseExtensions = leaseTtlMs > 0 ? Math.max(3, Math.ceil(maxDurationMs / leaseTtlMs) + 1) : 3
-			return {
-				leaseTtlMs,
-				heartbeatIntervalMs: this.manifest.executionPolicy?.heartbeatIntervalMs ?? 10_000,
-				maxLeaseExtensions: this.manifest.executionPolicy?.maxLeaseExtensions ?? derivedMaxLeaseExtensions,
-				maxAttempts: this.manifest.executionPolicy?.maxAttempts ?? 3,
-				maxDurationMs,
-				recovery: this.manifest.executionPolicy?.recovery ?? 'resume-from-checkpoints',
-				httpBehavior: this.manifest.executionPolicy?.httpBehavior ?? 'attach-and-stream',
-				cleanup: this.manifest.executionPolicy?.cleanup ?? {},
-				scopeFromPayload: this.manifest.executionPolicy?.scopeFromPayload ?? [],
-			}
-		}
-		const deriveExtraScope = (payload: unknown) => {
-			const keys = resolveExecutionPolicy().scopeFromPayload
-			if (!payload || typeof payload !== 'object' || keys.length === 0) {
-				return undefined
-			}
-			const entries = keys
-				.map(key => {
-					const value = (payload as Record<string, unknown>)[key]
-					return typeof value === 'string' && value.trim().length > 0 ? [key, value.trim()] : undefined
-				})
-				.filter((entry): entry is [string, string] => Array.isArray(entry))
-			return entries.length > 0 ? Object.fromEntries(entries) : undefined
-		}
+		const resolveExecutionPolicy = () => resolveAgentExecutionPolicy(this.manifest.executionPolicy)
+		const deriveExtraScope = (payload: unknown) =>
+			deriveExecutionExtraScope(payload, resolveExecutionPolicy().scopeFromPayload)
 		const normalizeAgentError = (error: unknown): AgentRunError => {
 			if (error instanceof HandledError) {
 				return {
@@ -943,13 +1136,13 @@ export class AgentBuilder<
 				invokeAgent: (context as { invokeAgent?: EmptyObject }).invokeAgent ?? ({} as EmptyObject),
 			}) as unknown as CommandFunctionContext
 		const executeAgent = async (
-			thisArg: { config?: { runtime?: AgentRuntimeConfig } },
+			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
 			onEnvelope?: (envelope: unknown) => Promise<void>,
 		) => {
-			const runtime = thisArg.config?.runtime
+			const runtime = thisArg.config?.__agentRuntime
 			if (!runtime?.handler) {
 				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
 			}
@@ -1544,6 +1737,7 @@ export class AgentBuilder<
 				})
 				currentAgentContext = agentContext
 
+				await this.runBeforeGuards(context, payload, parameter)
 				const result = await runtime.handler(
 					agentContext as AgentHandlerContext<
 						unknown,
@@ -1555,6 +1749,7 @@ export class AgentBuilder<
 					payload,
 					parameter,
 				)
+				await this.runAfterGuards(context, payload, parameter, result)
 
 				const resultObject =
 					typeof result === 'object' && result && 'message' in result ? (result as AgentHandlerResultObject) : undefined
@@ -1605,7 +1800,7 @@ export class AgentBuilder<
 		}
 
 		const observeQueuedRun = async (
-			thisArg: { config?: { runtime?: AgentRuntimeConfig } },
+			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1613,7 +1808,7 @@ export class AgentBuilder<
 			extraScope: Record<string, string> | undefined,
 			onEnvelope?: (envelope: unknown) => Promise<void>,
 		) => {
-			const runtime = thisArg.config?.runtime
+			const runtime = thisArg.config?.__agentRuntime
 			if (!runtime) {
 				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
 			}
@@ -1692,13 +1887,13 @@ export class AgentBuilder<
 		}
 
 		const executeQueuedAgent = async (
-			thisArg: { config?: { runtime?: AgentRuntimeConfig } },
+			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
 			onEnvelope?: (envelope: unknown) => Promise<void>,
 		) => {
-			const runtime = thisArg.config?.runtime
+			const runtime = thisArg.config?.__agentRuntime
 			if (!runtime) {
 				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
 			}
@@ -1745,25 +1940,25 @@ export class AgentBuilder<
 		}
 
 		this.commandBuilder.setCommandFunction(async function commandImpl(
-			this: { config?: { runtime?: AgentRuntimeConfig } },
+			this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext,
 			payload: unknown,
 			parameter: unknown,
 		) {
-			if (this.config?.runtime?.manifest.executionMode === 'queued') {
+			if (this.config?.__agentRuntime?.manifest.executionMode === 'queued') {
 				return await executeQueuedAgent(this, context, payload, parameter)
 			}
 			return await executeAgent(this, context, payload, parameter)
 		})
 
 		this.streamBuilder.setStreamFunction(async function streamImpl(
-			this: { config?: { runtime?: AgentRuntimeConfig } },
+			this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 			context: StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
 			writer: StreamWriter<unknown, unknown[]>,
 		) {
-			const protocol = this.config?.runtime?.manifest.httpExposure?.sseProtocol ?? 'purista'
+			const protocol = this.config?.__agentRuntime?.manifest.httpExposure?.sseProtocol ?? 'purista'
 			const streamedEnvelopes: AgentProtocolEnvelope[] = []
 			let emittedEventCount = 0
 			const flushConvertedEvents = async (includeTerminal = false) => {
@@ -1783,7 +1978,9 @@ export class AgentBuilder<
 				}
 				emittedEventCount = visibleEvents.length
 			}
-			const final = (this.config?.runtime?.manifest.executionMode === 'queued' ? executeQueuedAgent : executeAgent)(
+			const final = (
+				this.config?.__agentRuntime?.manifest.executionMode === 'queued' ? executeQueuedAgent : executeAgent
+			)(
 				this,
 				context,
 				payload,
@@ -1833,11 +2030,11 @@ export class AgentBuilder<
 				.setMode('continuous')
 				.setMaxParallelHandlers(1)
 				.setHandler(async function durableWorker(
-					this: { config?: { runtime?: AgentRuntimeConfig } },
+					this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
 					context: QueueJobContext<DurableAgentQueuePayload>,
 					message: QueueMessage<DurableAgentQueuePayload>,
 				) {
-					const runtime = this.config?.runtime
+					const runtime = this.config?.__agentRuntime
 					if (!runtime) {
 						await context.job.fail('Agent runtime not configured', true)
 						return { status: 'fail', reason: 'Agent runtime not configured', fatal: true }
@@ -1894,7 +2091,7 @@ export class AgentBuilder<
 					try {
 						await run.update({ phase: 'running', status: 'running', heartbeat: true })
 						const envelopes = (await executeAgent(
-							{ config: { runtime } },
+							{ config: { __agentRuntime: runtime } },
 							serviceContext,
 							message.payload.payload,
 							message.payload.parameter,
@@ -1953,7 +2150,7 @@ export class AgentBuilder<
 			this.queueWorkerDefinitionAdded = true
 		}
 
-		return this as AgentBuilder<
+		return this as unknown as AgentBuilder<
 			ModelAliases,
 			TextAliases,
 			StreamAliases,
@@ -1961,11 +2158,14 @@ export class AgentBuilder<
 			RerankAliases,
 			ObjectAliases,
 			AgentInvokes,
-			SkillNames
+			SkillNames,
+			Resources,
+			ConfigType,
+			ConfigInputType
 		>
 	}
 
-	build(): AgentDefinition<SkillNames> {
+	build(): AgentDefinition<SkillNames, Resources, ConfigInputType, ConfigType> {
 		if (!this.handler) {
 			throw new Error('Agent handler is required. Call setHandler() before build().')
 		}
@@ -1993,6 +2193,8 @@ export class AgentBuilder<
 			callOptionsSchema: this.callOptionsSchema,
 			prepareCall: this.prepareCallHook,
 			prepareStep: this.prepareStepHook,
+			configSchema: this.runtimeConfigSchema,
+			defaultConfig: this.defaultRuntimeConfig as Complete<Record<string, unknown>> | undefined,
 		}
 
 		return {
@@ -2005,11 +2207,12 @@ export class AgentBuilder<
 				context: this.contextSchema,
 			},
 			getManifest: () => manifest,
+			getDefaultConfig: () => this.defaultRuntimeConfig,
 			getExternalRuntimeMetadata: () => ({
 				commands: manifest.allowedTools,
 				agents: manifest.allowedAgents ?? [],
 			}),
-			getInstance: async (eventBridge, options?: AgentInstanceOptions<SkillNames>) => {
+			getInstance: async (eventBridge, options?: AgentInstanceOptions<SkillNames, Resources, ConfigInputType>) => {
 				const runtimeOptions = options
 				const instance = new AgentInstance(dependencies, eventBridge, runtimeOptions)
 				return instance

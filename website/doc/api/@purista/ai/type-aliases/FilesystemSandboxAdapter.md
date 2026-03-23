@@ -8,7 +8,7 @@
 
 > **FilesystemSandboxAdapter** = `object`
 
-Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:6
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:6](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L6)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAd
 
 > **executeCommand**: (`command`) => `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:7
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:7](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L7)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAd
 
 > **readFile**: (`path`) => `Promise`\<`string`\>
 
-Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:8
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:8](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L8)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAd
 
 > **writeFiles**: (`files`) => `Promise`\<`void`\>
 
-Defined in: packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:9
+Defined in: [packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts:9](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/adapter/local/createLocalFilesystemSandboxAdapter.ts#L9)
 
 #### Parameters
 

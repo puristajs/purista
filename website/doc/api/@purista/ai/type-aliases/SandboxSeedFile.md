@@ -8,7 +8,7 @@
 
 > **SandboxSeedFile** = `object`
 
-Defined in: packages/ai/src/sandbox/workspaceLayout.ts:13
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:13](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/workspaceLayout.ts#L13)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: packages/ai/src/sandbox/workspaceLayout.ts:13
 
 > **content**: `string` \| `Buffer`
 
-Defined in: packages/ai/src/sandbox/workspaceLayout.ts:15
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:15](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/workspaceLayout.ts#L15)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: packages/ai/src/sandbox/workspaceLayout.ts:15
 
 > **path**: `string`
 
-Defined in: packages/ai/src/sandbox/workspaceLayout.ts:14
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:14](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/workspaceLayout.ts#L14)

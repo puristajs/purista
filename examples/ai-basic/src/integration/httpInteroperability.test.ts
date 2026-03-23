@@ -80,6 +80,11 @@ describe('ai-basic http interoperability flows', () => {
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
+			resources: {
+				supportPolicy: {
+					developerInstruction: 'Keep answers concise and actionable.',
+				},
+			},
 			skills: exampleSkills,
 			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 2, poolId: 'support' },

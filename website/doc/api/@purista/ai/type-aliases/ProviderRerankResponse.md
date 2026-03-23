@@ -8,7 +8,7 @@
 
 > **ProviderRerankResponse**\<`Document`\> = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:117](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L117)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:137](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L137)
 
 Response emitted by reranking-capable providers.
 
@@ -24,7 +24,7 @@ Response emitted by reranking-capable providers.
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:124](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L124)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:144](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L144)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:124](https://git
 
 > **ranking**: `object`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:118](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L118)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:138](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L138)
 
 #### document
 
@@ -52,4 +52,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:118](https://git
 
 > **rerankedDocuments**: `Document`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:123](https://github.com/puristajs/purista/blob/1dc8022a437b4fd3d9732b2d4b57646f0269cf2d/packages/ai/src/providers/runtime/ModelProvider.ts#L123)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:143](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/providers/runtime/ModelProvider.ts#L143)

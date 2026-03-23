@@ -8,7 +8,7 @@
 
 > **createInMemorySandboxRegistry**(`options?`): [`SandboxRegistry`](../classes/SandboxRegistry.md)
 
-Defined in: packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:15
+Defined in: [packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts:15](https://github.com/puristajs/purista/blob/51cb5010c904d34b1289917309477e1c8bbd5d08/packages/ai/src/sandbox/resources/createInMemorySandboxRegistry.ts#L15)
 
 Creates a SandboxRegistry backed by PURISTA's in-memory DefaultStateStore.
 

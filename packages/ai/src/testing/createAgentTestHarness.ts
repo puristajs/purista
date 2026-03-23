@@ -1,4 +1,4 @@
-import { DefaultQueueBridge, type EventBridge, type QueueBridge } from '@purista/core'
+import { DefaultQueueBridge, type EmptyObject, type EventBridge, type QueueBridge } from '@purista/core'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type {
@@ -28,7 +28,11 @@ export type AgentHarnessResult = AgentInvokeResult & {
 	runStateArtifacts: ReturnType<typeof getRunStateArtifacts>
 }
 
-export type CreateAgentTestHarnessOptions = AgentInstanceOptions & {
+export type CreateAgentTestHarnessOptions<
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+> = AgentInstanceOptions<SkillNames, Resources, ConfigInput> & {
 	eventBridge?: EventBridge
 	queueBridge?: QueueBridge
 }
@@ -37,9 +41,13 @@ export type AgentStreamHarnessResult = AgentHarnessResult & {
 	liveEnvelopes: AgentProtocolEnvelope[]
 }
 
-export const createAgentTestHarness = async (
-	definition: AgentDefinition,
-	options = {} as CreateAgentTestHarnessOptions,
+export const createAgentTestHarness = async <
+	SkillNames extends string = string,
+	Resources extends Record<string, unknown> = EmptyObject,
+	ConfigInput extends Record<string, unknown> = EmptyObject,
+>(
+	definition: AgentDefinition<SkillNames, Resources, ConfigInput>,
+	options = {} as CreateAgentTestHarnessOptions<SkillNames, Resources, ConfigInput>,
 ): Promise<{
 	instance: AgentRuntimeInstance
 	eventBridge: EventBridge

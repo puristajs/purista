@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
 import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
+import { invokeAgent } from '../runtime/invokeAgent.js'
 import { AgentBuilder } from './AgentBuilder.js'
 
 const findLastFinalMessage = (frames: Array<{ kind: string; final?: boolean; content?: unknown }>) => {
@@ -223,6 +224,170 @@ describe('AgentBuilder', () => {
 		expect(manifest.httpExposure?.sseProtocol).toBe('ai-sdk-responses')
 		expect(manifest.httpExposure?.path).toBe('agents/helperAgent')
 		expect(manifest.httpExposure?.streamingMode).toBe('stream')
+	})
+
+	it('declares runtime resources through defineResource and requires them at instance creation', async () => {
+		const definition = new AgentBuilder({
+			agentName: 'resourcefulAgent',
+			agentVersion: '1',
+		})
+			.defineResource<'supportPolicy', { conciseAnswers: boolean }>()
+			.setHandler(async context => ({ message: context.resources.supportPolicy.conciseAnswers ? 'short' : 'long' }))
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+
+		const instance = await (definition as any).getInstance(eventBridge, { models: {} })
+		await expect(instance.start()).rejects.toThrow('This services requires resources to be set in getInstance options')
+	})
+
+	it('validates and merges runtime config declared via setConfigSchema and setDefaultConfig', async () => {
+		const definition = new AgentBuilder({
+			agentName: 'configuredAgent',
+			agentVersion: '1',
+		})
+			.setConfigSchema(
+				z.object({
+					locale: z.string().min(2),
+				}),
+			)
+			.setDefaultConfig({ locale: 'en' })
+			.setHandler(async () => ({ message: 'ok' }))
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+
+		const defaultedInstance = await definition.getInstance(eventBridge, { models: {} })
+		await defaultedInstance.start()
+		try {
+			expect(
+				(defaultedInstance as unknown as { service?: { config?: { runtime?: { locale?: string } } } }).service?.config
+					?.runtime?.locale,
+			).toBe('en')
+		} finally {
+			await defaultedInstance.stop()
+		}
+
+		const overriddenInstance = await definition.getInstance(eventBridge, {
+			models: {},
+			config: { locale: 'de' },
+		})
+		await overriddenInstance.start()
+		try {
+			expect(
+				(overriddenInstance as unknown as { service?: { config?: { runtime?: { locale?: string } } } }).service?.config
+					?.runtime?.locale,
+			).toBe('de')
+		} finally {
+			await overriddenInstance.stop()
+		}
+
+		expect(definition.getDefaultConfig()).toEqual({ locale: 'en' })
+
+		const invalidInstance = await definition.getInstance(eventBridge, {
+			models: {},
+			config: { locale: '' },
+		})
+		await expect(invalidInstance.start()).rejects.toThrow('The given agent runtime configuration is invalid')
+	})
+
+	it('marks command and stream exposure as deprecated', async () => {
+		const builder = new AgentBuilder({
+			agentName: 'deprecatedAgent',
+			agentVersion: '1',
+		})
+			.markAsDeprecated()
+			.exposeAsHttpEndpoint('POST', 'agents/deprecatedAgent')
+			.setHandler(async () => ({ message: 'ok' }))
+
+		const definition = builder.build()
+		expect(definition.getManifest().deprecated).toBe(true)
+
+		const serviceDefinition = await (builder as any).serviceBuilder.getFullServiceDefinition()
+		expect(serviceDefinition.commands[0]?.metadata?.expose?.deprecated).toBe(true)
+		expect(serviceDefinition.streams[0]?.metadata?.expose?.deprecated).toBe(true)
+	})
+
+	it('executes before and after guard hooks for command invocations', async () => {
+		const order: string[] = []
+		const definition = new AgentBuilder({
+			agentName: 'guardedCommandAgent',
+			agentVersion: '1',
+		})
+			.setBeforeGuardHooks({
+				before: async () => {
+					order.push('before')
+				},
+			})
+			.setAfterGuardHooks({
+				after: async () => {
+					order.push('after')
+				},
+			})
+			.setHandler(async () => {
+				order.push('handler')
+				return { message: 'ok' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, { models: {} })
+		await instance.start()
+		try {
+			await instance.invoke({ payload: {} })
+		} finally {
+			await instance.stop()
+		}
+
+		expect(order).toEqual(['before', 'handler', 'after'])
+	})
+
+	it('executes before and after guard hooks for streamed invocations', async () => {
+		const order: string[] = []
+		const definition = new AgentBuilder({
+			agentName: 'guardedStreamAgent',
+			agentVersion: '1',
+		})
+			.setBeforeGuardHooks({
+				before: async () => {
+					order.push('before')
+				},
+			})
+			.setAfterGuardHooks({
+				after: async () => {
+					order.push('after')
+				},
+			})
+			.setHandler(async context => {
+				order.push('handler')
+				context.stream.sendFinal('ok')
+				return { message: 'ok' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, { models: {} })
+		await instance.start()
+		try {
+			await invokeAgent({
+				eventBridge,
+				agentName: 'guardedStreamAgent',
+				agentVersion: '1',
+				payload: {},
+			})
+		} finally {
+			await instance.stop()
+		}
+
+		expect(order).toEqual(['before', 'handler', 'after'])
 	})
 
 	it('automatically injects declared skills and allowlisted bindings into model text calls', async () => {
