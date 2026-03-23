@@ -264,9 +264,7 @@ export const supportAgent = new AgentBuilder({
 
 			await run.setFinalMessage(answer)
 			await run.finishSuccess(answer)
-			await (
-				context.emit as (eventName: 'support.agent.completed', payload: { sessionId: string; escalated: boolean }) => Promise<void>
-			)('support.agent.completed', {
+			await context.emit('support.agent.completed', {
 				sessionId,
 				escalated: escalationPattern.test(userPrompt),
 			})

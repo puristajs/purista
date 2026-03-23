@@ -1,6 +1,7 @@
 import type {
 	AgentInvokeList,
 	CommandFunctionContext,
+	EmitCustomMessageFunction,
 	EmptyObject,
 	EventBridge,
 	InferIn,
@@ -167,10 +168,36 @@ export type ProtocolBufferOptions = {
 	onEnvelope?: (envelope: AgentProtocolEnvelope) => void | Promise<void>
 }
 
-export type ProtocolContext = CommandFunctionContext | StreamFunctionContext
+export type ProtocolContext<
+	Payload = unknown,
+	Parameter = unknown,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitList extends Record<string, Schema> = Record<string, Schema>,
+> =
+	| CommandFunctionContext<
+			Payload,
+			Parameter,
+			Resources,
+			InvokeList,
+			StreamInvokeList,
+			EmitList,
+			QueueInvokeList,
+			AgentInvokes
+	  >
+	| StreamFunctionContext<
+			Payload,
+			Parameter,
+			Resources,
+			InvokeList,
+			StreamInvokeList,
+			EmitList,
+			QueueInvokeList,
+			AgentInvokes
+	  >
 
 export const createProtocolBuffer = (
-	context: ProtocolContext,
+	context: ProtocolContext<any, any, Record<string, unknown>, any, any>,
 	config: ProtocolBufferOptions = {},
 ): AgentProtocolBuffer => {
 	const frames: ProtocolFrameEntry[] = []
@@ -297,7 +324,7 @@ export type ToolInvoker = {
 }
 
 const createToolInvoker = (
-	serviceContext: ProtocolContext,
+	serviceContext: ProtocolContext<any, any, Record<string, unknown>, any, any>,
 	tools: AllowedToolDefinition[],
 	protocol: ProtocolEmitter,
 ): ToolInvoker => {
@@ -445,7 +472,7 @@ export type SessionHelpers = {
 }
 
 type SessionIdentityInput = {
-	context: ProtocolContext
+	context: ProtocolContext<any, any, Record<string, unknown>, any, any>
 	manifest: AgentManifest
 	payload: unknown
 }
@@ -499,12 +526,13 @@ export type AgentHandlerContext<
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitPayloads extends Record<string, unknown> = EmptyObject,
 > = {
 	logger: Logger
 	payload: Payload
 	parameter: Parameter
-	message: ProtocolContext['message']
-	emit: ProtocolContext['emit']
+	message: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['message']
+	emit: EmitCustomMessageFunction<EmitPayloads>
 	conversation: ConversationHelpers
 	session: SessionHelpers
 	stream: AgentStreamEmitter
@@ -562,10 +590,10 @@ export type AgentHandlerContext<
 			): Promise<ProviderRerankResponse<Document>>
 		}
 	}
-	serviceContext: ProtocolContext
-	secrets: ProtocolContext['secrets']
-	configs: ProtocolContext['configs']
-	states: ProtocolContext['states']
+	serviceContext: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>
+	secrets: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['secrets']
+	configs: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['configs']
+	states: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['states']
 	runState: AgentRunStateHelpers
 	manifest: AgentManifest
 }
@@ -577,27 +605,7 @@ export type CreateAgentHandlerContextInput<
 	Models extends Record<string, ModelProvider>,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
-	serviceContext:
-		| CommandFunctionContext<
-				Payload,
-				Parameter,
-				Resources,
-				InvokeList,
-				StreamInvokeList,
-				Record<string, Schema>,
-				QueueInvokeList,
-				AgentInvokes
-		  >
-		| StreamFunctionContext<
-				Payload,
-				Parameter,
-				Resources,
-				InvokeList,
-				StreamInvokeList,
-				Record<string, Schema>,
-				QueueInvokeList,
-				AgentInvokes
-		  >
+	serviceContext: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>
 	eventBridge: EventBridge
 	payload: Payload
 	parameter: Parameter
@@ -685,30 +693,16 @@ type ResolvedAgentBinding = {
 const hasErrorEnvelope = (envelopes: AgentProtocolEnvelope[]): boolean =>
 	envelopes.some(envelope => envelope.frame.kind === 'error')
 
-const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(input: {
+const createAgentInvocationHelpers = <
+	Payload = unknown,
+	Parameter = unknown,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitList extends Record<string, Schema> = Record<string, Schema>,
+>(input: {
 	eventBridge: EventBridge
 	protocol: ProtocolEmitter
-	serviceContext:
-		| CommandFunctionContext<
-				unknown,
-				unknown,
-				Record<string, unknown>,
-				InvokeList,
-				StreamInvokeList,
-				Record<string, Schema>,
-				QueueInvokeList,
-				AgentInvokes
-		  >
-		| StreamFunctionContext<
-				unknown,
-				unknown,
-				Record<string, unknown>,
-				InvokeList,
-				StreamInvokeList,
-				Record<string, Schema>,
-				QueueInvokeList,
-				AgentInvokes
-		  >
+	serviceContext: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, EmitList>
 	session: SessionHelpers
 	manifest: AgentManifest
 }) => {
@@ -1154,9 +1148,10 @@ export const createAgentHandlerContext = <
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitPayloads extends Record<string, unknown> = EmptyObject,
 >(
 	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, AgentInvokes>,
-): AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes> => {
+): AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads> => {
 	const sessionHelpers = createSessionHelpers(input.conversationStore, {
 		context: input.serviceContext,
 		manifest: input.manifest,
@@ -1176,7 +1171,7 @@ export const createAgentHandlerContext = <
 		payload: input.payload,
 		parameter: input.parameter,
 		message: input.serviceContext.message,
-		emit: input.serviceContext.emit.bind(input.serviceContext) as ProtocolContext['emit'],
+		emit: input.serviceContext.emit.bind(input.serviceContext) as EmitCustomMessageFunction<EmitPayloads>,
 		session: sessionHelpers,
 		conversation: createConversationHelpers(sessionHelpers, input.manifest),
 		stream: createStreamEmitter(input.protocol),
@@ -1197,9 +1192,17 @@ export const createAgentHandlerContext = <
 			Parameter,
 			Resources,
 			Models,
-			AgentInvokes
+			AgentInvokes,
+			EmitPayloads
 		>['embeddings'],
-		rerankers: input.rerankers as AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes>['rerankers'],
+		rerankers: input.rerankers as AgentHandlerContext<
+			Payload,
+			Parameter,
+			Resources,
+			Models,
+			AgentInvokes,
+			EmitPayloads
+		>['rerankers'],
 		serviceContext: input.serviceContext,
 		secrets: input.serviceContext.secrets,
 		configs: input.serviceContext.configs,

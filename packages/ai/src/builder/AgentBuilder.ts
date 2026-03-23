@@ -169,14 +169,22 @@ export type AgentHandler<
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitPayloads extends Record<string, unknown> = EmptyObject,
 > = (
-	context: AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes>,
+	context: AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads>,
 	payload: Payload,
 	parameter: Parameter,
 ) => Promise<AgentHandlerResult> | AgentHandlerResult
 
-type AgentRuntimeConfig = {
-	handler: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>>
+type AgentRuntimeConfig<EmitPayloads extends Record<string, unknown> = Record<string, unknown>> = {
+	handler: AgentHandler<
+		unknown,
+		unknown,
+		Record<string, unknown>,
+		Record<string, ModelProvider>,
+		AgentInvokeList,
+		EmitPayloads
+	>
 	manifest: AgentManifest
 	conversationStore: ConversationStore
 	poolManager: PoolManager
@@ -321,6 +329,7 @@ export class AgentBuilder<
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 	SkillNames extends string = never,
 	Resources extends AgentDeclaredResourceMap = EmptyObject,
+	EmitPayloads extends Record<string, unknown> = EmptyObject,
 	ConfigType extends Record<string, unknown> = EmptyObject,
 	ConfigInputType extends Record<string, unknown> = EmptyObject,
 > {
@@ -343,7 +352,14 @@ export class AgentBuilder<
 	private commandDefinitionAdded = false
 	private streamDefinitionAdded = false
 	private manifest: AgentManifest
-	private handler?: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>>
+	private handler?: AgentHandler<
+		unknown,
+		unknown,
+		Record<string, unknown>,
+		Record<string, ModelProvider>,
+		AgentInvokeList,
+		EmitPayloads
+	>
 	private runtimeConfigSchema?: Schema
 	private defaultRuntimeConfig?: Complete<ConfigType>
 	private declaredBeforeGuardHooks: Record<string, AgentBeforeGuardHook<any, any>> = {}
@@ -415,6 +431,7 @@ export class AgentBuilder<
 			AgentInvokes,
 			SkillNames,
 			Resources,
+			EmitPayloads,
 			Infer<T> extends Record<string, unknown> ? Infer<T> : EmptyObject,
 			InferIn<T> extends Record<string, unknown> ? InferIn<T> : EmptyObject
 		>
@@ -471,6 +488,7 @@ export class AgentBuilder<
 			AgentInvokes,
 			SkillNames,
 			Resources & { [K in ResourceName]: ResourceType },
+			EmitPayloads,
 			ConfigType,
 			ConfigInputType
 		>
@@ -478,17 +496,6 @@ export class AgentBuilder<
 
 	useEventBridge(name: string) {
 		this.manifest.eventBridge = name
-		return this
-	}
-
-	/**
-	 * @deprecated Use defineResource<ResourceName, ResourceType>() and provide the concrete instance via getInstance(..., { resources }).
-	 */
-	useResource(alias: string, resource: { resourceName: string }) {
-		this.manifest.resources = {
-			...(this.manifest.resources ?? {}),
-			[alias]: resource,
-		}
 		return this
 	}
 
@@ -505,6 +512,7 @@ export class AgentBuilder<
 		AgentInvokes,
 		SkillNames,
 		Resources,
+		EmitPayloads,
 		ConfigType,
 		ConfigInputType
 	> {
@@ -540,6 +548,7 @@ export class AgentBuilder<
 			AgentInvokes,
 			SkillNames,
 			Resources,
+			EmitPayloads,
 			ConfigType,
 			ConfigInputType
 		>
@@ -562,6 +571,7 @@ export class AgentBuilder<
 		AgentInvokes,
 		SkillNames | Names[number],
 		Resources,
+		EmitPayloads,
 		ConfigType,
 		ConfigInputType
 	> {
@@ -588,6 +598,7 @@ export class AgentBuilder<
 			AgentInvokes,
 			SkillNames | Names[number],
 			Resources,
+			EmitPayloads,
 			ConfigType,
 			ConfigInputType
 		>
@@ -725,6 +736,7 @@ export class AgentBuilder<
 			>,
 		SkillNames,
 		Resources,
+		EmitPayloads,
 		ConfigType,
 		ConfigInputType
 	> {
@@ -781,16 +793,46 @@ export class AgentBuilder<
 				>,
 			SkillNames,
 			Resources,
+			EmitPayloads,
 			ConfigType,
 			ConfigInputType
 		>
 	}
 
-	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
+	canEmit<EventName extends string, T extends Schema>(
+		eventName: EventName,
+		schema: T,
+	): AgentBuilder<
+		ModelAliases,
+		TextAliases,
+		StreamAliases,
+		EmbeddingAliases,
+		RerankAliases,
+		ObjectAliases,
+		AgentInvokes,
+		SkillNames,
+		Resources,
+		EmitPayloads & { [K in EventName]: InferIn<T> },
+		ConfigType,
+		ConfigInputType
+	> {
 		this.declaredEmitSchemas[eventName] = schema
 		this.commandBuilder.canEmit(eventName, schema)
 		this.streamBuilder.canEmit(eventName, schema)
-		return this
+		return this as unknown as AgentBuilder<
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases,
+			ObjectAliases,
+			AgentInvokes,
+			SkillNames,
+			Resources,
+			EmitPayloads & { [K in EventName]: InferIn<T> },
+			ConfigType,
+			ConfigInputType
+		>
 	}
 
 	/**
@@ -1057,13 +1099,14 @@ export class AgentBuilder<
 			RerankAliases,
 			ObjectAliases
 		>,
-	>(fn: AgentHandler<Payload, Parameter, HandlerResources, Models, AgentInvokes>) {
+	>(fn: AgentHandler<Payload, Parameter, HandlerResources, Models, AgentInvokes, EmitPayloads>) {
 		this.handler = fn as AgentHandler<
 			unknown,
 			unknown,
 			Record<string, unknown>,
 			Record<string, ModelProvider>,
-			AgentInvokeList
+			AgentInvokeList,
+			EmitPayloads
 		>
 		const queueName = `agent:${this.info.agentName}:${this.info.agentVersion}:run`
 		const workerName = 'execute'
@@ -1094,7 +1137,7 @@ export class AgentBuilder<
 			}
 		}
 		const createQueuedProtocolContext = (
-			runtime: AgentRuntimeConfig,
+			runtime: AgentRuntimeConfig<EmitPayloads>,
 			context: QueueJobContext<DurableAgentQueuePayload>,
 			message: QueueMessage<DurableAgentQueuePayload>,
 		) =>
@@ -1162,7 +1205,7 @@ export class AgentBuilder<
 				invokeAgent: (context as { invokeAgent?: EmptyObject }).invokeAgent ?? ({} as EmptyObject),
 			}) as unknown as CommandFunctionContext
 		const executeAgent = async (
-			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1407,7 +1450,8 @@ export class AgentBuilder<
 								unknown,
 								Record<string, unknown>,
 								Record<string, ModelProvider>,
-								AgentInvokes
+								AgentInvokes,
+								EmitPayloads
 							>,
 							'skills' | 'expose' | 'manifest'
 					  >
@@ -1764,12 +1808,13 @@ export class AgentBuilder<
 				currentAgentContext = agentContext
 
 				const result = await runtime.handler(
-					agentContext as AgentHandlerContext<
+					agentContext as unknown as AgentHandlerContext<
 						unknown,
 						unknown,
 						Record<string, unknown>,
 						Record<string, ModelProvider>,
-						AgentInvokes
+						AgentInvokes,
+						EmitPayloads
 					>,
 					payload,
 					parameter,
@@ -1823,7 +1868,7 @@ export class AgentBuilder<
 		}
 
 		const observeQueuedRun = async (
-			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1910,7 +1955,7 @@ export class AgentBuilder<
 		}
 
 		const executeQueuedAgent = async (
-			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1963,7 +2008,7 @@ export class AgentBuilder<
 		}
 
 		this.commandBuilder.setCommandFunction(async function commandImpl(
-			this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+			this: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 			context: CommandFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1975,7 +2020,7 @@ export class AgentBuilder<
 		})
 
 		this.streamBuilder.setStreamFunction(async function streamImpl(
-			this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+			this: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 			context: StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -2057,7 +2102,7 @@ export class AgentBuilder<
 						Object.entries(this.declaredBeforeGuardHooks).map(([name, hook]) => [
 							name,
 							async function queuedAgentBeforeGuard(
-								this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+								this: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 								context: QueueJobContext,
 								message: QueueMessage<DurableAgentQueuePayload>,
 							) {
@@ -2080,7 +2125,7 @@ export class AgentBuilder<
 						Object.entries(this.declaredAfterGuardHooks).map(([name, hook]) => [
 							name,
 							async function queuedAgentAfterGuard(
-								this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+								this: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 								context: QueueJobContext,
 								result: DurableAgentQueueResult,
 								message: QueueMessage<DurableAgentQueuePayload>,
@@ -2106,7 +2151,7 @@ export class AgentBuilder<
 					) as Record<string, never>,
 				)
 				.setHandler(async function durableWorker(
-					this: { config?: { __agentRuntime?: AgentRuntimeConfig } },
+					this: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 					context: QueueJobContext<DurableAgentQueuePayload>,
 					message: QueueMessage<DurableAgentQueuePayload>,
 				) {
@@ -2236,12 +2281,13 @@ export class AgentBuilder<
 			AgentInvokes,
 			SkillNames,
 			Resources,
+			EmitPayloads,
 			ConfigType,
 			ConfigInputType
 		>
 	}
 
-	build(): AgentDefinition<SkillNames, Resources, ConfigInputType, ConfigType> {
+	build(): AgentDefinition<SkillNames, Resources, ConfigInputType, ConfigType, EmitPayloads> {
 		if (!this.handler) {
 			throw new Error('Agent handler is required. Call setHandler() before build().')
 		}
@@ -2261,7 +2307,7 @@ export class AgentBuilder<
 
 		manifest.allowedTools = manifest.allowedTools ?? []
 		manifest.allowedAgents = manifest.allowedAgents ?? []
-		const dependencies: AgentInstanceDependencies = {
+		const dependencies: AgentInstanceDependencies<EmitPayloads> = {
 			info: this.info,
 			manifest,
 			serviceBuilder: this.serviceBuilder,

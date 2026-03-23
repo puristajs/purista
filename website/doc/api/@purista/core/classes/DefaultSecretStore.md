@@ -89,13 +89,9 @@ Enable generally set method
 
 [`Logger`](Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 #### Returns
 
@@ -163,13 +159,9 @@ Enable generally set method
 
 > `optional` **logger**: [`Logger`](Logger.md)
 
-A logger instance
-
 #### logLevel?
 
 > `optional` **logLevel**: [`LogLevelName`](../type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 #### Inherited from
 

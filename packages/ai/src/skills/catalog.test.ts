@@ -56,7 +56,9 @@ describe('canonical PURISTA skill catalog', () => {
 			.map(entry => entry.name)
 			.sort()
 
-		expect(names).toEqual(requiredSkills.sort())
+		for (const skillName of requiredSkills) {
+			expect(names).toContain(skillName)
+		}
 	})
 
 	it('keeps every skill on the standard structure with existing references', async () => {

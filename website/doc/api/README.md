@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file.
 - Refactor ai runtime and testing foundations
 - Refactor ai runtime defaults and docs
 - Refactor ai agent builder parity and docs
+- Refactor builder parity across core and ai
 
 ### Styling
 

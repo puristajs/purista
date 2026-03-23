@@ -41,13 +41,13 @@ import type {
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { withSessionIdInPayload } from './sessionPayload.js'
 
-export type AgentInstanceDependencies = {
+export type AgentInstanceDependencies<EmitPayloads extends Record<string, unknown> = Record<string, unknown>> = {
 	info: AgentInfo
 	manifest: AgentManifest
 	serviceBuilder: ServiceBuilder<
 		ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
 	>
-	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
+	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any, EmitPayloads>
 	callOptionsSchema?: import('zod').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
 	prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
 	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
@@ -87,10 +87,10 @@ type ResolvedAgentRuntimeDependencies = {
 	config?: Record<string, unknown>
 }
 
-type AgentServiceConfig = {
+type AgentServiceConfig<EmitPayloads extends Record<string, unknown> = Record<string, unknown>> = {
 	runtime?: Record<string, unknown>
 	__agentRuntime: {
-		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
+		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any, EmitPayloads>
 		manifest: AgentManifest
 		conversationStore: ConversationStore
 		poolManager: PoolManager
@@ -152,12 +152,18 @@ const resolveSkillResource = <SkillNames extends string>(
 	return createInlineSkillResource(skills)
 }
 
-export class AgentInstance implements AgentInstanceContract {
+export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record<string, unknown>>
+	implements AgentInstanceContract<EmitPayloads>
+{
 	private service?: Service
-	private readonly dependencies: AgentInstanceDependencies
+	private readonly dependencies: AgentInstanceDependencies<EmitPayloads>
 	private readonly runtime: ResolvedAgentRuntimeDependencies
 
-	constructor(deps: AgentInstanceDependencies, eventBridge: EventBridge, runtime: AgentRuntimeDependencies = {}) {
+	constructor(
+		deps: AgentInstanceDependencies<EmitPayloads>,
+		eventBridge: EventBridge,
+		runtime: AgentRuntimeDependencies = {},
+	) {
 		this.dependencies = deps
 		const poolId = runtime.poolConfig?.poolId ?? `agent:${deps.info.agentName}`
 		const maxConcurrencyPerInstance = runtime.poolConfig?.maxConcurrencyPerInstance ?? 1
@@ -228,7 +234,7 @@ export class AgentInstance implements AgentInstanceContract {
 			resolvedRuntimeConfig = validationResult.data as Record<string, unknown>
 		}
 
-		const serviceConfig: AgentServiceConfig = {
+		const serviceConfig: AgentServiceConfig<EmitPayloads> = {
 			runtime: resolvedRuntimeConfig,
 			__agentRuntime: {
 				handler: this.dependencies.handler,

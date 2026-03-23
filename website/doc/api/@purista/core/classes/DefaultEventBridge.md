@@ -66,13 +66,9 @@ Use this if there is a need to always have the same instance id.
 
 [`Logger`](Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../type-aliases/LogLevelName.md)
-
-If no logger instance is given, use this log level
 
 ###### logWarnOnMessagesWithoutReceiver?
 
@@ -83,8 +79,6 @@ Log warnings on messages which are emitted, but could not delivered to at least 
 ###### spanProcessor?
 
 `SpanProcessor`
-
-A OpenTelemetry span processor
 
 #### Returns
 

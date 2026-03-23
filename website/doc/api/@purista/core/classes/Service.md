@@ -34,6 +34,7 @@ class MyService extends Service {
 
 ## Extended by
 
+- [`SandboxService`](../../ai/classes/SandboxService.md)
 - [`HonoServiceClass`](../../hono-http-server/classes/HonoServiceClass.md)
 - [`HttpServerClass`](../../httpserver/classes/HttpServerClass.md)
 

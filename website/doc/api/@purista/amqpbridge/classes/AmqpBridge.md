@@ -105,13 +105,9 @@ Use this if there is a need to always have the same instance id.
 
 [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-If no logger instance is given, use this log level
 
 ###### namePrefix?
 
@@ -134,8 +130,6 @@ socket options
 ###### spanProcessor?
 
 `SpanProcessor`
-
-A OpenTelemetry span processor
 
 ###### url?
 

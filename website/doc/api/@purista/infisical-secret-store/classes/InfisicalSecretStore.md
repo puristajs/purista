@@ -172,7 +172,7 @@ A logger instance
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
-A log level for new logger if logger is not set
+the loglevel if no logger instance is given
 
 ###### name?
 
@@ -342,7 +342,7 @@ A logger instance
 
 > `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
-A log level for new logger if logger is not set
+the loglevel if no logger instance is given
 
 #### name?
 

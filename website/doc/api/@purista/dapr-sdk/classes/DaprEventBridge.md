@@ -130,25 +130,13 @@ Use this if there is a need to always have the same instance id.
 
 [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
-If no logger instance is given, use this log level
-
 ###### name?
 
 `string`
-
-name of the bridge
-
-**Default**
-
-```ts
-HttpEventBridge
-```
 
 ###### pathPrefix?
 
@@ -203,8 +191,6 @@ Port of the server.
 ###### spanProcessor?
 
 `SpanProcessor`
-
-A OpenTelemetry span processor
 
 ###### subscriptionPayloadAsCloudEvent?
 

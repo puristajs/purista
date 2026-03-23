@@ -79,6 +79,7 @@ export type AgentDefinition<
 	Resources extends Record<string, unknown> = EmptyObject,
 	ConfigInput extends Record<string, unknown> = EmptyObject,
 	Config extends Record<string, unknown> = ConfigInput,
+	EmitPayloads extends Record<string, unknown> = EmptyObject,
 > = {
 	info: AgentInfo
 	manifest: AgentManifest
@@ -93,14 +94,17 @@ export type AgentDefinition<
 	getInstance(
 		eventBridge: EventBridge,
 		options?: AgentInstanceOptions<SkillNames, Resources, ConfigInput>,
-	): Promise<AgentRuntimeInstance>
+	): Promise<AgentRuntimeInstance<EmitPayloads>>
 	getDefaultConfig(): Complete<Config> | undefined
 }
 
-export type AgentRuntimeInstance = {
+export type AgentRuntimeInstance<EmitPayloads extends Record<string, unknown> = EmptyObject> = {
 	start(): Promise<void>
 	stop(): Promise<void>
-	invoke(request: AgentInvokeRequest, contextOverrides?: Partial<AgentInvokeContext>): Promise<AgentInvokeResult>
+	invoke(
+		request: AgentInvokeRequest,
+		contextOverrides?: Partial<AgentInvokeContext<EmitPayloads>>,
+	): Promise<AgentInvokeResult>
 	getStatus(): AgentRuntimeStatus
 	getExternalRuntimeMetadata(): ExternalRuntimeMetadata
 }
@@ -116,11 +120,11 @@ export type AgentInvokeRequest = {
 	tenantId?: string
 }
 
-export type AgentInvokeContext = {
-	stream?: AgentStreamResponder
+export type AgentInvokeContext<EmitPayloads extends Record<string, unknown> = EmptyObject> = {
+	stream?: AgentStreamResponder<EmitPayloads>
 }
 
-export type AgentStreamResponder = {
+export type AgentStreamResponder<_EmitPayloads extends Record<string, unknown> = EmptyObject> = {
 	onFrame(frame: AgentProtocolEnvelope): void | Promise<void>
 	onComplete(): void | Promise<void>
 	onError(error: unknown): void | Promise<void>

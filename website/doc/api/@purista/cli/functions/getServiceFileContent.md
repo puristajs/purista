@@ -8,7 +8,7 @@
 
 > **getServiceFileContent**(`input`): `string`
 
-Defined in: [content/service/getServiceFileContent.ts:10](https://github.com/puristajs/purista/blob/f5d6341014c00d0ace275b083eb8e473fc2845f5/packages/cli/src/api/content/service/getServiceFileContent.ts#L10)
+Defined in: [content/service/getServiceFileContent.ts:10](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/cli/src/api/content/service/getServiceFileContent.ts#L10)
 
 Generate the service file content for a given service name and version.
 

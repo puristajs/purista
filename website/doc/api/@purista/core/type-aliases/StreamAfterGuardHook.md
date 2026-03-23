@@ -8,7 +8,7 @@
 
 > **StreamAfterGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionFinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `result`, `originalPayload`, `originalParameter`) => `Promise`\<`void`\>
 
-Defined in: core/types/stream/StreamAfterGuardHook.ts:19
+Defined in: [core/types/stream/StreamAfterGuardHook.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamAfterGuardHook.ts#L19)
 
 Guard called after a stream completes successfully and the final payload has
 been validated.

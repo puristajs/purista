@@ -8,7 +8,7 @@
 
 > **addPuristaCommand**(`input`): `Promise`\<`void`\>
 
-Defined in: [addPuristaCommand.ts:17](https://github.com/puristajs/purista/blob/f5d6341014c00d0ace275b083eb8e473fc2845f5/packages/cli/src/api/addPuristaCommand.ts#L17)
+Defined in: [addPuristaCommand.ts:17](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/cli/src/api/addPuristaCommand.ts#L17)
 
 Add all folders and files for a new command to an existing PURISTA service.
 

@@ -8,7 +8,7 @@
 
 > **getStreamBuilderFileContent**(`input`): `string`
 
-Defined in: [content/stream/getStreamBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/f5d6341014c00d0ace275b083eb8e473fc2845f5/packages/cli/src/api/content/stream/getStreamBuilderFileContent.ts#L9)
+Defined in: [content/stream/getStreamBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/4404dd96f5462503c1bc6e1de335782a5a892137/packages/cli/src/api/content/stream/getStreamBuilderFileContent.ts#L9)
 
 ## Parameters
 

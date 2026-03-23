@@ -8,7 +8,7 @@
 
 > **StreamBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`void`\>
 
-Defined in: core/types/stream/StreamBeforeGuardHook.ts:18
+Defined in: [core/types/stream/StreamBeforeGuardHook.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamBeforeGuardHook.ts#L18)
 
 Guard called after stream input validation and before the stream handler runs.
 
