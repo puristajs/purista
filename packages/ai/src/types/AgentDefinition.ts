@@ -9,6 +9,7 @@ import type {
 	QueueBridge,
 	Schema,
 	SecretStore,
+	Service,
 	StateStore,
 } from '@purista/core'
 import type { ConversationStore } from '../memory/conversationStore.js'
@@ -101,6 +102,23 @@ export type AgentDefinition<
 export type AgentRuntimeInstance<EmitPayloads extends Record<string, unknown> = EmptyObject> = {
 	start(): Promise<void>
 	stop(): Promise<void>
+	/**
+	 * Return the underlying PURISTA service instance backing this agent runtime.
+	 *
+	 * This is mainly useful for HTTP/bootstrap integration where services need to be
+	 * registered with another PURISTA-aware runtime, for example an HTTP server.
+	 *
+	 * @example
+	 * ```ts
+	 * const instance = await supportAgent.getInstance(eventBridge, { models })
+	 * await instance.start()
+	 * const service = instance.getService()
+	 * if (service) {
+	 *   httpService.registerService(service)
+	 * }
+	 * ```
+	 */
+	getService(): Service | undefined
 	invoke(
 		request: AgentInvokeRequest,
 		contextOverrides?: Partial<AgentInvokeContext<EmitPayloads>>,

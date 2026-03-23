@@ -269,6 +269,10 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 		await this.service.start()
 	}
 
+	getService(): Service | undefined {
+		return this.service
+	}
+
 	async stop() {
 		if (!this.service) {
 			return
