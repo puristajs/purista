@@ -1,6 +1,6 @@
 ---
 name: purista-deployment-topologies
-description: Choose deployment shapes for PURISTA services, queues, agents, and sandbox-backed workloads without breaking the architectural boundaries.
+description: Teach untrained models how builder-defined PURISTA services, queues, agents, and sandbox workloads map to deployable runtime processes and infrastructure.
 topics: [deployment, topology, operations]
 phases: [architecture, planning]
 ---
@@ -11,7 +11,16 @@ phases: [architecture, planning]
 Use this skill when the user asks how the designed system should run in development, staging, or production.
 
 ## What this component/package is for
-This skill helps map PURISTA services, queues, agents, and sandbox components into deployable processes and infrastructure boundaries.
+This skill maps builder-defined services, queues, agents, and sandbox components into deployable processes and infrastructure boundaries.
+
+## Core PURISTA concept
+Deployment topology comes after builder design. Services, queues, agents, and runtimes are defined first; topology decides which processes host which runtime instances and bridges.
+
+## Builder lifecycle
+1. Define service, queue, worker, agent, and transport boundaries.
+2. Identify runtime dependencies for each instance.
+3. Group compatible instances into deployable processes.
+4. Separate them only when concurrency, isolation, or operational concerns require it.
 
 ## Hard rules
 - Keep deployment topology separate from service boundaries.
@@ -23,27 +32,37 @@ This skill helps map PURISTA services, queues, agents, and sandbox components in
 - Keep sandbox service near workloads that need code execution.
 - Start with a simple topology and split only when concurrency, tenancy, or resource isolation needs it.
 
-## Recommended file/folder structure
-```text
-config/
-apps/
-packages/
-```
+## Definition pattern
+- Builder definitions should stay topology-neutral.
+- Topology plans should refer back to the service or agent instances they host.
 
-## Common implementation patterns
-- One bootstrap entrypoint wires EventBridge, QueueBridge, stores, services, agents, and HTTP.
-- Dedicated worker pools for durable agent classes.
-- Local development with Docker-compatible sandbox drivers and prebuilt images.
+## Implementation pattern
+- Group runtime instances by traffic shape, durability needs, and operational prerequisites.
+- Keep queue workers, HTTP servers, and heavy sandbox workloads split when they would otherwise interfere.
+
+## Configuration pattern
+- Environment-specific bridge endpoints, store locations, and runtime limits are deployment config, not builder logic.
+
+## Instantiation / runtime wiring
+- A topology is complete only when it can say which process instantiates which services or agents and with what bridges, stores, and resources.
+
+## Verification cues
+- Each deployed process can list the service or agent instances it hosts.
+- Queue-backed work, HTTP exposure, and sandbox runtime needs are explicit.
+- No topology decision silently changes the underlying builder-defined business boundary.
 
 ## Common mistakes / anti-patterns
-- Designing deployment first and forcing service boundaries to fit it.
-- Running every workload in the same process forever.
-- Forgetting queue bridges, state stores, or sandbox images in environment setup.
+- Letting process layout redefine service boundaries.
+- Mixing heavy durable workers into latency-sensitive HTTP processes without justification.
+- Forgetting sandbox or queue prerequisites in production planning.
+- Explaining topology without identifying the concrete runtime instances being deployed.
 
 ## How this connects to other PURISTA concepts
-Deployment depends on services, queue bridges, agents, sandbox, stores, and observability.
+Deployment topology composes service builders, HTTP runtime, queue bridges, agents, sandbox runtime, stores, and observability.
 
 ## Read if needed
-- `website/doc/handbook/3_eco_system/index.md`
-- `website/doc/handbook/3_eco_system/sandbox.md`
-- `specs/25-voyage/20-code-workspace/00-repository-and-execution-isolation.md`
+- `specs/20-agents/10-platform-architecture.md`
+- `specs/15-async-queues/20-recommended-design-v1.md`
+- `specs/25-voyage/70-backend/00-backend-architecture.md`
+- `packages/httpserver`
+- `packages/ai/src/sandbox`

@@ -1,6 +1,6 @@
 ---
 name: purista-external-runtime-bindings
-description: Expose commands and agents as provider-neutral external runtime bindings using context.expose and neutral metadata.
+description: Teach untrained models how PURISTA exposes builder-defined commands and agents through provider-neutral runtime bindings and explicit instance wiring.
 topics: [agents, external-runtime, tools]
 phases: [architecture, implementation]
 ---
@@ -13,6 +13,14 @@ Use this skill when an external tool loop needs access to PURISTA commands or ag
 ## What this component/package is for
 External runtime bindings are the provider-neutral contract for exposing PURISTA commands and agents to model/tool runtimes.
 
+## Core PURISTA concept
+Bindings sit on top of builder-defined commands and agents. The service or agent definition remains the source of truth, and the runtime binding only exposes a neutral interface for external loops.
+
+## Builder lifecycle
+1. Define commands or agents normally.
+2. Create neutral external bindings with `context.expose.*` from the running agent or service runtime.
+3. Adapt those neutral bindings into provider-specific tools only at the provider boundary.
+
 ## Hard rules
 - Keep the binding source of truth neutral and provider-agnostic.
 - Use `context.expose.tool`, `context.expose.agent`, `context.expose.tools`, and `context.expose.metadata`.
@@ -23,27 +31,39 @@ External runtime bindings are the provider-neutral contract for exposing PURISTA
 - Expose agents when an external loop should delegate to another model-driven unit.
 - Reject unsupported durable cases early instead of inventing fallback semantics.
 
-## Recommended file/folder structure
-```text
-src/agents/<agent-name>/v1/
-  <agentName>.ts
-  prompt.md
-```
+## Definition pattern
+- Define commands and agents first.
+- Expose them from runtime context; do not invent parallel binding-only behavior.
 
-## Common implementation patterns
-- Build bindings from the runtime context inside the handler.
-- Convert them to provider tools only at the adapter boundary, for example with `toAiSdkTools`.
-- Inspect `context.expose.metadata()` for diagnostics and test assertions.
+## Implementation pattern
+- Build neutral bindings from declared commands, agents, and metadata.
+- Keep binding creation close to runtime context where allowlists and capabilities are already known.
+
+## Configuration pattern
+- Allowed tools, agents, and metadata are part of definition.
+- Provider-specific adapters and model runtimes are runtime concerns.
+
+## Instantiation / runtime wiring
+- Neutral bindings only exist once the service or agent is running with full runtime context.
+- Provider adapters consume those bindings after instance creation; they should not become the primary definition surface.
+
+## Verification cues
+- The underlying command or agent is still traceable to a builder definition.
+- Neutral bindings contain the metadata external runtimes need.
+- Provider code only adapts neutral bindings and does not recreate business contracts.
 
 ## Common mistakes / anti-patterns
-- Creating provider-native tools as the source of truth.
-- Reintroducing old bridge helper names or compatibility aliases.
-- Mixing queue policy and allowlist resolution into the provider adapter.
+- Making the provider adapter the source of truth.
+- Smuggling allowlist logic into the provider layer.
+- Exposing hidden side effects through bindings that the service definition never declared.
+- Teaching provider adaptation without showing the underlying builder-defined command or agent.
 
 ## How this connects to other PURISTA concepts
-This skill connects commands, agents, queue durability, tool metadata, and provider adapters such as the AI SDK adapter.
+This skill builds on commands, agents, `context.expose`, AI SDK adapters, MCP/A2A exposure, and runtime providers.
 
 ## Read if needed
-- `website/doc/handbook/2_building_business-logic/agent/external-runtime-bridge.md`
-- `packages/ai/src/bridge/externalRuntime.ts`
+- `packages/ai/src/builder/AgentBuilder.ts`
 - `packages/ai/src/runtime/context.ts`
+- `packages/ai/src/bridge/externalRuntime.test.ts`
+- `specs/20-agents/40-core-interfaces.md`
+- `specs/20-agents/20-protocol-and-ui.md`

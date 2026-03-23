@@ -1,6 +1,6 @@
 ---
 name: purista-ai-sdk-adapter
-description: Adapt provider-neutral PURISTA bindings to Vercel AI SDK tools without making AI SDK the source of truth.
+description: Teach untrained models how PURISTA adapts neutral external bindings from builder-defined commands and agents into Vercel AI SDK tools without changing the source of truth.
 topics: [agents, ai-sdk, tools]
 phases: [implementation]
 ---
@@ -13,6 +13,15 @@ Use this skill when the chosen provider loop is Vercel AI SDK and PURISTA bindin
 ## What this component/package is for
 The AI SDK adapter is a thin conversion layer from neutral external runtime bindings to AI SDK-compatible tool definitions.
 
+## Core PURISTA concept
+AI SDK tooling is an adapter over builder-defined commands and agents. The neutral binding remains the stable contract; AI SDK is only one runtime surface.
+
+## Builder lifecycle
+1. Define commands or agents normally.
+2. Expose them as neutral bindings from runtime context.
+3. Convert those bindings with `toAiSdkTool(...)` or `toAiSdkTools(...)`.
+4. Pass the adapted tools into the AI SDK request.
+
 ## Hard rules
 - Keep `toAiSdkTool` and `toAiSdkTools` as pure adapters.
 - Do not move allowlist lookup or queue decisions into the adapter.
@@ -20,28 +29,43 @@ The AI SDK adapter is a thin conversion layer from neutral external runtime bind
 
 ## Decision rules
 - Use the adapter only at the provider boundary.
-- Keep neutral binding creation inside the runtime context with `context.expose`.
+- Keep neutral binding creation inside runtime context with `context.expose`.
+- If the business contract changes, change the underlying builder definition first, not the AI SDK adapter.
 
-## Recommended file/folder structure
-```text
-src/agents/<agent-name>/v1/
-  <agentName>.ts
-```
+## Definition pattern
+- Define tools and agents through PURISTA builders and neutral runtime bindings.
+- Keep adapter files separate from service and agent definition files.
 
-## Common implementation patterns
-- `const bindings = context.expose.tools(...)`
-- `const tools = toAiSdkTools(bindings)`
-- pass `tools` into `generateText` metadata only after the binding set is complete
+## Implementation pattern
+- Convert neutral bindings late.
+- Render skills and references separately from tool conversion.
+- Keep the prompt/request assembly explicit.
+
+## Configuration pattern
+- Provider-specific model settings belong to the provider/runtime layer.
+- Tool and command capability boundaries remain defined by PURISTA builders and bindings.
+
+## Instantiation / runtime wiring
+- The adapter only has meaningful input after the service or agent instance is running and exposing neutral bindings.
+- Runtime wiring must still provide the underlying providers, skill resources, and allowed bindings.
+
+## Verification cues
+- The same command or agent can be exposed through a non-AI-SDK runtime because the neutral binding is still present.
+- The adapter layer contains conversion, not business logic.
+- A reviewer can trace an AI SDK tool back to a PURISTA builder-defined command or agent.
 
 ## Common mistakes / anti-patterns
-- Building AI SDK tools directly from service metadata without neutral bindings.
-- Treating the adapter as the place to enforce durable execution policy.
-- Hiding binding creation in custom helpers that recreate old bridge abstractions.
+- Letting AI SDK-specific concerns leak into command or agent definitions.
+- Rebuilding tool metadata manually in the adapter.
+- Treating the AI SDK adapter as the only exposure path.
+- Explaining adapter code without showing the neutral binding and underlying builder-defined capability.
 
 ## How this connects to other PURISTA concepts
-This skill sits on top of external runtime bindings, agent runtime, and provider-specific model invocation.
+This skill composes external runtime bindings, agent runtime, skill rendering, and provider runtime integration.
 
 ## Read if needed
-- `website/doc/handbook/2_building_business-logic/agent/ai-sdk-adapter.md`
 - `packages/ai/src/bridge/aiSdk.ts`
-- `packages/ai/src/bridge/externalRuntime.ts`
+- `packages/ai/src/providers/runtime/AiSdkProvider.ts`
+- `packages/ai/src/builder/AgentBuilder.ts`
+- `examples/ai-basic/src/service/support/v1/command/getMcpTools/getMcpToolsCommandBuilder.ts`
+- `specs/20-agents/30-builder-integration.md`

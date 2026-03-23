@@ -1,6 +1,6 @@
 ---
 name: purista-agent-runtime
-description: Implement agent handlers with current PURISTA runtime helpers, conversation state, run-state, context.expose, and explicit skill loading.
+description: Teach untrained models how PURISTA agent handlers run with explicit context, skills, stores, expose helpers, and runtime resources supplied at instance creation time.
 topics: [agents, runtime, skills, run-state]
 phases: [implementation]
 ---
@@ -11,7 +11,15 @@ phases: [implementation]
 Use this skill when writing or reviewing agent handler code.
 
 ## What this component/package is for
-The runtime context gives an agent controlled access to models, tools, resources, other agents, conversation memory, run-state, and skills.
+The agent runtime context gives a running agent controlled access to models, tools, resources, other agents, conversation memory, run-state, and skills.
+
+## Core PURISTA concept
+Agent runtime helpers are runtime composition surfaces, not magic prompt state. The agent definition declares what is allowed, and the running instance supplies the concrete skill resource, stores, bindings, and providers.
+
+## Builder lifecycle
+1. Declare the agent with its allowed skills, tools, models, and runtime policy.
+2. Create the running instance with concrete providers, skill resources, stores, and bridges.
+3. Inside the handler, use `context.skills`, `context.expose`, `context.tools`, `context.agents`, `context.runState`, and `context.conversation` explicitly.
 
 ## Hard rules
 - Use `context.expose.*` for provider-neutral external runtime bindings.
@@ -24,29 +32,49 @@ The runtime context gives an agent controlled access to models, tools, resources
 - Use `context.agents.forward` when child output should be visible to the user.
 - Use `context.skills.search`, `context.skills.load`, and `context.skills.loadReferences` only when the handler actually needs those materials.
 
-## Recommended file/folder structure
-```text
-src/agents/<agent-name>/v1/
-  <agentName>.ts
-  prompt.md
-  helpers.ts
-```
+## Definition pattern
+- Declare skill names with `builder.useSkills([...])`.
+- Declare runtime bindings, execution policy, and stores on the agent definition.
 
-## Common implementation patterns
-- Search skills by `phases`, `topics`, and user query, then render only the selected skill documents.
-- Convert neutral bindings to provider tools at the boundary with `toAiSdkTools`.
-- Use `context.stream` and `context.runState` together for long-running user-visible work.
+## Implementation pattern
+- Search skills by phase, topic, and query, then render only the selected documents.
+- Convert neutral bindings to provider tools at the boundary, not inside domain logic.
+- Use run-state plus streaming for long-running user-visible work.
+
+## Configuration pattern
+- The agent definition owns declared skill names and conversation/run-state strategy.
+- The concrete `SkillResource`, model providers, stores, and bridges are runtime inputs.
+
+## Instantiation / runtime wiring
+- The running agent instance must receive the concrete skill resource and any required runtime resources at `getInstance(...)`.
+- If `builder.useSkills([...])` was declared but no runtime `skills` resource is supplied, that is a wiring error.
+- Queue-backed agents additionally need runtime `queueBridge` support.
+
+## Verification cues
+- The handler uses declared context helpers instead of hidden globals.
+- Skill names are declared on the builder and backed by a real runtime skill resource.
+- Runtime wiring can name which stores, providers, and bridges are passed to the agent instance.
+- Durable workflow state is in run-state, not in prompt history.
 
 ## Common mistakes / anti-patterns
 - Reintroducing a knowledgebase abstraction instead of resources and skills.
 - Storing workflow checkpoints in conversation history.
 - Building provider-specific tools directly inside the agent instead of using `context.expose`.
+- Teaching runtime helpers without explaining the builder declaration plus `getInstance(...)` wiring.
 
 ## How this connects to other PURISTA concepts
-This skill depends on external runtime bindings, AI SDK adapters, conversation store, run-state, resources, and sandbox integration.
+This skill depends on agent builders, skill resources, external runtime bindings, AI SDK adapters, conversation store, run-state, resources, and queue execution.
+
+## Related skills
+- `purista-agents-core` for deciding when an agent belongs in the design
+- `purista-external-runtime-bindings` for neutral binding exposure
+- `purista-ai-sdk-adapter` for AI SDK conversion at the provider boundary
+- `purista-stores` for conversation and run-state boundaries
+- `purista-sandbox` for isolated tool execution paths
 
 ## Read if needed
 - `website/doc/handbook/2_building_business-logic/agent/handler-context.md`
-- `website/doc/handbook/2_building_business-logic/agent/runtime.md`
-- `website/doc/handbook/2_building_business-logic/agent/run-state.md`
 - `packages/ai/src/runtime/context.ts`
+- `packages/ai/src/builder/AgentBuilder.ts`
+- `examples/ai-basic/src/agents/supportAgent/v1/supportAgent.ts`
+- `examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.ts`

@@ -1,6 +1,6 @@
 ---
 name: purista-sandbox
-description: Run workspace and script execution in isolated PURISTA sandboxes with explicit ownership, scope, and startup diagnostics.
+description: Teach untrained models how builder-defined services and agents use PURISTA sandbox adapters and resources for isolated execution with explicit runtime ownership and wiring.
 topics: [sandbox, execution, isolation]
 phases: [architecture, implementation, simulation]
 requires_sandbox: true
@@ -14,6 +14,15 @@ Use this skill when code, shell commands, or skill scripts must run in an isolat
 ## What this component/package is for
 The sandbox runtime inside `@purista/ai` provisions isolated execution environments behind a service boundary and adapter layer.
 
+## Core PURISTA concept
+Sandboxing is runtime infrastructure exposed through services, resources, and adapters. Business services and agents should depend on sandbox capabilities explicitly rather than assuming direct host execution.
+
+## Builder lifecycle
+1. Decide which service or agent needs isolated execution.
+2. Model sandbox access as a resource, service dependency, or explicit runtime adapter.
+3. Define commands, queues, or agents that use that sandbox capability.
+4. Instantiate the runtime with the concrete sandbox driver or sandbox service wiring.
+
 ## Hard rules
 - Route execution through the sandbox service or adapter, not direct host shell access.
 - Keep ownership deterministic with tenant, project, user, and optional scope.
@@ -22,31 +31,43 @@ The sandbox runtime inside `@purista/ai` provisions isolated execution environme
 
 ## Decision rules
 - Use shared default ownership for persistent per-user workspaces.
-- Use scoped sandboxes such as `agent-run` or conversation-level keys for isolated concurrent work.
-- Keep executable skill scripts sandbox-backed rather than host-backed.
+- Use isolated scope values for parallel or risky workloads.
+- Prefer queue-backed execution when sandbox work is long-running or restart-sensitive.
 
-## Recommended file/folder structure
-```text
-src/resources/sandboxExecutionResource/
-src/application/workspace/
-apps/server/Dockerfile.sandbox
-```
+## Definition pattern
+- Keep sandbox capabilities behind resources, adapters, or service commands.
+- Do not let arbitrary business handlers shell out directly.
 
-## Common implementation patterns
-- `ensureSandbox` before writing files or executing commands.
-- Keep image/runtime diagnostics in startup bootstrap.
-- Use a Docker-compatible driver for Docker Desktop, OrbStack, or Colima.
+## Implementation pattern
+- Use sandbox adapters to seed repo and skill files into isolated workspaces.
+- Keep sandbox execution separate from host filesystem assumptions.
+- Pair sandbox-heavy flows with queue or run-state support when recovery matters.
+
+## Configuration pattern
+- Sandbox driver selection, ownership rules, and runtime diagnostics are configuration and runtime concerns.
+- Builders define that sandbox capability is required; bootstrap provides the actual driver or service resource.
+
+## Instantiation / runtime wiring
+- A service or agent that needs sandboxing is incomplete until the concrete sandbox runtime is supplied.
+- Startup diagnostics should verify image/runtime availability before user traffic hits the capability.
+
+## Verification cues
+- The design can name which running service or agent receives sandbox capability and how.
+- Scope and ownership are explicit.
+- Sandbox tasks that need durability also name queue/runtime state support.
 
 ## Common mistakes / anti-patterns
-- Assuming a shared sandbox is safe for parallel isolated agent runs.
-- Treating `tenantId` and `principalId` as mandatory when the app may need stable defaults.
-- Shipping an image that exits immediately instead of staying alive for `docker exec`.
+- Running host shell commands directly from handlers.
+- Letting multiple users or tasks collide in one shared workspace implicitly.
+- Treating sandboxing as prompt text instead of a runtime capability.
+- Explaining sandbox execution without showing which service or agent gets the sandbox adapter at runtime.
 
 ## How this connects to other PURISTA concepts
-Sandbox connects agents, skills with scripts, queue-backed long work, resources, and startup diagnostics.
+Sandboxing composes with resources, queues, agents, skills, observability, and deployment topology.
 
 ## Read if needed
-- `packages/ai/src/sandbox/index.ts`
-- `website/doc/handbook/3_eco_system/sandbox.md`
-- `packages/ai/src/sandbox/types/SandboxDriver.ts`
-- `packages/ai/src/sandbox/service/Sandbox/v1/helper/ownership.ts`
+- `references/scope-examples.md`
+- `packages/ai/src/sandbox/workspaceLayout.ts`
+- `packages/ai/src/sandbox/service/Sandbox/v1/SandboxServiceBuilder.ts`
+- `packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts`
+- `specs/20-agents/10-platform-architecture.md`

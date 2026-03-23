@@ -1,6 +1,6 @@
 ---
 name: purista-agent-testing
-description: Test PURISTA agents with the current harness, context mocks, scripted models, and protocol assertions.
+description: Teach untrained models how to verify builder-defined PURISTA agents and their runtime wiring with public mocks, harnesses, scripted models, and protocol assertions.
 topics: [agents, testing, protocol]
 phases: [implementation, simulation]
 ---
@@ -11,7 +11,15 @@ phases: [implementation, simulation]
 Use this skill when writing unit or integration tests for agent behavior, protocol frames, queue parity, or tool loops.
 
 ## What this component/package is for
-PURISTA now ships first-class agent test helpers so tests do not have to hand-roll runtime context, models, bridges, or protocol parsing.
+PURISTA ships agent test helpers so tests do not need to hand-roll runtime context, models, bridges, or protocol parsing.
+
+## Core PURISTA concept
+Agent tests should verify the builder-defined runtime contract, not only prompt text. The test harness proves that declared skills, resources, stores, tools, and execution modes work once the agent instance is created.
+
+## Builder lifecycle
+1. Define the agent and its skills, tools, resources, and runtime behavior.
+2. Instantiate the agent in tests with public mocks or harness helpers.
+3. Verify protocol frames, tool calls, queue parity, and final outputs against the declared runtime contract.
 
 ## Hard rules
 - Prefer `createAgentContextMock` for handler-level unit tests.
@@ -22,29 +30,40 @@ PURISTA now ships first-class agent test helpers so tests do not have to hand-ro
 ## Decision rules
 - Use context mocks when the handler is the subject under test.
 - Use the harness when lifecycle, EventBridge wiring, queue behavior, or provider integration matters.
+- Add queue-backed tests when the agent supports durable execution.
 
-## Recommended file/folder structure
-```text
-src/agents/<agent-name>/v1/
-  <agentName>.test.ts
-  <agentName>.integration.test.ts
-```
+## Definition pattern
+- Tests should remain traceable to the agent builder’s declared skills, tools, stores, and execution policy.
 
-## Common implementation patterns
-- Capture final output with `finalMessage`.
-- Assert run-state artifacts with `getRunStateArtifacts`.
-- Reuse shared scripted provider sequences for multi-turn or tool-loop tests.
+## Implementation pattern
+- Use scripted models to force deterministic model outputs.
+- Assert skill loading, tool binding, protocol frames, and child-agent calls explicitly.
+
+## Configuration pattern
+- Test setup should provide the same kind of resources and stores the real instance expects.
+- Mocking is allowed, but hidden undeclared dependencies are not.
+
+## Instantiation / runtime wiring
+- Tests should create the running agent instance or handler context with explicit runtime resources.
+- If an agent declares skills or queue-backed execution, the test should prove that the required runtime pieces are wired correctly.
+
+## Verification cues
+- The test harness can trace behavior back to declared builder configuration.
+- Inline and queued execution produce compatible observable behavior when both are supported.
+- Skills, tools, and references are present only when declared and wired.
 
 ## Common mistakes / anti-patterns
-- Rebuilding custom runtime mocks in every test file.
-- Testing only happy-path final text and ignoring tool or protocol output.
-- Using real external dependencies when a resource or model double is enough.
+- Testing only prompt strings and not runtime effects.
+- Mocking hidden dependencies the builder never declared.
+- Skipping queue parity tests for durable agents.
+- Verifying generation but not protocol, tool, or skill behavior.
 
 ## How this connects to other PURISTA concepts
-Testing touches resources, event/queue bridges, external runtime bindings, protocol streaming, and durable agent execution.
+Agent testing depends on agent builders, runtime context, skills, external bindings, queue execution, protocol rendering, and observability.
 
 ## Read if needed
-- `website/doc/handbook/2_building_business-logic/agent/testing.md`
-- `packages/ai/src/testing/createAgentContextMock.ts`
-- `packages/ai/src/testing/createAgentTestHarness.ts`
-- `packages/ai/src/testing/protocolTestHelpers.ts`
+- `packages/ai/src/testing/createAgentContextMock.test.ts`
+- `packages/ai/src/builder/AgentBuilder.test.ts`
+- `packages/ai/src/runtime/context.test.ts`
+- `examples/ai-basic/src/integration/aiSdkMockToolFlow.test.ts`
+- `examples/ai-basic/src/integration/httpInteroperability.test.ts`
