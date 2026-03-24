@@ -27,10 +27,13 @@ Agent runtime helpers are runtime composition surfaces, not magic prompt state. 
 - Use `context.memory.run` for durable workflow state and `context.memory.conversation` for chat history.
 - Keep prompt assembly explicit.
 - Prefer `context.ai.policy.resolve(...)`, `context.ai.reflect.run(...)`, and `context.runtime.approvals.*` over handwritten local abstractions when the runtime already provides them.
+- Let the runtime/provider layer own bounded invocation, timeout/retry policy, and provider-safe structured-output compilation.
+- Do not hand-roll app-local timeout wrappers or strict-provider schema patches inside handlers.
 
 ## Decision rules
 - Use `context.invoke.tools` for declared command invocations.
 - Use `context.invoke.agents.forward` when child output should be visible to the user.
+- Use `context.invoke.agents.invoke` when private worker output should stay internal and only the parent agent should narrate to the user.
 - Use `context.ai.skills.search`, `context.ai.skills.load`, and `context.ai.skills.loadReferences` only when the handler actually needs those materials.
 
 ## Definition pattern
@@ -41,6 +44,8 @@ Agent runtime helpers are runtime composition surfaces, not magic prompt state. 
 - Search skills by phase, topic, and query, then render only the selected documents.
 - Convert neutral bindings to provider tools at the boundary, not inside domain logic.
 - Use run-state plus streaming for long-running user-visible work.
+- For strict structured output, rely on the provider/runtime compilation path in `packages/ai/src/providers/runtime/providerJsonSchema.ts`.
+- For bounded model calls, rely on the shared invocation path in `packages/ai/src/providers/runtime/modelInvocation.ts` and provider defaults/metadata instead of local wrappers.
 
 ## Configuration pattern
 - The agent definition owns declared skill names and conversation/run-state strategy.
@@ -61,6 +66,8 @@ Agent runtime helpers are runtime composition surfaces, not magic prompt state. 
 - Reintroducing a knowledgebase abstraction instead of resources and skills.
 - Storing workflow checkpoints in conversation history.
 - Building provider-specific tools directly inside the agent instead of using `context.invoke.expose`.
+- Catching provider-schema or timeout failures by fabricating domain output instead of surfacing a real recovery path.
+- Teaching handler code without showing which runtime behavior is framework-owned versus app-owned.
 - Teaching runtime helpers without explaining the builder declaration plus `getInstance(...)` wiring.
 
 ## How this connects to other PURISTA concepts
@@ -77,5 +84,7 @@ This skill depends on agent builders, skill resources, external runtime bindings
 - `website/doc/handbook/2_building_business-logic/agent/handler-context.md`
 - `packages/ai/src/runtime/context.ts`
 - `packages/ai/src/builder/AgentBuilder.ts`
+- `packages/ai/src/providers/runtime/modelInvocation.ts`
+- `packages/ai/src/providers/runtime/providerJsonSchema.ts`
 - `examples/ai-basic/src/agents/supportAgent/v1/supportAgent.ts`
 - `examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.ts`

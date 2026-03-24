@@ -6,50 +6,44 @@ order: 203704
 
 # Runtime
 
-`AgentBuilder` definitions are inert. They become real workloads only when you
-call `getInstance(eventBridge, options)`.
-
-This is the instance-creation phase of the PURISTA lifecycle.
+`AgentBuilder` definitions are inert. They become real, running workloads only when you call `getInstance(eventBridge, options)`. This is the instance-creation phase of the PURISTA lifecycle, where the abstract definitions from the builder meet concrete, environment-specific dependencies.
 
 ## What Belongs In `getInstance(...)`
 
-Provide concrete runtime dependencies here:
+Provide all concrete runtime dependencies here:
 
-- model providers
-- queue bridge
-- stores
-- resource implementations
-- skills
-- runtime config values
-- pool configuration
-- sandbox-backed execution resources
-
-This is where environment and infrastructure meet the builder definition.
+- **Model Providers**: Bind model aliases to actual provider instances (e.g., `AiSdkProvider`).
+- **Queue Bridge**: Required for agents in `'queued'` execution mode.
+- **Stores**: Provide implementations for `conversationStore`, `stateStore`, etc.
+- **Resources**: Provide implementations for any custom resources declared with `defineResource(...)`.
+- **Skills**: Provide the actual skill content, either inline or as a `SkillResource`.
+- **Runtime Config**: Pass environment-specific values for the schema defined by `setConfigSchema(...)`.
+- **Pool Configuration**: Configure concurrency and resource pools.
+- **Sandbox Execution**: Provide a sandbox runtime if the agent needs an isolated workspace.
 
 ## The Common Example
 
 ```ts
-import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
-import { AiSdkProvider, createLayeredFileSkillResource } from '@purista/ai'
+import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core';
+import { AiSdkProvider, createLayeredFileSkillResource } from '@purista/ai';
+import { RedisStateStore } from '@purista/redis-state-store';
 
-const eventBridge = new DefaultEventBridge()
-const queueBridge = new DefaultQueueBridge()
-
-await eventBridge.start()
+const eventBridge = new DefaultEventBridge();
+const queueBridge = new DefaultQueueBridge();
+const stateStore = new RedisStateStore(); // For durable runs
 
 const supportSkills = createLayeredFileSkillResource({
-  canonicalRoots: [new URL('../../skills', import.meta.url).pathname],
   overlayRoots: [new URL('./skills', import.meta.url).pathname],
-})
+});
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   queueBridge,
+  stateStore,
   models: {
     'openai:primary': new AiSdkProvider({
       model: openai('gpt-4o-mini'),
     }),
   },
-  conversationStore: conversationStore,
   resources: {
     supportPolicy: {
       developerInstruction: 'Answer concisely and always include next steps.',
@@ -63,231 +57,111 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
     poolId: 'support',
     maxConcurrencyPerInstance: 4,
   },
-})
+});
 
-await supportAgentInstance.start()
+await supportAgentInstance.start();
 ```
 
-## Models
+## Runtime Dependencies in Detail
 
-The builder declares aliases. `getInstance(...)` binds those aliases to real providers.
+### Models
+
+The builder declares aliases; `getInstance(...)` binds them to real providers. This separation keeps your handler code provider-agnostic.
 
 ```ts
-const instance = await supportAgent.getInstance(eventBridge, {
+.getInstance(eventBridge, {
   models: {
-    'openai:primary': provider,
+    'openai:primary': new AiSdkProvider({ model: openai('gpt-4o') }),
   },
 })
 ```
+`getInstance` validates that a provider is supplied for every alias declared in the builder and that it supports the required capabilities (e.g., `json`, `stream`).
 
-Think about models in two steps:
+### Skills
 
-1. the builder says which aliases exist
-2. instance creation says what those aliases really use
+Provide skill implementations for the names declared with `.useSkills([...])`.
 
-That keeps the handler simple, because the handler only needs `context.ai.models['alias']`.
-
-## Skills
-
-`getInstance(...)` is also where you provide the actual skill implementations.
-
-Two common paths:
-
-### Inline typed skills
-
-```ts
-const instance = await supportAgent.getInstance(eventBridge, {
-  models: {
-    'openai:primary': provider,
-  },
+- **Inline Skills**: Good for tests or small, self-contained agents.
+  ```ts
   skills: {
-    'spec-elicitation': {
-      content: 'Ask for missing constraints before committing to architecture.',
-    },
-    'support-workflow': {
-      content: 'Triage first, then gather facts, then answer.',
-    },
-  },
-})
-```
-
-### File-based skill catalogs
-
-```ts
-const instance = await supportAgent.getInstance(eventBridge, {
-  models: {
-    'openai:primary': provider,
-  },
+    'spec-elicitation': { content: '...' },
+  }
+  ```
+- **File-Based Catalogs**: Use `createLayeredFileSkillResource` for reusable, application-wide skill catalogs.
+  ```ts
   skills: createLayeredFileSkillResource({
-    canonicalRoots: [canonicalRoot],
-    overlayRoots: [appRoot],
-  }),
-})
-```
+    canonicalRoots: [sharedSkillsPath],
+    overlayRoots: [appSkillsPath],
+  })
+  ```
 
-Use inline skills for tests or tiny agents. Use file-based catalogs when you want reusable application skills.
+### Stores and Queue Bridge
 
-## Runtime config
+- **`queueBridge`**: A queue bridge instance is **required** if the agent's execution mode is `'queued'`.
+- **`stateStore`**: A persistent state store (like `@purista/redis-state-store`) is highly recommended for durable agents to store run state.
+- **`conversationStore`**: Manages chat history. If not provided, it **defaults to an in-memory store**, which is not suitable for production use with durable or multi-instance agents.
 
-Use runtime config for small host-controlled values declared earlier with
-`setConfigSchema(...)` and optionally `setDefaultConfig(...)`.
+### Pools
 
-```ts
-const instance = await supportAgent.getInstance(eventBridge, {
-  models: {
-    'openai:primary': provider,
-  },
-  config: {
-    locale: 'en',
-  },
-})
-```
-
-Read the resolved values in the handler through:
-
-```ts
-context.runtime.service.config.runtime.locale
-```
-
-Rule:
-
-- use resources for runtime objects or richer dependencies
-- use config for simple validated values
-
-## Queue Bridge
-
-Queued durable agents need a `queueBridge`.
-
-```ts
-const instance = await supportAgent.getInstance(eventBridge, {
-  queueBridge,
-  models: {
-    'openai:primary': provider,
-  },
-})
-```
-
-Inline agents do not need one.
-
-Rule:
-
-- if the builder uses `setExecutionMode('queued')`, plan to provide a queue bridge
-
-## Propagation And Tracing
-
-The AI runtime keeps PURISTA request metadata intact across orchestration.
-
-- `tenantId` and `principalId` flow through queued runs, tool calls, child-agent
-  invocation, and explicit custom events
-- child-agent invocation reuses the caller `traceId`, so traces stay connected
-- `correlationId` keeps the wider distributed request chain intact
-
-The runtime also adds explicit orchestration spans on top of the normal command
-or queue-worker span:
-
-- `ai.tool_call:<service>/<command>`
-- `ai.agent_invoke:<agent>/<version>`
-
-Those spans carry the forwarded tenant/principal tags plus the AI-specific
-attributes used by the handbook and specs.
-
-## Resources and stores
-
-Declare resources in the builder with `defineResource(...)`, then provide the
-real implementation at instance creation.
-
-```ts
-const instance = await supportAgent.getInstance(eventBridge, {
-  models: {
-    'openai:primary': provider,
-  },
-  resources: {
-    supportPolicy: {
-      developerInstruction: 'Be concise and operational.',
-    },
-  },
-  conversationStore,
-})
-```
-
-This keeps runtime dependencies explicit. The builder says which resources are
-required; the instance says what concrete implementation exists.
-
-## Pools
-
-Use pool config to constrain concurrency.
+Use `poolConfig` to constrain concurrency for expensive operations like model calls. This is useful for managing costs and ensuring fairness across workloads.
 
 ```ts
 poolConfig: {
-  poolId: 'support',
+  poolId: 'support-agents',
   maxConcurrencyPerInstance: 4,
 }
 ```
 
-Use pools when:
+### Runtime Config
 
-- model calls are expensive
-- you need fairness across workloads
-- queued workers should not run unbounded parallel work
+Provide environment-specific values for the schema you defined with `setConfigSchema(...)`.
 
-## Sandbox Runtime
-
-If the agent needs a real workspace for:
-
-- shell execution
-- repository work
-- skill scripts
-- generated files
-
-then instance creation is where you provide the sandbox-backed execution resource.
-
-The canonical sandbox layout is:
-
-```text
-/workspace/
-  repo/
-  skills/
-  tmp/
-  outputs/
+```ts
+.getInstance(eventBridge, {
+  config: {
+    locale: process.env.AGENT_LOCALE || 'en',
+  },
+})
 ```
+The handler can access this resolved, validated config via `context.runtime.service.config`.
 
-Rules:
+### The `AgentInstance` Object
 
-- repo files belong in `/workspace/repo`
-- materialized skill bundles belong in `/workspace/skills/<skill-name>`
-- scratch data belongs in `/workspace/tmp`
-- generated non-repo outputs belong in `/workspace/outputs`
+The `getInstance(...)` method returns an `AgentInstance` object, which represents the running agent. You are responsible for managing its lifecycle:
 
-You do not need sandbox for every agent. Add it only when the agent really needs workspace execution.
+- `await agentInstance.start()`: Starts the underlying PURISTA service and its subscriptions.
+- `await agentInstance.stop()`: Stops the service and cleans up resources.
+- `agentInstance.getStatus()`: Returns runtime status, including pool statistics.
+
+## Propagation and Tracing
+
+The PURISTA AI runtime automatically ensures that request metadata is preserved across all operations:
+- `tenantId` and `principalId` flow through queued runs, tool calls, and child-agent invocations.
+- `traceId` is maintained, keeping distributed traces connected.
+
+The runtime also adds explicit orchestration spans to your traces, such as `ai.tool_call:<service>/<command>` and `ai.agent_invoke:<agent>/<version>`, providing deep visibility into the agent's execution.
 
 ## Instance Creation Checklist
 
-When `getInstance(...)` feels unclear, ask:
+When `getInstance(...)` feels unclear, run through this checklist:
 
-1. Which model aliases must be bound?
-2. Is the agent inline or queued?
-3. Does it need declared skills, and where do those skills come from?
-4. Does it need runtime config values?
-5. Does it need stores or resources?
-6. Does the chosen model provider need to drive an external tool loop?
-7. Does it need a real sandbox workspace?
-
-That checklist covers almost all runtime confusion.
+1.  Which **model aliases** need to be bound to providers?
+2.  Is the agent `inline` or `queued`? If queued, is a **`queueBridge`** provided?
+3.  Does it need a persistent **`stateStore`** or **`conversationStore`**?
+4.  Does it use declared **skills**, and where do they come from (inline or file)?
+5.  Does it need **runtime config** values?
+6.  Are there any custom **resources** to provide?
+7.  Does it need a **sandbox** workspace for shell execution or file system access?
 
 ## Common Mistakes
-
-- Expecting `.useSkills([...])` to provide skills by itself.
-- Forgetting the queue bridge for queued agents.
-- Mixing provider creation into the builder instead of instance creation.
-- Forgetting to provide resources declared with `defineResource(...)`.
-- Putting object-style runtime dependencies into `config` when they should be resources.
-- Introducing sandbox complexity for agents that only need models and commands.
+- **Forgetting the `queueBridge`**: Queued agents will fail to start without it.
+- **Using Default In-Memory Stores in Production**: Forgetting to provide a persistent `conversationStore` or `stateStore` can lead to state loss.
+- **Provider/Capability Mismatch**: Not providing a model provider for a declared alias, or providing one that lacks a required capability.
+- **Forgetting to Provide Resources**: If you use `defineResource(...)`, you must provide an implementation here.
 
 ## Related Guides
-
 - [Quick Start](./getting-started.md)
-- [Context](./handler-context.md)
-- [Builder](./agent-builder.md)
+- [Agent Builder](./agent-builder.md)
+- [Handler Context](./handler-context.md)
 - [Skills](./skills.md)
-- [AI SDK Adapter](./ai-sdk-adapter.md)
 - [Sandbox Runtime](../../3_eco_system/sandbox.md)

@@ -70,6 +70,20 @@ const throwIfErrorEnvelope = (envelope: AgentProtocolEnvelope, failOnErrorFrame:
 	})
 }
 
+const mergeUniqueEnvelopes = (current: AgentProtocolEnvelope[], final: AgentProtocolEnvelope[]) => {
+	const seen = new Set(current.map(envelope => JSON.stringify(envelope)))
+	const additions: AgentProtocolEnvelope[] = []
+	for (const envelope of final) {
+		const key = JSON.stringify(envelope)
+		if (seen.has(key)) {
+			continue
+		}
+		seen.add(key)
+		additions.push(envelope)
+	}
+	return additions
+}
+
 /**
  * Convenience helper for invoking an agent command via an EventBridge.
  */
@@ -143,12 +157,10 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 
 			if (frame.payload.frameType === 'complete') {
 				if (Array.isArray(frame.payload.final)) {
-					if (!envelopes.length) {
-						for (const envelope of frame.payload.final) {
-							throwIfErrorEnvelope(envelope, options.failOnErrorFrame ?? true)
-							envelopes.push(envelope)
-							await emitFrame(envelope)
-						}
+					for (const envelope of mergeUniqueEnvelopes(envelopes, frame.payload.final)) {
+						throwIfErrorEnvelope(envelope, options.failOnErrorFrame ?? true)
+						envelopes.push(envelope)
+						await emitFrame(envelope)
 					}
 				}
 				await options.stream?.onComplete?.()

@@ -1,5 +1,7 @@
 import { StatusCode, UnhandledError } from '@purista/core'
 import type { ModelProvider, ProviderRequest } from './ModelProvider.js'
+import type { ModelInvocationPolicy } from './modelInvocation.js'
+import { runBoundedModelInvocation } from './modelInvocation.js'
 import { collectStreamText } from './streamNormalization.js'
 
 export type GenerateTextOptions = {
@@ -7,10 +9,12 @@ export type GenerateTextOptions = {
 	request: ProviderRequest
 	onReasoning?: (text: string) => void | Promise<void>
 	onTextDelta?: (delta: string) => void | Promise<void>
+	policy?: ModelInvocationPolicy
+	label?: string
 }
 
 /**
- * Generates one final text output from a model provider.
+ * Generates one final text output from a model provider with optional bounded invocation policy.
  *
  * Strategy:
  * 1. Prefer `stream()` when available and forward reasoning/text callbacks.
@@ -18,30 +22,35 @@ export type GenerateTextOptions = {
  */
 export const generateText = async (input: GenerateTextOptions): Promise<string> => {
 	const { model, request, onReasoning, onTextDelta } = input
+	return await runBoundedModelInvocation({
+		label: input.label ?? 'model.generateText',
+		policy: input.policy,
+		operation: async () => {
+			if (typeof model.generateText === 'function') {
+				return await model.generateText({
+					...request,
+					onReasoning,
+					onTextDelta,
+				})
+			}
 
-	if (typeof model.generateText === 'function') {
-		return await model.generateText({
-			...request,
-			onReasoning,
-			onTextDelta,
-		})
-	}
+			if (typeof model.stream === 'function') {
+				const final = await collectStreamText(model.stream(request), {
+					onReasoning,
+					onTextDelta,
+				})
+				return final.output
+			}
 
-	if (typeof model.stream === 'function') {
-		const final = await collectStreamText(model.stream(request), {
-			onReasoning,
-			onTextDelta,
-		})
-		return final.output
-	}
+			if (typeof model.generate === 'function') {
+				const result = await model.generate(request)
+				if (result.reasoningText?.trim()) {
+					await onReasoning?.(result.reasoningText)
+				}
+				return result.output
+			}
 
-	if (typeof model.generate === 'function') {
-		const result = await model.generate(request)
-		if (result.reasoningText?.trim()) {
-			await onReasoning?.(result.reasoningText)
-		}
-		return result.output
-	}
-
-	throw new UnhandledError(StatusCode.InternalServerError, 'Model provider must support stream() or generate()')
+			throw new UnhandledError(StatusCode.InternalServerError, 'Model provider must support stream() or generate()')
+		},
+	})
 }

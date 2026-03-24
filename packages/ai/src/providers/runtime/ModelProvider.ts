@@ -1,5 +1,6 @@
 import type { ExternalBinding, ExternalBindingSet } from '../../bridge/externalRuntime.js'
 import type { SkillDocument, SkillReferenceDocument } from '../../skills/fileSystem.js'
+import type { ModelInvocationPolicy, ModelInvocationRetryPolicy } from './modelInvocation.js'
 
 /**
  * Payload sent to a model provider.
@@ -49,6 +50,9 @@ export type ProviderGenerateTextRequest = ProviderRequest & {
 
 /**
  * Payload sent to structured JSON generation capable providers.
+ *
+ * The runtime compiles Standard Schema or plain JSON Schema inputs into
+ * provider-safe structured-output schemas before the request reaches the SDK.
  */
 export type ProviderJsonRequest = {
 	prompt: string
@@ -155,6 +159,13 @@ export type ModelProviderCapability =
 	| 'moderation'
 
 export type ModelProviderCapabilities = Partial<Record<ModelProviderCapability, boolean>>
+
+export type ProviderInvocationMode = 'text' | 'json' | 'stream' | 'structured-json-strict' | 'structured-json-relaxed'
+
+export type ProviderInvocationPolicy = ModelInvocationPolicy & {
+	mode?: ProviderInvocationMode
+	retry?: ModelInvocationRetryPolicy
+}
 
 /**
  * Incremental events emitted by {@link ModelProvider.stream}.

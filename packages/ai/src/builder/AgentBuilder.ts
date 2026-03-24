@@ -29,7 +29,7 @@ import { toProtocolSseEvents } from '../protocol/sse.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import { agentProtocolEnvelopeSchema } from '../protocol/types.js'
 import { generateText } from '../providers/runtime/generateText.js'
-import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
+import type { ModelProvider, ProviderJsonRequest } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
@@ -1783,7 +1783,7 @@ export class AgentBuilder<
 							prompt: string
 							context?: string
 							developerInstruction?: string | string[]
-							schema?: unknown
+							schema?: ProviderJsonRequest['schema']
 							metadata?: Record<string, unknown>
 						}): Promise<{
 							data: T

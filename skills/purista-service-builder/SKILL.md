@@ -35,7 +35,7 @@ The service builder is the boundary between application design and runtime execu
 - Add a new service when ownership, state, or integration boundaries differ materially.
 - Add a new version when a public contract changes incompatibly.
 - Use one service builder as the parent for all command, subscription, stream, queue, and worker builders in that version folder.
-- If AI workers need deterministic persistence, keep the worker agent separate from the command that applies its deliverable.
+- If AI workers need deterministic persistence, keep the worker agent separate from the command or coordinator that applies canonical truth.
 
 ## Definition pattern
 - Put the service builder in its own versioned file.
@@ -52,11 +52,23 @@ src/service/<service-name>/v1/
   worker/
 ```
 
+For agent-heavy applications, keep the agent folders equally explicit:
+
+```text
+src/agents/<agent-name>/v1/
+  <agentName>.ts
+  schema.ts
+  <agentName>.test.ts
+```
+
+Do not hide the active builder/handler behind a legacy alias folder when the new agent name is the real runtime boundary.
+
 ## Implementation pattern
 - Child builder files define schemas and handler implementations.
 - The service module imports child builders, collects `getDefinition()` results, and registers them on the service builder.
 - Handler bodies stay thin and use typed context, resources, stores, and other declared capabilities.
-- Prefer shared application helpers for repeated workflow patching or deliverable application logic instead of copying resource update code across commands.
+- Prefer shared application helpers for repeated truth-application logic instead of copying resource update code across commands.
+- Keep agent-specific helper functions beside the owning agent unless they are genuinely reusable across domains.
 
 ## Configuration pattern
 - Use `setConfigSchema(...)` for service-owned configuration shape.

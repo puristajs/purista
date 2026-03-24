@@ -13,11 +13,15 @@ Use this skill when the user gives incomplete requirements, asks for architectur
 ## What this component/package is for
 This skill helps an agent turn vague requirements into structured, implementation-ready specifications that can later be mapped into services, contracts, resources, queues, and agents.
 
+## Core PURISTA concept
+Specification work should stay grounded in the user's language and persist as markdown truth that later architecture or planning work can read directly.
+
 ## Hard rules
 - Ask for missing business outcomes before deciding technical topology.
 - Separate confirmed requirements, assumptions, constraints, and open questions.
 - Keep user-facing language concrete and domain-specific.
 - Do not invent external systems, compliance rules, or SLAs without evidence.
+- Keep the canonical spec in markdown files, not transient JSON summaries.
 
 ## Decision rules
 - Ask about actors, inputs, outputs, invariants, integrations, failure handling, and latency only when they affect design choices.
@@ -27,15 +31,16 @@ This skill helps an agent turn vague requirements into structured, implementatio
 ## Recommended file/folder structure
 ```text
 specs/
+  README.md
   spec.md
   open-questions.md
-  assumptions.md
 ```
 
 ## Common implementation patterns
 - Summarize back the confirmed scope after each clarification.
 - Translate the user’s words into candidate services and events only after the domain language is stable.
 - Preserve unresolved questions instead of burying them in prose.
+- Keep the current truth legible enough that a later worker can synthesize architecture from `specs/spec.md` plus `specs/open-questions.md` without hidden state.
 
 ## Common mistakes / anti-patterns
 - Asking the user to choose framework internals too early.

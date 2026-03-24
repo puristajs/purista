@@ -192,6 +192,45 @@ describe('invokeAgent', () => {
 		expect(onError).not.toHaveBeenCalled()
 	})
 
+	it('merges completion envelopes even when chunk frames were already streamed', async () => {
+		const statusEnvelope = {
+			frame: { kind: 'artifact', artifactId: 'status', mimeType: 'application/json', content: '{}' },
+		} as AgentProtocolEnvelope
+		const finalMessageEnvelope = {
+			frame: { kind: 'message', content: '{"ok":true}', role: 'assistant', final: true },
+		} as AgentProtocolEnvelope
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'chunk', sequence: 1, chunk: statusEnvelope } }
+					yield {
+						payload: {
+							frameType: 'complete',
+							sequence: 2,
+							final: [statusEnvelope, finalMessageEnvelope],
+						},
+					}
+				},
+			}),
+			invoke: vi.fn(),
+		} as any
+
+		const onFrame = vi.fn()
+		const result = await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'hello' },
+			stream: { onFrame, onComplete: vi.fn(), onError: vi.fn() },
+		})
+
+		expect(result).toEqual([statusEnvelope, finalMessageEnvelope])
+		expect(onFrame).toHaveBeenCalledTimes(2)
+	})
+
 	it('throws stream error frames as UnhandledError', async () => {
 		const eventBridge = {
 			instanceId: 'instance-1',

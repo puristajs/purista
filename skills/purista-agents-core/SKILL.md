@@ -18,8 +18,8 @@ Agents extend the builder model instead of replacing it. They are model-driven r
 
 Current preferred shape:
 - one public conductor agent for user-facing orchestration
-- worker agents for synthesis/review/discovery
-- deterministic commands for applying project truth
+- a small set of private reasoning workers with explicit modes
+- deterministic coordinators or commands that apply markdown truth and rebuild projections
 
 ## Builder lifecycle
 1. Decide whether the workflow needs an agent or a deterministic service path.
@@ -33,12 +33,14 @@ Current preferred shape:
 - Use agents for model-driven reasoning and orchestration, not as generic replacements for application services.
 - Separate inline from queued durable execution deliberately.
 - Emit protocol-safe progress and errors.
-- Keep worker agents deliverable-first; do not hide mutation inside them.
+- Keep worker agents reasoning-first; do not let them mutate canonical truth directly.
+- Keep markdown or domain truth outside the agent envelope when the workspace is the real source of truth.
 
 ## Decision rules
 - Use inline agents for short, low-risk turns.
 - Use queued durable agents for planning, simulation, long-running tool loops, or resumable work.
-- Keep deterministic business invariants in services, commands, queues, and resources even when an agent is involved.
+- Keep deterministic business invariants in services, commands, queues, resources, and truth-application coordinators even when an agent is involved.
+- Use more agent types only when specialization is materially valuable; prefer worker modes over a swarm of narrow agents.
 
 ## Definition pattern
 - Define agents as explicit runtime units with declared skills, tools, resources, and execution policy.
@@ -49,6 +51,7 @@ Current preferred shape:
 - Keep business side effects behind commands, services, queues, or allowlisted runtime bindings.
 - Use explicit protocol or stream surfaces for user-visible progress.
 - Use grouped context domains such as `context.ai`, `context.invoke`, `context.memory`, and `context.io` instead of older flat helper patterns.
+- If the application uses workspace markdown as truth, let agents propose reasoning results over that truth and let deterministic code apply accepted changes.
 
 ## Configuration pattern
 - Agent model aliases, skill names, conversation persistence, run-state, and runtime bindings are part of definition.
@@ -68,6 +71,8 @@ Current preferred shape:
 - Treating the agent as the whole application.
 - Hiding durable workflow state in chat memory.
 - Letting provider SDK details define the architecture.
+- Multiplying agents when one worker with explicit modes would be clearer.
+- Treating typed deliverables or side files as stronger truth than the canonical workspace state.
 - Describing an agent loop without its surrounding services, resources, or runtime wiring.
 
 ## How this connects to other PURISTA concepts

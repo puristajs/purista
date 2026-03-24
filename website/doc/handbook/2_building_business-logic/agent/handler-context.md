@@ -6,281 +6,177 @@ order: 203703
 
 # Context
 
-The handler is the implementation phase of a PURISTA agent.
+The handler is the implementation phase of a PURISTA agent. Once the builder has declared what the agent may do, the handler uses the `context` object to perform that work.
 
-Once the builder has declared what the agent may do, the handler uses `context`
-to perform that work.
-
-The important shift is:
-
-- the builder declares capability
-- the handler uses those capabilities
+The core principle is:
+- The **builder** declares *capability*.
+- The **handler** *uses* those capabilities.
 
 ## The Example
 
-Assume the builder already declared:
-
-- `.defineModel('openai:primary')`
-- `.useSkills(['spec-elicitation', 'support-workflow'])`
-- `.canInvoke('support', '1', 'lookupFaq')`
-- `.canInvokeAgent('triageAgent', '1')`
-
-Then the handler can use the corresponding grouped `context` APIs directly.
+Assuming the builder has already declared models, skills, and invocations, the handler can access them through a clean, grouped API.
 
 ```ts
 .setHandler(async (context, payload) => {
+  // Start a durable run for observability and recovery
   const run = await context.memory.run.start({
-    title: 'Support response',
-    extraScope: { sessionId: payload.sessionId ?? context.input.message.id },
-  })
+    title: 'Support Response',
+    extraScope: { sessionId: payload.sessionId },
+  });
 
-  await context.memory.conversation.addUser(payload.prompt)
+  // Add user message to conversation history
+  await context.memory.conversation.addUser(payload.prompt);
   await run.plan([
     { id: 'triage', title: 'Classify urgency' },
     { id: 'faq', title: 'Load FAQ guidance' },
     { id: 'answer', title: 'Write final answer' },
-  ])
+  ]);
 
-  const skills = await context.ai.skills.loadAvailable()
+  // Use allowlisted tools and agents
   const triage = await context.invoke.agents.runText({
     agentName: 'triageAgent',
     agentVersion: '1',
     payload: { prompt: payload.prompt },
-  })
+  });
+
   const faq = await context.invoke.tools.invoke.support['1'].lookupFaq({
     question: payload.prompt,
-  })
+  });
 
-  const answer = await generateText({
-    model: context.ai.models['openai:primary'],
-    request: {
-      prompt: [
-        renderSkillDocuments('Relevant skills', skills),
-        `Customer request: ${payload.prompt}`,
-        `Triage result: ${triage}`,
-        `FAQ answer: ${String(faq.answer ?? '')}`,
-      ].filter(Boolean).join('\n\n'),
-    },
+  // Use declared skills and models
+  const skills = await context.ai.skills.loadAvailable();
+  const answer = await context.ai.models['openai:primary'].generateText({
+    prompt: `...`,
     onTextDelta: delta => context.io.stream.sendChunk(delta),
-  })
+  });
 
-  await context.memory.conversation.addAssistant(answer)
-  await run.finishSuccess(answer)
-  context.io.stream.sendFinal(answer)
-  return { message: answer }
+  // Persist the response and finalize the run
+  await context.memory.conversation.addAssistant(answer);
+  await run.finishSuccess(answer);
+  context.io.stream.sendFinal(answer);
+
+  return { message: answer };
 })
 ```
-
-That one handler already shows the main context groups.
 
 ## The Context Groups
 
 ### 1. `context.input`
 
-Use `context.input` for invocation input:
+Provides access to the invocation input: the payload, parameters, and the raw PURISTA message.
 
 ```ts
-const sessionId = payload.sessionId ?? context.input.message.id
+const sessionId = payload.sessionId ?? context.input.message.id;
 ```
 
 ### 2. `context.memory`
 
-Use `context.memory` for chat history and durable workflow state.
+Handles state management for the agent.
 
-```ts
-await context.memory.conversation.addUser(payload.prompt)
-const run = await context.memory.run.start({
-  title: 'Architecture synthesis',
-})
-```
-
-Rule:
-
-- `context.memory.conversation` is LLM-visible history
-- `context.memory.run` is durable operational state
+- `context.memory.conversation`: Manages the LLM-visible chat history (`addUser`, `addAssistant`).
+- `context.memory.run`: Controls the durable workflow state for observability and recovery (`start`, `plan`, `step`, `finishSuccess`). See [Durable Run State](./run-state.md).
+- `context.memory.session`: Provides low-level access to the underlying session store.
 
 ### 3. `context.invoke`
 
-Use `context.invoke` for allowlisted tools and child agents.
+Used to call allowlisted tools (commands) and child agents.
 
-#### Tools
+- **Tools**: `context.invoke.tools.invoke.serviceName['version'].commandName(...)`
+- **Child Agents**: `context.invoke.agents.runText(...)` or `context.invoke.agents.forward(...)`
 
-```ts
-const faq = await context.invoke.tools.invoke.support['1'].lookupFaq({
-  question: payload.prompt,
-})
-```
-
-#### Child agents
-
-```ts
-const triage = await context.invoke.agents.runText({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: payload.prompt },
-})
-```
+You can also use `context.invoke.expose` to create bindings for external runtimes like the Vercel AI SDK.
 
 ### 4. `context.ai`
 
-Use the model aliases declared in the builder.
+This is the central hub for AI-related functionality.
 
-```ts
-const answer = await context.ai.models['openai:primary'].generate({
-  prompt: payload.prompt,
-})
-```
-
-Or use the higher-level helper:
-
-```ts
-import { generateText } from '@purista/ai'
-
-const answer = await generateText({
-  model: context.ai.models['openai:primary'],
-  request: { prompt: payload.prompt },
-  onTextDelta: delta => context.io.stream.sendChunk(delta),
-})
-```
-
-Use `context.ai.models` when the handler itself owns the reasoning loop.
-
-Skills also live under `context.ai`:
-
-```ts
-const skills = await context.ai.skills.loadAvailable()
-```
-
-Reflection and policy helpers also live here:
-
-```ts
-const quality = context.ai.policy.resolve(payload.qualityProfile)
-const reflection = await context.ai.reflect.run({
-  name: 'support-answer',
-  profile: quality.name,
-  draft: async () => 'first draft',
-  critique: async () => ({ accepted: true, feedback: [] }),
-  accept: ({ critique }) => critique.accepted,
-})
-```
-
-Resolved quality profiles are operational, not descriptive only. When a profile
-declares `execution.maxModelSteps` or `execution.maxToolCalls`, those limits are
-enforced by the runtime wrappers.
+- **`context.ai.models`**: Access model providers declared in the builder.
+  ```ts
+  const answer = await context.ai.models['openai:primary'].generateText({ prompt });
+  ```
+- **`context.ai.embeddings`**: Access embedding models.
+  ```ts
+  const embedding = await context.ai.embeddings['text-embed-ada'].embed({ value: '...' });
+  ```
+- **`context.ai.rerankers`**: Access reranking models.
+  ```ts
+  const reranked = await context.ai.rerankers['cohere-rerank'].rerank({ query, documents });
+  ```
+- **`context.ai.skills`**: Load and search skills declared with `useSkills`.
+  ```ts
+ts
+  const skills = await context.ai.skills.loadAvailable();
+  ```
+- **`context.ai.policy`**: Resolve agent policies (e.g., quality profiles) at runtime.
+  ```ts
+  const quality = context.ai.policy.resolve(payload.qualityProfile);
+  ```
+- **`context.ai.reflect`**: Run explicit draft-critique-refine loops for self-correction.
+  ```ts
+  const reflection = await context.ai.reflect.run({ name: 'support-answer', ... });
+  ```
 
 ### 5. `context.io`
 
-Use `context.io.stream` and `context.io.protocol` for transport-facing output.
+Handles input/output for streaming and the agent protocol.
 
-```ts
-context.io.stream.sendChunk('Working...')
-context.io.stream.sendFinal('Resolved')
-context.io.protocol.emitArtifact({
-  artifactId: 'result',
-  content: { ok: true },
-  final: true,
-})
-```
+- `context.io.stream`: High-level API for sending streaming data to the client (`sendChunk`, `sendFinal`).
+- `context.io.protocol`: Low-level API for emitting specific agent protocol frames (`emitMessage`, `emitArtifact`, `emitError`).
 
 ### 6. `context.output`
 
-Use `context.output.emit(...)` only for declared PURISTA events that your
-application explicitly wants to publish. Agents do not emit custom events by
-default.
+Use `context.output.emit(...)` to publish custom PURISTA events that have been declared in the builder with `canEmit`.
 
 ```ts
-await context.output.emit('support.agent.completed', {
-  sessionId,
-  escalated: false,
-})
+await context.output.emit('support.agent.completed', { sessionId });
 ```
 
 ### 7. `context.app`
 
-Use `context.app.resources` and `context.app.manifest` for application-owned configuration and metadata.
+Provides access to application-level configuration and metadata.
 
-```ts
-const instruction = context.app.resources.supportPolicy.developerInstruction
-```
+- `context.app.resources`: Access resources provided at `getInstance(...)`.
+  ```ts
+  const instruction = context.app.resources.supportPolicy.developerInstruction;
+  ```
+- `context.app.manifest`: The agent's full manifest.
 
 ### 8. `context.runtime`
 
-Use `context.runtime` for low-level runtime helpers and stores when the higher-level APIs are not enough.
+Offers low-level access to PURISTA runtime features.
 
-Approvals live here:
-
-```ts
-await context.runtime.approvals.wait({
-  checkpoint: 'publish-response',
-  detail: 'Review before sending',
-})
-```
-
-Approval expiry fails the run by default. If you need to write or inspect the
-decision outside the waiting helper, use the exported approval helpers:
-
-```ts
-import { getApprovalStateKey, writeApprovalDecision } from '@purista/ai'
-
-const key = getApprovalStateKey('supportAgent', '1', 'publish-response')
-await writeApprovalDecision(context.runtime.stores.states, {
-  agentName: 'supportAgent',
-  agentVersion: '1',
-  checkpoint: 'publish-response',
-  decision: 'approved',
-  decidedBy: 'reviewer-1',
-})
-```
-
-### 9. `context.invoke.expose`
-
-Use `context.invoke.expose.*` only when adapting to an external tool/runtime loop.
-
-Example:
-
-```ts
-const bindings = context.invoke.expose.tools({
-  commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
-  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
-})
-```
-
-This is the bridge from PURISTA declarations to SDK adapters. It is not the normal direct handler path.
+- `context.runtime.stores`: Access to state, secret, and config stores.
+- `context.runtime.approvals`: Manage human-in-the-loop approval checkpoints (`wait`, `writeApprovalDecision`).
+- `context.runtime.service`: The underlying core service context.
 
 ## How To Think About The Handler
 
-Keep the handler focused on:
+Keep the handler focused on orchestration:
+- Managing conversation and run state.
+- Constructing prompts.
+- Calling tools, agents, and models.
+- Streaming progress and results.
 
-- orchestration
-- prompt construction
-- command and child-agent calls
-- durable progress updates
-- streaming
-
-Do not bury environment bootstrapping or provider construction in the handler.
+Avoid putting environment setup or provider construction in the handler. That belongs in `getInstance(...)`.
 
 ## Decision Rules
 
-- Use `context.invoke.tools` for command-backed operations.
-- Use `context.invoke.agents` for child-agent orchestration.
-- Use `context.ai.skills` for declared instruction bundles.
-- Use `context.memory.run` for durable workflow state.
-- Use `context.ai.reflect` when a draft/critique/refine loop is worth the cost.
-- Use `context.runtime.approvals` only for explicit gated transitions.
-- Use `context.ai.models` for provider-owned adapters such as `AiSdkProvider`.
-- Use `context.invoke.expose` only when you are crossing into an adapter boundary such as the AI SDK.
+- Use `context.invoke.*` for calling other PURISTA services and agents.
+- Use `context.ai.skills` for reusable instruction sets.
+- Use `context.memory.run` for durable, resumable workflows.
+- Use `context.ai.reflect` and `context.runtime.approvals` for tasks requiring high quality or human oversight.
+- Use `context.invoke.expose` only when adapting to an external tool loop (like the Vercel AI SDK).
 
 ## Common Mistakes
 
-- Treating `context.ai.skills` as a global registry instead of a declared per-agent scope.
-- Using conversation history to store workflow checkpoints.
-- Re-implementing tool exposure manually instead of using `context.invoke.expose`.
-- Mixing runtime bootstrapping into the handler.
+- **Mixing Concerns**: Putting runtime bootstrapping (like creating providers) inside the handler.
+- **Global Thinking**: Treating `context.ai.skills` as a global registry instead of a per-agent declared scope.
+- **Manual Exposure**: Re-implementing tool exposure manually instead of using `context.invoke.expose`.
+- **State Mismanagement**: Using conversation history (`context.memory.conversation`) to store workflow checkpoints, which belong in `context.memory.run`.
 
 ## Related Guides
-
-- [Builder](./agent-builder.md)
+- [Agent Builder](./agent-builder.md)
 - [Runtime](./runtime.md)
 - [Skills](./skills.md)
-- [AI SDK Adapter](./ai-sdk-adapter.md)
 - [Durable Run State](./run-state.md)
+- [Production-Ready Agents](./production-ready-agents.md)

@@ -12,12 +12,11 @@ Use it to declare:
 
 - the agent identity
 - payload and output schemas
-- execution mode
+- execution mode and policies
 - runtime config schema and defaults
-- model aliases
+- model aliases and hooks
 - declared resources
-- allowlisted commands
-- allowlisted child agents
+- allowlisted commands and child agents
 - declared skills
 - guard hooks
 - transport exposure
@@ -81,7 +80,6 @@ export const supportAgent = new AgentBuilder({
     },
   })
   .persistConversation('user', { maxFrames: 20 })
-  .persistConversation('agent', { maxFrames: 20 })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setSseProtocol('ai-sdk-ui-message')
   .setHandler(async (context, payload) => {
@@ -93,7 +91,7 @@ export const supportAgent = new AgentBuilder({
 
 ## Builder Areas
 
-### 1. Identity and schemas
+### 1. Identity and Schemas
 
 Use these first:
 
@@ -105,27 +103,42 @@ Use these first:
 
 These make the workload explicit and testable.
 
-### 2. Execution mode
+### 2. Execution Mode and Policies
+
+#### Execution Mode
 
 Use:
 
-- `setExecutionMode('inline')`
-- `setExecutionMode('queued')`
+- `setExecutionMode('inline')` for short, immediate work.
+- `setExecutionMode('queued')` for long-running, streaming, resumable, or failure-sensitive work.
 
-Rule:
+Queued durable agents should usually also define an execution policy and use `context.memory.run` in the handler.
 
-- `inline` for short, immediate work
-- `queued` for long-running, streaming, resumable, or failure-sensitive work
+#### Execution Policy
 
-Queued durable agents should usually also define:
+`setExecutionPolicy` defines how a queued agent behaves:
 
-- `setExecutionPolicy(...)`
-- `context.memory.run` usage in the handler
+```ts
+.setExecutionPolicy({
+  httpBehavior: 'attach-and-stream',
+  recovery: 'resume-from-checkpoints',
+  scopeFromPayload: ['sessionId'],
+})
+```
 
-### 3. Runtime config
+- `httpBehavior`: What happens when an HTTP request hits a running durable agent. `'attach-and-stream'` is common.
+- `recovery`: How to handle interruptions. `'resume-from-checkpoints'` is key for durability.
+- `scopeFromPayload`: Creates a durable run scope from payload fields, so subsequent calls for the same `sessionId` attach to the same run.
 
-Use runtime config when the agent needs small host-controlled settings that are
-not model instances, not resources, and not request payload.
+#### Other Policies
+
+- `setAgentPolicy(...)`: Defines agent-wide policies for quality, approvals, and resource usage.
+- `setReflectionPolicy(...)`: Configures self-correction loops (draft, critique, refine).
+- `setRetryPolicy(...)`: Defines retry behavior for transient failures.
+
+### 3. Runtime Config
+
+Use runtime config for small, host-controlled settings that are not model instances, resources, or request payload.
 
 ```ts
 .setConfigSchema(
@@ -138,97 +151,117 @@ not model instances, not resources, and not request payload.
 
 Typical examples:
 
-- locale or formatting defaults
-- feature flags for one deployment
-- max step count or retry policy knobs
+- Locale or formatting defaults
+- Feature flags for a deployment
+- Max step count or retry knobs
 
 Rule:
 
-- builder declares the config contract
-- `getInstance(...)` provides concrete config values
-- handler reads runtime services or stores from `context.runtime.*`
+- The builder declares the config contract with `setConfigSchema`.
+- `getInstance(...)` provides concrete config values.
+- The handler reads values from `context.runtime.service.config`.
 
-More detail:
-
-- [Runtime](./runtime.md)
+More detail: [Runtime](./runtime.md)
 
 ### 4. Models
 
-Use `defineModel(alias, capabilities)` to declare model aliases.
+#### Model Aliases
+
+Use `defineModel(alias, { capabilities })` to declare model aliases.
 
 ```ts
 .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
 .defineModel('openai:classifier', { capabilities: ['json'] })
 ```
 
-The builder should declare aliases, not provider objects. Real providers are bound later at instance creation.
+The builder declares aliases, not provider objects. Real providers are bound at instance creation.
+
+#### Model Hooks
+
+Use `prepareCall` or `prepareStep` to dynamically modify model requests. This is useful for adding metadata or changing options based on the agent's state.
+
+```ts
+.prepareStep(async ({ step, alias }) => {
+  if (alias === 'openai:primary' && step > 1) {
+    return {
+      aiSdk: {
+        temperature: 0.5, // Increase temperature for subsequent steps
+      },
+    };
+  }
+})
+```
+
+- `prepareCall`: A hook that runs for every model call.
+- `prepareStep`: A step-aware hook, useful for iterative refinements.
 
 ### 5. Resources
 
-Use `defineResource(...)` when the handler needs a runtime dependency that
-should be declared up front and provided explicitly at `getInstance(...)`.
+Use `defineResource(...)` for runtime dependencies that should be declared upfront and provided at `getInstance(...)`.
 
 ```ts
 .defineResource<'supportPolicy', { developerInstruction: string }>()
 ```
 
-That gives you:
+This gives you:
 
-- a typed requirement at instance creation
-- `context.app.resources.supportPolicy` in the handler
+- A typed requirement at instance creation.
+- `context.app.resources.supportPolicy` in the handler.
 
-Use resources for:
+Use resources for domain-specific helpers, runtime policies, or repositories. Do not use them for model providers, queue bridges, skills, or request payload.
 
-- domain-specific helper objects
-- runtime policies
-- repositories or service clients you own
+### 6. Conversation Persistence
 
-Do not use resources for:
+Use `persistConversation` to configure how chat history is stored.
 
-- model providers
-- queue bridges
-- skills
-- request payload data
+You can use convenient presets:
 
-### 6. Commands and child agents
+```ts
+// Good for user messages: full content, more history
+.persistConversation('user', { maxFrames: 40 })
+
+// Good for agent responses: summarized, less history
+.persistConversation('agent', { maxFrames: 20 })
+```
+
+Or provide a full configuration object for more control.
+
+### 7. Invocations and Events
+
+#### Commands and Child Agents
 
 Use:
 
 - `canInvoke(serviceName, serviceVersion, commandName)`
 - `canInvokeAgent(agentName, agentVersion)`
 
-These declarations feed both:
+These declarations enable `context.invoke.tools` and `context.invoke.agents` in the handler and are used by adapters for tool exposure.
 
-- direct handler APIs like `context.invoke.tools` and `context.invoke.agents`
-- external runtime binding helpers like `context.invoke.expose.tools(...)`
+#### Custom Events
 
-`canEmit(...)` belongs in the same contract area. It declares which custom
-PURISTA events the agent may emit from the handler with `context.output.emit(...)`.
-
-### 7. Skills
-
-Use:
+Declare events the agent can emit with `canEmit(...)`:
 
 ```ts
-.useSkills(['spec-elicitation', 'support-workflow'])
+.canEmit(
+  'support.agent.completed',
+  z.object({ sessionId: z.string(), escalated: z.boolean() }),
+)
 ```
 
-This means:
+Emit them from the handler:
 
-- the agent may only access these skill names
-- the runtime must provide implementations for those names
-- `context.ai.skills` is scoped to that declared set
+```ts
+await context.output.emit('support.agent.completed', {
+  sessionId: payload.sessionId,
+  escalated: false,
+})
+```
 
-It does not mean:
-
-- automatically load a global catalog
-- automatically inject PURISTA’s own skills
-- search arbitrary skills outside the declared boundary
+For a single, automatic event with the agent's final result, use `setSuccessEventName(...)` instead.
 
 ### 8. Guards
 
-Use guard hooks for request policy checks that should happen before or after the
-handler body.
+Use guard hooks for request policy checks before or after the handler runs.
 
 ```ts
 .setBeforeGuardHooks({
@@ -240,108 +273,65 @@ handler body.
 })
 ```
 
-Good guard use cases:
+Good use cases: auth checks, quota management, and input validation.
+Bad use cases: business logic, model calls, or command orchestration.
 
-- auth or tenant checks
-- quota and rate policy checks
-- cheap request validation beyond schema shape
-- audit or policy hooks after execution
-
-Bad guard use cases:
-
-- long-running business logic
-- model calls
-- command orchestration
-
-Keep guards short and deterministic. They are part of the agent contract, not
-the handler workflow.
-
-Use normal function syntax for guard hooks so PURISTA can bind `this` the same
-way it does for commands, streams, subscriptions, and queue workers.
-
-### 8a. Custom events
-
-Agents can emit normal PURISTA custom events just like commands and streams.
-This is always explicit. Agents do not emit custom events by default.
-
-```ts
-.canEmit(
-  'support.agent.completed',
-  z.object({
-    sessionId: z.string(),
-    escalated: z.boolean(),
-  }),
-)
-```
-
-Then in the handler:
-
-```ts
-await context.output.emit('support.agent.completed', {
-  sessionId: payload.sessionId ?? context.message.id,
-  escalated: false,
-})
-```
-
-If you want an agent to publish its final aggregated result automatically, use
-`setSuccessEventName(...)` instead of emitting a manual custom event from the
-handler.
-
-That automatic event payload is the normalized terminal agent result, not the
-raw protocol envelope array. The payload includes the final status plus the
-aggregated agent output shape:
-
-- `status`
-- `finalMessage`
-- `summary`
-- `usage`
-- `runId`
-- `conversationId`
-- `agentName`
-- `agentVersion`
+Keep guards short. They are part of the contract, not the workflow.
 
 ### 9. Transport
 
-Use:
+Use `exposeAsHttpEndpoint(...)` to expose the agent via HTTP.
 
-- `exposeAsHttpEndpoint(...)`
-- `setSseProtocol(...)`
+```ts
+.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
+```
 
-These are still builder concerns because transport exposure is part of the public contract of the workload.
+For streaming responses, you can set a specific Server-Sent Events (SSE) protocol with `setSseProtocol(...)`:
+
+```ts
+.setSseProtocol('ai-sdk-ui-message')
+```
+
+Available protocols include:
+- `purista`: The default, raw PURISTA protocol.
+- `ai-sdk-ui-message`: Compatible with the Vercel AI SDK UI.
+- `ai-sdk-custom`: For use with the Vercel AI SDK's `experimental_streamText`.
+
+Transport exposure is part of the agent's public contract.
 
 ## What Should Not Live In The Builder
 
 Do not put these concerns into the builder:
 
-- model provider instances
-- concrete skill catalogs
-- conversation store instances
-- queue bridge instances
-- sandbox runtime drivers
-- resource implementations
-- runtime config values
+- Model provider instances
+- Concrete skill catalogs
+- Conversation store instances
+- Queue bridge instances
+- Sandbox runtime drivers
+- Resource implementations
+- Runtime config values
 
 Those belong in `getInstance(...)`.
 
 ## Decision Rules
 
-- If you can explain the setting as part of the agent contract, it belongs in the builder.
-- If it depends on environment, infrastructure, or deployment, it belongs in instance creation.
-- If it is actual business logic, it belongs in the handler.
+- If it's part of the agent's contract, it belongs in the builder.
+- If it depends on the environment or infrastructure, it belongs in instance creation.
+- If it's business logic, it belongs in the handler.
 
 ## Common Mistakes
 
-- Putting runtime dependency wiring into the builder discussion.
+- Putting runtime dependencies in the builder.
 - Thinking `.useSkills([...])` provides skills by itself.
-- Putting resource objects into the builder instead of declaring them with `defineResource(...)`.
-- Putting environment values into the builder instead of using `setConfigSchema(...)` plus `getInstance(..., { config })`.
-- Using queued execution without planning for `context.memory.run`.
-- Jumping to SDK adapters before the agent contract is clear.
+- Forgetting to provide resources declared with `defineResource(...)`.
+- Hardcoding environment values instead of using `setConfigSchema(...)`.
+- Using `queued` execution without `context.memory.run`.
 
 ## Related Guides
 
 - [Quick Start](./getting-started.md)
 - [Context](./handler-context.md)
-- [Runtime](./runtime.md)
+-- [Runtime](./runtime.md)
 - [Skills](./skills.md)
 - [AI SDK Adapter](./ai-sdk-adapter.md)
+- [Production-Ready Agents](./production-ready-agents.md)

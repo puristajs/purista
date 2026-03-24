@@ -1,4 +1,4 @@
-import { UnhandledError } from '@purista/core'
+import { StatusCode, UnhandledError } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 import { generateText } from './generateText.js'
 import type { ModelProvider } from './ModelProvider.js'
@@ -62,6 +62,33 @@ describe('generateText', () => {
 			request: { prompt: 'x' },
 		})
 		expect(result).toBe('fallback')
+	})
+
+	it('honors bounded invocation policy', async () => {
+		vi.useFakeTimers()
+		try {
+			const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
+				generate: async () =>
+					await new Promise(resolve => {
+						setTimeout(() => resolve({ output: 'late' }), 50)
+					}),
+			}
+			const promise = generateText({
+				model,
+				request: { prompt: 'x' },
+				policy: { timeoutMs: 10 },
+				label: 'provider:text',
+			})
+			const observed = promise.catch(error => error)
+			await vi.advanceTimersByTimeAsync(11)
+			await expect(observed).resolves.toBeInstanceOf(UnhandledError)
+			await expect(observed).resolves.toMatchObject({
+				errorCode: StatusCode.GatewayTimeout,
+				data: expect.objectContaining({ kind: 'timeout' }),
+			})
+		} finally {
+			vi.useRealTimers()
+		}
 	})
 
 	it('throws UnhandledError when neither stream nor generate is available', async () => {

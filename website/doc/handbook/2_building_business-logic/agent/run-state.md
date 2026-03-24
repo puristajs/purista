@@ -208,7 +208,7 @@ If a parent agent forwards a child agent with:
 
 ```ts
 await context.invoke.agents.forward({
-  agentName: 'architectureAgent',
+  agentName: 'projectArchitectureAgent',
   agentVersion: '1',
   payload,
 })

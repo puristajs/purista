@@ -18,9 +18,9 @@ Architecture in PURISTA is a graph of builder-owned capabilities. You decide whi
 
 For AI-heavy systems, the preferred split is:
 - public conductor/orchestrator
-- specialist worker agents
-- deterministic apply commands
-- workflow/readiness/approval state
+- a small set of private reasoning workers with explicit modes
+- deterministic commands or coordinators that apply canonical truth
+- workflow/readiness/approval projections that are weaker than canonical truth
 - UI projections separate from domain truth
 
 ## Builder lifecycle
@@ -42,7 +42,8 @@ For AI-heavy systems, the preferred split is:
 - If a capability owns state and invariants, it deserves a service boundary.
 - If an LLM only enriches a deterministic workflow, keep the control flow in service builders, commands, queues, and resources.
 - If the runtime concern is transport only, keep it out of the service definition.
-- If the user-facing flow mixes reasoning and state mutation, split it into deliverables plus deterministic apply commands.
+- If the user-facing flow mixes reasoning and state mutation, split it into reasoning workers plus deterministic truth-application commands or coordinators.
+- If markdown or files are the canonical truth, treat JSON status or readiness artifacts as rebuildable projections only.
 
 ## Definition pattern
 - Define a capability map first.
@@ -61,6 +62,17 @@ src/
   resources/
   config/
   agents/
+```
+
+For the current multi-repo workspace, keep the top-level split explicit:
+
+```text
+purista/
+starter/
+create-purista/
+specs/
+voyage/
+sandbox/
 ```
 
 ## Implementation pattern
@@ -89,7 +101,8 @@ src/
 - Designing agents before service contracts exist.
 - Letting one service become a generic orchestration dump.
 - Naming handlers and files without first deciding the owning service builder.
-- Letting worker agents write project truth directly when a command should own the mutation.
+- Letting worker agents write project truth directly when a command or coordinator should own the mutation.
+- Treating workflow projections as stronger truth than the canonical workspace state.
 
 ## How this connects to other PURISTA concepts
 This skill routes to `purista-core`, `purista-service-builder`, `purista-resources`, queue and stream skills, stores, HTTP runtime, sandbox, and agent runtime.
@@ -105,5 +118,6 @@ This skill routes to `purista-core`, `purista-service-builder`, `purista-resourc
 - `website/doc/handbook/2_building_business-logic/service/index.md`
 - `specs/25-voyage/70-backend/00-backend-architecture.md`
 - `specs/26-voyage-refinement/05-architecture-model.md`
+- `specs/26-voyage-refinement/40-markdown-first-agentic-rearchitecture.md`
 - `examples/ai-basic/src/service/support/v1/supportV1Service.ts`
 - `examples/quickstart/src/service/ping/v1/pingV1Service.ts`

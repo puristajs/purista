@@ -44,12 +44,12 @@ A command is not just a handler. It is a builder-defined contract derived from a
 src/service/<service-name>/v1/command/<command-name>/
   <commandName>CommandBuilder.ts
   schema.ts
-  handler.ts
+  implementation.ts  # optional helper module if the logic is not kept inline
 ```
 
 ## Implementation pattern
 - Put schema declarations beside the command builder.
-- Use `setCommandFunction(...)` for the business implementation.
+- Use `setCommandFunction(...)` directly in the builder file or delegate to a nearby builder-owned implementation module when the logic grows.
 - Keep resource and store access in helpers if the logic grows.
 - Return domain results, not transport wrappers.
 

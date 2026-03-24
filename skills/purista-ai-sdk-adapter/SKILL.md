@@ -27,12 +27,14 @@ AI SDK tooling is an adapter over builder-defined commands and agents. The neutr
 - Do not move allowlist lookup, workflow mutation, or queue decisions into the adapter.
 - Keep provider-specific metadata out of the neutral contract.
 - Do not use the adapter as the business contract. The neutral binding remains the source of truth.
+- Let the runtime/provider layer sanitize provider-facing tool names and strict response schemas.
+- Do not patch OpenAI strict-schema issues locally in application agents when the runtime can own the conversion.
 
 ## Decision rules
 - Use the adapter only at the provider boundary.
 - Keep neutral binding creation inside runtime context with `context.invoke.expose`.
 - If the business contract changes, change the underlying builder definition first, not the AI SDK adapter.
-- If an agent emits typed deliverables or structured UI artifacts, keep that logic outside the adapter.
+- If an agent emits markdown-grounded reasoning results or structured UI artifacts, keep that logic outside the adapter.
 
 ## Definition pattern
 - Define tools and agents through PURISTA builders and neutral runtime bindings.
@@ -43,6 +45,7 @@ AI SDK tooling is an adapter over builder-defined commands and agents. The neutr
 - Render skills and references separately from tool conversion.
 - Keep prompt/request assembly explicit.
 - In grouped agent context, combine adapters with `context.ai.models`, `context.invoke.*`, and `context.io.stream` instead of recreating custom runtime wrappers.
+- Use the shared provider runtime to compile request schemas and response schemas into provider-safe JSON Schema.
 
 ## Configuration pattern
 - Provider-specific model settings belong to the provider/runtime layer.
@@ -61,6 +64,7 @@ AI SDK tooling is an adapter over builder-defined commands and agents. The neutr
 ## Common mistakes / anti-patterns
 - Letting AI SDK-specific concerns leak into command or agent definitions.
 - Rebuilding tool metadata manually in the adapter.
+- Re-implementing provider-safe schema normalization or tool-name sanitization in application code.
 - Treating the AI SDK adapter as the only exposure path.
 - Explaining adapter code without showing the neutral binding and underlying builder-defined capability.
 
@@ -70,6 +74,7 @@ This skill composes external runtime bindings, agent runtime, skill rendering, a
 ## Read if needed
 - `packages/ai/src/bridge/aiSdk.ts`
 - `packages/ai/src/providers/runtime/AiSdkProvider.ts`
+- `packages/ai/src/providers/runtime/providerJsonSchema.ts`
 - `packages/ai/src/builder/AgentBuilder.ts`
 - `packages/ai/src/runtime/context.ts`
 - `examples/ai-basic/src/service/support/v1/command/getMcpTools/getMcpToolsCommandBuilder.ts`

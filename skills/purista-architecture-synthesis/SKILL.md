@@ -32,8 +32,9 @@ architecture/
   flows/
   contracts/
   decisions/
-  status.json
 ```
+
+Persist canonical architecture truth in markdown only. Derived summaries or status projections may exist, but they must be rebuildable and must never outrank the markdown documents.
 
 ## Common implementation patterns
 - Start from business capabilities, then map services, contracts, queues, and agents.

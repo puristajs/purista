@@ -242,7 +242,7 @@ describe('external runtime bindings', () => {
 
 		expect(binding.resultMode).toBe('object')
 		expect(aiSdkTool.externalRuntime?.descriptor.bindingName).toBe('reportAgent.1.run')
-		expect(toolSet['reportAgent_1_run']).toBeDefined()
+		expect(toolSet.reportAgent_1_run).toBeDefined()
 		expect(await aiSdkTool.execute?.({ id: '42' }, {} as never)).toEqual({ id: '42' })
 	})
 
@@ -491,13 +491,13 @@ describe('external runtime bindings', () => {
 		expect(request.prompt).toContain('Relevant skills')
 		expect(request.prompt).toContain('spec-elicitation')
 		expect(request.prompt).toContain('Customer prompt: design a support workflow')
-			expect((request.metadata?.aiSdk as { tools?: Record<string, unknown>; toolChoice?: string }).toolChoice).toBe(
-				'required',
-			)
-			expect(Object.keys((request.metadata?.aiSdk as { tools: Record<string, unknown> }).tools)).toEqual([
-				'support_1_lookupFaq',
-			])
-		})
+		expect((request.metadata?.aiSdk as { tools?: Record<string, unknown>; toolChoice?: string }).toolChoice).toBe(
+			'required',
+		)
+		expect(Object.keys((request.metadata?.aiSdk as { tools: Record<string, unknown> }).tools)).toEqual([
+			'support_1_lookupFaq',
+		])
+	})
 
 	it('merges existing AI SDK metadata with rendered binding metadata', () => {
 		const request = createAiSdkRequest({

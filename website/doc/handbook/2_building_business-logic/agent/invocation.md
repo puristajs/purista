@@ -1,150 +1,109 @@
 ---
 title: Invocation
 description: Call agents from PURISTA services first; use orchestration and forwarding only when the use case really needs it.
-order: 203707
+order: 22
 ---
 
 # Invocation
 
-Invocation is the point where one PURISTA workload calls another.
+Invocation is how PURISTA workloads call each other. This guide covers the different ways to invoke an agent, from simple service calls to complex in-handler orchestration.
 
 The default rule is simple:
+- From a service, command, or subscription, use `context.invokeAgent`.
+- Inside an agent handler, use `context.invoke.agents`.
 
-- from services, commands, subscriptions, or streams, use `context.invokeAgent`
-- inside an agent handler, use `context.invoke.agents`
-- use forwarding only when the child agent should be visible to the end user
-- use standalone invocation only for scripts and tooling
+## 1. Standard Invocation from a Service
 
-## Start With The Normal PURISTA Path
+This is the most common and recommended path for integrating agents into your application.
 
-Most applications should start here.
-
-Register the dependency on the caller:
-
+First, declare the dependency on the calling service's builder:
 ```ts
 .canInvokeAgent('supportAgent', '1')
 ```
 
-Then call it from the service context:
-
+Then, call it from the service's handler using the typed `context.invokeAgent` helper:
 ```ts title="src/services/support/v1/command/ask.ts"
 export const askCommand = supportServiceBuilder
   .getCommandBuilder('ask', 'Ask the support agent')
   .canInvokeAgent('supportAgent', '1', {
     payloadSchema: z.object({ prompt: z.string() }),
   })
-  .setCommandFunction(async (context, payload) => {
+  .setHandler(async (context, payload) => {
     const result = await context.invokeAgent.supportAgent['1']
       .call({ prompt: payload.prompt })
-      .final()
+      .final(); // .final() awaits the complete, aggregated result
 
-    return result.message
-  })
+    // The result is the array of protocol envelopes.
+    // You'll typically find the final message in the last 'message' frame.
+    const finalMessage = result.find(e => e.frame.kind === 'message' && e.frame.final)?.frame.content;
+
+    return { message: finalMessage };
+  });
 ```
 
-Use this path when:
+This is the default path because it provides type safety, automatic identity and trace forwarding, and connected observability, regardless of whether the agent is inline or queued.
 
-- a command wants an agent result
-- a subscription wants to delegate work to an agent
-- a stream handler wants to trigger an agent
+### Streaming from a Service
 
-Why this is the default:
-
-- typed payloads
-- automatic identity forwarding
-- tracing and observability stay connected
-- queued durable agents still look like normal invocations
-
-## When You Need More Than The Final Message
-
-Sometimes the caller needs the streamed envelopes, not just the final result.
+If the calling service needs to handle the live stream of frames from the agent, you can iterate over the invocation directly:
 
 ```ts
 const invocation = context.invokeAgent.supportAgent['1'].call({
   prompt: payload.prompt,
-})
+});
 
 for await (const frame of invocation) {
   if (frame.kind === 'message') {
-    console.log(frame.content)
+    console.log(frame.content);
   }
 }
 
-const result = await invocation.final()
+const result = await invocation.final();
 ```
 
-Use this when the caller needs:
+## 2. In-Handler Orchestration (Agent-to-Agent)
 
-- live frames
-- custom stream handling
-- access to protocol details
+When one agent needs to call another, use the `context.invoke.agents` helpers.
 
-If you only need the final result, do not use this shape yet.
+### Simple Result Helpers
 
-## In-Handler Orchestration
+For most internal orchestration, you only need the final result of the child agent.
 
-When an agent calls another agent, use `context.invoke.agents`.
+- **`runText(...)`**: Use when you only need the final assistant text output.
+  ```ts
+  const triageSummary = await context.invoke.agents.runText({
+    agentName: 'triageAgent',
+    agentVersion: '1',
+    payload: { prompt: payload.prompt },
+  });
+  ```
+- **`runObject<T>(...)`**: Use when the child agent returns a structured JSON object in its final message.
+  ```ts
+  const triageData = await context.invoke.agents.runObject<{
+    urgency: 'low' | 'medium' | 'high';
+  }>({
+    agentName: 'triageAgent',
+    agentVersion: '1',
+    payload: { prompt: payload.prompt },
+  });
+  ```
 
-The common case is internal reasoning:
+### Forwarding for UI-Visible Children
 
-```ts
-const triage = await context.invoke.agents.runText({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: payload.prompt },
-})
-```
-
-Use:
-
-- `runText(...)` when you only need the final assistant text
-- `runObject<T>(...)` when the child returns structured JSON in its final message
-
-Example:
-
-```ts
-const triage = await context.invoke.agents.runObject<{
-  urgency: 'low' | 'medium' | 'high'
-  nextSteps: string[]
-}>({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: payload.prompt },
-})
-```
-
-This is the normal multi-agent orchestration path.
-
-## When The Child Agent Should Be Visible To The User
-
-Use forwarding only when the child agent is part of the visible user experience.
+Use `forward(...)` only when the child agent's progress should be streamed directly to the end user. This is common for orchestrator or supervisor agents.
 
 ```ts
 await context.invoke.agents.forward({
-  agentName: 'architectureAgent',
+  agentName: 'projectArchitectureAgent',
   agentVersion: '1',
-  payload: { prompt: payload.prompt, projectId: payload.projectId },
-})
+  payload: { prompt: 'Design a new microservice' },
+});
 ```
+Forwarding streams the child agent's assistant text, reasoning, artifacts, and run state directly into the parent's output stream. For internal-only child agents, prefer `runText` or `runObject`.
 
-What forwarding does:
+### Full Control with `invoke(...)`
 
-- forwards assistant text
-- forwards reasoning
-- forwards artifacts
-- forwards `run-state`
-
-That is why forwarding is useful for:
-
-- orchestrator agents
-- supervisor agents
-- queued durable child runs that should surface progress directly
-
-If the child is only an internal classifier or planner, prefer `runText(...)` or `runObject<T>(...)`.
-
-## Full Control
-
-Use `context.invoke.agents.invoke(...)` only when you genuinely need raw envelopes or custom forwarding behavior.
+For advanced use cases where you need raw access to the child agent's protocol envelopes or custom forwarding behavior, use `invoke(...)`.
 
 ```ts
 const envelopes = await context.invoke.agents.invoke({
@@ -152,78 +111,64 @@ const envelopes = await context.invoke.agents.invoke({
   agentVersion: '1',
   payload: { prompt: payload.prompt },
   forwardToCurrentStream: {
-    assistant: true,
-    reasoning: true,
-    artifacts: true,
-    errors: true,
-    toolEvents: false,
+    assistant: true, // Forward assistant messages
+    errors: true,      // Forward error frames
+    artifacts: false,  // Do not forward artifacts
   },
-  emitInvocationToolEvents: false,
-})
+  emitInvocationToolEvents: false, // Don't show this as a "tool" in the parent's trace
+});
 ```
 
-This is an advanced path. The usual choices should still be:
+## 3. Standalone Invocation (Scripts & Tooling)
 
-- `runText(...)`
-- `runObject<T>(...)`
-- `forward(...)`
-
-## Standalone Invocation
-
-For scripts or tooling where no normal service context exists, use `invokeAgent(...)`.
+For invoking an agent from outside a PURISTA service context (e.g., in a script, CLI, or test), use the standalone `invokeAgent` helper.
 
 ```ts
-import { invokeAgent } from '@purista/ai'
+import { invokeAgent } from '@purista/ai';
 
 const result = await invokeAgent({
   eventBridge,
   agentName: 'supportAgent',
   agentVersion: '1',
   payload: { prompt: 'A customer was charged twice.' },
-  sessionId: 'manual-session',
-})
+  sessionId: 'manual-session-123',
+});
+
+// result is the array of AgentProtocolEnvelope
 ```
 
-Use this for:
+This function constructs and sends the command message over the provided event bridge. It supports streaming via the `stream` option.
 
-- CLI tools
-- scripts
-- admin maintenance flows
+## Invocation Options
 
-Do not treat it as the default application integration path.
+When calling child agents via `context.invoke.agents`, you can pass several options:
 
-## HTTP Exposure Modes
+| Option                   | Description                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `timeoutMs`              | Sets a timeout for the invocation.                                                                            |
+| `correlationId`          | Overrides the correlation ID for trace chaining.                                                              |
+| `sessionId`              | Overrides the session ID for the child agent call.                                                            |
+| `failOnErrorFrame`       | If `true` (default), the invocation promise will reject if the child agent returns an `error` frame.            |
+| `forwardToCurrentStream` | Forwards frames from the child to the parent's stream. Can be `true` or an object for fine-grained control. |
+| `emitInvocationToolEvents` | If `true` (default), the child agent call will appear as a `tool` event in the parent's protocol stream.      |
 
-Once an agent is exposed over HTTP, invocation transport can be:
+## Error Handling
 
-- `stream` for SSE
-- `aggregate` for one final JSON response
-
-Queued durable agents still use the same exposure. The difference is that the transport attaches to the durable run instead of assuming everything finishes inside one request.
+PURISTA's standard error handling applies to agent invocations:
+- If a child agent throws a `HandledError`, the invocation promise will reject with that error. The calling agent can catch it and handle it as a predictable business failure.
+- If a child agent throws an `UnhandledError` (or any other unexpected error), the promise will reject, and the parent agent can decide whether to retry or fail.
+- By default, if a child agent emits an `error` frame in its protocol stream, the invocation will fail. You can disable this with `failOnErrorFrame: false` to handle the error frames manually.
 
 ## Decision Rules
 
-- Service or command calling an agent:
-  use `context.invokeAgent`
-- Agent calling another agent for internal reasoning:
-  use `context.invoke.agents.runText(...)` or `runObject<T>(...)`
-- Parent agent wants the child visible to the user:
-  use `context.invoke.agents.forward(...)`
-- Need full envelope control:
-  use `context.invoke.agents.invoke(...)`
-- Script or tooling:
-  use `invokeAgent(...)`
-
-## Common Mistakes
-
-- Using forwarding for internal-only orchestration.
-- Jumping to raw envelope APIs when a final result helper is enough.
-- Treating standalone invocation as the normal app integration path.
-- Mixing external SDK adapter concerns into the normal invocation story.
+- **Service-to-Agent**: Use `context.invokeAgent`.
+- **Internal Agent-to-Agent**: Use `context.invoke.agents.runText(...)` or `runObject<T>(...)`.
+- **UI-Visible Child Agent**: Use `context.invoke.agents.forward(...)`.
+- **Full Control Needed**: Use `context.invoke.agents.invoke(...)` with custom options.
+- **External Script/Tool**: Use the standalone `invokeAgent(...)` helper.
 
 ## Related Guides
-
-- [Quick Start](./getting-started.md)
-- [Context](./handler-context.md)
-- [AI SDK Adapter](./ai-sdk-adapter.md)
+- [Agent Builder](./agent-builder.md)
+- [Handler Context](./handler-context.md)
+- [Production-Ready Agents](./production-ready-agents.md)
 - [External Runtime Bindings](./external-runtime-bridge.md)

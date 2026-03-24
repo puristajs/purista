@@ -1,5 +1,7 @@
+import { StatusCode, UnhandledError } from '@purista/core'
 import type { LanguageModel } from 'ai'
 import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 import { createCommandBinding } from '../../bridge/externalRuntime.js'
 
 import { AiSdkProvider } from './AiSdkProvider.js'
@@ -27,6 +29,18 @@ vi.mock('ai', () => ({
 const mockModel = {} as LanguageModel
 
 describe('AiSdkProvider', () => {
+	beforeEach(() => {
+		generateTextMock.mockReset()
+		generateObjectMock.mockReset()
+		streamTextMock.mockReset()
+		embedMock.mockReset()
+		embedManyMock.mockReset()
+		rerankMock.mockReset()
+		wrapLanguageModelMock.mockReset()
+		toolMock.mockReset()
+		toolMock.mockImplementation(definition => definition)
+	})
+
 	it('wraps language model when middleware is configured', () => {
 		wrapLanguageModelMock.mockReturnValueOnce(mockModel)
 		void new AiSdkProvider({
@@ -106,7 +120,7 @@ describe('AiSdkProvider', () => {
 		expect(final.metadata?.warnings).toEqual([{ type: 'other', message: 'stream warning' }])
 	})
 
-	it('supports structured json generation', async () => {
+	it('compiles provider-safe structured json schemas', async () => {
 		generateObjectMock.mockResolvedValueOnce({
 			object: { urgency: 'low' },
 			reasoningText: 'reasoning',
@@ -122,10 +136,54 @@ describe('AiSdkProvider', () => {
 		const provider = new AiSdkProvider({ model: mockModel })
 		const result = await provider.generateJson<{ urgency: string }>({
 			prompt: 'classify',
+			schema: z.object({
+				urgency: z.string(),
+				settings: z
+					.object({
+						enabled: z.boolean(),
+					})
+					.optional(),
+			}),
 		})
 		expect(result.data.urgency).toBe('low')
 		expect(result.reasoningText).toBe('reasoning')
 		expect(result.text).toContain('"urgency"')
+		expect(generateObjectMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				schema: expect.objectContaining({
+					jsonSchema: expect.anything(),
+				}),
+			}),
+		)
+		const callSchema = (
+			generateObjectMock.mock.calls[generateObjectMock.mock.calls.length - 1]?.[0] as {
+				schema?: { jsonSchema?: Promise<unknown> | unknown }
+			}
+		).schema
+		const compiledJsonSchema = await callSchema?.jsonSchema
+		expect(compiledJsonSchema).toMatchObject({
+			type: 'object',
+			properties: expect.objectContaining({
+				settings: expect.objectContaining({
+					type: 'object',
+					additionalProperties: false,
+				}),
+			}),
+			additionalProperties: false,
+		})
+		expect(JSON.stringify(compiledJsonSchema)).not.toContain('propertyNames')
+	})
+
+	it('wraps provider structured-output errors as UnhandledError', async () => {
+		generateObjectMock.mockRejectedValueOnce(new Error("Invalid schema for response_format 'response'"))
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const result = provider.generateJson({
+			prompt: 'classify',
+			schema: { type: 'object' },
+		})
+		await expect(result).rejects.toBeInstanceOf(UnhandledError)
+		await expect(result).rejects.toMatchObject({ errorCode: StatusCode.InternalServerError })
 	})
 
 	it('supports embedding and reranking when models are configured', async () => {
@@ -312,14 +370,14 @@ describe('AiSdkProvider', () => {
 			},
 		})
 
-			expect(generateTextMock).toHaveBeenCalledWith(
-				expect.objectContaining({
-					prompt: expect.stringContaining('spec-elicitation'),
-					tools: expect.objectContaining({
-						support_1_lookupFaq: expect.any(Object),
-					}),
-					toolChoice: 'required',
-					system: expect.arrayContaining([
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				prompt: expect.stringContaining('spec-elicitation'),
+				tools: expect.objectContaining({
+					support_1_lookupFaq: expect.any(Object),
+				}),
+				toolChoice: 'required',
+				system: expect.arrayContaining([
 					expect.objectContaining({
 						content: 'Use tools before answering.',
 						providerOptions: { openai: { systemMessageMode: 'developer' } },

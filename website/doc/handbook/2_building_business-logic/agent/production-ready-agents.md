@@ -6,331 +6,186 @@ order: 203706
 
 # Production-Ready Agents
 
-Production-ready PURISTA agents are not "prompt wrappers".
+Production-ready PURISTA agents are not "prompt wrappers." They are robust, observable, and testable workloads that follow the same explicit lifecycle as any other part of a PURISTA application.
 
-They follow the same PURISTA separation as everything else:
+This guide covers the key principles and features that help you build agents ready for real-world use cases.
 
-1. define the contract with `AgentBuilder`
-2. implement the orchestration in the handler
-3. create an instance with concrete runtime dependencies
-4. adapt only at the transport or SDK edge
+## The Production Baseline
 
-That separation matters because robust agents need more than model calls. They need:
+For any agent intended for production, consider these features as your default starting point:
 
-- explicit tool and child-agent allowlists
-- durable run state
-- bounded execution policy
-- explicit reflection loops
-- optional approval checkpoints
-- deterministic tests that assert the execution trajectory
+- **Queued Durable Execution**: Use `setExecutionMode('queued')` for any work that is long-running, might fail, or needs to stream progress. This ensures resilience.
+- **Durable Run State**: Use `context.memory.run` to track plans, checkpoints, and the final status of an agent's work. This is crucial for observability and recovery.
+- **Explicit Policies**: Define policies for execution, quality, and retries in the `AgentBuilder`. This makes agent behavior predictable.
+- **Allowlisted Access**: Strictly define which tools and child agents can be invoked using `canInvoke` and `canInvokeAgent`.
+- **Structured Error Handling**: Use `HandledError` for expected business failures and let the framework manage unexpected ones.
+- **Trajectory Testing**: Write tests that assert the agent's execution path, not just its final output. Use `evaluateTrajectory` for this.
+- **Connected Tracing**: Ensure that traces (`traceId`) and security contexts (`tenantId`, `principalId`) are propagated correctly across all calls.
 
-## The Canonical Example
+## 1. Define Policy in the Builder
 
-The canonical production example for this handbook lives in:
+The `AgentBuilder` is where you define the agent's contract and its operational policies. This makes the agent's behavior inspectable and predictable before it even runs.
 
-- [`examples/ai-basic/src/agents/supportAgent/v1/supportAgent.ts`](../../../../../examples/ai-basic/src/agents/supportAgent/v1/supportAgent.ts)
-- [`examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`](../../../../../examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts)
-- [`examples/ai-basic/src/agents/supportAgent/v1/schema.ts`](../../../../../examples/ai-basic/src/agents/supportAgent/v1/schema.ts)
+### Execution and Retry Policies
 
-It combines:
-
-- queued durable execution
-- grouped handler context
-- command-backed tool calls
-- child-agent escalation
-- quality profiles
-- reflection through `context.ai.reflect.run(...)`
-- approval checkpoints through `context.runtime.approvals.wait(...)`
-- example-level trajectory assertions with `evaluateTrajectory(...)`
-- focused helper tests in `packages/ai` for reflection, approvals, and trajectory evaluation
-
-## The Design Principles
-
-### 1. Definition Owns Policy
-
-Use the builder to declare:
-
-- what models exist
-- what tools and child agents are allowed
-- what skills are available
-- how the run should behave under failure
-- which quality profiles and approval checkpoints exist
-
-That keeps behavior inspectable before the handler runs.
+- `setExecutionPolicy({...})`: Controls the behavior of queued agents, including recovery strategies and how they handle concurrent requests.
+- `setRetryPolicy({...})`: Configures automatic retries for transient failures, which is essential for robustness.
 
 ```ts
-.setReflectionPolicy({
-  enabledByDefault: false,
-  presets: {
-    synthesis: {
-      maxIterations: 2,
-      stopOnStagnation: true,
-      artifacts: {
-        emitArtifacts: true,
-        artifactPrefix: 'reflection',
-      },
-    },
-  },
+.setExecutionPolicy({
+  recovery: 'resume-from-checkpoints',
+  httpBehavior: 'attach-and-stream',
 })
+.setRetryPolicy({
+  maxRetries: 3,
+  backoff: 'exponential',
+})
+```
+
+### Agent and Reflection Policies
+
+- `setAgentPolicy({...})`: Defines quality profiles and approval checkpoints. For example, a "synthesis" profile might require a reflection loop, while a "quick" profile might disable it.
+- `setReflectionPolicy({...})`: Configures the behavior of self-correction loops (`draft`, `critique`, `refine`), including iteration limits and artifact generation.
+
+```ts
 .setAgentPolicy({
   quality: {
     defaultProfile: 'standard',
     profiles: {
-      quick: {
-        reflection: { enabled: false },
-      },
       synthesis: {
-        reflection: {
-          enabled: true,
-          preset: 'synthesis',
-          maxIterations: 2,
-        },
+        reflection: { enabled: true, preset: 'synthesis' },
         verification: { required: true },
       },
     },
   },
   approvals: {
     checkpoints: {
-      'publish-response': {
-        required: true,
-        when: 'before-final-message',
-        timeoutMs: 5_000,
-      },
+      'publish-response': { required: true },
     },
+  },
+})
+.setReflectionPolicy({
+  presets: {
+    synthesis: { maxIterations: 2 },
   },
 })
 ```
 
-The builder defines the policy surface. The handler decides when to apply it.
-When `quality.profiles[*].execution` declares `maxModelSteps` or
-`maxToolCalls`, those limits are enforced by the runtime.
+When `quality.profiles[*].execution` declares limits like `maxModelSteps` or `maxToolCalls`, the PURISTA runtime enforces them automatically.
 
-### 1a. Propagation And Error Semantics Must Stay Native
+## 2. Implement Robust Orchestration in the Handler
 
-Robust agents do not invent a separate metadata model.
+The handler's job is to orchestrate the workflow using the capabilities defined in the builder.
 
-- `tenantId` and `principalId` must survive every tool call, child-agent hop,
-  queued handoff, and custom event emission
-- child-agent orchestration must reuse the current `traceId`
-- handled business failures stay `HandledError`
-- unexpected failures stay `UnhandledError`
+### Durable Run State
 
-If a child agent emits a protocol error frame, the caller must reconstruct the
-same PURISTA error class from the `handled` flag instead of flattening
-everything into a generic failure.
-
-### 2. The Handler Owns Orchestration
-
-The handler should orchestrate:
-
-- conversation memory
-- durable run state
-- tool execution
-- child-agent delegation
-- quality policy resolution
-- reflection loops
-- approval gates
-
-It should not construct providers or runtime dependencies.
+Use `context.memory.run` to create a durable, observable workflow. This is more than just logging; it's a stateful record of the agent's execution that can be resumed after a failure.
 
 ```ts
-const quality = context.ai.policy.resolve(payload.qualityProfile)
 const run = await context.memory.run.start({
-  title: 'Support orchestration',
+  title: 'Support Orchestration',
   phase: 'planning',
-})
+});
 
-const faqAnswer = await context.invoke.tools.invoke.support['1'].lookupFaq({
-  question: userPrompt,
-})
+await run.plan([
+  { id: 'triage', title: 'Classify Urgency' },
+  { id: 'faq', title: 'Load FAQ Guidance' },
+]);
 
-const triageSummary = await context.invoke.agents.runText({
-  agentName: 'triageAgent',
-  agentVersion: '1',
-  payload: { prompt: userPrompt, sessionId },
-})
+await run.step('triage', async () => {
+  // ... perform triage
+});
+
+await run.finishSuccess('Completed');
 ```
 
-Grouped context keeps that surface speakable:
+### Explicit Reflection and Approvals
 
-- `context.input.*`
-- `context.output.*`
-- `context.memory.*`
-- `context.invoke.*`
-- `context.ai.*`
-- `context.io.*`
-- `context.app.*`
-- `context.runtime.*`
+For complex or high-stakes tasks, use explicit reflection and approval steps.
 
-### 3. Reflection Must Be Explicit
-
-PURISTA does not auto-wrap every answer in a hidden review loop.
-
-If an agent needs a draft, critique, refine cycle, call it explicitly:
+- **Reflection**: Call `context.ai.reflect.run(...)` for tasks that benefit from a draft-critique-refine cycle. This is a traceable, stateful process, not a hidden loop.
+- **Approvals**: Use `context.runtime.approvals.wait(...)` to create a durable waiting point for human-in-the-loop verification before proceeding with a risky action.
 
 ```ts
 const reflection = await context.ai.reflect.run({
   name: 'support-answer',
-  profile: quality.name,
   draft: async () => await generateDraft(),
   critique: async ({ draft }) => await critiqueDraft(draft),
   accept: ({ critique }) => critique.accepted,
-  refine: async ({ draft, critique }) => await reviseDraft(draft, critique),
-})
+});
 
-const answer = reflection.output
-```
-
-This gives you:
-
-- traceable checkpoints in run state
-- protocol artifacts for draft, critique, and summary
-- deterministic stop rules
-- full control over when the loop is worth the cost
-- visible orchestration spans when reflection uses tools or child agents
-
-Explicit `preset` values passed to `reflect.run(...)` win over profile defaults.
-
-### 4. Approvals Should Gate Risky Transitions
-
-High-risk transitions should be modeled as explicit checkpoints.
-
-```ts
 if (payload.requireApproval) {
   await context.runtime.approvals.wait({
     checkpoint: 'publish-response',
-    detail: 'Review the generated support response before it is sent.',
-  })
+  });
 }
 ```
 
-This does not create a separate workflow engine. It gives the agent a durable
-waiting point with a clear artifact trail. Approval expiry fails the run by
-default. External approval writers can use `writeApprovalDecision(...)` and
-`getApprovalStateKey(...)`.
+## 3. Handle Errors Gracefully
 
-### 5. Tests Should Assert The Trajectory
+Robust error handling is critical in production.
 
-Final text alone is not enough for robust agents.
+- **`HandledError`**: Throw a `HandledError` for predictable business failures (e.g., invalid input, policy violation). This communicates a controlled failure to the caller and avoids unnecessary retries for non-transient issues.
 
-At the example level, you usually care that the agent:
+  ```ts
+  import { HandledError, StatusCode } from '@purista/core';
 
-- emitted run-state artifacts
-- emitted reflection and approval artifacts when those features were requested
-- produced the expected final answer
+  if (!payload.prompt) {
+    throw new HandledError(StatusCode.BadRequest, 'Prompt is required.');
+  }
+  ```
+
+- **`UnhandledError`**: Unexpected errors (e.g., a provider outage, a bug in the handler) are automatically wrapped as `UnhandledError`. These are the types of errors that a `retryPolicy` is designed to handle.
+
+- **Error Propagation**: PURISTA ensures that errors from tools and child agents are propagated correctly, preserving their original `HandledError` or `UnhandledError` status. This allows the calling agent to react appropriately.
+
+## 4. Test the Trajectory, Not Just the Output
+
+A key aspect of production-ready agents is deterministic testing. Because LLM output can be variable, you should focus your tests on the **execution trajectory**—the sequence of steps the agent took to arrive at its result.
+
+The `evaluateTrajectory` helper allows you to assert that the agent:
+- Called the correct tools and child agents.
+- Emitted the expected run state and reflection artifacts.
+- Reached the required approval checkpoints.
 
 ```ts
-expect(
-  evaluateTrajectory(result.envelopes, {
-    mode: 'any-order',
-    tools: [
-      { name: 'support.1.lookupFaq', statuses: ['invoked', 'success'] },
-      { name: 'triageAgent.1.run', statuses: ['invoked', 'success'] },
-    ],
-    artifacts: [
-      { id: 'run-state', phase: 'any' },
-      { id: 'reflection:support-answer:summary', phase: 'final' },
-      { id: 'approval:publish-response', phase: 'final' },
-    ],
-    requireReflectionSummary: true,
-    requireApprovalArtifact: 'approval:publish-response',
-    reflection: { name: 'support-answer', minIterations: 2 },
-    finalMessage: /Reviewed answer/,
-  }).success,
-).toBe(true)
+import { evaluateTrajectory } from '@purista/ai/testing';
+
+// ... inside your test
+const result = await agent.invoke(...);
+
+const evaluation = evaluateTrajectory(result.envelopes, {
+  mode: 'any-order',
+  tools: [
+    { name: 'support.1.lookupFaq', statuses: ['invoked', 'success'] },
+  ],
+  artifacts: [
+    { id: 'run-state', phase: 'any' },
+    { id: 'reflection:support-answer:summary', phase: 'final' },
+  ],
+  requireReflectionSummary: true,
+  finalMessage: /Reviewed answer/,
+});
+
+expect(evaluation.success).toBe(true);
 ```
 
-For focused helper behavior, assert the helpers directly in `packages/ai`:
+This approach makes your tests more stable and provides much deeper insight into the agent's behavior than simply checking its final text response.
 
-- [`packages/ai/src/runtime/reflection.test.ts`](../../../../../packages/ai/src/runtime/reflection.test.ts)
-- [`packages/ai/src/runtime/approvals.test.ts`](../../../../../packages/ai/src/runtime/approvals.test.ts)
-- [`packages/ai/src/testing/trajectory.test.ts`](../../../../../packages/ai/src/testing/trajectory.test.ts)
+## 5. Follow the PURISTA Lifecycle
 
-Those tests are where the runtime contracts for `context.ai.reflect.run(...)`, `context.runtime.approvals.wait(...)`, and `evaluateTrajectory(...)` are verified directly.
+Always remember the separation of concerns:
 
-## The Production Baseline
+1.  **Definition (Builder)**: Define the contract, including schemas, allowed tools, and policies.
+2.  **Implementation (Handler)**: Orchestrate the business logic using the `context` object.
+3.  **Instance Creation (`getInstance`)**: Provide the concrete runtime dependencies like model providers, stores, and skills.
+4.  **Adaptation (Edge)**: Adapt to external systems like HTTP servers or the Vercel AI SDK at the boundary, keeping the core logic clean.
 
-If an agent will run in production, treat these as the default baseline:
-
-- Use `setExecutionMode('queued')` for long or failure-sensitive work.
-- Use `context.memory.run` for plans, checkpoints, and final status.
-- Keep reflection opt-in through quality profiles.
-- Use approval checkpoints for irreversible or high-risk outputs.
-- Keep tool and child-agent access allowlisted in the builder.
-- Make tests deterministic with `ScriptedModel`, state stores, and trajectory checks.
-- Verify traces show `ai.tool_call:*` and `ai.agent_invoke:*` spans with the
-  expected tenant/principal attributes.
-- Throw `HandledError` for expected business failures and let unexpected faults
-  remain `UnhandledError`.
-
-## Definition, Implementation, Instance, Adapter
-
-### Definition
-
-Definition belongs in the builder:
-
-- schemas
-- models
-- skills
-- resources
-- allowed tools
-- allowed agents
-- execution policy
-- reflection policy
-- agent policy
-
-### Implementation
-
-Implementation belongs in the handler:
-
-- reading input
-- updating conversation memory
-- creating and updating durable runs
-- invoking tools and agents
-- resolving quality profiles
-- running reflection loops
-- waiting for approvals
-
-### Instance Creation
-
-Instance creation belongs in `getInstance(...)`:
-
-- models
-- queue bridge
-- state store
-- conversation store
-- skill resources
-- resource values
-- event bridge
-
-### Adapters
-
-Adapters belong at the edge:
-
-- HTTP/SSE exposure
-- AI SDK runtime bridges
-- frontend streaming protocols
-
-Adapters should consume the runtime. They should not own the business logic.
-
-## How To Use The Example
-
-Read the example in this order:
-
-1. [`examples/ai-basic/src/agents/supportAgent/v1/schema.ts`](../../../../../examples/ai-basic/src/agents/supportAgent/v1/schema.ts)
-2. [`examples/ai-basic/src/agents/supportAgent/v1/supportAgent.ts`](../../../../../examples/ai-basic/src/agents/supportAgent/v1/supportAgent.ts)
-3. [`examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`](../../../../../examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts)
-
-That sequence mirrors the PURISTA flow:
-
-1. input contract
-2. behavior and orchestration
-3. production-style verification
+By following these principles, you can build PURISTA agents that are not only powerful but also reliable, observable, and ready for production.
 
 ## Related Guides
-
-- [Context](./handler-context.md)
+- [Agent Builder](./agent-builder.md)
+- [Handler Context](./handler-context.md)
 - [Durable Run State](./run-state.md)
-- [Testing](./testing.md)
+- [Agent Testing](./testing.md)
 - [Runtime](./runtime.md)
-- [AI SDK Adapter](./ai-sdk-adapter.md)

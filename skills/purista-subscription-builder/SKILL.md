@@ -42,13 +42,13 @@ A subscription is a builder-defined reactive contract owned by a service. It sub
 src/service/<service-name>/v1/subscription/<subscription-name>/
   <subscriptionName>SubscriptionBuilder.ts
   schema.ts
-  handler.ts
+  implementation.ts  # optional helper module if the logic is not kept inline
 ```
 
 ## Implementation pattern
 - Normalize external events before mapping them to local behavior.
 - Emit new facts explicitly when the subscription establishes a new state.
-- Use resources, stores, and service invokes through typed context.
+- Keep `setSubscriptionFunction(...)` in the builder file unless a nearby builder-owned implementation module is needed, and use resources, stores, and service invokes through typed context.
 
 ## Configuration pattern
 - Subscription handlers inherit service config, resources, stores, and invokes from the owning service.

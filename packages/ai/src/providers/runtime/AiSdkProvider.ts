@@ -10,7 +10,7 @@ import {
 	wrapLanguageModel,
 } from 'ai'
 import { createAiSdkRequest } from '../../bridge/aiSdk.js'
-import { generateText as generateTextWithFallback } from './generateText.js'
+import { generateText as generateTextWithBounds } from './generateText.js'
 import type {
 	ModelProvider,
 	ModelProviderCapabilities,
@@ -19,6 +19,7 @@ import type {
 	ProviderEmbedRequest,
 	ProviderEmbedResponse,
 	ProviderGenerateTextRequest,
+	ProviderInvocationPolicy,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
 	ProviderRequest,
@@ -27,6 +28,8 @@ import type {
 	ProviderResponse,
 	ProviderStream,
 } from './ModelProvider.js'
+import { runBoundedModelInvocation } from './modelInvocation.js'
+import { compileProviderAiSdkSchema } from './providerJsonSchema.js'
 import { normalizeReasoningDelta, reasoningDelta, textDelta } from './streamNormalization.js'
 
 /**
@@ -55,8 +58,9 @@ export type AiSdkProviderOptions = {
 	systemPrompt?: string
 	/**
 	 * Default call options forwarded to `generateText` (temperature, maxOutputTokens, tools, ...).
+	 * Use `invocation` for bounded timeout/retry policy.
 	 */
-	defaults?: AiSdkProviderOverrides
+	defaults?: AiSdkProviderDefaults
 	/**
 	 * Optional tracer injected by the runtime. When set, AI SDK telemetry uses this tracer.
 	 */
@@ -69,7 +73,7 @@ export type AiSdkProviderOptions = {
 
 /**
  * Request metadata field understood by {@link AiSdkProvider}. Attach it to {@link ProviderRequest.metadata}
- * to override call settings per invocation.
+ * to override call settings per invocation, including bounded invocation policy.
  *
  * @example
  * ```ts
@@ -86,7 +90,7 @@ export type AiSdkProviderOptions = {
  */
 export type AiSdkProviderMetadata = {
 	aiSdk?:
-		| (AiSdkProviderOverrides & {
+		| (AiSdkProviderDefaults & {
 				generate?: AiSdkProviderOverrides
 				embed?: AiSdkEmbedOverrides
 				embedMany?: AiSdkEmbedManyOverrides
@@ -101,6 +105,9 @@ export type AiSdkProviderMetadata = {
  */
 export type GenerateTextArgs = Parameters<typeof aiGenerateText>[0]
 export type AiSdkProviderOverrides = Partial<Omit<GenerateTextArgs, 'model' | 'prompt' | 'system' | 'messages'>>
+export type AiSdkProviderDefaults = AiSdkProviderOverrides & {
+	invocation?: ProviderInvocationPolicy
+}
 export type EmbedArgs = Parameters<typeof embed>[0]
 export type EmbedManyArgs = Parameters<typeof embedMany>[0]
 export type RerankArgs = Parameters<typeof rerank>[0]
@@ -114,6 +121,11 @@ export type AiSdkGenerateJsonOverrides = Partial<
 
 const isMetadata = (value: Record<string, unknown> | undefined): value is AiSdkProviderMetadata => {
 	return !!value && typeof value === 'object' && 'aiSdk' in value
+}
+
+const stripInvocationField = <T extends Record<string, unknown>>(value: T): T => {
+	const { invocation: _ignoredInvocation, ...rest } = value
+	return rest as T
 }
 
 const composeSystemPrompt = (systemPrompt?: string, context?: string) => {
@@ -203,10 +215,11 @@ export class AiSdkProvider implements ModelProvider {
 	private readonly embeddingModel?: EmbeddingModel
 	private readonly rerankingModel?: RerankingModel
 	private readonly systemPrompt?: string
-	private readonly defaults: AiSdkProviderOverrides
+	private readonly defaults: AiSdkProviderDefaults
 	private readonly embeddingDefaults: AiSdkEmbedOverrides
 	private readonly embeddingManyDefaults: AiSdkEmbedManyOverrides
 	private readonly rerankDefaults: AiSdkRerankOverrides
+	private readonly invocationDefaults: ProviderInvocationPolicy
 	private readonly tracer?: Tracer
 
 	constructor(options: AiSdkProviderOptions) {
@@ -227,6 +240,7 @@ export class AiSdkProvider implements ModelProvider {
 		this.embeddingDefaults = {}
 		this.embeddingManyDefaults = {}
 		this.rerankDefaults = {}
+		this.invocationDefaults = options.defaults?.invocation ?? {}
 		this.tracer = options.tracer
 		this.name = options.name ?? (typeof options.model === 'string' ? options.model : 'ai-sdk-provider')
 		this.capabilities = {
@@ -250,13 +264,13 @@ export class AiSdkProvider implements ModelProvider {
 			const { generate, ...topLevel } = aiSdk as Record<string, unknown>
 			if (generate && typeof generate === 'object') {
 				return {
-					...topLevel,
-					...(generate as Record<string, unknown>),
+					...stripInvocationField(topLevel),
+					...stripInvocationField(generate as Record<string, unknown>),
 				}
 			}
-			return topLevel
+			return stripInvocationField(topLevel)
 		}
-		return aiSdk
+		return stripInvocationField(aiSdk as Record<string, unknown>)
 	}
 
 	private getEmbedOverrides(metadata: Record<string, unknown> | undefined): AiSdkEmbedOverrides {
@@ -267,7 +281,9 @@ export class AiSdkProvider implements ModelProvider {
 		if (!aiSdk || typeof aiSdk !== 'object' || !('embed' in aiSdk)) {
 			return {}
 		}
-		return typeof aiSdk.embed === 'object' && aiSdk.embed ? aiSdk.embed : {}
+		return typeof aiSdk.embed === 'object' && aiSdk.embed
+			? stripInvocationField(aiSdk.embed as Record<string, unknown>)
+			: {}
 	}
 
 	private getEmbedManyOverrides(metadata: Record<string, unknown> | undefined): AiSdkEmbedManyOverrides {
@@ -278,7 +294,9 @@ export class AiSdkProvider implements ModelProvider {
 		if (!aiSdk || typeof aiSdk !== 'object' || !('embedMany' in aiSdk)) {
 			return {}
 		}
-		return typeof aiSdk.embedMany === 'object' && aiSdk.embedMany ? aiSdk.embedMany : {}
+		return typeof aiSdk.embedMany === 'object' && aiSdk.embedMany
+			? stripInvocationField(aiSdk.embedMany as Record<string, unknown>)
+			: {}
 	}
 
 	private getRerankOverrides(metadata: Record<string, unknown> | undefined): AiSdkRerankOverrides {
@@ -289,7 +307,9 @@ export class AiSdkProvider implements ModelProvider {
 		if (!aiSdk || typeof aiSdk !== 'object' || !('rerank' in aiSdk)) {
 			return {}
 		}
-		return typeof aiSdk.rerank === 'object' && aiSdk.rerank ? aiSdk.rerank : {}
+		return typeof aiSdk.rerank === 'object' && aiSdk.rerank
+			? stripInvocationField(aiSdk.rerank as Record<string, unknown>)
+			: {}
 	}
 
 	private getGenerateJsonOverrides(metadata: Record<string, unknown> | undefined): AiSdkGenerateJsonOverrides {
@@ -300,7 +320,34 @@ export class AiSdkProvider implements ModelProvider {
 		if (!aiSdk || typeof aiSdk !== 'object' || !('generateJson' in aiSdk)) {
 			return {}
 		}
-		return typeof aiSdk.generateJson === 'object' && aiSdk.generateJson ? aiSdk.generateJson : {}
+		return typeof aiSdk.generateJson === 'object' && aiSdk.generateJson
+			? stripInvocationField(aiSdk.generateJson as Record<string, unknown>)
+			: {}
+	}
+
+	private getInvocationPolicy(metadata: Record<string, unknown> | undefined): ProviderInvocationPolicy {
+		if (!isMetadata(metadata)) {
+			return this.invocationDefaults
+		}
+		const aiSdk = metadata.aiSdk
+		if (!aiSdk || typeof aiSdk !== 'object') {
+			return this.invocationDefaults
+		}
+		const invocation =
+			'invocation' in aiSdk ? (aiSdk as { invocation?: ProviderInvocationPolicy }).invocation : undefined
+		if (!invocation || typeof invocation !== 'object') {
+			return this.invocationDefaults
+		}
+		return {
+			...this.invocationDefaults,
+			...invocation,
+			retry: invocation.retry
+				? {
+						...(this.invocationDefaults.retry ?? {}),
+						...invocation.retry,
+					}
+				: this.invocationDefaults.retry,
+		}
 	}
 
 	private getCallInput(request: ProviderRequest): GenerateTextArgs {
@@ -312,8 +359,9 @@ export class AiSdkProvider implements ModelProvider {
 			metadata: request.metadata,
 		})
 		const metadataOverrides = this.getTextOverrides(adaptedRequest.metadata)
+		const { invocation: _ignoredInvocation, ...defaultsWithoutInvocation } = this.defaults as Record<string, unknown>
 		return {
-			...this.defaults,
+			...defaultsWithoutInvocation,
 			...metadataOverrides,
 			model: this.model,
 			prompt: adaptedRequest.prompt,
@@ -321,7 +369,7 @@ export class AiSdkProvider implements ModelProvider {
 			experimental_telemetry: {
 				isEnabled: true,
 				...(this.tracer ? { tracer: this.tracer } : {}),
-				...(this.defaults.experimental_telemetry ?? {}),
+				...(defaultsWithoutInvocation.experimental_telemetry ?? {}),
 				...(metadataOverrides.experimental_telemetry ?? {}),
 			},
 		}
@@ -388,7 +436,11 @@ export class AiSdkProvider implements ModelProvider {
 
 	async generate(request: ProviderRequest): Promise<ProviderResponse> {
 		const callInput = this.getCallInput(request)
-		const result = await aiGenerateText(callInput)
+		const result = await runBoundedModelInvocation({
+			label: `${this.name}:generate`,
+			policy: this.getInvocationPolicy(request.metadata),
+			operation: async () => await aiGenerateText(callInput),
+		})
 		const { usage } = result
 
 		return {
@@ -409,27 +461,38 @@ export class AiSdkProvider implements ModelProvider {
 
 	async generateJson<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
 		const metadataOverrides = this.getGenerateJsonOverrides(request.metadata)
-		const { output: _ignoredOutput, ...defaultsWithoutOutput } = this.defaults as Record<string, unknown>
+		const {
+			output: _ignoredOutput,
+			invocation: _ignoredInvocation,
+			...defaultsWithoutOutput
+		} = this.defaults as Record<string, unknown>
 		const { output: _ignoredOverrideOutput, ...metadataWithoutOutput } = metadataOverrides as Record<string, unknown>
-		const objectRequest = request.schema
-			? {
-					schema: request.schema as never,
-				}
-			: {
-					output: 'no-schema' as const,
-				}
-		const result = await generateObject({
-			...defaultsWithoutOutput,
-			...metadataWithoutOutput,
-			model: this.model,
-			prompt: request.prompt,
-			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
-			...objectRequest,
-			experimental_telemetry: {
-				isEnabled: true,
-				...(this.tracer ? { tracer: this.tracer } : {}),
-				...(this.defaults.experimental_telemetry ?? {}),
-				...(metadataOverrides.experimental_telemetry ?? {}),
+		const result = await runBoundedModelInvocation({
+			label: `${this.name}:generateJson`,
+			policy: this.getInvocationPolicy(request.metadata),
+			operation: async () => {
+				const compiledSchema = await compileProviderAiSdkSchema(request.schema)
+				const objectRequest = compiledSchema
+					? {
+							schema: compiledSchema as never,
+						}
+					: {
+							output: 'no-schema' as const,
+						}
+				return await generateObject({
+					...defaultsWithoutOutput,
+					...metadataWithoutOutput,
+					model: this.model,
+					prompt: request.prompt,
+					system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
+					...objectRequest,
+					experimental_telemetry: {
+						isEnabled: true,
+						...(this.tracer ? { tracer: this.tracer } : {}),
+						...(defaultsWithoutOutput.experimental_telemetry ?? {}),
+						...(metadataOverrides.experimental_telemetry ?? {}),
+					},
+				})
 			},
 		})
 		const { usage } = result
@@ -522,7 +585,7 @@ export class AiSdkProvider implements ModelProvider {
 	}
 
 	async generateText(request: ProviderGenerateTextRequest): Promise<string> {
-		return await generateTextWithFallback({
+		return await generateTextWithBounds({
 			model: {
 				generate: this.generate.bind(this),
 				stream: this.stream.bind(this),
@@ -538,12 +601,18 @@ export class AiSdkProvider implements ModelProvider {
 			},
 			onReasoning: request.onReasoning,
 			onTextDelta: request.onTextDelta,
+			policy: this.getInvocationPolicy(request.metadata),
+			label: `${this.name}:generateText`,
 		})
 	}
 
 	async embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse> {
 		const callInput = this.getEmbedInput(request)
-		const result = await embed(callInput)
+		const result = await runBoundedModelInvocation({
+			label: `${this.name}:embed`,
+			policy: this.getInvocationPolicy(request.metadata),
+			operation: async () => await embed(callInput),
+		})
 		return {
 			embedding: result.embedding,
 			usage: {
@@ -558,7 +627,11 @@ export class AiSdkProvider implements ModelProvider {
 
 	async embedMany(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse> {
 		const callInput = this.getEmbedManyInput(request)
-		const result = await embedMany(callInput)
+		const result = await runBoundedModelInvocation({
+			label: `${this.name}:embedMany`,
+			policy: this.getInvocationPolicy(request.metadata),
+			operation: async () => await embedMany(callInput),
+		})
 		return {
 			embeddings: result.embeddings,
 			usage: {
@@ -575,7 +648,11 @@ export class AiSdkProvider implements ModelProvider {
 		request: ProviderRerankRequest<Document>,
 	): Promise<ProviderRerankResponse<Document>> {
 		const callInput = this.getRerankInput(request)
-		const result = await rerank(callInput)
+		const result = await runBoundedModelInvocation({
+			label: `${this.name}:rerank`,
+			policy: this.getInvocationPolicy(request.metadata),
+			operation: async () => await rerank(callInput),
+		})
 		return {
 			ranking: result.ranking as ProviderRerankResponse<Document>['ranking'],
 			rerankedDocuments: result.rerankedDocuments as Document[],

@@ -63,7 +63,7 @@ src/
 ```
 
 ## Implementation pattern
-- Keep implementation logic in `handler.ts` or `set*Function(...)` bodies behind builder contracts.
+- Keep implementation logic behind builder contracts, either inline in `set*Function(...)` or in explicit handler modules owned by the versioned builder folder.
 - Let service builders define structure and let handlers call resources, stores, or other services.
 - Use the service module to collect child definitions and expose the assembled service definition.
 

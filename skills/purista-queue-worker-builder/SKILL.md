@@ -41,13 +41,13 @@ A queue worker is a builder-defined execution unit for a named queue. It defines
 ```text
 src/service/<service-name>/v1/worker/<worker-name>/
   <workerName>QueueWorkerBuilder.ts
-  handler.ts
+  implementation.ts  # optional helper module if the logic is not kept inline
 ```
 
 ## Implementation pattern
 - Load durable state or run-state first.
 - Execute one logical step at a time and checkpoint after success.
-- Use `setHandler(...)` for the actual worker execution function.
+- Use `setHandler(...)` in the builder file or delegate to a nearby builder-owned implementation module when the logic grows.
 - Keep before/after guard hooks explicit when worker preconditions matter.
 
 ## Configuration pattern
