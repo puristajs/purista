@@ -16,6 +16,11 @@ PURISTA agents are first-class runtime units that share EventBridge, queues, sto
 ## Core PURISTA concept
 Agents extend the builder model instead of replacing it. They are model-driven runtime units that must still be attached to services, resources, skills, stores, and runtime policies explicitly.
 
+Current preferred shape:
+- one public conductor agent for user-facing orchestration
+- worker agents for synthesis/review/discovery
+- deterministic commands for applying project truth
+
 ## Builder lifecycle
 1. Decide whether the workflow needs an agent or a deterministic service path.
 2. Define the owning agent builder and any service builders it depends on.
@@ -28,6 +33,7 @@ Agents extend the builder model instead of replacing it. They are model-driven r
 - Use agents for model-driven reasoning and orchestration, not as generic replacements for application services.
 - Separate inline from queued durable execution deliberately.
 - Emit protocol-safe progress and errors.
+- Keep worker agents deliverable-first; do not hide mutation inside them.
 
 ## Decision rules
 - Use inline agents for short, low-risk turns.
@@ -42,6 +48,7 @@ Agents extend the builder model instead of replacing it. They are model-driven r
 - Let agents orchestrate tools, services, child agents, and skills.
 - Keep business side effects behind commands, services, queues, or allowlisted runtime bindings.
 - Use explicit protocol or stream surfaces for user-visible progress.
+- Use grouped context domains such as `context.ai`, `context.invoke`, `context.memory`, and `context.io` instead of older flat helper patterns.
 
 ## Configuration pattern
 - Agent model aliases, skill names, conversation persistence, run-state, and runtime bindings are part of definition.

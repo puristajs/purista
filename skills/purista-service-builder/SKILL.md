@@ -35,6 +35,7 @@ The service builder is the boundary between application design and runtime execu
 - Add a new service when ownership, state, or integration boundaries differ materially.
 - Add a new version when a public contract changes incompatibly.
 - Use one service builder as the parent for all command, subscription, stream, queue, and worker builders in that version folder.
+- If AI workers need deterministic persistence, keep the worker agent separate from the command that applies its deliverable.
 
 ## Definition pattern
 - Put the service builder in its own versioned file.
@@ -55,6 +56,7 @@ src/service/<service-name>/v1/
 - Child builder files define schemas and handler implementations.
 - The service module imports child builders, collects `getDefinition()` results, and registers them on the service builder.
 - Handler bodies stay thin and use typed context, resources, stores, and other declared capabilities.
+- Prefer shared application helpers for repeated workflow patching or deliverable application logic instead of copying resource update code across commands.
 
 ## Configuration pattern
 - Use `setConfigSchema(...)` for service-owned configuration shape.

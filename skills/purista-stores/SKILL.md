@@ -23,10 +23,10 @@ Stores are runtime infrastructure, not prompt memory. Builders define whether a 
 4. Use the matching context surface at runtime.
 
 ## Hard rules
-- Use `context.states` or `context.runState` for workflow state.
-- Use `context.conversation` only for chat memory.
+- Use grouped context surfaces: `context.memory.run` for durable agent execution state and `context.memory.conversation` for chat memory.
 - Keep secrets and config in their dedicated stores.
 - Do not hide operational state in prompts or ad hoc files.
+- Keep workflow truth separate from conversation projections and UI artifacts.
 
 ## Decision rules
 - Use run-state for user-visible execution progress and resumable work.
@@ -40,6 +40,7 @@ Stores are runtime infrastructure, not prompt memory. Builders define whether a 
 ## Implementation pattern
 - Read config, secrets, state, conversation, and run-state through the typed runtime context.
 - Keep workflow checkpoints out of prompts and out of handler-local globals.
+- Store typed workflow fields such as deliverables, pending approvals, readiness reports, and promotion candidates as structured records rather than opaque blobs.
 
 ## Configuration pattern
 - Builders decide that the capability exists.

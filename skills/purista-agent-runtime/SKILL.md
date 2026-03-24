@@ -19,18 +19,19 @@ Agent runtime helpers are runtime composition surfaces, not magic prompt state. 
 ## Builder lifecycle
 1. Declare the agent with its allowed skills, tools, models, and runtime policy.
 2. Create the running instance with concrete providers, skill resources, stores, and bridges.
-3. Inside the handler, use `context.skills`, `context.expose`, `context.tools`, `context.agents`, `context.runState`, and `context.conversation` explicitly.
+3. Inside the handler, use grouped context surfaces such as `context.ai`, `context.invoke`, `context.memory`, `context.io`, and `context.app` explicitly.
 
 ## Hard rules
-- Use `context.expose.*` for provider-neutral external runtime bindings.
-- Keep retrieval and skill loading behind resources and `context.skills`, not hidden prompt magic.
-- Use `context.runState` for durable workflow state and `context.conversation` for chat history.
+- Use `context.invoke.expose.*` for provider-neutral external runtime bindings.
+- Keep retrieval and skill loading behind `context.ai.skills`, not hidden prompt magic.
+- Use `context.memory.run` for durable workflow state and `context.memory.conversation` for chat history.
 - Keep prompt assembly explicit.
+- Prefer `context.ai.policy.resolve(...)`, `context.ai.reflect.run(...)`, and `context.runtime.approvals.*` over handwritten local abstractions when the runtime already provides them.
 
 ## Decision rules
-- Use `context.tools` for declared command invocations.
-- Use `context.agents.forward` when child output should be visible to the user.
-- Use `context.skills.search`, `context.skills.load`, and `context.skills.loadReferences` only when the handler actually needs those materials.
+- Use `context.invoke.tools` for declared command invocations.
+- Use `context.invoke.agents.forward` when child output should be visible to the user.
+- Use `context.ai.skills.search`, `context.ai.skills.load`, and `context.ai.skills.loadReferences` only when the handler actually needs those materials.
 
 ## Definition pattern
 - Declare skill names with `builder.useSkills([...])`.

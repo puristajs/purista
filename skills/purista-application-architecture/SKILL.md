@@ -16,6 +16,13 @@ This skill teaches how to map business capabilities to service builders, resourc
 ## Core PURISTA concept
 Architecture in PURISTA is a graph of builder-owned capabilities. You decide which service builders exist, which child builders they expose, which resources they require, and which runtime infrastructure must be supplied when instances are created.
 
+For AI-heavy systems, the preferred split is:
+- public conductor/orchestrator
+- specialist worker agents
+- deterministic apply commands
+- workflow/readiness/approval state
+- UI projections separate from domain truth
+
 ## Builder lifecycle
 1. Identify business capabilities and ownership boundaries.
 2. Create one versioned service builder per bounded capability.
@@ -35,6 +42,7 @@ Architecture in PURISTA is a graph of builder-owned capabilities. You decide whi
 - If a capability owns state and invariants, it deserves a service boundary.
 - If an LLM only enriches a deterministic workflow, keep the control flow in service builders, commands, queues, and resources.
 - If the runtime concern is transport only, keep it out of the service definition.
+- If the user-facing flow mixes reasoning and state mutation, split it into deliverables plus deterministic apply commands.
 
 ## Definition pattern
 - Define a capability map first.
@@ -81,6 +89,7 @@ src/
 - Designing agents before service contracts exist.
 - Letting one service become a generic orchestration dump.
 - Naming handlers and files without first deciding the owning service builder.
+- Letting worker agents write project truth directly when a command should own the mutation.
 
 ## How this connects to other PURISTA concepts
 This skill routes to `purista-core`, `purista-service-builder`, `purista-resources`, queue and stream skills, stores, HTTP runtime, sandbox, and agent runtime.

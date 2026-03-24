@@ -22,10 +22,11 @@ Observability is part of runtime composition. Builder-defined services and agent
 3. Instantiate runtime infrastructure that records traces, telemetry, and diagnostics.
 
 ## Hard rules
-- Preserve trace metadata through service, queue, and sandbox boundaries.
+- Preserve trace metadata through service, queue, agent, and sandbox boundaries.
 - Emit structured telemetry, not only prose logs.
 - Classify handled versus unhandled failures explicitly.
 - Treat protocol frames and run-state as observability artifacts, not only UI artifacts.
+- Preserve tenant and principal attributes where the runtime owns that boundary.
 
 ## Decision rules
 - Use protocol artifacts for user-visible progress.
@@ -39,6 +40,7 @@ Observability is part of runtime composition. Builder-defined services and agent
 ## Implementation pattern
 - Emit protocol frames, queue telemetry, and classified errors deliberately.
 - Preserve trace context when invoking services, agents, or queue-backed work.
+- Add explicit spans around reflection loops, approval waits, child-agent forwarding, and deterministic apply commands when those boundaries matter to operators.
 
 ## Configuration pattern
 - Trace exporters, metrics backends, and log sinks are runtime concerns.
@@ -58,6 +60,7 @@ Observability is part of runtime composition. Builder-defined services and agent
 - Dropping trace metadata at queue or sandbox boundaries.
 - Treating protocol frames as optional decoration instead of part of system visibility.
 - Describing observability goals without the runtime components that must carry them.
+- Rewrapping `HandledError`/`UnhandledError` as plain `Error` at integration boundaries.
 
 ## How this connects to other PURISTA concepts
 Observability cuts across services, EventBridge, QueueBridge, agents, streams, sandbox execution, and deployment topology.

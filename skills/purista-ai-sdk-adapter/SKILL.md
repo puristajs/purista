@@ -11,7 +11,7 @@ phases: [implementation]
 Use this skill when the chosen provider loop is Vercel AI SDK and PURISTA bindings need to become AI SDK tools.
 
 ## What this component/package is for
-The AI SDK adapter is a thin conversion layer from neutral external runtime bindings to AI SDK-compatible tool definitions.
+The AI SDK adapter is a thin conversion layer from neutral external runtime bindings to AI SDK-compatible tool definitions and stream events.
 
 ## Core PURISTA concept
 AI SDK tooling is an adapter over builder-defined commands and agents. The neutral binding remains the stable contract; AI SDK is only one runtime surface.
@@ -24,13 +24,15 @@ AI SDK tooling is an adapter over builder-defined commands and agents. The neutr
 
 ## Hard rules
 - Keep `toAiSdkTool` and `toAiSdkTools` as pure adapters.
-- Do not move allowlist lookup or queue decisions into the adapter.
+- Do not move allowlist lookup, workflow mutation, or queue decisions into the adapter.
 - Keep provider-specific metadata out of the neutral contract.
+- Do not use the adapter as the business contract. The neutral binding remains the source of truth.
 
 ## Decision rules
 - Use the adapter only at the provider boundary.
-- Keep neutral binding creation inside runtime context with `context.expose`.
+- Keep neutral binding creation inside runtime context with `context.invoke.expose`.
 - If the business contract changes, change the underlying builder definition first, not the AI SDK adapter.
+- If an agent emits typed deliverables or structured UI artifacts, keep that logic outside the adapter.
 
 ## Definition pattern
 - Define tools and agents through PURISTA builders and neutral runtime bindings.
@@ -39,7 +41,8 @@ AI SDK tooling is an adapter over builder-defined commands and agents. The neutr
 ## Implementation pattern
 - Convert neutral bindings late.
 - Render skills and references separately from tool conversion.
-- Keep the prompt/request assembly explicit.
+- Keep prompt/request assembly explicit.
+- In grouped agent context, combine adapters with `context.ai.models`, `context.invoke.*`, and `context.io.stream` instead of recreating custom runtime wrappers.
 
 ## Configuration pattern
 - Provider-specific model settings belong to the provider/runtime layer.
@@ -53,6 +56,7 @@ AI SDK tooling is an adapter over builder-defined commands and agents. The neutr
 - The same command or agent can be exposed through a non-AI-SDK runtime because the neutral binding is still present.
 - The adapter layer contains conversion, not business logic.
 - A reviewer can trace an AI SDK tool back to a PURISTA builder-defined command or agent.
+- Tool calls, child-agent forwarding, and final protocol output remain observable with normal PURISTA tracing and protocol helpers.
 
 ## Common mistakes / anti-patterns
 - Letting AI SDK-specific concerns leak into command or agent definitions.
@@ -67,5 +71,6 @@ This skill composes external runtime bindings, agent runtime, skill rendering, a
 - `packages/ai/src/bridge/aiSdk.ts`
 - `packages/ai/src/providers/runtime/AiSdkProvider.ts`
 - `packages/ai/src/builder/AgentBuilder.ts`
+- `packages/ai/src/runtime/context.ts`
 - `examples/ai-basic/src/service/support/v1/command/getMcpTools/getMcpToolsCommandBuilder.ts`
 - `specs/20-agents/30-builder-integration.md`
