@@ -118,44 +118,50 @@ describe('external runtime bindings', () => {
 		const emitToolEvent = vi.fn()
 
 		const expose = createExposeHelpers({
-			manifest: {
-				agentName: 'supportAgent',
-				agentVersion: '1',
-				eventBridge: 'default',
-				allowedTools: [
-					{
-						serviceName: 'support',
-						serviceVersion: '1',
-						commandName: 'lookupFaq',
-						payloadSchema: z.object({ question: z.string() }),
-					},
-				],
-				allowedAgents: [
-					{
-						agentName: 'architectureAgent',
-						agentVersion: '1',
-						payloadSchema: z.object({ prompt: z.string() }),
-					},
-				],
+			app: {
+				manifest: {
+					agentName: 'supportAgent',
+					agentVersion: '1',
+					eventBridge: 'default',
+					allowedTools: [
+						{
+							serviceName: 'support',
+							serviceVersion: '1',
+							commandName: 'lookupFaq',
+							payloadSchema: z.object({ question: z.string() }),
+						},
+					],
+					allowedAgents: [
+						{
+							agentName: 'architectureAgent',
+							agentVersion: '1',
+							payloadSchema: z.object({ prompt: z.string() }),
+						},
+					],
+				},
 			},
-			tools: {
-				list: () => [],
-				invoke: {
-					support: {
-						'1': {
-							lookupFaq,
+			invoke: {
+				tools: {
+					list: () => [],
+					invoke: {
+						support: {
+							'1': {
+								lookupFaq,
+							},
 						},
 					},
 				},
+				agents: {
+					invoke,
+					runText: vi.fn(),
+					runObject: vi.fn(),
+					forward: vi.fn(),
+				},
 			},
-			agents: {
-				invoke,
-				runText: vi.fn(),
-				runObject: vi.fn(),
-				forward: vi.fn(),
-			},
-			protocol: {
-				emitToolEvent,
+			io: {
+				protocol: {
+					emitToolEvent,
+				},
 			},
 		})
 
@@ -184,21 +190,25 @@ describe('external runtime bindings', () => {
 
 	it('rejects undeclared commands and agents from the runtime bridge', async () => {
 		const expose = createExposeHelpers({
-			manifest: {
-				agentName: 'supportAgent',
-				agentVersion: '1',
-				eventBridge: 'default',
-				allowedTools: [],
-				allowedAgents: [],
+			app: {
+				manifest: {
+					agentName: 'supportAgent',
+					agentVersion: '1',
+					eventBridge: 'default',
+					allowedTools: [],
+					allowedAgents: [],
+				},
 			},
-			tools: { list: () => [], invoke: {} },
-			agents: {
-				invoke: vi.fn(),
-				runText: vi.fn(),
-				runObject: vi.fn(),
-				forward: vi.fn(),
+			invoke: {
+				tools: { list: () => [], invoke: {} },
+				agents: {
+					invoke: vi.fn(),
+					runText: vi.fn(),
+					runObject: vi.fn(),
+					forward: vi.fn(),
+				},
 			},
-			protocol: { emitToolEvent: vi.fn() },
+			io: { protocol: { emitToolEvent: vi.fn() } },
 		})
 
 		expect(() =>
@@ -239,48 +249,52 @@ describe('external runtime bindings', () => {
 	it('supports protocol and object result modes from bridged agents', async () => {
 		const emitToolEvent = vi.fn()
 		const expose = createExposeHelpers({
-			manifest: {
-				agentName: 'supportAgent',
-				agentVersion: '1',
-				eventBridge: 'default',
-				allowedTools: [],
-				allowedAgents: [
-					{
-						agentName: 'reportAgent',
-						agentVersion: '1',
-						payloadSchema: z.object({ id: z.string() }),
-					},
-				],
-			},
-			tools: { list: () => [], invoke: {} },
-			agents: {
-				invoke: vi
-					.fn()
-					.mockResolvedValueOnce([
+			app: {
+				manifest: {
+					agentName: 'supportAgent',
+					agentVersion: '1',
+					eventBridge: 'default',
+					allowedTools: [],
+					allowedAgents: [
 						{
-							frame: {
-								kind: 'message',
-								role: 'assistant',
-								content: '{"id":"42"}',
-								final: true,
-							},
+							agentName: 'reportAgent',
+							agentVersion: '1',
+							payloadSchema: z.object({ id: z.string() }),
 						},
-					])
-					.mockResolvedValueOnce([
-						{
-							frame: {
-								kind: 'message',
-								role: 'assistant',
-								content: 'protocol reply',
-								final: true,
-							},
-						},
-					]),
-				runText: vi.fn(),
-				runObject: vi.fn(),
-				forward: vi.fn(),
+					],
+				},
 			},
-			protocol: { emitToolEvent },
+			invoke: {
+				tools: { list: () => [], invoke: {} },
+				agents: {
+					invoke: vi
+						.fn()
+						.mockResolvedValueOnce([
+							{
+								frame: {
+									kind: 'message',
+									role: 'assistant',
+									content: '{"id":"42"}',
+									final: true,
+								},
+							},
+						])
+						.mockResolvedValueOnce([
+							{
+								frame: {
+									kind: 'message',
+									role: 'assistant',
+									content: 'protocol reply',
+									final: true,
+								},
+							},
+						]),
+					runText: vi.fn(),
+					runObject: vi.fn(),
+					forward: vi.fn(),
+				},
+			},
+			io: { protocol: { emitToolEvent } },
 		})
 
 		const objectBinding = expose.agent(
@@ -323,26 +337,30 @@ describe('external runtime bindings', () => {
 
 	it('extracts text results when the delegated agent only streams partial assistant frames', async () => {
 		const expose = createExposeHelpers({
-			manifest: {
-				agentName: 'supportAgent',
-				agentVersion: '1',
-				eventBridge: 'default',
-				allowedTools: [],
-				allowedAgents: [{ agentName: 'reportAgent', agentVersion: '1' }],
+			app: {
+				manifest: {
+					agentName: 'supportAgent',
+					agentVersion: '1',
+					eventBridge: 'default',
+					allowedTools: [],
+					allowedAgents: [{ agentName: 'reportAgent', agentVersion: '1' }],
+				},
 			},
-			tools: { list: () => [], invoke: {} },
-			agents: {
-				invoke: vi
-					.fn()
-					.mockResolvedValue([
-						{ frame: { kind: 'message', role: 'assistant', content: 'Hello ' } },
-						{ frame: { kind: 'message', role: 'assistant', content: 'World' } },
-					]),
-				runText: vi.fn(),
-				runObject: vi.fn(),
-				forward: vi.fn(),
+			invoke: {
+				tools: { list: () => [], invoke: {} },
+				agents: {
+					invoke: vi
+						.fn()
+						.mockResolvedValue([
+							{ frame: { kind: 'message', role: 'assistant', content: 'Hello ' } },
+							{ frame: { kind: 'message', role: 'assistant', content: 'World' } },
+						]),
+					runText: vi.fn(),
+					runObject: vi.fn(),
+					forward: vi.fn(),
+				},
 			},
-			protocol: { emitToolEvent: vi.fn() },
+			io: { protocol: { emitToolEvent: vi.fn() } },
 		})
 
 		const binding = expose.agent({ agentName: 'reportAgent', agentVersion: '1' })
@@ -352,21 +370,25 @@ describe('external runtime bindings', () => {
 
 	it('returns an empty text result when delegated agent frames contain no assistant messages', async () => {
 		const expose = createExposeHelpers({
-			manifest: {
-				agentName: 'supportAgent',
-				agentVersion: '1',
-				eventBridge: 'default',
-				allowedTools: [],
-				allowedAgents: [{ agentName: 'reportAgent', agentVersion: '1' }],
+			app: {
+				manifest: {
+					agentName: 'supportAgent',
+					agentVersion: '1',
+					eventBridge: 'default',
+					allowedTools: [],
+					allowedAgents: [{ agentName: 'reportAgent', agentVersion: '1' }],
+				},
 			},
-			tools: { list: () => [], invoke: {} },
-			agents: {
-				invoke: vi.fn().mockResolvedValue([{ frame: { kind: 'reasoning', content: 'thinking' } }]),
-				runText: vi.fn(),
-				runObject: vi.fn(),
-				forward: vi.fn(),
+			invoke: {
+				tools: { list: () => [], invoke: {} },
+				agents: {
+					invoke: vi.fn().mockResolvedValue([{ frame: { kind: 'reasoning', content: 'thinking' } }]),
+					runText: vi.fn(),
+					runObject: vi.fn(),
+					forward: vi.fn(),
+				},
 			},
-			protocol: { emitToolEvent: vi.fn() },
+			io: { protocol: { emitToolEvent: vi.fn() } },
 		})
 
 		const binding = expose.agent({ agentName: 'reportAgent', agentVersion: '1' })

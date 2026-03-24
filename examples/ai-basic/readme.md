@@ -61,15 +61,15 @@ Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
 - `src/agents/supportAgent/v1/supportAgent.ts`
   - queued durable execution
   - `.useSkills(['spec-elicitation', 'support-workflow'])`
-  - `context.runState` planning, checkpoints, and task updates
-  - `context.skills.loadAvailable()` and `context.skills.loadReferences(...)`
+  - `context.memory.run` planning, checkpoints, and task updates
+  - `context.ai.skills.loadAvailable()` and `context.ai.skills.loadReferences(...)`
   - attach-and-stream HTTP behavior
   - optional delegation to `triageAgent`
 
 - `src/agents/bridgeDemoAgent/v1/bridgeDemoAgent.ts`
   - `.useSkills(['spec-elicitation', 'tool-loop-discipline'])`
-  - `context.models['openai:gpt-4o-mini'].generateText(...)` for the model-owned adapter path
-  - explicit `context.expose.tools(...)` bindings for commands
+  - `context.ai.models['openai:gpt-4o-mini'].generateText(...)` for the model-owned adapter path
+  - explicit `context.invoke.expose.tools(...)` bindings for commands
 
 ### Frontend
 

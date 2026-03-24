@@ -18,6 +18,7 @@ const childPayload = (prompt: string) => ({
 
 const baseMessage = {
 	id: 'msg-1',
+	traceId: 'trace-parent-1',
 	correlationId: 'corr-1',
 	sender: {
 		serviceName: 'support',
@@ -28,6 +29,8 @@ const baseMessage = {
 	principalId: 'principal-1',
 	tenantId: 'tenant-1',
 } as any
+
+const startedSpans: Array<{ name: string; span: { setAttribute: ReturnType<typeof vi.fn> } }> = []
 
 const baseAgentInvoke = {
 	childAgent: {
@@ -104,14 +107,16 @@ const baseServiceContext = {
 		debug: vi.fn(),
 	},
 	startActiveSpan: vi.fn(async (_name, _opts, _ctx, fn) => {
-		return await fn({
+		const span = {
 			setAttribute: vi.fn(),
 			setAttributes: vi.fn(),
 			recordException: vi.fn(),
 			setStatus: vi.fn(),
 			spanContext: () => ({ traceId: 'trace', spanId: 'span', traceFlags: 1 }),
 			end: vi.fn(),
-		})
+		}
+		startedSpans.push({ name: _name, span })
+		return await fn(span)
 	}),
 	message: baseMessage,
 	service: {
@@ -213,35 +218,37 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const toolResult = await context.tools.invoke.ToolService['1'].createTicket({ title: 'Need help' })
+		const toolResult = await context.invoke.tools.invoke.ToolService['1'].createTicket({ title: 'Need help' })
 		expect(toolResult).toEqual({ id: 'ticket-1' })
-		const toolResultViaPath = await context.tools.invoke.ToolService['1'].createTicket({ title: 'Need help (path)' })
+		const toolResultViaPath = await context.invoke.tools.invoke.ToolService['1'].createTicket({
+			title: 'Need help (path)',
+		})
 		expect(toolResultViaPath).toEqual({ id: 'ticket-1' })
 
-		await context.session.save({ conversationId: 's1', data: { value: 1 }, updatedAt: Date.now() })
-		const session = await context.session.load('s1')
+		await context.memory.session.save({ conversationId: 's1', data: { value: 1 }, updatedAt: Date.now() })
+		const session = await context.memory.session.load('s1')
 		expect(session?.conversationId).toBe('s1')
 
-		await context.conversation.addUser('Need password reset help')
-		await context.conversation.addAssistant('Use the forgot-password page.')
-		const promptInput = await context.conversation.buildPromptInput()
+		await context.memory.conversation.addUser('Need password reset help')
+		await context.memory.conversation.addAssistant('Use the forgot-password page.')
+		const promptInput = await context.memory.conversation.buildPromptInput()
 		expect(promptInput).toContain('user: Need password reset help')
 		expect(promptInput).toContain('assistant: Use the forgot-password page.')
 		await (
-			context.embeddings as Record<string, { embed: (request: { value: string }) => Promise<unknown> }>
+			context.ai.embeddings as Record<string, { embed: (request: { value: string }) => Promise<unknown> }>
 		).vector.embed({
 			value: 'reset password',
 		})
 		await (
-			context.rerankers as Record<
+			context.ai.rerankers as Record<
 				string,
 				{ rerank: (request: { query: string; documents: string[] }) => Promise<unknown> }
 			>
 		).ranker.rerank({ query: 'reset', documents: ['doc'] })
 		expect(embed).toHaveBeenCalledOnce()
 		expect(rerank).toHaveBeenCalledOnce()
-		context.stream.sendReasoning('reasoning note')
-		await (context.emit as (eventName: string, payload: { status: string }) => Promise<void>)('agent.updated', {
+		context.io.stream.sendReasoning('reasoning note')
+		await (context.output.emit as (eventName: string, payload: { status: string }) => Promise<void>)('agent.updated', {
 			status: 'ok',
 		})
 		expect(baseServiceContext.emit).toHaveBeenCalledWith('agent.updated', { status: 'ok' })
@@ -249,6 +256,11 @@ describe('runtime context helpers', () => {
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
 		expect(envelopes.some(envelope => envelope.frame.kind === 'artifact')).toBe(true)
+		const toolSpan = startedSpans.find(entry => entry.name === 'ai.tool_call:ToolService/createTicket')
+		expect(toolSpan).toBeDefined()
+		expect(toolSpan?.span.setAttribute).toHaveBeenCalledWith('purista.ai.tool_name', 'ToolService.1.createTicket')
+		expect(toolSpan?.span.setAttribute).toHaveBeenCalledWith('purista.principalId', 'principal-1')
+		expect(toolSpan?.span.setAttribute).toHaveBeenCalledWith('purista.tenantId', 'tenant-1')
 	})
 
 	it('exposes durable run state helpers on the handler context', async () => {
@@ -293,12 +305,12 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const run = await context.runState.start({
+		const run = await context.memory.run.start({
 			title: 'Example run',
 			extraScope: { projectId: 'demo' },
 		})
 		await run.plan([{ id: 'step-1', title: 'Collect facts' }])
-		const persisted = await context.runState.get({ extraScope: { projectId: 'demo' } })
+		const persisted = await context.memory.run.get({ extraScope: { projectId: 'demo' } })
 
 		expect(persisted?.title).toBe('Example run')
 		expect(persisted?.tasks[0]?.title).toBe('Collect facts')
@@ -321,11 +333,11 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.session.save({ data: { value: 'implicit' } })
-		const session = await context.session.load()
+		await context.memory.session.save({ data: { value: 'implicit' } })
+		const session = await context.memory.session.load()
 		expect(session?.conversationId).toBe('chat-42')
-		expect(context.session.identity.baseSessionId).toBe('chat-42')
-		expect(context.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
+		expect(context.memory.session.identity.baseSessionId).toBe('chat-42')
+		expect(context.memory.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
 	})
 
 	it('uses message id when payload does not provide sessionId', async () => {
@@ -344,7 +356,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		expect(context.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:msg-1')
+		expect(context.memory.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:msg-1')
 	})
 
 	it('creates structured error frames', () => {
@@ -370,7 +382,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await expect(context.tools.invoke.Unknown['1'].run({})).rejects.toBeInstanceOf(HandledError)
+		await expect(context.invoke.tools.invoke.Unknown['1'].run({})).rejects.toBeInstanceOf(HandledError)
 	})
 
 	it('supports message emission for primitive values and has() checks', () => {
@@ -403,7 +415,7 @@ describe('runtime context helpers', () => {
 		expect(envelope.conversationId).toBe('c1')
 	})
 
-	it('provides subagent invocation helpers on context.agents', async () => {
+	it('provides subagent invocation helpers on context.invoke.agents', async () => {
 		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
 		baseEventBridge.invoke.mockResolvedValue([
 			createProtocolEnvelope({
@@ -427,14 +439,14 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const envelopes = await context.agents.invoke({
+		const envelopes = await context.invoke.agents.invoke({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
 		})
 		expect(envelopes).toHaveLength(1)
 
-		const childAgentApi = context.agents.invoke.childAgent?.['1']
+		const childAgentApi = context.invoke.agents.invoke.childAgent?.['1']
 		expect(childAgentApi).toBeDefined()
 		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
 			throw new Error('expected child agent api to be defined')
@@ -443,7 +455,7 @@ describe('runtime context helpers', () => {
 		const chainedEnvelopes = await chainedInvocation.final()
 		expect(chainedEnvelopes).toHaveLength(1)
 
-		const text = await context.agents.runText({
+		const text = await context.invoke.agents.runText({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
@@ -457,12 +469,64 @@ describe('runtime context helpers', () => {
 				frame: { kind: 'message', role: 'assistant', content: '{"ok":true}', final: true },
 			}),
 		])
-		const obj = await context.agents.runObject<{ ok: boolean }>({
+		const obj = await context.invoke.agents.runObject<{ ok: boolean }>({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
 		})
 		expect(obj).toEqual({ ok: true })
+		expect(baseEventBridge.invoke).toHaveBeenCalled()
+		expect(baseEventBridge.invoke.mock.calls[0][0].traceId).toBe('trace-parent-1')
+		const agentSpan = startedSpans.find(entry => entry.name === 'ai.agent_invoke:childAgent/1')
+		expect(agentSpan).toBeDefined()
+		expect(agentSpan?.span.setAttribute).toHaveBeenCalledWith('purista.ai.agent_name', 'childAgent')
+		expect(agentSpan?.span.setAttribute).toHaveBeenCalledWith('purista.ai.agent_version', '1')
+		expect(agentSpan?.span.setAttribute).toHaveBeenCalledWith('purista.principalId', 'principal-1')
+		expect(agentSpan?.span.setAttribute).toHaveBeenCalledWith('purista.tenantId', 'tenant-1')
+	})
+
+	it('falls back to direct event bridge invocation when no service-level agent binding is present', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-direct-1',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: 'direct child result', final: true },
+			}),
+		])
+
+		const context = createAgentHandlerContext({
+			serviceContext: {
+				...baseServiceContext,
+				invokeAgent: undefined,
+			},
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello', sessionId: 'chat-queue' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const text = await context.invoke.agents.runText({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('queue child'),
+		})
+		expect(text).toBe('direct child result')
+
+		const childAgentApi = context.invoke.agents.invoke.childAgent?.['1']
+		expect(childAgentApi).toBeDefined()
+		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
+			throw new Error('expected child agent api to be defined')
+		}
+
+		const chainedEnvelopes = await childAgentApi.call(childPayload('queue child chained')).final()
+		expect(chainedEnvelopes).toHaveLength(1)
 		expect(baseEventBridge.invoke).toHaveBeenCalled()
 	})
 
@@ -482,7 +546,7 @@ describe('runtime context helpers', () => {
 		})
 
 		await expect(
-			context.agents.invoke({
+			context.invoke.agents.invoke({
 				agentName: 'missingAgent',
 				agentVersion: '1',
 				payload: { prompt: 'go' },
@@ -509,7 +573,7 @@ describe('runtime context helpers', () => {
 		})
 
 		await expect(
-			context.agents.invoke({
+			context.invoke.agents.invoke({
 				agentName: 'typedAgent',
 				agentVersion: '1',
 				payload: { wrong: true },
@@ -535,7 +599,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const childAgentApi = context.agents.invoke.childAgent['1']
+		const childAgentApi = context.invoke.agents.invoke.childAgent['1']
 		expect(childAgentApi).toBeDefined()
 		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
 			throw new Error('expected child agent api to be defined')
@@ -592,7 +656,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.agents.invoke({
+		await context.invoke.agents.invoke({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
@@ -632,7 +696,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.agents.invoke({
+		await context.invoke.agents.invoke({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('typed'),
@@ -676,7 +740,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.agents.forward({
+		await context.invoke.agents.forward({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
@@ -718,7 +782,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.agents.forward({
+		await context.invoke.agents.forward({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
@@ -771,7 +835,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.agents.forward({
+		await context.invoke.agents.forward({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: childPayload('go'),
@@ -809,9 +873,9 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		expect(context.secrets).toBe(baseServiceContext.secrets)
-		expect(context.configs).toBe(baseServiceContext.configs)
-		expect(context.states).toBe(baseServiceContext.states)
+		expect(context.runtime.stores.secrets).toBe(baseServiceContext.secrets)
+		expect(context.runtime.stores.configs).toBe(baseServiceContext.configs)
+		expect(context.runtime.stores.states).toBe(baseServiceContext.states)
 	})
 
 	it('fails subagent invocation on protocol error envelopes by default', async () => {
@@ -839,12 +903,12 @@ describe('runtime context helpers', () => {
 		})
 
 		await expect(
-			context.agents.invoke({
+			context.invoke.agents.invoke({
 				agentName: 'childAgent',
 				agentVersion: '1',
 				payload: { prompt: 'go' },
 			}),
-		).rejects.toThrow('child failed')
+		).rejects.toBeInstanceOf(HandledError)
 	})
 
 	it('allows protocol error envelopes when failOnErrorFrame is false', async () => {
@@ -871,7 +935,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const envelopes = await context.agents.invoke({
+		const envelopes = await context.invoke.agents.invoke({
 			agentName: 'childAgent',
 			agentVersion: '1',
 			payload: { prompt: 'go' },
@@ -906,7 +970,7 @@ describe('runtime context helpers', () => {
 		})
 
 		await expect(
-			context.agents.runObject({
+			context.invoke.agents.runObject({
 				agentName: 'childAgent',
 				agentVersion: '1',
 				payload: { prompt: 'go' },
@@ -932,10 +996,10 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		context.stream.sendChunk('')
-		context.stream.sendFinal('')
-		context.stream.sendChunk('chunk')
-		context.stream.sendFinal('final')
+		context.io.stream.sendChunk('')
+		context.io.stream.sendFinal('')
+		context.io.stream.sendChunk('chunk')
+		context.io.stream.sendFinal('final')
 
 		const messageFrames = buffer
 			.toEnvelopes()
@@ -970,7 +1034,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await context.session.save({ conversationId: 's1', data: { value: 1 } })
+		await context.memory.session.save({ conversationId: 's1', data: { value: 1 } })
 		expect(conversationStore.save).toHaveBeenCalledWith(expect.objectContaining({ conversationId: 's1' }), {
 			agentName: 'supportAgent',
 			agentVersion: '1',
@@ -978,7 +1042,7 @@ describe('runtime context helpers', () => {
 			principalId: 'principal-1',
 		})
 
-		await context.session.load('s1')
+		await context.memory.session.load('s1')
 		expect(conversationStore.load).toHaveBeenCalledWith('s1', {
 			agentName: 'supportAgent',
 			agentVersion: '1',
@@ -986,7 +1050,7 @@ describe('runtime context helpers', () => {
 			principalId: 'principal-1',
 		})
 
-		await context.session.delete('s1')
+		await context.memory.session.delete('s1')
 		expect(conversationStore.delete).toHaveBeenCalledWith('s1', {
 			agentName: 'supportAgent',
 			agentVersion: '1',
@@ -1030,14 +1094,14 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await tenantAContext.session.save({ data: { owner: 'tenant-a' } })
-		await tenantBContext.session.save({ data: { owner: 'tenant-b' } })
+		await tenantAContext.memory.session.save({ data: { owner: 'tenant-a' } })
+		await tenantBContext.memory.session.save({ data: { owner: 'tenant-b' } })
 
-		await expect(tenantAContext.session.load()).resolves.toMatchObject({
+		await expect(tenantAContext.memory.session.load()).resolves.toMatchObject({
 			conversationId: 'shared',
 			data: { owner: 'tenant-a' },
 		})
-		await expect(tenantBContext.session.load()).resolves.toMatchObject({
+		await expect(tenantBContext.memory.session.load()).resolves.toMatchObject({
 			conversationId: 'shared',
 			data: { owner: 'tenant-b' },
 		})
@@ -1099,16 +1163,16 @@ Map requirements to services and queues.`,
 			},
 		})
 
-		await expect(context.skills.loadAvailable()).resolves.toEqual(
+		await expect(context.ai.skills.loadAvailable()).resolves.toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({ name: 'spec-elicitation' }),
 				expect.objectContaining({ name: 'architecture-synthesis' }),
 			]),
 		)
-		await expect(context.skills.search({ queries: ['services'] })).resolves.toEqual([
+		await expect(context.ai.skills.search({ queries: ['services'] })).resolves.toEqual([
 			expect.objectContaining({ name: 'architecture-synthesis' }),
 		])
-		expect(context.skills.config).toEqual({
+		expect(context.ai.skills.config).toEqual({
 			resourceName: 'skills',
 			names: ['spec-elicitation', 'architecture-synthesis'],
 		})

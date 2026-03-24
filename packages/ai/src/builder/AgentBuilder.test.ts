@@ -16,6 +16,55 @@ const findLastFinalMessage = (frames: Array<{ kind: string; final?: boolean; con
 	return undefined
 }
 
+const interceptCustomMessages = (eventBridge: DefaultEventBridge) => {
+	const originalEmitMessage = eventBridge.emitMessage.bind(eventBridge)
+	const captured: Array<{ eventName: string; payload: unknown }> = []
+	const waiters = new Map<string, Array<(payload: { eventName: string; payload: unknown }) => void>>()
+
+	eventBridge.emitMessage = (async message => {
+		if ((message as { messageType?: string }).messageType === 'customMessage') {
+			const customMessage = message as { eventName: string; payload: unknown }
+			const payload = {
+				eventName: customMessage.eventName,
+				payload: customMessage.payload,
+			}
+			captured.push(payload)
+			const listeners = waiters.get(customMessage.eventName)
+			if (listeners) {
+				waiters.delete(customMessage.eventName)
+				for (const listener of listeners) {
+					listener(payload)
+				}
+			}
+			return {
+				...message,
+				id: 'test-message-id',
+				timestamp: Date.now(),
+				correlationId: 'test-correlation-id',
+			}
+		}
+		return await originalEmitMessage(message)
+	}) as typeof eventBridge.emitMessage
+
+	return {
+		restore() {
+			eventBridge.emitMessage = originalEmitMessage
+		},
+		waitFor(eventName: string) {
+			const existing = captured.find(entry => entry.eventName === eventName)
+			if (existing) {
+				return Promise.resolve(existing)
+			}
+			return new Promise<{ eventName: string; payload: unknown }>(resolve => {
+				waiters.set(eventName, [...(waiters.get(eventName) ?? []), resolve])
+			})
+		},
+		get(eventName: string) {
+			return captured.find(entry => entry.eventName === eventName)
+		},
+	}
+}
+
 class DeterministicTextProvider implements ModelProvider {
 	readonly name = 'deterministic-text'
 	readonly capabilities = { text: true, stream: true }
@@ -232,7 +281,7 @@ describe('AgentBuilder', () => {
 			agentVersion: '1',
 		})
 			.defineResource<'supportPolicy', { conciseAnswers: boolean }>()
-			.setHandler(async context => ({ message: context.resources.supportPolicy.conciseAnswers ? 'short' : 'long' }))
+			.setHandler(async context => ({ message: context.app.resources.supportPolicy.conciseAnswers ? 'short' : 'long' }))
 			.build()
 
 		const eventBridge = new DefaultEventBridge()
@@ -366,7 +415,7 @@ describe('AgentBuilder', () => {
 			})
 			.setHandler(async context => {
 				order.push('handler')
-				context.stream.sendFinal('ok')
+				context.io.stream.sendFinal('ok')
 				return { message: 'ok' }
 			})
 			.build()
@@ -402,7 +451,7 @@ describe('AgentBuilder', () => {
 			.canInvoke('support', '1', 'lookupFaq')
 			.canInvokeAgent('triageAgent', '1')
 			.setHandler(async (context, payload) => {
-				const answer = await context.models['openai:primary'].generateText({
+				const answer = await context.ai.models['openai:primary'].generateText({
 					prompt: payload.prompt,
 				})
 				return { message: answer }
@@ -475,17 +524,17 @@ describe('AgentBuilder', () => {
 				scopeFromPayload: ['projectId'],
 			})
 			.setHandler(async (context, payload) => {
-				await context.runState.update({ phase: 'planning', status: 'planning' })
-				await context.runState.replaceTasks([
+				await context.memory.run.update({ phase: 'planning', status: 'planning' })
+				await context.memory.run.replaceTasks([
 					{ id: 'plan', title: 'Plan work' },
 					{ id: 'deliver', title: 'Deliver answer' },
 				])
-				await context.runState.checkpoint('plan', { prompt: payload.prompt }, { completed: true })
-				await context.runState.startTask('plan')
-				await context.runState.completeTask('plan')
-				await context.runState.startTask('deliver')
-				await context.runState.completeTask('deliver', payload.prompt.toUpperCase())
-				context.stream.sendFinal(`queued:${payload.prompt}`)
+				await context.memory.run.checkpoint('plan', { prompt: payload.prompt }, { completed: true })
+				await context.memory.run.startTask('plan')
+				await context.memory.run.completeTask('plan')
+				await context.memory.run.startTask('deliver')
+				await context.memory.run.completeTask('deliver', payload.prompt.toUpperCase())
+				context.io.stream.sendFinal(`queued:${payload.prompt}`)
 				return { message: `queued:${payload.prompt}` }
 			})
 			.build()
@@ -630,11 +679,11 @@ describe('AgentBuilder', () => {
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 			.setStreamingMode('stream')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
-				const result = await context.models.echo.generate?.({ prompt: payload.prompt })
+				const result = await context.ai.models.echo.generate?.({ prompt: payload.prompt })
 				if (!result) {
 					throw new Error('missing text model capability')
 				}
-				context.stream.sendFinal(result.output)
+				context.io.stream.sendFinal(result.output)
 				return { message: result.output }
 			})
 			.build()
@@ -672,12 +721,12 @@ describe('AgentBuilder', () => {
 			)
 			.defineModel('bound')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
-				const stream = context.models.bound.stream?.({ prompt: payload.prompt })
+				const stream = context.ai.models.bound.stream?.({ prompt: payload.prompt })
 				if (!stream) {
 					throw new Error('missing stream provider')
 				}
 				const final = await stream.final()
-				context.stream.sendFinal(final.output)
+				context.io.stream.sendFinal(final.output)
 				return { message: final.output }
 			})
 			.build()
@@ -797,16 +846,16 @@ describe('AgentBuilder', () => {
 			.defineModel('embedder', { capabilities: ['embedding'] })
 			.defineModel('reranker', { capabilities: ['rerank'] })
 			.setHandler(async context => {
-				await context.models.textOnly.generate({ prompt: 'hello' })
-				await context.models.jsoner.generateJson({ prompt: 'classify', schema: z.object({ ok: z.boolean() }) })
-				await context.embeddings.embedder.embed({ value: 'hello' })
-				await context.rerankers.reranker.rerank({ query: 'q', documents: ['a', 'b'] })
+				await context.ai.models.textOnly.generate({ prompt: 'hello' })
+				await context.ai.models.jsoner.generateJson({ prompt: 'classify', schema: z.object({ ok: z.boolean() }) })
+				await context.ai.embeddings.embedder.embed({ value: 'hello' })
+				await context.ai.rerankers.reranker.rerank({ query: 'q', documents: ['a', 'b'] })
 				// @ts-expect-error textOnly does not expose embedding capability
-				await context.embeddings.textOnly.embed({ value: 'x' })
+				await context.ai.embeddings.textOnly.embed({ value: 'x' })
 				// @ts-expect-error embedder does not expose text generation capability
-				await context.models.embedder.generate({ prompt: 'x' })
+				await context.ai.models.embedder.generate({ prompt: 'x' })
 				// @ts-expect-error textOnly does not expose JSON generation capability
-				await context.models.textOnly.generateJson({ prompt: 'x' })
+				await context.ai.models.textOnly.generateJson({ prompt: 'x' })
 				return { message: 'ok' }
 			})
 	})
@@ -835,8 +884,8 @@ describe('AgentBuilder', () => {
 				}
 			})
 			.setHandler(async context => {
-				await context.models.echo.generate?.({ prompt: 'first' })
-				await context.models.echo.generate?.({ prompt: 'second' })
+				await context.ai.models.echo.generate?.({ prompt: 'first' })
+				await context.ai.models.echo.generate?.({ prompt: 'second' })
 				return { message: 'done' }
 			})
 			.build()
@@ -884,7 +933,7 @@ describe('AgentBuilder', () => {
 				},
 			}))
 			.setHandler(async context => {
-				await context.models.echo.generate?.({ prompt: 'hello' })
+				await context.ai.models.echo.generate?.({ prompt: 'hello' })
 				return { message: 'ok' }
 			})
 			.build()
@@ -907,7 +956,107 @@ describe('AgentBuilder', () => {
 		}
 	})
 
-	it('supports subagent orchestration through context.agents helpers', async () => {
+	it('enforces model-step limits from the active quality profile', async () => {
+		const definition = new AgentBuilder({ agentName: 'limitedModelAgent', agentVersion: '1' })
+			.defineModel('echo')
+			.setExecutionPolicy({ maxModelSteps: 5 })
+			.setAgentPolicy({
+				quality: {
+					defaultProfile: 'strict',
+					profiles: {
+						strict: {
+							execution: {
+								maxModelSteps: 1,
+							},
+						},
+					},
+				},
+			})
+			.setHandler(async context => {
+				await context.ai.models.echo.generate?.({ prompt: 'first' })
+				await context.ai.models.echo.generate?.({ prompt: 'second' })
+				return { message: 'done' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, {
+			models: {
+				echo: new DeterministicTextProvider(),
+			},
+		})
+		await instance.start()
+		try {
+			const result = await instance.invoke({ payload: {} })
+			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
+			expect(errorFrame).toMatchObject({
+				kind: 'error',
+				code: '429',
+				message: 'Agent modelSteps budget exceeded',
+			})
+		} finally {
+			await instance.stop()
+		}
+	})
+
+	it('enforces tool-call limits for child-agent orchestration', async () => {
+		const childDefinition = new AgentBuilder({ agentName: 'budgetChildAgent', agentVersion: '1' })
+			.setHandler(async () => ({ message: 'child-response' }))
+			.build()
+
+		const parentDefinition = new AgentBuilder({ agentName: 'limitedToolAgent', agentVersion: '1' })
+			.canInvokeAgent('budgetChildAgent', '1')
+			.setAgentPolicy({
+				quality: {
+					defaultProfile: 'strict',
+					profiles: {
+						strict: {
+							execution: {
+								maxToolCalls: 1,
+							},
+						},
+					},
+				},
+			})
+			.setHandler(async context => {
+				await context.invoke.agents.runText({
+					agentName: 'budgetChildAgent',
+					agentVersion: '1',
+					payload: { prompt: 'first' },
+				})
+				await context.invoke.agents.runText({
+					agentName: 'budgetChildAgent',
+					agentVersion: '1',
+					payload: { prompt: 'second' },
+				})
+				return { message: 'done' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const childInstance = await childDefinition.getInstance(eventBridge, { models: {} })
+		const parentInstance = await parentDefinition.getInstance(eventBridge, { models: {} })
+		await childInstance.start()
+		await parentInstance.start()
+		try {
+			const result = await parentInstance.invoke({ payload: {} })
+			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
+			expect(errorFrame).toMatchObject({
+				kind: 'error',
+				code: '429',
+				message: 'Agent toolCalls budget exceeded',
+			})
+		} finally {
+			await parentInstance.stop()
+			await childInstance.stop()
+		}
+	})
+
+	it('supports subagent orchestration through context.invoke.agents helpers', async () => {
 		const childDefinition = new AgentBuilder({ agentName: 'childAgent', agentVersion: '1' })
 			.setHandler(async () => ({ message: 'child-response' }))
 			.build()
@@ -915,7 +1064,7 @@ describe('AgentBuilder', () => {
 		const parentDefinition = new AgentBuilder({ agentName: 'parentAgent', agentVersion: '1' })
 			.canInvokeAgent('childAgent', '1')
 			.setHandler(async context => {
-				const text = await context.agents.runText({
+				const text = await context.invoke.agents.runText({
 					agentName: 'childAgent',
 					agentVersion: '1',
 					payload: { prompt: 'from-parent' },
@@ -942,13 +1091,16 @@ describe('AgentBuilder', () => {
 		}
 	})
 
-	it('supports canEmit declarations with context.emit in agent handlers', async () => {
+	it('supports canEmit declarations with context.output.emit in agent handlers', async () => {
 		const definition = new AgentBuilder({ agentName: 'emitAgent', agentVersion: '1' })
 			.canEmit('agent.finished', z.object({ ok: z.boolean() }))
 			.setHandler(async context => {
-				await (context.emit as (eventName: string, payload: { ok: boolean }) => Promise<void>)('agent.finished', {
-					ok: true,
-				})
+				await (context.output.emit as (eventName: string, payload: { ok: boolean }) => Promise<void>)(
+					'agent.finished',
+					{
+						ok: true,
+					},
+				)
 				return { message: 'done' }
 			})
 			.build()
@@ -956,15 +1108,41 @@ describe('AgentBuilder', () => {
 		const eventBridge = new DefaultEventBridge()
 		bridges.push(eventBridge)
 		await eventBridge.start()
+		const customMessages = interceptCustomMessages(eventBridge)
 		const instance = await definition.getInstance(eventBridge, { models: {} })
 		await instance.start()
 		try {
+			const emittedPromise = customMessages.waitFor('agent.finished')
 			const result = await instance.invoke({ payload: {} })
+			const emitted = await emittedPromise
 			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
 			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(errorFrame).toBeUndefined()
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
+			expect(emitted.payload).toEqual({ ok: true })
 		} finally {
+			customMessages.restore()
+			await instance.stop()
+		}
+	})
+
+	it('does not emit a terminal result event when no success event is configured', async () => {
+		const definition = new AgentBuilder({ agentName: 'noResultEventAgent', agentVersion: '1' })
+			.setHandler(async () => ({ message: 'done' }))
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const customMessages = interceptCustomMessages(eventBridge)
+		const instance = await definition.getInstance(eventBridge, { models: {} })
+		await instance.start()
+		try {
+			await instance.invoke({ payload: {} })
+			await new Promise(resolve => setTimeout(resolve, 10))
+			expect(customMessages.get('noResultEventAgent.finished')).toBeUndefined()
+		} finally {
+			customMessages.restore()
 			await instance.stop()
 		}
 	})
@@ -978,15 +1156,26 @@ describe('AgentBuilder', () => {
 		const eventBridge = new DefaultEventBridge()
 		bridges.push(eventBridge)
 		await eventBridge.start()
+		const customMessages = interceptCustomMessages(eventBridge)
 		const instance = await definition.getInstance(eventBridge, { models: {} })
 		await instance.start()
 		try {
+			const emittedPromise = customMessages.waitFor('resultEventAgent.finished')
 			const result = await instance.invoke({ payload: {} })
+			const emitted = await emittedPromise
 			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
 			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(errorFrame).toBeUndefined()
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
+			expect(emitted.payload).toMatchObject({
+				status: 'completed',
+				finalMessage: 'done',
+				agentName: 'resultEventAgent',
+				agentVersion: '1',
+			})
+			expect(Array.isArray(emitted.payload)).toBe(false)
 		} finally {
+			customMessages.restore()
 			await instance.stop()
 		}
 	})
@@ -1003,15 +1192,25 @@ describe('AgentBuilder', () => {
 		const eventBridge = new DefaultEventBridge()
 		bridges.push(eventBridge)
 		await eventBridge.start()
+		const customMessages = interceptCustomMessages(eventBridge)
 		const instance = await definition.getInstance(eventBridge, { models: {} })
 		await instance.start()
 		try {
+			const emittedPromise = customMessages.waitFor('constructorResultEventAgent.finished')
 			const result = await instance.invoke({ payload: {} })
+			const emitted = await emittedPromise
 			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
 			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(errorFrame).toBeUndefined()
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
+			expect(emitted.payload).toMatchObject({
+				status: 'completed',
+				finalMessage: 'done',
+				agentName: 'constructorResultEventAgent',
+				agentVersion: '1',
+			})
 		} finally {
+			customMessages.restore()
 			await instance.stop()
 		}
 	})

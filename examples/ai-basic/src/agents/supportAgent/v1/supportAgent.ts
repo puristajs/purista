@@ -12,6 +12,11 @@ const jsonAnswerSchema = z.object({
 	sources: z.array(z.string()).default([]),
 })
 
+const answerCritiqueSchema = z.object({
+	accepted: z.boolean(),
+	feedback: z.array(z.string()).default([]),
+})
+
 const extractFirstUrl = (input: string): string | undefined => {
 	const match = input.match(/https?:\/\/[^\s)]+/i)
 	return match?.[0]
@@ -27,6 +32,7 @@ const extractCalculationExpression = (input: string): string | undefined => {
 	return generic?.[1]?.trim()
 }
 
+// biome-ignore lint/correctness/useHookAtTopLevel: AgentBuilder.useSkills is a builder method, not a React hook.
 export const supportAgent = new AgentBuilder({
 	agentName: 'supportAgent',
 	agentVersion: '1',
@@ -47,20 +53,85 @@ export const supportAgent = new AgentBuilder({
 		maxAttempts: 3,
 		maxDurationMs: 15 * 60_000,
 	})
+	.setReflectionPolicy({
+		enabledByDefault: false,
+		presets: {
+			synthesis: {
+				maxIterations: 2,
+				stopOnStagnation: true,
+				artifacts: {
+					emitArtifacts: true,
+					artifactPrefix: 'reflection',
+				},
+			},
+		},
+	})
+	.setAgentPolicy({
+		quality: {
+			defaultProfile: 'standard',
+			profiles: {
+				quick: {
+					reflection: {
+						enabled: false,
+					},
+					verification: {
+						required: false,
+					},
+					execution: {
+						maxModelSteps: 8,
+						maxToolCalls: 8,
+					},
+				},
+				standard: {
+					reflection: {
+						enabled: false,
+					},
+					verification: {
+						required: true,
+					},
+					execution: {
+						maxModelSteps: 16,
+						maxToolCalls: 12,
+					},
+				},
+				synthesis: {
+					reflection: {
+						enabled: true,
+						preset: 'synthesis',
+						maxIterations: 2,
+					},
+					verification: {
+						required: true,
+					},
+					execution: {
+						maxModelSteps: 24,
+						maxToolCalls: 16,
+					},
+				},
+			},
+		},
+		approvals: {
+			checkpoints: {
+				'publish-response': {
+					required: true,
+					when: 'before-final-message',
+					timeoutMs: 5_000,
+				},
+			},
+		},
+		resources: {
+			objective: 'quality',
+			maxDurationMs: 15 * 60_000,
+		},
+	})
 	.canInvoke('support', '1', 'lookupFaq')
 	.canInvoke('support', '1', 'calculate')
 	.canInvoke('support', '1', 'fetchWebsite')
 	.canInvokeAgent('triageAgent', '1')
-	.canEmit(
-		'support.agent.completed',
-		z.object({
-			sessionId: z.string(),
-			escalated: z.boolean(),
-		}),
-	)
 	.setBeforeGuardHooks({
 		requirePrompt: async function requirePrompt(_context, payload) {
-			const prompt = typeof payload === 'object' && payload !== null ? (payload as { prompt?: string }).prompt : undefined
+			const prompt =
+				typeof payload === 'object' && payload !== null ? (payload as { prompt?: string }).prompt : undefined
 			if (!prompt?.trim()) {
 				throw new HandledError(StatusCode.BadRequest, 'prompt is required')
 			}
@@ -70,9 +141,10 @@ export const supportAgent = new AgentBuilder({
 	.setSseProtocol('ai-sdk-ui-message')
 	.setHandler<SupportAgentInput>(async function (context, payload) {
 		const userPrompt = payload.prompt ?? payload.message ?? ''
-		const model = context.models['openai:gpt-4o-mini']
-		const sessionId = payload.sessionId ?? context.message.id
-		const run = await context.runState.start({
+		const model = context.ai.models['openai:gpt-4o-mini']
+		const sessionId = payload.sessionId ?? context.input.message.id
+		const quality = context.ai.policy.resolve(payload.qualityProfile)
+		const run = await context.memory.run.start({
 			title: 'Support orchestration',
 			phase: 'planning',
 			extraScope: {
@@ -86,7 +158,7 @@ export const supportAgent = new AgentBuilder({
 			},
 		})
 
-		await context.conversation.addUser(userPrompt)
+		await context.memory.conversation.addUser(userPrompt)
 		await run.plan([
 			{ id: 'faq', title: 'Check knowledge base' },
 			{ id: 'website', title: 'Fetch website context when needed' },
@@ -99,16 +171,28 @@ export const supportAgent = new AgentBuilder({
 			{
 				prompt: userPrompt,
 				responseFormat: payload.responseFormat ?? 'text',
+				qualityProfile: quality.name ?? 'standard',
+				requireApproval: payload.requireApproval ?? false,
 			},
 			{ completed: true },
 		)
 		await run.update({ phase: 'running', status: 'running' })
+		await run.checkpoint(
+			'quality-profile',
+			{
+				name: quality.name ?? 'standard',
+				reflectionEnabled: quality.reflection.enabled,
+				maxIterations: quality.reflection.maxIterations,
+				verificationRequired: quality.verification.required,
+			},
+			{ completed: true },
+		)
 
 		const faqAnswer = await run.step(
 			'faq',
 			async () => {
-				context.stream.sendChunk('Checking knowledge base...')
-				const faqResult = await context.tools.invoke.support['1'].lookupFaq({ question: userPrompt })
+				context.io.stream.sendChunk('Checking knowledge base...')
+				const faqResult = await context.invoke.tools.invoke.support['1'].lookupFaq({ question: userPrompt })
 				return typeof faqResult === 'object' &&
 					faqResult &&
 					'answer' in faqResult &&
@@ -126,8 +210,8 @@ export const supportAgent = new AgentBuilder({
 				if (!extractedUrl) {
 					return ''
 				}
-				context.stream.sendChunk(`Fetching website context from ${extractedUrl}...`)
-				const websiteResult = await context.tools.invoke.support['1'].fetchWebsite({ url: extractedUrl })
+				context.io.stream.sendChunk(`Fetching website context from ${extractedUrl}...`)
+				const websiteResult = await context.invoke.tools.invoke.support['1'].fetchWebsite({ url: extractedUrl })
 				if (
 					typeof websiteResult === 'object' &&
 					websiteResult &&
@@ -151,9 +235,9 @@ export const supportAgent = new AgentBuilder({
 				if (!calculationExpression) {
 					return ''
 				}
-				context.stream.sendChunk(`Calculating: ${calculationExpression}`)
+				context.io.stream.sendChunk(`Calculating: ${calculationExpression}`)
 				try {
-					const calc = await context.tools.invoke.support['1'].calculate({ expression: calculationExpression })
+					const calc = await context.invoke.tools.invoke.support['1'].calculate({ expression: calculationExpression })
 					if (typeof calc === 'object' && calc && 'result' in calc) {
 						return String(calc.result)
 					}
@@ -174,9 +258,9 @@ export const supportAgent = new AgentBuilder({
 				if (!escalationPattern.test(userPrompt)) {
 					return ''
 				}
-				context.stream.sendChunk('Escalating to triage agent...')
+				context.io.stream.sendChunk('Escalating to triage agent...')
 				try {
-					return await context.agents.runText({
+					return await context.invoke.agents.runText({
 						agentName: 'triageAgent',
 						agentVersion: '1',
 						payload: {
@@ -187,7 +271,7 @@ export const supportAgent = new AgentBuilder({
 					})
 				} catch (error) {
 					context.logger.warn({ err: error }, 'triageAgent failed, continuing with tool-based fallback')
-					context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
+					context.io.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
 					return ''
 				}
 			},
@@ -197,14 +281,14 @@ export const supportAgent = new AgentBuilder({
 			},
 		)
 
-		const skills = await context.skills.loadAvailable()
-		const skillReferences = await context.skills.loadReferences('support-workflow').catch(() => [])
+		const skills = await context.ai.skills.loadAvailable()
+		const skillReferences = await context.ai.skills.loadReferences('support-workflow').catch(() => [])
 
 		const prompt = [
 			renderSkillDocuments('Relevant skills', skills),
 			renderSkillReferences('Relevant references', skillReferences),
-			context.resources.supportPolicy.developerInstruction,
-			await context.conversation.buildPromptInput(),
+			context.app.resources.supportPolicy.developerInstruction,
+			await context.memory.conversation.buildPromptInput(),
 			`Customer prompt: ${userPrompt}`,
 			`Knowledge base answer: ${faqAnswer}`,
 			calculationResult ? `Calculation result: ${calculationResult}` : undefined,
@@ -213,6 +297,18 @@ export const supportAgent = new AgentBuilder({
 		]
 			.filter(Boolean)
 			.join('\n')
+
+		const generateTextAnswer = async (instructions?: string) => {
+			if (!model.generateText) {
+				throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
+			}
+			return await model.generateText({
+				prompt: [prompt, instructions].filter(Boolean).join('\n\n'),
+				context: payload.context,
+				metadata: { aiSdk: { temperature: 0.2 } },
+				onReasoning: text => context.io.stream.sendReasoning(text),
+			})
+		}
 
 		try {
 			await run.update({ phase: 'summarizing', status: 'summarizing' })
@@ -228,50 +324,90 @@ export const supportAgent = new AgentBuilder({
 						})
 
 						if (jsonResult.reasoningText?.trim()) {
-							context.stream.sendReasoning(jsonResult.reasoningText)
+							context.io.stream.sendReasoning(jsonResult.reasoningText)
 						}
-						context.stream.sendArtifact({
+						context.io.stream.sendArtifact({
 							artifactId: 'json-response',
 							content: jsonResult.data,
 							mimeType: 'application/json',
 							final: true,
 						})
-						await context.conversation.addAssistant(jsonResult.data.answer)
+						await context.memory.conversation.addAssistant(jsonResult.data.answer)
 						return jsonResult.data.answer
 					}
 
-					if (!model.generateText) {
-						throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
+					let answer: string
+					if (quality.reflection.enabled) {
+						context.io.stream.sendChunk(`Running ${quality.name ?? 'synthesis'} reflection loop...`)
+						const reflection = await context.ai.reflect.run<string, z.infer<typeof answerCritiqueSchema>>({
+							name: 'support-answer',
+							profile: quality.name,
+							draft: async () =>
+								await generateTextAnswer('Write the first support response draft. Keep it actionable and specific.'),
+							critique: async ({ draft, iteration }) => {
+								if (!model.generateJson) {
+									return { accepted: true, feedback: [] }
+								}
+								const critique = await model.generateJson<z.infer<typeof answerCritiqueSchema>>({
+									prompt: [
+										prompt,
+										`Draft ${iteration}:`,
+										draft,
+										'Review the draft. Accept only when it is concrete, correct, and production-safe.',
+									].join('\n\n'),
+									schema: answerCritiqueSchema,
+									context: payload.context,
+									metadata: { aiSdk: { temperature: 0 } },
+								})
+								return critique.data
+							},
+							accept: ({ critique }) => critique.accepted,
+							refine: async ({ draft, critique }) =>
+								await generateTextAnswer(
+									[
+										'Revise the previous draft using the critique.',
+										`Previous draft:\n${draft}`,
+										critique.feedback.length > 0
+											? `Critique:\n- ${critique.feedback.join('\n- ')}`
+											: 'Critique: tighten wording and improve completeness.',
+									].join('\n\n'),
+								),
+						})
+						answer = reflection.output
+					} else {
+						context.io.stream.sendChunk('Generating final answer...')
+						answer = await model.generateText({
+							prompt,
+							context: payload.context,
+							metadata: { aiSdk: { temperature: 0.2 } },
+							onReasoning: text => context.io.stream.sendReasoning(text),
+							onTextDelta: delta => {
+								if (delta.length > 0) {
+									context.io.stream.sendChunk(delta)
+								}
+							},
+						})
 					}
-
-					context.stream.sendChunk('Generating final answer...')
-					const answer = await model.generateText({
-						prompt,
-						context: payload.context,
-						metadata: { aiSdk: { temperature: 0.2 } },
-						onReasoning: text => context.stream.sendReasoning(text),
-						onTextDelta: delta => {
-							if (delta.length > 0) {
-								context.stream.sendChunk(delta)
-							}
-						},
-					})
-					await context.conversation.addAssistant(answer)
+					await context.memory.conversation.addAssistant(answer)
 					return answer
 				},
 				{ detail: 'Generating final answer', checkpoint: 'final-answer' },
 			)
 
+			if (payload.requireApproval) {
+				context.io.stream.sendChunk('Waiting for approval before sending the final answer...')
+				await context.runtime.approvals.wait({
+					checkpoint: 'publish-response',
+					detail: 'Review the generated support response before it is sent to the user.',
+				})
+			}
+
 			await run.setFinalMessage(answer)
 			await run.finishSuccess(answer)
-			await context.emit('support.agent.completed', {
-				sessionId,
-				escalated: escalationPattern.test(userPrompt),
-			})
-			context.stream.sendFinal(answer)
+			context.io.stream.sendFinal(answer)
 			return { message: answer }
 		} catch (error) {
-			await context.conversation.revertLast({ role: 'user' })
+			await context.memory.conversation.revertLast({ role: 'user' })
 			await run.failTask('answer', error instanceof Error ? error.message : String(error))
 			await run.finishFailure(error instanceof Error ? error.message : String(error), {
 				code: error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',

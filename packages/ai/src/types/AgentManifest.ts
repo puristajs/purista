@@ -41,6 +41,68 @@ export type AgentExecutionPolicy = {
 	scopeFromPayload?: string[]
 }
 
+export type ReflectionStopReason = 'accepted' | 'max-iterations' | 'stagnation'
+
+export type ReflectionArtifactPolicy = {
+	emitArtifacts?: boolean
+	artifactPrefix?: string
+}
+
+export type ReflectionPreset = {
+	maxIterations?: number
+	stopOnStagnation?: boolean
+	artifacts?: ReflectionArtifactPolicy
+}
+
+export type ReflectionPolicy = {
+	enabledByDefault?: boolean
+	presets?: Record<string, ReflectionPreset>
+}
+
+export type AgentQualityProfile = {
+	reflection?: {
+		enabled?: boolean
+		preset?: string
+		maxIterations?: number
+		stopOnStagnation?: boolean
+	}
+	verification?: {
+		required?: boolean
+	}
+	execution?: {
+		maxModelSteps?: number
+		maxToolCalls?: number
+	}
+}
+
+export type AgentQualityPolicy = {
+	defaultProfile?: string
+	profiles?: Record<string, AgentQualityProfile>
+}
+
+export type AgentApprovalCheckpointPolicy = {
+	required?: boolean
+	when?: string
+	timeoutMs?: number
+	onExpiry?: 'fail' | 'return-expired'
+}
+
+export type AgentApprovalPolicy = {
+	checkpoints?: Record<string, AgentApprovalCheckpointPolicy>
+}
+
+export type AgentResourcePolicy = {
+	objective?: 'quality' | 'latency' | 'cost'
+	budgetUsd?: number
+	maxDurationMs?: number
+}
+
+export type AgentPolicy = {
+	quality?: AgentQualityPolicy
+	approvals?: AgentApprovalPolicy
+	resources?: AgentResourcePolicy
+}
+
 /**
  * Controls how agent stream chunks should be serialized when the endpoint uses SSE.
  * - `purista`: native PURISTA stream frames (canonical source protocol)
@@ -120,6 +182,8 @@ export type AgentManifest = {
 	eventBridge: string
 	executionMode?: AgentExecutionMode
 	executionPolicy?: AgentExecutionPolicy
+	reflection?: ReflectionPolicy
+	agentPolicy?: AgentPolicy
 	models?: AgentModelBinding[]
 	modelResource?: { resourceName: string; variant?: string }
 	skills?: AgentSkillConfig

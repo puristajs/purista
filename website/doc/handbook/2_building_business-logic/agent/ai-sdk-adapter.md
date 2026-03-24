@@ -16,7 +16,7 @@ The normal PURISTA flow stays the same:
 
 1. define a model alias in the builder
 2. bind the real provider at `getInstance(...)`
-3. call `context.models['alias']` in the handler
+3. call `context.ai.models['alias']` in the handler
 
 This page shows that full flow with one working example.
 
@@ -32,7 +32,7 @@ In most projects, you want this:
 
 - the builder declares one alias such as `'openai:primary'`
 - instance creation binds that alias to `AiSdkProvider`
-- the handler calls `context.models['openai:primary'].generateText(...)`
+- the handler calls `context.ai.models['openai:primary'].generateText(...)`
 - declared PURISTA skills are attached automatically
 - allowlisted PURISTA commands and child agents are exposed automatically
 - the provider translates both for the AI SDK internally
@@ -41,7 +41,7 @@ That keeps the handler short and easy to swap later.
 
 ## Automatic Defaults
 
-When you call `context.models['alias'].generateText(...)` inside a handler:
+When you call `context.ai.models['alias'].generateText(...)` inside a handler:
 
 - declared skills are loaded automatically if you omit `skills`
 - allowlisted commands and child agents are exposed automatically if you omit `bindings`
@@ -49,10 +49,10 @@ When you call `context.models['alias'].generateText(...)` inside a handler:
 That means the lowest-code default is usually:
 
 ```ts
-const answer = await context.models['openai:primary'].generateText({
+const answer = await context.ai.models['openai:primary'].generateText({
   developerInstruction: 'Use the available tools before answering.',
   prompt: payload.prompt,
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.io.stream.sendChunk(delta),
 })
 ```
 
@@ -75,9 +75,9 @@ export const supportAgent = new AgentBuilder({
   .canInvoke('support', '1', 'lookupFaq')
   .canInvokeAgent('triageAgent', '1')
   .setHandler(async (context, payload) => {
-    const answer = await context.models['openai:primary'].generateText({
+    const answer = await context.ai.models['openai:primary'].generateText({
       developerInstruction: [
-        context.resources.supportPolicy.developerInstruction,
+        context.app.resources.supportPolicy.developerInstruction,
         'Use the available tools before answering.',
       ],
       prompt: payload.prompt,
@@ -88,10 +88,10 @@ export const supportAgent = new AgentBuilder({
           maxSteps: 6,
         },
       },
-      onTextDelta: delta => context.stream.sendChunk(delta),
+      onTextDelta: delta => context.io.stream.sendChunk(delta),
     })
 
-    context.stream.sendFinal(answer)
+    context.io.stream.sendFinal(answer)
     return { message: answer }
   })
   .build()
@@ -134,15 +134,15 @@ You work with normal PURISTA concepts:
 - `developerInstruction`
 - `prompt`
 - `metadata`
-- `context.resources`
-- `context.skills`
+- `context.app.resources`
+- `context.ai.skills`
 
 The provider fills in default skills and bindings when you do not pass them, and translates the final request into AI SDK inputs.
 
 From the handler’s point of view, the important API is simply:
 
 ```ts
-await context.models['openai:primary'].generateText(...)
+await context.ai.models['openai:primary'].generateText(...)
 ```
 
 ## How `AiSdkProvider` Maps PURISTA Concepts
@@ -167,10 +167,10 @@ This means you can keep one handler style and still get:
 If you want the smallest possible default code, this is usually enough:
 
 ```ts
-const answer = await context.models['openai:primary'].generateText({
+const answer = await context.ai.models['openai:primary'].generateText({
   developerInstruction: 'Use the available tools before answering.',
   prompt: payload.prompt,
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.io.stream.sendChunk(delta),
 })
 ```
 
@@ -189,8 +189,8 @@ Typical cases:
 
 Do not use `bindings` when the handler already knows it must call the command directly. In that case, call the command through:
 
-- `context.tools`
-- or `context.agents`
+- `context.invoke.tools`
+- or `context.invoke.agents`
 
 and pass the result to the model as normal text context.
 
@@ -220,6 +220,7 @@ Examples:
 
 - skill: `support-workflow`
 - tool: `support.1.lookupFaq`
+- child agent: `triageAgent.1.run`
 
 The AI SDK adapter supports both, but it does not collapse them into one concept.
 
@@ -240,16 +241,16 @@ The goal is that the handler can stay the same as long as the new provider imple
 That is the PURISTA intention:
 
 - define aliases in the builder
-- implement against `context.models[...]`
+- implement against `context.ai.models[...]`
 - choose the concrete adapter only at `getInstance(...)`
 
 ## Common Mistakes
 
 - Building AI SDK request objects inside the handler.
-- Treating the adapter as a second runtime API next to `context.models`.
+- Treating the adapter as a second runtime API next to `context.ai.models`.
 - Putting provider construction into the builder instead of `getInstance(...)`.
 - Passing large numbers of provider-specific overrides on every call.
-- Using tool loops when a direct `context.tools` call would be simpler.
+- Using tool loops when a direct `context.invoke.tools` call would be simpler.
 
 ## Decision Guide
 

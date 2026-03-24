@@ -313,18 +313,14 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 		}
 	}
 
-	private notifyStream(stream: AgentStreamResponder | undefined, envelopes: AgentProtocolEnvelope[]) {
+	private async notifyStream(stream: AgentStreamResponder | undefined, envelopes: AgentProtocolEnvelope[]) {
 		if (!stream) {
 			return
 		}
-		try {
-			for (const envelope of envelopes) {
-				stream.onFrame(envelope)
-			}
-			stream.onComplete()
-		} catch (error) {
-			stream.onError(error)
+		for (const envelope of envelopes) {
+			await stream.onFrame(envelope)
 		}
+		await stream.onComplete()
 	}
 
 	async invoke(
@@ -364,18 +360,17 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 				parameter: request.parameter ?? {},
 			},
 		}
-
 		try {
 			const result = (await this.runtime.eventBridge.invoke(
 				commandMessage,
 				request.timeoutMs,
 			)) as AgentProtocolEnvelope[]
-			this.notifyStream(contextOverrides?.stream, result)
-			this.notifyStream(request.stream, result)
+			await this.notifyStream(contextOverrides?.stream, result)
+			await this.notifyStream(request.stream, result)
 			return { envelopes: result }
 		} catch (error) {
-			contextOverrides?.stream?.onError(error)
-			request.stream?.onError(error)
+			await contextOverrides?.stream?.onError(error)
+			await request.stream?.onError(error)
 			throw error
 		}
 	}

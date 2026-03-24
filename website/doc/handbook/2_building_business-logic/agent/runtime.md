@@ -85,7 +85,7 @@ Think about models in two steps:
 1. the builder says which aliases exist
 2. instance creation says what those aliases really use
 
-That keeps the handler simple, because the handler only needs `context.models['alias']`.
+That keeps the handler simple, because the handler only needs `context.ai.models['alias']`.
 
 ## Skills
 
@@ -146,7 +146,7 @@ const instance = await supportAgent.getInstance(eventBridge, {
 Read the resolved values in the handler through:
 
 ```ts
-context.config.runtime.locale
+context.runtime.service.config.runtime.locale
 ```
 
 Rule:
@@ -172,6 +172,24 @@ Inline agents do not need one.
 Rule:
 
 - if the builder uses `setExecutionMode('queued')`, plan to provide a queue bridge
+
+## Propagation And Tracing
+
+The AI runtime keeps PURISTA request metadata intact across orchestration.
+
+- `tenantId` and `principalId` flow through queued runs, tool calls, child-agent
+  invocation, and explicit custom events
+- child-agent invocation reuses the caller `traceId`, so traces stay connected
+- `correlationId` keeps the wider distributed request chain intact
+
+The runtime also adds explicit orchestration spans on top of the normal command
+or queue-worker span:
+
+- `ai.tool_call:<service>/<command>`
+- `ai.agent_invoke:<agent>/<version>`
+
+Those spans carry the forwarded tenant/principal tags plus the AI-specific
+attributes used by the handbook and specs.
 
 ## Resources and stores
 

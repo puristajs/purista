@@ -33,16 +33,21 @@ import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
+import { createAgentExecutionBudget } from '../runtime/executionBudget.js'
+import { resolveAgentExecutionLimits } from '../runtime/policy.js'
 import type { AgentRunError, AgentRunState } from '../runtime/runState.js'
-import type { AgentDefinition, AgentInfo, AgentInstanceOptions } from '../types/AgentDefinition.js'
+import { createAgentTerminalResult } from '../runtime/terminalResult.js'
+import type { AgentDefinition, AgentInfo, AgentInstanceOptions, AgentTerminalResult } from '../types/AgentDefinition.js'
 import type {
 	AgentExecutionMode,
 	AgentExecutionPolicy,
 	AgentHistoryPreset,
 	AgentManifest,
 	AgentModelCapability,
+	AgentPolicy,
 	AgentSessionConfig,
 	AgentSseProtocol,
+	ReflectionPolicy,
 	RetryPolicy,
 } from '../types/AgentManifest.js'
 import { deriveExecutionExtraScope, resolveAgentExecutionPolicy } from './agentExecutionPolicy.js'
@@ -223,6 +228,62 @@ const normalizeInfo = (info: AgentInfo): AgentInfo => {
 	}
 }
 
+const QUEUED_PROTOCOL_PAGE_SIZE = 25
+
+type QueuedProtocolMeta = {
+	pageSize: number
+	lastSequence: number
+	terminal: boolean
+}
+
+const getRequestedQualityProfileName = (payload: unknown, parameter: unknown) => {
+	const payloadProfile =
+		payload &&
+		typeof payload === 'object' &&
+		typeof (payload as { qualityProfile?: unknown }).qualityProfile === 'string'
+			? (payload as { qualityProfile: string }).qualityProfile || undefined
+			: undefined
+	if (payloadProfile) {
+		return payloadProfile
+	}
+	const parameterProfile =
+		parameter &&
+		typeof parameter === 'object' &&
+		typeof (parameter as { qualityProfile?: unknown }).qualityProfile === 'string'
+			? (parameter as { qualityProfile: string }).qualityProfile || undefined
+			: undefined
+	return parameterProfile
+}
+
+const queuedProtocolMetaKey = (agentName: string, runId: string) =>
+	`purista:ai:queued-protocol:${agentName}:${runId}:meta`
+const queuedProtocolPageKey = (agentName: string, runId: string, page: number) =>
+	`purista:ai:queued-protocol:${agentName}:${runId}:page:${String(page).padStart(6, '0')}`
+
+const parseQueuedProtocolMeta = (value: unknown): QueuedProtocolMeta => {
+	if (!value || typeof value !== 'object') {
+		return {
+			pageSize: QUEUED_PROTOCOL_PAGE_SIZE,
+			lastSequence: 0,
+			terminal: false,
+		}
+	}
+	return {
+		pageSize:
+			typeof (value as { pageSize?: unknown }).pageSize === 'number'
+				? (value as { pageSize: number }).pageSize
+				: QUEUED_PROTOCOL_PAGE_SIZE,
+		lastSequence:
+			typeof (value as { lastSequence?: unknown }).lastSequence === 'number'
+				? (value as { lastSequence: number }).lastSequence
+				: 0,
+		terminal:
+			typeof (value as { terminal?: unknown }).terminal === 'boolean'
+				? (value as { terminal: boolean }).terminal
+				: false,
+	}
+}
+
 const sleep = async (durationMs: number) => await new Promise(resolve => setTimeout(resolve, durationMs))
 
 const resolveHistoryPresetConfig = (
@@ -385,9 +446,6 @@ export class AgentBuilder<
 		})
 		this.serviceBuilder.setConfigSchema(agentRuntimeConfigSchema)
 		this.commandBuilder = this.serviceBuilder.getCommandBuilder('run', `Invoke ${this.info.agentName}`)
-		if (this.info.successEventName) {
-			this.commandBuilder.setSuccessEventName(this.info.successEventName)
-		}
 		this.streamBuilder = this.serviceBuilder.getStreamBuilder('run', `Stream ${this.info.agentName}`)
 		this.streamBuilder.addChunkSchema(z.union([agentProtocolEnvelopeSchema, sseProtocolEventSchema]))
 		this.streamBuilder.addFinalSchema(agentProtocolEnvelopeSchema.array())
@@ -649,6 +707,46 @@ export class AgentBuilder<
 			cleanup: {
 				...(this.manifest.executionPolicy?.cleanup ?? {}),
 				...(policy.cleanup ?? {}),
+			},
+		}
+		return this
+	}
+
+	setAgentPolicy(policy: AgentPolicy) {
+		this.manifest.agentPolicy = {
+			...(this.manifest.agentPolicy ?? {}),
+			...policy,
+			quality: {
+				...(this.manifest.agentPolicy?.quality ?? {}),
+				...(policy.quality ?? {}),
+				profiles: {
+					...(this.manifest.agentPolicy?.quality?.profiles ?? {}),
+					...(policy.quality?.profiles ?? {}),
+				},
+			},
+			approvals: {
+				...(this.manifest.agentPolicy?.approvals ?? {}),
+				...(policy.approvals ?? {}),
+				checkpoints: {
+					...(this.manifest.agentPolicy?.approvals?.checkpoints ?? {}),
+					...(policy.approvals?.checkpoints ?? {}),
+				},
+			},
+			resources: {
+				...(this.manifest.agentPolicy?.resources ?? {}),
+				...(policy.resources ?? {}),
+			},
+		}
+		return this
+	}
+
+	setReflectionPolicy(policy: ReflectionPolicy) {
+		this.manifest.reflection = {
+			...(this.manifest.reflection ?? {}),
+			...policy,
+			presets: {
+				...(this.manifest.reflection?.presets ?? {}),
+				...(policy.presets ?? {}),
 			},
 		}
 		return this
@@ -945,7 +1043,7 @@ export class AgentBuilder<
 	}
 
 	setSuccessEventName(eventName: string) {
-		this.commandBuilder.setSuccessEventName(eventName)
+		this.info.successEventName = eventName.trim()
 		return this
 	}
 
@@ -1204,6 +1302,127 @@ export class AgentBuilder<
 				}) as CommandFunctionContext['emit'],
 				invokeAgent: (context as { invokeAgent?: EmptyObject }).invokeAgent ?? ({} as EmptyObject),
 			}) as unknown as CommandFunctionContext
+		const getResolvedExecutionLimits = (
+			runtime: AgentRuntimeConfig<EmitPayloads>,
+			payload: unknown,
+			parameter: unknown,
+		) =>
+			resolveAgentExecutionLimits(
+				runtime.manifest.agentPolicy,
+				runtime.manifest.reflection,
+				runtime.manifest.executionPolicy,
+				getRequestedQualityProfileName(payload, parameter),
+			)
+		const emitAgentSuccessEvent = async (
+			runtime: AgentRuntimeConfig<EmitPayloads>,
+			context: CommandFunctionContext | StreamFunctionContext,
+			result: AgentTerminalResult,
+		) => {
+			if (!this.info.successEventName) {
+				return
+			}
+			await runtime.eventBridge.emitMessage({
+				messageType: EBMessageType.CustomMessage,
+				eventName: this.info.successEventName,
+				payload: result,
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				traceId: context.message.traceId,
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+				sender: {
+					serviceName: runtime.manifest.agentName,
+					serviceVersion: runtime.manifest.agentVersion,
+					serviceTarget: 'run',
+					instanceId: context.message.receiver.instanceId ?? context.message.sender.instanceId,
+				},
+			})
+		}
+		const readQueuedProtocolMeta = async (
+			context: Pick<QueueJobContext | CommandFunctionContext | StreamFunctionContext, 'states'>,
+			agentName: string,
+			runId: string,
+		) => {
+			const key = queuedProtocolMetaKey(agentName, runId)
+			const state = await context.states.getState(key)
+			return parseQueuedProtocolMeta(state[key])
+		}
+		const writeQueuedProtocolMeta = async (
+			context: Pick<QueueJobContext | CommandFunctionContext | StreamFunctionContext, 'states'>,
+			agentName: string,
+			runId: string,
+			meta: QueuedProtocolMeta,
+		) => {
+			await context.states.setState(queuedProtocolMetaKey(agentName, runId), meta)
+		}
+		const appendQueuedProtocolEnvelope = async (
+			context: Pick<QueueJobContext | CommandFunctionContext | StreamFunctionContext, 'states'>,
+			agentName: string,
+			runId: string,
+			envelope: AgentProtocolEnvelope,
+			options?: { terminal?: boolean },
+		) => {
+			const meta = await readQueuedProtocolMeta(context, agentName, runId)
+			const nextSequence = meta.lastSequence + 1
+			const pageIndex = Math.floor((nextSequence - 1) / meta.pageSize)
+			const key = queuedProtocolPageKey(agentName, runId, pageIndex)
+			const current = await context.states.getState(key)
+			const page = agentProtocolEnvelopeSchema.array().catch([]).parse(current[key])
+			page.push(agentProtocolEnvelopeSchema.parse(envelope))
+			await context.states.setState(key, page)
+			await writeQueuedProtocolMeta(context, agentName, runId, {
+				pageSize: meta.pageSize,
+				lastSequence: nextSequence,
+				terminal: options?.terminal ?? meta.terminal,
+			})
+		}
+		const readQueuedProtocolSince = async (
+			context: Pick<CommandFunctionContext | StreamFunctionContext, 'states'>,
+			agentName: string,
+			runId: string,
+			nextSequence: number,
+		) => {
+			const meta = await readQueuedProtocolMeta(context, agentName, runId)
+			if (meta.lastSequence < nextSequence) {
+				return {
+					meta,
+					envelopes: [] as AgentProtocolEnvelope[],
+					nextSequence,
+				}
+			}
+			const envelopes: AgentProtocolEnvelope[] = []
+			for (let sequence = nextSequence; sequence <= meta.lastSequence; ) {
+				const pageIndex = Math.floor((sequence - 1) / meta.pageSize)
+				const key = queuedProtocolPageKey(agentName, runId, pageIndex)
+				const state = await context.states.getState(key)
+				const page = agentProtocolEnvelopeSchema.array().catch([]).parse(state[key])
+				const offset = (sequence - 1) % meta.pageSize
+				for (const envelope of page.slice(offset)) {
+					envelopes.push(envelope)
+					sequence += 1
+				}
+				if (page.length === 0) {
+					break
+				}
+			}
+			return {
+				meta,
+				envelopes,
+				nextSequence: meta.lastSequence + 1,
+			}
+		}
+		const clearQueuedProtocolState = async (
+			context: Pick<QueueJobContext | CommandFunctionContext | StreamFunctionContext, 'states'>,
+			agentName: string,
+			runId: string,
+		) => {
+			const meta = await readQueuedProtocolMeta(context, agentName, runId)
+			const pageCount = meta.lastSequence > 0 ? Math.ceil(meta.lastSequence / meta.pageSize) : 0
+			for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+				await context.states.removeState(queuedProtocolPageKey(agentName, runId, pageIndex))
+			}
+			await context.states.removeState(queuedProtocolMetaKey(agentName, runId))
+		}
 		const executeAgent = async (
 			thisArg: { config?: { __agentRuntime?: AgentRuntimeConfig<EmitPayloads> } },
 			context: CommandFunctionContext | StreamFunctionContext,
@@ -1229,6 +1448,11 @@ export class AgentBuilder<
 
 			const protocolBuffer = createProtocolBuffer(context, {
 				onEnvelope,
+			})
+			const executionLimits = getResolvedExecutionLimits(runtime, payload, parameter)
+			const executionBudget = createAgentExecutionBudget({
+				modelSteps: executionLimits.maxModelSteps,
+				toolCalls: executionLimits.maxToolCalls,
 			})
 
 			try {
@@ -1444,17 +1668,32 @@ export class AgentBuilder<
 				}
 
 				let currentAgentContext:
-					| Pick<
-							AgentHandlerContext<
+					| {
+							ai: AgentHandlerContext<
 								unknown,
 								unknown,
 								Record<string, unknown>,
 								Record<string, ModelProvider>,
 								AgentInvokes,
 								EmitPayloads
-							>,
-							'skills' | 'expose' | 'manifest'
-					  >
+							>['ai']
+							invoke: AgentHandlerContext<
+								unknown,
+								unknown,
+								Record<string, unknown>,
+								Record<string, ModelProvider>,
+								AgentInvokes,
+								EmitPayloads
+							>['invoke']
+							app: AgentHandlerContext<
+								unknown,
+								unknown,
+								Record<string, unknown>,
+								Record<string, ModelProvider>,
+								AgentInvokes,
+								EmitPayloads
+							>['app']
+					  }
 					| undefined
 
 				const applyAutomaticModelRequestDefaults = async <
@@ -1471,26 +1710,26 @@ export class AgentBuilder<
 
 					const nextRequest = { ...request }
 
-					if (request.skills === undefined && currentAgentContext.skills.available) {
-						nextRequest.skills = await currentAgentContext.skills.loadAvailable()
+					if (request.skills === undefined && currentAgentContext.ai.skills.available) {
+						nextRequest.skills = await currentAgentContext.ai.skills.loadAvailable()
 					}
 
 					if (request.bindings === undefined) {
-						const commands = currentAgentContext.manifest.allowedTools.map(command => ({
+						const commands = currentAgentContext.app.manifest.allowedTools.map(command => ({
 							serviceName: command.serviceName,
 							serviceVersion: command.serviceVersion,
 							commandName: command.commandName,
 							name: command.toolName,
 							description: command.description,
 						}))
-						const agents = (currentAgentContext.manifest.allowedAgents ?? []).map(agent => ({
+						const agents = (currentAgentContext.app.manifest.allowedAgents ?? []).map(agent => ({
 							agentName: agent.agentName,
 							agentVersion: agent.agentVersion,
 							name: agent.toolName,
 							description: agent.description,
 						}))
 						if (commands.length > 0 || agents.length > 0) {
-							nextRequest.bindings = currentAgentContext.expose.tools({ commands, agents })
+							nextRequest.bindings = currentAgentContext.invoke.expose.tools({ commands, agents })
 						}
 					}
 
@@ -1507,6 +1746,7 @@ export class AgentBuilder<
 						modelApi.generate = async request => {
 							const requestStartedAt = Date.now()
 							try {
+								executionBudget.consumeModelStep({ alias, callKind: 'generate' })
 								const preparedRequest = await applyAutomaticModelRequestDefaults(request)
 								const metadata = addAiSdkTelemetry(
 									await resolvePreparedMetadata({
@@ -1557,6 +1797,7 @@ export class AgentBuilder<
 						}> => {
 							const requestStartedAt = Date.now()
 							try {
+								executionBudget.consumeModelStep({ alias, callKind: 'generateJson' })
 								const metadata = addAiSdkTelemetry(
 									await resolvePreparedMetadata({
 										alias,
@@ -1598,6 +1839,7 @@ export class AgentBuilder<
 						const streamProvider = provider.stream.bind(provider)
 						modelApi.stream = request => {
 							const requestStartedAt = Date.now()
+							executionBudget.consumeModelStep({ alias, callKind: 'stream' })
 							let streamHandlePromise: Promise<ReturnType<NonNullable<ModelProvider['stream']>>> | undefined
 							const resolveStream = async () => {
 								streamHandlePromise ??= (async () => {
@@ -1662,6 +1904,7 @@ export class AgentBuilder<
 							embed: async request => {
 								const requestStartedAt = Date.now()
 								try {
+									executionBudget.consumeModelStep({ alias, callKind: 'embed' })
 									const metadata = addAiSdkTelemetry(
 										await resolvePreparedMetadata({
 											alias,
@@ -1686,6 +1929,7 @@ export class AgentBuilder<
 								? async request => {
 										const requestStartedAt = Date.now()
 										try {
+											executionBudget.consumeModelStep({ alias, callKind: 'embedMany' })
 											const metadata = addAiSdkTelemetry(
 												await resolvePreparedMetadata({
 													alias,
@@ -1717,6 +1961,7 @@ export class AgentBuilder<
 							rerank: async request => {
 								const requestStartedAt = Date.now()
 								try {
+									executionBudget.consumeModelStep({ alias, callKind: 'rerank' })
 									const metadata = addAiSdkTelemetry(
 										await resolvePreparedMetadata({
 											alias,
@@ -1745,6 +1990,7 @@ export class AgentBuilder<
 							if (typeof provider.generateText === 'function') {
 								const requestStartedAt = Date.now()
 								try {
+									executionBudget.consumeModelStep({ alias, callKind: 'generateText' })
 									const preparedRequest = await applyAutomaticModelRequestDefaults(request)
 									const metadata = addAiSdkTelemetry(
 										await resolvePreparedMetadata({
@@ -1766,6 +2012,7 @@ export class AgentBuilder<
 							}
 
 							const preparedRequest = await applyAutomaticModelRequestDefaults(request)
+							executionBudget.consumeModelStep({ alias, callKind: 'generateText' })
 							return await generateText({
 								model: provider,
 								request: {
@@ -1804,8 +2051,9 @@ export class AgentBuilder<
 					embeddings: instrumentedEmbeddings,
 					rerankers: instrumentedRerankers,
 					manifest: runtime.manifest,
+					executionBudget,
 				})
-				currentAgentContext = agentContext
+				currentAgentContext = agentContext as unknown as typeof currentAgentContext
 
 				const result = await runtime.handler(
 					agentContext as unknown as AgentHandlerContext<
@@ -1856,10 +2104,20 @@ export class AgentBuilder<
 				}
 
 				await protocolBuffer.flush()
-				return protocolBuffer.toEnvelopes()
+				const envelopes = protocolBuffer.toEnvelopes()
+				const terminalResult = createAgentTerminalResult({
+					envelopes,
+					agentName: runtime.manifest.agentName,
+					agentVersion: runtime.manifest.agentVersion,
+				})
+				await emitAgentSuccessEvent(runtime, context, terminalResult)
+				return envelopes
 			} catch (error) {
 				context.logger.error({ err: error, agent: runtime.manifest.agentName }, 'agent handler failed')
-				protocolBuffer.protocol.emitError(error)
+				protocolBuffer.protocol.emitError(error, {
+					code: error instanceof HandledError ? String(error.errorCode) : undefined,
+					handled: error instanceof HandledError,
+				})
 				await protocolBuffer.flush()
 				return protocolBuffer.toEnvelopes()
 			} finally {
@@ -1880,14 +2138,38 @@ export class AgentBuilder<
 			if (!runtime) {
 				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
 			}
-			const protocolBuffer = createProtocolBuffer(context, { onEnvelope })
+			const collectedEnvelopes: AgentProtocolEnvelope[] = []
+			const observedEnvelopeIds = new Set<string>()
+			const handleObservedEnvelope = async (envelope: AgentProtocolEnvelope) => {
+				if (observedEnvelopeIds.has(envelope.messageId)) {
+					return
+				}
+				observedEnvelopeIds.add(envelope.messageId)
+				collectedEnvelopes.push(envelope)
+				await onEnvelope?.(envelope)
+			}
+			const protocolBuffer = createProtocolBuffer(context, { onEnvelope: handleObservedEnvelope })
 			const pollIntervalMs = 250
 			const maxDurationMs = resolveExecutionPolicy().maxDurationMs
 			const startedAt = Date.now()
 			let lastStateSignature = ''
 			let finalState: AgentRunState | undefined
+			let nextProtocolSequence = 1
 
 			while (Date.now() - startedAt <= maxDurationMs) {
+				const storedProtocol = await readQueuedProtocolSince(
+					context,
+					runtime.manifest.agentName,
+					runId,
+					nextProtocolSequence,
+				)
+				if (storedProtocol.envelopes.length > 0) {
+					for (const envelope of storedProtocol.envelopes) {
+						await handleObservedEnvelope(envelope)
+					}
+					nextProtocolSequence = storedProtocol.nextSequence
+				}
+
 				const snapshot = createAgentHandlerContext({
 					payload,
 					parameter,
@@ -1901,7 +2183,7 @@ export class AgentBuilder<
 					rerankers: {},
 					manifest: runtime.manifest,
 				})
-				const current = await snapshot.runState.get({ runId, extraScope })
+				const current = await snapshot.memory.run.get({ runId, extraScope })
 				if (current) {
 					const signature = JSON.stringify({
 						status: current.status,
@@ -1937,21 +2219,24 @@ export class AgentBuilder<
 				})
 			}
 
-			if (finalState.finalMessage) {
+			if (finalState.finalMessage && !collectedEnvelopes.some(envelope => envelope.frame.kind === 'message')) {
 				protocolBuffer.protocol.emitMessage({
 					content: finalState.finalMessage,
 					final: true,
 					summary: finalState.summary,
 				})
 			}
-			if (finalState.error) {
+			if (finalState.error && !collectedEnvelopes.some(envelope => envelope.frame.kind === 'error')) {
 				protocolBuffer.protocol.emitError(new Error(finalState.error.message), {
 					code: finalState.error.code,
 					handled: finalState.error.handled,
 				})
 			}
 			await protocolBuffer.flush()
-			return protocolBuffer.toEnvelopes()
+			if (runtime.manifest.executionPolicy?.cleanup?.keepFinalRunRecord === false) {
+				await clearQueuedProtocolState(context, runtime.manifest.agentName, runId)
+			}
+			return collectedEnvelopes
 		}
 
 		const executeQueuedAgent = async (
@@ -1979,12 +2264,12 @@ export class AgentBuilder<
 				rerankers: {},
 				manifest: runtime.manifest,
 			})
-			const existing = await helperContext.runState.get({ extraScope })
+			const existing = await helperContext.memory.run.get({ extraScope })
 			if (existing && !['completed', 'failed', 'cancelled'].includes(existing.status)) {
 				return await observeQueuedRun(thisArg, context, payload, parameter, existing.runId, extraScope, onEnvelope)
 			}
 
-			const run = await helperContext.runState.start({
+			const run = await helperContext.memory.run.start({
 				title: runtime.manifest.description ?? `${runtime.manifest.agentName} execution`,
 				phase: 'queued',
 				status: 'queued',
@@ -1993,6 +2278,11 @@ export class AgentBuilder<
 					queuedAt: new Date().toISOString(),
 				},
 				retention: runtime.manifest.executionPolicy?.cleanup,
+			})
+			await writeQueuedProtocolMeta(context, runtime.manifest.agentName, run.state.runId, {
+				pageSize: QUEUED_PROTOCOL_PAGE_SIZE,
+				lastSequence: 0,
+				terminal: false,
 			})
 			await context.queue.enqueue(queueName, {
 				runId: run.state.runId,
@@ -2162,7 +2452,16 @@ export class AgentBuilder<
 					}
 
 					const serviceContext = createQueuedProtocolContext(runtime, context, message)
-					const protocolBuffer = createProtocolBuffer(serviceContext)
+					const protocolBuffer = createProtocolBuffer(serviceContext, {
+						onEnvelope: async envelope => {
+							await appendQueuedProtocolEnvelope(
+								context,
+								runtime.manifest.agentName,
+								message.payload.runId,
+								agentProtocolEnvelopeSchema.parse(envelope),
+							)
+						},
+					})
 					const helperContext = createAgentHandlerContext({
 						payload: message.payload.payload,
 						parameter: message.payload.parameter,
@@ -2176,7 +2475,7 @@ export class AgentBuilder<
 						rerankers: {},
 						manifest: runtime.manifest,
 					})
-					const run = await helperContext.runState.start({
+					const run = await helperContext.memory.run.start({
 						runId: message.payload.runId,
 						title: runtime.manifest.description ?? `${runtime.manifest.agentName} execution`,
 						phase: 'recovering',
@@ -2216,38 +2515,41 @@ export class AgentBuilder<
 							serviceContext,
 							message.payload.payload,
 							message.payload.parameter,
+							async envelope => {
+								await appendQueuedProtocolEnvelope(
+									context,
+									runtime.manifest.agentName,
+									message.payload.runId,
+									agentProtocolEnvelopeSchema.parse(envelope),
+								)
+							},
 						)) as AgentProtocolEnvelope[]
-						const finalMessage =
-							envelopes
-								.map(envelope => envelope.frame)
-								.filter(
-									(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
-										frame.kind === 'message' && frame.role === 'assistant',
-								)
-								.filter(frame => frame.final)
-								.at(-1)?.content ??
-							envelopes
-								.map(envelope => envelope.frame)
-								.filter(
-									(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
-										frame.kind === 'message' && frame.role === 'assistant',
-								)
-								.map(frame => frame.content)
-								.join('')
+						const terminalResult = createAgentTerminalResult({
+							envelopes,
+							agentName: runtime.manifest.agentName,
+							agentVersion: runtime.manifest.agentVersion,
+						})
+						await writeQueuedProtocolMeta(context, runtime.manifest.agentName, message.payload.runId, {
+							...(await readQueuedProtocolMeta(context, runtime.manifest.agentName, message.payload.runId)),
+							terminal: true,
+						})
 
 						await run.finish({
 							status: 'completed',
-							finalMessage,
-							summary: finalMessage,
+							finalMessage: terminalResult.finalMessage,
+							summary: terminalResult.summary ?? terminalResult.finalMessage,
 						})
 						await context.job.complete({
+							...terminalResult,
 							runId: message.payload.runId,
-							status: 'completed',
-							finalMessage,
 						} satisfies DurableAgentQueueResult)
-						return { status: 'success' as const, output: { finalMessage } }
+						return { status: 'success' as const, output: terminalResult }
 					} catch (error) {
 						const normalizedError = normalizeAgentError(error)
+						await writeQueuedProtocolMeta(context, runtime.manifest.agentName, message.payload.runId, {
+							...(await readQueuedProtocolMeta(context, runtime.manifest.agentName, message.payload.runId)),
+							terminal: true,
+						})
 						await run.finish({
 							status: 'failed',
 							summary: normalizedError.message,

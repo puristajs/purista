@@ -1,5 +1,6 @@
 import { extendApi } from '@purista/core'
 import { z } from 'zod'
+import type { AgentTerminalResult } from '../types/AgentDefinition.js'
 
 export type DurableAgentQueuePayload = {
 	runId: string
@@ -12,10 +13,8 @@ export type DurableAgentQueuePayload = {
 	extraScope?: Record<string, string>
 }
 
-export type DurableAgentQueueResult = {
+export type DurableAgentQueueResult = AgentTerminalResult & {
 	runId: string
-	status: 'completed' | 'failed' | 'cancelled'
-	finalMessage?: string
 }
 
 export const durableAgentQueuePayloadSchema = extendApi(

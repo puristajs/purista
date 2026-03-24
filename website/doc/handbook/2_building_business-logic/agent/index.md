@@ -42,6 +42,7 @@ Across the pages below, the same example is used repeatedly:
 - a queued durable `supportAgent`
 - one inline `triageAgent`
 - one allowlisted command `support.1.lookupFaq`
+- one allowlisted child agent `triageAgent.1`
 - two declared skills:
   - `spec-elicitation`
   - `support-workflow`
@@ -71,6 +72,8 @@ That example is intentionally small, but it exercises the main PURISTA concerns:
 
 - [Context](./handler-context.md)
   Explains what the handler gets and how to use it.
+- [Production-Ready Agents](./production-ready-agents.md)
+  Shows how reflection, approvals, durable state, and trajectory testing fit together in one real example.
 - [Durable Run State](./run-state.md)
   Focuses on plans, tasks, checkpoints, locks, and recovery.
 - [Invocation](./invocation.md)

@@ -25,34 +25,34 @@ Assume the builder already declared:
 - `.canInvoke('support', '1', 'lookupFaq')`
 - `.canInvokeAgent('triageAgent', '1')`
 
-Then the handler can use the corresponding `context` APIs directly.
+Then the handler can use the corresponding grouped `context` APIs directly.
 
 ```ts
 .setHandler(async (context, payload) => {
-  const run = await context.runState.start({
+  const run = await context.memory.run.start({
     title: 'Support response',
-    extraScope: { sessionId: payload.sessionId ?? context.message.id },
+    extraScope: { sessionId: payload.sessionId ?? context.input.message.id },
   })
 
-  await context.conversation.addUser(payload.prompt)
+  await context.memory.conversation.addUser(payload.prompt)
   await run.plan([
     { id: 'triage', title: 'Classify urgency' },
     { id: 'faq', title: 'Load FAQ guidance' },
     { id: 'answer', title: 'Write final answer' },
   ])
 
-  const skills = await context.skills.loadAvailable()
-  const triage = await context.agents.runText({
+  const skills = await context.ai.skills.loadAvailable()
+  const triage = await context.invoke.agents.runText({
     agentName: 'triageAgent',
     agentVersion: '1',
     payload: { prompt: payload.prompt },
   })
-  const faq = await context.tools.invoke.support['1'].lookupFaq({
+  const faq = await context.invoke.tools.invoke.support['1'].lookupFaq({
     question: payload.prompt,
   })
 
   const answer = await generateText({
-    model: context.models['openai:primary'],
+    model: context.ai.models['openai:primary'],
     request: {
       prompt: [
         renderSkillDocuments('Relevant skills', skills),
@@ -61,12 +61,12 @@ Then the handler can use the corresponding `context` APIs directly.
         `FAQ answer: ${String(faq.answer ?? '')}`,
       ].filter(Boolean).join('\n\n'),
     },
-    onTextDelta: delta => context.stream.sendChunk(delta),
+    onTextDelta: delta => context.io.stream.sendChunk(delta),
   })
 
-  await context.conversation.addAssistant(answer)
+  await context.memory.conversation.addAssistant(answer)
   await run.finishSuccess(answer)
-  context.stream.sendFinal(answer)
+  context.io.stream.sendFinal(answer)
   return { message: answer }
 })
 ```
@@ -75,12 +75,58 @@ That one handler already shows the main context groups.
 
 ## The Context Groups
 
-### 1. `context.models`
+### 1. `context.input`
+
+Use `context.input` for invocation input:
+
+```ts
+const sessionId = payload.sessionId ?? context.input.message.id
+```
+
+### 2. `context.memory`
+
+Use `context.memory` for chat history and durable workflow state.
+
+```ts
+await context.memory.conversation.addUser(payload.prompt)
+const run = await context.memory.run.start({
+  title: 'Architecture synthesis',
+})
+```
+
+Rule:
+
+- `context.memory.conversation` is LLM-visible history
+- `context.memory.run` is durable operational state
+
+### 3. `context.invoke`
+
+Use `context.invoke` for allowlisted tools and child agents.
+
+#### Tools
+
+```ts
+const faq = await context.invoke.tools.invoke.support['1'].lookupFaq({
+  question: payload.prompt,
+})
+```
+
+#### Child agents
+
+```ts
+const triage = await context.invoke.agents.runText({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt },
+})
+```
+
+### 4. `context.ai`
 
 Use the model aliases declared in the builder.
 
 ```ts
-const answer = await context.models['openai:primary'].generate({
+const answer = await context.ai.models['openai:primary'].generate({
   prompt: payload.prompt,
 })
 ```
@@ -91,149 +137,109 @@ Or use the higher-level helper:
 import { generateText } from '@purista/ai'
 
 const answer = await generateText({
-  model: context.models['openai:primary'],
+  model: context.ai.models['openai:primary'],
   request: { prompt: payload.prompt },
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.io.stream.sendChunk(delta),
 })
 ```
 
-Use `context.models` when the handler itself owns the reasoning loop.
+Use `context.ai.models` when the handler itself owns the reasoning loop.
 
-### 2. `context.tools`
-
-Use commands that were allowlisted with `.canInvoke(...)`.
+Skills also live under `context.ai`:
 
 ```ts
-const faq = await context.tools.invoke.support['1'].lookupFaq({
-  question: payload.prompt,
+const skills = await context.ai.skills.loadAvailable()
+```
+
+Reflection and policy helpers also live here:
+
+```ts
+const quality = context.ai.policy.resolve(payload.qualityProfile)
+const reflection = await context.ai.reflect.run({
+  name: 'support-answer',
+  profile: quality.name,
+  draft: async () => 'first draft',
+  critique: async () => ({ accepted: true, feedback: [] }),
+  accept: ({ critique }) => critique.accepted,
 })
 ```
 
-This is the normal handler path for command-backed tool usage.
+Resolved quality profiles are operational, not descriptive only. When a profile
+declares `execution.maxModelSteps` or `execution.maxToolCalls`, those limits are
+enforced by the runtime wrappers.
 
-### 3. `context.agents`
+### 5. `context.io`
 
-Use child agents that were allowlisted with `.canInvokeAgent(...)`.
-
-Common helpers:
-
-- `runText(...)`
-- `runObject<T>(...)`
-- `forward(...)`
-- `invoke(...)`
-
-Example:
+Use `context.io.stream` and `context.io.protocol` for transport-facing output.
 
 ```ts
-const triage = await context.agents.runText({
-  agentName: 'triageAgent',
+context.io.stream.sendChunk('Working...')
+context.io.stream.sendFinal('Resolved')
+context.io.protocol.emitArtifact({
+  artifactId: 'result',
+  content: { ok: true },
+  final: true,
+})
+```
+
+### 6. `context.output`
+
+Use `context.output.emit(...)` only for declared PURISTA events that your
+application explicitly wants to publish. Agents do not emit custom events by
+default.
+
+```ts
+await context.output.emit('support.agent.completed', {
+  sessionId,
+  escalated: false,
+})
+```
+
+### 7. `context.app`
+
+Use `context.app.resources` and `context.app.manifest` for application-owned configuration and metadata.
+
+```ts
+const instruction = context.app.resources.supportPolicy.developerInstruction
+```
+
+### 8. `context.runtime`
+
+Use `context.runtime` for low-level runtime helpers and stores when the higher-level APIs are not enough.
+
+Approvals live here:
+
+```ts
+await context.runtime.approvals.wait({
+  checkpoint: 'publish-response',
+  detail: 'Review before sending',
+})
+```
+
+Approval expiry fails the run by default. If you need to write or inspect the
+decision outside the waiting helper, use the exported approval helpers:
+
+```ts
+import { getApprovalStateKey, writeApprovalDecision } from '@purista/ai'
+
+const key = getApprovalStateKey('supportAgent', '1', 'publish-response')
+await writeApprovalDecision(context.runtime.stores.states, {
+  agentName: 'supportAgent',
   agentVersion: '1',
-  payload: { prompt: payload.prompt },
+  checkpoint: 'publish-response',
+  decision: 'approved',
+  decidedBy: 'reviewer-1',
 })
 ```
 
-Use:
+### 9. `context.invoke.expose`
 
-- `runText(...)` when only the final text matters
-- `runObject<T>(...)` when the child returns JSON in its final message
-- `forward(...)` when the child stream should be visible to the current user
-- `invoke(...)` when you need raw envelopes or full control
-
-### 4. `context.skills`
-
-Use only the skills declared by `.useSkills([...])`.
-
-Common path:
-
-```ts
-const skills = await context.skills.loadAvailable()
-```
-
-Narrow within the declared set:
-
-```ts
-const skills = await context.skills.search({
-  queries: [payload.prompt],
-  limit: 1,
-})
-```
-
-Load references when needed:
-
-```ts
-const references = await context.skills.loadReferences('support-workflow')
-```
-
-Rule:
-
-- builder declares allowed names
-- instance creation provides the real skill implementations
-- handler loads and uses them
-
-### 5. `context.stream`
-
-Use streaming helpers to keep the client responsive.
-
-- `sendChunk(...)`
-- `sendReasoning(...)`
-- `sendArtifact(...)`
-- `sendFinal(...)`
-- `sendError(...)`
-
-For most agents:
-
-- stream deltas during long generation
-- send the final answer once
-
-### 6. `context.conversation`
-
-Use conversation history for LLM-visible chat state.
-
-```ts
-await context.conversation.addUser(payload.prompt)
-await context.conversation.addAssistant(answer)
-```
-
-This is for chat memory, not for operational workflow state.
-
-### 7. `context.runState`
-
-Use run state for durable execution:
-
-- plans
-- tasks
-- checkpoints
-- statuses
-- locks
+Use `context.invoke.expose.*` only when adapting to an external tool/runtime loop.
 
 Example:
 
 ```ts
-const run = await context.runState.start({
-  title: 'Architecture synthesis',
-  extraScope: { projectId: payload.projectId },
-})
-
-await run.plan([
-  { id: 'review', title: 'Review inputs' },
-  { id: 'write', title: 'Write outputs' },
-  { id: 'verify', title: 'Verify outputs' },
-])
-```
-
-Rule:
-
-- `context.conversation` is for LLM-visible history
-- `context.runState` is for durable operational state
-
-### 8. `context.expose`
-
-Use `context.expose.*` only when adapting to an external tool/runtime loop.
-
-Example:
-
-```ts
-const bindings = context.expose.tools({
+const bindings = context.invoke.expose.tools({
   commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
   agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
 })
@@ -255,18 +261,20 @@ Do not bury environment bootstrapping or provider construction in the handler.
 
 ## Decision Rules
 
-- Use `context.tools` for command-backed operations.
-- Use `context.agents` for child-agent orchestration.
-- Use `context.skills` for declared instruction bundles.
-- Use `context.runState` for durable long-running workflow state.
-- Use `context.models` for provider-owned adapters such as `AiSdkProvider`.
-- Use `context.expose` only when you are crossing into an adapter boundary such as the AI SDK.
+- Use `context.invoke.tools` for command-backed operations.
+- Use `context.invoke.agents` for child-agent orchestration.
+- Use `context.ai.skills` for declared instruction bundles.
+- Use `context.memory.run` for durable workflow state.
+- Use `context.ai.reflect` when a draft/critique/refine loop is worth the cost.
+- Use `context.runtime.approvals` only for explicit gated transitions.
+- Use `context.ai.models` for provider-owned adapters such as `AiSdkProvider`.
+- Use `context.invoke.expose` only when you are crossing into an adapter boundary such as the AI SDK.
 
 ## Common Mistakes
 
-- Treating `context.skills` as a global registry instead of a declared per-agent scope.
+- Treating `context.ai.skills` as a global registry instead of a declared per-agent scope.
 - Using conversation history to store workflow checkpoints.
-- Re-implementing tool exposure manually instead of using `context.expose`.
+- Re-implementing tool exposure manually instead of using `context.invoke.expose`.
 - Mixing runtime bootstrapping into the handler.
 
 ## Related Guides

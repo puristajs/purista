@@ -148,6 +148,22 @@ export type AgentStreamResponder<_EmitPayloads extends Record<string, unknown> =
 	onError(error: unknown): void | Promise<void>
 }
 
+export type AgentTerminalResult = {
+	status: 'completed' | 'failed' | 'cancelled'
+	finalMessage?: string
+	summary?: string
+	usage?: {
+		promptTokens?: number
+		completionTokens?: number
+		totalTokens?: number
+		costUsd?: number
+	}
+	runId?: string
+	conversationId?: string
+	agentName: string
+	agentVersion: string
+}
+
 export type AgentInvokeResult = {
 	envelopes: AgentProtocolEnvelope[]
 }

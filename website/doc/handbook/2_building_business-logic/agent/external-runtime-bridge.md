@@ -14,8 +14,8 @@ If you do not have that problem, you probably do not need this page yet.
 
 The default PURISTA path is still:
 
-- direct `context.tools`
-- direct `context.agents`
+- direct `context.invoke.tools`
+- direct `context.invoke.agents`
 
 External runtime bindings are the advanced path for external tool loops.
 
@@ -27,7 +27,7 @@ Use bindings when:
 - tool execution must still go through PURISTA commands or child agents
 - you want tracing, telemetry, queue safety, and allowlists to remain intact
 
-Do not use bindings when the handler itself already owns the loop. In that case, just call `context.tools` or `context.agents` directly.
+Do not use bindings when the handler itself already owns the loop. In that case, just call `context.invoke.tools` or `context.invoke.agents` directly.
 
 ## The Normal Binding Flow
 
@@ -41,7 +41,7 @@ Do not use bindings when the handler itself already owns the loop. In that case,
 ### 2. Build bindings in the handler
 
 ```ts
-const bindings = context.expose.tools({
+const bindings = context.invoke.expose.tools({
   commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
   agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
 })
@@ -56,7 +56,7 @@ That concrete provider-adapter step is covered in [AI SDK Adapter](./ai-sdk-adap
 This is the important mental model:
 
 - builder declares what is allowed
-- `context.expose.*` binds that allowlist to the live runtime
+- `context.invoke.expose.*` binds that allowlist to the live runtime
 - the adapter translates those bindings for the external SDK
 
 ## Command Binding Example
@@ -64,7 +64,7 @@ This is the important mental model:
 If you want one command binding explicitly:
 
 ```ts
-const faqBinding = context.expose.tool({
+const faqBinding = context.invoke.expose.tool({
   serviceName: 'support',
   serviceVersion: '1',
   commandName: 'lookupFaq',
@@ -82,7 +82,7 @@ Use this shape when:
 If the external loop should be able to call a child agent:
 
 ```ts
-const triageBinding = context.expose.agent(
+const triageBinding = context.invoke.expose.agent(
   {
     agentName: 'triageAgent',
     agentVersion: '1',
@@ -141,9 +141,9 @@ That is why bindings are better than hand-written tool objects in durable system
 ## Decision Rules
 
 - If the handler owns the loop:
-  use `context.tools` / `context.agents`
+  use `context.invoke.tools` / `context.invoke.agents`
 - If an external SDK owns the loop:
-  use `context.expose.*` and then an adapter
+  use `context.invoke.expose.*` and then an adapter
 - If the tool target is not a PURISTA command or child agent:
   do not treat it as a queue-safe binding yet
 

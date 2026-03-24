@@ -44,8 +44,9 @@ export const triageAgent = new AgentBuilder({
   .setExecutionMode('inline')
   .addPayloadSchema(z.object({ prompt: z.string().min(1) }))
   .defineModel('openai:fast', { capabilities: ['json'] })
-  .setHandler(async (context, payload) => {
-    const result = await context.models['openai:fast'].generateJson({
+  .setHandler(async context => {
+    const payload = context.input.payload
+    const result = await context.ai.models['openai:fast'].generateJson({
       prompt: `Classify the urgency of this support request: ${payload.prompt}`,
       schema: z.object({
         urgency: z.enum(['low', 'medium', 'high']),
@@ -116,20 +117,12 @@ export const supportAgent = new AgentBuilder({
   .defineResource<'supportPolicy', { developerInstruction: string }>()
   // The builder only declares model aliases and capabilities.
   .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
-  // Only these skills are visible through context.skills.
+  // Only these skills are visible through context.ai.skills.
   .useSkills(['spec-elicitation', 'support-workflow'])
   // Allow one command-backed tool.
   .canInvoke('support', '1', 'lookupFaq')
   // Allow one child agent.
   .canInvokeAgent('triageAgent', '1')
-  // Declare custom PURISTA events the agent may emit.
-  .canEmit(
-    'support.agent.completed',
-    z.object({
-      sessionId: z.string(),
-      escalated: z.boolean(),
-    }),
-  )
   // Guard hooks are for short request policy checks, not business logic.
   .setBeforeGuardHooks({
     requirePrompt: async function requirePrompt(_context, requestPayload) {
@@ -143,13 +136,13 @@ export const supportAgent = new AgentBuilder({
   .setSseProtocol('ai-sdk-ui-message')
   .setHandler(async (context, payload) => {
     // 1. Start durable workflow state for progress, checkpoints, and recovery.
-    const run = await context.runState.start({
+    const run = await context.memory.run.start({
       title: 'Support response',
-      extraScope: { sessionId: payload.sessionId ?? context.message.id },
+      extraScope: { sessionId: payload.sessionId ?? context.input.message.id },
     })
 
     // Keep user-visible conversation history separate from workflow state.
-    await context.conversation.addUser(payload.prompt)
+    await context.memory.conversation.addUser(payload.prompt)
     await run.plan([
       { id: 'triage', title: 'Classify urgency' },
       { id: 'faq', title: 'Load FAQ guidance' },
@@ -159,54 +152,56 @@ export const supportAgent = new AgentBuilder({
 
     // 2. Gather the factual inputs needed for the final answer.
     // Call the allowlisted child agent.
-    const triage = await context.agents.runText({
+    const triage = await context.invoke.agents.runText({
       agentName: 'triageAgent',
       agentVersion: '1',
       payload: { prompt: payload.prompt },
     })
 
     // Call the allowlisted PURISTA command as a tool.
-    const faq = await context.tools.invoke.support['1'].lookupFaq({
+    const faq = await context.invoke.tools.invoke.support['1'].lookupFaq({
       question: payload.prompt,
     })
 
     // 3. Load the declared skills exactly where they are needed:
     // right before prompt construction for the final answer.
-    const skills = await context.skills.loadAvailable()
+    const skills = await context.ai.skills.loadAvailable()
     const skillBlock = renderSkillDocuments('Relevant skills', skills)
 
     // 4. Generate the final answer while streaming deltas to the client.
     const answer = await run.step(
       'answer',
       async () =>
-        await context.models['openai:primary'].generateText({
-          developerInstruction: context.resources.supportPolicy.developerInstruction,
+        await context.ai.models['openai:primary'].generateText({
+          developerInstruction: context.app.resources.supportPolicy.developerInstruction,
           prompt: [
             skillBlock,
-            `Locale: ${context.config.runtime.locale}`,
             `Customer request: ${payload.prompt}`,
             `Triage result: ${triage}`,
             `FAQ answer: ${String(faq.answer ?? '')}`,
           ]
             .filter(Boolean)
             .join('\n\n'),
-          onTextDelta: delta => context.stream.sendChunk(delta),
+          onTextDelta: delta => context.io.stream.sendChunk(delta),
         }),
       { checkpoint: 'final-answer' },
     )
 
     // 5. Persist the assistant message and finish the durable run.
-    await context.conversation.addAssistant(answer)
+    await context.memory.conversation.addAssistant(answer)
     await run.finishSuccess(answer)
-    await context.emit('support.agent.completed', {
-      sessionId: payload.sessionId ?? context.message.id,
-      escalated: /urgent|incident|legal/i.test(payload.prompt),
-    })
-    context.stream.sendFinal(answer)
+    context.io.stream.sendFinal(answer)
     return { message: answer }
   })
   .build()
 ```
+
+If you want to publish a custom event from an agent, declare it explicitly with
+`.canEmit(...)` and call `context.output.emit(...)` yourself. If you want a
+single event with the agent's final aggregated result, use
+`.setSuccessEventName(...)`. That success event emits one normalized terminal
+result payload, not the raw protocol envelope list. Otherwise, the default is
+no custom event.
 
 Read that code in two passes:
 
@@ -236,14 +231,14 @@ More detail:
 
 These use that contract:
 
-- `context.runState`
-- `context.conversation`
-- `context.resources`
-- `context.skills`
-- `context.agents`
-- `context.tools`
-- `context.models`
-- `context.stream`
+- `context.memory.run`
+- `context.memory.conversation`
+- `context.app.resources`
+- `context.ai.skills`
+- `context.invoke.agents`
+- `context.invoke.tools`
+- `context.ai.models`
+- `context.io.stream`
 
 More detail:
 
@@ -347,7 +342,7 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   // Queued durable agents need a queue bridge.
   queueBridge,
   models: {
-    // This is the real provider used by context.models['openai:primary'].
+    // This is the real provider used by context.ai.models['openai:primary'].
     'openai:primary': new AiSdkProvider({
       model: openai('gpt-4o'),
     }),
@@ -422,7 +417,7 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 Then keep the handler in the same PURISTA style and talk only to the alias:
 
 ```ts
-const answer = await context.models['openai:primary'].generateText({
+const answer = await context.ai.models['openai:primary'].generateText({
   developerInstruction: 'Use tools before answering.',
   prompt: payload.prompt,
   metadata: {
@@ -431,7 +426,7 @@ const answer = await context.models['openai:primary'].generateText({
       parallelToolCalls: false,
     },
   },
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.io.stream.sendChunk(delta),
 })
 ```
 
@@ -439,7 +434,7 @@ What matters here:
 
 - the builder still only declares the alias
 - the instance binds the real provider
-- the handler still uses `context.models['openai:primary']`
+- the handler still uses `context.ai.models['openai:primary']`
 - the provider handles the Vercel-specific mapping internally, including default skills and allowlisted bindings
 - the provider path does not change how resources, skills, or guards work
 
@@ -465,7 +460,7 @@ If the agent only needs models, commands, child agents, and skills as text, do n
 - Use guards for short policy checks, not for workflow logic.
 - Adapt at the SDK boundary, not earlier.
 - Skills are declared in the builder and provided at instance creation.
-- Queued durable agents need `queueBridge` and should use `context.runState`.
+- Queued durable agents need `queueBridge` and should use `context.memory.run`.
 
 ## Where To Go Next
 

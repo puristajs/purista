@@ -1,5 +1,12 @@
 import type { Command, EventBridge } from '@purista/core'
-import { EBMessageType, getNewEBMessageId, getNewTraceId, StatusCode, UnhandledError } from '@purista/core'
+import {
+	EBMessageType,
+	getNewEBMessageId,
+	getNewTraceId,
+	HandledError,
+	StatusCode,
+	UnhandledError,
+} from '@purista/core'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { AgentStreamResponder } from '../types/AgentDefinition.js'
@@ -24,6 +31,8 @@ export type InvokeAgentOptions = {
 	timeoutMs?: number
 	/** Optional correlation id used for distributed trace chaining. */
 	correlationId?: string
+	/** Optional trace id used to preserve distributed tracing across agent boundaries. */
+	traceId?: string
 	/** Optional session id injected into object payloads when missing. */
 	sessionId?: string
 	/** Optional live frame responder for streaming consumption. */
@@ -43,7 +52,18 @@ const throwIfErrorEnvelope = (envelope: AgentProtocolEnvelope, failOnErrorFrame:
 	if (frame.kind !== 'error') {
 		return
 	}
-	throw new UnhandledError(StatusCode.InternalServerError, frame.message || 'agent returned error frame', {
+	const statusCode =
+		typeof frame.code === 'string' && /^\d+$/.test(frame.code)
+			? Number.parseInt(frame.code, 10)
+			: StatusCode.InternalServerError
+	if (frame.handled) {
+		throw new HandledError(statusCode, frame.message || 'agent returned handled error frame', {
+			code: frame.code,
+			handled: frame.handled,
+			details: frame.details,
+		})
+	}
+	throw new UnhandledError(statusCode, frame.message || 'agent returned error frame', {
 		code: frame.code,
 		handled: frame.handled,
 		details: frame.details,
@@ -66,7 +86,7 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 		id: getNewEBMessageId(),
 		timestamp: Date.now(),
 		messageType: EBMessageType.Command,
-		traceId: getNewTraceId(),
+		traceId: options.traceId ?? getNewTraceId(),
 		correlationId: options.correlationId ?? getNewEBMessageId(),
 		contentType: 'application/json',
 		contentEncoding: 'utf-8',

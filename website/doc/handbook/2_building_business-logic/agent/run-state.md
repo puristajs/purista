@@ -6,7 +6,7 @@ order: 203704
 
 # Durable Run State
 
-Use `context.runState` when the work must survive beyond one in-memory process:
+Use `context.memory.run` when the work must survive beyond one in-memory process:
 
 - execution plans
 - task lists
@@ -14,7 +14,7 @@ Use `context.runState` when the work must survive beyond one in-memory process:
 - recovery metadata
 - single-active-run locks
 
-`context.runState` is backed by `context.states`, so it is durable application state, not transient memory.
+`context.memory.run` is backed by the runtime state store, so it is durable application state, not transient memory.
 
 ## Why It Exists
 
@@ -27,14 +27,14 @@ Use run state for:
 - background planning
 - child-agent orchestration where the UI should show progress
 
-Queued durable agents should use `context.runState` together with a queue bridge and checkpoints. Run state alone is not the full recovery model.
+Queued durable agents should use `context.memory.run` together with a queue bridge and checkpoints. Run state alone is not the full recovery model.
 
-For queued durable agents, PURISTA creates the run record before the handler starts. The handler should read the existing run with `context.runState.get()` and then mutate it with `update()`, `replaceTasks()`, `step()`, `checkpoint()`, and `finish(...)`.
+For queued durable agents, PURISTA creates the run record before the handler starts. The handler should read the existing run with `context.memory.run.get()` and then mutate it with `update()`, `replaceTasks()`, `step()`, `checkpoint()`, and `finish(...)`.
 
 ## Core Lifecycle
 
 ```ts
-const run = await context.runState.start({
+const run = await context.memory.run.start({
   title: 'Architecture synthesis',
   extraScope: { projectId: payload.projectId },
   lock: { key: 'architecture' },
@@ -66,13 +66,13 @@ Read the lifecycle in phases instead of as a method list:
 
 ### 1. Start or resume the run
 
-Use `context.runState.start(...)` when the handler begins a new durable workflow and needs:
+Use `context.memory.run.start(...)` when the handler begins a new durable workflow and needs:
 
 - a title
 - scope metadata
 - an optional lock
 
-Use `context.runState.get(...)` when you need to reopen an existing run or inspect previously persisted state.
+Use `context.memory.run.get(...)` when you need to reopen an existing run or inspect previously persisted state.
 
 ### 2. Describe the work
 
@@ -155,7 +155,7 @@ When you are unsure which helper to use, this is the practical guide:
 If only one run should be active for a scope, acquire a lock when the run starts.
 
 ```ts
-const run = await context.runState.start({
+const run = await context.memory.run.start({
   title: 'Simulation',
   extraScope: { projectId: payload.projectId },
   lock: {
@@ -207,7 +207,7 @@ Keep execution progress separate from the chat transcript. The chat should usual
 If a parent agent forwards a child agent with:
 
 ```ts
-await context.agents.forward({
+await context.invoke.agents.forward({
   agentName: 'architectureAgent',
   agentVersion: '1',
   payload,

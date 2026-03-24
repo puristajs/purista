@@ -32,9 +32,9 @@ export const supportAgent = new AgentBuilder({ ... })
 Use it in the handler:
 
 ```ts
-await context.conversation.addUser(payload.prompt)
-const messages = await context.conversation.getMessages()
-await context.conversation.addAssistant(answer)
+await context.memory.conversation.addUser(payload.prompt)
+const messages = await context.memory.conversation.getMessages()
+await context.memory.conversation.addAssistant(answer)
 ```
 
 Use this for:
@@ -51,10 +51,10 @@ Do not use it for:
 
 ## 2. Durable Run State
 
-Use `context.runState` for operational workflow state.
+Use `context.memory.run` for operational workflow state.
 
 ```ts
-const run = await context.runState.start({
+const run = await context.memory.run.start({
   title: 'Simulation review',
   extraScope: { projectId: payload.projectId },
   lock: { key: 'simulation' },
@@ -100,11 +100,11 @@ PURISTA does not ship a framework-owned knowledgebase abstraction.
 Use normal resources for retrieval systems:
 
 ```ts
-const docs = await context.resources.supportFaq.search({
+const docs = await context.app.resources.supportFaq.search({
   query: payload.prompt,
   limit: 3,
-  tenantId: context.service.tenantId,
-  principalId: context.service.principalId,
+  tenantId: context.input.message.tenantId,
+  principalId: context.input.message.principalId,
 })
 ```
 
@@ -123,11 +123,11 @@ Use retrieval when the agent needs external facts, not just prior chat or workfl
 When you are unsure where something belongs, ask:
 
 - “Should the model see this as part of the conversation?”
-  Use `context.conversation`.
+  Use `context.memory.conversation`.
 - “Should the workflow resume from this after reconnect or retry?”
-  Use `context.runState`.
+  Use `context.memory.run`.
 - “Is this external data or search infrastructure?”
-  Use `context.resources`.
+  Use `context.app.resources`.
 
 That rule is more useful than memorizing APIs.
 
@@ -154,7 +154,7 @@ Instead:
 
 1. expose retrieval through a normal PURISTA command
 2. allowlist that command
-3. call it through `context.tools` or external bindings
+3. call it through `context.invoke.tools` or external bindings
 
 That keeps retrieval inside the same command and telemetry model as the rest of the application.
 
@@ -162,7 +162,7 @@ That keeps retrieval inside the same command and telemetry model as the rest of 
 
 - Storing workflow progress in conversation memory.
 - Treating retrieval as a hidden framework subsystem.
-- Using `context.states` directly when `context.runState` already expresses the workflow.
+- Using `context.runtime.stores.states` directly when `context.memory.run` already expresses the workflow.
 - Mixing skill catalogs and retrieval systems into one vague “knowledge” bucket.
 
 ## Related Guides

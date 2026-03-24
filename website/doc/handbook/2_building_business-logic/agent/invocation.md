@@ -11,7 +11,7 @@ Invocation is the point where one PURISTA workload calls another.
 The default rule is simple:
 
 - from services, commands, subscriptions, or streams, use `context.invokeAgent`
-- inside an agent handler, use `context.agents`
+- inside an agent handler, use `context.invoke.agents`
 - use forwarding only when the child agent should be visible to the end user
 - use standalone invocation only for scripts and tooling
 
@@ -83,12 +83,12 @@ If you only need the final result, do not use this shape yet.
 
 ## In-Handler Orchestration
 
-When an agent calls another agent, use `context.agents`.
+When an agent calls another agent, use `context.invoke.agents`.
 
 The common case is internal reasoning:
 
 ```ts
-const triage = await context.agents.runText({
+const triage = await context.invoke.agents.runText({
   agentName: 'triageAgent',
   agentVersion: '1',
   payload: { prompt: payload.prompt },
@@ -103,7 +103,7 @@ Use:
 Example:
 
 ```ts
-const triage = await context.agents.runObject<{
+const triage = await context.invoke.agents.runObject<{
   urgency: 'low' | 'medium' | 'high'
   nextSteps: string[]
 }>({
@@ -120,7 +120,7 @@ This is the normal multi-agent orchestration path.
 Use forwarding only when the child agent is part of the visible user experience.
 
 ```ts
-await context.agents.forward({
+await context.invoke.agents.forward({
   agentName: 'architectureAgent',
   agentVersion: '1',
   payload: { prompt: payload.prompt, projectId: payload.projectId },
@@ -144,10 +144,10 @@ If the child is only an internal classifier or planner, prefer `runText(...)` or
 
 ## Full Control
 
-Use `context.agents.invoke(...)` only when you genuinely need raw envelopes or custom forwarding behavior.
+Use `context.invoke.agents.invoke(...)` only when you genuinely need raw envelopes or custom forwarding behavior.
 
 ```ts
-const envelopes = await context.agents.invoke({
+const envelopes = await context.invoke.agents.invoke({
   agentName: 'triageAgent',
   agentVersion: '1',
   payload: { prompt: payload.prompt },
@@ -206,11 +206,11 @@ Queued durable agents still use the same exposure. The difference is that the tr
 - Service or command calling an agent:
   use `context.invokeAgent`
 - Agent calling another agent for internal reasoning:
-  use `context.agents.runText(...)` or `runObject<T>(...)`
+  use `context.invoke.agents.runText(...)` or `runObject<T>(...)`
 - Parent agent wants the child visible to the user:
-  use `context.agents.forward(...)`
+  use `context.invoke.agents.forward(...)`
 - Need full envelope control:
-  use `context.agents.invoke(...)`
+  use `context.invoke.agents.invoke(...)`
 - Script or tooling:
   use `invokeAgent(...)`
 

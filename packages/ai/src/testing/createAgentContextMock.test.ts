@@ -113,11 +113,13 @@ describe('createAgentContextMock', () => {
 			},
 		})
 
-		await expect(mock.context.tools.invoke.support['1'].lookupFaq({ question: 'reset password' })).resolves.toEqual({
+		await expect(
+			mock.context.invoke.tools.invoke.support['1'].lookupFaq({ question: 'reset password' }),
+		).resolves.toEqual({
 			answer: 'FAQ:reset password',
 		})
 		await expect(
-			mock.context.agents.runText({
+			mock.context.invoke.agents.runText({
 				agentName: 'triageAgent',
 				agentVersion: '1',
 				payload: { prompt: 'reset password' },
@@ -125,39 +127,39 @@ describe('createAgentContextMock', () => {
 		).resolves.toBe('urgent')
 		expect(
 			Object.keys(
-				mock.context.expose.tools({
+				mock.context.invoke.expose.tools({
 					commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
 				}),
 			),
 		).toEqual(['support.1.lookupFaq'])
-		expect(mock.context.expose.metadata().agents).toHaveLength(1)
-		expect(mock.context.expose.metadata().agents[0]).toMatchObject({
+		expect(mock.context.invoke.expose.metadata().agents).toHaveLength(1)
+		expect(mock.context.invoke.expose.metadata().agents[0]).toMatchObject({
 			agentName: 'triageAgent',
 			agentVersion: '1',
 			parameterSchema: undefined,
 		})
-		expect(mock.context.expose.metadata().agents[0]?.payloadSchema).toBeDefined()
-		expect(mock.context.resources.search).toEqual({ enabled: true })
-		expect(mock.context.skills.names).toEqual(['purista-architecture'])
-		await expect(mock.context.skills.list()).resolves.toEqual([
+		expect(mock.context.invoke.expose.metadata().agents[0]?.payloadSchema).toBeDefined()
+		expect(mock.context.app.resources.search).toEqual({ enabled: true })
+		expect(mock.context.ai.skills.names).toEqual(['purista-architecture'])
+		await expect(mock.context.ai.skills.list()).resolves.toEqual([
 			expect.objectContaining({
 				name: 'purista-architecture',
 			}),
 		])
-		await expect(mock.context.skills.search({ queries: ['architecture'] })).resolves.toEqual([
+		await expect(mock.context.ai.skills.search({ queries: ['architecture'] })).resolves.toEqual([
 			expect.objectContaining({
 				name: 'purista-architecture',
 			}),
 		])
-		await expect(mock.context.skills.loadReferences('purista-architecture')).resolves.toEqual([
+		await expect(mock.context.ai.skills.loadReferences('purista-architecture')).resolves.toEqual([
 			expect.objectContaining({
 				relativePath: 'references/decision-matrix.md',
 			}),
 		])
-		await expect(mock.context.secrets.getSecret('OPENAI_API_KEY')).resolves.toBe('secret')
-		await expect(mock.context.configs.getConfig('model')).resolves.toBe('openai:test')
+		await expect(mock.context.runtime.stores.secrets.getSecret('OPENAI_API_KEY')).resolves.toBe('secret')
+		await expect(mock.context.runtime.stores.configs.getConfig('model')).resolves.toBe('openai:test')
 
-		const run = await mock.context.runState.start({ title: 'Test run' })
+		const run = await mock.context.memory.run.start({ title: 'Test run' })
 		await run.plan([{ id: 'lookup', title: 'Lookup answer' }])
 		await run.finishSuccess('done')
 		await mock.flush()
@@ -177,9 +179,9 @@ describe('createAgentContextMock', () => {
 			},
 		})
 
-		expect(mock.context.skills.available).toBe(false)
-		expect(() => mock.context.resources.missing).toThrow('Resource missing is not stubbed')
-		await expect(mock.context.skills.list()).rejects.toThrow('No declared skills are configured')
-		await expect(mock.context.secrets.getSecret('NOPE')).rejects.toThrow('Secret NOPE is not stubbed')
+		expect(mock.context.ai.skills.available).toBe(false)
+		expect(() => mock.context.app.resources.missing).toThrow('Resource missing is not stubbed')
+		await expect(mock.context.ai.skills.list()).rejects.toThrow('No declared skills are configured')
+		await expect(mock.context.runtime.stores.secrets.getSecret('NOPE')).rejects.toThrow('Secret NOPE is not stubbed')
 	})
 })

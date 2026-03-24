@@ -5,8 +5,8 @@ import { MockLanguageModelV3 } from 'ai/test'
 import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../agents/supportAgent/v1/supportAgent.js'
-import { exampleSkills } from '../skills.js'
 import { supportV1Service } from '../service/support/v1/index.js'
+import { exampleSkills } from '../skills.js'
 
 const waitForRegistration = async () => {
 	await new Promise(resolve => setTimeout(resolve, 25))

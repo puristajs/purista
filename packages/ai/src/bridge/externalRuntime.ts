@@ -96,10 +96,20 @@ export type ExposeHelpers = {
 	metadata(): ExternalRuntimeMetadata
 }
 
-export type AgentContextLike = Pick<
-	AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>,
-	'manifest' | 'tools' | 'agents' | 'protocol'
->
+export type AgentContextLike = {
+	app: Pick<
+		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>['app'],
+		'manifest'
+	>
+	invoke: Pick<
+		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>['invoke'],
+		'tools' | 'agents'
+	>
+	io: Pick<
+		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>['io'],
+		'protocol'
+	>
+}
 
 const getCommandBindingName = (command: AllowedToolDefinition, explicitName?: string) =>
 	explicitName ?? command.toolName ?? `${command.serviceName}.${command.serviceVersion}.${command.commandName}`
@@ -187,7 +197,7 @@ export const createExternalBindings = (input: CreateExternalBindingsInput): Exte
 }
 
 const findAllowedCommand = (context: AgentContextLike, input: AllowedToolDefinition) => {
-	const descriptor = context.manifest.allowedTools.find(
+	const descriptor = context.app.manifest.allowedTools.find(
 		(entry: AllowedToolDefinition) =>
 			entry.serviceName === input.serviceName &&
 			entry.serviceVersion === input.serviceVersion &&
@@ -203,7 +213,7 @@ const findAllowedCommand = (context: AgentContextLike, input: AllowedToolDefinit
 }
 
 const findAllowedAgent = (context: AgentContextLike, input: AllowedAgentDefinition) => {
-	const descriptor = (context.manifest.allowedAgents ?? []).find(
+	const descriptor = (context.app.manifest.allowedAgents ?? []).find(
 		(entry: AllowedAgentDefinition) => entry.agentName === input.agentName && entry.agentVersion === input.agentVersion,
 	)
 	if (!descriptor) {
@@ -222,12 +232,12 @@ const invokeBoundAgent = async (
 	payload: unknown,
 ) => {
 	const bindingName = getAgentBindingName(agent, options.name)
-	context.protocol.emitToolEvent({
+	context.io.protocol.emitToolEvent({
 		toolName: bindingName,
 		status: 'invoked',
 		input: payload,
 	})
-	const envelopes = await context.agents.invoke({
+	const envelopes = await context.invoke.agents.invoke({
 		agentName: agent.agentName,
 		agentVersion: agent.agentVersion,
 		payload,
@@ -236,7 +246,7 @@ const invokeBoundAgent = async (
 	})
 	const assistantText = extractAssistantText(envelopes)
 	if ((options.resultMode ?? 'text') === 'protocol') {
-		context.protocol.emitToolEvent({
+		context.io.protocol.emitToolEvent({
 			toolName: bindingName,
 			status: 'success',
 			input: payload,
@@ -246,7 +256,7 @@ const invokeBoundAgent = async (
 	}
 	if ((options.resultMode ?? 'text') === 'object') {
 		const result = JSON.parse(assistantText) as unknown
-		context.protocol.emitToolEvent({
+		context.io.protocol.emitToolEvent({
 			toolName: bindingName,
 			status: 'success',
 			input: payload,
@@ -254,7 +264,7 @@ const invokeBoundAgent = async (
 		})
 		return result
 	}
-	context.protocol.emitToolEvent({
+	context.io.protocol.emitToolEvent({
 		toolName: bindingName,
 		status: 'success',
 		input: payload,
@@ -266,8 +276,8 @@ const invokeBoundAgent = async (
 export const createExposeHelpers = (context: AgentContextLike): ExposeHelpers => ({
 	metadata() {
 		return {
-			commands: context.manifest.allowedTools,
-			agents: context.manifest.allowedAgents ?? [],
+			commands: context.app.manifest.allowedTools,
+			agents: context.app.manifest.allowedAgents ?? [],
 		}
 	},
 	tool(command, options) {
@@ -281,10 +291,9 @@ export const createExposeHelpers = (context: AgentContextLike): ExposeHelpers =>
 			name: options?.name,
 			description: descriptor.description,
 			execute: async payload =>
-				await context.tools.invoke[descriptor.serviceName]?.[descriptor.serviceVersion]?.[descriptor.commandName](
-					payload,
-					options?.parameter,
-				),
+				await context.invoke.tools.invoke[descriptor.serviceName]?.[descriptor.serviceVersion]?.[
+					descriptor.commandName
+				](payload, options?.parameter),
 		})
 	},
 	agent(agent, options) {
@@ -312,7 +321,7 @@ export const createExposeHelpers = (context: AgentContextLike): ExposeHelpers =>
 				name: command.name,
 				description: command.description,
 				execute: async payload =>
-					await context.tools.invoke[command.serviceName]?.[command.serviceVersion]?.[command.commandName](
+					await context.invoke.tools.invoke[command.serviceName]?.[command.serviceVersion]?.[command.commandName](
 						payload,
 						command.parameter,
 					),

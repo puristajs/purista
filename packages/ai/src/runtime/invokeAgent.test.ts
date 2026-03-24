@@ -1,4 +1,4 @@
-import { StatusCode, UnhandledError } from '@purista/core'
+import { HandledError, StatusCode, UnhandledError } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
@@ -34,6 +34,30 @@ describe('invokeAgent', () => {
 		const message = openStream.mock.calls[0][0]
 		expect(message.receiver).toEqual({ serviceName: 'supportAgent', serviceVersion: '1', serviceTarget: 'run' })
 		expect(message.payload).toEqual({ frameType: 'open', payload: { prompt: 'hello' }, parameter: { locale: 'en' } })
+	})
+
+	it('reuses the provided trace id for child-agent invocation', async () => {
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'complete', sequence: 1, final: [] } }
+				},
+			}),
+			invoke: vi.fn(),
+		} as any
+
+		await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'hello' },
+			traceId: 'trace-parent-1',
+		})
+
+		expect(eventBridge.openStream.mock.calls[0][0].traceId).toBe('trace-parent-1')
 	})
 
 	it('streams envelopes incrementally when a stream responder is provided', async () => {
@@ -228,7 +252,7 @@ describe('invokeAgent', () => {
 				agentVersion: '1',
 				payload: { prompt: 'hello' },
 			}),
-		).rejects.toThrow('No spec files were changed')
+		).rejects.toBeInstanceOf(HandledError)
 	})
 
 	it('throws when fallback invoke returns protocol error envelope', async () => {
@@ -255,6 +279,32 @@ describe('invokeAgent', () => {
 				payload: { prompt: 'hello' },
 			}),
 		).rejects.toThrow('Sub-agent failed')
+	})
+
+	it('keeps unhandled protocol error envelopes as UnhandledError', async () => {
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
+			invoke: vi.fn().mockResolvedValue([
+				{
+					frame: {
+						kind: 'error',
+						code: 'UnhandledError',
+						message: 'Sub-agent crashed',
+						handled: false,
+					},
+				},
+			]),
+		} as any
+
+		await expect(
+			invokeAgent({
+				eventBridge,
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				payload: { prompt: 'hello' },
+			}),
+		).rejects.toBeInstanceOf(UnhandledError)
 	})
 
 	it('allows protocol error envelopes when failOnErrorFrame is false', async () => {

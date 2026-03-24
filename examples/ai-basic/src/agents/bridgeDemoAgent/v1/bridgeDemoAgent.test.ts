@@ -1,14 +1,8 @@
-import {
-	createAgentTestHarness,
-	getFinalAssistantText,
-	getRunStateArtifacts,
-	ScriptedModel,
-} from '@purista/ai'
+import { createAgentTestHarness, getFinalAssistantText, getRunStateArtifacts, ScriptedModel } from '@purista/ai'
 import { DefaultEventBridge, DefaultQueueBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
-
-import { exampleSkills } from '../../../skills.js'
 import { supportV1Service } from '../../../service/support/v1/index.js'
+import { exampleSkills } from '../../../skills.js'
 import { bridgeDemoAgent } from './bridgeDemoAgent.js'
 
 const waitForRegistration = async () => {
@@ -54,9 +48,10 @@ describe('bridgeDemoAgent', () => {
 			})
 
 			const firstCall = provider.calls[0]
-			const firstCallBindings = firstCall?.method === 'generateText' || firstCall?.method === 'generate' || firstCall?.method === 'stream'
-				? firstCall.request.bindings
-				: undefined
+			const firstCallBindings =
+				firstCall?.method === 'generateText' || firstCall?.method === 'generate' || firstCall?.method === 'stream'
+					? firstCall.request.bindings
+					: undefined
 			const bindingNames = Array.isArray(firstCallBindings)
 				? firstCallBindings.map(binding => binding.name)
 				: Object.keys(firstCallBindings ?? {})

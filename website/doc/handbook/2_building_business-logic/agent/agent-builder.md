@@ -73,13 +73,6 @@ export const supportAgent = new AgentBuilder({
   .useSkills(['spec-elicitation', 'support-workflow'])
   .canInvoke('support', '1', 'lookupFaq')
   .canInvokeAgent('triageAgent', '1')
-  .canEmit(
-    'support.agent.completed',
-    z.object({
-      sessionId: z.string(),
-      escalated: z.boolean(),
-    }),
-  )
   .setBeforeGuardHooks({
     requirePrompt: async function requirePrompt(_context, payload) {
       if (!payload.prompt.trim()) {
@@ -127,7 +120,7 @@ Rule:
 Queued durable agents should usually also define:
 
 - `setExecutionPolicy(...)`
-- `context.runState` usage in the handler
+- `context.memory.run` usage in the handler
 
 ### 3. Runtime config
 
@@ -153,7 +146,7 @@ Rule:
 
 - builder declares the config contract
 - `getInstance(...)` provides concrete config values
-- handler reads the resolved values from `context.config.runtime`
+- handler reads runtime services or stores from `context.runtime.*`
 
 More detail:
 
@@ -182,7 +175,7 @@ should be declared up front and provided explicitly at `getInstance(...)`.
 That gives you:
 
 - a typed requirement at instance creation
-- `context.resources.supportPolicy` in the handler
+- `context.app.resources.supportPolicy` in the handler
 
 Use resources for:
 
@@ -206,11 +199,11 @@ Use:
 
 These declarations feed both:
 
-- direct handler APIs like `context.tools` and `context.agents`
-- external runtime binding helpers like `context.expose.tools(...)`
+- direct handler APIs like `context.invoke.tools` and `context.invoke.agents`
+- external runtime binding helpers like `context.invoke.expose.tools(...)`
 
 `canEmit(...)` belongs in the same contract area. It declares which custom
-PURISTA events the agent may emit from the handler with `context.emit(...)`.
+PURISTA events the agent may emit from the handler with `context.output.emit(...)`.
 
 ### 7. Skills
 
@@ -224,7 +217,7 @@ This means:
 
 - the agent may only access these skill names
 - the runtime must provide implementations for those names
-- `context.skills` is scoped to that declared set
+- `context.ai.skills` is scoped to that declared set
 
 It does not mean:
 
@@ -269,6 +262,7 @@ way it does for commands, streams, subscriptions, and queue workers.
 ### 8a. Custom events
 
 Agents can emit normal PURISTA custom events just like commands and streams.
+This is always explicit. Agents do not emit custom events by default.
 
 ```ts
 .canEmit(
@@ -283,11 +277,28 @@ Agents can emit normal PURISTA custom events just like commands and streams.
 Then in the handler:
 
 ```ts
-await context.emit('support.agent.completed', {
+await context.output.emit('support.agent.completed', {
   sessionId: payload.sessionId ?? context.message.id,
   escalated: false,
 })
 ```
+
+If you want an agent to publish its final aggregated result automatically, use
+`setSuccessEventName(...)` instead of emitting a manual custom event from the
+handler.
+
+That automatic event payload is the normalized terminal agent result, not the
+raw protocol envelope array. The payload includes the final status plus the
+aggregated agent output shape:
+
+- `status`
+- `finalMessage`
+- `summary`
+- `usage`
+- `runId`
+- `conversationId`
+- `agentName`
+- `agentVersion`
 
 ### 9. Transport
 
@@ -324,7 +335,7 @@ Those belong in `getInstance(...)`.
 - Thinking `.useSkills([...])` provides skills by itself.
 - Putting resource objects into the builder instead of declaring them with `defineResource(...)`.
 - Putting environment values into the builder instead of using `setConfigSchema(...)` plus `getInstance(..., { config })`.
-- Using queued execution without planning for `context.runState`.
+- Using queued execution without planning for `context.memory.run`.
 - Jumping to SDK adapters before the agent contract is clear.
 
 ## Related Guides

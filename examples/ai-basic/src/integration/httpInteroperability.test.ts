@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../agents/supportAgent/v1/supportAgent.js'
 import { triageAgent } from '../agents/triageAgent/v1/triageAgent.js'
-import { exampleSkills } from '../skills.js'
 import { supportV1Service } from '../service/support/v1/index.js'
+import { exampleSkills } from '../skills.js'
 
 class DeterministicProvider implements ModelProvider {
 	readonly name = 'deterministic-test-provider'

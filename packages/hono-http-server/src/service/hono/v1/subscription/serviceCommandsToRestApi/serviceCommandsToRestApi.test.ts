@@ -1,4 +1,10 @@
-import { createSubscriptionContextMock, getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import {
+	createSubscriptionContextMock,
+	getCommandSuccessMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { honoV1Service } from '../../honoV1Service.js'

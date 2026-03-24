@@ -13,7 +13,7 @@ In PURISTA, skills follow the same lifecycle as the rest of the AI runtime:
 1. define the skill
 2. declare the allowed skill names in the builder
 3. provide the implementations at `getInstance(...)`
-4. load them from `context.skills` in the handler
+4. load them from `context.ai.skills` in the handler
 5. optionally pass them to an adapter such as the Vercel AI SDK
 
 That is the important point: skills are part of the PURISTA lifecycle, not an independent magic subsystem.
@@ -76,14 +76,14 @@ export const supportAgent = new AgentBuilder({
   .defineResource<'supportPolicy', { developerInstruction: string }>()
   .useSkills(['spec-elicitation', 'support-workflow'])
   .setHandler(async (context, payload) => {
-    const skills = await context.skills.loadAvailable()
+    const skills = await context.ai.skills.loadAvailable()
     const prompt = [
-      context.resources.supportPolicy.developerInstruction,
+      context.app.resources.supportPolicy.developerInstruction,
       ...skills.map(skill => skill.content),
       payload.prompt,
     ].join('\n\n')
 
-    const answer = await context.models['openai:primary'].generateText({
+    const answer = await context.ai.models['openai:primary'].generateText({
       prompt,
     })
 
@@ -95,7 +95,7 @@ export const supportAgent = new AgentBuilder({
 What `.useSkills([...])` means:
 
 - these are the only skill names this agent may access
-- `context.skills` is scoped to those names
+- `context.ai.skills` is scoped to those names
 - runtime provisioning must provide those names
 
 What it does not mean:
@@ -180,7 +180,7 @@ Once the instance is created, the handler can load only its declared skills.
 ### Common path: load everything declared
 
 ```ts
-const skills = await context.skills.loadAvailable()
+const skills = await context.ai.skills.loadAvailable()
 ```
 
 Use this when the agent should always see the full declared set.
@@ -188,7 +188,7 @@ Use this when the agent should always see the full declared set.
 ### Narrow within the declared set
 
 ```ts
-const skills = await context.skills.search({
+const skills = await context.ai.skills.search({
   queries: [payload.prompt],
   limit: 1,
 })
@@ -199,7 +199,7 @@ This searches only within the declared names from `.useSkills([...])`.
 ### Load references when needed
 
 ```ts
-const references = await context.skills.loadReferences('support-workflow')
+const references = await context.ai.skills.loadReferences('support-workflow')
 ```
 
 ### Render for prompts
@@ -207,8 +207,8 @@ const references = await context.skills.loadReferences('support-workflow')
 ```ts
 import { renderSkillDocuments, renderSkillReferences } from '@purista/ai'
 
-const skills = await context.skills.loadAvailable()
-const references = await context.skills.loadReferences('support-workflow')
+const skills = await context.ai.skills.loadAvailable()
+const references = await context.ai.skills.loadReferences('support-workflow')
 
 const prompt = [
   renderSkillDocuments('Relevant skills', skills),
@@ -256,9 +256,9 @@ skills: {
 ### Use them in the handler
 
 ```ts
-const skills = await context.skills.loadAvailable()
-const answer = await context.models['openai:primary'].generateText({
-  developerInstruction: context.resources.supportPolicy.developerInstruction,
+const skills = await context.ai.skills.loadAvailable()
+const answer = await context.ai.models['openai:primary'].generateText({
+  developerInstruction: context.app.resources.supportPolicy.developerInstruction,
   prompt: [payload.prompt, ...skills.map(skill => skill.content)].join('\n\n'),
 })
 ```
@@ -300,21 +300,21 @@ When a model provider such as `AiSdkProvider` owns the external tool loop, keep 
 3. let the provider translate them
 
 ```ts
-const skills = await context.skills.loadAvailable()
-const references = await context.skills.loadReferences('support-workflow')
+const skills = await context.ai.skills.loadAvailable()
+const references = await context.ai.skills.loadReferences('support-workflow')
 
-const answer = await context.models['openai:primary'].generateText({
+const answer = await context.ai.models['openai:primary'].generateText({
   developerInstruction: 'Use the support workflow before answering.',
   skills,
   references,
   prompt: payload.prompt,
-  bindings: context.expose.tools({
+  bindings: context.invoke.expose.tools({
     commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
   }),
 })
 ```
 
-The provider consumes the skills, but it does not replace the PURISTA lifecycle. The concrete provider is bound at `getInstance(...)`, not inside the handler. The handler still only depends on `context.models['alias']`, so swapping adapters later should not require handler changes.
+The provider consumes the skills, but it does not replace the PURISTA lifecycle. The concrete provider is bound at `getInstance(...)`, not inside the handler. The handler still only depends on `context.ai.models['alias']`, so swapping adapters later should not require handler changes.
 
 ## Decision Rules
 
@@ -327,7 +327,7 @@ The provider consumes the skills, but it does not replace the PURISTA lifecycle.
 ## Common Mistakes
 
 - Thinking `.useSkills([...])` provides the skills by itself.
-- Treating `context.skills` as a global registry.
+- Treating `context.ai.skills` as a global registry.
 - Using filesystem catalogs when inline typed skills would be simpler.
 - Adding sandbox to agents that only need text skills.
 

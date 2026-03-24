@@ -22,6 +22,11 @@ export const getArtifactFrames = (envelopes: AgentProtocolEnvelope[]) =>
 		(frame): frame is Extract<AgentProtocolFrame, { kind: 'artifact' }> => frame.kind === 'artifact',
 	)
 
+export const getErrorFrames = (envelopes: AgentProtocolEnvelope[]) =>
+	getFrames(envelopes).filter(
+		(frame): frame is Extract<AgentProtocolFrame, { kind: 'error' }> => frame.kind === 'error',
+	)
+
 export const getTelemetryFrames = (envelopes: AgentProtocolEnvelope[]) =>
 	getFrames(envelopes).filter(
 		(frame): frame is Extract<AgentProtocolFrame, { kind: 'telemetry' }> => frame.kind === 'telemetry',
@@ -32,3 +37,9 @@ export const getRunStateArtifacts = (envelopes: AgentProtocolEnvelope[]) =>
 
 export const getToolOutputs = (envelopes: AgentProtocolEnvelope[], toolName: string) =>
 	getToolFrames(envelopes).filter(frame => frame.toolName === toolName)
+
+export const getArtifactIds = (envelopes: AgentProtocolEnvelope[]) =>
+	getArtifactFrames(envelopes).map(frame => frame.artifactId)
+
+export const getToolNames = (envelopes: AgentProtocolEnvelope[]) =>
+	getToolFrames(envelopes).map(frame => frame.toolName)

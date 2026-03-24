@@ -9,6 +9,12 @@ export const supportAgentInputSchema = extendApi(
 			message: extendApi(z.string().min(1).optional(), { title: 'Agent protocol compatible message field' }),
 			context: extendApi(z.string().optional(), { title: 'Optional extra context' }),
 			responseFormat: extendApi(z.enum(['text', 'json']).optional(), { title: 'Preferred response format' }),
+			qualityProfile: extendApi(z.enum(['quick', 'standard', 'synthesis']).optional(), {
+				title: 'Execution depth and quality profile',
+			}),
+			requireApproval: extendApi(z.boolean().optional(), {
+				title: 'Require approval before sending the final answer',
+			}),
 			conversationId: extendApi(z.string().optional(), { title: 'Optional conversation id for compatibility' }),
 			history: extendApi(z.array(z.unknown()).optional(), { title: 'Optional conversation history' }),
 			attachments: extendApi(z.array(z.unknown()).optional(), { title: 'Optional attachments' }),

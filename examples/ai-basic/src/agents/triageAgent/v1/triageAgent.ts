@@ -20,13 +20,13 @@ export const triageAgent = new AgentBuilder({
 	.setExecutionMode('inline')
 	.persistConversation('agent', { maxFrames: 10 })
 	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
-		const model = context.models['openai:gpt-4o-mini']
+		const model = context.ai.models['openai:gpt-4o-mini']
 		const generateJson = model.generateJson
 		if (typeof generateJson !== 'function') {
 			throw new Error('Configured triage model does not support JSON generation')
 		}
 
-		context.stream.sendChunk('Escalation check in progress...')
+		context.io.stream.sendChunk('Escalation check in progress...')
 		const result = await generateJson<z.infer<typeof triageJsonSchema>>({
 			prompt: `Classify this request urgency and produce JSON with urgency, explanation, and nextSteps: ${payload.prompt}`,
 			schema: triageJsonSchema,
@@ -38,7 +38,7 @@ export const triageAgent = new AgentBuilder({
 		})
 
 		const answer = `**Urgency Classification:** ${result.data.urgency}\n\n**Explanation:** ${result.data.explanation}\n\n**Next Steps:** ${result.data.nextSteps}`
-		context.stream.sendFinal(answer)
+		context.io.stream.sendFinal(answer)
 		return {
 			message: answer,
 		}

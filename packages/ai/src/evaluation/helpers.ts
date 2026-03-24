@@ -1,5 +1,6 @@
 import type { Schema } from '@purista/core'
 import { validate } from '@purista/core'
+import type { TrajectoryEvaluationResult } from '../testing/trajectory.js'
 
 /**
  * Individual test case captured inside an evaluation run.
@@ -11,6 +12,7 @@ export type EvaluationSample = {
 	success?: boolean
 	durationMs?: number
 	tokens?: number
+	trajectory?: TrajectoryEvaluationResult
 }
 
 /**

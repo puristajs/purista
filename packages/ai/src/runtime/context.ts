@@ -12,7 +12,7 @@ import type {
 	StreamFunctionContext,
 	StreamInvokeList,
 } from '@purista/core'
-import { HandledError, StatusCode, validate } from '@purista/core'
+import { HandledError, PuristaSpanTag, StatusCode, validate } from '@purista/core'
 
 import { createExposeHelpers, type ExposeHelpers } from '../bridge/externalRuntime.js'
 import type {
@@ -48,8 +48,12 @@ import type {
 	SkillSearchInput,
 } from '../skills/fileSystem.js'
 import type { AgentManifest, AgentSkillConfig, AllowedToolDefinition } from '../types/AgentManifest.js'
+import { type AgentApprovalHelpers, createAgentApprovalHelpers } from './approvals.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
+import type { AgentExecutionBudget } from './executionBudget.js'
 import { invokeAgent } from './invokeAgent.js'
+import { type AgentPolicyHelpers, createAgentPolicyHelpers } from './policy.js'
+import { type AgentReflectionHelpers, createAgentReflectionHelpers } from './reflection.js'
 import { type AgentRunStateHelpers, createAgentRunStateHelpers } from './runState.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
 import { withSessionIdInPayload } from './sessionPayload.js'
@@ -58,6 +62,25 @@ type ProtocolFrameEntry = {
 	frame: AgentProtocolFrame
 	envelope: AgentProtocolEnvelope
 }
+
+const withAiInvocationSpan = async <T>(
+	serviceContext: ProtocolContext<any, any, Record<string, unknown>, any, any>,
+	name: string,
+	attributes: Record<string, string | number | boolean | undefined>,
+	run: () => Promise<T>,
+) =>
+	await serviceContext.startActiveSpan(name, {}, undefined, async span => {
+		for (const [key, value] of Object.entries({
+			...attributes,
+			[PuristaSpanTag.PrincipalId]: serviceContext.message.principalId,
+			[PuristaSpanTag.TenantId]: serviceContext.message.tenantId,
+		})) {
+			if (value !== undefined) {
+				span.setAttribute(key, value)
+			}
+		}
+		return await run()
+	})
 
 export type ProtocolEmitter = {
 	emitMessage(
@@ -327,6 +350,7 @@ const createToolInvoker = (
 	serviceContext: ProtocolContext<any, any, Record<string, unknown>, any, any>,
 	tools: AllowedToolDefinition[],
 	protocol: ProtocolEmitter,
+	executionBudget?: AgentExecutionBudget,
 ): ToolInvoker => {
 	type ServiceInvokeMap = Record<
 		string,
@@ -374,16 +398,30 @@ const createToolInvoker = (
 				`Command ${tool.commandName} not available on service ${tool.serviceName} v${tool.serviceVersion}`,
 			)
 		}
-		try {
-			emitStatus(tool, 'invoked', payload)
-			const result = await commandFn(payload, parameter ?? {})
-			emitStatus(tool, 'success', payload, result)
-			return result
-		} catch (error) {
-			const handled = error instanceof HandledError
-			emitStatus(tool, 'error', payload, undefined, handled ? String(error.errorCode) : 'UnhandledError')
-			throw error
-		}
+		return await withAiInvocationSpan(
+			serviceContext,
+			`ai.tool_call:${tool.serviceName}/${tool.commandName}`,
+			{
+				'purista.ai.tool_name': `${tool.serviceName}.${tool.serviceVersion}.${tool.commandName}`,
+				'purista.ai.tool_kind': 'command',
+			},
+			async () => {
+				try {
+					executionBudget?.consumeToolCall({
+						toolName: `${tool.serviceName}.${tool.serviceVersion}.${tool.commandName}`,
+						kind: 'tool',
+					})
+					emitStatus(tool, 'invoked', payload)
+					const result = await commandFn(payload, parameter ?? {})
+					emitStatus(tool, 'success', payload, result)
+					return result
+				} catch (error) {
+					const handled = error instanceof HandledError
+					emitStatus(tool, 'error', payload, undefined, handled ? String(error.errorCode) : 'UnhandledError')
+					throw error
+				}
+			},
+		)
 	}
 
 	const getAllowedTool = (serviceName: string, serviceVersion: string, commandName: string) => {
@@ -529,73 +567,94 @@ export type AgentHandlerContext<
 	EmitPayloads extends Record<string, unknown> = EmptyObject,
 > = {
 	logger: Logger
-	payload: Payload
-	parameter: Parameter
-	message: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['message']
-	emit: EmitCustomMessageFunction<EmitPayloads>
-	conversation: ConversationHelpers
-	session: SessionHelpers
-	stream: AgentStreamEmitter
-	protocol: ProtocolEmitter
-	tools: ToolInvoker
-	expose: ExposeHelpers
-	skills: {
-		available: boolean
-		names: string[]
-		config?: AgentSkillConfig
-		list(): Promise<SkillMetadata[]>
-		loadAvailable(): Promise<SkillDocument[]>
-		load(skillName: string): Promise<SkillDocument>
-		loadMany(skillNames: string[]): Promise<SkillDocument[]>
-		loadReferences(skillName: string): Promise<SkillReferenceDocument[]>
-		search(input?: SkillSearchInput): Promise<SkillDocument[]>
+	input: {
+		payload: Payload
+		parameter: Parameter
+		message: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['message']
 	}
-	resources: Resources
-	models: Models
-	agents: {
-		/**
-		 * Invokes another agent via EventBridge and returns its emitted envelopes.
-		 * Supports both direct options-based calls and typed chained access:
-		 * `context.agents.invoke({ agentName, agentVersion, payload })`
-		 * and `context.agents.invoke.someAgent['1'].call(payload, parameter)`.
-		 */
-		invoke: AgentInvokes & ((options: AgentInvocationOptions) => Promise<AgentProtocolEnvelope[]>)
-		/**
-		 * Invokes another agent and extracts a best-effort assistant text output from message frames.
-		 */
-		runText(options: AgentInvocationOptions): Promise<string>
-		/**
-		 * Invokes another agent and forwards its live output into the current stream.
-		 * Defaults to forwarding assistant text, reasoning, artifacts, and errors while suppressing
-		 * synthetic outer `agent.run` tool telemetry.
-		 */
-		forward(options: AgentForwardInvocationOptions): Promise<AgentProtocolEnvelope[]>
-		/**
-		 * Invokes another agent and parses the final assistant message as JSON.
-		 */
-		runObject<T = unknown>(options: AgentInvocationOptions): Promise<T>
+	output: {
+		emit: EmitCustomMessageFunction<EmitPayloads>
 	}
-	embeddings: {
-		[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
-			name: string
-			embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
-			embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
+	memory: {
+		conversation: ConversationHelpers
+		session: SessionHelpers
+		run: AgentRunStateHelpers
+	}
+	invoke: {
+		tools: ToolInvoker
+		expose: ExposeHelpers
+		agents: {
+			/**
+			 * Invokes another agent via EventBridge and returns its emitted envelopes.
+			 * Supports both direct options-based calls and typed chained access:
+			 * `context.invoke.agents.invoke({ agentName, agentVersion, payload })`
+			 * and `context.invoke.agents.invoke.someAgent['1'].call(payload, parameter)`.
+			 */
+			invoke: AgentInvokes & ((options: AgentInvocationOptions) => Promise<AgentProtocolEnvelope[]>)
+			/**
+			 * Invokes another agent and extracts a best-effort assistant text output from message frames.
+			 */
+			runText(options: AgentInvocationOptions): Promise<string>
+			/**
+			 * Invokes another agent and forwards its live output into the current stream.
+			 * Defaults to forwarding assistant text, reasoning, artifacts, and errors while suppressing
+			 * synthetic outer `agent.run` tool telemetry.
+			 */
+			forward(options: AgentForwardInvocationOptions): Promise<AgentProtocolEnvelope[]>
+			/**
+			 * Invokes another agent and parses the final assistant message as JSON.
+			 */
+			runObject<T = unknown>(options: AgentInvocationOptions): Promise<T>
 		}
 	}
-	rerankers: {
-		[Alias in keyof Models as Models[Alias] extends { rerank: (...args: any[]) => any } ? Alias : never]: {
-			name: string
-			rerank<Document = string | Record<string, unknown>>(
-				request: ProviderRerankRequest<Document>,
-			): Promise<ProviderRerankResponse<Document>>
+	ai: {
+		models: Models
+		embeddings: {
+			[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
+				name: string
+				embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
+				embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
+			}
 		}
+		rerankers: {
+			[Alias in keyof Models as Models[Alias] extends { rerank: (...args: any[]) => any } ? Alias : never]: {
+				name: string
+				rerank<Document = string | Record<string, unknown>>(
+					request: ProviderRerankRequest<Document>,
+				): Promise<ProviderRerankResponse<Document>>
+			}
+		}
+		skills: {
+			available: boolean
+			names: string[]
+			config?: AgentSkillConfig
+			list(): Promise<SkillMetadata[]>
+			loadAvailable(): Promise<SkillDocument[]>
+			load(skillName: string): Promise<SkillDocument>
+			loadMany(skillNames: string[]): Promise<SkillDocument[]>
+			loadReferences(skillName: string): Promise<SkillReferenceDocument[]>
+			search(input?: SkillSearchInput): Promise<SkillDocument[]>
+		}
+		policy: AgentPolicyHelpers
+		reflect: AgentReflectionHelpers
 	}
-	serviceContext: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>
-	secrets: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['secrets']
-	configs: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['configs']
-	states: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['states']
-	runState: AgentRunStateHelpers
-	manifest: AgentManifest
+	io: {
+		stream: AgentStreamEmitter
+		protocol: ProtocolEmitter
+	}
+	app: {
+		resources: Resources
+		manifest: AgentManifest
+	}
+	runtime: {
+		service: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>
+		stores: {
+			secrets: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['secrets']
+			configs: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['configs']
+			states: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, Record<string, Schema>>['states']
+		}
+		approvals: AgentApprovalHelpers
+	}
 }
 
 export type CreateAgentHandlerContextInput<
@@ -624,6 +683,7 @@ export type CreateAgentHandlerContextInput<
 		}
 	>
 	manifest: AgentManifest
+	executionBudget?: AgentExecutionBudget
 }
 
 export type AgentInvocationOptions = {
@@ -705,9 +765,125 @@ const createAgentInvocationHelpers = <
 	serviceContext: ProtocolContext<Payload, Parameter, Resources, AgentInvokes, EmitList>
 	session: SessionHelpers
 	manifest: AgentManifest
+	executionBudget?: AgentExecutionBudget
 }) => {
+	const createDirectBindingInvocation = (
+		agentName: string,
+		agentVersion: string,
+		payload: unknown,
+		parameter: unknown,
+	) => {
+		let resolveNext: ((result: IteratorResult<AgentProtocolEnvelope>) => void) | undefined
+		let rejectNext: ((error: unknown) => void) | undefined
+		const bufferedValues: AgentProtocolEnvelope[] = []
+		let iteratorDone = false
+		let iteratorError: unknown
+
+		const emitValue = (value: AgentProtocolEnvelope) => {
+			if (iteratorDone) {
+				return
+			}
+			if (resolveNext) {
+				const resolve = resolveNext
+				resolveNext = undefined
+				rejectNext = undefined
+				resolve({
+					value,
+					done: false,
+				})
+				return
+			}
+			bufferedValues.push(value)
+		}
+
+		const emitDone = () => {
+			if (iteratorDone) {
+				return
+			}
+			iteratorDone = true
+			if (resolveNext) {
+				const resolve = resolveNext
+				resolveNext = undefined
+				rejectNext = undefined
+				resolve({
+					value: undefined,
+					done: true,
+				})
+			}
+		}
+
+		const emitError = (error: unknown) => {
+			iteratorError = error
+			if (rejectNext) {
+				const reject = rejectNext
+				resolveNext = undefined
+				rejectNext = undefined
+				reject(error)
+			}
+		}
+
+		const finalPromise = invokeAgent({
+			eventBridge: input.eventBridge,
+			agentName,
+			agentVersion,
+			payload,
+			parameter,
+			traceId: input.serviceContext.message.traceId,
+			correlationId: input.serviceContext.message.correlationId,
+			principalId: input.serviceContext.message.principalId,
+			tenantId: input.serviceContext.message.tenantId,
+			sessionId: input.session.identity.baseSessionId,
+			failOnErrorFrame: true,
+			stream: {
+				onFrame: async envelope => {
+					emitValue(envelope)
+				},
+				onComplete: () => {
+					emitDone()
+				},
+				onError: error => {
+					emitError(error)
+				},
+			},
+		})
+			.then(result => {
+				emitDone()
+				return result
+			})
+			.catch(error => {
+				emitError(error)
+				throw error
+			})
+
+		return {
+			final: async () => await finalPromise,
+			[Symbol.asyncIterator]: async function* () {
+				while (true) {
+					if (bufferedValues.length > 0) {
+						yield bufferedValues.shift() as AgentProtocolEnvelope
+						continue
+					}
+					if (iteratorError) {
+						throw iteratorError
+					}
+					if (iteratorDone) {
+						return
+					}
+					const next = await new Promise<IteratorResult<AgentProtocolEnvelope>>((resolve, reject) => {
+						resolveNext = resolve
+						rejectNext = reject
+					})
+					if (next.done) {
+						return
+					}
+					yield next.value
+				}
+			},
+		}
+	}
+
 	const resolveDeclaredBinding = (agentName: string, agentVersion: string): ResolvedAgentBinding => {
-		const allowed = input.manifest.allowedAgents?.some(
+		const allowed = input.manifest.allowedAgents?.find(
 			agent => agent.agentName === agentName && agent.agentVersion === agentVersion,
 		)
 		if (!allowed) {
@@ -721,16 +897,13 @@ const createAgentInvocationHelpers = <
 			Record<string, Record<string, DeclaredAgentBinding> | undefined>
 		const versionApi = invokeAgentApi[agentName]
 		const binding = versionApi?.[agentVersion]
-		if (!binding?.call) {
-			throw new HandledError(
-				StatusCode.BadRequest,
-				`Agent ${agentName}.${agentVersion} is declared but no invoke binding is available in the current context`,
-			)
-		}
 		return {
-			call: binding.call,
-			payloadSchema: binding.payloadSchema,
-			parameterSchema: binding.parameterSchema,
+			call:
+				binding?.call ??
+				((payload: unknown, parameter?: unknown) =>
+					createDirectBindingInvocation(agentName, agentVersion, payload, parameter ?? {})),
+			payloadSchema: binding?.payloadSchema ?? allowed.payloadSchema,
+			parameterSchema: binding?.parameterSchema ?? allowed.parameterSchema,
 		}
 	}
 
@@ -883,8 +1056,16 @@ const createAgentInvocationHelpers = <
 		if (options.emitInvocationToolEvents !== false) {
 			emitStatus(options, 'invoked')
 		}
-		const finalPromise = invocation
-			.final()
+		const finalPromise = withAiInvocationSpan(
+			input.serviceContext,
+			`ai.agent_invoke:${options.agentName}/${options.agentVersion}`,
+			{
+				'purista.ai.agent_name': options.agentName,
+				'purista.ai.agent_version': options.agentVersion,
+				'purista.ai.invocation_type': 'binding',
+			},
+			async () => await invocation.final(),
+		)
 			.then(result => {
 				const envelopes = Array.isArray(result) ? agentProtocolEnvelopeSchema.array().safeParse(result) : undefined
 				if (envelopes?.success && hasErrorEnvelope(envelopes.data)) {
@@ -930,48 +1111,64 @@ const createAgentInvocationHelpers = <
 		const payload = withSessionIdInPayload(options.payload, options.sessionId ?? input.session.identity.baseSessionId)
 		const parameter = options.parameter ?? {}
 		await validateInvocationInput(binding, payload, parameter)
+		input.executionBudget?.consumeToolCall({
+			toolName: `${options.agentName}.${options.agentVersion}.run`,
+			kind: 'agent',
+		})
 		if (options.emitInvocationToolEvents !== false) {
 			emitStatus(options, 'invoked')
 		}
-		try {
-			const forwardingResponder = options.forwardToCurrentStream
-				? createForwardingResponder(options.forwardToCurrentStream)
-				: undefined
-			const envelopes = await invokeAgent({
-				eventBridge: input.eventBridge,
-				agentName: options.agentName,
-				agentVersion: options.agentVersion,
-				payload,
-				parameter,
-				timeoutMs: options.timeoutMs,
-				stream: mergeStreamResponders(forwardingResponder, options.stream),
-				correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
-				principalId: input.serviceContext.message.principalId,
-				tenantId: input.serviceContext.message.tenantId,
-				sessionId: options.sessionId ?? input.session.identity.baseSessionId,
-				failOnErrorFrame: options.failOnErrorFrame ?? true,
-			})
-			if (hasErrorEnvelope(envelopes)) {
-				if (options.emitInvocationToolEvents !== false) {
-					emitStatus(options, 'error', envelopes, 'AgentErrorEnvelope')
+		return await withAiInvocationSpan(
+			input.serviceContext,
+			`ai.agent_invoke:${options.agentName}/${options.agentVersion}`,
+			{
+				'purista.ai.agent_name': options.agentName,
+				'purista.ai.agent_version': options.agentVersion,
+				'purista.ai.invocation_type': 'direct',
+			},
+			async () => {
+				try {
+					const forwardingResponder = options.forwardToCurrentStream
+						? createForwardingResponder(options.forwardToCurrentStream)
+						: undefined
+					const envelopes = await invokeAgent({
+						eventBridge: input.eventBridge,
+						agentName: options.agentName,
+						agentVersion: options.agentVersion,
+						payload,
+						parameter,
+						timeoutMs: options.timeoutMs,
+						stream: mergeStreamResponders(forwardingResponder, options.stream),
+						traceId: input.serviceContext.message.traceId,
+						correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
+						principalId: input.serviceContext.message.principalId,
+						tenantId: input.serviceContext.message.tenantId,
+						sessionId: options.sessionId ?? input.session.identity.baseSessionId,
+						failOnErrorFrame: options.failOnErrorFrame ?? true,
+					})
+					if (hasErrorEnvelope(envelopes)) {
+						if (options.emitInvocationToolEvents !== false) {
+							emitStatus(options, 'error', envelopes, 'AgentErrorEnvelope')
+						}
+					} else {
+						if (options.emitInvocationToolEvents !== false) {
+							emitStatus(options, 'success', envelopes)
+						}
+					}
+					return envelopes
+				} catch (error) {
+					if (options.emitInvocationToolEvents !== false) {
+						emitStatus(
+							options,
+							'error',
+							undefined,
+							error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+						)
+					}
+					throw error
 				}
-			} else {
-				if (options.emitInvocationToolEvents !== false) {
-					emitStatus(options, 'success', envelopes)
-				}
-			}
-			return envelopes
-		} catch (error) {
-			if (options.emitInvocationToolEvents !== false) {
-				emitStatus(
-					options,
-					'error',
-					undefined,
-					error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
-				)
-			}
-			throw error
-		}
+			},
+		)
 	}
 
 	const runText = async (options: Parameters<typeof invoke>[0]) => {
@@ -1046,7 +1243,13 @@ const createAgentInvocationHelpers = <
 										agentVersion: versionProp,
 										payload,
 									},
-									call(withSessionIdInPayload(payload, input.session.identity.baseSessionId), parameter ?? {}),
+									(() => {
+										input.executionBudget?.consumeToolCall({
+											toolName: `${prop}.${versionProp}.run`,
+											kind: 'agent',
+										})
+										return call(withSessionIdInPayload(payload, input.session.identity.baseSessionId), parameter ?? {})
+									})(),
 								),
 							payloadSchema: binding.payloadSchema,
 							parameterSchema: binding.parameterSchema,
@@ -1061,7 +1264,7 @@ const createAgentInvocationHelpers = <
 		Record<string, unknown>,
 		Record<string, ModelProvider>,
 		AgentInvokes
-	>['agents']['invoke']
+	>['invoke']['agents']['invoke']
 
 	return {
 		invoke: invokeProxy,
@@ -1157,63 +1360,117 @@ export const createAgentHandlerContext = <
 		manifest: input.manifest,
 		payload: input.payload,
 	})
-	const tools = createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol)
+	const tools = createToolInvoker(
+		input.serviceContext,
+		input.manifest.allowedTools ?? [],
+		input.protocol,
+		input.executionBudget,
+	)
+	const runState = createAgentRunStateHelpers({
+		states: input.serviceContext.states,
+		protocol: input.protocol,
+		manifest: input.manifest,
+		payload: input.payload,
+		message: input.serviceContext.message,
+	})
 	const agents = createAgentInvocationHelpers({
 		eventBridge: input.eventBridge,
 		protocol: input.protocol,
 		serviceContext: input.serviceContext,
 		session: sessionHelpers,
 		manifest: input.manifest,
+		executionBudget: input.executionBudget,
+	})
+	const policy = createAgentPolicyHelpers(input.manifest.agentPolicy, input.manifest.reflection)
+	const skills = createSkillHelpers(input.resources, input.manifest)
+	const stream = createStreamEmitter(input.protocol)
+	const expose = createExposeHelpers({
+		app: {
+			manifest: input.manifest,
+		},
+		invoke: {
+			tools,
+			agents,
+		},
+		io: {
+			protocol: input.protocol,
+		},
+	})
+	const reflect = createAgentReflectionHelpers({
+		protocol: input.protocol,
+		runState,
+		policy,
+		reflectionPolicy: input.manifest.reflection,
+		serviceContext: input.serviceContext,
+	})
+	const approvals = createAgentApprovalHelpers({
+		states: input.serviceContext.states,
+		runState,
+		protocol: input.protocol,
+		approvalPolicy: input.manifest.agentPolicy?.approvals,
+		agentName: input.manifest.agentName,
+		agentVersion: input.manifest.agentVersion,
+		serviceContext: input.serviceContext,
 	})
 
 	return {
 		logger: input.serviceContext.logger,
-		payload: input.payload,
-		parameter: input.parameter,
-		message: input.serviceContext.message,
-		emit: input.serviceContext.emit.bind(input.serviceContext) as EmitCustomMessageFunction<EmitPayloads>,
-		session: sessionHelpers,
-		conversation: createConversationHelpers(sessionHelpers, input.manifest),
-		stream: createStreamEmitter(input.protocol),
-		protocol: input.protocol,
-		tools,
-		expose: createExposeHelpers({
-			manifest: input.manifest,
-			tools,
-			agents,
-			protocol: input.protocol,
-		}),
-		skills: createSkillHelpers(input.resources, input.manifest),
-		resources: input.resources,
-		models: input.models,
-		agents,
-		embeddings: input.embeddings as AgentHandlerContext<
-			Payload,
-			Parameter,
-			Resources,
-			Models,
-			AgentInvokes,
-			EmitPayloads
-		>['embeddings'],
-		rerankers: input.rerankers as AgentHandlerContext<
-			Payload,
-			Parameter,
-			Resources,
-			Models,
-			AgentInvokes,
-			EmitPayloads
-		>['rerankers'],
-		serviceContext: input.serviceContext,
-		secrets: input.serviceContext.secrets,
-		configs: input.serviceContext.configs,
-		states: input.serviceContext.states,
-		runState: createAgentRunStateHelpers({
-			states: input.serviceContext.states,
-			protocol: input.protocol,
-			manifest: input.manifest,
+		input: {
 			payload: input.payload,
+			parameter: input.parameter,
 			message: input.serviceContext.message,
-		}),
-		manifest: input.manifest,
+		},
+		output: {
+			emit: input.serviceContext.emit.bind(input.serviceContext) as EmitCustomMessageFunction<EmitPayloads>,
+		},
+		memory: {
+			session: sessionHelpers,
+			conversation: createConversationHelpers(sessionHelpers, input.manifest),
+			run: runState,
+		},
+		invoke: {
+			tools,
+			expose,
+			agents,
+		},
+		ai: {
+			models: input.models,
+			embeddings: input.embeddings as AgentHandlerContext<
+				Payload,
+				Parameter,
+				Resources,
+				Models,
+				AgentInvokes,
+				EmitPayloads
+			>['ai']['embeddings'],
+			rerankers: input.rerankers as AgentHandlerContext<
+				Payload,
+				Parameter,
+				Resources,
+				Models,
+				AgentInvokes,
+				EmitPayloads
+			>['ai']['rerankers'],
+			skills,
+			policy,
+			reflect,
+		},
+		io: {
+			stream,
+			protocol: input.protocol,
+		},
+		app: {
+			resources: input.resources,
+			manifest: input.manifest,
+		},
+		runtime: {
+			service: input.serviceContext,
+			stores: {
+				secrets: input.serviceContext.secrets,
+				configs: input.serviceContext.configs,
+				states: input.serviceContext.states,
+			},
+			approvals,
+		},
 	}
 }
