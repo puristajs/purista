@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
-import { createAiSdkRequest, toAiSdkTool, toAiSdkTools } from './aiSdk.js'
+import { createAiSdkRequest, toAiSdkTool, toAiSdkToolName, toAiSdkTools } from './aiSdk.js'
 import {
 	createAgentBinding,
 	createBindingsMetadata,
@@ -242,7 +242,7 @@ describe('external runtime bindings', () => {
 
 		expect(binding.resultMode).toBe('object')
 		expect(aiSdkTool.externalRuntime?.descriptor.bindingName).toBe('reportAgent.1.run')
-		expect(toolSet['reportAgent.1.run']).toBeDefined()
+		expect(toolSet['reportAgent_1_run']).toBeDefined()
 		expect(await aiSdkTool.execute?.({ id: '42' }, {} as never)).toEqual({ id: '42' })
 	})
 
@@ -436,6 +436,34 @@ describe('external runtime bindings', () => {
 		expect(() => toAiSdkTools([first, second])).toThrow('Duplicate AI SDK tool name "shared"')
 	})
 
+	it('sanitizes dotted binding names into provider-safe AI SDK tool names', () => {
+		expect(toAiSdkToolName('support.1.lookupFaq')).toBe('support_1_lookupFaq')
+		expect(toAiSdkToolName('architectureAgent.1.run')).toBe('architectureAgent_1_run')
+	})
+
+	it('rejects duplicate AI SDK tool names after sanitization', () => {
+		const first = createCommandBinding({
+			command: {
+				serviceName: 'support',
+				serviceVersion: '1',
+				commandName: 'lookupFaq',
+			},
+			name: 'support.1.lookupFaq',
+			execute: async () => 'ok',
+		})
+		const second = createCommandBinding({
+			command: {
+				serviceName: 'support',
+				serviceVersion: '1',
+				commandName: 'lookupFaqV2',
+			},
+			name: 'support_1_lookupFaq',
+			execute: async () => 'ok',
+		})
+
+		expect(() => toAiSdkTools([first, second])).toThrow('Duplicate AI SDK tool name "support_1_lookupFaq"')
+	})
+
 	it('builds AI SDK requests with rendered skills and explicit tool bindings', () => {
 		const bindings = createExternalBindings({
 			commands: [
@@ -463,13 +491,13 @@ describe('external runtime bindings', () => {
 		expect(request.prompt).toContain('Relevant skills')
 		expect(request.prompt).toContain('spec-elicitation')
 		expect(request.prompt).toContain('Customer prompt: design a support workflow')
-		expect((request.metadata?.aiSdk as { tools?: Record<string, unknown>; toolChoice?: string }).toolChoice).toBe(
-			'required',
-		)
-		expect(Object.keys((request.metadata?.aiSdk as { tools: Record<string, unknown> }).tools)).toEqual([
-			'support.1.lookupFaq',
-		])
-	})
+			expect((request.metadata?.aiSdk as { tools?: Record<string, unknown>; toolChoice?: string }).toolChoice).toBe(
+				'required',
+			)
+			expect(Object.keys((request.metadata?.aiSdk as { tools: Record<string, unknown> }).tools)).toEqual([
+				'support_1_lookupFaq',
+			])
+		})
 
 	it('merges existing AI SDK metadata with rendered binding metadata', () => {
 		const request = createAiSdkRequest({

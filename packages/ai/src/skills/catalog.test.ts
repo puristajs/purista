@@ -149,7 +149,7 @@ describe('canonical PURISTA skill catalog', () => {
 		await expect(reads('purista-service-builder')).resolves.toContain('addCommandDefinition')
 		await expect(reads('purista-command-builder')).resolves.toContain('getCommandBuilder')
 		await expect(reads('purista-queue-builder')).resolves.toContain('setQueueBridgeConfig')
-		await expect(reads('purista-agent-runtime')).resolves.toContain('context.expose')
+		await expect(reads('purista-agent-runtime')).resolves.toContain('context.invoke.expose')
 		await expect(reads('purista-agent-testing')).resolves.toContain('createAgentTestHarness')
 		await expect(reads('purista-sandbox')).resolves.toContain('scope')
 		await expect(reads('purista-resources')).resolves.toContain('defineResource')

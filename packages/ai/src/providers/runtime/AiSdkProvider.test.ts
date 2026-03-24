@@ -312,14 +312,14 @@ describe('AiSdkProvider', () => {
 			},
 		})
 
-		expect(generateTextMock).toHaveBeenCalledWith(
-			expect.objectContaining({
-				prompt: expect.stringContaining('spec-elicitation'),
-				tools: expect.objectContaining({
-					'support.1.lookupFaq': expect.any(Object),
-				}),
-				toolChoice: 'required',
-				system: expect.arrayContaining([
+			expect(generateTextMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					prompt: expect.stringContaining('spec-elicitation'),
+					tools: expect.objectContaining({
+						support_1_lookupFaq: expect.any(Object),
+					}),
+					toolChoice: 'required',
+					system: expect.arrayContaining([
 					expect.objectContaining({
 						content: 'Use tools before answering.',
 						providerOptions: { openai: { systemMessageMode: 'developer' } },

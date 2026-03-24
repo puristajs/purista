@@ -33,6 +33,11 @@ export type AiSdkRequest = {
 const toBindingArray = (input: ExternalBindingSet | ExternalBinding[]) =>
 	Array.isArray(input) ? input : Object.values(input)
 
+export const toAiSdkToolName = (bindingName: string) => {
+	const sanitized = bindingName.replace(/[^a-zA-Z0-9_-]/g, '_')
+	return sanitized.length > 0 ? sanitized : 'tool'
+}
+
 export const toAiSdkTool = (binding: ExternalBinding): AiSdkTool =>
 	Object.assign(
 		tool({
@@ -48,10 +53,11 @@ export const toAiSdkTool = (binding: ExternalBinding): AiSdkTool =>
 export const toAiSdkTools = (bindings: ExternalBindingSet | ExternalBinding[]): AiSdkToolSet => {
 	const result: AiSdkToolSet = {}
 	for (const binding of toBindingArray(bindings)) {
-		if (binding.name in result) {
-			throw new Error(`Duplicate AI SDK tool name "${binding.name}"`)
+		const toolName = toAiSdkToolName(binding.name)
+		if (toolName in result) {
+			throw new Error(`Duplicate AI SDK tool name "${toolName}"`)
 		}
-		result[binding.name] = toAiSdkTool(binding)
+		result[toolName] = toAiSdkTool(binding)
 	}
 	return result
 }

@@ -19,7 +19,7 @@ Resources belong to service or agent definition, but concrete resource objects a
 ## Builder lifecycle
 1. Declare a resource on the service builder with `defineResource<'name', Type>()`.
 2. Use builders derived from that service builder so handlers see typed resources in context.
-3. Implement handlers against `context.resources` or the relevant typed context surface.
+3. Implement handlers against `context.app.resources` or the relevant typed context surface.
 4. Pass concrete `resources` into `getInstance(...)`.
 
 ## Hard rules

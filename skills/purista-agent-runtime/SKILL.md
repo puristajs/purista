@@ -60,7 +60,7 @@ Agent runtime helpers are runtime composition surfaces, not magic prompt state. 
 ## Common mistakes / anti-patterns
 - Reintroducing a knowledgebase abstraction instead of resources and skills.
 - Storing workflow checkpoints in conversation history.
-- Building provider-specific tools directly inside the agent instead of using `context.expose`.
+- Building provider-specific tools directly inside the agent instead of using `context.invoke.expose`.
 - Teaching runtime helpers without explaining the builder declaration plus `getInstance(...)` wiring.
 
 ## How this connects to other PURISTA concepts
