@@ -1,3 +1,4 @@
+import { extractFinalAssistantText } from '../protocol/extract.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { AgentTerminalResult } from '../types/AgentDefinition.js'
 
@@ -16,11 +17,17 @@ const getFinalRunStateArtifact = (envelopes: AgentProtocolEnvelope[]) => {
 	return undefined
 }
 
-const getFinalAssistantFrame = (envelopes: AgentProtocolEnvelope[]) => {
+const getFinalAssistantSummary = (envelopes: AgentProtocolEnvelope[]) => {
 	for (let index = envelopes.length - 1; index >= 0; index -= 1) {
 		const frame = envelopes[index]?.frame
-		if (frame?.kind === 'message' && frame.role === 'assistant' && frame.final === true) {
-			return frame
+		if (
+			frame?.kind === 'message' &&
+			frame.role === 'assistant' &&
+			frame.final === true &&
+			typeof frame.summary === 'string' &&
+			frame.summary.trim().length > 0
+		) {
+			return frame.summary
 		}
 	}
 	return undefined
@@ -50,7 +57,6 @@ export const createAgentTerminalResult = (input: {
 	agentVersion: string
 }): AgentTerminalResult => {
 	const runState = getFinalRunStateArtifact(input.envelopes)
-	const finalAssistant = getFinalAssistantFrame(input.envelopes)
 	const usage = getLastTelemetryUsage(input.envelopes)
 
 	return {
@@ -58,14 +64,12 @@ export const createAgentTerminalResult = (input: {
 		finalMessage:
 			typeof runState?.finalMessage === 'string'
 				? runState.finalMessage
-				: typeof finalAssistant?.content === 'string'
-					? finalAssistant.content
-					: undefined,
+				: extractFinalAssistantText(input.envelopes) || undefined,
 		summary:
 			typeof runState?.summary === 'string'
 				? runState.summary
-				: typeof finalAssistant?.summary === 'string'
-					? finalAssistant.summary
+				: typeof getFinalAssistantSummary(input.envelopes) === 'string'
+					? getFinalAssistantSummary(input.envelopes)
 					: undefined,
 		usage: usage
 			? {

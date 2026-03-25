@@ -1,3 +1,4 @@
+import { extractFinalAssistantText } from '../protocol/extract.js'
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from '../protocol/types.js'
 
 export const getFrames = (envelopes: AgentProtocolEnvelope[]) => envelopes.map(envelope => envelope.frame)
@@ -7,12 +8,7 @@ export const getMessageFrames = (envelopes: AgentProtocolEnvelope[]) =>
 		(frame): frame is Extract<AgentProtocolFrame, { kind: 'message' }> => frame.kind === 'message',
 	)
 
-export const getFinalAssistantText = (envelopes: AgentProtocolEnvelope[]) =>
-	getMessageFrames(envelopes)
-		.filter(frame => frame.role === 'assistant')
-		.map(frame => frame.content)
-		.filter(Boolean)
-		.at(-1) ?? ''
+export const getFinalAssistantText = (envelopes: AgentProtocolEnvelope[]) => extractFinalAssistantText(envelopes)
 
 export const getToolFrames = (envelopes: AgentProtocolEnvelope[]) =>
 	getFrames(envelopes).filter((frame): frame is Extract<AgentProtocolFrame, { kind: 'tool' }> => frame.kind === 'tool')

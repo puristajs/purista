@@ -29,7 +29,7 @@ export const messageFrameSchema = extendApi(
 	z.object({
 		kind: z.literal('message'),
 		role: agentRoleSchema,
-		content: z.string().min(1),
+		content: z.string(),
 		summary: z.string().optional(),
 		partial: z.boolean().optional(),
 		final: z.boolean().optional(),

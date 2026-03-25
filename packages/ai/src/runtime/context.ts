@@ -29,6 +29,7 @@ import {
 	createMessageFrame,
 	createTelemetryFrame,
 	createToolEventFrame,
+	extractFinalAssistantText,
 } from '../protocol/index.js'
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from '../protocol/types.js'
 import type {
@@ -127,6 +128,8 @@ export type AgentProtocolBuffer = {
 }
 
 export type AgentStreamEmitter = {
+	sendTextDelta(content: string): void
+	endText(options?: { summary?: string }): void
 	sendChunk(content: string): void
 	sendFinal(content: string, options?: { summary?: string }): void
 	sendReasoning(content: string, options?: { artifactId?: string }): void
@@ -142,16 +145,19 @@ export type AgentStreamEmitter = {
 }
 
 const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => ({
-	sendChunk(content) {
+	sendTextDelta(content) {
 		if (content.length === 0) {
 			return
 		}
 		protocol.emitMessage({ content, partial: true, final: false })
 	},
+	endText(options) {
+		protocol.emitMessage({ content: '', summary: options?.summary, partial: false, final: true })
+	},
+	sendChunk(content) {
+		this.sendTextDelta(content)
+	},
 	sendFinal(content, options) {
-		if (content.length === 0) {
-			return
-		}
 		protocol.emitMessage({ content, summary: options?.summary, partial: false, final: true })
 	},
 	sendReasoning(content, options) {
@@ -1173,27 +1179,7 @@ const createAgentInvocationHelpers = <
 
 	const runText = async (options: Parameters<typeof invoke>[0]) => {
 		const envelopes = await invoke(options)
-		const assistantMessageFrames = envelopes
-			.map(envelope => envelope.frame)
-			.filter(
-				(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
-					frame.kind === 'message' && frame.role === 'assistant',
-			)
-		let finalMessage: string | undefined
-		for (let index = assistantMessageFrames.length - 1; index >= 0; index -= 1) {
-			const frame = assistantMessageFrames[index]
-			if (frame?.final === true) {
-				finalMessage = frame.content
-				break
-			}
-		}
-		if (typeof finalMessage === 'string' && finalMessage.trim().length > 0) {
-			return finalMessage
-		}
-		return assistantMessageFrames
-			.map(frame => frame.content)
-			.filter((content): content is string => typeof content === 'string' && content.length > 0)
-			.join('')
+		return extractFinalAssistantText(envelopes)
 	}
 
 	const runObject = async <T = unknown>(options: Parameters<typeof invoke>[0]): Promise<T> => {

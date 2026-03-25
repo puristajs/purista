@@ -236,7 +236,7 @@ export const toAiSdkStreamEvents = async function* (
 						},
 					}
 				} else {
-					if (!startedText) {
+					if (!startedText && envelope.frame.content.length > 0) {
 						yield {
 							event: 'data',
 							data: {
@@ -252,15 +252,33 @@ export const toAiSdkStreamEvents = async function* (
 						}
 						startedText = true
 					}
-					yield {
-						event: 'data',
-						data: {
-							type: 'text-delta',
-							id: textId,
-							delta: envelope.frame.content,
-						},
+					if (envelope.frame.content.length > 0) {
+						yield {
+							event: 'data',
+							data: {
+								type: 'text-delta',
+								id: textId,
+								delta: envelope.frame.content,
+							},
+						}
 					}
 					if (envelope.frame.final) {
+						if (!startedText) {
+							yield {
+								event: 'data',
+								data: {
+									type: 'start',
+								},
+							}
+							yield {
+								event: 'data',
+								data: {
+									type: 'text-start',
+									id: textId,
+								},
+							}
+							startedText = true
+						}
 						yield {
 							event: 'data',
 							data: {
@@ -678,36 +696,6 @@ export const toAiSdkStreamEvents = async function* (
 				data: {
 					type: 'reasoning-end',
 					id: reasoningId,
-				},
-			}
-		}
-		if (!startedText && finalText.length > 0) {
-			yield {
-				event: 'data',
-				data: {
-					type: 'start',
-				},
-			}
-			yield {
-				event: 'data',
-				data: {
-					type: 'text-start',
-					id: textId,
-				},
-			}
-			yield {
-				event: 'data',
-				data: {
-					type: 'text-delta',
-					id: textId,
-					delta: finalText,
-				},
-			}
-			yield {
-				event: 'data',
-				data: {
-					type: 'text-end',
-					id: textId,
 				},
 			}
 		}
