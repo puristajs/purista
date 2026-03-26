@@ -91,7 +91,7 @@ This is the central hub for AI-related functionality.
 
 - **`context.ai.models`**: Access model providers declared in the builder.
   ```ts
-  const answer = await context.ai.models['openai:primary'].generateText({ prompt });
+  const draft = await context.ai.models['openai:primary'].generateText({ prompt });
   ```
 - **`context.ai.reply`**: Stream public assistant replies through the current turn.
   ```ts

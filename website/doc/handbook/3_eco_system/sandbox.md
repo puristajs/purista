@@ -429,10 +429,6 @@ export const codingAgent = new AgentBuilder({
   .canInvoke('Sandbox', '1', 'writeFiles')
   .canInvoke('Sandbox', '1', 'destroySandbox')
   .setHandler(async function (context, payload) {
-    const model = context.models['openai:primary']
-    if (!model?.generateText) {
-      throw new Error('Model alias openai:primary is not configured')
-    }
     const ensured = await context.tools.invoke.Sandbox['1'].ensureSandbox({
       projectId: payload.projectId,
     })
@@ -459,13 +455,9 @@ export const codingAgent = new AgentBuilder({
         ].join('\n'),
       })
 
-      const answer = await model.generateText({
+      const answer = await context.ai.reply.generate({
+        model: 'openai:primary',
         prompt: payload.prompt,
-        onTextDelta: (delta) => {
-          if (delta.length > 0) {
-            context.stream.sendChunk(delta)
-          }
-        },
         metadata: {
           aiSdk: {
             tools: bashToolkit.tools,
@@ -475,7 +467,6 @@ export const codingAgent = new AgentBuilder({
         },
       })
 
-      context.stream.sendFinal(answer)
       return { message: answer }
     } finally {
       await context.tools.invoke.Sandbox['1'].destroySandbox({ sandboxId: ensured.sandboxId })

@@ -83,7 +83,8 @@ export const supportAgent = new AgentBuilder({
       payload.prompt,
     ].join('\n\n')
 
-    const answer = await context.ai.models['openai:primary'].generateText({
+    const answer = await context.ai.reply.generate({
+      model: 'openai:primary',
       prompt,
     })
 
@@ -219,6 +220,24 @@ const prompt = [
   .join('\n\n')
 ```
 
+If that prompt is producing the final public assistant reply, prefer:
+
+```ts
+const answer = await context.ai.reply.generate({
+  model: 'openai:primary',
+  prompt,
+})
+```
+
+If the prompt is only producing internal draft text for critique, reflection, or approval before publication, prefer:
+
+```ts
+const draft = await context.ai.reply.compose({
+  model: 'openai:primary',
+  prompt,
+})
+```
+
 ## End-To-End Example
 
 Here is the complete skill flow in one place.
@@ -257,7 +276,8 @@ skills: {
 
 ```ts
 const skills = await context.ai.skills.loadAvailable()
-const answer = await context.ai.models['openai:primary'].generateText({
+const answer = await context.ai.reply.generate({
+  model: 'openai:primary',
   developerInstruction: context.app.resources.supportPolicy.developerInstruction,
   prompt: [payload.prompt, ...skills.map(skill => skill.content)].join('\n\n'),
 })
@@ -303,7 +323,8 @@ When a model provider such as `AiSdkProvider` owns the external tool loop, keep 
 const skills = await context.ai.skills.loadAvailable()
 const references = await context.ai.skills.loadReferences('support-workflow')
 
-const answer = await context.ai.models['openai:primary'].generateText({
+const answer = await context.ai.reply.compose({
+  model: 'openai:primary',
   developerInstruction: 'Use the support workflow before answering.',
   skills,
   references,
