@@ -7,6 +7,7 @@ PURISTA AI runtime primitives for:
 - tool and child-agent bridging
 - conversation memory
 - structured JSON generation
+- provisional structured output streaming
 - multimodal input parts
 
 ## Multimodal input
@@ -81,3 +82,54 @@ For Voyage:
 - app-specific parsers stay outside the framework
 
 This keeps `@purista/ai` provider-neutral and extension-friendly.
+
+## Structured output streaming
+
+`@purista/ai` now supports provisional structured streaming alongside final structured JSON generation.
+
+Key surfaces:
+
+- `ModelProvider.streamObject?(request)`
+- `context.ai.models["alias"].streamObject(...)`
+- `context.io.stream.sendStructuredSection(...)`
+- `context.io.stream.endStructuredObject(...)`
+
+Design rules:
+
+- provisional section updates are for live UI only
+- final structured output remains the canonical, schema-validated result
+- streamed sections use replacement semantics by logical section key
+- providers may degrade safely to final-object-only behavior when native structured streaming is unavailable
+
+Example:
+
+```ts
+const stream = context.ai.models["openai:primary"].streamObject({
+  prompt: "Review the current specification for architecture readiness.",
+  schema: readinessSchema,
+  sections: (partial) => ({
+    summary: partial.summary,
+    blockingBusinessQuestions: partial.blockingBusinessQuestions,
+    assumptionsIfProceeding: partial.assumptionsIfProceeding,
+  }),
+})
+
+for await (const chunk of stream) {
+  if (chunk.type === "section") {
+    context.io.stream.sendStructuredSection({
+      streamId: "review:architecture",
+      section: chunk.section,
+      content: chunk.content,
+      source: "review-worker",
+    })
+  }
+}
+
+const final = await stream.final()
+context.io.stream.endStructuredObject({
+  streamId: "review:architecture",
+  data: final.data,
+})
+```
+
+This is intended for apps such as Voyage, where lower workers stream live structured progress while only the final deliverable is persisted into markdown truth or workflow state.

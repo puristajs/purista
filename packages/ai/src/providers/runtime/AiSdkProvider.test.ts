@@ -9,6 +9,7 @@ import { AiSdkProvider } from './AiSdkProvider.js'
 const generateTextMock = vi.fn()
 const generateObjectMock = vi.fn()
 const streamTextMock = vi.fn()
+const streamObjectMock = vi.fn()
 const embedMock = vi.fn()
 const embedManyMock = vi.fn()
 const rerankMock = vi.fn()
@@ -19,6 +20,7 @@ vi.mock('ai', () => ({
 	generateText: (...args: unknown[]) => generateTextMock(...args),
 	generateObject: (...args: unknown[]) => generateObjectMock(...args),
 	streamText: (...args: unknown[]) => streamTextMock(...args),
+	streamObject: (...args: unknown[]) => streamObjectMock(...args),
 	embed: (...args: unknown[]) => embedMock(...args),
 	embedMany: (...args: unknown[]) => embedManyMock(...args),
 	rerank: (...args: unknown[]) => rerankMock(...args),
@@ -33,6 +35,7 @@ describe('AiSdkProvider', () => {
 		generateTextMock.mockReset()
 		generateObjectMock.mockReset()
 		streamTextMock.mockReset()
+		streamObjectMock.mockReset()
 		embedMock.mockReset()
 		embedManyMock.mockReset()
 		rerankMock.mockReset()
@@ -290,6 +293,104 @@ describe('AiSdkProvider', () => {
 				],
 			}),
 		)
+	})
+
+	it('streams provisional object sections before the final structured object', async () => {
+		streamObjectMock.mockReturnValueOnce({
+			partialObjectStream: (async function* () {
+				yield {
+					summary: 'Ready to review',
+				}
+				yield {
+					summary: 'Ready to review',
+					blockers: ['Missing cancellation rule'],
+				}
+			})(),
+			usage: Promise.resolve({ inputTokens: 9, outputTokens: 3 }),
+			object: Promise.resolve({
+				summary: 'Ready to review',
+				blockers: ['Missing cancellation rule'],
+			}),
+			request: Promise.resolve({ id: 'request' }),
+			response: Promise.resolve({ id: 'response' }),
+			providerMetadata: Promise.resolve({ provider: 'mock' }),
+			warnings: Promise.resolve([]),
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const stream = provider.streamObject<{
+			summary?: string
+			blockers?: string[]
+		}>({
+			prompt: 'Review the current project',
+			schema: z.object({
+				summary: z.string().optional(),
+				blockers: z.array(z.string()).default([]),
+			}),
+			sections: partial => ({
+				summary: partial.summary,
+				blockers: partial.blockers,
+			}),
+		})
+
+		const chunks = []
+		for await (const chunk of stream) {
+			chunks.push(chunk)
+		}
+
+		expect(chunks).toEqual([
+			{ type: 'section', section: 'summary', content: 'Ready to review' },
+			{
+				type: 'section',
+				section: 'blockers',
+				content: ['Missing cancellation rule'],
+			},
+			expect.objectContaining({
+				type: 'final-object',
+				data: {
+					summary: 'Ready to review',
+					blockers: ['Missing cancellation rule'],
+				},
+			}),
+		])
+	})
+
+	it('falls back to generateJson when object streaming is unavailable', async () => {
+		streamObjectMock.mockRejectedValueOnce(new Error('no native object stream'))
+		generateObjectMock.mockResolvedValueOnce({
+			object: { summary: 'Fallback review' },
+			usage: {
+				inputTokens: 4,
+				outputTokens: 2,
+			},
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: { provider: 'mock' },
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const stream = provider.streamObject<{ summary?: string }>({
+			prompt: 'Review the current project',
+			schema: z.object({
+				summary: z.string().optional(),
+			}),
+			sections: partial => ({
+				summary: partial.summary,
+			}),
+		})
+
+		const chunks = []
+		for await (const chunk of stream) {
+			chunks.push(chunk)
+		}
+
+		expect(chunks).toEqual([
+			{ type: 'section', section: 'summary', content: 'Fallback review' },
+			expect.objectContaining({
+				type: 'final-object',
+				data: { summary: 'Fallback review' },
+			}),
+		])
 	})
 
 	it('wraps provider structured-output errors as UnhandledError', async () => {

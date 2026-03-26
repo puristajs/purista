@@ -9,6 +9,7 @@ import type {
 } from 'ai'
 import {
 	generateText as aiGenerateText,
+	streamObject as aiStreamObject,
 	embed,
 	embedMany,
 	generateObject,
@@ -29,6 +30,8 @@ import type {
 	ProviderInvocationPolicy,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
+	ProviderObjectStream,
+	ProviderObjectStreamRequest,
 	ProviderRequest,
 	ProviderRerankRequest,
 	ProviderRerankResponse,
@@ -194,6 +197,16 @@ const composeSystemMessages = (
 	}
 
 	return systemMessages.length > 0 ? systemMessages : undefined
+}
+
+const resolveObjectSections = <T>(
+	sections: ProviderObjectStreamRequest<T>['sections'],
+	partial: T,
+): Record<string, unknown | undefined> => {
+	if (!sections) {
+		return {}
+	}
+	return typeof sections === 'function' ? sections(partial) : sections
 }
 
 /**
@@ -609,6 +622,161 @@ export class AiSdkProvider implements ModelProvider {
 							type: 'error',
 							error: part.error,
 						}
+					}
+				}
+			},
+		}
+	}
+
+	streamObject<T = unknown>(request: ProviderObjectStreamRequest<T>): ProviderObjectStream<T> {
+		let finalResponsePromise: Promise<ProviderJsonResponse<T>> | undefined
+		let aiStreamPromise: Promise<Awaited<ReturnType<typeof aiStreamObject>>> | undefined
+
+		const resolveFallbackFinal = async () => {
+			finalResponsePromise ??= this.generateJson<T>(request)
+			return await finalResponsePromise
+		}
+
+		const resolveAiStream = async () => {
+			aiStreamPromise ??= runBoundedModelInvocation({
+				label: `${this.name}:streamObject`,
+				policy: this.getInvocationPolicy(request.metadata),
+				operation: async () => {
+					const metadataOverrides = this.getGenerateJsonOverrides(request.metadata)
+					const {
+						output: _ignoredOutput,
+						invocation: _ignoredInvocation,
+						...defaultsWithoutOutput
+					} = this.defaults as Record<string, unknown>
+					const { output: _ignoredOverrideOutput, ...metadataWithoutOutput } = metadataOverrides as Record<
+						string,
+						unknown
+					>
+					const compiledSchema = await compileProviderAiSdkSchema(request.schema)
+					const objectRequest = compiledSchema
+						? ({
+								schema: compiledSchema as never,
+							} as const)
+						: ({
+								output: 'no-schema' as const,
+							} as const)
+					const adaptedRequest = createAiSdkRequest({
+						prompt: request.prompt,
+						input: request.input,
+						attachments: request.attachments,
+						metadata: request.metadata,
+					})
+					const promptInput = adaptedRequest.messages
+						? {
+								messages: adaptedRequest.messages as ModelMessage[],
+							}
+						: {
+								prompt: adaptedRequest.prompt ?? '',
+							}
+					return aiStreamObject({
+						...defaultsWithoutOutput,
+						...metadataWithoutOutput,
+						model: this.model,
+						system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
+						...promptInput,
+						...objectRequest,
+						experimental_telemetry: {
+							isEnabled: true,
+							...(this.tracer ? { tracer: this.tracer } : {}),
+							...(defaultsWithoutOutput.experimental_telemetry ?? {}),
+							...(metadataOverrides.experimental_telemetry ?? {}),
+						},
+					})
+				},
+			})
+			return await aiStreamPromise
+		}
+
+		return {
+			async final() {
+				if (finalResponsePromise) {
+					return await finalResponsePromise
+				}
+				try {
+					const result = await resolveAiStream()
+					const [usage, object, requestMetadata, responseMetadata, providerMetadata, warnings] = await Promise.all([
+						result.usage,
+						result.object,
+						result.request,
+						result.response,
+						result.providerMetadata,
+						(result as { warnings?: Promise<unknown> | unknown }).warnings,
+					])
+					finalResponsePromise = Promise.resolve({
+						data: object as T,
+						text: JSON.stringify(object ?? {}),
+						tokens: {
+							prompt: usage?.inputTokens ?? 0,
+							completion: usage?.outputTokens ?? 0,
+						},
+						metadata: {
+							request: requestMetadata,
+							response: responseMetadata,
+							providerMetadata,
+							warnings,
+						},
+					})
+					return await finalResponsePromise
+				} catch {
+					return await resolveFallbackFinal()
+				}
+			},
+			async *[Symbol.asyncIterator]() {
+				try {
+					const result = await resolveAiStream()
+					const seen = new Map<string, string>()
+					for await (const partial of result.partialObjectStream) {
+						const sections = resolveObjectSections(request.sections, partial as T)
+						for (const [section, content] of Object.entries(sections)) {
+							if (content === undefined) {
+								continue
+							}
+							const fingerprint = JSON.stringify(content)
+							if (seen.get(section) === fingerprint) {
+								continue
+							}
+							seen.set(section, fingerprint)
+							yield {
+								type: 'section' as const,
+								section,
+								content,
+							}
+						}
+					}
+					const final = await this.final()
+					yield {
+						type: 'final-object' as const,
+						data: final.data,
+						text: final.text,
+						reasoningText: final.reasoningText,
+						tokens: final.tokens,
+						metadata: final.metadata,
+					}
+				} catch {
+					const final = await resolveFallbackFinal()
+					const sections = resolveObjectSections(request.sections, final.data)
+					for (const [section, content] of Object.entries(sections)) {
+						if (content === undefined) {
+							continue
+						}
+						yield {
+							type: 'section' as const,
+							section,
+							content,
+						}
+					}
+					yield {
+						type: 'final-object' as const,
+						data: final.data,
+						text: final.text,
+						reasoningText: final.reasoningText,
+						tokens: final.tokens,
+						metadata: final.metadata,
 					}
 				}
 			},

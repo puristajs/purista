@@ -141,6 +141,16 @@ export type AgentStreamEmitter = {
 		total?: number
 		final?: boolean
 	}): void
+	sendStructuredSection(input: {
+		streamId: string
+		section: string
+		content: unknown
+		order?: number
+		title?: string
+		summary?: string
+		source?: string
+	}): void
+	endStructuredObject(input: { streamId: string; data: unknown; summary?: string; source?: string }): void
 	sendError(error: unknown, overrides?: { code?: string; handled?: boolean }): void
 }
 
@@ -170,6 +180,39 @@ const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => (
 	},
 	sendArtifact(input) {
 		protocol.emitArtifact(input)
+	},
+	sendStructuredSection(input) {
+		protocol.emitArtifact({
+			artifactId: 'agent-structured-section',
+			mimeType: 'application/json',
+			content: {
+				streamId: input.streamId,
+				section: input.section,
+				content: input.content,
+				order: input.order,
+				title: input.title,
+				summary: input.summary,
+				source: input.source,
+				provisional: true,
+				updatedAt: new Date().toISOString(),
+			},
+			final: false,
+		})
+	},
+	endStructuredObject(input) {
+		protocol.emitArtifact({
+			artifactId: 'agent-structured-final',
+			mimeType: 'application/json',
+			content: {
+				streamId: input.streamId,
+				data: input.data,
+				summary: input.summary,
+				source: input.source,
+				provisional: false,
+				updatedAt: new Date().toISOString(),
+			},
+			final: true,
+		})
 	},
 	sendError(error, overrides) {
 		protocol.emitError(error, overrides)

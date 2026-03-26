@@ -29,7 +29,11 @@ import { toProtocolSseEvents } from '../protocol/sse.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import { agentProtocolEnvelopeSchema } from '../protocol/types.js'
 import { generateText } from '../providers/runtime/generateText.js'
-import type { ModelProvider, ProviderJsonRequest } from '../providers/runtime/ModelProvider.js'
+import type {
+	ModelProvider,
+	ProviderJsonRequest,
+	ProviderObjectStreamRequest,
+} from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
@@ -1896,6 +1900,87 @@ export class AgentBuilder<
 						}
 					}
 
+					if (provider.streamObject || provider.generateJson) {
+						modelApi.streamObject = <T = unknown>(request: ProviderObjectStreamRequest<T>) => {
+							const requestStartedAt = Date.now()
+							executionBudget.consumeModelStep({ alias, callKind: 'generateJson' })
+							let streamHandlePromise:
+								| Promise<import('../providers/runtime/ModelProvider.js').ProviderObjectStream<T>>
+								| undefined
+							const resolveStream = async () => {
+								streamHandlePromise ??= (async () => {
+									try {
+										const metadata = addAiSdkTelemetry(
+											await resolvePreparedMetadata({
+												alias,
+												callKind: 'generateJson',
+												requestMetadata: request.metadata,
+											}),
+											'generateJson',
+											alias,
+										)
+										if (provider.streamObject) {
+											const streamHandle = provider.streamObject<T>({
+												...request,
+												metadata,
+											})
+											if (!streamHandle) {
+												throw new HandledError(
+													StatusCode.InternalServerError,
+													'Model object stream provider unavailable',
+												)
+											}
+											return streamHandle as import('../providers/runtime/ModelProvider.js').ProviderObjectStream<T>
+										}
+
+										const fallbackFinal = await provider.generateJson?.<T>({
+											...request,
+											metadata,
+										})
+										if (!fallbackFinal) {
+											throw new HandledError(StatusCode.InternalServerError, 'Model JSON provider unavailable')
+										}
+										return {
+											final: async () => fallbackFinal,
+											async *[Symbol.asyncIterator]() {
+												yield {
+													type: 'final-object' as const,
+													data: fallbackFinal.data,
+													text: fallbackFinal.text,
+													reasoningText: fallbackFinal.reasoningText,
+													tokens: fallbackFinal.tokens,
+													metadata: fallbackFinal.metadata,
+												}
+											},
+										} satisfies import('../providers/runtime/ModelProvider.js').ProviderObjectStream<T>
+									} catch (error) {
+										logProviderFailure('generateJson', alias, provider.name, requestStartedAt, error)
+										throw error
+									}
+								})()
+								return await streamHandlePromise
+							}
+
+							return {
+								final: async () => {
+									const streamHandle = await resolveStream()
+									const result = await streamHandle.final()
+									logProviderWarnings('generateJson', alias, provider.name, result.metadata)
+									usage.provider = provider.name
+									usage.promptTokens += result.tokens?.prompt ?? 0
+									usage.completionTokens += result.tokens?.completion ?? 0
+									return result
+								},
+								async *[Symbol.asyncIterator]() {
+									const streamHandle = await resolveStream()
+									for await (const chunk of streamHandle) {
+										yield chunk
+									}
+								},
+							}
+						}
+					}
+
 					if (provider.embed) {
 						const embedProvider = provider.embed.bind(provider)
 						const embedManyProvider = provider.embedMany?.bind(provider)
@@ -2034,7 +2119,7 @@ export class AgentBuilder<
 						}
 					}
 
-					if (modelApi.generate || modelApi.stream) {
+					if (modelApi.generate || modelApi.stream || modelApi.streamObject) {
 						instrumentedModels[alias] = modelApi
 					}
 				}

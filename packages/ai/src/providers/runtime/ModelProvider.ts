@@ -77,6 +77,14 @@ export type ProviderJsonRequest = {
 	metadata?: Record<string, unknown>
 }
 
+export type ProviderObjectSections<T = unknown> =
+	| Record<string, unknown | undefined>
+	| ((partial: T) => Record<string, unknown | undefined>)
+
+export type ProviderObjectStreamRequest<T = unknown> = ProviderJsonRequest & {
+	sections?: ProviderObjectSections<T>
+}
+
 /**
  * Payload sent to embedding-capable providers.
  */
@@ -126,6 +134,44 @@ export type ProviderJsonResponse<T = unknown> = {
 		completion: number
 	}
 	metadata?: Record<string, unknown>
+}
+
+export type ProviderObjectSectionChunk = {
+	type: 'section'
+	section: string
+	content: unknown
+}
+
+export type ProviderObjectStatusChunk = {
+	type: 'status'
+	message: string
+}
+
+export type ProviderObjectFinalChunk<T = unknown> = {
+	type: 'final-object'
+	data: T
+	text: string
+	reasoningText?: string
+	tokens?: {
+		prompt: number
+		completion: number
+	}
+	metadata?: Record<string, unknown>
+}
+
+export type ProviderObjectErrorChunk = {
+	type: 'error'
+	error: unknown
+}
+
+export type ProviderObjectStreamChunk<T = unknown> =
+	| ProviderObjectSectionChunk
+	| ProviderObjectStatusChunk
+	| ProviderObjectFinalChunk<T>
+	| ProviderObjectErrorChunk
+
+export type ProviderObjectStream<T = unknown> = AsyncIterable<ProviderObjectStreamChunk<T>> & {
+	final(): Promise<ProviderJsonResponse<T>>
 }
 
 /**
@@ -233,6 +279,7 @@ export interface ModelProvider {
 	 */
 	generateText?(request: ProviderGenerateTextRequest): Promise<string>
 	generateJson?<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>>
+	streamObject?<T = unknown>(request: ProviderObjectStreamRequest<T>): ProviderObjectStream<T>
 	embed?(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
 	embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
 	rerank?<Document = string | Record<string, unknown>>(
