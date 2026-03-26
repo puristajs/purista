@@ -1,3 +1,10 @@
+/**
+ * Raw attachment reference supplied by the application layer.
+ *
+ * Keep storage/provider choices outside the framework. Applications may use
+ * hosted URLs, inline test data, or any other source they can normalize into
+ * this shape.
+ */
 export type AgentAttachmentSource =
 	| {
 			kind: 'url'
@@ -18,6 +25,14 @@ export type AgentAttachment = {
 	metadata?: Record<string, unknown>
 }
 
+/**
+ * Canonical normalized model input surface used across the runtime.
+ *
+ * Applications should convert higher-level uploads/documents into these parts
+ * before model invocation. For non-native formats such as PDF or Office files,
+ * use a file-ingestion adapter rather than adding parser logic directly to the
+ * framework runtime.
+ */
 export type AgentTextInputPart = {
 	type: 'text'
 	text: string

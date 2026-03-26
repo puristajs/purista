@@ -29,6 +29,9 @@ export type AgentExecutionOptions = {
 
 /**
  * Payload the executor receives whenever a run is initiated.
+ *
+ * For multimodal requests, keep `prompt` as the human-visible text task and
+ * pass files/images through `input` or `attachments`.
  */
 export type AgentExecutionInput = {
 	sessionId: string
@@ -70,6 +73,10 @@ export type AgentExecutionResult = {
  * const result = await executor.run({ sessionId: 'demo', prompt: 'Hello agent!' })
  * console.log(result.output)
  * ```
+ *
+ * The executor persists typed user parts into conversation history. It does not
+ * perform document extraction itself; applications should plug in that logic
+ * before invoking the executor.
  */
 export class AgentExecutor {
 	private readonly maxHistoryFrames = 50

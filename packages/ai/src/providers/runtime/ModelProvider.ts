@@ -5,6 +5,13 @@ import type { ModelInvocationPolicy, ModelInvocationRetryPolicy } from './modelI
 
 /**
  * Payload sent to a model provider.
+ *
+ * `prompt` remains the convenience field for pure text requests.
+ * `input` and `attachments` are the canonical multimodal surfaces.
+ *
+ * Applications should pass already-normalized parts into providers.
+ * File extraction itself belongs behind a file-ingestion adapter and is not
+ * built into the framework for PDF/Office formats.
  */
 export type ProviderRequest = {
 	prompt: string
@@ -56,6 +63,9 @@ export type ProviderGenerateTextRequest = ProviderRequest & {
  *
  * The runtime compiles Standard Schema or plain JSON Schema inputs into
  * provider-safe structured-output schemas before the request reaches the SDK.
+ *
+ * `input` and `attachments` follow the same multimodal rules as
+ * {@link ProviderRequest}.
  */
 export type ProviderJsonRequest = {
 	prompt: string

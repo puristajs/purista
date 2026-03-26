@@ -1,3 +1,11 @@
+/**
+ * Framework-level extension seam for turning raw file attachments into
+ * normalized runtime input parts.
+ *
+ * Important: the framework provides only the contract and orchestration hook.
+ * Concrete PDF, Office, OCR, or domain-specific document parsing belongs in
+ * application-provided ingestors.
+ */
 import type { AgentAttachment, AgentInputPart } from './types.js'
 import { attachmentToInputPart, isImageMediaType } from './types.js'
 
