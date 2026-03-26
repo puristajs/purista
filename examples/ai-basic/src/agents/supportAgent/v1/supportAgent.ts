@@ -312,6 +312,7 @@ export const supportAgent = new AgentBuilder({
 
 		try {
 			await run.update({ phase: 'summarizing', status: 'summarizing' })
+			let publishedReply = false
 			const answer = await run.step(
 				'answer',
 				async () => {
@@ -332,11 +333,22 @@ export const supportAgent = new AgentBuilder({
 							mimeType: 'application/json',
 							final: true,
 						})
-						await context.memory.conversation.addAssistant(jsonResult.data.answer)
 						return jsonResult.data.answer
 					}
 
-					let answer: string
+					if (!quality.reflection.enabled && !payload.requireApproval) {
+						context.io.stream.sendChunk('Generating final answer...')
+						publishedReply = true
+						return await context.ai.reply.generate({
+							model: 'openai:gpt-4o-mini',
+							prompt,
+							context: payload.context,
+							metadata: { aiSdk: { temperature: 0.2 } },
+							onReasoning: text => context.io.stream.sendReasoning(text),
+						})
+					}
+
+					let internalAnswer: string
 					if (quality.reflection.enabled) {
 						context.io.stream.sendChunk(`Running ${quality.name ?? 'synthesis'} reflection loop...`)
 						const reflection = await context.ai.reflect.run<string, z.infer<typeof answerCritiqueSchema>>({
@@ -373,23 +385,17 @@ export const supportAgent = new AgentBuilder({
 									].join('\n\n'),
 								),
 						})
-						answer = reflection.output
+						internalAnswer = reflection.output
 					} else {
 						context.io.stream.sendChunk('Generating final answer...')
-						answer = await model.generateText({
+						internalAnswer = await model.generateText({
 							prompt,
 							context: payload.context,
 							metadata: { aiSdk: { temperature: 0.2 } },
 							onReasoning: text => context.io.stream.sendReasoning(text),
-							onTextDelta: delta => {
-								if (delta.length > 0) {
-									context.io.stream.sendChunk(delta)
-								}
-							},
 						})
 					}
-					await context.memory.conversation.addAssistant(answer)
-					return answer
+					return internalAnswer
 				},
 				{ detail: 'Generating final answer', checkpoint: 'final-answer' },
 			)
@@ -402,9 +408,12 @@ export const supportAgent = new AgentBuilder({
 				})
 			}
 
+			if (!publishedReply) {
+				context.ai.reply.publish(answer)
+			}
+			await context.memory.conversation.addAssistant(answer)
 			await run.setFinalMessage(answer)
 			await run.finishSuccess(answer)
-			context.io.stream.sendFinal(answer)
 			return { message: answer }
 		} catch (error) {
 			await context.memory.conversation.revertLast({ role: 'user' })
