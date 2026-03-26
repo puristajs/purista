@@ -1,4 +1,5 @@
 import type { ExternalBinding, ExternalBindingSet } from '../../bridge/externalRuntime.js'
+import type { AgentAttachment, AgentInputPart } from '../../input/types.js'
 import type { SkillDocument, SkillReferenceDocument } from '../../skills/fileSystem.js'
 import type { ModelInvocationPolicy, ModelInvocationRetryPolicy } from './modelInvocation.js'
 
@@ -7,6 +8,8 @@ import type { ModelInvocationPolicy, ModelInvocationRetryPolicy } from './modelI
  */
 export type ProviderRequest = {
 	prompt: string
+	input?: AgentInputPart[]
+	attachments?: AgentAttachment[]
 	context?: string
 	/**
 	 * Optional high-priority app/developer instruction(s) injected on every call.
@@ -56,6 +59,8 @@ export type ProviderGenerateTextRequest = ProviderRequest & {
  */
 export type ProviderJsonRequest = {
 	prompt: string
+	input?: AgentInputPart[]
+	attachments?: AgentAttachment[]
 	context?: string
 	developerInstruction?: string | string[]
 	schema?: unknown

@@ -1,6 +1,8 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { Logger } from '@purista/core'
 import { PuristaSpanName } from '@purista/core'
+import type { AgentAttachment, AgentInputPart } from '../input/types.js'
+import { attachmentsToInputParts } from '../input/types.js'
 import type { ConversationStore, ConversationStoreScope } from '../memory/conversationStore.js'
 import type { ConversationHistory } from '../memory/historyHelpers.js'
 import { appendMessage, summarizeHistory, trimHistory } from '../memory/historyHelpers.js'
@@ -31,6 +33,8 @@ export type AgentExecutionOptions = {
 export type AgentExecutionInput = {
 	sessionId: string
 	prompt: string
+	input?: AgentInputPart[]
+	attachments?: AgentAttachment[]
 	context?: string
 	metadata?: ProviderRequest['metadata']
 	tenantId?: string
@@ -92,17 +96,55 @@ export class AgentExecutor {
 			PuristaSpanName.EventBridgeInvokeCommand,
 			{},
 			undefined,
-			async () => generate({ prompt: input.prompt, context: providerContext, metadata: input.metadata }),
+			async () =>
+				generate({
+					prompt: input.prompt,
+					input: input.input,
+					attachments: input.attachments,
+					context: providerContext,
+					metadata: input.metadata,
+				}),
 		)
+
+		const userParts = [
+			...(input.prompt.trim().length > 0
+				? [
+						{
+							type: 'text' as const,
+							text: input.prompt,
+						},
+					]
+				: []),
+			...(input.input ?? []),
+			...attachmentsToInputParts(input.attachments),
+		].map(part => {
+			if (part.type === 'text') {
+				return part
+			}
+			return {
+				type: 'attachment' as const,
+				attachmentId: part.attachmentId ?? 'input',
+				mediaType: part.type === 'image' ? (part.mediaType ?? 'image/*') : part.mediaType,
+				filename: part.filename,
+				title: part.title,
+			}
+		})
 
 		const userFrame = appendMessage(history, {
 			role: 'user',
 			content: input.prompt,
+			parts: userParts,
 			timestamp: Date.now(),
 		})
 		const updatedHistory = appendMessage(userFrame, {
 			role: 'assistant',
 			content: response.output,
+			parts: [
+				{
+					type: 'text',
+					text: response.output,
+				},
+			],
 			timestamp: Date.now(),
 		})
 

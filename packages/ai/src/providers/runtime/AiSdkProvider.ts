@@ -1,5 +1,12 @@
 import type { Tracer } from '@opentelemetry/api'
-import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel, SystemModelMessage } from 'ai'
+import type {
+	EmbeddingModel,
+	LanguageModel,
+	LanguageModelMiddleware,
+	ModelMessage,
+	RerankingModel,
+	SystemModelMessage,
+} from 'ai'
 import {
 	generateText as aiGenerateText,
 	embed,
@@ -353,6 +360,8 @@ export class AiSdkProvider implements ModelProvider {
 	private getCallInput(request: ProviderRequest): GenerateTextArgs {
 		const adaptedRequest = createAiSdkRequest({
 			prompt: request.prompt,
+			input: request.input,
+			attachments: request.attachments,
 			skills: request.skills,
 			references: request.references,
 			bindings: request.bindings,
@@ -360,11 +369,10 @@ export class AiSdkProvider implements ModelProvider {
 		})
 		const metadataOverrides = this.getTextOverrides(adaptedRequest.metadata)
 		const { invocation: _ignoredInvocation, ...defaultsWithoutInvocation } = this.defaults as Record<string, unknown>
-		return {
+		const baseInput = {
 			...defaultsWithoutInvocation,
 			...metadataOverrides,
 			model: this.model,
-			prompt: adaptedRequest.prompt,
 			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
 			experimental_telemetry: {
 				isEnabled: true,
@@ -372,6 +380,16 @@ export class AiSdkProvider implements ModelProvider {
 				...(defaultsWithoutInvocation.experimental_telemetry ?? {}),
 				...(metadataOverrides.experimental_telemetry ?? {}),
 			},
+		}
+		if (adaptedRequest.messages) {
+			return {
+				...baseInput,
+				messages: adaptedRequest.messages as ModelMessage[],
+			}
+		}
+		return {
+			...baseInput,
+			prompt: adaptedRequest.prompt ?? '',
 		}
 	}
 
@@ -479,12 +497,25 @@ export class AiSdkProvider implements ModelProvider {
 					: {
 							output: 'no-schema' as const,
 						}
+				const adaptedRequest = createAiSdkRequest({
+					prompt: request.prompt,
+					input: request.input,
+					attachments: request.attachments,
+					metadata: request.metadata,
+				})
+				const promptInput = adaptedRequest.messages
+					? {
+							messages: adaptedRequest.messages as ModelMessage[],
+						}
+					: {
+							prompt: adaptedRequest.prompt ?? '',
+						}
 				return await generateObject({
 					...defaultsWithoutOutput,
 					...metadataWithoutOutput,
 					model: this.model,
-					prompt: request.prompt,
 					system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
+					...promptInput,
 					...objectRequest,
 					experimental_telemetry: {
 						isEnabled: true,
@@ -592,6 +623,8 @@ export class AiSdkProvider implements ModelProvider {
 			},
 			request: {
 				prompt: request.prompt,
+				input: request.input,
+				attachments: request.attachments,
 				context: request.context,
 				developerInstruction: request.developerInstruction,
 				skills: request.skills,

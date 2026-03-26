@@ -81,6 +81,75 @@ describe('AiSdkProvider', () => {
 		})
 	})
 
+	it('passes multimodal message content through generate calls', async () => {
+		generateTextMock.mockResolvedValueOnce({
+			text: 'analyzed',
+			usage: {
+				inputTokens: 20,
+				outputTokens: 5,
+			},
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: { provider: 'mock' },
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		await provider.generate({
+			prompt: 'Analyze the uploaded assets',
+			input: [
+				{
+					type: 'image',
+					image: new URL('https://example.com/mockup.png'),
+					mediaType: 'image/png',
+					detail: 'low',
+				},
+			],
+			attachments: [
+				{
+					attachmentId: 'brief-1',
+					mediaType: 'application/pdf',
+					filename: 'brief.pdf',
+					source: {
+						kind: 'url',
+						url: 'https://example.com/brief.pdf',
+					},
+				},
+			],
+		})
+
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				messages: [
+					{
+						role: 'user',
+						content: [
+							{
+								type: 'text',
+								text: 'Analyze the uploaded assets',
+							},
+							{
+								type: 'image',
+								image: new URL('https://example.com/mockup.png'),
+								mediaType: 'image/png',
+								providerOptions: {
+									openai: {
+										imageDetail: 'low',
+									},
+								},
+							},
+							{
+								type: 'file',
+								data: new URL('https://example.com/brief.pdf'),
+								mediaType: 'application/pdf',
+								filename: 'brief.pdf',
+							},
+						],
+					},
+				],
+			}),
+		)
+	})
+
 	it('streams text deltas and resolves final usage', async () => {
 		streamTextMock.mockReturnValueOnce({
 			fullStream: (async function* () {
@@ -172,6 +241,55 @@ describe('AiSdkProvider', () => {
 			additionalProperties: false,
 		})
 		expect(JSON.stringify(compiledJsonSchema)).not.toContain('propertyNames')
+	})
+
+	it('passes multimodal messages through structured json generation', async () => {
+		generateObjectMock.mockResolvedValueOnce({
+			object: { result: 'ok' },
+			usage: {
+				inputTokens: 4,
+				outputTokens: 2,
+			},
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: { provider: 'mock' },
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		await provider.generateJson({
+			prompt: 'Extract the visible fields',
+			input: [
+				{
+					type: 'image',
+					image: new URL('https://example.com/form.png'),
+					mediaType: 'image/png',
+				},
+			],
+			schema: z.object({
+				result: z.string(),
+			}),
+		})
+
+		expect(generateObjectMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				messages: [
+					{
+						role: 'user',
+						content: [
+							{
+								type: 'text',
+								text: 'Extract the visible fields',
+							},
+							{
+								type: 'image',
+								image: new URL('https://example.com/form.png'),
+								mediaType: 'image/png',
+							},
+						],
+					},
+				],
+			}),
+		)
 	})
 
 	it('wraps provider structured-output errors as UnhandledError', async () => {

@@ -517,4 +517,66 @@ describe('external runtime bindings', () => {
 			false,
 		)
 	})
+
+	it('builds AI SDK multimodal requests with text, images, and files', () => {
+		const request = createAiSdkRequest({
+			prompt: 'Please analyze these references',
+			input: [
+				{
+					type: 'text',
+					text: 'Focus on the user-visible error state.',
+				},
+				{
+					type: 'image',
+					image: new URL('https://example.com/mockup.png'),
+					mediaType: 'image/png',
+					detail: 'high',
+				},
+			],
+			attachments: [
+				{
+					attachmentId: 'pdf-1',
+					mediaType: 'application/pdf',
+					filename: 'brief.pdf',
+					source: {
+						kind: 'url',
+						url: 'https://example.com/brief.pdf',
+					},
+				},
+			],
+		})
+
+		expect(request.prompt).toBeUndefined()
+		expect(request.messages).toEqual([
+			{
+				role: 'user',
+				content: [
+					{
+						type: 'text',
+						text: 'Please analyze these references',
+					},
+					{
+						type: 'text',
+						text: 'Focus on the user-visible error state.',
+					},
+					{
+						type: 'image',
+						image: new URL('https://example.com/mockup.png'),
+						mediaType: 'image/png',
+						providerOptions: {
+							openai: {
+								imageDetail: 'high',
+							},
+						},
+					},
+					{
+						type: 'file',
+						data: new URL('https://example.com/brief.pdf'),
+						mediaType: 'application/pdf',
+						filename: 'brief.pdf',
+					},
+				],
+			},
+		])
+	})
 })
