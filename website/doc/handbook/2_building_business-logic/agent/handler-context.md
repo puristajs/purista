@@ -45,15 +45,14 @@ Assuming the builder has already declared models, skills, and invocations, the h
 
   // Use declared skills and models
   const skills = await context.ai.skills.loadAvailable();
-  const answer = await context.ai.models['openai:primary'].generateText({
+  const answer = await context.ai.reply.generate({
+    model: 'openai:primary',
     prompt: `...`,
-    onTextDelta: delta => context.io.stream.sendChunk(delta),
   });
 
   // Persist the response and finalize the run
   await context.memory.conversation.addAssistant(answer);
   await run.finishSuccess(answer);
-  context.io.stream.sendFinal(answer);
 
   return { message: answer };
 })
@@ -93,6 +92,13 @@ This is the central hub for AI-related functionality.
 - **`context.ai.models`**: Access model providers declared in the builder.
   ```ts
   const answer = await context.ai.models['openai:primary'].generateText({ prompt });
+  ```
+- **`context.ai.reply`**: Stream public assistant replies through the current turn.
+  ```ts
+  const answer = await context.ai.reply.generate({
+    model: 'openai:primary',
+    prompt,
+  });
   ```
 - **`context.ai.embeddings`**: Access embedding models.
   ```ts

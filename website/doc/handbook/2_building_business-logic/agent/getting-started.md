@@ -172,7 +172,8 @@ export const supportAgent = new AgentBuilder({
     const answer = await run.step(
       'answer',
       async () =>
-        await context.ai.models['openai:primary'].generateText({
+        await context.ai.reply.generate({
+          model: 'openai:primary',
           developerInstruction: context.app.resources.supportPolicy.developerInstruction,
           prompt: [
             skillBlock,
@@ -182,7 +183,6 @@ export const supportAgent = new AgentBuilder({
           ]
             .filter(Boolean)
             .join('\n\n'),
-          onTextDelta: delta => context.io.stream.sendChunk(delta),
         }),
       { checkpoint: 'final-answer' },
     )
@@ -190,7 +190,6 @@ export const supportAgent = new AgentBuilder({
     // 5. Persist the assistant message and finish the durable run.
     await context.memory.conversation.addAssistant(answer)
     await run.finishSuccess(answer)
-    context.io.stream.sendFinal(answer)
     return { message: answer }
   })
   .build()

@@ -68,7 +68,7 @@ Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
 
 - `src/agents/bridgeDemoAgent/v1/bridgeDemoAgent.ts`
   - `.useSkills(['spec-elicitation', 'tool-loop-discipline'])`
-  - `context.ai.models['openai:gpt-4o-mini'].generateText(...)` for the model-owned adapter path
+  - `context.ai.reply.generate(...)` for streamed public replies on the model-owned adapter path
   - explicit `context.invoke.expose.tools(...)` bindings for commands
 
 ### Frontend

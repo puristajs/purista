@@ -38,7 +38,7 @@ export const triageAgent = new AgentBuilder({
 		})
 
 		const answer = `**Urgency Classification:** ${result.data.urgency}\n\n**Explanation:** ${result.data.explanation}\n\n**Next Steps:** ${result.data.nextSteps}`
-		context.io.stream.sendFinal(answer)
+		context.ai.reply.publish(answer)
 		return {
 			message: answer,
 		}

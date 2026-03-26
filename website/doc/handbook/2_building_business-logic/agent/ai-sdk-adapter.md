@@ -45,7 +45,8 @@ export const supportAgent = new AgentBuilder({
   .useSkills(['support-workflow'])
   .canInvoke('support', '1', 'lookupFaq') // Allowlist the tool
   .setHandler(async (context, payload) => {
-    const answer = await context.ai.models['openai:primary'].generateText({
+    const answer = await context.ai.reply.generate({
+      model: 'openai:primary',
       developerInstruction: 'Use the available tools before answering.',
       prompt: payload.prompt,
       metadata: {
@@ -53,10 +54,8 @@ export const supportAgent = new AgentBuilder({
           toolChoice: 'required', // Force the model to use a tool
         },
       },
-      onTextDelta: delta => context.io.stream.sendChunk(delta),
     });
 
-    context.io.stream.sendFinal(answer);
     return { message: answer };
   })
   .build();
@@ -99,13 +98,15 @@ When you call `generateText(...)`, the `AiSdkProvider` automatically:
 - Loads skills declared with `useSkills` if you don't provide them in the request.
 - Exposes tools and child agents from `canInvoke` and `canInvokeAgent` as `bindings` if you don't provide them.
 
-This means the shortest useful call is often just:
+For public assistant replies, the shortest useful call is often just:
 ```ts
-const answer = await context.ai.models['your-alias'].generateText({
+const answer = await context.ai.reply.generate({
+  model: 'your-alias',
   prompt: payload.prompt,
-  onTextDelta: delta => context.io.stream.sendChunk(delta),
 });
 ```
+
+Use `context.ai.models['your-alias'].generateText(...)` directly when the generated text is an internal synthesis step rather than the final user-facing reply.
 
 ### Prompt and System Message Composition
 

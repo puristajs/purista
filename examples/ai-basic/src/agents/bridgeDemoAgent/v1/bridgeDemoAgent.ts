@@ -39,7 +39,8 @@ export const bridgeDemoAgent = new AgentBuilder({
 		const answer = await run.step(
 			'answer',
 			async () =>
-				await context.ai.models['openai:gpt-4o-mini'].generateText({
+				await context.ai.reply.generate({
+					model: 'openai:gpt-4o-mini',
 					developerInstruction: [
 						'Use the provided tools before answering.',
 						'Return one concise answer that includes the FAQ guidance and a short urgency recommendation.',
@@ -48,7 +49,6 @@ export const bridgeDemoAgent = new AgentBuilder({
 						`Customer request: ${payload.prompt}`,
 						'Use support.1.lookupFaq to retrieve the relevant guidance.',
 					].join('\n'),
-					onTextDelta: delta => context.io.stream.sendChunk(delta),
 				}),
 			{ detail: 'Running external bridge tool loop', checkpoint: 'bridge-answer' },
 		)
@@ -56,7 +56,6 @@ export const bridgeDemoAgent = new AgentBuilder({
 		await context.memory.conversation.addAssistant(answer)
 		await run.setFinalMessage(answer)
 		await run.finishSuccess(answer)
-		context.io.stream.sendFinal(answer)
 		return { message: answer }
 	})
 	.build()
