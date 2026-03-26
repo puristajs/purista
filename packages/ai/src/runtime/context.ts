@@ -155,6 +155,40 @@ export type AgentStreamEmitter = {
 	sendError(error: unknown, overrides?: { code?: string; handled?: boolean }): void
 }
 
+const splitParagraphForStreaming = (paragraph: string): string[] => {
+	if (paragraph.includes('\n')) {
+		return paragraph
+			.split('\n')
+			.filter(line => line.trim().length > 0)
+			.map((line, index) => (index === 0 ? line : `\n${line}`))
+	}
+
+	const sentences =
+		paragraph
+			.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g)
+			?.map(entry => entry.trim())
+			.filter(entry => entry.length > 0) ?? []
+	if (sentences.length <= 1) {
+		return [paragraph]
+	}
+	return sentences.map((sentence, index) => (index === 0 ? sentence : ` ${sentence}`))
+}
+
+const streamReplyText = (input: { text: string; streamText: (delta: string) => void }) => {
+	const paragraphs = input.text
+		.trim()
+		.split(/\n\n+/)
+		.map(entry => entry.trim())
+		.filter(entry => entry.length > 0)
+	paragraphs.forEach((paragraph, paragraphIndex) => {
+		const chunks = splitParagraphForStreaming(paragraph)
+		chunks.forEach((chunk, chunkIndex) => {
+			const prefix = paragraphIndex > 0 && chunkIndex === 0 ? '\n\n' : ''
+			input.streamText(`${prefix}${chunk}`)
+		})
+	})
+}
+
 const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => ({
 	sendTextDelta(content) {
 		if (content.length === 0) {
@@ -666,6 +700,7 @@ export type AgentHandlerContext<
 			generate<Alias extends Extract<keyof Models, string>>(
 				request: { model: Alias; summary?: string } & ProviderGenerateTextRequest,
 			): Promise<string>
+			publish(input: string | { text: string; summary?: string; chunked?: boolean }): string
 		}
 		embeddings: {
 			[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
@@ -1443,6 +1478,26 @@ export const createAgentHandlerContext = <
 			})
 			stream.endText(summary ? { summary } : undefined)
 			return replyText.trim()
+		},
+		publish: (input: string | { text: string; summary?: string; chunked?: boolean }) => {
+			const text = typeof input === 'string' ? input : input.text
+			const summary = typeof input === 'string' ? undefined : input.summary
+			const chunked = typeof input === 'string' ? true : input.chunked !== false
+			const normalized = text.trim()
+			if (normalized.length === 0) {
+				stream.endText(summary ? { summary } : undefined)
+				return normalized
+			}
+			if (chunked) {
+				streamReplyText({
+					text: normalized,
+					streamText: delta => stream.sendTextDelta(delta),
+				})
+				stream.endText(summary ? { summary } : undefined)
+				return normalized
+			}
+			stream.sendFinal(normalized, summary ? { summary } : undefined)
+			return normalized
 		},
 	}
 	const expose = createExposeHelpers({

@@ -414,10 +414,13 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 })
 ```
 
-Then keep the handler in the same PURISTA style and talk only to the alias:
+Then keep the handler in the same PURISTA style and talk only to the alias.
+
+For the common case where this is the public assistant reply the user should see, prefer the handler-level reply helper:
 
 ```ts
-const answer = await context.ai.models['openai:primary'].generateText({
+const answer = await context.ai.reply.generate({
+  model: 'openai:primary',
   developerInstruction: 'Use tools before answering.',
   prompt: payload.prompt,
   metadata: {
@@ -426,9 +429,12 @@ const answer = await context.ai.models['openai:primary'].generateText({
       parallelToolCalls: false,
     },
   },
-  onTextDelta: delta => context.io.stream.sendChunk(delta),
 })
 ```
+
+That helper streams deltas to the current turn, emits the final assistant end marker, and returns the final reply text so you can persist it.
+
+Use `context.ai.models['openai:primary'].generateText(...)` directly when the text is internal synthesis input for a larger workflow, not the final public reply.
 
 What matters here:
 

@@ -146,6 +146,7 @@ This is intended for apps such as Voyage, where lower workers stream live struct
 Surface:
 
 - `context.ai.reply.generate(...)`
+- `context.ai.reply.publish(...)`
 
 Example:
 
@@ -160,3 +161,13 @@ await saveAssistantReply(reply)
 ```
 
 This is the preferred PURISTA-style pattern for public streamed assistant narration. It keeps model-generated reply text as the source of the visible conversation while leaving deterministic structured artifacts and deliverables on their existing paths.
+
+When you already have the final user-facing reply text and only want PURISTA to stream and terminate it correctly, use `publish(...)`:
+
+```ts
+const reply = context.ai.reply.publish(
+  "The approval was recorded and the project remains in the current stage.",
+)
+
+await saveAssistantReply(reply)
+```

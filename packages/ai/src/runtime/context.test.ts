@@ -1091,6 +1091,47 @@ describe('runtime context helpers', () => {
 		})
 	})
 
+	it('publishes deterministic public assistant replies through context.ai.reply.publish', () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const reply = context.ai.reply.publish('First sentence. Second sentence.\n\nFinal paragraph.')
+
+		expect(reply).toBe('First sentence. Second sentence.\n\nFinal paragraph.')
+		const messageFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'message')
+		expect(messageFrames).toHaveLength(4)
+		if (
+			messageFrames[0]?.kind === 'message' &&
+			messageFrames[1]?.kind === 'message' &&
+			messageFrames[2]?.kind === 'message' &&
+			messageFrames[3]?.kind === 'message'
+		) {
+			expect(messageFrames[0].content).toBe('First sentence.')
+			expect(messageFrames[0].partial).toBe(true)
+			expect(messageFrames[1].content).toBe(' Second sentence.')
+			expect(messageFrames[1].partial).toBe(true)
+			expect(messageFrames[2].content).toBe('\n\nFinal paragraph.')
+			expect(messageFrames[2].partial).toBe(true)
+			expect(messageFrames[3].content).toBe('')
+			expect(messageFrames[3].final).toBe(true)
+		}
+	})
+
 	it('passes tenantId and principalId to conversation store', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const conversationStore = {

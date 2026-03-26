@@ -14,11 +14,11 @@ describe('createAgentTestHarness', () => {
 			.addPayloadSchema(z.object({ prompt: z.string() }))
 			.defineModel('openai:test', { capabilities: ['text', 'stream'] })
 			.setHandler(async (context, payload) => {
-				const output = await context.ai.models['openai:test'].generateText?.({
+				const output = await context.ai.reply.generate({
+					model: 'openai:test',
 					prompt: payload.prompt,
 				})
-				context.io.stream.sendFinal(output ?? '')
-				return { message: output ?? '' }
+				return { message: output }
 			})
 			.build()
 

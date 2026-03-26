@@ -163,6 +163,8 @@ Avoid putting environment setup or provider construction in the handler. That be
 
 - Use `context.invoke.*` for calling other PURISTA services and agents.
 - Use `context.ai.skills` for reusable instruction sets.
+- Use `context.ai.reply.generate(...)` for model-generated public assistant replies that should stream on the current turn.
+- Use `context.ai.reply.publish(...)` when you already have the final public reply text and only need PURISTA to stream it correctly.
 - Use `context.memory.run` for durable, resumable workflows.
 - Use `context.ai.reflect` and `context.runtime.approvals` for tasks requiring high quality or human oversight.
 - Use `context.invoke.expose` only when adapting to an external tool loop (like the Vercel AI SDK).
