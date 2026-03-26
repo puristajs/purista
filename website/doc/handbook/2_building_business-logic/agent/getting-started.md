@@ -433,7 +433,7 @@ const answer = await context.ai.reply.generate({
 
 That helper streams deltas to the current turn, emits the final assistant end marker, and returns the final reply text so you can persist it.
 
-Use `context.ai.models['openai:primary'].generateText(...)` directly when the text is internal synthesis input for a larger workflow, not the final public reply.
+Use `context.ai.reply.compose(...)` when the text is internal synthesis input for a larger workflow, not the final public reply.
 
 What matters here:
 

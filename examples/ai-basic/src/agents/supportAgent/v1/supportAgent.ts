@@ -299,10 +299,8 @@ export const supportAgent = new AgentBuilder({
 			.join('\n')
 
 		const generateTextAnswer = async (instructions?: string) => {
-			if (!model.generateText) {
-				throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
-			}
-			return await model.generateText({
+			return await context.ai.reply.compose({
+				model: 'openai:gpt-4o-mini',
 				prompt: [prompt, instructions].filter(Boolean).join('\n\n'),
 				context: payload.context,
 				metadata: { aiSdk: { temperature: 0.2 } },
@@ -388,7 +386,8 @@ export const supportAgent = new AgentBuilder({
 						internalAnswer = reflection.output
 					} else {
 						context.io.stream.sendChunk('Generating final answer...')
-						internalAnswer = await model.generateText({
+						internalAnswer = await context.ai.reply.compose({
+							model: 'openai:gpt-4o-mini',
 							prompt,
 							context: payload.context,
 							metadata: { aiSdk: { temperature: 0.2 } },

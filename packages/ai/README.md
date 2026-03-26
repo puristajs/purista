@@ -145,6 +145,7 @@ This is intended for apps such as Voyage, where lower workers stream live struct
 
 Surface:
 
+- `context.ai.reply.compose(...)`
 - `context.ai.reply.generate(...)`
 - `context.ai.reply.publish(...)`
 
@@ -160,7 +161,22 @@ const reply = await context.ai.reply.generate({
 await saveAssistantReply(reply)
 ```
 
-This is the preferred PURISTA-style pattern for public streamed assistant narration. It keeps model-generated reply text as the source of the visible conversation while leaving deterministic structured artifacts and deliverables on their existing paths.
+Decision model:
+
+- `compose(...)`: generate internal draft text without streaming it
+- `generate(...)`: generate and stream the public assistant reply with a model
+- `publish(...)`: stream an already-final deterministic public reply
+
+This is the preferred PURISTA-style pattern for assistant narration. It keeps model-generated or deterministic reply text on explicit framework paths while leaving structured artifacts and deliverables on their existing paths.
+
+Use `compose(...)` when the text is an internal synthesis input for reflection, approval, critique, or later publication:
+
+```ts
+const draft = await context.ai.reply.compose({
+  model: "openai:primary",
+  prompt: "Draft the support response internally. Do not stream it yet.",
+})
+```
 
 When you already have the final user-facing reply text and only want PURISTA to stream and terminate it correctly, use `publish(...)`:
 

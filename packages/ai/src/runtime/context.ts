@@ -697,6 +697,9 @@ export type AgentHandlerContext<
 	ai: {
 		models: Models
 		reply: {
+			compose<Alias extends Extract<keyof Models, string>>(
+				request: { model: Alias } & ProviderGenerateTextRequest,
+			): Promise<string>
 			generate<Alias extends Extract<keyof Models, string>>(
 				request: { model: Alias; summary?: string } & ProviderGenerateTextRequest,
 			): Promise<string>
@@ -1457,18 +1460,36 @@ export const createAgentHandlerContext = <
 	const policy = createAgentPolicyHelpers(input.manifest.agentPolicy, input.manifest.reflection)
 	const skills = createSkillHelpers(input.resources, input.manifest)
 	const stream = createStreamEmitter(input.protocol)
+	const resolveReplyModel = <Alias extends Extract<keyof Models, string>>(
+		modelAlias: Alias,
+	): NonNullable<Models[Alias]> & { generateText: NonNullable<ModelProvider['generateText']> } => {
+		const model = input.models[modelAlias]
+		if (!model || typeof model.generateText !== 'function') {
+			throw new HandledError(
+				StatusCode.InternalServerError,
+				`Model ${String(modelAlias)} is not configured for text replies`,
+			)
+		}
+		return model as NonNullable<Models[Alias]> & {
+			generateText: NonNullable<ModelProvider['generateText']>
+		}
+	}
 	const reply = {
+		compose: async <Alias extends Extract<keyof Models, string>>(
+			request: { model: Alias } & ProviderGenerateTextRequest,
+		) => {
+			const { model: modelAlias, ...modelRequest } = request
+			const model = resolveReplyModel(modelAlias)
+			const replyText = await model.generateText({
+				...modelRequest,
+			})
+			return replyText.trim()
+		},
 		generate: async <Alias extends Extract<keyof Models, string>>(
 			request: { model: Alias; summary?: string } & ProviderGenerateTextRequest,
 		) => {
 			const { model: modelAlias, summary, onTextDelta, ...modelRequest } = request
-			const model = input.models[modelAlias]
-			if (!model || typeof model.generateText !== 'function') {
-				throw new HandledError(
-					StatusCode.InternalServerError,
-					`Model ${String(modelAlias)} is not configured for streamed text replies`,
-				)
-			}
+			const model = resolveReplyModel(modelAlias)
 			const replyText = await model.generateText({
 				...modelRequest,
 				onTextDelta: async delta => {

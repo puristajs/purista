@@ -63,6 +63,7 @@ Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
   - `.useSkills(['spec-elicitation', 'support-workflow'])`
   - `context.memory.run` planning, checkpoints, and task updates
   - `context.ai.skills.loadAvailable()` and `context.ai.skills.loadReferences(...)`
+  - `context.ai.reply.compose(...)`, `generate(...)`, and `publish(...)` for internal drafting vs public reply publication
   - attach-and-stream HTTP behavior
   - optional delegation to `triageAgent`
 

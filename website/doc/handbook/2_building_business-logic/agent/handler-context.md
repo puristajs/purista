@@ -100,6 +100,12 @@ This is the central hub for AI-related functionality.
     prompt,
   });
   ```
+  ```ts
+  const draft = await context.ai.reply.compose({
+    model: 'openai:primary',
+    prompt,
+  });
+  ```
 - **`context.ai.embeddings`**: Access embedding models.
   ```ts
   const embedding = await context.ai.embeddings['text-embed-ada'].embed({ value: '...' });
@@ -169,6 +175,7 @@ Avoid putting environment setup or provider construction in the handler. That be
 
 - Use `context.invoke.*` for calling other PURISTA services and agents.
 - Use `context.ai.skills` for reusable instruction sets.
+- Use `context.ai.reply.compose(...)` for internal draft text that should not stream yet.
 - Use `context.ai.reply.generate(...)` for model-generated public assistant replies that should stream on the current turn.
 - Use `context.ai.reply.publish(...)` when you already have the final public reply text and only need PURISTA to stream it correctly.
 - Use `context.memory.run` for durable, resumable workflows.

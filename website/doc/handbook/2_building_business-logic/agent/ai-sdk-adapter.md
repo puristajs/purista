@@ -106,7 +106,7 @@ const answer = await context.ai.reply.generate({
 });
 ```
 
-Use `context.ai.models['your-alias'].generateText(...)` directly when the generated text is an internal synthesis step rather than the final user-facing reply.
+Use `context.ai.reply.compose(...)` when the generated text is an internal synthesis step rather than the final user-facing reply.
 
 ### Prompt and System Message Composition
 
@@ -124,7 +124,8 @@ This ensures the model gets a rich, well-structured context for its reasoning pr
 For per-call control, you can pass AI SDK-specific options via `metadata.aiSdk`.
 
 ```ts
-await context.ai.models['your-alias'].generateText({
+await context.ai.reply.compose({
+  model: 'your-alias',
   prompt: '...',
   metadata: {
     aiSdk: {

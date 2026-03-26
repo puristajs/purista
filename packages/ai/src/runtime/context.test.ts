@@ -1062,6 +1062,43 @@ describe('runtime context helpers', () => {
 		}
 	})
 
+	it('composes internal assistant replies without streaming them', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'reply-model',
+					generateText: async request => {
+						await request.onTextDelta?.('ignored')
+						return 'Internal draft'
+					},
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const reply = await context.ai.reply.compose({
+			model: 'primary',
+			prompt: 'Draft internally',
+		})
+
+		expect(reply).toBe('Internal draft')
+		const messageFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'message')
+		expect(messageFrames).toHaveLength(0)
+	})
+
 	it('fails public assistant replies when the selected model does not support streamed text', async () => {
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
@@ -1085,6 +1122,35 @@ describe('runtime context helpers', () => {
 			context.ai.reply.generate({
 				model: 'primary',
 				prompt: 'Say hello',
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.InternalServerError,
+		})
+	})
+
+	it('fails internal assistant composition when the selected model does not support text', async () => {
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'reply-model',
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.ai.reply.compose({
+				model: 'primary',
+				prompt: 'Draft internally',
 			}),
 		).rejects.toMatchObject({
 			errorCode: StatusCode.InternalServerError,
