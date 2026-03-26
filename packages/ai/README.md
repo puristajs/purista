@@ -133,3 +133,30 @@ context.io.stream.endStructuredObject({
 ```
 
 This is intended for apps such as Voyage, where lower workers stream live structured progress while only the final deliverable is persisted into markdown truth or workflow state.
+
+## Public streamed replies
+
+`@purista/ai` also provides a handler-level helper for the common pattern:
+
+- generate a public assistant reply with a configured model
+- stream text deltas into the current turn
+- emit a final assistant end marker automatically
+- return the final reply text for persistence
+
+Surface:
+
+- `context.ai.reply.generate(...)`
+
+Example:
+
+```ts
+const reply = await context.ai.reply.generate({
+  model: "openai:primary",
+  prompt:
+    "Write the user-facing reply after the latest specification refinement. Keep it concise and grounded in the current project truth.",
+})
+
+await saveAssistantReply(reply)
+```
+
+This is the preferred PURISTA-style pattern for public streamed assistant narration. It keeps model-generated reply text as the source of the visible conversation while leaving deterministic structured artifacts and deliverables on their existing paths.

@@ -1012,6 +1012,85 @@ describe('runtime context helpers', () => {
 		}
 	})
 
+	it('streams public assistant replies through context.ai.reply.generate', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'reply-model',
+					generateText: async request => {
+						await request.onTextDelta?.('Hello')
+						await request.onTextDelta?.(' world')
+						return 'Hello world'
+					},
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const reply = await context.ai.reply.generate({
+			model: 'primary',
+			prompt: 'Say hello',
+		})
+
+		expect(reply).toBe('Hello world')
+		const messageFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'message')
+		expect(messageFrames).toHaveLength(3)
+		if (
+			messageFrames[0]?.kind === 'message' &&
+			messageFrames[1]?.kind === 'message' &&
+			messageFrames[2]?.kind === 'message'
+		) {
+			expect(messageFrames[0].content).toBe('Hello')
+			expect(messageFrames[0].partial).toBe(true)
+			expect(messageFrames[1].content).toBe(' world')
+			expect(messageFrames[1].partial).toBe(true)
+			expect(messageFrames[2].content).toBe('')
+			expect(messageFrames[2].final).toBe(true)
+		}
+	})
+
+	it('fails public assistant replies when the selected model does not support streamed text', async () => {
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'reply-model',
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.ai.reply.generate({
+				model: 'primary',
+				prompt: 'Say hello',
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.InternalServerError,
+		})
+	})
+
 	it('passes tenantId and principalId to conversation store', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const conversationStore = {

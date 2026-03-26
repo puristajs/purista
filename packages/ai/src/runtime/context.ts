@@ -38,6 +38,7 @@ import type {
 	ProviderEmbedManyResponse,
 	ProviderEmbedRequest,
 	ProviderEmbedResponse,
+	ProviderGenerateTextRequest,
 	ProviderRerankRequest,
 	ProviderRerankResponse,
 } from '../providers/runtime/ModelProvider.js'
@@ -168,6 +169,9 @@ const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => (
 		this.sendTextDelta(content)
 	},
 	sendFinal(content, options) {
+		if (content.length === 0) {
+			return
+		}
 		protocol.emitMessage({ content, summary: options?.summary, partial: false, final: true })
 	},
 	sendReasoning(content, options) {
@@ -307,7 +311,7 @@ export const createProtocolBuffer = (
 				partial: message.partial,
 				final: message.final,
 			})
-			if (frame.content.length === 0) {
+			if (frame.content.length === 0 && frame.final !== true) {
 				return
 			}
 			pushFrame(frame)
@@ -658,6 +662,11 @@ export type AgentHandlerContext<
 	}
 	ai: {
 		models: Models
+		reply: {
+			generate<Alias extends Extract<keyof Models, string>>(
+				request: { model: Alias; summary?: string } & ProviderGenerateTextRequest,
+			): Promise<string>
+		}
 		embeddings: {
 			[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
 				name: string
@@ -1413,6 +1422,29 @@ export const createAgentHandlerContext = <
 	const policy = createAgentPolicyHelpers(input.manifest.agentPolicy, input.manifest.reflection)
 	const skills = createSkillHelpers(input.resources, input.manifest)
 	const stream = createStreamEmitter(input.protocol)
+	const reply = {
+		generate: async <Alias extends Extract<keyof Models, string>>(
+			request: { model: Alias; summary?: string } & ProviderGenerateTextRequest,
+		) => {
+			const { model: modelAlias, summary, onTextDelta, ...modelRequest } = request
+			const model = input.models[modelAlias]
+			if (!model || typeof model.generateText !== 'function') {
+				throw new HandledError(
+					StatusCode.InternalServerError,
+					`Model ${String(modelAlias)} is not configured for streamed text replies`,
+				)
+			}
+			const replyText = await model.generateText({
+				...modelRequest,
+				onTextDelta: async delta => {
+					stream.sendTextDelta(delta)
+					await onTextDelta?.(delta)
+				},
+			})
+			stream.endText(summary ? { summary } : undefined)
+			return replyText.trim()
+		},
+	}
 	const expose = createExposeHelpers({
 		app: {
 			manifest: input.manifest,
@@ -1464,6 +1496,7 @@ export const createAgentHandlerContext = <
 		},
 		ai: {
 			models: input.models,
+			reply,
 			embeddings: input.embeddings as AgentHandlerContext<
 				Payload,
 				Parameter,
