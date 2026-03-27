@@ -1555,8 +1555,15 @@ export const createAgentHandlerContext = <
 					await onTextDelta?.(delta)
 				},
 			})
+			const normalizedReply = replyText.trim()
+			if (normalizedReply.length === 0) {
+				throw new HandledError(
+					StatusCode.InternalServerError,
+					`Model ${String(modelAlias)} generated an empty public reply`,
+				)
+			}
 			stream.endText(summary ? { summary } : undefined)
-			return replyText.trim()
+			return normalizedReply
 		},
 		publish: (input: string | { text: string; summary?: string; chunked?: boolean }) => {
 			const text = typeof input === 'string' ? input : input.text

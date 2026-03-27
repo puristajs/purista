@@ -1128,6 +1128,37 @@ describe('runtime context helpers', () => {
 		})
 	})
 
+	it('fails public assistant replies when the model returns an empty reply', async () => {
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'reply-model',
+					generateText: async () => '   ',
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.ai.reply.generate({
+				model: 'primary',
+				prompt: 'Say hello',
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.InternalServerError,
+			message: 'Model primary generated an empty public reply',
+		})
+	})
+
 	it('fails internal assistant composition when the selected model does not support text', async () => {
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
