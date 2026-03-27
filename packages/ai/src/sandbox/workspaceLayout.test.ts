@@ -22,7 +22,7 @@ describe('workspaceLayout', () => {
 
 	it('maps repo and skill paths into stable sandbox locations', () => {
 		expect(toSandboxRepoPath('specs/spec.md')).toBe('/workspace/repo/specs/spec.md')
-		expect(toSandboxSkillPath('purista-core', 'scripts/plan.sh')).toBe('/workspace/skills/purista-core/scripts/plan.sh')
+		expect(toSandboxSkillPath('purista', 'scripts/plan.sh')).toBe('/workspace/skills/purista/scripts/plan.sh')
 	})
 
 	it('creates seed files for repo and skill bundles', () => {
@@ -30,13 +30,13 @@ describe('workspaceLayout', () => {
 			{ path: '/workspace/repo/architecture/index.md', content: '# Architecture' },
 		])
 		expect(
-			createSandboxSkillSeedFiles('purista-core', [
+			createSandboxSkillSeedFiles('purista', [
 				{ relativePath: 'SKILL.md', content: '# Skill' },
 				{ relativePath: 'references/guide.md', content: 'guide' },
 			]),
 		).toEqual([
-			{ path: '/workspace/skills/purista-core/SKILL.md', content: '# Skill' },
-			{ path: '/workspace/skills/purista-core/references/guide.md', content: 'guide' },
+			{ path: '/workspace/skills/purista/SKILL.md', content: '# Skill' },
+			{ path: '/workspace/skills/purista/references/guide.md', content: 'guide' },
 		])
 	})
 })

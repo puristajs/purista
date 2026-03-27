@@ -18,10 +18,7 @@
 
 ## Skills
 - https://github.com/puristajs/purista/blob/master/skills/README.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-core/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-application-architecture/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-agents-core/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-agent-runtime/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-agent-testing/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-sandbox/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-observability/SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/05-agents-skills-and-ai-runtime.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/07-http-sandbox-mcp-and-external-bindings.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/08-testing-observability-and-deployment.md

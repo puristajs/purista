@@ -11,5 +11,5 @@ Reusable multi-tenant sandbox runtime for PURISTA, with pluggable virtualization
 
 ## Skills
 - https://github.com/puristajs/purista/blob/master/skills/README.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-sandbox/SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/purista-service-builder/SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/07-http-sandbox-mcp-and-external-bindings.md

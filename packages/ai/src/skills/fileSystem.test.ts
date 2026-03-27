@@ -99,30 +99,30 @@ Use harnesses and mocks for service and agent testing.`,
 		)
 		await createSkill(
 			root,
-			'purista-sandbox',
+			'purista-skill-maintainer',
 			`---
-name: purista-sandbox
-description: Run tools in a sandbox.
+name: purista-skill-maintainer
+description: Maintain the canonical PURISTA skill.
 topics:
-  - sandbox
-  - execution
+  - skills
+  - maintenance
 phases:
   - architecture
-requires_sandbox: true
+requires_sandbox: false
 ---
 
-Use a sandbox for scripts and shell execution.`,
+Keep the shared framework skill coherent.`,
 		)
 
 		const resource = new FileSkillResource({ roots: [root] })
 		const result = await resource.search({
-			queries: ['sandbox'],
+			queries: ['maintenance'],
 			limit: 1,
 		})
 
 		expect(result).toHaveLength(1)
-		expect(result[0]?.name).toBe('purista-sandbox')
-		expect(result[0]?.requiresSandbox).toBe(true)
+		expect(result[0]?.name).toBe('purista-skill-maintainer')
+		expect(result[0]?.requiresSandbox).toBe(false)
 	})
 
 	it('scores skills by phase and topic metadata', async () => {
@@ -173,10 +173,10 @@ Use structured requirement discovery.`,
 		const localRoot = await mkdtemp(join(tmpdir(), 'purista-skill-local-'))
 		await createSkill(
 			canonicalRoot,
-			'purista-core',
+			'purista',
 			`---
-name: purista-core
-description: Core framework guidance.
+name: purista
+description: Canonical framework guidance.
 topics:
   - core
 phases:
@@ -208,8 +208,8 @@ Local application rules.`,
 			limit: 5,
 		})
 
-		expect(listed.map(entry => entry.name)).toEqual(['purista-core', 'voyage-agent-loop'])
-		expect(result.map(entry => entry.name)).toEqual(['voyage-agent-loop', 'purista-core'])
+		expect(listed.map(entry => entry.name)).toEqual(['purista', 'voyage-agent-loop'])
+		expect(result.map(entry => entry.name)).toEqual(['voyage-agent-loop', 'purista'])
 	})
 
 	it('prefers later roots as overlays when a skill exists more than once', async () => {
@@ -217,9 +217,9 @@ Local application rules.`,
 		const localRoot = await mkdtemp(join(tmpdir(), 'purista-skill-overlay-local-'))
 		await createSkill(
 			canonicalRoot,
-			'purista-core',
+			'purista',
 			`---
-name: purista-core
+name: purista
 description: Canonical guidance.
 topics:
   - core
@@ -231,9 +231,9 @@ Canonical body.`,
 		)
 		await createSkill(
 			localRoot,
-			'purista-core',
+			'purista',
 			`---
-name: purista-core
+name: purista
 description: Local overlay.
 topics:
   - core
@@ -245,7 +245,7 @@ Local overlay body.`,
 		)
 
 		const resource = new FileSkillResource({ roots: [canonicalRoot, localRoot] })
-		const loaded = await resource.load('purista-core')
+		const loaded = await resource.load('purista')
 
 		expect(loaded.description).toBe('Local overlay.')
 		expect(loaded.content).toContain('Local overlay body.')
@@ -265,9 +265,9 @@ Local overlay body.`,
 		const localRoot = await mkdtemp(join(tmpdir(), 'purista-skill-helper-local-'))
 		await createSkill(
 			canonicalRoot,
-			'purista-core',
+			'purista',
 			`---
-name: purista-core
+name: purista
 description: Canonical framework guidance.
 topics:
   - architecture
@@ -279,9 +279,9 @@ Canonical body.`,
 		)
 		await createSkill(
 			localRoot,
-			'purista-core',
+			'purista',
 			`---
-name: purista-core
+name: purista
 description: Local overlay guidance.
 topics:
   - architecture
@@ -297,10 +297,38 @@ Overlay body.`,
 			overlayRoots: [localRoot],
 		})
 
-		await expect(resource.load('purista-core')).resolves.toEqual(
+		await expect(resource.load('purista')).resolves.toEqual(
 			expect.objectContaining({
 				description: 'Local overlay guidance.',
 				content: 'Overlay body.',
+			}),
+		)
+	})
+
+	it('loads the canonical purista skill by name in layered resources', async () => {
+		const canonicalRoot = await mkdtemp(join(tmpdir(), 'purista-skill-helper-direct-'))
+		await createSkill(
+			canonicalRoot,
+			'purista',
+			`---
+name: purista
+description: Canonical framework skill.
+topics:
+  - architecture
+phases:
+  - architecture
+---
+
+Canonical body.`,
+		)
+		const resource = createLayeredFileSkillResource({
+			canonicalRoots: [canonicalRoot],
+		})
+
+		await expect(resource.load('purista')).resolves.toEqual(
+			expect.objectContaining({
+				description: 'Canonical framework skill.',
+				content: 'Canonical body.',
 			}),
 		)
 	})

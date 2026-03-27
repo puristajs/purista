@@ -1,14 +1,27 @@
 # Skill Catalogs
 
-This repository ships one shared skill catalog in `skills/`.
+This repository ships one shared framework skill catalog in `skills/`.
 
+## Canonical model
+- `skills/purista/` is the single shared framework skill for PURISTA.
+- `skills/purista-skill-maintainer/` is the meta skill for maintaining that catalog.
+- Applications may add overlay skills, but they should not split core framework knowledge back into many sibling framework skills.
+
+## Filesystem layout
 - Each skill uses `skills/<skill-name>/SKILL.md`.
 - Optional `references/`, `scripts/`, and `assets/` folders may exist beside `SKILL.md`.
 - `SKILL.md` may use lightweight frontmatter for routing metadata such as `topics`, `phases`, and `requires_sandbox`.
-- The shared catalog is the canonical framework-memory layer for PURISTA. Skills should teach the framework to models that do not already know PURISTA.
-- Framework skills should explain definition, implementation, configuration, and instantiation explicitly.
+
+## Content expectations
+- The shared `purista` skill is the canonical framework-memory layer for models that do not already know PURISTA.
+- `SKILL.md` should stay compact and route the model to deeper `references/` documents.
+- The skill should teach definition, implementation, configuration, and instantiation explicitly.
 - Use `skills/purista-skill-maintainer` when creating or updating catalog entries so the maintenance workflow stays consistent.
-- Applications can combine this catalog with any other shared or app-local skill roots.
+
+## Layering
+- Shared roots load first.
+- App-local overlay roots load second.
+- Overlays may override a shared skill of the same name, but the preferred app shape is one shared `purista` skill plus app-specific overlays.
 
 Recommended loading pattern:
 

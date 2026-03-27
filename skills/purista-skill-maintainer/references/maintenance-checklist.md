@@ -17,11 +17,13 @@ Use this checklist when creating or updating a skill.
 
 ## 3. Structure check
 - `SKILL.md` stays compact
-- One primary concern per skill
+- The umbrella `purista` skill keeps one coherent navigation model
 - Detailed material moved to `references/` when needed
 - `scripts/` added only for repeatable deterministic tasks
 - Filesystem layout supports progressive disclosure instead of loading everything at once
 - Templates or assets exist only when they materially improve repeatability
+- Reference documents are grouped so a model can load only the needed topic
+- Short code snippets appear only where they materially teach a PURISTA concept
 
 ## 4. Content check
 - “When to use” is explicit
@@ -34,6 +36,8 @@ Use this checklist when creating or updating a skill.
 - “Read if needed” links point to real files
 - The skill category is clear: knowledge, verification, data, automation, scaffolding, review, or runbook
 - The body contains only high-signal context the base model would not already know
+- The umbrella skill avoids duplicate explanations across references
+- The single-skill navigation remains coherent for an otherwise untrained model
 
 ## 5. Verification check
 - The skill defines how success is validated
@@ -47,6 +51,8 @@ Use this checklist when creating or updating a skill.
 - `create-purista` aligned when scaffolding or templates changed
 - `voyage` aligned when framework capability assumptions changed
 - `specs` updated when guidance or migration expectations changed
+- Public handbook and published LLM knowledge files point to the canonical single skill path
+- Voyage still works correctly with one shared framework skill plus local overlays
 
 ## 7. Quality check
 - No generic filler
@@ -55,3 +61,4 @@ Use this checklist when creating or updating a skill.
 - No unresolved contradiction with the shared skill catalog
 - No brittle over-constraint where flexible decision rules would be safer
 - No noisy cross-link sprawl with weak or circular relationships
+- The split between `SKILL.md` and `references/` is intentional and readable
