@@ -73,6 +73,9 @@ export type ProviderJsonRequest = {
 	attachments?: AgentAttachment[]
 	context?: string
 	developerInstruction?: string | string[]
+	skills?: Array<Pick<SkillDocument, 'name' | 'content'>>
+	references?: Array<Pick<SkillReferenceDocument, 'skillName' | 'relativePath' | 'content'>>
+	bindings?: ExternalBindingSet | ExternalBinding[]
 	schema?: unknown
 	metadata?: Record<string, unknown>
 }

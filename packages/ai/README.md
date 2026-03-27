@@ -100,6 +100,8 @@ Design rules:
 - final structured output remains the canonical, schema-validated result
 - streamed sections use replacement semantics by logical section key
 - providers may degrade safely to final-object-only behavior when native structured streaming is unavailable
+- declared skills from `builder.useSkills([...])` are auto-loaded for `generateText(...)`, `generateJson(...)`, and `streamObject(...)`
+- deeper reference files are still an explicit handler choice via `references: [...]`
 
 Example:
 

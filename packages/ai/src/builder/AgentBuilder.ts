@@ -23,6 +23,8 @@ import {
 	validate,
 } from '@purista/core'
 import { z } from 'zod'
+import type { ExternalBinding, ExternalBindingSet } from '../bridge/externalRuntime.js'
+import type { AgentAttachment, AgentInputPart } from '../input/types.js'
 import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import { toProtocolSseEvents } from '../protocol/sse.js'
@@ -41,6 +43,7 @@ import { createAgentExecutionBudget } from '../runtime/executionBudget.js'
 import { resolveAgentExecutionLimits } from '../runtime/policy.js'
 import type { AgentRunError, AgentRunState } from '../runtime/runState.js'
 import { createAgentTerminalResult } from '../runtime/terminalResult.js'
+import type { SkillDocument, SkillReferenceDocument } from '../skills/fileSystem.js'
 import type { AgentDefinition, AgentInfo, AgentInstanceOptions, AgentTerminalResult } from '../types/AgentDefinition.js'
 import type {
 	AgentExecutionMode,
@@ -1704,6 +1707,7 @@ export class AgentBuilder<
 					Request extends {
 						skills?: unknown
 						bindings?: unknown
+						references?: unknown
 					},
 				>(
 					request: Request,
@@ -1785,8 +1789,13 @@ export class AgentBuilder<
 					if (provider.generateJson) {
 						modelApi.generateJson = async <T = unknown>(request: {
 							prompt: string
+							input?: AgentInputPart[]
+							attachments?: AgentAttachment[]
 							context?: string
 							developerInstruction?: string | string[]
+							skills?: Array<Pick<SkillDocument, 'name' | 'content'>>
+							references?: Array<Pick<SkillReferenceDocument, 'skillName' | 'relativePath' | 'content'>>
+							bindings?: ExternalBindingSet | ExternalBinding[]
 							schema?: ProviderJsonRequest['schema']
 							metadata?: Record<string, unknown>
 						}): Promise<{
@@ -1802,17 +1811,18 @@ export class AgentBuilder<
 							const requestStartedAt = Date.now()
 							try {
 								executionBudget.consumeModelStep({ alias, callKind: 'generateJson' })
+								const preparedRequest = await applyAutomaticModelRequestDefaults(request)
 								const metadata = addAiSdkTelemetry(
 									await resolvePreparedMetadata({
 										alias,
 										callKind: 'generateJson',
-										requestMetadata: request.metadata,
+										requestMetadata: preparedRequest.metadata,
 									}),
 									'generateJson',
 									alias,
 								)
 								const result = await provider.generateJson?.({
-									...request,
+									...preparedRequest,
 									metadata,
 								})
 								if (!result) {
@@ -1910,18 +1920,19 @@ export class AgentBuilder<
 							const resolveStream = async () => {
 								streamHandlePromise ??= (async () => {
 									try {
+										const preparedRequest = await applyAutomaticModelRequestDefaults(request)
 										const metadata = addAiSdkTelemetry(
 											await resolvePreparedMetadata({
 												alias,
 												callKind: 'generateJson',
-												requestMetadata: request.metadata,
+												requestMetadata: preparedRequest.metadata,
 											}),
 											'generateJson',
 											alias,
 										)
 										if (provider.streamObject) {
 											const streamHandle = provider.streamObject<T>({
-												...request,
+												...preparedRequest,
 												metadata,
 											})
 											if (!streamHandle) {
@@ -1934,7 +1945,7 @@ export class AgentBuilder<
 										}
 
 										const fallbackFinal = await provider.generateJson?.<T>({
-											...request,
+											...preparedRequest,
 											metadata,
 										})
 										if (!fallbackFinal) {

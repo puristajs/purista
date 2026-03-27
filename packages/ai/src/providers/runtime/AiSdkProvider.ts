@@ -514,6 +514,9 @@ export class AiSdkProvider implements ModelProvider {
 					prompt: request.prompt,
 					input: request.input,
 					attachments: request.attachments,
+					skills: request.skills,
+					references: request.references,
+					bindings: request.bindings,
 					metadata: request.metadata,
 				})
 				const promptInput = adaptedRequest.messages
@@ -664,6 +667,9 @@ export class AiSdkProvider implements ModelProvider {
 						prompt: request.prompt,
 						input: request.input,
 						attachments: request.attachments,
+						skills: request.skills,
+						references: request.references,
+						bindings: request.bindings,
 						metadata: request.metadata,
 					})
 					const promptInput = adaptedRequest.messages

@@ -2,7 +2,7 @@ import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
 import { afterEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
-import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
+import type { ModelProvider, ProviderJsonRequest, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import { invokeAgent } from '../runtime/invokeAgent.js'
 import { AgentBuilder } from './AgentBuilder.js'
 
@@ -171,13 +171,22 @@ class RecordingProvider implements ModelProvider {
 
 class AutomaticDefaultsProvider implements ModelProvider {
 	readonly name = 'automatic-defaults-provider'
-	readonly capabilities = { text: true, stream: true }
-	lastRequest?: ProviderRequest
+	readonly capabilities = { text: true, stream: true, json: true }
+	lastRequest?: ProviderRequest | ProviderJsonRequest
 
 	async generate(request: ProviderRequest) {
 		this.lastRequest = request
 		return {
 			output: 'ok',
+			tokens: { prompt: 1, completion: 1 },
+		}
+	}
+
+	async generateJson(request: ProviderJsonRequest) {
+		this.lastRequest = request
+		return {
+			data: { ok: true },
+			text: '{"ok":true}',
 			tokens: { prompt: 1, completion: 1 },
 		}
 	}
@@ -455,6 +464,118 @@ describe('AgentBuilder', () => {
 					prompt: payload.prompt,
 				})
 				return { message: answer }
+			})
+			.build()
+
+		const bridge = new DefaultEventBridge()
+		bridges.push(bridge)
+		await bridge.start()
+
+		const instance = await definition.getInstance(bridge, {
+			models: { 'openai:primary': provider },
+			skills: {
+				'spec-elicitation': {
+					content: 'Ask clarifying questions first.',
+				},
+			},
+		})
+
+		await instance.start()
+		try {
+			await instance.invoke({
+				payload: { prompt: 'Help' },
+			})
+			expect(provider.lastRequest?.skills).toEqual([
+				expect.objectContaining({
+					name: 'spec-elicitation',
+					content: 'Ask clarifying questions first.',
+				}),
+			])
+			const bindings = Array.isArray(provider.lastRequest?.bindings)
+				? provider.lastRequest?.bindings
+				: Object.values(provider.lastRequest?.bindings ?? {})
+			expect(bindings.map(binding => binding.name)).toEqual(
+				expect.arrayContaining(['support.1.lookupFaq', 'triageAgent.1.run']),
+			)
+		} finally {
+			await instance.stop()
+		}
+	})
+
+	it('automatically injects declared skills and allowlisted bindings into model json calls', async () => {
+		const provider = new AutomaticDefaultsProvider()
+		const definition = new AgentBuilder({
+			agentName: 'autoJsonDefaultsAgent',
+			agentVersion: '1',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string() }))
+			.defineModel('openai:primary', { capabilities: ['json'] })
+			.useSkills(['spec-elicitation'])
+			.canInvoke('support', '1', 'lookupFaq')
+			.canInvokeAgent('triageAgent', '1')
+			.setHandler(async (context, payload) => {
+				await context.ai.models['openai:primary'].generateJson({
+					prompt: payload.prompt,
+					schema: z.object({ ok: z.boolean() }),
+				})
+				return { message: 'ok' }
+			})
+			.build()
+
+		const bridge = new DefaultEventBridge()
+		bridges.push(bridge)
+		await bridge.start()
+
+		const instance = await definition.getInstance(bridge, {
+			models: { 'openai:primary': provider },
+			skills: {
+				'spec-elicitation': {
+					content: 'Ask clarifying questions first.',
+				},
+			},
+		})
+
+		await instance.start()
+		try {
+			await instance.invoke({
+				payload: { prompt: 'Help' },
+			})
+			expect(provider.lastRequest?.skills).toEqual([
+				expect.objectContaining({
+					name: 'spec-elicitation',
+					content: 'Ask clarifying questions first.',
+				}),
+			])
+			const bindings = Array.isArray(provider.lastRequest?.bindings)
+				? provider.lastRequest?.bindings
+				: Object.values(provider.lastRequest?.bindings ?? {})
+			expect(bindings.map(binding => binding.name)).toEqual(
+				expect.arrayContaining(['support.1.lookupFaq', 'triageAgent.1.run']),
+			)
+		} finally {
+			await instance.stop()
+		}
+	})
+
+	it('automatically injects declared skills and allowlisted bindings into model object streams', async () => {
+		const provider = new AutomaticDefaultsProvider()
+		const definition = new AgentBuilder({
+			agentName: 'autoObjectStreamDefaultsAgent',
+			agentVersion: '1',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string() }))
+			.defineModel('openai:primary', { capabilities: ['json', 'stream'] })
+			.useSkills(['spec-elicitation'])
+			.canInvoke('support', '1', 'lookupFaq')
+			.canInvokeAgent('triageAgent', '1')
+			.setHandler(async (context, payload) => {
+				await context.ai.models['openai:primary']
+					.streamObject({
+						prompt: payload.prompt,
+						schema: z.object({ ok: z.boolean() }),
+					})
+					.final()
+				return { message: 'ok' }
 			})
 			.build()
 

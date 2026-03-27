@@ -93,6 +93,18 @@ This is the central hub for AI-related functionality.
   ```ts
   const draft = await context.ai.models['openai:primary'].generateText({ prompt });
   ```
+  Declared skills from `useSkills([...])` are injected automatically for `generateText(...)`, `generateJson(...)`, and `streamObject(...)`.
+  Load deeper reference files explicitly when the handler needs targeted framework knowledge:
+  ```ts
+  const references = await context.ai.skills.loadReferences('purista');
+  const result = await context.ai.models['openai:primary'].generateJson({
+    prompt,
+    schema,
+    references: references.filter((entry) =>
+      ['references/02-spec-to-architecture.md'].includes(entry.relativePath),
+    ),
+  });
+  ```
 - **`context.ai.reply`**: Stream public assistant replies through the current turn.
   ```ts
   const answer = await context.ai.reply.generate({
