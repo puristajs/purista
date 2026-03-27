@@ -203,6 +203,30 @@ This searches only within the declared names from `.useSkills([...])`.
 const references = await context.ai.skills.loadReferences('support-workflow')
 ```
 
+Use this when the handler truly wants every deeper reference for that one skill.
+
+### Select references dynamically when needed
+
+For larger umbrella skills, prefer dynamic selection instead of hardcoding a fixed file list:
+
+```ts
+const references = await context.ai.skills.selectReferences({
+  skillName: 'purista',
+  queries: [
+    payload.prompt,
+    'service boundaries builders contracts',
+  ],
+  relativePathPrefixes: ['references/'],
+  limit: 4,
+})
+```
+
+This keeps the agent generic:
+
+- the umbrella skill is always available through `.useSkills([...])`
+- the handler chooses only the focused sub-documents needed for the current task
+- apps do not need brittle per-agent hardcoded reference file lists
+
 ### Render for prompts
 
 ```ts
@@ -237,6 +261,20 @@ const draft = await context.ai.reply.compose({
   prompt,
 })
 ```
+
+## Skills vs references
+
+Use this decision rule:
+
+- declare umbrella skills with `.useSkills([...])`
+- let PURISTA inject those root skills automatically into `generateText(...)`, `generateJson(...)`, and `streamObject(...)`
+- load or select deeper references only when the task needs more focused knowledge
+
+That separation matters:
+
+- skills provide the general working model
+- references provide targeted depth
+- handlers stay explicit about when narrower framework or domain guidance is actually needed
 
 ## End-To-End Example
 

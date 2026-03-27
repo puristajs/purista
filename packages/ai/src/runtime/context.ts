@@ -278,6 +278,13 @@ export type ProtocolBufferOptions = {
 	onEnvelope?: (envelope: AgentProtocolEnvelope) => void | Promise<void>
 }
 
+export type SkillReferenceSelectionInput = {
+	skillName: string
+	queries?: string[]
+	limit?: number
+	relativePathPrefixes?: string[]
+}
+
 export type ProtocolContext<
 	Payload = unknown,
 	Parameter = unknown,
@@ -729,6 +736,7 @@ export type AgentHandlerContext<
 			load(skillName: string): Promise<SkillDocument>
 			loadMany(skillNames: string[]): Promise<SkillDocument[]>
 			loadReferences(skillName: string): Promise<SkillReferenceDocument[]>
+			selectReferences(input: SkillReferenceSelectionInput): Promise<SkillReferenceDocument[]>
 			search(input?: SkillSearchInput): Promise<SkillDocument[]>
 		}
 		policy: AgentPolicyHelpers
@@ -1362,6 +1370,32 @@ const uniqueSkillStrings = (values: string[] | undefined): string[] => [
 	...new Set((values ?? []).map(entry => entry.trim()).filter(Boolean)),
 ]
 
+const scoreSkillReferenceDocument = (document: SkillReferenceDocument, queries: string[]) => {
+	if (queries.length === 0) {
+		return 1
+	}
+	const haystack = `${document.relativePath}\n${document.content}`.toLowerCase()
+	let score = 0
+	for (const query of queries) {
+		if (!query) {
+			continue
+		}
+		if (haystack.includes(query)) {
+			score += query.length > 18 ? 5 : 3
+		}
+		const queryTerms = query.split(/\s+/).filter(Boolean)
+		for (const term of queryTerms) {
+			if (term.length < 3) {
+				continue
+			}
+			if (haystack.includes(term)) {
+				score += 1
+			}
+		}
+	}
+	return score
+}
+
 const createSkillHelpers = (resources: Record<string, unknown>, manifest: AgentManifest) => {
 	const declaredNames = uniqueSkillStrings(manifest.skills?.names)
 	const ensureSkillResource = () => {
@@ -1407,6 +1441,30 @@ const createSkillHelpers = (resources: Record<string, unknown>, manifest: AgentM
 		loadReferences: async (skillName: string) => {
 			ensureDeclared([skillName.trim()])
 			return await ensureSkillResource().loadReferences(skillName)
+		},
+		selectReferences: async (input: SkillReferenceSelectionInput) => {
+			const skillName = input.skillName.trim()
+			ensureDeclared([skillName])
+			const normalizedPrefixes = uniqueSkillStrings(input.relativePathPrefixes)
+			const normalizedQueries = uniqueSkillStrings(input.queries).map(entry => entry.toLowerCase())
+			const limit = Math.max(1, input.limit ?? 6)
+			const references = await ensureSkillResource().loadReferences(skillName)
+			const filtered =
+				normalizedPrefixes.length > 0
+					? references.filter(reference => normalizedPrefixes.some(prefix => reference.relativePath.startsWith(prefix)))
+					: references
+			return filtered
+				.map(reference => ({
+					reference,
+					score: scoreSkillReferenceDocument(reference, normalizedQueries),
+				}))
+				.filter(entry => entry.score > 0)
+				.sort(
+					(left, right) =>
+						right.score - left.score || left.reference.relativePath.localeCompare(right.reference.relativePath),
+				)
+				.slice(0, limit)
+				.map(entry => entry.reference)
 		},
 		search: async (input: SkillSearchInput = {}) => {
 			const requestedNames = uniqueSkillStrings(input.skillNames)

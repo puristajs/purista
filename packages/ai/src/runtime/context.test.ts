@@ -1363,4 +1363,63 @@ Map requirements to services and queues.`,
 			names: ['spec-elicitation', 'architecture-synthesis'],
 		})
 	})
+
+	it('selects relevant references from a declared skill dynamically', async () => {
+		const skillRoot = await mkdtemp(join(tmpdir(), 'skill-select-'))
+		await mkdir(join(skillRoot, 'purista', 'references'), { recursive: true })
+		await writeFile(
+			join(skillRoot, 'purista', 'SKILL.md'),
+			['---', 'name: purista', 'description: Canonical Purista skill', '---', '', '# PURISTA'].join('\n'),
+		)
+		await writeFile(
+			join(skillRoot, 'purista', 'references', '02-spec-to-architecture.md'),
+			'Use business capabilities, actors, and flows to derive service boundaries and architecture.',
+		)
+		await writeFile(
+			join(skillRoot, 'purista', 'references', '03-service-builders-and-contracts.md'),
+			'Choose service builders, commands, events, and contracts explicitly.',
+		)
+		await writeFile(
+			join(skillRoot, 'purista', 'references', '08-testing-observability-and-deployment.md'),
+			'Testing and deployment guidance for Purista.',
+		)
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {
+				skills: new FileSkillResource({ roots: [skillRoot] }),
+			},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest: {
+				...manifest,
+				skills: {
+					resourceName: 'skills',
+					names: ['purista'],
+				},
+			},
+		})
+
+		await expect(
+			context.ai.skills.selectReferences({
+				skillName: 'purista',
+				queries: ['architecture service boundaries builders contracts'],
+				limit: 2,
+				relativePathPrefixes: ['references/'],
+			}),
+		).resolves.toEqual([
+			expect.objectContaining({
+				relativePath: 'references/02-spec-to-architecture.md',
+			}),
+			expect.objectContaining({
+				relativePath: 'references/03-service-builders-and-contracts.md',
+			}),
+		])
+	})
 })

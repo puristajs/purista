@@ -101,7 +101,7 @@ Design rules:
 - streamed sections use replacement semantics by logical section key
 - providers may degrade safely to final-object-only behavior when native structured streaming is unavailable
 - declared skills from `builder.useSkills([...])` are auto-loaded for `generateText(...)`, `generateJson(...)`, and `streamObject(...)`
-- deeper reference files are still an explicit handler choice via `references: [...]`
+- deeper reference files remain an explicit handler choice via `references: [...]` or dynamic selection helpers
 
 Example:
 
@@ -135,6 +135,67 @@ context.io.stream.endStructuredObject({
 ```
 
 This is intended for apps such as Voyage, where lower workers stream live structured progress while only the final deliverable is persisted into markdown truth or workflow state.
+
+## Skills and references
+
+Declared root skills from `builder.useSkills([...])` are injected automatically into:
+
+- `generateText(...)`
+- `generateJson(...)`
+- `streamObject(...)`
+
+That automatic injection gives the model the umbrella skill context. Deeper reference documents should still be selected explicitly by the handler when the task needs more focused knowledge.
+
+Use `context.ai.skills.selectReferences(...)` when you want targeted reference loading without hardcoding a fixed file list:
+
+```ts
+const references = await context.ai.skills.selectReferences({
+  skillName: "purista",
+  queries: [
+    "service boundaries builders contracts",
+    "implementation planning work packages",
+  ],
+  relativePathPrefixes: ["references/"],
+  limit: 4,
+})
+
+const result = await context.ai.models["openai:primary"].generateJson({
+  prompt,
+  schema,
+  references,
+})
+```
+
+This is the preferred pattern for generic agents:
+
+- declare the umbrella skill once with `useSkills([...])`
+- let the model always see that root skill
+- select deeper references dynamically from the handler based on the actual task
+
+## Conversation retention
+
+Conversation persistence is explicit agent policy, not something to leave to chance.
+
+Framework default:
+
+- strategy: `full`
+- max frames: `40`
+
+Use `persistConversation(...)` on agents that need a larger or different retention window:
+
+```ts
+new AgentBuilder({ agentName: "specAgent", agentVersion: "1" })
+  .persistConversation("user", {
+    strategy: "full",
+    maxFrames: 72,
+    storeName: "spec-agent-history",
+  })
+```
+
+Recommended rule:
+
+- use explicit full-history budgets for agents that synthesize business truth, architecture, or plans
+- use smaller summarized histories only when the agent truly benefits from compression more than exact context preservation
 
 ## Public streamed replies
 
