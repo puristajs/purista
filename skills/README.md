@@ -16,6 +16,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - The shared `purista` skill is the canonical framework-memory layer for models that do not already know PURISTA.
 - `SKILL.md` should stay compact and route the model to deeper `references/` documents.
 - The skill should teach definition, implementation, configuration, and instantiation explicitly.
+- Contract guidance should prefer boundary-local consumer schemas over one oversized shared schema reused across many services.
 - Use `skills/purista-skill-maintainer` when creating or updating catalog entries so the maintenance workflow stays consistent.
 
 ## Layering

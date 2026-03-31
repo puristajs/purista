@@ -27,6 +27,10 @@ Keep this distinction visible. Do not collapse builder definitions, runtime bind
 - Model deterministic truth explicitly. Prompts, projections, and readiness summaries are weaker than canonical truth.
 - Put external systems behind resources or declared runtime bindings.
 - Keep schemas explicit for commands, events, queues, streams, and agent inputs/outputs.
+- Do not share one large Zod schema across multiple services or consumers.
+- Let each consumer define its own schema again for the boundary it actually reads.
+- Keep required fields mandatory, but mark extra producer-only fields optional or omit them entirely from the consumer schema.
+- Prefer consumer-local schemas that only select the fields the consumer really uses; Zod will strip the rest and keep payloads smaller.
 - Treat transports, bridges, stores, sandbox, and providers as runtime wiring, not service definition.
 
 ## Decision rules

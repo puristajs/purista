@@ -31,6 +31,7 @@ Use this checklist when creating or updating a skill.
 - “Decision rules” help choose the right PURISTA primitive
 - The PURISTA concept is taught, not only referenced
 - The builder role is clear where relevant: definition, implementation, configuration, instantiation
+- Schema guidance reinforces boundary-local consumer schemas instead of one oversized shared cross-service schema
 - Related skill links exist where they help the model navigate prerequisite or next-step concepts
 - File structures and package paths exist
 - “Read if needed” links point to real files
@@ -62,3 +63,4 @@ Use this checklist when creating or updating a skill.
 - No brittle over-constraint where flexible decision rules would be safer
 - No noisy cross-link sprawl with weak or circular relationships
 - The split between `SKILL.md` and `references/` is intentional and readable
+- Schema examples do not encourage consumers to import a bigger shared shape than they actually use

@@ -29,6 +29,7 @@ Read sources in this order before changing a skill:
 - Verify every file path, package path, and code snippet in the repo.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Do not split the framework back into many sibling skills unless there is a genuinely separate non-runtime concern.
+- When teaching schemas and contracts, prefer consumer-local schema definitions over one shared cross-service Zod schema unless every consumer truly needs the exact same shape.
 
 ## Decision rules
 - Keep one framework skill and split depth into references instead of adding more framework skill folders.
@@ -36,6 +37,7 @@ Read sources in this order before changing a skill:
 - Put only the routing model, core mental model, and highest-signal rules into `SKILL.md`.
 - Put examples, nuanced decisions, and topic-specific teaching into `references/`.
 - Add code snippets only when they materially teach a PURISTA concept.
+- If a producer emits a broad payload, document that consumers should redefine a narrower schema locally and keep only the fields they actually use.
 
 ## Required read order
 - `specs/00-context.md`
