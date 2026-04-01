@@ -2,6 +2,7 @@ import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import { EventBridgeLateResponseHandling } from '../core/EventBridge/types/EventBridgeLateResponseHandling.js'
 
 /**
  * Mocks the eventBridge and stubs the methods
@@ -27,6 +28,15 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
 		name: 'EventBridgeMock',
 		instanceId: 'mockedInstanceId',
 		defaultCommandTimeout: 30000,
+		capabilities: {
+			supportsStreams: true,
+			durableCommands: false,
+			durableSubscriptions: false,
+			manualAckSupported: false,
+			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
+			gracefulDrainSupported: false,
+			nativeDeadLettering: false,
+		},
 		emitMessage,
 		registerCommand,
 		registerSubscription,

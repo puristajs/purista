@@ -3,6 +3,7 @@ import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } fr
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
 import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'

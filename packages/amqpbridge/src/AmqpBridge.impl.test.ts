@@ -1,7 +1,7 @@
 import {
 	getCommandMessageMock,
 	getCommandSuccessMessageMock,
-	type PendigInvocation,
+	type PendingInvocationRegistry,
 	StatusCode,
 	type Subscription,
 	UnhandledError,
@@ -14,7 +14,7 @@ import { AmqpBridge } from './AmqpBridge.impl.js'
 type BridgeInternals = {
 	serviceFunctions: Map<string, { cb: (message: unknown) => Promise<unknown>; channel: Channel }>
 	subscriptions: Map<string, { cb: (message: unknown) => Promise<unknown>; channel: Channel }>
-	pendingInvocations: Map<string, PendigInvocation>
+	pendingInvocations: PendingInvocationRegistry<unknown>
 	connection?: { createChannel?: () => Promise<unknown>; close?: () => Promise<unknown> }
 	channel?: {
 		publish?: (...args: unknown[]) => unknown
@@ -175,7 +175,6 @@ describe('AmqpBridge', () => {
 	it('rejects pending invocations during destroy', async () => {
 		const bridge = new AmqpBridge({ defaultCommandTimeout: 5 })
 		const internals = getBridgeInternals(bridge)
-		const reject = vi.fn()
 		const channel = {
 			cancel: vi.fn().mockResolvedValue(undefined),
 			close: vi.fn().mockResolvedValue(undefined),
@@ -187,15 +186,59 @@ describe('AmqpBridge', () => {
 		internals.channel = channel
 		internals.connection = connection
 		internals.consumerRegistrations = [{ channel, tag: 'ctag-1' }]
-		internals.pendingInvocations.set('cid-1', { resolve: vi.fn(), reject })
+		const pendingInvocation = internals.pendingInvocations.register('cid-1', 1_000, 'trace-1')
 
 		await bridge.destroy()
 
 		expect(channel.cancel).toHaveBeenCalledWith('ctag-1')
-		expect(reject).toHaveBeenCalledTimes(1)
-		expect(reject).toHaveBeenCalledWith(expect.objectContaining({ errorCode: StatusCode.ServiceUnavailable }))
+		await expect(pendingInvocation).rejects.toMatchObject({ errorCode: StatusCode.ServiceUnavailable })
 		expect(internals.pendingInvocations.size).toBe(0)
 		expect(await bridge.isHealthy()).toBe(false)
 		expect(await bridge.isReady()).toBe(false)
+	})
+
+	it('uses non-auto-delete durable command queues with manual ack', async () => {
+		const bridge = new AmqpBridge({ prefetch: 5 })
+		const internals = getBridgeInternals(bridge)
+		const channel = {
+			on: vi.fn(),
+			prefetch: vi.fn().mockResolvedValue(undefined),
+			assertQueue: vi.fn().mockResolvedValue({ queue: 'purista.cmd.Users.1.create' }),
+			bindQueue: vi.fn().mockResolvedValue(undefined),
+			consume: vi.fn().mockResolvedValue({ consumerTag: 'ctag-1' }),
+		}
+		internals.connection = {
+			createChannel: vi.fn().mockResolvedValue(channel),
+		}
+		vi.spyOn(bridge, 'emitMessage').mockResolvedValue({} as never)
+
+		await bridge.registerCommand(
+			{
+				serviceName: 'Users',
+				serviceVersion: '1',
+				serviceTarget: 'create',
+			},
+			async () => getCommandSuccessMessageMock({}),
+			{} as never,
+			{
+				autoacknowledge: true,
+				durable: true,
+				shared: true,
+			},
+		)
+
+		expect(channel.prefetch).toHaveBeenCalledWith(5)
+		expect(channel.assertQueue).toHaveBeenCalledWith(
+			'purista.cmd.Users.1.create',
+			expect.objectContaining({
+				durable: true,
+				autoDelete: false,
+			}),
+		)
+		expect(channel.consume).toHaveBeenCalledWith(
+			'purista.cmd.Users.1.create',
+			expect.any(Function),
+			expect.objectContaining({ noAck: false }),
+		)
 	})
 })

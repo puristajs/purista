@@ -40,9 +40,18 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
 
 			const correlationId = packet.properties?.correlationData?.toString() ?? message.correlationId
 
-			const invocation = this.pendingInvocations.get(correlationId)
+			const result = isCommandSuccessResponse(message)
+				? this.pendingInvocations.resolve(correlationId, message.payload)
+				: this.pendingInvocations.reject(
+						correlationId,
+						message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message),
+					)
 
-			if (!invocation) {
+			if (result !== 'resolved' && result !== 'rejected') {
+				if (result === 'late') {
+					log.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
+					return
+				}
 				const err = new UnhandledError(
 					StatusCode.InternalServerError,
 					`received response with invalid correlationId ${correlationId}`,
@@ -57,9 +66,7 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
 				return
 			}
 
-			if (isCommandSuccessResponse(message)) {
-				invocation.resolve(message.payload)
-			} else if (isCommandErrorResponse(message)) {
+			if (isCommandErrorResponse(message)) {
 				const error = message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message)
 				log.error({ err: error }, error.message)
 				span.recordException(error)
@@ -67,7 +74,6 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
 					code: SpanStatusCode.ERROR,
 					message: error.message,
 				})
-				invocation.reject(error)
 			}
 		},
 	)

@@ -14,6 +14,7 @@ type LeaseEntry = {
 	leaseId: string
 	message: QueueMessage
 	expiresAt: number
+	queueName: string
 }
 
 export type DefaultQueueBridgeOptions = {
@@ -98,6 +99,7 @@ export class DefaultQueueBridge implements QueueBridge {
 	}
 
 	async leaseNext(queueName: string, _opts?: QueueLeaseOptions): Promise<QueueLease | undefined> {
+		this.recoverExpiredLeases(queueName)
 		const queue = this.queues.get(queueName)
 		if (!queue || queue.length === 0) {
 			return undefined
@@ -129,6 +131,7 @@ export class DefaultQueueBridge implements QueueBridge {
 			leaseId,
 			message,
 			expiresAt: message.leaseExpiresAt,
+			queueName,
 		})
 		this.leases.set(queueName, leaseEntries)
 
@@ -160,16 +163,12 @@ export class DefaultQueueBridge implements QueueBridge {
 		leaseEntries.delete(leaseId)
 
 		const message = lease.message
-		if (request.delayMs) {
-			message.scheduledAt = Date.now() + request.delayMs
-		} else {
-			message.scheduledAt = Date.now()
-		}
+		this.applyRetryReason(message, request.reason)
+		message.leaseExpiresAt = 0
+		message.scheduledAt = request.delayMs ? Date.now() + request.delayMs : Date.now()
 
 		if (message.attempt >= message.maxAttempts) {
-			const dlq = this.deadLetters.get(queueName) ?? []
-			dlq.push(message)
-			this.deadLetters.set(queueName, dlq)
+			await this.moveToDeadLetter(queueName, message, request.reason ?? 'max_attempts_exceeded')
 			return
 		}
 
@@ -186,24 +185,68 @@ export class DefaultQueueBridge implements QueueBridge {
 				'x-purista-dead-letter-reason': reason,
 			}
 		}
+		message.leaseExpiresAt = 0
 		dlq.push(message)
 		this.deadLetters.set(queueName, dlq)
 	}
 
 	async metrics(queueName: string): Promise<QueueMetrics> {
+		this.recoverExpiredLeases(queueName)
 		const queue = this.queues.get(queueName) ?? []
 		const inflight = this.leases.get(queueName) ?? new Map()
 		const dlq = this.deadLetters.get(queueName) ?? []
 		const now = Date.now()
 		const pending = queue.length
-		const oldestAgeMs = queue.length > 0 ? now - (queue[0].scheduledAt ?? queue[0].createdAt) : undefined
+		const retries =
+			queue.reduce((count, item) => count + Math.max(0, item.attempt - 1), 0) +
+			Array.from(inflight.values()).reduce((count, lease) => count + Math.max(0, lease.message.attempt - 1), 0)
+		const oldestAgeMs = queue.length > 0 ? now - (queue[0].createdAt ?? now) : undefined
 
 		return {
 			pending,
 			inflight: inflight.size,
 			deadLetter: dlq.length,
-			retries: pending + inflight.size,
+			retries,
 			oldestAgeMs,
+		}
+	}
+
+	private recoverExpiredLeases(queueName: string) {
+		const now = Date.now()
+		const leaseEntries = this.leases.get(queueName)
+		if (!leaseEntries || leaseEntries.size === 0) {
+			return
+		}
+
+		for (const [leaseId, lease] of Array.from(leaseEntries.entries())) {
+			if (lease.expiresAt > now) {
+				continue
+			}
+			leaseEntries.delete(leaseId)
+
+			const message = lease.message
+			message.leaseExpiresAt = 0
+			this.applyRetryReason(message, 'lease_expired')
+
+			if (message.attempt >= message.maxAttempts) {
+				void this.moveToDeadLetter(lease.queueName, message, 'lease_expired')
+				continue
+			}
+
+			message.scheduledAt = now
+			const queue = this.queues.get(lease.queueName) ?? []
+			queue.push(message)
+			this.queues.set(lease.queueName, queue)
+		}
+	}
+
+	private applyRetryReason(message: QueueMessage, reason?: string) {
+		if (!reason) {
+			return
+		}
+		message.headers = {
+			...message.headers,
+			'x-purista-last-retry-reason': reason,
 		}
 	}
 }

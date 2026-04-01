@@ -10,13 +10,13 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 
 ## Support matrix
 
-| bridge | scale out | durable backlog | typical delivery mode | stream support (`openStream`) |
+| bridge | scale out | durable backlog | typical delivery mode | late response handling | stream support (`openStream`) |
 |---|---:|---:|---|---:|
-| [Default](./default_event_bridge.md) | no | no | at-most-once (in-memory) | yes |
-| [AMQP](./amqp.md) | yes | yes | at-least-once (queue + ack based) | no (currently) |
-| [MQTT](./mqtt.md) | yes | broker-dependent | QoS dependent (0/1/2) | no (currently) |
-| [NATS](./nats.md) | yes | no (core NATS) | typically at-most-once | no (currently) |
-| [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | no (currently) |
+| [Default](./default_event_bridge.md) | no | no | at-most-once (in-memory) | ignored with warning after timeout | yes |
+| [AMQP](./amqp.md) | yes | yes | at-least-once for durable queues with manual ack | ignored with warning after timeout | no (currently) |
+| [MQTT](./mqtt.md) | yes | broker-dependent | QoS dependent (0/1/2) | ignored with warning after timeout | no (currently) |
+| [NATS](./nats.md) | yes | yes with JetStream, no with core NATS | at-most-once on core NATS, at-least-once with JetStream durable consumers | not applicable | no (currently) |
+| [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | not applicable | no (currently) |
 
 ### Queue bridge support
 
@@ -37,12 +37,15 @@ PURISTA itself provides typed message contracts and processing flow. Delivery gu
 - `at-least-once`: safer delivery, but duplicates are possible.
 - `exactly-once`: generally not guaranteed end-to-end in distributed systems; design handlers to be idempotent.
 
+Late command responses are normalized across invoke-capable bridges in this slice. Once the caller-side timeout fires, PURISTA keeps a short-lived tombstone for the correlation id and ignores any later response with a warning instead of raising a bridge error.
+
 ## Reliability checklist
 
 - configure broker durability/retry features explicitly
 - keep bridge settings identical across instances
 - implement idempotency in command/subscription side effects
 - define timeout/retry policies intentionally (do not rely on defaults only)
+- verify shutdown, readiness, and reconnect semantics in integration tests
 - test reconnect and broker outage scenarios in integration tests
 
 ## When to use which bridge

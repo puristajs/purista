@@ -176,5 +176,30 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			const dlqMetrics = await activeBridge.metrics(dlqName)
 			expect(dlqMetrics.deadLetter).toBeGreaterThanOrEqual(1)
 		})
+
+		it('recovers expired leases and requeues the job', async () => {
+			if (!ensureReady()) {
+				return
+			}
+
+			const queueName = `contract-expire-${randomUUID()}`
+			const activeBridge = getBridgeOrThrow()
+			await activeBridge.enqueue({
+				queueName,
+				payload: { id: 'expiring-job' },
+				maxAttempts: 3,
+				leaseTtlMs: 40,
+			})
+
+			const firstLease = await waitForLease(queueName)
+			expect(firstLease.message.attempt).toBe(1)
+
+			await delay(80)
+
+			const recoveredLease = await waitForLease(queueName)
+			expect(recoveredLease.message.id).toBe(firstLease.message.id)
+			expect(recoveredLease.message.attempt).toBeGreaterThanOrEqual(2)
+			await activeBridge.ack(queueName, recoveredLease.leaseId)
+		})
 	})
 }

@@ -10,10 +10,8 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessage,
 	EBMessageAddress,
-	EBMessageId,
 	EventBridge,
 	EventBridgeConfig,
-	PendigInvocation,
 	Subscription,
 } from '@purista/core'
 import {
@@ -22,10 +20,12 @@ import {
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
+	EventBridgeLateResponseHandling,
 	getNewCorrelationId,
 	getNewEBMessageId,
 	getNewInstanceId,
 	isCommandResponse,
+	PendingInvocationRegistry,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
@@ -65,7 +65,11 @@ import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
  */
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
 	public client: MqttClient | undefined
-	public pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+	public pendingInvocations = new PendingInvocationRegistry<unknown>({
+		onLateResponse: correlationId => {
+			this.logger.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
+		},
+	})
 	private registeredSubscriptionTopics = new Map<string, string>()
 	private router = new TopicRouter()
 
@@ -83,6 +87,15 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 			clientId: config?.clientId ?? config?.instanceId ?? getNewInstanceId(),
 		}
 		super('MqttBridge', conf)
+		this.capabilities = {
+			supportsStreams: false,
+			durableCommands: false,
+			durableSubscriptions: false,
+			manualAckSupported: false,
+			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
+			gracefulDrainSupported: true,
+			nativeDeadLettering: false,
+		}
 	}
 
 	async start() {
@@ -239,43 +252,11 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 					otp: serializeOtp(),
 				})
 
-				const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
-
-				const removeFromPending = () => {
-					if (!this.pendingInvocations.delete(correlationId)) {
-						this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
-					}
-				}
-
-				const executionPromise = new Promise<T>((resolve, reject) => {
-					const timeout = setTimeout(() => {
-						const err = new UnhandledError(
-							StatusCode.GatewayTimeout,
-							'invocation timed out',
-							undefined,
-							command.traceId,
-						)
-						log.warn({ err })
-						rejectFn(err)
-					}, commandTimeout)
-
-					const resolveFn = (successPayload: T) => {
-						clearTimeout(timeout)
-						removeFromPending()
-						resolve(successPayload)
-					}
-
-					const rejectFn = (err: unknown) => {
-						clearTimeout(timeout)
-						removeFromPending()
-						reject(err)
-					}
-
-					this.pendingInvocations.set(command.correlationId, {
-						resolve: resolveFn,
-						reject: rejectFn,
-					})
-				})
+				const executionPromise = this.pendingInvocations.register(
+					command.correlationId,
+					commandTimeout,
+					command.traceId,
+				) as Promise<T>
 
 				span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
 				span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
@@ -411,6 +392,18 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 	}
 
 	async destroy() {
-		this.client?.end(true)
+		this.pendingInvocations.rejectAll(new UnhandledError(StatusCode.ServiceUnavailable, 'mqtt bridge closed'))
+		const drained = await this.waitForInFlightDrain()
+		if (!drained) {
+			this.logger.error('Some MQTT command or subscription handlers did not finish before shutdown')
+		}
+		const client = this.client
+		this.client = undefined
+		if (!client) {
+			return
+		}
+		await new Promise<void>(resolve => {
+			client.end(false, {}, () => resolve())
+		})
 	}
 }

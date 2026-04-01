@@ -22,6 +22,7 @@ import {
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
+	EventBridgeLateResponseHandling,
 	getErrorMessageForCode,
 	getNewCorrelationId,
 	getNewEBMessageId,
@@ -82,6 +83,15 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		}
 
 		super(conf.name ?? 'HttpEventBridge', conf)
+		this.capabilities = {
+			supportsStreams: false,
+			durableCommands: false,
+			durableSubscriptions: false,
+			manualAckSupported: false,
+			lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
+			gracefulDrainSupported: true,
+			nativeDeadLettering: false,
+		}
 
 		this.client = client
 
@@ -132,6 +142,8 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			port: this.config.serverPort,
 			hostname: this.config.serverHost,
 		})
+		this.isShuttingDown = false
+		this.isStarted = true
 
 		this.server.on('listening', () => {
 			this.emit(EventBridgeEventNames.EventbridgeConnected)
@@ -279,7 +291,9 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		eventBridgeConfig: DefinitionEventBridgeConfig,
 	): Promise<string> {
 		const fn = getCommandHandler.bind(this)
-		const handler = fn(address, cb, metadata, eventBridgeConfig, this.config.commandPayloadAsCloudEvent)
+		const rawHandler = fn(address, cb, metadata, eventBridgeConfig, this.config.commandPayloadAsCloudEvent)
+		const handler = ((...args: Parameters<typeof rawHandler>) =>
+			this.runInFlight(() => rawHandler(...args))) as typeof rawHandler
 
 		const path = this.client.getInternalPathForCommand(address)
 
@@ -293,7 +307,9 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			this.logger.debug({ apiPath })
 
 			const fnRest = getCommandHandlerRestApi.bind(this)
-			const handlerRest = fnRest(address, cb, metadata, eventBridgeConfig)
+			const rawHandlerRest = fnRest(address, cb, metadata, eventBridgeConfig)
+			const handlerRest = ((...args: Parameters<typeof rawHandlerRest>) =>
+				this.runInFlight(() => rawHandlerRest(...args))) as typeof rawHandlerRest
 
 			switch (httpMeta.method) {
 				case 'DELETE':
@@ -334,7 +350,9 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		}
 
 		const fn = getSubscriptionHandler.bind(this)
-		const handler = fn(subscription, cb, this.config.subscriptionPayloadAsCloudEvent)
+		const rawHandler = fn(subscription, cb, this.config.subscriptionPayloadAsCloudEvent)
+		const handler = ((...args: Parameters<typeof rawHandler>) =>
+			this.runInFlight(() => rawHandler(...args))) as typeof rawHandler
 
 		const path = this.client.getInternalPathForSubscription(subscription.subscriber)
 
@@ -365,10 +383,17 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		if (!this.server) {
 			return
 		}
+		this.isShuttingDown = true
 		if (this.server instanceof Server) {
 			this.server.closeIdleConnections()
 		}
+		const drained = await this.waitForInFlightDrain()
+		if (!drained) {
+			this.logger.error('Some HTTP bridge requests did not finish before shutdown')
+		}
 		const server = this.server
 		await new Promise(resolve => server.close(resolve))
+		this.isStarted = false
+		this.server = undefined
 	}
 }

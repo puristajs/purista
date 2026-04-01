@@ -50,5 +50,12 @@ export type NatsBridgeConfig = Prettify<
 		 * @default 10
 		 */
 		maxMessages: number
+
+		/**
+		 * Controls how durable registrations behave when JetStream durability is not implemented.
+		 *
+		 * @default strict
+		 */
+		durableSubscriptionMode: 'strict' | 'best-effort'
 	} & ConnectionOptions
 >

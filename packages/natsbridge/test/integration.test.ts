@@ -3,6 +3,7 @@ import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, Ser
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 import { createSandbox } from 'sinon'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
 import { NatsBridge } from '../src/index.js'
@@ -27,7 +28,7 @@ describeWithNats('@purista/natsbridge', () => {
 	const serviceConfigSchema = z.object({}).default({})
 
 	beforeAll(async () => {
-		container = await new NatsContainer(NATS_IMAGE).withStartupTimeout(30000).start()
+		container = await new NatsContainer(NATS_IMAGE).withJetStream().withStartupTimeout(30000).start()
 
 		eventbridge = new NatsBridge({
 			logger: logger.mock,

@@ -16,6 +16,7 @@ order: 301520
 | Delayed delivery | ✅ (sorted-set scheduler) |
 | Dead-letter queue | ✅ (dedicated Redis keys or custom suffix) |
 | Lease extension | ✅ (`PEXPIRE` heartbeat + extendLease) |
+| Lease expiry recovery | ✅ (atomic claim of expired leases before requeue) |
 | Metrics | ✅ (`context.queue.metrics.<queueId>`) |
 
 ## Configuration
@@ -36,13 +37,14 @@ await service.start()
 
 - Set a key prefix per environment/tenant to avoid collisions.
 - Enable Redis persistence/replication for true durability.
+- Keep one dead-letter suffix convention per environment; runtime storage, metrics, and service health now use the same resolved target name.
 - Override lifecycle defaults per queue when workloads differ (long-running AI jobs vs. short webhooks).
 
 ## Operational tips
 
 - Use Redis ACLs or network policies so only the queue bridge can touch the key prefix.
 - Monitor queue metrics (`pending`, `inFlight`, `deadLetter`, `oldestAgeMs`) to scale worker pools or alert on DLQ growth.
-- Combine Redis Sentinel/Cluster for HA; the bridge re-establishes leases after reconnects so jobs are not lost.
+- Combine Redis Sentinel/Cluster for HA; delayed jobs and expired leases are claimed atomically before being requeued.
 - Keep DLQ keys small by draining them through tooling or an administrative worker.
 
 ## Related links

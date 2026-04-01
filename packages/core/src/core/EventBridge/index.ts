@@ -1,2 +1,4 @@
 export * from './EventBridgeBaseClass.impl.js'
+export * from './InFlightExecutionTracker.impl.js'
+export * from './PendingInvocationRegistry.impl.js'
 export * from './types/index.js'

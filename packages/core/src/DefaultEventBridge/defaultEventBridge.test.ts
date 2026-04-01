@@ -1,8 +1,14 @@
 import { assert, spy, stub } from 'sinon'
+import { describe, expect, it } from 'vitest'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Subscription } from '../core/index.js'
 import { createInfoMessage, EBMessageType } from '../core/index.js'
-import { getCommandMessageMock, getCustomMessageMessageMock, getLoggerMock } from '../mocks/index.js'
+import {
+	getCommandMessageMock,
+	getCommandSuccessMessageMock,
+	getCustomMessageMessageMock,
+	getLoggerMock,
+} from '../mocks/index.js'
 import { DefaultEventBridge } from './DefaultEventBridge.impl.js'
 
 class TestDefaultEventBridge extends DefaultEventBridge {
@@ -11,7 +17,7 @@ class TestDefaultEventBridge extends DefaultEventBridge {
 	}
 
 	public getPendingInvocations() {
-		return this.pendingInvocations
+		return this.pendingInvocations.getPendingMap()
 	}
 }
 
@@ -259,6 +265,37 @@ describe('DefaultEventBridge', () => {
 		const duration = Date.now() - start
 
 		expect(duration).toBeGreaterThanOrEqual(20)
+	})
+
+	it('ignores late command responses after timeout without failing the bridge', async () => {
+		const logger = getLoggerMock()
+		const eventBridge = new DefaultEventBridge({ defaultCommandTimeout: 20, logger: logger.mock })
+		await eventBridge.start()
+
+		await eventBridge.registerCommand(
+			receiver,
+			async message => {
+				await new Promise(resolve => setTimeout(resolve, 50))
+				return getCommandSuccessMessageMock({ ok: true }, undefined, message)
+			},
+			{ expose: {} },
+		)
+
+		const commandMessage = getCommandMessageMock({
+			sender,
+			receiver,
+			payload: {
+				payload: { ping: true },
+				parameter: {},
+			},
+		})
+
+		await expect(eventBridge.invoke(commandMessage)).rejects.toBeInstanceOf(UnhandledError)
+		await new Promise(resolve => setTimeout(resolve, 80))
+
+		expect(logger.stubs.warn.called).toBeTruthy()
+		await expect(eventBridge.isHealthy()).resolves.toBe(true)
+		await eventBridge.destroy()
 	})
 
 	it('supports stream open and frame delivery', async () => {

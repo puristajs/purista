@@ -20,8 +20,11 @@ import type { StreamDefinitionMetadataBase } from '../types/stream/StreamDefinit
 import type { StreamHandle } from '../types/stream/StreamHandle.js'
 import type { StreamMessage } from '../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
+import { InFlightExecutionTracker } from './InFlightExecutionTracker.impl.js'
+import type { EventBridgeCapabilities } from './types/EventBridgeCapabilities.js'
 import type { EventBridgeConfig } from './types/EventBridgeConfig.js'
 import type { EventBridgeEvents } from './types/EventBridgeEvents.js'
+import { EventBridgeLateResponseHandling } from './types/EventBridgeLateResponseHandling.js'
 
 /**
  * The base class to be extended by event bridge implementations
@@ -35,10 +38,20 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 	config: Complete<EventBridgeConfig<ConfigType>>
 
 	name: string
+	capabilities: EventBridgeCapabilities = {
+		supportsStreams: false,
+		durableCommands: false,
+		durableSubscriptions: false,
+		manualAckSupported: false,
+		lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
+		gracefulDrainSupported: true,
+		nativeDeadLettering: false,
+	}
 
 	instanceId: Readonly<InstanceId>
 
 	defaultCommandTimeout: Readonly<number>
+	protected readonly inFlightExecutions = new InFlightExecutionTracker()
 	constructor(name: string, config: EventBridgeConfig<ConfigType>) {
 		super()
 		this.name = name
@@ -163,6 +176,18 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 
 	async destroy() {}
 	async start() {}
+
+	runInFlight<T>(fn: () => Promise<T>): Promise<T> {
+		return this.inFlightExecutions.run(fn)
+	}
+
+	async waitForInFlightDrain(timeoutMs = this.defaultCommandTimeout) {
+		return this.inFlightExecutions.waitForIdle(timeoutMs)
+	}
+
+	getInFlightExecutionCount() {
+		return this.inFlightExecutions.size
+	}
 
 	async openStream<Chunk = unknown, Final = unknown>(
 		_input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,

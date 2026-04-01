@@ -1,4 +1,5 @@
 import { getLoggerMock } from '@purista/core'
+import { describe, expect, it } from 'vitest'
 import { MqttBridge } from '../MqttEventBridge.js'
 import { getSharedTopicName } from './getSharedTopicName.impl.js'
 

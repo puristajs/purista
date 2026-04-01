@@ -1,6 +1,6 @@
 import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
 import { StatusCode, type UnhandledError } from '@purista/core'
-import type { NatsConnection, Subscription as NatsSubscription } from 'nats'
+import type { JetStreamClient, JetStreamSubscription, NatsConnection, Subscription as NatsSubscription } from 'nats'
 import { describe, expect, it, vi } from 'vitest'
 import { NatsBridge } from './NatsBridge.js'
 
@@ -50,5 +50,46 @@ describe('NatsBridge registerSubscription', () => {
 
 		expect(unsubscribe).toHaveBeenCalledTimes(1)
 		expect(drain).toHaveBeenCalledTimes(1)
+	})
+
+	it('rejects durable registrations in strict mode until JetStream consumer support exists', async () => {
+		const bridge = new NatsBridge()
+		bridge.connection = { subscribe: vi.fn() } as unknown as NatsConnection
+		const subscription = getSubscriptionInput()
+		subscription.eventBridgeConfig.durable = true
+
+		await expect(bridge.registerSubscription(subscription, async () => undefined)).rejects.toMatchObject({
+			errorCode: StatusCode.NotImplemented,
+		} satisfies Partial<UnhandledError>)
+	})
+
+	it('uses JetStream durable consumers when JetStream is available', async () => {
+		const bridge = new NatsBridge()
+		const jetStreamSubscription = {
+			unsubscribe: vi.fn(),
+			destroy: vi.fn().mockResolvedValue(undefined),
+		} as unknown as JetStreamSubscription
+		const subscribe = vi.fn().mockResolvedValue(jetStreamSubscription)
+		const find = vi
+			.fn()
+			.mockRejectedValueOnce(new Error('not found'))
+			.mockResolvedValue('purista_subscription_user_created')
+		const add = vi.fn().mockResolvedValue(undefined)
+		bridge.connection = { subscribe: vi.fn() } as unknown as NatsConnection
+		bridge.isJetStreamEnabled = true
+		bridge.js = { subscribe } as unknown as JetStreamClient
+		bridge.jsm = {
+			streams: { find, add },
+		} as never
+
+		const subscription = getSubscriptionInput()
+		subscription.eventBridgeConfig.durable = true
+
+		await bridge.registerSubscription(subscription, async () => undefined)
+
+		expect(add).toHaveBeenCalledTimes(1)
+		expect(subscribe).toHaveBeenCalledTimes(1)
+		const key = `${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`
+		expect(bridge.subscriptions.get(key)).toBe(jetStreamSubscription)
 	})
 })

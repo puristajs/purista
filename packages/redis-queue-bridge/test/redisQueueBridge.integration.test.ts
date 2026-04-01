@@ -3,7 +3,7 @@ import { emitWarning } from 'node:process'
 
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer, Wait } from 'testcontainers'
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { describeQueueBridgeContract } from '../../core/test/helpers/queueBridgeContractSuite.js'
 import { RedisQueueBridge } from '../src/RedisQueueBridge.impl.js'

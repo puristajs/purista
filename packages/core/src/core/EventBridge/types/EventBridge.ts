@@ -11,6 +11,7 @@ import type { StreamHandle } from '../../types/stream/StreamHandle.js'
 import type { StreamMessage } from '../../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../../types/stream/StreamOpenRequest.js'
 import type { Subscription } from '../../types/subscription/Subscription.js'
+import type { EventBridgeCapabilities } from './EventBridgeCapabilities.js'
 
 /**
  * Event bridge interface
@@ -20,6 +21,7 @@ import type { Subscription } from '../../types/subscription/Subscription.js'
  */
 export interface EventBridge {
 	readonly name: string
+	readonly capabilities: EventBridgeCapabilities
 
 	readonly instanceId: string
 	/**

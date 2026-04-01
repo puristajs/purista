@@ -8,10 +8,8 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessage,
 	EBMessageAddress,
-	EBMessageId,
 	EventBridge,
 	EventBridgeConfig,
-	PendigInvocation,
 	Subscription,
 } from '@purista/core'
 import {
@@ -20,14 +18,15 @@ import {
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
+	EventBridgeLateResponseHandling,
 	getCleanedMessage,
 	getNewCorrelationId,
 	getNewEBMessageId,
 	HandledError,
-	isCommandErrorResponse,
 	isCommandResponse,
 	isCommandSuccessResponse,
 	isInfoMessage,
+	PendingInvocationRegistry,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
@@ -86,9 +85,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 	>()
 
-	protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
-
-	protected runningSubscriptionCount = 0
+	protected pendingInvocations = new PendingInvocationRegistry<unknown>({
+		onLateResponse: correlationId => {
+			this.logger.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
+		},
+	})
 
 	protected subscriptions = new Map<
 		string,
@@ -130,6 +131,15 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		this.encrypter = {
 			...this.encrypter,
 			...this.config.encrypter,
+		}
+		this.capabilities = {
+			supportsStreams: false,
+			durableCommands: true,
+			durableSubscriptions: true,
+			manualAckSupported: true,
+			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
+			gracefulDrainSupported: true,
+			nativeDeadLettering: true,
 		}
 	}
 
@@ -227,8 +237,20 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 							const log = this.logger.getChildLogger({ customTraceId: message.traceId, ...span.spanContext() })
 
 							if (isCommandResponse(message)) {
-								const mapEntry = this.pendingInvocations.get(message.correlationId)
-								if (!mapEntry) {
+								const result = isCommandSuccessResponse(message)
+									? this.pendingInvocations.resolve(message.correlationId, message.payload)
+									: this.pendingInvocations.reject(
+											message.correlationId,
+											message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message),
+										)
+								if (result !== 'resolved' && result !== 'rejected') {
+									if (result === 'late') {
+										log.warn(
+											{ correlationId: message.correlationId },
+											'Ignoring late command response after invocation timeout',
+										)
+										return
+									}
 									const err = new UnhandledError(
 										StatusCode.BadRequest,
 										'InvalidCommandResponse: received invalid command response',
@@ -242,16 +264,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 									log.error({ err }, 'received invalid command response')
 									this.emit(EventBridgeEventNames.EventbridgeError, err)
 									return
-								}
-								if (isCommandSuccessResponse(message)) {
-									mapEntry.resolve(message.payload)
-								} else if (isCommandErrorResponse(message)) {
-									const error = message.isHandledError
-										? HandledError.fromMessage(message)
-										: UnhandledError.fromMessage(message)
-									span.recordException(error)
-									log.error({ err: error }, error.message)
-									mapEntry.reject(error)
 								}
 								return
 							}
@@ -414,41 +426,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 					},
 				})
 
-				const removeFromPending = () => {
-					if (!this.pendingInvocations.delete(correlationId)) {
-						this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
-					}
-				}
-
-				const executionPromise = new Promise<T>((resolve, reject) => {
-					const timeout = setTimeout(() => {
-						const err = new UnhandledError(
-							StatusCode.GatewayTimeout,
-							'invocation timed out',
-							undefined,
-							command.traceId,
-						)
-						this.logger.warn({ err })
-						rejectFn(err)
-					}, commandTimeout)
-
-					const resolveFn = (successPayload: T) => {
-						clearTimeout(timeout)
-						removeFromPending()
-						resolve(successPayload)
-					}
-
-					const rejectFn = (err: unknown) => {
-						clearTimeout(timeout)
-						removeFromPending()
-						reject(err)
-					}
-
-					this.pendingInvocations.set(command.correlationId, {
-						resolve: resolveFn,
-						reject: rejectFn,
-					})
-				})
+				const executionPromise = this.pendingInvocations.register(
+					correlationId,
+					commandTimeout,
+					command.traceId,
+				) as Promise<T>
 
 				span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
 				span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
@@ -487,16 +469,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 						persistent: true,
 					})
 				} catch (error) {
-					const pending = this.pendingInvocations.get(correlationId)
-					if (pending) {
-						const invocationError = UnhandledError.fromError(
-							error,
-							StatusCode.InternalServerError,
-							'invoke failed to publish command',
-							command.traceId,
-						)
-						pending.reject(invocationError)
-					}
+					const invocationError = UnhandledError.fromError(
+						error,
+						StatusCode.InternalServerError,
+						'invoke failed to publish command',
+						command.traceId,
+					)
+					this.pendingInvocations.reject(correlationId, invocationError)
 				}
 
 				return executionPromise
@@ -524,7 +503,10 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 		const channel = await this.connection.createChannel()
 
-		const noAck = eventBridgeConfig.autoacknowledge ?? true
+		const noAck = eventBridgeConfig.durable ? false : (eventBridgeConfig.autoacknowledge ?? true)
+		if (this.config.prefetch && !noAck) {
+			await channel.prefetch(this.config.prefetch)
+		}
 
 		channel.on('close', () => {
 			this.healthy = false
@@ -538,7 +520,20 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			this.emit(EventBridgeEventNames.EventbridgeError, err)
 		})
 
-		const queue = await channel.assertQueue(queueName, { durable: !!eventBridgeConfig.durable, autoDelete: true })
+		const queue = await channel.assertQueue(queueName, {
+			durable: !!eventBridgeConfig.durable,
+			autoDelete: !eventBridgeConfig.durable,
+			arguments: eventBridgeConfig.durable
+				? {
+						...(this.config.deadLetterExchangeName
+							? { 'x-dead-letter-exchange': this.config.deadLetterExchangeName }
+							: {}),
+						...(this.config.deadLetterRoutingKey
+							? { 'x-dead-letter-routing-key': this.config.deadLetterRoutingKey }
+							: {}),
+					}
+				: undefined,
+		})
 		await channel.bindQueue(queue.queue, this.config.exchangeName ?? getDefaultConfig().exchangeName, '', {
 			'x-match': 'all',
 			messageType: EBMessageType.Command,
@@ -551,107 +546,109 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			queue.queue,
 			async msg => {
 				const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
-				return this.startActiveSpan(
-					PuristaSpanName.EventBridgeCommandReceived,
-					{ kind: SpanKind.CONSUMER },
-					context,
-					async span => {
-						if (!msg) {
-							return
-						}
-						try {
-							const command = await this.decodeContent<Command>(
-								msg.content,
-								msg.properties.contentType,
-								msg.properties.contentEncoding,
-							)
-
-							command.otp = serializeOtp()
-
-							const result = await cb(command)
-
-							const returnContext = deserializeOtp(this.logger, result.otp)
-							return this.startActiveSpan(
-								PuristaSpanName.EventBridgeCommandResponseSent,
-								{ kind: SpanKind.PRODUCER },
-								returnContext,
-								async subSpan => {
-									const responseMessage = {
-										...result,
-										otp: serializeOtp(),
-										sender: {
-											...result.sender,
-											instanceId: this.instanceId,
-										},
-									}
-
-									subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
-									subSpan.setAttribute(PuristaSpanTag.SenderServiceVersion, responseMessage.sender.serviceVersion)
-									subSpan.setAttribute(PuristaSpanTag.SenderServiceTarget, responseMessage.sender.serviceTarget)
-
-									if (responseMessage.eventName) {
-										subSpan.addEvent(responseMessage.eventName)
-									}
-
-									const headers: Record<string, string | undefined> = {
-										messageType: responseMessage.messageType,
-										senderServiceName: responseMessage.sender.serviceName,
-										senderServiceVersion: responseMessage.sender.serviceVersion,
-										senderServiceTarget: responseMessage.sender.serviceTarget,
-										senderInstanceId: responseMessage.sender.instanceId,
-										receiverServiceName: responseMessage.receiver.serviceName,
-										receiverServiceVersion: responseMessage.receiver.serviceVersion,
-										receiverServiceTarget: responseMessage.receiver.serviceTarget,
-										receiverServiceInstanceId: responseMessage.receiver.instanceId,
-										replyTo: msg.properties.replyTo,
-										eventName: responseMessage.eventName,
-										principalId: responseMessage.principalId,
-										tenantId: responseMessage.tenantId,
-									}
-
-									serializeOtpForAmqpHeader(headers)
-
-									const contentType = 'application/json'
-									const contentEncoding = 'utf-8'
-
-									const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
-
-									channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
-										messageId: responseMessage.id,
-										timestamp: responseMessage.timestamp,
-										correlationId: msg.properties.correlationId,
-										contentType,
-										contentEncoding,
-										type: responseMessage.messageType,
-										headers,
-										persistent: true,
-									})
-
-									if (!noAck) {
-										channel.ack(msg)
-									}
-								},
-							)
-						} catch (error) {
-							const err = new UnhandledError(
-								StatusCode.InternalServerError,
-								'Failed to consume command response message',
-								{
-									error,
-								},
-							)
-							span.setStatus({
-								code: SpanStatusCode.ERROR,
-								message: err.message,
-							})
-							span.recordException(err)
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
-							this.logger.error({ err }, 'Failed to consume command response message')
-							if (!noAck) {
-								channel.nack(msg)
+				return this.runInFlight(() =>
+					this.startActiveSpan(
+						PuristaSpanName.EventBridgeCommandReceived,
+						{ kind: SpanKind.CONSUMER },
+						context,
+						async span => {
+							if (!msg) {
+								return
 							}
-						}
-					},
+							try {
+								const command = await this.decodeContent<Command>(
+									msg.content,
+									msg.properties.contentType,
+									msg.properties.contentEncoding,
+								)
+
+								command.otp = serializeOtp()
+
+								const result = await cb(command)
+
+								const returnContext = deserializeOtp(this.logger, result.otp)
+								return this.startActiveSpan(
+									PuristaSpanName.EventBridgeCommandResponseSent,
+									{ kind: SpanKind.PRODUCER },
+									returnContext,
+									async subSpan => {
+										const responseMessage = {
+											...result,
+											otp: serializeOtp(),
+											sender: {
+												...result.sender,
+												instanceId: this.instanceId,
+											},
+										}
+
+										subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
+										subSpan.setAttribute(PuristaSpanTag.SenderServiceVersion, responseMessage.sender.serviceVersion)
+										subSpan.setAttribute(PuristaSpanTag.SenderServiceTarget, responseMessage.sender.serviceTarget)
+
+										if (responseMessage.eventName) {
+											subSpan.addEvent(responseMessage.eventName)
+										}
+
+										const headers: Record<string, string | undefined> = {
+											messageType: responseMessage.messageType,
+											senderServiceName: responseMessage.sender.serviceName,
+											senderServiceVersion: responseMessage.sender.serviceVersion,
+											senderServiceTarget: responseMessage.sender.serviceTarget,
+											senderInstanceId: responseMessage.sender.instanceId,
+											receiverServiceName: responseMessage.receiver.serviceName,
+											receiverServiceVersion: responseMessage.receiver.serviceVersion,
+											receiverServiceTarget: responseMessage.receiver.serviceTarget,
+											receiverServiceInstanceId: responseMessage.receiver.instanceId,
+											replyTo: msg.properties.replyTo,
+											eventName: responseMessage.eventName,
+											principalId: responseMessage.principalId,
+											tenantId: responseMessage.tenantId,
+										}
+
+										serializeOtpForAmqpHeader(headers)
+
+										const contentType = 'application/json'
+										const contentEncoding = 'utf-8'
+
+										const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
+
+										channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
+											messageId: responseMessage.id,
+											timestamp: responseMessage.timestamp,
+											correlationId: msg.properties.correlationId,
+											contentType,
+											contentEncoding,
+											type: responseMessage.messageType,
+											headers,
+											persistent: true,
+										})
+
+										if (!noAck) {
+											channel.ack(msg)
+										}
+									},
+								)
+							} catch (error) {
+								const err = new UnhandledError(
+									StatusCode.InternalServerError,
+									'Failed to consume command response message',
+									{
+										error,
+									},
+								)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+								span.recordException(err)
+								this.emit(EventBridgeEventNames.EventbridgeError, err)
+								this.logger.error({ err }, 'Failed to consume command response message')
+								if (!noAck) {
+									channel.nack(msg)
+								}
+							}
+						},
+					),
 				)
 			},
 			{ noAck },
@@ -759,58 +756,61 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
 
 				const spanContext = context ? trace.getSpanContext(context) : undefined
-				this.startActiveSpan(
-					PuristaSpanName.EventBridgeSubscriptionEventReceived,
-					{ kind: SpanKind.CONSUMER, links: spanContext ? [{ context: spanContext }] : [] },
-					context,
-					async span => {
-						if (!msg) {
-							return
-						}
-						this.runningSubscriptionCount++
-						try {
-							const message = await this.decodeContent<EBMessage>(
-								msg.content,
-								msg.properties.contentType,
-								msg.properties.contentEncoding,
-							)
-
-							span.setAttribute(PuristaSpanTag.SenderServiceName, message.sender.serviceName)
-							span.setAttribute(PuristaSpanTag.SenderServiceVersion, message.sender.serviceVersion)
-							span.setAttribute(PuristaSpanTag.SenderServiceTarget, message.sender.serviceTarget)
-
-							if (message.eventName) {
-								span.addEvent(message.eventName)
+				this.runInFlight(() =>
+					this.startActiveSpan(
+						PuristaSpanName.EventBridgeSubscriptionEventReceived,
+						{ kind: SpanKind.CONSUMER, links: spanContext ? [{ context: spanContext }] : [] },
+						context,
+						async span => {
+							if (!msg) {
+								return
 							}
+							try {
+								const message = await this.decodeContent<EBMessage>(
+									msg.content,
+									msg.properties.contentType,
+									msg.properties.contentEncoding,
+								)
 
-							message.otp = serializeOtp()
+								span.setAttribute(PuristaSpanTag.SenderServiceName, message.sender.serviceName)
+								span.setAttribute(PuristaSpanTag.SenderServiceVersion, message.sender.serviceVersion)
+								span.setAttribute(PuristaSpanTag.SenderServiceTarget, message.sender.serviceTarget)
 
-							const result = await cb(message)
-							if (subscription.emitEventName && result) {
-								await this.emitMessage(result)
+								if (message.eventName) {
+									span.addEvent(message.eventName)
+								}
+
+								message.otp = serializeOtp()
+
+								const result = await cb(message)
+								if (subscription.emitEventName && result) {
+									await this.emitMessage(result)
+								}
+								if (!noAck) {
+									channel.ack(msg)
+								}
+							} catch (error) {
+								const err = new UnhandledError(
+									StatusCode.InternalServerError,
+									'Failed to consume subscription message',
+									{
+										error,
+										subscription,
+									},
+								)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+								span.recordException(err)
+								this.emit(EventBridgeEventNames.EventbridgeError, err)
+								this.logger.error({ err }, 'Failed to consume subscription message')
+								if (!noAck) {
+									channel.nack(msg)
+								}
 							}
-							if (!noAck) {
-								channel.ack(msg)
-							}
-							this.runningSubscriptionCount--
-						} catch (error) {
-							this.runningSubscriptionCount--
-							const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
-								error,
-								subscription,
-							})
-							span.setStatus({
-								code: SpanStatusCode.ERROR,
-								message: err.message,
-							})
-							span.recordException(err)
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
-							this.logger.error({ err }, 'Failed to consume subscription message')
-							if (!noAck) {
-								channel.nack(msg)
-							}
-						}
-					},
+						},
+					),
 				)
 			},
 			{ noAck },
@@ -908,7 +908,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			// ensure actual running commands and subscriptions are finished before closing connection
 			await new Promise<void>(resolve => {
 				const waitForExecutionEnd = () => {
-					if (this.runningSubscriptionCount <= 0) {
+					if (this.getInFlightExecutionCount() <= 0) {
 						resolve()
 						return
 					}
@@ -929,10 +929,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		if (this.connection) {
 			await this.connection.close()
 		}
-		for (const [_, value] of Array.from(this.pendingInvocations)) {
-			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
-		}
-		this.pendingInvocations.clear()
+		this.pendingInvocations.rejectAll(new UnhandledError(StatusCode.ServiceUnavailable))
 		this.healthy = false
 		this.ready = false
 

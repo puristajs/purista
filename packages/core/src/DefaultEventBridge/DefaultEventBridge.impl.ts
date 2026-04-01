@@ -4,9 +4,11 @@ import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { EventBridgeBaseClass } from '../core/EventBridge/EventBridgeBaseClass.impl.js'
+import { PendingInvocationRegistry } from '../core/EventBridge/PendingInvocationRegistry.impl.js'
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { EventBridgeConfig } from '../core/EventBridge/types/EventBridgeConfig.js'
 import { EventBridgeEventNames } from '../core/EventBridge/types/EventBridgeEvents.js'
+import { EventBridgeLateResponseHandling } from '../core/EventBridge/types/EventBridgeLateResponseHandling.js'
 import { createErrorResponse } from '../core/helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../core/helper/createInfoMessage.impl.js'
 import { getCleanedMessage } from '../core/helper/getCleanedMessage.impl.js'
@@ -21,12 +23,10 @@ import type { CommandDefinitionMetadataBase } from '../core/types/commandType/Co
 import type { CommandErrorResponse } from '../core/types/commandType/CommandErrorResponse.js'
 import type { CommandSuccessResponse } from '../core/types/commandType/CommandSuccessResponse.js'
 import { isCommand } from '../core/types/commandType/isCommand.impl.js'
-import { isCommandErrorResponse } from '../core/types/commandType/isCommandErrorResponse.impl.js'
 import { isCommandResponse } from '../core/types/commandType/isCommandResponse.impl.js'
 import { isCommandSuccessResponse } from '../core/types/commandType/isCommandSuccessResponse.impl.js'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
-import type { EBMessageId } from '../core/types/EBMessageId.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import { isInfoMessage } from '../core/types/infoType/isInfoMessage.impl.js'
 import { PuristaSpanName } from '../core/types/PuristaSpanName.enum.js'
@@ -48,10 +48,7 @@ import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl.
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl.js'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl.js'
 import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.js'
-import type { PendigInvocation } from './types/PendingInvocations.js'
 import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
-
-const TIMED_OUT_INVOCATION_RETENTION_MS = 60_000
 
 export type PendingStreamInvocation<Chunk = unknown, Final = unknown> = {
 	push: (frame: StreamFrame<Chunk, Final>) => void
@@ -90,25 +87,17 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 	>()
 
 	protected streamFunctions = new Map<string, (message: StreamMessage) => Promise<void>>()
-
-	protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
-	protected timedOutInvocations = new Map<EBMessageId, number>()
+	protected pendingInvocations = new PendingInvocationRegistry<unknown>({
+		onLateResponse: correlationId => {
+			this.logger.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
+		},
+	})
 	protected pendingStreams = new Map<string, PendingStreamInvocation<any, any>>()
-	protected runningSubscriptionCount = 0
 
 	protected subscriptions = new Map<string, SubscriptionStorageEntry>()
 
 	protected hasStarted = false
 	protected healthy = false
-
-	protected cleanupTimedOutInvocations() {
-		const now = Date.now()
-		for (const [correlationId, timestamp] of this.timedOutInvocations) {
-			if (now - timestamp > TIMED_OUT_INVOCATION_RETENTION_MS) {
-				this.timedOutInvocations.delete(correlationId)
-			}
-		}
-	}
 
 	constructor(config?: EventBridgeConfig<DefaultEventBridgeConfig>) {
 		const conf = {
@@ -117,6 +106,15 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 			...config,
 		}
 		super('DefaultEventBridge', conf)
+		this.capabilities = {
+			supportsStreams: true,
+			durableCommands: false,
+			durableSubscriptions: false,
+			manualAckSupported: false,
+			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
+			gracefulDrainSupported: true,
+			nativeDeadLettering: false,
+		}
 	}
 
 	async isReady() {
@@ -142,16 +140,13 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 						for (const [_, subscription] of Array.from(this.subscriptions)) {
 							if (isMessageMatchingSubscription(this.logger, message, subscription)) {
 								isAtLeastDeliveredOnce = true
-								this.runningSubscriptionCount++
-								subscription
-									.cb(message)
+								this.runInFlight(() => subscription.cb(message))
 									.then(result => {
 										if (subscription.emitEventName && result) {
-											this.emitMessage(result)
+											return this.emitMessage(result)
 										}
 									})
 									.catch(err => this.logger.error({ err }))
-									.finally(() => this.runningSubscriptionCount--)
 							}
 						}
 
@@ -177,9 +172,9 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 							}
 
 							isAtLeastDeliveredOnce = true
-							mapEntry(message as Readonly<Command>)
+							this.runInFlight(() => mapEntry(message as Readonly<Command>))
 								.then(result => {
-									this.emitMessage(result)
+									return this.emitMessage(result)
 								})
 								.catch(error => {
 									const err = UnhandledError.fromError(
@@ -207,10 +202,14 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 						}
 
 						if (isCommandResponse(message)) {
-							const mapEntry = this.pendingInvocations.get(message.correlationId)
-							if (!mapEntry) {
-								if (this.timedOutInvocations.has(message.correlationId)) {
-									this.timedOutInvocations.delete(message.correlationId)
+							const result = isCommandSuccessResponse(message)
+								? this.pendingInvocations.resolve(message.correlationId, message.payload)
+								: this.pendingInvocations.reject(
+										message.correlationId,
+										message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message),
+									)
+							if (result !== 'resolved' && result !== 'rejected') {
+								if (result === 'late') {
 									this.logger.warn(
 										{ correlationId: message.correlationId, customTraceId: message.traceId },
 										'Ignoring late command response after invocation timeout',
@@ -233,14 +232,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 							}
 
 							isAtLeastDeliveredOnce = true
-							if (isCommandSuccessResponse(message)) {
-								mapEntry.resolve(message.payload)
-							} else if (isCommandErrorResponse(message)) {
-								const error = message.isHandledError
-									? HandledError.fromMessage(message)
-									: UnhandledError.fromMessage(message)
-								mapEntry.reject(error)
-							}
 							return next()
 						}
 
@@ -469,50 +460,20 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				traceId: input.traceId,
 			})
 
-			const removeFromPending = () => {
-				if (!this.pendingInvocations.delete(correlationId)) {
-					this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
-				}
-			}
-
-			const executionPromise = new Promise<T>((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
-					this.logger.warn({ err })
-					this.timedOutInvocations.set(correlationId, Date.now())
-					this.cleanupTimedOutInvocations()
-					rejectFn(err)
-				}, commandTimeout)
-
-				const resolveFn = (successPayload: T) => {
-					clearTimeout(timeout)
-					removeFromPending()
-					resolve(successPayload)
-				}
-
-				const rejectFn = (err: unknown) => {
-					clearTimeout(timeout)
-					removeFromPending()
-					reject(err)
-				}
-
-				this.pendingInvocations.set(correlationId, {
-					resolve: resolveFn,
-					reject: rejectFn,
-				})
-			})
+			const executionPromise = this.pendingInvocations.register(
+				correlationId,
+				commandTimeout,
+				command.traceId,
+			) as Promise<T>
 
 			try {
 				await this.emitMessage(command)
 			} catch (err) {
-				const pending = this.pendingInvocations.get(correlationId)
-				if (pending) {
-					const invocationError =
-						err instanceof Error
-							? UnhandledError.fromError(err, undefined, undefined, command.traceId)
-							: new UnhandledError(StatusCode.InternalServerError, 'invocation emit failed', err, command.traceId)
-					pending.reject(invocationError)
-				}
+				const invocationError =
+					err instanceof Error
+						? UnhandledError.fromError(err, undefined, undefined, command.traceId)
+						: new UnhandledError(StatusCode.InternalServerError, 'invocation emit failed', err, command.traceId)
+				this.pendingInvocations.reject(correlationId, invocationError)
 			}
 			return executionPromise
 		})
@@ -712,7 +673,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		// ensure actual running commands and subscriptions are finished before closing connection
 		await new Promise<void>(resolve => {
 			const waitForExecutionEnd = () => {
-				if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
+				if (this.pendingInvocations.size <= 0 && this.getInFlightExecutionCount() <= 0) {
 					resolve()
 					return
 				}
@@ -731,11 +692,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 
-		for (const [_, value] of Array.from(this.pendingInvocations)) {
-			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
-		}
-		this.pendingInvocations.clear()
-		this.timedOutInvocations.clear()
+		this.pendingInvocations.rejectAll(new UnhandledError(StatusCode.ServiceUnavailable))
 
 		for (const [_, value] of Array.from(this.pendingStreams)) {
 			value.reject(new UnhandledError(StatusCode.ServiceUnavailable, 'stream closed'))

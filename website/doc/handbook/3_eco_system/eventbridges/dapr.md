@@ -32,8 +32,11 @@ Use the startup sequence required for Dapr endpoint discovery:
 2. create/start service instance
 3. start Dapr bridge
 
+Readiness and health now follow the actual HTTP bridge lifecycle more closely. During shutdown, the bridge marks itself as shutting down before closing the server so orchestrators and sidecars can stop routing new traffic promptly.
+
 ## Reliability recommendations
 
 - document and version-control Dapr component/resiliency specs
 - validate duplicate handling in command/subscription side effects
 - test sidecar restarts and service readiness ordering
+- verify shutdown behavior with the same readiness probes used in production

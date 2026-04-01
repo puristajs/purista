@@ -16,6 +16,7 @@ order: 301510
 | Delayed delivery | ✅ (timer-based scheduling) |
 | Dead-letter queue | ✅ (in-memory store) |
 | Lease extension | ✅ |
+| Lease expiry recovery | ✅ (requeue or DLQ inside the same process) |
 | Metrics | ✅ (`context.queue.metrics.<queueId>`) |
 
 ## When to use
@@ -38,6 +39,7 @@ const service = await myServiceV1Service.getInstance(eventBridge, {
 ## Tips
 
 - Because jobs are in-memory, do not rely on this bridge in production or any environment with multiple instances.
+- Expired leases are recovered when the queue is polled again, so worker crashes no longer strand jobs permanently inside the in-memory lease map.
 - Combine with Vitest to speed up queue-related tests (`DefaultQueueBridge` runs fully synchronously).
 - Use Redis or another persistent bridge as soon as you need horizontal scaling or crash resilience.
 

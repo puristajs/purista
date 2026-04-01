@@ -30,9 +30,6 @@ const DEFAULT_LEASE_TTL_MS = 15 * 60 * 1000
 const DEAD_LETTER_HEADER = 'x-purista-dead-letter-reason'
 const LAST_RETRY_HEADER = 'x-purista-last-retry-reason'
 
-type RedisBulk = string | Buffer
-type RedisScoredEntry = { value: RedisBulk; score: number | string }
-
 export class RedisQueueBridge<
 	M extends RedisModules = RedisModules,
 	F extends RedisFunctions = RedisFunctions,
@@ -52,7 +49,7 @@ export class RedisQueueBridge<
 		exactlyOnce: false,
 		maxBatchSize: 1,
 		defaultDeadLetterPrefix: '',
-		defaultDeadLetterSuffix: ':dlq',
+		defaultDeadLetterSuffix: ':dead-letter',
 		deadLetterInspectable: true,
 	}
 
@@ -323,23 +320,13 @@ export class RedisQueueBridge<
 
 	private async releaseDueJobs(queueName: string) {
 		const client = await this.getClient()
-		const now = Date.now()
-		const rawDueJobs = (await client.zRangeByScoreWithScores(this.scheduledKey(queueName), 0, now, {
-			LIMIT: {
-				offset: 0,
-				count: this.scheduleBatchSize,
-			},
-		})) as RedisScoredEntry[] | null
-
-		const dueJobs = this.normalizeScoredEntries(rawDueJobs)
-
+		const dueJobs = await this.claimScheduledJobs(queueName, Date.now(), this.scheduleBatchSize)
 		if (!dueJobs.length) {
 			return
 		}
 
 		const multi = client.multi()
 		for (const entry of dueJobs) {
-			multi.zRem(this.scheduledKey(queueName), entry.value)
 			multi.lPush(this.pendingKey(queueName), entry.value)
 		}
 		await multi.exec()
@@ -347,28 +334,14 @@ export class RedisQueueBridge<
 
 	private async recoverExpiredLeases(queueName: string) {
 		const client = await this.getClient()
-		const now = Date.now()
-		const rawExpired = (await client.zRangeByScoreWithScores(this.leaseExpiryKey(queueName), 0, now, {
-			LIMIT: {
-				offset: 0,
-				count: this.recoveryBatchSize,
-			},
-		})) as RedisScoredEntry[] | null
-
-		const expired = this.normalizeScoredEntries(rawExpired)
-
+		const expired = await this.claimExpiredLeaseIds(queueName, Date.now(), this.recoveryBatchSize)
 		if (!expired.length) {
 			return
 		}
 
-		for (const entry of expired) {
-			const leaseId = entry.value
+		for (const leaseId of expired) {
 			const jobId = this.decodeBulkString(await client.hGet(this.leaseMapKey(queueName), leaseId))
-			await client
-				.multi()
-				.zRem(this.leaseExpiryKey(queueName), leaseId)
-				.hDel(this.leaseMapKey(queueName), leaseId)
-				.exec()
+			await client.multi().hDel(this.leaseMapKey(queueName), leaseId).exec()
 
 			if (jobId) {
 				await client.lRem(this.processingKey(queueName), 0, jobId)
@@ -423,20 +396,45 @@ export class RedisQueueBridge<
 		return typeof value === 'string' ? value : value.toString('utf-8')
 	}
 
-	private normalizeScoredEntries(entries: RedisScoredEntry[] | null | undefined) {
-		if (!entries) {
-			return [] as Array<{ value: string; score: number }>
+	private async claimScheduledJobs(queueName: string, now: number, batchSize: number) {
+		const result = await this.client.eval(
+			[
+				"local jobs = redis.call('ZRANGEBYSCORE', KEYS[1], '-inf', ARGV[1], 'LIMIT', 0, ARGV[2])",
+				'if #jobs == 0 then return jobs end',
+				"for _, jobId in ipairs(jobs) do redis.call('ZREM', KEYS[1], jobId) end",
+				'return jobs',
+			].join('\n'),
+			{
+				keys: [this.scheduledKey(queueName)],
+				arguments: [String(now), String(batchSize)],
+			},
+		)
+		return this.normalizeEvalStringArray(result).map(value => ({ value, score: now }))
+	}
+
+	private async claimExpiredLeaseIds(queueName: string, now: number, batchSize: number) {
+		const result = await this.client.eval(
+			[
+				"local leases = redis.call('ZRANGEBYSCORE', KEYS[1], '-inf', ARGV[1], 'LIMIT', 0, ARGV[2])",
+				'if #leases == 0 then return leases end',
+				"for _, leaseId in ipairs(leases) do redis.call('ZREM', KEYS[1], leaseId) end",
+				'return leases',
+			].join('\n'),
+			{
+				keys: [this.leaseExpiryKey(queueName)],
+				arguments: [String(now), String(batchSize)],
+			},
+		)
+		return this.normalizeEvalStringArray(result)
+	}
+
+	private normalizeEvalStringArray(value: unknown) {
+		if (!Array.isArray(value)) {
+			return [] as string[]
 		}
-		return entries
-			.map(entry => {
-				const value = this.decodeBulkString(entry.value)
-				if (!value) {
-					return undefined
-				}
-				const score = typeof entry.score === 'number' ? entry.score : Number(entry.score)
-				return { value, score }
-			})
-			.filter((entry): entry is { value: string; score: number } => !!entry)
+		return value
+			.map(entry => this.decodeBulkString(entry as string | Buffer | null | undefined))
+			.filter((entry): entry is string => !!entry)
 	}
 
 	private normalizeNumber(value: number | `${number}` | null | undefined) {

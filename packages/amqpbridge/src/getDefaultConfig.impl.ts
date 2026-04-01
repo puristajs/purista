@@ -14,5 +14,8 @@ export const getDefaultConfig = (): Complete<AmqpBridgeConfig> & { exchangeName:
 		encrypter: {},
 		socketOptions: undefined,
 		exchangeOptions: undefined,
+		prefetch: 10,
+		deadLetterExchangeName: undefined,
+		deadLetterRoutingKey: undefined,
 	}
 }

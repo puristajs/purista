@@ -953,6 +953,26 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		await this.ackQueueJob(queueName, lease.leaseId, lease.message.id)
 	}
 
+	private async getQueueMetricsWithResolvedDeadLetter(
+		queueDefinition: QueueDefinition<any, any, any, any, any>,
+	): Promise<QueueMetrics> {
+		const metrics = await this.queueBridge.metrics(queueDefinition.queueName)
+		const deadLetterQueueName = this.resolveDeadLetterQueueName(queueDefinition, queueDefinition.queueName)
+		if (deadLetterQueueName === queueDefinition.queueName) {
+			return metrics
+		}
+
+		try {
+			const deadLetterMetrics = await this.queueBridge.metrics(deadLetterQueueName)
+			return {
+				...metrics,
+				deadLetter: deadLetterMetrics.deadLetter,
+			}
+		} catch {
+			return metrics
+		}
+	}
+
 	private async runQueueWorkerBeforeGuards(
 		worker: QueueWorkerDefinition<any, any, any, any, any>,
 		context: QueueJobContext,
@@ -2052,7 +2072,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			queues = await Promise.all(
 				this.queueDefinitionList.map(async queue => {
 					try {
-						const metrics = await this.queueBridge.metrics(queue.queueName)
+						const metrics = await this.getQueueMetricsWithResolvedDeadLetter(queue)
 						this.queueMetricsCache.set(queue.queueName, metrics)
 						const health = this.evaluateQueueHealth(queue.queueName, metrics)
 						return {

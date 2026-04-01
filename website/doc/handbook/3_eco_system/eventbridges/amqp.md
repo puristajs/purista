@@ -15,7 +15,16 @@ The `@purista/amqpbridge` package connects PURISTA to AMQP brokers such as Rabbi
 - durability: supported (durable queues/exchanges)
 - retries: supported (broker + consumer policies)
 - dead-lettering: supported by broker configuration
-- typical delivery mode: at-least-once (duplicates must be handled)
+- typical delivery mode: at-least-once when durable queues use manual ack (duplicates must be handled)
+
+Durable command consumers now default to:
+
+- `autoacknowledge: false`
+- `autoDelete: false`
+- configurable `prefetch`
+- optional dead-letter exchange / routing-key arguments
+
+This makes the safe path the default for durable command workloads instead of requiring every service to override queue settings manually.
 
 ## Stream support
 
@@ -37,5 +46,6 @@ await eventBridge.start()
 
 - configure durable queues for long-lived subscriptions
 - configure dead-letter queues for poison messages
+- keep manual ack enabled for durable command consumers
 - make command/subscription handlers idempotent
 - align exchange/queue naming and routing settings across all instances

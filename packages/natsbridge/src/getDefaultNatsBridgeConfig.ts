@@ -8,5 +8,6 @@ export const getDefaultNatsBridgeConfig = (): NatsBridgeConfig => {
 		commandResponsePublishTwice: 'eventOnly',
 		defaultMessageExpiryInterval: 30 * SECONDS_PER_DAY,
 		maxMessages: 10,
+		durableSubscriptionMode: 'strict',
 	}
 }
