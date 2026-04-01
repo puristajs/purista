@@ -24,7 +24,7 @@
 	"scripts": {
 		"start": "./dist/bin.js",
 		"dev": "tsx src/bin.ts",
-		"build": "rimraf dist && tshy && chmod 755 dist/commonjs/bin.js",
+		"build": "rimraf dist .tshy .tshy-build && tshy && chmod 755 dist/commonjs/bin.js",
 		"lint": "npx @biomejs/biome check --write",
 		"test": "vitest"
 	},

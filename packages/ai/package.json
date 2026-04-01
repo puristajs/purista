@@ -40,7 +40,7 @@
 		"lint:fix": "npx @biomejs/biome check --write src/bridge src/builder src/evaluation src/manifest src/mcp src/memory src/platform src/pools src/protocol src/providers src/runtime src/sandbox src/skills src/testing src/types scripts package.json vitest.config.ts",
 		"test": "vitest -c ./vitest.config.ts",
 		"test:coverage": "vitest run -c ./vitest.config.ts --coverage",
-		"build": "rimraf dist tsconfig.tsbuildinfo && tshy && node ./scripts/assert-build-artifacts.mjs"
+		"build": "rimraf dist .tshy .tshy-build tsconfig.tsbuildinfo && tshy && node ./scripts/assert-build-artifacts.mjs"
 	},
 	"tshy": {
 		"exclude": [

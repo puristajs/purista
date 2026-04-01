@@ -36,7 +36,7 @@
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
 		"test": "vitest",
-		"build": "rimraf dist && tshy",
+		"build": "rimraf dist .tshy .tshy-build && tshy",
 		"env:up": "docker compose -f docker-compose.yml up -d",
 		"env:down": "docker compose -f docker-compose.yml down"
 	},

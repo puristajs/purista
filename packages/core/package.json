@@ -22,7 +22,7 @@
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
 		"test": "tsc --noEmit && vitest -c ../../vitest.config.ts",
-		"build": "rimraf dist && tshy",
+		"build": "rimraf dist .tshy .tshy-build && tshy",
 		"test:integration": "vitest -c ../../vitest.config.ts"
 	},
 	"tshy": {

@@ -97,4 +97,66 @@ describe('RedisQueueBridge specific behaviour', () => {
 
 		await bridge.destroy()
 	})
+
+	it('recovers an expired lease exactly once across competing workers', async () => {
+		if (!metricsDockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const keyPrefix = `competing-workers:${randomUUID()}:`
+		const queueName = `orders-${randomUUID()}`
+		const bridgeA = new RedisQueueBridge({
+			config: {
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+			},
+			keyPrefix,
+		})
+		const bridgeB = new RedisQueueBridge({
+			config: {
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+			},
+			keyPrefix,
+		})
+
+		await bridgeA.start()
+		await bridgeB.start()
+
+		try {
+			await bridgeA.enqueue({
+				queueName,
+				payload: { orderId: 'order-1' },
+				maxAttempts: 3,
+				leaseTtlMs: 40,
+			})
+
+			const firstLease = await bridgeA.leaseNext(queueName, { waitTimeMs: 100 })
+			expect(firstLease).toBeDefined()
+
+			await new Promise(resolve => setTimeout(resolve, 80))
+
+			const [recoveredA, recoveredB] = await Promise.all([
+				bridgeA.leaseNext(queueName, { waitTimeMs: 50 }),
+				bridgeB.leaseNext(queueName, { waitTimeMs: 50 }),
+			])
+
+			const recoveredLeases = [recoveredA, recoveredB].filter(lease => lease !== undefined)
+
+			expect(recoveredLeases).toHaveLength(1)
+			expect(recoveredLeases[0]?.message.id).toBe(firstLease?.message.id)
+			expect(recoveredLeases[0]?.message.attempt).toBeGreaterThanOrEqual(2)
+
+			if (recoveredLeases[0]) {
+				await bridgeA.ack(queueName, recoveredLeases[0].leaseId)
+			}
+
+			const metrics = await bridgeA.metrics(queueName)
+			expect(metrics.pending).toBe(0)
+			expect(metrics.inflight).toBe(0)
+			expect(metrics.deadLetter).toBe(0)
+		} finally {
+			await bridgeA.destroy()
+			await bridgeB.destroy()
+		}
+	})
 })
