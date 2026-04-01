@@ -224,6 +224,9 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(agentBuilder).toContain(
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
 		)
+		expect(agentBuilder).toContain('context.memory.conversation.addUser(payload.prompt)')
+		expect(agentBuilder).toContain("context.ai.models['openai:gpt-4o-mini']")
+		expect(agentBuilder).toContain('context.io.stream.sendFinal(answer)')
 		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
 		expect(agentTestContent).toContain('runs with the agent test harness and emits protocol frames')
 		expect(agentTestContent).toContain("new ScriptedModel().nextText('hello')")

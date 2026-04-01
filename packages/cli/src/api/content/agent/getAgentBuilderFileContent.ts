@@ -56,12 +56,12 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
-		writer.writeLine(
-			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
-		)
+			writer.writeLine(
+				'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
+			)
 		writer.indent(() => {
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
-			writer.writeLine('await context.conversation.addUser(payload.prompt)')
+			writer.writeLine('await context.memory.conversation.addUser(payload.prompt)')
 			writer.writeLine('// This template is inline by default. Keep it for short interactive work.')
 			writer.writeLine(
 				"// For long-running work switch to .setExecutionMode('queued') and provide a queueBridge at runtime.",
@@ -72,8 +72,8 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine(
 				'// context.runState.replaceTasks(...), context.runState.step(...), and context.runState.finish(...).',
 			)
-			writer.writeLine('const prompt = await context.conversation.buildPromptInput()')
-			writer.writeLine("const model = context.models['openai:gpt-4o-mini']")
+			writer.writeLine('const prompt = await context.memory.conversation.buildPromptInput()')
+			writer.writeLine("const model = context.ai.models['openai:gpt-4o-mini']")
 			writer.writeLine('if (!model.generate) {')
 			writer.indent(() => {
 				writer.writeLine("throw new Error('Model alias openai:gpt-4o-mini does not provide generate()')")
@@ -82,12 +82,12 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine('const result = await model.generate({ prompt, context: payload.context })')
 			writer.writeLine('if (result.reasoningText?.trim()) {')
 			writer.indent(() => {
-				writer.writeLine('context.stream.sendReasoning(result.reasoningText)')
+				writer.writeLine('context.io.stream.sendReasoning(result.reasoningText)')
 			})
 			writer.writeLine('}')
 			writer.writeLine('const answer = result.output')
-			writer.writeLine('await context.conversation.addAssistant(answer)')
-			writer.writeLine('context.stream.sendFinal(answer)')
+			writer.writeLine('await context.memory.conversation.addAssistant(answer)')
+			writer.writeLine('context.io.stream.sendFinal(answer)')
 			writer.writeLine('return { message: answer }')
 		})
 		writer.writeLine('})')

@@ -9,7 +9,7 @@ order: 30
 ## Create a new project
 
 The easiest and fastest way to start with PURISTA is using your package manager's `create` command.  
-The scaffold is based on blueprint templates and guides you through runtime/event bridge/server choices.
+The scaffold is blueprint-driven and guides you through runtime, event bridge, server, linting, and module-format choices.
 
 In the project folder, simply execute:
 
@@ -35,9 +35,31 @@ pnpm create purista@latest
 
 The CLI tool will guide you through all the necessary steps.  
 
+The same generator is also available through the main CLI:
+
+```bash
+purista init my-app
+```
+
+Both entry points use the same underlying engine, so `npm create purista@latest` and `purista init` generate the same project shape.
+
+For non-interactive scripts and CI:
+
+```bash
+purista init my-app --defaults --non-interactive --no-install
+```
+
+Non-interactive mode never prompts. It applies only declared defaults and fails fast when required values are still missing.
+
 ## PURISTA CLI
 
-PURISTA provides a command line interface (CLI) that allows you to create new services and add commands, subscriptions, streams, queues, queue workers, and AI agents to existing services.
+PURISTA provides a command line interface (CLI) that supports three usage modes:
+
+- interactive usage for humans
+- non-interactive usage for scripts and CI
+- programmatic usage for tools and agents
+
+The CLI allows you to create new projects and add services, commands, subscriptions, streams, queues, queue workers, and AI agents to existing services.
 
 You can either install the CLI globally, or run it with `npx`.
 
@@ -74,6 +96,25 @@ Or without global install:
 ```bash
 npx @purista/cli add [service|command|subscription|stream|queue|queue-worker|agent]
 ```
+
+Programmatic callers can use the same command engine through `createPuristaCliEngine(...)`, `resolvePuristaCommand(...)`, and `runPuristaCommand(...)`.
+
+### Common commands
+
+```bash
+purista init my-app
+purista add service user --description "User service"
+purista add command sign-up --service user --service-version 1 --description "Register a user"
+purista add queue process-jobs --service user --service-version 1 --description "Background jobs"
+purista add queue-worker process-jobs --service user --service-version 1 --queue processJobs
+purista add agent triage --service user --service-version 1 --description "Review tickets"
+```
+
+### Non-interactive behavior
+
+- `--non-interactive` disables prompts and fails on unresolved required input
+- `--defaults` and `--yes` apply only explicit defaults
+- interactive mode may ask only for unresolved values, but command validation stays the same across modes
 
 Generated command, subscription, and queue schema stubs default to `z.unknown()` for payloads.
 This keeps generated code type-safe by default and avoids accidental `any` propagation. The queue wizard also inserts `.canEnqueue()` declarations plus optional producer commands so you can expose HTTP `202 Accepted` endpoints immediately.
