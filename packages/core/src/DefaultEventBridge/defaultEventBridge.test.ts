@@ -57,6 +57,16 @@ describe('DefaultEventBridge', () => {
 		expect(eventBridge).toBeDefined()
 	})
 
+	it('does not expose event-emitter methods on bridge instances', () => {
+		const logger = getLoggerMock()
+
+		const eventBridge = new DefaultEventBridge({ logger: logger.mock })
+
+		expect('emit' in eventBridge).toBe(false)
+		expect('on' in eventBridge).toBe(false)
+		expect('removeAllListeners' in eventBridge).toBe(false)
+	})
+
 	it('routes custom messages to subscriptions', async () => {
 		const logger = getLoggerMock()
 
@@ -246,6 +256,9 @@ describe('DefaultEventBridge', () => {
 	it('waits for running work before destroy completes', async () => {
 		const eventBridge = new TestDefaultEventBridge({ defaultCommandTimeout: 500 })
 		await eventBridge.start()
+		const timeout = setTimeout(() => {
+			/* noop */
+		}, 1_000)
 
 		eventBridge.getPendingInvocations().set('pending-id', {
 			resolve: () => {
@@ -254,6 +267,7 @@ describe('DefaultEventBridge', () => {
 			reject: () => {
 				/* noop */
 			},
+			timeout,
 		})
 
 		setTimeout(() => {

@@ -77,14 +77,33 @@ const builder = myServiceBuilder
   .getSubscriptionBuilder('mySub', '...')
   .adviceDurable(true)
   .adviceAutoacknowledgeMessage(false)
+  .adviceConsumerFailureHandling({
+    maxAttempts: 5,
+    retryDelayMs: 1000,
+    deadLetterTarget: 'billing.userCreated.dead-letter',
+  })
   .receiveMessageOnEveryInstance(true)
 ```
 
 - `adviceDurable(true)` asks the broker to persist messages while subscriber is offline.
 - `adviceAutoacknowledgeMessage(false)` prefers ack after successful execution.
+- `adviceConsumerFailureHandling(...)` declares a bounded retry budget and optional dead-letter target.
 - `receiveMessageOnEveryInstance(true)` disables shared-consumer mode and fans out to each instance.
 
 Support depends on the selected event bridge/broker.
+
+### When to use subscription retries vs queues
+
+Use subscription retry / dead-letter handling for reactive push workloads where the broker should make a bounded number of delivery attempts and then move the message aside for investigation.
+
+Use a queue instead when you need:
+
+- long backoff windows
+- controlled replay / re-drive operations
+- worker heartbeats / leases
+- operator-visible backlog metrics and remediation flows
+
+Queues are the stronger abstraction for workflow-style work. Subscription retries should stay focused on bounded event-consumer hardening.
 
 ## Invoke and emit from subscriptions
 

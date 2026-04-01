@@ -34,6 +34,14 @@ export type SubscriptionContextMockResult<TBuilder extends SubscriptionDefinitio
 		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']
 	>
+	mock: SubscriptionFunctionContext<
+		SubscriptionContextMockBuilderTypes<TBuilder>['Resources'],
+		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
+		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
+		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']
+	>
 	stubs: {
 		logger: Record<string, SinonStub>
 		emit: FromEmitToOtherType<SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'], SinonStub>
@@ -139,6 +147,7 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 
 	return {
 		context,
+		mock: context,
 		stubs: {
 			...base.stubs,
 			service: invokeProxy.createApi<Record<string, any>>(),

@@ -4,7 +4,13 @@ import { addPuristaService } from '../api/addPuristaService.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
 import { createProjectSnapshot } from '../project/createProjectSnapshot.js'
-import { captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult, requirePuristaConfig } from './shared.js'
+import {
+	captureMutationSnapshot,
+	createIssuesFromZod,
+	createPendingResolution,
+	createResult,
+	requirePuristaConfig,
+} from './shared.js'
 
 export type AddServiceInput = {
 	name?: string
@@ -20,13 +26,18 @@ const schema = z.object({
 
 export const addServiceCommand: PuristaExecutableCommand<AddServiceInput, z.infer<typeof schema>> = {
 	id: 'add-service',
-	resolve: async (input, context): Promise<PuristaCommandResolution<AddServiceInput, z.infer<typeof schema>>> => {
+	resolve: async (input, _context): Promise<PuristaCommandResolution<AddServiceInput, z.infer<typeof schema>>> => {
 		const missing = []
 		if (!input.name?.trim()) {
 			missing.push({ type: 'input', key: 'name', message: 'Name of the service', required: true } as const)
 		}
 		if (!input.description?.trim()) {
-			missing.push({ type: 'input', key: 'description', message: 'Description of the service', required: true } as const)
+			missing.push({
+				type: 'input',
+				key: 'description',
+				message: 'Description of the service',
+				required: true,
+			} as const)
 		}
 
 		const parsed = schema.safeParse({ ...input, version: input.version ?? '1' })

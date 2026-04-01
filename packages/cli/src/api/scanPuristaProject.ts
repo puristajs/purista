@@ -1,7 +1,14 @@
+import {
+	createProjectSnapshot,
+	type ProjectSnapshot,
+	type ServiceVersionSnapshot,
+} from '../project/createProjectSnapshot.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
-import { createProjectSnapshot, type ProjectSnapshot, type ServiceVersionSnapshot } from '../project/createProjectSnapshot.js'
 
-export type PuristaProjectServices = Record<string, Record<string, Omit<ServiceVersionSnapshot, 'queues' | 'queueWorkers'>>>
+export type PuristaProjectServices = Record<
+	string,
+	Record<string, Omit<ServiceVersionSnapshot, 'queues' | 'queueWorkers'>>
+>
 
 export type PuristaProjectInfo = {
 	services: PuristaProjectServices
@@ -9,7 +16,10 @@ export type PuristaProjectInfo = {
 	eventEnumFileName: string
 }
 
-export const scanPuristaProject = async (puristaConfig: PuristaConfig, projectRootPath?: string): Promise<PuristaProjectInfo> => {
+export const scanPuristaProject = async (
+	puristaConfig: PuristaConfig,
+	projectRootPath?: string,
+): Promise<PuristaProjectInfo> => {
 	const snapshot = await createProjectSnapshot(puristaConfig, projectRootPath)
 	const services = Object.fromEntries(
 		Object.entries(snapshot.services).map(([serviceName, versions]) => [

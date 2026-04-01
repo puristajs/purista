@@ -40,6 +40,27 @@ describe('protocol extract helpers', () => {
 				},
 			] as never),
 		).toBe('Hello world')
+		expect(
+			extractFinalAssistantText([
+				{
+					frame: { kind: 'message', role: 'assistant', content: 'status update', partial: true },
+				},
+				{
+					frame: { kind: 'artifact', artifactId: 'run-state', content: { ok: true } },
+				},
+				{
+					frame: { kind: 'message', role: 'assistant', content: 'Final ', partial: true },
+				},
+				{
+					frame: {
+						kind: 'message',
+						role: 'assistant',
+						content: '',
+						final: true,
+					},
+				},
+			] as never),
+		).toBe('Final')
 		expect(extractFinalAssistantText([])).toBe('')
 	})
 

@@ -8,7 +8,7 @@
 
 > **CreateCommandContextMockInput**\<`TBuilder`\> = `object`
 
-Defined in: testing/createCommandContextMock.ts:29
+Defined in: [testing/createCommandContextMock.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L29)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: testing/createCommandContextMock.ts:29
 
 > `optional` **message**: `object`
 
-Defined in: testing/createCommandContextMock.ts:40
+Defined in: [testing/createCommandContextMock.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L40)
 
 #### parameter
 
@@ -38,7 +38,7 @@ Defined in: testing/createCommandContextMock.ts:40
 
 > **parameter**: [`GetMessageParamsType`](GetMessageParamsType.md)\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ParamsSchema"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"TransformInputParamsSchema"`\]\>
 
-Defined in: testing/createCommandContextMock.ts:34
+Defined in: [testing/createCommandContextMock.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L34)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: testing/createCommandContextMock.ts:34
 
 > **payload**: [`GetMessagePayloadType`](GetMessagePayloadType.md)\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"PayloadSchema"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"TransformInputPayloadSchema"`\]\>
 
-Defined in: testing/createCommandContextMock.ts:30
+Defined in: [testing/createCommandContextMock.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L30)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: testing/createCommandContextMock.ts:30
 
 > `optional` **resources**: `Partial`\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\]\>
 
-Defined in: testing/createCommandContextMock.ts:39
+Defined in: [testing/createCommandContextMock.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L39)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: testing/createCommandContextMock.ts:39
 
 > `optional` **sandbox**: `SinonSandbox`
 
-Defined in: testing/createCommandContextMock.ts:38
+Defined in: [testing/createCommandContextMock.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L38)

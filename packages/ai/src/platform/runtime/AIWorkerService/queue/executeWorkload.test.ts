@@ -25,6 +25,7 @@ const loadModule = async () => await import('./executeWorkload.js')
 
 beforeEach(() => {
 	vi.clearAllMocks()
+	vi.resetModules()
 })
 
 describe('getUnsupportedWorkerAiSdkReason', () => {

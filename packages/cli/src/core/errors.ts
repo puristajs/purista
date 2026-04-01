@@ -5,7 +5,10 @@ export class PuristaCliError extends Error {
 	readonly issues: PuristaCommandIssue[]
 	readonly exitCode: number
 
-	constructor(message: string, options?: { command?: PuristaCommandId; issues?: PuristaCommandIssue[]; exitCode?: number }) {
+	constructor(
+		message: string,
+		options?: { command?: PuristaCommandId; issues?: PuristaCommandIssue[]; exitCode?: number },
+	) {
 		super(message)
 		this.name = 'PuristaCliError'
 		this.command = options?.command

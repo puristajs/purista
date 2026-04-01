@@ -56,9 +56,9 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
-			writer.writeLine(
-				'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
-			)
+		writer.writeLine(
+			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
+		)
 		writer.indent(() => {
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
 			writer.writeLine('await context.memory.conversation.addUser(payload.prompt)')

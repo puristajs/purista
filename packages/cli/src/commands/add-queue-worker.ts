@@ -3,7 +3,20 @@ import { z } from 'zod'
 import { addPuristaQueueWorker } from '../api/addPuristaQueueWorker.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
-import { baseAddInputSchema, captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult, getQueueChoices, getServiceBasePath, getServiceChoices, getServiceVersionChoices, queueWorkerModeChoices, requireProjectContext, requirePuristaConfig } from './shared.js'
+import {
+	baseAddInputSchema,
+	captureMutationSnapshot,
+	createIssuesFromZod,
+	createPendingResolution,
+	createResult,
+	getQueueChoices,
+	getServiceBasePath,
+	getServiceChoices,
+	getServiceVersionChoices,
+	queueWorkerModeChoices,
+	requireProjectContext,
+	requirePuristaConfig,
+} from './shared.js'
 
 const schema = baseAddInputSchema.extend({
 	name: z.string().trim().min(1),
@@ -23,11 +36,22 @@ export const addQueueWorkerCommand: PuristaExecutableCommand<AddQueueWorkerInput
 	resolve: async (input, context): Promise<PuristaCommandResolution<AddQueueWorkerInput, z.infer<typeof schema>>> => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const missing = []
-		if (!input.name?.trim()) missing.push({ type: 'input', key: 'name', message: 'Name of the queue worker', required: true } as const)
+		if (!input.name?.trim())
+			missing.push({ type: 'input', key: 'name', message: 'Name of the queue worker', required: true } as const)
 		if (!input.description?.trim())
-			missing.push({ type: 'input', key: 'description', message: 'Description of the queue worker', required: true } as const)
+			missing.push({
+				type: 'input',
+				key: 'description',
+				message: 'Description of the queue worker',
+				required: true,
+			} as const)
 		if (!input.serviceName?.trim())
-			missing.push({ type: 'select', key: 'serviceName', message: 'What service do you want to use?', choices: getServiceChoices(projectSnapshot) } as const)
+			missing.push({
+				type: 'select',
+				key: 'serviceName',
+				message: 'What service do you want to use?',
+				choices: getServiceChoices(projectSnapshot),
+			} as const)
 		if (!input.serviceVersion?.trim())
 			missing.push({
 				type: 'select',
@@ -43,7 +67,12 @@ export const addQueueWorkerCommand: PuristaExecutableCommand<AddQueueWorkerInput
 				choices: getQueueChoices(projectSnapshot, input.serviceName, input.serviceVersion),
 			} as const)
 		if (!input.workerMode?.trim())
-			missing.push({ type: 'select', key: 'workerMode', message: 'Select worker mode', choices: queueWorkerModeChoices } as const)
+			missing.push({
+				type: 'select',
+				key: 'workerMode',
+				message: 'Select worker mode',
+				choices: queueWorkerModeChoices,
+			} as const)
 		if (input.workerMode === 'interval' && !input.intervalMs) {
 			missing.push({
 				type: 'input',

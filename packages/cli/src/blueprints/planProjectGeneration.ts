@@ -1,12 +1,12 @@
 import { resolve } from 'node:path'
 import type { TsConfigJson } from 'type-fest'
-import { PuristaCliValidationError } from '../core/errors.js'
 import { convertToProjectFileCasing } from '../api/convertToProjectFileCasing.js'
-import { puristaConfigSchema, type PuristaConfig } from '../api/loadPuristaConfig.js'
-import { createEventBridgeFile, createEntrypointFile, createHttpFile } from './content.js'
-import { projectBlueprintRegistry } from './registry.js'
+import { type PuristaConfig, puristaConfigSchema } from '../api/loadPuristaConfig.js'
+import { PuristaCliValidationError } from '../core/errors.js'
 import { mergePackageJson, type PKG } from '../create/getPackageJson.js'
 import type { CreateProjectInput } from '../create/types.js'
+import { createEntrypointFile, createEventBridgeFile, createHttpFile } from './content.js'
+import { projectBlueprintRegistry } from './registry.js'
 import { resolveProjectBlueprints } from './resolveProjectBlueprints.js'
 import type {
 	BlueprintId,
@@ -55,10 +55,7 @@ const pushFile = (target: ProjectFileContribution[], file: ProjectFileContributi
 	target.push(file)
 }
 
-const createPredictedExampleArtifacts = (
-	step: ProjectGeneratorStep,
-	puristaConfig: PuristaConfig,
-): string[] => {
+const createPredictedExampleArtifacts = (step: ProjectGeneratorStep, puristaConfig: PuristaConfig): string[] => {
 	if (step.type !== 'example-service') {
 		return []
 	}
@@ -130,7 +127,10 @@ export const planProjectGeneration = (
 	for (const blueprintId of resolution.selectedBlueprints) {
 		const blueprint = projectBlueprintRegistry[blueprintId]
 		const contribution = blueprint.create(blueprintContext)
-		packageJson = mergePackageJson(packageJson, contribution.packageJson ?? { dependencies: {}, devDependencies: {}, trustedDependencies: [] })
+		packageJson = mergePackageJson(
+			packageJson,
+			contribution.packageJson ?? { dependencies: {}, devDependencies: {}, trustedDependencies: [] },
+		)
 		tsconfig = mergeTsConfig(tsconfig, contribution.tsconfig ?? {})
 		puristaConfig = mergePuristaConfig(puristaConfig, contribution.puristaConfig ?? {})
 		for (const file of contribution.files ?? []) {
@@ -151,7 +151,10 @@ export const planProjectGeneration = (
 		content: createEventBridgeFile(input),
 	})
 
-	if (resolution.selectedBlueprints.includes('http-node' as BlueprintId) || resolution.selectedBlueprints.includes('http-bun' as BlueprintId)) {
+	if (
+		resolution.selectedBlueprints.includes('http-node' as BlueprintId) ||
+		resolution.selectedBlueprints.includes('http-bun' as BlueprintId)
+	) {
 		pushFile(files, {
 			path: 'src/http.ts',
 			content: createHttpFile(input.runtime),

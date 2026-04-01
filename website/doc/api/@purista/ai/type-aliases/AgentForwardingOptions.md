@@ -8,4 +8,4 @@
 
 > **AgentForwardingOptions** = `true` \| \{ `artifacts?`: `boolean`; `assistant?`: `boolean`; `errors?`: `boolean`; `reasoning?`: `boolean`; `toolEvents?`: `boolean`; \}
 
-Defined in: [packages/ai/src/runtime/context.ts:655](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L655)
+Defined in: [packages/ai/src/runtime/context.ts:819](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L819)

@@ -185,7 +185,7 @@ class AutomaticDefaultsProvider implements ModelProvider {
 	async generateJson(request: ProviderJsonRequest) {
 		this.lastRequest = request
 		return {
-			data: { ok: true },
+			data: { ok: true } as any,
 			text: '{"ok":true}',
 			tokens: { prompt: 1, completion: 1 },
 		}
@@ -460,8 +460,9 @@ describe('AgentBuilder', () => {
 			.canInvoke('support', '1', 'lookupFaq')
 			.canInvokeAgent('triageAgent', '1')
 			.setHandler(async (context, payload) => {
+				const input = payload as { prompt: string }
 				const answer = await context.ai.models['openai:primary'].generateText({
-					prompt: payload.prompt,
+					prompt: input.prompt,
 				})
 				return { message: answer }
 			})
@@ -514,8 +515,9 @@ describe('AgentBuilder', () => {
 			.canInvoke('support', '1', 'lookupFaq')
 			.canInvokeAgent('triageAgent', '1')
 			.setHandler(async (context, payload) => {
+				const input = payload as { prompt: string }
 				await context.ai.models['openai:primary'].generateJson({
-					prompt: payload.prompt,
+					prompt: input.prompt,
 					schema: z.object({ ok: z.boolean() }),
 				})
 				return { message: 'ok' }
@@ -569,12 +571,11 @@ describe('AgentBuilder', () => {
 			.canInvoke('support', '1', 'lookupFaq')
 			.canInvokeAgent('triageAgent', '1')
 			.setHandler(async (context, payload) => {
-				await context.ai.models['openai:primary']
-					.streamObject({
-						prompt: payload.prompt,
-						schema: z.object({ ok: z.boolean() }),
-					})
-					.final()
+				const input = payload as { prompt: string }
+				await context.ai.models['openai:primary'].generateJson({
+					prompt: input.prompt,
+					schema: z.object({ ok: z.boolean() }),
+				})
 				return { message: 'ok' }
 			})
 			.build()
@@ -645,18 +646,19 @@ describe('AgentBuilder', () => {
 				scopeFromPayload: ['projectId'],
 			})
 			.setHandler(async (context, payload) => {
+				const input = payload as { prompt: string }
 				await context.memory.run.update({ phase: 'planning', status: 'planning' })
 				await context.memory.run.replaceTasks([
 					{ id: 'plan', title: 'Plan work' },
 					{ id: 'deliver', title: 'Deliver answer' },
 				])
-				await context.memory.run.checkpoint('plan', { prompt: payload.prompt }, { completed: true })
+				await context.memory.run.checkpoint('plan', { prompt: input.prompt }, { completed: true })
 				await context.memory.run.startTask('plan')
 				await context.memory.run.completeTask('plan')
 				await context.memory.run.startTask('deliver')
-				await context.memory.run.completeTask('deliver', payload.prompt.toUpperCase())
-				context.io.stream.sendFinal(`queued:${payload.prompt}`)
-				return { message: `queued:${payload.prompt}` }
+				await context.memory.run.completeTask('deliver', { detail: input.prompt.toUpperCase() })
+				context.io.stream.sendFinal(`queued:${input.prompt}`)
+				return { message: `queued:${input.prompt}` }
 			})
 			.build()
 
@@ -712,8 +714,9 @@ describe('AgentBuilder', () => {
 				},
 			})
 			.setHandler(async (_context, payload) => {
-				order.push(`handler:${payload.prompt}`)
-				return { message: `queued:${payload.prompt}` }
+				const input = payload as { prompt: string }
+				order.push(`handler:${input.prompt}`)
+				return { message: `queued:${input.prompt}` }
 			})
 			.build()
 

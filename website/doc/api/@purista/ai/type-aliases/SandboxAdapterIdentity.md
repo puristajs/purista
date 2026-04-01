@@ -8,7 +8,7 @@
 
 > **SandboxAdapterIdentity** = `object`
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:10](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L10)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:10](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L10)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapte
 
 > **principalId**: `string`
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:13](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L13)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:13](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L13)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapte
 
 > **sandboxId**: `string`
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:11](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L11)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:11](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L11)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapte
 
 > **tenantId**: `string`
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:12](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L12)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:12](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L12)

@@ -1,6 +1,10 @@
 import { configDefaults, defineConfig } from 'vitest/config'
+import { getPuristaWorkspaceAliases } from './vitest.workspaceAliases.js'
 
 export default defineConfig({
+	resolve: {
+		alias: getPuristaWorkspaceAliases(),
+	},
 	test: {
 		isolate: false,
 		globals: true,

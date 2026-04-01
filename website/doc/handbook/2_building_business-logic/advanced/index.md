@@ -17,7 +17,6 @@ This section covers internals and production-grade operating patterns.
 - [AI Retrieval & RAG](./ai-retrieval.md): deep dive into vector stores, retrieval resources, and explicit scoping.
 - [Custom AI Stores](./ai-custom-stores.md): building custom conversation memory and retrieval resources.
 - [Standard AI Protocols (MCP & A2A)](./ai-mcp-and-a2a.md): interoperability via Model Context Protocol and Agent2Agent.
-- [JavaScript Events](./javascript_events.md): integrating framework events with native JS events.
 
 ## When to read this section
 

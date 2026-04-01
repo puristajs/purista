@@ -8,7 +8,7 @@
 
 > **SkillBundle** = `object`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:37](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L37)
+Defined in: [packages/ai/src/skills/fileSystem.ts:37](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/skills/fileSystem.ts#L37)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:37](https://github.com/purista
 
 > **files**: [`SkillBundleFile`](SkillBundleFile.md)[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:39](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L39)
+Defined in: [packages/ai/src/skills/fileSystem.ts:39](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/skills/fileSystem.ts#L39)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:39](https://github.com/purista
 
 > **skill**: [`SkillMetadata`](SkillMetadata.md)
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:38](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/skills/fileSystem.ts#L38)
+Defined in: [packages/ai/src/skills/fileSystem.ts:38](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/skills/fileSystem.ts#L38)

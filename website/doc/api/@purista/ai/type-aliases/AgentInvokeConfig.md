@@ -8,7 +8,7 @@
 
 > **AgentInvokeConfig**\<`Payload`, `Parameter`\> = `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:90](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L90)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:102](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L102)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:90](https://github.com/puri
 
 > `optional` **parameterSchema**: `Parameter`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:92](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L92)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:104](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L104)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:92](https://github.com/puri
 
 > `optional` **payloadSchema**: `Payload`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:91](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L91)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:103](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L103)

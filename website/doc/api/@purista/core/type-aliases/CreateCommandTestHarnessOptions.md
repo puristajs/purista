@@ -8,7 +8,7 @@
 
 > **CreateCommandTestHarnessOptions**\<`TServiceBuilder`\> = [`InstanceConfigType`](InstanceConfigType.md)\<[`InferCommandHarnessServiceBuilderConfig`](InferCommandHarnessServiceBuilderConfig.md)\<`TServiceBuilder`\>\> & `object`
 
-Defined in: testing/createCommandTestHarness.ts:25
+Defined in: [testing/createCommandTestHarness.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandTestHarness.ts#L25)
 
 ## Type Declaration
 

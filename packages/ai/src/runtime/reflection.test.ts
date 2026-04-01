@@ -82,7 +82,7 @@ describe('reflection helpers', () => {
 			preset: 'wide',
 			draft: async ({ previousDraft }) => previousDraft ?? 'draft-1',
 			critique: async ({ draft }) => ({ accepted: draft === 'draft-2' }),
-			accept: async ({ critique }) => critique.accepted,
+			accept: async ({ critique }) => (critique as { accepted: boolean }).accepted,
 			refine: async ({ draft }) => (draft === 'draft-1' ? 'draft-2' : draft),
 		})
 
@@ -109,7 +109,7 @@ describe('reflection helpers', () => {
 			maxIterations: 3,
 			draft: async () => 'draft-1',
 			critique: async ({ draft }) => ({ accepted: draft === 'draft-2' }),
-			accept: async ({ critique }) => critique.accepted,
+			accept: async ({ critique }) => (critique as { accepted: boolean }).accepted,
 			refine: async ({ draft }) => (draft === 'draft-1' ? 'draft-2' : draft),
 		})
 

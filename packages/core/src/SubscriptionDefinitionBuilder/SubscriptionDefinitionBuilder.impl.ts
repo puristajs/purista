@@ -18,6 +18,7 @@ import type {
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
+import type { DefinitionEventBridgeConsumerFailureHandling } from '../core/types/DefinitionEventBridgeConsumerFailureHandling.js'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { InstanceId } from '../core/types/InstanceId.js'
@@ -116,6 +117,7 @@ export class SubscriptionDefinitionBuilder<
 
 	private shared = true
 	private autoacknowledge = false
+	private consumerFailureHandling?: DefinitionEventBridgeConsumerFailureHandling
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
@@ -525,6 +527,25 @@ export class SubscriptionDefinitionBuilder<
 	 */
 	adviceDurable(durable: boolean) {
 		this.durable = durable
+		return this
+	}
+
+	/**
+	 * Advise retry and dead-letter handling for this subscription.
+	 *
+	 * The selected event bridge decides which parts it can honor. Production
+	 * adapters should document whether retries are broker-native, bridge-emulated,
+	 * or unsupported.
+	 */
+	adviceConsumerFailureHandling(config: DefinitionEventBridgeConsumerFailureHandling) {
+		if (config.maxAttempts !== undefined && config.maxAttempts < 1) {
+			throw new Error('maxAttempts must be greater than 0')
+		}
+		if (config.retryDelayMs !== undefined && config.retryDelayMs < 0) {
+			throw new Error('retryDelayMs must be greater than or equal to 0')
+		}
+
+		this.consumerFailureHandling = { ...config }
 		return this
 	}
 
@@ -1000,6 +1021,7 @@ export class SubscriptionDefinitionBuilder<
 			durable: this.durable,
 			autoacknowledge: this.autoacknowledge,
 			shared: this.shared,
+			consumerFailureHandling: this.consumerFailureHandling,
 		}
 
 		const [inputPayload, parameter, outputPayload] = await Promise.all([

@@ -1,5 +1,4 @@
 export * from './EventBridge.js'
 export * from './EventBridgeCapabilities.js'
 export * from './EventBridgeConfig.js'
-export * from './EventBridgeEvents.js'
 export * from './EventBridgeLateResponseHandling.js'

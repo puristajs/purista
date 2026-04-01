@@ -6,13 +6,9 @@
 
 # Class: EventBridgeBaseClass\<ConfigType\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L31)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L32)
 
 The base class to be extended by event bridge implementations
-
-## Extends
-
-- [`GenericEventEmitter`](GenericEventEmitter.md)\<[`EventBridgeEvents`](../type-aliases/EventBridgeEvents.md)\>
 
 ## Extended by
 
@@ -34,7 +30,7 @@ The base class to be extended by event bridge implementations
 
 > **new EventBridgeBaseClass**\<`ConfigType`\>(`name`, `config`): `EventBridgeBaseClass`\<`ConfigType`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L42)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L53)
 
 #### Parameters
 
@@ -50,17 +46,21 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:42](https://github.co
 
 `EventBridgeBaseClass`\<`ConfigType`\>
 
-#### Overrides
-
-[`GenericEventEmitter`](GenericEventEmitter.md).[`constructor`](GenericEventEmitter.md#constructor)
-
 ## Properties
+
+### capabilities
+
+> **capabilities**: [`EventBridgeCapabilities`](../type-aliases/EventBridgeCapabilities.md)
+
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L39)
+
+***
 
 ### config
 
 > **config**: [`Complete`](../type-aliases/Complete.md)\<[`EventBridgeConfig`](../type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L35)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L36)
 
 ***
 
@@ -68,7 +68,15 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:35](https://github.co
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L41)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L51)
+
+***
+
+### inFlightExecutions
+
+> `protected` `readonly` **inFlightExecutions**: [`InFlightExecutionTracker`](InFlightExecutionTracker.md)
+
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L52)
 
 ***
 
@@ -76,7 +84,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:41](https://github.co
 
 > **instanceId**: `string`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L39)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L49)
 
 ***
 
@@ -84,7 +92,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:39](https://github.co
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L32)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L33)
 
 ***
 
@@ -92,7 +100,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:32](https://github.co
 
 > **name**: `string`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L37)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L38)
 
 ***
 
@@ -100,7 +108,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:37](https://github.co
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L33)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L34)
 
 ## Methods
 
@@ -108,7 +116,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:33](https://github.co
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:164](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L164)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:174](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L174)
 
 #### Returns
 
@@ -116,36 +124,15 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:164](https://github.c
 
 ***
 
-### emit()
+### getInFlightExecutionCount()
 
-> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
+> **getInFlightExecutionCount**(): `number`
 
-Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L27)
-
-#### Type Parameters
-
-##### K
-
-`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
-
-#### Parameters
-
-##### eventName
-
-`K`
-
-##### parameter?
-
-`object`\[`K`\]
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:185](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L185)
 
 #### Returns
 
-`void`
-
-#### Inherited from
-
-[`GenericEventEmitter`](GenericEventEmitter.md).[`emit`](GenericEventEmitter.md#emit)
+`number`
 
 ***
 
@@ -153,7 +140,7 @@ Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/
 
 > **getTracer**(): `Tracer`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:79](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L79)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L89)
 
 Returns open telemetry tracer of this service
 
@@ -165,77 +152,11 @@ Tracer
 
 ***
 
-### off()
-
-> **off**\<`K`\>(`eventName`, `fn`): `void`
-
-Defined in: [core/types/GenericEventEmitter.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L23)
-
-#### Type Parameters
-
-##### K
-
-`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
-
-#### Parameters
-
-##### eventName
-
-`K`
-
-##### fn
-
-[`EventReceiver`](../type-aliases/EventReceiver.md)\<`object`\[`K`\]\>
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`GenericEventEmitter`](GenericEventEmitter.md).[`off`](GenericEventEmitter.md#off)
-
-***
-
-### on()
-
-> **on**\<`K`\>(`eventName`, `fn`): `void`
-
-Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L19)
-
-#### Type Parameters
-
-##### K
-
-`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
-
-#### Parameters
-
-##### eventName
-
-`K`
-
-##### fn
-
-[`EventReceiver`](../type-aliases/EventReceiver.md)\<`object`\[`K`\]\>
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`GenericEventEmitter`](GenericEventEmitter.md).[`on`](GenericEventEmitter.md#on)
-
-***
-
 ### openStream()
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:167](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L167)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:189](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L189)
 
 #### Type Parameters
 
@@ -267,7 +188,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:167](https://github.c
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:174](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L174)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:196](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L196)
 
 #### Parameters
 
@@ -293,19 +214,27 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:174](https://github.c
 
 ***
 
-### removeAllListeners()
+### runInFlight()
 
-> **removeAllListeners**(): `void`
+> **runInFlight**\<`T`\>(`fn`): `Promise`\<`T`\>
 
-Defined in: [core/types/GenericEventEmitter.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L31)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:177](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L177)
+
+#### Type Parameters
+
+##### T
+
+`T`
+
+#### Parameters
+
+##### fn
+
+() => `Promise`\<`T`\>
 
 #### Returns
 
-`void`
-
-#### Inherited from
-
-[`GenericEventEmitter`](GenericEventEmitter.md).[`removeAllListeners`](GenericEventEmitter.md#removealllisteners)
+`Promise`\<`T`\>
 
 ***
 
@@ -313,7 +242,7 @@ Defined in: [core/types/GenericEventEmitter.ts:31](https://github.com/puristajs/
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:165](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L165)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:175](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L175)
 
 #### Returns
 
@@ -325,7 +254,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:165](https://github.c
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L91)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:101](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L101)
 
 Start a child span for opentelemetry tracking
 
@@ -373,7 +302,7 @@ return value of fn
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:183](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L183)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:205](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L205)
 
 #### Parameters
 
@@ -387,11 +316,29 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:183](https://github.c
 
 ***
 
+### waitForInFlightDrain()
+
+> **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
+
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:181](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L181)
+
+#### Parameters
+
+##### timeoutMs?
+
+`number` = `...`
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+***
+
 ### wrapInSpan()
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:141](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L141)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:151](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L151)
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

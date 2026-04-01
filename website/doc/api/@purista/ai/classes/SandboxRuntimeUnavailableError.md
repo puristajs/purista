@@ -6,7 +6,7 @@
 
 # Class: SandboxRuntimeUnavailableError
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:18](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L18)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:18](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L18)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:18](https://gi
 
 > **new SandboxRuntimeUnavailableError**(`diagnostics`): `SandboxRuntimeUnavailableError`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:21](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L21)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:21](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L21)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 > `readonly` **diagnostics**: [`SandboxRuntimeDiagnostics`](../type-aliases/SandboxRuntimeDiagnostics.md)
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:19](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L19)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:19](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L19)
 
 ***
 

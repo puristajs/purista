@@ -9,5 +9,10 @@ export const getDefaultNatsBridgeConfig = (): NatsBridgeConfig => {
 		defaultMessageExpiryInterval: 30 * SECONDS_PER_DAY,
 		maxMessages: 10,
 		durableSubscriptionMode: 'strict',
+		defaultConsumerFailureHandling: {
+			maxAttempts: 5,
+			retryDelayMs: 1_000,
+			deadLetterSuffix: '.dead-letter',
+		},
 	}
 }

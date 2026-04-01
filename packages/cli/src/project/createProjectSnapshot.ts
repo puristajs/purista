@@ -39,7 +39,10 @@ const pushUnique = (target: string[], value: string) => {
 	}
 }
 
-export const createProjectSnapshot = async (puristaConfig: PuristaConfig, projectRootPath?: string): Promise<ProjectSnapshot> => {
+export const createProjectSnapshot = async (
+	puristaConfig: PuristaConfig,
+	projectRootPath?: string,
+): Promise<ProjectSnapshot> => {
 	const projectPath = projectRootPath ?? process.cwd()
 	const servicePath = join(projectPath, puristaConfig.servicePath)
 	const result: ProjectSnapshot = {
@@ -68,7 +71,8 @@ export const createProjectSnapshot = async (puristaConfig: PuristaConfig, projec
 		}
 
 		result.services[serviceName] = result.services[serviceName] ?? {}
-		result.services[serviceName][serviceVersion] = result.services[serviceName][serviceVersion] ?? createEmptyServiceVersionSnapshot()
+		result.services[serviceName][serviceVersion] =
+			result.services[serviceName][serviceVersion] ?? createEmptyServiceVersionSnapshot()
 		const versionEntry = result.services[serviceName][serviceVersion]
 
 		if (splitPath.length === 3) {

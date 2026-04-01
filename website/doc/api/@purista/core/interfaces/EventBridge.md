@@ -6,18 +6,26 @@
 
 # Interface: EventBridge
 
-Defined in: [core/EventBridge/types/EventBridge.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L21)
+Defined in: [core/EventBridge/types/EventBridge.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L22)
 
 Event bridge interface
 The event bridge must implement this interface.
 
 ## Properties
 
+### capabilities
+
+> `readonly` **capabilities**: [`EventBridgeCapabilities`](../type-aliases/EventBridgeCapabilities.md)
+
+Defined in: [core/EventBridge/types/EventBridge.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L24)
+
+***
+
 ### defaultCommandTimeout
 
 > `readonly` **defaultCommandTimeout**: `number`
 
-Defined in: [core/EventBridge/types/EventBridge.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L28)
+Defined in: [core/EventBridge/types/EventBridge.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L30)
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -27,7 +35,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `readonly` **instanceId**: `string`
 
-Defined in: [core/EventBridge/types/EventBridge.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L24)
+Defined in: [core/EventBridge/types/EventBridge.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L26)
 
 ***
 
@@ -35,7 +43,7 @@ Defined in: [core/EventBridge/types/EventBridge.ts:24](https://github.com/purist
 
 > `readonly` **name**: `string`
 
-Defined in: [core/EventBridge/types/EventBridge.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L22)
+Defined in: [core/EventBridge/types/EventBridge.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L23)
 
 ## Methods
 
@@ -43,7 +51,7 @@ Defined in: [core/EventBridge/types/EventBridge.ts:22](https://github.com/purist
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L123)
+Defined in: [core/EventBridge/types/EventBridge.ts:125](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L125)
 
 Shut down event bridge as gracefully as possible
 
@@ -57,7 +65,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L39)
+Defined in: [core/EventBridge/types/EventBridge.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L41)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -79,7 +87,7 @@ the message
 
 > **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L46)
+Defined in: [core/EventBridge/types/EventBridge.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L48)
 
 Call a command of a service and return the result of this command
 
@@ -113,7 +121,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:118](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L118)
+Defined in: [core/EventBridge/types/EventBridge.ts:120](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L120)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -127,7 +135,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:113](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L113)
+Defined in: [core/EventBridge/types/EventBridge.ts:115](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L115)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -141,7 +149,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **openStream**\<`Chunk`, `Final`\>(`input`, `ttl?`): `Promise`\<[`StreamHandle`](StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L52)
+Defined in: [core/EventBridge/types/EventBridge.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L54)
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -176,7 +184,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L62)
+Defined in: [core/EventBridge/types/EventBridge.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L64)
 
 #### Parameters
 
@@ -210,7 +218,7 @@ the function to be called if a matching command arrives
 
 > **registerStream**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:76](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L76)
+Defined in: [core/EventBridge/types/EventBridge.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L78)
 
 Register a service stream.
 
@@ -242,7 +250,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:99](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L99)
+Defined in: [core/EventBridge/types/EventBridge.ts:101](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L101)
 
 Register a new subscription
 
@@ -270,7 +278,7 @@ the function to be called if a matching message arrives
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L33)
+Defined in: [core/EventBridge/types/EventBridge.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L35)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -284,7 +292,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L87)
+Defined in: [core/EventBridge/types/EventBridge.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L89)
 
 Unregister a service command
 
@@ -306,7 +314,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterStream**(`address`): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L92)
+Defined in: [core/EventBridge/types/EventBridge.ts:94](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L94)
 
 Unregister a service stream
 
@@ -326,7 +334,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/types/EventBridge.ts:108](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L108)
+Defined in: [core/EventBridge/types/EventBridge.ts:110](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L110)
 
 #### Parameters
 

@@ -79,10 +79,7 @@ export const attachmentToInputPart = (attachment: AgentAttachment): AgentInputPa
 		title: attachment.title,
 		metadata: attachment.metadata,
 	}
-	const sourceData =
-		attachment.source.kind === 'url'
-			? toAttachmentUrl(attachment.source.url)
-			: attachment.source.data
+	const sourceData = attachment.source.kind === 'url' ? toAttachmentUrl(attachment.source.url) : attachment.source.data
 
 	if (isImageMediaType(attachment.mediaType)) {
 		return {

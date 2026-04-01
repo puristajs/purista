@@ -11,7 +11,6 @@ import { getNewInstanceId } from '../helper/getNewInstanceId.impl.js'
 import type { Complete } from '../types/Complete.js'
 import type { DefinitionEventBridgeConfig } from '../types/DefinitionEventBridgeConfig.js'
 import type { EBMessageAddress } from '../types/EBMessageAddress.js'
-import { GenericEventEmitter } from '../types/GenericEventEmitter.js'
 import type { InstanceId } from '../types/InstanceId.js'
 import type { Logger } from '../types/Logger.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
@@ -23,7 +22,6 @@ import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
 import { InFlightExecutionTracker } from './InFlightExecutionTracker.impl.js'
 import type { EventBridgeCapabilities } from './types/EventBridgeCapabilities.js'
 import type { EventBridgeConfig } from './types/EventBridgeConfig.js'
-import type { EventBridgeEvents } from './types/EventBridgeEvents.js'
 import { EventBridgeLateResponseHandling } from './types/EventBridgeLateResponseHandling.js'
 
 /**
@@ -31,7 +29,7 @@ import { EventBridgeLateResponseHandling } from './types/EventBridgeLateResponse
  *
  * @group Event bridge
  */
-export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventBridgeEvents> {
+export class EventBridgeBaseClass<ConfigType> {
 	logger: Logger
 	traceProvider: NodeTracerProvider
 
@@ -53,7 +51,6 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 	defaultCommandTimeout: Readonly<number>
 	protected readonly inFlightExecutions = new InFlightExecutionTracker()
 	constructor(name: string, config: EventBridgeConfig<ConfigType>) {
-		super()
 		this.name = name
 		const logger = config?.logger ?? initLogger(config?.logLevel)
 		this.logger = logger.getChildLogger({ name })

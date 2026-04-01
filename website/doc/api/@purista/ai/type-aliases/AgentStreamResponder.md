@@ -8,7 +8,7 @@
 
 > **AgentStreamResponder**\<`_EmitPayloads`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:145](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L145)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:145](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentDefinition.ts#L145)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:145](https://github.com/pu
 
 > **onComplete**(): `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:147](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L147)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:147](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentDefinition.ts#L147)
 
 #### Returns
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:147](https://github.com/pu
 
 > **onError**(`error`): `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:148](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L148)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:148](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentDefinition.ts#L148)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:148](https://github.com/pu
 
 > **onFrame**(`frame`): `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:146](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentDefinition.ts#L146)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:146](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentDefinition.ts#L146)
 
 #### Parameters
 

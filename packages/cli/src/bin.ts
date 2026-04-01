@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { Argument, Command, Option } from 'commander'
+import { getCommandMode } from './adapters/argv/getCommandMode.js'
 import { createTerminalPromptAdapter } from './adapters/interactive/terminalPromptAdapter.js'
 import { createTerminalOutputAdapter } from './adapters/output/terminalOutput.js'
-import { getCommandMode } from './adapters/argv/getCommandMode.js'
 import { PuristaCliError } from './core/errors.js'
 import { createPuristaCliEngine } from './engine.js'
 import { puristaVersion } from './version.js'
@@ -28,7 +28,12 @@ const mapAddComponentToCommand = (component: string) => {
 	}
 }
 
-const createEngineForOptions = (options: { interactive?: boolean; nonInteractive?: boolean; yes?: boolean; defaults?: boolean }) => {
+const createEngineForOptions = (options: {
+	interactive?: boolean
+	nonInteractive?: boolean
+	yes?: boolean
+	defaults?: boolean
+}) => {
 	const mode = getCommandMode(options)
 	return createPuristaCliEngine({
 		cwd: process.cwd(),

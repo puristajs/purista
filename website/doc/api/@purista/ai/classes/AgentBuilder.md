@@ -6,7 +6,7 @@
 
 # Class: AgentBuilder\<ModelAliases, TextAliases, StreamAliases, EmbeddingAliases, RerankAliases, ObjectAliases, AgentInvokes, SkillNames, Resources, EmitPayloads, ConfigType, ConfigInputType\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:322](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L322)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:390](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L390)
 
 ## Type Parameters
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:322](https://github.com/pur
 
 > **new AgentBuilder**\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>(`info`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:377](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L377)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:445](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L445)
 
 #### Parameters
 
@@ -82,7 +82,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:377](https://github.com/pur
 
 > **addContextSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:992](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L992)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1097](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1097)
 
 #### Parameters
 
@@ -100,7 +100,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:992](https://github.com/pur
 
 > **addOutputSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:985](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L985)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1090](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1090)
 
 #### Parameters
 
@@ -118,7 +118,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:985](https://github.com/pur
 
 > **addParameterSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:977](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L977)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1082](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1082)
 
 #### Parameters
 
@@ -136,7 +136,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:977](https://github.com/pur
 
 > **addPayloadSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:965](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L965)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1070](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1070)
 
 #### Parameters
 
@@ -154,7 +154,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:965](https://github.com/pur
 
 > **build**(): [`AgentDefinition`](../type-aliases/AgentDefinition.md)\<`SkillNames`, `Resources`, `ConfigInputType`, `ConfigType`, `EmitPayloads`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:2290](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L2290)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:2688](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L2688)
 
 #### Returns
 
@@ -166,7 +166,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:2290](https://github.com/pu
 
 > **canEmit**\<`EventName`, `T`\>(`eventName`, `schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads` & `{ [K in string]: InferIn<T> }`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:802](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L802)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:907](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L907)
 
 #### Type Parameters
 
@@ -198,7 +198,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:802](https://github.com/pur
 
 > **canInvoke**(`serviceName`, `serviceVersion`, `commandName`, `outputSchema?`, `payloadSchema?`, `parameterSchema?`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:671](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L671)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:776](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L776)
 
 #### Parameters
 
@@ -236,7 +236,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:671](https://github.com/pur
 
 > **canInvokeAgent**\<`Payload`, `Parameter`, `SName`, `Version`\>(`agentName`, `agentVersion`, `invokeConfigOrParameterSchema?`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes` & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter?`) => [`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:711](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L711)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:816](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L816)
 
 #### Type Parameters
 
@@ -280,7 +280,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:711](https://github.com/pur
 
 > **defineModel**\<`Alias`, `Caps`\>(`alias`, `options?`): `AgentBuilder`\<`ModelAliases` \| `Alias`, `TextAliases` \| [`ResolveCapability`](../type-aliases/ResolveCapability.md)\<`Caps`, `"text"`\> *extends* `true` ? `Alias` : `never`, `StreamAliases` \| [`ResolveCapability`](../type-aliases/ResolveCapability.md)\<`Caps`, `"stream"`\> *extends* `true` ? `Alias` : `never`, `EmbeddingAliases` \| [`ResolveCapability`](../type-aliases/ResolveCapability.md)\<`Caps`, `"embedding"`\> *extends* `true` ? `Alias` : `never`, `RerankAliases` \| [`ResolveCapability`](../type-aliases/ResolveCapability.md)\<`Caps`, `"rerank"`\> *extends* `true` ? `Alias` : `never`, `ObjectAliases` \| [`ResolveCapability`](../type-aliases/ResolveCapability.md)\<`Caps`, `"json"`\> *extends* `true` ? `Alias` : `never`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:502](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L502)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:567](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L567)
 
 #### Type Parameters
 
@@ -314,7 +314,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:502](https://github.com/pur
 
 > **defineResource**\<`ResourceName`, `ResourceType`\>(): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources` & `{ [K in string]: ResourceType }`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:479](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L479)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:544](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L544)
 
 Declare that the agent requires a runtime resource passed through `getInstance(..., { resources })`.
 
@@ -347,7 +347,7 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 
 > **exposeAsHttpEndpoint**(`method`, `path`, `contentTypeRequest?`, `contentEncodingRequest?`, `contentTypeResponse?`, `contentEncodingResponse?`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1030](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1030)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1135](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1135)
 
 #### Parameters
 
@@ -385,7 +385,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:1030](https://github.com/pu
 
 > **getAfterGuardHook**(`name`): [`AgentAfterGuardHook`](../type-aliases/AgentAfterGuardHook.md)\<`any`, `any`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:943](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L943)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1048](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1048)
 
 #### Parameters
 
@@ -403,7 +403,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:943](https://github.com/pur
 
 > **getBeforeGuardHook**(`name`): [`AgentBeforeGuardHook`](../type-aliases/AgentBeforeGuardHook.md)\<`any`, `any`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:889](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L889)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:994](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L994)
 
 #### Parameters
 
@@ -421,7 +421,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:889](https://github.com/pur
 
 > **makeEndpointPublic**(): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1082](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1082)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1187](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1187)
 
 #### Returns
 
@@ -433,7 +433,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:1082](https://github.com/pu
 
 > **markAsDeprecated**(): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:455](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L455)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:520](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L520)
 
 Mark the agent endpoints as deprecated.
 
@@ -451,7 +451,7 @@ This mirrors the core builder behavior and propagates deprecation metadata to th
 
 > **persistConversation**(`config`): `this`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:620](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L620)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:685](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L685)
 
 Configure conversation persistence.
 
@@ -480,7 +480,7 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 
 > **persistConversation**(`preset`, `overrides?`): `this`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:621](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L621)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:686](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L686)
 
 Configure conversation persistence.
 
@@ -515,7 +515,7 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 
 > **prepareCall**(`hook`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1015](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1015)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1120](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1120)
 
 Registers a per-model-call hook that can inject metadata and AI SDK call options dynamically.
 
@@ -535,7 +535,7 @@ Registers a per-model-call hook that can inject metadata and AI SDK call options
 
 > **prepareStep**(`hook`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1025](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1025)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1130](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1130)
 
 Registers a step-aware hook invoked for each model call.
 
@@ -557,7 +557,7 @@ Use this when call options need to change across iterative refinement passes.
 
 > **setAfterGuardHooks**(`hooks`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:896](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L896)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1001](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1001)
 
 Register one or more guard hooks that run after the agent handler logic completed successfully.
 
@@ -573,11 +573,29 @@ Register one or more guard hooks that run after the agent handler logic complete
 
 ***
 
+### setAgentPolicy()
+
+> **setAgentPolicy**(`policy`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
+
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:722](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L722)
+
+#### Parameters
+
+##### policy
+
+[`AgentPolicy`](../type-aliases/AgentPolicy.md)
+
+#### Returns
+
+`AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
+
+***
+
 ### setBeforeGuardHooks()
 
 > **setBeforeGuardHooks**(`hooks`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:844](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L844)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:949](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L949)
 
 Register one or more guard hooks that run before the agent handler logic executes.
 
@@ -600,7 +618,7 @@ Keep business logic in the handler itself.
 
 > **setCallOptionsSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1007](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1007)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1112](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1112)
 
 Sets a validation schema for model call options returned by [prepareCall](#preparecall) / [prepareStep](#preparestep).
 
@@ -622,7 +640,7 @@ The schema is validated for every hook result before metadata is merged into mod
 
 > **setConfigSchema**\<`T`\>(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, [`Infer`](../../core/type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../../core/type-aliases/Infer.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\>\> : [`EmptyObject`](../../core/type-aliases/EmptyObject.md), [`InferIn`](../../core/type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../../core/type-aliases/InferIn.md)\<[`InferIn`](../../core/type-aliases/InferIn.md)\<`T`\>\> : [`EmptyObject`](../../core/type-aliases/EmptyObject.md)\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:422](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L422)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:487](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L487)
 
 Declare the shape of host-provided runtime config passed through `getInstance(..., { config })`.
 
@@ -658,7 +676,7 @@ const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentVersion:
 
 > **setContextSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:998](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L998)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1103](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1103)
 
 #### Parameters
 
@@ -676,7 +694,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:998](https://github.com/pur
 
 > **setDefaultConfig**(`config`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:445](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L445)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:510](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L510)
 
 Provide default values for the runtime config declared via [setConfigSchema](#setconfigschema).
 
@@ -698,7 +716,7 @@ These defaults are merged before validation and can still be overridden via `get
 
 > **setDescription**(`description`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:405](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L405)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:470](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L470)
 
 #### Parameters
 
@@ -716,7 +734,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:405](https://github.com/pur
 
 > **setEvaluation**(`profile`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:957](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L957)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1062](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1062)
 
 #### Parameters
 
@@ -734,7 +752,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:957](https://github.com/pur
 
 > **setExecutionMode**(`mode`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:640](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L640)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:705](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L705)
 
 #### Parameters
 
@@ -752,7 +770,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:640](https://github.com/pur
 
 > **setExecutionPolicy**(`policy`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:645](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L645)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:710](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L710)
 
 #### Parameters
 
@@ -770,7 +788,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:645](https://github.com/pur
 
 > **setHandler**\<`Payload`, `Parameter`, `HandlerResources`, `Models`\>(`fn`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1090](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1090)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1195](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1195)
 
 #### Type Parameters
 
@@ -806,7 +824,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:1090](https://github.com/pu
 
 > **setInputSchema**(`schema`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:973](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L973)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1078](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1078)
 
 #### Parameters
 
@@ -824,7 +842,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:973](https://github.com/pur
 
 > **setMemory**(`config`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:667](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L667)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:772](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L772)
 
 #### Parameters
 
@@ -842,7 +860,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:667](https://github.com/pur
 
 > **setModelResource**(`resource`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:657](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L657)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:762](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L762)
 
 #### Parameters
 
@@ -856,11 +874,29 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:657](https://github.com/pur
 
 ***
 
+### setReflectionPolicy()
+
+> **setReflectionPolicy**(`policy`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
+
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:750](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L750)
+
+#### Parameters
+
+##### policy
+
+[`ReflectionPolicy`](../type-aliases/ReflectionPolicy.md)
+
+#### Returns
+
+`AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
+
+***
+
 ### setRetryPolicy()
 
 > **setRetryPolicy**(`policy`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:662](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L662)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:767](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L767)
 
 #### Parameters
 
@@ -878,7 +914,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:662](https://github.com/pur
 
 > **setRuntime**(`mode`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:632](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L632)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:697](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L697)
 
 #### Parameters
 
@@ -896,7 +932,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:632](https://github.com/pur
 
 > **setSseProtocol**(`protocol`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1073](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1073)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1178](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1178)
 
 Selects the SSE wire protocol for exposed stream endpoints.
 
@@ -919,7 +955,7 @@ This setting is only relevant when `streamingMode` is `stream`.
 
 > **setStreamingMode**(`mode`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:1058](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L1058)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1163](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1163)
 
 #### Parameters
 
@@ -937,7 +973,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:1058](https://github.com/pu
 
 > **setSuccessEventName**(`eventName`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:947](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L947)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1052](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1052)
 
 #### Parameters
 
@@ -955,7 +991,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:947](https://github.com/pur
 
 > **setTelemetry**(`config`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:952](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L952)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:1057](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L1057)
 
 #### Parameters
 
@@ -973,7 +1009,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:952](https://github.com/pur
 
 > **useConversationStore**(`config`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:557](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L557)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:622](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L622)
 
 #### Parameters
 
@@ -991,7 +1027,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:557](https://github.com/pur
 
 > **useEventBridge**(`name`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames`, `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:497](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L497)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:562](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L562)
 
 #### Parameters
 
@@ -1009,7 +1045,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:497](https://github.com/pur
 
 > **useSkills**\<`Names`\>(`skillNames`): `AgentBuilder`\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`, `AgentInvokes`, `SkillNames` \| `Names`\[`number`\], `Resources`, `EmitPayloads`, `ConfigType`, `ConfigInputType`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:562](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L562)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:627](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L627)
 
 #### Type Parameters
 

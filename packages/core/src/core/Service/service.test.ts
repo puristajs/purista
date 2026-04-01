@@ -34,6 +34,24 @@ describe('Service', () => {
 		await expect(service.destroy()).resolves.toBeUndefined()
 	})
 
+	it('does not expose event-emitter methods on service instances', () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock().mock
+
+		const service = new Service({
+			logger,
+			eventBridge,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			config: {},
+		})
+
+		expect('emit' in service).toBe(false)
+		expect('on' in service).toBe(false)
+		expect('removeAllListeners' in service).toBe(false)
+	})
+
 	it('validates invokes in subscription after-guard hooks', async () => {
 		const logger = getLoggerMock()
 		const eventBridge = getEventBridgeMock()
@@ -650,7 +668,9 @@ describe('Service', () => {
 		expect(health.status).toBe('warn')
 		expect(health.queues).toHaveLength(1)
 		expect(health.queues[0].status).toBe('warn')
-		expect(queueBridge.stubs.metrics.callCount).toBe(1)
+		expect(queueBridge.stubs.metrics.callCount).toBe(2)
+		expect(queueBridge.stubs.metrics.getCall(0)?.args[0]).toBe('orders')
+		expect(queueBridge.stubs.metrics.getCall(1)?.args[0]).toBe('orders.dead-letter')
 	})
 
 	it('marks service health as error when queue metrics cannot be fetched', async () => {

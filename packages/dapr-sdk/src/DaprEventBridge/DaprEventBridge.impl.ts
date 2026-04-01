@@ -1,6 +1,6 @@
 import { getDefaultHttpEventBridgeConfig, HttpEventBridge } from '@purista/base-http-bridge'
 import type { CustomMessage, EBMessage, EventBridge, EventBridgeConfig, Subscription } from '@purista/core'
-import { EventBridgeEventNames, initLogger, StatusCode, safeBind, UnhandledError } from '@purista/core'
+import { initLogger, StatusCode, safeBind, UnhandledError } from '@purista/core'
 
 import { DaprClient } from '../DaprClient/DaprClient.impl.js'
 import type { DaprPubSubType } from '../types/pubsub/DaprPubSub.type.js'
@@ -100,7 +100,6 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
 	): Promise<string> {
 		if (!subscription.eventName) {
 			const err = new UnhandledError(StatusCode.InternalServerError, 'only subscriptions by event name are supported')
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 			throw err
 		}
 		const path = await super.registerSubscription(subscription, cb)

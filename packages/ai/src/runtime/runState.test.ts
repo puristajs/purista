@@ -8,6 +8,7 @@ const manifest: AgentManifest = {
 	agentName: 'plannerAgent',
 	agentVersion: '1',
 	eventBridge: 'default',
+	allowedTools: [],
 }
 
 const createInMemoryStates = () => {
@@ -97,7 +98,7 @@ describe('agent run state helpers', () => {
 		const lock = await first.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 })
 		await expect(
 			second.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 }),
-		).rejects.toMatchObject<Partial<HandledError>>({ errorCode: StatusCode.Conflict })
+		).rejects.toMatchObject({ errorCode: StatusCode.Conflict } satisfies Partial<HandledError>)
 
 		await lock.release()
 		await expect(

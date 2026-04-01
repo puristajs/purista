@@ -59,6 +59,7 @@ import { NatsBridge } from '@purista/natsbridge'
 - [INatsBridge](type-aliases/INatsBridge.md)
 - [IncomingMessageFunction](type-aliases/IncomingMessageFunction.md)
 - [NatsBridgeConfig](type-aliases/NatsBridgeConfig.md)
+- [NatsConsumerFailureHandlingDefaults](type-aliases/NatsConsumerFailureHandlingDefaults.md)
 
 ## Variables
 

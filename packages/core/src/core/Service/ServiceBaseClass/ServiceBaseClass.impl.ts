@@ -11,11 +11,9 @@ import type { ConfigStore } from '../../ConfigStore/types/ConfigStore.js'
 import type { EventBridge } from '../../EventBridge/types/EventBridge.js'
 import type { SecretStore } from '../../SecretStore/types/SecretStore.js'
 import type { StateStore } from '../../StateStore/types/StateStore.js'
-import { GenericEventEmitter } from '../../types/GenericEventEmitter.js'
 import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
 import type { Logger } from '../../types/Logger.js'
 import { PuristaSpanTag } from '../../types/PuristaSpanTag.enum.js'
-import type { ServiceEvents } from '../../types/ServiceEvents.js'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 
 /**
@@ -27,7 +25,7 @@ import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
  *
  * @group Service
  */
-export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
+export class ServiceBaseClass {
 	readonly info: ServiceInfoType
 
 	protected eventBridge: EventBridge
@@ -54,7 +52,6 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 		stateStore: StateStore
 		configSchema?: Schema
 	}) {
-		super()
 		this.info = new Proxy(
 			{
 				serviceName: '',

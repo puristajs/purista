@@ -8,9 +8,9 @@
 
 > **generateText**(`input`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/providers/runtime/generateText.ts:19](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/generateText.ts#L19)
+Defined in: [packages/ai/src/providers/runtime/generateText.ts:23](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/generateText.ts#L23)
 
-Generates one final text output from a model provider.
+Generates one final text output from a model provider with optional bounded invocation policy.
 
 Strategy:
 1. Prefer `stream()` when available and forward reasoning/text callbacks.

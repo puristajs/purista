@@ -250,24 +250,16 @@ If a subscription throws some error - other than a `HandledError`, it is automat
 
 ## Error tracking
 
-In general, there are three different options available, to track errors in PURISTA.
+In general, there are two supported options available to track errors in PURISTA.
 
 ### OpenTelemetry and logging
 
-The default and recommended way to track errors in a PURISTA based application is, to use the OpenTelemetry possibilities.
+The default and recommended way to track errors in a PURISTA based application is to use OpenTelemetry together with structured logging.
 
-### Tracking of javascript events
-
-To allow a more flexible way of tracking, monitoring or alerting, you might want to use some external services like [sentry](https://sentry.io/) or you like to programmatically react on errors and issues.
-For example, automatically open a issue in your ticket system.
-
-To allow a flexible and decoupled way, a service emits the following events:
-
-- `handled-subscription-error` emitted when a subscription throws a HandledError
-- `handled-command-error` emitted when a command throws a HandledError
-- `unhandled-subscription-error` emitted when a subscription throws an error other than a HandledError
-- `unhandled-command-error` emitted when a command throws an error other than a HandledError
-
-This means, you can attach your logic like opening a issue in your ticket system, instead of deeply integrate it into your business logic.
+This is the right integration point for tooling such as [Sentry](https://sentry.io/), alerting pipelines, or custom operational automation.
+Wire these systems at the host/runtime layer instead of adding side-channel logic to service handlers.
 
 ### Tracking of error messages
+
+If your application needs downstream business reactions to failures, emit explicit PURISTA custom events with `.canEmit(...)` and `context.emit(...)`.
+This keeps the event contract schema-first and aligned with subscriptions and transport delivery instead of relying on in-process runtime hooks.

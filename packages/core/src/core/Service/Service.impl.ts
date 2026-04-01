@@ -75,7 +75,6 @@ import type { QueueWorkerDefinitionListResolved } from '../types/queue/QueueWork
 import type { ServiceClass } from '../types/ServiceClass.js'
 import type { ServiceClassTypes } from '../types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../types/ServiceConstructorInput.js'
-import { ServiceEventsNames } from '../types/ServiceEvents.js'
 import type { QueueHealthState, ServiceHealthState } from '../types/ServiceHealthState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StoreType } from '../types/StoreType.enum.js'
@@ -230,10 +229,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					{ ...span.spanContext(), puristaVersion },
 					`service ${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} started`,
 				)
-				this.emit(ServiceEventsNames.ServiceStarted)
 			} catch (err) {
 				this.logger.error({ err, ...span.spanContext(), puristaVersion }, 'failed to start service')
-				this.emit(ServiceEventsNames.ServiceUnavailable, err)
 				throw err
 			}
 
@@ -1772,7 +1769,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				return await this.startActiveSpan(`${command.commandName}.success`, {}, undefined, async subSpan => {
 					if (command.eventName) {
 						subSpan.addEvent(command.eventName)
-						this.emit(`custom-${command.eventName}`, result)
 					}
 					return {
 						...createSuccessResponse(this.eventBridge.instanceId, message, result, command.eventName),
@@ -1783,11 +1779,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				span.recordException(error as Error)
 
 				if (error instanceof HandledError) {
-					this.emit(ServiceEventsNames.CommandHandledError, {
-						commandName: command.commandName,
-						error,
-						traceId,
-					})
 					span.setStatus({
 						code: SpanStatusCode.ERROR,
 						message: error.message,
@@ -1797,12 +1788,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						createErrorResponse(this.eventBridge.instanceId, message, error.errorCode, error),
 					)
 				}
-
-				this.emit(ServiceEventsNames.CommandUnhandledError, {
-					commandName: command.commandName,
-					error,
-					traceId,
-				})
 
 				logger.error(
 					{ err: error, message: getCleanedMessage(message), ...span.spanContext() },
@@ -2581,7 +2566,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							{},
 							undefined,
 							async subSpan => {
-								this.emit(`custom-${subscription.emitEventName}`, result)
 								subSpan.addEvent(subscription.emitEventName as string)
 								const resultMsg: Omit<CustomMessage, 'id' | 'timestamp'> = {
 									messageType: EBMessageType.CustomMessage,
@@ -2605,20 +2589,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				} catch (err) {
 					logger.error({ err }, 'Error in subscription execution')
 					if (err instanceof HandledError) {
-						this.emit(ServiceEventsNames.SubscriptionHandledError, {
-							subscriptionName,
-							error: err,
-							traceId,
-						})
 						// handled errors prevent that the message is re-delivered for retry
 						return
-					}
-					if (err instanceof UnhandledError) {
-						this.emit(ServiceEventsNames.SubscriptionUnhandledError, {
-							subscriptionName,
-							error: err,
-							traceId,
-						})
 					}
 					span.recordException(err as Error)
 
@@ -2711,9 +2683,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			await this.queueBridge.destroy()
 			this.queueBridgeStarted = false
 		}
-		this.emit(ServiceEventsNames.ServiceDrain)
-		this.emit(ServiceEventsNames.ServiceStopped)
-		this.removeAllListeners()
 		await super.destroy()
 	}
 }

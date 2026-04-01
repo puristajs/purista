@@ -3,7 +3,20 @@ import { z } from 'zod'
 import { addPuristaQueue } from '../api/addPuristaQueue.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
-import { baseAddInputSchema, captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult, getServiceBasePath, getServiceChoices, getServiceVersionChoices, nonEmptyOptionalStringSchema, queueWorkerModeChoices, requireProjectContext, requirePuristaConfig } from './shared.js'
+import {
+	baseAddInputSchema,
+	captureMutationSnapshot,
+	createIssuesFromZod,
+	createPendingResolution,
+	createResult,
+	getServiceBasePath,
+	getServiceChoices,
+	getServiceVersionChoices,
+	nonEmptyOptionalStringSchema,
+	queueWorkerModeChoices,
+	requireProjectContext,
+	requirePuristaConfig,
+} from './shared.js'
 
 const schema = baseAddInputSchema.extend({
 	name: z.string().trim().min(1),
@@ -28,11 +41,17 @@ export const addQueueCommand: PuristaExecutableCommand<AddQueueInput, z.infer<ty
 	resolve: async (input, context): Promise<PuristaCommandResolution<AddQueueInput, z.infer<typeof schema>>> => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const missing = []
-		if (!input.name?.trim()) missing.push({ type: 'input', key: 'name', message: 'Name of the queue', required: true } as const)
+		if (!input.name?.trim())
+			missing.push({ type: 'input', key: 'name', message: 'Name of the queue', required: true } as const)
 		if (!input.description?.trim())
 			missing.push({ type: 'input', key: 'description', message: 'Description of the queue', required: true } as const)
 		if (!input.serviceName?.trim())
-			missing.push({ type: 'select', key: 'serviceName', message: 'What service do you want to use?', choices: getServiceChoices(projectSnapshot) } as const)
+			missing.push({
+				type: 'select',
+				key: 'serviceName',
+				message: 'What service do you want to use?',
+				choices: getServiceChoices(projectSnapshot),
+			} as const)
 		if (!input.serviceVersion?.trim())
 			missing.push({
 				type: 'select',
@@ -41,7 +60,12 @@ export const addQueueCommand: PuristaExecutableCommand<AddQueueInput, z.infer<ty
 				choices: getServiceVersionChoices(projectSnapshot, input.serviceName),
 			} as const)
 		if (!input.workerName?.trim())
-			missing.push({ type: 'input', key: 'workerName', message: 'Name of the queue worker', defaultValue: input.name ? `${input.name} worker` : undefined } as const)
+			missing.push({
+				type: 'input',
+				key: 'workerName',
+				message: 'Name of the queue worker',
+				defaultValue: input.name ? `${input.name} worker` : undefined,
+			} as const)
 		if (!input.workerDescription?.trim())
 			missing.push({
 				type: 'input',
@@ -50,7 +74,13 @@ export const addQueueCommand: PuristaExecutableCommand<AddQueueInput, z.infer<ty
 				defaultValue: input.description,
 			} as const)
 		if (!input.workerMode?.trim())
-			missing.push({ type: 'select', key: 'workerMode', message: 'Select worker mode', choices: queueWorkerModeChoices, defaultValue: 'continuous' } as const)
+			missing.push({
+				type: 'select',
+				key: 'workerMode',
+				message: 'Select worker mode',
+				choices: queueWorkerModeChoices,
+				defaultValue: 'continuous',
+			} as const)
 		if (input.workerMode === 'interval' && !input.intervalMs)
 			missing.push({
 				type: 'input',
@@ -70,7 +100,12 @@ export const addQueueCommand: PuristaExecutableCommand<AddQueueInput, z.infer<ty
 				validate: (value: string) => (Number.parseInt(value, 10) > 0 ? true : 'Enter a positive integer'),
 			} as const)
 		if (typeof input.createProducer !== 'boolean')
-			missing.push({ type: 'confirm', key: 'createProducer', message: 'Create a producer command that enqueues jobs?', defaultValue: true } as const)
+			missing.push({
+				type: 'confirm',
+				key: 'createProducer',
+				message: 'Create a producer command that enqueues jobs?',
+				defaultValue: true,
+			} as const)
 		if (input.createProducer && !input.producerCommandName?.trim())
 			missing.push({
 				type: 'input',
@@ -80,7 +115,12 @@ export const addQueueCommand: PuristaExecutableCommand<AddQueueInput, z.infer<ty
 				required: true,
 			} as const)
 		if (input.createProducer && !input.producerCommandDescription?.trim())
-			missing.push({ type: 'input', key: 'producerCommandDescription', message: 'Description of the producer command', required: true } as const)
+			missing.push({
+				type: 'input',
+				key: 'producerCommandDescription',
+				message: 'Description of the producer command',
+				required: true,
+			} as const)
 
 		const parsed = schema.safeParse(input)
 		if (!parsed.success) {

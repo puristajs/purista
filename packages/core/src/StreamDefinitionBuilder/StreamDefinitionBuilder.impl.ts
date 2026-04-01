@@ -747,6 +747,7 @@ export class StreamDefinitionBuilder<
 			durable: this.durable,
 			autoacknowledge: this.autoacknowledge,
 			shared: true,
+			consumerFailureHandling: undefined,
 		}
 
 		const [inputPayload, parameter, chunkPayload, finalPayload] = await Promise.all([

@@ -2,7 +2,6 @@ import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import type { BrokerHeaderCustomMsg, CustomMessage, EBMessage, Subscription } from '@purista/core'
 import {
 	deserializeOtp,
-	EventBridgeEventNames,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
@@ -107,8 +106,8 @@ export const getSubscriptionHandler = (
 							message: err.message,
 						})
 						span.recordException(err)
-						this.emit(EventBridgeEventNames.EventbridgeError, err)
 						log.error({ err }, 'Failed to consume subscription message')
+						throw err
 					}
 				},
 			)

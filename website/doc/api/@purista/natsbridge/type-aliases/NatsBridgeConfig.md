@@ -8,6 +8,6 @@
 
 > **NatsBridgeConfig** = [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `ConnectionOptions`\>
 
-Defined in: [natsbridge/src/types/NatsBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/NatsBridgeConfig.ts#L6)
+Defined in: [natsbridge/src/types/NatsBridgeConfig.ts:12](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/NatsBridgeConfig.ts#L12)
 
 the configuration for the NATS event bridge

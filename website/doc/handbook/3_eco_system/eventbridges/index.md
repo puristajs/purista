@@ -39,12 +39,15 @@ PURISTA itself provides typed message contracts and processing flow. Delivery gu
 
 Late command responses are normalized across invoke-capable bridges in this slice. Once the caller-side timeout fires, PURISTA keeps a short-lived tombstone for the correlation id and ignores any later response with a warning instead of raising a bridge error.
 
+Subscription retry and dead-letter handling are advisory bridge-level concerns. Service definitions can declare bounded consumer failure handling, but each adapter decides whether it can honor that through broker-native features, bridge-emulated dead-lettering, or documented best-effort fallback.
+
 ## Reliability checklist
 
 - configure broker durability/retry features explicitly
 - keep bridge settings identical across instances
 - implement idempotency in command/subscription side effects
 - define timeout/retry policies intentionally (do not rely on defaults only)
+- keep subscription retry budgets bounded and route poison messages to a dead-letter target
 - verify shutdown, readiness, and reconnect semantics in integration tests
 - test reconnect and broker outage scenarios in integration tests
 
@@ -54,4 +57,5 @@ Late command responses are normalized across invoke-capable bridges in this slic
 - `AMQP`: production systems with durable queues/retries and strong operational control.
 - `MQTT`: IoT/edge and broker setups where topic/QoS tuning is central.
 - `NATS`: low-latency eventing where simple operations are preferred.
+- `NATS` with JetStream: good fit when you want bounded subscription retries and dead-letter subjects without introducing a separate queue backend.
 - `Dapr`: polyglot/service-mesh environments leveraging Dapr components.

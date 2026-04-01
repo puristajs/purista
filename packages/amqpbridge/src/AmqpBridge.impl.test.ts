@@ -241,4 +241,156 @@ describe('AmqpBridge', () => {
 			expect.objectContaining({ noAck: false }),
 		)
 	})
+
+	it('retries subscription messages with incremented attempt header before dead-lettering', async () => {
+		const bridge = new AmqpBridge()
+		const internals = getBridgeInternals(bridge)
+		const consumeHandlers: Array<(msg: unknown) => Promise<void>> = []
+		const channel = {
+			on: vi.fn(),
+			assertQueue: vi.fn().mockResolvedValue({ queue: 'purista.sub.Users.1.onCreated' }),
+			bindQueue: vi.fn().mockResolvedValue(undefined),
+			consume: vi.fn().mockImplementation(async (_queue, handler) => {
+				consumeHandlers.push(handler)
+				return { consumerTag: 'ctag-1' }
+			}),
+			ack: vi.fn(),
+			nack: vi.fn(),
+			sendToQueue: vi.fn(),
+			close: vi.fn().mockResolvedValue(undefined),
+		}
+		internals.connection = {
+			createChannel: vi.fn().mockResolvedValue(channel),
+		}
+
+		await bridge.registerSubscription(
+			{
+				subscriber: {
+					serviceName: 'Users',
+					serviceVersion: '1',
+					serviceTarget: 'onCreated',
+				},
+				eventBridgeConfig: {
+					shared: true,
+					durable: true,
+					autoacknowledge: false,
+					consumerFailureHandling: {
+						maxAttempts: 3,
+						retryDelayMs: 100,
+						deadLetterTarget: 'Users.onCreated.dead-letter',
+					},
+				},
+			},
+			async () => {
+				throw new Error('boom')
+			},
+		)
+
+		await consumeHandlers[0]({
+			content: Buffer.from(
+				JSON.stringify(
+					getCommandSuccessMessageMock(
+						{},
+						{
+							eventName: 'user.created',
+						},
+					),
+				),
+			),
+			properties: {
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				headers: {},
+			},
+		})
+		await new Promise(resolve => setTimeout(resolve, 0))
+
+		expect(channel.sendToQueue).toHaveBeenCalledWith(
+			'purista.sub.Users.1.onCreated',
+			expect.any(Buffer),
+			expect.objectContaining({
+				headers: expect.objectContaining({
+					'x-purista-retry-attempt': 2,
+				}),
+			}),
+		)
+		expect(channel.ack).toHaveBeenCalledTimes(1)
+		expect(channel.nack).not.toHaveBeenCalled()
+	})
+
+	it('dead-letters subscription messages when the retry budget is exhausted', async () => {
+		const bridge = new AmqpBridge()
+		const internals = getBridgeInternals(bridge)
+		const consumeHandlers: Array<(msg: unknown) => Promise<void>> = []
+		const channel = {
+			on: vi.fn(),
+			assertQueue: vi.fn().mockResolvedValue({ queue: 'purista.sub.Users.1.onCreated' }),
+			bindQueue: vi.fn().mockResolvedValue(undefined),
+			consume: vi.fn().mockImplementation(async (_queue, handler) => {
+				consumeHandlers.push(handler)
+				return { consumerTag: 'ctag-1' }
+			}),
+			ack: vi.fn(),
+			nack: vi.fn(),
+			sendToQueue: vi.fn(),
+			close: vi.fn().mockResolvedValue(undefined),
+		}
+		internals.connection = {
+			createChannel: vi.fn().mockResolvedValue(channel),
+		}
+
+		await bridge.registerSubscription(
+			{
+				subscriber: {
+					serviceName: 'Users',
+					serviceVersion: '1',
+					serviceTarget: 'onCreated',
+				},
+				eventBridgeConfig: {
+					shared: true,
+					durable: true,
+					autoacknowledge: false,
+					consumerFailureHandling: {
+						maxAttempts: 2,
+						deadLetterTarget: 'Users.onCreated.dead-letter',
+					},
+				},
+			},
+			async () => {
+				throw new Error('poison')
+			},
+		)
+
+		await consumeHandlers[0]({
+			content: Buffer.from(
+				JSON.stringify(
+					getCommandSuccessMessageMock(
+						{},
+						{
+							eventName: 'user.created',
+						},
+					),
+				),
+			),
+			properties: {
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				headers: {
+					'x-purista-retry-attempt': 2,
+				},
+			},
+		})
+		await new Promise(resolve => setTimeout(resolve, 0))
+
+		expect(channel.sendToQueue).toHaveBeenCalledWith(
+			'Users.onCreated.dead-letter',
+			expect.any(Buffer),
+			expect.objectContaining({
+				headers: expect.objectContaining({
+					'x-purista-dead-letter-reason': 'Failed to consume subscription message',
+				}),
+			}),
+		)
+		expect(channel.ack).toHaveBeenCalledTimes(1)
+	})
 })

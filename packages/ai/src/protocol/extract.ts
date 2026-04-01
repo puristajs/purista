@@ -8,38 +8,49 @@ export const toFrameRecord = (envelope: AgentProtocolEnvelope | undefined): Reco
 	return frame as Record<string, unknown>
 }
 
-export const extractFinalAssistantText = (envelopes: AgentProtocolEnvelope[]): string => {
-	const assistantFrames = envelopes
-		.map(envelope => toFrameRecord(envelope))
-		.filter(
-			(
-				frame,
-			): frame is Record<string, unknown> & {
-				kind: 'message'
-				role: 'assistant'
-				content: string
-				final?: boolean
-			} =>
-				frame !== null &&
-				frame.kind === 'message' &&
-				frame.role === 'assistant' &&
-				typeof frame.content === 'string' &&
-				frame.content.trim().length > 0,
-		)
-	if (assistantFrames.length === 0) {
+const isAssistantMessageFrame = (
+	frame: Record<string, unknown> | null,
+): frame is Record<string, unknown> & {
+	kind: 'message'
+	role: 'assistant'
+	content?: string
+	partial?: boolean
+	final?: boolean
+} =>
+	frame !== null &&
+	frame.kind === 'message' &&
+	frame.role === 'assistant' &&
+	(typeof frame.content === 'string' || frame.final === true)
+
+const resolveSegmentText = (
+	frames: Array<
+		Record<string, unknown> & {
+			content?: string
+			partial?: boolean
+			final?: boolean
+		}
+	>,
+) => {
+	if (frames.length === 0) {
 		return ''
 	}
-	const streamed = assistantFrames
-		.filter(frame => frame.final !== true)
-		.map(frame => String(frame.content))
-		.join('')
-	const finalFrame = [...assistantFrames].reverse().find(frame => frame.final === true)
+	const finalFrame = [...frames].reverse().find(frame => frame.final === true)
 	if (!finalFrame) {
-		return streamed.trim()
+		return frames
+			.map(frame => String(frame.content ?? ''))
+			.join('')
+			.trim()
 	}
-	const finalText = String(finalFrame.content)
+	const streamed = frames
+		.filter(frame => frame !== finalFrame)
+		.map(frame => String(frame.content ?? ''))
+		.join('')
+	const finalText = String(finalFrame.content ?? '')
 	if (!streamed) {
 		return finalText.trim()
+	}
+	if (!finalText) {
+		return streamed.trim()
 	}
 	if (finalText.startsWith(streamed)) {
 		return finalText.trim()
@@ -48,6 +59,59 @@ export const extractFinalAssistantText = (envelopes: AgentProtocolEnvelope[]): s
 		return streamed.trim()
 	}
 	return `${streamed}${finalText}`.trim()
+}
+
+export const extractFinalAssistantText = (envelopes: AgentProtocolEnvelope[]): string => {
+	if (envelopes.length === 0) {
+		return ''
+	}
+
+	let finalIndex = -1
+	for (let index = envelopes.length - 1; index >= 0; index -= 1) {
+		const frame = toFrameRecord(envelopes[index])
+		if (isAssistantMessageFrame(frame) && frame.final === true) {
+			finalIndex = index
+			break
+		}
+	}
+
+	if (finalIndex >= 0) {
+		const segment: Array<
+			Record<string, unknown> & {
+				content?: string
+				partial?: boolean
+				final?: boolean
+			}
+		> = []
+		for (let index = finalIndex; index >= 0; index -= 1) {
+			const frame = toFrameRecord(envelopes[index])
+			if (!isAssistantMessageFrame(frame)) {
+				break
+			}
+			segment.unshift(frame)
+			if (index !== finalIndex && frame.final === true) {
+				segment.shift()
+				break
+			}
+		}
+		return resolveSegmentText(segment)
+	}
+
+	const trailingSegment: Array<
+		Record<string, unknown> & {
+			content?: string
+			partial?: boolean
+			final?: boolean
+		}
+	> = []
+	for (let index = envelopes.length - 1; index >= 0; index -= 1) {
+		const frame = toFrameRecord(envelopes[index])
+		if (!isAssistantMessageFrame(frame)) {
+			break
+		}
+		trailingSegment.unshift(frame)
+	}
+	return resolveSegmentText(trailingSegment)
 }
 
 export const extractAgentErrorMessage = (envelopes: AgentProtocolEnvelope[]): string => {

@@ -1094,6 +1094,7 @@ export class CommandDefinitionBuilder<
 			durable: this.durable,
 			autoacknowledge: this.autoacknowledge,
 			shared: true,
+			consumerFailureHandling: undefined,
 		}
 
 		const [inputPayload, parameter, outputPayload] = await Promise.all([

@@ -18,4 +18,4 @@ Defined in: [mqttbridge/src/types/IMqttBridge.ts:5](https://github.com/puristajs
 
 ### pendingInvocations
 
-> **pendingInvocations**: `Map`\<[`EBMessageId`](../../core/type-aliases/EBMessageId.md), [`PendigInvocation`](../../core/type-aliases/PendigInvocation.md)\>
+> **pendingInvocations**: [`PendingInvocationRegistry`](../../core/classes/PendingInvocationRegistry.md)\<`unknown`\>

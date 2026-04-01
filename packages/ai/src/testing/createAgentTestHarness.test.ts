@@ -14,9 +14,10 @@ describe('createAgentTestHarness', () => {
 			.addPayloadSchema(z.object({ prompt: z.string() }))
 			.defineModel('openai:test', { capabilities: ['text', 'stream'] })
 			.setHandler(async (context, payload) => {
+				const input = payload as { prompt: string }
 				const output = await context.ai.reply.generate({
 					model: 'openai:test',
-					prompt: payload.prompt,
+					prompt: input.prompt,
 				})
 				return { message: output }
 			})
@@ -50,12 +51,13 @@ describe('createAgentTestHarness', () => {
 				scopeFromPayload: ['sessionId'],
 			})
 			.setHandler(async (context, payload) => {
+				const input = payload as { prompt: string }
 				const run = await context.memory.run.start({ title: 'Queued harness run' })
 				await run.plan([{ id: 'answer', title: 'Answer request' }])
-				await run.completeTask('answer', payload.prompt.toUpperCase())
-				await run.finishSuccess(payload.prompt.toUpperCase())
-				context.io.stream.sendFinal(payload.prompt.toUpperCase())
-				return { message: payload.prompt.toUpperCase() }
+				await run.completeTask('answer', input.prompt.toUpperCase())
+				await run.finishSuccess(input.prompt.toUpperCase())
+				context.io.stream.sendFinal(input.prompt.toUpperCase())
+				return { message: input.prompt.toUpperCase() }
 			})
 			.build()
 

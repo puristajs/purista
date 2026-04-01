@@ -8,7 +8,7 @@
 
 > **ProtocolBufferOptions** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:167](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L167)
+Defined in: [packages/ai/src/runtime/context.ts:277](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L277)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:167](https://github.com/puristaj
 
 > `optional` **onEnvelope**: (`envelope`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:168](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L168)
+Defined in: [packages/ai/src/runtime/context.ts:278](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L278)
 
 #### Parameters
 

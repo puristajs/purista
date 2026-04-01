@@ -42,7 +42,7 @@ order: 301010
 ```typescript
 import { DefaultEventBridge } from '@purista/core'
 
-const eventBridge = new DefaultEventBridge({ emitMessagesAsEventBridgeEvents: true })
+const eventBridge = new DefaultEventBridge()
 await eventBridge.start()
 ```
 

@@ -8,7 +8,7 @@
 
 > **ProviderEmbedRequest** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:64](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L64)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:94](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L94)
 
 Payload sent to embedding-capable providers.
 
@@ -18,7 +18,7 @@ Payload sent to embedding-capable providers.
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:66](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L66)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:96](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L96)
 
 ***
 
@@ -26,4 +26,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:66](https://gith
 
 > **value**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:65](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/ModelProvider.ts#L65)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:95](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L95)

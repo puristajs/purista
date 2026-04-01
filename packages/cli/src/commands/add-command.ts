@@ -4,7 +4,19 @@ import { addPuristaCommand } from '../api/addPuristaCommand.js'
 import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
-import { baseAddInputSchema, captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult, getServiceBasePath, getServiceChoices, getServiceVersionChoices, nonEmptyOptionalStringSchema, requireProjectContext, requirePuristaConfig } from './shared.js'
+import {
+	baseAddInputSchema,
+	captureMutationSnapshot,
+	createIssuesFromZod,
+	createPendingResolution,
+	createResult,
+	getServiceBasePath,
+	getServiceChoices,
+	getServiceVersionChoices,
+	nonEmptyOptionalStringSchema,
+	requireProjectContext,
+	requirePuristaConfig,
+} from './shared.js'
 
 export type AddCommandInput = z.input<typeof schema>
 
@@ -21,9 +33,15 @@ export const addCommandCommand: PuristaExecutableCommand<AddCommandInput, z.infe
 	resolve: async (input, context): Promise<PuristaCommandResolution<AddCommandInput, z.infer<typeof schema>>> => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const missing = []
-		if (!input.name?.trim()) missing.push({ type: 'input', key: 'name', message: 'Name of the command', required: true } as const)
+		if (!input.name?.trim())
+			missing.push({ type: 'input', key: 'name', message: 'Name of the command', required: true } as const)
 		if (!input.description?.trim())
-			missing.push({ type: 'input', key: 'description', message: 'Description of the command', required: true } as const)
+			missing.push({
+				type: 'input',
+				key: 'description',
+				message: 'Description of the command',
+				required: true,
+			} as const)
 		if (!input.serviceName?.trim())
 			missing.push({
 				type: 'select',
@@ -59,7 +77,9 @@ export const addCommandCommand: PuristaExecutableCommand<AddCommandInput, z.infe
 			})
 		}
 
-		const expectedPaths = [join(getServiceBasePath(context, resolvedInput.serviceName, resolvedInput.serviceVersion), 'command')]
+		const expectedPaths = [
+			join(getServiceBasePath(context, resolvedInput.serviceName, resolvedInput.serviceVersion), 'command'),
+		]
 		const mutationSnapshot = captureMutationSnapshot(expectedPaths)
 		await addPuristaCommand({
 			projectRootPath: context.cwd,

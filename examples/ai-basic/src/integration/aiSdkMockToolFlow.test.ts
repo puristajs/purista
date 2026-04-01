@@ -1,4 +1,4 @@
-import { type AgentProtocolEnvelope, AiSdkProvider } from '@purista/ai'
+import { type AgentProtocolEnvelope, AiSdkProvider, extractFinalAssistantText } from '@purista/ai'
 import { DefaultEventBridge, DefaultQueueBridge, initLogger } from '@purista/core'
 import { simulateReadableStream } from 'ai'
 import { MockLanguageModelV3 } from 'ai/test'
@@ -88,7 +88,6 @@ describe('ai-basic integration with ai/test mock model', () => {
 			})
 
 			const messageFrames = getMessageFrames(envelopes)
-			const finalFrame = [...messageFrames].reverse().find(frame => frame.final === true)
 			const runStateFrames = envelopes
 				.map(envelope => envelope.frame)
 				.filter(
@@ -96,7 +95,8 @@ describe('ai-basic integration with ai/test mock model', () => {
 						frame.kind === 'artifact' && frame.artifactId === 'run-state',
 				)
 
-			expect(finalFrame?.content).toContain('Mocked answer: reset your password in account settings.')
+			expect(messageFrames.some(frame => frame.final === true)).toBe(true)
+			expect(extractFinalAssistantText(envelopes)).toContain('Mocked answer: reset your password in account settings.')
 			expect(runStateFrames.length).toBeGreaterThan(0)
 		} finally {
 			await supportAgentInstance.stop()

@@ -89,7 +89,7 @@ describe('createAgentContextMock', () => {
 			commands: {
 				support: {
 					'1': {
-						lookupFaq: async (payload: { question: string }) => ({ answer: `FAQ:${payload.question}` }),
+						lookupFaq: async payload => ({ answer: `FAQ:${(payload as { question: string }).question}` }),
 					},
 				},
 			},

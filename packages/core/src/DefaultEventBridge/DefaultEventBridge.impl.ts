@@ -7,7 +7,6 @@ import { EventBridgeBaseClass } from '../core/EventBridge/EventBridgeBaseClass.i
 import { PendingInvocationRegistry } from '../core/EventBridge/PendingInvocationRegistry.impl.js'
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { EventBridgeConfig } from '../core/EventBridge/types/EventBridgeConfig.js'
-import { EventBridgeEventNames } from '../core/EventBridge/types/EventBridgeEvents.js'
 import { EventBridgeLateResponseHandling } from '../core/EventBridge/types/EventBridgeLateResponseHandling.js'
 import { createErrorResponse } from '../core/helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../core/helper/createInfoMessage.impl.js'
@@ -164,7 +163,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 								})
 								span.recordException(err)
 								this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
-								this.emit(EventBridgeEventNames.EventbridgeError, err)
 
 								const errorResponse = createErrorResponse(this.instanceId, message, StatusCode.BadGateway, err)
 								this.emitMessage(errorResponse)
@@ -188,7 +186,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 									})
 									span.recordException(err)
 									this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
-									this.emit(EventBridgeEventNames.EventbridgeError, err)
 
 									const errorResponse = createErrorResponse(
 										this.instanceId,
@@ -227,7 +224,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 								})
 								span.recordException(err)
 								this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
-								this.emit(EventBridgeEventNames.EventbridgeError, err)
 								return next()
 							}
 
@@ -246,7 +242,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 									await pendingStream.setOwnerInstanceId(message.sender.instanceId)
 								}
 								pendingStream.push(message)
-								this.emit(EventBridgeEventNames.StreamFrameReceived, message)
 								return next()
 							}
 
@@ -274,13 +269,11 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 								message,
 							)
 							this.logger.warn({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
 						}
 
 						return next()
 					} catch (error) {
 						const err = new UnhandledError(StatusCode.InternalServerError, 'eventbus failure', error)
-						this.emit(EventBridgeEventNames.EventbridgeError, err)
 						this.logger.error({ err, ...span.spanContext() }, err.message)
 
 						span.recordException(err)
@@ -301,8 +294,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		this.writeStream._write = write.bind(this)
 
 		this.readStream.pipe(this.writeStream)
-
-		this.emit(EventBridgeEventNames.EventbridgeConnected)
 
 		this.logger.info({ puristaVersion }, 'DefaultEventBridge started')
 
@@ -415,14 +406,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				span.setAttribute(PuristaSpanTag.SenderServiceTarget, msg.sender.serviceTarget)
 
 				this.readStream.push(msg)
-
-				if (this.config.emitMessagesAsEventBridgeEvents && msg.eventName) {
-					this.emit(`custom-${msg.eventName}`, msg)
-				}
-
-				if (isStreamMessage(msg as unknown as EBMessage) && isStreamFrame(msg as unknown as StreamMessage)) {
-					this.emit(EventBridgeEventNames.StreamFrameSent, msg as unknown as StreamFrame)
-				}
 
 				return msg as Readonly<EBMessage>
 			} catch (err) {
@@ -617,7 +600,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		}
 
 		await this.emitMessage(streamOpenMessage as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
-		this.emit(EventBridgeEventNames.StreamOpened, { sessionId: correlationId })
 
 		return {
 			sessionId: correlationId,
@@ -635,7 +617,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 									value.payload.frameType === 'error' ||
 									value.payload.frameType === 'cancel'
 								) {
-									this.emit(EventBridgeEventNames.StreamClosed, { sessionId: correlationId })
 								}
 								if (isDone && queue.length === 0) {
 									flushDone()
@@ -649,7 +630,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 						}
 
 						if (isDone) {
-							this.emit(EventBridgeEventNames.StreamClosed, { sessionId: correlationId })
 							return { done: true, value: undefined }
 						}
 
@@ -690,8 +670,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 		clearTimeout(timeout)
 
-		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
-
 		this.pendingInvocations.rejectAll(new UnhandledError(StatusCode.ServiceUnavailable))
 
 		for (const [_, value] of Array.from(this.pendingStreams)) {
@@ -699,7 +677,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		}
 		this.pendingStreams.clear()
 
-		this.removeAllListeners()
 		this.writeStream.end().removeAllListeners()
 		this.readStream.destroy()
 		this.hasStarted = false

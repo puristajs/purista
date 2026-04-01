@@ -10,7 +10,6 @@ import type {
 } from '@purista/core'
 import {
 	deserializeOtp,
-	EventBridgeEventNames,
 	isCommand,
 	isCommandErrorResponse,
 	PuristaSpanName,
@@ -19,7 +18,7 @@ import {
 	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
-import type { MsgHdrs } from 'nats'
+import type { Msg, MsgHdrs } from 'nats'
 import { headers as getNewHeaders } from 'nats'
 
 import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl.js'
@@ -65,7 +64,6 @@ export const getCommandHandler = (
 								message: err.message,
 							})
 							span.recordException(err)
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
 							return
 						}
 
@@ -128,10 +126,19 @@ export const getCommandHandler = (
 								}
 
 								const responseData = this.sc.encode(responseMessage)
-
-								msg.respond(responseData, {
-									headers,
-								})
+								const replyMessage = msg as Partial<Msg>
+								if (typeof replyMessage.respond === 'function') {
+									replyMessage.respond(responseData, {
+										headers,
+									})
+								} else if (replyMessage.reply) {
+									this.connection?.publish(replyMessage.reply, responseData, { headers })
+								} else {
+									throw new UnhandledError(
+										StatusCode.InternalServerError,
+										'NATS command message does not provide a reply target',
+									)
+								}
 
 								if (this.config.commandResponsePublishTwice === 'never') {
 									return
@@ -163,7 +170,6 @@ export const getCommandHandler = (
 							message: err.message,
 						})
 						span.recordException(err)
-						this.emit(EventBridgeEventNames.EventbridgeError, err)
 						log.error({ err }, 'Failed to consume command response message')
 						throw err
 					}

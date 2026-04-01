@@ -1,6 +1,11 @@
 import type { PuristaCommandMode } from '../../core/types.js'
 
-export const getCommandMode = (options: { interactive?: boolean; nonInteractive?: boolean; yes?: boolean; defaults?: boolean }) => {
+export const getCommandMode = (options: {
+	interactive?: boolean
+	nonInteractive?: boolean
+	yes?: boolean
+	defaults?: boolean
+}) => {
 	if (options.nonInteractive || options.yes || options.defaults) {
 		return 'non-interactive' satisfies PuristaCommandMode
 	}

@@ -4,7 +4,18 @@ import { addPuristaAgent } from '../api/addPuristaAgent.js'
 import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
-import { baseAddInputSchema, captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult, getServiceChoices, getServiceVersionChoices, nonEmptyOptionalStringSchema, requireProjectContext, requirePuristaConfig } from './shared.js'
+import {
+	baseAddInputSchema,
+	captureMutationSnapshot,
+	createIssuesFromZod,
+	createPendingResolution,
+	createResult,
+	getServiceChoices,
+	getServiceVersionChoices,
+	nonEmptyOptionalStringSchema,
+	requireProjectContext,
+	requirePuristaConfig,
+} from './shared.js'
 
 const schema = baseAddInputSchema.extend({
 	name: z.string().trim().min(1),
@@ -21,11 +32,17 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 	resolve: async (input, context): Promise<PuristaCommandResolution<AddAgentInput, z.infer<typeof schema>>> => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const missing = []
-		if (!input.name?.trim()) missing.push({ type: 'input', key: 'name', message: 'Name of the agent', required: true } as const)
+		if (!input.name?.trim())
+			missing.push({ type: 'input', key: 'name', message: 'Name of the agent', required: true } as const)
 		if (!input.description?.trim())
 			missing.push({ type: 'input', key: 'description', message: 'Description of the agent', required: true } as const)
 		if (!input.serviceName?.trim())
-			missing.push({ type: 'select', key: 'serviceName', message: 'What service do you want to use?', choices: getServiceChoices(projectSnapshot) } as const)
+			missing.push({
+				type: 'select',
+				key: 'serviceName',
+				message: 'What service do you want to use?',
+				choices: getServiceChoices(projectSnapshot),
+			} as const)
 		if (!input.serviceVersion?.trim())
 			missing.push({
 				type: 'select',

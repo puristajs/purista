@@ -8,7 +8,7 @@
 
 > **getSubscriptionHandler**(`_subscription`, `cb`): [`IncomingMessageFunction`](../type-aliases/IncomingMessageFunction.md)
 
-Defined in: [mqttbridge/src/handler/getSubscriptionHandler.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L18)
+Defined in: [mqttbridge/src/handler/getSubscriptionHandler.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L17)
 
 ## Parameters
 

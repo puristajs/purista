@@ -8,7 +8,7 @@
 
 > **ProtocolSseEvent** = `object`
 
-Defined in: [packages/ai/src/protocol/sse.ts:6](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/protocol/sse.ts#L6)
+Defined in: [packages/ai/src/protocol/sse.ts:6](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/sse.ts#L6)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/protocol/sse.ts:6](https://github.com/puristajs/pur
 
 > **data**: `unknown`
 
-Defined in: [packages/ai/src/protocol/sse.ts:8](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/protocol/sse.ts#L8)
+Defined in: [packages/ai/src/protocol/sse.ts:8](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/sse.ts#L8)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/protocol/sse.ts:8](https://github.com/puristajs/pur
 
 > **event**: `string`
 
-Defined in: [packages/ai/src/protocol/sse.ts:7](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/protocol/sse.ts#L7)
+Defined in: [packages/ai/src/protocol/sse.ts:7](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/sse.ts#L7)

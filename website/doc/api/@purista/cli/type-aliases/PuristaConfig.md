@@ -8,6 +8,6 @@
 
 > **PuristaConfig** = `z.infer`\<*typeof* [`puristaConfigSchema`](../variables/puristaConfigSchema.md)\>
 
-Defined in: [loadPuristaConfig.ts:40](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/cli/src/api/loadPuristaConfig.ts#L40)
+Defined in: [packages/cli/src/api/loadPuristaConfig.ts:40](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/loadPuristaConfig.ts#L40)
 
 The type for the Purista configuration.

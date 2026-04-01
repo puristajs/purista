@@ -17,7 +17,6 @@ import {
 	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
-	EventBridgeEventNames,
 	EventBridgeLateResponseHandling,
 	getCleanedMessage,
 	getNewCorrelationId,
@@ -47,6 +46,9 @@ import { serializeOtpForAmqpHeader } from './serializeOtpForAmqpHeader.impl.js'
 import type { AmqpBridgeConfig } from './types/AmqpBridgeConfig.js'
 import type { Encoder } from './types/Encoder.js'
 import type { Encrypter } from './types/Encrypter.js'
+
+const RETRY_ATTEMPT_HEADER = 'x-purista-retry-attempt'
+const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
 
 /**
  * The AMQP event bridge connects to a AMQP broker.
@@ -115,6 +117,84 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		this.consumerRegistrations = this.consumerRegistrations.filter(entry => entry.channel !== channel)
 	}
 
+	protected getConsumerAttempt(headers: unknown) {
+		if (!headers || typeof headers !== 'object') {
+			return 1
+		}
+
+		const attempt = (headers as Record<string, unknown>)[RETRY_ATTEMPT_HEADER]
+		if (typeof attempt === 'number' && Number.isFinite(attempt) && attempt >= 1) {
+			return attempt
+		}
+		if (typeof attempt === 'string') {
+			const parsed = Number.parseInt(attempt, 10)
+			if (Number.isFinite(parsed) && parsed >= 1) {
+				return parsed
+			}
+		}
+
+		return 1
+	}
+
+	protected getSubscriptionDeadLetterTarget(subscription: Subscription) {
+		return subscription.eventBridgeConfig.consumerFailureHandling?.deadLetterTarget ?? this.config.deadLetterRoutingKey
+	}
+
+	protected async retrySubscriptionMessage(
+		channel: Channel,
+		queueName: string,
+		msg: amqplib.ConsumeMessage,
+		nextAttempt: number,
+	) {
+		const headers = {
+			...(msg.properties.headers ?? {}),
+			[RETRY_ATTEMPT_HEADER]: nextAttempt,
+		}
+		channel.sendToQueue(queueName, msg.content, {
+			headers,
+			contentType: msg.properties.contentType,
+			contentEncoding: msg.properties.contentEncoding,
+			correlationId: msg.properties.correlationId,
+			replyTo: msg.properties.replyTo,
+			messageId: msg.properties.messageId,
+			timestamp: msg.properties.timestamp,
+			type: msg.properties.type,
+			appId: msg.properties.appId,
+		})
+		channel.ack(msg)
+	}
+
+	protected async deadLetterSubscriptionMessage(
+		channel: Channel,
+		subscription: Subscription,
+		msg: amqplib.ConsumeMessage,
+		reason: string,
+	) {
+		const deadLetterTarget = this.getSubscriptionDeadLetterTarget(subscription)
+		if (!deadLetterTarget) {
+			channel.nack(msg, false, false)
+			return
+		}
+
+		const headers = {
+			...(msg.properties.headers ?? {}),
+			[DEAD_LETTER_REASON_HEADER]: reason,
+		}
+
+		channel.sendToQueue(deadLetterTarget, msg.content, {
+			headers,
+			contentType: msg.properties.contentType,
+			contentEncoding: msg.properties.contentEncoding,
+			correlationId: msg.properties.correlationId,
+			replyTo: msg.properties.replyTo,
+			messageId: msg.properties.messageId,
+			timestamp: msg.properties.timestamp,
+			type: msg.properties.type,
+			appId: msg.properties.appId,
+		})
+		channel.ack(msg)
+	}
+
 	constructor(config?: EventBridgeConfig<AmqpBridgeConfig>) {
 		//= getDefaultConfig()
 		const conf = {
@@ -165,7 +245,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		try {
 			this.connection = await amqplib.connect(this.config.url ?? getDefaultConfig().url, this.config.socketOptions)
 		} catch (err) {
-			this.emit(EventBridgeEventNames.EventbridgeConnectionError, err)
 			this.logger.fatal({ err }, 'unable to connect to broker')
 			throw err
 		}
@@ -173,16 +252,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		this.connection.on('error', err => {
 			this.healthy = false
 			this.logger.error({ err }, 'amqp lib error')
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 		})
 		this.connection.on('close', () => {
 			this.healthy = false
 			this.ready = false
-			this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 			this.logger.info('amqp connection disconnected')
 		})
 
-		this.emit(EventBridgeEventNames.EventbridgeConnected)
 		this.logger.info('connected to broker')
 		this.channel = await this.connection.createChannel()
 
@@ -190,13 +266,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			this.healthy = false
 			this.ready = false
 			this.logger.info('channel closed')
-			this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 		})
 
 		this.channel.on('error', err => {
 			this.healthy = false
 			this.logger.error({ err }, 'amqp channel error')
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 		})
 
 		this.logger.debug('ensured: default exchange')
@@ -262,7 +336,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 									})
 									span.recordException(err)
 									log.error({ err }, 'received invalid command response')
-									this.emit(EventBridgeEventNames.EventbridgeError, err)
 									return
 								}
 								return
@@ -280,7 +353,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 							})
 							span.recordException(err)
 							log.error({ err }, 'received invalid message')
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
 						} catch (error) {
 							const err = new HandledError(StatusCode.InternalServerError, 'failed to handle response message', error)
 							span.setStatus({
@@ -288,7 +360,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 								message: err.message,
 							})
 							span.recordException(err)
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
 							this.logger.error({ err, ...span.spanContext() }, 'failed to handle response message')
 						}
 					},
@@ -511,13 +582,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		channel.on('close', () => {
 			this.healthy = false
 			this.logger.info({ queueName }, 'channel for command closed')
-			this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 		})
 
 		channel.on('error', err => {
 			this.healthy = false
 			this.logger.error({ err, queueName }, 'command channel error')
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 		})
 
 		const queue = await channel.assertQueue(queueName, {
@@ -641,7 +710,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 									message: err.message,
 								})
 								span.recordException(err)
-								this.emit(EventBridgeEventNames.EventbridgeError, err)
 								this.logger.error({ err }, 'Failed to consume command response message')
 								if (!noAck) {
 									channel.nack(msg)
@@ -690,7 +758,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				error,
 				address,
 			})
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 			this.logger.error({ err }, 'Failed to unregister service function')
 		}
 	}
@@ -707,6 +774,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 
 		const noAck = !!subscription.eventBridgeConfig.autoacknowledge
+		const failureHandling = subscription.eventBridgeConfig.consumerFailureHandling
 
 		const isShared = subscription.eventBridgeConfig.shared === undefined || subscription.eventBridgeConfig.shared
 
@@ -724,13 +792,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		channel.on('close', () => {
 			this.healthy = false
 			this.logger.info({ queueName }, 'channel for subscription closed')
-			this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 		})
 
 		channel.on('error', err => {
 			this.healthy = false
 			this.logger.error({ err, queueName }, 'subscription channel error')
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 		})
 
 		const queue = await channel.assertQueue(queueName, queueOptions)
@@ -803,10 +869,24 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 									message: err.message,
 								})
 								span.recordException(err)
-								this.emit(EventBridgeEventNames.EventbridgeError, err)
 								this.logger.error({ err }, 'Failed to consume subscription message')
 								if (!noAck) {
-									channel.nack(msg)
+									if (failureHandling) {
+										const attempt = this.getConsumerAttempt(msg.properties.headers)
+										if (attempt >= (failureHandling.maxAttempts ?? 5)) {
+											await this.deadLetterSubscriptionMessage(channel, subscription, msg, err.message)
+										} else {
+											if ((failureHandling.retryDelayMs ?? 0) > 0) {
+												this.logger.warn(
+													{ queueName, retryDelayMs: failureHandling.retryDelayMs },
+													'AMQP subscription retryDelayMs requires broker retry topology; retrying immediately',
+												)
+											}
+											await this.retrySubscriptionMessage(channel, queue.queue, msg, attempt + 1)
+										}
+									} else {
+										channel.nack(msg)
+									}
 								}
 							}
 						},
@@ -842,7 +922,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				error,
 				address,
 			})
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
 			this.logger.error({ err }, 'Failed to unregister subscription')
 		}
 	}

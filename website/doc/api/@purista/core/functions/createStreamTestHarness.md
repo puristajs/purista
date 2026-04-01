@@ -8,7 +8,7 @@
 
 > **createStreamTestHarness**\<`TServiceBuilder`, `TStreamBuilder`\>(`serviceBuilder`, `streamBuilder`, `options?`): `Promise`\<\{ `destroy`: () => `Promise`\<`void`\>; `eventBridge`: [`EventBridge`](../interfaces/EventBridge.md); `run`: (`input`) => `Promise`\<\{ `chunks`: [`Infer`](../type-aliases/Infer.md)\<[`InferStreamBuilderConfig`](../type-aliases/InferStreamBuilderConfig.md)\<`TStreamBuilder`\>\[`"ChunkSchema"`\]\>[]; `final`: [`Infer`](../type-aliases/Infer.md)\<[`InferStreamBuilderConfig`](../type-aliases/InferStreamBuilderConfig.md)\<`TStreamBuilder`\>\[`"FinalSchema"`\]\> \| `undefined`; `frames`: `object`[]; \}\>; `service`: [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`EmptyObject`](../type-aliases/EmptyObject.md), [`EmptyObject`](../type-aliases/EmptyObject.md)\>\>; `stubs`: \{ `eventBridge`: `Record`\<`string`, `SinonStub`\<`any`[], `any`\>\> \| `undefined`; \}; \}\>
 
-Defined in: testing/createStreamTestHarness.ts:71
+Defined in: [testing/createStreamTestHarness.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamTestHarness.ts#L71)
 
 Boot a real service instance and execute one stream through the PURISTA runtime.
 

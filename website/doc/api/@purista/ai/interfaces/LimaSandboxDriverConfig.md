@@ -6,7 +6,7 @@
 
 # Interface: LimaSandboxDriverConfig
 
-Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:5](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L5)
+Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:5](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L5)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.
 
 > `optional` **cpus**: `number`
 
-Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:11](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L11)
+Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:11](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L11)
 
 CPU limit for the VM
 
@@ -24,7 +24,7 @@ CPU limit for the VM
 
 > `optional` **memory**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:9](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L9)
+Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:9](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L9)
 
 Memory limit for the VM
 
@@ -34,7 +34,7 @@ Memory limit for the VM
 
 > **template**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:7](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L7)
+Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:7](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L7)
 
 The name of the base Lima template to use (e.g. 'ubuntu-lts')
 
@@ -44,6 +44,6 @@ The name of the base Lima template to use (e.g. 'ubuntu-lts')
 
 > `optional` **useVz**: `boolean`
 
-Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:13](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L13)
+Defined in: [packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts:13](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts#L13)
 
 Whether to use the native Apple Virtualization Framework (vz)

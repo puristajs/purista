@@ -8,7 +8,7 @@
 
 > **diffEvaluationResults**(`a`, `b`): `object`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:62](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/evaluation/helpers.ts#L62)
+Defined in: [packages/ai/src/evaluation/helpers.ts:64](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/evaluation/helpers.ts#L64)
 
 Produces a quick diff between two runs so regressions are easy to spot.
 

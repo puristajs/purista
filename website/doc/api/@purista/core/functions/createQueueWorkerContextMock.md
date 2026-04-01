@@ -8,7 +8,7 @@
 
 > **createQueueWorkerContextMock**\<`Payload`, `Parameter`, `Resources`\>(`_builder`, `input`): [`QueueWorkerContextMockResult`](../type-aliases/QueueWorkerContextMockResult.md)\<`Payload`, `Parameter`, `Resources`\>
 
-Defined in: testing/createQueueWorkerContextMock.ts:83
+Defined in: [testing/createQueueWorkerContextMock.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L83)
 
 Create a queue worker context mock with controllable job controls.
 

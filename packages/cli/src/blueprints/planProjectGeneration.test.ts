@@ -47,7 +47,9 @@ describe('resolveProjectBlueprints', () => {
 		})
 
 		expect(resolution.selectedBlueprints).toEqual(['base', 'runtime-node', 'bridge-dapr', 'linter-biome'])
-		expect(resolution.warnings).toContain('The Dapr blueprint does not enable the bundled HTTP server. The request was ignored.')
+		expect(resolution.warnings).toContain(
+			'The Dapr blueprint does not enable the bundled HTTP server. The request was ignored.',
+		)
 	})
 })
 

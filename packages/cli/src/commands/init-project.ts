@@ -1,11 +1,11 @@
 import { basename, resolve } from 'node:path'
 import { z } from 'zod'
-import type { PuristaExecutableCommand } from '../core/command.js'
-import type { PuristaCommandResolution } from '../core/types.js'
-import { PuristaCliValidationError } from '../core/errors.js'
+import { materializeProjectGeneration } from '../blueprints/materializeProjectGeneration.js'
 import { planProjectGeneration } from '../blueprints/planProjectGeneration.js'
 import { resolveProjectBlueprints } from '../blueprints/resolveProjectBlueprints.js'
-import { materializeProjectGeneration } from '../blueprints/materializeProjectGeneration.js'
+import type { PuristaExecutableCommand } from '../core/command.js'
+import { PuristaCliValidationError } from '../core/errors.js'
+import type { PuristaCommandResolution } from '../core/types.js'
 import { ensureProjectDir } from '../create/ensureProjectDir.js'
 import { installDependencies } from '../create/installDependencies.js'
 import type { CreateProjectInput } from '../create/types.js'
@@ -41,7 +41,8 @@ export const initProjectCommand: PuristaExecutableCommand<InitProjectInput, Crea
 	id: 'init-project',
 	resolve: async (input, _context): Promise<PuristaCommandResolution<InitProjectInput, CreateProjectInput>> => {
 		const missing = []
-		if (!input.target?.trim()) missing.push({ type: 'input', key: 'target', message: 'Target directory', defaultValue: 'my-app' } as const)
+		if (!input.target?.trim())
+			missing.push({ type: 'input', key: 'target', message: 'Target directory', defaultValue: 'my-app' } as const)
 		if (!input.runtime?.trim())
 			missing.push({
 				type: 'select',
@@ -54,7 +55,13 @@ export const initProjectCommand: PuristaExecutableCommand<InitProjectInput, Crea
 				defaultValue: 'node',
 			} as const)
 		if (!input.packageManager?.trim())
-			missing.push({ type: 'select', key: 'packageManager', message: 'Which package manager do you want to use?', choices: packageManagerChoices, defaultValue: 'npm' } as const)
+			missing.push({
+				type: 'select',
+				key: 'packageManager',
+				message: 'Which package manager do you want to use?',
+				choices: packageManagerChoices,
+				defaultValue: 'npm',
+			} as const)
 		if (!input.type?.trim())
 			missing.push({
 				type: 'select',
@@ -104,7 +111,9 @@ export const initProjectCommand: PuristaExecutableCommand<InitProjectInput, Crea
 		const targetDirectoryPath = resolve(context.cwd, resolvedInput.target)
 		const targetEmptyOrCreated = await ensureProjectDir(targetDirectoryPath)
 		if (!targetEmptyOrCreated && context.mode === 'non-interactive') {
-			throw new PuristaCliValidationError('Target directory is not empty. Use interactive mode to confirm or choose another directory.')
+			throw new PuristaCliValidationError(
+				'Target directory is not empty. Use interactive mode to confirm or choose another directory.',
+			)
 		}
 		if (!targetEmptyOrCreated && context.mode !== 'non-interactive') {
 			const overwrite = await context.prompt.confirm({

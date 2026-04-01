@@ -8,7 +8,7 @@
 
 > **DefinitionEventBridgeConfig** = `object`
 
-Defined in: [core/types/DefinitionEventBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L6)
+Defined in: [core/types/DefinitionEventBridgeConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L8)
 
 Settings and advices for the event bridge, which are set in the command or subscription builder.
 The properties are advices and hints.
@@ -20,7 +20,7 @@ It depends on the used event bridge implementation and underlaying message broke
 
 > **autoacknowledge**: `boolean`
 
-Defined in: [core/types/DefinitionEventBridgeConfig.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L18)
+Defined in: [core/types/DefinitionEventBridgeConfig.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L20)
 
 Send the acknowledge to message broker as soon as the message arrives
 - defaults to true for commands
@@ -28,11 +28,25 @@ Send the acknowledge to message broker as soon as the message arrives
 
 ***
 
+### consumerFailureHandling?
+
+> `optional` **consumerFailureHandling**: [`DefinitionEventBridgeConsumerFailureHandling`](DefinitionEventBridgeConsumerFailureHandling.md)
+
+Defined in: [core/types/DefinitionEventBridgeConfig.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L40)
+
+Advisory retry and dead-letter handling for consumer-style registrations.
+
+This is primarily relevant for subscriptions and other push consumers.
+Adapters may ignore or partially honor these settings when the provider
+lacks broker-side retry or dead-letter support.
+
+***
+
 ### durable
 
 > **durable**: `boolean`
 
-Defined in: [core/types/DefinitionEventBridgeConfig.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L11)
+Defined in: [core/types/DefinitionEventBridgeConfig.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L13)
 
 Advise the underlaying message broker to store messages if no consumer is available.
 Messages will be send as soon as the service is able to consume.
@@ -43,7 +57,7 @@ Messages will be send as soon as the service is able to consume.
 
 > **shared**: `boolean`
 
-Defined in: [core/types/DefinitionEventBridgeConfig.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L30)
+Defined in: [core/types/DefinitionEventBridgeConfig.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L32)
 
 If set to true, the event bridge is adviced to deliver one message to at least one consumer instance.
 True is the default value.

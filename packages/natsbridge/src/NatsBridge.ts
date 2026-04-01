@@ -9,6 +9,7 @@ import type {
 	CommandSuccessResponse,
 	CustomMessage,
 	DefinitionEventBridgeConfig,
+	DefinitionEventBridgeConsumerFailureHandling,
 	EBMessage,
 	EBMessageAddress,
 	EventBridge,
@@ -20,7 +21,6 @@ import {
 	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
-	EventBridgeEventNames,
 	EventBridgeLateResponseHandling,
 	getNewCorrelationId,
 	getNewEBMessageId,
@@ -38,8 +38,10 @@ import type {
 	JetStreamManager,
 	JetStreamSubscription,
 	JsMsg,
+	Msg,
 	MsgHdrs,
 	NatsConnection,
+	NatsError,
 	Subscription as NatsSubscription,
 } from 'nats'
 import {
@@ -64,6 +66,17 @@ import { getSubscriptionTopic } from './topic/getSubscriptionTopic.impl.js'
 import { getTopicName } from './topic/getTopicName.impl.js'
 
 import type { NatsBridgeConfig } from './types/NatsBridgeConfig.js'
+
+const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
+const DEAD_LETTER_ATTEMPT_HEADER = 'x-purista-dead-letter-attempt'
+const DEAD_LETTER_ORIGINAL_SUBJECT_HEADER = 'x-purista-dead-letter-original-subject'
+const DEAD_LETTER_SUBSCRIBER_HEADER = 'x-purista-dead-letter-subscriber'
+
+type ResolvedConsumerFailureHandling = {
+	maxAttempts: number
+	retryDelayMs: number
+	deadLetterTarget: string
+}
 
 /**
 The event bridge supports low-latency core NATS messaging.
@@ -116,20 +129,35 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		}
 	}
 
-	private canUseJetStreamDurability(kind: 'command' | 'subscription', durable: boolean) {
-		if (!durable) {
+	private requiresJetStreamConsumer(kind: 'command' | 'subscription', eventBridgeConfig: DefinitionEventBridgeConfig) {
+		if (kind === 'command') {
+			return eventBridgeConfig.durable
+		}
+
+		return (
+			eventBridgeConfig.durable ||
+			!eventBridgeConfig.autoacknowledge ||
+			eventBridgeConfig.consumerFailureHandling !== undefined
+		)
+	}
+
+	private shouldUseJetStreamConsumer(kind: 'command' | 'subscription', eventBridgeConfig: DefinitionEventBridgeConfig) {
+		if (!this.requiresJetStreamConsumer(kind, eventBridgeConfig)) {
 			return false
 		}
 		if (this.isJetStreamEnabled && this.jsm && this.js) {
 			return true
 		}
 		if (this.config.durableSubscriptionMode === 'best-effort') {
-			this.logger.warn({ kind }, 'Falling back to non-durable core NATS semantics for durable registration request')
+			this.logger.warn(
+				{ kind, eventBridgeConfig },
+				'Falling back to core NATS semantics because JetStream-backed acknowledgements are unavailable',
+			)
 			return false
 		}
 		throw new UnhandledError(
 			StatusCode.NotImplemented,
-			`Durable NATS ${kind} registration requires JetStream support on the broker and bridge`,
+			`NATS ${kind} registration requires JetStream support for the requested delivery semantics`,
 		)
 	}
 
@@ -148,6 +176,78 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 	private getJetStreamConsumerName(kind: 'command' | 'subscription', address: EBMessageAddress, shared: boolean) {
 		const base = `${kind}_${address.serviceName}_${address.serviceVersion}_${address.serviceTarget}`
 		return this.sanitizeName(shared ? base : `${base}_${this.instanceId}`)
+	}
+
+	private resolveConsumerFailureHandling(
+		subject: string,
+		config?: DefinitionEventBridgeConsumerFailureHandling,
+	): ResolvedConsumerFailureHandling {
+		const maxAttempts = config?.maxAttempts ?? this.config.defaultConsumerFailureHandling.maxAttempts
+		const retryDelayMs = config?.retryDelayMs ?? this.config.defaultConsumerFailureHandling.retryDelayMs
+		const deadLetterTarget =
+			config?.deadLetterTarget ?? `${subject}${this.config.defaultConsumerFailureHandling.deadLetterSuffix}`
+
+		if (maxAttempts < 1) {
+			throw new UnhandledError(StatusCode.BadRequest, 'consumer failure handling maxAttempts must be greater than 0')
+		}
+		if (retryDelayMs < 0) {
+			throw new UnhandledError(
+				StatusCode.BadRequest,
+				'consumer failure handling retryDelayMs must be greater than or equal to 0',
+			)
+		}
+
+		return {
+			maxAttempts,
+			retryDelayMs,
+			deadLetterTarget,
+		}
+	}
+
+	private getFailureReason(error: unknown) {
+		if (error instanceof UnhandledError && error.data && typeof error.data === 'object' && 'error' in error.data) {
+			const cause = (error.data as { error?: unknown }).error
+			if (cause instanceof Error) {
+				return cause.message
+			}
+			if (typeof cause === 'string') {
+				return cause
+			}
+		}
+
+		if (error instanceof Error) {
+			return error.message
+		}
+
+		return String(error)
+	}
+
+	private async publishDeadLetterMessage(
+		subject: string,
+		address: EBMessageAddress,
+		msg: JsMsg,
+		reason: string,
+		failureHandling: ResolvedConsumerFailureHandling,
+	) {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
+
+		await this.ensureJetStreamStream(failureHandling.deadLetterTarget, 'subscription')
+
+		let headers: MsgHdrs | undefined
+		if (this.connection.info?.headers) {
+			headers = getNewHeaders()
+			headers.set(DEAD_LETTER_REASON_HEADER, reason)
+			headers.set(DEAD_LETTER_ATTEMPT_HEADER, String(msg.info.deliveryCount))
+			headers.set(DEAD_LETTER_ORIGINAL_SUBJECT_HEADER, subject)
+			headers.set(
+				DEAD_LETTER_SUBSCRIBER_HEADER,
+				`${address.serviceName}/${address.serviceVersion}/${address.serviceTarget}`,
+			)
+		}
+
+		this.connection.publish(failureHandling.deadLetterTarget, msg.data, { headers })
 	}
 
 	private async ensureJetStreamStream(subject: string, kind: 'command' | 'subscription') {
@@ -180,7 +280,8 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		subject: string,
 		address: EBMessageAddress,
 		shared: boolean,
-		handler: (error: null, msg: JsMsg) => Promise<unknown>,
+		eventBridgeConfig: DefinitionEventBridgeConfig,
+		handler: (error: NatsError | null, msg: Msg | JsMsg) => Promise<unknown>,
 	) {
 		if (!this.js) {
 			throw new UnhandledError(StatusCode.NotImplemented, 'JetStream client is not available')
@@ -188,6 +289,10 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 		const stream = await this.ensureJetStreamStream(subject, kind)
 		const durableName = this.getJetStreamConsumerName(kind, address, shared)
+		const failureHandling =
+			kind === 'subscription'
+				? this.resolveConsumerFailureHandling(subject, eventBridgeConfig.consumerFailureHandling)
+				: undefined
 		const opts = consumerOpts()
 			.bindStream(stream)
 			.durable(durableName)
@@ -198,22 +303,55 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			.ackWait(this.defaultCommandTimeout)
 			.maxAckPending(this.config.maxMessages)
 			.filterSubject(subject)
+			.maxDeliver(failureHandling?.maxAttempts ?? 1)
 			.callback((error, msg) => {
-				if (error || !msg) {
-					void handler(null, msg as JsMsg)
+				if (error) {
+					this.logger.error({ err: error, subject, durableName, kind }, 'JetStream consumer callback failed')
+					return
+				}
+				if (!msg) {
+					this.logger.warn({ subject, durableName, kind }, 'JetStream consumer callback invoked without a message')
 					return
 				}
 
-				this.runInFlight(async () => {
-					await handler(null, msg)
-					msg.ack()
-				}).catch(err => {
-					this.logger.error(
-						{ err, subject, durableName, kind },
-						'JetStream consumer handler failed, requesting redelivery',
-					)
-					msg.nak()
-				})
+				void handler(null, msg)
+					.then(() => {
+						msg.ack()
+					})
+					.catch(async err => {
+						this.logger.error({ err, subject, durableName, kind }, 'JetStream consumer handler failed')
+
+						if (kind === 'subscription' && failureHandling) {
+							if (msg.info.deliveryCount >= failureHandling.maxAttempts) {
+								try {
+									await this.publishDeadLetterMessage(
+										subject,
+										address,
+										msg,
+										this.getFailureReason(err),
+										failureHandling,
+									)
+									msg.term(`dead-lettered by PURISTA after ${msg.info.deliveryCount} attempts`)
+									return
+								} catch (deadLetterError) {
+									this.logger.error(
+										{
+											err: deadLetterError,
+											subject,
+											durableName,
+											deadLetterTarget: failureHandling.deadLetterTarget,
+										},
+										'Failed to publish JetStream dead-letter message',
+									)
+								}
+							}
+
+							msg.nak(failureHandling.retryDelayMs)
+							return
+						}
+
+						msg.nak()
+					})
 			})
 
 		if (shared) {
@@ -236,8 +374,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		}
 		this.capabilities.durableCommands = this.isJetStreamEnabled
 		this.capabilities.durableSubscriptions = this.isJetStreamEnabled
-
-		this.emit(EventBridgeEventNames.EventbridgeConnected)
+		this.capabilities.manualAckSupported = this.isJetStreamEnabled
 	}
 
 	async isReady() {
@@ -432,7 +569,6 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 									message: err.message,
 								})
 								returnSpan.recordException(err)
-								this.emit(EventBridgeEventNames.EventbridgeError, err)
 								throw err
 							}
 
@@ -476,8 +612,15 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		const topic = getCommandSubscriptionTopic.bind(this)(address)
 		const callback = getCommandHandler(address, cb, metadata, eventBridgeConfig).bind(this)
 		const registrationKey = this.getRegistrationKey(address)
-		const subscription = this.canUseJetStreamDurability('command', eventBridgeConfig.durable)
-			? await this.registerJetStreamConsumer('command', topic, address, eventBridgeConfig.shared, callback)
+		const subscription = this.shouldUseJetStreamConsumer('command', eventBridgeConfig)
+			? await this.registerJetStreamConsumer(
+					'command',
+					topic,
+					address,
+					eventBridgeConfig.shared,
+					eventBridgeConfig,
+					callback,
+				)
 			: this.connection.subscribe(topic, { callback, queue: getQueueGroupName(this.config.topicPrefix, address) })
 
 		this.commands.set(registrationKey, subscription)
@@ -501,10 +644,11 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 		const registrationKey = this.getRegistrationKey(address)
 		const subscription = this.commands.get(registrationKey)
+		const destroyableSubscription = subscription as Partial<JetStreamSubscription> | undefined
 
 		subscription?.unsubscribe()
-		if ('destroy' in (subscription ?? {}) && typeof subscription?.destroy === 'function') {
-			await subscription.destroy()
+		if (typeof destroyableSubscription?.destroy === 'function') {
+			await destroyableSubscription.destroy()
 		} else {
 			await subscription?.drain()
 		}
@@ -521,12 +665,13 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		const topic = getSubscriptionTopic.bind(this)(subscription)
 		const callback = getSubscriptionHandler(subscription, cb).bind(this)
 		const registrationKey = this.getRegistrationKey(subscription.subscriber)
-		const natsSubscription = this.canUseJetStreamDurability('subscription', subscription.eventBridgeConfig.durable)
+		const natsSubscription = this.shouldUseJetStreamConsumer('subscription', subscription.eventBridgeConfig)
 			? await this.registerJetStreamConsumer(
 					'subscription',
 					topic,
 					subscription.subscriber,
 					subscription.eventBridgeConfig.shared,
+					subscription.eventBridgeConfig,
 					callback,
 				)
 			: this.connection.subscribe(topic, {
@@ -547,10 +692,11 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 		const registrationKey = this.getRegistrationKey(address)
 		const subscription = this.subscriptions.get(registrationKey)
+		const destroyableSubscription = subscription as Partial<JetStreamSubscription> | undefined
 
 		subscription?.unsubscribe()
-		if ('destroy' in (subscription ?? {}) && typeof subscription?.destroy === 'function') {
-			await subscription.destroy()
+		if (typeof destroyableSubscription?.destroy === 'function') {
+			await destroyableSubscription.destroy()
 		} else {
 			await subscription?.drain()
 		}
@@ -565,7 +711,6 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 		await this.connection?.drain()
 		await this.connection?.close()
-		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 		await super.destroy()
 	}
 }

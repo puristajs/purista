@@ -4,7 +4,19 @@ import { addPuristaSubscription } from '../api/addPuristaSubscription.js'
 import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import type { PuristaCommandResolution } from '../core/types.js'
-import { baseAddInputSchema, captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult, getServiceBasePath, getServiceChoices, getServiceVersionChoices, nonEmptyOptionalStringSchema, requireProjectContext, requirePuristaConfig } from './shared.js'
+import {
+	baseAddInputSchema,
+	captureMutationSnapshot,
+	createIssuesFromZod,
+	createPendingResolution,
+	createResult,
+	getServiceBasePath,
+	getServiceChoices,
+	getServiceVersionChoices,
+	nonEmptyOptionalStringSchema,
+	requireProjectContext,
+	requirePuristaConfig,
+} from './shared.js'
 
 const schema = baseAddInputSchema.extend({
 	name: z.string().trim().min(1),
@@ -22,11 +34,22 @@ export const addSubscriptionCommand: PuristaExecutableCommand<AddSubscriptionInp
 	resolve: async (input, context): Promise<PuristaCommandResolution<AddSubscriptionInput, z.infer<typeof schema>>> => {
 		const { projectSnapshot } = requireProjectContext(context)
 		const missing = []
-		if (!input.name?.trim()) missing.push({ type: 'input', key: 'name', message: 'Name of the subscription', required: true } as const)
+		if (!input.name?.trim())
+			missing.push({ type: 'input', key: 'name', message: 'Name of the subscription', required: true } as const)
 		if (!input.description?.trim())
-			missing.push({ type: 'input', key: 'description', message: 'Description of the subscription', required: true } as const)
+			missing.push({
+				type: 'input',
+				key: 'description',
+				message: 'Description of the subscription',
+				required: true,
+			} as const)
 		if (!input.serviceName?.trim())
-			missing.push({ type: 'select', key: 'serviceName', message: 'What service do you want to use?', choices: getServiceChoices(projectSnapshot) } as const)
+			missing.push({
+				type: 'select',
+				key: 'serviceName',
+				message: 'What service do you want to use?',
+				choices: getServiceChoices(projectSnapshot),
+			} as const)
 		if (!input.serviceVersion?.trim())
 			missing.push({
 				type: 'select',

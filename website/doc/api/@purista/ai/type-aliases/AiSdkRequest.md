@@ -8,20 +8,28 @@
 
 > **AiSdkRequest** = `object`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:28](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/aiSdk.ts#L28)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:38](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/aiSdk.ts#L38)
 
 ## Properties
+
+### messages?
+
+> `optional` **messages**: `ModelMessage`[]
+
+Defined in: [packages/ai/src/bridge/aiSdk.ts:40](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/aiSdk.ts#L40)
+
+***
 
 ### metadata?
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:30](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/aiSdk.ts#L30)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:41](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/aiSdk.ts#L41)
 
 ***
 
-### prompt
+### prompt?
 
-> **prompt**: `string`
+> `optional` **prompt**: `string`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:29](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/aiSdk.ts#L29)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:39](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/aiSdk.ts#L39)

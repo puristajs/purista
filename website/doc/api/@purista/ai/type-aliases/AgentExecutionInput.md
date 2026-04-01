@@ -8,17 +8,36 @@
 
 > **AgentExecutionInput** = `object`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:31](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L31)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:36](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L36)
 
 Payload the executor receives whenever a run is initiated.
 
+For multimodal requests, keep `prompt` as the human-visible text task and
+pass files/images through `input` or `attachments`.
+
 ## Properties
+
+### attachments?
+
+> `optional` **attachments**: [`AgentAttachment`](AgentAttachment.md)[]
+
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:40](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L40)
+
+***
 
 ### context?
 
 > `optional` **context**: `string`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:34](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L34)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:41](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L41)
+
+***
+
+### input?
+
+> `optional` **input**: [`AgentInputPart`](AgentInputPart.md)[]
+
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:39](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L39)
 
 ***
 
@@ -26,7 +45,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:34](https://github.com/pur
 
 > `optional` **metadata**: [`ProviderRequest`](ProviderRequest.md)\[`"metadata"`\]
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:35](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L35)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:42](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L42)
 
 ***
 
@@ -34,7 +53,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:35](https://github.com/pur
 
 > `optional` **principalId**: `string`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:37](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L37)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:44](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L44)
 
 ***
 
@@ -42,7 +61,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:37](https://github.com/pur
 
 > **prompt**: `string`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:33](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L33)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:38](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L38)
 
 ***
 
@@ -50,7 +69,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:33](https://github.com/pur
 
 > **sessionId**: `string`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:32](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L32)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:37](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L37)
 
 ***
 
@@ -58,4 +77,4 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:32](https://github.com/pur
 
 > `optional` **tenantId**: `string`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:36](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L36)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:43](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L43)

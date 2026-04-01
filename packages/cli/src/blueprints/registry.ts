@@ -1,7 +1,6 @@
 import type { TsConfigJson } from 'type-fest'
 import type { PuristaConfig } from '../api/loadPuristaConfig.js'
 import type { PKG } from '../create/getPackageJson.js'
-import type { ProjectBlueprint } from './types.js'
 import {
 	createAmqpConfigFile,
 	createBiomeConfigFile,
@@ -16,6 +15,7 @@ import {
 	createReadmeFile,
 	createServiceEventEnumFile,
 } from './content.js'
+import type { ProjectBlueprint } from './types.js'
 
 const baseTsConfig: TsConfigJson = {
 	compilerOptions: {

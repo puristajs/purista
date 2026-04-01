@@ -752,7 +752,7 @@ The before guard hook, or undefined if not found.
 
 > **getCommandFunction**\<`T`\>(`input?`): [`CommandFunction`](../type-aliases/CommandFunction.md)\<`S`, [`GetMessagePayloadType`](../type-aliases/GetMessagePayloadType.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"TransformInputPayloadSchema"`\]\>, [`GetMessageParamsType`](../type-aliases/GetMessageParamsType.md)\<`C`\[`"ParamsSchema"`\], `C`\[`"TransformInputParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"PayloadSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"OutputSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1200](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1200)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1201](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1201)
 
 Get the function implementation including input and output validation.
 Also, before hooks are triggered during execution.
@@ -786,7 +786,7 @@ the function
 
 > **getCommandFunctionPlain**(): [`CommandFunction`](../type-aliases/CommandFunction.md)\<`S`, [`GetMessagePayloadType`](../type-aliases/GetMessagePayloadType.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"TransformInputPayloadSchema"`\]\>, [`GetMessageParamsType`](../type-aliases/GetMessageParamsType.md)\<`C`\[`"ParamsSchema"`\], `C`\[`"TransformInputParamsSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"OutputSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1231](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1231)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1232](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1232)
 
 Get the function implementation without input and output validation.
 No hooks are triggered during execution.
@@ -803,7 +803,7 @@ the function
 
 > **getCommandTransformContextMock**(`input`): `object`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1259](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1259)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1260](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1260)
 
 Returns a mocked transform function context, which can be used in unit tests.
 
@@ -1222,7 +1222,7 @@ CommandDefinitionBuilder
 
 > **setCommandFunction**(`fn`): `CommandDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1170](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1170)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:1171](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L1171)
 
 Required: Set the function implementation.
 The types should be automatically set as soon as schemas previously defined.

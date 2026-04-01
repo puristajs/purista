@@ -8,7 +8,7 @@
 
 > **getCommandTypeFileContent**(`input`): `string`
 
-Defined in: [content/command/getCommandTypeFileContent.ts:6](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/cli/src/api/content/command/getCommandTypeFileContent.ts#L6)
+Defined in: [packages/cli/src/api/content/command/getCommandTypeFileContent.ts:6](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/content/command/getCommandTypeFileContent.ts#L6)
 
 ## Parameters
 
@@ -24,7 +24,7 @@ Defined in: [content/command/getCommandTypeFileContent.ts:6](https://github.com/
 
 #### puristaConfig
 
-\{ `$schema`: `string`; `agentPath`: `string`; `eventBridge`: `"default"` \| `"amqp"` \| `"nats"` \| `"mqtt"` \| `"dapr"`; `eventConvention`: `"camel"` \| `"snake"` \| `"kebab"` \| `"pascal"` \| `"pascalSnake"` \| `"constantCase"` \| `"dotCase"` \| `"pathCase"` \| `"trainCase"`; `fileConvention`: `"camel"` \| `"snake"` \| `"kebab"` \| `"pascal"` \| `"pascalSnake"`; `formatter`: `"biome"` \| `"none"` \| `"prettier"`; `linter`: `"biome"` \| `"eslint"` \| `"none"`; `runtime`: `"node"` \| `"bun"`; `servicePath`: `string`; \}
+\{ `$schema`: `string`; `agentPath`: `string`; `eventBridge`: `"default"` \| `"amqp"` \| `"nats"` \| `"mqtt"` \| `"dapr"`; `eventConvention`: `"camel"` \| `"snake"` \| `"kebab"` \| `"pascal"` \| `"pascalSnake"` \| `"constantCase"` \| `"dotCase"` \| `"pathCase"` \| `"trainCase"`; `fileConvention`: `"camel"` \| `"snake"` \| `"kebab"` \| `"pascal"` \| `"pascalSnake"`; `formatter`: `"biome"` \| `"prettier"` \| `"none"`; `linter`: `"biome"` \| `"none"` \| `"eslint"`; `runtime`: `"node"` \| `"bun"`; `servicePath`: `string`; \}
 
 #### puristaConfig.$schema
 
@@ -48,11 +48,11 @@ Defined in: [content/command/getCommandTypeFileContent.ts:6](https://github.com/
 
 #### puristaConfig.formatter
 
-`"biome"` \| `"none"` \| `"prettier"` = `...`
+`"biome"` \| `"prettier"` \| `"none"` = `...`
 
 #### puristaConfig.linter
 
-`"biome"` \| `"eslint"` \| `"none"` = `...`
+`"biome"` \| `"none"` \| `"eslint"` = `...`
 
 #### puristaConfig.runtime
 

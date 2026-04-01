@@ -8,7 +8,7 @@
 
 > **QueueWorkerContextMockResult**\<`Payload`, `Parameter`, `Resources`\> = `object`
 
-Defined in: testing/createQueueWorkerContextMock.ts:24
+Defined in: [testing/createQueueWorkerContextMock.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L24)
 
 ## Type Parameters
 
@@ -30,7 +30,7 @@ Defined in: testing/createQueueWorkerContextMock.ts:24
 
 > **context**: [`QueueJobContext`](QueueJobContext.md)\<`Payload`, `Parameter`, `Resources`\>
 
-Defined in: testing/createQueueWorkerContextMock.ts:29
+Defined in: [testing/createQueueWorkerContextMock.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L29)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: testing/createQueueWorkerContextMock.ts:29
 
 > **message**: [`QueueMessage`](QueueMessage.md)\<`Payload`, `Parameter`\>
 
-Defined in: testing/createQueueWorkerContextMock.ts:30
+Defined in: [testing/createQueueWorkerContextMock.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L30)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: testing/createQueueWorkerContextMock.ts:30
 
 > **stubs**: `object`
 
-Defined in: testing/createQueueWorkerContextMock.ts:31
+Defined in: [testing/createQueueWorkerContextMock.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L31)
 
 #### emit
 

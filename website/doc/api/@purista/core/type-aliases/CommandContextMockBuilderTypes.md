@@ -8,7 +8,7 @@
 
 > **CommandContextMockBuilderTypes**\<`T`\> = `T` *extends* [`CommandDefinitionBuilder`](../classes/CommandDefinitionBuilder.md)\<`any`, infer C\> ? `C` : `never`
 
-Defined in: testing/createCommandContextMock.ts:27
+Defined in: [testing/createCommandContextMock.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L27)
 
 Infer the internal builder type configuration from a command builder.
 

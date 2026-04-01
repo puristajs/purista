@@ -1,11 +1,17 @@
+import { createNoPromptAdapter } from './adapters/interactive/noPromptAdapter.js'
 import { getFormatConfig } from './api/getFormatConfig.js'
 import { loadPuristaConfig } from './api/loadPuristaConfig.js'
-import type { PuristaCommandContext } from './core/command.js'
-import { PuristaCliValidationError } from './core/errors.js'
-import type { PromptAdapter, PuristaCommandId, PuristaCommandMode, PuristaCommandResolution, PuristaCommandResult } from './core/types.js'
 import { getCommand } from './commands/index.js'
 import { askForMissingValues } from './commands/shared.js'
-import { createNoPromptAdapter } from './adapters/interactive/noPromptAdapter.js'
+import type { PuristaCommandContext } from './core/command.js'
+import { PuristaCliValidationError } from './core/errors.js'
+import type {
+	PromptAdapter,
+	PuristaCommandId,
+	PuristaCommandMode,
+	PuristaCommandResolution,
+	PuristaCommandResult,
+} from './core/types.js'
 import { createProjectSnapshot } from './project/createProjectSnapshot.js'
 
 export type PuristaCliEngineOptions = {
@@ -48,7 +54,10 @@ export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) =>
 		},
 		runPuristaCommand: async <TInput>(commandId: PuristaCommandId, input: TInput): Promise<PuristaCommandResult> => {
 			const command = getCommand(commandId) as unknown as {
-				resolve: (input: Record<string, unknown>, context: PuristaCommandContext) => Promise<PuristaCommandResolution<Record<string, unknown>, unknown>>
+				resolve: (
+					input: Record<string, unknown>,
+					context: PuristaCommandContext,
+				) => Promise<PuristaCommandResolution<Record<string, unknown>, unknown>>
 				execute: (resolvedInput: unknown, context: PuristaCommandContext) => Promise<PuristaCommandResult>
 			}
 			const context = await createCommandContext(commandId)
@@ -57,13 +66,23 @@ export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) =>
 
 			while (resolution.missing.length > 0 && (context.mode === 'interactive' || context.applyDefaults)) {
 				currentInput = await askForMissingValues(currentInput, resolution.missing, context)
-				resolution = (await command.resolve(currentInput, context)) as PuristaCommandResolution<Record<string, unknown>, unknown>
+				resolution = (await command.resolve(currentInput, context)) as PuristaCommandResolution<
+					Record<string, unknown>,
+					unknown
+				>
 			}
 
 			if (resolution.missing.length > 0 || resolution.errors.length > 0 || !resolution.resolvedInput) {
 				throw new PuristaCliValidationError(`Unable to resolve command ${commandId}.`, {
 					command: commandId,
-					issues: [...resolution.errors, ...resolution.missing.map(prompt => ({ code: 'missing_input', message: prompt.message, path: [prompt.key] }))],
+					issues: [
+						...resolution.errors,
+						...resolution.missing.map(prompt => ({
+							code: 'missing_input',
+							message: prompt.message,
+							path: [prompt.key],
+						})),
+					],
 				})
 			}
 

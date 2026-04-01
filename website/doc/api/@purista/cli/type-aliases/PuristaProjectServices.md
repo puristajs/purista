@@ -6,16 +6,6 @@
 
 # Type Alias: PuristaProjectServices
 
-> **PuristaProjectServices** = `Record`\<`string`, `Record`\<`string`, \{ `builderFile`: `string`; `commands`: `string`[]; `serviceFile`: `string`; `streams`: `string`[]; `subscriptions`: `string`[]; \}\>\>
+> **PuristaProjectServices** = `Record`\<`string`, `Record`\<`string`, `Omit`\<[`ServiceVersionSnapshot`](ServiceVersionSnapshot.md), `"queues"` \| `"queueWorkers"`\>\>\>
 
-Defined in: [scanPuristaProject.ts:21](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/cli/src/api/scanPuristaProject.ts#L21)
-
-Information about a service.
-It is a nested object.
-The top level key is the service name, the value is a nested object, where the keys are the versions of the service.
-[serviceName][serviceVersion] is an object that contains:
-- `commands`: An array of strings representing the command names available for the service.
-- `subscriptions`: An array of strings representing the subscription names available for the service.
-- `streams`: An array of strings representing the stream names available for the service.
-- `builderFile`: The path to the builder file for the service.
-- `serviceFile`: The path to the service file for the service.
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:8](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/scanPuristaProject.ts#L8)

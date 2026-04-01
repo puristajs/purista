@@ -163,7 +163,7 @@ describe('external runtime bindings', () => {
 					emitToolEvent,
 				},
 			},
-		})
+		} as any)
 
 		const bindings = expose.tools({
 			commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
@@ -209,7 +209,7 @@ describe('external runtime bindings', () => {
 				},
 			},
 			io: { protocol: { emitToolEvent: vi.fn() } },
-		})
+		} as any)
 
 		expect(() =>
 			expose.tool({
@@ -295,7 +295,7 @@ describe('external runtime bindings', () => {
 				},
 			},
 			io: { protocol: { emitToolEvent } },
-		})
+		} as any)
 
 		const objectBinding = expose.agent(
 			{
@@ -361,7 +361,7 @@ describe('external runtime bindings', () => {
 				},
 			},
 			io: { protocol: { emitToolEvent: vi.fn() } },
-		})
+		} as any)
 
 		const binding = expose.agent({ agentName: 'reportAgent', agentVersion: '1' })
 
@@ -389,7 +389,7 @@ describe('external runtime bindings', () => {
 				},
 			},
 			io: { protocol: { emitToolEvent: vi.fn() } },
-		})
+		} as any)
 
 		const binding = expose.agent({ agentName: 'reportAgent', agentVersion: '1' })
 

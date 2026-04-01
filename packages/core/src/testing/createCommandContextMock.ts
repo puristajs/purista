@@ -66,6 +66,22 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']
 	>
+	mock: CommandFunctionContext<
+		GetMessagePayloadType<
+			CommandContextMockBuilderTypes<TBuilder>['PayloadSchema'],
+			CommandContextMockBuilderTypes<TBuilder>['TransformInputPayloadSchema']
+		>,
+		GetMessageParamsType<
+			CommandContextMockBuilderTypes<TBuilder>['ParamsSchema'],
+			CommandContextMockBuilderTypes<TBuilder>['TransformInputParamsSchema']
+		>,
+		CommandContextMockBuilderTypes<TBuilder>['Resources'],
+		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
+		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
+		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']
+	>
 	stubs: {
 		logger: Record<string, SinonStub>
 		emit: FromEmitToOtherType<CommandContextMockBuilderTypes<TBuilder>['EmitList'], SinonStub>
@@ -212,6 +228,7 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 
 	return {
 		context,
+		mock: context,
 		stubs: {
 			...base.stubs,
 			service: invokeProxy.createApi<Record<string, any>>(),

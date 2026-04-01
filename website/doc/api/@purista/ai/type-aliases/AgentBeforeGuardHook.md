@@ -8,7 +8,7 @@
 
 > **AgentBeforeGuardHook**\<`Payload`, `Parameter`\> = (`context`, `payload`, `parameter`) => `Promise`\<`void`\> \| `void`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:71](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/builder/AgentBuilder.ts#L71)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:83](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L83)
 
 Guard hook that runs before the agent handler executes.
 

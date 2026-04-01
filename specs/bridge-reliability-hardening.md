@@ -14,6 +14,7 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Changed `AmqpBridge` durable command defaults to manual ack and non-auto-delete queues.
 - Added shared in-flight execution drain tracking in core and reused it across bridge implementations.
 - Implemented JetStream durable consumers for `NatsBridge` when JetStream is available, while keeping strict fail-fast behavior for brokers without JetStream.
+- Added advisory subscription consumer failure handling in core so adapters can honor bounded retry and dead-letter behavior without coupling service definitions to one transport.
 - Updated handbook pages so support matrices and reliability wording match current runtime behavior.
 
 ## Test coverage landed
@@ -22,6 +23,7 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - HTTP readiness lifecycle
 - AMQP safe durable defaults and shutdown rejection
 - NATS strict durable rejection
+- NATS subscription retry-to-success and retry-to-dead-letter integration coverage
 - MQTT topic helpers and bridge lifecycle behavior
 - default queue bridge lease recovery
 - Redis queue bridge contract/integration suite, skipped automatically when Docker is unavailable

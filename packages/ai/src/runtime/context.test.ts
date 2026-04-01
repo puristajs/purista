@@ -1025,6 +1025,7 @@ describe('runtime context helpers', () => {
 			models: {
 				primary: {
 					name: 'reply-model',
+					capabilities: { text: true, stream: true },
 					generateText: async request => {
 						await request.onTextDelta?.('Hello')
 						await request.onTextDelta?.(' world')
@@ -1075,6 +1076,7 @@ describe('runtime context helpers', () => {
 			models: {
 				primary: {
 					name: 'reply-model',
+					capabilities: { text: true },
 					generateText: async request => {
 						await request.onTextDelta?.('ignored')
 						return 'Internal draft'
@@ -1111,6 +1113,7 @@ describe('runtime context helpers', () => {
 			models: {
 				primary: {
 					name: 'reply-model',
+					capabilities: {},
 				},
 			},
 			embeddings: {},
@@ -1140,6 +1143,7 @@ describe('runtime context helpers', () => {
 			models: {
 				primary: {
 					name: 'reply-model',
+					capabilities: { text: true, stream: true },
 					generateText: async () => '   ',
 				},
 			},
@@ -1171,6 +1175,7 @@ describe('runtime context helpers', () => {
 			models: {
 				primary: {
 					name: 'reply-model',
+					capabilities: {},
 				},
 			},
 			embeddings: {},

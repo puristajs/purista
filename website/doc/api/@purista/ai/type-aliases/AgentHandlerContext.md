@@ -8,7 +8,7 @@
 
 > **AgentHandlerContext**\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`\> = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:523](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L523)
+Defined in: [packages/ai/src/runtime/context.ts:655](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L655)
 
 ## Type Parameters
 
@@ -38,22 +38,250 @@ Defined in: [packages/ai/src/runtime/context.ts:523](https://github.com/puristaj
 
 ## Properties
 
-### agents
+### ai
+
+> **ai**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:704](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L704)
+
+#### embeddings
+
+> **embeddings**: `{ [Alias in keyof Models as Models[Alias] extends { embed: (args: any[]) => any } ? Alias : never]: { name: string; embed: any; embedMany?: any } }`
+
+#### models
+
+> **models**: `Models`
+
+#### policy
+
+> **policy**: [`AgentPolicyHelpers`](AgentPolicyHelpers.md)
+
+#### reflect
+
+> **reflect**: [`AgentReflectionHelpers`](AgentReflectionHelpers.md)
+
+#### reply
+
+> **reply**: `object`
+
+##### reply.compose()
+
+> **compose**\<`Alias`\>(`request`): `Promise`\<`string`\>
+
+###### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+###### Parameters
+
+###### request
+
+`object` & [`ProviderRequest`](ProviderRequest.md) & `object`
+
+###### Returns
+
+`Promise`\<`string`\>
+
+##### reply.generate()
+
+> **generate**\<`Alias`\>(`request`): `Promise`\<`string`\>
+
+###### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+###### Parameters
+
+###### request
+
+`object` & [`ProviderRequest`](ProviderRequest.md) & `object`
+
+###### Returns
+
+`Promise`\<`string`\>
+
+##### reply.publish()
+
+> **publish**(`input`): `string`
+
+###### Parameters
+
+###### input
+
+`string` | \{ `chunked?`: `boolean`; `summary?`: `string`; `text`: `string`; \}
+
+###### Returns
+
+`string`
+
+#### rerankers
+
+> **rerankers**: `{ [Alias in keyof Models as Models[Alias] extends { rerank: (args: any[]) => any } ? Alias : never]: { name: string; rerank: any } }`
+
+#### skills
+
+> **skills**: `object`
+
+##### skills.available
+
+> **available**: `boolean`
+
+##### skills.config?
+
+> `optional` **config**: [`AgentSkillConfig`](AgentSkillConfig.md)
+
+##### skills.names
+
+> **names**: `string`[]
+
+##### skills.list()
+
+> **list**(): `Promise`\<[`SkillMetadata`](SkillMetadata.md)[]\>
+
+###### Returns
+
+`Promise`\<[`SkillMetadata`](SkillMetadata.md)[]\>
+
+##### skills.load()
+
+> **load**(`skillName`): `Promise`\<[`SkillDocument`](SkillDocument.md)\>
+
+###### Parameters
+
+###### skillName
+
+`string`
+
+###### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)\>
+
+##### skills.loadAvailable()
+
+> **loadAvailable**(): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+###### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+##### skills.loadMany()
+
+> **loadMany**(`skillNames`): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+###### Parameters
+
+###### skillNames
+
+`string`[]
+
+###### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+##### skills.loadReferences()
+
+> **loadReferences**(`skillName`): `Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
+
+###### Parameters
+
+###### skillName
+
+`string`
+
+###### Returns
+
+`Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
+
+##### skills.search()
+
+> **search**(`input?`): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+###### Parameters
+
+###### input?
+
+[`SkillSearchInput`](SkillSearchInput.md)
+
+###### Returns
+
+`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
+
+##### skills.selectReferences()
+
+> **selectReferences**(`input`): `Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
+
+###### Parameters
+
+###### input
+
+[`SkillReferenceSelectionInput`](SkillReferenceSelectionInput.md)
+
+###### Returns
+
+`Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
+
+***
+
+### app
+
+> **app**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:749](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L749)
+
+#### manifest
+
+> **manifest**: [`AgentManifest`](AgentManifest.md)
+
+#### resources
+
+> **resources**: `Resources`
+
+***
+
+### input
+
+> **input**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:664](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L664)
+
+#### message
+
+> **message**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"message"`\]
+
+#### parameter
+
+> **parameter**: `Parameter`
+
+#### payload
+
+> **payload**: `Payload`
+
+***
+
+### invoke
+
+> **invoke**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:677](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L677)
+
+#### agents
 
 > **agents**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:555](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L555)
-
-#### invoke
+##### agents.invoke
 
 > **invoke**: `AgentInvokes` & (`options`) => `Promise`\<[`AgentProtocolEnvelope`](AgentProtocolEnvelope.md)[]\>
 
 Invokes another agent via EventBridge and returns its emitted envelopes.
 Supports both direct options-based calls and typed chained access:
-`context.agents.invoke({ agentName, agentVersion, payload })`
-and `context.agents.invoke.someAgent['1'].call(payload, parameter)`.
+`context.invoke.agents.invoke({ agentName, agentVersion, payload })`
+and `context.invoke.agents.invoke.someAgent['1'].call(payload, parameter)`.
 
-#### forward()
+##### agents.forward()
 
 > **forward**(`options`): `Promise`\<`object`[]\>
 
@@ -61,93 +289,77 @@ Invokes another agent and forwards its live output into the current stream.
 Defaults to forwarding assistant text, reasoning, artifacts, and errors while suppressing
 synthetic outer `agent.run` tool telemetry.
 
-##### Parameters
+###### Parameters
 
 ###### options
 
 [`AgentForwardInvocationOptions`](AgentForwardInvocationOptions.md)
 
-##### Returns
+###### Returns
 
 `Promise`\<`object`[]\>
 
-#### runObject()
+##### agents.runObject()
 
 > **runObject**\<`T`\>(`options`): `Promise`\<`T`\>
 
 Invokes another agent and parses the final assistant message as JSON.
 
-##### Type Parameters
+###### Type Parameters
 
 ###### T
 
 `T` = `unknown`
 
-##### Parameters
+###### Parameters
 
 ###### options
 
 [`AgentInvocationOptions`](AgentInvocationOptions.md)
 
-##### Returns
+###### Returns
 
 `Promise`\<`T`\>
 
-#### runText()
+##### agents.runText()
 
 > **runText**(`options`): `Promise`\<`string`\>
 
 Invokes another agent and extracts a best-effort assistant text output from message frames.
 
-##### Parameters
+###### Parameters
 
 ###### options
 
 [`AgentInvocationOptions`](AgentInvocationOptions.md)
 
-##### Returns
+###### Returns
 
 `Promise`\<`string`\>
 
-***
-
-### configs
-
-> **configs**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"configs"`\]
-
-Defined in: [packages/ai/src/runtime/context.ts:595](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L595)
-
-***
-
-### conversation
-
-> **conversation**: [`ConversationHelpers`](ConversationHelpers.md)
-
-Defined in: [packages/ai/src/runtime/context.ts:536](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L536)
-
-***
-
-### embeddings
-
-> **embeddings**: `{ [Alias in keyof Models as Models[Alias] extends { embed: (args: any[]) => any } ? Alias : never]: { name: string; embed: any; embedMany?: any } }`
-
-Defined in: [packages/ai/src/runtime/context.ts:578](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L578)
-
-***
-
-### emit
-
-> **emit**: [`EmitCustomMessageFunction`](../../core/type-aliases/EmitCustomMessageFunction.md)\<`EmitPayloads`\>
-
-Defined in: [packages/ai/src/runtime/context.ts:535](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L535)
-
-***
-
-### expose
+#### expose
 
 > **expose**: [`ExposeHelpers`](ExposeHelpers.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:541](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L541)
+#### tools
+
+> **tools**: [`ToolInvoker`](ToolInvoker.md)
+
+***
+
+### io
+
+> **io**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:745](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L745)
+
+#### protocol
+
+> **protocol**: [`ProtocolEmitter`](ProtocolEmitter.md)
+
+#### stream
+
+> **stream**: [`AgentStreamEmitter`](AgentStreamEmitter.md)
 
 ***
 
@@ -155,216 +367,68 @@ Defined in: [packages/ai/src/runtime/context.ts:541](https://github.com/puristaj
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:531](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L531)
+Defined in: [packages/ai/src/runtime/context.ts:663](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L663)
 
 ***
 
-### manifest
+### memory
 
-> **manifest**: [`AgentManifest`](AgentManifest.md)
+> **memory**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:598](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L598)
+Defined in: [packages/ai/src/runtime/context.ts:672](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L672)
 
-***
+#### conversation
 
-### message
+> **conversation**: [`ConversationHelpers`](ConversationHelpers.md)
 
-> **message**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"message"`\]
+#### run
 
-Defined in: [packages/ai/src/runtime/context.ts:534](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L534)
+> **run**: [`AgentRunStateHelpers`](AgentRunStateHelpers.md)
 
-***
-
-### models
-
-> **models**: `Models`
-
-Defined in: [packages/ai/src/runtime/context.ts:554](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L554)
-
-***
-
-### parameter
-
-> **parameter**: `Parameter`
-
-Defined in: [packages/ai/src/runtime/context.ts:533](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L533)
-
-***
-
-### payload
-
-> **payload**: `Payload`
-
-Defined in: [packages/ai/src/runtime/context.ts:532](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L532)
-
-***
-
-### protocol
-
-> **protocol**: [`ProtocolEmitter`](ProtocolEmitter.md)
-
-Defined in: [packages/ai/src/runtime/context.ts:539](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L539)
-
-***
-
-### rerankers
-
-> **rerankers**: `{ [Alias in keyof Models as Models[Alias] extends { rerank: (args: any[]) => any } ? Alias : never]: { name: string; rerank: any } }`
-
-Defined in: [packages/ai/src/runtime/context.ts:585](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L585)
-
-***
-
-### resources
-
-> **resources**: `Resources`
-
-Defined in: [packages/ai/src/runtime/context.ts:553](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L553)
-
-***
-
-### runState
-
-> **runState**: [`AgentRunStateHelpers`](AgentRunStateHelpers.md)
-
-Defined in: [packages/ai/src/runtime/context.ts:597](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L597)
-
-***
-
-### secrets
-
-> **secrets**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"secrets"`\]
-
-Defined in: [packages/ai/src/runtime/context.ts:594](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L594)
-
-***
-
-### serviceContext
-
-> **serviceContext**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>
-
-Defined in: [packages/ai/src/runtime/context.ts:593](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L593)
-
-***
-
-### session
+#### session
 
 > **session**: [`SessionHelpers`](SessionHelpers.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:537](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L537)
+***
+
+### output
+
+> **output**: `object`
+
+Defined in: [packages/ai/src/runtime/context.ts:669](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L669)
+
+#### emit
+
+> **emit**: [`EmitCustomMessageFunction`](../../core/type-aliases/EmitCustomMessageFunction.md)\<`EmitPayloads`\>
 
 ***
 
-### skills
+### runtime
 
-> **skills**: `object`
+> **runtime**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:542](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L542)
+Defined in: [packages/ai/src/runtime/context.ts:753](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/context.ts#L753)
 
-#### available
+#### approvals
 
-> **available**: `boolean`
+> **approvals**: [`AgentApprovalHelpers`](AgentApprovalHelpers.md)
 
-#### config?
+#### service
 
-> `optional` **config**: [`AgentSkillConfig`](AgentSkillConfig.md)
+> **service**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>
 
-#### names
+#### stores
 
-> **names**: `string`[]
+> **stores**: `object`
 
-#### list()
+##### stores.configs
 
-> **list**(): `Promise`\<[`SkillMetadata`](SkillMetadata.md)[]\>
+> **configs**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"configs"`\]
 
-##### Returns
+##### stores.secrets
 
-`Promise`\<[`SkillMetadata`](SkillMetadata.md)[]\>
+> **secrets**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"secrets"`\]
 
-#### load()
-
-> **load**(`skillName`): `Promise`\<[`SkillDocument`](SkillDocument.md)\>
-
-##### Parameters
-
-###### skillName
-
-`string`
-
-##### Returns
-
-`Promise`\<[`SkillDocument`](SkillDocument.md)\>
-
-#### loadAvailable()
-
-> **loadAvailable**(): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
-
-##### Returns
-
-`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
-
-#### loadMany()
-
-> **loadMany**(`skillNames`): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
-
-##### Parameters
-
-###### skillNames
-
-`string`[]
-
-##### Returns
-
-`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
-
-#### loadReferences()
-
-> **loadReferences**(`skillName`): `Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
-
-##### Parameters
-
-###### skillName
-
-`string`
-
-##### Returns
-
-`Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
-
-#### search()
-
-> **search**(`input?`): `Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
-
-##### Parameters
-
-###### input?
-
-[`SkillSearchInput`](SkillSearchInput.md)
-
-##### Returns
-
-`Promise`\<[`SkillDocument`](SkillDocument.md)[]\>
-
-***
-
-### states
+##### stores.states
 
 > **states**: [`ProtocolContext`](ProtocolContext.md)\<`Payload`, `Parameter`, `Resources`, `AgentInvokes`, `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>\>\[`"states"`\]
-
-Defined in: [packages/ai/src/runtime/context.ts:596](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L596)
-
-***
-
-### stream
-
-> **stream**: [`AgentStreamEmitter`](AgentStreamEmitter.md)
-
-Defined in: [packages/ai/src/runtime/context.ts:538](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L538)
-
-***
-
-### tools
-
-> **tools**: [`ToolInvoker`](ToolInvoker.md)
-
-Defined in: [packages/ai/src/runtime/context.ts:540](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/context.ts#L540)

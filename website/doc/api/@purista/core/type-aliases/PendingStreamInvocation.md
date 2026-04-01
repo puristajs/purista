@@ -8,7 +8,7 @@
 
 > **PendingStreamInvocation**\<`Chunk`, `Final`\> = `object`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L56)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L52)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:56](https://github.co
 
 > **push**: (`frame`) => `void`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L57)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L53)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:57](https://github.co
 
 > **reject**: (`error`) => `void`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L58)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L54)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:58](https://github.co
 
 > **setOwnerInstanceId**: (`instanceId`) => `Promise`\<`void`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L59)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L55)
 
 #### Parameters
 

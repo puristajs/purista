@@ -11,7 +11,6 @@ Defined in: [core/types/GenericEventEmitter.ts:17](https://github.com/puristajs/
 ## Extended by
 
 - [`ClientBuilder`](ClientBuilder.md)
-- [`EventBridgeBaseClass`](EventBridgeBaseClass.md)
 
 ## Type Parameters
 

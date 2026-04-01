@@ -66,7 +66,10 @@ export type ConfirmPromptRequest<TKey extends string = string> = BasePromptReque
 	defaultValue?: boolean
 }
 
-export type SelectPromptRequest<TKey extends string = string, TValue extends string = string> = BasePromptRequest<TKey> & {
+export type SelectPromptRequest<
+	TKey extends string = string,
+	TValue extends string = string,
+> = BasePromptRequest<TKey> & {
 	type: 'select'
 	choices: ReadonlyArray<PromptChoice<TValue>>
 	defaultValue?: TValue

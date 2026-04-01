@@ -20,7 +20,7 @@ This section explains how to implement business logic with strong types and clea
 8. Add [AI Agents](./agent/index.md) with managed manifests, orchestration queues, and evaluation helpers.
 9. Emit [Custom event messages](./custom_events.md), wire [Logging](./logging.md), and [Error handling](./error-handling.md).
 10. Connect [Stores](./stores/index.md) and expose APIs through [exposing commands](./exposing_endpoints/index.md) + [HTTP clients](./fetch_based_http_client.md).
-11. Operate/observe services via [Connect to PURISTA](./connect_to_a_purista_application/index.md) and the [Advanced](./advanced/index.md) topics (JavaScript events, message structure, delivery semantics).
+11. Operate/observe services via [Connect to PURISTA](./connect_to_a_purista_application/index.md) and the [Advanced](./advanced/index.md) topics (message structure, delivery semantics, protocol internals).
 
 ## Suggested chapter order
 
@@ -39,4 +39,4 @@ This section explains how to implement business logic with strong types and clea
 13. [Exposing Commands](./exposing_endpoints/index.md)
 14. [HTTP Client](./fetch_based_http_client.md)
 15. [Connect To PURISTA](./connect_to_a_purista_application/index.md)
-16. [Advanced](./advanced/index.md) → [JavaScript Events](./advanced/javascript_events.md), [Structure Of A Message](./advanced/structure_of_a_message.md), [AI Protocol](./advanced/ai-protocol.md), [Delivery Semantics And Reliability](./advanced/delivery-semantics-and-reliability.md)
+16. [Advanced](./advanced/index.md) → [Structure Of A Message](./advanced/structure_of_a_message.md), [AI Protocol](./advanced/ai-protocol.md), [Delivery Semantics And Reliability](./advanced/delivery-semantics-and-reliability.md)

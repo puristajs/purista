@@ -6,6 +6,30 @@
 
 # Type Alias: AgentContextLike
 
-> **AgentContextLike** = `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>, `"manifest"` \| `"tools"` \| `"agents"` \| `"protocol"`\>
+> **AgentContextLike** = `object`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:99](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L99)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:99](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L99)
+
+## Properties
+
+### app
+
+> **app**: `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>\[`"app"`\], `"manifest"`\>
+
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:100](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L100)
+
+***
+
+### invoke
+
+> **invoke**: `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>\[`"invoke"`\], `"tools"` \| `"agents"`\>
+
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:104](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L104)
+
+***
+
+### io
+
+> **io**: `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>\[`"io"`\], `"protocol"`\>
+
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:108](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L108)

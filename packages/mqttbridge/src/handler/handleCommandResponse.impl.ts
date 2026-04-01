@@ -1,6 +1,5 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
-	EventBridgeEventNames,
 	HandledError,
 	isCommandErrorResponse,
 	isCommandResponse,
@@ -34,7 +33,6 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
 					message: err.message,
 				})
 				span.recordException(err)
-				this.emit(EventBridgeEventNames.EventbridgeError, err)
 				return
 			}
 
@@ -62,7 +60,6 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
 					message: err.message,
 				})
 				span.recordException(err)
-				this.emit(EventBridgeEventNames.EventbridgeError, err)
 				return
 			}
 

@@ -1,6 +1,6 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { puristaConfigSchema } from '../api/loadPuristaConfig.js'
 import { createProjectSnapshot } from './createProjectSnapshot.js'
@@ -25,7 +25,10 @@ describe('createProjectSnapshot', () => {
 		mkdirSync(join(serviceDir, 'queue-worker', 'processJobsWorker'), { recursive: true })
 		mkdirSync(join(TEST_DIR, 'src', 'agents', 'triage', 'v1'), { recursive: true })
 
-		writeFileSync(join(TEST_DIR, 'src', 'service', 'serviceEvent.enum.ts'), 'export enum ServiceEvent { Example = "example" }\n')
+		writeFileSync(
+			join(TEST_DIR, 'src', 'service', 'serviceEvent.enum.ts'),
+			'export enum ServiceEvent { Example = "example" }\n',
+		)
 		writeFileSync(join(serviceDir, 'userV1ServiceBuilder.ts'), 'export const userV1ServiceBuilder = {}\n')
 		writeFileSync(join(serviceDir, 'userV1Service.ts'), 'export const userV1Service = {}\n')
 		writeFileSync(join(TEST_DIR, 'src', 'agents', 'triage', 'v1', 'triageAgent.ts'), 'export const triageAgent = {}\n')

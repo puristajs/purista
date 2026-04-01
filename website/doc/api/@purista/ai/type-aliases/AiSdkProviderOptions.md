@@ -8,7 +8,7 @@
 
 > **AiSdkProviderOptions** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:35](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L35)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:48](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L48)
 
 Options accepted by [AiSdkProvider](../classes/AiSdkProvider.md).
 
@@ -16,11 +16,12 @@ Options accepted by [AiSdkProvider](../classes/AiSdkProvider.md).
 
 ### defaults?
 
-> `optional` **defaults**: [`AiSdkProviderOverrides`](AiSdkProviderOverrides.md)
+> `optional` **defaults**: [`AiSdkProviderDefaults`](AiSdkProviderDefaults.md)
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:59](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L59)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:73](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L73)
 
 Default call options forwarded to `generateText` (temperature, maxOutputTokens, tools, ...).
+Use `invocation` for bounded timeout/retry policy.
 
 ***
 
@@ -28,7 +29,7 @@ Default call options forwarded to `generateText` (temperature, maxOutputTokens, 
 
 > `optional` **embeddingModel**: `EmbeddingModel`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:43](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L43)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:56](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L56)
 
 Optional embedding model used for `embed` / `embedMany` capability calls.
 
@@ -38,7 +39,7 @@ Optional embedding model used for `embed` / `embedMany` capability calls.
 
 > `optional` **middleware**: `LanguageModelMiddleware` \| `LanguageModelMiddleware`[]
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:67](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L67)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:81](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L81)
 
 Optional AI SDK language model middleware chain.
 
@@ -48,7 +49,7 @@ Optional AI SDK language model middleware chain.
 
 > **model**: [`LanguageModel`](https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text)
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:39](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L39)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:52](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L52)
 
 Language model instance (or provider id) created via the Vercel AI SDK (e.g. `openai('')`).
 
@@ -58,7 +59,7 @@ Language model instance (or provider id) created via the Vercel AI SDK (e.g. `op
 
 > `optional` **name**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:51](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L51)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:64](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L64)
 
 Optional readable name that shows up in telemetry. Defaults to the model identifier.
 
@@ -68,7 +69,7 @@ Optional readable name that shows up in telemetry. Defaults to the model identif
 
 > `optional` **rerankingModel**: `RerankingModel`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:47](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L47)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:60](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L60)
 
 Optional reranking model used for `rerank` capability calls.
 
@@ -78,7 +79,7 @@ Optional reranking model used for `rerank` capability calls.
 
 > `optional` **systemPrompt**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:55](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L55)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:68](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L68)
 
 Static system prompt prepended to every request.
 
@@ -88,6 +89,6 @@ Static system prompt prepended to every request.
 
 > `optional` **tracer**: `Tracer`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:63](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/providers/runtime/AiSdkProvider.ts#L63)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:77](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/AiSdkProvider.ts#L77)
 
 Optional tracer injected by the runtime. When set, AI SDK telemetry uses this tracer.

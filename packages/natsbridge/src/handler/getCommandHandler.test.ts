@@ -40,7 +40,7 @@ describe('nats getCommandHandler', () => {
 			startActiveSpan: vi
 				.fn()
 				.mockImplementation(async (_name, _options, _context, fn: (span: Span) => Promise<void>) => fn(getSpanMock())),
-			emit: vi.fn(),
+			runInFlight: async <T>(fn: () => Promise<T>) => fn(),
 		} as unknown as INatsBridge
 
 		const handler = getCommandHandler(command.receiver, async () => response, {} as never, {
@@ -83,7 +83,7 @@ describe('nats getCommandHandler', () => {
 			startActiveSpan: vi
 				.fn()
 				.mockImplementation(async (_name, _options, _context, fn: (span: Span) => Promise<void>) => fn(getSpanMock())),
-			emit: vi.fn(),
+			runInFlight: async <T>(fn: () => Promise<T>) => fn(),
 		} as unknown as INatsBridge
 
 		const handler = getCommandHandler(command.receiver, async () => response, {} as never, {

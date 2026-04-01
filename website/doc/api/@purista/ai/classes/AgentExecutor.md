@@ -6,7 +6,7 @@
 
 # Class: AgentExecutor
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:70](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L70)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:81](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L81)
 
 Runs prompts against the configured [ModelProvider](../interfaces/ModelProvider.md), writes session state,
 and captures telemetry spans using the provided logger/span factory.
@@ -26,13 +26,17 @@ const result = await executor.run({ sessionId: 'demo', prompt: 'Hello agent!' })
 console.log(result.output)
 ```
 
+The executor persists typed user parts into conversation history. It does not
+perform document extraction itself; applications should plug in that logic
+before invoking the executor.
+
 ## Constructors
 
 ### Constructor
 
 > **new AgentExecutor**(`options`): `AgentExecutor`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:73](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L73)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:84](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L84)
 
 #### Parameters
 
@@ -50,7 +54,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:73](https://github.com/pur
 
 > **run**(`input`): `Promise`\<[`AgentExecutionResult`](../type-aliases/AgentExecutionResult.md)\>
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:75](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/runtime/AgentExecutor.ts#L75)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:86](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/AgentExecutor.ts#L86)
 
 #### Parameters
 

@@ -18,7 +18,16 @@ For core NATS without JetStream persistence, behavior is typically:
 - retries: application-level retry patterns required
 - typical delivery mode: at-most-once
 
-When JetStream is available, durable command and subscription registrations create JetStream consumers and use explicit acknowledgements for redelivery.
+When JetStream is available, subscriptions and durable commands can use JetStream consumers with explicit acknowledgements.
+
+For subscriptions, PURISTA now supports a bounded consumer failure policy:
+
+- manual ack path for `autoacknowledge: false`
+- configurable retry budget (`consumerFailureHandling.maxAttempts`)
+- configurable retry delay (`consumerFailureHandling.retryDelayMs`)
+- dead-letter publish to an explicit subject or a derived default subject
+
+The default NATS bridge configuration applies a bounded retry budget for JetStream-backed subscriptions. Per-subscription failure handling hints override that adapter default.
 
 If a registration requests `durable: true` against a broker without JetStream, the bridge fails fast in `strict` mode instead of silently falling back to non-durable core NATS behavior.
 
@@ -31,4 +40,6 @@ PURISTA stream runtime (`openStream`) is currently not implemented for NATS brid
 - design handlers idempotent even when retries are app-driven
 - keep subject prefix configuration identical across instances
 - enable JetStream on the broker when you rely on `durable: true`
+- monitor dead-letter subjects and treat them as operator inboxes, not silent sinks
+- prefer queue bridges for long-running workflows or replay-heavy remediation
 - validate timeout/error behavior under broker disconnect scenarios

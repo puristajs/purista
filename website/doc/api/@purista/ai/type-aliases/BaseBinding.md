@@ -8,7 +8,7 @@
 
 > **BaseBinding** = `object`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:25](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L25)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:25](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L25)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:25](https://github.com/pu
 
 > `optional` **description**: `string`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:27](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L27)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:27](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L27)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:27](https://github.com/pu
 
 > **execute**: (`payload`) => `Promise`\<`unknown`\>
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:29](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L29)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:29](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L29)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:29](https://github.com/pu
 
 > **externalRuntime**: [`ExternalBindingMetadata`](ExternalBindingMetadata.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:30](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L30)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:30](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L30)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:30](https://github.com/pu
 
 > `optional` **inputSchema**: [`Schema`](../../core/type-aliases/Schema.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:28](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L28)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:28](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L28)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:28](https://github.com/pu
 
 > **name**: `string`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:26](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/bridge/externalRuntime.ts#L26)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:26](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/bridge/externalRuntime.ts#L26)

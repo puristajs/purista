@@ -11,7 +11,6 @@ import type {
 } from '@purista/core'
 import {
 	deserializeOtp,
-	EventBridgeEventNames,
 	isCommand,
 	PuristaSpanName,
 	PuristaSpanTag,
@@ -51,7 +50,6 @@ export const getCommandHandler = (
 								message: err.message,
 							})
 							span.recordException(err)
-							this.emit(EventBridgeEventNames.EventbridgeError, err)
 							return
 						}
 
@@ -132,7 +130,6 @@ export const getCommandHandler = (
 							message: err.message,
 						})
 						span.recordException(err)
-						this.emit(EventBridgeEventNames.EventbridgeError, err)
 						log.error({ err }, 'Failed to consume command response message')
 					}
 				},

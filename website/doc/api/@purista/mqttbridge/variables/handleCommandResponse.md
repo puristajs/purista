@@ -8,4 +8,4 @@
 
 > `const` **handleCommandResponse**: [`IncomingMessageFunction`](../type-aliases/IncomingMessageFunction.md)
 
-Defined in: [mqttbridge/src/handler/handleCommandResponse.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/handleCommandResponse.impl.ts#L16)
+Defined in: [mqttbridge/src/handler/handleCommandResponse.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/handleCommandResponse.impl.ts#L15)

@@ -8,7 +8,7 @@
 
 > **InferCommandBuilderConfig**\<`T`\> = `T` *extends* [`CommandDefinitionBuilder`](../classes/CommandDefinitionBuilder.md)\<`any`, infer C\> ? `C` : `never`
 
-Defined in: testing/createCommandTestHarness.ts:23
+Defined in: [testing/createCommandTestHarness.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandTestHarness.ts#L23)
 
 Infer the definition config type from a command builder.
 

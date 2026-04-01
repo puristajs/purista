@@ -8,7 +8,7 @@
 
 > **createStreamContextMock**\<`TBuilder`\>(`builder`, `input`): [`StreamContextMockResult`](../type-aliases/StreamContextMockResult.md)\<`TBuilder`\>
 
-Defined in: testing/createStreamContextMock.ts:145
+Defined in: [testing/createStreamContextMock.ts:145](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L145)
 
 Create a typed stream handler context mock together with a capture writer.
 

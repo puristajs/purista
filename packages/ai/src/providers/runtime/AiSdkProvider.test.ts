@@ -4,8 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { createCommandBinding } from '../../bridge/externalRuntime.js'
 
-import { AiSdkProvider } from './AiSdkProvider.js'
-
 const generateTextMock = vi.fn()
 const generateObjectMock = vi.fn()
 const streamTextMock = vi.fn()
@@ -17,21 +15,23 @@ const wrapLanguageModelMock = vi.fn()
 const toolMock = vi.fn((definition: unknown) => definition)
 
 vi.mock('ai', () => ({
-	generateText: (...args: unknown[]) => generateTextMock(...args),
-	generateObject: (...args: unknown[]) => generateObjectMock(...args),
-	streamText: (...args: unknown[]) => streamTextMock(...args),
-	streamObject: (...args: unknown[]) => streamObjectMock(...args),
-	embed: (...args: unknown[]) => embedMock(...args),
-	embedMany: (...args: unknown[]) => embedManyMock(...args),
-	rerank: (...args: unknown[]) => rerankMock(...args),
-	wrapLanguageModel: (...args: unknown[]) => wrapLanguageModelMock(...args),
-	tool: (...args: unknown[]) => toolMock(...args),
+	generateText: (input: unknown) => generateTextMock(input),
+	generateObject: (input: unknown) => generateObjectMock(input),
+	streamText: (input: unknown) => streamTextMock(input),
+	streamObject: (input: unknown) => streamObjectMock(input),
+	embed: (input: unknown) => embedMock(input),
+	embedMany: (input: unknown) => embedManyMock(input),
+	rerank: (input: unknown) => rerankMock(input),
+	wrapLanguageModel: (input: unknown) => wrapLanguageModelMock(input),
+	tool: (input: unknown) => toolMock(input),
 }))
 
 const mockModel = {} as LanguageModel
+const loadModule = async () => await import('./AiSdkProvider.js')
 
 describe('AiSdkProvider', () => {
 	beforeEach(() => {
+		vi.resetModules()
 		generateTextMock.mockReset()
 		generateObjectMock.mockReset()
 		streamTextMock.mockReset()
@@ -44,7 +44,8 @@ describe('AiSdkProvider', () => {
 		toolMock.mockImplementation(definition => definition)
 	})
 
-	it('wraps language model when middleware is configured', () => {
+	it('wraps language model when middleware is configured', async () => {
+		const { AiSdkProvider } = await loadModule()
 		wrapLanguageModelMock.mockReturnValueOnce(mockModel)
 		void new AiSdkProvider({
 			model: mockModel,
@@ -54,6 +55,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('maps generateText responses into provider response', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'hello',
 			usage: {
@@ -85,6 +87,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('passes multimodal message content through generate calls', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'analyzed',
 			usage: {
@@ -154,6 +157,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('streams text deltas and resolves final usage', async () => {
+		const { AiSdkProvider } = await loadModule()
 		streamTextMock.mockReturnValueOnce({
 			fullStream: (async function* () {
 				yield { type: 'text-delta', text: 'Hello ' }
@@ -193,6 +197,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('compiles provider-safe structured json schemas', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateObjectMock.mockResolvedValueOnce({
 			object: { urgency: 'low' },
 			reasoningText: 'reasoning',
@@ -247,6 +252,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('passes multimodal messages through structured json generation', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateObjectMock.mockResolvedValueOnce({
 			object: { result: 'ok' },
 			usage: {
@@ -296,6 +302,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('streams provisional object sections before the final structured object', async () => {
+		const { AiSdkProvider } = await loadModule()
 		streamObjectMock.mockReturnValueOnce({
 			partialObjectStream: (async function* () {
 				yield {
@@ -356,6 +363,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('falls back to generateJson when object streaming is unavailable', async () => {
+		const { AiSdkProvider } = await loadModule()
 		streamObjectMock.mockRejectedValueOnce(new Error('no native object stream'))
 		generateObjectMock.mockResolvedValueOnce({
 			object: { summary: 'Fallback review' },
@@ -394,6 +402,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('wraps provider structured-output errors as UnhandledError', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateObjectMock.mockRejectedValueOnce(new Error("Invalid schema for response_format 'response'"))
 
 		const provider = new AiSdkProvider({ model: mockModel })
@@ -401,11 +410,14 @@ describe('AiSdkProvider', () => {
 			prompt: 'classify',
 			schema: { type: 'object' },
 		})
-		await expect(result).rejects.toBeInstanceOf(UnhandledError)
-		await expect(result).rejects.toMatchObject({ errorCode: StatusCode.InternalServerError })
+		await expect(result).rejects.toMatchObject({
+			name: UnhandledError.name,
+			errorCode: StatusCode.InternalServerError,
+		})
 	})
 
 	it('supports embedding and reranking when models are configured', async () => {
+		const { AiSdkProvider } = await loadModule()
 		embedMock.mockResolvedValueOnce({
 			embedding: [0.1, 0.2, 0.3],
 			usage: { tokens: 12 },
@@ -462,6 +474,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('supports metadata overrides and no-schema JSON generation fallback', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'override-ok',
 			usage: { inputTokens: 2, outputTokens: 1 },
@@ -522,6 +535,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('preserves top-level aiSdk options when aiSdk.generate is present', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'with-tools',
 			usage: { inputTokens: 1, outputTokens: 1 },
@@ -558,6 +572,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('maps skills, references, and bindings from provider requests into the AI SDK call', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'with-runtime-context',
 			usage: { inputTokens: 3, outputTokens: 2 },
@@ -607,6 +622,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('maps per-call developer instructions to provider system messages in generate/stream/generateJson', async () => {
+		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'ok',
 			usage: { inputTokens: 1, outputTokens: 1 },
@@ -695,6 +711,7 @@ describe('AiSdkProvider', () => {
 	})
 
 	it('throws when embedding or reranking models are missing', async () => {
+		const { AiSdkProvider } = await loadModule()
 		const provider = new AiSdkProvider({ model: mockModel })
 
 		await expect(provider.embed({ value: 'hello' })).rejects.toThrow(

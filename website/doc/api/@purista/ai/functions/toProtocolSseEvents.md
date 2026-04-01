@@ -8,7 +8,7 @@
 
 > **toProtocolSseEvents**(`envelopes`, `protocol`): `AsyncGenerator`\<[`ProtocolSseEvent`](../type-aliases/ProtocolSseEvent.md)\>
 
-Defined in: [packages/ai/src/protocol/sse.ts:16](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/protocol/sse.ts#L16)
+Defined in: [packages/ai/src/protocol/sse.ts:16](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/sse.ts#L16)
 
 Converts PURISTA protocol envelopes to protocol-specific SSE events.
 This allows endpoint consumers to select an interoperable stream protocol

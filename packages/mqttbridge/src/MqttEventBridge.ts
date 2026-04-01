@@ -19,7 +19,6 @@ import {
 	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
-	EventBridgeEventNames,
 	EventBridgeLateResponseHandling,
 	getNewCorrelationId,
 	getNewEBMessageId,
@@ -102,19 +101,16 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		this.client = await connectAsync(this.config)
 
 		this.client.on('connect', () => {
-			this.emit(EventBridgeEventNames.EventbridgeConnected)
+			this.logger.info('connected to MQTT broker')
 		})
-
 		this.client.on('error', (err: Error) => {
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
+			this.logger.error({ err }, 'mqtt client error')
 		})
-
 		this.client.on('disconnect', () => {
-			this.emit(EventBridgeEventNames.EventbridgeDisconnected)
+			this.logger.warn('mqtt client disconnected')
 		})
-
 		this.client.on('reconnect', () => {
-			this.emit(EventBridgeEventNames.EventbridgeReconnecting)
+			this.logger.info('mqtt client reconnecting')
 		})
 
 		const topic = getCommandResponseSubscriptionTopic.bind(this)()

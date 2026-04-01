@@ -37,7 +37,7 @@ describe('AgentInstance', () => {
 
 		expect(
 			() =>
-				new AgentInstance({ ...baseDependencies, manifest }, { instanceId: 'bridge-1' } as any, {
+				new AgentInstance({ ...baseDependencies, manifest } as any, { instanceId: 'bridge-1' } as any, {
 					models: {},
 				}),
 		).toThrow('Missing model provider for alias "openai:"')
@@ -51,7 +51,7 @@ describe('AgentInstance', () => {
 
 		expect(
 			() =>
-				new AgentInstance({ ...baseDependencies, manifest }, { instanceId: 'bridge-1' } as any, {
+				new AgentInstance({ ...baseDependencies, manifest } as any, { instanceId: 'bridge-1' } as any, {
 					models: {
 						'openai:gpt-4o-mini': {
 							name: 'test-provider',
@@ -73,7 +73,7 @@ describe('AgentInstance', () => {
 			{
 				...baseDependencies,
 				manifest,
-			},
+			} as any,
 			eventBridge,
 			{ models: {} },
 		)
@@ -99,7 +99,7 @@ describe('AgentInstance', () => {
 					...baseDependencies.serviceBuilder,
 					getInstance,
 				},
-			},
+			} as any,
 			eventBridge,
 			{ models: {} },
 		)
@@ -132,7 +132,7 @@ describe('AgentInstance', () => {
 					...baseDependencies.serviceBuilder,
 					getInstance,
 				},
-			},
+			} as any,
 			eventBridge,
 			{ models: {} },
 		)
@@ -151,7 +151,7 @@ describe('AgentInstance', () => {
 
 	it('exposes read-only runtime concurrency status', async () => {
 		const poolManager = new PoolManager()
-		const instance = new AgentInstance({ ...baseDependencies }, { instanceId: 'bridge-1' } as any, {
+		const instance = new AgentInstance({ ...baseDependencies } as any, { instanceId: 'bridge-1' } as any, {
 			models: {},
 			poolManager,
 			poolConfig: {
@@ -182,7 +182,7 @@ describe('AgentInstance', () => {
 	})
 
 	it('exposes external runtime metadata', () => {
-		const instance = new AgentInstance({ ...baseDependencies }, { instanceId: 'bridge-1' } as any, {
+		const instance = new AgentInstance({ ...baseDependencies } as any, { instanceId: 'bridge-1' } as any, {
 			models: {},
 		})
 
@@ -213,7 +213,7 @@ describe('AgentInstance', () => {
 					...baseDependencies.serviceBuilder,
 					getInstance,
 				},
-			},
+			} as any,
 			{ instanceId: 'bridge-1' } as any,
 			{
 				models: {},

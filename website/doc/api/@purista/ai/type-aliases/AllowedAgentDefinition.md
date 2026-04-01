@@ -8,7 +8,7 @@
 
 > **AllowedAgentDefinition** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:74](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L74)
+Defined in: [packages/ai/src/types/AgentManifest.ts:136](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L136)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:74](https://github.com/puris
 
 > **agentName**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:75](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L75)
+Defined in: [packages/ai/src/types/AgentManifest.ts:137](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L137)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:75](https://github.com/puris
 
 > **agentVersion**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:76](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L76)
+Defined in: [packages/ai/src/types/AgentManifest.ts:138](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L138)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:76](https://github.com/puris
 
 > `optional` **description**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:77](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L77)
+Defined in: [packages/ai/src/types/AgentManifest.ts:139](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L139)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:77](https://github.com/puris
 
 > `optional` **outputSchema**: [`Schema`](../../core/type-aliases/Schema.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:80](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L80)
+Defined in: [packages/ai/src/types/AgentManifest.ts:142](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L142)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:80](https://github.com/puris
 
 > `optional` **parameterSchema**: [`Schema`](../../core/type-aliases/Schema.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:79](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L79)
+Defined in: [packages/ai/src/types/AgentManifest.ts:141](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L141)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:79](https://github.com/puris
 
 > `optional` **payloadSchema**: [`Schema`](../../core/type-aliases/Schema.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:78](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L78)
+Defined in: [packages/ai/src/types/AgentManifest.ts:140](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L140)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:78](https://github.com/puris
 
 > `optional` **toolName**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:81](https://github.com/puristajs/purista/blob/ce29fa15493ed0d4cf00acd89702c11c1d7a2a20/packages/ai/src/types/AgentManifest.ts#L81)
+Defined in: [packages/ai/src/types/AgentManifest.ts:143](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L143)

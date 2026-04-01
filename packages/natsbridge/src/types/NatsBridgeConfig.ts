@@ -1,5 +1,11 @@
 import type { Prettify } from '@purista/core'
 import type { ConnectionOptions } from 'nats'
+
+export type NatsConsumerFailureHandlingDefaults = {
+	maxAttempts: number
+	retryDelayMs: number
+	deadLetterSuffix: string
+}
 /**
  * the configuration for the NATS event bridge
  */
@@ -57,5 +63,11 @@ export type NatsBridgeConfig = Prettify<
 		 * @default strict
 		 */
 		durableSubscriptionMode: 'strict' | 'best-effort'
+
+		/**
+		 * Default failure handling for JetStream-backed subscription consumers.
+		 * Per-subscription consumer failure handling hints override these values.
+		 */
+		defaultConsumerFailureHandling: NatsConsumerFailureHandlingDefaults
 	} & ConnectionOptions
 >
