@@ -37,6 +37,15 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Added broker failure-path safety tests for retry/DLQ handoff:
   - NATS dead-letter publish failure must not terminate the original JetStream delivery prematurely.
   - AMQP retry/DLQ handoff confirm failure must not acknowledge the original delivery prematurely.
+- Formalized core runtime operator APIs on `ServiceClass` for Kubernetes-style operations:
+  - `getInFlightDiagnostics()`
+  - `getQueueWorkerPauseState()`
+  - `pauseQueueWorkers(queueName, reason?)`
+  - `resumeQueueWorkers(queueName)`
+  - `getPausedSubscriptionConsumerState()`
+  - `resumeSubscriptionConsumer(registrationKey)`
+- Added shared core operator-state types (`InFlightDiagnostics`, `PausedQueueWorkerState`, `PausedSubscriptionConsumerState`) and exposed them as first-class public API.
+- Extended `ServiceHealthState` with structured paused queue worker and paused subscription consumer details and marked paused-state presence as `warn`.
 
 ## Test coverage landed
 
@@ -56,55 +65,17 @@ This document tracks the `purista` monorepo implementation status for the bridge
 
 ## Follow-up items
 
-- Extend runtime pause/resume controls into first-class CLI/operator commands in addition to direct service APIs.
-- Extend pause/resume operational controls with first-class CLI commands and audit views.
-- Extend the new queue adapter pattern to additional providers only when they match the pull + lease + ack contract cleanly.
+- Add first-class CLI commands and audit views for queue worker and subscription consumer pause/resume state (deferred; runtime APIs are now formalized and stable).
+- Evaluate additional queue providers (`AWS SQS`, `Azure Storage Queue`) only when they can satisfy the existing pull + lease + ack contract without semantic hacks.
 
-## Next implementation slice
+## Current status
 
-The next hardening phase is no longer about basic bridge bugs. It is about making queue handling and subscription handling production-complete while preserving PURISTA’s current architecture and reducing complexity.
-
-### Priorities
-
-- Defaults first:
-  - safe production defaults must exist everywhere practical so teams can start quickly with low effort and limited broker expertise
-  - startup must fail fast when a requested guarantee cannot be honored in strict mode
-- Public API honesty:
-  - code, docs, and runtime behavior must match exactly
-  - dead config and fake knobs should be implemented or removed
-- Operator controls:
-  - DLQ inspect / replay / purge must become first-class queue operations
-  - poison-message quarantine / worker pause needs an explicit model
-- Code cleanup:
-  - reduce duplicated retry / DLQ handling across adapters
-  - prefer reusable helpers and smaller surfaces over more inheritance
-  - breaking changes are acceptable if they simplify the model and improve truthfulness
-
-### Queue backlog
-
-- add explicit `moveToDeadLetter` support to the queue job context or remove the docs promise
-- add queue bridge APIs for DLQ inspection, replay, and purge
-- add capability flags for those operations
-- keep safe defaults explicit everywhere so new users can start with low effort and limited broker knowledge
-- implement or remove currently dead queue fields / knobs:
-  - queue bridge config hints that are not enforced
-  - `partitionKey`
-  - `idempotencyKey`
-  - DLQ event emission knobs
-- keep Redis as the production baseline and prioritize JetStream as the next queue adapter candidate
-
-### Subscription backlog
-
-- tighten `consumerFailureHandling` so it is less ambiguous and more capability-driven
-- add explicit strict vs best-effort handling for requested semantics
-- add portable fatal / transient / dead-letter-now style outcomes for subscription consumers
-- harden NATS and AMQP retry / DLQ hops so the retry / dead-letter publish is confirmed before the original delivery is settled
-
-### Queue adapter roadmap
-
-Queue adapters should be added only when they fit the existing pull + lease + ack architecture without semantic hacks.
-
-- keep: Redis
-- next preferred: NATS JetStream pull consumers
-- evaluate after that: AWS SQS / SQS FIFO, Azure Storage Queues
-- not qualified today: MQTT, HTTP, classic push-style AMQP / RabbitMQ consumer model
+- Queue API cleanup is complete for the current wave:
+  - `QueueJobContext.job.moveToDeadLetter(...)` is part of the runtime contract.
+  - Queue bridge DLQ/operator APIs (`peek`, `redrive`, `purge`, `inspectLeases`) are implemented.
+  - Queue bridge capabilities expose operator and strict-startup traits.
+  - dead queue API knobs removed from core (`QueueDefinition.deadLetter.emitEvent/eventName`).
+- Additional provider coverage is intentionally limited to existing providers in this wave:
+  - production baseline: Redis queue bridge
+  - additional production provider: NATS JetStream queue bridge
+  - no new queue provider packages are introduced in this slice.

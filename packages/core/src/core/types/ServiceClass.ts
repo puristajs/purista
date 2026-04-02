@@ -4,6 +4,11 @@ import type { ContextBase } from './ContextBase.js'
 import type { Logger } from './Logger.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
 import type { ServiceHealthState } from './ServiceHealthState.js'
+import type {
+	InFlightDiagnostics,
+	PausedSubscriptionConsumersByRegistrationKey,
+	QueueWorkerPauseStateByQueue,
+} from './ServiceOperatorState.js'
 
 /**
  * The ServiceClass interface
@@ -77,6 +82,10 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 
 	getContextFunctions(logger: Logger): ContextBase
 	getServiceHealth(): Promise<ServiceHealthState>
-	getPausedSubscriptionConsumerState(): Record<string, { pausedAt: number; reason: string }>
+	getInFlightDiagnostics(): InFlightDiagnostics
+	getQueueWorkerPauseState(): QueueWorkerPauseStateByQueue
+	pauseQueueWorkers(queueName: string, reason?: string): void
+	resumeQueueWorkers(queueName: string): void
+	getPausedSubscriptionConsumerState(): PausedSubscriptionConsumersByRegistrationKey
 	resumeSubscriptionConsumer(registrationKey: string): Promise<void>
 }

@@ -51,6 +51,11 @@ PURISTA now defaults to strict startup validation for reliability-sensitive comm
 Event bridges expose in-flight diagnostics by work kind (`command`, `subscription`, `stream`, `generic`).
 Services can use this during shutdown and operator diagnostics to verify that drain reached zero before teardown.
 
+For service-level operators, use `Service.getInFlightDiagnostics()` as the canonical API:
+
+- `total`: all in-flight handlers
+- `byKind`: in-flight handlers split by `command`, `subscription`, `stream`, `generic`
+
 ## Subscription control outcomes
 
 Subscription handlers can return explicit outcomes:
@@ -63,6 +68,16 @@ Subscription handlers can return explicit outcomes:
 
 `stop-consumer` is implemented as consumer pause (not service shutdown).  
 Use `Service.getPausedSubscriptionConsumerState()` for diagnostics and `Service.resumeSubscriptionConsumer(registrationKey)` to resume.
+
+## Health and paused-state semantics
+
+Service health now includes paused operational state as first-class observability:
+
+- paused queue workers are exposed in `ServiceHealthState.pausedQueueWorkers`
+- paused subscription consumers are exposed in `ServiceHealthState.pausedSubscriptionConsumers`
+- if either list is non-empty, service health is `warn`
+
+This is additive observability: event bridge health, queue bridge health, and queue metrics evaluation keep their existing behavior.
 
 ## Streams and reliability
 

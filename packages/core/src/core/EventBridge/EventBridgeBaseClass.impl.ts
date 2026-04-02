@@ -14,6 +14,10 @@ import type { EBMessageAddress } from '../types/EBMessageAddress.js'
 import type { InstanceId } from '../types/InstanceId.js'
 import type { Logger } from '../types/Logger.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
+import type {
+	InFlightExecutionCounts,
+	PausedSubscriptionConsumersByRegistrationKey,
+} from '../types/ServiceOperatorState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StreamDefinitionMetadataBase } from '../types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamHandle } from '../types/stream/StreamHandle.js'
@@ -219,11 +223,11 @@ export class EventBridgeBaseClass<ConfigType> {
 		return this.inFlightExecutions.size
 	}
 
-	getInFlightExecutionCounts() {
+	getInFlightExecutionCounts(): InFlightExecutionCounts {
 		return this.inFlightExecutions.getCounts()
 	}
 
-	getPausedSubscriptionConsumers() {
+	getPausedSubscriptionConsumers(): PausedSubscriptionConsumersByRegistrationKey {
 		return {}
 	}
 

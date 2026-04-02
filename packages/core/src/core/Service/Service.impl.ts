@@ -76,6 +76,12 @@ import type { ServiceClass } from '../types/ServiceClass.js'
 import type { ServiceClassTypes } from '../types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../types/ServiceConstructorInput.js'
 import type { QueueHealthState, ServiceHealthState } from '../types/ServiceHealthState.js'
+import type {
+	InFlightDiagnostics,
+	PausedQueueWorkerState,
+	PausedSubscriptionConsumersByRegistrationKey,
+	QueueWorkerPauseStateByQueue,
+} from '../types/ServiceOperatorState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StoreType } from '../types/StoreType.enum.js'
 import type { StreamInvokeList } from '../types/StreamInvokeList.js'
@@ -109,11 +115,6 @@ type ResolvedSubscriptionFailureHandling = {
 	maxAttempts: number
 	retryDelayMs: number
 	deadLetterTarget?: string
-}
-
-type QueueWorkerPauseState = {
-	pausedAt: number
-	reason: string
 }
 
 /**
@@ -169,7 +170,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	private readonly queueDefinitionMap: Map<string, QueueDefinition<any, any, any, any, any>>
 	private queueWorkerTasks = new Set<Promise<void>>()
 	private queueWorkersShouldStop = false
-	private queueWorkerPausedQueues = new Map<string, QueueWorkerPauseState>()
+	private queueWorkerPausedQueues = new Map<string, PausedQueueWorkerState>()
 	private queueMetricsCache = new Map<string, QueueMetrics>()
 	private queueBridgeStarted = false
 
@@ -1153,8 +1154,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 		this.queueWorkerPausedQueues.set(queueName, {
 			pausedAt: Date.now(),
-			reason,
+			reason: this.normalizePauseReason(reason, 'poison_message_detected'),
 		})
+	}
+
+	private normalizePauseReason(reason: string | undefined, fallback: string) {
+		const normalized = reason?.trim()
+		return normalized && normalized.length > 0 ? normalized : fallback
 	}
 
 	private async scheduleRetryOrDeadLetter(
@@ -2319,6 +2325,16 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	public async getServiceHealth(): Promise<ServiceHealthState> {
 		const eventBridgeHealthy = await this.eventBridge.isHealthy()
 		const hasQueues = this.hasQueueFeatures()
+		const pausedQueueWorkers = Object.entries(this.getQueueWorkerPauseState()).map(([queueName, state]) => ({
+			queueName,
+			...state,
+		}))
+		const pausedSubscriptionConsumers = Object.entries(this.getPausedSubscriptionConsumerState()).map(
+			([registrationKey, state]) => ({
+				registrationKey,
+				...state,
+			}),
+		)
 
 		let queueBridgeHealthy = true
 		let queues: QueueHealthState[] = []
@@ -2354,7 +2370,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		let status: ServiceHealthState['status'] = 'ok'
 		if (!eventBridgeHealthy || !queueBridgeHealthy || queues.some(queue => queue.status === 'error')) {
 			status = 'error'
-		} else if (queues.some(queue => queue.status === 'warn') || this.queueWorkerPausedQueues.size > 0) {
+		} else if (
+			queues.some(queue => queue.status === 'warn') ||
+			pausedQueueWorkers.length > 0 ||
+			pausedSubscriptionConsumers.length > 0
+		) {
 			status = 'warn'
 		}
 
@@ -2363,28 +2383,30 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			eventBridgeHealthy,
 			queueBridgeHealthy,
 			queues,
+			pausedQueueWorkers,
+			pausedSubscriptionConsumers,
 		}
 	}
 
-	public getInFlightDiagnostics() {
+	public getInFlightDiagnostics(): InFlightDiagnostics {
 		return {
 			total: this.eventBridge.getInFlightExecutionCount(),
 			byKind: this.eventBridge.getInFlightExecutionCounts(),
 		}
 	}
 
-	public getQueueWorkerPauseState() {
+	public getQueueWorkerPauseState(): QueueWorkerPauseStateByQueue {
 		return Object.fromEntries(this.queueWorkerPausedQueues.entries())
 	}
 
-	public getPausedSubscriptionConsumerState() {
+	public getPausedSubscriptionConsumerState(): PausedSubscriptionConsumersByRegistrationKey {
 		return this.eventBridge.getPausedSubscriptionConsumers()
 	}
 
 	public pauseQueueWorkers(queueName: string, reason = 'paused_by_operator') {
 		this.queueWorkerPausedQueues.set(queueName, {
 			pausedAt: Date.now(),
-			reason,
+			reason: this.normalizePauseReason(reason, 'paused_by_operator'),
 		})
 	}
 

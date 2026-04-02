@@ -45,6 +45,12 @@ Queue bridges expose `metrics(queueName)` and, when supported, operator-grade DL
 - When `deadLetterPurgeSupported` is true, use `purgeDeadLetter(queueName)` to clear operator-confirmed poison messages.
 - Emit custom events or alerts in your worker when `context.job.retry()` hits `maxAttempts` so SREs see DLQ growth before SLAs are impacted.
 
+For runtime operators:
+
+- pause workers explicitly with `service.pauseQueueWorkers(queueName, reason?)`
+- inspect paused workers with `service.getQueueWorkerPauseState()`
+- resume workers with `service.resumeQueueWorkers(queueName)`
+
 ## DLQ operator workflow
 
 Use DLQs as operator inboxes, not silent sinks:
@@ -55,6 +61,14 @@ Use DLQs as operator inboxes, not silent sinks:
 4. purge confirmed poison batches with `purgeDeadLetter(queueName)` once the incident is closed
 
 If you need long-lived replay tooling, workflow-specific remediation, or human approval, prefer queue-backed workloads over subscription retries.
+
+## Health model integration
+
+Queue pause state is now reflected in service health:
+
+- paused queues appear under `ServiceHealthState.pausedQueueWorkers`
+- paused subscription consumers appear under `ServiceHealthState.pausedSubscriptionConsumers`
+- service health is `warn` while paused entries exist
 
 ## Safe defaults
 

@@ -6,6 +6,10 @@ import type { CommandSuccessResponse } from '../../types/commandType/CommandSucc
 import type { DefinitionEventBridgeConfig } from '../../types/DefinitionEventBridgeConfig.js'
 import type { EBMessage } from '../../types/EBMessage.js'
 import type { EBMessageAddress } from '../../types/EBMessageAddress.js'
+import type {
+	InFlightExecutionCounts,
+	PausedSubscriptionConsumersByRegistrationKey,
+} from '../../types/ServiceOperatorState.js'
 import type { StreamDefinitionMetadataBase } from '../../types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamHandle } from '../../types/stream/StreamHandle.js'
 import type { StreamMessage } from '../../types/stream/StreamMessage.js'
@@ -132,12 +136,12 @@ export interface EventBridge {
 	/**
 	 * Number of currently running handlers grouped by work kind.
 	 */
-	getInFlightExecutionCounts(): Record<'command' | 'subscription' | 'stream' | 'generic', number>
+	getInFlightExecutionCounts(): InFlightExecutionCounts
 
 	/**
 	 * Returns paused subscription consumer states keyed by adapter registration key.
 	 */
-	getPausedSubscriptionConsumers(): Record<string, { pausedAt: number; reason: string }>
+	getPausedSubscriptionConsumers(): PausedSubscriptionConsumersByRegistrationKey
 
 	/**
 	 * Resumes a paused subscription consumer by registration key.
