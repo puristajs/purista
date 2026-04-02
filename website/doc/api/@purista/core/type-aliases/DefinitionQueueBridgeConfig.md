@@ -16,16 +16,6 @@ be able to honor depending on their provider capabilities.
 
 ## Properties
 
-### durable
-
-> **durable**: `boolean`
-
-Defined in: [core/types/DefinitionQueueBridgeConfig.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionQueueBridgeConfig.ts#L26)
-
-Whether the queue should persist jobs durably when no workers are available.
-
-***
-
 ### orderingGuarantee
 
 > **orderingGuarantee**: [`QueueOrderingGuarantee`](QueueOrderingGuarantee.md)
@@ -44,14 +34,3 @@ or if the provider can deliver them without ordering guarantees.
 Defined in: [core/types/DefinitionQueueBridgeConfig.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionQueueBridgeConfig.ts#L17)
 
 Desired number of jobs a worker should prefetch/lease at once.
-
-***
-
-### shared
-
-> **shared**: `boolean`
-
-Defined in: [core/types/DefinitionQueueBridgeConfig.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionQueueBridgeConfig.ts#L22)
-
-Hint whether multiple service instances share the workload (`true`)
-or if every instance should receive a copy (`false`).

@@ -8,7 +8,7 @@
 
 > **ApprovalWaitResult** = `object`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:29](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/approvals.ts#L29)
+Defined in: [packages/ai/src/runtime/approvals.ts:29](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/approvals.ts#L29)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:29](https://github.com/purista
 
 > **checkpoint**: `string`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:30](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/approvals.ts#L30)
+Defined in: [packages/ai/src/runtime/approvals.ts:30](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/approvals.ts#L30)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:30](https://github.com/purista
 
 > `optional` **decision**: [`ApprovalDecision`](ApprovalDecision.md)
 
-Defined in: [packages/ai/src/runtime/approvals.ts:32](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/approvals.ts#L32)
+Defined in: [packages/ai/src/runtime/approvals.ts:32](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/approvals.ts#L32)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/runtime/approvals.ts:32](https://github.com/purista
 
 > **status**: `"approved"` \| `"rejected"` \| `"expired"`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:31](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/approvals.ts#L31)
+Defined in: [packages/ai/src/runtime/approvals.ts:31](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/approvals.ts#L31)

@@ -8,7 +8,7 @@
 
 > **ConversationStoreScope** = `object`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:20](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/memory/conversationStore.ts#L20)
+Defined in: [packages/ai/src/memory/conversationStore.ts:20](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/memory/conversationStore.ts#L20)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:20](https://github.com/
 
 > `optional` **agentName**: `string`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:23](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/memory/conversationStore.ts#L23)
+Defined in: [packages/ai/src/memory/conversationStore.ts:23](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/memory/conversationStore.ts#L23)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:23](https://github.com/
 
 > `optional` **agentVersion**: `string`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:24](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/memory/conversationStore.ts#L24)
+Defined in: [packages/ai/src/memory/conversationStore.ts:24](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/memory/conversationStore.ts#L24)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:24](https://github.com/
 
 > `optional` **principalId**: `string`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:22](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/memory/conversationStore.ts#L22)
+Defined in: [packages/ai/src/memory/conversationStore.ts:22](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/memory/conversationStore.ts#L22)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:22](https://github.com/
 
 > `optional` **tenantId**: `string`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:21](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/memory/conversationStore.ts#L21)
+Defined in: [packages/ai/src/memory/conversationStore.ts:21](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/memory/conversationStore.ts#L21)

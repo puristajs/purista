@@ -387,7 +387,7 @@ describe('AmqpBridge', () => {
 			expect.any(Buffer),
 			expect.objectContaining({
 				headers: expect.objectContaining({
-					'x-purista-dead-letter-reason': 'Failed to consume subscription message',
+					'x-purista-dead-letter-reason': 'poison',
 				}),
 			}),
 		)

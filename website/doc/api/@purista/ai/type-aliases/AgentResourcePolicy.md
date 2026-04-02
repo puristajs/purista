@@ -8,7 +8,7 @@
 
 > **AgentResourcePolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:94](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L94)
+Defined in: [packages/ai/src/types/AgentManifest.ts:94](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L94)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:94](https://github.com/puris
 
 > `optional` **budgetUsd**: `number`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:96](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L96)
+Defined in: [packages/ai/src/types/AgentManifest.ts:96](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L96)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:96](https://github.com/puris
 
 > `optional` **maxDurationMs**: `number`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:97](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L97)
+Defined in: [packages/ai/src/types/AgentManifest.ts:97](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L97)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:97](https://github.com/puris
 
 > `optional` **objective**: `"quality"` \| `"latency"` \| `"cost"`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:95](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L95)
+Defined in: [packages/ai/src/types/AgentManifest.ts:95](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L95)

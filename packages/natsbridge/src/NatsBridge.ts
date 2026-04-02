@@ -126,6 +126,15 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
 			gracefulDrainSupported: true,
 			nativeDeadLettering: false,
+			consumerFailureHandling: {
+				boundedRetry: true,
+				delayedRetry: true,
+				deadLetterTarget: true,
+				bridgeManagedDeadLettering: true,
+				nativeDeadLettering: false,
+				fatalClassification: false,
+				strictMode: true,
+			},
 		}
 	}
 
@@ -229,14 +238,14 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		reason: string,
 		failureHandling: ResolvedConsumerFailureHandling,
 	) {
-		if (!this.connection) {
-			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		if (!this.js) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'JetStream is not available for dead-letter publishing')
 		}
 
 		await this.ensureJetStreamStream(failureHandling.deadLetterTarget, 'subscription')
 
 		let headers: MsgHdrs | undefined
-		if (this.connection.info?.headers) {
+		if (this.connection?.info?.headers) {
 			headers = getNewHeaders()
 			headers.set(DEAD_LETTER_REASON_HEADER, reason)
 			headers.set(DEAD_LETTER_ATTEMPT_HEADER, String(msg.info.deliveryCount))
@@ -247,7 +256,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			)
 		}
 
-		this.connection.publish(failureHandling.deadLetterTarget, msg.data, { headers })
+		await this.js.publish(failureHandling.deadLetterTarget, msg.data, { headers })
 	}
 
 	private async ensureJetStreamStream(subject: string, kind: 'command' | 'subscription') {

@@ -8,7 +8,7 @@
 
 > **ProjectSnapshot** = `object`
 
-Defined in: [packages/cli/src/project/createProjectSnapshot.ts:19](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/project/createProjectSnapshot.ts#L19)
+Defined in: [packages/cli/src/project/createProjectSnapshot.ts:19](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/project/createProjectSnapshot.ts#L19)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/project/createProjectSnapshot.ts:19](https://githu
 
 > **agents**: `Record`\<`string`, `string`[]\>
 
-Defined in: [packages/cli/src/project/createProjectSnapshot.ts:21](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/project/createProjectSnapshot.ts#L21)
+Defined in: [packages/cli/src/project/createProjectSnapshot.ts:21](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/project/createProjectSnapshot.ts#L21)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/project/createProjectSnapshot.ts:21](https://githu
 
 > **eventEnumFileName**: `string`
 
-Defined in: [packages/cli/src/project/createProjectSnapshot.ts:23](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/project/createProjectSnapshot.ts#L23)
+Defined in: [packages/cli/src/project/createProjectSnapshot.ts:23](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/project/createProjectSnapshot.ts#L23)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/cli/src/project/createProjectSnapshot.ts:23](https://githu
 
 > **eventNames**: `object`[]
 
-Defined in: [packages/cli/src/project/createProjectSnapshot.ts:22](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/project/createProjectSnapshot.ts#L22)
+Defined in: [packages/cli/src/project/createProjectSnapshot.ts:22](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/project/createProjectSnapshot.ts#L22)
 
 #### name
 
@@ -48,4 +48,4 @@ Defined in: [packages/cli/src/project/createProjectSnapshot.ts:22](https://githu
 
 > **services**: `Record`\<`string`, `Record`\<`string`, [`ServiceVersionSnapshot`](ServiceVersionSnapshot.md)\>\>
 
-Defined in: [packages/cli/src/project/createProjectSnapshot.ts:20](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/project/createProjectSnapshot.ts#L20)
+Defined in: [packages/cli/src/project/createProjectSnapshot.ts:20](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/project/createProjectSnapshot.ts#L20)

@@ -8,7 +8,7 @@
 
 > **createAgentPolicyHelpers**(`policy`, `reflectionPolicy`): [`AgentPolicyHelpers`](../type-aliases/AgentPolicyHelpers.md)
 
-Defined in: [packages/ai/src/runtime/policy.ts:110](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/policy.ts#L110)
+Defined in: [packages/ai/src/runtime/policy.ts:110](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/policy.ts#L110)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **createPuristaSandboxAdapter**(`eventBridge`, `identity`): [`SandboxAdapter`](../type-aliases/SandboxAdapter.md)
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:21](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L21)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:21](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L21)
 
 Creates a generic sandbox adapter for command-based bash runtimes.
 

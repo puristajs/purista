@@ -68,6 +68,10 @@ export const createQueueWorkerTestHarness = async <TServiceBuilder extends Servi
 				leaseExpiresAt: Date.now() + 60_000,
 			}
 			queueBridgeMock?.stubs.leaseNext.reset()
+			queueBridgeMock?.stubs.ack.resetHistory()
+			queueBridgeMock?.stubs.nack.resetHistory()
+			queueBridgeMock?.stubs.moveToDeadLetter.resetHistory()
+			queueBridgeMock?.stubs.extendLease.resetHistory()
 			queueBridgeMock?.stubs.leaseNext.onFirstCall().resolves(lease)
 			queueBridgeMock?.stubs.leaseNext.onSecondCall().callsFake(async () => {
 				;(service as unknown as { queueWorkersShouldStop: boolean }).queueWorkersShouldStop = true

@@ -1,6 +1,6 @@
 import { fail } from 'node:assert'
 import { createSandbox } from 'sinon'
-import { vi } from 'vitest'
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import type { ServiceInfoType } from '../src/index.js'

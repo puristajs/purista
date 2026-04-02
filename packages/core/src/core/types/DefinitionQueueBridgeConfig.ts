@@ -15,13 +15,4 @@ export type DefinitionQueueBridgeConfig = {
 	 * Desired number of jobs a worker should prefetch/lease at once.
 	 */
 	prefetch: number
-	/**
-	 * Hint whether multiple service instances share the workload (`true`)
-	 * or if every instance should receive a copy (`false`).
-	 */
-	shared: boolean
-	/**
-	 * Whether the queue should persist jobs durably when no workers are available.
-	 */
-	durable: boolean
 }

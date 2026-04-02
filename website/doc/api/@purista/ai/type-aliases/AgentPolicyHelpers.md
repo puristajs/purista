@@ -8,7 +8,7 @@
 
 > **AgentPolicyHelpers** = `object`
 
-Defined in: [packages/ai/src/runtime/policy.ts:26](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/policy.ts#L26)
+Defined in: [packages/ai/src/runtime/policy.ts:26](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/policy.ts#L26)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:26](https://github.com/puristajs/
 
 > **resolve**(`profileName?`): [`ResolvedAgentQualityProfile`](ResolvedAgentQualityProfile.md)
 
-Defined in: [packages/ai/src/runtime/policy.ts:27](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/policy.ts#L27)
+Defined in: [packages/ai/src/runtime/policy.ts:27](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/policy.ts#L27)
 
 #### Parameters
 

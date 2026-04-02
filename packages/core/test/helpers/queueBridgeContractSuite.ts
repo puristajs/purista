@@ -177,6 +177,41 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			expect(dlqMetrics.deadLetter).toBeGreaterThanOrEqual(1)
 		})
 
+		it('supports dead-letter inspection, replay, and purge when advertised', async () => {
+			if (!ensureReady()) {
+				return
+			}
+
+			const queueName = `contract-dlq-ops-${randomUUID()}`
+			const dlqName = `${queueName}.manual`
+			const activeBridge = getBridgeOrThrow()
+
+			await activeBridge.enqueue({
+				queueName,
+				payload: { id: 'dlq-ops' },
+			})
+
+			const lease = await waitForLease(queueName)
+			await activeBridge.moveToDeadLetter(dlqName, lease.message, 'operator-test')
+
+			if (activeBridge.capabilities.deadLetterInspectSupported) {
+				const entries = await activeBridge.peekDeadLetter(dlqName, { limit: 10 })
+				expect(entries.length).toBeGreaterThanOrEqual(1)
+				expect(entries[0]?.headers?.['x-purista-dead-letter-reason']).toBe('operator-test')
+			}
+
+			if (activeBridge.capabilities.deadLetterReplaySupported) {
+				const replayed = await activeBridge.redriveDeadLetter(dlqName, { limit: 1 })
+				expect(replayed).toBe(1)
+			}
+
+			if (activeBridge.capabilities.deadLetterPurgeSupported) {
+				await activeBridge.moveToDeadLetter(dlqName, lease.message, 'purge-test')
+				const purged = await activeBridge.purgeDeadLetter(dlqName)
+				expect(purged).toBeGreaterThanOrEqual(1)
+			}
+		})
+
 		it('recovers expired leases and requeues the job', async () => {
 			if (!ensureReady()) {
 				return
@@ -200,6 +235,32 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			expect(recoveredLease.message.id).toBe(firstLease.message.id)
 			expect(recoveredLease.message.attempt).toBeGreaterThanOrEqual(2)
 			await activeBridge.ack(queueName, recoveredLease.leaseId)
+		})
+
+		it('exposes lease inspection when advertised', async () => {
+			if (!ensureReady()) {
+				return
+			}
+
+			const queueName = `contract-inspect-${randomUUID()}`
+			const activeBridge = getBridgeOrThrow()
+			await activeBridge.enqueue({
+				queueName,
+				payload: { id: 'inspect' },
+				leaseTtlMs: 500,
+			})
+
+			const lease = await waitForLease(queueName)
+
+			if (activeBridge.capabilities.leaseInspectionSupported) {
+				const records = await activeBridge.inspectLeases(queueName, { limit: 10 })
+				expect(records.some(record => record.leaseId === lease.leaseId && record.jobId === lease.message.id)).toBe(true)
+			} else {
+				const records = await activeBridge.inspectLeases(queueName, { limit: 10 })
+				expect(records).toStrictEqual([])
+			}
+
+			await activeBridge.ack(queueName, lease.leaseId)
 		})
 	})
 }

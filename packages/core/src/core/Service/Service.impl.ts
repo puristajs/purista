@@ -102,6 +102,13 @@ type LeaseHeartbeatController = {
 	stop: () => void
 }
 
+type ResolvedSubscriptionFailureHandling = {
+	mode: 'strict' | 'best-effort'
+	maxAttempts: number
+	retryDelayMs: number
+	deadLetterTarget?: string
+}
+
 /**
  * Base class for all services.
  * This class provides base functions to work with the event bridge, logging and so on
@@ -294,6 +301,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			this.logger.error({ err }, 'Queue bridge is not ready - can not start service')
 			throw err
 		}
+		this.validateQueueDefinitionsAgainstCapabilities()
 		this.startQueueWorkers()
 	}
 
@@ -893,6 +901,132 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		const prefix = capabilities.defaultDeadLetterPrefix ?? ''
 		const suffix = capabilities.defaultDeadLetterSuffix ?? '.dead-letter'
 		return `${prefix}${queueName}${suffix}`
+	}
+
+	private validateQueueDefinitionsAgainstCapabilities() {
+		const capabilities = this.queueBridge.capabilities
+
+		if (!capabilities.strictStartupValidation) {
+			return
+		}
+
+		for (const queueDefinition of this.queueDefinitionList) {
+			const config = queueDefinition.queueBridgeConfig
+
+			if (config.orderingGuarantee === 'fifo' && !capabilities.fifoOrdering) {
+				throw new UnhandledError(
+					StatusCode.NotImplemented,
+					`queue "${queueDefinition.queueName}" requires fifo ordering, but ${this.queueBridge.name} does not support it`,
+				)
+			}
+
+			if (config.prefetch > capabilities.maxBatchSize) {
+				throw new UnhandledError(
+					StatusCode.NotImplemented,
+					`queue "${queueDefinition.queueName}" requests prefetch ${config.prefetch}, but ${this.queueBridge.name} supports at most ${capabilities.maxBatchSize}`,
+				)
+			}
+		}
+	}
+
+	private resolveSubscriptionFailureHandling(
+		subscriptionDefinition: SubscriptionDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	): ResolvedSubscriptionFailureHandling | undefined {
+		const config = subscriptionDefinition.eventBridgeConfig.consumerFailureHandling
+		if (!config) {
+			return undefined
+		}
+
+		return {
+			mode: config.mode ?? 'strict',
+			maxAttempts: config.maxAttempts ?? 1,
+			retryDelayMs: config.retryDelayMs ?? 0,
+			deadLetterTarget: config.deadLetterTarget,
+		}
+	}
+
+	private validateSubscriptionAgainstCapabilities(
+		subscriptionDefinition: SubscriptionDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	) {
+		const capabilities = this.eventBridge.capabilities
+		const failureHandling = this.resolveSubscriptionFailureHandling(subscriptionDefinition)
+
+		if (subscriptionDefinition.eventBridgeConfig.durable && !capabilities.durableSubscriptions) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires durable delivery, but ${this.eventBridge.name} does not support durable subscriptions`,
+			)
+		}
+
+		if (!subscriptionDefinition.eventBridgeConfig.autoacknowledge && !capabilities.manualAckSupported) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires manual acknowledgement, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (!failureHandling) {
+			return
+		}
+
+		const consumerCapabilities = capabilities.consumerFailureHandling
+		if (failureHandling.mode === 'best-effort') {
+			return
+		}
+
+		if (!consumerCapabilities.strictMode) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`${this.eventBridge.name} does not support strict consumer failure handling for subscription "${subscriptionDefinition.subscriptionName}"`,
+			)
+		}
+
+		if (failureHandling.maxAttempts > 1 && !consumerCapabilities.boundedRetry) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires bounded retry, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (failureHandling.retryDelayMs > 0 && !consumerCapabilities.delayedRetry) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires delayed retry, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (!consumerCapabilities.deadLetterTarget) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires dead-letter routing, but ${this.eventBridge.name} does not support it`,
+			)
+		}
 	}
 
 	private computeRetryDelay(lifecycle: QueueLifecycleConfig, attempt: number, requestedDelay?: number): number {
@@ -1880,6 +2014,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			let lease: QueueLease | undefined
 			let jobState: { handled: boolean } | undefined
 			let heartbeat: LeaseHeartbeatController | undefined
+			let queueDefinition: QueueDefinition<any, any, any, any, any> | undefined
 			try {
 				lease = await this.wrapInSpan(PuristaSpanName.QueueLease, {}, async span => {
 					span.setAttribute(PuristaSpanTag.QueueName, worker.queueName)
@@ -1896,7 +2031,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				}
 
 				const activeLease = lease
-				const queueDefinition = this.getQueueDefinition(worker.queueName)
+				queueDefinition = this.getQueueDefinition(worker.queueName)
 				activeLease.message = await this.applyQueueBeforeExecuteTransform(
 					queueDefinition,
 					activeLease.message,
@@ -1931,11 +2066,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				workerLogger.error({ err }, 'queue worker execution failed')
 				if (lease && !jobState?.handled) {
 					try {
-						await this.nackQueueJob(worker.queueName, lease.leaseId, lease.message.id, {
+						await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
 							reason: err instanceof Error ? err.message : 'queue worker failure',
 						})
 					} catch (nackErr) {
-						workerLogger.error({ err: nackErr }, 'nack failed after worker error')
+						workerLogger.error({ err: nackErr }, 'retry or dead-letter failed after worker error')
 					}
 				}
 				await this.waitForNextPoll(worker)
@@ -1988,6 +2123,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				} else {
 					await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, { reason })
 				}
+			},
+			moveToDeadLetter: async (reason?: string) => {
+				if (!settle()) return
+				await this.deadLetterJob(queueDefinition, worker.queueName, lease, reason)
 			},
 			extendLease: async (durationMs: number) => {
 				await this.queueBridge.extendLease(worker.queueName, lease.leaseId, durationMs)
@@ -2648,6 +2787,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				principalId: subscriptionDefinition.principalId,
 				tenantId: subscriptionDefinition.tenantId,
 			}
+
+			this.validateSubscriptionAgainstCapabilities(subscriptionDefinition)
 
 			await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
 				this.executeSubscription(message, subscriptionDefinition.subscriptionName),

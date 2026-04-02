@@ -2,14 +2,24 @@ import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import type { EventBridgeCapabilities } from '../core/EventBridge/types/EventBridgeCapabilities.js'
 import { EventBridgeLateResponseHandling } from '../core/EventBridge/types/EventBridgeLateResponseHandling.js'
+
+type EventBridgeCapabilityOverrides = Partial<Omit<EventBridgeCapabilities, 'consumerFailureHandling'>> & {
+	consumerFailureHandling?: Partial<EventBridgeCapabilities['consumerFailureHandling']>
+}
 
 /**
  * Mocks the eventBridge and stubs the methods
  * @returns EventBridge mocked
  * @group Unit test helper
  */
-export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
+export const getEventBridgeMock = (
+	sandboxOrOptions?: SinonSandbox | { sandbox?: SinonSandbox; capabilities?: EventBridgeCapabilityOverrides },
+): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
+	const sandbox = sandboxOrOptions && 'stub' in sandboxOrOptions ? sandboxOrOptions : sandboxOrOptions?.sandbox
+	const capabilityOverrides =
+		sandboxOrOptions && 'stub' in sandboxOrOptions ? undefined : sandboxOrOptions?.capabilities
 	const emitMessage = sandbox?.stub() ?? stub()
 	const registerCommand = sandbox?.stub() ?? stub()
 	const registerSubscription = sandbox?.stub() ?? stub()
@@ -23,19 +33,36 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
 	const isReady = sandbox?.stub().resolves(true) ?? stub().resolves(true)
 	const isHealthy = sandbox?.stub().resolves(true) ?? stub().resolves(true)
 	const destroy = sandbox?.stub().resolves() ?? stub().resolves()
+	const defaultCapabilities: EventBridgeCapabilities = {
+		supportsStreams: true,
+		durableCommands: false,
+		durableSubscriptions: false,
+		manualAckSupported: false,
+		lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
+		gracefulDrainSupported: false,
+		nativeDeadLettering: false,
+		consumerFailureHandling: {
+			boundedRetry: false,
+			delayedRetry: false,
+			deadLetterTarget: false,
+			bridgeManagedDeadLettering: false,
+			nativeDeadLettering: false,
+			fatalClassification: false,
+			strictMode: true,
+		},
+	}
 
 	const mock: EventBridge = {
 		name: 'EventBridgeMock',
 		instanceId: 'mockedInstanceId',
 		defaultCommandTimeout: 30000,
 		capabilities: {
-			supportsStreams: true,
-			durableCommands: false,
-			durableSubscriptions: false,
-			manualAckSupported: false,
-			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
-			gracefulDrainSupported: false,
-			nativeDeadLettering: false,
+			...defaultCapabilities,
+			...capabilityOverrides,
+			consumerFailureHandling: {
+				...defaultCapabilities.consumerFailureHandling,
+				...capabilityOverrides?.consumerFailureHandling,
+			},
 		},
 		emitMessage,
 		registerCommand,

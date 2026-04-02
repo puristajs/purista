@@ -8,7 +8,7 @@
 
 > **ProviderRequest** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:16](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L16)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:16](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L16)
 
 Payload sent to a model provider.
 
@@ -25,7 +25,7 @@ built into the framework for PDF/Office formats.
 
 > `optional` **attachments**: [`AgentAttachment`](AgentAttachment.md)[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:19](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L19)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:19](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L19)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:19](https://gith
 
 > `optional` **bindings**: [`ExternalBindingSet`](ExternalBindingSet.md) \| [`ExternalBinding`](ExternalBinding.md)[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:48](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L48)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:48](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L48)
 
 Optional executable bindings for allowlisted PURISTA commands and child agents.
 
@@ -47,7 +47,7 @@ exposes the allowlisted commands and agents declared in the builder.
 
 > `optional` **context**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:20](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L20)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:20](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L20)
 
 ***
 
@@ -55,7 +55,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:20](https://gith
 
 > `optional` **developerInstruction**: `string` \| `string`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:25](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L25)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:25](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L25)
 
 Optional high-priority app/developer instruction(s) injected on every call.
 Providers may map these to dedicated instruction roles when supported.
@@ -66,7 +66,7 @@ Providers may map these to dedicated instruction roles when supported.
 
 > `optional` **input**: [`AgentInputPart`](AgentInputPart.md)[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:18](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L18)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:18](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L18)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:18](https://gith
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:49](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L49)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:49](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L49)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:49](https://gith
 
 > **prompt**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:17](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L17)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:17](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L17)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:17](https://gith
 
 > `optional` **references**: `Pick`\<[`SkillReferenceDocument`](SkillReferenceDocument.md), `"skillName"` \| `"relativePath"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:40](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L40)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:40](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L40)
 
 Optional reference documents belonging to already selected skills.
 
@@ -103,7 +103,7 @@ skill-specific choice made by the handler.
 
 > `optional` **skills**: `Pick`\<[`SkillDocument`](SkillDocument.md), `"name"` \| `"content"`\>[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:33](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L33)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:33](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L33)
 
 Optional skill documents that shape reasoning and prompt context.
 

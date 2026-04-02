@@ -94,6 +94,15 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
 			gracefulDrainSupported: true,
 			nativeDeadLettering: false,
+			consumerFailureHandling: {
+				boundedRetry: false,
+				delayedRetry: false,
+				deadLetterTarget: false,
+				bridgeManagedDeadLettering: false,
+				nativeDeadLettering: false,
+				fatalClassification: false,
+				strictMode: true,
+			},
 		}
 	}
 

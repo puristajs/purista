@@ -8,7 +8,7 @@
 
 > **PuristaExecutableCommand**\<`TInput`, `TResolved`\> = `object`
 
-Defined in: [packages/cli/src/core/command.ts:24](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/core/command.ts#L24)
+Defined in: [packages/cli/src/core/command.ts:24](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/command.ts#L24)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [packages/cli/src/core/command.ts:24](https://github.com/puristajs/p
 
 > **execute**: (`resolvedInput`, `context`) => `Promise`\<[`PuristaCommandResult`](PuristaCommandResult.md)\>
 
-Defined in: [packages/cli/src/core/command.ts:27](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/core/command.ts#L27)
+Defined in: [packages/cli/src/core/command.ts:27](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/command.ts#L27)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ Defined in: [packages/cli/src/core/command.ts:27](https://github.com/puristajs/p
 
 > **id**: [`PuristaCommandId`](PuristaCommandId.md)
 
-Defined in: [packages/cli/src/core/command.ts:25](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/core/command.ts#L25)
+Defined in: [packages/cli/src/core/command.ts:25](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/command.ts#L25)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/cli/src/core/command.ts:25](https://github.com/puristajs/p
 
 > **resolve**: (`input`, `context`) => `Promise`\<[`PuristaCommandResolution`](PuristaCommandResolution.md)\<`TInput`, `TResolved`\>\>
 
-Defined in: [packages/cli/src/core/command.ts:26](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/core/command.ts#L26)
+Defined in: [packages/cli/src/core/command.ts:26](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/command.ts#L26)
 
 #### Parameters
 

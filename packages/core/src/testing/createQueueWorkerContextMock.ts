@@ -142,6 +142,7 @@ export const createQueueWorkerContextMock = <
 			retry: async (request?: QueueRetryRequest) => job.retry(request),
 			fail: async (reason: string, fatal?: boolean) => job.fail(reason, fatal),
 			extendLease: async (durationMs: number) => job.extendLease(durationMs),
+			moveToDeadLetter: async (reason?: string) => job.fail(reason ?? 'dead-letter', true),
 		},
 		resources: resourcesProxy,
 	}

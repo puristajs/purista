@@ -90,7 +90,7 @@ Enable generally set method
 
 > **cache**: [`ConfigStoreCacheMap`](../../core/type-aliases/ConfigStoreCacheMap.md)
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L28)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -102,7 +102,7 @@ Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:28](https://
 
 > **config**: `object`
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
 
 #### cacheTtl?
 
@@ -164,7 +164,7 @@ Enable generally set method
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L23)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -176,7 +176,7 @@ Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:23](https://
 
 > **name**: `string`
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:21
 
 #### Inherited from
 
@@ -188,7 +188,7 @@ Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:128](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L128)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:72
 
 #### Returns
 
@@ -204,7 +204,7 @@ Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:128](https:/
 
 > **getConfig**\<`ConfigNames`\>(...`configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`ConfigNames`\>\>
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L64)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:39
 
 Returns the values for given config properties.
 This function **SHOULD NOT** be overwritten by store implementation.
@@ -272,7 +272,7 @@ an object of { [configName]: value | undefined }
 
 > **removeConfig**(`configName`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L91)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:54
 
 Removes the config item given by config name.
 This function **SHOULD NOT** be overwritten by store implementation.
@@ -322,7 +322,7 @@ This method must be overwritten by actual store implementation.
 
 > **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:118](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L118)
+Defined in: core/dist/esm/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:71
 
 Sets a config value
 This function **SHOULD NOT** be overwritten by store implementation.

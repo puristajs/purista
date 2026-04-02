@@ -6,7 +6,7 @@
 
 # Interface: QueueBridge
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L10)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:10](https://github.com/purist
 
 > `readonly` **capabilities**: [`QueueBridgeCapabilities`](../type-aliases/QueueBridgeCapabilities.md)
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L13)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L16)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:13](https://github.com/purist
 
 > `readonly` **instanceId**: `string`
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L12)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L15)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:12](https://github.com/purist
 
 > `readonly` **name**: `string`
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L11)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L14)
 
 ## Methods
 
@@ -38,7 +38,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:11](https://github.com/purist
 
 > **ack**(`queueName`, `leaseId`): `Promise`\<`void`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L23)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L26)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:23](https://github.com/purist
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L18)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L21)
 
 #### Returns
 
@@ -72,7 +72,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:18](https://github.com/purist
 
 > **enqueue**(`options`): `Promise`\<[`QueueEnqueueResult`](../type-aliases/QueueEnqueueResult.md)\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L20)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L23)
 
 #### Parameters
 
@@ -90,7 +90,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:20](https://github.com/purist
 
 > **extendLease**(`queueName`, `leaseId`, `extensionMs`): `Promise`\<`void`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L22)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L25)
 
 #### Parameters
 
@@ -112,11 +112,33 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:22](https://github.com/purist
 
 ***
 
+### inspectLeases()
+
+> **inspectLeases**(`queueName`, `options?`): `Promise`\<[`QueueLeaseInspectionRecord`](../type-aliases/QueueLeaseInspectionRecord.md)[]\>
+
+Defined in: [core/QueueBridge/types/QueueBridge.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L32)
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+##### options?
+
+[`QueueDeadLetterListOptions`](../type-aliases/QueueDeadLetterListOptions.md)
+
+#### Returns
+
+`Promise`\<[`QueueLeaseInspectionRecord`](../type-aliases/QueueLeaseInspectionRecord.md)[]\>
+
+***
+
 ### isHealthy()
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L17)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L20)
 
 #### Returns
 
@@ -128,7 +150,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:17](https://github.com/purist
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L16)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L19)
 
 #### Returns
 
@@ -140,7 +162,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:16](https://github.com/purist
 
 > **leaseNext**(`queueName`, `options?`): `Promise`\<[`QueueLease`](../type-aliases/QueueLease.md) \| `undefined`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L21)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L24)
 
 #### Parameters
 
@@ -162,7 +184,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:21](https://github.com/purist
 
 > **metrics**(`queueName`): `Promise`\<[`QueueMetrics`](../type-aliases/QueueMetrics.md)\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L26)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L33)
 
 #### Parameters
 
@@ -180,7 +202,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:26](https://github.com/purist
 
 > **moveToDeadLetter**(`queueName`, `message`, `reason?`): `Promise`\<`void`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L25)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L28)
 
 #### Parameters
 
@@ -206,7 +228,7 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:25](https://github.com/purist
 
 > **nack**(`queueName`, `leaseId`, `request`): `Promise`\<`void`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L24)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L27)
 
 #### Parameters
 
@@ -228,11 +250,73 @@ Defined in: [core/QueueBridge/types/QueueBridge.ts:24](https://github.com/purist
 
 ***
 
+### peekDeadLetter()
+
+> **peekDeadLetter**(`queueName`, `options?`): `Promise`\<[`QueueMessage`](../type-aliases/QueueMessage.md)[]\>
+
+Defined in: [core/QueueBridge/types/QueueBridge.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L29)
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+##### options?
+
+[`QueueDeadLetterListOptions`](../type-aliases/QueueDeadLetterListOptions.md)
+
+#### Returns
+
+`Promise`\<[`QueueMessage`](../type-aliases/QueueMessage.md)[]\>
+
+***
+
+### purgeDeadLetter()
+
+> **purgeDeadLetter**(`queueName`): `Promise`\<`number`\>
+
+Defined in: [core/QueueBridge/types/QueueBridge.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L31)
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+#### Returns
+
+`Promise`\<`number`\>
+
+***
+
+### redriveDeadLetter()
+
+> **redriveDeadLetter**(`queueName`, `options?`): `Promise`\<`number`\>
+
+Defined in: [core/QueueBridge/types/QueueBridge.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L30)
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+##### options?
+
+[`QueueDeadLetterRedriveOptions`](../type-aliases/QueueDeadLetterRedriveOptions.md)
+
+#### Returns
+
+`Promise`\<`number`\>
+
+***
+
 ### start()
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [core/QueueBridge/types/QueueBridge.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L15)
+Defined in: [core/QueueBridge/types/QueueBridge.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridge.ts#L18)
 
 #### Returns
 

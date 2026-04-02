@@ -2,7 +2,10 @@ import { randomUUID } from 'node:crypto'
 
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { QueueBridgeCapabilities } from '../core/QueueBridge/types/QueueBridgeCapabilities.js'
+import type { QueueDeadLetterListOptions } from '../core/QueueBridge/types/QueueDeadLetterListOptions.js'
+import type { QueueDeadLetterRedriveOptions } from '../core/QueueBridge/types/QueueDeadLetterRedriveOptions.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
+import type { QueueLeaseInspectionRecord } from '../core/QueueBridge/types/QueueLeaseInspectionRecord.js'
 import type { QueueLeaseOptions } from '../core/QueueBridge/types/QueueLeaseOptions.js'
 import type { QueueRetryRequest } from '../core/QueueBridge/types/QueueRetryRequest.js'
 import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
@@ -37,6 +40,14 @@ export class DefaultQueueBridge implements QueueBridge {
 		defaultDeadLetterPrefix: '',
 		defaultDeadLetterSuffix: '.dead-letter',
 		deadLetterInspectable: true,
+		deadLetterInspectSupported: true,
+		deadLetterReplaySupported: true,
+		deadLetterPurgeSupported: true,
+		leaseInspectionSupported: false,
+		idempotencyEnforcement: false,
+		partitionOrdering: false,
+		providerManagedDelayedDelivery: false,
+		strictStartupValidation: true,
 	}
 
 	public readonly instanceId: string
@@ -188,6 +199,48 @@ export class DefaultQueueBridge implements QueueBridge {
 		message.leaseExpiresAt = 0
 		dlq.push(message)
 		this.deadLetters.set(queueName, dlq)
+	}
+
+	async peekDeadLetter(queueName: string, options?: QueueDeadLetterListOptions): Promise<QueueMessage[]> {
+		const dlq = this.deadLetters.get(queueName) ?? []
+		const offset = options?.offset ?? 0
+		const limit = options?.limit ?? dlq.length
+		return dlq.slice(offset, offset + limit)
+	}
+
+	async redriveDeadLetter(queueName: string, options?: QueueDeadLetterRedriveOptions): Promise<number> {
+		const dlq = this.deadLetters.get(queueName) ?? []
+		if (dlq.length === 0) {
+			return 0
+		}
+
+		const limit = options?.limit ?? dlq.length
+		const queue = this.queues.get(queueName) ?? []
+		const now = Date.now()
+		const replay = dlq.splice(0, limit)
+
+		for (const message of replay) {
+			message.leaseExpiresAt = 0
+			message.scheduledAt = now
+			queue.push(message)
+		}
+
+		this.queues.set(queueName, queue)
+		this.deadLetters.set(queueName, dlq)
+		return replay.length
+	}
+
+	async purgeDeadLetter(queueName: string): Promise<number> {
+		const dlq = this.deadLetters.get(queueName) ?? []
+		this.deadLetters.delete(queueName)
+		return dlq.length
+	}
+
+	async inspectLeases(
+		_queueName: string,
+		_options?: QueueDeadLetterListOptions,
+	): Promise<QueueLeaseInspectionRecord[]> {
+		return []
 	}
 
 	async metrics(queueName: string): Promise<QueueMetrics> {

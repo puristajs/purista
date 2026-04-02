@@ -8,7 +8,7 @@
 
 > **ConversationSessionHelpers** = `object`
 
-Defined in: [packages/ai/src/runtime/conversation.ts:26](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/conversation.ts#L26)
+Defined in: [packages/ai/src/runtime/conversation.ts:26](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/conversation.ts#L26)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/conversation.ts:26](https://github.com/puri
 
 > **load**(`sessionId?`): `Promise`\<[`ConversationStoreRecord`](ConversationStoreRecord.md) \| `undefined`\>
 
-Defined in: [packages/ai/src/runtime/conversation.ts:27](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/conversation.ts#L27)
+Defined in: [packages/ai/src/runtime/conversation.ts:27](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/conversation.ts#L27)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/runtime/conversation.ts:27](https://github.com/puri
 
 > **save**(`record`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/conversation.ts:28](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/conversation.ts#L28)
+Defined in: [packages/ai/src/runtime/conversation.ts:28](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/conversation.ts#L28)
 
 #### Parameters
 

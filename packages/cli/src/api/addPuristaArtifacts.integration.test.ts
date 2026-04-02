@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import { addPuristaAgent } from './addPuristaAgent.js'
 import { addPuristaCommand } from './addPuristaCommand.js'
@@ -13,12 +14,15 @@ import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
 let TEST_DIR = ''
+const TEST_FILE_DIR = dirname(fileURLToPath(import.meta.url))
+const CLI_PACKAGE_ROOT = join(TEST_FILE_DIR, '..', '..')
+const REPO_ROOT = join(CLI_PACKAGE_ROOT, '..', '..')
 
 const createBaseProject = () => {
-	const coreDtsPath = join(process.cwd(), '..', 'core', 'dist', 'esm', 'index.d.ts')
-	const coreGlobPath = join(process.cwd(), '..', 'core', 'dist', 'esm', '*')
-	const aiDistPath = join(process.cwd(), '..', 'ai', 'dist', 'esm')
-	TEST_DIR = mkdtempSync(join(process.cwd(), 'node_modules', 'tmp-e2e-'))
+	const coreDtsPath = join(REPO_ROOT, 'packages', 'core', 'dist', 'esm', 'index.d.ts')
+	const coreGlobPath = join(REPO_ROOT, 'packages', 'core', 'dist', 'esm', '*')
+	const aiDistPath = join(REPO_ROOT, 'packages', 'ai', 'dist', 'esm')
+	TEST_DIR = mkdtempSync(join(REPO_ROOT, 'node_modules', 'tmp-e2e-'))
 	writeFileSync(
 		join(TEST_DIR, 'tsconfig.json'),
 		JSON.stringify({
@@ -274,15 +278,15 @@ describe('CLI artifact generation (e2e)', () => {
 
 		try {
 			execSync('npm run build -w @purista/ai', {
-				cwd: process.cwd(),
+				cwd: REPO_ROOT,
 				stdio: 'pipe',
 			})
 			execSync('npm run build -w @purista/core', {
-				cwd: process.cwd(),
+				cwd: REPO_ROOT,
 				stdio: 'pipe',
 			})
 			execSync(`npx tsc --noEmit -p "${join(TEST_DIR, 'tsconfig.json')}"`, {
-				cwd: process.cwd(),
+				cwd: REPO_ROOT,
 				stdio: 'pipe',
 			})
 		} catch (error) {
@@ -295,5 +299,5 @@ describe('CLI artifact generation (e2e)', () => {
 			}
 			throw error
 		}
-	})
+	}, 60_000)
 })

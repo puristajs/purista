@@ -8,7 +8,7 @@
 
 > **ProviderObjectStatusChunk** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:148](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L148)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:148](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L148)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:148](https://git
 
 > **message**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:150](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L150)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:150](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L150)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:150](https://git
 
 > **type**: `"status"`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:149](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L149)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:149](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L149)

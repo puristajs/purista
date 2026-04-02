@@ -1,3 +1,4 @@
+import type { EventBridgeConsumerFailureCapabilities } from './EventBridgeConsumerFailureCapabilities.js'
 import type { EventBridgeLateResponseHandling } from './EventBridgeLateResponseHandling.js'
 
 export type EventBridgeCapabilities = {
@@ -8,4 +9,5 @@ export type EventBridgeCapabilities = {
 	lateResponseHandling: EventBridgeLateResponseHandling
 	gracefulDrainSupported: boolean
 	nativeDeadLettering: boolean
+	consumerFailureHandling: EventBridgeConsumerFailureCapabilities
 }

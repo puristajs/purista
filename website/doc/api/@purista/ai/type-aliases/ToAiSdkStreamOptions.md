@@ -8,7 +8,7 @@
 
 > **ToAiSdkStreamOptions** = `object`
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:69](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/aiSdkStream.ts#L69)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:69](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/protocol/aiSdkStream.ts#L69)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/protocol/aiSdkStream.ts:69](https://github.com/puri
 
 > `optional` **mode**: [`AiSdkStreamMode`](AiSdkStreamMode.md)
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:70](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/aiSdkStream.ts#L70)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:70](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/protocol/aiSdkStream.ts#L70)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/protocol/aiSdkStream.ts:70](https://github.com/puri
 
 > `optional` **uiMessage**: [`ToAiSdkUiMessageOptions`](ToAiSdkUiMessageOptions.md)
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:71](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/protocol/aiSdkStream.ts#L71)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:71](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/protocol/aiSdkStream.ts#L71)

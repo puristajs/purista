@@ -8,4 +8,4 @@
 
 > `const` **ExecuteBashOutputSchema**: `ZodObject`\<\{ `exitCode`: `ZodNumber`; `stderr`: `ZodString`; `stdout`: `ZodString`; \}, `$strip`\> = `BashResultSchema`
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts:9](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts#L9)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts:9](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts#L9)

@@ -8,7 +8,7 @@
 
 > **ReflectionArtifactPolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:46](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L46)
+Defined in: [packages/ai/src/types/AgentManifest.ts:46](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L46)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:46](https://github.com/puris
 
 > `optional` **artifactPrefix**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:48](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L48)
+Defined in: [packages/ai/src/types/AgentManifest.ts:48](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L48)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:48](https://github.com/puris
 
 > `optional` **emitArtifacts**: `boolean`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:47](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L47)
+Defined in: [packages/ai/src/types/AgentManifest.ts:47](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L47)

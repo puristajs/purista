@@ -11,11 +11,20 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - Escape changelog angle brackets for api docs build ([#240](https://github.com/orhun/git-cliff/issues/240))
+- Sanitize provider tool names and refresh skills
+- Apply skills to structured model calls
+- Reject empty streamed public replies
+- Stabilize package builds and bridge typing
 
 ### Documentation
 
 - Sync generated site and api artifacts
 - Clarify nested agent orchestration
+- Refresh canonical PURISTA skill catalog
+- Document multimodal file hooks
+- Align examples with reply helpers
+- Align handbook with reply decision model
+- Prefer consumer-local schemas
 
 ### Features
 
@@ -26,6 +35,15 @@ All notable changes to this project will be documented in this file.
 - Feat sandbox runtime diagnostics and preflight
 - Feat ai filesystem skills and sandbox contract
 - Feat ai skill metadata selection helpers
+- Harden agent runtime and grouped context
+- Harden model runtime and agent guidance
+- Add protocol extraction helpers
+- Add multimodal input ingestion
+- Add structured output streaming
+- Add streamed public reply helper
+- Add internal reply composition helper
+- Add dynamic skill reference selection
+- Harden bridge reliability handling
 
 ### Refactor
 
@@ -37,6 +55,13 @@ All notable changes to this project will be documented in this file.
 - Refactor ai dx typing and api docs
 - Reframe purista skills as builder memory
 - Refactor ai expose typed agent service handle
+- Refactor testing helpers and scaffolding
+- Make stream protocol delta-first
+- Standardize public reply publishing
+- Align support agent reply flow
+- Consolidate framework catalog
+- Add modular blueprint init engine
+- Remove runtime js events
 
 ### Styling
 

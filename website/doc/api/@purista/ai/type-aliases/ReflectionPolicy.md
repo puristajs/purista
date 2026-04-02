@@ -8,7 +8,7 @@
 
 > **ReflectionPolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:57](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L57)
+Defined in: [packages/ai/src/types/AgentManifest.ts:57](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L57)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:57](https://github.com/puris
 
 > `optional` **enabledByDefault**: `boolean`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:58](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L58)
+Defined in: [packages/ai/src/types/AgentManifest.ts:58](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L58)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:58](https://github.com/puris
 
 > `optional` **presets**: `Record`\<`string`, [`ReflectionPreset`](ReflectionPreset.md)\>
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:59](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/types/AgentManifest.ts#L59)
+Defined in: [packages/ai/src/types/AgentManifest.ts:59](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L59)

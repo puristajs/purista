@@ -14,7 +14,7 @@ export type DefinitionEventBridgeConfig = {
 	/**
 	 * Send the acknowledge to message broker as soon as the message arrives
 	 * - defaults to true for commands
-	 * - defaults to false for subscriptions
+	 * - defaults to true for subscriptions
 	 *
 	 * */
 	autoacknowledge: boolean

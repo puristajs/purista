@@ -144,7 +144,7 @@ Custom trace Id
 
 > `protected` **auth**: [`AuthCredentials`](../../core/type-aliases/AuthCredentials.md)
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L52)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
 
 #### Inherited from
 
@@ -154,9 +154,9 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:52](https://github.com/puris
 
 ### baseUrl
 
-> **baseUrl**: `URL` \| `undefined` = `undefined`
+> **baseUrl**: `URL` \| `undefined`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L47)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
 #### Inherited from
 
@@ -168,7 +168,7 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:47](https://github.com/puris
 
 > **config**: `object`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L43)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
 
 #### baseUrl?
 
@@ -284,7 +284,7 @@ Custom trace Id
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L42)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:25
 
 #### Inherited from
 
@@ -294,9 +294,9 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:42](https://github.com/puris
 
 ### name
 
-> **name**: `string` = `'HttpClient'`
+> **name**: `string`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L41)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
 
 #### Inherited from
 
@@ -308,7 +308,7 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:41](https://github.com/puris
 
 > **spanProcessor**: `SpanProcessor` \| `undefined`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L49)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:29
 
 #### Inherited from
 
@@ -320,7 +320,7 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:49](https://github.com/puris
 
 > **timeout**: `number`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L45)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:27
 
 #### Inherited from
 
@@ -332,7 +332,7 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:45](https://github.com/puris
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L50)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:30
 
 #### Inherited from
 
@@ -344,7 +344,7 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:50](https://github.com/puris
 
 > **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:330](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L330)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:101
 
 DELETE request
 
@@ -382,7 +382,7 @@ DELETE request
 
 > `protected` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:194](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L194)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:66
 
 Helper method
 
@@ -422,7 +422,7 @@ UnhandledError
 
 > **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:290](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L290)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:73
 
 GET request
 
@@ -490,7 +490,7 @@ Fetches the token data from the server for given access token
 
 > **getTracer**(): `Tracer`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:95](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L95)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:38
 
 Returns open telemetry tracer of this service
 
@@ -510,7 +510,7 @@ Tracer
 
 > `protected` **getUrlAndHeader**(`path`, `options?`): `object`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:142](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L142)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:48
 
 #### Parameters
 
@@ -544,7 +544,7 @@ Defined in: [core/src/HttpClient/HttpClient.impl.ts:142](https://github.com/puri
 
 > **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:320](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L320)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:94
 
 PATCH request
 
@@ -582,7 +582,7 @@ PATCH request
 
 > **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:300](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L300)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:80
 
 POST request
 
@@ -620,7 +620,7 @@ POST request
 
 > **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:310](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L310)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:87
 
 PUT request
 
@@ -678,7 +678,7 @@ Remove a secret
 
 > **setBearerToken**(`token`): `void`
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:181](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L181)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:56
 
 Set the bearer token for all following requests.
 
@@ -729,7 +729,7 @@ It will first try to update and if the secret does not exist, it will create a n
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [core/src/HttpClient/HttpClient.impl.ts:107](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L107)
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:47
 
 Start a child span for opentelemetry tracking
 

@@ -8,7 +8,7 @@
 
 > **resolvePuristaCommand**\<`TInput`\>(`commandId`, `input`, `options?`): `Promise`\<[`PuristaCommandResolution`](../type-aliases/PuristaCommandResolution.md)\<`TInput`, `unknown`\>\>
 
-Defined in: [packages/cli/src/engine.ts:94](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/engine.ts#L94)
+Defined in: [packages/cli/src/engine.ts:94](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/engine.ts#L94)
 
 ## Type Parameters
 

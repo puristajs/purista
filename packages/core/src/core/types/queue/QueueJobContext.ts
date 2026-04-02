@@ -11,6 +11,7 @@ export type QueueJobControls = {
 	complete(output?: unknown, headers?: Record<string, string>): Promise<void>
 	retry(request?: QueueRetryRequest): Promise<void>
 	fail(reason: string, fatal?: boolean): Promise<void>
+	moveToDeadLetter(reason?: string): Promise<void>
 	extendLease(durationMs: number): Promise<void>
 }
 

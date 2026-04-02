@@ -2473,8 +2473,6 @@ export class AgentBuilder<
 					maxAttempts: resolveExecutionPolicy().maxAttempts,
 				})
 				.setQueueBridgeConfig({
-					durable: true,
-					shared: true,
 					prefetch: 1,
 					orderingGuarantee: 'fifo',
 				})

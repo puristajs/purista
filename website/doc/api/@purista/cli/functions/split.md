@@ -8,7 +8,7 @@
 
 > **split**(`value`): `string`[]
 
-Defined in: [packages/cli/src/api/change-case.ts:52](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/change-case.ts#L52)
+Defined in: [packages/cli/src/api/change-case.ts:52](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L52)
 
 Split any cased input strings into an array of words.
 

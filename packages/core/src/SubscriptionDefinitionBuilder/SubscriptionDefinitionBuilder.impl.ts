@@ -113,10 +113,10 @@ export class SubscriptionDefinitionBuilder<
 	private principalId?: PrincipalId
 	private tenantId?: TenantId
 
-	private durable = true
+	private durable = false
 
 	private shared = true
-	private autoacknowledge = false
+	private autoacknowledge = true
 	private consumerFailureHandling?: DefinitionEventBridgeConsumerFailureHandling
 
 	private invokes: C['Invokes'] = {}
@@ -543,6 +543,9 @@ export class SubscriptionDefinitionBuilder<
 		}
 		if (config.retryDelayMs !== undefined && config.retryDelayMs < 0) {
 			throw new Error('retryDelayMs must be greater than or equal to 0')
+		}
+		if (config.mode !== undefined && config.mode !== 'strict' && config.mode !== 'best-effort') {
+			throw new Error('mode must be either "strict" or "best-effort"')
 		}
 
 		this.consumerFailureHandling = { ...config }

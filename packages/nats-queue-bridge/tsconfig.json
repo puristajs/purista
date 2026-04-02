@@ -1,0 +1,10 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@purista/core": ["../core/dist/esm/index.d.ts"]
+		}
+	},
+	"include": ["./src/**/*"]
+}

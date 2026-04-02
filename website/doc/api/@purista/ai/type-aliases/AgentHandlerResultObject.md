@@ -8,7 +8,7 @@
 
 > **AgentHandlerResultObject** = `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:165](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L165)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:165](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/builder/AgentBuilder.ts#L165)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:165](https://github.com/pur
 
 > **message**: `string`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:166](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L166)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:166](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/builder/AgentBuilder.ts#L166)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:166](https://github.com/pur
 
 > `optional` **summary**: `string`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:167](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L167)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:167](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/builder/AgentBuilder.ts#L167)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:167](https://github.com/pur
 
 > `optional` **usage**: `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:168](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/builder/AgentBuilder.ts#L168)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:168](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/builder/AgentBuilder.ts#L168)
 
 #### completionTokens?
 

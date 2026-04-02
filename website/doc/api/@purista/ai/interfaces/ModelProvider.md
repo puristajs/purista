@@ -6,7 +6,7 @@
 
 # Interface: ModelProvider
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:262](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L262)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:262](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L262)
 
 Minimal interface providers must satisfy so they can be swapped at runtime.
 
@@ -16,7 +16,7 @@ Minimal interface providers must satisfy so they can be swapped at runtime.
 
 > `readonly` **capabilities**: [`ModelProviderCapabilities`](../type-aliases/ModelProviderCapabilities.md)
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:264](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L264)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:264](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L264)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:264](https://git
 
 > `readonly` **name**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:263](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L263)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:263](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L263)
 
 ## Methods
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:263](https://git
 
 > `optional` **embed**(`request`): `Promise`\<[`ProviderEmbedResponse`](../type-aliases/ProviderEmbedResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:286](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L286)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:286](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L286)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:286](https://git
 
 > `optional` **embedMany**(`request`): `Promise`\<[`ProviderEmbedManyResponse`](../type-aliases/ProviderEmbedManyResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:287](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L287)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:287](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L287)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:287](https://git
 
 > `optional` **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:265](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L265)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:265](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L265)
 
 #### Parameters
 
@@ -86,7 +86,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:265](https://git
 
 > `optional` **generateJson**\<`T`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L284)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L284)
 
 #### Type Parameters
 
@@ -110,7 +110,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://git
 
 > `optional` **generateText**(`request`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:283](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L283)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:283](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L283)
 
 High-level helper that yields one final text output while automatically
 preferring `stream()` and falling back to `generate()`.
@@ -144,7 +144,7 @@ allowlisted bindings automatically when you omit them.
 
 > `optional` **rerank**\<`Document`\>(`request`): `Promise`\<[`ProviderRerankResponse`](../type-aliases/ProviderRerankResponse.md)\<`Document`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:288](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L288)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:288](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L288)
 
 #### Type Parameters
 
@@ -168,7 +168,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:288](https://git
 
 > `optional` **stream**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:266](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L266)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:266](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L266)
 
 #### Parameters
 
@@ -186,7 +186,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:266](https://git
 
 > `optional` **streamObject**\<`T`\>(`request`): [`ProviderObjectStream`](../type-aliases/ProviderObjectStream.md)\<`T`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:285](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/providers/runtime/ModelProvider.ts#L285)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:285](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L285)
 
 #### Type Parameters
 

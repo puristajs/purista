@@ -6,7 +6,7 @@
 
 # Class: SandboxService
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:11](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L11)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:11](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L11)
 
 Custom Sandbox service with startup reconciliation.
 
@@ -335,7 +335,7 @@ Get service info
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:195
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:198
 
 Stop and destroy the current service
 
@@ -353,7 +353,7 @@ Stop and destroy the current service
 
 > **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:143
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:146
 
 Called when a command is received by the service
 
@@ -379,7 +379,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:187
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:190
 
 #### Parameters
 
@@ -401,7 +401,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:187
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:189
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:192
 
 #### Parameters
 
@@ -503,7 +503,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:100
 
 > `protected` **getConsumeStreamFunction**\<`StreamInvokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `streamInvokes?`): [`OpenStreamFunction`](../../core/type-aliases/OpenStreamFunction.md)
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:135
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:138
 
 #### Type Parameters
 
@@ -547,7 +547,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:135
 
 > **getContextFunctions**(`logger`, `queueNamespace?`): [`ContextBase`](../../core/type-aliases/ContextBase.md)
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:137
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:140
 
 #### Parameters
 
@@ -573,7 +573,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:137
 
 > `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `emitList?`): \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`) => `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:136
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:139
 
 #### Type Parameters
 
@@ -771,7 +771,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:110
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../../core/type-aliases/ServiceHealthState.md)\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:186
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:189
 
 #### Returns
 
@@ -865,7 +865,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:92
 
 > **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:179
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:182
 
 #### Parameters
 
@@ -887,7 +887,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:179
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:188
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:191
 
 #### Parameters
 
@@ -909,7 +909,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:188
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:190
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:193
 
 #### Parameters
 
@@ -967,7 +967,7 @@ function name is need in messages like InfoServiceFunctionAdded
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:16](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L16)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:16](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L16)
 
 It connects to the event bridge and subscribes to the topics that are in the subscription list.
 
@@ -1037,7 +1037,7 @@ return value of fn
 
 > `protected` **startQueueWorkers**(): `void`
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:180
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:183
 
 #### Returns
 
@@ -1053,7 +1053,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:180
 
 > `protected` **stopQueueWorkers**(): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:181
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:184
 
 #### Returns
 

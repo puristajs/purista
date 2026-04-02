@@ -8,7 +8,7 @@
 
 > **TrajectoryEvaluationResult** = `object`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:24](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/testing/trajectory.ts#L24)
+Defined in: [packages/ai/src/testing/trajectory.ts:24](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/testing/trajectory.ts#L24)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:24](https://github.com/purist
 
 > **failures**: `string`[]
 
-Defined in: [packages/ai/src/testing/trajectory.ts:33](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/testing/trajectory.ts#L33)
+Defined in: [packages/ai/src/testing/trajectory.ts:33](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/testing/trajectory.ts#L33)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:33](https://github.com/purist
 
 > **mode**: [`TrajectoryMatchMode`](TrajectoryMatchMode.md)
 
-Defined in: [packages/ai/src/testing/trajectory.ts:26](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/testing/trajectory.ts#L26)
+Defined in: [packages/ai/src/testing/trajectory.ts:26](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/testing/trajectory.ts#L26)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:26](https://github.com/purist
 
 > **observed**: `object`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:27](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/testing/trajectory.ts#L27)
+Defined in: [packages/ai/src/testing/trajectory.ts:27](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/testing/trajectory.ts#L27)
 
 #### artifacts
 
@@ -56,4 +56,4 @@ Defined in: [packages/ai/src/testing/trajectory.ts:27](https://github.com/purist
 
 > **success**: `boolean`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:25](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/testing/trajectory.ts#L25)
+Defined in: [packages/ai/src/testing/trajectory.ts:25](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/testing/trajectory.ts#L25)

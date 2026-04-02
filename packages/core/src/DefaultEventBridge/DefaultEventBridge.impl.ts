@@ -113,6 +113,15 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
 			gracefulDrainSupported: true,
 			nativeDeadLettering: false,
+			consumerFailureHandling: {
+				boundedRetry: false,
+				delayedRetry: false,
+				deadLetterTarget: false,
+				bridgeManagedDeadLettering: false,
+				nativeDeadLettering: false,
+				fatalClassification: false,
+				strictMode: true,
+			},
 		}
 	}
 

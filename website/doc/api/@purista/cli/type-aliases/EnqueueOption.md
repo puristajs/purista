@@ -8,7 +8,7 @@
 
 > **EnqueueOption** = `object`
 
-Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L9)
+Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L9)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.t
 
 > **importPath**: `string`
 
-Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:11](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L11)
+Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:11](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L11)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.t
 
 > **parameterSchemaIdentifier**: `string`
 
-Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:13](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L13)
+Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:13](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L13)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.t
 
 > **payloadSchemaIdentifier**: `string`
 
-Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:12](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L12)
+Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:12](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L12)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.t
 
 > **queueName**: `string`
 
-Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:10](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L10)
+Defined in: [packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:10](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L10)

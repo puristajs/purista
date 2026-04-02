@@ -4,7 +4,10 @@
 		"baseUrl": ".",
 		"outDir": "./dist",
 		"declaration": true,
-		"paths": {},
+		"paths": {
+			"@purista/base-http-bridge": ["../base-http-bridge/dist/esm/index.d.ts"],
+			"@purista/core": ["../core/dist/esm/index.d.ts"]
+		},
 		"sourceMap": false,
 		"declarationMap": true,
 		"types": ["vitest/globals", "node"]

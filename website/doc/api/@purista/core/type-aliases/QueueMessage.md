@@ -66,7 +66,7 @@ Defined in: [core/types/queue/QueueMessage.ts:2](https://github.com/puristajs/pu
 
 > `optional` **idempotencyKey**: `string`
 
-Defined in: [core/types/queue/QueueMessage.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L18)
+Defined in: [core/types/queue/QueueMessage.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L17)
 
 ***
 
@@ -107,14 +107,6 @@ Defined in: [core/types/queue/QueueMessage.ts:5](https://github.com/puristajs/pu
 > `optional` **parentSpanId**: `string`
 
 Defined in: [core/types/queue/QueueMessage.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L15)
-
-***
-
-### partitionKey?
-
-> `optional` **partitionKey**: `string`
-
-Defined in: [core/types/queue/QueueMessage.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L17)
 
 ***
 

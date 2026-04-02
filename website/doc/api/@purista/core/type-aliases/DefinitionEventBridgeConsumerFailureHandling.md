@@ -8,13 +8,14 @@
 
 > **DefinitionEventBridgeConsumerFailureHandling** = `object`
 
-Defined in: core/types/DefinitionEventBridgeConsumerFailureHandling.ts:8
+Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L11)
 
 Advisory failure handling for broker-backed consumers such as subscriptions.
 
-Event bridge implementations may honor all, some, or none of these fields
-depending on their transport capabilities. Use bridge capabilities and
-transport-specific documentation to understand the effective behavior.
+The selected event bridge must validate this request against its capabilities.
+In `strict` mode the bridge must fail startup if it cannot honor the requested
+semantics. In `best-effort` mode the bridge may degrade behavior but must log
+the degradation explicitly.
 
 ## Properties
 
@@ -22,7 +23,7 @@ transport-specific documentation to understand the effective behavior.
 
 > `optional` **deadLetterTarget**: `string`
 
-Defined in: core/types/DefinitionEventBridgeConsumerFailureHandling.ts:30
+Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L38)
 
 Logical dead-letter target to use when the retry budget is exhausted.
 
@@ -37,12 +38,27 @@ The meaning depends on the adapter:
 
 > `optional` **maxAttempts**: `number`
 
-Defined in: core/types/DefinitionEventBridgeConsumerFailureHandling.ts:15
+Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L23)
 
 Maximum number of delivery attempts including the initial delivery.
 
-If omitted, the adapter default applies. If the adapter has no default,
-the broker may retry indefinitely.
+If omitted, the adapter default applies.
+
+***
+
+### mode?
+
+> `optional` **mode**: [`DefinitionEventBridgeConsumerFailureMode`](DefinitionEventBridgeConsumerFailureMode.md)
+
+Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L17)
+
+Controls whether unsupported semantics fail startup or degrade explicitly.
+
+#### Default
+
+```ts
+strict
+```
 
 ***
 
@@ -50,7 +66,7 @@ the broker may retry indefinitely.
 
 > `optional` **retryDelayMs**: `number`
 
-Defined in: core/types/DefinitionEventBridgeConsumerFailureHandling.ts:21
+Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L29)
 
 Delay in milliseconds before a failed message is redelivered.
 

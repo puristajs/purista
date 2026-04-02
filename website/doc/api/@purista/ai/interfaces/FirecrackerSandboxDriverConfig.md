@@ -6,7 +6,7 @@
 
 # Interface: FirecrackerSandboxDriverConfig
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:7](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L7)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:7](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L7)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/Firecracker
 
 > **firecrackerBinary**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:9](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L9)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:9](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L9)
 
 Path to the Firecracker binary
 
@@ -24,7 +24,7 @@ Path to the Firecracker binary
 
 > **kernelImagePath**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:11](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L11)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:11](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L11)
 
 Path to the kernel image (vmlinux)
 
@@ -34,7 +34,7 @@ Path to the kernel image (vmlinux)
 
 > **rootfsImagePath**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:13](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L13)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:13](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L13)
 
 Path to the base rootfs image
 
@@ -44,6 +44,6 @@ Path to the base rootfs image
 
 > **workspaceDir**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:15](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L15)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:15](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L15)
 
 Directory to store VM-specific sockets and drives

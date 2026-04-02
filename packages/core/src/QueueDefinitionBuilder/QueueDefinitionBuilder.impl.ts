@@ -17,8 +17,6 @@ export class QueueDefinitionBuilder {
 	private workers: QueueWorkerDefinition[] = []
 	private deadLetter?: { queueName?: string; eventName?: string; emitEvent?: boolean }
 	private queueBridgeConfig: DefinitionQueueBridgeConfig = {
-		durable: true,
-		shared: true,
 		prefetch: 1,
 		orderingGuarantee: 'fifo',
 	}

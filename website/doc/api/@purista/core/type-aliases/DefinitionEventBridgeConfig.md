@@ -24,7 +24,7 @@ Defined in: [core/types/DefinitionEventBridgeConfig.ts:20](https://github.com/pu
 
 Send the acknowledge to message broker as soon as the message arrives
 - defaults to true for commands
-- defaults to false for subscriptions
+- defaults to true for subscriptions
 
 ***
 

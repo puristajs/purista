@@ -194,10 +194,6 @@ export default defineConfig({
 							text: '@purista/hono-http-server',
 							link: '/api/@purista/hono-http-server/README.md',
 						},
-						{
-							text: '@purista/httpserver',
-							link: '/api/@purista/httpserver/README.md',
-						},
 					],
 				},
 				{
@@ -236,6 +232,10 @@ export default defineConfig({
 						{
 							text: '@purista/redis-queue-bridge',
 							link: '/api/@purista/redis-queue-bridge/README.md',
+						},
+						{
+							text: '@purista/nats-queue-bridge',
+							link: '/api/@purista/nats-queue-bridge/README.md',
 						},
 					],
 				},

@@ -18,14 +18,25 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 | [NATS](./nats.md) | yes | yes with JetStream, no with core NATS | at-most-once on core NATS, at-least-once with JetStream durable consumers | not applicable | no (currently) |
 | [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | not applicable | no (currently) |
 
+### Subscription consumer failure handling
+
+| bridge | bounded retry | delayed retry | dead-letter target | strict startup validation |
+|---|---:|---:|---:|---:|
+| [Default](./default_event_bridge.md) | no | no | no | yes |
+| [AMQP](./amqp.md) | yes | no, immediate retry unless broker topology adds delay | yes | yes |
+| [MQTT](./mqtt.md) | no | no | no | yes |
+| [NATS](./nats.md) | yes with JetStream | yes with JetStream | yes with JetStream | yes |
+| [Dapr](./dapr.md) | component-dependent | component-dependent | component-dependent | yes |
+
 ### Queue bridge support
 
 | queue bridge package | preferred workloads | compatible event bridges |
 | --- | --- | --- |
 | `@purista/core` default queue bridge | local dev, unit tests, single instance deployments | Any (in-memory inside the service) |
 | `@purista/redis-queue-bridge` | production pull-based CQRS, delayed jobs, AI worker pools | Default, AMQP, MQTT, NATS, Dapr (redis acts as the queue backend while the event bridge handles command/subscription traffic) |
+| `@purista/nats-queue-bridge` | production pull-based workloads on NATS-first platforms | Default, AMQP, MQTT, NATS, Dapr (JetStream acts as the queue backend while the event bridge handles command/subscription traffic) |
 
-Future queue bridge packages will live next to the event bridge adapters (e.g. `@purista/nats-queue-bridge`) once those providers expose reliable pull + lease semantics. When evaluating infrastructure, pick an event bridge + queue bridge pair that matches your durability and scaling needs.
+Future queue bridge packages will live next to the event bridge adapters once those providers expose reliable pull + lease semantics. When evaluating infrastructure, pick an event bridge + queue bridge pair that matches your durability and scaling needs.
 
 See the dedicated [Queue Bridges](../queue_bridges/index.md) page for wiring guidance and capability details.
 
@@ -39,7 +50,7 @@ PURISTA itself provides typed message contracts and processing flow. Delivery gu
 
 Late command responses are normalized across invoke-capable bridges in this slice. Once the caller-side timeout fires, PURISTA keeps a short-lived tombstone for the correlation id and ignores any later response with a warning instead of raising a bridge error.
 
-Subscription retry and dead-letter handling are advisory bridge-level concerns. Service definitions can declare bounded consumer failure handling, but each adapter decides whether it can honor that through broker-native features, bridge-emulated dead-lettering, or documented best-effort fallback.
+Subscription retry and dead-letter handling are capability-driven bridge concerns. Service definitions can declare consumer failure handling in `strict` or `best-effort` mode. In `strict` mode, PURISTA fails startup if the selected adapter cannot honor the requested semantics. Exhausted subscription messages are dead-lettered; PURISTA no longer exposes unimplemented `drop` or `stop-consumer` outcomes in the public contract.
 
 ## Reliability checklist
 

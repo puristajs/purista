@@ -14,7 +14,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:9](https://gi
 
 > **new QueueDefinitionBuilder**(`queueName`, `queueDescription`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L26)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L24)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:26](https://g
 
 > **addParameterSchema**(`schema`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L36)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L34)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:36](https://g
 
 > **addPayloadSchema**(`schema`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L31)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L29)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:31](https://g
 
 > **addWorkerDefinition**(...`workers`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L82)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L80)
 
 #### Parameters
 
@@ -90,7 +90,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:82](https://g
 
 > **getDefinition**(): `Promise`\<[`QueueDefinition`](../type-aliases/QueueDefinition.md)\>
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L87)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L85)
 
 #### Returns
 
@@ -102,7 +102,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:87](https://g
 
 > **markAsDeprecated**(): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L69)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L67)
 
 #### Returns
 
@@ -114,7 +114,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:69](https://g
 
 > **setBeforeEnqueueTransform**(`transform`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L49)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L47)
 
 #### Parameters
 
@@ -132,7 +132,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:49](https://g
 
 > **setBeforeExecuteTransform**(`transform`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L54)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L52)
 
 #### Parameters
 
@@ -150,7 +150,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:54](https://g
 
 > **setDeadLetterOptions**(`options`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L59)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L57)
 
 #### Parameters
 
@@ -178,7 +178,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:59](https://g
 
 > **setLifecycleConfig**(`config`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L41)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L39)
 
 #### Parameters
 
@@ -196,7 +196,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:41](https://g
 
 > **setQueueBridgeConfig**(`config`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L74)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L72)
 
 #### Parameters
 
@@ -214,7 +214,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:74](https://g
 
 > **setTags**(`tags`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L64)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L62)
 
 #### Parameters
 

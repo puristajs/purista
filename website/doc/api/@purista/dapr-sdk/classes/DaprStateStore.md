@@ -90,7 +90,7 @@ The name of the state store
 
 > **config**: `object`
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
@@ -152,7 +152,7 @@ The name of the state store
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L21)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -164,7 +164,7 @@ Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](https://gi
 
 > **name**: `string`
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -176,7 +176,7 @@ Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:24](https://gi
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L84)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:27
 
 #### Returns
 
@@ -192,7 +192,7 @@ Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:84](https://gi
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L45)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -248,7 +248,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://gith
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L60)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -292,7 +292,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://gith
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L74)
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

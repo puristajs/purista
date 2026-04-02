@@ -8,7 +8,7 @@
 
 > **QueueJobContext**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`\> = [`ContextBase`](ContextBase.md) & `object`
 
-Defined in: [core/types/queue/QueueJobContext.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L17)
+Defined in: [core/types/queue/QueueJobContext.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L18)
 
 ## Type Declaration
 

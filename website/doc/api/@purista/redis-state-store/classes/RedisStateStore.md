@@ -136,7 +136,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:53](https://github.co
 
 > **config**: `object`
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
@@ -190,7 +190,7 @@ Enable generally set method
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L21)
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -202,7 +202,7 @@ Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](https://gi
 
 > **name**: `string`
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -242,7 +242,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:61](https://github.co
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L45)
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -298,7 +298,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:68](https://github.co
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L60)
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -342,7 +342,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:87](https://github.co
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/StateStore/StateStoreBaseClass.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L74)
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

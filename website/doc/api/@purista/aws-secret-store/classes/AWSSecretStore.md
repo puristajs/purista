@@ -94,7 +94,7 @@ Enable generally set method
 
 > **cache**: [`SecretStoreCacheMap`](../../core/type-aliases/SecretStoreCacheMap.md)
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L29)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -114,7 +114,7 @@ Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:33](https://github.com/
 
 > **config**: `object`
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L25)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
 #### cacheTtl?
 
@@ -170,7 +170,7 @@ Enable generally set method
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L24)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 #### Inherited from
 
@@ -182,7 +182,7 @@ Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:24](https://
 
 > **name**: `string`
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L27)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -194,7 +194,7 @@ Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:27](https://
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L137)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 #### Returns
 
@@ -210,7 +210,7 @@ Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:137](https:/
 
 > **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L51)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
@@ -266,7 +266,7 @@ Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:40](https://github.com/
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:105](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L105)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 #### Parameters
 
@@ -310,7 +310,7 @@ Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:63](https://github.com/
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:121](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L121)
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 #### Parameters
 

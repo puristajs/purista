@@ -6,6 +6,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - `skills/purista/` is the single shared framework skill for PURISTA.
 - `skills/purista-skill-maintainer/` is the meta skill for maintaining that catalog.
 - Applications may add overlay skills, but they should not split core framework knowledge back into many sibling framework skills.
+- Repo-local `skills/` is the source of truth. Installed copies in `$CODEX_HOME/skills` are deployable mirrors and should be refreshed from here when drift appears.
 
 ## Filesystem layout
 - Each skill uses `skills/<skill-name>/SKILL.md`.
@@ -16,6 +17,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - The shared `purista` skill is the canonical framework-memory layer for models that do not already know PURISTA.
 - `SKILL.md` should stay compact and route the model to deeper `references/` documents.
 - The skill should teach definition, implementation, configuration, and instantiation explicitly.
+- The skill must keep current platform decisions visible, including safe defaults, strict capability validation, Hono as the active HTTP server surface, and the separation between EventBridge and QueueBridge contracts.
 - Contract guidance should prefer boundary-local consumer schemas over one oversized shared schema reused across many services.
 - Use `skills/purista-skill-maintainer` when creating or updating catalog entries so the maintenance workflow stays consistent.
 

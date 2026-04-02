@@ -44,6 +44,15 @@ export class EventBridgeBaseClass<ConfigType> {
 		lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
 		gracefulDrainSupported: true,
 		nativeDeadLettering: false,
+		consumerFailureHandling: {
+			boundedRetry: false,
+			delayedRetry: false,
+			deadLetterTarget: false,
+			bridgeManagedDeadLettering: false,
+			nativeDeadLettering: false,
+			fatalClassification: false,
+			strictMode: true,
+		},
 	}
 
 	instanceId: Readonly<InstanceId>

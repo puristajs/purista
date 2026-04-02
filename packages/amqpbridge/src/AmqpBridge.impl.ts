@@ -32,7 +32,7 @@ import {
 	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
-import type { Channel, ChannelModel } from 'amqplib'
+import type { ChannelModel, ConfirmChannel } from 'amqplib'
 import amqplib from 'amqplib'
 
 import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.impl.js'
@@ -71,19 +71,19 @@ const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
  */
 export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implements EventBridge {
 	protected connection?: ChannelModel
-	protected channel?: Channel
+	protected channel?: ConfirmChannel
 
 	protected healthy = false
 	protected ready = false
 
-	protected consumerRegistrations: { channel: Channel; tag: string }[] = []
+	protected consumerRegistrations: { channel: ConfirmChannel; tag: string }[] = []
 
 	protected replyQueueName?: string
 	protected serviceFunctions = new Map<
 		string,
 		{
 			cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>
-			channel: Channel
+			channel: ConfirmChannel
 		}
 	>()
 
@@ -97,7 +97,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		string,
 		{
 			cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
-			channel: Channel
+			channel: ConfirmChannel
 		}
 	>()
 
@@ -109,12 +109,34 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		...plainEncrypter,
 	}
 
-	protected addConsumerRegistration(channel: Channel, tag: string) {
+	protected addConsumerRegistration(channel: ConfirmChannel, tag: string) {
 		this.consumerRegistrations.push({ channel, tag })
 	}
 
-	protected removeConsumerRegistrationsForChannel(channel: Channel) {
+	protected removeConsumerRegistrationsForChannel(channel: ConfirmChannel) {
 		this.consumerRegistrations = this.consumerRegistrations.filter(entry => entry.channel !== channel)
+	}
+
+	protected async sendToQueueAndConfirm(
+		channel: ConfirmChannel,
+		queueName: string,
+		content: Buffer,
+		options: Parameters<ConfirmChannel['sendToQueue']>[2],
+	) {
+		channel.sendToQueue(queueName, content, options)
+		if ('waitForConfirms' in channel && typeof channel.waitForConfirms === 'function') {
+			await channel.waitForConfirms()
+		}
+	}
+
+	protected async createPublishingChannel() {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'No connection - not connected')
+		}
+		if ('createConfirmChannel' in this.connection && typeof this.connection.createConfirmChannel === 'function') {
+			return this.connection.createConfirmChannel()
+		}
+		return this.connection.createChannel() as Promise<ConfirmChannel>
 	}
 
 	protected getConsumerAttempt(headers: unknown) {
@@ -140,8 +162,26 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return subscription.eventBridgeConfig.consumerFailureHandling?.deadLetterTarget ?? this.config.deadLetterRoutingKey
 	}
 
+	protected getSubscriptionFailureReason(error: unknown) {
+		if (error instanceof UnhandledError && error.data && typeof error.data === 'object' && 'error' in error.data) {
+			const cause = (error.data as { error?: unknown }).error
+			if (cause instanceof Error) {
+				return cause.message
+			}
+			if (typeof cause === 'string') {
+				return cause
+			}
+		}
+
+		if (error instanceof Error) {
+			return error.message
+		}
+
+		return String(error)
+	}
+
 	protected async retrySubscriptionMessage(
-		channel: Channel,
+		channel: ConfirmChannel,
 		queueName: string,
 		msg: amqplib.ConsumeMessage,
 		nextAttempt: number,
@@ -150,7 +190,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			...(msg.properties.headers ?? {}),
 			[RETRY_ATTEMPT_HEADER]: nextAttempt,
 		}
-		channel.sendToQueue(queueName, msg.content, {
+		await this.sendToQueueAndConfirm(channel, queueName, msg.content, {
 			headers,
 			contentType: msg.properties.contentType,
 			contentEncoding: msg.properties.contentEncoding,
@@ -165,7 +205,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 	}
 
 	protected async deadLetterSubscriptionMessage(
-		channel: Channel,
+		channel: ConfirmChannel,
 		subscription: Subscription,
 		msg: amqplib.ConsumeMessage,
 		reason: string,
@@ -181,7 +221,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			[DEAD_LETTER_REASON_HEADER]: reason,
 		}
 
-		channel.sendToQueue(deadLetterTarget, msg.content, {
+		await this.sendToQueueAndConfirm(channel, deadLetterTarget, msg.content, {
 			headers,
 			contentType: msg.properties.contentType,
 			contentEncoding: msg.properties.contentEncoding,
@@ -220,6 +260,15 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
 			gracefulDrainSupported: true,
 			nativeDeadLettering: true,
+			consumerFailureHandling: {
+				boundedRetry: true,
+				delayedRetry: false,
+				deadLetterTarget: true,
+				bridgeManagedDeadLettering: true,
+				nativeDeadLettering: true,
+				fatalClassification: false,
+				strictMode: true,
+			},
 		}
 	}
 
@@ -260,7 +309,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		})
 
 		this.logger.info('connected to broker')
-		this.channel = await this.connection.createChannel()
+		this.channel = await this.createPublishingChannel()
 
 		this.channel.on('close', () => {
 			this.healthy = false
@@ -572,7 +621,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 		const queueName = getCommandQueueName(address, this.config.namePrefix)
 
-		const channel = await this.connection.createChannel()
+		const channel = await this.createPublishingChannel()
 
 		const noAck = eventBridgeConfig.durable ? false : (eventBridgeConfig.autoacknowledge ?? true)
 		if (this.config.prefetch && !noAck) {
@@ -787,7 +836,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				}
 			: { exclusive: true, autoDelete: true, durable: false }
 
-		const channel = await this.connection.createChannel()
+		const channel = await this.createPublishingChannel()
 
 		channel.on('close', () => {
 			this.healthy = false
@@ -871,10 +920,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 								span.recordException(err)
 								this.logger.error({ err }, 'Failed to consume subscription message')
 								if (!noAck) {
+									const failureReason = this.getSubscriptionFailureReason(err)
 									if (failureHandling) {
 										const attempt = this.getConsumerAttempt(msg.properties.headers)
 										if (attempt >= (failureHandling.maxAttempts ?? 5)) {
-											await this.deadLetterSubscriptionMessage(channel, subscription, msg, err.message)
+											await this.deadLetterSubscriptionMessage(channel, subscription, msg, failureReason)
 										} else {
 											if ((failureHandling.retryDelayMs ?? 0) > 0) {
 												this.logger.warn(

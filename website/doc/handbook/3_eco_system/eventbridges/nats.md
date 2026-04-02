@@ -26,6 +26,7 @@ For subscriptions, PURISTA now supports a bounded consumer failure policy:
 - configurable retry budget (`consumerFailureHandling.maxAttempts`)
 - configurable retry delay (`consumerFailureHandling.retryDelayMs`)
 - dead-letter publish to an explicit subject or a derived default subject
+- strict startup validation when `consumerFailureHandling.mode` is left at the safe default (`strict`)
 
 The default NATS bridge configuration applies a bounded retry budget for JetStream-backed subscriptions. Per-subscription failure handling hints override that adapter default.
 
@@ -40,6 +41,7 @@ PURISTA stream runtime (`openStream`) is currently not implemented for NATS brid
 - design handlers idempotent even when retries are app-driven
 - keep subject prefix configuration identical across instances
 - enable JetStream on the broker when you rely on `durable: true`
+- keep dead-letter subjects on JetStream as operator inboxes and replay them intentionally
 - monitor dead-letter subjects and treat them as operator inboxes, not silent sinks
 - prefer queue bridges for long-running workflows or replay-heavy remediation
 - validate timeout/error behavior under broker disconnect scenarios

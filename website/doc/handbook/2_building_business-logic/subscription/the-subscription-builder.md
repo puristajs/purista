@@ -78,6 +78,7 @@ const builder = myServiceBuilder
   .adviceDurable(true)
   .adviceAutoacknowledgeMessage(false)
   .adviceConsumerFailureHandling({
+    mode: 'strict',
     maxAttempts: 5,
     retryDelayMs: 1000,
     deadLetterTarget: 'billing.userCreated.dead-letter',
@@ -87,10 +88,16 @@ const builder = myServiceBuilder
 
 - `adviceDurable(true)` asks the broker to persist messages while subscriber is offline.
 - `adviceAutoacknowledgeMessage(false)` prefers ack after successful execution.
-- `adviceConsumerFailureHandling(...)` declares a bounded retry budget and optional dead-letter target.
+- `adviceConsumerFailureHandling(...)` declares bounded retry semantics, strictness, and the dead-letter target that exhausted messages should use.
 - `receiveMessageOnEveryInstance(true)` disables shared-consumer mode and fans out to each instance.
 
 Support depends on the selected event bridge/broker.
+
+### Failure handling modes
+
+- `mode: 'strict'` is the recommended default. PURISTA validates the selected event bridge at startup and rejects unsupported retry/DLQ requirements.
+- `mode: 'best-effort'` allows adapter-specific degradation when you explicitly accept weaker semantics.
+- Exhausted subscription messages are dead-lettered. Set `deadLetterTarget` explicitly when you want a stable operator inbox, or rely on the adapter default suffix when the selected bridge documents one.
 
 ### When to use subscription retries vs queues
 

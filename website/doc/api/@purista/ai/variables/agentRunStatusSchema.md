@@ -8,4 +8,4 @@
 
 > `const` **agentRunStatusSchema**: `ZodEnum`\<\{ `cancelled`: `"cancelled"`; `completed`: `"completed"`; `failed`: `"failed"`; `idle`: `"idle"`; `planning`: `"planning"`; `queued`: `"queued"`; `recovering`: `"recovering"`; `retrying`: `"retrying"`; `running`: `"running"`; `summarizing`: `"summarizing"`; \}\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:39](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/runtime/runState.ts#L39)
+Defined in: [packages/ai/src/runtime/runState.ts:39](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/runState.ts#L39)

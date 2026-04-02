@@ -8,7 +8,7 @@
 
 > **FileIngestionContext** = `object`
 
-Defined in: [packages/ai/src/input/ingestion.ts:12](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/ingestion.ts#L12)
+Defined in: [packages/ai/src/input/ingestion.ts:12](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L12)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:12](https://github.com/puristajs
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/input/ingestion.ts:16](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/ingestion.ts#L16)
+Defined in: [packages/ai/src/input/ingestion.ts:16](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L16)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:16](https://github.com/puristajs
 
 > `optional` **principalId**: `string`
 
-Defined in: [packages/ai/src/input/ingestion.ts:14](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/ingestion.ts#L14)
+Defined in: [packages/ai/src/input/ingestion.ts:14](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L14)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:14](https://github.com/puristajs
 
 > `optional` **sessionId**: `string`
 
-Defined in: [packages/ai/src/input/ingestion.ts:15](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/ingestion.ts#L15)
+Defined in: [packages/ai/src/input/ingestion.ts:15](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L15)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/input/ingestion.ts:15](https://github.com/puristajs
 
 > `optional` **tenantId**: `string`
 
-Defined in: [packages/ai/src/input/ingestion.ts:13](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/ingestion.ts#L13)
+Defined in: [packages/ai/src/input/ingestion.ts:13](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L13)

@@ -8,7 +8,7 @@
 
 > **AgentAttachment** = `object`
 
-Defined in: [packages/ai/src/input/types.ts:18](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L18)
+Defined in: [packages/ai/src/input/types.ts:18](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L18)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/input/types.ts:18](https://github.com/puristajs/pur
 
 > **attachmentId**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:19](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L19)
+Defined in: [packages/ai/src/input/types.ts:19](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L19)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/input/types.ts:19](https://github.com/puristajs/pur
 
 > `optional` **byteSize**: `number`
 
-Defined in: [packages/ai/src/input/types.ts:23](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L23)
+Defined in: [packages/ai/src/input/types.ts:23](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L23)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/input/types.ts:23](https://github.com/puristajs/pur
 
 > `optional` **filename**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:21](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L21)
+Defined in: [packages/ai/src/input/types.ts:21](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L21)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/input/types.ts:21](https://github.com/puristajs/pur
 
 > **mediaType**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:20](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L20)
+Defined in: [packages/ai/src/input/types.ts:20](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L20)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/input/types.ts:20](https://github.com/puristajs/pur
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/input/types.ts:25](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L25)
+Defined in: [packages/ai/src/input/types.ts:25](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L25)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/input/types.ts:25](https://github.com/puristajs/pur
 
 > **source**: [`AgentAttachmentSource`](AgentAttachmentSource.md)
 
-Defined in: [packages/ai/src/input/types.ts:24](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L24)
+Defined in: [packages/ai/src/input/types.ts:24](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L24)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [packages/ai/src/input/types.ts:24](https://github.com/puristajs/pur
 
 > `optional` **title**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:22](https://github.com/puristajs/purista/blob/6e0354b1e51abc331c66c917ee95829470c9fba2/packages/ai/src/input/types.ts#L22)
+Defined in: [packages/ai/src/input/types.ts:22](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L22)

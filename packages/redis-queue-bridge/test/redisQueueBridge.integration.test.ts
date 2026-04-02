@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { emitWarning } from 'node:process'
 
+import { createClient } from '@redis/client'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer, Wait } from 'testcontainers'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -155,6 +156,67 @@ describe('RedisQueueBridge specific behaviour', () => {
 			expect(metrics.inflight).toBe(0)
 			expect(metrics.deadLetter).toBe(0)
 		} finally {
+			await bridgeA.destroy()
+			await bridgeB.destroy()
+		}
+	})
+
+	it('recovers orphaned processing jobs without lease metadata exactly once across competing workers', async () => {
+		if (!metricsDockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const keyPrefix = `orphan-processing:${randomUUID()}:`
+		const queueName = `payments-${randomUUID()}`
+		const bridgeA = new RedisQueueBridge({
+			config: {
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+			},
+			keyPrefix,
+		})
+		const bridgeB = new RedisQueueBridge({
+			config: {
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+			},
+			keyPrefix,
+		})
+		const client = createClient({
+			url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+		})
+
+		await bridgeA.start()
+		await bridgeB.start()
+		await client.connect()
+
+		try {
+			await bridgeA.enqueue({
+				queueName,
+				payload: { paymentId: 'payment-1' },
+				maxAttempts: 3,
+			})
+
+			await client.lMove(`${keyPrefix}${queueName}:pending`, `${keyPrefix}${queueName}:processing`, 'RIGHT', 'LEFT')
+
+			const [recoveredA, recoveredB] = await Promise.all([
+				bridgeA.leaseNext(queueName, { waitTimeMs: 50 }),
+				bridgeB.leaseNext(queueName, { waitTimeMs: 50 }),
+			])
+			const recoveredLeases = [recoveredA, recoveredB].filter(lease => lease !== undefined)
+
+			expect(recoveredLeases).toHaveLength(1)
+			expect(recoveredLeases[0]?.message.payload).toStrictEqual({ paymentId: 'payment-1' })
+
+			if (recoveredLeases[0]) {
+				await bridgeA.ack(queueName, recoveredLeases[0].leaseId)
+			}
+
+			const metrics = await bridgeA.metrics(queueName)
+			expect(metrics.pending).toBe(0)
+			expect(metrics.inflight).toBe(0)
+			expect(metrics.deadLetter).toBe(0)
+		} finally {
+			await client.disconnect()
 			await bridgeA.destroy()
 			await bridgeB.destroy()
 		}

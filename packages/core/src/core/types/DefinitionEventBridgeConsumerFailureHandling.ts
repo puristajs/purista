@@ -1,16 +1,24 @@
+export type DefinitionEventBridgeConsumerFailureMode = 'strict' | 'best-effort'
+
 /**
  * Advisory failure handling for broker-backed consumers such as subscriptions.
  *
- * Event bridge implementations may honor all, some, or none of these fields
- * depending on their transport capabilities. Use bridge capabilities and
- * transport-specific documentation to understand the effective behavior.
+ * The selected event bridge must validate this request against its capabilities.
+ * In `strict` mode the bridge must fail startup if it cannot honor the requested
+ * semantics. In `best-effort` mode the bridge may degrade behavior but must log
+ * the degradation explicitly.
  */
 export type DefinitionEventBridgeConsumerFailureHandling = {
 	/**
+	 * Controls whether unsupported semantics fail startup or degrade explicitly.
+	 *
+	 * @default strict
+	 */
+	mode?: DefinitionEventBridgeConsumerFailureMode
+	/**
 	 * Maximum number of delivery attempts including the initial delivery.
 	 *
-	 * If omitted, the adapter default applies. If the adapter has no default,
-	 * the broker may retry indefinitely.
+	 * If omitted, the adapter default applies.
 	 */
 	maxAttempts?: number
 	/**
@@ -28,4 +36,8 @@ export type DefinitionEventBridgeConsumerFailureHandling = {
 	 * - other adapters: documented transport-specific equivalent
 	 */
 	deadLetterTarget?: string
+	/**
+	 * Exhausted messages are dead-lettered. Adapters must either honor this
+	 * behavior or reject the registration in `strict` mode.
+	 */
 }
