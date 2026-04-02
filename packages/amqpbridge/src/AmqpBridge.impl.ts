@@ -13,6 +13,7 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createErrorResponse,
 	createInfoMessage,
 	deserializeOtp,
 	EBMessageType,
@@ -813,21 +814,68 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 										},
 									)
 								} catch (error) {
-									const err = new UnhandledError(
-										StatusCode.InternalServerError,
-										'Failed to consume command response message',
-										{
-											error,
-										},
-									)
+									const err =
+										error instanceof UnhandledError
+											? error
+											: UnhandledError.fromError(error, StatusCode.InternalServerError)
 									span.setStatus({
 										code: SpanStatusCode.ERROR,
 										message: err.message,
 									})
 									span.recordException(err)
-									this.logger.error({ err }, 'Failed to consume command response message')
+									this.logger.error({ err }, 'Failed to consume command message')
+
+									try {
+										const command = await this.decodeContent<Command>(
+											msg.content,
+											msg.properties.contentType,
+											msg.properties.contentEncoding,
+										)
+										const responseMessage = createErrorResponse(this.instanceId, command, err.errorCode, err)
+										const headers: Record<string, string | undefined> = {
+											messageType: responseMessage.messageType,
+											senderServiceName: responseMessage.sender.serviceName,
+											senderServiceVersion: responseMessage.sender.serviceVersion,
+											senderServiceTarget: responseMessage.sender.serviceTarget,
+											senderInstanceId: responseMessage.sender.instanceId,
+											receiverServiceName: responseMessage.receiver.serviceName,
+											receiverServiceVersion: responseMessage.receiver.serviceVersion,
+											receiverServiceTarget: responseMessage.receiver.serviceTarget,
+											receiverServiceInstanceId: responseMessage.receiver.instanceId,
+											replyTo: msg.properties.replyTo,
+											eventName: responseMessage.eventName,
+											principalId: responseMessage.principalId,
+											tenantId: responseMessage.tenantId,
+										}
+
+										serializeOtpForAmqpHeader(headers)
+
+										const contentType = 'application/json'
+										const contentEncoding = 'utf-8'
+										const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
+
+										channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
+											messageId: responseMessage.id,
+											timestamp: responseMessage.timestamp,
+											correlationId: msg.properties.correlationId,
+											contentType,
+											contentEncoding,
+											type: responseMessage.messageType,
+											headers,
+											persistent: true,
+										})
+									} catch (responseError) {
+										this.logger.error(
+											{
+												err: responseError,
+												correlationId: msg.properties.correlationId,
+											},
+											'Unable to return AMQP command error response',
+										)
+									}
+
 									if (!noAck) {
-										channel.nack(msg)
+										channel.ack(msg)
 									}
 								}
 							},

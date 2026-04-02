@@ -63,6 +63,7 @@ Late command responses are normalized across invoke-capable bridges in this slic
 Subscription retry and dead-letter handling are capability-driven bridge concerns. Service definitions can declare consumer failure handling in `strict` or `best-effort` mode. In `strict` mode, PURISTA fails startup if the selected adapter cannot honor the requested semantics. Exhausted subscription messages are dead-lettered. Where adapter capabilities allow it, handlers can explicitly return `drop` and `stop-consumer`.
 
 Command registrations now follow the same strict startup validation approach for delivery semantics. If a command requests durable/manual-ack handling that the active bridge cannot provide, startup fails early instead of silently degrading.
+Commands are treated as single request/response operations: they are not retried by subscription retry policies. Handler failures are returned as `CommandErrorResponse` (`UnhandledError` for unhandled failures) instead of triggering transport redelivery loops.
 
 ## Reliability checklist
 

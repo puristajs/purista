@@ -10,6 +10,7 @@ import type {
 	EBMessageAddress,
 } from '@purista/core'
 import {
+	createErrorResponse,
 	deserializeOtp,
 	isCommand,
 	PuristaSpanName,
@@ -118,19 +119,25 @@ export const getCommandHandler = (
 							},
 						)
 					} catch (error) {
-						const err = new UnhandledError(
-							StatusCode.InternalServerError,
-							'Failed to consume command response message',
-							{
-								error,
-							},
-						)
+						const err =
+							error instanceof UnhandledError ? error : UnhandledError.fromError(error, StatusCode.InternalServerError)
 						span.setStatus({
 							code: SpanStatusCode.ERROR,
 							message: err.message,
 						})
 						span.recordException(err)
-						log.error({ err }, 'Failed to consume command response message')
+						log.error({ err }, 'Failed to consume command message')
+
+						const errorResponse = createErrorResponse(this.instanceId, command as Command, err.errorCode, err)
+						const responseTopic = getTopicName.bind(this)(errorResponse)
+						await this.client?.publish(responseTopic, JSON.stringify(errorResponse), {
+							qos: this.config.qosCommand,
+							properties: {
+								messageExpiryInterval: msToSec(this.config.defaultCommandTimeout ?? this.defaultCommandTimeout),
+								contentType: 'application/json',
+								correlationData: Buffer.from(errorResponse.correlationId),
+							},
+						})
 					}
 				},
 			)

@@ -26,6 +26,7 @@ For command invocation, PURISTA applies both:
 - MQTT `messageExpiryInterval` derived from command timeout for non-event command messages
 
 This keeps timeout handling predictable while still preferring broker-native expiry where available.
+Command handlers are single-shot request/response: failures are returned as `CommandErrorResponse` (`UnhandledError`) and are not retried by subscription-style delivery loops.
 
 ## Stream support
 

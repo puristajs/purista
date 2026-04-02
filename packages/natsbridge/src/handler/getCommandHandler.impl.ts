@@ -9,6 +9,7 @@ import type {
 	EBMessageAddress,
 } from '@purista/core'
 import {
+	createErrorResponse,
 	deserializeOtp,
 	isCommand,
 	isCommandErrorResponse,
@@ -158,20 +159,36 @@ export const getCommandHandler = (
 							},
 						)
 					} catch (error) {
-						const err = new UnhandledError(
-							StatusCode.InternalServerError,
-							'Failed to consume command response message',
-							{
-								error,
-							},
-						)
+						const err =
+							error instanceof UnhandledError ? error : UnhandledError.fromError(error, StatusCode.InternalServerError)
 						span.setStatus({
 							code: SpanStatusCode.ERROR,
 							message: err.message,
 						})
 						span.recordException(err)
-						log.error({ err }, 'Failed to consume command response message')
-						throw err
+						log.error({ err }, 'Failed to consume command message')
+
+						const errorResponse = createErrorResponse(this.instanceId, command, err.errorCode, err)
+						const responseData = this.sc.encode(errorResponse)
+						const replyMessage = msg as Partial<Msg>
+
+						if (typeof replyMessage.respond === 'function') {
+							replyMessage.respond(responseData)
+							return
+						}
+
+						if (replyMessage.reply) {
+							this.connection?.publish(replyMessage.reply, responseData)
+							return
+						}
+
+						log.error(
+							{
+								commandId: command.id,
+								correlationId: command.correlationId,
+							},
+							'Unable to return command error response because reply target is missing',
+						)
 					}
 				},
 			)

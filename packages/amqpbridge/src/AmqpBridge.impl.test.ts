@@ -296,6 +296,73 @@ describe('AmqpBridge', () => {
 		)
 	})
 
+	it('acks once and returns command error response when command callback throws', async () => {
+		const bridge = new AmqpBridge()
+		const internals = getBridgeInternals(bridge)
+		const consumeHandlers: Array<(msg: unknown) => Promise<void>> = []
+		const channel = {
+			on: vi.fn(),
+			prefetch: vi.fn().mockResolvedValue(undefined),
+			assertQueue: vi.fn().mockResolvedValue({ queue: 'purista.cmd.Users.1.create' }),
+			bindQueue: vi.fn().mockResolvedValue(undefined),
+			consume: vi.fn().mockImplementation(async (_queue, handler) => {
+				consumeHandlers.push(handler)
+				return { consumerTag: 'ctag-1' }
+			}),
+			ack: vi.fn(),
+			nack: vi.fn(),
+			publish: vi.fn().mockReturnValue(true),
+		}
+		internals.connection = {
+			createChannel: vi.fn().mockResolvedValue(channel),
+		}
+		vi.spyOn(bridge, 'emitMessage').mockResolvedValue({} as never)
+
+		await bridge.registerCommand(
+			{
+				serviceName: 'Users',
+				serviceVersion: '1',
+				serviceTarget: 'create',
+			},
+			async () => {
+				throw new Error('boom')
+			},
+			{} as never,
+			{
+				autoacknowledge: true,
+				durable: true,
+				shared: true,
+			},
+		)
+
+		const command = getCommandMessageMock({
+			receiver: {
+				serviceName: 'Users',
+				serviceVersion: '1',
+				serviceTarget: 'create',
+				instanceId: 'receiver-instance',
+			},
+		})
+
+		await consumeHandlers[0]({
+			content: Buffer.from(JSON.stringify(command)),
+			properties: {
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				correlationId: command.correlationId,
+				headers: {},
+			},
+		})
+
+		expect(channel.ack).toHaveBeenCalledTimes(1)
+		expect(channel.nack).not.toHaveBeenCalled()
+		expect(channel.publish).toHaveBeenCalledOnce()
+		const payloadBuffer = channel.publish.mock.calls[0]?.[2] as Buffer
+		const response = JSON.parse(payloadBuffer.toString()) as { messageType: string; isHandledError: boolean }
+		expect(response.messageType).toBe('commandErrorResponse')
+		expect(response.isHandledError).toBe(false)
+	})
+
 	it('retries subscription messages with incremented attempt header via broker delay queue before dead-lettering', async () => {
 		const bridge = new AmqpBridge()
 		const internals = getBridgeInternals(bridge)

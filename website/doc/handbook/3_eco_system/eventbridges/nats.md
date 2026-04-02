@@ -35,6 +35,7 @@ The default NATS bridge configuration applies a bounded retry budget for JetStre
 JetStream processing timeout/redelivery is configured at broker level via `jetStreamAckWaitMs` (or command-specific timeout override), so redelivery is driven by JetStream rather than a PURISTA timer loop.
 
 For command invocation, PURISTA uses native NATS request/reply timeout handling (`connection.request(..., { timeout })`). This keeps timeout enforcement on broker protocol level instead of running a parallel PURISTA timeout registry for NATS commands.
+Command handlers are single-shot request/response: on failure the bridge responds with `CommandErrorResponse` (`UnhandledError`) and settles the delivery instead of retrying command execution.
 
 For dead-letter handoff safety, PURISTA publishes to the dead-letter subject first and only terminates the original JetStream delivery after publish acknowledgement.
 

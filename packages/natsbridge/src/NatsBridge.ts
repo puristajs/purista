@@ -479,6 +479,12 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 							return
 						}
 
+						if (kind === 'command') {
+							// Commands are request/response and must not be retried by transport redelivery.
+							msg.ack()
+							return
+						}
+
 						msg.nak()
 					})
 			})
