@@ -27,6 +27,8 @@ Durable command consumers now default to:
 
 This makes the safe path the default for durable command workloads instead of requiring every service to override queue settings manually.
 
+For command invocation, PURISTA keeps a pending invocation timeout registry and additionally sets AMQP message `expiration` from the invocation timeout. This combines caller-side timeout determinism with broker-side stale-message expiry.
+
 Durable subscriptions can now also declare `consumerFailureHandling`:
 
 - `maxAttempts` is honored by the bridge through bounded republish

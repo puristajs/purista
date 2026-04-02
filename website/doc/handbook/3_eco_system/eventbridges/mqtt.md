@@ -20,6 +20,13 @@ Delivery behavior depends on your MQTT QoS and retention/session settings:
 
 Durability and replay are broker- and topic-config dependent.
 
+For command invocation, PURISTA applies both:
+
+- caller-side pending invocation timeout tracking
+- MQTT `messageExpiryInterval` derived from command timeout for non-event command messages
+
+This keeps timeout handling predictable while still preferring broker-native expiry where available.
+
 ## Stream support
 
 PURISTA stream runtime (`openStream`) is currently not implemented for MQTT bridge.

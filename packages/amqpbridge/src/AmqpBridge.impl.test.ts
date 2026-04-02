@@ -137,6 +137,48 @@ describe('AmqpBridge', () => {
 		expect(internals.pendingInvocations.size).toBe(0)
 	})
 
+	it('sets AMQP message expiration from command timeout on invoke publish', async () => {
+		const bridge = new AmqpBridge()
+		const internals = getBridgeInternals(bridge)
+		const publish = vi.fn((...args: unknown[]) => {
+			const options = args[3] as Record<string, unknown>
+			const correlationId = String(options.correlationId)
+			void internals.pendingInvocations.resolve(correlationId, { ok: true })
+			return true
+		})
+		internals.channel = { publish }
+
+		const command = getCommandMessageMock({
+			receiver: {
+				serviceName: 'Users',
+				serviceVersion: '1',
+				serviceTarget: 'create',
+				instanceId: 'receiver-instance',
+			},
+			sender: {
+				serviceName: 'Client',
+				serviceVersion: '1',
+				serviceTarget: 'api',
+				instanceId: 'sender-instance',
+			},
+			payload: {
+				payload: { name: 'Ada' },
+				parameter: {},
+			},
+		})
+
+		const { id, correlationId, messageType, timestamp, ...input } = command
+		void id
+		void correlationId
+		void messageType
+		void timestamp
+
+		await expect(bridge.invoke(input, 1234)).resolves.toEqual({ ok: true })
+		expect(publish).toHaveBeenCalledTimes(1)
+		const publishOptions = publish.mock.calls[0]?.[3] as Record<string, unknown>
+		expect(publishOptions.expiration).toBe('1234')
+	})
+
 	it('throws typed service unavailable error when registering command without connection', async () => {
 		const bridge = new AmqpBridge()
 

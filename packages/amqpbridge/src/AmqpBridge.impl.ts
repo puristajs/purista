@@ -645,6 +645,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 						messageId: command.id,
 						timestamp: command.timestamp,
 						correlationId: command.correlationId,
+						expiration: String(Math.max(1, Math.floor(commandTimeout))),
 						contentType: 'application/json',
 						contentEncoding: 'utf-8',
 						type: command.messageType,

@@ -1,7 +1,7 @@
 import { emitWarning } from 'node:process'
 
 import type { Service } from '@purista/core'
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
+import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, StatusCode } from '@purista/core'
 import type { ConsumeMessage } from 'amqplib'
 import amqplib from 'amqplib'
 import { createSandbox } from 'sinon'
@@ -100,6 +100,55 @@ describe('@purista/amqpbridge', () => {
 			ping: true,
 		})
 	})
+
+	it('times out delayed command invocations and keeps later command calls healthy', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const address = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `delayedCommand_${Date.now()}`,
+		} as const
+
+		await eventbridge.registerCommand(
+			address,
+			async message => {
+				await new Promise(resolve => setTimeout(resolve, 150))
+				return getCommandSuccessMessageMock({ delayed: true }, undefined, message)
+			},
+			{} as never,
+			{
+				durable: true,
+				autoacknowledge: false,
+				shared: true,
+			},
+		)
+
+		const command = getCommandMessageMock({
+			receiver: address,
+			sender: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: 'timeout-check',
+				instanceId: 'sender-timeout-check',
+			},
+			payload: {
+				payload: undefined,
+				parameter: {},
+			},
+		})
+
+		try {
+			await expect(eventbridge.invoke(command, 50)).rejects.toMatchObject({ errorCode: StatusCode.GatewayTimeout })
+			await new Promise(resolve => setTimeout(resolve, 250))
+			await expect(eventbridge.invoke(command, 1_000)).resolves.toEqual({ delayed: true })
+		} finally {
+			await eventbridge.unregisterCommand(address)
+		}
+	}, 20_000)
 
 	it('receives subscriptions', async () => {
 		if (!dockerAvailable) {

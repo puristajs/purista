@@ -121,6 +121,55 @@ describe('@purista/natsbridge', () => {
 		expect(true).toBeTruthy()
 	})
 
+	it('times out delayed command invocations and keeps later command calls healthy', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const address = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `delayedCommand_${Date.now()}`,
+		} as const
+
+		await eventbridge.registerCommand(
+			address,
+			async message => {
+				await new Promise(resolve => setTimeout(resolve, 150))
+				return getCommandSuccessMessageMock({ delayed: true }, undefined, message)
+			},
+			{} as never,
+			{
+				durable: false,
+				autoacknowledge: true,
+				shared: true,
+			},
+		)
+
+		const command = getCommandMessageMock({
+			receiver: address,
+			sender: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: 'timeout-check',
+				instanceId: eventbridge.instanceId,
+			},
+			payload: {
+				payload: undefined,
+				parameter: {},
+			},
+		})
+
+		try {
+			await expect(eventbridge.invoke(command, 50)).rejects.toBeInstanceOf(Error)
+			await new Promise(resolve => setTimeout(resolve, 220))
+			await expect(eventbridge.invoke(command, 1_000)).resolves.toEqual({ delayed: true })
+		} finally {
+			await eventbridge.unregisterCommand(address).catch(() => undefined)
+		}
+	}, 20_000)
+
 	it('receives subscriptions', async () => {
 		if (!dockerAvailable) {
 			expect(true).toBe(true)

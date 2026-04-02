@@ -20,6 +20,8 @@ Semantics are driven by the selected Dapr pub/sub component and broker backend.
 
 Always verify your concrete component behavior in integration tests.
 
+For command invocation, timeout behavior is owned by the Dapr sidecar/client request lifecycle (TTL forwarded from PURISTA invoke calls). PURISTA does not emulate broker-style command retries for Dapr invoke paths.
+
 ## Stream support
 
 PURISTA stream runtime (`openStream`) is currently not implemented for Dapr bridge.
