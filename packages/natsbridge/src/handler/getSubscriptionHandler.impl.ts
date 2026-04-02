@@ -5,6 +5,7 @@ import {
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
+	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
@@ -98,6 +99,9 @@ export const getSubscriptionHandler = (
 							},
 						)
 					} catch (error) {
+						if (error instanceof SubscriptionConsumerControlError) {
+							throw error
+						}
 						const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
 							error,
 						})
@@ -111,7 +115,7 @@ export const getSubscriptionHandler = (
 					}
 				},
 			)
-		})
+		}, 'subscription')
 	}
 
 	return handler

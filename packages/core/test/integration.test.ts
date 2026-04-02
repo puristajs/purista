@@ -406,7 +406,7 @@ describe('integration test', () => {
 
 			const result = await subscriptionOne(contextMock.context, payload, parameter)
 
-			expect(result.result).toBe('SUBSCRIPTION:MY INPUT')
+			expect(result).toMatchObject({ result: 'SUBSCRIPTION:MY INPUT' })
 			expect(contextMock.stubs.logger.debug.calledWith('subscription one')).toBeTruthy()
 		})
 

@@ -33,6 +33,7 @@ import {
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
+	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
@@ -353,6 +354,39 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 						msg.ack()
 					})
 					.catch(async err => {
+						if (err instanceof SubscriptionConsumerControlError && kind === 'subscription' && failureHandling) {
+							if (err.outcome === 'deadLetter') {
+								try {
+									await this.publishDeadLetterMessage(
+										subject,
+										address,
+										msg,
+										err.reason ?? 'subscription requested dead-letter',
+										failureHandling,
+									)
+									msg.term('dead-lettered by PURISTA control signal')
+									return
+								} catch (deadLetterError) {
+									this.logger.error(
+										{
+											err: deadLetterError,
+											subject,
+											durableName,
+											deadLetterTarget: failureHandling.deadLetterTarget,
+										},
+										'Failed to publish JetStream dead-letter message for control signal',
+									)
+									msg.nak(err.delayMs ?? failureHandling.retryDelayMs)
+									return
+								}
+							}
+
+							if (err.outcome === 'retry') {
+								msg.nak(err.delayMs ?? failureHandling.retryDelayMs)
+								return
+							}
+						}
+
 						this.logger.error({ err, subject, durableName, kind }, 'JetStream consumer handler failed')
 
 						if (kind === 'subscription' && failureHandling) {

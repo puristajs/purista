@@ -201,8 +201,11 @@ export class EventBridgeBaseClass<ConfigType> {
 	async destroy() {}
 	async start() {}
 
-	runInFlight<T>(fn: () => Promise<T>): Promise<T> {
-		return this.inFlightExecutions.run(fn)
+	runInFlight<T>(
+		fn: () => Promise<T>,
+		kind: 'command' | 'subscription' | 'stream' | 'generic' = 'generic',
+	): Promise<T> {
+		return this.inFlightExecutions.run(fn, kind)
 	}
 
 	async waitForInFlightDrain(timeoutMs = this.defaultCommandTimeout) {
@@ -211,6 +214,10 @@ export class EventBridgeBaseClass<ConfigType> {
 
 	getInFlightExecutionCount() {
 		return this.inFlightExecutions.size
+	}
+
+	getInFlightExecutionCounts() {
+		return this.inFlightExecutions.getCounts()
 	}
 
 	async openStream<Chunk = unknown, Final = unknown>(

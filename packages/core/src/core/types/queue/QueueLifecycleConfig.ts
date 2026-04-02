@@ -8,4 +8,6 @@ export type QueueLifecycleConfig = {
 	autoHeartbeat: boolean
 	maxAttempts: number
 	retryStrategy: QueueRetryStrategy
+	poisonMessageFailureThreshold: number
+	poisonMessageAction: 'none' | 'pause-worker'
 }

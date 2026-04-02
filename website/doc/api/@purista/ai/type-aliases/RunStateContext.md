@@ -8,7 +8,7 @@
 
 > **RunStateContext** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:24](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L24)
+Defined in: [packages/ai/src/runtime/runState.ts:24](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L24)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:24](https://github.com/puristaj
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:27](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L27)
+Defined in: [packages/ai/src/runtime/runState.ts:27](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L27)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:27](https://github.com/puristaj
 
 > **message**: `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:29](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L29)
+Defined in: [packages/ai/src/runtime/runState.ts:29](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L29)
 
 #### id
 
@@ -44,7 +44,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:29](https://github.com/puristaj
 
 > **payload**: `unknown`
 
-Defined in: [packages/ai/src/runtime/runState.ts:28](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L28)
+Defined in: [packages/ai/src/runtime/runState.ts:28](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L28)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:28](https://github.com/puristaj
 
 > **protocol**: [`RunStateProtocolEmitter`](RunStateProtocolEmitter.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:26](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L26)
+Defined in: [packages/ai/src/runtime/runState.ts:26](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L26)
 
 ***
 
@@ -60,4 +60,4 @@ Defined in: [packages/ai/src/runtime/runState.ts:26](https://github.com/puristaj
 
 > **states**: [`StateStoreHelpers`](StateStoreHelpers.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:25](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L25)
+Defined in: [packages/ai/src/runtime/runState.ts:25](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L25)

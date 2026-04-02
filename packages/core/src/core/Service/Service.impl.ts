@@ -89,9 +89,11 @@ import type { StreamMessage } from '../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
 import type { StreamWriter } from '../types/stream/StreamWriter.js'
 import type { Subscription } from '../types/subscription/Subscription.js'
+import { SubscriptionConsumerControlError } from '../types/subscription/SubscriptionConsumerControlError.js'
 import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 import type { SubscriptionDefinitionListResolved } from '../types/subscription/SubscriptionDefinitionList.js'
 import type { SubscriptionFunctionContext } from '../types/subscription/SubscriptionFunctionContext.js'
+import { isSubscriptionHandlerResult } from '../types/subscription/SubscriptionHandlerResult.js'
 import type { TenantId } from '../types/TenantId.js'
 import type { TraceId } from '../types/TraceId.js'
 import { commandTransformInput } from './commandTransformInput.impl.js'
@@ -107,6 +109,11 @@ type ResolvedSubscriptionFailureHandling = {
 	maxAttempts: number
 	retryDelayMs: number
 	deadLetterTarget?: string
+}
+
+type QueueWorkerPauseState = {
+	pausedAt: number
+	reason: string
 }
 
 /**
@@ -162,6 +169,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	private readonly queueDefinitionMap: Map<string, QueueDefinition<any, any, any, any, any>>
 	private queueWorkerTasks = new Set<Promise<void>>()
 	private queueWorkersShouldStop = false
+	private queueWorkerPausedQueues = new Map<string, QueueWorkerPauseState>()
 	private queueMetricsCache = new Map<string, QueueMetrics>()
 	private queueBridgeStarted = false
 
@@ -1117,6 +1125,36 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 	private hasRetryWindowExpired(lifecycle: QueueLifecycleConfig, message: QueueMessage) {
 		return Date.now() - message.createdAt >= lifecycle.retryWindowMs
+	}
+
+	private shouldPauseQueueWorkerForPoisonMessage(
+		lifecycle: QueueLifecycleConfig,
+		message: QueueMessage,
+		reason: string,
+	) {
+		if (lifecycle.poisonMessageAction !== 'pause-worker') {
+			return false
+		}
+		if (lifecycle.poisonMessageFailureThreshold <= 0) {
+			return false
+		}
+
+		const previousReason = message.headers['x-purista-last-retry-reason']
+		if (!previousReason || previousReason !== reason) {
+			return false
+		}
+
+		return message.attempt >= lifecycle.poisonMessageFailureThreshold
+	}
+
+	private pauseQueueWorkerForPoisonMessage(queueName: string, reason: string) {
+		if (this.queueWorkerPausedQueues.has(queueName)) {
+			return
+		}
+		this.queueWorkerPausedQueues.set(queueName, {
+			pausedAt: Date.now(),
+			reason,
+		})
 	}
 
 	private async scheduleRetryOrDeadLetter(
@@ -2081,6 +2119,16 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		})
 
 		while (!this.queueWorkersShouldStop) {
+			const pauseState = this.queueWorkerPausedQueues.get(worker.queueName)
+			if (pauseState) {
+				workerLogger.warn(
+					{ queueName: worker.queueName, reason: pauseState.reason, pausedAt: pauseState.pausedAt },
+					'queue worker is paused',
+				)
+				await this.waitForNextPoll(worker)
+				continue
+			}
+
 			let lease: QueueLease | undefined
 			let jobState: { handled: boolean } | undefined
 			let heartbeat: LeaseHeartbeatController | undefined
@@ -2235,6 +2283,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		if (result.status === 'retry') {
+			const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+			const retryReason = result.reason ?? 'retry_requested'
+			if (this.shouldPauseQueueWorkerForPoisonMessage(lifecycle, lease.message, retryReason)) {
+				this.pauseQueueWorkerForPoisonMessage(worker.queueName, retryReason)
+				await this.deadLetterJob(queueDefinition, worker.queueName, lease, `poison_message:${retryReason}`)
+				return
+			}
 			await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
 				delayMs: result.delayMs,
 				reason: result.reason,
@@ -2246,6 +2301,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			if (result.fatal) {
 				await this.deadLetterJob(queueDefinition, worker.queueName, lease, result.reason)
 			} else {
+				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+				const retryReason = result.reason ?? 'worker_failure'
+				if (this.shouldPauseQueueWorkerForPoisonMessage(lifecycle, lease.message, retryReason)) {
+					this.pauseQueueWorkerForPoisonMessage(worker.queueName, retryReason)
+					await this.deadLetterJob(queueDefinition, worker.queueName, lease, `poison_message:${retryReason}`)
+					return
+				}
 				await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
 					reason: result.reason,
 					delayMs: result.delayMs,
@@ -2292,7 +2354,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		let status: ServiceHealthState['status'] = 'ok'
 		if (!eventBridgeHealthy || !queueBridgeHealthy || queues.some(queue => queue.status === 'error')) {
 			status = 'error'
-		} else if (queues.some(queue => queue.status === 'warn')) {
+		} else if (queues.some(queue => queue.status === 'warn') || this.queueWorkerPausedQueues.size > 0) {
 			status = 'warn'
 		}
 
@@ -2302,6 +2364,28 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			queueBridgeHealthy,
 			queues,
 		}
+	}
+
+	public getInFlightDiagnostics() {
+		return {
+			total: this.eventBridge.getInFlightExecutionCount(),
+			byKind: this.eventBridge.getInFlightExecutionCounts(),
+		}
+	}
+
+	public getQueueWorkerPauseState() {
+		return Object.fromEntries(this.queueWorkerPausedQueues.entries())
+	}
+
+	public pauseQueueWorkers(queueName: string, reason = 'paused_by_operator') {
+		this.queueWorkerPausedQueues.set(queueName, {
+			pausedAt: Date.now(),
+			reason,
+		})
+	}
+
+	public resumeQueueWorkers(queueName: string) {
+		this.queueWorkerPausedQueues.delete(queueName)
 	}
 
 	public async executeStream(message: Readonly<StreamMessage>) {
@@ -2682,6 +2766,41 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						},
 					)
 
+					const consumerFailureHandling = this.resolveSubscriptionFailureHandling(subscription)
+					if (isSubscriptionHandlerResult(result)) {
+						switch (result.status) {
+							case 'ack':
+								return undefined
+							case 'retry': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									result.delayMs &&
+									result.delayMs > 0 &&
+									!this.eventBridge.capabilities.consumerFailureHandling.delayedRetry
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested delayed retry, but ${this.eventBridge.name} does not support delayed retry`,
+									)
+								}
+
+								throw new SubscriptionConsumerControlError('retry', result.reason, result.delayMs)
+							}
+							case 'deadLetter': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									!this.eventBridge.capabilities.consumerFailureHandling.deadLetterTarget
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested dead-letter handling, but ${this.eventBridge.name} does not support dead-letter routing`,
+									)
+								}
+								throw new SubscriptionConsumerControlError('deadLetter', result.reason)
+							}
+						}
+					}
+
 					if (Object.keys(subscription.hooks.afterGuard ?? {}).length) {
 						const guards = subscription.hooks.afterGuard
 
@@ -2797,6 +2916,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					}
 					return undefined
 				} catch (err) {
+					if (err instanceof SubscriptionConsumerControlError) {
+						throw err
+					}
 					logger.error({ err }, 'Error in subscription execution')
 					if (err instanceof HandledError) {
 						// handled errors prevent that the message is re-delivered for retry

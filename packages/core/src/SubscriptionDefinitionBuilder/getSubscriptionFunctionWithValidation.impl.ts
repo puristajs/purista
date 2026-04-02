@@ -6,6 +6,7 @@ import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionBeforeGuardHook } from '../core/types/subscription/SubscriptionBeforeGuardHook.js'
 import type { SubscriptionFunction } from '../core/types/subscription/SubscriptionFunction.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
+import { isSubscriptionHandlerResult } from '../core/types/subscription/SubscriptionHandlerResult.js'
 import type { Schema } from '../schema/index.js'
 import { validate } from '../schema/index.js'
 
@@ -100,6 +101,10 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 			const call = fn.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)
 			return call()
 		})
+
+		if (isSubscriptionHandlerResult(output)) {
+			return output
+		}
 
 		if (!outputPayloadSchema) {
 			return output

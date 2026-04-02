@@ -6,7 +6,7 @@
 
 # Class: InFlightExecutionTracker
 
-Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L1)
+Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L4)
 
 ## Constructors
 
@@ -26,7 +26,7 @@ Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:1](https://github
 
 > **get** **size**(): `number`
 
-Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L4)
+Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L8)
 
 ##### Returns
 
@@ -34,11 +34,23 @@ Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:4](https://github
 
 ## Methods
 
+### getCounts()
+
+> **getCounts**(): `InFlightExecutionCounts`
+
+Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L30)
+
+#### Returns
+
+`InFlightExecutionCounts`
+
+***
+
 ### run()
 
-> **run**\<`T`\>(`fn`): `Promise`\<`T`\>
+> **run**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
-Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L8)
+Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L12)
 
 #### Type Parameters
 
@@ -52,6 +64,10 @@ Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:8](https://github
 
 () => `Promise`\<`T`\>
 
+##### kind?
+
+[`InFlightExecutionKind`](../type-aliases/InFlightExecutionKind.md) = `'generic'`
+
 #### Returns
 
 `Promise`\<`T`\>
@@ -62,7 +78,7 @@ Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:8](https://github
 
 > **waitForIdle**(`timeoutMs`): `Promise`\<`boolean`\>
 
-Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L19)
+Defined in: [core/EventBridge/InFlightExecutionTracker.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/InFlightExecutionTracker.impl.ts#L43)
 
 #### Parameters
 

@@ -128,11 +128,23 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:201](https://github.c
 
 > **getInFlightExecutionCount**(): `number`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:212](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L212)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:215](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L215)
 
 #### Returns
 
 `number`
+
+***
+
+### getInFlightExecutionCounts()
+
+> **getInFlightExecutionCounts**(): `InFlightExecutionCounts`
+
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:219](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L219)
+
+#### Returns
+
+`InFlightExecutionCounts`
 
 ***
 
@@ -156,7 +168,7 @@ Tracer
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:216](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L216)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:223](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L223)
 
 #### Type Parameters
 
@@ -188,7 +200,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:216](https://github.c
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:223](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L223)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:230](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L230)
 
 #### Parameters
 
@@ -216,7 +228,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:223](https://github.c
 
 ### runInFlight()
 
-> **runInFlight**\<`T`\>(`fn`): `Promise`\<`T`\>
+> **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
 Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:204](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L204)
 
@@ -231,6 +243,10 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:204](https://github.c
 ##### fn
 
 () => `Promise`\<`T`\>
+
+##### kind?
+
+`"stream"` | `"command"` | `"subscription"` | `"generic"`
 
 #### Returns
 
@@ -302,7 +318,7 @@ return value of fn
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:232](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L232)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:239](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L239)
 
 #### Parameters
 
@@ -320,7 +336,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:232](https://github.c
 
 > **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:208](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L208)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:211](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L211)
 
 #### Parameters
 

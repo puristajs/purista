@@ -99,6 +99,31 @@ Support depends on the selected event bridge/broker.
 - `mode: 'best-effort'` allows adapter-specific degradation when you explicitly accept weaker semantics.
 - Exhausted subscription messages are dead-lettered. Set `deadLetterTarget` explicitly when you want a stable operator inbox, or rely on the adapter default suffix when the selected bridge documents one.
 
+### Explicit handler outcomes
+
+Subscription handlers can return explicit control outcomes instead of only throwing exceptions:
+
+```typescript
+const builder = myServiceBuilder
+  .getSubscriptionBuilder('mySub', '...')
+  .setSubscriptionFunction(async function (context, payload) {
+    if (payload.temporaryUnavailable) {
+      return { status: 'retry', reason: 'temporary downstream outage', delayMs: 5_000 }
+    }
+
+    if (payload.invalidData) {
+      return { status: 'deadLetter', reason: 'invalid payload for projection' }
+    }
+
+    return { status: 'ack' }
+  })
+```
+
+- `ack` settles the delivery as successful.
+- `retry` signals transient failure with optional delay hint.
+- `deadLetter` routes immediately to dead-letter handling.
+- Thrown errors still map through the configured retry/DLQ policy for backward-compatible behavior.
+
 ### When to use subscription retries vs queues
 
 Use subscription retry / dead-letter handling for reactive push workloads where the broker should make a bounded number of delivery attempts and then move the message aside for investigation.
@@ -144,6 +169,7 @@ const builder = myServiceBuilder
       }
     }
   })
+```
 
 ## Invoke AI agents
 

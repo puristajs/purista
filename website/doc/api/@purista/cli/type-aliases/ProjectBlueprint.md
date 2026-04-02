@@ -8,7 +8,7 @@
 
 > **ProjectBlueprint** = `object`
 
-Defined in: [packages/cli/src/blueprints/types.ts:56](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L56)
+Defined in: [packages/cli/src/blueprints/types.ts:56](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L56)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:56](https://github.com/purista
 
 > `optional` **applies**: (`context`) => `boolean`
 
-Defined in: [packages/cli/src/blueprints/types.ts:62](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L62)
+Defined in: [packages/cli/src/blueprints/types.ts:62](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L62)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:62](https://github.com/purista
 
 > `optional` **conflicts**: [`BlueprintId`](BlueprintId.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:61](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L61)
+Defined in: [packages/cli/src/blueprints/types.ts:61](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L61)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:61](https://github.com/purista
 
 > **create**: (`context`) => [`ProjectBlueprintContribution`](ProjectBlueprintContribution.md)
 
-Defined in: [packages/cli/src/blueprints/types.ts:63](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L63)
+Defined in: [packages/cli/src/blueprints/types.ts:63](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L63)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:63](https://github.com/purista
 
 > `optional` **dependencies**: [`BlueprintId`](BlueprintId.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:60](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L60)
+Defined in: [packages/cli/src/blueprints/types.ts:60](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L60)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:60](https://github.com/purista
 
 > **description**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:58](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L58)
+Defined in: [packages/cli/src/blueprints/types.ts:58](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L58)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:58](https://github.com/purista
 
 > **id**: [`BlueprintId`](BlueprintId.md)
 
-Defined in: [packages/cli/src/blueprints/types.ts:57](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L57)
+Defined in: [packages/cli/src/blueprints/types.ts:57](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L57)
 
 ***
 
@@ -84,4 +84,4 @@ Defined in: [packages/cli/src/blueprints/types.ts:57](https://github.com/purista
 
 > **tags**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:59](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L59)
+Defined in: [packages/cli/src/blueprints/types.ts:59](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L59)

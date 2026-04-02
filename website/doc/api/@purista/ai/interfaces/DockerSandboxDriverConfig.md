@@ -6,7 +6,7 @@
 
 # Interface: DockerSandboxDriverConfig
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:16](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L16)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:16](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L16)
 
 Configuration for the DockerSandboxDriver.
 
@@ -16,7 +16,7 @@ Configuration for the DockerSandboxDriver.
 
 > `optional` **cpus**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:22](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L22)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:22](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L22)
 
 CPU limit for the container (e.g. '1.0')
 
@@ -26,7 +26,7 @@ CPU limit for the container (e.g. '1.0')
 
 > **imageName**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:18](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L18)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:18](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L18)
 
 The name of the Docker image to use for the sandbox
 
@@ -36,7 +36,7 @@ The name of the Docker image to use for the sandbox
 
 > `optional` **memory**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:20](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L20)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:20](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L20)
 
 Memory limit for the container (e.g. '1g')
 
@@ -46,6 +46,6 @@ Memory limit for the container (e.g. '1g')
 
 > `optional` **networkDisabled**: `boolean`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:24](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L24)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:24](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L24)
 
 Disable network access

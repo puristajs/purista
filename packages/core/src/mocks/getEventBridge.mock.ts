@@ -38,6 +38,10 @@ export const getEventBridgeMock = (
 	const isReady = sandbox?.stub().resolves(true) ?? stub().resolves(true)
 	const isHealthy = sandbox?.stub().resolves(true) ?? stub().resolves(true)
 	const destroy = sandbox?.stub().resolves() ?? stub().resolves()
+	const getInFlightExecutionCount = sandbox?.stub().returns(0) ?? stub().returns(0)
+	const getInFlightExecutionCounts =
+		sandbox?.stub().returns({ command: 0, subscription: 0, stream: 0, generic: 0 }) ??
+		stub().returns({ command: 0, subscription: 0, stream: 0, generic: 0 })
 	const defaultCapabilities: EventBridgeCapabilities = {
 		supportsStreams: true,
 		durableCommands: false,
@@ -95,6 +99,8 @@ export const getEventBridgeMock = (
 		isReady,
 		isHealthy,
 		destroy,
+		getInFlightExecutionCount,
+		getInFlightExecutionCounts,
 	}
 
 	return {
@@ -112,6 +118,8 @@ export const getEventBridgeMock = (
 			isReady,
 			isHealthy,
 			destroy,
+			getInFlightExecutionCount,
+			getInFlightExecutionCounts,
 		},
 		mock,
 	}

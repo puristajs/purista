@@ -83,6 +83,34 @@ the message
 
 ***
 
+### getInFlightExecutionCount()
+
+> **getInFlightExecutionCount**(): `number`
+
+Defined in: [core/EventBridge/types/EventBridge.ts:130](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L130)
+
+Number of currently running handlers across all work kinds.
+
+#### Returns
+
+`number`
+
+***
+
+### getInFlightExecutionCounts()
+
+> **getInFlightExecutionCounts**(): `Record`\<`"command"` \| `"subscription"` \| `"stream"` \| `"generic"`, `number`\>
+
+Defined in: [core/EventBridge/types/EventBridge.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L135)
+
+Number of currently running handlers grouped by work kind.
+
+#### Returns
+
+`Record`\<`"command"` \| `"subscription"` \| `"stream"` \| `"generic"`, `number`\>
+
+***
+
 ### invoke()
 
 > **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>

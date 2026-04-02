@@ -164,7 +164,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 						for (const [_, subscription] of Array.from(this.subscriptions)) {
 							if (isMessageMatchingSubscription(this.logger, message, subscription)) {
 								isAtLeastDeliveredOnce = true
-								this.runInFlight(() => subscription.cb(message))
+								this.runInFlight(() => subscription.cb(message), 'subscription')
 									.then(result => {
 										if (subscription.emitEventName && result) {
 											return this.emitMessage(result)
@@ -195,7 +195,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 							}
 
 							isAtLeastDeliveredOnce = true
-							this.runInFlight(() => mapEntry(message as Readonly<Command>))
+							this.runInFlight(() => mapEntry(message as Readonly<Command>), 'command')
 								.then(result => {
 									return this.emitMessage(result)
 								})

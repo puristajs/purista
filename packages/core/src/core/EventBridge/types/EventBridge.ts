@@ -123,4 +123,14 @@ export interface EventBridge {
 	 * Shut down event bridge as gracefully as possible
 	 */
 	destroy(): Promise<void>
+
+	/**
+	 * Number of currently running handlers across all work kinds.
+	 */
+	getInFlightExecutionCount(): number
+
+	/**
+	 * Number of currently running handlers grouped by work kind.
+	 */
+	getInFlightExecutionCounts(): Record<'command' | 'subscription' | 'stream' | 'generic', number>
 }

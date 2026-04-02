@@ -8,7 +8,7 @@
 
 > **SkillReferenceDocument** = `object`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:23](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L23)
+Defined in: [packages/ai/src/skills/fileSystem.ts:23](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/skills/fileSystem.ts#L23)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:23](https://github.com/purista
 
 > **content**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:27](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L27)
+Defined in: [packages/ai/src/skills/fileSystem.ts:27](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/skills/fileSystem.ts#L27)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:27](https://github.com/purista
 
 > **path**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:25](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L25)
+Defined in: [packages/ai/src/skills/fileSystem.ts:25](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/skills/fileSystem.ts#L25)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:25](https://github.com/purista
 
 > **relativePath**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:26](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L26)
+Defined in: [packages/ai/src/skills/fileSystem.ts:26](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/skills/fileSystem.ts#L26)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:26](https://github.com/purista
 
 > **skillName**: `string`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:24](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L24)
+Defined in: [packages/ai/src/skills/fileSystem.ts:24](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/skills/fileSystem.ts#L24)

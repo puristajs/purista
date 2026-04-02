@@ -11,6 +11,8 @@ export const defaultQueueLifecycleConfig: QueueLifecycleConfig = {
 	retryWindowMs: 24 * 60 * 60 * 1000, // 24 hours
 	autoHeartbeat: true,
 	maxAttempts: 10,
+	poisonMessageFailureThreshold: 0,
+	poisonMessageAction: 'none',
 	retryStrategy: {
 		initialDelayMs: 1_000,
 		maxDelayMs: 120_000,

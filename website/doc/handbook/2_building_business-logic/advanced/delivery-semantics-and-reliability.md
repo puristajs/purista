@@ -35,6 +35,21 @@ PURISTA now defaults to strict startup validation for reliability-sensitive comm
 - if a handler requests delivery behavior a bridge cannot honor, startup fails in strict mode
 - late command responses after timeout are ignored with warning where applicable
 - stream sessions use bounded timeout handling and terminal-frame enforcement instead of open-ended waits
+- queue workers apply bounded retries and dead-letter routing using lifecycle defaults unless you override them
+
+### Canonical defaults table
+
+| area | default | behavior |
+| --- | --- | --- |
+| command invocation timeout | bridge `defaultCommandTimeout` (30s unless configured) | caller timeout is terminal; late responses are ignored with warning |
+| stream invocation timeout | bridge `defaultCommandTimeout` (unless stream timeout override is configured) | late frames after timeout/terminal are ignored with warning |
+| subscription failure handling | `mode: 'strict'`, `maxAttempts: 1`, `retryDelayMs: 0` when configured without overrides | startup rejects unsupported semantics; exhausted attempts dead-letter when configured |
+| queue lifecycle retry | `maxAttempts: 10`, exponential retry strategy, `retryWindowMs: 24h` | retries stay bounded and route to DLQ after budget/window exhaustion |
+
+## Drain observability
+
+Event bridges expose in-flight diagnostics by work kind (`command`, `subscription`, `stream`, `generic`).
+Services can use this during shutdown and operator diagnostics to verify that drain reached zero before teardown.
 
 ## Streams and reliability
 

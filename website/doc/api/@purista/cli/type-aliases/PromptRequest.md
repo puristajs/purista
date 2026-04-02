@@ -8,7 +8,7 @@
 
 > **PromptRequest**\<`TKey`\> = [`InputPromptRequest`](InputPromptRequest.md)\<`TKey`\> \| [`ConfirmPromptRequest`](ConfirmPromptRequest.md)\<`TKey`\> \| [`SelectPromptRequest`](SelectPromptRequest.md)\<`TKey`\>
 
-Defined in: [packages/cli/src/core/types.ts:78](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/core/types.ts#L78)
+Defined in: [packages/cli/src/core/types.ts:78](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/core/types.ts#L78)
 
 ## Type Parameters
 

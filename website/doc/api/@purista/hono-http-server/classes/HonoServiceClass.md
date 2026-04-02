@@ -84,7 +84,7 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:117](https
 
 > `protected` **activeStreamSessions**: `Map`\<`string`, \{ `cancelled`: `boolean`; `cancelReason?`: `string`; `onCancel`: (`reason?`) => `void`[]; \}\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:65
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:69
 
 #### Inherited from
 
@@ -106,7 +106,7 @@ The Hono instance
 
 > **commandDefinitionList**: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:76
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:81
 
 #### Inherited from
 
@@ -118,7 +118,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:76
 
 > `protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../../core/type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:61
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:65
 
 #### Inherited from
 
@@ -130,7 +130,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:61
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:84
 
 #### apiMountPath
 
@@ -326,7 +326,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **isStarted**: `boolean`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:81
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:86
 
 #### Inherited from
 
@@ -360,7 +360,7 @@ The OpenApiBuilder instance
 
 > `protected` **queueDefinitionList**: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:63
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:67
 
 #### Inherited from
 
@@ -372,7 +372,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:63
 
 > `protected` **queueWorkerDefinitionList**: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:64
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:68
 
 #### Inherited from
 
@@ -384,7 +384,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:64
 
 > **resources**: [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:80
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:85
 
 #### Inherited from
 
@@ -432,7 +432,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **streamDefinitionList**: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:78
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:83
 
 #### Inherited from
 
@@ -444,7 +444,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:78
 
 > `protected` **streams**: `Map`\<`string`, [`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:62
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:66
 
 #### Inherited from
 
@@ -456,7 +456,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:62
 
 > **subscriptionDefinitionList**: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:77
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:82
 
 #### Inherited from
 
@@ -468,7 +468,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:77
 
 > `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../../core/type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:60
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:64
 
 #### Inherited from
 
@@ -494,7 +494,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **get** **name**(): `string`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:83
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:88
 
 ##### Returns
 
@@ -576,7 +576,7 @@ Stop and destroy the current service
 
 > **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:148
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:155
 
 Called when a command is received by the service
 
@@ -602,7 +602,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:192
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:208
 
 #### Parameters
 
@@ -624,7 +624,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:192
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:194
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:210
 
 #### Parameters
 
@@ -650,7 +650,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:194
 
 > `protected` **getAgentInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `agentInvokes?`): \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`receiver`, `payload`, `parameter`) => [`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:105
 
 #### Type Parameters
 
@@ -726,7 +726,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
 
 > `protected` **getConsumeStreamFunction**\<`StreamInvokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `streamInvokes?`): [`OpenStreamFunction`](../../core/type-aliases/OpenStreamFunction.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:140
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:147
 
 #### Type Parameters
 
@@ -770,7 +770,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:140
 
 > **getContextFunctions**(`logger`, `queueNamespace?`): [`ContextBase`](../../core/type-aliases/ContextBase.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:142
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:149
 
 #### Parameters
 
@@ -796,7 +796,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:142
 
 > `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `emitList?`): \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`) => `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:141
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:148
 
 #### Type Parameters
 
@@ -868,11 +868,35 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:141
 
 ***
 
+### getInFlightDiagnostics()
+
+> **getInFlightDiagnostics**(): `object`
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:199
+
+#### Returns
+
+`object`
+
+##### byKind
+
+> **byKind**: `Record`\<`"stream"` \| `"command"` \| `"subscription"` \| `"generic"`, `number`\>
+
+##### total
+
+> **total**: `number`
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getInFlightDiagnostics`](../../core/classes/Service.md#getinflightdiagnostics)
+
+***
+
 ### getInvokeFunction()
 
 > `protected` **getInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `invokes?`): \<`Payload`, `Parameter`\>(`receiver`, `invokePayload`, `invokeparameter`, `contentType?`, `contentEncoding?`) => `Promise`\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:99
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:104
 
 #### Type Parameters
 
@@ -952,7 +976,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:99
 
 > `protected` **getQueueNamespace**(`queueInvokes?`, `traceId?`, `principalId?`, `tenantId?`): `object`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:110
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:115
 
 #### Parameters
 
@@ -990,11 +1014,27 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:110
 
 ***
 
+### getQueueWorkerPauseState()
+
+> **getQueueWorkerPauseState**(): `object`
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:203
+
+#### Returns
+
+`object`
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getQueueWorkerPauseState`](../../core/classes/Service.md#getqueueworkerpausestate)
+
+***
+
 ### getServiceHealth()
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../../core/type-aliases/ServiceHealthState.md)\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:191
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:198
 
 #### Returns
 
@@ -1040,7 +1080,7 @@ Tracer
 
 > `protected` **initializeEventbridgeConnect**(`commandDefinitionList`, `subscriptions`, `streams`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:91
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:96
 
 Connect service to event bridge to receive commands and command responses
 
@@ -1072,7 +1112,7 @@ Connect service to event bridge to receive commands and command responses
 
 > `protected` **initializeQueues**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:92
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:97
 
 #### Returns
 
@@ -1134,6 +1174,32 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:635](https
 
 ***
 
+### pauseQueueWorkers()
+
+> **pauseQueueWorkers**(`queueName`, `reason?`): `void`
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:206
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+##### reason?
+
+`string`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`pauseQueueWorkers`](../../core/classes/Service.md#pausequeueworkers)
+
+***
+
 ### prepareDestroy()
 
 > **prepareDestroy**(): `object`
@@ -1178,7 +1244,7 @@ honoService
 
 > **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:184
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:191
 
 #### Parameters
 
@@ -1222,7 +1288,7 @@ Adds the endpoints of the service commands to the Hono router
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:193
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:209
 
 #### Parameters
 
@@ -1244,7 +1310,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:193
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:195
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:211
 
 #### Parameters
 
@@ -1262,11 +1328,33 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:195
 
 ***
 
+### resumeQueueWorkers()
+
+> **resumeQueueWorkers**(`queueName`): `void`
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:207
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`resumeQueueWorkers`](../../core/classes/Service.md#resumequeueworkers)
+
+***
+
 ### sendServiceInfo()
 
 > `protected` **sendServiceInfo**(`infoType`, `target?`, `payload?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:98
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:103
 
 Broadcast service info message
 
@@ -1475,7 +1563,7 @@ return value of fn
 
 > `protected` **startQueueWorkers**(): `void`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:185
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:192
 
 #### Returns
 
@@ -1491,7 +1579,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:185
 
 > `protected` **stopQueueWorkers**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:186
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:193
 
 #### Returns
 

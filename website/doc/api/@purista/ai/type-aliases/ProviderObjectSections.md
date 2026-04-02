@@ -8,7 +8,7 @@
 
 > **ProviderObjectSections**\<`T`\> = `Record`\<`string`, `unknown` \| `undefined`\> \| (`partial`) => `Record`\<`string`, `unknown` \| `undefined`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:83](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/providers/runtime/ModelProvider.ts#L83)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:83](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L83)
 
 ## Type Parameters
 

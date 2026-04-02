@@ -6,6 +6,7 @@ import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
+import type { SubscriptionHandlerResult } from './SubscriptionHandlerResult.js'
 /**
  * CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
  *
@@ -27,4 +28,4 @@ export type SubscriptionFunction<
 	context: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,
-) => Promise<FunctionOutputType>
+) => Promise<FunctionOutputType | SubscriptionHandlerResult>

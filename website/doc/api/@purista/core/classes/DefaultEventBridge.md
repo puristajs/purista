@@ -322,15 +322,43 @@ EBMessage
 
 > **getInFlightExecutionCount**(): `number`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:212](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L212)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:215](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L215)
+
+Number of currently running handlers across all work kinds.
 
 #### Returns
 
 `number`
 
+#### Implementation of
+
+[`EventBridge`](../interfaces/EventBridge.md).[`getInFlightExecutionCount`](../interfaces/EventBridge.md#getinflightexecutioncount)
+
 #### Inherited from
 
 [`EventBridgeBaseClass`](EventBridgeBaseClass.md).[`getInFlightExecutionCount`](EventBridgeBaseClass.md#getinflightexecutioncount)
+
+***
+
+### getInFlightExecutionCounts()
+
+> **getInFlightExecutionCounts**(): `InFlightExecutionCounts`
+
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:219](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L219)
+
+Number of currently running handlers grouped by work kind.
+
+#### Returns
+
+`InFlightExecutionCounts`
+
+#### Implementation of
+
+[`EventBridge`](../interfaces/EventBridge.md).[`getInFlightExecutionCounts`](../interfaces/EventBridge.md#getinflightexecutioncounts)
+
+#### Inherited from
+
+[`EventBridgeBaseClass`](EventBridgeBaseClass.md).[`getInFlightExecutionCounts`](EventBridgeBaseClass.md#getinflightexecutioncounts)
 
 ***
 
@@ -579,7 +607,7 @@ the function to be called if a matching message arrives
 
 ### runInFlight()
 
-> **runInFlight**\<`T`\>(`fn`): `Promise`\<`T`\>
+> **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
 Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:204](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L204)
 
@@ -594,6 +622,10 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:204](https://github.c
 ##### fn
 
 () => `Promise`\<`T`\>
+
+##### kind?
+
+`"stream"` | `"command"` | `"subscription"` | `"generic"`
 
 #### Returns
 
@@ -759,7 +791,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:425](https://github.c
 
 > **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:208](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L208)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:211](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L211)
 
 #### Parameters
 

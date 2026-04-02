@@ -8,7 +8,7 @@
 
 > **SessionHelpers** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:573](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L573)
+Defined in: [packages/ai/src/runtime/context.ts:573](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L573)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:573](https://github.com/puristaj
 
 > **identity**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:597](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L597)
+Defined in: [packages/ai/src/runtime/context.ts:597](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L597)
 
 Identity metadata used to build scoped session ids.
 
@@ -46,7 +46,7 @@ Identity metadata used to build scoped session ids.
 
 > **delete**(`sessionId?`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:589](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L589)
+Defined in: [packages/ai/src/runtime/context.ts:589](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L589)
 
 Delete a session. If no id is provided, the default scoped id is used.
 
@@ -66,7 +66,7 @@ Delete a session. If no id is provided, the default scoped id is used.
 
 > **load**(`sessionId?`): `Promise`\<[`ConversationStoreRecord`](ConversationStoreRecord.md) \| `undefined`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:577](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L577)
+Defined in: [packages/ai/src/runtime/context.ts:577](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L577)
 
 Load the session record. If no id is provided, the default scoped id is used.
 
@@ -86,7 +86,7 @@ Load the session record. If no id is provided, the default scoped id is used.
 
 > **resolveSessionId**(`sessionId?`): `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:593](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L593)
+Defined in: [packages/ai/src/runtime/context.ts:593](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L593)
 
 Returns the effective scoped session id for explicit or implicit usage.
 
@@ -106,7 +106,7 @@ Returns the effective scoped session id for explicit or implicit usage.
 
 > **save**(`record`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:581](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L581)
+Defined in: [packages/ai/src/runtime/context.ts:581](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L581)
 
 Save session data. If `sessionId` is omitted, the default scoped id is used.
 

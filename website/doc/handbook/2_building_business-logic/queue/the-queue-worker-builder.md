@@ -52,6 +52,19 @@ All helpers emit OpenTelemetry spans so you get timing and failure statistics au
 
 Unhandled exceptions trigger `context.job.retry()` automatically until `maxAttempts` is exceeded. Use `HandledError` to control the reason/status stored alongside the job. For critical failures, call `context.job.moveToDeadLetter()` yourself to bypass retries.
 
+### Poison message controls
+
+Queue lifecycle supports optional poison handling:
+
+- `poisonMessageFailureThreshold`: number of repeated identical failures before action triggers
+- `poisonMessageAction: 'pause-worker'`: pauses workers for that queue when threshold is reached
+
+When enabled, operators can:
+
+- inspect paused queues via `service.getQueueWorkerPauseState()`
+- resume processing with `service.resumeQueueWorkers(queueName)`
+- pause manually with `service.pauseQueueWorkers(queueName, reason)`
+
 ## Workers + resources
 
 Workers share the same service resources defined through the `ServiceBuilder`. Inject DB clients, OpenAI SDKs, etc., via `serviceBuilder.addResource(...)` and they become available as `context.resources.<name>` inside the worker.

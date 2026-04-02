@@ -44,6 +44,22 @@ Defined in: [core/types/queue/QueueLifecycleConfig.ts:5](https://github.com/puri
 
 ***
 
+### poisonMessageAction
+
+> **poisonMessageAction**: `"none"` \| `"pause-worker"`
+
+Defined in: [core/types/queue/QueueLifecycleConfig.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueLifecycleConfig.ts#L12)
+
+***
+
+### poisonMessageFailureThreshold
+
+> **poisonMessageFailureThreshold**: `number`
+
+Defined in: [core/types/queue/QueueLifecycleConfig.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueLifecycleConfig.ts#L11)
+
+***
+
 ### retryStrategy
 
 > **retryStrategy**: [`QueueRetryStrategy`](QueueRetryStrategy.md)

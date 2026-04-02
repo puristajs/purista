@@ -8,7 +8,7 @@
 
 > **createSandboxRepoSeedFiles**(`files`, `layout?`): [`SandboxSeedFile`](../type-aliases/SandboxSeedFile.md)[]
 
-Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:50](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/workspaceLayout.ts#L50)
+Defined in: [packages/ai/src/sandbox/workspaceLayout.ts:50](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/workspaceLayout.ts#L50)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **createEvaluationResult**(`input`): [`EvaluationResult`](../type-aliases/EvaluationResult.md)
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:37](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/evaluation/helpers.ts#L37)
+Defined in: [packages/ai/src/evaluation/helpers.ts:37](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L37)
 
 Creates a normalized evaluation summary from raw samples.
 

@@ -8,7 +8,7 @@
 
 > **AgentReflectionHelpers** = `object`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:49](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/reflection.ts#L49)
+Defined in: [packages/ai/src/runtime/reflection.ts:49](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/reflection.ts#L49)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:49](https://github.com/purist
 
 > **run**\<`TDraft`, `TCritique`\>(`options`): `Promise`\<[`ReflectionLoopResult`](ReflectionLoopResult.md)\<`TDraft`, `TCritique`\>\>
 
-Defined in: [packages/ai/src/runtime/reflection.ts:50](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/reflection.ts#L50)
+Defined in: [packages/ai/src/runtime/reflection.ts:50](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/reflection.ts#L50)
 
 #### Type Parameters
 

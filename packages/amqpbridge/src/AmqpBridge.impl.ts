@@ -32,6 +32,7 @@ import {
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
+	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
@@ -708,108 +709,110 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			queue.queue,
 			async msg => {
 				const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
-				return this.runInFlight(() =>
-					this.startActiveSpan(
-						PuristaSpanName.EventBridgeCommandReceived,
-						{ kind: SpanKind.CONSUMER },
-						context,
-						async span => {
-							if (!msg) {
-								return
-							}
-							try {
-								const command = await this.decodeContent<Command>(
-									msg.content,
-									msg.properties.contentType,
-									msg.properties.contentEncoding,
-								)
-
-								command.otp = serializeOtp()
-
-								const result = await cb(command)
-
-								const returnContext = deserializeOtp(this.logger, result.otp)
-								return this.startActiveSpan(
-									PuristaSpanName.EventBridgeCommandResponseSent,
-									{ kind: SpanKind.PRODUCER },
-									returnContext,
-									async subSpan => {
-										const responseMessage = {
-											...result,
-											otp: serializeOtp(),
-											sender: {
-												...result.sender,
-												instanceId: this.instanceId,
-											},
-										}
-
-										subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
-										subSpan.setAttribute(PuristaSpanTag.SenderServiceVersion, responseMessage.sender.serviceVersion)
-										subSpan.setAttribute(PuristaSpanTag.SenderServiceTarget, responseMessage.sender.serviceTarget)
-
-										if (responseMessage.eventName) {
-											subSpan.addEvent(responseMessage.eventName)
-										}
-
-										const headers: Record<string, string | undefined> = {
-											messageType: responseMessage.messageType,
-											senderServiceName: responseMessage.sender.serviceName,
-											senderServiceVersion: responseMessage.sender.serviceVersion,
-											senderServiceTarget: responseMessage.sender.serviceTarget,
-											senderInstanceId: responseMessage.sender.instanceId,
-											receiverServiceName: responseMessage.receiver.serviceName,
-											receiverServiceVersion: responseMessage.receiver.serviceVersion,
-											receiverServiceTarget: responseMessage.receiver.serviceTarget,
-											receiverServiceInstanceId: responseMessage.receiver.instanceId,
-											replyTo: msg.properties.replyTo,
-											eventName: responseMessage.eventName,
-											principalId: responseMessage.principalId,
-											tenantId: responseMessage.tenantId,
-										}
-
-										serializeOtpForAmqpHeader(headers)
-
-										const contentType = 'application/json'
-										const contentEncoding = 'utf-8'
-
-										const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
-
-										channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
-											messageId: responseMessage.id,
-											timestamp: responseMessage.timestamp,
-											correlationId: msg.properties.correlationId,
-											contentType,
-											contentEncoding,
-											type: responseMessage.messageType,
-											headers,
-											persistent: true,
-										})
-
-										if (!noAck) {
-											channel.ack(msg)
-										}
-									},
-								)
-							} catch (error) {
-								const err = new UnhandledError(
-									StatusCode.InternalServerError,
-									'Failed to consume command response message',
-									{
-										error,
-									},
-								)
-								span.setStatus({
-									code: SpanStatusCode.ERROR,
-									message: err.message,
-								})
-								span.recordException(err)
-								this.logger.error({ err }, 'Failed to consume command response message')
-								if (!noAck) {
-									channel.nack(msg)
+				return this.runInFlight(
+					() =>
+						this.startActiveSpan(
+							PuristaSpanName.EventBridgeCommandReceived,
+							{ kind: SpanKind.CONSUMER },
+							context,
+							async span => {
+								if (!msg) {
+									return
 								}
-							}
-						},
-					),
+								try {
+									const command = await this.decodeContent<Command>(
+										msg.content,
+										msg.properties.contentType,
+										msg.properties.contentEncoding,
+									)
+
+									command.otp = serializeOtp()
+
+									const result = await cb(command)
+
+									const returnContext = deserializeOtp(this.logger, result.otp)
+									return this.startActiveSpan(
+										PuristaSpanName.EventBridgeCommandResponseSent,
+										{ kind: SpanKind.PRODUCER },
+										returnContext,
+										async subSpan => {
+											const responseMessage = {
+												...result,
+												otp: serializeOtp(),
+												sender: {
+													...result.sender,
+													instanceId: this.instanceId,
+												},
+											}
+
+											subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
+											subSpan.setAttribute(PuristaSpanTag.SenderServiceVersion, responseMessage.sender.serviceVersion)
+											subSpan.setAttribute(PuristaSpanTag.SenderServiceTarget, responseMessage.sender.serviceTarget)
+
+											if (responseMessage.eventName) {
+												subSpan.addEvent(responseMessage.eventName)
+											}
+
+											const headers: Record<string, string | undefined> = {
+												messageType: responseMessage.messageType,
+												senderServiceName: responseMessage.sender.serviceName,
+												senderServiceVersion: responseMessage.sender.serviceVersion,
+												senderServiceTarget: responseMessage.sender.serviceTarget,
+												senderInstanceId: responseMessage.sender.instanceId,
+												receiverServiceName: responseMessage.receiver.serviceName,
+												receiverServiceVersion: responseMessage.receiver.serviceVersion,
+												receiverServiceTarget: responseMessage.receiver.serviceTarget,
+												receiverServiceInstanceId: responseMessage.receiver.instanceId,
+												replyTo: msg.properties.replyTo,
+												eventName: responseMessage.eventName,
+												principalId: responseMessage.principalId,
+												tenantId: responseMessage.tenantId,
+											}
+
+											serializeOtpForAmqpHeader(headers)
+
+											const contentType = 'application/json'
+											const contentEncoding = 'utf-8'
+
+											const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
+
+											channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
+												messageId: responseMessage.id,
+												timestamp: responseMessage.timestamp,
+												correlationId: msg.properties.correlationId,
+												contentType,
+												contentEncoding,
+												type: responseMessage.messageType,
+												headers,
+												persistent: true,
+											})
+
+											if (!noAck) {
+												channel.ack(msg)
+											}
+										},
+									)
+								} catch (error) {
+									const err = new UnhandledError(
+										StatusCode.InternalServerError,
+										'Failed to consume command response message',
+										{
+											error,
+										},
+									)
+									span.setStatus({
+										code: SpanStatusCode.ERROR,
+										message: err.message,
+									})
+									span.recordException(err)
+									this.logger.error({ err }, 'Failed to consume command response message')
+									if (!noAck) {
+										channel.nack(msg)
+									}
+								}
+							},
+						),
+					'command',
 				)
 			},
 			{ noAck },
@@ -915,78 +918,107 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
 
 				const spanContext = context ? trace.getSpanContext(context) : undefined
-				this.runInFlight(() =>
-					this.startActiveSpan(
-						PuristaSpanName.EventBridgeSubscriptionEventReceived,
-						{ kind: SpanKind.CONSUMER, links: spanContext ? [{ context: spanContext }] : [] },
-						context,
-						async span => {
-							if (!msg) {
-								return
-							}
-							try {
-								const message = await this.decodeContent<EBMessage>(
-									msg.content,
-									msg.properties.contentType,
-									msg.properties.contentEncoding,
-								)
-
-								span.setAttribute(PuristaSpanTag.SenderServiceName, message.sender.serviceName)
-								span.setAttribute(PuristaSpanTag.SenderServiceVersion, message.sender.serviceVersion)
-								span.setAttribute(PuristaSpanTag.SenderServiceTarget, message.sender.serviceTarget)
-
-								if (message.eventName) {
-									span.addEvent(message.eventName)
+				return this.runInFlight(
+					() =>
+						this.startActiveSpan(
+							PuristaSpanName.EventBridgeSubscriptionEventReceived,
+							{ kind: SpanKind.CONSUMER, links: spanContext ? [{ context: spanContext }] : [] },
+							context,
+							async span => {
+								if (!msg) {
+									return
 								}
+								try {
+									const message = await this.decodeContent<EBMessage>(
+										msg.content,
+										msg.properties.contentType,
+										msg.properties.contentEncoding,
+									)
 
-								message.otp = serializeOtp()
+									span.setAttribute(PuristaSpanTag.SenderServiceName, message.sender.serviceName)
+									span.setAttribute(PuristaSpanTag.SenderServiceVersion, message.sender.serviceVersion)
+									span.setAttribute(PuristaSpanTag.SenderServiceTarget, message.sender.serviceTarget)
 
-								const result = await cb(message)
-								if (subscription.emitEventName && result) {
-									await this.emitMessage(result)
-								}
-								if (!noAck) {
-									channel.ack(msg)
-								}
-							} catch (error) {
-								const err = new UnhandledError(
-									StatusCode.InternalServerError,
-									'Failed to consume subscription message',
-									{
-										error,
-										subscription,
-									},
-								)
-								span.setStatus({
-									code: SpanStatusCode.ERROR,
-									message: err.message,
-								})
-								span.recordException(err)
-								this.logger.error({ err }, 'Failed to consume subscription message')
-								if (!noAck) {
-									const failureReason = this.getSubscriptionFailureReason(err)
-									if (failureHandling) {
-										const attempt = this.getConsumerAttempt(msg.properties.headers)
-										if (attempt >= (failureHandling.maxAttempts ?? 5)) {
-											await this.deadLetterSubscriptionMessage(channel, subscription, msg, failureReason)
-										} else {
-											const retryDelayMs = failureHandling.retryDelayMs ?? 0
-											await this.retrySubscriptionMessage(
-												channel,
-												queue.queue,
-												msg,
-												attempt + 1,
-												retryDelayMs,
-												!!subscription.eventBridgeConfig.durable,
-											)
+									if (message.eventName) {
+										span.addEvent(message.eventName)
+									}
+
+									message.otp = serializeOtp()
+
+									const result = await cb(message)
+									if (subscription.emitEventName && result) {
+										await this.emitMessage(result)
+									}
+									if (!noAck) {
+										channel.ack(msg)
+									}
+								} catch (error) {
+									if (error instanceof SubscriptionConsumerControlError) {
+										if (!noAck) {
+											if (error.outcome === 'deadLetter') {
+												await this.deadLetterSubscriptionMessage(
+													channel,
+													subscription,
+													msg,
+													error.reason ?? 'subscription requested dead-letter',
+												)
+												return
+											}
+											if (error.outcome === 'retry') {
+												const attempt = this.getConsumerAttempt(msg.properties.headers)
+												const retryDelayMs = error.delayMs ?? failureHandling?.retryDelayMs ?? 0
+												await this.retrySubscriptionMessage(
+													channel,
+													queue.queue,
+													msg,
+													attempt + 1,
+													retryDelayMs,
+													!!subscription.eventBridgeConfig.durable,
+												)
+												return
+											}
 										}
-									} else {
-										channel.nack(msg)
+										return
+									}
+									const err = new UnhandledError(
+										StatusCode.InternalServerError,
+										'Failed to consume subscription message',
+										{
+											error,
+											subscription,
+										},
+									)
+									span.setStatus({
+										code: SpanStatusCode.ERROR,
+										message: err.message,
+									})
+									span.recordException(err)
+									this.logger.error({ err }, 'Failed to consume subscription message')
+									if (!noAck) {
+										const failureReason = this.getSubscriptionFailureReason(err)
+										if (failureHandling) {
+											const attempt = this.getConsumerAttempt(msg.properties.headers)
+											if (attempt >= (failureHandling.maxAttempts ?? 5)) {
+												await this.deadLetterSubscriptionMessage(channel, subscription, msg, failureReason)
+											} else {
+												const retryDelayMs = failureHandling.retryDelayMs ?? 0
+												await this.retrySubscriptionMessage(
+													channel,
+													queue.queue,
+													msg,
+													attempt + 1,
+													retryDelayMs,
+													!!subscription.eventBridgeConfig.durable,
+												)
+											}
+										} else {
+											channel.nack(msg)
+										}
 									}
 								}
-							}
-						},
-					),
+							},
+						),
+					'subscription',
 				)
 			},
 			{ noAck },

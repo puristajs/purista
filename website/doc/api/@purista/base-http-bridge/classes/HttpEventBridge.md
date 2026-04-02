@@ -282,13 +282,57 @@ the message
 
 Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
+Number of currently running handlers across all work kinds.
+
 #### Returns
 
 `number`
 
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`getInFlightExecutionCount`](../../core/interfaces/EventBridge.md#getinflightexecutioncount)
+
 #### Inherited from
 
 [`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`getInFlightExecutionCount`](../../core/classes/EventBridgeBaseClass.md#getinflightexecutioncount)
+
+***
+
+### getInFlightExecutionCounts()
+
+> **getInFlightExecutionCounts**(): `object`
+
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
+
+Number of currently running handlers grouped by work kind.
+
+#### Returns
+
+`object`
+
+##### command
+
+> **command**: `number`
+
+##### generic
+
+> **generic**: `number`
+
+##### stream
+
+> **stream**: `number`
+
+##### subscription
+
+> **subscription**: `number`
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`getInFlightExecutionCounts`](../../core/interfaces/EventBridge.md#getinflightexecutioncounts)
+
+#### Inherited from
+
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`getInFlightExecutionCounts`](../../core/classes/EventBridgeBaseClass.md#getinflightexecutioncounts)
 
 ***
 
@@ -390,7 +434,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -473,7 +517,7 @@ the function to be called if a matching command arrives
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:73
 
 Register a service stream.
 
@@ -543,7 +587,7 @@ the function to be called if a matching message arrives
 
 ### runInFlight()
 
-> **runInFlight**\<`T`\>(`fn`): `Promise`\<`T`\>
+> **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
 Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 
@@ -558,6 +602,10 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 ##### fn
 
 () => `Promise`\<`T`\>
+
+##### kind?
+
+`"command"` | `"subscription"` | `"stream"` | `"generic"`
 
 #### Returns
 
@@ -673,7 +721,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:68
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
 
 Unregister a service stream
 

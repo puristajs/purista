@@ -28,16 +28,26 @@ Future adapters will live in `packages/<provider>-queue-bridge` once that provid
 
 ## Safe defaults
 
-- PURISTA defaults queue workers to `prefetch: 1` and FIFO-style processing so a new queue starts conservatively and predictably.
-- Queue worker failures retry with the lifecycle strategy until `maxAttempts` or `retryWindowMs` is exceeded; after that the runtime dead-letters the job.
-- `context.job.moveToDeadLetter(reason?)` exists in every queue worker context, so poison messages can be handled explicitly without custom bridge code.
-- Startup validation is strict by default for queue bridges that advertise `strictStartupValidation`, so unsupported ordering or prefetch assumptions fail during service startup instead of degrading silently.
+| default | value | effect |
+| --- | --- | --- |
+| worker mode | `sequential` + `prefetch: 1` | conservative processing with minimal duplicate pressure |
+| retry budget | `maxAttempts: 10` | bounded retries before dead-letter |
+| retry timing | exponential backoff (1s initial, max 120s, jitter) | avoids hot retry loops by default |
+| retry window | `retryWindowMs: 24h` | stale jobs stop retrying forever |
+| poison handling | `poisonMessageFailureThreshold: 0` + `poisonMessageAction: 'none'` | no automatic worker pause unless explicitly enabled |
+| startup validation | strict where bridge advertises `strictStartupValidation` | unsupported guarantees fail fast |
+
+- Queue worker failures retry with lifecycle policy until `maxAttempts` or `retryWindowMs` is exceeded; after that the runtime dead-letters the job.
+- `context.job.moveToDeadLetter(reason?)` is always available to bypass retries intentionally.
+- Enable poison controls per queue lifecycle to auto-pause workers on repeated identical failures.
 
 ## Operator workflow
 
 - Inspect DLQ entries with the queue bridge when `deadLetterInspectSupported` is true.
 - Redrive DLQ entries back into the queue with `redriveDeadLetter(...)` after the root cause is fixed.
 - Purge DLQ entries only when they are confirmed as non-replayable poison messages.
+- Pause queue workers when repeated poison failures threaten stability: `service.pauseQueueWorkers(queueName, reason)`.
+- Resume after remediation with `service.resumeQueueWorkers(queueName)`.
 - Prefer queue bridges over event bridges for replay-heavy, lease-sensitive workloads that need operator remediation.
 
 ## Wiring queue bridges

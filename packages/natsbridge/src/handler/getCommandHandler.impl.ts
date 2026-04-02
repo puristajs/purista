@@ -175,7 +175,7 @@ export const getCommandHandler = (
 					}
 				},
 			)
-		})
+		}, 'command')
 	}
 
 	return handleCommand

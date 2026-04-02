@@ -8,7 +8,7 @@
 
 > **ProjectGenerationPlan** = `object`
 
-Defined in: [packages/cli/src/blueprints/types.ts:72](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L72)
+Defined in: [packages/cli/src/blueprints/types.ts:72](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L72)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:72](https://github.com/purista
 
 > **conflicts**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:81](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L81)
+Defined in: [packages/cli/src/blueprints/types.ts:81](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L81)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:81](https://github.com/purista
 
 > **files**: [`ProjectFileContribution`](ProjectFileContribution.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:76](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L76)
+Defined in: [packages/cli/src/blueprints/types.ts:76](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L76)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:76](https://github.com/purista
 
 > **generatorSteps**: [`ProjectGeneratorStep`](ProjectGeneratorStep.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:82](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L82)
+Defined in: [packages/cli/src/blueprints/types.ts:82](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L82)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:82](https://github.com/purista
 
 > **input**: `CreateProjectInput`
 
-Defined in: [packages/cli/src/blueprints/types.ts:73](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L73)
+Defined in: [packages/cli/src/blueprints/types.ts:73](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L73)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:73](https://github.com/purista
 
 > **installCommand**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:84](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L84)
+Defined in: [packages/cli/src/blueprints/types.ts:84](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L84)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:84](https://github.com/purista
 
 > **packageJson**: `PKG`
 
-Defined in: [packages/cli/src/blueprints/types.ts:77](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L77)
+Defined in: [packages/cli/src/blueprints/types.ts:77](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L77)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:77](https://github.com/purista
 
 > **packageManager**: `PackageManager`
 
-Defined in: [packages/cli/src/blueprints/types.ts:85](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L85)
+Defined in: [packages/cli/src/blueprints/types.ts:85](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L85)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:85](https://github.com/purista
 
 > **predictedFiles**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:83](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L83)
+Defined in: [packages/cli/src/blueprints/types.ts:83](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L83)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:83](https://github.com/purista
 
 > **puristaConfig**: [`PuristaConfig`](PuristaConfig.md)
 
-Defined in: [packages/cli/src/blueprints/types.ts:79](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L79)
+Defined in: [packages/cli/src/blueprints/types.ts:79](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L79)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:79](https://github.com/purista
 
 > **selectedBlueprints**: [`BlueprintId`](BlueprintId.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:75](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L75)
+Defined in: [packages/cli/src/blueprints/types.ts:75](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L75)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:75](https://github.com/purista
 
 > **targetDirectoryPath**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:74](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L74)
+Defined in: [packages/cli/src/blueprints/types.ts:74](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L74)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:74](https://github.com/purista
 
 > **tsconfig**: `TsConfigJson`
 
-Defined in: [packages/cli/src/blueprints/types.ts:78](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L78)
+Defined in: [packages/cli/src/blueprints/types.ts:78](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L78)
 
 ***
 
@@ -112,4 +112,4 @@ Defined in: [packages/cli/src/blueprints/types.ts:78](https://github.com/purista
 
 > **warnings**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:80](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/blueprints/types.ts#L80)
+Defined in: [packages/cli/src/blueprints/types.ts:80](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/blueprints/types.ts#L80)

@@ -8,7 +8,7 @@
 
 > **ProviderRerankRequest**\<`Document`\> = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:110](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/providers/runtime/ModelProvider.ts#L110)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:110](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L110)
 
 Payload sent to reranking-capable providers.
 
@@ -24,7 +24,7 @@ Payload sent to reranking-capable providers.
 
 > **documents**: `Document`[]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:112](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/providers/runtime/ModelProvider.ts#L112)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:112](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L112)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:112](https://git
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:114](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/providers/runtime/ModelProvider.ts#L114)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:114](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L114)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:114](https://git
 
 > **query**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:111](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/providers/runtime/ModelProvider.ts#L111)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:111](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L111)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:111](https://git
 
 > `optional` **topN**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:113](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/providers/runtime/ModelProvider.ts#L113)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:113](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L113)

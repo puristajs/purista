@@ -8,7 +8,7 @@
 
 > **FileIngestionResult** = `object`
 
-Defined in: [packages/ai/src/input/ingestion.ts:19](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L19)
+Defined in: [packages/ai/src/input/ingestion.ts:19](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L19)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:19](https://github.com/puristajs
 
 > **attachment**: [`AgentAttachment`](AgentAttachment.md)
 
-Defined in: [packages/ai/src/input/ingestion.ts:20](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L20)
+Defined in: [packages/ai/src/input/ingestion.ts:20](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L20)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:20](https://github.com/puristajs
 
 > `optional` **extractedText**: `string`
 
-Defined in: [packages/ai/src/input/ingestion.ts:22](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L22)
+Defined in: [packages/ai/src/input/ingestion.ts:22](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L22)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:22](https://github.com/puristajs
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/input/ingestion.ts:24](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L24)
+Defined in: [packages/ai/src/input/ingestion.ts:24](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L24)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:24](https://github.com/puristajs
 
 > **parts**: [`AgentInputPart`](AgentInputPart.md)[]
 
-Defined in: [packages/ai/src/input/ingestion.ts:21](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L21)
+Defined in: [packages/ai/src/input/ingestion.ts:21](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L21)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/input/ingestion.ts:21](https://github.com/puristajs
 
 > `optional` **previewText**: `string`
 
-Defined in: [packages/ai/src/input/ingestion.ts:23](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L23)
+Defined in: [packages/ai/src/input/ingestion.ts:23](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L23)

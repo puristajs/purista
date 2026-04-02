@@ -171,4 +171,34 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			expect((error as UnhandledError).data).toHaveProperty('issues')
 		}
 	})
+
+	it('bypasses output schema validation for subscription control results', async () => {
+		const outputSchema = z.object({
+			result: z.string(),
+		})
+
+		const subscriptionFunction = async () => {
+			return { status: 'retry', reason: 'transient issue', delayMs: 120 } as const
+		}
+
+		const wrapped = getSubscriptionFunctionWithValidation(subscriptionFunction, undefined, undefined, outputSchema, {})
+
+		const message = getCommandMessageMock({
+			payload: {
+				payload: {},
+				parameter: {},
+			},
+		})
+
+		const { context } = createSubscriptionContextMock(builder, {
+			message,
+			sandbox,
+		})
+
+		await expect(wrapped.call(service, context, {}, {})).resolves.toEqual({
+			status: 'retry',
+			reason: 'transient issue',
+			delayMs: 120,
+		})
+	})
 })

@@ -8,7 +8,7 @@
 
 > **CreateAgentTestHarnessOptions**\<`SkillNames`, `Resources`, `ConfigInput`\> = [`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`, `Resources`, `ConfigInput`\> & `object`
 
-Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:31](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/createAgentTestHarness.ts#L31)
+Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:31](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/testing/createAgentTestHarness.ts#L31)
 
 ## Type Declaration
 

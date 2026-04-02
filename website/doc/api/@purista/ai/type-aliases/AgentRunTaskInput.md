@@ -8,7 +8,7 @@
 
 > **AgentRunTaskInput** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:177](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L177)
+Defined in: [packages/ai/src/runtime/runState.ts:177](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L177)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:177](https://github.com/purista
 
 > `optional` **detail**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:182](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L182)
+Defined in: [packages/ai/src/runtime/runState.ts:182](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L182)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:182](https://github.com/purista
 
 > **id**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:178](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L178)
+Defined in: [packages/ai/src/runtime/runState.ts:178](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L178)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:178](https://github.com/purista
 
 > `optional` **order**: `number`
 
-Defined in: [packages/ai/src/runtime/runState.ts:181](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L181)
+Defined in: [packages/ai/src/runtime/runState.ts:181](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L181)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:181](https://github.com/purista
 
 > `optional` **status**: [`AgentRunTaskStatus`](AgentRunTaskStatus.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:180](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L180)
+Defined in: [packages/ai/src/runtime/runState.ts:180](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L180)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/runtime/runState.ts:180](https://github.com/purista
 
 > **title**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:179](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/runState.ts#L179)
+Defined in: [packages/ai/src/runtime/runState.ts:179](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L179)

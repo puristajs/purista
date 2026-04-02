@@ -6,7 +6,7 @@
 
 # Class: PassthroughImageFileIngestor
 
-Defined in: [packages/ai/src/input/ingestion.ts:33](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L33)
+Defined in: [packages/ai/src/input/ingestion.ts:33](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L33)
 
 ## Implements
 
@@ -28,7 +28,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:33](https://github.com/puristajs
 
 > `readonly` **name**: `"passthrough-image"` = `'passthrough-image'`
 
-Defined in: [packages/ai/src/input/ingestion.ts:34](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L34)
+Defined in: [packages/ai/src/input/ingestion.ts:34](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L34)
 
 #### Implementation of
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:34](https://github.com/puristajs
 
 > **ingest**(`attachment`): `Promise`\<[`FileIngestionResult`](../type-aliases/FileIngestionResult.md)\>
 
-Defined in: [packages/ai/src/input/ingestion.ts:40](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L40)
+Defined in: [packages/ai/src/input/ingestion.ts:40](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L40)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:40](https://github.com/puristajs
 
 > **supports**(`attachment`): `boolean`
 
-Defined in: [packages/ai/src/input/ingestion.ts:36](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/input/ingestion.ts#L36)
+Defined in: [packages/ai/src/input/ingestion.ts:36](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/ingestion.ts#L36)
 
 #### Parameters
 
