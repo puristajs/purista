@@ -19,9 +19,10 @@
  *
  * const honoService = await honoV1Service.getInstance(eventBridge, {
  *   serviceConfig: {
- *     services: [pingService]
+ *     enableDynamicRoutes: false,
  *   }
  * })
+ * honoService.registerService(pingService)
  * await honoService.start()
  *
  * const _serverInstance = serve({

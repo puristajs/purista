@@ -84,9 +84,10 @@ import type { HonoServiceV1Config } from './honoServiceConfig.js'
  *
  * const honoService = await honoV1Service.getInstance(eventBridge, {
  *   serviceConfig: {
- *     services: [pingService]
+ *     enableDynamicRoutes: false,
  *   }
  * })
+ * honoService.registerService(pingService)
  * await honoService.start()
  *
  * const _serverInstance = serve({
@@ -111,6 +112,7 @@ export class HonoServiceClass<
 	public openApi: OpenApiBuilder
 
 	private knownServices: Set<string> = new Set()
+	private knownEndpoints: Map<string, string> = new Map()
 
 	private isAvailable = false
 
@@ -202,8 +204,7 @@ export class HonoServiceClass<
 			this.openApi.addPath(this.config.healthPath, {
 				get: {
 					summary: 'server health check',
-					description:
-						'Returns a 200 response as long as given health function does not throw and the server is connected to the event bridge',
+					description: 'Returns a 200 response as long as the configured health function does not throw',
 					responses: {
 						'200': {
 							'application/json': {},
@@ -217,17 +218,10 @@ export class HonoServiceClass<
 				return await this.startActiveSpan('healthHandler', { kind: SpanKind.SERVER }, con, async span => {
 					span.setAttribute(ATTR_HTTP_ROUTE, this.config.healthPath)
 					span.setAttribute(ATTR_HTTP_REQUEST_METHOD, 'GET')
-					const isEventBridgeReady = await this.eventBridge.isHealthy()
 
 					const traceId = c.req.header(this.config.traceHeaderField)
 					if (traceId) {
 						c.header(this.config.traceHeaderField, traceId)
-					}
-
-					if (!isEventBridgeReady) {
-						const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
-						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-						return this.sendProblemResponse(c, err, StatusCode.InternalServerError)
 					}
 
 					if (!this.isAvailable) {
@@ -331,7 +325,9 @@ export class HonoServiceClass<
 			})
 		})
 
-		this.registerService(...this.config.services)
+		if (this.config.autoRegisterServicesFromConfig) {
+			this.registerService(...this.config.services)
+		}
 
 		await this.setServiceAvailable()
 
@@ -345,6 +341,13 @@ export class HonoServiceClass<
 	 * @param services
 	 */
 	registerService(...services: Service[]) {
+		if (this.isStarted) {
+			throw new UnhandledError(
+				StatusCode.BadRequest,
+				'registerService must be called before start (or use addEndpoint for explicit runtime registration)',
+			)
+		}
+
 		for (const service of services) {
 			for (const command of service.commandDefinitionList) {
 				this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
@@ -373,6 +376,7 @@ export class HonoServiceClass<
 		if (this.knownServices.has(`${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`)) {
 			return
 		}
+		const serviceRegistrationKey = `${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`
 
 		const httpMetadata = metadata as HttpExposedServiceMeta
 		const expose = httpMetadata.expose
@@ -380,6 +384,7 @@ export class HonoServiceClass<
 
 		const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 		const path = posix.join(this.config.apiMountPath, `v${service.serviceVersion}`, expose.http.path)
+		const endpointKey = `${method}:${path}`
 
 		const requestContentType = expose.contentTypeRequest ?? 'application/json'
 		const requestEncodingType = expose.contentEncodingRequest ?? 'utf-8'
@@ -400,6 +405,14 @@ export class HonoServiceClass<
 		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
 
 		const isStreamEndpoint = isDeclaredStreamDefinition || responseContentType.toLowerCase() === 'text/event-stream'
+
+		const endpointOwner = this.knownEndpoints.get(endpointKey)
+		if (endpointOwner && endpointOwner !== serviceRegistrationKey) {
+			throw new UnhandledError(
+				StatusCode.Conflict,
+				`HTTP endpoint already registered for ${endpointKey}. Configure a unique http path/method combination.`,
+			)
+		}
 
 		const handler: Handler = async c => {
 			const parentContext = propagation.extract(context.active(), c.req.raw.headers)
@@ -614,7 +627,8 @@ export class HonoServiceClass<
 		} else {
 			this.app[method](path, handler)
 		}
-		this.knownServices.add(`${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`)
+		this.knownServices.add(serviceRegistrationKey)
+		this.knownEndpoints.set(endpointKey, serviceRegistrationKey)
 	}
 
 	async invoke<T>(

@@ -34,7 +34,8 @@ order: 303000
 ## Checklist
 
 - `@purista/hono-http-server` is installed
-- routes are registered via static services list or dynamic mode
+- routes are registered explicitly via `registerService(...)` or via dynamic mode
+- health endpoint is enabled explicitly when needed (`enableHealth: true`)
 - command endpoints are mapped to JSON responses
 - framework-generated HTTP errors are exposed as `application/problem+json`
 - clients can request `text/markdown` for the same normalized error details
@@ -69,10 +70,11 @@ Without that setting, the adapter uses `about:blank` instead of hardcoded framew
 ```typescript
 const server = await honoV1Service.getInstance(eventBridge, {
   serviceConfig: {
-    services: [myService],
+    enableDynamicRoutes: false,
     problemDetails: {
       typeBaseUri: 'https://api.example.com/problems',
     },
   },
 })
+server.registerService(myService)
 ```

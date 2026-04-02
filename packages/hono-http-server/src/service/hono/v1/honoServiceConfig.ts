@@ -57,8 +57,9 @@ export const honoServiceV1ConfigSchema = z.object({
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	enableDynamicRoutes: z.boolean().default(false),
 	apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
-	enableHealth: z.boolean().optional().default(true),
+	enableHealth: z.boolean().optional().default(false),
 	healthPath: z.string().optional().default('/healthz'),
+	autoRegisterServicesFromConfig: z.boolean().optional().default(false),
 	// Keep `any`: app-specific health/protection hooks are intentionally framework-agnostic.
 	healthFunction: z.any().optional(),
 	protectHandler: z.any().optional(),
