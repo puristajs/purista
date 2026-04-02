@@ -8,7 +8,7 @@
 
 > **ProviderEmbedManyResponse** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:194](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L194)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:194](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L194)
 
 Response emitted by batch embedding-capable providers.
 
@@ -18,7 +18,7 @@ Response emitted by batch embedding-capable providers.
 
 > **embeddings**: `number`[][]
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:195](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L195)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:195](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L195)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:195](https://git
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:199](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L199)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:199](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L199)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:199](https://git
 
 > `optional` **usage**: `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:196](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L196)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:196](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L196)
 
 #### tokens?
 

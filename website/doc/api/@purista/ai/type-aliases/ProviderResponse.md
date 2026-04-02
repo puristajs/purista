@@ -8,7 +8,7 @@
 
 > **ProviderResponse** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:120](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L120)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:120](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L120)
 
 Response emitted by a model provider.
 
@@ -18,7 +18,7 @@ Response emitted by a model provider.
 
 > `optional` **costUsd**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:127](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L127)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:127](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L127)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:127](https://git
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:128](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L128)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:128](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L128)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:128](https://git
 
 > **output**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:121](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L121)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:121](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L121)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:121](https://git
 
 > `optional` **reasoningText**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:122](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L122)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:122](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L122)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:122](https://git
 
 > `optional` **tokens**: `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:123](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/providers/runtime/ModelProvider.ts#L123)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:123](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/providers/runtime/ModelProvider.ts#L123)
 
 #### completion
 

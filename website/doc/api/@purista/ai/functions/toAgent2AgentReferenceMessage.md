@@ -8,7 +8,7 @@
 
 > **toAgent2AgentReferenceMessage**(`envelope`): [`Agent2AgentReferenceMessage`](../type-aliases/Agent2AgentReferenceMessage.md)
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:28](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/protocol/interoperability.ts#L28)
+Defined in: [packages/ai/src/protocol/interoperability.ts:28](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/protocol/interoperability.ts#L28)
 
 Converts a PURISTA AI protocol envelope into an Agent-to-Agent reference message.
 This is a reference adapter and not a claim of full compliance with any external standard.

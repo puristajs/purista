@@ -16,6 +16,7 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Implemented JetStream durable consumers for `NatsBridge` when JetStream is available, while keeping strict fail-fast behavior for brokers without JetStream.
 - Added advisory subscription consumer failure handling in core so adapters can honor bounded retry and dead-letter behavior without coupling service definitions to one transport.
 - Added strict startup validation for queue bridge config and subscription consumer failure handling in core service registration.
+- Added strict startup validation for command delivery requirements and stream support in core service registration.
 - Added queue operator APIs for DLQ inspection, replay, purge, and lease inspection to the queue bridge contract.
 - Added `@purista/nats-queue-bridge` as a JetStream-based queue provider package with contract coverage.
 - Removed the unimplemented subscription exhaustion outcomes from the public contract; exhausted subscription messages are dead-lettered.
@@ -23,6 +24,8 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Added configurable bridge mocks plus shared subscription reliability contract tests so adapter verification stays capability-driven.
 - Removed the legacy `@purista/httpserver` package from the active platform surface in favor of the Hono-based server package.
 - Updated handbook pages so support matrices and reliability wording match current runtime behavior.
+- Added explicit command and stream capability surfaces to event bridge capabilities, including command transport and stream late-frame handling.
+- Replaced `DefaultEventBridge` stream session bookkeeping with a shared `PendingStreamRegistry` to centralize timeout and late-frame handling.
 
 ## Test coverage landed
 

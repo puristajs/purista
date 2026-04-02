@@ -8,7 +8,7 @@
 
 > **getEventBridgeMock**(`sandboxOrOptions?`): `object`
 
-Defined in: [mocks/getEventBridge.mock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L17)
+Defined in: [mocks/getEventBridge.mock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L22)
 
 Mocks the eventBridge and stubs the methods
 

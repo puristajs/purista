@@ -8,7 +8,7 @@
 
 > **QueueLeaseInspectionRecord** = `object`
 
-Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:1
+Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L1)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:1
 
 > **jobId**: `string`
 
-Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:4
+Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L4)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:4
 
 > `optional` **leasedAt**: `number`
 
-Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:5
+Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L5)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:5
 
 > **leaseExpiresAt**: `number`
 
-Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:6
+Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L6)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:6
 
 > **leaseId**: `string`
 
-Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:2
+Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L2)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:2
 
 > **queueName**: `string`
 
-Defined in: core/QueueBridge/types/QueueLeaseInspectionRecord.ts:3
+Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L3)

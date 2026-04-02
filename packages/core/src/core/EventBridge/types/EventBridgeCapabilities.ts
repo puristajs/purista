@@ -1,5 +1,7 @@
+import type { EventBridgeCommandCapabilities } from './EventBridgeCommandCapabilities.js'
 import type { EventBridgeConsumerFailureCapabilities } from './EventBridgeConsumerFailureCapabilities.js'
 import type { EventBridgeLateResponseHandling } from './EventBridgeLateResponseHandling.js'
+import type { EventBridgeStreamCapabilities } from './EventBridgeStreamCapabilities.js'
 
 export type EventBridgeCapabilities = {
 	supportsStreams: boolean
@@ -9,5 +11,7 @@ export type EventBridgeCapabilities = {
 	lateResponseHandling: EventBridgeLateResponseHandling
 	gracefulDrainSupported: boolean
 	nativeDeadLettering: boolean
+	commandHandling: EventBridgeCommandCapabilities
+	streamHandling: EventBridgeStreamCapabilities
 	consumerFailureHandling: EventBridgeConsumerFailureCapabilities
 }

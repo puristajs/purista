@@ -8,7 +8,7 @@
 
 > **AgentFileInputPart** = `object`
 
-Defined in: [packages/ai/src/input/types.ts:53](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L53)
+Defined in: [packages/ai/src/input/types.ts:53](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L53)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/input/types.ts:53](https://github.com/puristajs/pur
 
 > `optional` **attachmentId**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:55](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L55)
+Defined in: [packages/ai/src/input/types.ts:55](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L55)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/input/types.ts:55](https://github.com/puristajs/pur
 
 > **data**: `string` \| `Uint8Array` \| `ArrayBuffer` \| `URL`
 
-Defined in: [packages/ai/src/input/types.ts:56](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L56)
+Defined in: [packages/ai/src/input/types.ts:56](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L56)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/input/types.ts:56](https://github.com/puristajs/pur
 
 > `optional` **filename**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:58](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L58)
+Defined in: [packages/ai/src/input/types.ts:58](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L58)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/input/types.ts:58](https://github.com/puristajs/pur
 
 > **mediaType**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:57](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L57)
+Defined in: [packages/ai/src/input/types.ts:57](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L57)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/input/types.ts:57](https://github.com/puristajs/pur
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/input/types.ts:60](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L60)
+Defined in: [packages/ai/src/input/types.ts:60](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L60)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/input/types.ts:60](https://github.com/puristajs/pur
 
 > `optional` **title**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:59](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L59)
+Defined in: [packages/ai/src/input/types.ts:59](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L59)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [packages/ai/src/input/types.ts:59](https://github.com/puristajs/pur
 
 > **type**: `"file"`
 
-Defined in: [packages/ai/src/input/types.ts:54](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/types.ts#L54)
+Defined in: [packages/ai/src/input/types.ts:54](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/types.ts#L54)

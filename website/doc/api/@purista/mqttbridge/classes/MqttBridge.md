@@ -6,7 +6,7 @@
 
 # Class: MqttBridge
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:65](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L65)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:68](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L68)
 
 The MQTT event bridge connects to a MQTT broker.
 The broker must support the MQTT 5 protocol version
@@ -36,7 +36,7 @@ await eventBridge.start()
 
 > **new MqttBridge**(`config?`): `MqttBridge`
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:82](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L82)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:85](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L85)
 
 #### Parameters
 
@@ -198,7 +198,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:2
 
 > **client**: `MqttClient` \| `undefined`
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:66](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L66)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:69](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L69)
 
 ***
 
@@ -292,7 +292,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:2
 
 > **pendingInvocations**: [`PendingInvocationRegistry`](../../core/classes/PendingInvocationRegistry.md)\<`unknown`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:67](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:70](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L70)
 
 ***
 
@@ -312,7 +312,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:2
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:399](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L399)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:415](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L415)
 
 Shut down event bridge as gracefully as possible
 
@@ -334,7 +334,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:156](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L156)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:172](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L172)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -410,7 +410,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:233](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L233)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:249](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L249)
 
 Call a command of a service and return the result of this command
 
@@ -448,7 +448,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:229](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L229)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:245](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L245)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -466,7 +466,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:225](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L225)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:241](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L241)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -527,7 +527,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:324](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L324)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:340](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L340)
 
 #### Parameters
 
@@ -605,7 +605,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:355](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L355)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:371](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L371)
 
 Register a new subscription
 
@@ -665,7 +665,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:6
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:109](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L109)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:125](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L125)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -739,7 +739,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:348](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L348)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:364](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L364)
 
 Unregister a service command
 
@@ -793,7 +793,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:386](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L386)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:402](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L402)
 
 #### Parameters
 

@@ -321,7 +321,7 @@ Get service info
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2817](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2817)
+Defined in: [core/Service/Service.impl.ts:2888](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2888)
 
 Stop and destroy the current service
 
@@ -343,7 +343,7 @@ Stop and destroy the current service
 
 > **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
-Defined in: [core/Service/Service.impl.ts:1716](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1716)
+Defined in: [core/Service/Service.impl.ts:1785](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1785)
 
 Called when a command is received by the service
 
@@ -365,7 +365,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2237](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2237)
+Defined in: [core/Service/Service.impl.ts:2307](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2307)
 
 #### Parameters
 
@@ -383,7 +383,7 @@ Defined in: [core/Service/Service.impl.ts:2237](https://github.com/puristajs/pur
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: [core/Service/Service.impl.ts:2514](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2514)
+Defined in: [core/Service/Service.impl.ts:2585](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2585)
 
 #### Parameters
 
@@ -477,7 +477,7 @@ Defined in: [core/Service/Service.impl.ts:468](https://github.com/puristajs/puri
 
 > `protected` **getConsumeStreamFunction**\<`StreamInvokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `streamInvokes?`): [`OpenStreamFunction`](../type-aliases/OpenStreamFunction.md)
 
-Defined in: [core/Service/Service.impl.ts:1351](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1351)
+Defined in: [core/Service/Service.impl.ts:1420](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1420)
 
 #### Type Parameters
 
@@ -517,7 +517,7 @@ Defined in: [core/Service/Service.impl.ts:1351](https://github.com/puristajs/pur
 
 > **getContextFunctions**(`logger`, `queueNamespace?`): [`ContextBase`](../type-aliases/ContextBase.md)
 
-Defined in: [core/Service/Service.impl.ts:1541](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1541)
+Defined in: [core/Service/Service.impl.ts:1610](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1610)
 
 #### Parameters
 
@@ -543,7 +543,7 @@ Defined in: [core/Service/Service.impl.ts:1541](https://github.com/puristajs/pur
 
 > `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `emitList?`): \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType`, `contentEncoding`) => `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:1463](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1463)
+Defined in: [core/Service/Service.impl.ts:1532](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1532)
 
 #### Type Parameters
 
@@ -729,7 +729,7 @@ Defined in: [core/Service/Service.impl.ts:735](https://github.com/puristajs/puri
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../type-aliases/ServiceHealthState.md)\>
 
-Defined in: [core/Service/Service.impl.ts:2187](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2187)
+Defined in: [core/Service/Service.impl.ts:2257](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2257)
 
 #### Returns
 
@@ -819,7 +819,7 @@ Defined in: [core/Service/Service.impl.ts:287](https://github.com/puristajs/puri
 
 > **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:1943](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1943)
+Defined in: [core/Service/Service.impl.ts:2012](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2012)
 
 #### Parameters
 
@@ -837,7 +837,7 @@ Defined in: [core/Service/Service.impl.ts:1943](https://github.com/puristajs/pur
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2485](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2485)
+Defined in: [core/Service/Service.impl.ts:2555](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2555)
 
 #### Parameters
 
@@ -855,7 +855,7 @@ Defined in: [core/Service/Service.impl.ts:2485](https://github.com/puristajs/pur
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2748](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2748)
+Defined in: [core/Service/Service.impl.ts:2819](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2819)
 
 #### Parameters
 
@@ -979,7 +979,7 @@ return value of fn
 
 > `protected` **startQueueWorkers**(): `void`
 
-Defined in: [core/Service/Service.impl.ts:1987](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1987)
+Defined in: [core/Service/Service.impl.ts:2057](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2057)
 
 #### Returns
 
@@ -991,7 +991,7 @@ Defined in: [core/Service/Service.impl.ts:1987](https://github.com/puristajs/pur
 
 > `protected` **stopQueueWorkers**(): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2002](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2002)
+Defined in: [core/Service/Service.impl.ts:2072](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2072)
 
 #### Returns
 

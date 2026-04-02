@@ -18,6 +18,16 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 | [NATS](./nats.md) | yes | yes with JetStream, no with core NATS | at-most-once on core NATS, at-least-once with JetStream durable consumers | not applicable | no (currently) |
 | [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | not applicable | no (currently) |
 
+### Command reliability model
+
+| bridge | command transport | pending invocation cancellation on shutdown | response confirmation |
+|---|---|---:|---|
+| [Default](./default_event_bridge.md) | in-memory | yes | none |
+| [AMQP](./amqp.md) | reply queue | yes | broker confirm |
+| [MQTT](./mqtt.md) | topic correlation | yes | protocol-level (QoS dependent) |
+| [NATS](./nats.md) | request/reply | no (request timeout owned by NATS request call) | protocol-level |
+| [Dapr](./dapr.md) | HTTP request | no (request lifecycle owned by sidecar/client timeout) | protocol-level |
+
 ### Subscription consumer failure handling
 
 | bridge | bounded retry | delayed retry | dead-letter target | strict startup validation |
@@ -51,6 +61,8 @@ PURISTA itself provides typed message contracts and processing flow. Delivery gu
 Late command responses are normalized across invoke-capable bridges in this slice. Once the caller-side timeout fires, PURISTA keeps a short-lived tombstone for the correlation id and ignores any later response with a warning instead of raising a bridge error.
 
 Subscription retry and dead-letter handling are capability-driven bridge concerns. Service definitions can declare consumer failure handling in `strict` or `best-effort` mode. In `strict` mode, PURISTA fails startup if the selected adapter cannot honor the requested semantics. Exhausted subscription messages are dead-lettered; PURISTA no longer exposes unimplemented `drop` or `stop-consumer` outcomes in the public contract.
+
+Command registrations now follow the same strict startup validation approach for delivery semantics. If a command requests durable/manual-ack handling that the active bridge cannot provide, startup fails early instead of silently degrading.
 
 ## Reliability checklist
 

@@ -8,7 +8,7 @@
 
 > **ReflectionPreset** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:51](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L51)
+Defined in: [packages/ai/src/types/AgentManifest.ts:51](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L51)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:51](https://github.com/puris
 
 > `optional` **artifacts**: [`ReflectionArtifactPolicy`](ReflectionArtifactPolicy.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:54](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L54)
+Defined in: [packages/ai/src/types/AgentManifest.ts:54](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L54)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:54](https://github.com/puris
 
 > `optional` **maxIterations**: `number`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:52](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L52)
+Defined in: [packages/ai/src/types/AgentManifest.ts:52](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L52)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:52](https://github.com/puris
 
 > `optional` **stopOnStagnation**: `boolean`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:53](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L53)
+Defined in: [packages/ai/src/types/AgentManifest.ts:53](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L53)

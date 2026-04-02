@@ -6,7 +6,7 @@
 
 # Class: NatsBridge
 
-Defined in: [natsbridge/src/NatsBridge.ts:101](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L101)
+Defined in: [natsbridge/src/NatsBridge.ts:104](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L104)
 
 The event bridge supports low-latency core NATS messaging.
 
@@ -44,7 +44,7 @@ import { NatsBridge } from '@purista/natsbridge'
 
 > **new NatsBridge**(`config?`): `NatsBridge`
 
-Defined in: [natsbridge/src/NatsBridge.ts:114](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L114)
+Defined in: [natsbridge/src/NatsBridge.ts:117](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L117)
 
 #### Parameters
 
@@ -196,7 +196,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 > **commands**: `Map`\<`string`, `JetStreamSubscription` \| `Subscription`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:109](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L109)
+Defined in: [natsbridge/src/NatsBridge.ts:112](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L112)
 
 ***
 
@@ -216,7 +216,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 > **connection**: `NatsConnection` \| `undefined`
 
-Defined in: [natsbridge/src/NatsBridge.ts:102](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L102)
+Defined in: [natsbridge/src/NatsBridge.ts:105](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L105)
 
 ***
 
@@ -270,7 +270,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 > **isJetStreamEnabled**: `boolean` = `false`
 
-Defined in: [natsbridge/src/NatsBridge.ts:104](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L104)
+Defined in: [natsbridge/src/NatsBridge.ts:107](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L107)
 
 ***
 
@@ -278,7 +278,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:104](https://github.com/puristajs/puri
 
 > **js**: `JetStreamClient` \| `undefined`
 
-Defined in: [natsbridge/src/NatsBridge.ts:107](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L107)
+Defined in: [natsbridge/src/NatsBridge.ts:110](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L110)
 
 ***
 
@@ -286,7 +286,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:107](https://github.com/puristajs/puri
 
 > **jsm**: `JetStreamManager` \| `undefined`
 
-Defined in: [natsbridge/src/NatsBridge.ts:106](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L106)
+Defined in: [natsbridge/src/NatsBridge.ts:109](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L109)
 
 ***
 
@@ -322,7 +322,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 > **sc**: `Codec`\<`unknown`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:112](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L112)
+Defined in: [natsbridge/src/NatsBridge.ts:115](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L115)
 
 ***
 
@@ -330,7 +330,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:112](https://github.com/puristajs/puri
 
 > **subscriptions**: `Map`\<`string`, `JetStreamSubscription` \| `Subscription`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:110](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L110)
+Defined in: [natsbridge/src/NatsBridge.ts:113](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L113)
 
 ***
 
@@ -350,7 +350,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:715](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L715)
+Defined in: [natsbridge/src/NatsBridge.ts:731](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L731)
 
 Shut down event bridge as gracefully as possible
 
@@ -372,7 +372,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:397](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L397)
+Defined in: [natsbridge/src/NatsBridge.ts:413](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L413)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -448,7 +448,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:470](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L470)
+Defined in: [natsbridge/src/NatsBridge.ts:486](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L486)
 
 Call a command of a service and return the result of this command
 
@@ -486,7 +486,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:393](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L393)
+Defined in: [natsbridge/src/NatsBridge.ts:409](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L409)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -504,7 +504,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:389](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L389)
+Defined in: [natsbridge/src/NatsBridge.ts:405](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L405)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -565,7 +565,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:612](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L612)
+Defined in: [natsbridge/src/NatsBridge.ts:628](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L628)
 
 #### Parameters
 
@@ -643,7 +643,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:667](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L667)
+Defined in: [natsbridge/src/NatsBridge.ts:683](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L683)
 
 Register a new subscription
 
@@ -703,7 +703,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:374](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L374)
+Defined in: [natsbridge/src/NatsBridge.ts:390](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L390)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -777,7 +777,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:649](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L649)
+Defined in: [natsbridge/src/NatsBridge.ts:665](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L665)
 
 Unregister a service command
 
@@ -831,7 +831,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:697](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L697)
+Defined in: [natsbridge/src/NatsBridge.ts:713](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L713)
 
 #### Parameters
 

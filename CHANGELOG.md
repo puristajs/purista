@@ -40,6 +40,7 @@ All notable changes to this project will be documented in this file.
 - Add internal reply composition helper
 - Add dynamic skill reference selection
 - Harden bridge reliability handling
+- Harden queue and subscription reliability
 
 ### Refactor
 

@@ -1029,6 +1029,75 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 	}
 
+	private validateCommandAgainstCapabilities(
+		commandDefinition: CommandDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	) {
+		const capabilities = this.eventBridge.capabilities
+		const commandConfig = commandDefinition.eventBridgeConfig
+
+		if (commandConfig.durable && !capabilities.durableCommands) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`command "${commandDefinition.commandName}" requires durable delivery, but ${this.eventBridge.name} does not support durable commands`,
+			)
+		}
+
+		if (!commandConfig.autoacknowledge && !capabilities.manualAckSupported) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`command "${commandDefinition.commandName}" requires manual acknowledgement, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if ((commandConfig.durable || !commandConfig.autoacknowledge) && !capabilities.commandHandling.strictMode) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`${this.eventBridge.name} does not support strict command delivery handling for command "${commandDefinition.commandName}"`,
+			)
+		}
+	}
+
+	private validateStreamAgainstCapabilities(
+		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>,
+	) {
+		const capabilities = this.eventBridge.capabilities
+		if (!capabilities.supportsStreams) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`stream "${streamDefinition.streamName}" cannot be registered because ${this.eventBridge.name} does not support streams`,
+			)
+		}
+
+		if (!capabilities.streamHandling.incrementalDelivery) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`stream "${streamDefinition.streamName}" requires incremental delivery support, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (streamDefinition.aggregateChunks && !capabilities.streamHandling.aggregatedFinalSupported) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`stream "${streamDefinition.streamName}" requires aggregated final payload support, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+	}
+
 	private computeRetryDelay(lifecycle: QueueLifecycleConfig, attempt: number, requestedDelay?: number): number {
 		if (typeof requestedDelay === 'number') {
 			return Math.max(0, Math.min(requestedDelay, lifecycle.retryStrategy.maxDelayMs))
@@ -1960,6 +2029,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerCommand', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
+			this.validateCommandAgainstCapabilities(commandDefinition)
 
 			span.setAttributes({
 				serviceName: this.serviceInfo.serviceName,
@@ -2437,8 +2507,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					return
 				}
 
-				// If producer did not close explicitly, auto-complete.
-				if (sequence <= 1 || chunks.length > 0) {
+				// If producer did not close explicitly, auto-complete deterministically.
+				if (!streamClosed && !activeSession.cancelled) {
 					await writer.close()
 				}
 
@@ -2487,6 +2557,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerStream', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register stream')
+			this.validateStreamAgainstCapabilities(streamDefinition)
 
 			span.setAttributes({
 				serviceName: this.serviceInfo.serviceName,

@@ -6,7 +6,7 @@
 
 # Class: HttpEventBridge\<CustomConfig\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:66](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L66)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L69)
 
 The HTTP event bridge is a generic event bridge.
 In environments like Dapr or Knative, the communication is done via sidecar containers and via HTTP.
@@ -46,7 +46,7 @@ To use the HttpEventBridge, you will need following peer-dependencies installed:
 
 > **new HttpEventBridge**\<`CustomConfig`\>(`config`, `client`): `HttpEventBridge`\<`CustomConfig`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L77)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L80)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:77](ht
 
 > **app**: `Hono`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L71)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L74)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 > **client**: [`HttpEventBridgeClient`](../interfaces/HttpEventBridgeClient.md)
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:75](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L75)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L78)
 
 ***
 
@@ -162,7 +162,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 > **isShuttingDown**: `boolean` = `false`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L72)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:75](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L75)
 
 ***
 
@@ -170,7 +170,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:72](ht
 
 > **isStarted**: `boolean` = `false`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:73](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L73)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:76](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L76)
 
 ***
 
@@ -206,7 +206,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 > **server**: `Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`\> \| `Http2Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `Http2SecureServer`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `undefined`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L70)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:73](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L73)
 
 ***
 
@@ -226,7 +226,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:383](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L383)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:399](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L399)
 
 Shut down event bridge as gracefully as possible
 
@@ -248,7 +248,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**\<`T`\>(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:169](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L169)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:185](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L185)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -316,7 +316,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:224](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L224)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:240](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L240)
 
 Call a command of a service and return the result of this command
 
@@ -354,7 +354,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:373](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L373)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:389](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L389)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -372,7 +372,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:369](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L369)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:385](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L385)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -433,7 +433,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:280](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L280)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:296](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L296)
 
 #### Parameters
 
@@ -513,7 +513,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:343](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L343)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:359](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L359)
 
 Register a new subscription
 
@@ -573,7 +573,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:109](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L109)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:125](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L125)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -647,7 +647,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:339](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L339)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:355](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L355)
 
 Unregister a service command
 
@@ -701,7 +701,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:365](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L365)
+Defined in: [base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:381](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L381)
 
 #### Parameters
 

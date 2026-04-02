@@ -8,7 +8,7 @@
 
 > **ReflectionRefineFn**\<`TDraft`, `TCritique`\> = (`input`) => `Promise`\<`TDraft`\> \| `TDraft`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:22](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/runtime/reflection.ts#L22)
+Defined in: [packages/ai/src/runtime/reflection.ts:22](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/reflection.ts#L22)
 
 ## Type Parameters
 

@@ -28,6 +28,14 @@ End-to-end message delivery guarantees are a combination of:
 - set timeout and retry budgets intentionally
 - persist important business state outside process memory
 
+## Safe defaults
+
+PURISTA now defaults to strict startup validation for reliability-sensitive command and subscription semantics.
+
+- if a handler requests delivery behavior a bridge cannot honor, startup fails in strict mode
+- late command responses after timeout are ignored with warning where applicable
+- stream sessions use bounded timeout handling and terminal-frame enforcement instead of open-ended waits
+
 ## Streams and reliability
 
 Current stream runtime support is available in `DefaultEventBridge` only.
@@ -38,6 +46,7 @@ For stream consumers:
 - treat cancellation as a normal control path
 - validate chunk/final payloads where needed
 - keep chunk processing resilient to partial interruptions
+- expect exactly one terminal state (`complete`, `error`, or `cancel`) per session
 
 ## Minimal acceptance checklist
 

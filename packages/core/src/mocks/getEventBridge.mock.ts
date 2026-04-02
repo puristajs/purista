@@ -3,7 +3,12 @@ import { stub } from 'sinon'
 
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { EventBridgeCapabilities } from '../core/EventBridge/types/EventBridgeCapabilities.js'
+import {
+	EventBridgeCommandTransport,
+	EventBridgeResponseConfirmationLevel,
+} from '../core/EventBridge/types/EventBridgeCommandCapabilities.js'
 import { EventBridgeLateResponseHandling } from '../core/EventBridge/types/EventBridgeLateResponseHandling.js'
+import { EventBridgeStreamLateFrameHandling } from '../core/EventBridge/types/EventBridgeStreamLateFrameHandling.js'
 
 type EventBridgeCapabilityOverrides = Partial<Omit<EventBridgeCapabilities, 'consumerFailureHandling'>> & {
 	consumerFailureHandling?: Partial<EventBridgeCapabilities['consumerFailureHandling']>
@@ -41,6 +46,19 @@ export const getEventBridgeMock = (
 		lateResponseHandling: EventBridgeLateResponseHandling.IgnoreWithWarning,
 		gracefulDrainSupported: false,
 		nativeDeadLettering: false,
+		commandHandling: {
+			transport: EventBridgeCommandTransport.InMemory,
+			pendingInvocationCancellation: true,
+			responseConfirmation: EventBridgeResponseConfirmationLevel.None,
+			strictMode: true,
+		},
+		streamHandling: {
+			incrementalDelivery: true,
+			consumerCancellation: true,
+			gracefulStreamDrain: true,
+			aggregatedFinalSupported: true,
+			lateFrameHandling: EventBridgeStreamLateFrameHandling.IgnoreWithWarning,
+		},
 		consumerFailureHandling: {
 			boundedRetry: false,
 			delayedRetry: false,

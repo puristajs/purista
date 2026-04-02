@@ -21,8 +21,13 @@ import type { StreamMessage } from '../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
 import { InFlightExecutionTracker } from './InFlightExecutionTracker.impl.js'
 import type { EventBridgeCapabilities } from './types/EventBridgeCapabilities.js'
+import {
+	EventBridgeCommandTransport,
+	EventBridgeResponseConfirmationLevel,
+} from './types/EventBridgeCommandCapabilities.js'
 import type { EventBridgeConfig } from './types/EventBridgeConfig.js'
 import { EventBridgeLateResponseHandling } from './types/EventBridgeLateResponseHandling.js'
+import { EventBridgeStreamLateFrameHandling } from './types/EventBridgeStreamLateFrameHandling.js'
 
 /**
  * The base class to be extended by event bridge implementations
@@ -44,6 +49,19 @@ export class EventBridgeBaseClass<ConfigType> {
 		lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
 		gracefulDrainSupported: true,
 		nativeDeadLettering: false,
+		commandHandling: {
+			transport: EventBridgeCommandTransport.InMemory,
+			pendingInvocationCancellation: true,
+			responseConfirmation: EventBridgeResponseConfirmationLevel.None,
+			strictMode: true,
+		},
+		streamHandling: {
+			incrementalDelivery: false,
+			consumerCancellation: false,
+			gracefulStreamDrain: true,
+			aggregatedFinalSupported: false,
+			lateFrameHandling: EventBridgeStreamLateFrameHandling.NotApplicable,
+		},
 		consumerFailureHandling: {
 			boundedRetry: false,
 			delayedRetry: false,

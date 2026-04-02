@@ -8,15 +8,23 @@
 
 > **EventBridgeCapabilities** = `object`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L4)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L6)
 
 ## Properties
+
+### commandHandling
+
+> **commandHandling**: [`EventBridgeCommandCapabilities`](EventBridgeCommandCapabilities.md)
+
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L14)
+
+***
 
 ### consumerFailureHandling
 
 > **consumerFailureHandling**: [`EventBridgeConsumerFailureCapabilities`](EventBridgeConsumerFailureCapabilities.md)
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L12)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L16)
 
 ***
 
@@ -24,7 +32,7 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:12](https://githu
 
 > **durableCommands**: `boolean`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L6)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L8)
 
 ***
 
@@ -32,7 +40,7 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:6](https://github
 
 > **durableSubscriptions**: `boolean`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L7)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L9)
 
 ***
 
@@ -40,7 +48,7 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:7](https://github
 
 > **gracefulDrainSupported**: `boolean`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L10)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L12)
 
 ***
 
@@ -48,7 +56,7 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:10](https://githu
 
 > **lateResponseHandling**: [`EventBridgeLateResponseHandling`](../enumerations/EventBridgeLateResponseHandling.md)
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L9)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L11)
 
 ***
 
@@ -56,7 +64,7 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:9](https://github
 
 > **manualAckSupported**: `boolean`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L8)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L10)
 
 ***
 
@@ -64,7 +72,15 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:8](https://github
 
 > **nativeDeadLettering**: `boolean`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L11)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L13)
+
+***
+
+### streamHandling
+
+> **streamHandling**: [`EventBridgeStreamCapabilities`](EventBridgeStreamCapabilities.md)
+
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L15)
 
 ***
 
@@ -72,4 +88,4 @@ Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:11](https://githu
 
 > **supportsStreams**: `boolean`
 
-Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L5)
+Defined in: [core/EventBridge/types/EventBridgeCapabilities.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCapabilities.ts#L7)

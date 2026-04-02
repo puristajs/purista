@@ -6,7 +6,7 @@
 
 # Interface: FileIngestor
 
-Defined in: [packages/ai/src/input/ingestion.ts:27](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L27)
+Defined in: [packages/ai/src/input/ingestion.ts:27](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/ingestion.ts#L27)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:27](https://github.com/puristajs
 
 > `readonly` **name**: `string`
 
-Defined in: [packages/ai/src/input/ingestion.ts:28](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L28)
+Defined in: [packages/ai/src/input/ingestion.ts:28](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/ingestion.ts#L28)
 
 ## Methods
 
@@ -22,7 +22,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:28](https://github.com/puristajs
 
 > **ingest**(`attachment`, `context`): `Promise`\<[`FileIngestionResult`](../type-aliases/FileIngestionResult.md)\>
 
-Defined in: [packages/ai/src/input/ingestion.ts:30](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L30)
+Defined in: [packages/ai/src/input/ingestion.ts:30](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/ingestion.ts#L30)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [packages/ai/src/input/ingestion.ts:30](https://github.com/puristajs
 
 > **supports**(`attachment`): `boolean`
 
-Defined in: [packages/ai/src/input/ingestion.ts:29](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/input/ingestion.ts#L29)
+Defined in: [packages/ai/src/input/ingestion.ts:29](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/input/ingestion.ts#L29)
 
 #### Parameters
 

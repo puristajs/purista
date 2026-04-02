@@ -8,7 +8,7 @@
 
 > **createGitIgnoreFile**(): `string`
 
-Defined in: [packages/cli/src/blueprints/content.ts:7](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/blueprints/content.ts#L7)
+Defined in: [packages/cli/src/blueprints/content.ts:7](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/blueprints/content.ts#L7)
 
 ## Returns
 

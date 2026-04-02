@@ -8,7 +8,7 @@
 
 > **EventBridgeConsumerFailureCapabilities** = `object`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:1
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L1)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:1
 
 > **boundedRetry**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:2
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L2)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:2
 
 > **bridgeManagedDeadLettering**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:5
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L5)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:5
 
 > **deadLetterTarget**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:4
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L4)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:4
 
 > **delayedRetry**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:3
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L3)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:3
 
 > **fatalClassification**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:7
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L7)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:7
 
 > **nativeDeadLettering**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:6
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L6)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:6
 
 > **strictMode**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:8
+Defined in: [core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConsumerFailureCapabilities.ts#L8)

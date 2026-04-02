@@ -6,7 +6,7 @@
 
 # Class: PuristaCliPromptError
 
-Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/errors.ts#L27)
+Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/core/errors.ts#L27)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/pu
 
 > **new PuristaCliPromptError**(`message`, `options?`): `PuristaCliPromptError`
 
-Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/errors.ts#L28)
+Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/core/errors.ts#L28)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 > `readonly` `optional` **command**: `"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"init-project"`
 
-Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/errors.ts#L4)
+Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/core/errors.ts#L4)
 
 #### Inherited from
 
@@ -74,7 +74,7 @@ Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/pur
 
 > `readonly` **exitCode**: `number`
 
-Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/errors.ts#L6)
+Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/core/errors.ts#L6)
 
 #### Inherited from
 
@@ -86,7 +86,7 @@ Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/pur
 
 > `readonly` **issues**: [`PuristaCommandIssue`](../type-aliases/PuristaCommandIssue.md)[]
 
-Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/core/errors.ts#L5)
+Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/core/errors.ts#L5)
 
 #### Inherited from
 

@@ -8,7 +8,7 @@
 
 > **AgentApprovalCheckpointPolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:83](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L83)
+Defined in: [packages/ai/src/types/AgentManifest.ts:83](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L83)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:83](https://github.com/puris
 
 > `optional` **onExpiry**: `"fail"` \| `"return-expired"`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:87](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L87)
+Defined in: [packages/ai/src/types/AgentManifest.ts:87](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L87)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:87](https://github.com/puris
 
 > `optional` **required**: `boolean`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:84](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L84)
+Defined in: [packages/ai/src/types/AgentManifest.ts:84](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L84)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:84](https://github.com/puris
 
 > `optional` **timeoutMs**: `number`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:86](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L86)
+Defined in: [packages/ai/src/types/AgentManifest.ts:86](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L86)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:86](https://github.com/puris
 
 > `optional` **when**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:85](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/types/AgentManifest.ts#L85)
+Defined in: [packages/ai/src/types/AgentManifest.ts:85](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentManifest.ts#L85)

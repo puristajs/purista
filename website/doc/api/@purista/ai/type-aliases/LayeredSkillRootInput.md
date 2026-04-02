@@ -8,7 +8,7 @@
 
 > **LayeredSkillRootInput** = `object`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:63](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/skills/fileSystem.ts#L63)
+Defined in: [packages/ai/src/skills/fileSystem.ts:63](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L63)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:63](https://github.com/purista
 
 > `optional` **canonicalRoots**: `string`[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:64](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/skills/fileSystem.ts#L64)
+Defined in: [packages/ai/src/skills/fileSystem.ts:64](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L64)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:64](https://github.com/purista
 
 > `optional` **overlayRoots**: `string`[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:65](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/skills/fileSystem.ts#L65)
+Defined in: [packages/ai/src/skills/fileSystem.ts:65](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L65)

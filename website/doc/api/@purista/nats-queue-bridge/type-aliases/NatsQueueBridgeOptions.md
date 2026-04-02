@@ -8,7 +8,7 @@
 
 > **NatsQueueBridgeOptions** = `object`
 
-Defined in: types.ts:3
+Defined in: [types.ts:3](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L3)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: types.ts:3
 
 > `optional` **connectionOptions**: `ConnectionOptions`
 
-Defined in: types.ts:4
+Defined in: [types.ts:4](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L4)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: types.ts:4
 
 > `optional` **defaultLeaseTtlMs**: `number`
 
-Defined in: types.ts:6
+Defined in: [types.ts:6](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L6)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: types.ts:6
 
 > `optional` **defaultMaxAttempts**: `number`
 
-Defined in: types.ts:7
+Defined in: [types.ts:7](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L7)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: types.ts:7
 
 > `optional` **releaseBatchSize**: `number`
 
-Defined in: types.ts:9
+Defined in: [types.ts:9](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L9)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: types.ts:9
 
 > `optional` **storageType**: `"file"` \| `"memory"`
 
-Defined in: types.ts:8
+Defined in: [types.ts:8](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L8)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: types.ts:8
 
 > `optional` **subjectPrefix**: `string`
 
-Defined in: types.ts:5
+Defined in: [types.ts:5](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/nats-queue-bridge/src/types.ts#L5)

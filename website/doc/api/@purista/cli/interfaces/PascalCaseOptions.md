@@ -6,7 +6,7 @@
 
 # Interface: PascalCaseOptions
 
-Defined in: [packages/cli/src/api/change-case.ts:32](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L32)
+Defined in: [packages/cli/src/api/change-case.ts:32](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L32)
 
 Options used for converting strings to pascal/camel case.
 
@@ -20,7 +20,7 @@ Options used for converting strings to pascal/camel case.
 
 > `optional` **delimiter**: `string`
 
-Defined in: [packages/cli/src/api/change-case.ts:44](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L44)
+Defined in: [packages/cli/src/api/change-case.ts:44](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L44)
 
 #### Inherited from
 
@@ -32,7 +32,7 @@ Defined in: [packages/cli/src/api/change-case.ts:44](https://github.com/puristaj
 
 > `optional` **locale**: [`Locale`](../type-aliases/Locale.md)
 
-Defined in: [packages/cli/src/api/change-case.ts:40](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L40)
+Defined in: [packages/cli/src/api/change-case.ts:40](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L40)
 
 #### Inherited from
 
@@ -44,7 +44,7 @@ Defined in: [packages/cli/src/api/change-case.ts:40](https://github.com/puristaj
 
 > `optional` **mergeAmbiguousCharacters**: `boolean`
 
-Defined in: [packages/cli/src/api/change-case.ts:33](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L33)
+Defined in: [packages/cli/src/api/change-case.ts:33](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L33)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [packages/cli/src/api/change-case.ts:33](https://github.com/puristaj
 
 > `optional` **prefixCharacters**: `string`
 
-Defined in: [packages/cli/src/api/change-case.ts:45](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L45)
+Defined in: [packages/cli/src/api/change-case.ts:45](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L45)
 
 #### Inherited from
 
@@ -64,7 +64,7 @@ Defined in: [packages/cli/src/api/change-case.ts:45](https://github.com/puristaj
 
 > `optional` **separateNumbers**: `boolean`
 
-Defined in: [packages/cli/src/api/change-case.ts:43](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L43)
+Defined in: [packages/cli/src/api/change-case.ts:43](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L43)
 
 #### Deprecated
 
@@ -80,7 +80,7 @@ Pass `split: splitSeparateNumbers` instead.
 
 > `optional` **split**: (`value`) => `string`[]
 
-Defined in: [packages/cli/src/api/change-case.ts:41](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L41)
+Defined in: [packages/cli/src/api/change-case.ts:41](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L41)
 
 #### Parameters
 
@@ -102,7 +102,7 @@ Defined in: [packages/cli/src/api/change-case.ts:41](https://github.com/puristaj
 
 > `optional` **suffixCharacters**: `string`
 
-Defined in: [packages/cli/src/api/change-case.ts:46](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/cli/src/api/change-case.ts#L46)
+Defined in: [packages/cli/src/api/change-case.ts:46](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L46)
 
 #### Inherited from
 

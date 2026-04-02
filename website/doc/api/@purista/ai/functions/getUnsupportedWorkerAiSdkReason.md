@@ -8,7 +8,7 @@
 
 > **getUnsupportedWorkerAiSdkReason**(`metadata`): `string` \| `null`
 
-Defined in: [packages/ai/src/platform/runtime/AIWorkerService/queue/executeWorkload.ts:17](https://github.com/puristajs/purista/blob/6304710cc2bd8718e85e838752c7933f343ed2ce/packages/ai/src/platform/runtime/AIWorkerService/queue/executeWorkload.ts#L17)
+Defined in: [packages/ai/src/platform/runtime/AIWorkerService/queue/executeWorkload.ts:17](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/platform/runtime/AIWorkerService/queue/executeWorkload.ts#L17)
 
 Worker queue payload metadata must stay JSON-serializable.
 Function-based AI SDK tools cannot be transported/executed by the worker runtime yet.
