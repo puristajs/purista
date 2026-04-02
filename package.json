@@ -58,6 +58,6 @@
 	},
 	"packageManager": "npm@11.9.0",
 	"dependencies": {
-		"npm": "^11.2.0"
+		"npm": "^11.12.1"
 	}
 }
