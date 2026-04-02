@@ -31,7 +31,7 @@ Durable subscriptions can now also declare `consumerFailureHandling`:
 
 - `maxAttempts` is honored by the bridge through bounded republish
 - `deadLetterTarget` is honored as the terminal queue name
-- `retryDelayMs` is advisory only unless your broker topology provides delayed retry queues
+- `retryDelayMs` is honored for durable subscriptions through bridge-managed broker retry queues (TTL + dead-letter back to source queue)
 - `mode: 'strict'` keeps startup honest by rejecting unsupported semantics instead of degrading silently
 
 ## Stream support

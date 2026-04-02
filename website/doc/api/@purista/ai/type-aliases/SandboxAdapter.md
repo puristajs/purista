@@ -8,7 +8,7 @@
 
 > **SandboxAdapter** = `object`
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:4](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L4)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:4](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L4)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapte
 
 > **executeCommand**: (`command`) => `Promise`\<[`ExecuteBashOutput`](ExecuteBashOutput.md)\>
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:5](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L5)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:5](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L5)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapte
 
 > **readFile**: (`path`) => `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:6](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L6)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:6](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L6)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapte
 
 > **writeFiles**: (`files`) => `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:7](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L7)
+Defined in: [packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts:7](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/adapter/BashTool/createPuristaSandboxAdapter.ts#L7)
 
 #### Parameters
 

@@ -242,7 +242,7 @@ describe('AmqpBridge', () => {
 		)
 	})
 
-	it('retries subscription messages with incremented attempt header before dead-lettering', async () => {
+	it('retries subscription messages with incremented attempt header via broker delay queue before dead-lettering', async () => {
 		const bridge = new AmqpBridge()
 		const internals = getBridgeInternals(bridge)
 		const consumeHandlers: Array<(msg: unknown) => Promise<void>> = []
@@ -305,8 +305,19 @@ describe('AmqpBridge', () => {
 		})
 		await new Promise(resolve => setTimeout(resolve, 0))
 
+		expect(channel.assertQueue).toHaveBeenCalledWith(
+			'purista.sub.Users.1.onCreated.retry.100',
+			expect.objectContaining({
+				durable: true,
+				arguments: expect.objectContaining({
+					'x-message-ttl': 100,
+					'x-dead-letter-exchange': '',
+					'x-dead-letter-routing-key': 'purista.sub.Users.1.onCreated',
+				}),
+			}),
+		)
 		expect(channel.sendToQueue).toHaveBeenCalledWith(
-			'purista.sub.Users.1.onCreated',
+			'purista.sub.Users.1.onCreated.retry.100',
 			expect.any(Buffer),
 			expect.objectContaining({
 				headers: expect.objectContaining({

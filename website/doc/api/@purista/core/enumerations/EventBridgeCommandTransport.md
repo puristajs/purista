@@ -6,7 +6,7 @@
 
 # Enumeration: EventBridgeCommandTransport
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:1
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L1)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:1
 
 > **HttpRequest**: `"http-request"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:5
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L5)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:5
 
 > **InMemory**: `"in-memory"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:6
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L6)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:6
 
 > **ReplyQueue**: `"reply-queue"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:3
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L3)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:3
 
 > **RequestReply**: `"request-reply"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:2
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L2)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:2
 
 > **TopicCorrelation**: `"topic-correlation"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:4
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L4)

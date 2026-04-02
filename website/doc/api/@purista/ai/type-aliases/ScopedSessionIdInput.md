@@ -8,7 +8,7 @@
 
 > **ScopedSessionIdInput** = `object`
 
-Defined in: [packages/ai/src/runtime/sessionIdentity.ts:6](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/sessionIdentity.ts#L6)
+Defined in: [packages/ai/src/runtime/sessionIdentity.ts:6](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/sessionIdentity.ts#L6)
 
 Input required to build the canonical scoped session id used by agent session helpers.
 
@@ -18,7 +18,7 @@ Input required to build the canonical scoped session id used by agent session he
 
 > **agentName**: `string`
 
-Defined in: [packages/ai/src/runtime/sessionIdentity.ts:7](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/sessionIdentity.ts#L7)
+Defined in: [packages/ai/src/runtime/sessionIdentity.ts:7](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/sessionIdentity.ts#L7)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/runtime/sessionIdentity.ts:7](https://github.com/pu
 
 > **agentVersion**: `string`
 
-Defined in: [packages/ai/src/runtime/sessionIdentity.ts:8](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/sessionIdentity.ts#L8)
+Defined in: [packages/ai/src/runtime/sessionIdentity.ts:8](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/sessionIdentity.ts#L8)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/runtime/sessionIdentity.ts:8](https://github.com/pu
 
 > **baseSessionId**: `string`
 
-Defined in: [packages/ai/src/runtime/sessionIdentity.ts:9](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/sessionIdentity.ts#L9)
+Defined in: [packages/ai/src/runtime/sessionIdentity.ts:9](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/sessionIdentity.ts#L9)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/runtime/sessionIdentity.ts:9](https://github.com/pu
 
 > `optional` **principalId**: `string`
 
-Defined in: [packages/ai/src/runtime/sessionIdentity.ts:11](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/sessionIdentity.ts#L11)
+Defined in: [packages/ai/src/runtime/sessionIdentity.ts:11](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/sessionIdentity.ts#L11)
 
 ***
 
@@ -50,4 +50,4 @@ Defined in: [packages/ai/src/runtime/sessionIdentity.ts:11](https://github.com/p
 
 > `optional` **tenantId**: `string`
 
-Defined in: [packages/ai/src/runtime/sessionIdentity.ts:10](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/sessionIdentity.ts#L10)
+Defined in: [packages/ai/src/runtime/sessionIdentity.ts:10](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/sessionIdentity.ts#L10)

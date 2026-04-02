@@ -33,7 +33,7 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 | bridge | bounded retry | delayed retry | dead-letter target | strict startup validation |
 |---|---:|---:|---:|---:|
 | [Default](./default_event_bridge.md) | no | no | no | yes |
-| [AMQP](./amqp.md) | yes | no, immediate retry unless broker topology adds delay | yes | yes |
+| [AMQP](./amqp.md) | yes | yes, broker-managed delayed retry queue when `retryDelayMs > 0` on durable subscriptions | yes | yes |
 | [MQTT](./mqtt.md) | no | no | no | yes |
 | [NATS](./nats.md) | yes with JetStream | yes with JetStream | yes with JetStream | yes |
 | [Dapr](./dapr.md) | component-dependent | component-dependent | component-dependent | yes |

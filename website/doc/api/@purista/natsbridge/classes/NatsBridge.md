@@ -129,6 +129,19 @@ The instance id of the event bridge.
 If not set, a id will generated each time a instance is created.
 Use this if there is a need to always have the same instance id.
 
+###### jetStreamAckWaitMs?
+
+`number`
+
+JetStream consumer ack wait in milliseconds for command and subscription consumers.
+This is a broker-level processing timeout used for redelivery when no ack/nak/term is sent.
+
+**Default**
+
+```ts
+30000
+```
+
 ###### logger?
 
 [`Logger`](../../core/classes/Logger.md)
@@ -350,7 +363,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:731](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L731)
+Defined in: [natsbridge/src/NatsBridge.ts:740](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L740)
 
 Shut down event bridge as gracefully as possible
 
@@ -372,7 +385,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:413](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L413)
+Defined in: [natsbridge/src/NatsBridge.ts:422](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L422)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -448,7 +461,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:486](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L486)
+Defined in: [natsbridge/src/NatsBridge.ts:495](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L495)
 
 Call a command of a service and return the result of this command
 
@@ -486,7 +499,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:409](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L409)
+Defined in: [natsbridge/src/NatsBridge.ts:418](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L418)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -504,7 +517,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:405](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L405)
+Defined in: [natsbridge/src/NatsBridge.ts:414](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L414)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -565,7 +578,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:628](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L628)
+Defined in: [natsbridge/src/NatsBridge.ts:637](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L637)
 
 #### Parameters
 
@@ -643,7 +656,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:683](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L683)
+Defined in: [natsbridge/src/NatsBridge.ts:692](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L692)
 
 Register a new subscription
 
@@ -703,7 +716,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:390](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L390)
+Defined in: [natsbridge/src/NatsBridge.ts:399](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L399)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -777,7 +790,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:665](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L665)
+Defined in: [natsbridge/src/NatsBridge.ts:674](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L674)
 
 Unregister a service command
 
@@ -831,7 +844,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:713](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L713)
+Defined in: [natsbridge/src/NatsBridge.ts:722](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L722)
 
 #### Parameters
 

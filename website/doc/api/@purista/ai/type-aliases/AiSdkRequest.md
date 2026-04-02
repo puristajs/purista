@@ -8,7 +8,7 @@
 
 > **AiSdkRequest** = `object`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:38](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/aiSdk.ts#L38)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:38](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/aiSdk.ts#L38)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:38](https://github.com/puristajs/pu
 
 > `optional` **messages**: `ModelMessage`[]
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:40](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/aiSdk.ts#L40)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:40](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/aiSdk.ts#L40)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:40](https://github.com/puristajs/pu
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:41](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/aiSdk.ts#L41)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:41](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/aiSdk.ts#L41)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/bridge/aiSdk.ts:41](https://github.com/puristajs/pu
 
 > `optional` **prompt**: `string`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:39](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/aiSdk.ts#L39)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:39](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/aiSdk.ts#L39)

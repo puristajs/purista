@@ -188,12 +188,20 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		queueName: string,
 		msg: amqplib.ConsumeMessage,
 		nextAttempt: number,
+		retryDelayMs: number,
+		durable: boolean,
 	) {
+		const retryQueueName =
+			retryDelayMs > 0 && durable ? this.getSubscriptionRetryQueueName(queueName, retryDelayMs) : queueName
+		if (retryQueueName !== queueName) {
+			await this.ensureSubscriptionRetryQueue(channel, queueName, retryQueueName, retryDelayMs)
+		}
+
 		const headers = {
 			...(msg.properties.headers ?? {}),
 			[RETRY_ATTEMPT_HEADER]: nextAttempt,
 		}
-		await this.sendToQueueAndConfirm(channel, queueName, msg.content, {
+		await this.sendToQueueAndConfirm(channel, retryQueueName, msg.content, {
 			headers,
 			contentType: msg.properties.contentType,
 			contentEncoding: msg.properties.contentEncoding,
@@ -205,6 +213,26 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			appId: msg.properties.appId,
 		})
 		channel.ack(msg)
+	}
+
+	protected getSubscriptionRetryQueueName(queueName: string, retryDelayMs: number) {
+		return `${queueName}.retry.${retryDelayMs}`
+	}
+
+	protected async ensureSubscriptionRetryQueue(
+		channel: ConfirmChannel,
+		sourceQueueName: string,
+		retryQueueName: string,
+		retryDelayMs: number,
+	) {
+		await channel.assertQueue(retryQueueName, {
+			durable: true,
+			arguments: {
+				'x-message-ttl': retryDelayMs,
+				'x-dead-letter-exchange': '',
+				'x-dead-letter-routing-key': sourceQueueName,
+			},
+		})
 	}
 
 	protected async deadLetterSubscriptionMessage(
@@ -942,13 +970,15 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 										if (attempt >= (failureHandling.maxAttempts ?? 5)) {
 											await this.deadLetterSubscriptionMessage(channel, subscription, msg, failureReason)
 										} else {
-											if ((failureHandling.retryDelayMs ?? 0) > 0) {
-												this.logger.warn(
-													{ queueName, retryDelayMs: failureHandling.retryDelayMs },
-													'AMQP subscription retryDelayMs requires broker retry topology; retrying immediately',
-												)
-											}
-											await this.retrySubscriptionMessage(channel, queue.queue, msg, attempt + 1)
+											const retryDelayMs = failureHandling.retryDelayMs ?? 0
+											await this.retrySubscriptionMessage(
+												channel,
+												queue.queue,
+												msg,
+												attempt + 1,
+												retryDelayMs,
+												!!subscription.eventBridgeConfig.durable,
+											)
 										}
 									} else {
 										channel.nack(msg)

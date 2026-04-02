@@ -6,7 +6,7 @@
 
 # Class: FirecrackerSandboxDriver
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:23](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L23)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:23](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L23)
 
 FirecrackerSandboxDriver - A driver for AWS Firecracker MicroVMs.
 Best for Linux environments with KVM support.
@@ -22,7 +22,7 @@ On Mac, this would typically run inside a Linux VM.
 
 > **new FirecrackerSandboxDriver**(`config`): `FirecrackerSandboxDriver`
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L27)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L27)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/Firecracker
 
 > **name**: `string` = `'FirecrackerSandboxDriver'`
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:24](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L24)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:24](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L24)
 
 The unique name of the driver implementation
 
@@ -54,7 +54,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:35](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L35)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:35](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L35)
 
 Provisions and starts a new sandbox environment.
 
@@ -112,7 +112,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:90](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L90)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:90](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L90)
 
 Permanently removes a sandbox and its resources.
 
@@ -140,7 +140,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`_params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:99](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L99)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:99](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L99)
 
 Executes a bash command within the specified sandbox.
 
@@ -178,7 +178,7 @@ The result of the command execution
 
 > **readFile**(`_params`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:109](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L109)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:109](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L109)
 
 Reads the content of a file from the sandbox.
 
@@ -210,7 +210,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:117](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L117)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:117](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L117)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -229,7 +229,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`_params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:113](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L113)
+Defined in: [packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts:113](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts#L113)
 
 Writes one or more files to the sandbox workspace.
 

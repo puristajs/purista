@@ -117,6 +117,70 @@ describe('@purista/amqpbridge', () => {
 
 		expect(subscriptionStub.called).toBeTruthy()
 	})
+
+	it('uses broker delayed retry queues when retryDelayMs is configured', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const eventName = `subscription.retry.delay.${Date.now()}`
+		const subscriber = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `subscription_retry_delay_${Date.now()}`,
+		} as const
+
+		let attempts = 0
+		const attemptTimestamps: number[] = []
+
+		await eventbridge.registerSubscription(
+			{
+				subscriber,
+				eventName,
+				eventBridgeConfig: {
+					durable: true,
+					autoacknowledge: false,
+					shared: true,
+					consumerFailureHandling: {
+						maxAttempts: 3,
+						retryDelayMs: 600,
+						deadLetterTarget: `${eventName}.dead-letter`,
+					},
+				},
+			},
+			async () => {
+				attempts += 1
+				attemptTimestamps.push(Date.now())
+				if (attempts < 2) {
+					throw new Error('retry once')
+				}
+				return undefined
+			},
+		)
+
+		try {
+			await eventbridge.emitMessage(
+				getCommandSuccessMessageMock(
+					{ delayedRetry: true },
+					{
+						eventName,
+					},
+				),
+			)
+
+			const start = Date.now()
+			while (attempts < 2 && Date.now() - start < 6_000) {
+				await new Promise(resolve => setTimeout(resolve, 50))
+			}
+
+			expect(attempts).toBe(2)
+			expect(attemptTimestamps[1] - attemptTimestamps[0]).toBeGreaterThanOrEqual(500)
+		} finally {
+			await eventbridge.unregisterSubscription(subscriber)
+		}
+	})
+
 	describeSubscriptionReliabilityContract('@purista/amqpbridge subscription reliability', {
 		shouldSkip: () => !dockerAvailable,
 		createHarness: async () => {

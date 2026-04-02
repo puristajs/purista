@@ -8,7 +8,7 @@
 
 > **AgentInvokeRequest** = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:130](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L130)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:130](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L130)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:130](https://github.com/pu
 
 > `optional` **correlationId**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:133](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L133)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:133](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L133)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:133](https://github.com/pu
 
 > `optional` **parameter**: `unknown`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:132](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L132)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:132](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L132)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:132](https://github.com/pu
 
 > **payload**: `unknown`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:131](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L131)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:131](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L131)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:131](https://github.com/pu
 
 > `optional` **principalId**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:137](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L137)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:137](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L137)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:137](https://github.com/pu
 
 > `optional` **sessionId**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:134](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L134)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:134](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L134)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:134](https://github.com/pu
 
 > `optional` **stream**: [`AgentStreamResponder`](AgentStreamResponder.md)
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:135](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L135)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:135](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L135)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:135](https://github.com/pu
 
 > `optional` **tenantId**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:138](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L138)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:138](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L138)
 
 ***
 
@@ -72,4 +72,4 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:138](https://github.com/pu
 
 > `optional` **timeoutMs**: `number`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:136](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/types/AgentDefinition.ts#L136)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:136](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/types/AgentDefinition.ts#L136)

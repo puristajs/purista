@@ -8,7 +8,7 @@
 
 > **kebabCase**(`input`, `options?`): `string`
 
-Defined in: [packages/cli/src/api/change-case.ts:164](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/change-case.ts#L164)
+Defined in: [packages/cli/src/api/change-case.ts:164](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/api/change-case.ts#L164)
 
 Convert a string to kebab case (`foo-bar`).
 

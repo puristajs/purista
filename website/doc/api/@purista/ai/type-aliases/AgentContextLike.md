@@ -8,7 +8,7 @@
 
 > **AgentContextLike** = `object`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:99](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L99)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:99](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L99)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:99](https://github.com/pu
 
 > **app**: `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>\[`"app"`\], `"manifest"`\>
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:100](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L100)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:100](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L100)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:100](https://github.com/p
 
 > **invoke**: `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>\[`"invoke"`\], `"tools"` \| `"agents"`\>
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:104](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L104)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:104](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L104)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:104](https://github.com/p
 
 > **io**: `Pick`\<[`AgentHandlerContext`](AgentHandlerContext.md)\<`unknown`, `unknown`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `never`\>, [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)\>\[`"io"`\], `"protocol"`\>
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:108](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L108)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:108](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L108)

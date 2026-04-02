@@ -203,6 +203,14 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		return this.sanitizeName(shared ? base : `${base}_${this.instanceId}`)
 	}
 
+	private resolveJetStreamAckWaitMs(): number {
+		const configured = this.config.jetStreamAckWaitMs
+		if (!Number.isFinite(configured) || configured <= 0) {
+			throw new UnhandledError(StatusCode.BadRequest, 'JetStream ack wait must be a positive number of milliseconds')
+		}
+		return configured
+	}
+
 	private resolveConsumerFailureHandling(
 		subject: string,
 		config?: DefinitionEventBridgeConsumerFailureHandling,
@@ -318,6 +326,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			kind === 'subscription'
 				? this.resolveConsumerFailureHandling(subject, eventBridgeConfig.consumerFailureHandling)
 				: undefined
+		const ackWaitMs = this.resolveJetStreamAckWaitMs()
 		const opts = consumerOpts()
 			.bindStream(stream)
 			.durable(durableName)
@@ -325,7 +334,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			.deliverTo(createInbox())
 			.manualAck()
 			.ackExplicit()
-			.ackWait(this.defaultCommandTimeout)
+			.ackWait(ackWaitMs)
 			.maxAckPending(this.config.maxMessages)
 			.filterSubject(subject)
 			.maxDeliver(failureHandling?.maxAttempts ?? 1)

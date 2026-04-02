@@ -6,7 +6,7 @@
 
 # Enumeration: EventBridgeResponseConfirmationLevel
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:9
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L9)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:9
 
 > **BrokerConfirm**: `"broker-confirm"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:12
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L12)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:12
 
 > **None**: `"none"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:10
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L10)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:10
 
 > **ProtocolLevel**: `"protocol-level"`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:11
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L11)

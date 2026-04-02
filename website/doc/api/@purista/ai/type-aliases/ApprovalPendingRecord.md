@@ -8,7 +8,7 @@
 
 > **ApprovalPendingRecord** = `object`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:13](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/approvals.ts#L13)
+Defined in: [packages/ai/src/runtime/approvals.ts:13](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/approvals.ts#L13)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:13](https://github.com/purista
 
 > **checkpoint**: `string`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:15](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/approvals.ts#L15)
+Defined in: [packages/ai/src/runtime/approvals.ts:15](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/approvals.ts#L15)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:15](https://github.com/purista
 
 > `optional` **detail**: `string`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:16](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/approvals.ts#L16)
+Defined in: [packages/ai/src/runtime/approvals.ts:16](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/approvals.ts#L16)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:16](https://github.com/purista
 
 > **requestedAt**: `string`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:17](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/approvals.ts#L17)
+Defined in: [packages/ai/src/runtime/approvals.ts:17](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/approvals.ts#L17)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:17](https://github.com/purista
 
 > **status**: `"pending"`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:14](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/approvals.ts#L14)
+Defined in: [packages/ai/src/runtime/approvals.ts:14](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/approvals.ts#L14)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/runtime/approvals.ts:14](https://github.com/purista
 
 > **timeoutMs**: `number`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:18](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/approvals.ts#L18)
+Defined in: [packages/ai/src/runtime/approvals.ts:18](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/approvals.ts#L18)

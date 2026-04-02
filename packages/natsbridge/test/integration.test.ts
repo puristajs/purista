@@ -11,6 +11,7 @@ import { z } from 'zod'
 
 import { describeSubscriptionReliabilityContract } from '../../core/test/helpers/subscriptionReliabilityContractSuite.js'
 import { NatsBridge } from '../src/index.js'
+import { getSubscriptionTopic } from '../src/topic/getSubscriptionTopic.impl.js'
 
 const EXAMPLE_EVENT = 'exampleEvent'
 const NATS_IMAGE = 'nats:2.10-alpine'
@@ -136,6 +137,56 @@ describe('@purista/natsbridge', () => {
 
 		expect(subscriptionStub.called).toBeTruthy()
 	})
+
+	it('configures JetStream consumer ackWait at broker level', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const ackWaitMs = 2_000
+		const bridge = new NatsBridge({
+			logger: logger.mock,
+			...container.getConnectionOptions(),
+			jetStreamAckWaitMs: ackWaitMs,
+		})
+		await bridge.start()
+
+		const subscription = {
+			subscriber: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: `ackwait_${Date.now()}`,
+			},
+			eventName: `ackwait.event.${Date.now()}`,
+			eventBridgeConfig: {
+				durable: true,
+				autoacknowledge: false,
+				shared: true,
+				consumerFailureHandling: {
+					maxAttempts: 2,
+					retryDelayMs: 100,
+					deadLetterTarget: `ackwait.dead-letter.${Date.now()}`,
+				},
+			},
+		} as const
+
+		await bridge.registerSubscription(subscription, async () => undefined)
+		try {
+			if (!bridge.jsm) {
+				throw new Error('JetStream manager was not initialized')
+			}
+			const subject = getSubscriptionTopic.call(bridge, subscription)
+			const streamName = await bridge.jsm.streams.find(subject)
+			const durableName = `subscription_${subscription.subscriber.serviceName}_${subscription.subscriber.serviceVersion}_${subscription.subscriber.serviceTarget}`
+			const info = await bridge.jsm.consumers.info(streamName, durableName)
+			expect(info.config.ack_wait).toBe(ackWaitMs * 1_000_000)
+		} finally {
+			await bridge.unregisterSubscription(subscription.subscriber)
+			await bridge.destroy()
+		}
+	})
+
 	describeSubscriptionReliabilityContract('@purista/natsbridge subscription reliability', {
 		shouldSkip: () => !dockerAvailable,
 		createHarness: async () => {

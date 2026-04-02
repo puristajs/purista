@@ -8,7 +8,7 @@
 
 > **TrajectoryExpectation** = `object`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:6](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L6)
+Defined in: [packages/ai/src/testing/trajectory.ts:6](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L6)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:6](https://github.com/purista
 
 > `optional` **approval**: `object`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:16](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L16)
+Defined in: [packages/ai/src/testing/trajectory.ts:16](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L16)
 
 #### checkpoint?
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:16](https://github.com/purist
 
 > `optional` **artifacts**: (`string` \| \{ `contentIncludes?`: `string` \| `RegExp`; `id`: `string`; `phase?`: `"chunk"` \| `"final"` \| `"any"`; \})[]
 
-Defined in: [packages/ai/src/testing/trajectory.ts:8](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L8)
+Defined in: [packages/ai/src/testing/trajectory.ts:8](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L8)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:8](https://github.com/purista
 
 > `optional` **errors**: `boolean` \| (`string` \| `RegExp`)[]
 
-Defined in: [packages/ai/src/testing/trajectory.ts:20](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L20)
+Defined in: [packages/ai/src/testing/trajectory.ts:20](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L20)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:20](https://github.com/purist
 
 > `optional` **finalMessage**: `string` \| `RegExp`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:9](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L9)
+Defined in: [packages/ai/src/testing/trajectory.ts:9](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L9)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:9](https://github.com/purista
 
 > `optional` **mode**: [`TrajectoryMatchMode`](TrajectoryMatchMode.md)
 
-Defined in: [packages/ai/src/testing/trajectory.ts:21](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L21)
+Defined in: [packages/ai/src/testing/trajectory.ts:21](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L21)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:21](https://github.com/purist
 
 > `optional` **reflection**: `object`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:11](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L11)
+Defined in: [packages/ai/src/testing/trajectory.ts:11](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L11)
 
 #### minIterations?
 
@@ -80,7 +80,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:11](https://github.com/purist
 
 > `optional` **requireApprovalArtifact**: `boolean` \| `string`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:15](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L15)
+Defined in: [packages/ai/src/testing/trajectory.ts:15](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L15)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [packages/ai/src/testing/trajectory.ts:15](https://github.com/purist
 
 > `optional` **requireReflectionSummary**: `boolean`
 
-Defined in: [packages/ai/src/testing/trajectory.ts:10](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L10)
+Defined in: [packages/ai/src/testing/trajectory.ts:10](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L10)
 
 ***
 
@@ -96,4 +96,4 @@ Defined in: [packages/ai/src/testing/trajectory.ts:10](https://github.com/purist
 
 > `optional` **tools**: (`string` \| \{ `name`: `string`; `statuses?`: (`"invoked"` \| `"success"` \| `"error"`)[]; \})[]
 
-Defined in: [packages/ai/src/testing/trajectory.ts:7](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/testing/trajectory.ts#L7)
+Defined in: [packages/ai/src/testing/trajectory.ts:7](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/testing/trajectory.ts#L7)

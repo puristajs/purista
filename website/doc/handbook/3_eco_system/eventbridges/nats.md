@@ -29,6 +29,7 @@ For subscriptions, PURISTA now supports a bounded consumer failure policy:
 - strict startup validation when `consumerFailureHandling.mode` is left at the safe default (`strict`)
 
 The default NATS bridge configuration applies a bounded retry budget for JetStream-backed subscriptions. Per-subscription failure handling hints override that adapter default.
+JetStream processing timeout/redelivery is configured at broker level via `jetStreamAckWaitMs` (or command-specific timeout override), so redelivery is driven by JetStream rather than a PURISTA timer loop.
 
 If a registration requests `durable: true` against a broker without JetStream, the bridge fails fast in `strict` mode instead of silently falling back to non-durable core NATS behavior.
 

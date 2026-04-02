@@ -8,7 +8,7 @@
 
 > **BaseBindingFactoryInput** = `object`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:47](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L47)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:47](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L47)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:47](https://github.com/pu
 
 > `optional` **description**: `string`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:49](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L49)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:49](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L49)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:49](https://github.com/pu
 
 > `optional` **name**: `string`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:48](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L48)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:48](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L48)

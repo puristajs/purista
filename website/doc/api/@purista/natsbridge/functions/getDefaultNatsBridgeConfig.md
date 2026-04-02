@@ -77,6 +77,19 @@ The string which should be used in topics for parts, which are undefined
 __none__
 ```
 
+### jetStreamAckWaitMs
+
+> **jetStreamAckWaitMs**: `number`
+
+JetStream consumer ack wait in milliseconds for command and subscription consumers.
+This is a broker-level processing timeout used for redelivery when no ack/nak/term is sent.
+
+#### Default
+
+```ts
+30000
+```
+
 ### maxMessages
 
 > **maxMessages**: `number`

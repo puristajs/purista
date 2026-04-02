@@ -8,7 +8,7 @@
 
 > **EventBridgeStreamCapabilities** = `object`
 
-Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:3
+Defined in: [core/EventBridge/types/EventBridgeStreamCapabilities.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamCapabilities.ts#L3)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:3
 
 > **aggregatedFinalSupported**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:7
+Defined in: [core/EventBridge/types/EventBridgeStreamCapabilities.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamCapabilities.ts#L7)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:7
 
 > **consumerCancellation**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:5
+Defined in: [core/EventBridge/types/EventBridgeStreamCapabilities.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamCapabilities.ts#L5)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:5
 
 > **gracefulStreamDrain**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:6
+Defined in: [core/EventBridge/types/EventBridgeStreamCapabilities.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamCapabilities.ts#L6)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:6
 
 > **incrementalDelivery**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:4
+Defined in: [core/EventBridge/types/EventBridgeStreamCapabilities.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamCapabilities.ts#L4)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:4
 
 > **lateFrameHandling**: [`EventBridgeStreamLateFrameHandling`](../enumerations/EventBridgeStreamLateFrameHandling.md)
 
-Defined in: core/EventBridge/types/EventBridgeStreamCapabilities.ts:8
+Defined in: [core/EventBridge/types/EventBridgeStreamCapabilities.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamCapabilities.ts#L8)

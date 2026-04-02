@@ -8,7 +8,7 @@
 
 > **MCPExposeInput** = `object`
 
-Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:33](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/mcp/exposeCommandAsMCP.ts#L33)
+Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:33](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/mcp/exposeCommandAsMCP.ts#L33)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:33](https://github.com/pu
 
 > `optional` **agents**: [`AgentDefinition`](AgentDefinition.md)[]
 
-Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:34](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/mcp/exposeCommandAsMCP.ts#L34)
+Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:34](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/mcp/exposeCommandAsMCP.ts#L34)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:34](https://github.com/pu
 
 > `optional` **commands**: [`MCPCommandDescriptorInput`](MCPCommandDescriptorInput.md)[]
 
-Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:35](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/mcp/exposeCommandAsMCP.ts#L35)
+Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:35](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/mcp/exposeCommandAsMCP.ts#L35)

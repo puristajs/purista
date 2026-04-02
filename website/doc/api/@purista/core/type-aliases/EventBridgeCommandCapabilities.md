@@ -8,7 +8,7 @@
 
 > **EventBridgeCommandCapabilities** = `object`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:15
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L15)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:15
 
 > **pendingInvocationCancellation**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:17
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L17)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:17
 
 > **responseConfirmation**: [`EventBridgeResponseConfirmationLevel`](../enumerations/EventBridgeResponseConfirmationLevel.md)
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:18
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L18)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:18
 
 > **strictMode**: `boolean`
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:19
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L19)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:19
 
 > **transport**: [`EventBridgeCommandTransport`](../enumerations/EventBridgeCommandTransport.md)
 
-Defined in: core/EventBridge/types/EventBridgeCommandCapabilities.ts:16
+Defined in: [core/EventBridge/types/EventBridgeCommandCapabilities.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeCommandCapabilities.ts#L16)

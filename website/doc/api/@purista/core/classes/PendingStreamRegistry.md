@@ -6,7 +6,7 @@
 
 # Class: PendingStreamRegistry\<Chunk, Final\>
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:20
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L20)
 
 ## Type Parameters
 
@@ -24,7 +24,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:20
 
 > **new PendingStreamRegistry**\<`Chunk`, `Final`\>(`options?`): `PendingStreamRegistry`\<`Chunk`, `Final`\>
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:24
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L24)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:24
 
 > **get** **size**(): `number`
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:31
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L31)
 
 ##### Returns
 
@@ -62,7 +62,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:31
 
 > **clear**(): `void`
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:208
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:208](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L208)
 
 #### Returns
 
@@ -74,7 +74,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:208
 
 > **get**(`correlationId`): `PendingStreamSession`\<`Chunk`, `Final`\> \| `undefined`
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:187
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:187](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L187)
 
 #### Parameters
 
@@ -92,7 +92,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:187
 
 > **register**(`correlationId`, `timeoutMs`, `traceId`): `PendingStreamSession`\<`Chunk`, `Final`\>
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:35
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L35)
 
 #### Parameters
 
@@ -118,7 +118,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:35
 
 > **reject**(`correlationId`, `error`): `"rejected"` \| `PushResult`
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:191
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:191](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L191)
 
 #### Parameters
 
@@ -140,7 +140,7 @@ Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:191
 
 > **rejectAll**(`error`): `void`
 
-Defined in: core/EventBridge/PendingStreamRegistry.impl.ts:200
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:200](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L200)
 
 #### Parameters
 

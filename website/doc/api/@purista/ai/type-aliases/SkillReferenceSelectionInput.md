@@ -8,7 +8,7 @@
 
 > **SkillReferenceSelectionInput** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:281](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/context.ts#L281)
+Defined in: [packages/ai/src/runtime/context.ts:281](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L281)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:281](https://github.com/puristaj
 
 > `optional` **limit**: `number`
 
-Defined in: [packages/ai/src/runtime/context.ts:284](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/context.ts#L284)
+Defined in: [packages/ai/src/runtime/context.ts:284](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L284)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/context.ts:284](https://github.com/puristaj
 
 > `optional` **queries**: `string`[]
 
-Defined in: [packages/ai/src/runtime/context.ts:283](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/context.ts#L283)
+Defined in: [packages/ai/src/runtime/context.ts:283](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L283)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/context.ts:283](https://github.com/puristaj
 
 > `optional` **relativePathPrefixes**: `string`[]
 
-Defined in: [packages/ai/src/runtime/context.ts:285](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/context.ts#L285)
+Defined in: [packages/ai/src/runtime/context.ts:285](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L285)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/runtime/context.ts:285](https://github.com/puristaj
 
 > **skillName**: `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:282](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/runtime/context.ts#L282)
+Defined in: [packages/ai/src/runtime/context.ts:282](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/runtime/context.ts#L282)

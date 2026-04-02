@@ -6,7 +6,7 @@
 
 # Enumeration: EventBridgeStreamLateFrameHandling
 
-Defined in: core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:1
+Defined in: [core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts#L1)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:1
 
 > **IgnoreWithWarning**: `"ignore-with-warning"`
 
-Defined in: core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:2
+Defined in: [core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts#L2)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:2
 
 > **NotApplicable**: `"not-applicable"`
 
-Defined in: core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:3
+Defined in: [core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeStreamLateFrameHandling.ts#L3)

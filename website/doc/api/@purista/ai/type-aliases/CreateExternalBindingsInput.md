@@ -8,7 +8,7 @@
 
 > **CreateExternalBindingsInput** = `object`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:63](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L63)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:63](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L63)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:63](https://github.com/pu
 
 > `optional` **agents**: [`CreateAgentBindingInput`](CreateAgentBindingInput.md)[]
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:65](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L65)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:65](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L65)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:65](https://github.com/pu
 
 > `optional` **commands**: [`CreateCommandBindingInput`](CreateCommandBindingInput.md)[]
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:64](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/bridge/externalRuntime.ts#L64)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:64](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/bridge/externalRuntime.ts#L64)

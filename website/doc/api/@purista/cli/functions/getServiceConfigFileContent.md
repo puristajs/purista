@@ -8,7 +8,7 @@
 
 > **getServiceConfigFileContent**(`input`): `string`
 
-Defined in: [packages/cli/src/api/content/service/getServiceConfigFileContent.ts:8](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/cli/src/api/content/service/getServiceConfigFileContent.ts#L8)
+Defined in: [packages/cli/src/api/content/service/getServiceConfigFileContent.ts:8](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/cli/src/api/content/service/getServiceConfigFileContent.ts#L8)
 
 Generate the service config file, which contains the configuration schema and type for the service
 

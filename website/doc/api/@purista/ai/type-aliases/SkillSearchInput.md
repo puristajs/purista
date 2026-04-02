@@ -8,7 +8,7 @@
 
 > **SkillSearchInput** = `object`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:42](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L42)
+Defined in: [packages/ai/src/skills/fileSystem.ts:42](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L42)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:42](https://github.com/purista
 
 > `optional` **limit**: `number`
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:47](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L47)
+Defined in: [packages/ai/src/skills/fileSystem.ts:47](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L47)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:47](https://github.com/purista
 
 > `optional` **phases**: `string`[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:46](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L46)
+Defined in: [packages/ai/src/skills/fileSystem.ts:46](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L46)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:46](https://github.com/purista
 
 > `optional` **queries**: `string`[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:44](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L44)
+Defined in: [packages/ai/src/skills/fileSystem.ts:44](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L44)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:44](https://github.com/purista
 
 > `optional` **skillNames**: `string`[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:43](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L43)
+Defined in: [packages/ai/src/skills/fileSystem.ts:43](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L43)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/skills/fileSystem.ts:43](https://github.com/purista
 
 > `optional` **topics**: `string`[]
 
-Defined in: [packages/ai/src/skills/fileSystem.ts:45](https://github.com/puristajs/purista/blob/22fd555ef1ada6d421f1292a01620a9b2b527601/packages/ai/src/skills/fileSystem.ts#L45)
+Defined in: [packages/ai/src/skills/fileSystem.ts:45](https://github.com/puristajs/purista/blob/430e29c621b412b5f21de4eb9697723299bc616e/packages/ai/src/skills/fileSystem.ts#L45)
