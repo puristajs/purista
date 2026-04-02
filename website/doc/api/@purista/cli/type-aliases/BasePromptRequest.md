@@ -8,7 +8,7 @@
 
 > **BasePromptRequest**\<`TKey`\> = `object`
 
-Defined in: [packages/cli/src/core/types.ts:52](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/core/types.ts#L52)
+Defined in: [packages/cli/src/core/types.ts:52](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L52)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [packages/cli/src/core/types.ts:52](https://github.com/puristajs/pur
 
 > `optional` **defaultValue**: `string` \| `boolean`
 
-Defined in: [packages/cli/src/core/types.ts:55](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/core/types.ts#L55)
+Defined in: [packages/cli/src/core/types.ts:55](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L55)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [packages/cli/src/core/types.ts:55](https://github.com/puristajs/pur
 
 > **key**: `TKey`
 
-Defined in: [packages/cli/src/core/types.ts:53](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/core/types.ts#L53)
+Defined in: [packages/cli/src/core/types.ts:53](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L53)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [packages/cli/src/core/types.ts:53](https://github.com/puristajs/pur
 
 > **message**: `string`
 
-Defined in: [packages/cli/src/core/types.ts:54](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/core/types.ts#L54)
+Defined in: [packages/cli/src/core/types.ts:54](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L54)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [packages/cli/src/core/types.ts:54](https://github.com/puristajs/pur
 
 > `optional` **required**: `boolean`
 
-Defined in: [packages/cli/src/core/types.ts:56](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/cli/src/core/types.ts#L56)
+Defined in: [packages/cli/src/core/types.ts:56](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L56)

@@ -8,7 +8,7 @@
 
 > **NatsQueueBridgeOptions** = `object`
 
-Defined in: [types.ts:3](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L3)
+Defined in: [types.ts:3](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L3)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [types.ts:3](https://github.com/puristajs/purista/blob/a54e4eedd3278
 
 > `optional` **connectionOptions**: `ConnectionOptions`
 
-Defined in: [types.ts:4](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L4)
+Defined in: [types.ts:4](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L4)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [types.ts:4](https://github.com/puristajs/purista/blob/a54e4eedd3278
 
 > `optional` **defaultLeaseTtlMs**: `number`
 
-Defined in: [types.ts:6](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L6)
+Defined in: [types.ts:6](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L6)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [types.ts:6](https://github.com/puristajs/purista/blob/a54e4eedd3278
 
 > `optional` **defaultMaxAttempts**: `number`
 
-Defined in: [types.ts:7](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L7)
+Defined in: [types.ts:7](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L7)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [types.ts:7](https://github.com/puristajs/purista/blob/a54e4eedd3278
 
 > `optional` **releaseBatchSize**: `number`
 
-Defined in: [types.ts:9](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L9)
+Defined in: [types.ts:9](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L9)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [types.ts:9](https://github.com/puristajs/purista/blob/a54e4eedd3278
 
 > `optional` **storageType**: `"file"` \| `"memory"`
 
-Defined in: [types.ts:8](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L8)
+Defined in: [types.ts:8](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L8)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [types.ts:8](https://github.com/puristajs/purista/blob/a54e4eedd3278
 
 > `optional` **subjectPrefix**: `string`
 
-Defined in: [types.ts:5](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/nats-queue-bridge/src/types.ts#L5)
+Defined in: [types.ts:5](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/nats-queue-bridge/src/types.ts#L5)

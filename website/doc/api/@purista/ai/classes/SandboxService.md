@@ -6,7 +6,7 @@
 
 # Class: SandboxService
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:11](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L11)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:11](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L11)
 
 Custom Sandbox service with startup reconciliation.
 
@@ -335,7 +335,7 @@ Get service info
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:216
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:221
 
 Stop and destroy the current service
 
@@ -379,7 +379,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:208
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:213
 
 #### Parameters
 
@@ -401,7 +401,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:208
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:210
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:215
 
 #### Parameters
 
@@ -749,6 +749,22 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:104
 
 ***
 
+### getPausedSubscriptionConsumerState()
+
+> **getPausedSubscriptionConsumerState**(): `Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:206
+
+#### Returns
+
+`Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getPausedSubscriptionConsumerState`](../../core/classes/Service.md#getpausedsubscriptionconsumerstate)
+
+***
+
 ### getQueueNamespace()
 
 > `protected` **getQueueNamespace**(`queueInvokes?`, `traceId?`, `principalId?`, `tenantId?`): `object`
@@ -905,7 +921,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:97
 
 > **pauseQueueWorkers**(`queueName`, `reason?`): `void`
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:206
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:210
 
 #### Parameters
 
@@ -953,7 +969,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:191
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:209
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:214
 
 #### Parameters
 
@@ -975,7 +991,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:209
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:211
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:216
 
 #### Parameters
 
@@ -997,7 +1013,7 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:211
 
 > **resumeQueueWorkers**(`queueName`): `void`
 
-Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:207
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:211
 
 #### Parameters
 
@@ -1012,6 +1028,28 @@ Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:207
 #### Inherited from
 
 [`Service`](../../core/classes/Service.md).[`resumeQueueWorkers`](../../core/classes/Service.md#resumequeueworkers)
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: packages/core/dist/esm/core/Service/Service.impl.d.ts:212
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`resumeSubscriptionConsumer`](../../core/classes/Service.md#resumesubscriptionconsumer)
 
 ***
 
@@ -1055,7 +1093,7 @@ function name is need in messages like InfoServiceFunctionAdded
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:16](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L16)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts:16](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/service/Sandbox/v1/SandboxService.ts#L16)
 
 It connects to the event bridge and subscribes to the topics that are in the subscription list.
 

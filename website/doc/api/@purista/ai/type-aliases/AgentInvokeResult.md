@@ -8,7 +8,7 @@
 
 > **AgentInvokeResult** = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:167](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentDefinition.ts#L167)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:167](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentDefinition.ts#L167)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:167](https://github.com/pu
 
 > **envelopes**: [`AgentProtocolEnvelope`](AgentProtocolEnvelope.md)[]
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:168](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentDefinition.ts#L168)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:168](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentDefinition.ts#L168)

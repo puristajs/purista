@@ -8,7 +8,7 @@
 
 > **AgentRunLockInput** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:217](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L217)
+Defined in: [packages/ai/src/runtime/runState.ts:217](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L217)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:217](https://github.com/purista
 
 > `optional` **extraScope**: `Record`\<`string`, `string`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:220](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L220)
+Defined in: [packages/ai/src/runtime/runState.ts:220](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L220)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:220](https://github.com/purista
 
 > `optional` **key**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:218](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L218)
+Defined in: [packages/ai/src/runtime/runState.ts:218](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L218)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:218](https://github.com/purista
 
 > `optional` **runId**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:221](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L221)
+Defined in: [packages/ai/src/runtime/runState.ts:221](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L221)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/runtime/runState.ts:221](https://github.com/purista
 
 > `optional` **ttlMs**: `number`
 
-Defined in: [packages/ai/src/runtime/runState.ts:219](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L219)
+Defined in: [packages/ai/src/runtime/runState.ts:219](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L219)

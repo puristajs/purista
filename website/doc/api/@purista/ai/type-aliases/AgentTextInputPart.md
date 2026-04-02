@@ -8,7 +8,7 @@
 
 > **AgentTextInputPart** = `object`
 
-Defined in: [packages/ai/src/input/types.ts:36](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L36)
+Defined in: [packages/ai/src/input/types.ts:36](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L36)
 
 Canonical normalized model input surface used across the runtime.
 
@@ -23,7 +23,7 @@ framework runtime.
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/input/types.ts:39](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L39)
+Defined in: [packages/ai/src/input/types.ts:39](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L39)
 
 ***
 
@@ -31,7 +31,7 @@ Defined in: [packages/ai/src/input/types.ts:39](https://github.com/puristajs/pur
 
 > **text**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:38](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L38)
+Defined in: [packages/ai/src/input/types.ts:38](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L38)
 
 ***
 
@@ -39,4 +39,4 @@ Defined in: [packages/ai/src/input/types.ts:38](https://github.com/puristajs/pur
 
 > **type**: `"text"`
 
-Defined in: [packages/ai/src/input/types.ts:37](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L37)
+Defined in: [packages/ai/src/input/types.ts:37](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L37)

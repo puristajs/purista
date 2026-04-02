@@ -8,7 +8,7 @@
 
 > **ProviderGenerateTextRequest** = [`ProviderRequest`](ProviderRequest.md) & `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:56](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/ModelProvider.ts#L56)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:56](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L56)
 
 Request input for high-level text generation that auto-selects streaming
 or non-streaming provider capabilities.

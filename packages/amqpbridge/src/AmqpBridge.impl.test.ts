@@ -4,6 +4,7 @@ import {
 	type PendingInvocationRegistry,
 	StatusCode,
 	type Subscription,
+	SubscriptionConsumerControlError,
 	UnhandledError,
 } from '@purista/core'
 import type { Channel } from 'amqplib'
@@ -13,7 +14,18 @@ import { AmqpBridge } from './AmqpBridge.impl.js'
 
 type BridgeInternals = {
 	serviceFunctions: Map<string, { cb: (message: unknown) => Promise<unknown>; channel: Channel }>
-	subscriptions: Map<string, { cb: (message: unknown) => Promise<unknown>; channel: Channel }>
+	subscriptions: Map<
+		string,
+		{
+			cb: (message: unknown) => Promise<unknown>
+			channel: Channel
+			queueName: string
+			noAck: boolean
+			consumeHandler: (msg: unknown) => Promise<unknown>
+			consumerTag?: string
+		}
+	>
+	pausedSubscriptionConsumers: Map<string, { pausedAt: number; reason: string }>
 	pendingInvocations: PendingInvocationRegistry<unknown>
 	connection?: { createChannel?: () => Promise<unknown>; close?: () => Promise<unknown> }
 	channel?: {
@@ -403,5 +415,142 @@ describe('AmqpBridge', () => {
 			}),
 		)
 		expect(channel.ack).toHaveBeenCalledTimes(1)
+	})
+
+	it('drops subscription messages when control outcome is drop', async () => {
+		const bridge = new AmqpBridge()
+		const internals = getBridgeInternals(bridge)
+		const consumeHandlers: Array<(msg: unknown) => Promise<void>> = []
+		const channel = {
+			on: vi.fn(),
+			assertQueue: vi.fn().mockResolvedValue({ queue: 'purista.sub.Users.1.onCreated' }),
+			bindQueue: vi.fn().mockResolvedValue(undefined),
+			consume: vi.fn().mockImplementation(async (_queue, handler) => {
+				consumeHandlers.push(handler)
+				return { consumerTag: 'ctag-1' }
+			}),
+			ack: vi.fn(),
+			nack: vi.fn(),
+			sendToQueue: vi.fn(),
+		}
+		internals.connection = {
+			createChannel: vi.fn().mockResolvedValue(channel),
+		}
+
+		await bridge.registerSubscription(
+			{
+				subscriber: {
+					serviceName: 'Users',
+					serviceVersion: '1',
+					serviceTarget: 'onCreated',
+				},
+				eventBridgeConfig: {
+					shared: true,
+					durable: true,
+					autoacknowledge: false,
+					consumerFailureHandling: {
+						maxAttempts: 2,
+						deadLetterTarget: 'Users.onCreated.dead-letter',
+					},
+				},
+			},
+			async () => {
+				throw new SubscriptionConsumerControlError('drop', 'ignore this event')
+			},
+		)
+
+		await consumeHandlers[0]({
+			content: Buffer.from(
+				JSON.stringify(
+					getCommandSuccessMessageMock(
+						{},
+						{
+							eventName: 'user.created',
+						},
+					),
+				),
+			),
+			properties: {
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				headers: {},
+			},
+		})
+		await new Promise(resolve => setTimeout(resolve, 0))
+
+		expect(channel.ack).toHaveBeenCalledTimes(1)
+		expect(channel.nack).not.toHaveBeenCalled()
+		expect(channel.sendToQueue).not.toHaveBeenCalled()
+	})
+
+	it('pauses and resumes subscription consumers for stop-consumer control outcomes', async () => {
+		const bridge = new AmqpBridge()
+		const internals = getBridgeInternals(bridge)
+		const consumeHandlers: Array<(msg: unknown) => Promise<void>> = []
+		const channel = {
+			on: vi.fn(),
+			assertQueue: vi.fn().mockResolvedValue({ queue: 'purista.sub.Users.1.onCreated' }),
+			bindQueue: vi.fn().mockResolvedValue(undefined),
+			consume: vi.fn().mockImplementation(async (_queue, handler) => {
+				consumeHandlers.push(handler)
+				return { consumerTag: `ctag-${consumeHandlers.length}` }
+			}),
+			ack: vi.fn(),
+			nack: vi.fn(),
+			cancel: vi.fn().mockResolvedValue(undefined),
+		}
+		internals.connection = {
+			createChannel: vi.fn().mockResolvedValue(channel),
+		}
+
+		const key = await bridge.registerSubscription(
+			{
+				subscriber: {
+					serviceName: 'Users',
+					serviceVersion: '1',
+					serviceTarget: 'onCreated',
+				},
+				eventBridgeConfig: {
+					shared: true,
+					durable: true,
+					autoacknowledge: false,
+					consumerFailureHandling: {
+						maxAttempts: 2,
+						deadLetterTarget: 'Users.onCreated.dead-letter',
+					},
+				},
+			},
+			async () => {
+				throw new SubscriptionConsumerControlError('stop-consumer', 'poison sequence detected')
+			},
+		)
+
+		await consumeHandlers[0]({
+			content: Buffer.from(
+				JSON.stringify(
+					getCommandSuccessMessageMock(
+						{},
+						{
+							eventName: 'user.created',
+						},
+					),
+				),
+			),
+			properties: {
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				headers: {},
+			},
+		})
+		await new Promise(resolve => setTimeout(resolve, 0))
+
+		expect(channel.cancel).toHaveBeenCalledWith('ctag-1')
+		expect(internals.pausedSubscriptionConsumers.has(key)).toBe(true)
+		expect(bridge.getPausedSubscriptionConsumers()[key]?.reason).toBe('poison sequence detected')
+
+		await bridge.resumeSubscriptionConsumer(key)
+
+		expect(channel.consume).toHaveBeenCalledTimes(2)
+		expect(internals.pausedSubscriptionConsumers.has(key)).toBe(false)
 	})
 })

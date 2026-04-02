@@ -8,7 +8,7 @@
 
 > **isSubscriptionHandlerControlResult**(`value`): `value is SubscriptionHandlerControlResult`
 
-Defined in: core/types/subscription/SubscriptionHandlerResult.ts:17
+Defined in: [core/types/subscription/SubscriptionHandlerResult.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionHandlerResult.ts#L21)
 
 ## Parameters
 

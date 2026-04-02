@@ -8,7 +8,7 @@
 
 > **getApprovalStateKey**(`agentName`, `agentVersion`, `checkpoint`): `string`
 
-Defined in: [packages/ai/src/runtime/approvals.ts:58](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/approvals.ts#L58)
+Defined in: [packages/ai/src/runtime/approvals.ts:58](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/approvals.ts#L58)
 
 ## Parameters
 

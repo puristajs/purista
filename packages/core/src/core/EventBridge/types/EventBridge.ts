@@ -133,4 +133,14 @@ export interface EventBridge {
 	 * Number of currently running handlers grouped by work kind.
 	 */
 	getInFlightExecutionCounts(): Record<'command' | 'subscription' | 'stream' | 'generic', number>
+
+	/**
+	 * Returns paused subscription consumer states keyed by adapter registration key.
+	 */
+	getPausedSubscriptionConsumers(): Record<string, { pausedAt: number; reason: string }>
+
+	/**
+	 * Resumes a paused subscription consumer by registration key.
+	 */
+	resumeSubscriptionConsumer(registrationKey: string): Promise<void>
 }

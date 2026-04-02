@@ -6,7 +6,7 @@
 
 # Class: SubscriptionConsumerControlError
 
-Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:6
+Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L6)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:6
 
 > **new SubscriptionConsumerControlError**(`result`): `SubscriptionConsumerControlError`
 
-Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:11
+Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L11)
 
 #### Parameters
 
@@ -38,13 +38,13 @@ Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:11
 
 > **new SubscriptionConsumerControlError**(`outcome`, `reason?`, `delayMs?`): `SubscriptionConsumerControlError`
 
-Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:12
+Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L12)
 
 #### Parameters
 
 ##### outcome
 
-`"deadLetter"` | `"retry"`
+`"deadLetter"` | `"retry"` | `"drop"` | `"stop-consumer"`
 
 ##### reason?
 
@@ -68,15 +68,15 @@ Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:12
 
 > `readonly` `optional` **delayMs**: `number`
 
-Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:9
+Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L9)
 
 ***
 
 ### outcome
 
-> `readonly` **outcome**: `"deadLetter"` \| `"retry"`
+> `readonly` **outcome**: `"deadLetter"` \| `"retry"` \| `"drop"` \| `"stop-consumer"`
 
-Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:7
+Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L7)
 
 ***
 
@@ -84,4 +84,4 @@ Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:7
 
 > `readonly` `optional` **reason**: `string`
 
-Defined in: core/types/subscription/SubscriptionConsumerControlError.ts:8
+Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L8)

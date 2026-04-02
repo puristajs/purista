@@ -66,6 +66,9 @@ export class EventBridgeBaseClass<ConfigType> {
 			boundedRetry: false,
 			delayedRetry: false,
 			deadLetterTarget: false,
+			drop: false,
+			stopConsumer: false,
+			consumerPauseResume: false,
 			bridgeManagedDeadLettering: false,
 			nativeDeadLettering: false,
 			fatalClassification: false,
@@ -219,6 +222,12 @@ export class EventBridgeBaseClass<ConfigType> {
 	getInFlightExecutionCounts() {
 		return this.inFlightExecutions.getCounts()
 	}
+
+	getPausedSubscriptionConsumers() {
+		return {}
+	}
+
+	async resumeSubscriptionConsumer(_registrationKey: string) {}
 
 	async openStream<Chunk = unknown, Final = unknown>(
 		_input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,

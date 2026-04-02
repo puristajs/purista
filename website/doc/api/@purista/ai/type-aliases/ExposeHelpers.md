@@ -8,7 +8,7 @@
 
 > **ExposeHelpers** = `object`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:81](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/bridge/externalRuntime.ts#L81)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:81](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L81)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:81](https://github.com/pu
 
 > **agent**(`agent`, `options?`): [`ExternalAgentBinding`](ExternalAgentBinding.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:86](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/bridge/externalRuntime.ts#L86)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:86](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L86)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:86](https://github.com/pu
 
 > **metadata**(): [`ExternalRuntimeMetadata`](ExternalRuntimeMetadata.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:96](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/bridge/externalRuntime.ts#L96)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:96](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L96)
 
 #### Returns
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:96](https://github.com/pu
 
 > **tool**(`command`, `options?`): [`ExternalCommandBinding`](ExternalCommandBinding.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:82](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/bridge/externalRuntime.ts#L82)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:82](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L82)
 
 #### Parameters
 
@@ -96,7 +96,7 @@ Defined in: [packages/ai/src/bridge/externalRuntime.ts:82](https://github.com/pu
 
 > **tools**(`input`): [`ExternalBindingSet`](ExternalBindingSet.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:95](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/bridge/externalRuntime.ts#L95)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:95](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L95)
 
 #### Parameters
 

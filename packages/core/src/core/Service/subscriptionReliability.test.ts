@@ -194,6 +194,108 @@ describe('subscription reliability validation', () => {
 		await service.destroy()
 	})
 
+	it('maps subscription drop outcome to control error for adapters', async () => {
+		const eventBridgeMock = getEventBridgeMock({
+			capabilities: {
+				durableSubscriptions: true,
+				manualAckSupported: true,
+				consumerFailureHandling: {
+					boundedRetry: true,
+					delayedRetry: true,
+					deadLetterTarget: true,
+					drop: true,
+				},
+			},
+		})
+		const logger = getLoggerMock()
+		const builder = new ServiceBuilder({
+			serviceName: 'SubscriptionService',
+			serviceVersion: '1',
+			serviceDescription: 'subscription service',
+		}).setConfigSchema(z.object({}).default({}))
+
+		builder.addSubscriptionDefinition(
+			builder
+				.getSubscriptionBuilder('dropOutcome', 'drop outcome')
+				.subscribeToEvent('user.created')
+				.addPayloadSchema(z.object({ userId: z.string() }))
+				.adviceDurable(true)
+				.adviceConsumerFailureHandling({
+					maxAttempts: 3,
+					retryDelayMs: 50,
+					deadLetterTarget: 'user.created.dlq',
+				})
+				.setSubscriptionFunction(async function () {
+					return { status: 'drop', reason: 'irrelevant event' } as const
+				})
+				.getDefinition(),
+		)
+
+		const service = await builder.getInstance(eventBridgeMock.mock, {
+			logger: logger.mock,
+		})
+
+		await service.start()
+
+		const message = getCustomMessageMessageMock('user.created', { userId: 'u-1' })
+		await expect(service.executeSubscription(message, 'dropOutcome')).rejects.toMatchObject({
+			name: SubscriptionConsumerControlError.name,
+			outcome: 'drop',
+		})
+		await service.destroy()
+	})
+
+	it('rejects subscription stop-consumer outcome in strict mode when bridge lacks support', async () => {
+		const eventBridgeMock = getEventBridgeMock({
+			capabilities: {
+				durableSubscriptions: true,
+				manualAckSupported: true,
+				consumerFailureHandling: {
+					boundedRetry: true,
+					delayedRetry: true,
+					deadLetterTarget: true,
+					stopConsumer: false,
+				},
+			},
+		})
+		const logger = getLoggerMock()
+		const builder = new ServiceBuilder({
+			serviceName: 'SubscriptionService',
+			serviceVersion: '1',
+			serviceDescription: 'subscription service',
+		}).setConfigSchema(z.object({}).default({}))
+
+		builder.addSubscriptionDefinition(
+			builder
+				.getSubscriptionBuilder('stopConsumerOutcome', 'stop consumer outcome')
+				.subscribeToEvent('user.created')
+				.addPayloadSchema(z.object({ userId: z.string() }))
+				.adviceDurable(true)
+				.adviceConsumerFailureHandling({
+					mode: 'strict',
+					maxAttempts: 3,
+					retryDelayMs: 50,
+					deadLetterTarget: 'user.created.dlq',
+				})
+				.setSubscriptionFunction(async function () {
+					return { status: 'stop-consumer', reason: 'poison sequence detected' } as const
+				})
+				.getDefinition(),
+		)
+
+		const service = await builder.getInstance(eventBridgeMock.mock, {
+			logger: logger.mock,
+		})
+
+		await service.start()
+
+		const message = getCustomMessageMessageMock('user.created', { userId: 'u-1' })
+		await expect(service.executeSubscription(message, 'stopConsumerOutcome')).rejects.toMatchObject({
+			errorCode: StatusCode.NotImplemented,
+		})
+		await service.destroy()
+	})
+
 	it('rejects delayed retry control signal in strict mode if bridge has no delayed retry support', async () => {
 		const eventBridgeMock = getEventBridgeMock({
 			capabilities: {
@@ -242,5 +344,29 @@ describe('subscription reliability validation', () => {
 			errorCode: StatusCode.NotImplemented,
 		})
 		await service.destroy()
+	})
+
+	it('rejects resumeSubscriptionConsumer when bridge has no pause/resume support', async () => {
+		const eventBridgeMock = getEventBridgeMock({
+			capabilities: {
+				consumerFailureHandling: {
+					consumerPauseResume: false,
+				},
+			},
+		})
+		const logger = getLoggerMock()
+		const builder = new ServiceBuilder({
+			serviceName: 'SubscriptionService',
+			serviceVersion: '1',
+			serviceDescription: 'subscription service',
+		}).setConfigSchema(z.object({}).default({}))
+
+		const service = await builder.getInstance(eventBridgeMock.mock, {
+			logger: logger.mock,
+		})
+
+		await expect(service.resumeSubscriptionConsumer('subscription-key')).rejects.toMatchObject({
+			errorCode: StatusCode.NotImplemented,
+		})
 	})
 })

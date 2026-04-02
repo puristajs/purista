@@ -8,7 +8,7 @@
 
 > **AgentInvokeContext**\<`EmitPayloads`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:141](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentDefinition.ts#L141)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:141](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentDefinition.ts#L141)
 
 ## Type Parameters
 
@@ -22,4 +22,4 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:141](https://github.com/pu
 
 > `optional` **stream**: [`AgentStreamResponder`](AgentStreamResponder.md)\<`EmitPayloads`\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:142](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentDefinition.ts#L142)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:142](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentDefinition.ts#L142)

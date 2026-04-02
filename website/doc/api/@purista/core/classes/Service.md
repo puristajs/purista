@@ -321,7 +321,7 @@ Get service info
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:3010](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L3010)
+Defined in: [core/Service/Service.impl.ts:3048](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L3048)
 
 Stop and destroy the current service
 
@@ -365,7 +365,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2391](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2391)
+Defined in: [core/Service/Service.impl.ts:2405](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2405)
 
 #### Parameters
 
@@ -383,7 +383,7 @@ Defined in: [core/Service/Service.impl.ts:2391](https://github.com/puristajs/pur
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: [core/Service/Service.impl.ts:2669](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2669)
+Defined in: [core/Service/Service.impl.ts:2683](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2683)
 
 #### Parameters
 
@@ -707,6 +707,22 @@ Defined in: [core/Service/Service.impl.ts:341](https://github.com/puristajs/puri
 
 ***
 
+### getPausedSubscriptionConsumerState()
+
+> **getPausedSubscriptionConsumerState**(): `Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+Defined in: [core/Service/Service.impl.ts:2380](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2380)
+
+#### Returns
+
+`Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+#### Implementation of
+
+[`ServiceClass`](../interfaces/ServiceClass.md).[`getPausedSubscriptionConsumerState`](../interfaces/ServiceClass.md#getpausedsubscriptionconsumerstate)
+
+***
+
 ### getQueueNamespace()
 
 > `protected` **getQueueNamespace**(`queueInvokes?`, `traceId?`, `principalId?`, `tenantId?`): `object`
@@ -851,7 +867,7 @@ Defined in: [core/Service/Service.impl.ts:295](https://github.com/puristajs/puri
 
 > **pauseQueueWorkers**(`queueName`, `reason?`): `void`
 
-Defined in: [core/Service/Service.impl.ts:2380](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2380)
+Defined in: [core/Service/Service.impl.ts:2384](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2384)
 
 #### Parameters
 
@@ -891,7 +907,7 @@ Defined in: [core/Service/Service.impl.ts:2050](https://github.com/puristajs/pur
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2639](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2639)
+Defined in: [core/Service/Service.impl.ts:2653](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2653)
 
 #### Parameters
 
@@ -909,7 +925,7 @@ Defined in: [core/Service/Service.impl.ts:2639](https://github.com/puristajs/pur
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2941](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2941)
+Defined in: [core/Service/Service.impl.ts:2979](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2979)
 
 #### Parameters
 
@@ -927,7 +943,7 @@ Defined in: [core/Service/Service.impl.ts:2941](https://github.com/puristajs/pur
 
 > **resumeQueueWorkers**(`queueName`): `void`
 
-Defined in: [core/Service/Service.impl.ts:2387](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2387)
+Defined in: [core/Service/Service.impl.ts:2391](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2391)
 
 #### Parameters
 
@@ -938,6 +954,28 @@ Defined in: [core/Service/Service.impl.ts:2387](https://github.com/puristajs/pur
 #### Returns
 
 `void`
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: [core/Service/Service.impl.ts:2395](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2395)
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`ServiceClass`](../interfaces/ServiceClass.md).[`resumeSubscriptionConsumer`](../interfaces/ServiceClass.md#resumesubscriptionconsumer)
 
 ***
 

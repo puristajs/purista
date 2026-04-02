@@ -8,7 +8,7 @@
 
 > **ModelInvocationRetryPolicy** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:3](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/modelInvocation.ts#L3)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:3](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L3)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:3](https://git
 
 > `optional` **delayMs**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:5](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/modelInvocation.ts#L5)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:5](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L5)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:5](https://git
 
 > **maxAttempts**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:4](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/modelInvocation.ts#L4)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:4](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L4)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:4](https://git
 
 > `optional` **maxDelayMs**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:7](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/modelInvocation.ts#L7)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:7](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L7)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:7](https://git
 
 > `optional` **strategy**: `"fixed"` \| `"exponential"`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:6](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/modelInvocation.ts#L6)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:6](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L6)

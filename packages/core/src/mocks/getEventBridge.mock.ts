@@ -67,6 +67,9 @@ export const getEventBridgeMock = (
 			boundedRetry: false,
 			delayedRetry: false,
 			deadLetterTarget: false,
+			drop: false,
+			stopConsumer: false,
+			consumerPauseResume: false,
 			bridgeManagedDeadLettering: false,
 			nativeDeadLettering: false,
 			fatalClassification: false,
@@ -101,6 +104,8 @@ export const getEventBridgeMock = (
 		destroy,
 		getInFlightExecutionCount,
 		getInFlightExecutionCounts,
+		getPausedSubscriptionConsumers: sandbox?.stub().returns({}) ?? stub().returns({}),
+		resumeSubscriptionConsumer: sandbox?.stub().resolves() ?? stub().resolves(),
 	}
 
 	return {
@@ -120,6 +125,8 @@ export const getEventBridgeMock = (
 			destroy,
 			getInFlightExecutionCount,
 			getInFlightExecutionCounts,
+			getPausedSubscriptionConsumers: mock.getPausedSubscriptionConsumers as SinonStub,
+			resumeSubscriptionConsumer: mock.resumeSubscriptionConsumer as SinonStub,
 		},
 		mock,
 	}

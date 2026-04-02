@@ -51,6 +51,19 @@ PURISTA now defaults to strict startup validation for reliability-sensitive comm
 Event bridges expose in-flight diagnostics by work kind (`command`, `subscription`, `stream`, `generic`).
 Services can use this during shutdown and operator diagnostics to verify that drain reached zero before teardown.
 
+## Subscription control outcomes
+
+Subscription handlers can return explicit outcomes:
+
+- `ack`: settle as successful
+- `retry`: request retry, optionally with `delayMs`
+- `deadLetter`: route directly to dead-letter handling
+- `drop`: settle and discard the current delivery with a warning
+- `stop-consumer`: pause the subscription consumer and require explicit operator resume
+
+`stop-consumer` is implemented as consumer pause (not service shutdown).  
+Use `Service.getPausedSubscriptionConsumerState()` for diagnostics and `Service.resumeSubscriptionConsumer(registrationKey)` to resume.
+
 ## Streams and reliability
 
 Current stream runtime support is available in `DefaultEventBridge` only.

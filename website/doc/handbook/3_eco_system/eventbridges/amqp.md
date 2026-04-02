@@ -33,6 +33,9 @@ Durable subscriptions can now also declare `consumerFailureHandling`:
 - `deadLetterTarget` is honored as the terminal queue name
 - `retryDelayMs` is honored for durable subscriptions through bridge-managed broker retry queues (TTL + dead-letter back to source queue)
 - `mode: 'strict'` keeps startup honest by rejecting unsupported semantics instead of degrading silently
+- explicit handler outcomes:
+  - `drop`: ack and discard the current delivery with warning metadata
+  - `stop-consumer`: cancel and pause the affected consumer tag until explicit resume
 
 ## Stream support
 
@@ -55,6 +58,7 @@ await eventBridge.start()
 - configure durable queues for long-lived subscriptions
 - configure dead-letter queues for poison messages
 - use confirm-channel backed retry/DLQ handoff so the original delivery is not acknowledged before the retry/DLQ write is accepted
+- monitor paused subscription consumers and resume them deliberately after remediation
 - use queue bridges instead of subscriptions when you need long backoff windows or operator-driven replay
 - keep manual ack enabled for durable command consumers
 - make command/subscription handlers idempotent

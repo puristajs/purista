@@ -6,7 +6,7 @@
 
 # Class: AmqpBridge
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:76](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L76)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L91)
 
 The AMQP event bridge connects to a AMQP broker.
 
@@ -39,7 +39,7 @@ await eventBridge.start()
 
 > **new AmqpBridge**(`config?`): `AmqpBridge`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:270](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L270)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:286](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L286)
 
 #### Parameters
 
@@ -191,7 +191,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 > `protected` `optional` **channel**: `ConfirmChannel`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L78)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L93)
 
 ***
 
@@ -211,7 +211,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 > `protected` `optional` **connection**: `ChannelModel`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L77)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L92)
 
 ***
 
@@ -219,7 +219,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:77](https://github.com/puristajs/
 
 > `protected` **consumerRegistrations**: `object`[] = `[]`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L83)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:98](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L98)
 
 #### channel
 
@@ -253,7 +253,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `protected` **encoder**: [`Encoder`](../type-aliases/Encoder.md)
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:108](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L108)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:118](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L118)
 
 ***
 
@@ -261,7 +261,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:108](https://github.com/puristajs
 
 > `protected` **encrypter**: [`Encrypter`](../type-aliases/Encrypter.md)
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:112](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L112)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:122](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L122)
 
 ***
 
@@ -269,7 +269,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:112](https://github.com/puristajs
 
 > `protected` **healthy**: `boolean` = `false`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L80)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:95](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L95)
 
 ***
 
@@ -329,11 +329,19 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 ***
 
+### pausedSubscriptionConsumers
+
+> `protected` **pausedSubscriptionConsumers**: `Map`\<`string`, `PausedSubscriptionState`\>
+
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L116)
+
+***
+
 ### pendingInvocations
 
 > `protected` **pendingInvocations**: [`PendingInvocationRegistry`](../../core/classes/PendingInvocationRegistry.md)\<`unknown`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:94](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L94)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:109](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L109)
 
 ***
 
@@ -341,7 +349,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:94](https://github.com/puristajs/
 
 > `protected` **ready**: `boolean` = `false`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L81)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:96](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L96)
 
 ***
 
@@ -349,7 +357,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:81](https://github.com/puristajs/
 
 > `protected` `optional` **replyQueueName**: `string`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:85](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L85)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:100](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L100)
 
 ***
 
@@ -357,15 +365,15 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:85](https://github.com/puristajs/
 
 > `protected` **serviceFunctions**: `Map`\<`string`, \{ `cb`: (`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>; `channel`: `ConfirmChannel`; \}\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L86)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:101](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L101)
 
 ***
 
 ### subscriptions
 
-> `protected` **subscriptions**: `Map`\<`string`, \{ `cb`: (`message`) => `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>; `channel`: `ConfirmChannel`; \}\>
+> `protected` **subscriptions**: `Map`\<`string`, `RegisteredSubscription`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:100](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L100)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:115](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L115)
 
 ***
 
@@ -385,7 +393,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > `protected` **addConsumerRegistration**(`channel`, `tag`): `void`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L116)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:126](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L126)
 
 #### Parameters
 
@@ -407,7 +415,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:116](https://github.com/puristajs
 
 > `protected` **createPublishingChannel**(): `Promise`\<`ConfirmChannel`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:136](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L136)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:152](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L152)
 
 #### Returns
 
@@ -419,7 +427,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:136](https://github.com/puristajs
 
 > `protected` **deadLetterSubscriptionMessage**(`channel`, `subscription`, `msg`, `reason`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:239](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L239)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:255](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L255)
 
 #### Parameters
 
@@ -449,7 +457,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:239](https://github.com/puristajs
 
 > `protected` **decodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`T`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1085](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1085)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1171](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1171)
 
 Decode buffer into given type
 
@@ -489,7 +497,7 @@ the encoding type of buffer content
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1104](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1104)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1190](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1190)
 
 Gracefully stops all consumers, waits for in-flight subscription handlers,
 closes AMQP resources and rejects unresolved pending invocations.
@@ -512,7 +520,7 @@ closes AMQP resources and rejects unresolved pending invocations.
 
 > **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:478](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L478)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:497](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L497)
 
 Emits a message via AMQP headers exchange.
 The message is encoded and encrypted according to configured codecs.
@@ -551,7 +559,7 @@ The message is encoded and encrypted according to configured codecs.
 
 > `protected` **encodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`Buffer`\<`ArrayBufferLike`\>\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1064](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1064)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1150](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1150)
 
 Encode given payload to buffer
 
@@ -585,7 +593,7 @@ Encode given payload to buffer
 
 > `protected` **ensureSubscriptionRetryQueue**(`channel`, `sourceQueueName`, `retryQueueName`, `retryDelayMs`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:223](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L223)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:239](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L239)
 
 #### Parameters
 
@@ -615,7 +623,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:223](https://github.com/puristajs
 
 > `protected` **getConsumerAttempt**(`headers`): `number`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:146](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L146)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:162](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L162)
 
 #### Parameters
 
@@ -689,11 +697,33 @@ Number of currently running handlers grouped by work kind.
 
 ***
 
+### getPausedSubscriptionConsumers()
+
+> **getPausedSubscriptionConsumers**(): `object`
+
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1118](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1118)
+
+Returns paused subscription consumer states keyed by adapter registration key.
+
+#### Returns
+
+`object`
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`getPausedSubscriptionConsumers`](../../core/interfaces/EventBridge.md#getpausedsubscriptionconsumers)
+
+#### Overrides
+
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`getPausedSubscriptionConsumers`](../../core/classes/EventBridgeBaseClass.md#getpausedsubscriptionconsumers)
+
+***
+
 ### getSubscriptionDeadLetterTarget()
 
 > `protected` **getSubscriptionDeadLetterTarget**(`subscription`): `string` \| `undefined`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:165](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L165)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:181](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L181)
 
 #### Parameters
 
@@ -711,7 +741,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:165](https://github.com/puristajs
 
 > `protected` **getSubscriptionFailureReason**(`error`): `string`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:169](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L169)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:185](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L185)
 
 #### Parameters
 
@@ -729,7 +759,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:169](https://github.com/puristajs
 
 > `protected` **getSubscriptionRetryQueueName**(`queueName`, `retryDelayMs`): `string`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:219](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L219)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:235](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L235)
 
 #### Parameters
 
@@ -771,7 +801,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:557](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L557)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:576](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L576)
 
 Invokes a remote command and waits for a matching command response.
 The call is rejected with timeout if no response is received in time.
@@ -806,7 +836,7 @@ The call is rejected with timeout if no response is received in time.
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:330](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L330)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:349](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L349)
 
 Indicates if the bridge connection and channels are currently healthy.
 
@@ -824,7 +854,7 @@ Indicates if the bridge connection and channels are currently healthy.
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:323](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L323)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:342](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L342)
 
 Indicates if the bridge finished startup and is ready to process traffic.
 
@@ -842,7 +872,7 @@ Indicates if the bridge finished startup and is ready to process traffic.
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -885,7 +915,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:657](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L657)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:676](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L676)
 
 Register a service function and ensure that there is a queue for all incoming command requests.
 
@@ -927,7 +957,7 @@ the id of command function queue
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:73
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:75
 
 Register a service stream.
 
@@ -967,7 +997,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:864](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L864)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:883](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L883)
 
 Registers a subscription consumer and returns its stable subscription key.
 
@@ -991,11 +1021,33 @@ Registers a subscription consumer and returns its stable subscription key.
 
 ***
 
+### removeConsumerRegistration()
+
+> `protected` **removeConsumerRegistration**(`channel`, `tag`): `void`
+
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:134](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L134)
+
+#### Parameters
+
+##### channel
+
+`ConfirmChannel`
+
+##### tag
+
+`string`
+
+#### Returns
+
+`void`
+
+***
+
 ### removeConsumerRegistrationsForChannel()
 
 > `protected` **removeConsumerRegistrationsForChannel**(`channel`): `void`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:120](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L120)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:130](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L130)
 
 #### Parameters
 
@@ -1009,11 +1061,39 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:120](https://github.com/puristajs
 
 ***
 
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1122](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1122)
+
+Resumes a paused subscription consumer by registration key.
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`resumeSubscriptionConsumer`](../../core/interfaces/EventBridge.md#resumesubscriptionconsumer)
+
+#### Overrides
+
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`resumeSubscriptionConsumer`](../../core/classes/EventBridgeBaseClass.md#resumesubscriptionconsumer)
+
+***
+
 ### retrySubscriptionMessage()
 
 > `protected` **retrySubscriptionMessage**(`channel`, `queueName`, `msg`, `nextAttempt`, `retryDelayMs`, `durable`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:187](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L187)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:203](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L203)
 
 #### Parameters
 
@@ -1083,7 +1163,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 
 > `protected` **sendToQueueAndConfirm**(`channel`, `queueName`, `content`, `options`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:124](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L124)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:140](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L140)
 
 #### Parameters
 
@@ -1113,7 +1193,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:124](https://github.com/puristajs
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:337](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L337)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:356](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L356)
 
 Connect to RabbitMQ broker, ensure exchange, call back queue
 
@@ -1187,7 +1267,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:840](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L840)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:859](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L859)
 
 Unregisters a command consumer and closes the dedicated command channel.
 
@@ -1211,7 +1291,7 @@ Unregisters a command consumer and closes the dedicated command channel.
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:76
 
 Unregister a service stream
 
@@ -1239,7 +1319,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1036](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1036)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:1096](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L1096)
 
 Unregisters a subscription consumer and closes its channel.
 

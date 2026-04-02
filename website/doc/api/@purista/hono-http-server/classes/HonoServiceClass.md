@@ -602,7 +602,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:208
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:213
 
 #### Parameters
 
@@ -624,7 +624,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:208
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:210
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:215
 
 #### Parameters
 
@@ -972,6 +972,22 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:104
 
 ***
 
+### getPausedSubscriptionConsumerState()
+
+> **getPausedSubscriptionConsumerState**(): `Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:206
+
+#### Returns
+
+`Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getPausedSubscriptionConsumerState`](../../core/classes/Service.md#getpausedsubscriptionconsumerstate)
+
+***
+
 ### getQueueNamespace()
 
 > `protected` **getQueueNamespace**(`queueInvokes?`, `traceId?`, `principalId?`, `tenantId?`): `object`
@@ -1178,7 +1194,7 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:635](https
 
 > **pauseQueueWorkers**(`queueName`, `reason?`): `void`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:206
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:210
 
 #### Parameters
 
@@ -1288,7 +1304,7 @@ Adds the endpoints of the service commands to the Hono router
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:209
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:214
 
 #### Parameters
 
@@ -1310,7 +1326,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:209
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:211
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:216
 
 #### Parameters
 
@@ -1332,7 +1348,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:211
 
 > **resumeQueueWorkers**(`queueName`): `void`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:207
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:211
 
 #### Parameters
 
@@ -1347,6 +1363,28 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:207
 #### Inherited from
 
 [`Service`](../../core/classes/Service.md).[`resumeQueueWorkers`](../../core/classes/Service.md#resumequeueworkers)
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:212
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`resumeSubscriptionConsumer`](../../core/classes/Service.md#resumesubscriptionconsumer)
 
 ***
 

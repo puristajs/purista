@@ -508,6 +508,28 @@ Number of currently running handlers grouped by work kind.
 
 ***
 
+### getPausedSubscriptionConsumers()
+
+> **getPausedSubscriptionConsumers**(): `object`
+
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
+
+Returns paused subscription consumer states keyed by adapter registration key.
+
+#### Returns
+
+`object`
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`getPausedSubscriptionConsumers`](../../core/interfaces/EventBridge.md#getpausedsubscriptionconsumers)
+
+#### Inherited from
+
+[`HttpEventBridge`](../../base-http-bridge/classes/HttpEventBridge.md).[`getPausedSubscriptionConsumers`](../../base-http-bridge/classes/HttpEventBridge.md#getpausedsubscriptionconsumers)
+
+***
+
 ### getTracer()
 
 > **getTracer**(): `Tracer`
@@ -618,7 +640,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -705,7 +727,7 @@ the function to be called if a matching command arrives
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:73
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:75
 
 Register a service stream.
 
@@ -774,6 +796,34 @@ the function to be called if a matching message arrives
 #### Overrides
 
 [`HttpEventBridge`](../../base-http-bridge/classes/HttpEventBridge.md).[`registerSubscription`](../../base-http-bridge/classes/HttpEventBridge.md#registersubscription)
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`_registrationKey`): `Promise`\<`void`\>
+
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:73
+
+Resumes a paused subscription consumer by registration key.
+
+#### Parameters
+
+##### \_registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`resumeSubscriptionConsumer`](../../core/interfaces/EventBridge.md#resumesubscriptionconsumer)
+
+#### Inherited from
+
+[`HttpEventBridge`](../../base-http-bridge/classes/HttpEventBridge.md).[`resumeSubscriptionConsumer`](../../base-http-bridge/classes/HttpEventBridge.md#resumesubscriptionconsumer)
 
 ***
 
@@ -917,7 +967,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:76
 
 Unregister a service stream
 

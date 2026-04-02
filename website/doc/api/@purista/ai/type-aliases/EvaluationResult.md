@@ -8,7 +8,7 @@
 
 > **EvaluationResult** = `object`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:21](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L21)
+Defined in: [packages/ai/src/evaluation/helpers.ts:21](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L21)
 
 Aggregated metrics for one workload/dataset pair.
 
@@ -18,7 +18,7 @@ Aggregated metrics for one workload/dataset pair.
 
 > **dataset**: `string`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:24](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L24)
+Defined in: [packages/ai/src/evaluation/helpers.ts:24](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L24)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:24](https://github.com/purist
 
 > **manifestVersion**: `string`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:23](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L23)
+Defined in: [packages/ai/src/evaluation/helpers.ts:23](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L23)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:23](https://github.com/purist
 
 > **samples**: [`EvaluationSample`](EvaluationSample.md)[]
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:31](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L31)
+Defined in: [packages/ai/src/evaluation/helpers.ts:31](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L31)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:31](https://github.com/purist
 
 > **summary**: `object`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:25](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L25)
+Defined in: [packages/ai/src/evaluation/helpers.ts:25](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L25)
 
 #### avgDurationMs?
 
@@ -66,4 +66,4 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:25](https://github.com/purist
 
 > **workload**: `string`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:22](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/evaluation/helpers.ts#L22)
+Defined in: [packages/ai/src/evaluation/helpers.ts:22](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L22)

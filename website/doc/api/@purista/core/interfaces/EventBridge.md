@@ -111,6 +111,20 @@ Number of currently running handlers grouped by work kind.
 
 ***
 
+### getPausedSubscriptionConsumers()
+
+> **getPausedSubscriptionConsumers**(): `Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+Defined in: [core/EventBridge/types/EventBridge.ts:140](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L140)
+
+Returns paused subscription consumer states keyed by adapter registration key.
+
+#### Returns
+
+`Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+***
+
 ### invoke()
 
 > **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>
@@ -299,6 +313,26 @@ the function to be called if a matching message arrives
 #### Returns
 
 `Promise`\<`string`\>
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: [core/EventBridge/types/EventBridge.ts:145](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L145)
+
+Resumes a paused subscription consumer by registration key.
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ***
 

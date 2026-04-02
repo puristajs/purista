@@ -8,4 +8,4 @@
 
 > **SubscriptionHandlerControlResult** = `Exclude`\<[`SubscriptionHandlerResult`](SubscriptionHandlerResult.md), \{ `status`: `"ack"`; \}\>
 
-Defined in: core/types/subscription/SubscriptionHandlerResult.ts:6
+Defined in: [core/types/subscription/SubscriptionHandlerResult.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionHandlerResult.ts#L8)

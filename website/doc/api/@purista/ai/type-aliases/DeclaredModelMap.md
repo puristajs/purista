@@ -8,7 +8,7 @@
 
 > **DeclaredModelMap**\<`ModelAliases`, `TextAliases`, `StreamAliases`, `EmbeddingAliases`, `RerankAliases`, `ObjectAliases`\> = `{ [Alias in ModelAliases]: DeclaredModelAliasApi<Alias, TextAliases, StreamAliases, EmbeddingAliases, RerankAliases, ObjectAliases> }`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:372](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/builder/AgentBuilder.ts#L372)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:372](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L372)
 
 ## Type Parameters
 

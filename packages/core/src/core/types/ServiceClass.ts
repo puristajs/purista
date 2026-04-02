@@ -77,4 +77,6 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 
 	getContextFunctions(logger: Logger): ContextBase
 	getServiceHealth(): Promise<ServiceHealthState>
+	getPausedSubscriptionConsumerState(): Record<string, { pausedAt: number; reason: string }>
+	resumeSubscriptionConsumer(registrationKey: string): Promise<void>
 }

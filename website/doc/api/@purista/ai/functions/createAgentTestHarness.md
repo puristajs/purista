@@ -8,7 +8,7 @@
 
 > **createAgentTestHarness**\<`SkillNames`, `Resources`, `ConfigInput`\>(`definition`, `options?`): `Promise`\<\{ `eventBridge`: [`EventBridge`](../../core/interfaces/EventBridge.md); `instance`: [`AgentRuntimeInstance`](../type-aliases/AgentRuntimeInstance.md); `queueBridge?`: [`QueueBridge`](../../core/interfaces/QueueBridge.md); `destroy`: `Promise`\<`void`\>; `run`: `Promise`\<[`AgentHarnessResult`](../type-aliases/AgentHarnessResult.md)\>; `stream`: `Promise`\<[`AgentStreamHarnessResult`](../type-aliases/AgentStreamHarnessResult.md)\>; \}\>
 
-Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:44](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/testing/createAgentTestHarness.ts#L44)
+Defined in: [packages/ai/src/testing/createAgentTestHarness.ts:44](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentTestHarness.ts#L44)
 
 ## Type Parameters
 

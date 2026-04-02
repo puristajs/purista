@@ -8,7 +8,7 @@
 
 > **RunStateProtocolEmitter** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:13](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L13)
+Defined in: [packages/ai/src/runtime/runState.ts:13](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L13)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:13](https://github.com/puristaj
 
 > **emitArtifact**(`input`): `void`
 
-Defined in: [packages/ai/src/runtime/runState.ts:14](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/runState.ts#L14)
+Defined in: [packages/ai/src/runtime/runState.ts:14](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L14)
 
 #### Parameters
 

@@ -115,6 +115,14 @@ const builder = myServiceBuilder
       return { status: 'deadLetter', reason: 'invalid payload for projection' }
     }
 
+    if (payload.ignoreForNow) {
+      return { status: 'drop', reason: 'known irrelevant event variant' }
+    }
+
+    if (payload.poisonSequenceDetected) {
+      return { status: 'stop-consumer', reason: 'manual operator review required' }
+    }
+
     return { status: 'ack' }
   })
 ```
@@ -122,7 +130,11 @@ const builder = myServiceBuilder
 - `ack` settles the delivery as successful.
 - `retry` signals transient failure with optional delay hint.
 - `deadLetter` routes immediately to dead-letter handling.
+- `drop` acknowledges and discards the current delivery with warning logging.
+- `stop-consumer` pauses the affected subscription consumer until explicitly resumed by an operator/runtime call.
 - Thrown errors still map through the configured retry/DLQ policy for backward-compatible behavior.
+
+`stop-consumer` support is capability-gated per adapter. In `mode: 'strict'`, unsupported adapters reject this outcome with a startup/runtime validation error instead of silently degrading behavior.
 
 ### When to use subscription retries vs queues
 

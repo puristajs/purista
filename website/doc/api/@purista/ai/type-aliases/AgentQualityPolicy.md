@@ -8,7 +8,7 @@
 
 > **AgentQualityPolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:78](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentManifest.ts#L78)
+Defined in: [packages/ai/src/types/AgentManifest.ts:78](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L78)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:78](https://github.com/puris
 
 > `optional` **defaultProfile**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:79](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentManifest.ts#L79)
+Defined in: [packages/ai/src/types/AgentManifest.ts:79](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L79)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:79](https://github.com/puris
 
 > `optional` **profiles**: `Record`\<`string`, [`AgentQualityProfile`](AgentQualityProfile.md)\>
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:80](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentManifest.ts#L80)
+Defined in: [packages/ai/src/types/AgentManifest.ts:80](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L80)

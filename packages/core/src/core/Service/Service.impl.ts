@@ -2377,6 +2377,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return Object.fromEntries(this.queueWorkerPausedQueues.entries())
 	}
 
+	public getPausedSubscriptionConsumerState() {
+		return this.eventBridge.getPausedSubscriptionConsumers()
+	}
+
 	public pauseQueueWorkers(queueName: string, reason = 'paused_by_operator') {
 		this.queueWorkerPausedQueues.set(queueName, {
 			pausedAt: Date.now(),
@@ -2386,6 +2390,16 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 	public resumeQueueWorkers(queueName: string) {
 		this.queueWorkerPausedQueues.delete(queueName)
+	}
+
+	public async resumeSubscriptionConsumer(registrationKey: string) {
+		if (!this.eventBridge.capabilities.consumerFailureHandling.consumerPauseResume) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`${this.eventBridge.name} does not support pausing/resuming subscription consumers`,
+			)
+		}
+		await this.eventBridge.resumeSubscriptionConsumer(registrationKey)
 	}
 
 	public async executeStream(message: Readonly<StreamMessage>) {
@@ -2797,6 +2811,30 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									)
 								}
 								throw new SubscriptionConsumerControlError('deadLetter', result.reason)
+							}
+							case 'drop': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									!this.eventBridge.capabilities.consumerFailureHandling.drop
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested drop handling, but ${this.eventBridge.name} does not support dropping deliveries`,
+									)
+								}
+								throw new SubscriptionConsumerControlError('drop', result.reason)
+							}
+							case 'stop-consumer': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									!this.eventBridge.capabilities.consumerFailureHandling.stopConsumer
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested stop-consumer handling, but ${this.eventBridge.name} does not support pausing subscription consumers`,
+									)
+								}
+								throw new SubscriptionConsumerControlError('stop-consumer', result.reason)
 							}
 						}
 					}

@@ -19,12 +19,20 @@ export class SubscriptionConsumerControlError extends Error {
 			typeof arg1 === 'string'
 				? arg1 === 'retry'
 					? { status: 'retry', reason: arg2, delayMs: arg3 }
-					: { status: 'deadLetter', reason: arg2 }
+					: arg1 === 'deadLetter'
+						? { status: 'deadLetter', reason: arg2 }
+						: arg1 === 'drop'
+							? { status: 'drop', reason: arg2 }
+							: { status: 'stop-consumer', reason: arg2 }
 				: arg1
 		super(
 			result.status === 'retry'
 				? (result.reason ?? 'subscription requested retry')
-				: (result.reason ?? 'subscription requested dead-letter'),
+				: result.status === 'deadLetter'
+					? (result.reason ?? 'subscription requested dead-letter')
+					: result.status === 'drop'
+						? (result.reason ?? 'subscription requested dropping current message')
+						: (result.reason ?? 'subscription requested stopping the consumer'),
 		)
 		this.name = 'SubscriptionConsumerControlError'
 		this.outcome = result.status

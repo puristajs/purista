@@ -8,7 +8,7 @@
 
 > **AgentImageInputPart** = `object`
 
-Defined in: [packages/ai/src/input/types.ts:42](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L42)
+Defined in: [packages/ai/src/input/types.ts:42](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L42)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/input/types.ts:42](https://github.com/puristajs/pur
 
 > `optional` **attachmentId**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:44](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L44)
+Defined in: [packages/ai/src/input/types.ts:44](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L44)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/input/types.ts:44](https://github.com/puristajs/pur
 
 > `optional` **detail**: `"low"` \| `"high"` \| `"auto"`
 
-Defined in: [packages/ai/src/input/types.ts:49](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L49)
+Defined in: [packages/ai/src/input/types.ts:49](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L49)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/input/types.ts:49](https://github.com/puristajs/pur
 
 > `optional` **filename**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:47](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L47)
+Defined in: [packages/ai/src/input/types.ts:47](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L47)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/input/types.ts:47](https://github.com/puristajs/pur
 
 > **image**: `string` \| `Uint8Array` \| `ArrayBuffer` \| `URL`
 
-Defined in: [packages/ai/src/input/types.ts:45](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L45)
+Defined in: [packages/ai/src/input/types.ts:45](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L45)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/input/types.ts:45](https://github.com/puristajs/pur
 
 > `optional` **mediaType**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:46](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L46)
+Defined in: [packages/ai/src/input/types.ts:46](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L46)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/input/types.ts:46](https://github.com/puristajs/pur
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/input/types.ts:50](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L50)
+Defined in: [packages/ai/src/input/types.ts:50](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L50)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/input/types.ts:50](https://github.com/puristajs/pur
 
 > `optional` **title**: `string`
 
-Defined in: [packages/ai/src/input/types.ts:48](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L48)
+Defined in: [packages/ai/src/input/types.ts:48](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L48)
 
 ***
 
@@ -72,4 +72,4 @@ Defined in: [packages/ai/src/input/types.ts:48](https://github.com/puristajs/pur
 
 > **type**: `"image"`
 
-Defined in: [packages/ai/src/input/types.ts:43](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/input/types.ts#L43)
+Defined in: [packages/ai/src/input/types.ts:43](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/input/types.ts#L43)

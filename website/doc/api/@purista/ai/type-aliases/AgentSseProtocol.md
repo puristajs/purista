@@ -8,7 +8,7 @@
 
 > **AgentSseProtocol** = `"purista"` \| `"ai-sdk-responses"` \| `"ai-sdk-ui-message"` \| `"ai-sdk-data"` \| `"ai-sdk-json-render"` \| `"agent2agent"` \| `"mcp"`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:116](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/types/AgentManifest.ts#L116)
+Defined in: [packages/ai/src/types/AgentManifest.ts:116](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L116)
 
 Controls how agent stream chunks should be serialized when the endpoint uses SSE.
 - `purista`: native PURISTA stream frames (canonical source protocol)

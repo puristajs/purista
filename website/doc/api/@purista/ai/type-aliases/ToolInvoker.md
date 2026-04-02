@@ -8,7 +8,7 @@
 
 > **ToolInvoker** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:438](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L438)
+Defined in: [packages/ai/src/runtime/context.ts:438](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L438)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:438](https://github.com/puristaj
 
 > **invoke**: `Record`\<`string`, `Record`\<`string`, `Record`\<`string`, (`payload`, `parameter?`) => `Promise`\<`unknown`\>\>\>\>
 
-Defined in: [packages/ai/src/runtime/context.ts:440](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L440)
+Defined in: [packages/ai/src/runtime/context.ts:440](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L440)
 
 ## Methods
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/context.ts:440](https://github.com/puristaj
 
 > **list**(): [`AllowedToolDefinition`](AllowedToolDefinition.md)[]
 
-Defined in: [packages/ai/src/runtime/context.ts:439](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/runtime/context.ts#L439)
+Defined in: [packages/ai/src/runtime/context.ts:439](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L439)
 
 #### Returns
 

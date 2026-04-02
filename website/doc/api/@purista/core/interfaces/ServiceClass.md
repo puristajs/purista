@@ -66,6 +66,18 @@ Defined in: [core/types/ServiceClass.ts:78](https://github.com/puristajs/purista
 
 ***
 
+### getPausedSubscriptionConsumerState()
+
+> **getPausedSubscriptionConsumerState**(): `Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+Defined in: [core/types/ServiceClass.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L80)
+
+#### Returns
+
+`Record`\<`string`, \{ `pausedAt`: `number`; `reason`: `string`; \}\>
+
+***
+
 ### getServiceHealth()
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../type-aliases/ServiceHealthState.md)\>
@@ -89,6 +101,24 @@ get the opentelemetry tracer of the service
 #### Returns
 
 `Tracer`
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: [core/types/ServiceClass.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L81)
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
 
 ***
 

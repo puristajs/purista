@@ -54,6 +54,21 @@ import type { Encrypter } from './types/Encrypter.js'
 const RETRY_ATTEMPT_HEADER = 'x-purista-retry-attempt'
 const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
 
+type PausedSubscriptionState = {
+	pausedAt: number
+	reason: string
+}
+
+type RegisteredSubscription = {
+	cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
+	channel: ConfirmChannel
+	queueName: string
+	subscription: Subscription
+	noAck: boolean
+	consumeHandler: (msg: amqplib.ConsumeMessage | null) => Promise<unknown>
+	consumerTag?: string
+}
+
 /**
  * The AMQP event bridge connects to a AMQP broker.
  *
@@ -97,13 +112,8 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		},
 	})
 
-	protected subscriptions = new Map<
-		string,
-		{
-			cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
-			channel: ConfirmChannel
-		}
-	>()
+	protected subscriptions = new Map<string, RegisteredSubscription>()
+	protected pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
 	protected encoder: Encoder = {
 		...jsonEncoder,
@@ -119,6 +129,12 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	protected removeConsumerRegistrationsForChannel(channel: ConfirmChannel) {
 		this.consumerRegistrations = this.consumerRegistrations.filter(entry => entry.channel !== channel)
+	}
+
+	protected removeConsumerRegistration(channel: ConfirmChannel, tag: string) {
+		this.consumerRegistrations = this.consumerRegistrations.filter(
+			entry => !(entry.channel === channel && entry.tag === tag),
+		)
 	}
 
 	protected async sendToQueueAndConfirm(
@@ -309,6 +325,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				boundedRetry: true,
 				delayedRetry: false,
 				deadLetterTarget: true,
+				drop: true,
+				stopConsumer: true,
+				consumerPauseResume: true,
 				bridgeManagedDeadLettering: true,
 				nativeDeadLettering: true,
 				fatalClassification: false,
@@ -911,60 +930,69 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			principalId: subscription.principalId,
 			tenantId: subscription.tenantId,
 		})
+		const consumeHandler = async (msg: amqplib.ConsumeMessage | null) => {
+			const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
 
-		const consume = await channel.consume(
-			queue.queue,
-			async msg => {
-				const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
+			const spanContext = context ? trace.getSpanContext(context) : undefined
+			return this.runInFlight(
+				() =>
+					this.startActiveSpan(
+						PuristaSpanName.EventBridgeSubscriptionEventReceived,
+						{ kind: SpanKind.CONSUMER, links: spanContext ? [{ context: spanContext }] : [] },
+						context,
+						async span => {
+							if (!msg) {
+								return
+							}
+							try {
+								const message = await this.decodeContent<EBMessage>(
+									msg.content,
+									msg.properties.contentType,
+									msg.properties.contentEncoding,
+								)
 
-				const spanContext = context ? trace.getSpanContext(context) : undefined
-				return this.runInFlight(
-					() =>
-						this.startActiveSpan(
-							PuristaSpanName.EventBridgeSubscriptionEventReceived,
-							{ kind: SpanKind.CONSUMER, links: spanContext ? [{ context: spanContext }] : [] },
-							context,
-							async span => {
-								if (!msg) {
-									return
+								span.setAttribute(PuristaSpanTag.SenderServiceName, message.sender.serviceName)
+								span.setAttribute(PuristaSpanTag.SenderServiceVersion, message.sender.serviceVersion)
+								span.setAttribute(PuristaSpanTag.SenderServiceTarget, message.sender.serviceTarget)
+
+								if (message.eventName) {
+									span.addEvent(message.eventName)
 								}
-								try {
-									const message = await this.decodeContent<EBMessage>(
-										msg.content,
-										msg.properties.contentType,
-										msg.properties.contentEncoding,
-									)
 
-									span.setAttribute(PuristaSpanTag.SenderServiceName, message.sender.serviceName)
-									span.setAttribute(PuristaSpanTag.SenderServiceVersion, message.sender.serviceVersion)
-									span.setAttribute(PuristaSpanTag.SenderServiceTarget, message.sender.serviceTarget)
+								message.otp = serializeOtp()
 
-									if (message.eventName) {
-										span.addEvent(message.eventName)
-									}
-
-									message.otp = serializeOtp()
-
-									const result = await cb(message)
-									if (subscription.emitEventName && result) {
-										await this.emitMessage(result)
-									}
+								const result = await cb(message)
+								if (subscription.emitEventName && result) {
+									await this.emitMessage(result)
+								}
+								if (!noAck) {
+									channel.ack(msg)
+								}
+							} catch (error) {
+								if (error instanceof SubscriptionConsumerControlError) {
 									if (!noAck) {
-										channel.ack(msg)
-									}
-								} catch (error) {
-									if (error instanceof SubscriptionConsumerControlError) {
-										if (!noAck) {
-											if (error.outcome === 'deadLetter') {
+										if (error.outcome === 'deadLetter') {
+											try {
 												await this.deadLetterSubscriptionMessage(
 													channel,
 													subscription,
 													msg,
 													error.reason ?? 'subscription requested dead-letter',
 												)
-												return
+											} catch (handoffError) {
+												this.logger.error(
+													{
+														err: handoffError,
+														queueName: queue.queue,
+														subscriptionKey: subscriptionStorageKey,
+													},
+													'Failed to hand off AMQP subscription message to dead-letter target',
+												)
 											}
-											if (error.outcome === 'retry') {
+											return
+										}
+										if (error.outcome === 'retry') {
+											try {
 												const attempt = this.getConsumerAttempt(msg.properties.headers)
 												const retryDelayMs = error.delayMs ?? failureHandling?.retryDelayMs ?? 0
 												await this.retrySubscriptionMessage(
@@ -975,33 +1003,92 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 													retryDelayMs,
 													!!subscription.eventBridgeConfig.durable,
 												)
-												return
+											} catch (handoffError) {
+												this.logger.error(
+													{
+														err: handoffError,
+														queueName: queue.queue,
+														subscriptionKey: subscriptionStorageKey,
+													},
+													'Failed to hand off AMQP subscription message to retry queue',
+												)
 											}
+											return
 										}
-										return
+										if (error.outcome === 'drop') {
+											this.logger.warn(
+												{
+													queueName: queue.queue,
+													subscriptionKey: subscriptionStorageKey,
+													reason: error.reason,
+												},
+												'Dropping AMQP subscription message by PURISTA control signal',
+											)
+											channel.ack(msg)
+											return
+										}
+										if (error.outcome === 'stop-consumer') {
+											this.pausedSubscriptionConsumers.set(subscriptionStorageKey, {
+												pausedAt: Date.now(),
+												reason: error.reason ?? 'paused_by_subscription_handler',
+											})
+											this.logger.warn(
+												{
+													queueName: queue.queue,
+													subscriptionKey: subscriptionStorageKey,
+													reason: error.reason,
+												},
+												'Paused AMQP subscription consumer by PURISTA control signal',
+											)
+											channel.nack(msg, false, true)
+											const currentTag = this.subscriptions.get(subscriptionStorageKey)?.consumerTag
+											if (currentTag) {
+												await channel.cancel(currentTag)
+												this.removeConsumerRegistration(channel, currentTag)
+												const entry = this.subscriptions.get(subscriptionStorageKey)
+												if (entry) {
+													entry.consumerTag = undefined
+												}
+											}
+											return
+										}
 									}
-									const err = new UnhandledError(
-										StatusCode.InternalServerError,
-										'Failed to consume subscription message',
-										{
-											error,
-											subscription,
-										},
-									)
-									span.setStatus({
-										code: SpanStatusCode.ERROR,
-										message: err.message,
-									})
-									span.recordException(err)
-									this.logger.error({ err }, 'Failed to consume subscription message')
-									if (!noAck) {
-										const failureReason = this.getSubscriptionFailureReason(err)
-										if (failureHandling) {
-											const attempt = this.getConsumerAttempt(msg.properties.headers)
-											if (attempt >= (failureHandling.maxAttempts ?? 5)) {
+									return
+								}
+								const err = new UnhandledError(
+									StatusCode.InternalServerError,
+									'Failed to consume subscription message',
+									{
+										error,
+										subscription,
+									},
+								)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+								span.recordException(err)
+								this.logger.error({ err }, 'Failed to consume subscription message')
+								if (!noAck) {
+									const failureReason = this.getSubscriptionFailureReason(err)
+									if (failureHandling) {
+										const attempt = this.getConsumerAttempt(msg.properties.headers)
+										if (attempt >= (failureHandling.maxAttempts ?? 5)) {
+											try {
 												await this.deadLetterSubscriptionMessage(channel, subscription, msg, failureReason)
-											} else {
-												const retryDelayMs = failureHandling.retryDelayMs ?? 0
+											} catch (handoffError) {
+												this.logger.error(
+													{
+														err: handoffError,
+														queueName: queue.queue,
+														subscriptionKey: subscriptionStorageKey,
+													},
+													'Failed to hand off AMQP subscription message to dead-letter target',
+												)
+											}
+										} else {
+											const retryDelayMs = failureHandling.retryDelayMs ?? 0
+											try {
 												await this.retrySubscriptionMessage(
 													channel,
 													queue.queue,
@@ -1010,23 +1097,40 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 													retryDelayMs,
 													!!subscription.eventBridgeConfig.durable,
 												)
+											} catch (handoffError) {
+												this.logger.error(
+													{
+														err: handoffError,
+														queueName: queue.queue,
+														subscriptionKey: subscriptionStorageKey,
+													},
+													'Failed to hand off AMQP subscription message to retry queue',
+												)
 											}
-										} else {
-											channel.nack(msg)
 										}
+									} else {
+										channel.nack(msg)
 									}
 								}
-							},
-						),
-					'subscription',
-				)
-			},
-			{ noAck },
-		)
+							}
+						},
+					),
+				'subscription',
+			)
+		}
+		const consume = await channel.consume(queue.queue, consumeHandler, { noAck })
 
 		this.addConsumerRegistration(channel, consume.consumerTag)
 
-		this.subscriptions.set(subscriptionStorageKey, { cb, channel })
+		this.subscriptions.set(subscriptionStorageKey, {
+			cb,
+			channel,
+			queueName: queue.queue,
+			subscription,
+			noAck,
+			consumeHandler,
+			consumerTag: consume.consumerTag,
+		})
 		return subscriptionStorageKey
 	}
 
@@ -1045,6 +1149,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			if (!this.subscriptions.delete(queueName)) {
 				this.logger.error({ queueName, address }, 'Failed to clean unregister subscription function')
 			}
+			this.pausedSubscriptionConsumers.delete(queueName)
 		} catch (error) {
 			const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister subscription', {
 				error,
@@ -1052,6 +1157,31 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			})
 			this.logger.error({ err }, 'Failed to unregister subscription')
 		}
+	}
+
+	getPausedSubscriptionConsumers() {
+		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
+	}
+
+	async resumeSubscriptionConsumer(registrationKey: string) {
+		const entry = this.subscriptions.get(registrationKey)
+		if (!entry) {
+			return
+		}
+		if (!this.pausedSubscriptionConsumers.has(registrationKey)) {
+			return
+		}
+		if (entry.consumerTag) {
+			this.pausedSubscriptionConsumers.delete(registrationKey)
+			return
+		}
+		const consume = await entry.channel.consume(entry.queueName, entry.consumeHandler, {
+			noAck: entry.noAck,
+		})
+		entry.consumerTag = consume.consumerTag
+		this.addConsumerRegistration(entry.channel, consume.consumerTag)
+		this.pausedSubscriptionConsumers.delete(registrationKey)
+		this.logger.info({ registrationKey }, 'Resumed paused AMQP subscription consumer')
 	}
 
 	/**
@@ -1106,6 +1236,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			// instruct message broker to no longer send messages
 			await Promise.allSettled(this.consumerRegistrations.map(entry => entry.channel.cancel(entry.tag)))
 			this.consumerRegistrations = []
+			this.pausedSubscriptionConsumers.clear()
 
 			let isTimedOut = false
 			const timeout = setTimeout(() => {

@@ -8,7 +8,7 @@
 
 > **compileProviderAiSdkSchema**\<`T`\>(`schema`): `Promise`\<`Schema`\<`T`\> \| `undefined`\>
 
-Defined in: [packages/ai/src/providers/runtime/providerJsonSchema.ts:183](https://github.com/puristajs/purista/blob/a54e4eedd3278d44c6382db014435e1a5908fb6f/packages/ai/src/providers/runtime/providerJsonSchema.ts#L183)
+Defined in: [packages/ai/src/providers/runtime/providerJsonSchema.ts:183](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/providerJsonSchema.ts#L183)
 
 Compiles an input schema into an AI SDK schema wrapper with provider-safe JSON Schema.
 

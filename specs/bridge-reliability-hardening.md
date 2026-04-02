@@ -18,6 +18,8 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Added strict startup validation for queue bridge config and subscription consumer failure handling in core service registration.
 - Added strict startup validation for command delivery requirements and stream support in core service registration.
 - Added explicit subscription handler control outcomes (`ack`, `retry`, `deadLetter`) and runtime normalization so adapters no longer rely on exception-only signaling.
+- Expanded subscription handler control outcomes to include `drop` and `stop-consumer`, with strict capability validation and adapter runtime handling in NATS (JetStream) and AMQP.
+- Added paused-subscription diagnostics and runtime resume APIs (`Service.getPausedSubscriptionConsumerState`, `Service.resumeSubscriptionConsumer`) backed by adapter pause/resume support.
 - Added queue operator APIs for DLQ inspection, replay, purge, and lease inspection to the queue bridge contract.
 - Added `@purista/nats-queue-bridge` as a JetStream-based queue provider package with contract coverage.
 - Removed the unimplemented subscription exhaustion outcomes from the public contract; exhausted subscription messages are dead-lettered.
@@ -32,6 +34,9 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Added explicit command and stream capability surfaces to event bridge capabilities, including command transport and stream late-frame handling.
 - Replaced `DefaultEventBridge` stream session bookkeeping with a shared `PendingStreamRegistry` to centralize timeout and late-frame handling.
 - Added per-kind in-flight diagnostics (`command`, `subscription`, `stream`, `generic`) for better drain observability.
+- Added broker failure-path safety tests for retry/DLQ handoff:
+  - NATS dead-letter publish failure must not terminate the original JetStream delivery prematurely.
+  - AMQP retry/DLQ handoff confirm failure must not acknowledge the original delivery prematurely.
 
 ## Test coverage landed
 
@@ -46,12 +51,13 @@ This document tracks the `purista` monorepo implementation status for the bridge
 - Redis queue bridge contract/integration suite, skipped automatically when Docker is unavailable
 - shared queue worker runtime coverage for thrown handler errors and strict/best-effort subscription validation
 - subscription outcome mapping tests (`ack`, `retry`, delayed-retry strictness checks)
+- subscription outcome mapping tests (`ack`, `retry`, `deadLetter`, `drop`, `stop-consumer`) plus strict capability guards
 - in-flight execution per-kind tracker tests
 
 ## Follow-up items
 
 - Extend runtime pause/resume controls into first-class CLI/operator commands in addition to direct service APIs.
-- Add deeper provider fault-injection tests for confirm / publish failures, not just happy-path broker integrations.
+- Extend pause/resume operational controls with first-class CLI commands and audit views.
 - Extend the new queue adapter pattern to additional providers only when they match the pull + lease + ack contract cleanly.
 
 ## Next implementation slice

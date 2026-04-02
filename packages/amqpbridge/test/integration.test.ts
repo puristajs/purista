@@ -7,7 +7,7 @@ import amqplib from 'amqplib'
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
 import { describeSubscriptionReliabilityContract } from '../../core/test/helpers/subscriptionReliabilityContractSuite.js'
@@ -180,6 +180,103 @@ describe('@purista/amqpbridge', () => {
 			await eventbridge.unregisterSubscription(subscriber)
 		}
 	})
+
+	it('does not ack original delivery when retry/dead-letter handoff publish fails', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const eventName = `subscription.handoff.failure.${Date.now()}`
+		const deadLetterTarget = `${eventName}.dead-letter`
+		const subscriber = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `subscription_handoff_failure_${Date.now()}`,
+		} as const
+
+		let attempts = 0
+		const bridgeInternals = eventbridge as unknown as {
+			sendToQueueAndConfirm: (...args: unknown[]) => Promise<void>
+			subscriptions: Map<string, { channel?: { recover?: () => Promise<void> } }>
+		}
+		const originalSendToQueueAndConfirm = bridgeInternals.sendToQueueAndConfirm.bind(eventbridge)
+		let failOnce = true
+		const publishSpy = vi
+			.spyOn(bridgeInternals, 'sendToQueueAndConfirm')
+			.mockImplementation(async (...args: unknown[]) => {
+				if (failOnce) {
+					failOnce = false
+					throw new Error('simulated confirm failure')
+				}
+				await originalSendToQueueAndConfirm(...args)
+			})
+
+		const registrationKey = await eventbridge.registerSubscription(
+			{
+				subscriber,
+				eventName,
+				eventBridgeConfig: {
+					durable: true,
+					autoacknowledge: false,
+					shared: true,
+					consumerFailureHandling: {
+						maxAttempts: 1,
+						retryDelayMs: 0,
+						deadLetterTarget,
+					},
+				},
+			},
+			async () => {
+				attempts += 1
+				throw new Error('poison for dead-letter handoff')
+			},
+		)
+
+		const dlqConnection = await amqplib.connect(amqpUrl)
+		const dlqChannel = await dlqConnection.createChannel()
+		await dlqChannel.assertQueue(deadLetterTarget, { durable: true })
+		const deadLetterReceived = new Promise<void>(resolve => {
+			void dlqChannel.consume(deadLetterTarget, msg => {
+				if (!msg) {
+					return
+				}
+				dlqChannel.ack(msg)
+				resolve()
+			})
+		})
+
+		try {
+			await eventbridge.emitMessage(
+				getCommandSuccessMessageMock(
+					{ handoffFailure: true },
+					{
+						eventName,
+					},
+				),
+			)
+
+			const channel = bridgeInternals.subscriptions.get(registrationKey)?.channel
+			if (!channel?.recover) {
+				throw new Error('AMQP subscription channel recover() is unavailable')
+			}
+
+			const start = Date.now()
+			while (attempts < 1 && Date.now() - start < 5_000) {
+				await new Promise(resolve => setTimeout(resolve, 25))
+			}
+			await channel.recover()
+
+			await deadLetterReceived
+			expect(attempts).toBeGreaterThanOrEqual(2)
+			expect(publishSpy).toHaveBeenCalledTimes(2)
+		} finally {
+			publishSpy.mockRestore()
+			await eventbridge.unregisterSubscription(subscriber)
+			await dlqChannel.close()
+			await dlqConnection.close()
+		}
+	}, 20_000)
 
 	describeSubscriptionReliabilityContract('@purista/amqpbridge subscription reliability', {
 		shouldSkip: () => !dockerAvailable,

@@ -82,6 +82,15 @@ type ResolvedConsumerFailureHandling = {
 	deadLetterTarget: string
 }
 
+type PausedSubscriptionState = {
+	pausedAt: number
+	reason: string
+}
+
+type RegisteredSubscription = {
+	subscription: JetStreamSubscription | NatsSubscription
+}
+
 /**
 The event bridge supports low-latency core NATS messaging.
 
@@ -111,7 +120,8 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 	public js: JetStreamClient | undefined
 
 	commands = new Map<string, JetStreamSubscription | NatsSubscription>()
-	subscriptions = new Map<string, JetStreamSubscription | NatsSubscription>()
+	subscriptions = new Map<string, RegisteredSubscription>()
+	private pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
 	sc = JSONCodec()
 
@@ -147,6 +157,9 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 				boundedRetry: true,
 				delayedRetry: true,
 				deadLetterTarget: true,
+				drop: true,
+				stopConsumer: true,
+				consumerPauseResume: true,
 				bridgeManagedDeadLettering: true,
 				nativeDeadLettering: false,
 				fatalClassification: false,
@@ -189,6 +202,20 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 	private getRegistrationKey(address: EBMessageAddress) {
 		return `${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`
+	}
+
+	private getPauseRetryDelayMs(failureHandling?: ResolvedConsumerFailureHandling) {
+		if (failureHandling && failureHandling.retryDelayMs > 0) {
+			return failureHandling.retryDelayMs
+		}
+		return 1_000
+	}
+
+	private pauseSubscriptionConsumer(registrationKey: string, reason: string) {
+		this.pausedSubscriptionConsumers.set(registrationKey, {
+			pausedAt: Date.now(),
+			reason,
+		})
 	}
 
 	private sanitizeName(input: string) {
@@ -313,6 +340,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		kind: 'command' | 'subscription',
 		subject: string,
 		address: EBMessageAddress,
+		registrationKey: string,
 		shared: boolean,
 		eventBridgeConfig: DefinitionEventBridgeConfig,
 		handler: (error: NatsError | null, msg: Msg | JsMsg) => Promise<unknown>,
@@ -338,7 +366,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			.ackWait(ackWaitMs)
 			.maxAckPending(this.config.maxMessages)
 			.filterSubject(subject)
-			.maxDeliver(failureHandling?.maxAttempts ?? 1)
+			.maxDeliver(failureHandling ? failureHandling.maxAttempts + 1 : 1)
 			.callback((error, msg) => {
 				if (error) {
 					this.logger.error({ err: error, subject, durableName, kind }, 'JetStream consumer callback failed')
@@ -346,6 +374,10 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 				}
 				if (!msg) {
 					this.logger.warn({ subject, durableName, kind }, 'JetStream consumer callback invoked without a message')
+					return
+				}
+				if (kind === 'subscription' && this.pausedSubscriptionConsumers.has(registrationKey)) {
+					msg.nak(this.getPauseRetryDelayMs(failureHandling))
 					return
 				}
 
@@ -383,6 +415,35 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 							if (err.outcome === 'retry') {
 								msg.nak(err.delayMs ?? failureHandling.retryDelayMs)
+								return
+							}
+
+							if (err.outcome === 'drop') {
+								this.logger.warn(
+									{
+										subject,
+										durableName,
+										registrationKey,
+										reason: err.reason,
+									},
+									'Dropping subscription message by PURISTA control signal',
+								)
+								msg.ack()
+								return
+							}
+
+							if (err.outcome === 'stop-consumer') {
+								this.pauseSubscriptionConsumer(registrationKey, err.reason ?? 'paused_by_subscription_handler')
+								this.logger.warn(
+									{
+										subject,
+										durableName,
+										registrationKey,
+										reason: err.reason,
+									},
+									'Paused JetStream subscription consumer by PURISTA control signal',
+								)
+								msg.nak(this.getPauseRetryDelayMs(failureHandling))
 								return
 							}
 						}
@@ -443,6 +504,9 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		this.capabilities.durableCommands = this.isJetStreamEnabled
 		this.capabilities.durableSubscriptions = this.isJetStreamEnabled
 		this.capabilities.manualAckSupported = this.isJetStreamEnabled
+		this.capabilities.consumerFailureHandling.drop = this.isJetStreamEnabled
+		this.capabilities.consumerFailureHandling.stopConsumer = this.isJetStreamEnabled
+		this.capabilities.consumerFailureHandling.consumerPauseResume = this.isJetStreamEnabled
 	}
 
 	async isReady() {
@@ -685,6 +749,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 					'command',
 					topic,
 					address,
+					registrationKey,
 					eventBridgeConfig.shared,
 					eventBridgeConfig,
 					callback,
@@ -738,6 +803,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 					'subscription',
 					topic,
 					subscription.subscriber,
+					registrationKey,
 					subscription.eventBridgeConfig.shared,
 					subscription.eventBridgeConfig,
 					callback,
@@ -748,7 +814,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 						? getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
 						: undefined,
 				})
-		this.subscriptions.set(registrationKey, natsSubscription)
+		this.subscriptions.set(registrationKey, { subscription: natsSubscription })
 
 		return topic
 	}
@@ -759,7 +825,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		}
 
 		const registrationKey = this.getRegistrationKey(address)
-		const subscription = this.subscriptions.get(registrationKey)
+		const subscription = this.subscriptions.get(registrationKey)?.subscription
 		const destroyableSubscription = subscription as Partial<JetStreamSubscription> | undefined
 
 		subscription?.unsubscribe()
@@ -769,6 +835,19 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			await subscription?.drain()
 		}
 		this.subscriptions.delete(registrationKey)
+		this.pausedSubscriptionConsumers.delete(registrationKey)
+	}
+
+	getPausedSubscriptionConsumers() {
+		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
+	}
+
+	async resumeSubscriptionConsumer(registrationKey: string) {
+		if (!this.pausedSubscriptionConsumers.has(registrationKey)) {
+			return
+		}
+		this.pausedSubscriptionConsumers.delete(registrationKey)
+		this.logger.info({ registrationKey }, 'Resumed paused NATS subscription consumer')
 	}
 
 	async destroy() {
@@ -776,6 +855,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		if (!drained) {
 			this.logger.error('Some NATS command or subscription handlers did not finish before shutdown')
 		}
+		this.pausedSubscriptionConsumers.clear()
 
 		await this.connection?.drain()
 		await this.connection?.close()

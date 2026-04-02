@@ -45,7 +45,7 @@ describe('NatsBridge registerSubscription', () => {
 		)
 
 		const key = `${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`
-		expect(bridge.subscriptions.get(key)).toBe(natsSubscription)
+		expect(bridge.subscriptions.get(key)?.subscription).toBe(natsSubscription)
 
 		await bridge.unregisterSubscription(subscription.subscriber)
 
@@ -119,6 +119,6 @@ describe('NatsBridge registerSubscription', () => {
 		expect(add).toHaveBeenCalledTimes(1)
 		expect(subscribe).toHaveBeenCalledTimes(1)
 		const key = `${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`
-		expect(bridge.subscriptions.get(key)).toBe(jetStreamSubscription)
+		expect(bridge.subscriptions.get(key)?.subscription).toBe(jetStreamSubscription)
 	})
 })

@@ -6,7 +6,7 @@ import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 import { connect } from 'nats'
 import { createSandbox } from 'sinon'
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import { describeSubscriptionReliabilityContract } from '../../core/test/helpers/subscriptionReliabilityContractSuite.js'
@@ -186,6 +186,93 @@ describe('@purista/natsbridge', () => {
 			await bridge.destroy()
 		}
 	})
+
+	it('does not terminate the original JetStream message when dead-letter publish fails', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const eventName = `subscription.dlq.failure.${Date.now()}`
+		const deadLetterTarget = `${eventName}.dead-letter`
+		const subscriber = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `subscription_dlq_failure_${Date.now()}`,
+		} as const
+
+		let attempts = 0
+		const originalPublishDeadLetterMessage = (
+			eventbridge as unknown as {
+				publishDeadLetterMessage: (...args: unknown[]) => Promise<void>
+			}
+		).publishDeadLetterMessage.bind(eventbridge)
+		let failOnce = true
+		const publishDeadLetterSpy = vi
+			.spyOn(
+				eventbridge as unknown as { publishDeadLetterMessage: (...args: unknown[]) => Promise<void> },
+				'publishDeadLetterMessage',
+			)
+			.mockImplementation(async (...args: unknown[]) => {
+				if (failOnce) {
+					failOnce = false
+					throw new Error('simulated dead-letter publish failure')
+				}
+				await originalPublishDeadLetterMessage(...args)
+			})
+
+		await eventbridge.registerSubscription(
+			{
+				subscriber,
+				eventName,
+				eventBridgeConfig: {
+					durable: true,
+					autoacknowledge: false,
+					shared: true,
+					consumerFailureHandling: {
+						maxAttempts: 2,
+						retryDelayMs: 100,
+						deadLetterTarget,
+					},
+				},
+			},
+			async () => {
+				attempts += 1
+				throw new Error('poison for dead-letter')
+			},
+		)
+
+		const dlqConnection = await connect(container.getConnectionOptions())
+		const deadLetterReceived = new Promise<void>(resolve => {
+			dlqConnection.subscribe(deadLetterTarget, {
+				callback: (_error, msg) => {
+					if (msg) {
+						resolve()
+					}
+				},
+			})
+		})
+
+		try {
+			await eventbridge.emitMessage(
+				getCommandSuccessMessageMock(
+					{ dlqFailure: true },
+					{
+						eventName,
+					},
+				),
+			)
+
+			await deadLetterReceived
+			expect(attempts).toBeGreaterThanOrEqual(2)
+			expect(publishDeadLetterSpy).toHaveBeenCalledTimes(2)
+		} finally {
+			publishDeadLetterSpy.mockRestore()
+			await eventbridge.unregisterSubscription(subscriber)
+			await dlqConnection.drain()
+			await dlqConnection.close()
+		}
+	}, 20_000)
 
 	describeSubscriptionReliabilityContract('@purista/natsbridge subscription reliability', {
 		shouldSkip: () => !dockerAvailable,
