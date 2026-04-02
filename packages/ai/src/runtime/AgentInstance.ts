@@ -1,14 +1,10 @@
 import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import {
-	type Command,
 	type Complete,
 	type ConfigStore,
-	EBMessageType,
 	type EmptyObject,
 	type EventBridge,
-	getNewEBMessageId,
-	getNewTraceId,
 	HandledError,
 	type Logger,
 	type QueueBridge,
@@ -32,6 +28,7 @@ import type {
 	AgentInfo,
 	AgentRuntimeInstance as AgentInstanceContract,
 	AgentInstanceOptions,
+	AgentInvocationDeliveryMode,
 	AgentInvokeContext,
 	AgentInvokeRequest,
 	AgentInvokeResult,
@@ -39,7 +36,7 @@ import type {
 	AgentStreamResponder,
 } from '../types/AgentDefinition.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
-import { withSessionIdInPayload } from './sessionPayload.js'
+import { invokeAgentInternal } from './agentInvocationTransport.js'
 
 export type AgentInstanceDependencies<EmitPayloads extends Record<string, unknown> = Record<string, unknown>> = {
 	info: AgentInfo
@@ -323,6 +320,32 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 		await stream.onComplete()
 	}
 
+	private mergeStreamResponders(
+		first: AgentStreamResponder | undefined,
+		second: AgentStreamResponder | undefined,
+	): AgentStreamResponder | undefined {
+		if (!first) {
+			return second
+		}
+		if (!second) {
+			return first
+		}
+		return {
+			onFrame: async frame => {
+				await first.onFrame(frame)
+				await second.onFrame(frame)
+			},
+			onComplete: async () => {
+				await first.onComplete()
+				await second.onComplete()
+			},
+			onError: async error => {
+				await first.onError(error)
+				await second.onError(error)
+			},
+		}
+	}
+
 	async invoke(
 		request: AgentInvokeRequest,
 		contextOverrides?: Partial<AgentInvokeContext>,
@@ -331,43 +354,34 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 			await this.start()
 		}
 
-		const receiver = {
-			serviceName: this.dependencies.serviceBuilder.info.serviceName,
-			serviceVersion: this.dependencies.serviceBuilder.info.serviceVersion,
-			serviceTarget: 'run',
-		} as const
-		const payload = withSessionIdInPayload(request.payload, request.sessionId)
-
-		const commandMessage: Command = {
-			id: getNewEBMessageId(),
-			timestamp: Date.now(),
-			messageType: EBMessageType.Command,
-			traceId: getNewTraceId(),
-			correlationId: request.correlationId ?? getNewEBMessageId(),
-			contentType: 'application/json',
-			contentEncoding: 'utf-8',
-			principalId: request.principalId,
-			tenantId: request.tenantId,
-			sender: {
-				serviceName: 'agent.runtime',
-				serviceVersion: 'v1',
-				serviceTarget: this.dependencies.info.agentName,
-				instanceId: this.runtime.eventBridge.instanceId,
-			},
-			receiver,
-			payload: {
-				payload,
-				parameter: request.parameter ?? {},
-			},
-		}
 		try {
-			const result = (await this.runtime.eventBridge.invoke(
-				commandMessage,
-				request.timeoutMs,
-			)) as AgentProtocolEnvelope[]
-			await this.notifyStream(contextOverrides?.stream, result)
-			await this.notifyStream(request.stream, result)
-			return { envelopes: result }
+			const mergedStream = this.mergeStreamResponders(contextOverrides?.stream, request.stream)
+			const deliveryMode: AgentInvocationDeliveryMode = request.deliveryMode ?? 'prefer-stream'
+			const envelopes = await invokeAgentInternal({
+				eventBridge: this.runtime.eventBridge,
+				agentName: this.dependencies.serviceBuilder.info.serviceName,
+				agentVersion: this.dependencies.serviceBuilder.info.serviceVersion,
+				payload: request.payload,
+				parameter: request.parameter,
+				correlationId: request.correlationId,
+				sessionId: request.sessionId,
+				stream: mergedStream,
+				timeoutMs: request.timeoutMs,
+				principalId: request.principalId,
+				tenantId: request.tenantId,
+				deliveryMode,
+				sender: {
+					serviceName: 'agent.runtime',
+					serviceVersion: 'v1',
+					serviceTarget: this.dependencies.info.agentName,
+					instanceId: this.runtime.eventBridge.instanceId,
+				},
+			})
+			if (!mergedStream) {
+				await this.notifyStream(contextOverrides?.stream, envelopes)
+				await this.notifyStream(request.stream, envelopes)
+			}
+			return { envelopes }
 		} catch (error) {
 			await contextOverrides?.stream?.onError(error)
 			await request.stream?.onError(error)

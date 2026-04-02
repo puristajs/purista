@@ -37,6 +37,7 @@ import type {
 	ProviderObjectStreamRequest,
 } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
+import { AGENT_RUN_TARGET } from '../runtime/agentAddress.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
 import { createAgentExecutionBudget } from '../runtime/executionBudget.js'
@@ -102,6 +103,7 @@ export type AgentAfterGuardHook<Payload = unknown, Parameter = unknown> = (
 export type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
+	outputSchema?: Schema
 }
 
 /**
@@ -452,8 +454,8 @@ export class AgentBuilder<
 			serviceDescription: this.info.description ?? `Agent ${this.info.agentName}`,
 		})
 		this.serviceBuilder.setConfigSchema(agentRuntimeConfigSchema)
-		this.commandBuilder = this.serviceBuilder.getCommandBuilder('run', `Invoke ${this.info.agentName}`)
-		this.streamBuilder = this.serviceBuilder.getStreamBuilder('run', `Stream ${this.info.agentName}`)
+		this.commandBuilder = this.serviceBuilder.getCommandBuilder(AGENT_RUN_TARGET, `Invoke ${this.info.agentName}`)
+		this.streamBuilder = this.serviceBuilder.getStreamBuilder(AGENT_RUN_TARGET, `Stream ${this.info.agentName}`)
 		this.streamBuilder.addChunkSchema(z.union([agentProtocolEnvelopeSchema, sseProtocolEventSchema]))
 		this.streamBuilder.addFinalSchema(agentProtocolEnvelopeSchema.array())
 
@@ -851,13 +853,16 @@ export class AgentBuilder<
 			invokeConfigOrParameterSchema &&
 			typeof invokeConfigOrParameterSchema === 'object' &&
 			!('~standard' in invokeConfigOrParameterSchema) &&
-			('payloadSchema' in invokeConfigOrParameterSchema || 'parameterSchema' in invokeConfigOrParameterSchema)
+			('payloadSchema' in invokeConfigOrParameterSchema ||
+				'parameterSchema' in invokeConfigOrParameterSchema ||
+				'outputSchema' in invokeConfigOrParameterSchema)
 				? (invokeConfigOrParameterSchema as AgentInvokeConfig<Payload, Parameter>)
 				: undefined
 		const payloadSchema = invokeConfig?.payloadSchema
 		const parameterSchema = invokeConfig
 			? invokeConfig.parameterSchema
 			: (invokeConfigOrParameterSchema as Parameter | undefined)
+		const outputSchema = invokeConfig?.outputSchema
 
 		const alreadyRegistered =
 			this.manifest.allowedAgents?.some(
@@ -872,6 +877,7 @@ export class AgentBuilder<
 					agentVersion,
 					payloadSchema,
 					parameterSchema,
+					outputSchema,
 				},
 			]
 		}
@@ -1213,7 +1219,7 @@ export class AgentBuilder<
 			AgentInvokeList,
 			EmitPayloads
 		>
-		const queueName = `agent:${this.info.agentName}:${this.info.agentVersion}:run`
+		const queueName = `agent:${this.info.agentName}:${this.info.agentVersion}:${AGENT_RUN_TARGET}`
 		const workerName = 'execute'
 		this.commandBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
 		this.streamBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
@@ -1254,7 +1260,7 @@ export class AgentBuilder<
 					receiver: {
 						serviceName: runtime.manifest.agentName,
 						serviceVersion: runtime.manifest.agentVersion,
-						serviceTarget: 'run',
+						serviceTarget: AGENT_RUN_TARGET,
 						instanceId: `queued-worker:${process.pid}`,
 					},
 					timestamp: message.createdAt,
@@ -1267,7 +1273,7 @@ export class AgentBuilder<
 					sender: {
 						serviceName: runtime.manifest.agentName,
 						serviceVersion: runtime.manifest.agentVersion,
-						serviceTarget: 'run',
+						serviceTarget: AGENT_RUN_TARGET,
 						instanceId: `queued-worker:${process.pid}`,
 					},
 				},
@@ -1302,7 +1308,7 @@ export class AgentBuilder<
 						sender: {
 							serviceName: runtime.manifest.agentName,
 							serviceVersion: runtime.manifest.agentVersion,
-							serviceTarget: 'run',
+							serviceTarget: AGENT_RUN_TARGET,
 							instanceId: `queued-worker:${process.pid}`,
 						},
 					})
@@ -1340,7 +1346,7 @@ export class AgentBuilder<
 				sender: {
 					serviceName: runtime.manifest.agentName,
 					serviceVersion: runtime.manifest.agentVersion,
-					serviceTarget: 'run',
+					serviceTarget: AGENT_RUN_TARGET,
 					instanceId: context.message.receiver.instanceId ?? context.message.sender.instanceId,
 				},
 			})
@@ -2412,7 +2418,9 @@ export class AgentBuilder<
 			parameter: unknown,
 			writer: StreamWriter<unknown, unknown[]>,
 		) {
-			const protocol = this.config?.__agentRuntime?.manifest.httpExposure?.sseProtocol ?? 'purista'
+			const configuredProtocol = this.config?.__agentRuntime?.manifest.httpExposure?.sseProtocol ?? 'purista'
+			const protocol =
+				context.message.sender.serviceName.toLowerCase() === 'hono' ? configuredProtocol : ('purista' as const)
 			const streamedEnvelopes: AgentProtocolEnvelope[] = []
 			let emittedEventCount = 0
 			const flushConvertedEvents = async (includeTerminal = false) => {

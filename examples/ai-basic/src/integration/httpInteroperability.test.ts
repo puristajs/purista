@@ -99,12 +99,13 @@ describe('ai-basic http interoperability flows', () => {
 		const supportAgentService = (supportAgentInstance as unknown as { service?: Service }).service
 		const httpService = await honoV1Service.getInstance(eventBridge, {
 			logger,
-			serviceConfig: {
-				services: [supportService, supportAgentService, triageService].filter(
-					(service): service is Service => service !== undefined,
-				),
-			},
+			serviceConfig: {},
 		})
+		httpService.registerService(
+			...[supportService, supportAgentService, triageService].filter(
+				(service): service is Service => service !== undefined,
+			),
+		)
 		await httpService.start()
 
 		try {

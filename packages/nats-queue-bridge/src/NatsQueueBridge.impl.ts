@@ -146,7 +146,7 @@ export class NatsQueueBridge implements QueueBridge {
 
 	async leaseNext(queueName: string, options?: QueueLeaseOptions): Promise<QueueLease | undefined> {
 		await this.ensureQueueTopology(queueName)
-		await this.releaseDueJobs(queueName)
+		await this.releaseDueJobs(queueName, options?.waitTimeMs)
 
 		const consumer = await this.getPendingConsumer(queueName)
 		const expires = Math.max(1_000, options?.waitTimeMs ?? 1_000)
@@ -311,9 +311,14 @@ export class NatsQueueBridge implements QueueBridge {
 		}
 	}
 
-	private async releaseDueJobs(queueName: string) {
+	private async releaseDueJobs(queueName: string, _waitTimeMs?: number) {
 		const consumer = await this.getScheduledConsumer(queueName)
 		for (let index = 0; index < this.releaseBatchSize; index += 1) {
+			const streamInfo = await this.getJetStreamManager().streams.info(this.scheduledStreamName(queueName))
+			if ((streamInfo.state.messages ?? 0) <= 0) {
+				return
+			}
+
 			const msg = await consumer.next({ expires: 1_000 })
 			if (!msg) {
 				return

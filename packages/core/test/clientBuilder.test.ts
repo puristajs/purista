@@ -42,7 +42,7 @@ describe('client-builder', () => {
 		await clientBuilder.generateHttpClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
-		clientBuilder.build()
+		await clientBuilder.build()
 	})
 
 	it('can create an eventbridge client via canonical method', async () => {
@@ -53,7 +53,7 @@ describe('client-builder', () => {
 		await clientBuilder.generateEventBridgeClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
-		clientBuilder.build()
+		await clientBuilder.build()
 	})
 
 	it('can create an eventbridge client via deprecated alias', async () => {
@@ -64,6 +64,6 @@ describe('client-builder', () => {
 		await clientBuilder.generateHEventBridgeClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
-		clientBuilder.build()
+		await clientBuilder.build()
 	})
 })

@@ -67,10 +67,10 @@ export const getAgentBuilderFileContent = (input: {
 				"// For long-running work switch to .setExecutionMode('queued') and provide a queueBridge at runtime.",
 			)
 			writer.writeLine(
-				'// In queued mode PURISTA creates the run before the handler starts, so update it with context.runState.get(),',
+				'// In queued mode PURISTA creates the run before the handler starts, so update it with context.memory.run.get(),',
 			)
 			writer.writeLine(
-				'// context.runState.replaceTasks(...), context.runState.step(...), and context.runState.finish(...).',
+				'// context.memory.run.plan(...), context.memory.run.step(...), and context.memory.run.finish(...).',
 			)
 			writer.writeLine('const prompt = await context.memory.conversation.buildPromptInput()')
 			writer.writeLine("const model = context.ai.models['openai:gpt-4o-mini']")

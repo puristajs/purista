@@ -99,7 +99,7 @@ await context.invoke.agents.forward({
   payload: { prompt: 'Design a new microservice' },
 });
 ```
-Forwarding streams the child agent's assistant text, reasoning, artifacts, and run state directly into the parent's output stream. For internal-only child agents, prefer `runText` or `runObject`.
+Forwarding streams the child agent's assistant text, reasoning, artifacts, and run state directly into the parent's output stream. It requires stream-capable transport and fails fast when streams are unavailable. For internal-only child agents, prefer `runText` or `runObject`.
 
 ### Full Control with `invoke(...)`
 
@@ -119,9 +119,9 @@ const envelopes = await context.invoke.agents.invoke({
 });
 ```
 
-## 3. Standalone Invocation (Scripts & Tooling)
+## 3. Invocation Outside Handler Context
 
-For invoking an agent from outside a PURISTA service context (e.g., in a script, CLI, or test), use the standalone `invokeAgent` helper.
+For invoking an agent from runtime callers outside handler-local context (for example bootstrap scripts, operational jobs, or tests), use `invokeAgent`.
 
 ```ts
 import { invokeAgent } from '@purista/ai';
@@ -132,12 +132,13 @@ const result = await invokeAgent({
   agentVersion: '1',
   payload: { prompt: 'A customer was charged twice.' },
   sessionId: 'manual-session-123',
+  deliveryMode: 'prefer-stream', // default
 });
 
 // result is the array of AgentProtocolEnvelope
 ```
 
-This function constructs and sends the command message over the provided event bridge. It supports streaming via the `stream` option.
+This function always opens stream transport first. In `deliveryMode: 'prefer-stream'` it may fall back to command invoke. In `deliveryMode: 'require-stream'` it fails fast when streams are unavailable.
 
 ## Invocation Options
 
@@ -149,8 +150,11 @@ When calling child agents via `context.invoke.agents`, you can pass several opti
 | `correlationId`          | Overrides the correlation ID for trace chaining.                                                              |
 | `sessionId`              | Overrides the session ID for the child agent call.                                                            |
 | `failOnErrorFrame`       | If `true` (default), the invocation promise will reject if the child agent returns an `error` frame.            |
+| `deliveryMode`           | `'prefer-stream'` (default) allows fallback; `'require-stream'` fails fast when stream transport is unavailable. |
 | `forwardToCurrentStream` | Forwards frames from the child to the parent's stream. Can be `true` or an object for fine-grained control. |
 | `emitInvocationToolEvents` | If `true` (default), the child agent call will appear as a `tool` event in the parent's protocol stream.      |
+
+For `runObject(...)`, you can also pass `outputSchema` to validate parsed JSON at call time. If omitted, PURISTA uses any `outputSchema` declared via `.canInvokeAgent(...)`.
 
 ## Error Handling
 
@@ -165,7 +169,7 @@ PURISTA's standard error handling applies to agent invocations:
 - **Internal Agent-to-Agent**: Use `context.invoke.agents.runText(...)` or `runObject<T>(...)`.
 - **UI-Visible Child Agent**: Use `context.invoke.agents.forward(...)`.
 - **Full Control Needed**: Use `context.invoke.agents.invoke(...)` with custom options.
-- **External Script/Tool**: Use the standalone `invokeAgent(...)` helper.
+- **External Runtime Caller**: Use `invokeAgent(...)` with explicit `deliveryMode` when needed.
 
 ## Related Guides
 - [Agent Builder](./agent-builder.md)

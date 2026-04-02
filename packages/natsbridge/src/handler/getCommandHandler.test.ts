@@ -148,7 +148,7 @@ describe('nats getCommandHandler', () => {
 		await handler(null, msg)
 
 		expect(respond).toHaveBeenCalledOnce()
-		const response = sc.decode(respond.mock.calls[0]?.[0])
+		const response = sc.decode(respond.mock.calls[0]?.[0]) as { messageType: EBMessageType; isHandledError: boolean }
 		expect(response.messageType).toBe(EBMessageType.CommandErrorResponse)
 		expect(response.isHandledError).toBe(false)
 		expect(publish).not.toHaveBeenCalled()

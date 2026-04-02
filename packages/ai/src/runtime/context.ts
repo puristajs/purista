@@ -50,10 +50,10 @@ import type {
 	SkillSearchInput,
 } from '../skills/fileSystem.js'
 import type { AgentManifest, AgentSkillConfig, AllowedToolDefinition } from '../types/AgentManifest.js'
+import { invokeAgentInternal } from './agentInvocationTransport.js'
 import { type AgentApprovalHelpers, createAgentApprovalHelpers } from './approvals.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import type { AgentExecutionBudget } from './executionBudget.js'
-import { invokeAgent } from './invokeAgent.js'
 import { type AgentPolicyHelpers, createAgentPolicyHelpers } from './policy.js'
 import { type AgentReflectionHelpers, createAgentReflectionHelpers } from './reflection.js'
 import { type AgentRunStateHelpers, createAgentRunStateHelpers } from './runState.js'
@@ -795,6 +795,7 @@ export type AgentInvocationOptions = {
 	agentVersion: string
 	payload: unknown
 	parameter?: unknown
+	outputSchema?: Schema
 	timeoutMs?: number
 	correlationId?: string
 	sessionId?: string
@@ -814,6 +815,7 @@ export type AgentInvocationOptions = {
 	 */
 	failOnErrorFrame?: boolean
 	stream?: import('../types/AgentDefinition.js').AgentStreamResponder
+	deliveryMode?: import('../types/AgentDefinition.js').AgentInvocationDeliveryMode
 }
 
 export type AgentForwardingOptions =
@@ -840,6 +842,7 @@ type DeclaredAgentBinding = {
 	}
 	payloadSchema?: Schema
 	parameterSchema?: Schema
+	outputSchema?: Schema
 }
 
 type ResolvedAgentBinding = {
@@ -852,6 +855,7 @@ type ResolvedAgentBinding = {
 	}
 	payloadSchema?: Schema
 	parameterSchema?: Schema
+	outputSchema?: Schema
 }
 
 const hasErrorEnvelope = (envelopes: AgentProtocolEnvelope[]): boolean =>
@@ -926,7 +930,7 @@ const createAgentInvocationHelpers = <
 			}
 		}
 
-		const finalPromise = invokeAgent({
+		const finalPromise = invokeAgentInternal({
 			eventBridge: input.eventBridge,
 			agentName,
 			agentVersion,
@@ -938,6 +942,7 @@ const createAgentInvocationHelpers = <
 			tenantId: input.serviceContext.message.tenantId,
 			sessionId: input.session.identity.baseSessionId,
 			failOnErrorFrame: true,
+			deliveryMode: 'prefer-stream',
 			stream: {
 				onFrame: async envelope => {
 					emitValue(envelope)
@@ -1008,6 +1013,7 @@ const createAgentInvocationHelpers = <
 					createDirectBindingInvocation(agentName, agentVersion, payload, parameter ?? {})),
 			payloadSchema: binding?.payloadSchema ?? allowed.payloadSchema,
 			parameterSchema: binding?.parameterSchema ?? allowed.parameterSchema,
+			outputSchema: binding?.outputSchema ?? allowed.outputSchema,
 		}
 	}
 
@@ -1235,7 +1241,9 @@ const createAgentInvocationHelpers = <
 					const forwardingResponder = options.forwardToCurrentStream
 						? createForwardingResponder(options.forwardToCurrentStream)
 						: undefined
-					const envelopes = await invokeAgent({
+					const derivedDeliveryMode =
+						options.deliveryMode ?? (options.forwardToCurrentStream ? 'require-stream' : 'prefer-stream')
+					const envelopes = await invokeAgentInternal({
 						eventBridge: input.eventBridge,
 						agentName: options.agentName,
 						agentVersion: options.agentVersion,
@@ -1249,6 +1257,7 @@ const createAgentInvocationHelpers = <
 						tenantId: input.serviceContext.message.tenantId,
 						sessionId: options.sessionId ?? input.session.identity.baseSessionId,
 						failOnErrorFrame: options.failOnErrorFrame ?? true,
+						deliveryMode: derivedDeliveryMode,
 					})
 					if (hasErrorEnvelope(envelopes)) {
 						if (options.emitInvocationToolEvents !== false) {
@@ -1281,21 +1290,36 @@ const createAgentInvocationHelpers = <
 	}
 
 	const runObject = async <T = unknown>(options: Parameters<typeof invoke>[0]): Promise<T> => {
+		const binding = resolveDeclaredBinding(options.agentName, options.agentVersion)
 		const text = await runText(options)
+		let parsed: unknown
 		try {
-			return JSON.parse(text) as T
+			parsed = JSON.parse(text)
 		} catch (error) {
 			throw new HandledError(StatusCode.BadGateway, 'Invoked agent did not return valid JSON in final message', {
 				text,
 				error: error instanceof Error ? error.message : String(error),
 			})
 		}
+		const outputSchema = options.outputSchema ?? binding.outputSchema
+		if (!outputSchema) {
+			return parsed as T
+		}
+		const result = await validate(outputSchema, parsed)
+		if (!result.success) {
+			throw new HandledError(StatusCode.BadGateway, 'Invoked agent JSON output schema validation failed', {
+				text,
+				issues: result.issues,
+			})
+		}
+		return result.data as T
 	}
 
 	const forward = async (options: AgentForwardInvocationOptions) =>
 		await invoke({
 			...options,
 			forwardToCurrentStream: options.forward ?? true,
+			deliveryMode: options.deliveryMode ?? 'require-stream',
 			emitInvocationToolEvents: options.emitInvocationToolEvents ?? false,
 		})
 
@@ -1337,6 +1361,7 @@ const createAgentInvocationHelpers = <
 								),
 							payloadSchema: binding.payloadSchema,
 							parameterSchema: binding.parameterSchema,
+							outputSchema: binding.outputSchema,
 						}
 					},
 				},

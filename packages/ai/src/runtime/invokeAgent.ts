@@ -1,16 +1,7 @@
-import type { Command, EventBridge } from '@purista/core'
-import {
-	EBMessageType,
-	getNewEBMessageId,
-	getNewTraceId,
-	HandledError,
-	StatusCode,
-	UnhandledError,
-} from '@purista/core'
-
-import type { AgentProtocolEnvelope } from '../protocol/types.js'
-import type { AgentStreamResponder } from '../types/AgentDefinition.js'
-import { withSessionIdInPayload } from './sessionPayload.js'
+import type { EventBridge } from '@purista/core'
+import type { AgentInvocationDeliveryMode, AgentStreamResponder } from '../types/AgentDefinition.js'
+import type { AgentInvocationTransportOptions } from './agentInvocationTransport.js'
+import { invokeAgentInternal } from './agentInvocationTransport.js'
 
 export type InvokeAgentOptions = {
 	/** EventBridge instance used to reach the target agent service. */
@@ -37,6 +28,8 @@ export type InvokeAgentOptions = {
 	sessionId?: string
 	/** Optional live frame responder for streaming consumption. */
 	stream?: AgentStreamResponder
+	/** Stream delivery behavior. Defaults to stream-first with fallback. */
+	deliveryMode?: AgentInvocationDeliveryMode
 	/**
 	 * When true (default), protocol `error` envelopes emitted by the target agent
 	 * are treated as invocation failures and throw immediately.
@@ -44,168 +37,13 @@ export type InvokeAgentOptions = {
 	failOnErrorFrame?: boolean
 }
 
-const throwIfErrorEnvelope = (envelope: AgentProtocolEnvelope, failOnErrorFrame: boolean | undefined) => {
-	if (!(failOnErrorFrame ?? true)) {
-		return
-	}
-	const frame = envelope.frame
-	if (frame.kind !== 'error') {
-		return
-	}
-	const statusCode =
-		typeof frame.code === 'string' && /^\d+$/.test(frame.code)
-			? Number.parseInt(frame.code, 10)
-			: StatusCode.InternalServerError
-	if (frame.handled) {
-		throw new HandledError(statusCode, frame.message || 'agent returned handled error frame', {
-			code: frame.code,
-			handled: frame.handled,
-			details: frame.details,
-		})
-	}
-	throw new UnhandledError(statusCode, frame.message || 'agent returned error frame', {
-		code: frame.code,
-		handled: frame.handled,
-		details: frame.details,
-	})
-}
-
-const mergeUniqueEnvelopes = (current: AgentProtocolEnvelope[], final: AgentProtocolEnvelope[]) => {
-	const seen = new Set(current.map(envelope => JSON.stringify(envelope)))
-	const additions: AgentProtocolEnvelope[] = []
-	for (const envelope of final) {
-		const key = JSON.stringify(envelope)
-		if (seen.has(key)) {
-			continue
-		}
-		seen.add(key)
-		additions.push(envelope)
-	}
-	return additions
-}
-
 /**
  * Convenience helper for invoking an agent command via an EventBridge.
  */
 export const invokeAgent = async (options: InvokeAgentOptions) => {
-	const receiver = {
-		serviceName: options.agentName,
-		serviceVersion: options.agentVersion,
-		serviceTarget: 'run',
-	} as const
-
-	const payload = withSessionIdInPayload(options.payload, options.sessionId)
-
-	const message: Command = {
-		id: getNewEBMessageId(),
-		timestamp: Date.now(),
-		messageType: EBMessageType.Command,
-		traceId: options.traceId ?? getNewTraceId(),
-		correlationId: options.correlationId ?? getNewEBMessageId(),
-		contentType: 'application/json',
-		contentEncoding: 'utf-8',
-		principalId: options.principalId,
-		tenantId: options.tenantId,
-		sender: {
-			serviceName: 'agent.invoke',
-			serviceVersion: 'v1',
-			serviceTarget: options.agentName,
-			instanceId: options.eventBridge.instanceId,
-		},
-		receiver,
-		payload: {
-			payload,
-			parameter: options.parameter ?? {},
-		},
+	const internalOptions: AgentInvocationTransportOptions = {
+		...options,
+		deliveryMode: options.deliveryMode ?? 'prefer-stream',
 	}
-
-	const streamRequest = {
-		traceId: message.traceId,
-		sender: message.sender,
-		receiver: message.receiver,
-		contentType: message.contentType,
-		contentEncoding: message.contentEncoding,
-		principalId: message.principalId,
-		tenantId: message.tenantId,
-		payload: {
-			frameType: 'open' as const,
-			payload: message.payload.payload,
-			parameter: message.payload.parameter,
-		},
-	}
-
-	const emitFrame = async (envelope: AgentProtocolEnvelope) => {
-		if (!options.stream) {
-			return
-		}
-		await options.stream.onFrame(envelope)
-	}
-
-	try {
-		const handle = await options.eventBridge.openStream<AgentProtocolEnvelope, AgentProtocolEnvelope[]>(
-			streamRequest,
-			options.timeoutMs,
-		)
-		const envelopes: AgentProtocolEnvelope[] = []
-		for await (const frame of handle) {
-			if (frame.payload.frameType === 'chunk' && frame.payload.chunk) {
-				throwIfErrorEnvelope(frame.payload.chunk, options.failOnErrorFrame ?? true)
-				envelopes.push(frame.payload.chunk)
-				await emitFrame(frame.payload.chunk)
-				continue
-			}
-
-			if (frame.payload.frameType === 'complete') {
-				if (Array.isArray(frame.payload.final)) {
-					for (const envelope of mergeUniqueEnvelopes(envelopes, frame.payload.final)) {
-						throwIfErrorEnvelope(envelope, options.failOnErrorFrame ?? true)
-						envelopes.push(envelope)
-						await emitFrame(envelope)
-					}
-				}
-				await options.stream?.onComplete?.()
-				return envelopes
-			}
-
-			if (frame.payload.frameType === 'error') {
-				throw new UnhandledError(
-					StatusCode.InternalServerError,
-					frame.payload.error?.message ?? 'agent stream failed',
-					frame.payload.error,
-				)
-			}
-		}
-
-		await options.stream?.onComplete?.()
-		return envelopes
-	} catch (error) {
-		const isStreamUnavailable =
-			(error instanceof UnhandledError &&
-				(error.errorCode === StatusCode.NotImplemented || error.errorCode === StatusCode.BadGateway)) ||
-			(error instanceof Error &&
-				(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
-
-		if (!isStreamUnavailable) {
-			await options.stream?.onError?.(error)
-			throw error
-		}
-		try {
-			const envelopes = (await options.eventBridge.invoke(message, options.timeoutMs)) as AgentProtocolEnvelope[]
-			if (options.failOnErrorFrame ?? true) {
-				for (const envelope of envelopes) {
-					throwIfErrorEnvelope(envelope, true)
-				}
-			}
-			if (options.stream) {
-				for (const envelope of envelopes) {
-					await options.stream.onFrame(envelope)
-				}
-				await options.stream.onComplete()
-			}
-			return envelopes
-		} catch (fallbackError) {
-			await options.stream?.onError?.(fallbackError)
-			throw fallbackError
-		}
-	}
+	return await invokeAgentInternal(internalOptions)
 }

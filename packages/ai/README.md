@@ -250,3 +250,21 @@ const reply = context.ai.reply.publish(
 
 await saveAssistantReply(reply)
 ```
+
+## Invocation model
+
+`@purista/ai` uses a stream-first invocation contract for agents.
+
+- canonical target is fixed to `run`
+- default invocation delivery mode is `prefer-stream`
+- `prefer-stream` opens a stream first and may fallback to command invoke
+- `require-stream` fails fast when stream transport is unavailable
+
+`context.invoke.agents.forward(...)` uses strict stream semantics (`require-stream`) because live relay cannot be emulated safely.
+
+`context.invoke.agents.runObject(...)` parses final assistant text as JSON and validates it against:
+
+- call-level `outputSchema` when provided
+- otherwise declared `.canInvokeAgent(..., { outputSchema })` schema
+
+Top-level package exports intentionally keep runtime internals private. Use `AgentBuilder`, `getInstance(...)`, and invocation helpers (`context.invoke.agents.*` / `invokeAgent`) as the supported DX.
