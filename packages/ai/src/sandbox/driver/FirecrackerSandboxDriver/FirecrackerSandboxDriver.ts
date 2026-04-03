@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import { execa } from 'execa'
 import type { z } from 'zod'
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import type { BashResultSchema, SandboxDriver, SandboxFileContent, SandboxMetadata } from '../../types/SandboxDriver.js'
 
 export interface FirecrackerSandboxDriverConfig {
 	/** Path to the Firecracker binary */
@@ -100,6 +100,7 @@ export class FirecrackerSandboxDriver implements SandboxDriver {
 		sandboxId: string
 		command: string
 		cwd?: string
+		timeoutMs?: number
 	}): Promise<z.infer<typeof BashResultSchema>> {
 		// Firecracker communication usually happens via virtio-vsock
 		// Requires a vsock-to-tcp bridge or direct vsock support in Node.js
@@ -110,7 +111,7 @@ export class FirecrackerSandboxDriver implements SandboxDriver {
 		return 'Firecracker readFile not fully implemented'
 	}
 
-	async writeFiles(_params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+	async writeFiles(_params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
 		// Use virtio-fs or vsock to transfer files
 	}
 

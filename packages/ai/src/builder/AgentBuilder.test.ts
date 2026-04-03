@@ -1072,9 +1072,9 @@ describe('AgentBuilder', () => {
 		})
 		await instance.start()
 		try {
-			const result = await instance.invoke({ payload: {} })
-			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
-			expect(errorFrame).toBeDefined()
+			await expect(instance.invoke({ payload: {}, timeoutMs: 200 })).rejects.toMatchObject({
+				message: expect.stringContaining('Invalid input: expected number, received string'),
+			})
 		} finally {
 			await instance.stop()
 		}
@@ -1113,11 +1113,8 @@ describe('AgentBuilder', () => {
 		})
 		await instance.start()
 		try {
-			const result = await instance.invoke({ payload: {} })
-			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
-			expect(errorFrame).toMatchObject({
-				kind: 'error',
-				code: '429',
+			await expect(instance.invoke({ payload: {}, timeoutMs: 200 })).rejects.toMatchObject({
+				errorCode: 429,
 				message: 'Agent modelSteps budget exceeded',
 			})
 		} finally {
@@ -1167,11 +1164,8 @@ describe('AgentBuilder', () => {
 		await childInstance.start()
 		await parentInstance.start()
 		try {
-			const result = await parentInstance.invoke({ payload: {} })
-			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
-			expect(errorFrame).toMatchObject({
-				kind: 'error',
-				code: '429',
+			await expect(parentInstance.invoke({ payload: {}, timeoutMs: 200 })).rejects.toMatchObject({
+				errorCode: 429,
 				message: 'Agent toolCalls budget exceeded',
 			})
 		} finally {

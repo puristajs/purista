@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { SandboxPayloadSchema } from '../../../../../types/SandboxDriver.js'
+import { SandboxFileContentSchema, SandboxPayloadSchema } from '../../../../../types/SandboxDriver.js'
 
 export const WriteFilesInputSchema = SandboxPayloadSchema.extend({
-	files: z.record(z.string(), z.string()),
+	files: z.record(z.string(), SandboxFileContentSchema),
 })
 
 export const WriteFilesOutputSchema = z.object({

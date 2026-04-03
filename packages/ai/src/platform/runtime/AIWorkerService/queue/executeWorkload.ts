@@ -1,7 +1,7 @@
 import { InMemoryConversationStore } from '../../../../memory/conversationStore.js'
 import { PoolManager } from '../../../../pools/PoolManager.js'
 import { defaultModelResourceRegistry } from '../../../../providers/resources/ModelResourceRegistry.js'
-import { AgentExecutor } from '../../../../runtime/AgentExecutor.js'
+import { executeAgentWorkload } from '../../../../runtime/executeAgentWorkload.js'
 import type { AgentManifest } from '../../../../types/AgentManifest.js'
 import { aiWorkerServiceBuilder } from '../info/info.js'
 import { aiWorkloadsQueueBuilder } from './aiWorkloads/aiWorkloadsQueueBuilder.js'
@@ -92,25 +92,26 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 				return undefined
 			}
 
-			const executor = new AgentExecutor({
-				manifest,
-				provider,
-				conversationStore,
-				logger: context.logger,
-				startActiveSpan: (name, options, spanContext, fn) =>
-					context.startActiveSpan(name, options ?? {}, spanContext, span =>
-						fn ? fn(span) : Promise.resolve(undefined as never),
-					),
-			})
-
-			const result = await executor.run({
-				sessionId: payload.sessionId,
-				prompt: payload.prompt,
-				context: payload.context,
-				metadata: payload.metadata,
-				tenantId: payload.tenantId,
-				principalId: payload.principalId,
-			})
+			const result = await executeAgentWorkload(
+				{
+					manifest,
+					provider,
+					conversationStore,
+					logger: context.logger,
+					startActiveSpan: (name, options, spanContext, fn) =>
+						context.startActiveSpan(name, options ?? {}, spanContext, span =>
+							fn ? fn(span) : Promise.resolve(undefined as never),
+						),
+				},
+				{
+					sessionId: payload.sessionId,
+					prompt: payload.prompt,
+					context: payload.context,
+					metadata: payload.metadata,
+					tenantId: payload.tenantId,
+					principalId: payload.principalId,
+				},
+			)
 
 			context.logger.info({ jobId: message.id, manifest: manifest.agentName }, 'AI workload completed', result)
 			await context.job.complete()

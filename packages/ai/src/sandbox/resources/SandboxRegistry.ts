@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import type { StateStore } from '@purista/core'
 import { type SandboxMetadata, SandboxMetadataSchema, type SandboxOwner } from '../types/SandboxDriver.js'
 
@@ -12,6 +13,7 @@ export class SandboxRegistry {
 	private store: StateStore
 	private prefix = 'sandbox:registry:'
 	private ownerPrefix = 'sandbox:owner:'
+	private ownerProvisionLockPrefix = 'sandbox:owner-lock:'
 
 	/**
 	 * @param store The PURISTA StateStore instance to use for persistence.
@@ -31,6 +33,15 @@ export class SandboxRegistry {
 		scope?: SandboxOwner['scope']
 	}): string {
 		return `${this.ownerPrefix}${owner.organizationId}:${owner.projectId}:${owner.userId}:${this.getScopeKeyPart(owner)}`
+	}
+
+	private getOwnerProvisionLockKey(owner: {
+		organizationId: string
+		projectId: string
+		userId: string
+		scope?: SandboxOwner['scope']
+	}): string {
+		return `${this.ownerProvisionLockPrefix}${owner.organizationId}:${owner.projectId}:${owner.userId}:${this.getScopeKeyPart(owner)}`
 	}
 
 	private getScopeKeyPart(owner: Pick<SandboxOwner, 'scope'>): string {
@@ -116,6 +127,88 @@ export class SandboxRegistry {
 			return undefined
 		}
 		return metadata
+	}
+
+	private parseProvisionLock(raw: unknown): { token: string; expiresAt: number } | undefined {
+		if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+			return undefined
+		}
+		const token = (raw as { token?: unknown }).token
+		const expiresAt = (raw as { expiresAt?: unknown }).expiresAt
+		if (typeof token !== 'string' || typeof expiresAt !== 'number') {
+			return undefined
+		}
+		return {
+			token,
+			expiresAt,
+		}
+	}
+
+	private async acquireOwnerProvisionLock(
+		owner: {
+			organizationId: string
+			projectId: string
+			userId: string
+			scope?: SandboxOwner['scope']
+		},
+		options: { lockTtlMs?: number; waitTimeoutMs?: number; pollIntervalMs?: number } = {},
+	): Promise<{ lockKey: string; token: string }> {
+		const lockTtlMs = options.lockTtlMs ?? 10_000
+		const waitTimeoutMs = options.waitTimeoutMs ?? 15_000
+		const pollIntervalMs = options.pollIntervalMs ?? 50
+		const lockKey = this.getOwnerProvisionLockKey(owner)
+		const startedAt = Date.now()
+		const token = randomUUID()
+		while (Date.now() - startedAt <= waitTimeoutMs) {
+			const currentState = await this.store.getState(lockKey)
+			const current = this.parseProvisionLock(currentState[lockKey])
+			const now = Date.now()
+			if (!current || current.expiresAt <= now) {
+				await this.store.setState(lockKey, {
+					token,
+					expiresAt: now + lockTtlMs,
+				})
+				const verificationState = await this.store.getState(lockKey)
+				const verification = this.parseProvisionLock(verificationState[lockKey])
+				if (verification?.token === token) {
+					return {
+						lockKey,
+						token,
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, pollIntervalMs))
+		}
+		throw new Error('Timed out acquiring sandbox owner provisioning lock')
+	}
+
+	private async releaseOwnerProvisionLock(lockKey: string, token: string): Promise<void> {
+		const state = await this.store.getState(lockKey)
+		const current = this.parseProvisionLock(state[lockKey])
+		if (current?.token === token) {
+			await this.store.removeState(lockKey)
+		}
+	}
+
+	/**
+	 * Runs owner-scoped provisioning work under a persistent lock.
+	 */
+	async withOwnerProvisionLock<T>(
+		owner: {
+			organizationId: string
+			projectId: string
+			userId: string
+			scope?: SandboxOwner['scope']
+		},
+		fn: () => Promise<T>,
+		options?: { lockTtlMs?: number; waitTimeoutMs?: number; pollIntervalMs?: number },
+	): Promise<T> {
+		const lock = await this.acquireOwnerProvisionLock(owner, options)
+		try {
+			return await fn()
+		} finally {
+			await this.releaseOwnerProvisionLock(lock.lockKey, lock.token)
+		}
 	}
 
 	/**

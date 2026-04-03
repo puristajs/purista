@@ -10,14 +10,9 @@ vi.mock('../../../../providers/resources/ModelResourceRegistry.js', () => ({
 	},
 }))
 
-vi.mock('../../../../runtime/AgentExecutor.js', () => ({
-	AgentExecutor: class {
-		constructor(private readonly dependencies: { startActiveSpan?: (...args: any[]) => Promise<unknown> | unknown }) {}
-
-		async run(input: unknown) {
-			await this.dependencies.startActiveSpan?.('worker-run', {}, undefined, async () => undefined)
-			return await executorRun(input)
-		}
+vi.mock('../../../../runtime/executeAgentWorkload.js', () => ({
+	executeAgentWorkload: async (_options: unknown, input: unknown) => {
+		return await executorRun(input)
 	},
 }))
 

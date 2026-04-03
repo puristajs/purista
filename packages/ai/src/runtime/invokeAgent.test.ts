@@ -158,6 +158,26 @@ describe('invokeAgent', () => {
 		expect(eventBridge.invoke).toHaveBeenCalledTimes(1)
 	})
 
+	it('fails fast in require-stream mode when stream is unavailable', async () => {
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
+			invoke: vi.fn(),
+		} as any
+
+		await expect(
+			invokeAgent({
+				eventBridge,
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				payload: { prompt: 'hello' },
+				deliveryMode: 'require-stream',
+			}),
+		).rejects.toThrow('stream unavailable')
+		expect(eventBridge.openStream).toHaveBeenCalledTimes(1)
+		expect(eventBridge.invoke).not.toHaveBeenCalled()
+	})
+
 	it('uses final envelopes when stream completes without chunk frames', async () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'final-only', role: 'assistant' } },

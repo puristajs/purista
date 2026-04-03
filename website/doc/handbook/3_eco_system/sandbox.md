@@ -295,6 +295,7 @@ const result = await eventBridge.invoke({
     payload: {
       sandboxId: created.sandboxId,
       command: 'ls -la',
+      timeoutMs: 10_000,
     },
     parameter: {},
   },
@@ -304,6 +305,21 @@ const result = await eventBridge.invoke({
   contentEncoding: 'utf-8',
 })
 ```
+
+## Reliability and failure semantics
+
+Sandbox runtime behavior is intentionally explicit:
+
+- `ensureSandbox` uses owner-tuple provisioning locks, so concurrent ensure calls for the same owner/scope do not create duplicate sandboxes.
+- `executeBash` supports optional `timeoutMs` and returns deterministic timeout behavior through the sandbox command contract.
+- ownership checks remain strict (`tenantId` + `principalId` + payload `projectId`/`scope`).
+- write-file transport is binary-safe (`utf-8` or `base64` encoded payloads), while `readFile` remains a text-oriented UTF-8 read path.
+
+Operational defaults:
+
+- use `ensureSandbox` before command/file operations
+- pass `timeoutMs` for long-running commands instead of relying on transport timeouts
+- use encoded write payloads for non-text artifacts
 
 ## Git and GitHub Auth in Sandboxes
 
@@ -348,7 +364,7 @@ In sandbox, a runtime adapter is implemented as a `SandboxDriver`.
 If you want to support a new backend, implement the `SandboxDriver` interface and inject it into the service resources.
 
 ```ts
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '@purista/ai'
+import type { BashResultSchema, SandboxDriver, SandboxFileContent, SandboxMetadata } from '@purista/ai'
 import type { z } from 'zod'
 
 type BashResult = z.infer<typeof BashResultSchema>
@@ -373,7 +389,7 @@ export class AcmeSandboxDriver implements SandboxDriver {
     // Remove runtime resources and workspace
   }
 
-  public async executeBash(params: { sandboxId: string; command: string; cwd?: string }): Promise<BashResult> {
+  public async executeBash(params: { sandboxId: string; command: string; cwd?: string; timeoutMs?: number }): Promise<BashResult> {
     // Execute command and return stdout/stderr/exitCode
     return { stdout: '', stderr: '', exitCode: 0 }
   }
@@ -383,7 +399,7 @@ export class AcmeSandboxDriver implements SandboxDriver {
     return ''
   }
 
-  public async writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+  public async writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
     // Persist files in sandbox workspace
   }
 
@@ -442,7 +458,14 @@ export const codingAgent = new AgentBuilder({
         writeFiles: async (files: Array<{ path: string; content: string | Buffer }>) =>
           await context.tools.invoke.Sandbox['1'].writeFiles({
             sandboxId: ensured.sandboxId,
-            files: Object.fromEntries(files.map((file) => [file.path, file.content.toString('utf-8')])),
+            files: Object.fromEntries(
+              files.map((file) => [
+                file.path,
+                typeof file.content === 'string'
+                  ? { encoding: 'utf-8' as const, content: file.content }
+                  : { encoding: 'base64' as const, content: file.content.toString('base64') },
+              ]),
+            ),
           }),
       }
 

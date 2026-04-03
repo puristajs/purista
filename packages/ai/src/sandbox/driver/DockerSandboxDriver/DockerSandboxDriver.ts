@@ -6,6 +6,7 @@ import type { z } from 'zod'
 import {
 	type BashResultSchema,
 	type SandboxDriver,
+	type SandboxFileContent,
 	type SandboxMetadata,
 	SandboxMetadataSchema,
 } from '../../types/SandboxDriver.js'
@@ -184,6 +185,7 @@ export class DockerSandboxDriver implements SandboxDriver {
 		sandboxId: string
 		command: string
 		cwd?: string
+		timeoutMs?: number
 	}): Promise<z.infer<typeof BashResultSchema>> {
 		const containerName = this.getContainerName(params.sandboxId)
 		const args = ['exec']
@@ -195,13 +197,23 @@ export class DockerSandboxDriver implements SandboxDriver {
 		args.push(containerName, 'bash', '-c', params.command)
 
 		try {
-			const { stdout, stderr, exitCode } = await execa('docker', args, { reject: false })
+			const { stdout, stderr, exitCode } = await execa('docker', args, {
+				reject: false,
+				timeout: params.timeoutMs,
+			})
 			return {
 				stdout: stdout || '',
 				stderr: stderr || '',
 				exitCode: exitCode ?? 1,
 			}
 		} catch (error: any) {
+			if (error?.timedOut === true) {
+				return {
+					stdout: error.stdout ?? '',
+					stderr: `Command timed out after ${params.timeoutMs ?? 0}ms`,
+					exitCode: 124,
+				}
+			}
 			return {
 				stdout: '',
 				stderr: error.message,
@@ -226,14 +238,16 @@ export class DockerSandboxDriver implements SandboxDriver {
 	/**
 	 * Writes files to the container by creating a local temp file and using 'docker cp'.
 	 */
-	async writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+	async writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
 		const containerName = this.getContainerName(params.sandboxId)
 		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-sandbox-'))
 
 		try {
-			for (const [filePath, content] of Object.entries(params.files)) {
+			for (const [filePath, encoded] of Object.entries(params.files)) {
 				const localFilePath = path.join(tempDir, 'file.tmp')
-				await fs.writeFile(localFilePath, content, 'utf-8')
+				const content =
+					encoded.encoding === 'base64' ? Buffer.from(encoded.content, 'base64') : Buffer.from(encoded.content, 'utf-8')
+				await fs.writeFile(localFilePath, content)
 
 				const targetDir = path.posix.dirname(filePath)
 				if (targetDir !== '.' && targetDir !== '/') {

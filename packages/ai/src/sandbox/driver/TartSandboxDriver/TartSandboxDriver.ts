@@ -3,7 +3,7 @@ import * as os from 'node:os'
 import * as path from 'node:path'
 import { execa } from 'execa'
 import type { z } from 'zod'
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import type { BashResultSchema, SandboxDriver, SandboxFileContent, SandboxMetadata } from '../../types/SandboxDriver.js'
 
 export interface TartSandboxDriverConfig {
 	/** The name of the base Tart image to clone (e.g. 'ghcr.io/cirruslabs/ubuntu:latest') */
@@ -111,6 +111,7 @@ export class TartSandboxDriver implements SandboxDriver {
 		sandboxId: string
 		command: string
 		cwd?: string
+		timeoutMs?: number
 	}): Promise<z.infer<typeof BashResultSchema>> {
 		const vmName = this.getVmName(params.sandboxId)
 		try {
@@ -119,7 +120,10 @@ export class TartSandboxDriver implements SandboxDriver {
 			const { stdout, stderr, exitCode } = await execa(
 				'ssh',
 				[`agent@${await this.getVmIp(vmName)}`, 'bash', '-c', params.command],
-				{ reject: false },
+				{
+					reject: false,
+					timeout: params.timeoutMs,
+				},
 			)
 			return {
 				stdout: stdout || '',
@@ -127,6 +131,13 @@ export class TartSandboxDriver implements SandboxDriver {
 				exitCode: exitCode ?? 1,
 			}
 		} catch (error: any) {
+			if (error?.timedOut === true) {
+				return {
+					stdout: error.stdout ?? '',
+					stderr: `Command timed out after ${params.timeoutMs ?? 0}ms`,
+					exitCode: 124,
+				}
+			}
 			return { stdout: '', stderr: error.message, exitCode: 1 }
 		}
 	}
@@ -143,12 +154,14 @@ export class TartSandboxDriver implements SandboxDriver {
 		return stdout
 	}
 
-	async writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+	async writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
 		const ip = await this.getVmIp(this.getVmName(params.sandboxId))
 		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-tart-'))
 		try {
-			for (const [filePath, content] of Object.entries(params.files)) {
+			for (const [filePath, encoded] of Object.entries(params.files)) {
 				const localPath = path.join(tempDir, 'file.tmp')
+				const content =
+					encoded.encoding === 'base64' ? Buffer.from(encoded.content, 'base64') : Buffer.from(encoded.content, 'utf-8')
 				await fs.writeFile(localPath, content)
 				await execa('scp', [localPath, `agent@${ip}:${filePath}`])
 			}

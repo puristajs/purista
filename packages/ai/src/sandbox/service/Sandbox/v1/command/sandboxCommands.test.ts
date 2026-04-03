@@ -17,11 +17,22 @@ const createContext = <TPayload>(
 		principalId: 'user-1',
 	},
 ) => {
+	const normalizedResources = {
+		...resources,
+		registry:
+			resources.registry &&
+			typeof (resources.registry as { withOwnerProvisionLock?: unknown }).withOwnerProvisionLock !== 'function'
+				? {
+						...(resources.registry as Record<string, unknown>),
+						withOwnerProvisionLock: async (_owner: unknown, fn: () => Promise<unknown>) => await fn(),
+					}
+				: resources.registry,
+	}
 	const context = createCommandContextMock(builder, {
 		payload,
 		parameter: {},
 		sandbox,
-		resources,
+		resources: normalizedResources,
 	})
 	context.context.message = getCommandMessageMock({
 		tenantId: identity.tenantId,
@@ -109,7 +120,7 @@ describe('sandbox command ownership', () => {
 		expect(driver.createSandbox.calledOnce).toBe(true)
 		expect(result.created).toBe(true)
 		expect(result.status).toBe('starting')
-		expect(result.sandboxId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
+		expect(result.sandboxId).toMatch(/^sb-[0-9a-f]{32}$/i)
 		expect(
 			driver.createSandbox.calledWithMatch({
 				sandboxId: result.sandboxId,
@@ -156,7 +167,12 @@ describe('sandbox command ownership', () => {
 	it.each([
 		['execute', executeBashCommandBuilder, { sandboxId: 'sb-1', command: 'pwd' }, 'executeBash'],
 		['read', readFileCommandBuilder, { sandboxId: 'sb-1', path: '/tmp/file.txt' }, 'readFile'],
-		['write', writeFilesCommandBuilder, { sandboxId: 'sb-1', files: { '/tmp/file.txt': 'x' } }, 'writeFiles'],
+		[
+			'write',
+			writeFilesCommandBuilder,
+			{ sandboxId: 'sb-1', files: { '/tmp/file.txt': { encoding: 'utf-8', content: 'x' } } },
+			'writeFiles',
+		],
 		['destroy', destroySandboxCommandBuilder, { sandboxId: 'sb-1' }, 'destroySandbox'],
 	] as const)('rejects %s access for the wrong owner', async (_name, builder, payload, driverMethod) => {
 		const driver = {
@@ -214,5 +230,34 @@ describe('sandbox command ownership', () => {
 		await expect(
 			executeBashCommandBuilder.getCommandFunction()(context.context, { sandboxId: 'sb-1', command: 'pwd' }, {}),
 		).rejects.toMatchObject({ errorCode: StatusCode.Unauthorized })
+	})
+
+	it('maps execute timeout to gateway-timeout handled error', async () => {
+		const driver = {
+			executeBash: sandbox.stub().resolves({ stdout: '', stderr: 'timeout', exitCode: 124 }),
+		}
+		const registry = {
+			getMetadata: sandbox.stub().resolves({
+				sandboxId: 'sb-1',
+				organizationId: 'tenant-1',
+				projectId: 'project-1',
+				userId: 'user-1',
+				containerName: 'container',
+				createdAt: Date.now(),
+			}),
+		}
+		const context = createContext(
+			executeBashCommandBuilder,
+			{ sandboxId: 'sb-1', command: 'sleep 10', timeoutMs: 100 },
+			{ driver, registry },
+		)
+
+		await expect(
+			executeBashCommandBuilder.getCommandFunction()(
+				context.context,
+				{ sandboxId: 'sb-1', command: 'sleep 10', timeoutMs: 100 },
+				{},
+			),
+		).rejects.toMatchObject({ errorCode: StatusCode.GatewayTimeout })
 	})
 })

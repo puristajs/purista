@@ -1,3 +1,4 @@
+import { StatusCode, UnhandledError } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { AgentHandler } from '../builder/AgentBuilder.js'
@@ -85,7 +86,8 @@ describe('AgentInstance', () => {
 
 	it('notifies stream responders for successful invocations', async () => {
 		const invoke = vi.fn().mockResolvedValue([{ frame: { kind: 'message', content: 'ok', role: 'assistant' } }])
-		const eventBridge = { instanceId: 'bridge-1', invoke } as any
+		const openStream = vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable'))
+		const eventBridge = { instanceId: 'bridge-1', openStream, invoke } as any
 		const service = {
 			start: vi.fn().mockResolvedValue(undefined),
 			destroy: vi.fn().mockResolvedValue(undefined),
@@ -118,7 +120,8 @@ describe('AgentInstance', () => {
 
 	it('injects sessionId into payload for runtime invokes', async () => {
 		const invoke = vi.fn().mockResolvedValue([])
-		const eventBridge = { instanceId: 'bridge-1', invoke } as any
+		const openStream = vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable'))
+		const eventBridge = { instanceId: 'bridge-1', openStream, invoke } as any
 		const service = {
 			start: vi.fn().mockResolvedValue(undefined),
 			destroy: vi.fn().mockResolvedValue(undefined),

@@ -10,6 +10,7 @@ describe('SandboxRegistry', () => {
 		await store.removeState('sandbox:owner:org:proj:user:shared-project-user')
 		await store.removeState('sandbox:owner:org:proj:user:agent-run:run-1')
 		await store.removeState('sandbox:owner:org:proj:user:agent-run:run-2')
+		await store.removeState('sandbox:owner-lock:org:proj:user:shared-project-user')
 	})
 
 	it('registers and retrieves metadata', async () => {
@@ -146,5 +147,44 @@ describe('SandboxRegistry', () => {
 		])
 
 		expect(await registry.getMetadata('sb-1')).toBeUndefined()
+	})
+
+	it('serializes owner-scoped provisioning callbacks with a lock', async () => {
+		const registry = new SandboxRegistry(store)
+		const owner = {
+			organizationId: 'org',
+			projectId: 'proj',
+			userId: 'user',
+		}
+		const order: string[] = []
+		let running = 0
+		let maxConcurrent = 0
+
+		const runSection = async (name: 'a' | 'b', waitMs = 0) => {
+			order.push(`${name}-start`)
+			running += 1
+			maxConcurrent = Math.max(maxConcurrent, running)
+			if (waitMs > 0) {
+				await new Promise(resolve => setTimeout(resolve, waitMs))
+			}
+			running -= 1
+			order.push(`${name}-end`)
+		}
+
+		await Promise.all([
+			registry.withOwnerProvisionLock(owner, async () => runSection('a', 20)),
+			registry.withOwnerProvisionLock(owner, async () => runSection('b')),
+		])
+		expect(maxConcurrent).toBe(1)
+		expect(order).toHaveLength(4)
+		expect(order.filter(entry => entry === 'a-start')).toHaveLength(1)
+		expect(order.filter(entry => entry === 'a-end')).toHaveLength(1)
+		expect(order.filter(entry => entry === 'b-start')).toHaveLength(1)
+		expect(order.filter(entry => entry === 'b-end')).toHaveLength(1)
+		expect(order[0]).toMatch(/^[ab]-start$/)
+		expect(order[1]).toMatch(/^[ab]-end$/)
+		expect(order[2]).toMatch(/^[ab]-start$/)
+		expect(order[3]).toMatch(/^[ab]-end$/)
+		expect(order[0].charAt(0)).not.toBe(order[2].charAt(0))
 	})
 })

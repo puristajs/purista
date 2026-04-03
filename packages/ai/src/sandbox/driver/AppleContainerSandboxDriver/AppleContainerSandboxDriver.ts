@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import type { BashResultSchema, SandboxDriver, SandboxFileContent, SandboxMetadata } from '../../types/SandboxDriver.js'
 import { DockerSandboxDriver, type DockerSandboxDriverConfig } from '../DockerSandboxDriver/DockerSandboxDriver.js'
 
 /**
@@ -52,6 +52,7 @@ export class AppleContainerSandboxDriver implements SandboxDriver {
 		sandboxId: string
 		command: string
 		cwd?: string
+		timeoutMs?: number
 	}): Promise<z.infer<typeof BashResultSchema>> {
 		return await this.dockerCompatDriver.executeBash(params)
 	}
@@ -60,7 +61,7 @@ export class AppleContainerSandboxDriver implements SandboxDriver {
 		return await this.dockerCompatDriver.readFile(params)
 	}
 
-	async writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+	async writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
 		await this.dockerCompatDriver.writeFiles(params)
 	}
 

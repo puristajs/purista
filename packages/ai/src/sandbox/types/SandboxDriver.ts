@@ -53,6 +53,17 @@ export const BashResultSchema = z.object({
 })
 
 /**
+ * Encoded file payload for sandbox writes.
+ * @group Schemas
+ */
+export const SandboxFileContentSchema = z.object({
+	encoding: z.enum(['utf-8', 'base64']),
+	content: z.string(),
+})
+
+export type SandboxFileContent = z.infer<typeof SandboxFileContentSchema>
+
+/**
  * Metadata for a sandbox instance used for registry and reconciliation.
  * @group Schemas
  */
@@ -131,7 +142,12 @@ export interface SandboxDriver {
 	 * @param params Command and execution context
 	 * @returns The result of the command execution
 	 */
-	executeBash(params: { sandboxId: string; command: string; cwd?: string }): Promise<z.infer<typeof BashResultSchema>>
+	executeBash(params: {
+		sandboxId: string
+		command: string
+		cwd?: string
+		timeoutMs?: number
+	}): Promise<z.infer<typeof BashResultSchema>>
 
 	/**
 	 * Reads the content of a file from the sandbox.
@@ -145,7 +161,7 @@ export interface SandboxDriver {
 	 *
 	 * @param params Map of file paths to their contents
 	 */
-	writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void>
+	writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void>
 
 	/**
 	 * Scans the underlying system for running sandboxes and recovers their metadata.

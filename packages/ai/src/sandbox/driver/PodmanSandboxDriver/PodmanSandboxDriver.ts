@@ -1,8 +1,12 @@
+import * as fs from 'node:fs/promises'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { execa } from 'execa'
 import type { z } from 'zod'
 import {
 	type BashResultSchema,
 	type SandboxDriver,
+	type SandboxFileContent,
 	type SandboxMetadata,
 	SandboxMetadataSchema,
 } from '../../types/SandboxDriver.js'
@@ -136,6 +140,7 @@ export class PodmanSandboxDriver implements SandboxDriver {
 		sandboxId: string
 		command: string
 		cwd?: string
+		timeoutMs?: number
 	}): Promise<z.infer<typeof BashResultSchema>> {
 		const containerName = this.getContainerName(params.sandboxId)
 		try {
@@ -143,13 +148,23 @@ export class PodmanSandboxDriver implements SandboxDriver {
 			if (params.cwd) args.push('-w', params.cwd)
 			args.push(containerName, 'bash', '-c', params.command)
 
-			const { stdout, stderr, exitCode } = await execa('podman', args, { reject: false })
+			const { stdout, stderr, exitCode } = await execa('podman', args, {
+				reject: false,
+				timeout: params.timeoutMs,
+			})
 			return {
 				stdout: stdout || '',
 				stderr: stderr || '',
 				exitCode: exitCode ?? 1,
 			}
 		} catch (error: any) {
+			if (error?.timedOut === true) {
+				return {
+					stdout: error.stdout ?? '',
+					stderr: `Command timed out after ${params.timeoutMs ?? 0}ms`,
+					exitCode: 124,
+				}
+			}
 			return { stdout: '', stderr: error.message, exitCode: 1 }
 		}
 	}
@@ -160,13 +175,23 @@ export class PodmanSandboxDriver implements SandboxDriver {
 		return stdout
 	}
 
-	async writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+	async writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
 		const containerName = this.getContainerName(params.sandboxId)
-		for (const [filePath, content] of Object.entries(params.files)) {
-			const proc = execa('podman', ['exec', '-i', containerName, 'bash', '-c', `cat > ${filePath}`])
-			proc.stdin?.write(content)
-			proc.stdin?.end()
-			await proc
+		const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-podman-'))
+		try {
+			for (const [filePath, encoded] of Object.entries(params.files)) {
+				const localFilePath = path.join(tempDir, 'file.tmp')
+				const content =
+					encoded.encoding === 'base64' ? Buffer.from(encoded.content, 'base64') : Buffer.from(encoded.content, 'utf-8')
+				await fs.writeFile(localFilePath, content)
+				const targetDir = path.posix.dirname(filePath)
+				if (targetDir !== '.' && targetDir !== '/') {
+					await execa('podman', ['exec', containerName, 'mkdir', '-p', targetDir])
+				}
+				await execa('podman', ['cp', localFilePath, `${containerName}:${filePath}`])
+			}
+		} finally {
+			await fs.rm(tempDir, { recursive: true, force: true })
 		}
 	}
 

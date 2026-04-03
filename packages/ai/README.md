@@ -268,3 +268,18 @@ await saveAssistantReply(reply)
 - otherwise declared `.canInvokeAgent(..., { outputSchema })` schema
 
 Top-level package exports intentionally keep runtime internals private. Use `AgentBuilder`, `getInstance(...)`, and invocation helpers (`context.invoke.agents.*` / `invokeAgent`) as the supported DX.
+
+## Sandbox reliability semantics
+
+Sandbox behavior is now explicit and converged for production troubleshooting:
+
+- `executeBash` accepts optional `timeoutMs` (max `30m`) and maps timeout failures to handled timeout responses.
+- owner-scoped `ensureSandbox` uses a persistent owner-tuple provisioning lock to avoid duplicate sandbox creation under concurrent calls.
+- sandbox file writes use a binary-safe transport contract (`utf-8` or `base64` encoded file payloads) instead of assuming text-only content.
+- runtime queue-worker execution and in-process execution use the same internal workload engine for envelope/error parity.
+
+Important design boundary remains unchanged:
+
+- root skill content is injected by default when declared via `useSkills([...])`
+- deeper skill/reference files are explicit handler choice
+- budget/limit policy stays developer-owned at app level

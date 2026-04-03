@@ -62,3 +62,26 @@ Canonical long-form architecture remains in `/Users/sebastianwessel/projekte/@pu
 - no additional queue/provider expansion in this wave
 - no CLI command surface for AI runtime operator controls in this wave
 - no standalone execution architecture will be introduced unless a new canonical spec approves it
+
+## AI DX hardening wave (sandbox + runtime convergence)
+
+This wave extends the phase-2 runtime with production-focused sandbox hardening and closes remaining execution-path drift.
+
+Implemented:
+
+1. Sandbox security and timeout handling
+- `executeBash` request supports `timeoutMs` and timeout propagation to drivers.
+- timeout result mapping is deterministic (`HandledError` timeout on command surface).
+- Podman file-write path no longer uses shell-string target interpolation; file transfer uses safe copy semantics.
+
+2. Concurrency-safe sandbox lifecycle
+- `SandboxRegistry` now provides owner-tuple provisioning lock semantics (`withOwnerProvisionLock`).
+- `ensureSandbox` runs owner-scoped create/recreate flow under lock and uses deterministic sandbox ids by owner scope.
+
+3. Binary-safe file transport
+- sandbox write payload changed from text-only strings to encoded content objects (`utf-8` / `base64`).
+- adapter layer keeps text convenience while preserving binary payloads losslessly.
+
+4. Canonical runtime convergence
+- worker and inline execution paths share one internal workload engine (`executeAgentWorkload`).
+- `AgentExecutor` remains compatibility wrapper, no standalone execution architecture reintroduced.

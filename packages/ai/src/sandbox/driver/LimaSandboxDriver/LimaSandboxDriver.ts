@@ -1,6 +1,6 @@
 import { execa } from 'execa'
 import type { z } from 'zod'
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import type { BashResultSchema, SandboxDriver, SandboxFileContent, SandboxMetadata } from '../../types/SandboxDriver.js'
 
 export interface LimaSandboxDriverConfig {
 	/** The name of the base Lima template to use (e.g. 'ubuntu-lts') */
@@ -112,17 +112,28 @@ export class LimaSandboxDriver implements SandboxDriver {
 		sandboxId: string
 		command: string
 		cwd?: string
+		timeoutMs?: number
 	}): Promise<z.infer<typeof BashResultSchema>> {
 		const instanceName = this.getInstanceName(params.sandboxId)
 		try {
 			const args = ['shell', instanceName, 'bash', '-c', params.command]
-			const { stdout, stderr, exitCode } = await execa('limactl', args, { reject: false })
+			const { stdout, stderr, exitCode } = await execa('limactl', args, {
+				reject: false,
+				timeout: params.timeoutMs,
+			})
 			return {
 				stdout: stdout || '',
 				stderr: stderr || '',
 				exitCode: exitCode ?? 1,
 			}
 		} catch (error: any) {
+			if (error?.timedOut === true) {
+				return {
+					stdout: error.stdout ?? '',
+					stderr: `Command timed out after ${params.timeoutMs ?? 0}ms`,
+					exitCode: 124,
+				}
+			}
 			return { stdout: '', stderr: error.message, exitCode: 1 }
 		}
 	}
@@ -133,10 +144,11 @@ export class LimaSandboxDriver implements SandboxDriver {
 		return stdout
 	}
 
-	async writeFiles(params: { sandboxId: string; files: Record<string, string> }): Promise<void> {
+	async writeFiles(params: { sandboxId: string; files: Record<string, SandboxFileContent> }): Promise<void> {
 		const instanceName = this.getInstanceName(params.sandboxId)
-		for (const [filePath, content] of Object.entries(params.files)) {
-			const proc = execa('limactl', ['shell', instanceName, 'bash', '-c', `cat > ${filePath}`])
+		for (const [filePath, encoded] of Object.entries(params.files)) {
+			const proc = execa('limactl', ['shell', instanceName, 'bash', '-c', `cat > '${filePath.replace(/'/g, `'\\''`)}'`])
+			const content = encoded.encoding === 'base64' ? Buffer.from(encoded.content, 'base64') : encoded.content
 			proc.stdin?.write(content)
 			proc.stdin?.end()
 			await proc

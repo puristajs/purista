@@ -30,5 +30,15 @@ export const executeBashCommandBuilder: any = sandboxServiceBuilder
 		assertSandboxAccess(context, metadata)
 
 		// 2. Execute command via driver
-		return await context.resources.driver.executeBash(payload)
+		const result = await context.resources.driver.executeBash(payload)
+		if (result.exitCode === 124) {
+			throw new HandledError(StatusCode.GatewayTimeout, 'Sandbox command timed out', {
+				sandboxId: payload.sandboxId,
+				command: payload.command,
+				cwd: payload.cwd,
+				timeoutMs: payload.timeoutMs,
+				stderr: result.stderr,
+			})
+		}
+		return result
 	})

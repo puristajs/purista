@@ -136,7 +136,10 @@ export type AgentInvokeRequest = {
 	timeoutMs?: number
 	principalId?: string
 	tenantId?: string
+	deliveryMode?: AgentInvocationDeliveryMode
 }
+
+export type AgentInvocationDeliveryMode = 'prefer-stream' | 'require-stream'
 
 export type AgentInvokeContext<EmitPayloads extends Record<string, unknown> = EmptyObject> = {
 	stream?: AgentStreamResponder<EmitPayloads>

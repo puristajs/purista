@@ -2,7 +2,7 @@ import type { EventBridge } from '@purista/core'
 import type { ExecuteBashOutput } from '../../service/Sandbox/v1/command/executeBash/schema.js'
 
 export type SandboxAdapter = {
-	executeCommand: (command: string) => Promise<ExecuteBashOutput>
+	executeCommand: (command: string, options?: { cwd?: string; timeoutMs?: number }) => Promise<ExecuteBashOutput>
 	readFile: (path: string) => Promise<string>
 	writeFiles: (files: Array<{ path: string; content: string | Buffer }>) => Promise<void>
 }
@@ -25,7 +25,7 @@ export const createPuristaSandboxAdapter = (
 	const { sandboxId, principalId, tenantId } = identity
 
 	return {
-		async executeCommand(command: string) {
+		async executeCommand(command: string, options?: { cwd?: string; timeoutMs?: number }) {
 			return await eventBridge.invoke<ExecuteBashOutput>({
 				sender: {
 					serviceName: 'BashToolAdapter',
@@ -39,7 +39,7 @@ export const createPuristaSandboxAdapter = (
 					serviceTarget: 'executeBash',
 				},
 				payload: {
-					payload: { sandboxId, command },
+					payload: { sandboxId, command, cwd: options?.cwd, timeoutMs: options?.timeoutMs },
 					parameter: {},
 				},
 				principalId,
@@ -74,9 +74,19 @@ export const createPuristaSandboxAdapter = (
 		},
 
 		async writeFiles(files: Array<{ path: string; content: string | Buffer }>) {
-			const filesRecord: Record<string, string> = {}
+			const filesRecord: Record<string, { encoding: 'utf-8' | 'base64'; content: string }> = {}
 			for (const file of files) {
-				filesRecord[file.path] = file.content.toString('utf-8')
+				if (typeof file.content === 'string') {
+					filesRecord[file.path] = {
+						encoding: 'utf-8',
+						content: file.content,
+					}
+					continue
+				}
+				filesRecord[file.path] = {
+					encoding: 'base64',
+					content: file.content.toString('base64'),
+				}
 			}
 
 			await eventBridge.invoke({

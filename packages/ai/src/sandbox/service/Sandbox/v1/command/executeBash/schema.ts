@@ -4,6 +4,12 @@ import { BashResultSchema, SandboxPayloadSchema } from '../../../../../types/San
 export const ExecuteBashInputSchema = SandboxPayloadSchema.extend({
 	command: z.string(),
 	cwd: z.string().optional(),
+	timeoutMs: z
+		.number()
+		.int()
+		.positive()
+		.max(30 * 60_000)
+		.optional(),
 })
 
 export const ExecuteBashOutputSchema = BashResultSchema

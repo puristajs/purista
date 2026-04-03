@@ -1,7 +1,7 @@
 import type { ContextBase, EBMessage } from '@purista/core'
 import { HandledError, PuristaSpanName } from '@purista/core'
 
-import type { AgentExecutionResult } from '../runtime/AgentExecutor.js'
+import type { AgentExecutionResult } from '../runtime/executeAgentWorkload.js'
 import {
 	type AgentProtocolEnvelope,
 	type AgentProtocolFrame,
@@ -95,7 +95,7 @@ export type AgentProtocolRunOptions = PuristaProtocolOptions & {
 }
 
 /**
- * Utility used by commands and subscriptions to wrap an {@link AgentExecutor} call
+ * Utility used by commands and subscriptions to wrap an agent workload execution call
  * so protocol envelopes (message + telemetry + errors) are emitted consistently.
  */
 export const runAgentWithProtocol = async (

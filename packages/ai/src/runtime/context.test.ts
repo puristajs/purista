@@ -485,6 +485,106 @@ describe('runtime context helpers', () => {
 		expect(agentSpan?.span.setAttribute).toHaveBeenCalledWith('purista.tenantId', 'tenant-1')
 	})
 
+	it('validates runObject output against declared canInvokeAgent outputSchema', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValueOnce([
+			createProtocolEnvelope({
+				conversationId: 'sub-schema-1',
+				actor: { service: 'child', version: '1', agent: 'typedAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: '{"ok":true}', final: true },
+			}),
+		])
+		const outputSchema = {
+			'~standard': {
+				vendor: 'test',
+				version: 1,
+				validate: async (value: unknown) =>
+					typeof (value as { ok?: unknown })?.ok === 'boolean'
+						? { value }
+						: { issues: [{ message: 'ok must be boolean', path: ['ok'] }] },
+			},
+		}
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest: {
+				...manifest,
+				allowedAgents: [
+					{ agentName: 'childAgent', agentVersion: '1' },
+					{ agentName: 'typedAgent', agentVersion: '1', outputSchema },
+				],
+			},
+		})
+
+		const obj = await context.invoke.agents.runObject<{ ok: boolean }>({
+			agentName: 'typedAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+		})
+		expect(obj).toEqual({ ok: true })
+	})
+
+	it('fails runObject when declared outputSchema validation fails', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValueOnce([
+			createProtocolEnvelope({
+				conversationId: 'sub-schema-2',
+				actor: { service: 'child', version: '1', agent: 'typedAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: '{"status":"wrong"}', final: true },
+			}),
+		])
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest: {
+				...manifest,
+				allowedAgents: [
+					{ agentName: 'childAgent', agentVersion: '1' },
+					{
+						agentName: 'typedAgent',
+						agentVersion: '1',
+						outputSchema: {
+							'~standard': {
+								vendor: 'test',
+								version: 1,
+								validate: async (value: unknown) =>
+									typeof (value as { ok?: unknown })?.ok === 'boolean'
+										? { value }
+										: { issues: [{ message: 'ok must be boolean', path: ['ok'] }] },
+							},
+						},
+					},
+				],
+			},
+		})
+
+		await expect(
+			context.invoke.agents.runObject({
+				agentName: 'typedAgent',
+				agentVersion: '1',
+				payload: childPayload('go'),
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.BadGateway,
+		})
+	})
+
 	it('falls back to direct event bridge invocation when no service-level agent binding is present', async () => {
 		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
 		baseEventBridge.invoke.mockResolvedValue([
@@ -616,30 +716,52 @@ describe('runtime context helpers', () => {
 	})
 
 	it('can forward sub-agent frames into the current agent stream', async () => {
-		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
-		baseEventBridge.invoke.mockResolvedValue([
-			createProtocolEnvelope({
-				conversationId: 'sub-forward',
-				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: { kind: 'message', role: 'assistant', content: 'hello ', partial: true, final: false },
-			}),
-			createProtocolEnvelope({
-				conversationId: 'sub-forward',
-				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: {
-					kind: 'artifact',
-					artifactId: 'reasoning',
-					content: 'thinking',
-					mimeType: 'text/markdown',
-					phase: 'chunk',
-				},
-			}),
-			createProtocolEnvelope({
-				conversationId: 'sub-forward',
-				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: { kind: 'message', role: 'assistant', content: 'world', final: true },
-			}),
-		])
+		baseEventBridge.openStream.mockResolvedValue({
+			sessionId: 'stream-forward-1',
+			cancel: vi.fn(),
+			async *[Symbol.asyncIterator]() {
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 1,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: { kind: 'message', role: 'assistant', content: 'hello ', partial: true, final: false },
+						}),
+					},
+				}
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 2,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: {
+								kind: 'artifact',
+								artifactId: 'reasoning',
+								content: 'thinking',
+								mimeType: 'text/markdown',
+								phase: 'chunk',
+							},
+						}),
+					},
+				}
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 3,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: { kind: 'message', role: 'assistant', content: 'world', final: true },
+						}),
+					},
+				}
+				yield { payload: { frameType: 'complete', sequence: 4, final: [] } }
+			},
+		})
 
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
@@ -711,19 +833,35 @@ describe('runtime context helpers', () => {
 	})
 
 	it('can forward another agent with orchestration defaults', async () => {
-		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
-		baseEventBridge.invoke.mockResolvedValue([
-			createProtocolEnvelope({
-				conversationId: 'sub-forward-defaults',
-				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: { kind: 'tool', toolName: 'readSpec', status: 'invoked', input: { path: 'specs/spec.md' } },
-			}),
-			createProtocolEnvelope({
-				conversationId: 'sub-forward-defaults',
-				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: { kind: 'message', role: 'assistant', content: 'forwarded text', final: true },
-			}),
-		])
+		baseEventBridge.openStream.mockResolvedValue({
+			sessionId: 'stream-forward-defaults',
+			cancel: vi.fn(),
+			async *[Symbol.asyncIterator]() {
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 1,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward-defaults',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: { kind: 'tool', toolName: 'readSpec', status: 'invoked', input: { path: 'specs/spec.md' } },
+						}),
+					},
+				}
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 2,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward-defaults',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: { kind: 'message', role: 'assistant', content: 'forwarded text', final: true },
+						}),
+					},
+				}
+				yield { payload: { frameType: 'complete', sequence: 3, final: [] } }
+			},
+		})
 
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
@@ -757,15 +895,61 @@ describe('runtime context helpers', () => {
 		expect(toolFrames).toHaveLength(0)
 	})
 
-	it('can forward nested tool events when requested explicitly', async () => {
+	it('fails fast for forward() when stream transport is unavailable', async () => {
+		baseEventBridge.openStream.mockClear()
+		baseEventBridge.invoke.mockClear()
 		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
 		baseEventBridge.invoke.mockResolvedValue([
 			createProtocolEnvelope({
-				conversationId: 'sub-forward-tool-events',
+				conversationId: 'sub-forward-fallback-ignored',
 				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: { kind: 'tool', toolName: 'readSpec', status: 'invoked', input: { path: 'specs/spec.md' } },
+				frame: { kind: 'message', role: 'assistant', content: 'fallback', final: true },
 			}),
 		])
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.invoke.agents.forward({
+				agentName: 'childAgent',
+				agentVersion: '1',
+				payload: childPayload('go'),
+			}),
+		).rejects.toThrow('does not support streams')
+		expect(baseEventBridge.invoke).not.toHaveBeenCalled()
+	})
+
+	it('can forward nested tool events when requested explicitly', async () => {
+		baseEventBridge.openStream.mockResolvedValue({
+			sessionId: 'stream-forward-tools',
+			cancel: vi.fn(),
+			async *[Symbol.asyncIterator]() {
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 1,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward-tool-events',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: { kind: 'tool', toolName: 'readSpec', status: 'invoked', input: { path: 'specs/spec.md' } },
+						}),
+					},
+				}
+				yield { payload: { frameType: 'complete', sequence: 2, final: [] } }
+			},
+		})
 
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
@@ -803,22 +987,32 @@ describe('runtime context helpers', () => {
 	})
 
 	it('forwards structured artifact payloads such as run-state by default', async () => {
-		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
-		baseEventBridge.invoke.mockResolvedValue([
-			createProtocolEnvelope({
-				conversationId: 'sub-forward-run-state',
-				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: createArtifactFrame({
-					artifactId: 'run-state',
-					mimeType: 'application/json',
-					content: {
-						runId: 'run-1',
-						title: 'Architecture draft',
-						status: 'running',
+		baseEventBridge.openStream.mockResolvedValue({
+			sessionId: 'stream-forward-run-state',
+			cancel: vi.fn(),
+			async *[Symbol.asyncIterator]() {
+				yield {
+					payload: {
+						frameType: 'chunk',
+						sequence: 1,
+						chunk: createProtocolEnvelope({
+							conversationId: 'sub-forward-run-state',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: createArtifactFrame({
+								artifactId: 'run-state',
+								mimeType: 'application/json',
+								content: {
+									runId: 'run-1',
+									title: 'Architecture draft',
+									status: 'running',
+								},
+							}),
+						}),
 					},
-				}),
-			}),
-		])
+				}
+				yield { payload: { frameType: 'complete', sequence: 2, final: [] } }
+			},
+		})
 
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
