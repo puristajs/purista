@@ -30,7 +30,7 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.19.9",
+		"@hono/node-server": "^1.19.13",
 		"@scalar/hono-api-reference": "^0.9.40",
 		"@purista/core": "*",
 		"@purista/hono-http-server": "*",

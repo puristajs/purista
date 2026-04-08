@@ -21,23 +21,25 @@
 	},
 	"dependencies": {
 		"@purista/core": "*",
-		"@hono/node-server": "latest",
-		"@scalar/hono-api-reference": "latest",
-		"@purista/hono-http-server": "*"
+		"@purista/hono-http-server": "*",
+		"@scalar/hono-api-reference": "*"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "*",
 		"@purista/cli": "*",
-		"@types/node": "latest",
-		"@types/sinon": "latest",
-		"@types/jest": "latest",
-		"typescript": "latest",
-		"sinon": "latest",
-		"@biomejs/biome": "latest",
-		"tsx": "latest",
-		"vitest": "latest"
+		"@types/jest": "*",
+		"@types/node": "*",
+		"@types/sinon": "*",
+		"sinon": "*",
+		"tsx": "*",
+		"typescript": "*",
+		"vitest": "*"
 	},
 	"trustedDependencies": [
 		"@biomejs/biome"
 	],
-	"name": "client-builder"
+	"name": "client-builder",
+	"optionalDependencies": {
+		"@hono/node-server": "^1.19.13"
+	}
 }
