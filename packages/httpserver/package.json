@@ -60,7 +60,7 @@
 		"@fastify/compress": "^8.3.1",
 		"@fastify/cors": "^11.2.0",
 		"@fastify/helmet": "^13.0.2",
-		"@fastify/static": "^9.0.0",
+		"@fastify/static": "^9.1.1",
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/semantic-conventions": "^1.39.0",
 		"@purista/core": "*",
