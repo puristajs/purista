@@ -140,8 +140,93 @@ describe('enterprise interoperability helpers', () => {
 			version: '1.0.0',
 			services: fixtureDefinition,
 		})
+		const asyncApiAgain = await exportAsyncApi({
+			title: 'Billing contracts',
+			version: '1.0.0',
+			services: fixtureDefinition,
+		})
 
-		expect(JSON.parse(JSON.stringify(asyncApi))).toMatchSnapshot()
+		const normalized = JSON.parse(JSON.stringify(asyncApi))
+		expect(JSON.parse(JSON.stringify(asyncApiAgain))).toStrictEqual(normalized)
+		expect(Object.keys(normalized.channels).sort()).toEqual([
+			'BillingService.1.command.createInvoice.request',
+			'BillingService.1.stream.invoiceProgress',
+			'event.billing.invoice.created',
+			'queue.billing.invoice.generate',
+		])
+		expect(Object.keys(normalized.operations).sort()).toEqual([
+			'BillingService.1.command.createInvoice.request.receive',
+			'BillingService.1.stream.invoiceProgress.receive',
+			'BillingService.1.subscription.sendReceipt.receive',
+			'binding.billing.monthly.due.billing.invoice.generate',
+			'event.billing.invoice.created.send',
+			'queue.billing.invoice.generate.receive',
+			'queue.billing.invoice.generate.send',
+		])
+		expect(normalized).toMatchObject({
+			asyncapi: '3.0.0',
+			defaultContentType: 'application/json',
+			info: {
+				title: 'Billing contracts',
+				version: '1.0.0',
+			},
+			channels: {
+				'queue.billing.invoice.generate': {
+					address: 'billing.invoice.generate',
+					'x-purista': {
+						kind: 'queue',
+						queueName: 'billing.invoice.generate',
+						resultPolicy: {
+							mode: 'event',
+							successEventName: 'billing.invoice.generate.succeeded',
+							failureEventName: 'billing.invoice.generate.failed',
+							eventId: 'jobIdAndStatus',
+							delivery: 'required',
+						},
+					},
+				},
+			},
+			operations: {
+				'binding.billing.monthly.due.billing.invoice.generate': {
+					action: 'receive',
+					channel: {
+						$ref: '#/channels/event.billing.monthly.due',
+					},
+					reply: {
+						channel: {
+							$ref: '#/channels/queue.billing.invoice.generate',
+						},
+					},
+					'x-purista': {
+						kind: 'event-to-queue-binding',
+						eventName: 'billing.monthly.due',
+						queueName: 'billing.invoice.generate',
+						idempotencyMode: 'strict',
+						idempotencyKey: 'messageId',
+					},
+				},
+			},
+			components: {
+				messages: {
+					'BillingService.1.command.createInvoice.request.message': {
+						payload: {
+							type: 'object',
+							properties: {
+								accountId: {
+									type: 'string',
+								},
+							},
+							required: ['accountId'],
+						},
+					},
+				},
+				schemas: {
+					PuristaHeaders: {
+						type: 'object',
+					},
+				},
+			},
+		})
 	})
 
 	it('exports deterministic provider-neutral schedule manifests', async () => {
