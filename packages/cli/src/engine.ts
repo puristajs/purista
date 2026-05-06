@@ -20,7 +20,8 @@ export type PuristaCliEngineOptions = {
 	prompt?: PromptAdapter
 }
 
-const shouldLoadProjectMetadata = (commandId: PuristaCommandId) => commandId !== 'init-project'
+const shouldLoadProjectMetadata = (commandId: PuristaCommandId) =>
+	commandId !== 'init-project' && !commandId.startsWith('export-')
 
 export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) => {
 	const cwd = options.cwd ?? process.cwd()
@@ -35,8 +36,14 @@ export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) =>
 			applyDefaults: true,
 		}
 
-		if (shouldLoadProjectMetadata(commandId)) {
+		if (commandId !== 'init-project') {
 			context.puristaConfig = await loadPuristaConfig(cwd)
+		}
+
+		if (shouldLoadProjectMetadata(commandId)) {
+			if (!context.puristaConfig) {
+				throw new PuristaCliValidationError(`Unable to load purista.json for command ${commandId}.`)
+			}
 			context.projectSnapshot = await createProjectSnapshot(context.puristaConfig, cwd)
 			context.codeWriterOptions = (await getFormatConfig(cwd)).codeWriterOptions
 		}

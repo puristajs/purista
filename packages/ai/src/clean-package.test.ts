@@ -2,6 +2,7 @@ import * as aiExports from '@purista/ai'
 import { AgentQueueBuilder, ServiceBuilder } from '@purista/ai'
 import * as testingExports from '@purista/ai/testing'
 import { createAgentContextMock, createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'
+import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { z } from 'zod'
 import { createAgentHandlerContext } from './runtime/context.js'
@@ -95,6 +96,51 @@ describe('AgentQueueBuilder', () => {
 		expect((definition.stream as any).metadata.expose.chunkPayload).toBeTruthy()
 	})
 
+	it('maps long-running response mode onto queue profile and result policy metadata', async () => {
+		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify support tickets')
+			.addPayloadSchema(payloadSchema)
+			.addParameterSchema(parameterSchema)
+			.addOutputSchema(outputSchema)
+			.setExecutionProfile('longRunning', { maxRuntimeMs: 30 * 60_000, strict: true })
+			.setResponseMode('accepted', {
+				resultPolicy: 'state-and-event',
+				statusUrl: '/jobs/{jobId}',
+				streamUrl: '/jobs/{jobId}/events',
+			})
+			.setRunFunction(async () => ({ priority: 'high' }))
+			.exposeAsHttpEndpoint('POST', '/agents/triage', { streamingMode: 'aggregate' })
+			.getDefinition()
+
+		expect(definition.manifest.response).toMatchObject({
+			mode: 'accepted',
+			jobId: { source: 'queue-job-id' },
+			runId: { source: 'queue-job-id', prefix: 'run:' },
+		})
+		expect((definition.queue as any).executionProfile).toMatchObject({
+			name: 'longRunning',
+			maxRuntimeMs: 30 * 60_000,
+			strict: true,
+		})
+		expect((definition.queue as any).lifecycle).toMatchObject({
+			autoHeartbeat: true,
+			heartbeatIntervalMs: 60_000,
+			visibilityTimeoutMs: 5 * 60_000,
+			maxAttempts: 3,
+		})
+		expect((definition.queue as any).resultPolicy).toMatchObject({
+			mode: 'state-and-event',
+			successEventName: 'support.triage.completed',
+			failureEventName: 'support.triage.failed',
+		})
+		expect((definition.queue as any).metadata.agent.response).toMatchObject({
+			mode: 'accepted',
+			jobId: { source: 'queue-job-id' },
+			runId: { source: 'queue-job-id', prefix: 'run:' },
+		})
+		expect((definition.command as any).metadata.expose.http.mode).toBe('async')
+		expect((definition.command as any).queueInvokes[definition.queue.queueName]).toBeDefined()
+	})
+
 	it('gates handler model methods by declared capabilities', async () => {
 		const model = createScriptedHarnessModel()
 		model.enqueueObject({
@@ -139,7 +185,7 @@ describe('AgentQueueBuilder', () => {
 					context.signal,
 				)
 
-				return result.object
+				return outputSchema.parse(result.object)
 			})
 			.getDefinition()
 
@@ -393,20 +439,11 @@ describe('runtime identity and events', () => {
 })
 
 function createEventBridgeMock() {
-	return {
-		name: 'event-bridge',
-		instanceId: 'event-bridge-test',
-		capabilities: {},
-		defaultCommandTimeout: 1_000,
-	}
+	return new DefaultEventBridge()
 }
 
 function createQueueBridgeMock() {
-	return {
-		name: 'queue-bridge',
-		instanceId: 'queue-bridge-test',
-		capabilities: {},
-	}
+	return new DefaultQueueBridge()
 }
 
 describe('testing helpers', () => {
@@ -457,6 +494,7 @@ describe('testing helpers', () => {
 			},
 			session: createAgentContextMock().harness.session,
 			models: {},
+			serviceName: 'support',
 			emitEvent: async () => undefined,
 			logger: createAgentContextMock().logger,
 			signal: new AbortController().signal,
@@ -493,7 +531,7 @@ describe('testing helpers', () => {
 		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify')
 			.addOutputSchema(z.object({ priority: z.literal('high') }))
 			.addModel('primary', { model: 'fake-object', capabilities: ['object'] as const })
-			.setRunFunction(async () => ({ priority: 'low' }))
+			.setRunFunction(async () => ({ priority: 'low' }) as never)
 			.getDefinition()
 
 		const harness = createAgentTestHarness(definition, {

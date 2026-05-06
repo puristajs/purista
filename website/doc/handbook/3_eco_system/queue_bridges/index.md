@@ -10,11 +10,27 @@ Queue bridges provide the persistence, leasing, and dead-letter mechanics for pu
 
 ## Support matrix
 
-| bridge | durability | delayed delivery | DLQ | lease expiry recovery | recommended use cases |
-| --- | --- | --- | --- | --- |
-| [DefaultQueueBridge](./default_queue_bridge.md) | in-memory per service instance | yes (timer based) | yes (in-memory) | yes, within the current process | unit tests, local dev, single-instance cron-like jobs |
-| [RedisQueueBridge](./redis_queue_bridge.md) | Redis persistence | yes (sorted set scheduling) | yes (separate Redis keys) | yes, with atomic recovery / requeue scripts and orphan-processing recovery | production CQRS, AI job pools, delayed processing |
-| [NatsQueueBridge](./nats_queue_bridge.md) | JetStream persistence | yes (scheduled stream + due-job release) | yes (dedicated DLQ streams) | yes, via JetStream ack timeout redelivery | production event-native workloads already standardized on NATS |
+| bridge | durability | delayed delivery | DLQ | lease expiry recovery | idempotency enforcement | recommended use cases |
+| --- | --- | --- | --- | --- | --- | --- |
+| [DefaultQueueBridge](./default_queue_bridge.md) | in-memory per service instance | yes (timer based) | yes (in-memory) | yes, within the current process | no | unit tests, local dev, single-instance cron-like jobs |
+| [RedisQueueBridge](./redis_queue_bridge.md) | Redis persistence | yes (sorted set scheduling) | yes (separate Redis keys) | yes, with atomic recovery / requeue scripts and orphan-processing recovery | no | production CQRS, AI job pools, delayed processing |
+| [NatsQueueBridge](./nats_queue_bridge.md) | JetStream persistence | yes (scheduled stream + due-job release) | yes (dedicated DLQ streams) | yes, via JetStream ack timeout redelivery | no | production event-native workloads already standardized on NATS |
+
+Current queue bridges pass idempotency keys through to queue messages, but they do not claim strict provider-level dedupe. Keep `idempotencyMode: 'advisory'` unless a bridge explicitly advertises `idempotencyEnforcement: true`.
+
+### Capability flags
+
+| capability | Default | Redis | NATS |
+| --- | ---: | ---: | ---: |
+| `delayedDelivery` | yes | yes | yes |
+| `providerManagedDelayedDelivery` | no | yes | yes |
+| `fifoOrdering` | yes | yes | yes |
+| `deadLetterInspectSupported` | yes | yes | yes |
+| `deadLetterReplaySupported` | yes | yes | yes |
+| `deadLetterPurgeSupported` | yes | yes | yes |
+| `leaseInspectionSupported` | no | yes | yes |
+| `idempotencyEnforcement` | no | no | no |
+| `strictStartupValidation` | yes | yes | yes |
 
 Future adapters will live in `packages/<provider>-queue-bridge` once that provider offers reliable pull + lease semantics (e.g., SQS, Azure Storage Queues).
 

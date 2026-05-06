@@ -48,6 +48,7 @@ export type QueueWorkerContextMockResult<
 			retry: SinonStub
 			fail: SinonStub
 			extendLease: SinonStub
+			cancelRequested: SinonStub
 		}
 		service: QueueJobContext<Payload, Parameter, Resources>['service']
 		stream: QueueJobContext<Payload, Parameter, Resources>['stream']
@@ -99,11 +100,14 @@ export const createQueueWorkerContextMock = <
 		retry: input.sandbox?.stub().resolves() ?? stub().resolves(),
 		fail: input.sandbox?.stub().resolves() ?? stub().resolves(),
 		extendLease: input.sandbox?.stub().resolves() ?? stub().resolves(),
+		cancelRequested: input.sandbox?.stub().returns(false) ?? stub().returns(false),
 	}
+	const abortController = new AbortController()
 
 	const context: QueueJobContext<Payload, Parameter, Resources> = {
 		logger: base.logger.mock,
 		message,
+		signal: abortController.signal,
 		emit: async (_eventName, _payload) => undefined,
 		wrapInSpan: base.stubs.wrapInSpan.callsFake((name, opts, fn) => {
 			void name
@@ -142,6 +146,7 @@ export const createQueueWorkerContextMock = <
 			retry: async (request?: QueueRetryRequest) => job.retry(request),
 			fail: async (reason: string, fatal?: boolean) => job.fail(reason, fatal),
 			extendLease: async (durationMs: number) => job.extendLease(durationMs),
+			cancelRequested: () => job.cancelRequested(),
 			moveToDeadLetter: async (reason?: string) => job.fail(reason ?? 'dead-letter', true),
 		},
 		resources: resourcesProxy,

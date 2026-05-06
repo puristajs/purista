@@ -10,7 +10,24 @@ import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataB
  * ```
  */
 export type CommandDefinitionList<S extends ServiceClass> = Promise<
-	CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any, any, CommandDefinitionMetadataBase>
+	CommandDefinition<
+		S,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		CommandDefinitionMetadataBase,
+		any
+	>
 >[]
 
 export type CommandDefinitionListResolved<S extends ServiceClass> = CommandDefinition<
@@ -28,5 +45,6 @@ export type CommandDefinitionListResolved<S extends ServiceClass> = CommandDefin
 	any,
 	any,
 	any,
-	CommandDefinitionMetadataBase
+	CommandDefinitionMetadataBase,
+	any
 >[]

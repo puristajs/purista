@@ -24,6 +24,9 @@ import type {
 	AgentManifest,
 	AgentModelBinding,
 	AgentQueueBuilderTypes,
+	AgentQueueResultPolicy,
+	AgentResponseMode,
+	AgentResponseModeOptions,
 	AgentRuntimeRef,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
@@ -37,6 +40,25 @@ import type {
 const defaultExecutionPolicy = {
 	maxAttempts: 3,
 	maxParallelHandlers: 1,
+}
+
+type AgentQueueLongRunningExecutionProfile = {
+	name: 'longRunning'
+	maxRuntimeMs: number
+	strict?: boolean
+	shutdown?: {
+		graceMs?: number
+		onTimeout?: 'letLeaseExpire'
+	}
+	onLeaseLost?: 'abort'
+}
+
+type QueueBuilderWithEnterprisePolicy = QueueDefinitionBuilder & {
+	setExecutionProfile(
+		profile: 'longRunning',
+		options: { maxRuntimeMs: number; strict?: boolean },
+	): QueueDefinitionBuilder
+	setResultPolicy(policy: AgentQueueResultPolicy): QueueDefinitionBuilder
 }
 
 /**
@@ -66,6 +88,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private httpExposure?: AgentHttpExposure
 	private streamingMode: 'stream' | 'aggregate' = 'stream'
 	private successEventName?: string
+	private executionProfile?: AgentQueueLongRunningExecutionProfile
+	private responseMode?: { mode: AgentResponseMode; options?: AgentResponseModeOptions }
 	private executionDefinitions: Array<AgentExecutionDefinition<any, any, any, any, any, any, any>> = []
 
 	constructor(
@@ -324,6 +348,48 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
+	/**
+	 * Apply a core queue execution profile to the generated agent queue.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setExecutionProfile('longRunning', {
+	 *   maxRuntimeMs: 30 * 60_000,
+	 * })
+	 * ```
+	 */
+	setExecutionProfile(profile: 'longRunning', options: { maxRuntimeMs: number; strict?: boolean }) {
+		if (profile !== 'longRunning') {
+			throw new Error(`unsupported agent execution profile "${profile}"`)
+		}
+		this.executionProfile = {
+			name: profile,
+			maxRuntimeMs: options.maxRuntimeMs,
+			strict: options.strict,
+			shutdown: { graceMs: 60_000, onTimeout: 'letLeaseExpire' },
+			onLeaseLost: 'abort',
+		}
+		return this
+	}
+
+	/**
+	 * Configure how a queued agent run exposes its final result contract.
+	 *
+	 * Long-running response modes enqueue the agent queue and keep `jobId` and
+	 * agent `runId` as separate metadata in the generated definitions.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setResponseMode('accepted', {
+	 *   resultPolicy: 'state-and-event',
+	 * })
+	 * ```
+	 */
+	setResponseMode(mode: AgentResponseMode, options?: AgentResponseModeOptions) {
+		this.responseMode = { mode, options }
+		return this
+	}
+
 	setSessionPolicy(policy: AgentSessionPolicy) {
 		this.sessionPolicy = policy
 		return this
@@ -397,9 +463,23 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			})
 			.getDefinition()
 
-		const queueBuilder = new QueueDefinitionBuilder(queueName, `Queue for ${this.serviceName} ${this.agentName} agent`)
-			.setLifecycleConfig(cleanLifecycleConfig(this.executionPolicy))
-			.addWorkerDefinition(worker)
+		const queueBuilder = new QueueDefinitionBuilder(
+			queueName,
+			`Queue for ${this.serviceName} ${this.agentName} agent`,
+		) as QueueBuilderWithEnterprisePolicy
+		if (this.executionProfile) {
+			queueBuilder.setExecutionProfile(this.executionProfile.name, {
+				maxRuntimeMs: this.executionProfile.maxRuntimeMs,
+				strict: this.executionProfile.strict,
+			})
+		} else {
+			queueBuilder.setLifecycleConfig(cleanLifecycleConfig(this.executionPolicy))
+		}
+		const resultPolicy = this.resolveResultPolicy()
+		if (resultPolicy) {
+			queueBuilder.setResultPolicy(resultPolicy)
+		}
+		queueBuilder.addWorkerDefinition(worker)
 
 		if (this.payloadSchema) {
 			queueBuilder.addPayloadSchema(this.payloadSchema)
@@ -421,6 +501,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		}
 		if (this.outputSchema) {
 			commandBuilder.addOutputSchema(this.outputSchema)
+		}
+		if (this.responseMode) {
+			commandBuilder.canEnqueue(queueName, this.payloadSchema, this.parameterSchema)
 		}
 		for (const tool of this.commandTools) {
 			commandBuilder.canInvoke(
@@ -449,12 +532,24 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				this.httpExposure.requestContentType,
 				undefined,
 				this.httpExposure.responseContentType,
+				undefined,
+				this.responseMode ? { mode: 'async' } : undefined,
 			)
 			if (this.httpExposure.public) {
 				commandBuilder.makeEndpointPublic()
 			}
 		}
 		commandBuilder.setCommandFunction(async function (context, payload, parameter) {
+			if (manifest.response) {
+				const job = await context.queue.enqueue(queueName, payload, parameter)
+				return {
+					...job,
+					runId: `run:${job.jobId}`,
+					status: 'queued',
+					...(manifest.response.options?.statusUrl ? { statusUrl: manifest.response.options.statusUrl } : {}),
+					...(manifest.response.options?.streamUrl ? { streamUrl: manifest.response.options.streamUrl } : {}),
+				}
+			}
 			return getRuntime(runtime).executeAggregate({
 				appContext: context as unknown as Record<string, unknown>,
 				message: context.message as unknown as Record<string, unknown>,
@@ -519,7 +614,10 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 		return {
 			...agentDefinition,
-			queue: (await queueBuilder.getDefinition()) as AttachedAgentDefinition<S>['queue'],
+			queue: withAgentQueueMetadata(
+				await queueBuilder.getDefinition(),
+				this.responseMode,
+			) as AttachedAgentDefinition<S>['queue'],
 			worker: worker as AttachedAgentDefinition<S>['worker'],
 			command: (await commandBuilder.getDefinition()) as AttachedAgentDefinition<S>['command'],
 			stream: (await streamBuilder.getDefinition()) as AttachedAgentDefinition<S>['stream'],
@@ -555,6 +653,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			execution,
 			sandbox: this.sandboxPolicy,
 			http: this.httpExposure,
+			response: this.responseMode
+				? {
+						mode: this.responseMode.mode,
+						options: this.responseMode.options,
+						jobId: { source: 'queue-job-id' },
+						runId: { source: 'queue-job-id', prefix: 'run:' },
+					}
+				: undefined,
 			streamingMode: this.streamingMode,
 			successEventName: this.successEventName,
 			allowedCommands: this.commandTools,
@@ -571,6 +677,66 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 	private getQueueName() {
 		return `agent:${this.serviceName}:${this.serviceVersion}:${this.agentName}`
+	}
+
+	private resolveResultPolicy(): AgentQueueResultPolicy | undefined {
+		if (!this.responseMode) {
+			return undefined
+		}
+		const { mode, options } = this.responseMode
+		const defaultEventBase = `${this.serviceName}.${this.agentName}`
+		const defaultMode =
+			mode === 'status'
+				? 'state'
+				: mode === 'event'
+					? 'event'
+					: mode === 'stream' || mode === 'callback'
+						? 'state-and-event'
+						: undefined
+		const configured = options?.resultPolicy
+		const basePolicy =
+			typeof configured === 'object'
+				? configured
+				: configured || defaultMode
+					? ({ mode: configured ?? defaultMode } as AgentQueueResultPolicy)
+					: undefined
+
+		if (!basePolicy || basePolicy.mode === 'none') {
+			return basePolicy
+		}
+
+		return {
+			successEventName: options?.successEventName ?? `${defaultEventBase}.completed`,
+			failureEventName: options?.failureEventName ?? `${defaultEventBase}.failed`,
+			progressEventName: options?.progressEventName ?? `${defaultEventBase}.progress`,
+			emitProgressEvents: mode === 'stream' ? true : undefined,
+			ttlMs: options?.ttlMs,
+			delivery: options?.delivery,
+			...basePolicy,
+		}
+	}
+}
+
+function withAgentQueueMetadata(
+	queueDefinition: unknown,
+	responseMode?: { mode: AgentResponseMode; options?: AgentResponseModeOptions },
+) {
+	if (!responseMode || !queueDefinition || typeof queueDefinition !== 'object') {
+		return queueDefinition
+	}
+	return {
+		...queueDefinition,
+		metadata: {
+			...((queueDefinition as { metadata?: Record<string, unknown> }).metadata ?? {}),
+			agent: {
+				response: {
+					mode: responseMode.mode,
+					options: responseMode.options,
+					jobId: { source: 'queue-job-id' },
+					runId: { source: 'queue-job-id', prefix: 'run:' },
+				},
+			},
+		},
 	}
 }
 

@@ -2,6 +2,7 @@ import type { Schema } from '../../../schema/index.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
+import type { ScheduleDefinition } from '../schedule/index.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
@@ -42,6 +43,8 @@ export type CommandDefinition<
 	metadata: MetadataType
 	/** config information for event bridge */
 	eventBridgeConfig: DefinitionEventBridgeConfig
+	/** provider-neutral schedule metadata for short command triggers */
+	schedules?: ScheduleDefinition[]
 	/** the command function */
 	call: CommandFunction<
 		S,

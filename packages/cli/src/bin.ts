@@ -118,6 +118,45 @@ const main = async () => {
 
 	registerGlobalModeOptions(
 		program
+			.command('export')
+			.description('Export PURISTA interoperability contracts.')
+			.addArgument(
+				new Argument('<contract>', 'Contract to export').choices([
+					'asyncapi',
+					'cloudevents-schema',
+					'runtime-capabilities',
+					'schedule-manifest',
+				]),
+			)
+			.option('--definitions <path>', 'service definitions JSON file', 'purista.definitions.json')
+			.option('--out <path>', 'output JSON file')
+			.option('--title <title>', 'export title')
+			.option('--export-version <version>', 'exported document version')
+			.option('--mode <mode>', 'runtime capability export mode')
+			.action(async (contract, options) => {
+				const commandId =
+					contract === 'asyncapi'
+						? 'export-asyncapi'
+						: contract === 'cloudevents-schema'
+							? 'export-cloudevents-schema'
+							: contract === 'schedule-manifest'
+								? 'export-schedule-manifest'
+								: 'export-runtime-capabilities'
+				const engine = createEngineForOptions(options)
+				const result = await engine.runPuristaCommand(commandId, {
+					definitions: options.definitions,
+					out: options.out,
+					title: options.title,
+					version: options.exportVersion,
+					mode: options.mode,
+				})
+
+				createTerminalOutputAdapter().renderResult(result)
+			}),
+	)
+
+	registerGlobalModeOptions(
+		program
 			.command('init')
 			.description('Create a new PURISTA project.')
 			.argument('[target]', 'target directory')

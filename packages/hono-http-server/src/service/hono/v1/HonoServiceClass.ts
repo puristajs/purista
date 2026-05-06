@@ -54,6 +54,9 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 		jobId: candidate.jobId,
 		queueName: candidate.queueName,
 		scheduledAt: candidate.scheduledAt,
+		...(typeof (candidate as { runId?: unknown }).runId === 'string'
+			? { runId: (candidate as { runId: string }).runId }
+			: {}),
 	}
 }
 
@@ -403,7 +406,7 @@ export class HonoServiceClass<
 			responseContentType,
 		})
 
-		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
+		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config, service)
 
 		const isStreamEndpoint = isDeclaredStreamDefinition || responseContentType.toLowerCase() === 'text/event-stream'
 
@@ -526,9 +529,7 @@ export class HonoServiceClass<
 											}
 
 											controller.enqueue(
-												encoder.encode(
-													`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`,
-												),
+												encoder.encode(`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`),
 											)
 										}
 										controller.close()
@@ -576,8 +577,11 @@ export class HonoServiceClass<
 
 					if (httpMode === 'async') {
 						const job = assertAsyncHttpResult(result)
+						const jobRunId = (job as unknown as { runId?: unknown }).runId
 						responsePayload = {
 							jobId: job.jobId,
+							...(typeof jobRunId === 'string' ? { runId: jobRunId } : {}),
+							status: 'queued',
 							queue: job.queueName,
 							queueName: job.queueName,
 							scheduledAt: job.scheduledAt,

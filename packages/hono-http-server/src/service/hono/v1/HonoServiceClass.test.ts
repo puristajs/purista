@@ -409,6 +409,7 @@ describe('HonoServiceClass', () => {
 				jobId: 'job-1',
 				queue: 'jobs',
 				queueName: 'jobs',
+				status: 'queued',
 				scheduledAt: 123,
 			})
 

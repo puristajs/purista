@@ -51,6 +51,7 @@ import type { PrincipalId } from '../types/PrincipalId.js'
 import { PuristaSpanName } from '../types/PuristaSpanName.enum.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
 import { defaultQueueLifecycleConfig } from '../types/queue/defaultQueueLifecycleConfig.js'
+import type { EventToQueueBindingDefinition } from '../types/queue/EventToQueueBindingDefinition.js'
 import type { QueueContext } from '../types/queue/QueueContext.js'
 import type { QueueDefinition } from '../types/queue/QueueDefinition.js'
 import type { QueueDefinitionListResolved } from '../types/queue/QueueDefinitionList.js'
@@ -58,10 +59,12 @@ import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
 import type { QueueHandlerResult } from '../types/queue/QueueHandlerResult.js'
 import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
 import type { QueueJobContext } from '../types/queue/QueueJobContext.js'
+import type { QueueJobStore } from '../types/queue/QueueJobStore.js'
 import type { QueueLease } from '../types/queue/QueueLease.js'
 import type { QueueLifecycleConfig } from '../types/queue/QueueLifecycleConfig.js'
 import type { QueueMessage } from '../types/queue/QueueMessage.js'
 import type { QueueMetrics } from '../types/queue/QueueMetrics.js'
+import type { QueueResultEventPayload, QueueResultStatus } from '../types/queue/QueueResultPolicy.js'
 import type { QueueTransformContext } from '../types/queue/QueueTransformHook.js'
 import type { QueueWorkerDefinition } from '../types/queue/QueueWorkerDefinition.js'
 import type { QueueWorkerDefinitionListResolved } from '../types/queue/QueueWorkerDefinitionList.js'
@@ -100,6 +103,12 @@ import { ServiceBaseClass } from './ServiceBaseClass/ServiceBaseClass.impl.js'
 import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js'
 
 type LeaseHeartbeatController = {
+	stop: () => void
+}
+
+type QueueRuntimeCancellation = {
+	controller: AbortController
+	cancelRequested: () => boolean
 	stop: () => void
 }
 
@@ -166,6 +175,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	private queueWorkerPausedQueues = new Map<string, PausedQueueWorkerState>()
 	private queueMetricsCache = new Map<string, QueueMetrics>()
 	private queueBridgeStarted = false
+	private readonly eventToQueueBindingList: EventToQueueBindingDefinition[]
+	private readonly queueJobStore?: QueueJobStore
+	private readonly activeQueueRuntimeCancellations = new Set<QueueRuntimeCancellation>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -196,9 +208,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		this.queueDefinitionList = config.queueDefinitionList ?? []
 		this.queueWorkerDefinitionList = config.queueWorkerDefinitionList ?? []
 		this.queueBridge = config.queueBridge ?? new DefaultQueueBridge()
+		this.queueJobStore = config.queueJobStore
+		this.eventToQueueBindingList = config.eventToQueueBindingList ?? []
 		this.queueDefinitionMap = new Map(
 			this.queueDefinitionList.map(def => [this.normalizeQueueName(def.queueName), def]),
 		)
+		this.subscriptionDefinitionList = [
+			...this.subscriptionDefinitionList,
+			...this.createEventToQueueSubscriptionDefinitions(this.eventToQueueBindingList),
+		] as SubscriptionDefinitionListResolved<any>
 	}
 
 	get name() {
@@ -540,6 +558,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		lease: QueueLease,
 		lifecycle: QueueLifecycleConfig,
 		logger: Logger,
+		cancellation?: QueueRuntimeCancellation,
 	): LeaseHeartbeatController {
 		if (lifecycle.autoHeartbeat === false || lifecycle.heartbeatIntervalMs <= 0 || lifecycle.maxLeaseExtensions <= 0) {
 			return {
@@ -571,6 +590,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				})
 				.catch(err => {
 					logger.warn({ err, queueName, leaseId: lease.leaseId }, 'failed to extend queue lease')
+					if (this.getQueueDefinition(queueName)?.executionProfile?.onLeaseLost === 'abort') {
+						cancellation?.controller.abort(err instanceof Error ? err : new Error('queue lease extension failed'))
+					}
 				})
 		}, lifecycle.heartbeatIntervalMs)
 
@@ -662,6 +684,106 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				)
 			}
 		}
+
+		for (const binding of this.eventToQueueBindingList) {
+			if (binding.idempotencyMode === 'strict' && !capabilities.idempotencyEnforcement) {
+				throw new UnhandledError(
+					StatusCode.NotImplemented,
+					`event-to-queue binding "${binding.eventName}" -> "${binding.queueName}" requires strict idempotency, but ${this.queueBridge.name} does not enforce idempotency`,
+				)
+			}
+		}
+	}
+
+	private createEventToQueueSubscriptionDefinitions(bindings: EventToQueueBindingDefinition[]) {
+		const supportsDurableManualAck =
+			this.eventBridge.capabilities.durableSubscriptions && this.eventBridge.capabilities.manualAckSupported
+
+		return bindings.map(binding => {
+			const subscriptionName = this.getEventToQueueSubscriptionName(binding)
+			return {
+				subscriptionName,
+				subscriptionDescription: `Enqueue "${binding.queueName}" from "${binding.eventName}"`,
+				metadata: { expose: {} },
+				eventBridgeConfig: {
+					durable: supportsDurableManualAck,
+					autoacknowledge: !supportsDurableManualAck,
+					shared: true,
+				},
+				call: async (_context: SubscriptionFunctionContext, payload: unknown) => {
+					try {
+						const eventPayload = payload as Record<string, unknown>
+						await this.enqueueQueue(
+							binding.queueName,
+							binding.mapPayload ? binding.mapPayload(eventPayload) : eventPayload,
+							binding.mapParameter ? binding.mapParameter(eventPayload) : undefined,
+							undefined,
+							_context.message.traceId,
+							_context.message.principalId,
+							_context.message.tenantId,
+							{
+								idempotencyKey: this.resolveEventToQueueIdempotencyKey(binding, _context.message),
+								headers: {
+									...this.createQueueIdentityHeaders(_context.message.principalId, _context.message.tenantId),
+									'purista.sourceEventName': binding.eventName,
+									'purista.sourceMessageId': _context.message.id,
+								},
+							},
+						)
+						return { status: 'ack' } as const
+					} catch (err) {
+						if (binding.onEnqueueFailure && 'status' in binding.onEnqueueFailure) {
+							return {
+								status: 'deadLetter',
+								reason: binding.onEnqueueFailure.reason,
+							} as const
+						}
+						if (binding.onEnqueueFailure) {
+							return {
+								status: 'retry',
+								reason: binding.onEnqueueFailure.reason,
+								delayMs: binding.onEnqueueFailure.delayMs,
+							} as const
+						}
+						throw err
+					}
+				},
+				eventName: binding.eventName,
+				hooks: {},
+				invokes: {},
+				streamInvokes: {},
+				emitList: {},
+				queueInvokes: {},
+				deprecated: false,
+			} as SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
+		})
+	}
+
+	private getEventToQueueSubscriptionName(binding: EventToQueueBindingDefinition) {
+		return `eventToQueue:${binding.eventName}:${binding.queueName}`
+	}
+
+	private resolveEventToQueueIdempotencyKey(binding: EventToQueueBindingDefinition, message: Readonly<EBMessage>) {
+		const strategy = binding.idempotencyKey
+		if (!strategy || strategy === 'none') {
+			return undefined
+		}
+		if (typeof strategy === 'function') {
+			return strategy(message)
+		}
+		if (strategy === 'messageId') {
+			return message.id
+		}
+		if (strategy === 'correlationId') {
+			return message.correlationId
+		}
+		if (strategy === 'eventField') {
+			const payload = (message as CustomMessage).payload
+			return payload && typeof payload === 'object'
+				? String((payload as Record<string, unknown>).id ?? '') || undefined
+				: undefined
+		}
+		return undefined
 	}
 
 	private resolveSubscriptionFailureHandling(
@@ -889,6 +1011,48 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return normalized && normalized.length > 0 ? normalized : fallback
 	}
 
+	private createQueueIdentityHeaders(principalId?: PrincipalId, tenantId?: TenantId) {
+		return {
+			...(principalId ? { 'purista.principalId': principalId } : {}),
+			...(tenantId ? { 'purista.tenantId': tenantId } : {}),
+		}
+	}
+
+	private createQueueRuntimeCancellation(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		logger: Logger,
+	): QueueRuntimeCancellation {
+		const controller = new AbortController()
+		let timer: ReturnType<typeof setTimeout> | undefined
+		const maxRuntimeMs = queueDefinition?.executionProfile?.maxRuntimeMs
+		if (typeof maxRuntimeMs === 'number' && maxRuntimeMs > 0) {
+			timer = setTimeout(() => {
+				if (!controller.signal.aborted) {
+					logger.warn(
+						{ queueName: lease.queueName, jobId: lease.message.id, maxRuntimeMs },
+						'queue job max runtime reached; requesting cooperative cancellation',
+					)
+					controller.abort(new Error('max_runtime_exceeded'))
+				}
+			}, maxRuntimeMs)
+			;(timer as { unref?: () => void }).unref?.()
+		}
+
+		const cancellation: QueueRuntimeCancellation = {
+			controller,
+			cancelRequested: () => controller.signal.aborted,
+			stop: () => {
+				if (timer) {
+					clearTimeout(timer)
+				}
+				this.activeQueueRuntimeCancellations.delete(cancellation)
+			},
+		}
+		this.activeQueueRuntimeCancellations.add(cancellation)
+		return cancellation
+	}
+
 	private async scheduleRetryOrDeadLetter(
 		workerQueueName: string,
 		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
@@ -919,6 +1083,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		reason?: string,
 	) {
 		const dlq = this.resolveDeadLetterQueueName(queueDefinition, queueName)
+		await this.deliverQueueResult(queueDefinition, lease, 'dead-lettered', { reason }, undefined, this.logger)
 		await this.moveMessageToDeadLetter(dlq, lease.message, reason)
 		await this.ackQueueJob(queueName, lease.leaseId, lease.message.id)
 	}
@@ -1823,6 +1988,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 	protected async stopQueueWorkers() {
 		this.queueWorkersShouldStop = true
+		for (const cancellation of this.activeQueueRuntimeCancellations) {
+			if (!cancellation.controller.signal.aborted) {
+				cancellation.controller.abort(new Error('service_shutdown'))
+			}
+		}
 		await Promise.allSettled(Array.from(this.queueWorkerTasks))
 		this.queueWorkerTasks.clear()
 	}
@@ -1846,6 +2016,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			let lease: QueueLease | undefined
 			let jobState: { handled: boolean } | undefined
 			let heartbeat: LeaseHeartbeatController | undefined
+			let cancellation: QueueRuntimeCancellation | undefined
 			let queueDefinition: QueueDefinition<any, any, any, any, any> | undefined
 			try {
 				lease = await this.wrapInSpan(PuristaSpanName.QueueLease, {}, async span => {
@@ -1871,7 +2042,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				)
 				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
 
-				heartbeat = this.startLeaseHeartbeat(worker.queueName, activeLease, lifecycle, workerLogger)
+				cancellation = this.createQueueRuntimeCancellation(queueDefinition, activeLease, workerLogger)
+				heartbeat = this.startLeaseHeartbeat(worker.queueName, activeLease, lifecycle, workerLogger, cancellation)
 				jobState = { handled: false }
 				const stopHeartbeat = () => heartbeat?.stop()
 
@@ -1882,6 +2054,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					workerLogger,
 					jobState,
 					stopHeartbeat,
+					cancellation,
 				)
 				await this.runQueueWorkerBeforeGuards(worker, context, activeLease.message)
 				const result = await this.startActiveSpan(PuristaSpanName.QueueProcess, {}, undefined, async span => {
@@ -1895,6 +2068,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				}
 			} catch (err) {
 				heartbeat?.stop()
+				cancellation?.stop()
 				workerLogger.error({ err }, 'queue worker execution failed')
 				if (lease && !jobState?.handled) {
 					try {
@@ -1908,6 +2082,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				await this.waitForNextPoll(worker)
 			} finally {
 				heartbeat?.stop()
+				cancellation?.stop()
 				if (worker.mode === 'interval') {
 					await this.waitForNextPoll(worker)
 				}
@@ -1929,6 +2104,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		logger: Logger,
 		jobState: { handled: boolean },
 		stopHeartbeat: () => void,
+		cancellation: QueueRuntimeCancellation,
 	): QueueJobContext {
 		const readHeader = (key: string) => {
 			const value = lease.message.headers[key]
@@ -1945,7 +2121,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		const jobControls = {
-			complete: async (_output?: unknown, _headers?: Record<string, string>) => {
+			complete: async (output?: unknown, headers?: Record<string, string>) => {
+				if (jobState.handled) return
+				stopHeartbeat()
+				await this.deliverQueueResult(queueDefinition, lease, 'success', output, headers, logger)
 				if (!settle()) return
 				await this.ackQueueJob(worker.queueName, lease.leaseId, lease.message.id)
 			},
@@ -1968,6 +2147,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			extendLease: async (durationMs: number) => {
 				await this.queueBridge.extendLease(worker.queueName, lease.leaseId, durationMs)
 			},
+			cancelRequested: () => cancellation.cancelRequested(),
 		}
 
 		const traceId = lease.message.traceId
@@ -1977,6 +2157,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return {
 			message: lease.message,
 			job: jobControls,
+			signal: cancellation.controller.signal,
 			emit: this.getEmitFunction(worker.name, traceId, principalId, tenantId, {}),
 			...this.getContextFunctions(logger),
 			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, principalId, tenantId, {})),
@@ -1995,15 +2176,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		jobState: { handled: boolean },
 		stopHeartbeat: () => void,
 	) {
-		jobState.handled = true
 		stopHeartbeat()
 
 		if (!result || result.status === 'success') {
+			await this.deliverQueueResult(queueDefinition, lease, 'success', result?.output, result?.headers, this.logger)
+			jobState.handled = true
 			await this.ackQueueJob(worker.queueName, lease.leaseId, lease.message.id)
 			return
 		}
 
 		if (result.status === 'retry') {
+			jobState.handled = true
 			const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
 			const retryReason = result.reason ?? 'retry_requested'
 			if (this.shouldPauseQueueWorkerForPoisonMessage(lifecycle, lease.message, retryReason)) {
@@ -2019,7 +2202,16 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		if (result.status === 'fail') {
+			jobState.handled = true
 			if (result.fatal) {
+				await this.deliverQueueResult(
+					queueDefinition,
+					lease,
+					'failed',
+					{ reason: result.reason },
+					undefined,
+					this.logger,
+				)
 				await this.deadLetterJob(queueDefinition, worker.queueName, lease, result.reason)
 			} else {
 				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
@@ -2035,6 +2227,147 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				})
 			}
 		}
+	}
+
+	private async deliverQueueResult(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		status: QueueResultStatus,
+		payload: unknown,
+		headers: Record<string, string> | undefined,
+		logger: Logger,
+	) {
+		const policy = queueDefinition?.resultPolicy
+		if (!policy || policy.mode === 'none') {
+			return
+		}
+
+		const delivery = policy.delivery ?? 'best-effort'
+		try {
+			const eventPayload = this.createQueueResultEventPayload(lease, status, payload, headers)
+			if (policy.mode === 'state' || policy.mode === 'state-and-event') {
+				await this.persistQueueResult(policy.ttlMs, eventPayload)
+			}
+			if (policy.mode === 'event' || policy.mode === 'state-and-event') {
+				await this.emitQueueResultEvent(queueDefinition, eventPayload)
+			}
+		} catch (err) {
+			if (delivery === 'required') {
+				throw err
+			}
+			logger.warn({ err, queueName: lease.queueName, jobId: lease.message.id }, 'queue result delivery failed')
+		}
+	}
+
+	private createQueueResultEventPayload(
+		lease: QueueLease,
+		status: QueueResultStatus,
+		payload: unknown,
+		headers?: Record<string, string>,
+	): QueueResultEventPayload {
+		const readHeader = (key: string) => {
+			const value = lease.message.headers[key]
+			return typeof value === 'string' && value.length > 0 ? value : undefined
+		}
+
+		return {
+			jobId: lease.message.id,
+			queueName: lease.queueName,
+			status,
+			attempt: lease.message.attempt,
+			payload,
+			headers,
+			traceId: lease.message.traceId,
+			correlationId: lease.message.correlationId,
+			tenantId: readHeader('purista.tenantId'),
+			principalId: readHeader('purista.principalId'),
+			runId: readHeader('purista.runId'),
+		}
+	}
+
+	private async persistQueueResult(ttlMs: number | undefined, eventPayload: QueueResultEventPayload) {
+		const store = this.queueJobStore
+		if (!store) {
+			return
+		}
+		const now = Date.now()
+		await store.set(
+			{
+				jobId: eventPayload.jobId,
+				queueName: eventPayload.queueName,
+				status: eventPayload.status,
+				attempt: eventPayload.attempt,
+				updatedAt: now,
+				completedAt: eventPayload.status === 'success' ? now : undefined,
+				failedAt: eventPayload.status === 'failed' ? now : undefined,
+				cancelledAt: eventPayload.status === 'cancelled' ? now : undefined,
+				result: eventPayload.status === 'success' ? eventPayload.payload : undefined,
+				error: eventPayload.status === 'failed' ? eventPayload.payload : undefined,
+				traceId: eventPayload.traceId,
+				correlationId: eventPayload.correlationId,
+				tenantId: eventPayload.tenantId,
+				principalId: eventPayload.principalId,
+				runId: eventPayload.runId,
+			},
+			ttlMs,
+		)
+	}
+
+	private async emitQueueResultEvent(
+		queueDefinition: QueueDefinition<any, any, any, any, any>,
+		payload: QueueResultEventPayload,
+	) {
+		const policy = queueDefinition.resultPolicy
+		if (!policy) {
+			return
+		}
+		const eventName =
+			payload.status === 'success'
+				? policy.successEventName
+				: payload.status === 'failed'
+					? policy.failureEventName
+					: payload.status === 'cancelled'
+						? policy.cancelledEventName
+						: payload.status === 'dead-lettered'
+							? policy.deadLetterEventName
+							: policy.progressEventName
+		if (!eventName) {
+			return
+		}
+		await this.eventBridge.emitMessage({
+			id: this.getQueueResultEventId(queueDefinition, payload),
+			messageType: EBMessageType.CustomMessage,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: payload.traceId,
+			correlationId: payload.correlationId,
+			principalId: payload.principalId,
+			tenantId: payload.tenantId,
+			sender: {
+				serviceName: this.info.serviceName,
+				serviceVersion: this.info.serviceVersion,
+				serviceTarget: queueDefinition.queueName,
+				instanceId: this.eventBridge.instanceId,
+			},
+			eventName,
+			payload,
+		} as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+	}
+
+	private getQueueResultEventId(
+		queueDefinition: QueueDefinition<any, any, any, any, any>,
+		payload: QueueResultEventPayload,
+	) {
+		const strategy = queueDefinition.resultPolicy?.eventId ?? 'jobIdAndStatus'
+		if (typeof strategy === 'function') {
+			return strategy({
+				jobId: payload.jobId,
+				queueName: payload.queueName,
+				status: payload.status,
+				attempt: payload.attempt,
+			})
+		}
+		return `${payload.jobId}:${payload.status}`
 	}
 
 	public async getServiceHealth(): Promise<ServiceHealthState> {

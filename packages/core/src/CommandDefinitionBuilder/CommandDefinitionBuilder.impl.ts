@@ -11,7 +11,6 @@ import {
 	registerInvokeCapability,
 	registerStreamInvokeCapability,
 } from '../core/helper/builderRegistry.impl.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -27,8 +26,8 @@ import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js
 import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.js'
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
@@ -79,6 +78,7 @@ export class CommandDefinitionBuilder<
 
 	private durable = false
 	private autoacknowledge = true
+	private schedules: ScheduleDefinition[] = []
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
@@ -160,18 +160,7 @@ export class CommandDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'] &
-					Record<
-						QueueName,
-						(
-							payload: InferIn<Payload>,
-							parameter: InferIn<Parameter>,
-							options?: Omit<
-								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
-								'queueName' | 'payload' | 'parameter'
-							>,
-						) => Promise<QueueEnqueueResult>
-					>
+				C['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
 			>
 		>
 	}
@@ -1011,6 +1000,38 @@ export class CommandDefinitionBuilder<
 	}
 
 	/**
+	 * Mark this command as a short, idempotent schedule target.
+	 *
+	 * @example
+	 * ```ts
+	 * command.markSchedulable({
+	 *   name: 'refresh-cache',
+	 *   expression: { kind: 'interval', everyMs: 300_000 },
+	 * })
+	 * ```
+	 */
+	markSchedulable(options: ScheduleOptions & { name: string; description?: string }) {
+		this.schedules.push({
+			name: options.name,
+			description: options.description,
+			targetKind: 'command',
+			targetName: this.commandName,
+			payloadSchema: options.payloadSchema,
+			parameterSchema: options.parameterSchema,
+			expression: options.expression,
+			timezone: options.timezone,
+			concurrencyPolicy: options.concurrencyPolicy ?? 'allow',
+			missedRunPolicy: options.missedRunPolicy ?? 'skip',
+			maxCatchUpCount: options.maxCatchUpCount,
+			jitterWindowMs: options.jitterWindowMs,
+			idempotencyKey: options.idempotencyKey,
+			enabledByDefault: options.enabledByDefault ?? true,
+			providerHints: options.providerHints,
+		})
+		return this
+	}
+
+	/**
 	 * Creates and returns the CommandDefinition used as input for the service.
 	 * @returns CommandDefinition
 	 */
@@ -1063,6 +1084,7 @@ export class CommandDefinitionBuilder<
 			commandName: this.commandName,
 			commandDescription: this.commandDescription,
 			eventBridgeConfig,
+			schedules: this.schedules,
 			metadata: {
 				expose: {
 					contentTypeRequest: this.inputContentType ?? 'application/json',

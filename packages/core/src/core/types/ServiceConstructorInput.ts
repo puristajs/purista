@@ -9,7 +9,9 @@ import type { StateStore } from '../StateStore/types/StateStore.js'
 import type { CommandDefinitionListResolved } from './commandType/CommandDefinitionList.js'
 import type { ServiceInfoType } from './infoType/ServiceInfoType.js'
 import type { Logger } from './Logger.js'
+import type { EventToQueueBindingDefinition } from './queue/EventToQueueBindingDefinition.js'
 import type { QueueDefinitionListResolved } from './queue/QueueDefinitionList.js'
+import type { QueueJobStore } from './queue/QueueJobStore.js'
 import type { QueueWorkerDefinitionListResolved } from './queue/QueueWorkerDefinitionList.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
 import type { StreamDefinitionListResolved } from './stream/StreamDefinitionList.js'
@@ -47,6 +49,10 @@ export type ServiceConstructorInput<S extends ServiceClassTypes = ServiceClassTy
 	spanProcessor?: SpanProcessor
 	/** Queue bridge implementation */
 	queueBridge?: QueueBridge
+	/** Optional queue job status/result store */
+	queueJobStore?: QueueJobStore
+	/** Generated event-to-queue bindings for this service */
+	eventToQueueBindingList?: EventToQueueBindingDefinition[]
 	/** The config validation schema */
 	configSchema?: Schema
 	resources?: S['Resources']

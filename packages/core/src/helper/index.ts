@@ -1,5 +1,6 @@
 export * from './convertEmitValidationsToSchema.impl.js'
 export * from './convertInvokeValidationsToSchema.impl.js'
+export * from './enterpriseInterop.js'
 export * from './exportServiceDefinitions.js'
 export * from './getTimeoutPromise.impl.js'
 export * from './gracefulShutdown.impl.js'

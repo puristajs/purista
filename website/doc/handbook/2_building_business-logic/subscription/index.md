@@ -36,6 +36,7 @@ Continue with:
 
 - [The Subscription Builder](./the-subscription-builder.md)
 - [Unit test a subscription](./unit-test-a-subscription.md)
+- [Enterprise event-to-queue handoff](../../6_integrations/enterprise_interoperability/event-to-queue.md)
 
 ## When to use
 
@@ -48,6 +49,7 @@ Continue with:
 - using subscriptions for synchronous request/response logic
 - overly broad filters causing unexpected message matches
 - assuming broker delivery guarantees that are not configured
+- doing long-running work directly instead of handing off to a queue
 
 ## Checklist
 

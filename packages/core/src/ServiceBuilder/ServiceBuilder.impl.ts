@@ -23,7 +23,10 @@ import type { LogLevelName } from '../core/types/LogLevelName.js'
 import type { NeverObject } from '../core/types/NeverObject.js'
 import type { Prettify } from '../core/types/Prettify.js'
 import type { QueueDefinitionList, QueueDefinitionListResolved } from '../core/types/queue/QueueDefinitionList.js'
+import type { QueueJobStore } from '../core/types/queue/QueueJobStore.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { EventToQueueBindingDefinition } from '../core/types/queue/EventToQueueBindingDefinition.js'
+import type { ScheduleDefinition } from '../core/types/schedule/index.js'
 import type {
 	QueueWorkerDefinitionList,
 	QueueWorkerDefinitionListResolved,
@@ -48,6 +51,7 @@ import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
 import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
+import { ScheduleDefinitionBuilder } from '../ScheduleDefinitionBuilder/ScheduleDefinitionBuilder.impl.js'
 import { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/StreamDefinitionBuilder.impl.js'
 import type { StreamDefinitionBuilderTypes } from '../StreamDefinitionBuilder/StreamDefinitionBuilderTypes.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
@@ -65,6 +69,7 @@ export type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 		configStore?: ConfigStore
 		stateStore?: StateStore
 		queueBridge?: QueueBridge
+		queueJobStore?: QueueJobStore
 	} & (keyof S['Resources'] extends never ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends never ? { serviceConfig?: never } : { serviceConfig?: S['ConfigInputType'] })
 >
@@ -80,12 +85,16 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
 	private queueDefinitionList: QueueDefinitionList<S['ServiceClassType']> = []
 	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
+	private scheduleDefinitionList: ScheduleDefinition[] = []
+	private eventToQueueBindingList: EventToQueueBindingDefinition[] = []
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
 	private streamDefinitionListResolved: StreamDefinitionListResolved<S['ServiceClassType']> = []
 	private queueDefinitionListResolved: QueueDefinitionListResolved<S['ServiceClassType']> = []
 	private queueWorkerDefinitionListResolved: QueueWorkerDefinitionListResolved<S['ServiceClassType']> = []
+	private scheduleDefinitionListResolved: ScheduleDefinition[] = []
+	private eventToQueueBindingListResolved: EventToQueueBindingDefinition[] = []
 
 	private configSchema?: Schema
 	private defaultConfig?: Complete<S['ConfigType']>
@@ -182,6 +191,46 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this
 	}
 
+	addScheduleDefinition(...schedules: ScheduleDefinition[]) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add schedules after resolveDefinitions is called.',
+			)
+		}
+		this.scheduleDefinitionList.push(...schedules)
+		return this
+	}
+
+	/**
+	 * Bind a custom event to a durable queue job through a generated bounded subscription.
+	 *
+	 * @example
+	 * ```ts
+	 * service.bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
+	 *   idempotencyKey: event => `billing-cycle:${event.cycleId}`,
+	 * })
+	 * ```
+	 */
+	bindEventToQueue(eventName: string, queueName: string, options: Omit<EventToQueueBindingDefinition, 'eventName' | 'queueName' | 'idempotencyMode'> & { idempotencyMode?: EventToQueueBindingDefinition['idempotencyMode'] } = {}) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add event-to-queue bindings after resolveDefinitions is called.',
+			)
+		}
+		this.eventToQueueBindingList.push({
+			eventName,
+			queueName,
+			idempotencyMode: options.idempotencyMode ?? 'advisory',
+			idempotencyKey: options.idempotencyKey,
+			mapPayload: options.mapPayload,
+			mapParameter: options.mapParameter,
+			onEnqueueFailure: options.onEnqueueFailure,
+		})
+		return this
+	}
+
 	public async resolveDefinitions() {
 		if (this.definitionsResolved) {
 			return {
@@ -190,6 +239,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				streams: this.streamDefinitionListResolved,
 				queues: this.queueDefinitionListResolved,
 				queueWorkers: this.queueWorkerDefinitionListResolved,
+				schedules: this.scheduleDefinitionListResolved,
+				eventToQueueBindings: this.eventToQueueBindingListResolved,
 			}
 		}
 
@@ -198,12 +249,16 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		this.streamDefinitionListResolved = await Promise.all(this.streamDefinitionList)
 		this.queueDefinitionListResolved = await Promise.all(this.queueDefinitionList)
 		this.queueWorkerDefinitionListResolved = await Promise.all(this.queueWorkerDefinitionList)
+		this.scheduleDefinitionListResolved = this.scheduleDefinitionList
+		this.eventToQueueBindingListResolved = this.eventToQueueBindingList
 
 		this.subscriptionDefinitionList = []
 		this.commandDefinitionList = []
 		this.streamDefinitionList = []
 		this.queueDefinitionList = []
 		this.queueWorkerDefinitionList = []
+		this.scheduleDefinitionList = []
+		this.eventToQueueBindingList = []
 
 		this.definitionsResolved = true
 		return {
@@ -212,6 +267,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			streams: this.streamDefinitionListResolved,
 			queues: this.queueDefinitionListResolved,
 			queueWorkers: this.queueWorkerDefinitionListResolved,
+			schedules: this.scheduleDefinitionListResolved,
+			eventToQueueBindings: this.eventToQueueBindingListResolved,
 		}
 	}
 
@@ -285,7 +342,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 		const queueBridge: QueueBridge = options?.queueBridge ?? new DefaultQueueBridge()
 
-		const { commands, subscriptions, streams, queues, queueWorkers } = await this.resolveDefinitions()
+		const { commands, subscriptions, streams, queues, queueWorkers, eventToQueueBindings } =
+			await this.resolveDefinitions()
 
 		const C = this.getCustomClass()
 
@@ -304,6 +362,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			configStore,
 			stateStore,
 			queueBridge,
+			queueJobStore: options?.queueJobStore,
+			eventToQueueBindingList: eventToQueueBindings,
 			configSchema: this.configSchema,
 			resources: options?.resources,
 		})
@@ -428,6 +488,10 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return new QueueWorkerBuilder(queueName, workerName)
 	}
 
+	getScheduleBuilder<T extends string>(scheduleName: NonEmptyString<T>, description: string) {
+		return new ScheduleDefinitionBuilder(scheduleName, description)
+	}
+
 	getQueueDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -446,6 +510,26 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			)
 		}
 		return this.queueWorkerDefinitionListResolved
+	}
+
+	getScheduleDefinitions() {
+		if (!this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Definitions not resolve. Please call resolveDefinitions() before using getScheduleDefinitions',
+			)
+		}
+		return this.scheduleDefinitionListResolved
+	}
+
+	getEventToQueueBindings() {
+		if (!this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Definitions not resolve. Please call resolveDefinitions() before using getEventToQueueBindings',
+			)
+		}
+		return this.eventToQueueBindingListResolved
 	}
 
 	async testServiceSetup() {

@@ -6,6 +6,10 @@ export const puristaCommandIds = [
 	'add-queue',
 	'add-queue-worker',
 	'add-agent',
+	'export-asyncapi',
+	'export-runtime-capabilities',
+	'export-schedule-manifest',
+	'export-cloudevents-schema',
 	'init-project',
 ] as const
 

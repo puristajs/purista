@@ -7,7 +7,6 @@ import {
 	registerInvokeCapability,
 	registerStreamInvokeCapability,
 } from '../core/helper/builderRegistry.impl.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -17,7 +16,6 @@ import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { InstanceId } from '../core/types/InstanceId.js'
 import type { PrincipalId } from '../core/types/PrincipalId.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionAfterGuardHook } from '../core/types/subscription/SubscriptionAfterGuardHook.js'

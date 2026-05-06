@@ -10,13 +10,15 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 
 ## Support matrix
 
-| bridge | scale out | durable backlog | typical delivery mode | late response handling | stream support (`openStream`) |
-|---|---:|---:|---|---:|
-| [Default](./default_event_bridge.md) | no | no | at-most-once (in-memory) | ignored with warning after timeout | yes |
-| [AMQP](./amqp.md) | yes | yes | at-least-once for durable queues with manual ack | ignored with warning after timeout | no (currently) |
-| [MQTT](./mqtt.md) | yes | broker-dependent | QoS dependent (0/1/2) | ignored with warning after timeout | no (currently) |
-| [NATS](./nats.md) | yes | yes with JetStream, no with core NATS | at-most-once on core NATS, at-least-once with JetStream durable consumers | not applicable | no (currently) |
-| [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | not applicable | no (currently) |
+| bridge | scale out | durable subscriptions | manual ack | event-to-queue strongest handoff | stream support (`openStream`) |
+|---|---:|---:|---:|---:|---:|
+| [Default](./default_event_bridge.md) | no | no | no | no, auto-ack in-memory fallback | yes |
+| [AMQP](./amqp.md) | yes | yes | yes | yes | no (currently) |
+| [MQTT](./mqtt.md) | yes | broker-dependent | no | no, QoS-dependent delivery only | no (currently) |
+| [NATS](./nats.md) | yes | yes with JetStream, no with core NATS | yes with JetStream, no with core NATS | yes with JetStream | no (currently) |
+| [Dapr](./dapr.md) | yes | component-dependent | component-dependent | component-dependent | no (currently) |
+
+For event-to-queue bindings, PURISTA asks for durable/manual-ack subscription semantics when the active event bridge advertises both capabilities. If not, the binding remains API-compatible and uses the bridge's best available behavior. See [Event-to-queue](../../6_integrations/enterprise_interoperability/event-to-queue.md) for the exact limitation.
 
 ### Command reliability model
 
@@ -68,6 +70,7 @@ Commands are treated as single request/response operations: they are not retried
 ## Reliability checklist
 
 - configure broker durability/retry features explicitly
+- check `eventBridge.capabilities` before relying on durable/manual-ack event-to-queue handoff
 - keep bridge settings identical across instances
 - implement idempotency in command/subscription side effects
 - define timeout/retry policies intentionally (do not rely on defaults only)

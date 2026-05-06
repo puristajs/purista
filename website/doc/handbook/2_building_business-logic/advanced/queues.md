@@ -82,3 +82,5 @@ Queue pause state is now reflected in service health:
 Queues are **at-least-once by design**: if a worker crashes before calling `complete`, the job is re-queued. Make handlers idempotent (use idempotency keys, versioned state, or side-effect guards) to avoid duplicated work when retries happen. Combine queue lifecycles with the event bridge semantics documented in [Delivery semantics and reliability](./delivery-semantics-and-reliability.md) for a full end-to-end picture.
 
 For Redis specifically, PURISTA uses a `pending` list, a `processing` list, and a `scheduled` sorted set. The bridge now applies atomic recovery scripts for delayed release, lease expiry, nack/requeue, and DLQ redrive, and it recovers orphaned `processing` entries when a worker crashes between claim and lease metadata registration.
+
+For the enterprise event-to-queue storyline, see [Enterprise interoperability](../../6_integrations/enterprise_interoperability/).

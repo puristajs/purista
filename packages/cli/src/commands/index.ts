@@ -6,6 +6,12 @@ import { addQueueWorkerCommand } from './add-queue-worker.js'
 import { addServiceCommand } from './add-service.js'
 import { addStreamCommand } from './add-stream.js'
 import { addSubscriptionCommand } from './add-subscription.js'
+import {
+	exportAsyncApiCommand,
+	exportCloudEventsSchemaCommand,
+	exportRuntimeCapabilitiesCommand,
+	exportScheduleManifestCommand,
+} from './export.js'
 import { initProjectCommand } from './init-project.js'
 
 export const commandRegistry = {
@@ -16,6 +22,10 @@ export const commandRegistry = {
 	'add-queue': addQueueCommand,
 	'add-queue-worker': addQueueWorkerCommand,
 	'add-agent': addAgentCommand,
+	'export-asyncapi': exportAsyncApiCommand,
+	'export-runtime-capabilities': exportRuntimeCapabilitiesCommand,
+	'export-schedule-manifest': exportScheduleManifestCommand,
+	'export-cloudevents-schema': exportCloudEventsSchemaCommand,
 	'init-project': initProjectCommand,
 } as const
 

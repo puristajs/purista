@@ -93,6 +93,37 @@ export type AgentExecutionPolicy = {
 	timeoutMs?: number
 }
 
+export type AgentQueueResultPolicyMode = 'none' | 'event' | 'state' | 'state-and-event'
+
+export type AgentQueueResultPolicy = {
+	mode: AgentQueueResultPolicyMode
+	successEventName?: string
+	failureEventName?: string
+	cancelledEventName?: string
+	deadLetterEventName?: string
+	progressEventName?: string
+	ttlMs?: number
+	emitProgressEvents?: boolean
+	eventId?:
+		| 'jobIdAndStatus'
+		| ((input: { jobId: string; queueName: string; status: string; attempt: number }) => string)
+	delivery?: 'required' | 'best-effort'
+}
+
+export type AgentResponseMode = 'accepted' | 'status' | 'stream' | 'event' | 'callback'
+
+export type AgentResponseModeOptions = {
+	resultPolicy?: AgentQueueResultPolicyMode | AgentQueueResultPolicy
+	successEventName?: string
+	failureEventName?: string
+	progressEventName?: string
+	ttlMs?: number
+	delivery?: AgentQueueResultPolicy['delivery']
+	statusUrl?: string
+	streamUrl?: string
+	callbackResourceName?: string
+}
+
 export type AgentSessionPolicy = { mode: 'ephemeral' } | { mode: 'conversation'; payloadPath: readonly string[] }
 
 export type AgentSandboxPolicy = {
@@ -135,8 +166,16 @@ export type AgentRunResult<Output = unknown> = {
 	events: AgentRunEvent[]
 }
 
-type InferOptionalInput<T> = T extends Schema ? InferIn<T> : unknown
-type InferOptionalOutput<T> = T extends Schema ? Infer<T> : unknown
+type InferOptionalInput<T> = [NonNullable<T>] extends [never]
+	? unknown
+	: NonNullable<T> extends Schema
+		? InferIn<NonNullable<T>>
+		: unknown
+type InferOptionalOutput<T> = [NonNullable<T>] extends [never]
+	? unknown
+	: NonNullable<T> extends Schema
+		? Infer<NonNullable<T>>
+		: unknown
 
 export type CommandToolInvokeMap<Tools extends Record<string, AllowedCommandToolDefinition>> = {
 	readonly [K in keyof Tools]: {
@@ -160,9 +199,9 @@ export type AgentHandlerContext<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
-	Models extends Record<string, AgentModelBinding> = Record<string, never>,
-	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<string, never>,
-	AgentTools extends Record<string, AllowedAgentDefinition> = Record<string, never>,
+	Models extends Record<string, AgentModelBinding> = Record<never, never>,
+	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
+	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 > = {
 	payload: Payload
 	parameter: Parameter
@@ -194,9 +233,9 @@ export type AgentHandler<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
-	Models extends Record<string, AgentModelBinding> = Record<string, never>,
-	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<string, never>,
-	AgentTools extends Record<string, AllowedAgentDefinition> = Record<string, never>,
+	Models extends Record<string, AgentModelBinding> = Record<never, never>,
+	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
+	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Output = unknown,
 > = (context: AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools>) => Promise<Output>
 
@@ -204,9 +243,9 @@ export type AgentExecutionDefinition<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
-	Models extends Record<string, AgentModelBinding> = Record<string, never>,
-	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<string, never>,
-	AgentTools extends Record<string, AllowedAgentDefinition> = Record<string, never>,
+	Models extends Record<string, AgentModelBinding> = Record<never, never>,
+	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
+	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Output = unknown,
 > =
 	| { kind: 'harnessAgent'; definition: HarnessAgentDefinition<any, any, any> }
@@ -228,6 +267,12 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 		Omit<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>
 	sandbox?: AgentSandboxPolicy
 	http?: AgentHttpExposure
+	response?: {
+		mode: AgentResponseMode
+		options?: AgentResponseModeOptions
+		jobId: { source: 'queue-job-id' }
+		runId: { source: 'queue-job-id'; prefix: 'run:' }
+	}
 	streamingMode: 'stream' | 'aggregate'
 	successEventName?: string
 	allowedCommands: readonly AllowedCommandToolDefinition[]
@@ -295,9 +340,9 @@ export type AgentQueueBuilderTypes<
 	ParameterSchema extends Schema = Schema,
 	OutputSchema extends Schema = Schema,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
-	Models extends Record<string, AgentModelBinding> = Record<string, never>,
-	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<string, never>,
-	AgentTools extends Record<string, AllowedAgentDefinition> = Record<string, never>,
+	Models extends Record<string, AgentModelBinding> = Record<never, never>,
+	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
+	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Execution extends AgentExecutionKind | undefined = undefined,
 > = {
 	PayloadSchema: PayloadSchema
@@ -321,7 +366,7 @@ export type AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes<
 	AgentExecutionKind | undefined
 >
 
-export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ? S['Models'] : Record<string, never>
+export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ? S['Models'] : Record<never, never>
 
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>

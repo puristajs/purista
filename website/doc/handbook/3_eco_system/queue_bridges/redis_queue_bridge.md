@@ -17,6 +17,8 @@ order: 301520
 | Dead-letter queue | ✅ (dedicated Redis keys or custom suffix) |
 | Lease extension | ✅ (`PEXPIRE` heartbeat + extendLease) |
 | Lease expiry recovery | ✅ (atomic claim of expired leases before requeue) |
+| Lease inspection | ✅ |
+| Idempotency enforcement | ❌ (keys are metadata only) |
 | Metrics | ✅ (`context.queue.metrics.<queueId>`) |
 
 ## Configuration
@@ -39,6 +41,7 @@ await service.start()
 - Enable Redis persistence/replication for true durability.
 - Keep one dead-letter suffix convention per environment; runtime storage, metrics, and service health now use the same resolved target name.
 - Override lifecycle defaults per queue when workloads differ (long-running AI jobs vs. short webhooks).
+- Keep event-to-queue idempotency in `advisory` mode unless you add application-level dedupe in your worker or repository.
 
 ## Operational tips
 

@@ -18,6 +18,7 @@ order: 301530
 | Lease extension | ✅ (`working()` heartbeats + lease inspection) |
 | Lease expiry recovery | ✅ (ack timeout redelivery) |
 | DLQ inspect / replay / purge | ✅ |
+| Idempotency enforcement | ❌ (keys are metadata only) |
 
 ## Safe defaults
 
@@ -31,6 +32,7 @@ order: 301530
 - This bridge is best when the same platform already uses NATS for event traffic and wants one operational stack.
 - DLQ replay is bridge-managed, not a JetStream “magic queue replay” feature. Operators should inspect the failed payload and reason before redriving.
 - Scheduled jobs are stored separately from immediately runnable jobs, so delayed workloads do not block normal queue throughput.
+- Keep event-to-queue idempotency in `advisory` mode unless your worker/repository enforces dedupe.
 
 ## Related links
 

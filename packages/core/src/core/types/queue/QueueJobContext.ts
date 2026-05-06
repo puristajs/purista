@@ -13,6 +13,7 @@ export type QueueJobControls = {
 	fail(reason: string, fatal?: boolean): Promise<void>
 	moveToDeadLetter(reason?: string): Promise<void>
 	extendLease(durationMs: number): Promise<void>
+	cancelRequested(): boolean
 }
 
 export type QueueJobContext<
@@ -25,6 +26,7 @@ export type QueueJobContext<
 > = ContextBase & {
 	message: Readonly<QueueMessage<MessagePayloadType, MessageParamsType>>
 	job: QueueJobControls
+	signal: AbortSignal
 	emit: EmitCustomMessageFunction<EmitList>
 	service: Invokes
 	stream: StreamInvokes

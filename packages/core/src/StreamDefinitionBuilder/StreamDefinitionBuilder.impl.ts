@@ -10,12 +10,10 @@ import {
 	registerInvokeCapability,
 	registerStreamInvokeCapability,
 } from '../core/helper/builderRegistry.impl.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamAfterGuardHook } from '../core/types/stream/StreamAfterGuardHook.js'
@@ -139,18 +137,7 @@ export class StreamDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'] &
-					Record<
-						QueueName,
-						(
-							payload: InferIn<Payload>,
-							parameter: InferIn<Parameter>,
-							options?: Omit<
-								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
-								'queueName' | 'payload' | 'parameter'
-							>,
-						) => Promise<QueueEnqueueResult>
-					>
+				C['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
 			>
 		>
 	}
