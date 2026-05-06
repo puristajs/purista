@@ -1,7 +1,5 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
-import type { AgentInvokeList } from '../core/types/agent/AgentInvokeList.js'
-import type { AgentInvocation, AgentProtocolResponse } from '../core/types/agent/AgentProtocol.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
@@ -115,76 +113,6 @@ export const createInvokeProxy = <Invokes extends InvokeList | StreamInvokeList 
 		api: getInvokeProxy<Invokes>(),
 		createApi: <TFaux>() => getInvokeProxy<TFaux>(),
 		stubs: invokeMocks,
-	}
-}
-
-export const createAgentInvokeProxy = <AgentInvokes extends AgentInvokeList = AgentInvokeList>(
-	sandbox?: SinonSandbox,
-) => {
-	const agentInvokeMocks: Record<string, Record<string, SinonStub>> = {}
-
-	const getAgentInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
-		const adr = {
-			serviceName: '',
-			serviceTarget: 'run',
-			serviceVersion: '',
-			...address,
-		}
-
-		return new Proxy(() => {}, {
-			get(_obj: object, name) {
-				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
-					return undefined
-				}
-
-				if (lvl === 0) {
-					const nextAddress = {
-						...adr,
-						serviceName: name,
-					}
-					agentInvokeMocks[nextAddress.serviceName] ??= {}
-					return getAgentInvokeProxy<unknown>(nextAddress, lvl + 1)
-				}
-				if (lvl === 1) {
-					const nextAddress = {
-						...adr,
-						serviceVersion: name,
-					}
-					if (!agentInvokeMocks[nextAddress.serviceName][nextAddress.serviceVersion]) {
-						agentInvokeMocks[nextAddress.serviceName][nextAddress.serviceVersion] = sandbox?.stub() ?? stub()
-						agentInvokeMocks[nextAddress.serviceName][nextAddress.serviceVersion].rejects(
-							new Error(
-								`agent invocation of ${nextAddress.serviceName} version ${nextAddress.serviceVersion} is not stubbed`,
-							),
-						)
-					}
-					return getAgentInvokeProxy<unknown>(nextAddress, lvl + 1)
-				}
-
-				if (lvl === 2 && name === 'call') {
-					return (payload: unknown, parameter?: unknown) => {
-						const promise = agentInvokeMocks[adr.serviceName]?.[adr.serviceVersion](
-							payload,
-							parameter,
-						) as Promise<AgentProtocolResponse>
-
-						return {
-							final: () => promise,
-							[Symbol.asyncIterator]: async function* () {
-								const result = await promise
-								yield result
-							},
-						} as AgentInvocation
-					}
-				}
-			},
-		}) as TFaux
-	}
-
-	return {
-		api: getAgentInvokeProxy<AgentInvokes>(),
-		createApi: <TFaux>() => getAgentInvokeProxy<TFaux>(),
-		stubs: agentInvokeMocks,
 	}
 }
 

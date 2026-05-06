@@ -183,40 +183,6 @@ const builder = myServiceBuilder
   })
 ```
 
-## Invoke AI agents
-
-Subscriptions can invoke AI agents by declaring them as a dependency.
-
-::: info Dependency required
-To use agent invocation, the optional **`@purista/ai`** package must be installed in your project.
-:::
-
-```typescript
-const builder = myServiceBuilder
-  .getSubscriptionBuilder('processFeedback', '...')
-  .canInvokeAgent('sentimentAgent', '1', {
-    payloadSchema: z.object({ text: z.string() })
-  })
-  .setSubscriptionFunction(async function (context, payload) {
-    const result = await context.invokeAgent.sentimentAgent['1']
-      .call({ text: payload.feedback })
-      .final()
-
-    if (result.message === 'negative') {
-      await context.service.SupportService['1'].createTicket({ 
-        reason: 'Negative feedback received' 
-      })
-    }
-  })
-```
-
-By using `.canInvokeAgent(...)`, you get:
-- **Type Safety**: Full inference for payload and parameters.
-- **Traceability**: Traces and correlation IDs flow automatically into the agent.
-- **Metadata**: `principalId` and `tenantId` are forwarded to the agent.
-- **Session**: `sessionId` is managed for conversation history.
-```
-
 ## Context
 
 The subscription function context provides:

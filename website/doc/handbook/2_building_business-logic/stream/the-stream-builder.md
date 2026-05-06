@@ -128,41 +128,6 @@ for await (const frame of handle) {
 }
 ```
 
-## Invoke AI agents
-
-Streams can invoke AI agents by declaring them as a dependency.
-
-::: info Dependency required
-To use agent invocation, the optional **`@purista/ai`** package must be installed in your project.
-:::
-
-```typescript
-const builder = myServiceBuilder
-.getStreamBuilder('chat', '...')
-.canInvokeAgent('supportAgent', '1', {
-  payloadSchema: z.object({ prompt: z.string() })
-})
-.setStreamFunction(async function (context, payload, parameter, writer) {
-  const invocation = context.invokeAgent.supportAgent['1'].call({ 
-    prompt: payload.prompt 
-  })
-
-  for await (const frame of invocation) {
-    // Forward agent frames to stream writer
-    await writer.write(frame)
-  }
-
-  const final = await invocation.final()
-  await writer.close(final)
-})
-```
-
-By using `.canInvokeAgent(...)`, you get:
-- **Type Safety**: Full inference for payload and parameters.
-- **Traceability**: Traces and correlation IDs flow automatically into the agent.
-- **Metadata**: `principalId` and `tenantId` are forwarded to the agent.
-- **Session**: `sessionId` is managed for conversation history.
-
 ## Custom events
 
 Streams can emit normal PURISTA custom events:

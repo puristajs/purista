@@ -8,7 +8,7 @@
 
 > **CreateStreamContextMockInput**\<`TBuilder`\> = `object`
 
-Defined in: [testing/createStreamContextMock.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L30)
+Defined in: [testing/createStreamContextMock.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L29)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [testing/createStreamContextMock.ts:30](https://github.com/puristajs
 
 > `optional` **message**: `Partial`\<[`StreamOpenRequest`](StreamOpenRequest.md)\<[`Infer`](Infer.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"PayloadSchema"`\]\>, [`Infer`](Infer.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ParamsSchema"`\]\>\>\>
 
-Defined in: [testing/createStreamContextMock.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L35)
+Defined in: [testing/createStreamContextMock.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L34)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [testing/createStreamContextMock.ts:35](https://github.com/puristajs
 
 > **parameter**: [`InferIn`](InferIn.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ParamsSchema"`\]\>
 
-Defined in: [testing/createStreamContextMock.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L32)
+Defined in: [testing/createStreamContextMock.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L31)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [testing/createStreamContextMock.ts:32](https://github.com/puristajs
 
 > **payload**: [`InferIn`](InferIn.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"PayloadSchema"`\]\>
 
-Defined in: [testing/createStreamContextMock.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L31)
+Defined in: [testing/createStreamContextMock.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L30)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [testing/createStreamContextMock.ts:31](https://github.com/puristajs
 
 > `optional` **resources**: `Partial`\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\]\>
 
-Defined in: [testing/createStreamContextMock.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L34)
+Defined in: [testing/createStreamContextMock.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L33)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [testing/createStreamContextMock.ts:34](https://github.com/puristajs
 
 > `optional` **sandbox**: `SinonSandbox`
 
-Defined in: [testing/createStreamContextMock.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L33)
+Defined in: [testing/createStreamContextMock.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L32)

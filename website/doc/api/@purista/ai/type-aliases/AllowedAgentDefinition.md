@@ -2,13 +2,27 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AllowedAgentDefinition
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AllowedAgentDefinition
 
-# Type Alias: AllowedAgentDefinition
+# Type Alias: AllowedAgentDefinition\<Output, Payload, Parameter\>
 
-> **AllowedAgentDefinition** = `object`
+> **AllowedAgentDefinition**\<`Output`, `Payload`, `Parameter`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:120](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L120)
+Defined in: ai/src/builder/types.ts:75
+
+## Type Parameters
+
+### Output
+
+`Output` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
+
+### Payload
+
+`Payload` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
+
+### Parameter
+
+`Parameter` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
 
 ## Properties
 
@@ -16,52 +30,36 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:120](https://github.com/puri
 
 > **agentName**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:121](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L121)
-
-***
-
-### description?
-
-> `optional` **description**: `string`
-
-Defined in: [packages/ai/src/types/AgentManifest.ts:123](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L123)
+Defined in: ai/src/builder/types.ts:80
 
 ***
 
 ### outputSchema?
 
-> `optional` **outputSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+> `optional` **outputSchema**: `Output`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:126](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L126)
+Defined in: ai/src/builder/types.ts:82
 
 ***
 
 ### parameterSchema?
 
-> `optional` **parameterSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+> `optional` **parameterSchema**: `Parameter`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:125](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L125)
+Defined in: ai/src/builder/types.ts:84
 
 ***
 
 ### payloadSchema?
 
-> `optional` **payloadSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+> `optional` **payloadSchema**: `Payload`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:124](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L124)
-
-***
-
-### serviceVersion?
-
-> `optional` **serviceVersion**: `string`
-
-Defined in: [packages/ai/src/types/AgentManifest.ts:122](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L122)
+Defined in: ai/src/builder/types.ts:83
 
 ***
 
-### toolName?
+### serviceVersion
 
-> `optional` **toolName**: `string`
+> **serviceVersion**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:127](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L127)
+Defined in: ai/src/builder/types.ts:81

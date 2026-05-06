@@ -7,18 +7,12 @@ import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.im
 import {
 	getNamedHook,
 	mergeNamedHooks,
-	registerAgentInvokeCapability,
 	registerEmitSchema,
 	registerInvokeCapability,
 	registerStreamInvokeCapability,
 } from '../core/helper/builderRegistry.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type {
-	AgentInvocation,
-	AgentProtocolResponse,
-	agentProtocolPayloadSchema,
-} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { CommandAfterGuardHook } from '../core/types/commandType/CommandAfterGuardHook.js'
@@ -46,20 +40,6 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
 
 export type HttpExposureOptions = {
 	mode?: 'sync' | 'async'
-}
-
-export type CommandAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
-	payloadSchema?: Payload
-	parameterSchema?: Parameter
-	outputSchema?: Schema
-}
-
-const isAgentInvokeConfig = (value: unknown): value is CommandAgentInvokeConfig<Schema, Schema> => {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		('payloadSchema' in value || 'parameterSchema' in value || 'outputSchema' in value)
-	)
 }
 
 /**
@@ -102,7 +82,6 @@ export class CommandDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
-	private agentInvokes: C['AgentInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 
@@ -114,11 +93,34 @@ export class CommandDefinitionBuilder<
 		}
 		beforeGuard: Record<
 			string,
-			CommandBeforeGuardHook<S, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
+			CommandBeforeGuardHook<
+				S,
+				any,
+				any,
+				any,
+				any,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
 		>
 		afterGuard: Record<
 			string,
-			CommandAfterGuardHook<S, any, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
+			CommandAfterGuardHook<
+				S,
+				any,
+				any,
+				any,
+				any,
+				any,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema
@@ -182,11 +184,12 @@ export class CommandDefinitionBuilder<
 		any,
 		any,
 		any,
-		C['Resources'],
-		C['Invokes'],
-		C['StreamInvokes'],
-		C['EmitList']
-	>
+			C['Resources'],
+			C['Invokes'],
+			C['StreamInvokes'],
+			C['EmitList'],
+			C['QueueInvokes']
+		>
 
 	constructor(
 		private commandName: Exclude<string, ''>,
@@ -268,7 +271,8 @@ export class CommandDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -354,92 +358,8 @@ export class CommandDefinitionBuilder<
 							>
 						>
 					>,
-				C['EmitList']
-			>
-		>
-	}
-
-	/**
-	 * Define an agent which can be invoked by the current command.
-	 * The agent must follow the PURISTA agent protocol.
-	 *
-	 * @param agentName The name of the agent service
-	 * @param serviceVersion The version of the agent service
-	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
-	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema, outputSchema }` validates `.call(payload, parameter)` arguments
-	 *   and declares expected final response envelopes for higher-level helpers.
-	 */
-	canInvokeAgent<
-		Payload extends Schema = typeof agentProtocolPayloadSchema,
-		Parameter extends Schema = Schema,
-		SName extends string = string,
-		Version extends string = string,
-	>(
-		agentName: SName,
-		serviceVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | CommandAgentInvokeConfig<Payload, Parameter>,
-	) {
-		if (agentName.trim() === '' || serviceVersion.trim() === '') {
-			throw new Error('canInvokeAgent requires non-empty agent name and version')
-		}
-
-		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.payloadSchema
-			: undefined
-		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.parameterSchema
-			: invokeConfigOrParameterSchema
-		const outputSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.outputSchema
-			: undefined
-
-		this.agentInvokes = registerAgentInvokeCapability(
-			this.agentInvokes as Record<
-				string,
-				Record<string, { payloadSchema?: Schema; parameterSchema?: Schema; outputSchema?: Schema }>
-			>,
-			agentName,
-			serviceVersion,
-			{ payloadSchema, parameterSchema, outputSchema },
-		) as unknown as C['AgentInvokes'] &
-			Record<
-				SName,
-				Record<
-					Version,
-					{
-						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
-					}
-				>
-			>
-
-		return this as unknown as CommandDefinitionBuilder<
-			S,
-			CommandDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes'] &
-					Record<
-						SName,
-						Record<
-							Version,
-							{
-								call: (
-									payload: InferIn<Payload>,
-									parameter?: InferIn<Parameter>,
-								) => AgentInvocation<AgentProtocolResponse>
-							}
-						>
-					>
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -510,7 +430,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -535,7 +456,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -568,7 +490,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -692,7 +615,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -762,7 +686,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -805,7 +730,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>,
 	) {
@@ -830,7 +756,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -853,7 +779,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>,
 	) {
@@ -878,7 +805,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1015,8 +942,7 @@ export class CommandDefinitionBuilder<
 				StreamInvokes,
 				EmitList,
 				CommandDefinitionMetadataBase,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		>,
 	) {
@@ -1041,8 +967,7 @@ export class CommandDefinitionBuilder<
 				StreamInvokes,
 				EmitList,
 				HttpExposedServiceMeta<InferTypeOrEmptyObject<C['ParamsSchema']>>,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		> = {
 			...definition,
@@ -1132,8 +1057,7 @@ export class CommandDefinitionBuilder<
 				C['StreamInvokes'],
 				C['EmitList'],
 				CommandDefinitionMetadataBase,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		> = {
 			commandName: this.commandName,
@@ -1156,7 +1080,6 @@ export class CommandDefinitionBuilder<
 			hooks: this.hooks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
-			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}
@@ -1192,7 +1115,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setCommandFunction')
@@ -1231,7 +1154,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1259,7 +1182,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 

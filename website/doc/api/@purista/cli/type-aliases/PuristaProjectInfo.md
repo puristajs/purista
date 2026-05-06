@@ -8,7 +8,7 @@
 
 > **PuristaProjectInfo** = `object`
 
-Defined in: [packages/cli/src/api/scanPuristaProject.ts:13](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/api/scanPuristaProject.ts#L13)
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:13](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L13)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/api/scanPuristaProject.ts:13](https://github.com/p
 
 > **eventEnumFileName**: `string`
 
-Defined in: [packages/cli/src/api/scanPuristaProject.ts:16](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/api/scanPuristaProject.ts#L16)
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:16](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L16)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/api/scanPuristaProject.ts:16](https://github.com/p
 
 > **eventNames**: `object`[]
 
-Defined in: [packages/cli/src/api/scanPuristaProject.ts:15](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/api/scanPuristaProject.ts#L15)
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:15](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L15)
 
 #### name
 
@@ -40,4 +40,4 @@ Defined in: [packages/cli/src/api/scanPuristaProject.ts:15](https://github.com/p
 
 > **services**: [`PuristaProjectServices`](PuristaProjectServices.md)
 
-Defined in: [packages/cli/src/api/scanPuristaProject.ts:14](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/api/scanPuristaProject.ts#L14)
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:14](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L14)

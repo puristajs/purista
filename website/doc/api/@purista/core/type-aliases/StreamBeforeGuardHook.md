@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamBeforeGuardHook
 
-# Type Alias: StreamBeforeGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: StreamBeforeGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **StreamBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`void`\>
+> **StreamBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`void`\>
 
-Defined in: [core/types/stream/StreamBeforeGuardHook.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamBeforeGuardHook.ts#L18)
+Defined in: [core/types/stream/StreamBeforeGuardHook.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamBeforeGuardHook.ts#L17)
 
 Guard called after stream input validation and before the stream handler runs.
 
@@ -57,10 +57,6 @@ route validation. Keep business logic in the stream handler itself.
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Parameters
 
 ### this
@@ -69,7 +65,7 @@ route validation. Keep business logic in the stream handler itself.
 
 ### context
 
-[`StreamFunctionContext`](StreamFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
+[`StreamFunctionContext`](StreamFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
 ### payload
 

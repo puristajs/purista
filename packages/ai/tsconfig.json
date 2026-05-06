@@ -8,10 +8,11 @@
 		"baseUrl": ".",
 		"moduleResolution": "Bundler",
 		"paths": {
-			"@purista/ai": ["./src/index.ts"]
+			"@purista/ai": ["./src/index.ts"],
+			"@purista/ai/testing": ["./src/testing/index.ts"]
 		},
 		"types": ["vitest/globals", "node"]
 	},
 	"include": ["./src/**/*"],
-	"exclude": ["./src/**/*.test.ts", "./dist/*", "./**/*.d.ts"]
+	"exclude": ["./src/**/*.test.ts", "./dist/*"]
 }

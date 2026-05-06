@@ -8,7 +8,7 @@
 
 > **createPuristaCliEngine**(`options?`): `object`
 
-Defined in: [packages/cli/src/engine.ts:25](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/engine.ts#L25)
+Defined in: [packages/cli/src/engine.ts:25](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/engine.ts#L25)
 
 ## Parameters
 

@@ -40,28 +40,6 @@ export const isTransportControlFrame = (frameType: unknown): boolean =>
 	typeof frameType === 'string' &&
 	(frameType === 'open' || frameType === 'close' || frameType === 'start' || frameType === 'complete')
 
-export const isAgentEnvelopeLike = (value: unknown): value is { frame: { kind?: string } } => {
-	if (!value || typeof value !== 'object') {
-		return false
-	}
-	const candidate = value as { version?: unknown; frame?: unknown }
-	return typeof candidate.version === 'string' && !!candidate.frame && typeof candidate.frame === 'object'
-}
-
-const extractAgentEnvelopes = (value: unknown): Array<{ frame: { kind?: string } }> => {
-	if (Array.isArray(value)) {
-		return value.filter(isAgentEnvelopeLike)
-	}
-	if (!value || typeof value !== 'object') {
-		return []
-	}
-	const candidate = value as { envelopes?: unknown }
-	if (Array.isArray(candidate.envelopes)) {
-		return candidate.envelopes.filter(isAgentEnvelopeLike)
-	}
-	return []
-}
-
 export const isStreamErrorPayload = (
 	payload: StreamTransportFramePayload,
 ): payload is StreamTransportFramePayload & { error: { status?: number; message?: string } } => {
@@ -82,20 +60,12 @@ export const resolveHttpStreamingMode = (input: {
 }
 
 export const collectAggregateStreamResult = async (handle: StreamHandle) => {
-	const envelopes: unknown[] = []
 	let finalPayload: unknown
 
 	for await (const frame of handle) {
 		const payload = frame.payload as StreamTransportFramePayload
-		if (payload.frameType === 'chunk' && payload.chunk !== undefined) {
-			envelopes.push(payload.chunk)
-			continue
-		}
 		if (payload.frameType === 'complete') {
 			finalPayload = payload.final
-			if (Array.isArray(payload.final)) {
-				envelopes.splice(0, envelopes.length, ...payload.final)
-			}
 			break
 		}
 		if (isStreamErrorPayload(payload)) {
@@ -108,17 +78,6 @@ export const collectAggregateStreamResult = async (handle: StreamHandle) => {
 				statusCode,
 				payload: payload.error,
 			}
-		}
-	}
-
-	const agentEnvelopes = extractAgentEnvelopes(finalPayload)
-	const fallbackEnvelopes = envelopes.filter(isAgentEnvelopeLike)
-	const finalEnvelope = (agentEnvelopes.length > 0 ? agentEnvelopes : fallbackEnvelopes).at(-1)
-	if (finalEnvelope?.frame?.kind === 'error') {
-		return {
-			status: 'error' as const,
-			statusCode: StatusCode.InternalServerError as ContentfulStatusCode,
-			payload: finalPayload ?? finalEnvelope,
 		}
 	}
 

@@ -8,7 +8,7 @@
 
 > **isStreamErrorPayload**(`payload`): `payload is StreamTransportFramePayload & { error: { message?: string; status?: number } }`
 
-Defined in: [hono-http-server/src/helper/streamTransport.ts:65](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L65)
+Defined in: [hono-http-server/src/helper/streamTransport.ts:43](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L43)
 
 ## Parameters
 

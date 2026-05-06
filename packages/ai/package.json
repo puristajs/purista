@@ -1,7 +1,7 @@
 {
 	"name": "@purista/ai",
 	"version": "2.2.0",
-	"description": "AI builders, runtime services, MCP helpers, and evaluation utilities for the PURISTA framework",
+	"description": "Harness-backed AI builder and runtime integration for the PURISTA framework",
 	"homepage": "https://purista.dev",
 	"repository": {
 		"type": "git",
@@ -22,12 +22,20 @@
 				"types": "./dist/commonjs/index.d.ts",
 				"default": "./dist/commonjs/index.js"
 			}
+		},
+		"./testing": {
+			"import": {
+				"types": "./dist/esm/testing/index.d.ts",
+				"default": "./dist/esm/testing/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/testing/index.d.ts",
+				"default": "./dist/commonjs/testing/index.js"
+			}
 		}
 	},
 	"files": [
-		"dist/**/*",
-		"Dockerfile.sandbox",
-		"Dockerfile.sandbox.alpine"
+		"dist/**/*"
 	],
 	"publishConfig": {
 		"access": "public"
@@ -36,11 +44,10 @@
 		"node": ">=18.15"
 	},
 	"scripts": {
-		"lint": "npx @biomejs/biome check src/bridge src/builder src/evaluation src/manifest src/mcp src/memory src/pools src/protocol src/providers src/runtime src/sandbox src/skills src/testing src/types scripts package.json vitest.config.ts",
-		"lint:fix": "npx @biomejs/biome check --write src/bridge src/builder src/evaluation src/manifest src/mcp src/memory src/pools src/protocol src/providers src/runtime src/sandbox src/skills src/testing src/types scripts package.json vitest.config.ts",
+		"lint": "npx @biomejs/biome check src/index.ts src/clean-package.test.ts src/builder src/runtime src/testing src/types package.json vitest.config.ts",
+		"lint:fix": "npx @biomejs/biome check --write src/index.ts src/clean-package.test.ts src/builder src/runtime src/testing src/types package.json vitest.config.ts",
 		"test": "vitest -c ./vitest.config.ts",
 		"test:coverage": "vitest run -c ./vitest.config.ts --coverage",
-		"sandbox:image:build": "node ./scripts/build-sandbox-image.mjs",
 		"build": "rimraf dist .tshy .tshy-build tsconfig.tsbuildinfo && tshy && node ./scripts/assert-build-artifacts.mjs"
 	},
 	"tshy": {
@@ -49,7 +56,8 @@
 		],
 		"exports": {
 			"./package.json": "./package.json",
-			".": "./src/index.ts"
+			".": "./src/index.ts",
+			"./testing": "./src/testing/index.ts"
 		}
 	},
 	"devDependencies": {
@@ -58,10 +66,9 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"ai": "^6.0.103",
 		"@opentelemetry/api": "^1.9.0",
 		"@purista/core": "*",
-		"execa": "^9.6.1",
+		"@purista/harness": "^1.0.0",
 		"zod": "^4.3.6"
 	},
 	"types": "./dist/commonjs/index.d.ts",

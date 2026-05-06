@@ -8,10 +8,6 @@
 
 Defined in: [QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueWorkerBuilder/QueueWorkerBuilder.impl.ts#L10)
 
-## Extended by
-
-- [`AgentWorkerBuilder`](../../ai/classes/AgentWorkerBuilder.md)
-
 ## Constructors
 
 ### Constructor

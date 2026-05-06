@@ -1,5 +1,4 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
@@ -21,7 +20,6 @@ export type StreamFunction<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = (
 	this: S,
 	context: StreamFunctionContext<
@@ -31,8 +29,7 @@ export type StreamFunction<
 		Invokes,
 		StreamInvokes,
 		EmitList,
-		QueueInvokes,
-		AgentInvokes
+		QueueInvokes
 	>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,

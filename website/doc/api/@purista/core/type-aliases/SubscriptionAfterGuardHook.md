@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionAfterGuardHook
 
-# Type Alias: SubscriptionAfterGuardHook()\<ServiceClassType, FunctionResultType, FunctionPayloadOutputType, FunctionParameterType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: SubscriptionAfterGuardHook()\<ServiceClassType, FunctionResultType, FunctionPayloadOutputType, FunctionParameterType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **SubscriptionAfterGuardHook**\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `result`, `payload`, `parameter`) => `Promise`\<`void`\>
+> **SubscriptionAfterGuardHook**\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `result`, `payload`, `parameter`) => `Promise`\<`void`\>
 
-Defined in: [core/types/subscription/SubscriptionAfterGuardHook.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts#L16)
+Defined in: [core/types/subscription/SubscriptionAfterGuardHook.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts#L15)
 
 Definition of after guard hook functions.
 This guard is called after function successfully returns and after output validation.
@@ -51,10 +51,6 @@ This guard is called after function successfully returns and after output valida
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Parameters
 
 ### this
@@ -63,7 +59,7 @@ This guard is called after function successfully returns and after output valida
 
 ### context
 
-[`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
+[`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
 ### result
 

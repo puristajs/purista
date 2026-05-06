@@ -154,51 +154,42 @@ export const addPathToOpenApi = (
 						: {
 								[responseContentType]: {
 									schema: isStreamResponse
-										? streamProtocol && streamProtocol !== 'purista'
-											? {
-													type: 'object',
-													properties: {
-														event: { type: 'string' },
-														data: {},
+										? {
+												oneOf: [
+													{
+														type: 'object',
+														properties: {
+															frameType: {
+																type: 'string',
+																enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+															},
+															sequence: {
+																type: 'integer',
+															},
+															chunk: exposeWithSchemas.chunkPayload,
+															final: exposeWithSchemas.finalPayload,
+															error: {
+																type: 'object',
+																properties: {
+																	status: { type: 'integer' },
+																	message: { type: 'string' },
+																	isHandledError: { type: 'boolean' },
+																	traceId: { type: 'string' },
+																},
+															},
+															reason: { type: 'string' },
+														},
 													},
-													required: ['event', 'data'],
-												}
-											: {
-													oneOf: [
-														{
-															type: 'object',
-															properties: {
-																frameType: {
-																	type: 'string',
-																	enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
-																},
-																sequence: {
-																	type: 'integer',
-																},
-																chunk: exposeWithSchemas.chunkPayload,
-																final: exposeWithSchemas.finalPayload,
-																error: {
-																	type: 'object',
-																	properties: {
-																		status: { type: 'integer' },
-																		message: { type: 'string' },
-																		isHandledError: { type: 'boolean' },
-																		traceId: { type: 'string' },
-																	},
-																},
-																reason: { type: 'string' },
-															},
+													{
+														type: 'object',
+														properties: {
+															event: { type: 'string' },
+															data: {},
 														},
-														{
-															type: 'object',
-															properties: {
-																event: { type: 'string' },
-																data: {},
-															},
-															required: ['event', 'data'],
-														},
-													],
-												}
+														required: ['event', 'data'],
+													},
+												],
+											}
 										: isAggregateStream
 											? (exposeWithSchemas.finalPayload ?? {
 													type: 'object',

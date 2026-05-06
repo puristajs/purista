@@ -6,18 +6,12 @@ import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.im
 import {
 	getNamedHook,
 	mergeNamedHooks,
-	registerAgentInvokeCapability,
 	registerEmitSchema,
 	registerInvokeCapability,
 	registerStreamInvokeCapability,
 } from '../core/helper/builderRegistry.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type {
-	AgentInvocation,
-	AgentProtocolResponse,
-	agentProtocolPayloadSchema,
-} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
@@ -34,20 +28,6 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
 
-export type StreamAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
-	payloadSchema?: Payload
-	parameterSchema?: Parameter
-	outputSchema?: Schema
-}
-
-const isAgentInvokeConfig = (value: unknown): value is StreamAgentInvokeConfig<Schema, Schema> => {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		('payloadSchema' in value || 'parameterSchema' in value || 'outputSchema' in value)
-	)
-}
-
 export class StreamDefinitionBuilder<
 	S extends Service,
 	C extends StreamDefinitionBuilderTypes = StreamDefinitionBuilderTypes,
@@ -63,7 +43,6 @@ export class StreamDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
-	private agentInvokes: C['AgentInvokes'] = {}
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
 
@@ -102,8 +81,7 @@ export class StreamDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		>
 	} = {
@@ -307,89 +285,6 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
-	/**
-	 * Define an agent which can be invoked by the current stream.
-	 * The agent must follow the PURISTA agent protocol.
-	 *
-	 * @param agentName The name of the agent service
-	 * @param serviceVersion The version of the agent service
-	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
-	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema, outputSchema }` validates `.call(payload, parameter)` arguments
-	 *   and declares expected final response envelopes for higher-level helpers.
-	 */
-	canInvokeAgent<
-		Payload extends Schema = typeof agentProtocolPayloadSchema,
-		Parameter extends Schema = Schema,
-		SName extends string = string,
-		Version extends string = string,
-	>(
-		agentName: SName,
-		serviceVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | StreamAgentInvokeConfig<Payload, Parameter>,
-	) {
-		if (agentName.trim() === '' || serviceVersion.trim() === '') {
-			throw new Error('canInvokeAgent requires non-empty agent name and version')
-		}
-
-		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.payloadSchema
-			: undefined
-		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.parameterSchema
-			: invokeConfigOrParameterSchema
-		const outputSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.outputSchema
-			: undefined
-
-		this.agentInvokes = registerAgentInvokeCapability(
-			this.agentInvokes as Record<
-				string,
-				Record<string, { payloadSchema?: Schema; parameterSchema?: Schema; outputSchema?: Schema }>
-			>,
-			agentName,
-			serviceVersion,
-			{ payloadSchema, parameterSchema, outputSchema },
-		) as unknown as C['AgentInvokes'] &
-			Record<
-				SName,
-				Record<
-					Version,
-					{
-						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
-					}
-				>
-			>
-
-		return this as unknown as StreamDefinitionBuilder<
-			S,
-			StreamDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['ChunkSchema'],
-				C['FinalSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes'] &
-					Record<
-						SName,
-						Record<
-							Version,
-							{
-								call: (
-									payload: InferIn<Payload>,
-									parameter?: InferIn<Parameter>,
-								) => AgentInvocation<AgentProtocolResponse>
-							}
-						>
-					>
-			>
-		>
-	}
-
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
 		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 		return this as unknown as StreamDefinitionBuilder<
@@ -425,8 +320,7 @@ export class StreamDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		>,
 	) {
@@ -444,8 +338,7 @@ export class StreamDefinitionBuilder<
 					C['Invokes'],
 					C['StreamInvokes'],
 					C['EmitList'],
-					C['QueueInvokes'],
-					C['AgentInvokes']
+					C['QueueInvokes']
 				>
 			>,
 			'setBeforeGuardHooks',
@@ -467,8 +360,7 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -490,8 +382,7 @@ export class StreamDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		>,
 	) {
@@ -510,8 +401,7 @@ export class StreamDefinitionBuilder<
 					C['Invokes'],
 					C['StreamInvokes'],
 					C['EmitList'],
-					C['QueueInvokes'],
-					C['AgentInvokes']
+					C['QueueInvokes']
 				>
 			>,
 			'setAfterGuardHooks',
@@ -534,8 +424,7 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -717,8 +606,7 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setStreamFunction')
@@ -745,8 +633,7 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -842,8 +729,7 @@ export class StreamDefinitionBuilder<
 			C['StreamInvokes'],
 			C['EmitList'],
 			StreamDefinitionMetadataBase,
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		> = {
 			streamName: this.streamName,
 			streamDescription: this.streamDescription,
@@ -859,7 +745,6 @@ export class StreamDefinitionBuilder<
 			aggregateChunks: this.aggregateChunks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
-			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}

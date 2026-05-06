@@ -8,7 +8,7 @@
 
 > **PuristaCommandResolution**\<`TInput`, `TResolved`\> = `object`
 
-Defined in: [packages/cli/src/core/types.ts:37](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L37)
+Defined in: [packages/cli/src/core/types.ts:37](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L37)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [packages/cli/src/core/types.ts:37](https://github.com/puristajs/pur
 
 > **command**: [`PuristaCommandId`](PuristaCommandId.md)
 
-Defined in: [packages/cli/src/core/types.ts:38](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L38)
+Defined in: [packages/cli/src/core/types.ts:38](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L38)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/cli/src/core/types.ts:38](https://github.com/puristajs/pur
 
 > **errors**: [`PuristaCommandIssue`](PuristaCommandIssue.md)[]
 
-Defined in: [packages/cli/src/core/types.ts:43](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L43)
+Defined in: [packages/cli/src/core/types.ts:43](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L43)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/cli/src/core/types.ts:43](https://github.com/puristajs/pur
 
 > **input**: `TInput`
 
-Defined in: [packages/cli/src/core/types.ts:39](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L39)
+Defined in: [packages/cli/src/core/types.ts:39](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L39)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [packages/cli/src/core/types.ts:39](https://github.com/puristajs/pur
 
 > **missing**: [`PromptRequest`](PromptRequest.md)[]
 
-Defined in: [packages/cli/src/core/types.ts:41](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L41)
+Defined in: [packages/cli/src/core/types.ts:41](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L41)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [packages/cli/src/core/types.ts:41](https://github.com/puristajs/pur
 
 > `optional` **resolvedInput**: `TResolved`
 
-Defined in: [packages/cli/src/core/types.ts:40](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L40)
+Defined in: [packages/cli/src/core/types.ts:40](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L40)
 
 ***
 
@@ -66,4 +66,4 @@ Defined in: [packages/cli/src/core/types.ts:40](https://github.com/puristajs/pur
 
 > **warnings**: `string`[]
 
-Defined in: [packages/cli/src/core/types.ts:42](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L42)
+Defined in: [packages/cli/src/core/types.ts:42](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L42)

@@ -1,5 +1,4 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
 import type { InstanceId } from '../InstanceId.js'
@@ -36,7 +35,6 @@ export type SubscriptionDefinition<
 	EmitList extends Record<string, Schema>,
 	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	/** the name of the subscription */
 	subscriptionName: string
@@ -56,8 +54,7 @@ export type SubscriptionDefinition<
 		Invokes,
 		StreamInvokes,
 		EmitList,
-		QueueInvokes,
-		AgentInvokes
+		QueueInvokes
 	>
 	/** filter for messages produced by given sender */
 	sender?: {
@@ -106,8 +103,7 @@ export type SubscriptionDefinition<
 				Invokes,
 				StreamInvokes,
 				EmitList,
-				QueueInvokes,
-				AgentInvokes
+				QueueInvokes
 			>
 		>
 		afterGuard?: Record<
@@ -121,8 +117,7 @@ export type SubscriptionDefinition<
 				Invokes,
 				StreamInvokes,
 				EmitList,
-				QueueInvokes,
-				AgentInvokes
+				QueueInvokes
 			>
 		>
 		transformOutput?: {
@@ -137,7 +132,6 @@ export type SubscriptionDefinition<
 	}
 	invokes: Invokes
 	streamInvokes: StreamInvokes
-	agentInvokes: AgentInvokes
 	emitList: EmitList
 	queueInvokes: QueueInvokes
 	deprecated: boolean

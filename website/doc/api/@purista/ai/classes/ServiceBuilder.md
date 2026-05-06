@@ -2,13 +2,29 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / ServiceBuilder
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / ServiceBuilder
 
-# Class: ServiceBuilder\<S\>
+# Class: ServiceBuilder\<S, Models\>
 
-Defined in: packages/ai/src/builder/ServiceBuilder.ts:172
+Defined in: [ai/src/builder/ServiceBuilder.ts:48](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/ServiceBuilder.ts#L48)
 
-This class is used to build a service.
+AI-enabled PURISTA service builder.
+
+It keeps agents outside `@purista/core` by expanding every attached agent into
+normal core queue, queue worker, command, and stream definitions.
+
+## Example
+
+```ts
+const service = new ServiceBuilder(info)
+const agent = await service
+  .getAgentQueueBuilder('triage', 'Classify tickets')
+  .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+  .setRunFunction(async context => ({ ok: true }))
+  .getDefinition()
+
+service.addAgentDefinition(agent)
+```
 
 ## Extends
 
@@ -20,13 +36,17 @@ This class is used to build a service.
 
 `S` *extends* [`ServiceBuilderTypes`](../../core/type-aliases/ServiceBuilderTypes.md) = [`ServiceBuilderTypes`](../../core/type-aliases/ServiceBuilderTypes.md)
 
+### Models
+
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](../type-aliases/AgentModelBinding.md)\> = `Record`\<`string`, `never`\>
+
 ## Constructors
 
 ### Constructor
 
-> **new ServiceBuilder**\<`S`\>(`info`): `ServiceBuilder`\<`S`\>
+> **new ServiceBuilder**\<`S`, `Models`\>(`info`): `ServiceBuilder`\<`S`, `Models`\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:82
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:79
 
 #### Parameters
 
@@ -36,7 +56,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:82
 
 #### Returns
 
-`ServiceBuilder`\<`S`\>
+`ServiceBuilder`\<`S`, `Models`\>
 
 #### Inherited from
 
@@ -48,7 +68,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:82
 
 > **info**: [`ServiceInfoType`](../../core/type-aliases/ServiceInfoType.md)
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:63
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:62
 
 #### Inherited from
 
@@ -60,7 +80,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:63
 
 > **SClass**: [`Newable`](../../core/type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:81
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:78
 
 #### Inherited from
 
@@ -70,29 +90,25 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:81
 
 ### addAgentDefinition()
 
-> **addAgentDefinition**\<`Definitions`\>(...`agentDefinitions`): `ServiceBuilder`\<[`SetNewTypeValues`](../../core/type-aliases/SetNewTypeValues.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<`S`, `"AgentDefinitions"`, \{ `__hasAgents`: `true`; `Models`: `NextServiceAgentModels`\<`S`, `Awaited`\<`Definitions`\[`number`\]\>\>; \}\>, \{ `AiConfig`: [`ServiceAiConfig`](../type-aliases/ServiceAiConfig.md)\<`NextServiceAgentModels`\<`S`, `Awaited`\<`Definitions`\[`number`\]\>\>\>; \}\>\>
+> **addAgentDefinition**\<`Definition`\>(...`definitions`): `ServiceBuilder`\<`S`, `MergeModels`\<`Models`, `ExtractAgentModels`\<`Definition`\>\>\>
 
-Defined in: packages/ai/src/builder/ServiceBuilder.ts:188
+Defined in: [ai/src/builder/ServiceBuilder.ts:65](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/ServiceBuilder.ts#L65)
 
 #### Type Parameters
 
-##### Definitions
+##### Definition
 
-`Definitions` *extends* [`AgentQueueDefinitionList`](../../core/type-aliases/AgentQueueDefinitionList.md)
+`Definition` *extends* [`AttachedAgentDefinition`](../type-aliases/AttachedAgentDefinition.md)\<`any`\>
 
 #### Parameters
 
-##### agentDefinitions
+##### definitions
 
-...`Definitions`
+...`Definition`[]
 
 #### Returns
 
-`ServiceBuilder`\<[`SetNewTypeValues`](../../core/type-aliases/SetNewTypeValues.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<`S`, `"AgentDefinitions"`, \{ `__hasAgents`: `true`; `Models`: `NextServiceAgentModels`\<`S`, `Awaited`\<`Definitions`\[`number`\]\>\>; \}\>, \{ `AiConfig`: [`ServiceAiConfig`](../type-aliases/ServiceAiConfig.md)\<`NextServiceAgentModels`\<`S`, `Awaited`\<`Definitions`\[`number`\]\>\>\>; \}\>\>
-
-#### Overrides
-
-[`ServiceBuilder`](../../core/classes/ServiceBuilder.md).[`addAgentDefinition`](../../core/classes/ServiceBuilder.md#addagentdefinition)
+`ServiceBuilder`\<`S`, `MergeModels`\<`Models`, `ExtractAgentModels`\<`Definition`\>\>\>
 
 ***
 
@@ -100,7 +116,7 @@ Defined in: packages/ai/src/builder/ServiceBuilder.ts:188
 
 > **addCommandDefinition**(...`commands`): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:90
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:87
 
 #### Parameters
 
@@ -122,7 +138,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:90
 
 > **addQueueDefinition**(...`queues`): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:93
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:90
 
 #### Parameters
 
@@ -144,7 +160,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:93
 
 > **addQueueWorkerDefinition**(...`workers`): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:94
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:91
 
 #### Parameters
 
@@ -166,7 +182,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:94
 
 > **addStreamDefinition**(...`streams`): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:92
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:89
 
 #### Parameters
 
@@ -188,7 +204,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:92
 
 > **addSubscriptionDefinition**(...`subscription`): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:91
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:88
 
 #### Parameters
 
@@ -210,7 +226,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:91
 
 > **defineResource**\<`ResourceName`, `ResourcesType`\>(): [`ServiceBuilder`](../../core/classes/ServiceBuilder.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<`S`, `"Resources"`, `S`\[`"Resources"`\] & `{ [K in string]: InstanceOrType<ResourcesType> }`\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:106
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:99
 
 #### Type Parameters
 
@@ -234,33 +250,29 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:106
 
 ### getAgentQueueBuilder()
 
-> **getAgentQueueBuilder**\<`Models`\>(`agentName`, `description?`, `successEventName?`): [`AgentQueueBuilder`](AgentQueueBuilder.md)\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<[`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `Models`\>\>
+> **getAgentQueueBuilder**\<`AgentName`\>(`agentName`, `description`): [`AgentQueueBuilder`](AgentQueueBuilder.md)\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<[`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), `S`\[`"Resources"`\] *extends* `Record`\<`string`, `unknown`\> ? `any`\[`any`\] : `Record`\<`string`, `never`\>\>\>
 
-Defined in: packages/ai/src/builder/ServiceBuilder.ts:173
+Defined in: [ai/src/builder/ServiceBuilder.ts:54](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/ServiceBuilder.ts#L54)
 
 #### Type Parameters
 
-##### Models
+##### AgentName
 
-`Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+`AgentName` *extends* `string`
 
 #### Parameters
 
 ##### agentName
 
-`string`
+`AgentName`
 
-##### description?
-
-`string`
-
-##### successEventName?
+##### description
 
 `string`
 
 #### Returns
 
-[`AgentQueueBuilder`](AgentQueueBuilder.md)\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<[`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `Models`\>\>
+[`AgentQueueBuilder`](AgentQueueBuilder.md)\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<[`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), `S`\[`"Resources"`\] *extends* `Record`\<`string`, `unknown`\> ? `any`\[`any`\] : `Record`\<`string`, `never`\>\>\>
 
 ***
 
@@ -268,7 +280,7 @@ Defined in: packages/ai/src/builder/ServiceBuilder.ts:173
 
 > **getCommandBuilder**\<`T`, `N`\>(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](../../core/classes/CommandDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`CommandDefinitionBuilderTypes`](../../core/type-aliases/CommandDefinitionBuilderTypes.md)\<[`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), `S`\[`"Resources"`\], [`InvokeList`](../../core/type-aliases/InvokeList.md), [`StreamInvokeList`](../../core/type-aliases/StreamInvokeList.md), `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>, [`QueueInvokeList`](../../core/type-aliases/QueueInvokeList.md)\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:110
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:103
 
 #### Type Parameters
 
@@ -308,7 +320,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:110
 
 > **getCommandDefinitions**(): [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:113
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:106
 
 #### Returns
 
@@ -324,7 +336,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:113
 
 > **getCustomClass**(): [`Newable`](../../core/type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:108
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:101
 
 #### Returns
 
@@ -338,13 +350,13 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:108
 
 ### getFullServiceDefinition()
 
-> **getFullServiceDefinition**(): `Promise`\<\{ `agents`: [`AgentQueueDefinitionListResolved`](../../core/type-aliases/AgentQueueDefinitionListResolved.md); `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
+> **getFullServiceDefinition**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:126
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:119
 
 #### Returns
 
-`Promise`\<\{ `agents`: [`AgentQueueDefinitionListResolved`](../../core/type-aliases/AgentQueueDefinitionListResolved.md); `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
+`Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
 #### Inherited from
 
@@ -354,9 +366,9 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:126
 
 ### getInstance()
 
-> **getInstance**(`eventBridge`, `options?`): `Promise`\<`S`\[`"ServiceClassType"`\]\>
+> **getInstance**(`eventBridge`, ...`args`): `Promise`\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: packages/ai/src/builder/ServiceBuilder.ts:195
+Defined in: [ai/src/builder/ServiceBuilder.ts:77](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/ServiceBuilder.ts#L77)
 
 #### Parameters
 
@@ -364,9 +376,9 @@ Defined in: packages/ai/src/builder/ServiceBuilder.ts:195
 
 [`EventBridge`](../../core/interfaces/EventBridge.md)
 
-##### options?
+##### args
 
-`ServiceBuilderGetInstanceOptions`\<`S`\>
+...keyof `Models` *extends* `never` ? \[`AiServiceInstanceConfig`\<`S`, `Models`\>\] : \[`AiServiceInstanceConfig`\<`S`, `Models`\>\]
 
 #### Returns
 
@@ -382,7 +394,7 @@ Defined in: packages/ai/src/builder/ServiceBuilder.ts:195
 
 > **getQueueBuilder**\<`T`\>(`queueName`, `description`): [`QueueDefinitionBuilder`](../../core/classes/QueueDefinitionBuilder.md)
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:116
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:109
 
 #### Type Parameters
 
@@ -414,7 +426,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:116
 
 > **getQueueDefinitions**(): [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:118
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:111
 
 #### Returns
 
@@ -430,7 +442,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:118
 
 > **getQueueWorkerBuilder**\<`T`\>(`queueName`, `workerName`): [`QueueWorkerBuilder`](../../core/classes/QueueWorkerBuilder.md)
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:117
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:110
 
 #### Type Parameters
 
@@ -462,7 +474,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:117
 
 > **getQueueWorkerDefinitions**(): [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:119
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:112
 
 #### Returns
 
@@ -478,7 +490,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:119
 
 > **getStreamBuilder**\<`T`, `N`\>(`streamName`, `description`, `finalEventName?`): [`StreamDefinitionBuilder`](../../core/classes/StreamDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`StreamDefinitionBuilderTypes`](../../core/type-aliases/StreamDefinitionBuilderTypes.md)\<[`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), [`Schema`](../../core/type-aliases/Schema.md), `S`\[`"Resources"`\], [`InvokeList`](../../core/type-aliases/InvokeList.md), [`StreamInvokeList`](../../core/type-aliases/StreamInvokeList.md), `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>, [`QueueInvokeList`](../../core/type-aliases/QueueInvokeList.md)\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:112
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:105
 
 #### Type Parameters
 
@@ -518,7 +530,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:112
 
 > **getStreamDefinitions**(): [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:115
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:108
 
 #### Returns
 
@@ -534,7 +546,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:115
 
 > **getSubscriptionBuilder**\<`T`\>(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](../../core/classes/SubscriptionDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`SubscriptionDefinitionBuilderTypes`](../../core/type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `S`\[`"Resources"`\], [`InvokeList`](../../core/type-aliases/InvokeList.md), [`StreamInvokeList`](../../core/type-aliases/StreamInvokeList.md), `Record`\<`string`, [`Schema`](../../core/type-aliases/Schema.md)\>, [`QueueInvokeList`](../../core/type-aliases/QueueInvokeList.md)\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:111
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:104
 
 #### Type Parameters
 
@@ -566,7 +578,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:111
 
 > **getSubscriptionDefinitions**(): [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:114
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:107
 
 #### Returns
 
@@ -582,7 +594,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:114
 
 > **markAsDeprecated**(): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:89
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:86
 
 #### Returns
 
@@ -596,13 +608,13 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:89
 
 ### resolveDefinitions()
 
-> **resolveDefinitions**(): `Promise`\<\{ `agents`: [`AgentQueueDefinitionListResolved`](../../core/type-aliases/AgentQueueDefinitionListResolved.md); `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
+> **resolveDefinitions**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:98
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:92
 
 #### Returns
 
-`Promise`\<\{ `agents`: [`AgentQueueDefinitionListResolved`](../../core/type-aliases/AgentQueueDefinitionListResolved.md); `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
+`Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queues`: [`QueueDefinitionListResolved`](../../core/type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../../core/type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `streams`: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
 #### Inherited from
 
@@ -614,7 +626,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:98
 
 > **setConfigSchema**\<`T`\>(`schema`): [`ServiceBuilder`](../../core/classes/ServiceBuilder.md)\<[`SetNewTypeValues`](../../core/type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../../core/type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../../core/type-aliases/InferIn.md)\<[`InferIn`](../../core/type-aliases/InferIn.md)\<`T`\>\> : [`NeverObject`](../../core/type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../../core/type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../../core/type-aliases/Infer.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\>\> : [`NeverObject`](../../core/type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../../core/type-aliases/Infer.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\>\> : [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:83
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:80
 
 #### Type Parameters
 
@@ -642,7 +654,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:83
 
 > **setCustomClass**\<`T`\>(`customClass`): [`ServiceBuilder`](../../core/classes/ServiceBuilder.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<`S`, `"ServiceClassType"`, `T`\>\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:107
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:100
 
 #### Type Parameters
 
@@ -670,7 +682,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:107
 
 > **setDefaultConfig**(`config`): `this`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:88
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:85
 
 #### Parameters
 
@@ -692,7 +704,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:88
 
 > **testServiceSetup**(): `Promise`\<`boolean`\>
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:120
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:113
 
 #### Returns
 
@@ -708,7 +720,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:120
 
 > **validateCommandDefinitions**(): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:141
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:133
 
 #### Returns
 
@@ -728,7 +740,7 @@ Use testServiceSetup() instead
 
 > `protected` **validateCommands**(`commandDefinitions`): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:121
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:114
 
 #### Parameters
 
@@ -750,7 +762,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:121
 
 > `protected` **validateQueues**(`queueDefinitions`): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:124
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:117
 
 #### Parameters
 
@@ -772,7 +784,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:124
 
 > `protected` **validateQueueWorkers**(`queueWorkers`, `queues`): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:125
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:118
 
 #### Parameters
 
@@ -798,7 +810,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:125
 
 > `protected` **validateStreams**(`streamDefinitions`): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:123
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:116
 
 #### Parameters
 
@@ -820,7 +832,7 @@ Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:123
 
 > **validateSubscriptionDefinitions**(): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:145
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:137
 
 #### Returns
 
@@ -840,7 +852,7 @@ Use testServiceSetup() instead
 
 > `protected` **validateSubscriptions**(`subscriptionDefinitions`): `void`
 
-Defined in: packages/core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:122
+Defined in: core/dist/esm/ServiceBuilder/ServiceBuilder.impl.d.ts:115
 
 #### Parameters
 

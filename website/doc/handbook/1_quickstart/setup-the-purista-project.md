@@ -81,22 +81,20 @@ Recommended scaffold order for new projects:
 1. `purista add service` and first `purista add command`
 2. `purista add stream` if you need push/live updates
 3. `purista add queue` + `purista add queue-worker` for background jobs
-4. `purista add agent` when you need LLM-powered workloads
+4. install optional AI packages in the application when you need LLM-powered workloads
 
 Rule of thumb:
 
 - commands = request/response entrypoints
 - streams = live outbound updates
 - queues/workers = durable async processing
-- agents = AI workloads invoked directly or from commands/queues/subscriptions
+- agents = optional application-level AI workloads built outside the core runtime
 
 See also:
 
 - [Streams](../2_building_business-logic/stream/index.md)
 - [Queues](../2_building_business-logic/queue/index.md)
-- [AI Agents](../2_building_business-logic/agent/index.md)
-
-If your app uses AI agents, add the package:
+If your app uses AI agents, add the optional package:
 
 ::: code-group
 

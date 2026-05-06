@@ -82,33 +82,6 @@ export const registerStreamInvokeCapability = <
 	}
 }
 
-type AgentInvokeSchemaConfig = {
-	payloadSchema?: unknown
-	parameterSchema?: unknown
-	outputSchema?: unknown
-}
-
-export const registerAgentInvokeCapability = <
-	TExisting extends Record<string, Record<string, AgentInvokeSchemaConfig>>,
->(
-	existing: TExisting,
-	agentName: string,
-	serviceVersion: string,
-	config: AgentInvokeSchemaConfig,
-) => {
-	if (agentName.trim() === '' || serviceVersion.trim() === '') {
-		throw new Error('canInvokeAgent requires non-empty agent name and version')
-	}
-
-	return {
-		...existing,
-		[agentName]: {
-			...(existing[agentName] ?? {}),
-			[serviceVersion]: config,
-		},
-	}
-}
-
 export const registerEmitSchema = <TExisting extends Record<string, unknown>, EventName extends string>(
 	existing: TExisting,
 	eventName: EventName,

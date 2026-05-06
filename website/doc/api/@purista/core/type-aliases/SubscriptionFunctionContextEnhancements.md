@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionFunctionContextEnhancements
 
-# Type Alias: SubscriptionFunctionContextEnhancements\<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: SubscriptionFunctionContextEnhancements\<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **SubscriptionFunctionContextEnhancements**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = `object`
+> **SubscriptionFunctionContextEnhancements**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L22)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L21)
 
 It provides the original command message.
 Also, the methods:
@@ -38,29 +38,15 @@ Also, the methods:
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Properties
 
 ### emit
 
 > **emit**: [`EmitCustomMessageFunction`](EmitCustomMessageFunction.md)\<`EmitList`\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L33)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L31)
 
 emit a custom message
-
-***
-
-### invokeAgent
-
-> **invokeAgent**: `AgentInvokes`
-
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L60)
-
-Invokes an agent and returns the result.
 
 ***
 
@@ -68,7 +54,7 @@ Invokes an agent and returns the result.
 
 > **message**: `Readonly`\<[`EBMessage`](EBMessage.md)\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L31)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L29)
 
 the original message
 
@@ -78,7 +64,7 @@ the original message
 
 > **queue**: [`QueueContext`](QueueContext.md)\<`QueueInvokes`\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L52)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L50)
 
 ***
 
@@ -86,7 +72,7 @@ Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:52](https://
 
 > **resources**: `Resources`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L56)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L54)
 
 Provides resources defined in service builder and set via config during service creation
 
@@ -96,7 +82,7 @@ Provides resources defined in service builder and set via config during service 
 
 > **service**: `Invokes`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L49)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L47)
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.
@@ -119,6 +105,6 @@ It is recommended to validate the result against a schema which only contains th
 
 > **stream**: `StreamInvokes`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L51)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L49)
 
 consumes stream responses from other service stream endpoints

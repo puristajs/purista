@@ -2,22 +2,11 @@ import { z } from 'zod'
 
 import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 
-const envelopeSchema = z.object({
-	version: z.string(),
-	messageId: z.string(),
-	conversationId: z.string(),
-	timestamp: z.string(),
-	actor: z.object({
-		service: z.string(),
-		version: z.string(),
-		agent: z.string(),
-	}),
-	frame: z.object({
-		kind: z.literal('message'),
-		role: z.string(),
-		content: z.string(),
-		final: z.boolean().optional(),
-	}),
+const eventSchema = z.object({
+	type: z.literal('message'),
+	role: z.string(),
+	content: z.string(),
+	final: z.boolean().optional(),
 })
 
 export const aggregateSuccessStreamBuilder = theServiceServiceBuilder
@@ -27,30 +16,19 @@ export const aggregateSuccessStreamBuilder = theServiceServiceBuilder
 	.addFinalSchema(
 		z.object({
 			message: z.string(),
-			envelopes: envelopeSchema.array(),
+			events: eventSchema.array(),
 		}),
 	)
 	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
-		const envelope: z.infer<typeof envelopeSchema> = {
-			version: 'purista.ai/1.0',
-			messageId: 'msg-success',
-			conversationId: 'conversation-success',
-			timestamp: new Date().toISOString(),
-			actor: {
-				service: 'theService',
-				version: '1',
-				agent: 'aggregateSuccess',
-			},
-			frame: {
-				kind: 'message',
-				role: 'assistant',
-				content: 'aggregate ok',
-				final: true,
-			},
+		const event: z.infer<typeof eventSchema> = {
+			type: 'message',
+			role: 'assistant',
+			content: 'aggregate ok',
+			final: true,
 		}
-		await writer.write(envelope)
+		await writer.write(event)
 		await writer.close({
 			message: 'aggregate ok',
-			envelopes: [envelope],
+			events: [event],
 		})
 	})

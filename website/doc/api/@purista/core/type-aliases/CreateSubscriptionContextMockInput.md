@@ -8,7 +8,7 @@
 
 > **CreateSubscriptionContextMockInput**\<`TBuilder`\> = `object`
 
-Defined in: [testing/createSubscriptionContextMock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L22)
+Defined in: [testing/createSubscriptionContextMock.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L21)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [testing/createSubscriptionContextMock.ts:22](https://github.com/pur
 
 > **message**: [`EBMessage`](EBMessage.md)
 
-Defined in: [testing/createSubscriptionContextMock.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L23)
+Defined in: [testing/createSubscriptionContextMock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L22)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [testing/createSubscriptionContextMock.ts:23](https://github.com/pur
 
 > `optional` **resources**: `Partial`\<[`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\]\>
 
-Defined in: [testing/createSubscriptionContextMock.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L25)
+Defined in: [testing/createSubscriptionContextMock.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L24)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [testing/createSubscriptionContextMock.ts:25](https://github.com/pur
 
 > `optional` **sandbox**: `SinonSandbox`
 
-Defined in: [testing/createSubscriptionContextMock.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L24)
+Defined in: [testing/createSubscriptionContextMock.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L23)

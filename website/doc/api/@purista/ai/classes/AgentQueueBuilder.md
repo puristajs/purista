@@ -2,47 +2,67 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentQueueBuilder
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentQueueBuilder
 
-# Class: AgentQueueBuilder\<T\>
+# Class: AgentQueueBuilder\<S\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:131
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:54](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L54)
+
+Builds an attached PURISTA agent from normal core queue, worker, command, and
+stream definitions plus an AI manifest consumed by `@purista/ai`.
+
+## Example
+
+```ts
+const triage = service
+  .getAgentQueueBuilder('supportTriage', 'Classifies tickets')
+  .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+  .setRunFunction(async context => ({ priority: 'high' }))
+```
 
 ## Type Parameters
 
-### T
+### S
 
-`T` *extends* [`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md) = [`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)
+`S` *extends* `AnyAgentQueueBuilderTypes` = [`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)
 
 ## Constructors
 
 ### Constructor
 
-> **new AgentQueueBuilder**\<`T`\>(`input`, `serviceVersion?`): `AgentQueueBuilder`\<`T`\>
+> **new AgentQueueBuilder**\<`S`\>(`serviceName`, `serviceVersion`, `agentName`, `description`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:170
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:71](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L71)
 
 #### Parameters
 
-##### input
+##### serviceName
 
-[`AgentQueueBuilderInput`](../type-aliases/AgentQueueBuilderInput.md)
+`string`
 
-##### serviceVersion?
+##### serviceVersion
+
+`string`
+
+##### agentName
+
+`string`
+
+##### description
 
 `string`
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<`S`\>
 
 ## Methods
 
 ### addModel()
 
-> **addModel**\<`Alias`, `Capabilities`\>(`alias`, `config?`): `AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"Models"`, `T`\[`"Models"`\] & `Record`\<`Alias`, [`ModelProviderForCapabilities`](../type-aliases/ModelProviderForCapabilities.md)\<`Capabilities`\>\>\>\>
+> **addModel**\<`Alias`, `Binding`\>(`alias`, `binding`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\] & `Record`\<`Alias`, `Binding`\>, `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:218
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:126](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L126)
 
 #### Type Parameters
 
@@ -50,9 +70,9 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:218
 
 `Alias` *extends* `string`
 
-##### Capabilities
+##### Binding
 
-`Capabilities` *extends* readonly [`AgentModelCapability`](../type-aliases/AgentModelCapability.md)[] = readonly \[`"text"`, `"object"`, `"object-stream"`, `"text-stream"`\]
+`Binding` *extends* [`AgentModelBinding`](../type-aliases/AgentModelBinding.md)
 
 #### Parameters
 
@@ -60,21 +80,21 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:218
 
 `Alias`
 
-##### config?
+##### binding
 
-[`AgentModelConfig`](../type-aliases/AgentModelConfig.md)\<`Capabilities`\>
+`Binding`
 
 #### Returns
 
-`AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"Models"`, `T`\[`"Models"`\] & `Record`\<`Alias`, [`ModelProviderForCapabilities`](../type-aliases/ModelProviderForCapabilities.md)\<`Capabilities`\>\>\>\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\] & `Record`\<`Alias`, `Binding`\>, `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
 ***
 
 ### addOutputSchema()
 
-> **addOutputSchema**\<`OutputSchema`\>(`schema`): `AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"OutputSchema"`, `OutputSchema`\>\>
+> **addOutputSchema**\<`OutputSchema`\>(`schema`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `OutputSchema`, `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:211
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:110](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L110)
 
 #### Type Parameters
 
@@ -90,15 +110,15 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:211
 
 #### Returns
 
-`AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"OutputSchema"`, `OutputSchema`\>\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `OutputSchema`, `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
 ***
 
 ### addParameterSchema()
 
-> **addParameterSchema**\<`ParameterSchema`\>(`schema`): `AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"ParameterSchema"`, `ParameterSchema`\>\>
+> **addParameterSchema**\<`ParameterSchema`\>(`schema`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `ParameterSchema`, `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:203
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:94](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L94)
 
 #### Type Parameters
 
@@ -114,15 +134,15 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:203
 
 #### Returns
 
-`AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"ParameterSchema"`, `ParameterSchema`\>\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `ParameterSchema`, `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
 ***
 
 ### addPayloadSchema()
 
-> **addPayloadSchema**\<`PayloadSchema`\>(`schema`): `AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"PayloadSchema"`, `PayloadSchema`\>\>
+> **addPayloadSchema**\<`PayloadSchema`\>(`schema`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`PayloadSchema`, `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:195
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:78](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L78)
 
 #### Type Parameters
 
@@ -138,81 +158,41 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:195
 
 #### Returns
 
-`AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"PayloadSchema"`, `PayloadSchema`\>\>
-
-***
-
-### addQueryParameters()
-
-> **addQueryParameters**(`params`): `AgentQueueBuilder`\<`T`\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:413
-
-#### Parameters
-
-##### params
-
-[`QueryParameter`](../../core/type-aliases/QueryParameter.md)[]
-
-#### Returns
-
-`AgentQueueBuilder`\<`T`\>
-
-***
-
-### canEmit()
-
-> **canEmit**(`eventName`, `schema`): `AgentQueueBuilder`\<`T`\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:333
-
-#### Parameters
-
-##### eventName
-
-`string`
-
-##### schema
-
-[`Schema`](../../core/type-aliases/Schema.md)
-
-#### Returns
-
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`PayloadSchema`, `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
 ***
 
 ### canInvoke()
 
-> **canInvoke**\<`ServiceName`, `ServiceVersion`, `CommandName`, `OutputSchema`, `PayloadSchema`, `ParameterSchema`\>(`serviceName`, `serviceVersion`, `commandName`, `_outputSchema?`, `_payloadSchema?`, `_parameterSchema?`): `AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"ToolInvokes"`, `T`\[`"ToolInvokes"`\] & `Record`\<`ServiceName`, `Record`\<`ServiceVersion`, `Record`\<`CommandName`, (`payload`, `parameter?`) => `Promise`\<[`Infer`](../../core/type-aliases/Infer.md)\<`OutputSchema`\>\>\>\>\>\>\>
+> **canInvoke**\<`Output`, `Payload`, `Parameter`, `ServiceName`, `Version`, `CommandName`\>(`serviceName`, `serviceVersion`, `commandName`, `schemas?`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\] & `Record`\<`` `${ServiceName}.${Version}.${CommandName}` ``, [`AllowedCommandToolDefinition`](../type-aliases/AllowedCommandToolDefinition.md)\<`Output`, `Payload`, `Parameter`\>\>, `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:267
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:153](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L153)
 
 #### Type Parameters
+
+##### Output
+
+`Output` *extends* [`Schema`](../../core/type-aliases/Schema.md)
+
+##### Payload
+
+`Payload` *extends* [`Schema`](../../core/type-aliases/Schema.md)
+
+##### Parameter
+
+`Parameter` *extends* [`Schema`](../../core/type-aliases/Schema.md)
 
 ##### ServiceName
 
 `ServiceName` *extends* `string`
 
-##### ServiceVersion
+##### Version
 
-`ServiceVersion` *extends* `string`
+`Version` *extends* `string`
 
 ##### CommandName
 
 `CommandName` *extends* `string`
-
-##### OutputSchema
-
-`OutputSchema` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
-
-##### PayloadSchema
-
-`PayloadSchema` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
-
-##### ParameterSchema
-
-`ParameterSchema` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
 
 #### Parameters
 
@@ -222,57 +202,59 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:267
 
 ##### serviceVersion
 
-`ServiceVersion`
+`Version`
 
 ##### commandName
 
 `CommandName`
 
-##### \_outputSchema?
+##### schemas?
 
-`OutputSchema`
+###### outputSchema?
 
-##### \_payloadSchema?
+`Output`
 
-`PayloadSchema`
+###### parameterSchema?
 
-##### \_parameterSchema?
+`Parameter`
 
-`ParameterSchema`
+###### payloadSchema?
+
+`Payload`
 
 #### Returns
 
-`AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"ToolInvokes"`, `T`\[`"ToolInvokes"`\] & `Record`\<`ServiceName`, `Record`\<`ServiceVersion`, `Record`\<`CommandName`, (`payload`, `parameter?`) => `Promise`\<[`Infer`](../../core/type-aliases/Infer.md)\<`OutputSchema`\>\>\>\>\>\>\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\] & `Record`\<`` `${ServiceName}.${Version}.${CommandName}` ``, [`AllowedCommandToolDefinition`](../type-aliases/AllowedCommandToolDefinition.md)\<`Output`, `Payload`, `Parameter`\>\>, `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
 ***
 
 ### canInvokeAgent()
 
-> **canInvokeAgent**\<`AgentName`, `ServiceVersion`, `PayloadSchema`, `ParameterSchema`, `OutputSchema`\>(`agentName`, `serviceVersionOrConfig?`, `invokeConfig?`): `AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"AgentInvokes"`, `T`\[`"AgentInvokes"`\] & `Record`\<`AgentName`, `Record`\<`ServiceVersion`, [`AgentInvokeBinding`](../type-aliases/AgentInvokeBinding.md)\<`PayloadSchema`, `ParameterSchema`, `OutputSchema`\>\>\>\>\>
+> **canInvokeAgent**\<`Output`, `Payload`, `Parameter`, `AgentName`, `Version`\>(`agentName`, `serviceVersion`, `schemas?`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\] & `Record`\<`` `${AgentName}.${Version}` ``, [`AllowedAgentDefinition`](../type-aliases/AllowedAgentDefinition.md)\<`Output`, `Payload`, `Parameter`\>\>, `S`\[`"Execution"`\]\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:294
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:189](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L189)
 
 #### Type Parameters
+
+##### Output
+
+`Output` *extends* [`Schema`](../../core/type-aliases/Schema.md)
+
+##### Payload
+
+`Payload` *extends* [`Schema`](../../core/type-aliases/Schema.md)
+
+##### Parameter
+
+`Parameter` *extends* [`Schema`](../../core/type-aliases/Schema.md)
 
 ##### AgentName
 
 `AgentName` *extends* `string`
 
-##### ServiceVersion
+##### Version
 
-`ServiceVersion` *extends* `string` = `"1"`
-
-##### PayloadSchema
-
-`PayloadSchema` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
-
-##### ParameterSchema
-
-`ParameterSchema` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
-
-##### OutputSchema
-
-`OutputSchema` *extends* [`Schema`](../../core/type-aliases/Schema.md) = [`Schema`](../../core/type-aliases/Schema.md)
+`Version` *extends* `string`
 
 #### Parameters
 
@@ -280,221 +262,97 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:294
 
 `AgentName`
 
-##### serviceVersionOrConfig?
+##### serviceVersion
 
-`ServiceVersion` | \{ `outputSchema?`: `OutputSchema`; `parameterSchema?`: `ParameterSchema`; `payloadSchema?`: `PayloadSchema`; `serviceVersion?`: `ServiceVersion`; \}
+`Version`
 
-##### invokeConfig?
+##### schemas?
 
 ###### outputSchema?
 
-`OutputSchema`
+`Output`
 
 ###### parameterSchema?
 
-`ParameterSchema`
+`Parameter`
 
 ###### payloadSchema?
 
-`PayloadSchema`
+`Payload`
 
 #### Returns
 
-`AgentQueueBuilder`\<`SetNewTypeValue`\<`T`, `"AgentInvokes"`, `T`\[`"AgentInvokes"`\] & `Record`\<`AgentName`, `Record`\<`ServiceVersion`, [`AgentInvokeBinding`](../type-aliases/AgentInvokeBinding.md)\<`PayloadSchema`, `ParameterSchema`, `OutputSchema`\>\>\>\>\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\] & `Record`\<`` `${AgentName}.${Version}` ``, [`AllowedAgentDefinition`](../type-aliases/AllowedAgentDefinition.md)\<`Output`, `Payload`, `Parameter`\>\>, `S`\[`"Execution"`\]\>\>
 
 ***
 
 ### exposeAsHttpEndpoint()
 
-> **exposeAsHttpEndpoint**(`method`, `path`, `requestContentType?`, `requestEncoding?`, `responseContentType?`, `responseEncoding?`): `AgentQueueBuilder`\<`T`\>
+> **exposeAsHttpEndpoint**(`method`, `path`, `options?`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:371
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:337](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L337)
 
 #### Parameters
 
 ##### method
 
-[`SupportedHttpMethod`](../../core/type-aliases/SupportedHttpMethod.md)
+`SupportedHttpMethod`
 
 ##### path
 
 `string`
 
-##### requestContentType?
+##### options?
 
-`string`
-
-##### requestEncoding?
-
-`string`
-
-##### responseContentType?
-
-`string`
-
-##### responseEncoding?
-
-`string`
+`Omit`\<[`AgentHttpExposure`](../type-aliases/AgentHttpExposure.md), `"method"` \| `"path"`\>
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
-
-***
-
-### getAfterGuardHook()
-
-> **getAfterGuardHook**(`name`): [`QueueWorkerAfterGuardHook`](../../core/type-aliases/QueueWorkerAfterGuardHook.md)
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:437
-
-#### Parameters
-
-##### name
-
-`string`
-
-#### Returns
-
-[`QueueWorkerAfterGuardHook`](../../core/type-aliases/QueueWorkerAfterGuardHook.md)
-
-***
-
-### getBeforeGuardHook()
-
-> **getBeforeGuardHook**(`name`): [`QueueWorkerBeforeGuardHook`](../../core/type-aliases/QueueWorkerBeforeGuardHook.md)
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:433
-
-#### Parameters
-
-##### name
-
-`string`
-
-#### Returns
-
-[`QueueWorkerBeforeGuardHook`](../../core/type-aliases/QueueWorkerBeforeGuardHook.md)
+`AgentQueueBuilder`\<`S`\>
 
 ***
 
 ### getDefinition()
 
-> **getDefinition**(): `Promise`\<[`AgentQueueDefinitionResult`](../type-aliases/AgentQueueDefinitionResult.md)\<`T`\>\>
+> **getDefinition**(): `Promise`\<[`AttachedAgentDefinition`](../type-aliases/AttachedAgentDefinition.md)\<`S`\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:446
-
-#### Returns
-
-`Promise`\<[`AgentQueueDefinitionResult`](../type-aliases/AgentQueueDefinitionResult.md)\<`T`\>\>
-
-***
-
-### getInstance()
-
-> **getInstance**(`eventBridge`, `options?`): `Promise`\<[`AgentInstance`](AgentInstance.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\[`"PayloadSchema"`\]\>, [`Infer`](../../core/type-aliases/Infer.md)\<`T`\[`"ParameterSchema"`\]\>, `T`\[`"Resources"`\], `T`\[`"Models"`\], `T`\[`"AgentInvokes"`\], `T`\[`"EmitPayloads"`\], `T`\[`"ToolInvokes"`\]\>\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:534
-
-#### Parameters
-
-##### eventBridge
-
-[`EventBridge`](../../core/interfaces/EventBridge.md)
-
-##### options?
-
-[`AgentInstanceOptions`](../type-aliases/AgentInstanceOptions.md)\<`string`, `Record`\<`string`, `unknown`\>\>
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:372](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L372)
 
 #### Returns
 
-`Promise`\<[`AgentInstance`](AgentInstance.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\[`"PayloadSchema"`\]\>, [`Infer`](../../core/type-aliases/Infer.md)\<`T`\[`"ParameterSchema"`\]\>, `T`\[`"Resources"`\], `T`\[`"Models"`\], `T`\[`"AgentInvokes"`\], `T`\[`"EmitPayloads"`\], `T`\[`"ToolInvokes"`\]\>\>
+`Promise`\<[`AttachedAgentDefinition`](../type-aliases/AttachedAgentDefinition.md)\<`S`\>\>
 
 ***
 
 ### getManifest()
 
-> **getManifest**(): `Promise`\<[`AgentManifestConfig`](../type-aliases/AgentManifestConfig.md)\>
+> **getManifest**(): [`AgentManifest`](../type-aliases/AgentManifest.md)\<`S`\[`"Models"`\]\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:530
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:368](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L368)
 
 #### Returns
 
-`Promise`\<[`AgentManifestConfig`](../type-aliases/AgentManifestConfig.md)\>
+[`AgentManifest`](../type-aliases/AgentManifest.md)\<`S`\[`"Models"`\]\>
 
 ***
 
 ### makeEndpointPublic()
 
-> **makeEndpointPublic**(): `AgentQueueBuilder`\<`T`\>
+> **makeEndpointPublic**(): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:407
-
-#### Returns
-
-`AgentQueueBuilder`\<`T`\>
-
-***
-
-### setAfterGuardHooks()
-
-> **setAfterGuardHooks**(`hooks`): `AgentQueueBuilder`\<`T`\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:428
-
-#### Parameters
-
-##### hooks
-
-`Record`\<`string`, [`QueueWorkerAfterGuardHook`](../../core/type-aliases/QueueWorkerAfterGuardHook.md)\>
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:354](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L354)
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
-
-***
-
-### setAgentFunction()
-
-> **setAgentFunction**(`fn`): `AgentQueueBuilder`\<`T`\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:251
-
-#### Parameters
-
-##### fn
-
-[`AgentHandler`](../type-aliases/AgentHandler.md)\<[`Infer`](../../core/type-aliases/Infer.md)\<`T`\[`"PayloadSchema"`\]\>, [`Infer`](../../core/type-aliases/Infer.md)\<`T`\[`"ParameterSchema"`\]\>, `T`\[`"Resources"`\], `T`\[`"Models"`\], `T`\[`"AgentInvokes"`\], `T`\[`"EmitPayloads"`\], `T`\[`"ToolInvokes"`\]\>
-
-#### Returns
-
-`AgentQueueBuilder`\<`T`\>
-
-***
-
-### setBeforeGuardHooks()
-
-> **setBeforeGuardHooks**(`hooks`): `AgentQueueBuilder`\<`T`\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:423
-
-#### Parameters
-
-##### hooks
-
-`Record`\<`string`, [`QueueWorkerBeforeGuardHook`](../../core/type-aliases/QueueWorkerBeforeGuardHook.md)\>
-
-#### Returns
-
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<`S`\>
 
 ***
 
 ### setExecutionPolicy()
 
-> **setExecutionPolicy**(`policy`): `AgentQueueBuilder`\<`T`\>
+> **setExecutionPolicy**(`policy`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:226
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:322](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L322)
 
 #### Parameters
 
@@ -504,72 +362,117 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:226
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<`S`\>
 
 ***
 
-### setMaxParallelHandlers()
+### setHarnessAgent()
 
-> **setMaxParallelHandlers**(`count`): `AgentQueueBuilder`\<`T`\>
+> **setHarnessAgent**(`this`, `definition`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"harnessAgent"`\>\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:441
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:221](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L221)
 
 #### Parameters
 
-##### count
+##### this
 
-`number`
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `undefined`\>\>
+
+##### definition
+
+`AgentDefinition`\<`any`\>
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"harnessAgent"`\>\>
+
+***
+
+### setHarnessWorkflow()
+
+> **setHarnessWorkflow**(`this`, `definition`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"harnessWorkflow"`\>\>
+
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:252](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L252)
+
+#### Parameters
+
+##### this
+
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `undefined`\>\>
+
+##### definition
+
+`WorkflowDefinition`\<`any`\>
+
+#### Returns
+
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"harnessWorkflow"`\>\>
+
+***
+
+### setRunFunction()
+
+> **setRunFunction**(`this`, `handler`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"runFunction"`\>\>
+
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:283](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L283)
+
+#### Parameters
+
+##### this
+
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `undefined`\>\>
+
+##### handler
+
+[`AgentHandler`](../type-aliases/AgentHandler.md)\<[`InferIn`](../../core/type-aliases/InferIn.md)\<`S`\[`"PayloadSchema"`\]\>, [`InferIn`](../../core/type-aliases/InferIn.md)\<`S`\[`"ParameterSchema"`\]\>, `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], [`Infer`](../../core/type-aliases/Infer.md)\<`S`\[`"OutputSchema"`\]\>\>
+
+#### Returns
+
+`AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"runFunction"`\>\>
 
 ***
 
 ### setSandboxPolicy()
 
-> **setSandboxPolicy**(`policy`): `AgentQueueBuilder`\<`T`\>
+> **setSandboxPolicy**(`policy`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:246
-
-Declare the sandbox policy for this agent.
-
-Runtime provisioning still happens through `getInstance(..., { ai: { sandbox } })`
-and `context.runtime.sandbox`; the manifest only describes the intended mode
-and default reuse scope.
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:332](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L332)
 
 #### Parameters
 
 ##### policy
 
-###### mode
-
-`"optional"` \| `"required"` \| `"disabled"` = `...`
-
-###### scope
-
-`"conversation"` \| `"shared-project-user"` \| `"agent-run"` \| `"agent-instance"` \| `"runtime-instance"` = `AgentSandboxScopeKindSchema`
+[`AgentSandboxPolicy`](../type-aliases/AgentSandboxPolicy.md)
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<`S`\>
 
-#### Example
+***
 
-```ts
-builder.setSandboxPolicy({
-  mode: 'optional',
-  scope: 'conversation',
-})
-```
+### setSessionPolicy()
+
+> **setSessionPolicy**(`policy`): `AgentQueueBuilder`\<`S`\>
+
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:327](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L327)
+
+#### Parameters
+
+##### policy
+
+[`AgentSessionPolicy`](../type-aliases/AgentSessionPolicy.md)
+
+#### Returns
+
+`AgentQueueBuilder`\<`S`\>
 
 ***
 
 ### setStreamingMode()
 
-> **setStreamingMode**(`mode`): `AgentQueueBuilder`\<`T`\>
+> **setStreamingMode**(`mode`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:393
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:349](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L349)
 
 #### Parameters
 
@@ -579,33 +482,15 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:393
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
-
-***
-
-### setStreamProtocolAdapter()
-
-> **setStreamProtocolAdapter**(`protocol`): `AgentQueueBuilder`\<`T`\>
-
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:398
-
-#### Parameters
-
-##### protocol
-
-[`AgentStreamProtocolAdapterId`](../type-aliases/AgentStreamProtocolAdapterId.md)
-
-#### Returns
-
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<`S`\>
 
 ***
 
 ### setSuccessEventName()
 
-> **setSuccessEventName**(`eventName`): `AgentQueueBuilder`\<`T`\>
+> **setSuccessEventName**(`eventName`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:418
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:362](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L362)
 
 #### Parameters
 
@@ -615,44 +500,44 @@ Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:418
 
 #### Returns
 
-`AgentQueueBuilder`\<`T`\>
+`AgentQueueBuilder`\<`S`\>
 
 ***
 
-### fromServiceBuilder()
+### useBuiltInTools()
 
-> `static` **fromServiceBuilder**(`serviceBuilder`, `agentName`, `description?`, `successEventName?`): `AgentQueueBuilder`
+> **useBuiltInTools**(`namesOrFalse`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: packages/ai/src/builder/AgentQueueBuilder.impl.ts:179
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:148](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L148)
 
 #### Parameters
 
-##### serviceBuilder
+##### namesOrFalse
 
-###### info
+`false` | readonly `BuiltinToolName`[]
 
-\{ `serviceName`: `string`; `serviceVersion`: `string`; \}
+#### Returns
 
-###### info.serviceName
+`AgentQueueBuilder`\<`S`\>
 
-`string`
+***
 
-###### info.serviceVersion
+### useSkills()
 
-`string`
+> **useSkills**(`names`, `resourceName?`): `AgentQueueBuilder`\<`S`\>
 
-##### agentName
+Defined in: [ai/src/builder/AgentQueueBuilder.ts:143](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L143)
 
-`string`
+#### Parameters
 
-##### description?
+##### names
 
-`string`
+readonly `string`[]
 
-##### successEventName?
+##### resourceName?
 
 `string`
 
 #### Returns
 
-`AgentQueueBuilder`
+`AgentQueueBuilder`\<`S`\>

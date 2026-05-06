@@ -8,7 +8,7 @@
 
 > **HttpExposureOptions** = `object`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L47)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L41)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:47](https
 
 > `optional` **mode**: `"sync"` \| `"async"`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L48)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L42)

@@ -83,12 +83,6 @@ set a config value in the config store
 
 emit a custom message
 
-##### invokeAgent
-
-[`EmptyObject`](../type-aliases/EmptyObject.md)
-
-Invokes an agent and returns the result.
-
 ##### logger
 
 [`Logger`](../classes/Logger.md)

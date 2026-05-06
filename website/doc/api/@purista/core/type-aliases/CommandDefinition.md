@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandDefinition
 
-# Type Alias: CommandDefinition\<S, MessagePayloadType, MessageParamsType, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, FunctionOutputType, FinalFunctionOutputType, TransformOutputHookOutput, Resources, Invokes, StreamInvokes, EmitList, MetadataType, QueueInvokes, AgentInvokes\>
+# Type Alias: CommandDefinition\<S, MessagePayloadType, MessageParamsType, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, FunctionOutputType, FinalFunctionOutputType, TransformOutputHookOutput, Resources, Invokes, StreamInvokes, EmitList, MetadataType, QueueInvokes\>
 
-> **CommandDefinition**\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\> = `object`
+> **CommandDefinition**\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`\> = `object`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L20)
+Defined in: [core/types/commandType/CommandDefinition.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L19)
 
 The definition for a command provided by some service.
 
@@ -78,25 +78,13 @@ The definition for a command provided by some service.
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`AgentInvokeList`](AgentInvokeList.md)
-
 ## Properties
-
-### agentInvokes
-
-> **agentInvokes**: `AgentInvokes`
-
-Defined in: [core/types/commandType/CommandDefinition.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L123)
-
-***
 
 ### call
 
-> **call**: [`CommandFunction`](CommandFunction.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `AgentInvokes`\>
+> **call**: [`CommandFunction`](CommandFunction.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
-Defined in: [core/types/commandType/CommandDefinition.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L48)
+Defined in: [core/types/commandType/CommandDefinition.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L46)
 
 the command function
 
@@ -106,7 +94,7 @@ the command function
 
 > **commandDescription**: `string`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L42)
+Defined in: [core/types/commandType/CommandDefinition.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L40)
 
 the description of the command
 
@@ -116,7 +104,7 @@ the description of the command
 
 > **commandName**: `string`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L40)
+Defined in: [core/types/commandType/CommandDefinition.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L38)
 
 the name of the command
 
@@ -126,7 +114,7 @@ the name of the command
 
 > **emitList**: `EmitList`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:124](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L124)
+Defined in: [core/types/commandType/CommandDefinition.ts:121](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L121)
 
 ***
 
@@ -134,7 +122,7 @@ Defined in: [core/types/commandType/CommandDefinition.ts:124](https://github.com
 
 > **eventBridgeConfig**: [`DefinitionEventBridgeConfig`](DefinitionEventBridgeConfig.md)
 
-Defined in: [core/types/commandType/CommandDefinition.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L46)
+Defined in: [core/types/commandType/CommandDefinition.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L44)
 
 config information for event bridge
 
@@ -144,7 +132,7 @@ config information for event bridge
 
 > `optional` **eventName**: `string`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L62)
+Defined in: [core/types/commandType/CommandDefinition.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L60)
 
 the eventName for the command response
 
@@ -154,17 +142,17 @@ the eventName for the command response
 
 > **hooks**: `object`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L64)
+Defined in: [core/types/commandType/CommandDefinition.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L62)
 
 hooks of command
 
 #### afterGuard?
 
-> `optional` **afterGuard**: `Record`\<`string`, [`CommandAfterGuardHook`](CommandAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `AgentInvokes`\>\>
+> `optional` **afterGuard**: `Record`\<`string`, [`CommandAfterGuardHook`](CommandAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
 #### beforeGuard?
 
-> `optional` **beforeGuard**: `Record`\<`string`, [`CommandBeforeGuardHook`](CommandBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `AgentInvokes`\>\>
+> `optional` **beforeGuard**: `Record`\<`string`, [`CommandBeforeGuardHook`](CommandBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
 #### transformInput?
 
@@ -200,7 +188,7 @@ hooks of command
 
 > **invokes**: `Invokes`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:121](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L121)
+Defined in: [core/types/commandType/CommandDefinition.ts:119](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L119)
 
 ***
 
@@ -208,7 +196,7 @@ Defined in: [core/types/commandType/CommandDefinition.ts:121](https://github.com
 
 > **metadata**: `MetadataType`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L44)
+Defined in: [core/types/commandType/CommandDefinition.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L42)
 
 the metadata of the command
 
@@ -218,7 +206,7 @@ the metadata of the command
 
 > **queueInvokes**: `QueueInvokes`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:125](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L125)
+Defined in: [core/types/commandType/CommandDefinition.ts:122](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L122)
 
 ***
 
@@ -226,4 +214,4 @@ Defined in: [core/types/commandType/CommandDefinition.ts:125](https://github.com
 
 > **streamInvokes**: `StreamInvokes`
 
-Defined in: [core/types/commandType/CommandDefinition.ts:122](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L122)
+Defined in: [core/types/commandType/CommandDefinition.ts:120](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L120)

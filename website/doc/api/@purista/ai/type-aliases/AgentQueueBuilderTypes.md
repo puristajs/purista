@@ -2,13 +2,13 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentQueueBuilderTypes
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentQueueBuilderTypes
 
-# Type Alias: AgentQueueBuilderTypes\<PayloadSchema, ParameterSchema, OutputSchema, Resources, Models, ToolInvokes, AgentInvokes, EmitPayloads\>
+# Type Alias: AgentQueueBuilderTypes\<PayloadSchema, ParameterSchema, OutputSchema, Resources, Models, CommandTools, AgentTools, Execution\>
 
-> **AgentQueueBuilderTypes**\<`PayloadSchema`, `ParameterSchema`, `OutputSchema`, `Resources`, `Models`, `ToolInvokes`, `AgentInvokes`, `EmitPayloads`\> = `object`
+> **AgentQueueBuilderTypes**\<`PayloadSchema`, `ParameterSchema`, `OutputSchema`, `Resources`, `Models`, `CommandTools`, `AgentTools`, `Execution`\> = `object`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:37
+Defined in: ai/src/builder/types.ts:292
 
 ## Type Parameters
 
@@ -26,39 +26,47 @@ Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:37
 
 ### Resources
 
-`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+`Resources` *extends* `Record`\<`string`, `unknown`\> = `Record`\<`string`, `unknown`\>
 
 ### Models
 
-`Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`string`, `never`\>
 
-### ToolInvokes
+### CommandTools
 
-`ToolInvokes` *extends* `Record`\<`string`, `Record`\<`string`, `Record`\<`string`, (...`args`) => `Promise`\<`unknown`\>\>\>\> = `Record`\<`string`, `Record`\<`string`, `Record`\<`string`, (...`args`) => `Promise`\<`unknown`\>\>\>\>
+`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`string`, `never`\>
 
-### AgentInvokes
+### AgentTools
 
-`AgentInvokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
+`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`string`, `never`\>
 
-### EmitPayloads
+### Execution
 
-`EmitPayloads` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+`Execution` *extends* `AgentExecutionKind` \| `undefined` = `undefined`
 
 ## Properties
 
-### AgentInvokes
+### AgentTools
 
-> **AgentInvokes**: `AgentInvokes`
+> **AgentTools**: `AgentTools`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:56
+Defined in: ai/src/builder/types.ts:308
 
 ***
 
-### EmitPayloads
+### CommandTools
 
-> **EmitPayloads**: `EmitPayloads`
+> **CommandTools**: `CommandTools`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:57
+Defined in: ai/src/builder/types.ts:307
+
+***
+
+### Execution
+
+> **Execution**: `Execution`
+
+Defined in: ai/src/builder/types.ts:309
 
 ***
 
@@ -66,7 +74,7 @@ Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:57
 
 > **Models**: `Models`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:54
+Defined in: ai/src/builder/types.ts:306
 
 ***
 
@@ -74,7 +82,7 @@ Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:54
 
 > **OutputSchema**: `OutputSchema`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:52
+Defined in: ai/src/builder/types.ts:304
 
 ***
 
@@ -82,7 +90,7 @@ Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:52
 
 > **ParameterSchema**: `ParameterSchema`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:51
+Defined in: ai/src/builder/types.ts:303
 
 ***
 
@@ -90,7 +98,7 @@ Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:51
 
 > **PayloadSchema**: `PayloadSchema`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:50
+Defined in: ai/src/builder/types.ts:302
 
 ***
 
@@ -98,12 +106,4 @@ Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:50
 
 > **Resources**: `Resources`
 
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:53
-
-***
-
-### ToolInvokes
-
-> **ToolInvokes**: `ToolInvokes`
-
-Defined in: packages/ai/src/builder/AgentQueueBuilderTypes.ts:55
+Defined in: ai/src/builder/types.ts:305

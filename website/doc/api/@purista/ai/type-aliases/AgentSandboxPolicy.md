@@ -2,10 +2,26 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentSandboxPolicy
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentSandboxPolicy
 
 # Type Alias: AgentSandboxPolicy
 
-> **AgentSandboxPolicy** = `z.infer`\<*typeof* [`AgentSandboxPolicySchema`](../variables/AgentSandboxPolicySchema.md)\>
+> **AgentSandboxPolicy** = `object`
 
-Defined in: packages/ai/src/sandbox/provider.ts:38
+Defined in: ai/src/builder/types.ts:97
+
+## Properties
+
+### adapter?
+
+> `optional` **adapter**: `unknown`
+
+Defined in: ai/src/builder/types.ts:99
+
+***
+
+### enabled?
+
+> `optional` **enabled**: `boolean`
+
+Defined in: ai/src/builder/types.ts:98

@@ -15,8 +15,6 @@ Add a command to an existing service with `purista add command`.
 Commands can access service resources (for example database clients/connections) via `context.resources`.
 Resources are provided when creating the service instance with `serviceBuilder.getInstance(eventBridge, { resources: ... })`.
 Commands can also consume stream endpoints via `context.stream` when declared with `.canConsumeStream(...)`.
-Commands can invoke AI agents via `.canInvokeAgent(...)` (requires optional `@purista/ai` package).
-
 ## Command lifecycle
 
 1. optional input transform
@@ -33,7 +31,6 @@ Commands can invoke AI agents via `.canInvokeAgent(...)` (requires optional `@pu
 - [Invoke another command](./invoke_command_from_command.md)
 - [Expose as HTTP endpoint](./exposing-a-command-as-http-endpoint.md)
 - [Test a command](./test-a-command.md)
-- [AI Agents](../agent/index.md)
 
 ## When to use
 

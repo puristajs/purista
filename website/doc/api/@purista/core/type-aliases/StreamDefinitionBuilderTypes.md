@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamDefinitionBuilderTypes
 
-# Type Alias: StreamDefinitionBuilderTypes\<PayloadSchema, ParamsSchema, ChunkSchema, FinalSchema, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: StreamDefinitionBuilderTypes\<PayloadSchema, ParamsSchema, ChunkSchema, FinalSchema, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **StreamDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `ChunkSchema`, `FinalSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = `object`
+> **StreamDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `ChunkSchema`, `FinalSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L8)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L7)
 
 ## Type Parameters
 
@@ -48,25 +48,13 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:8](https://
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`AgentInvokeList`](AgentInvokeList.md)
-
 ## Properties
-
-### AgentInvokes
-
-> **AgentInvokes**: `AgentInvokes`
-
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L29)
-
-***
 
 ### ChunkSchema
 
 > **ChunkSchema**: `ChunkSchema`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L22)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L20)
 
 ***
 
@@ -74,7 +62,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:22](https:/
 
 > **EmitList**: `EmitList`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L27)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L25)
 
 ***
 
@@ -82,7 +70,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:27](https:/
 
 > **FinalSchema**: `FinalSchema`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L23)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L21)
 
 ***
 
@@ -90,7 +78,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:23](https:/
 
 > **Invokes**: `Invokes`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L25)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L23)
 
 ***
 
@@ -98,7 +86,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:25](https:/
 
 > **ParamsSchema**: `ParamsSchema`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L21)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L19)
 
 ***
 
@@ -106,7 +94,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:21](https:/
 
 > **PayloadSchema**: `PayloadSchema`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L20)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L18)
 
 ***
 
@@ -114,7 +102,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:20](https:/
 
 > **QueueInvokes**: `QueueInvokes`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L28)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L26)
 
 ***
 
@@ -122,7 +110,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:28](https:/
 
 > **Resources**: `Resources`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L24)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L22)
 
 ***
 
@@ -130,4 +118,4 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:24](https:/
 
 > **StreamInvokes**: `StreamInvokes`
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L26)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts#L24)

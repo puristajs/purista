@@ -3,7 +3,6 @@ import type { CommandErrorResponse } from '../types/commandType/CommandErrorResp
 import type { ErrorResponsePayload } from '../types/ErrorResponsePayload.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { TraceId } from '../types/TraceId.js'
-import { UnhandledError } from './UnhandledError.impl.js'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.
@@ -49,10 +48,7 @@ export class HandledError extends Error {
 			return err
 		}
 
-		let t: string | undefined
-		if (err instanceof HandledError || err instanceof UnhandledError) {
-			t = err.traceId
-		}
+		const t = hasTraceId(err) ? err.traceId : undefined
 
 		const message = err instanceof Error ? err.message : String(err)
 		const error = new HandledError(errorCode ?? StatusCode.InternalServerError, message, data, traceId ?? t)
@@ -91,4 +87,8 @@ export class HandledError extends Error {
 	toJSON() {
 		return { stack: this.stack, name: this.name, ...this.getErrorResponse() }
 	}
+}
+
+function hasTraceId(err: unknown): err is { traceId?: TraceId } {
+	return typeof err === 'object' && err !== null && 'traceId' in err
 }

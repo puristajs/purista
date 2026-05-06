@@ -12,7 +12,6 @@ import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFun
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import type { Schema } from '../schema/index.js'
 import {
-	createAgentInvokeProxy,
 	createBaseContextStubs,
 	createInvokeProxy,
 	createMockSpan,
@@ -63,8 +62,7 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
 		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
-		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes']
 	>
 	mock: CommandFunctionContext<
 		GetMessagePayloadType<
@@ -79,8 +77,7 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
 		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
-		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes']
 	>
 	stubs: {
 		logger: Record<string, SinonStub>
@@ -101,7 +98,6 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		scheduleAt: SinonStub
 		service: Record<string, any>
 		resources: Partial<CommandContextMockBuilderTypes<TBuilder>['Resources']>
-		invokeAgent: Record<string, any>
 	}
 }
 
@@ -131,7 +127,6 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 	const internalBuilder = builder as unknown as {
 		invokes: CommandContextMockBuilderTypes<TBuilder>['Invokes']
 		streamInvokes: CommandContextMockBuilderTypes<TBuilder>['StreamInvokes']
-		agentInvokes: CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']
 		emitList: CommandContextMockBuilderTypes<TBuilder>['EmitList']
 		queueInvokes: QueueInvokeList
 	}
@@ -145,7 +140,6 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 	)
 	const invokeProxy = createInvokeProxy<CommandContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<CommandContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
-	const agentProxy = createAgentInvokeProxy<CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']>(input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 
 	const message = getCommandMessageMock({
@@ -176,8 +170,7 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
 		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
-		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		CommandContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes']
 	> = {
 		logger: base.logger.mock,
 		message,
@@ -192,11 +185,10 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 			void opts
 			void contextValue
 			return fn(createMockSpan(input.sandbox))
-		}),
-		service: invokeProxy.api,
-		stream: streamProxy.api,
-		invokeAgent: agentProxy.api,
-		secrets: {
+			}),
+			service: invokeProxy.api,
+			stream: streamProxy.api,
+			secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
 			removeSecret: base.stubs.removeSecret.rejects(new Error('removeSecret is not stubbed')),
@@ -232,7 +224,6 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		stubs: {
 			...base.stubs,
 			service: invokeProxy.createApi<Record<string, any>>(),
-			invokeAgent: agentProxy.createApi<Record<string, any>>(),
 		},
 	}
 }

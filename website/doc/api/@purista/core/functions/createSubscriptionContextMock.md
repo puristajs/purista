@@ -8,7 +8,7 @@
 
 > **createSubscriptionContextMock**\<`TBuilder`\>(`builder`, `input`): [`SubscriptionContextMockResult`](../type-aliases/SubscriptionContextMockResult.md)\<`TBuilder`\>
 
-Defined in: [testing/createSubscriptionContextMock.ts:76](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L76)
+Defined in: [testing/createSubscriptionContextMock.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L72)
 
 Create a typed subscription handler context mock from a subscription builder.
 

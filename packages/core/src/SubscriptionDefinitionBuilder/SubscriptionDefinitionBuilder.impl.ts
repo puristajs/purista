@@ -3,18 +3,12 @@ import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import {
 	mergeNamedHooks,
-	registerAgentInvokeCapability,
 	registerEmitSchema,
 	registerInvokeCapability,
 	registerStreamInvokeCapability,
 } from '../core/helper/builderRegistry.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type {
-	AgentInvocation,
-	AgentProtocolResponse,
-	agentProtocolPayloadSchema,
-} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
@@ -40,20 +34,6 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
-
-export type SubscriptionAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
-	payloadSchema?: Payload
-	parameterSchema?: Parameter
-	outputSchema?: Schema
-}
-
-const isAgentInvokeConfig = (value: unknown): value is SubscriptionAgentInvokeConfig<Schema, Schema> => {
-	return (
-		typeof value === 'object' &&
-		value !== null &&
-		('payloadSchema' in value || 'parameterSchema' in value || 'outputSchema' in value)
-	)
-}
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
@@ -126,7 +106,6 @@ export class SubscriptionDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
-	private agentInvokes: C['AgentInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
@@ -296,134 +275,6 @@ export class SubscriptionDefinitionBuilder<
 						>
 					>,
 				C['EmitList']
-			>
-		>
-	}
-
-	/**
-	 * Define an agent which can be invoked by the current subscription.
-	 * The agent must follow the PURISTA agent protocol.
-	 *
-	 * @param agentName The name of the agent service
-	 * @param serviceVersion The version of the agent service
-	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
-	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema, outputSchema }` validates `.call(payload, parameter)` arguments
-	 *   and declares expected final response envelopes for higher-level helpers.
-	 */
-	canInvokeAgent<
-		Payload extends Schema = typeof agentProtocolPayloadSchema,
-		Parameter extends Schema = Schema,
-		SName extends string = string,
-		Version extends string = string,
-	>(
-		agentName: SName,
-		serviceVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | SubscriptionAgentInvokeConfig<Payload, Parameter>,
-	) {
-		if (agentName.trim() === '' || serviceVersion.trim() === '') {
-			throw new Error('canInvokeAgent requires non-empty agent name and version')
-		}
-
-		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.payloadSchema
-			: undefined
-		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.parameterSchema
-			: invokeConfigOrParameterSchema
-		const outputSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.outputSchema
-			: undefined
-
-		this.agentInvokes = registerAgentInvokeCapability(
-			this.agentInvokes as Record<
-				string,
-				Record<string, { payloadSchema?: Schema; parameterSchema?: Schema; outputSchema?: Schema }>
-			>,
-			agentName,
-			serviceVersion,
-			{ payloadSchema, parameterSchema, outputSchema },
-		) as unknown as C['AgentInvokes'] &
-			Record<
-				SName,
-				Record<
-					Version,
-					{
-						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
-					}
-				>
-			>
-
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes'] &
-					Record<
-						SName,
-						Record<
-							Version,
-							{
-								call: (
-									payload: InferIn<Payload>,
-									parameter?: InferIn<Parameter>,
-								) => AgentInvocation<AgentProtocolResponse>
-							}
-						>
-					>
-			>
-		>
-	}
-
-	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
-		queueName: QueueName,
-		payloadSchema?: Payload,
-		parameterSchema?: Parameter,
-	) {
-		if (queueName.trim() === '') {
-			throw new Error('canEnqueue requires non-empty queue name')
-		}
-
-		this.queueInvokes = {
-			...this.queueInvokes,
-			[queueName]: { payloadSchema, parameterSchema },
-		}
-
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes'] &
-					Record<
-						QueueName,
-						(
-							payload: InferIn<Payload>,
-							parameter: InferIn<Parameter>,
-							options?: Omit<
-								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
-								'queueName' | 'payload' | 'parameter'
-							>,
-						) => Promise<QueueEnqueueResult>
-					>
 			>
 		>
 	}
@@ -947,8 +798,7 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setSubscriptionFunction')
@@ -985,8 +835,7 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1012,8 +861,7 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1060,8 +908,7 @@ export class SubscriptionDefinitionBuilder<
 				C['StreamInvokes'],
 				C['EmitList'],
 				SubscriptionDefinitionMetadataBase,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		> = {
 			subscriptionName: this.subscriptionName,
@@ -1090,7 +937,6 @@ export class SubscriptionDefinitionBuilder<
 			hooks: this.hooks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
-			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}

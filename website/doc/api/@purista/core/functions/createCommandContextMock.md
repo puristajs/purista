@@ -8,7 +8,7 @@
 
 > **createCommandContextMock**\<`TBuilder`\>(`builder`, `input`): [`CommandContextMockResult`](../type-aliases/CommandContextMockResult.md)\<`TBuilder`\>
 
-Defined in: [testing/createCommandContextMock.ts:127](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L127)
+Defined in: [testing/createCommandContextMock.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L123)
 
 Create a typed command handler context mock from a command builder.
 

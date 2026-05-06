@@ -284,29 +284,6 @@ describe('SubscriptionDefinitionBuilder', () => {
 		expect(result).toStrictEqual({ payload, parameter })
 	})
 
-	it('can register an agent dependency with payload and parameter schemas', async () => {
-		const agentPayloadSchema = z.object({ message: z.string(), topic: z.string() })
-		const agentParameterSchema = z.object({ channel: z.enum(['subscription']) })
-
-		const definition = await new SubscriptionDefinitionBuilder('agentSubscription', 'agent subscription test')
-			.canInvokeAgent('MyAgent', '1', {
-				payloadSchema: agentPayloadSchema,
-				parameterSchema: agentParameterSchema,
-			})
-			.setSubscriptionFunction(async function () {
-				return undefined
-			})
-			.getDefinition()
-
-		expect(definition.agentInvokes).toBeDefined()
-		expect(definition.agentInvokes.MyAgent).toBeDefined()
-		expect(definition.agentInvokes.MyAgent['1']).toBeDefined()
-		// @ts-expect-error
-		expect(definition.agentInvokes.MyAgent['1'].payloadSchema).toBe(agentPayloadSchema)
-		// @ts-expect-error
-		expect(definition.agentInvokes.MyAgent['1'].parameterSchema).toBe(agentParameterSchema)
-	})
-
 	it('does not throw on transform output', async () => {
 		const fn = builder.getTransformOutputFunction()
 

@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamAfterGuardHook
 
-# Type Alias: StreamAfterGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionFinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: StreamAfterGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionFinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **StreamAfterGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionFinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `result`, `originalPayload`, `originalParameter`) => `Promise`\<`void`\>
+> **StreamAfterGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionFinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `result`, `originalPayload`, `originalParameter`) => `Promise`\<`void`\>
 
-Defined in: [core/types/stream/StreamAfterGuardHook.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamAfterGuardHook.ts#L19)
+Defined in: [core/types/stream/StreamAfterGuardHook.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamAfterGuardHook.ts#L18)
 
 Guard called after a stream completes successfully and the final payload has
 been validated.
@@ -62,10 +62,6 @@ aggregated final payload when chunk aggregation is enabled.
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Parameters
 
 ### this
@@ -74,7 +70,7 @@ aggregated final payload when chunk aggregation is enabled.
 
 ### context
 
-[`StreamFunctionContext`](StreamFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
+[`StreamFunctionContext`](StreamFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
 ### result
 

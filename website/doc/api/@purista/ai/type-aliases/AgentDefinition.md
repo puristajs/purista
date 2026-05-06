@@ -2,130 +2,64 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentDefinition
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentDefinition
 
-# Type Alias: AgentDefinition\<SkillNames, Resources, ConfigInput, Config, EmitPayloads\>
+# Type Alias: AgentDefinition\<S\>
 
-> **AgentDefinition**\<`SkillNames`, `Resources`, `ConfigInput`, `Config`, `EmitPayloads`\> = `object`
+> **AgentDefinition**\<`S`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:80](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L80)
+Defined in: ai/src/builder/types.ts:263
 
 ## Type Parameters
 
-### SkillNames
+### S
 
-`SkillNames` *extends* `string` = `string`
-
-### Resources
-
-`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
-
-### ConfigInput
-
-`ConfigInput` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
-
-### Config
-
-`Config` *extends* `Record`\<`string`, `unknown`\> = `ConfigInput`
-
-### EmitPayloads
-
-`EmitPayloads` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+`S` *extends* `AnyAgentQueueBuilderTypes` = [`AgentQueueBuilderTypes`](AgentQueueBuilderTypes.md)
 
 ## Properties
 
-### info
+### execution
 
-> **info**: [`AgentInfo`](AgentInfo.md)
+> **execution**: `AgentExecutionDefinition`\<[`InferIn`](../../core/type-aliases/InferIn.md)\<`S`\[`"PayloadSchema"`\]\>, [`InferIn`](../../core/type-aliases/InferIn.md)\<`S`\[`"ParameterSchema"`\]\>, `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], [`Infer`](../../core/type-aliases/Infer.md)\<`S`\[`"OutputSchema"`\]\>\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:87](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L87)
+Defined in: ai/src/builder/types.ts:268
 
 ***
 
 ### manifest
 
-> **manifest**: [`AgentManifest`](AgentManifest.md)
+> **manifest**: [`AgentManifest`](AgentManifest.md)\<`S`\[`"Models"`\]\>
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:88](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L88)
-
-***
-
-### schemas
-
-> **schemas**: `object`
-
-Defined in: [packages/ai/src/types/AgentDefinition.ts:89](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L89)
-
-#### context?
-
-> `optional` **context**: [`Schema`](../../core/type-aliases/Schema.md)
-
-#### output?
-
-> `optional` **output**: [`Schema`](../../core/type-aliases/Schema.md)
-
-#### parameter?
-
-> `optional` **parameter**: [`Schema`](../../core/type-aliases/Schema.md)
-
-#### payload?
-
-> `optional` **payload**: [`Schema`](../../core/type-aliases/Schema.md)
-
-## Methods
-
-### getDefaultConfig()
-
-> **getDefaultConfig**(): [`Complete`](../../core/type-aliases/Complete.md)\<`Config`\> \| `undefined`
-
-Defined in: [packages/ai/src/types/AgentDefinition.ts:101](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L101)
-
-#### Returns
-
-[`Complete`](../../core/type-aliases/Complete.md)\<`Config`\> \| `undefined`
+Defined in: ai/src/builder/types.ts:264
 
 ***
 
-### getExternalRuntimeMetadata()
+### outputSchema?
 
-> **getExternalRuntimeMetadata**(): [`ExternalRuntimeMetadata`](ExternalRuntimeMetadata.md)
+> `optional` **outputSchema**: `S`\[`"OutputSchema"`\]
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:96](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L96)
-
-#### Returns
-
-[`ExternalRuntimeMetadata`](ExternalRuntimeMetadata.md)
+Defined in: ai/src/builder/types.ts:267
 
 ***
 
-### getInstance()
+### parameterSchema?
 
-> **getInstance**(`eventBridge`, `options?`): `Promise`\<[`AgentRuntimeInstance`](AgentRuntimeInstance.md)\<`EmitPayloads`\>\>
+> `optional` **parameterSchema**: `S`\[`"ParameterSchema"`\]
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:97](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L97)
-
-#### Parameters
-
-##### eventBridge
-
-[`EventBridge`](../../core/interfaces/EventBridge.md)
-
-##### options?
-
-[`AgentInstanceOptions`](AgentInstanceOptions.md)\<`SkillNames`, `Resources`, `ConfigInput`\>
-
-#### Returns
-
-`Promise`\<[`AgentRuntimeInstance`](AgentRuntimeInstance.md)\<`EmitPayloads`\>\>
+Defined in: ai/src/builder/types.ts:266
 
 ***
 
-### getManifest()
+### payloadSchema?
 
-> **getManifest**(): [`AgentManifest`](AgentManifest.md)
+> `optional` **payloadSchema**: `S`\[`"PayloadSchema"`\]
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:95](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentDefinition.ts#L95)
+Defined in: ai/src/builder/types.ts:265
 
-#### Returns
+***
 
-[`AgentManifest`](AgentManifest.md)
+### runtime
+
+> **runtime**: `AgentRuntimeRef`\<[`Infer`](../../core/type-aliases/Infer.md)\<`S`\[`"OutputSchema"`\]\>\>
+
+Defined in: ai/src/builder/types.ts:277

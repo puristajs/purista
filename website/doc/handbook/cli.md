@@ -216,4 +216,3 @@ This configuration file follows the [JSON Schema](https://json-schema.org/) spec
   "servicePath": "src/services"
 }
 ```
-Use `purista add agent` to scaffold an AI workload manifest powered by `@purista/ai`. The generator creates an `AgentQueueBuilder` under `src/agents/<name>/v<version>/` plus a prepared Vitest spec that already boots an in-memory event bridge, injects a deterministic provider, executes one agent run, and checks protocol frames. Agents run beside services—no helper command is required. After filling in the handler, call `<yourAgent>.getInstance(eventBridge, options)` inside your bootstrap and invoke from commands/subscriptions via `.canInvokeAgent(...)/context.invokeAgent` (or use `invokeAgent` for scripts/tests outside a Purista context).

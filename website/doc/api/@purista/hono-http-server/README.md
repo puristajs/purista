@@ -164,7 +164,6 @@ const _serverInstance = serve({
 - [getProblemDetailsSchema](functions/getProblemDetailsSchema.md)
 - [getProblemTypeUri](functions/getProblemTypeUri.md)
 - [getQueryDefinition](functions/getQueryDefinition.md)
-- [isAgentEnvelopeLike](functions/isAgentEnvelopeLike.md)
 - [isProtocolSseEvent](functions/isProtocolSseEvent.md)
 - [isStreamErrorPayload](functions/isStreamErrorPayload.md)
 - [isTransportControlFrame](functions/isTransportControlFrame.md)

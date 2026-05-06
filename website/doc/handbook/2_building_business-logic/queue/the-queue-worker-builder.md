@@ -67,7 +67,7 @@ When enabled, operators can:
 
 ## Workers + resources
 
-Workers share the same service resources defined through the `ServiceBuilder`. Inject DB clients, OpenAI SDKs, etc., via `serviceBuilder.addResource(...)` and they become available as `context.resources.<name>` inside the worker.
+Workers share the same service resources defined through the `ServiceBuilder`. Inject DB clients, model clients, and other adapters via `serviceBuilder.addResource(...)`; they become available as `context.resources.<name>` inside the worker.
 
 ## Testing workers
 

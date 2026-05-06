@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionDefinitionBuilderTypes
 
-# Type Alias: SubscriptionDefinitionBuilderTypes\<PayloadSchema, ParamsSchema, OutputSchema, TransformInputPayloadSchema, TransformInputParamsSchema, TransformOutputSchema, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: SubscriptionDefinitionBuilderTypes\<PayloadSchema, ParamsSchema, OutputSchema, TransformInputPayloadSchema, TransformInputParamsSchema, TransformOutputSchema, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **SubscriptionDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `OutputSchema`, `TransformInputPayloadSchema`, `TransformInputParamsSchema`, `TransformOutputSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = `object`
+> **SubscriptionDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `OutputSchema`, `TransformInputPayloadSchema`, `TransformInputParamsSchema`, `TransformOutputSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L8)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L7)
 
 ## Type Parameters
 
@@ -56,25 +56,13 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`AgentInvokeList`](AgentInvokeList.md)
-
 ## Properties
-
-### AgentInvokes
-
-> **AgentInvokes**: `AgentInvokes`
-
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L33)
-
-***
 
 ### EmitList
 
 > **EmitList**: `EmitList`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L31)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L29)
 
 ***
 
@@ -82,7 +70,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **Invokes**: `Invokes`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L29)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L27)
 
 ***
 
@@ -90,7 +78,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **OutputSchema**: `OutputSchema`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L24)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L22)
 
 ***
 
@@ -98,7 +86,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **ParamsSchema**: `ParamsSchema`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L23)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L21)
 
 ***
 
@@ -106,7 +94,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **PayloadSchema**: `PayloadSchema`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L22)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L20)
 
 ***
 
@@ -114,7 +102,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **QueueInvokes**: `QueueInvokes`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L32)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L30)
 
 ***
 
@@ -122,7 +110,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **Resources**: `Resources`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L28)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L26)
 
 ***
 
@@ -130,7 +118,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **StreamInvokes**: `StreamInvokes`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L30)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L28)
 
 ***
 
@@ -138,7 +126,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **TransformInputParamsSchema**: `TransformInputParamsSchema`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L26)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L24)
 
 ***
 
@@ -146,7 +134,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **TransformInputPayloadSchema**: `TransformInputPayloadSchema`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L25)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L23)
 
 ***
 
@@ -154,4 +142,4 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts
 
 > **TransformOutputSchema**: `TransformOutputSchema`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L27)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L25)

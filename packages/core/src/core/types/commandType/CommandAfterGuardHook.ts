@@ -1,7 +1,7 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { CommandFunctionContext } from './CommandFunctionContext.js'
@@ -23,7 +23,7 @@ export type CommandAfterGuardHook<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = (
 	this: S,
 	context: CommandFunctionContext<
@@ -33,8 +33,7 @@ export type CommandAfterGuardHook<
 		Invokes,
 		StreamInvokes,
 		EmitList,
-		any,
-		AgentInvokes
+		QueueInvokes
 	>,
 	result: Readonly<FunctionOutputType>,
 	originalPayload: Readonly<FunctionPayloadType>,

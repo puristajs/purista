@@ -4,9 +4,9 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandBeforeGuardHook
 
-# Type Alias: CommandBeforeGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, Resources, Invokes, StreamInvokes, EmitList, AgentInvokes\>
+# Type Alias: CommandBeforeGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **CommandBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `AgentInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`void`\>
+> **CommandBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`void`\>
 
 Defined in: [core/types/commandType/CommandBeforeGuardHook.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandBeforeGuardHook.ts#L17)
 
@@ -52,9 +52,9 @@ It should throw HandledError or return void.
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = [`EmptyObject`](EmptyObject.md)
 
-### AgentInvokes
+### QueueInvokes
 
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
+`QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
 ## Parameters
 
@@ -64,7 +64,7 @@ It should throw HandledError or return void.
 
 ### context
 
-[`CommandFunctionContext`](CommandFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `any`, `AgentInvokes`\>
+[`CommandFunctionContext`](CommandFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
 ### payload
 

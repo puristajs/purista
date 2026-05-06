@@ -2,26 +2,59 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentModelBinding
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentModelBinding
 
-# Type Alias: AgentModelBinding
+# Type Alias: AgentModelBinding\<Capabilities, Model\>
 
-> **AgentModelBinding** = `object`
+> **AgentModelBinding**\<`Capabilities`, `Model`\> = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:151](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L151)
+Defined in: ai/src/builder/types.ts:37
+
+Declares a model alias required by an attached PURISTA agent.
+
+The provider is supplied at service instantiation time; this declaration is
+the compile-time and startup contract for handlers and harness setup.
+
+## Example
+
+```ts
+builder.addModel('primary', {
+  model: 'gpt-4.1-mini',
+  capabilities: ['object', 'tool_use'],
+  defaults: { temperature: 0.2 },
+})
+```
+
+## Type Parameters
+
+### Capabilities
+
+`Capabilities` *extends* readonly [`AgentModelCapability`](AgentModelCapability.md)[] = readonly [`AgentModelCapability`](AgentModelCapability.md)[]
+
+### Model
+
+`Model` *extends* `string` = `string`
 
 ## Properties
 
-### alias
+### capabilities
 
-> **alias**: `string`
+> **capabilities**: `Capabilities`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:152](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L152)
+Defined in: ai/src/builder/types.ts:42
 
 ***
 
-### capabilities?
+### defaults?
 
-> `optional` **capabilities**: [`AgentModelCapability`](AgentModelCapability.md)[]
+> `optional` **defaults**: `ModelDefaults`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:153](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L153)
+Defined in: ai/src/builder/types.ts:43
+
+***
+
+### model
+
+> **model**: `Model`
+
+Defined in: ai/src/builder/types.ts:41

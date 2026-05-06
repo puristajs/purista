@@ -5,7 +5,6 @@ import type { SubscriptionFunctionContext } from '../core/types/subscription/Sub
 import type { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import type { Schema } from '../schema/index.js'
 import {
-	createAgentInvokeProxy,
 	createBaseContextStubs,
 	createInvokeProxy,
 	createMockSpan,
@@ -31,16 +30,14 @@ export type SubscriptionContextMockResult<TBuilder extends SubscriptionDefinitio
 		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes']
 	>
 	mock: SubscriptionFunctionContext<
 		SubscriptionContextMockBuilderTypes<TBuilder>['Resources'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes']
 	>
 	stubs: {
 		logger: Record<string, SinonStub>
@@ -61,7 +58,6 @@ export type SubscriptionContextMockResult<TBuilder extends SubscriptionDefinitio
 		scheduleAt: SinonStub
 		service: Record<string, any>
 		resources: Partial<SubscriptionContextMockBuilderTypes<TBuilder>['Resources']>
-		invokeAgent: Record<string, any>
 	}
 }
 
@@ -80,7 +76,6 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 	const internalBuilder = builder as unknown as {
 		invokes: SubscriptionContextMockBuilderTypes<TBuilder>['Invokes']
 		streamInvokes: SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes']
-		agentInvokes: SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']
 		emitList: SubscriptionContextMockBuilderTypes<TBuilder>['EmitList']
 	}
 
@@ -93,9 +88,6 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 	)
 	const invokeProxy = createInvokeProxy<SubscriptionContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
-	const agentProxy = createAgentInvokeProxy<SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']>(
-		input.sandbox,
-	)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 
 	const context: SubscriptionFunctionContext<
@@ -103,8 +95,7 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes']
 	> = {
 		logger: base.logger.mock,
 		message: input.message,
@@ -119,11 +110,10 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 			void opts
 			void contextValue
 			return fn(createMockSpan(input.sandbox))
-		}),
-		service: invokeProxy.api,
-		stream: streamProxy.api,
-		invokeAgent: agentProxy.api,
-		secrets: {
+			}),
+			service: invokeProxy.api,
+			stream: streamProxy.api,
+			secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
 			removeSecret: base.stubs.removeSecret.rejects(new Error('removeSecret is not stubbed')),
@@ -151,7 +141,6 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 		stubs: {
 			...base.stubs,
 			service: invokeProxy.createApi<Record<string, any>>(),
-			invokeAgent: agentProxy.createApi<Record<string, any>>(),
 		},
 	}
 }

@@ -8,7 +8,7 @@
 
 > **ProjectConfigPatch** = `object`
 
-Defined in: [packages/cli/src/blueprints/types.ts:29](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L29)
+Defined in: [packages/cli/src/blueprints/types.ts:29](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L29)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:29](https://github.com/purista
 
 > `optional` **packageJson**: `PKG`
 
-Defined in: [packages/cli/src/blueprints/types.ts:30](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L30)
+Defined in: [packages/cli/src/blueprints/types.ts:30](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L30)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:30](https://github.com/purista
 
 > `optional` **puristaConfig**: `Partial`\<[`PuristaConfig`](PuristaConfig.md)\>
 
-Defined in: [packages/cli/src/blueprints/types.ts:32](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L32)
+Defined in: [packages/cli/src/blueprints/types.ts:32](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L32)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/cli/src/blueprints/types.ts:32](https://github.com/purista
 
 > `optional` **tsconfig**: `TsConfigJson`
 
-Defined in: [packages/cli/src/blueprints/types.ts:31](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L31)
+Defined in: [packages/cli/src/blueprints/types.ts:31](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L31)

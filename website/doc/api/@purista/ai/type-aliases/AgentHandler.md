@@ -2,13 +2,13 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentHandler
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentHandler
 
-# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes\>
+# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output\>
 
-> **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\> = (`context`, `payload`, `parameter`) => `Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
+> **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`, `CommandTools`, `AgentTools`, `Output`\> = (`context`) => `Promise`\<`Output`\>
 
-Defined in: packages/ai/src/types/AgentHandler.ts:60
+Defined in: ai/src/builder/types.ts:192
 
 ## Type Parameters
 
@@ -26,34 +26,26 @@ Defined in: packages/ai/src/types/AgentHandler.ts:60
 
 ### Models
 
-`Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\> = `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`string`, `never`\>
 
-### AgentInvokes
+### CommandTools
 
-`AgentInvokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
+`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`string`, `never`\>
 
-### EmitPayloads
+### AgentTools
 
-`EmitPayloads` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`string`, `never`\>
 
-### ToolInvokes
+### Output
 
-`ToolInvokes` *extends* [`ToolInvokeMap`](ToolInvokeMap.md) = [`ToolInvokeMap`](ToolInvokeMap.md)
+`Output` = `unknown`
 
 ## Parameters
 
 ### context
 
-[`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>
-
-### payload
-
-`Payload`
-
-### parameter
-
-`Parameter`
+[`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `CommandTools`, `AgentTools`\>
 
 ## Returns
 
-`Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
+`Promise`\<`Output`\>

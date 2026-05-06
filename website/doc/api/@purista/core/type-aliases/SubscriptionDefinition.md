@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionDefinition
 
-# Type Alias: SubscriptionDefinition\<S, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, FunctionOutputType, FinalFunctionOutputType, TransformOutputHookOutput, Resources, Invokes, StreamInvokes, EmitList, MetadataType, QueueInvokes, AgentInvokes\>
+# Type Alias: SubscriptionDefinition\<S, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, FunctionOutputType, FinalFunctionOutputType, TransformOutputHookOutput, Resources, Invokes, StreamInvokes, EmitList, MetadataType, QueueInvokes\>
 
-> **SubscriptionDefinition**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\> = `object`
+> **SubscriptionDefinition**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`\> = `object`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L24)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L23)
 
 The definition for a subscription provided by some service.
 
@@ -70,25 +70,13 @@ The definition for a subscription provided by some service.
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`AgentInvokeList`](AgentInvokeList.md)
-
 ## Properties
-
-### agentInvokes
-
-> **agentInvokes**: `AgentInvokes`
-
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:140](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L140)
-
-***
 
 ### call
 
-> **call**: [`SubscriptionFunction`](SubscriptionFunction.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
+> **call**: [`SubscriptionFunction`](SubscriptionFunction.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L50)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L48)
 
 the subscription function
 
@@ -98,7 +86,7 @@ the subscription function
 
 > **deprecated**: `boolean`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:143](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L143)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L137)
 
 ***
 
@@ -106,7 +94,7 @@ Defined in: [core/types/subscription/SubscriptionDefinition.ts:143](https://gith
 
 > `optional` **emitEventName**: `string`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L81)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L78)
 
 event name to be used for custom message if the subscription functions returns value
 
@@ -116,7 +104,7 @@ event name to be used for custom message if the subscription functions returns v
 
 > **emitList**: `EmitList`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:141](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L141)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L135)
 
 ***
 
@@ -124,7 +112,7 @@ Defined in: [core/types/subscription/SubscriptionDefinition.ts:141](https://gith
 
 > **eventBridgeConfig**: [`DefinitionEventBridgeConfig`](DefinitionEventBridgeConfig.md)
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L48)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L46)
 
 config information for event bridge
 
@@ -134,7 +122,7 @@ config information for event bridge
 
 > `optional` **eventName**: `string`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:79](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L79)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:76](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L76)
 
 filter forevent name
 
@@ -144,17 +132,17 @@ filter forevent name
 
 > **hooks**: `object`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L87)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L84)
 
 hooks of subscription
 
 #### afterGuard?
 
-> `optional` **afterGuard**: `Record`\<`string`, [`SubscriptionAfterGuardHook`](SubscriptionAfterGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>\>
+> `optional` **afterGuard**: `Record`\<`string`, [`SubscriptionAfterGuardHook`](SubscriptionAfterGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
 #### beforeGuard?
 
-> `optional` **beforeGuard**: `Record`\<`string`, [`SubscriptionBeforeGuardHook`](SubscriptionBeforeGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>\>
+> `optional` **beforeGuard**: `Record`\<`string`, [`SubscriptionBeforeGuardHook`](SubscriptionBeforeGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
 #### transformInput?
 
@@ -190,7 +178,7 @@ hooks of subscription
 
 > **invokes**: `Invokes`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:138](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L138)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:133](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L133)
 
 ***
 
@@ -198,7 +186,7 @@ Defined in: [core/types/subscription/SubscriptionDefinition.ts:138](https://gith
 
 > `optional` **messageType**: [`EBMessageType`](../enumerations/EBMessageType.md)
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:77](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L77)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L74)
 
 filter for message type
 
@@ -208,7 +196,7 @@ filter for message type
 
 > **metadata**: `MetadataType`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L46)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L44)
 
 the metadata of the subscription
 
@@ -218,7 +206,7 @@ the metadata of the subscription
 
 > `optional` **principalId**: [`PrincipalId`](PrincipalId.md)
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L83)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L80)
 
 filter for principal id
 
@@ -228,7 +216,7 @@ filter for principal id
 
 > **queueInvokes**: `QueueInvokes`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:142](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L142)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:136](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L136)
 
 ***
 
@@ -236,7 +224,7 @@ Defined in: [core/types/subscription/SubscriptionDefinition.ts:142](https://gith
 
 > `optional` **receiver**: `object`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L70)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L67)
 
 filter for messages consumed by given receiver
 
@@ -262,7 +250,7 @@ filter for messages consumed by given receiver
 
 > `optional` **sender**: `object`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L63)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L60)
 
 filter for messages produced by given sender
 
@@ -288,7 +276,7 @@ filter for messages produced by given sender
 
 > **streamInvokes**: `StreamInvokes`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:139](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L139)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:134](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L134)
 
 ***
 
@@ -296,7 +284,7 @@ Defined in: [core/types/subscription/SubscriptionDefinition.ts:139](https://gith
 
 > **subscriptionDescription**: `string`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L44)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L42)
 
 the description of the subscription
 
@@ -306,7 +294,7 @@ the description of the subscription
 
 > **subscriptionName**: `string`
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L42)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L40)
 
 the name of the subscription
 
@@ -316,6 +304,6 @@ the name of the subscription
 
 > `optional` **tenantId**: [`TenantId`](TenantId.md)
 
-Defined in: [core/types/subscription/SubscriptionDefinition.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L85)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L82)
 
 filter for tenant id

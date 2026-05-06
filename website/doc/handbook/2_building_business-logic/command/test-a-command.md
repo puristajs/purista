@@ -132,4 +132,3 @@ Use this level when you want to verify:
 
 - [The command builder](./the-command-builder.md)
 - [Service builder](../service/the-service-builder.md)
-- [Agent testing](../agent/testing.md)

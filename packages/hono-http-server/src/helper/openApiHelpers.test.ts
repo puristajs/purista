@@ -168,8 +168,8 @@ describe('openapi helpers', () => {
 					path: 'stream',
 					stream: {
 						mode: 'stream',
-						protocol: 'ai-sdk-ui-message',
-						documentationUrl: 'https://example.com/ui-message',
+						protocol: 'custom-event-stream',
+						documentationUrl: 'https://example.com/stream-events',
 					},
 					openApi: {
 						isSecure: false,
@@ -189,12 +189,11 @@ describe('openapi helpers', () => {
 
 		expect(endpoint?.requestBody).toBeDefined()
 		expect(okResponse.content?.['text/event-stream']?.schema).toMatchObject({
-			type: 'object',
-			required: ['event', 'data'],
+			oneOf: expect.any(Array),
 		})
-		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol']).toBe('ai-sdk-ui-message')
+		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol']).toBe('custom-event-stream')
 		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol-docs']).toBe(
-			'https://example.com/ui-message',
+			'https://example.com/stream-events',
 		)
 	})
 })

@@ -1,5 +1,4 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
@@ -34,7 +33,6 @@ export type CommandDefinition<
 	EmitList extends Record<string, Schema>,
 	MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	/** the name of the command */
 	commandName: string
@@ -56,7 +54,7 @@ export type CommandDefinition<
 		Invokes,
 		StreamInvokes,
 		EmitList,
-		AgentInvokes
+		QueueInvokes
 	>
 	/** the eventName for the command response */
 	eventName?: string
@@ -83,12 +81,12 @@ export type CommandDefinition<
 				MessageParamsType,
 				FunctionPayloadType,
 				FunctionParamsType,
-				Resources,
-				Invokes,
-				StreamInvokes,
-				EmitList,
-				AgentInvokes
-			>
+					Resources,
+					Invokes,
+					StreamInvokes,
+					EmitList,
+					QueueInvokes
+				>
 		>
 		afterGuard?: Record<
 			string,
@@ -99,12 +97,12 @@ export type CommandDefinition<
 				FunctionPayloadType,
 				FunctionParamsType,
 				FunctionOutputType,
-				Resources,
-				Invokes,
-				StreamInvokes,
-				EmitList,
-				AgentInvokes
-			>
+					Resources,
+					Invokes,
+					StreamInvokes,
+					EmitList,
+					QueueInvokes
+				>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema
@@ -120,7 +118,6 @@ export type CommandDefinition<
 	}
 	invokes: Invokes
 	streamInvokes: StreamInvokes
-	agentInvokes: AgentInvokes
 	emitList: EmitList
 	queueInvokes: QueueInvokes
 }
