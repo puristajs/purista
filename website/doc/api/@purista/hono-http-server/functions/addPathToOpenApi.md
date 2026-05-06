@@ -8,7 +8,7 @@
 
 > **addPathToOpenApi**(`openApiBuilder`, `metadata`, `path`, `config`): `void`
 
-Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L14)
+Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:18](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L18)
 
 ## Parameters
 

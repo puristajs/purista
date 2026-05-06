@@ -52,18 +52,35 @@ All helpers emit OpenTelemetry spans so you get timing and failure statistics au
 
 Unhandled exceptions trigger `context.job.retry()` automatically until `maxAttempts` is exceeded. Use `HandledError` to control the reason/status stored alongside the job. For critical failures, call `context.job.moveToDeadLetter()` yourself to bypass retries.
 
+### Poison message controls
+
+Queue lifecycle supports optional poison handling:
+
+- `poisonMessageFailureThreshold`: number of repeated identical failures before action triggers
+- `poisonMessageAction: 'pause-worker'`: pauses workers for that queue when threshold is reached
+
+When enabled, operators can:
+
+- inspect paused queues via `service.getQueueWorkerPauseState()`
+- resume processing with `service.resumeQueueWorkers(queueName)`
+- pause manually with `service.pauseQueueWorkers(queueName, reason)`
+
 ## Workers + resources
 
-Workers share the same service resources defined through the `ServiceBuilder`. Inject DB clients, OpenAI SDKs, etc., via `serviceBuilder.addResource(...)` and they become available as `context.resources.<name>` inside the worker.
+Workers share the same service resources defined through the `ServiceBuilder`. Inject DB clients, model clients, and other adapters via `serviceBuilder.addResource(...)`; they become available as `context.resources.<name>` inside the worker.
 
 ## Testing workers
 
-- The CLI scaffolds Vitest suites that instantiate the worker handler with the default queue bridge.
-- Use `DefaultQueueBridge` for deterministic tests (no external dependencies).
-- Simulate retries by throwing from the handler and asserting that the queue metrics increment.
+Use the same testing split as the rest of PURISTA:
+
+- `createQueueWorkerContextMock(...)` for direct handler tests
+- `createQueueWorkerTestHarness(...)` for one real worker cycle through the runtime
+
+Use the runtime harness when you need to verify acknowledgements, retries, or dead-letter behavior instead of only the handler logic.
 
 ## Related docs
 
 - [Queue builder](./the-queue-builder.md)
+- [Test a queue worker](./test-a-queue-worker.md)
 - [Async HTTP exposure](./queue-http-exposure.md)
 - [Queue bridges](../../3_eco_system/queue_bridges/index.md)

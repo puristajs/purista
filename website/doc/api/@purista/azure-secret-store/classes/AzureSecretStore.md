@@ -77,13 +77,9 @@ Enable generally set method
 
 [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 ###### options?
 
@@ -178,13 +174,9 @@ Enable generally set method
 
 > `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 #### logLevel?
 
 > `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 #### options?
 

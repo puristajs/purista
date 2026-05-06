@@ -8,9 +8,7 @@
 
 > **scanPuristaProject**(`puristaConfig`, `projectRootPath?`): `Promise`\<[`PuristaProjectInfo`](../type-aliases/PuristaProjectInfo.md)\>
 
-Defined in: [scanPuristaProject.ts:44](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/scanPuristaProject.ts#L44)
-
-Walk through the file and folder structure and extract the existing services with their commands and subscriptions.
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:19](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L19)
 
 ## Parameters
 
@@ -38,11 +36,11 @@ Walk through the file and folder structure and extract the existing services wit
 
 #### formatter
 
-`"biome"` \| `"none"` \| `"prettier"` = `...`
+`"biome"` \| `"prettier"` \| `"none"` = `...`
 
 #### linter
 
-`"biome"` \| `"eslint"` \| `"none"` = `...`
+`"biome"` \| `"none"` \| `"eslint"` = `...`
 
 #### runtime
 

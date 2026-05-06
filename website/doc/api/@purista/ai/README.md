@@ -4,143 +4,112 @@
 
 [PURISTA API](../../packages.md) / @purista/ai
 
-# @purista/ai
+# `@purista/ai`
 
-## Classes
+Harness-backed AI agents for PURISTA services.
 
-- [AgentBuilder](classes/AgentBuilder.md)
-- [AgentExecutor](classes/AgentExecutor.md)
-- [AgentInstance](classes/AgentInstance.md)
-- [AiSdkProvider](classes/AiSdkProvider.md)
-- [InMemoryKnowledgeAdapter](classes/InMemoryKnowledgeAdapter.md)
-- [InMemorySessionStore](classes/InMemorySessionStore.md)
-- [ModelResourceRegistry](classes/ModelResourceRegistry.md)
-- [PoolManager](classes/PoolManager.md)
+`@purista/ai` is an optional package. Core PURISTA packages, HTTP adapters,
+default starters, and scaffolding runtime code must not depend on it. Install it
+only in applications that declare agents.
 
-## Interfaces
+## Runtime Model
 
-- [KnowledgeAdapter](interfaces/KnowledgeAdapter.md)
-- [ModelProvider](interfaces/ModelProvider.md)
-- [SessionStore](interfaces/SessionStore.md)
+The package wraps `@purista/harness` and exposes agents as normal PURISTA service
+artifacts:
 
-## Type Aliases
+- a queue for controlled concurrency
+- a worker for background execution
+- a command for aggregate calls
+- a stream for live harness run events
 
-- [Agent2AgentReferenceMessage](type-aliases/Agent2AgentReferenceMessage.md)
-- [AgentDefinition](type-aliases/AgentDefinition.md)
-- [AgentExecutionInput](type-aliases/AgentExecutionInput.md)
-- [AgentExecutionOptions](type-aliases/AgentExecutionOptions.md)
-- [AgentExecutionResult](type-aliases/AgentExecutionResult.md)
-- [AgentHandler](type-aliases/AgentHandler.md)
-- [AgentHandlerContext](type-aliases/AgentHandlerContext.md)
-- [AgentHandlerResult](type-aliases/AgentHandlerResult.md)
-- [AgentHistoryPreset](type-aliases/AgentHistoryPreset.md)
-- [AgentHttpExposure](type-aliases/AgentHttpExposure.md)
-- [AgentInfo](type-aliases/AgentInfo.md)
-- [AgentInstanceDependencies](type-aliases/AgentInstanceDependencies.md)
-- [AgentInstanceOptions](type-aliases/AgentInstanceOptions.md)
-- [AgentInvokeContext](type-aliases/AgentInvokeContext.md)
-- [AgentInvokeRequest](type-aliases/AgentInvokeRequest.md)
-- [AgentInvokeResult](type-aliases/AgentInvokeResult.md)
-- [AgentManifest](type-aliases/AgentManifest.md)
-- [AgentProtocolBuffer](type-aliases/AgentProtocolBuffer.md)
-- [AgentProtocolEnvelope](type-aliases/AgentProtocolEnvelope.md)
-- [AgentProtocolFrame](type-aliases/AgentProtocolFrame.md)
-- [AgentProtocolRunOptions](type-aliases/AgentProtocolRunOptions.md)
-- [AgentRole](type-aliases/AgentRole.md)
-- [AgentRuntimeDependencies](type-aliases/AgentRuntimeDependencies.md)
-- [AgentRuntimeInstance](type-aliases/AgentRuntimeInstance.md)
-- [AgentSessionConfig](type-aliases/AgentSessionConfig.md)
-- [AgentStreamEmitter](type-aliases/AgentStreamEmitter.md)
-- [AgentStreamResponder](type-aliases/AgentStreamResponder.md)
-- [AiSdkProviderMetadata](type-aliases/AiSdkProviderMetadata.md)
-- [AiSdkProviderOptions](type-aliases/AiSdkProviderOptions.md)
-- [AiSdkProviderOverrides](type-aliases/AiSdkProviderOverrides.md)
-- [AiSdkStreamEvent](type-aliases/AiSdkStreamEvent.md)
-- [AllowedToolDefinition](type-aliases/AllowedToolDefinition.md)
-- [ConversationFrame](type-aliases/ConversationFrame.md)
-- [ConversationHelpers](type-aliases/ConversationHelpers.md)
-- [ConversationHistory](type-aliases/ConversationHistory.md)
-- [ConversationMessage](type-aliases/ConversationMessage.md)
-- [ConversationRole](type-aliases/ConversationRole.md)
-- [ConversationState](type-aliases/ConversationState.md)
-- [CreateAgentHandlerContextInput](type-aliases/CreateAgentHandlerContextInput.md)
-- [CreateEnvelopeInput](type-aliases/CreateEnvelopeInput.md)
-- [EvaluationResult](type-aliases/EvaluationResult.md)
-- [EvaluationSample](type-aliases/EvaluationSample.md)
-- [InvokeAgentOptions](type-aliases/InvokeAgentOptions.md)
-- [KnowledgeAdapterConfig](type-aliases/KnowledgeAdapterConfig.md)
-- [KnowledgeDocument](type-aliases/KnowledgeDocument.md)
-- [McpReferenceContent](type-aliases/McpReferenceContent.md)
-- [McpReferenceToolResult](type-aliases/McpReferenceToolResult.md)
-- [MCPToolDescriptor](type-aliases/MCPToolDescriptor.md)
-- [ProtocolActor](type-aliases/ProtocolActor.md)
-- [ProviderRequest](type-aliases/ProviderRequest.md)
-- [ProviderResponse](type-aliases/ProviderResponse.md)
-- [PuristaProtocolOptions](type-aliases/PuristaProtocolOptions.md)
-- [RetryPolicy](type-aliases/RetryPolicy.md)
-- [ScopedSessionIdInput](type-aliases/ScopedSessionIdInput.md)
-- [SessionHelpers](type-aliases/SessionHelpers.md)
-- [SessionRecord](type-aliases/SessionRecord.md)
-- [SessionRecordData](type-aliases/SessionRecordData.md)
-- [StartActiveSpanFunction](type-aliases/StartActiveSpanFunction.md)
-- [TokenUsage](type-aliases/TokenUsage.md)
+Agents can execute one of three mutually exclusive definitions:
 
-## Variables
+- `setHarnessAgent(...)`
+- `setHarnessWorkflow(...)`
+- `setRunFunction(...)`
 
-- [agentProtocolEnvelopeSchema](variables/agentProtocolEnvelopeSchema.md)
-- [agentProtocolFrameSchema](variables/agentProtocolFrameSchema.md)
-- [agentRoleSchema](variables/agentRoleSchema.md)
-- [aiOrchestratorService](variables/aiOrchestratorService.md)
-- [aiOrchestratorServiceBuilder](variables/aiOrchestratorServiceBuilder.md)
-- [aiOrchestratorServiceInfo](variables/aiOrchestratorServiceInfo.md)
-- [aiWorkerService](variables/aiWorkerService.md)
-- [aiWorkerServiceBuilder](variables/aiWorkerServiceBuilder.md)
-- [aiWorkerServiceInfo](variables/aiWorkerServiceInfo.md)
-- [aiWorkloadsQueueBuilder](variables/aiWorkloadsQueueBuilder.md)
-- [artifactFrameSchema](variables/artifactFrameSchema.md)
-- [defaultModelResourceRegistry](variables/defaultModelResourceRegistry.md)
-- [enqueueRunCommandBuilder](variables/enqueueRunCommandBuilder.md)
-- [errorFrameSchema](variables/errorFrameSchema.md)
-- [executeWorkloadQueueWorkerBuilder](variables/executeWorkloadQueueWorkerBuilder.md)
-- [messageFrameSchema](variables/messageFrameSchema.md)
-- [planWorkloadCommandBuilder](variables/planWorkloadCommandBuilder.md)
-- [protocolActorSchema](variables/protocolActorSchema.md)
-- [protocolVersion](variables/protocolVersion.md)
-- [telemetryFrameSchema](variables/telemetryFrameSchema.md)
-- [tokenUsageSchema](variables/tokenUsageSchema.md)
-- [toolEventFrameSchema](variables/toolEventFrameSchema.md)
+The runtime emits harness `RunEvent` values. It does not emit a PURISTA-specific
+AI protocol envelope and it does not adapt streams to Vercel AI SDK message
+formats.
 
-## Functions
+## Builder
 
-- [appendMessage](functions/appendMessage.md)
-- [createActor](functions/createActor.md)
-- [createAgentHandlerContext](functions/createAgentHandlerContext.md)
-- [createArtifactFrame](functions/createArtifactFrame.md)
-- [createConversationHelpers](functions/createConversationHelpers.md)
-- [createEnvelopeFromContext](functions/createEnvelopeFromContext.md)
-- [createErrorEnvelopeFromContext](functions/createErrorEnvelopeFromContext.md)
-- [createErrorFrame](functions/createErrorFrame.md)
-- [createEvaluationResult](functions/createEvaluationResult.md)
-- [createMessageFrame](functions/createMessageFrame.md)
-- [createProtocolBuffer](functions/createProtocolBuffer.md)
-- [createProtocolEnvelope](functions/createProtocolEnvelope.md)
-- [createScopedSessionId](functions/createScopedSessionId.md)
-- [createTelemetryFrame](functions/createTelemetryFrame.md)
-- [createTokenUsage](functions/createTokenUsage.md)
-- [createToolEventFrame](functions/createToolEventFrame.md)
-- [diffEvaluationResults](functions/diffEvaluationResults.md)
-- [exposeAgentAsMCP](functions/exposeAgentAsMCP.md)
-- [fromAgent2AgentReferenceMessage](functions/fromAgent2AgentReferenceMessage.md)
-- [fromMcpReferenceToolCall](functions/fromMcpReferenceToolCall.md)
-- [getPayloadSessionId](functions/getPayloadSessionId.md)
-- [invokeAgent](functions/invokeAgent.md)
-- [publishAgentManifest](functions/publishAgentManifest.md)
-- [recordProtocolFrameAsSpan](functions/recordProtocolFrameAsSpan.md)
-- [resolveBaseSessionId](functions/resolveBaseSessionId.md)
-- [runAgentWithProtocol](functions/runAgentWithProtocol.md)
-- [summarizeHistory](functions/summarizeHistory.md)
-- [toAgent2AgentReferenceMessage](functions/toAgent2AgentReferenceMessage.md)
-- [toAiSdkStreamEvents](functions/toAiSdkStreamEvents.md)
-- [toMcpReferenceToolResult](functions/toMcpReferenceToolResult.md)
-- [trimHistory](functions/trimHistory.md)
-- [validateDataset](functions/validateDataset.md)
+```ts
+import { ServiceBuilder } from '@purista/ai'
+import { z } from 'zod'
+
+export const supportService = new ServiceBuilder('support', '1')
+
+export const triageAgent = supportService
+  .getAgentQueueBuilder('triage', 'Classifies incoming support tickets')
+  .addPayloadSchema(z.object({ text: z.string() }))
+  .addOutputSchema(z.object({ priority: z.enum(['low', 'normal', 'high']) }))
+  .addModel('primary', {
+    model: 'support-fast',
+    capabilities: ['text', 'object'],
+  })
+  .setRunFunction(async context => {
+    const result = await context.harness.models.primary.object(
+      {
+        messages: [{ role: 'user', content: context.payload.text }],
+        schema: {
+          type: 'object',
+          properties: { priority: { enum: ['low', 'normal', 'high'] } },
+          required: ['priority'],
+        },
+      },
+      context.signal,
+    )
+
+    return result.object
+  })
+```
+
+Builder declarations cascade into handler types:
+
+- payload, parameter, and output schemas infer handler input/output types
+- declared model aliases become `context.harness.models.<alias>`
+- model methods are capability-gated by the declared alias capabilities
+- allowlisted command tools and child agents become typed invoke maps
+
+## Service Instantiation
+
+Applications bind concrete harness providers at service startup:
+
+```ts
+const instance = await supportService.getInstance(eventBridge, {
+  ai: {
+    models: {
+      primary: {
+        provider,
+        model: 'gpt-4.1-mini',
+      },
+    },
+  },
+})
+```
+
+Startup fails fast when a declared alias is missing or the runtime provider does
+not satisfy the required capabilities.
+
+## Testing
+
+Use `@purista/ai/testing` for credential-free tests:
+
+```ts
+import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'
+
+const model = createScriptedHarnessModel({
+  object: [{ object: { priority: 'high' } }],
+})
+
+const harness = createAgentTestHarness({ models: { primary: model } })
+```
+
+Tests should assert harness events and validated final output, not transport
+protocol envelopes.
+
+## Modules
+
+- [](README.md)
+- [testing](testing/README.md)

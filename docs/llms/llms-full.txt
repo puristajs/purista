@@ -1,0 +1,26 @@
+# PURISTA LLM Full Context
+
+## Primary reading order
+1. https://github.com/puristajs/purista/blob/master/AGENTS.md
+2. https://github.com/puristajs/purista/blob/master/website/doc/handbook/index.md
+3. https://github.com/puristajs/purista/blob/master/website/doc/handbook/2_building_business-logic/agent/index.md
+4. https://github.com/puristajs/purista/blob/master/website/doc/handbook/3_eco_system/index.md
+
+## Service design rules
+- Use Builder APIs and Zod schemas.
+- Keep command/subscription handlers thin and resource-driven.
+- Keep versioned service directories.
+- Prefer explicit event contracts.
+- Keep tests adjacent to behavior.
+
+## Sandbox references
+- https://github.com/puristajs/purista/blob/master/website/doc/handbook/3_eco_system/sandbox.md
+- https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/index.ts
+- https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/workspaceLayout.ts
+- https://github.com/puristajs/purista/blob/master/packages/ai/Dockerfile.sandbox
+
+## Skills
+- https://github.com/puristajs/purista/blob/master/skills/README.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/01-core-mental-model.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/05-agents-skills-and-ai-runtime.md

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 /**
  * Schema of the purista.json configuration file.

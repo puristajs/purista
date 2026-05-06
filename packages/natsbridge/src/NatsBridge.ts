@@ -9,6 +9,7 @@ import type {
 	CommandSuccessResponse,
 	CustomMessage,
 	DefinitionEventBridgeConfig,
+	DefinitionEventBridgeConsumerFailureHandling,
 	EBMessage,
 	EBMessageAddress,
 	EventBridge,
@@ -20,7 +21,10 @@ import {
 	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
-	EventBridgeEventNames,
+	EventBridgeCommandTransport,
+	EventBridgeLateResponseHandling,
+	EventBridgeResponseConfirmationLevel,
+	EventBridgeStreamLateFrameHandling,
 	getNewCorrelationId,
 	getNewEBMessageId,
 	HandledError,
@@ -29,11 +33,30 @@ import {
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
+	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
-import type { JetStreamManager, MsgHdrs, NatsConnection, Subscription as NatsSubscription } from 'nats'
-import { connect, headers as getNewHeaders, JSONCodec } from 'nats'
+import type {
+	JetStreamClient,
+	JetStreamManager,
+	JetStreamSubscription,
+	JsMsg,
+	Msg,
+	MsgHdrs,
+	NatsConnection,
+	NatsError,
+	Subscription as NatsSubscription,
+} from 'nats'
+import {
+	connect,
+	consumerOpts,
+	createInbox,
+	headers as getNewHeaders,
+	JSONCodec,
+	RetentionPolicy,
+	StorageType,
+} from 'nats'
 
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl.js'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig.js'
@@ -48,11 +71,33 @@ import { getTopicName } from './topic/getTopicName.impl.js'
 
 import type { NatsBridgeConfig } from './types/NatsBridgeConfig.js'
 
-/**
-The event bridge supports brokers with and without JetStream enabled.
+const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
+const DEAD_LETTER_ATTEMPT_HEADER = 'x-purista-dead-letter-attempt'
+const DEAD_LETTER_ORIGINAL_SUBJECT_HEADER = 'x-purista-dead-letter-original-subject'
+const DEAD_LETTER_SUBSCRIBER_HEADER = 'x-purista-dead-letter-subscriber'
 
-If JetStream is enabled, subscriptions which are marked as durable are persisted by using JetStream.  
-If JetStream is not available, subscription fall back to live-subscriptions without any persistence.  
+type ResolvedConsumerFailureHandling = {
+	maxAttempts: number
+	retryDelayMs: number
+	deadLetterTarget: string
+}
+
+type PausedSubscriptionState = {
+	pausedAt: number
+	reason: string
+}
+
+type RegisteredSubscription = {
+	subscription: JetStreamSubscription | NatsSubscription
+}
+
+/**
+The event bridge supports low-latency core NATS messaging.
+
+When JetStream is available, durable command and subscription registrations use
+JetStream consumers. Without JetStream, durable requests fail fast by default
+(`durableSubscriptionMode: 'strict'`) instead of silently degrading to
+non-durable core NATS semantics.
 
 Example usage:
 
@@ -72,9 +117,11 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 	public isJetStreamEnabled = false
 
 	public jsm: JetStreamManager | undefined
+	public js: JetStreamClient | undefined
 
-	commands = new Map<string, NatsSubscription>()
-	subscriptions = new Map<string, NatsSubscription>()
+	commands = new Map<string, JetStreamSubscription | NatsSubscription>()
+	subscriptions = new Map<string, RegisteredSubscription>()
+	private pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
 	sc = JSONCodec()
 
@@ -85,6 +132,369 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		}
 
 		super('NatsBridge', conf)
+		this.capabilities = {
+			supportsStreams: false,
+			durableCommands: false,
+			durableSubscriptions: false,
+			manualAckSupported: false,
+			lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
+			gracefulDrainSupported: true,
+			nativeDeadLettering: false,
+			commandHandling: {
+				transport: EventBridgeCommandTransport.RequestReply,
+				pendingInvocationCancellation: false,
+				responseConfirmation: EventBridgeResponseConfirmationLevel.ProtocolLevel,
+				strictMode: true,
+			},
+			streamHandling: {
+				incrementalDelivery: false,
+				consumerCancellation: false,
+				gracefulStreamDrain: false,
+				aggregatedFinalSupported: false,
+				lateFrameHandling: EventBridgeStreamLateFrameHandling.NotApplicable,
+			},
+			consumerFailureHandling: {
+				boundedRetry: true,
+				delayedRetry: true,
+				deadLetterTarget: true,
+				drop: true,
+				stopConsumer: true,
+				consumerPauseResume: true,
+				bridgeManagedDeadLettering: true,
+				nativeDeadLettering: false,
+				fatalClassification: false,
+				strictMode: true,
+			},
+		}
+	}
+
+	private requiresJetStreamConsumer(kind: 'command' | 'subscription', eventBridgeConfig: DefinitionEventBridgeConfig) {
+		if (kind === 'command') {
+			return eventBridgeConfig.durable
+		}
+
+		return (
+			eventBridgeConfig.durable ||
+			!eventBridgeConfig.autoacknowledge ||
+			eventBridgeConfig.consumerFailureHandling !== undefined
+		)
+	}
+
+	private shouldUseJetStreamConsumer(kind: 'command' | 'subscription', eventBridgeConfig: DefinitionEventBridgeConfig) {
+		if (!this.requiresJetStreamConsumer(kind, eventBridgeConfig)) {
+			return false
+		}
+		if (this.isJetStreamEnabled && this.jsm && this.js) {
+			return true
+		}
+		if (this.config.durableSubscriptionMode === 'best-effort') {
+			this.logger.warn(
+				{ kind, eventBridgeConfig },
+				'Falling back to core NATS semantics because JetStream-backed acknowledgements are unavailable',
+			)
+			return false
+		}
+		throw new UnhandledError(
+			StatusCode.NotImplemented,
+			`NATS ${kind} registration requires JetStream support for the requested delivery semantics`,
+		)
+	}
+
+	private getRegistrationKey(address: EBMessageAddress) {
+		return `${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`
+	}
+
+	private getPauseRetryDelayMs(failureHandling?: ResolvedConsumerFailureHandling) {
+		if (failureHandling && failureHandling.retryDelayMs > 0) {
+			return failureHandling.retryDelayMs
+		}
+		return 1_000
+	}
+
+	private pauseSubscriptionConsumer(registrationKey: string, reason: string) {
+		this.pausedSubscriptionConsumers.set(registrationKey, {
+			pausedAt: Date.now(),
+			reason,
+		})
+	}
+
+	private sanitizeName(input: string) {
+		return input.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 200)
+	}
+
+	private getJetStreamStreamName(kind: 'command' | 'subscription', subject: string) {
+		return this.sanitizeName(`${this.config.topicPrefix}_${kind}_${subject}`)
+	}
+
+	private getJetStreamConsumerName(kind: 'command' | 'subscription', address: EBMessageAddress, shared: boolean) {
+		const base = `${kind}_${address.serviceName}_${address.serviceVersion}_${address.serviceTarget}`
+		return this.sanitizeName(shared ? base : `${base}_${this.instanceId}`)
+	}
+
+	private resolveJetStreamAckWaitMs(): number {
+		const configured = this.config.jetStreamAckWaitMs
+		if (!Number.isFinite(configured) || configured <= 0) {
+			throw new UnhandledError(StatusCode.BadRequest, 'JetStream ack wait must be a positive number of milliseconds')
+		}
+		return configured
+	}
+
+	private resolveConsumerFailureHandling(
+		subject: string,
+		config?: DefinitionEventBridgeConsumerFailureHandling,
+	): ResolvedConsumerFailureHandling {
+		const maxAttempts = config?.maxAttempts ?? this.config.defaultConsumerFailureHandling.maxAttempts
+		const retryDelayMs = config?.retryDelayMs ?? this.config.defaultConsumerFailureHandling.retryDelayMs
+		const deadLetterTarget =
+			config?.deadLetterTarget ?? `${subject}${this.config.defaultConsumerFailureHandling.deadLetterSuffix}`
+
+		if (maxAttempts < 1) {
+			throw new UnhandledError(StatusCode.BadRequest, 'consumer failure handling maxAttempts must be greater than 0')
+		}
+		if (retryDelayMs < 0) {
+			throw new UnhandledError(
+				StatusCode.BadRequest,
+				'consumer failure handling retryDelayMs must be greater than or equal to 0',
+			)
+		}
+
+		return {
+			maxAttempts,
+			retryDelayMs,
+			deadLetterTarget,
+		}
+	}
+
+	private getFailureReason(error: unknown) {
+		if (error instanceof UnhandledError && error.data && typeof error.data === 'object' && 'error' in error.data) {
+			const cause = (error.data as { error?: unknown }).error
+			if (cause instanceof Error) {
+				return cause.message
+			}
+			if (typeof cause === 'string') {
+				return cause
+			}
+		}
+
+		if (error instanceof Error) {
+			return error.message
+		}
+
+		return String(error)
+	}
+
+	private async publishDeadLetterMessage(
+		subject: string,
+		address: EBMessageAddress,
+		msg: JsMsg,
+		reason: string,
+		failureHandling: ResolvedConsumerFailureHandling,
+	) {
+		if (!this.js) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'JetStream is not available for dead-letter publishing')
+		}
+
+		await this.ensureJetStreamStream(failureHandling.deadLetterTarget, 'subscription')
+
+		let headers: MsgHdrs | undefined
+		if (this.connection?.info?.headers) {
+			headers = getNewHeaders()
+			headers.set(DEAD_LETTER_REASON_HEADER, reason)
+			headers.set(DEAD_LETTER_ATTEMPT_HEADER, String(msg.info.deliveryCount))
+			headers.set(DEAD_LETTER_ORIGINAL_SUBJECT_HEADER, subject)
+			headers.set(
+				DEAD_LETTER_SUBSCRIBER_HEADER,
+				`${address.serviceName}/${address.serviceVersion}/${address.serviceTarget}`,
+			)
+		}
+
+		await this.js.publish(failureHandling.deadLetterTarget, msg.data, { headers })
+	}
+
+	private async ensureJetStreamStream(subject: string, kind: 'command' | 'subscription') {
+		if (!this.jsm) {
+			throw new UnhandledError(StatusCode.NotImplemented, 'JetStream manager is not available')
+		}
+		try {
+			return await this.jsm.streams.find(subject)
+		} catch {
+			const streamName = this.getJetStreamStreamName(kind, subject)
+			try {
+				await this.jsm.streams.add({
+					name: streamName,
+					subjects: [subject],
+					retention: kind === 'command' ? RetentionPolicy.Workqueue : RetentionPolicy.Interest,
+					storage: StorageType.File,
+				})
+			} catch (error) {
+				this.logger.debug(
+					{ err: error instanceof Error ? error.message : String(error), streamName, subject },
+					'JetStream stream creation raced or already existed',
+				)
+			}
+			return this.jsm.streams.find(subject)
+		}
+	}
+
+	private async registerJetStreamConsumer(
+		kind: 'command' | 'subscription',
+		subject: string,
+		address: EBMessageAddress,
+		registrationKey: string,
+		shared: boolean,
+		eventBridgeConfig: DefinitionEventBridgeConfig,
+		handler: (error: NatsError | null, msg: Msg | JsMsg) => Promise<unknown>,
+	) {
+		if (!this.js) {
+			throw new UnhandledError(StatusCode.NotImplemented, 'JetStream client is not available')
+		}
+
+		const stream = await this.ensureJetStreamStream(subject, kind)
+		const durableName = this.getJetStreamConsumerName(kind, address, shared)
+		const failureHandling =
+			kind === 'subscription'
+				? this.resolveConsumerFailureHandling(subject, eventBridgeConfig.consumerFailureHandling)
+				: undefined
+		const ackWaitMs = this.resolveJetStreamAckWaitMs()
+		const opts = consumerOpts()
+			.bindStream(stream)
+			.durable(durableName)
+			.deliverNew()
+			.deliverTo(createInbox())
+			.manualAck()
+			.ackExplicit()
+			.ackWait(ackWaitMs)
+			.maxAckPending(this.config.maxMessages)
+			.filterSubject(subject)
+			.maxDeliver(failureHandling ? failureHandling.maxAttempts + 1 : 1)
+			.callback((error, msg) => {
+				if (error) {
+					this.logger.error({ err: error, subject, durableName, kind }, 'JetStream consumer callback failed')
+					return
+				}
+				if (!msg) {
+					this.logger.warn({ subject, durableName, kind }, 'JetStream consumer callback invoked without a message')
+					return
+				}
+				if (kind === 'subscription' && this.pausedSubscriptionConsumers.has(registrationKey)) {
+					msg.nak(this.getPauseRetryDelayMs(failureHandling))
+					return
+				}
+
+				void handler(null, msg)
+					.then(() => {
+						msg.ack()
+					})
+					.catch(async err => {
+						if (err instanceof SubscriptionConsumerControlError && kind === 'subscription' && failureHandling) {
+							if (err.outcome === 'deadLetter') {
+								try {
+									await this.publishDeadLetterMessage(
+										subject,
+										address,
+										msg,
+										err.reason ?? 'subscription requested dead-letter',
+										failureHandling,
+									)
+									msg.term('dead-lettered by PURISTA control signal')
+									return
+								} catch (deadLetterError) {
+									this.logger.error(
+										{
+											err: deadLetterError,
+											subject,
+											durableName,
+											deadLetterTarget: failureHandling.deadLetterTarget,
+										},
+										'Failed to publish JetStream dead-letter message for control signal',
+									)
+									msg.nak(err.delayMs ?? failureHandling.retryDelayMs)
+									return
+								}
+							}
+
+							if (err.outcome === 'retry') {
+								msg.nak(err.delayMs ?? failureHandling.retryDelayMs)
+								return
+							}
+
+							if (err.outcome === 'drop') {
+								this.logger.warn(
+									{
+										subject,
+										durableName,
+										registrationKey,
+										reason: err.reason,
+									},
+									'Dropping subscription message by PURISTA control signal',
+								)
+								msg.ack()
+								return
+							}
+
+							if (err.outcome === 'stop-consumer') {
+								this.pauseSubscriptionConsumer(registrationKey, err.reason ?? 'paused_by_subscription_handler')
+								this.logger.warn(
+									{
+										subject,
+										durableName,
+										registrationKey,
+										reason: err.reason,
+									},
+									'Paused JetStream subscription consumer by PURISTA control signal',
+								)
+								msg.nak(this.getPauseRetryDelayMs(failureHandling))
+								return
+							}
+						}
+
+						this.logger.error({ err, subject, durableName, kind }, 'JetStream consumer handler failed')
+
+						if (kind === 'subscription' && failureHandling) {
+							if (msg.info.deliveryCount >= failureHandling.maxAttempts) {
+								try {
+									await this.publishDeadLetterMessage(
+										subject,
+										address,
+										msg,
+										this.getFailureReason(err),
+										failureHandling,
+									)
+									msg.term(`dead-lettered by PURISTA after ${msg.info.deliveryCount} attempts`)
+									return
+								} catch (deadLetterError) {
+									this.logger.error(
+										{
+											err: deadLetterError,
+											subject,
+											durableName,
+											deadLetterTarget: failureHandling.deadLetterTarget,
+										},
+										'Failed to publish JetStream dead-letter message',
+									)
+								}
+							}
+
+							msg.nak(failureHandling.retryDelayMs)
+							return
+						}
+
+						if (kind === 'command') {
+							// Commands are request/response and must not be retried by transport redelivery.
+							msg.ack()
+							return
+						}
+
+						msg.nak()
+					})
+			})
+
+		if (shared) {
+			const queue = getQueueGroupName(this.config.topicPrefix, address)
+			opts.queue(queue).deliverGroup(queue)
+		}
+
+		return this.js.subscribe(subject, opts)
 	}
 
 	async start() {
@@ -95,9 +505,14 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
 		if (this.isJetStreamEnabled) {
 			this.jsm = await this.connection.jetstreamManager()
+			this.js = this.connection.jetstream()
 		}
-
-		this.emit(EventBridgeEventNames.EventbridgeConnected)
+		this.capabilities.durableCommands = this.isJetStreamEnabled
+		this.capabilities.durableSubscriptions = this.isJetStreamEnabled
+		this.capabilities.manualAckSupported = this.isJetStreamEnabled
+		this.capabilities.consumerFailureHandling.drop = this.isJetStreamEnabled
+		this.capabilities.consumerFailureHandling.stopConsumer = this.isJetStreamEnabled
+		this.capabilities.consumerFailureHandling.consumerPauseResume = this.isJetStreamEnabled
 	}
 
 	async isReady() {
@@ -292,7 +707,6 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 									message: err.message,
 								})
 								returnSpan.recordException(err)
-								this.emit(EventBridgeEventNames.EventbridgeError, err)
 								throw err
 							}
 
@@ -333,14 +747,22 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		if (!this.connection) {
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
 		}
-
 		const topic = getCommandSubscriptionTopic.bind(this)(address)
-
 		const callback = getCommandHandler(address, cb, metadata, eventBridgeConfig).bind(this)
-		const queue = getQueueGroupName(this.config.topicPrefix, address)
-		const subscription = this.connection.subscribe(topic, { callback, queue })
+		const registrationKey = this.getRegistrationKey(address)
+		const subscription = this.shouldUseJetStreamConsumer('command', eventBridgeConfig)
+			? await this.registerJetStreamConsumer(
+					'command',
+					topic,
+					address,
+					registrationKey,
+					eventBridgeConfig.shared,
+					eventBridgeConfig,
+					callback,
+				)
+			: this.connection.subscribe(topic, { callback, queue: getQueueGroupName(this.config.topicPrefix, address) })
 
-		this.commands.set(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`, subscription)
+		this.commands.set(registrationKey, subscription)
 
 		const info = createInfoMessage(
 			EBMessageType.InfoServiceFunctionAdded,
@@ -359,10 +781,17 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
 		}
 
-		const subscription = this.commands.get(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`)
+		const registrationKey = this.getRegistrationKey(address)
+		const subscription = this.commands.get(registrationKey)
+		const destroyableSubscription = subscription as Partial<JetStreamSubscription> | undefined
 
 		subscription?.unsubscribe()
-		await subscription?.drain()
+		if (typeof destroyableSubscription?.destroy === 'function') {
+			await destroyableSubscription.destroy()
+		} else {
+			await subscription?.drain()
+		}
+		this.commands.delete(registrationKey)
 	}
 
 	async registerSubscription(
@@ -372,19 +801,26 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		if (!this.connection) {
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
 		}
-
 		const topic = getSubscriptionTopic.bind(this)(subscription)
-
-		const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
-		const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
-		const natsSubscription = this.connection.subscribe(topic, {
-			callback: getSubscriptionHandler(subscription, cb).bind(this),
-			queue,
-		})
-		this.subscriptions.set(
-			`${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`,
-			natsSubscription,
-		)
+		const callback = getSubscriptionHandler(subscription, cb).bind(this)
+		const registrationKey = this.getRegistrationKey(subscription.subscriber)
+		const natsSubscription = this.shouldUseJetStreamConsumer('subscription', subscription.eventBridgeConfig)
+			? await this.registerJetStreamConsumer(
+					'subscription',
+					topic,
+					subscription.subscriber,
+					registrationKey,
+					subscription.eventBridgeConfig.shared,
+					subscription.eventBridgeConfig,
+					callback,
+				)
+			: this.connection.subscribe(topic, {
+					callback,
+					queue: subscription.eventBridgeConfig.shared
+						? getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
+						: undefined,
+				})
+		this.subscriptions.set(registrationKey, { subscription: natsSubscription })
 
 		return topic
 	}
@@ -394,18 +830,41 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
 		}
 
-		const subscription = this.subscriptions.get(
-			`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`,
-		)
+		const registrationKey = this.getRegistrationKey(address)
+		const subscription = this.subscriptions.get(registrationKey)?.subscription
+		const destroyableSubscription = subscription as Partial<JetStreamSubscription> | undefined
 
 		subscription?.unsubscribe()
-		await subscription?.drain()
+		if (typeof destroyableSubscription?.destroy === 'function') {
+			await destroyableSubscription.destroy()
+		} else {
+			await subscription?.drain()
+		}
+		this.subscriptions.delete(registrationKey)
+		this.pausedSubscriptionConsumers.delete(registrationKey)
+	}
+
+	getPausedSubscriptionConsumers() {
+		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
+	}
+
+	async resumeSubscriptionConsumer(registrationKey: string) {
+		if (!this.pausedSubscriptionConsumers.has(registrationKey)) {
+			return
+		}
+		this.pausedSubscriptionConsumers.delete(registrationKey)
+		this.logger.info({ registrationKey }, 'Resumed paused NATS subscription consumer')
 	}
 
 	async destroy() {
+		const drained = await this.waitForInFlightDrain()
+		if (!drained) {
+			this.logger.error('Some NATS command or subscription handlers did not finish before shutdown')
+		}
+		this.pausedSubscriptionConsumers.clear()
+
 		await this.connection?.drain()
 		await this.connection?.close()
-		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 		await super.destroy()
 	}
 }

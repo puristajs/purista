@@ -8,7 +8,7 @@
 
 > **addPuristaQueue**(`input`): `Promise`\<`void`\>
 
-Defined in: [addPuristaQueue.ts:47](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/addPuristaQueue.ts#L47)
+Defined in: [packages/cli/src/api/addPuristaQueue.ts:47](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/addPuristaQueue.ts#L47)
 
 ## Parameters
 

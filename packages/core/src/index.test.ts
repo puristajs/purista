@@ -5,8 +5,15 @@ import {
 	convertToKebabCase,
 	convertToPascalCase,
 	convertToSnakeCase,
+	createCommandContextMock,
+	createCommandTestHarness,
 	createErrorResponse,
 	createInfoMessage,
+	createQueueWorkerContextMock,
+	createQueueWorkerTestHarness,
+	createStreamContextMock,
+	createStreamTestHarness,
+	createSubscriptionContextMock,
 	createSuccessResponse,
 	DefaultConfigStore,
 	DefaultEventBridge,
@@ -15,7 +22,6 @@ import {
 	DefaultStateStore,
 	EBMessageType,
 	getCleanedMessage,
-	getCommandContextMock,
 	getCommandErrorMessageMock,
 	getCommandMessageMock,
 	getCommandSuccessMessageMock,
@@ -26,7 +32,6 @@ import {
 	getNewCorrelationId,
 	getNewEBMessageId,
 	getNewTraceId,
-	getSubscriptionContextMock,
 	getSubscriptionFunctionWithValidation,
 	getUniqueId,
 	HandledError,
@@ -95,10 +100,14 @@ it('exports core functions', () => {
 	expect(convertToSnakeCase).toBeDefined()
 
 	// test helper
-	expect(getCommandContextMock).toBeDefined()
-	expect(getSubscriptionContextMock).toBeDefined()
+	expect(createCommandContextMock).toBeDefined()
+	expect(createCommandTestHarness).toBeDefined()
+	expect(createSubscriptionContextMock).toBeDefined()
+	expect(createStreamContextMock).toBeDefined()
+	expect(createStreamTestHarness).toBeDefined()
+	expect(createQueueWorkerContextMock).toBeDefined()
+	expect(createQueueWorkerTestHarness).toBeDefined()
 	expect(getLoggerMock).toBeDefined()
-	expect(getCommandContextMock).toBeDefined()
 	expect(getEventBridgeMock).toBeDefined()
 	expect(getCommandErrorMessageMock).toBeDefined()
 	expect(getCommandMessageMock).toBeDefined()

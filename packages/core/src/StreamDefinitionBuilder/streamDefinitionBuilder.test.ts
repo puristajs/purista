@@ -1,6 +1,6 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
-import { Service } from '../core/index.js'
+import { z } from 'zod'
+import { EBMessageType, Service } from '../core/index.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
 import { StreamDefinitionBuilder } from './StreamDefinitionBuilder.impl.js'
@@ -172,29 +172,6 @@ describe('StreamDefinitionBuilder', () => {
 		expect(() => builder.getStreamFunction()).toThrow('No function implementation for searchUsers')
 	})
 
-	it('can register an agent dependency with payload and parameter schemas', async () => {
-		const agentPayloadSchema = z.object({ message: z.string(), topic: z.string() })
-		const agentParameterSchema = z.object({ channel: z.enum(['stream']) })
-
-		const definition = await new StreamDefinitionBuilder('agentStream', 'agent stream test')
-			.canInvokeAgent('MyAgent', '1', {
-				payloadSchema: agentPayloadSchema,
-				parameterSchema: agentParameterSchema,
-			})
-			.setStreamFunction(async function (_context, _payload, _parameter, writer) {
-				await writer.close()
-			})
-			.getDefinition()
-
-		expect(definition.agentInvokes).toBeDefined()
-		expect(definition.agentInvokes.MyAgent).toBeDefined()
-		expect(definition.agentInvokes.MyAgent['1']).toBeDefined()
-		// @ts-expect-error
-		expect(definition.agentInvokes.MyAgent['1'].payloadSchema).toBe(agentPayloadSchema)
-		// @ts-expect-error
-		expect(definition.agentInvokes.MyAgent['1'].parameterSchema).toBe(agentParameterSchema)
-	})
-
 	it('supports aggregate HTTP response mode for streams', async () => {
 		const definition = await new StreamDefinitionBuilder('aggregate', 'aggregate stream')
 			.exposeAsHttpStreamEndpoint('GET', '/aggregate')
@@ -206,5 +183,71 @@ describe('StreamDefinitionBuilder', () => {
 
 		expect(definition.metadata.expose.contentTypeResponse).toBe('application/json')
 		expect(definition.metadata.expose.http?.stream?.mode).toBe('aggregate')
+	})
+
+	it('stores and exposes stream guard hooks by name', () => {
+		const beforeGuard = vi.fn(async function beforeGuard() {})
+		const afterGuard = vi.fn(async function afterGuard() {})
+
+		const builder = new StreamDefinitionBuilder('guardedStream', 'guarded stream')
+			.setBeforeGuardHooks({ auth: beforeGuard })
+			.setAfterGuardHooks({ audit: afterGuard })
+
+		expect(builder.getBeforeGuardHook('auth')).toBe(beforeGuard)
+		expect(builder.getAfterGuardHook('audit')).toBe(afterGuard)
+	})
+
+	it('executes stream before and after guard hooks during runtime', async () => {
+		const events: string[] = []
+		const builder = new StreamDefinitionBuilder('guardedRuntime', 'guarded runtime stream')
+			.addPayloadSchema(z.object({ prompt: z.string() }))
+			.addFinalSchema(z.object({ answer: z.string() }))
+			.setBeforeGuardHooks({
+				auth: async function (_context, payload) {
+					events.push(`before:${payload.prompt}`)
+				},
+			})
+			.setAfterGuardHooks({
+				audit: async function (_context, result) {
+					events.push(`after:${String(result?.answer ?? '')}`)
+				},
+			})
+			.setStreamFunction(async function (_context, payload, _parameter, writer) {
+				events.push(`handler:${payload.prompt}`)
+				await writer.close({ answer: 'ok' })
+			})
+
+		const definition = await builder.getDefinition()
+		await service.registerStream(definition)
+		await service.executeStream({
+			id: 'stream-open-1',
+			correlationId: 'corr-1',
+			timestamp: Date.now(),
+			traceId: 'trace-1',
+			messageType: EBMessageType.Stream,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			principalId: 'principal',
+			tenantId: 'tenant',
+			sender: {
+				serviceName: 'Client',
+				serviceVersion: '1',
+				serviceTarget: 'open',
+				instanceId: 'client-1',
+			},
+			receiver: {
+				serviceName: 'TestService',
+				serviceVersion: '1',
+				serviceTarget: 'guardedRuntime',
+				instanceId: 'instance-1',
+			},
+			payload: {
+				frameType: 'open',
+				payload: { prompt: 'hello' },
+				parameter: {},
+			},
+		} as never)
+
+		expect(events).toEqual(['before:hello', 'handler:hello', 'after:ok'])
 	})
 })

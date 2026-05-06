@@ -23,7 +23,8 @@ export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = 
 		any,
 		any,
 		any,
-		SubscriptionDefinitionMetadataBase
+		SubscriptionDefinitionMetadataBase,
+		any
 	>
 >[]
 
@@ -40,5 +41,6 @@ export type SubscriptionDefinitionListResolved<ServiceClassType extends ServiceC
 	any,
 	any,
 	any,
-	SubscriptionDefinitionMetadataBase
+	SubscriptionDefinitionMetadataBase,
+	any
 >[]

@@ -15,7 +15,7 @@ export const getCommandSchemaFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.commandName}`)
 
 	writer.writeLine(`import { extendApi } from '@purista/core'`)
-	writer.writeLine(`import { z } from 'zod/v4'`)
+	writer.writeLine(`import { z } from 'zod'`)
 	writer.blankLine()
 	writer.writeLine(
 		`export const ${schemaPrefix}InputParameterSchema = extendApi(z.object({}), { title: 'input parameter schema' })`,

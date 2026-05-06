@@ -36,7 +36,7 @@
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
 		"test": "vitest",
-		"build": "rimraf dist && tshy"
+		"build": "rimraf dist .tshy .tshy-build && tshy"
 	},
 	"tshy": {
 		"exclude": [

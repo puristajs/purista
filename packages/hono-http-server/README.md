@@ -27,7 +27,12 @@ export const main = async () => {
   await pingService.start()
 
   // initiate the webserver service as second step
-  const honoService = await honoV1Service.getInstance(eventBridge, { serviceConfig: { services: [pingService] } })
+  const honoService = await honoV1Service.getInstance(eventBridge, {
+    serviceConfig: { enableDynamicRoutes: false },
+  })
+
+  // Explicit registration keeps HTTP surface ownership in application code.
+  honoService.registerService(pingService)
 
   honoService.app.use('*', compress())
   honoService.app.get('/api', swaggerUI({ url: '/api/openapi.json' }))
@@ -56,6 +61,12 @@ export const main = async () => {
 main()
 
 ```
+
+Notes:
+
+- Health endpoint exposure is opt-in (`serviceConfig.enableHealth = true`).
+- Service auto-registration from `serviceConfig.services` is opt-in (`serviceConfig.autoRegisterServicesFromConfig = true`).
+- Prefer explicit `registerService(...)` calls for predictable startup wiring.
 
 **Visit [purista.dev](https://purista.dev)**
 

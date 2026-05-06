@@ -8,4 +8,4 @@
 
 > **ServiceHealthStatus** = `"ok"` \| `"warn"` \| `"error"`
 
-Defined in: [core/types/ServiceHealthState.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L12)
+Defined in: [core/types/ServiceHealthState.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L13)

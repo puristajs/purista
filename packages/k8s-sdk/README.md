@@ -97,7 +97,7 @@ const main = async () => {
     // optional: shut down the state store
     stateStore,
     {
-      name: 'httpserver',
+      name: 'hono-http-server',
       destroy: async () =>
         new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
     },

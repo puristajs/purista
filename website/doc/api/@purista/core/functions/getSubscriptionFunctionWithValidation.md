@@ -8,7 +8,7 @@
 
 > **getSubscriptionFunctionWithValidation**\<`S`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): (`this`, `context`, `payload`, `parameter`) => `Promise`\<`unknown`\>
 
-Defined in: [SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L16)
+Defined in: [SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L17)
 
 Wraps a subscription handler with schema validation and guard execution.
 Input payload/parameter is validated before execution and output can be validated after execution.
@@ -23,7 +23,7 @@ Input payload/parameter is validated before execution and output can be validate
 
 ### fn
 
-[`SubscriptionFunction`](../type-aliases/SubscriptionFunction.md)\<`S`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`, `any`, `any`, `any`\>
+[`SubscriptionFunction`](../type-aliases/SubscriptionFunction.md)\<`S`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`, `any`, `any`\>
 
 ### inputPayloadSchema
 
@@ -39,7 +39,7 @@ Input payload/parameter is validated before execution and output can be validate
 
 ### beforeGuards?
 
-`Record`\<`string`, [`SubscriptionBeforeGuardHook`](../type-aliases/SubscriptionBeforeGuardHook.md)\<`S`, `unknown`, `unknown`, `any`, `any`, `any`, `any`, `any`, `any`\>\> = `{}`
+`Record`\<`string`, [`SubscriptionBeforeGuardHook`](../type-aliases/SubscriptionBeforeGuardHook.md)\<`S`, `unknown`, `unknown`, `any`, `any`, `any`, `any`, `any`\>\> = `{}`
 
 ## Returns
 
@@ -82,12 +82,6 @@ set a config value in the config store
 [`EmitCustomMessageFunction`](../type-aliases/EmitCustomMessageFunction.md)\<[`EmptyObject`](../type-aliases/EmptyObject.md)\>
 
 emit a custom message
-
-##### invokeAgent
-
-[`EmptyObject`](../type-aliases/EmptyObject.md)
-
-Invokes an agent and returns the result.
 
 ##### logger
 

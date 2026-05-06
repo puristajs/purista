@@ -3,7 +3,7 @@ import type { StreamDefinition } from './StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from './StreamDefinitionMetadataBase.js'
 
 export type StreamDefinitionList<S extends ServiceClass> = Promise<
-	StreamDefinition<S, any, any, any, any, any, any, any, any, any, any, StreamDefinitionMetadataBase>
+	StreamDefinition<S, any, any, any, any, any, any, any, any, any, any, StreamDefinitionMetadataBase, any>
 >[]
 
 export type StreamDefinitionListResolved<S extends ServiceClass> = StreamDefinition<
@@ -18,5 +18,6 @@ export type StreamDefinitionListResolved<S extends ServiceClass> = StreamDefinit
 	any,
 	any,
 	any,
-	StreamDefinitionMetadataBase
+	StreamDefinitionMetadataBase,
+	any
 >[]

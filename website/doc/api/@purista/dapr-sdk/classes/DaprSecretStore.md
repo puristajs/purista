@@ -68,13 +68,9 @@ Enable generally set method
 
 [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 ###### metadata?
 
@@ -108,7 +104,7 @@ The name of the secret store
 
 > **cache**: [`SecretStoreCacheMap`](../../core/type-aliases/SecretStoreCacheMap.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -120,7 +116,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
 #### cacheTtl?
 
@@ -162,13 +158,9 @@ Enable generally set method
 
 > `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 #### logLevel?
 
 > `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 #### metadata?
 
@@ -198,7 +190,7 @@ The name of the secret store
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 #### Inherited from
 
@@ -210,7 +202,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -222,7 +214,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 #### Returns
 
@@ -238,7 +230,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
@@ -294,7 +286,7 @@ Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:55](https://gi
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 #### Parameters
 
@@ -338,7 +330,7 @@ Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://gi
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
+Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 #### Parameters
 

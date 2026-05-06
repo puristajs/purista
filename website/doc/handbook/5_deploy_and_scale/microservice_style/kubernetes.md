@@ -153,7 +153,7 @@ const main = async () => {
     // optional: shut down the state store
     stateStore,
     {
-      name: 'httpserver',
+      name: 'hono-http-server',
       destroy: async () => {
         server.closeIdleConnections()
         server.close()
@@ -263,7 +263,7 @@ const main = async () => {
     // optional: shut down the state store
     stateStore,
     {
-      name: 'httpserver',
+      name: 'hono-http-server',
       destroy: async () => {
         server.closeIdleConnections()
         server.close()

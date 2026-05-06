@@ -155,14 +155,14 @@ describe('httpserver integration test', () => {
 		})
 
 		it('returns aggregate stream endpoint using the declared final schema', async () => {
-			const result = await client.get<{ message?: string; envelopes?: Array<{ frame?: { kind?: string } }> }>(
+			const result = await client.get<{ message?: string; events?: Array<{ type?: string }> }>(
 				`${apiMountPath}/v1/aggregate-success`,
 			)
 			expect(result?.message).toBe('aggregate ok')
-			expect(result?.envelopes?.[0]?.frame?.kind).toBe('message')
+			expect(result?.events?.[0]?.type).toBe('message')
 		})
 
-		it('maps aggregate stream final error envelope to 500', async () => {
+		it('maps aggregate stream transport errors to 500', async () => {
 			await expect(client.get(`${apiMountPath}/v1/aggregate-error`)).rejects.toThrowError('Internal Server Error')
 		})
 

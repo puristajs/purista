@@ -1,7 +1,7 @@
 import { getEventBridgeMock, getLoggerMock, ServiceBuilder, StatusCode } from '@purista/core'
 import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { honoV1Service } from './honoV1Service.js'
 
@@ -46,6 +46,26 @@ const queryCommand = serviceBuilder
 	})
 	.exposeAsHttpEndpoint('GET', 'secure')
 
+const getEndpointService = async () => {
+	const eventBridge = getEventBridgeMock()
+	const endpointBuilder = new ServiceBuilder({
+		serviceName: 'HttpEndpointService',
+		serviceVersion: '1',
+		serviceDescription: 'http endpoint service',
+	})
+	const endpointCommand = endpointBuilder
+		.getCommandBuilder('plainText', 'plain text')
+		.setCommandFunction(async function () {
+			return 'plain-text'
+		})
+		.exposeAsHttpEndpoint('GET', 'plain-text', undefined, undefined, 'text/plain')
+	endpointBuilder.addCommandDefinition(endpointCommand.getDefinition())
+
+	return endpointBuilder.getInstance(eventBridge.mock, {
+		logger: getLoggerMock().mock,
+	})
+}
+
 describe('HonoServiceClass', () => {
 	afterEach(() => {
 		vi.restoreAllMocks()
@@ -55,6 +75,7 @@ describe('HonoServiceClass', () => {
 		overrides?: Partial<{
 			enableHealth: boolean
 			enableDynamicRoutes: boolean
+			autoRegisterServicesFromConfig: boolean
 			services: unknown[]
 		}>,
 	) =>
@@ -63,6 +84,7 @@ describe('HonoServiceClass', () => {
 			serviceConfig: {
 				enableHealth: overrides?.enableHealth ?? false,
 				enableDynamicRoutes: overrides?.enableDynamicRoutes ?? false,
+				autoRegisterServicesFromConfig: overrides?.autoRegisterServicesFromConfig ?? false,
 				apiMountPath: '/api',
 				services: (overrides?.services ?? []) as any,
 			},
@@ -84,6 +106,134 @@ describe('HonoServiceClass', () => {
 		} finally {
 			await server.destroy()
 		}
+	})
+
+	it('does not auto-register configured services unless explicitly enabled', async () => {
+		const endpointService = await getEndpointService()
+
+		const server = await createServer({
+			services: [endpointService],
+			autoRegisterServicesFromConfig: false,
+		})
+		const invokeMock = vi.spyOn(server, 'invoke').mockResolvedValue('plain-text')
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
+			expect(response.status).toBe(404)
+		} finally {
+			invokeMock.mockRestore()
+			await server.destroy()
+		}
+	})
+
+	it('auto-registers configured services only when explicitly enabled', async () => {
+		const endpointService = await getEndpointService()
+
+		const server = await createServer({
+			services: [endpointService],
+			autoRegisterServicesFromConfig: true,
+		})
+		const invokeMock = vi.spyOn(server, 'invoke').mockResolvedValue('plain-text')
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
+			expect(response.status).toBe(200)
+			expect(await response.text()).toBe('plain-text')
+		} finally {
+			invokeMock.mockRestore()
+			await server.destroy()
+		}
+	})
+
+	it('health endpoint does not depend on event bridge health state', async () => {
+		const eventBridge = getEventBridgeMock()
+		const server = await honoV1Service.getInstance(eventBridge.mock, {
+			logger: getLoggerMock().mock,
+			serviceConfig: {
+				enableHealth: true,
+				enableDynamicRoutes: false,
+				autoRegisterServicesFromConfig: false,
+				apiMountPath: '/api',
+				services: [],
+			},
+		})
+		await server.start()
+		eventBridge.stubs.isHealthy.resolves(false)
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/healthz'))
+			expect(response.status).toBe(200)
+			await expect(response.json()).resolves.toMatchObject({
+				status: 200,
+				message: 'OK',
+			})
+		} finally {
+			await server.destroy()
+		}
+	})
+
+	it('rejects registerService calls after start', async () => {
+		const endpointService = {
+			serviceInfo: {
+				serviceName: 'HttpTestService',
+				serviceVersion: '1',
+				serviceDescription: 'http test service',
+			},
+			commandDefinitionList: [await plainTextCommand.getDefinition()],
+			streamDefinitionList: [],
+		}
+		const server = await createServer()
+		await server.start()
+
+		try {
+			expect(() => server.registerService(endpointService as any)).toThrowError(/must be called before start/i)
+		} finally {
+			await server.destroy()
+		}
+	})
+
+	it('rejects duplicate method+path endpoint registrations', async () => {
+		const server = await createServer()
+		const plainTextDefinition = await plainTextCommand.getDefinition()
+
+		server.addEndpoint(plainTextDefinition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'plainText',
+		})
+
+		expect(() =>
+			server.addEndpoint(plainTextDefinition.metadata as any, {
+				serviceName: 'AnotherService',
+				serviceVersion: '1',
+				serviceTarget: 'anotherPlainText',
+			}),
+		).toThrowError(/already registered/i)
+	})
+
+	it('accepts duplicate method+path registrations for the same logical service target', async () => {
+		const server = await createServer()
+		const plainTextDefinition = await plainTextCommand.getDefinition()
+
+		expect(() =>
+			server.addEndpoint(plainTextDefinition.metadata as any, {
+				serviceName: 'HttpTestService',
+				serviceVersion: '1',
+				serviceTarget: 'plainText',
+				instanceId: 'instance-a',
+			}),
+		).not.toThrow()
+
+		expect(() =>
+			server.addEndpoint(plainTextDefinition.metadata as any, {
+				serviceName: 'HttpTestService',
+				serviceVersion: '1',
+				serviceTarget: 'plainText',
+				instanceId: 'instance-b',
+			}),
+		).not.toThrow()
 	})
 
 	it('maps HTTPException and generic errors via app.onError', async () => {
@@ -259,6 +409,7 @@ describe('HonoServiceClass', () => {
 				jobId: 'job-1',
 				queue: 'jobs',
 				queueName: 'jobs',
+				status: 'queued',
 				scheduledAt: 123,
 			})
 

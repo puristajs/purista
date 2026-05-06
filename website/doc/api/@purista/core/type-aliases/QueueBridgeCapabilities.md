@@ -20,11 +20,35 @@ Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:11](https://githu
 
 ***
 
+### deadLetterInspectSupported
+
+> **deadLetterInspectSupported**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L12)
+
+***
+
 ### deadLetterNative
 
 > **deadLetterNative**: `boolean`
 
 Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L6)
+
+***
+
+### deadLetterPurgeSupported
+
+> **deadLetterPurgeSupported**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L14)
+
+***
+
+### deadLetterReplaySupported
+
+> **deadLetterReplaySupported**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L13)
 
 ***
 
@@ -68,11 +92,35 @@ Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:3](https://github
 
 ***
 
+### idempotencyEnforcement
+
+> **idempotencyEnforcement**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L16)
+
+***
+
+### leaseInspectionSupported
+
+> **leaseInspectionSupported**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L15)
+
+***
+
 ### maxBatchSize
 
 > **maxBatchSize**: `number`
 
 Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L8)
+
+***
+
+### partitionOrdering
+
+> **partitionOrdering**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L17)
 
 ***
 
@@ -89,3 +137,19 @@ Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:4](https://github
 > **priorities**: `boolean`
 
 Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L5)
+
+***
+
+### providerManagedDelayedDelivery
+
+> **providerManagedDelayedDelivery**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L18)
+
+***
+
+### strictStartupValidation
+
+> **strictStartupValidation**: `boolean`
+
+Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L19)

@@ -13,7 +13,6 @@ import type { ConfigSetterFunction } from '../ConfigStore/types/ConfigSetterFunc
 
 import { HandledError } from '../Error/HandledError.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
-import { createAgentInvokeFunctionProxy } from '../helper/createAgentInvokeFunctionProxy.impl.js'
 import { createErrorResponse } from '../helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../helper/createInfoMessage.impl.js'
 import { createInvokeFunctionProxy } from '../helper/createInvokeFunctionProxy.impl.js'
@@ -32,12 +31,6 @@ import type { SecretSetterFunction } from '../SecretStore/types/SecretSetterFunc
 import type { StateDeleteFunction } from '../StateStore/types/StateDeleteFunction.js'
 import type { StateGetterFunction } from '../StateStore/types/StateGetterFunction.js'
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
-import type {
-	AgentInvocation,
-	AgentInvokeList,
-	AgentProtocolPayload,
-	AgentProtocolResponse,
-} from '../types/agent/index.js'
 import type { ContextBase } from '../types/ContextBase.js'
 import type { CustomMessage } from '../types/CustomMessage.js'
 import type { Command } from '../types/commandType/Command.js'
@@ -58,6 +51,7 @@ import type { PrincipalId } from '../types/PrincipalId.js'
 import { PuristaSpanName } from '../types/PuristaSpanName.enum.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
 import { defaultQueueLifecycleConfig } from '../types/queue/defaultQueueLifecycleConfig.js'
+import type { EventToQueueBindingDefinition } from '../types/queue/EventToQueueBindingDefinition.js'
 import type { QueueContext } from '../types/queue/QueueContext.js'
 import type { QueueDefinition } from '../types/queue/QueueDefinition.js'
 import type { QueueDefinitionListResolved } from '../types/queue/QueueDefinitionList.js'
@@ -65,18 +59,25 @@ import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
 import type { QueueHandlerResult } from '../types/queue/QueueHandlerResult.js'
 import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
 import type { QueueJobContext } from '../types/queue/QueueJobContext.js'
+import type { QueueJobStore } from '../types/queue/QueueJobStore.js'
 import type { QueueLease } from '../types/queue/QueueLease.js'
 import type { QueueLifecycleConfig } from '../types/queue/QueueLifecycleConfig.js'
 import type { QueueMessage } from '../types/queue/QueueMessage.js'
 import type { QueueMetrics } from '../types/queue/QueueMetrics.js'
+import type { QueueResultEventPayload, QueueResultStatus } from '../types/queue/QueueResultPolicy.js'
 import type { QueueTransformContext } from '../types/queue/QueueTransformHook.js'
 import type { QueueWorkerDefinition } from '../types/queue/QueueWorkerDefinition.js'
 import type { QueueWorkerDefinitionListResolved } from '../types/queue/QueueWorkerDefinitionList.js'
 import type { ServiceClass } from '../types/ServiceClass.js'
 import type { ServiceClassTypes } from '../types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../types/ServiceConstructorInput.js'
-import { ServiceEventsNames } from '../types/ServiceEvents.js'
 import type { QueueHealthState, ServiceHealthState } from '../types/ServiceHealthState.js'
+import type {
+	InFlightDiagnostics,
+	PausedQueueWorkerState,
+	PausedSubscriptionConsumersByRegistrationKey,
+	QueueWorkerPauseStateByQueue,
+} from '../types/ServiceOperatorState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StoreType } from '../types/StoreType.enum.js'
 import type { StreamInvokeList } from '../types/StreamInvokeList.js'
@@ -85,13 +86,16 @@ import { isStreamOpenRequest } from '../types/stream/isStreamOpenRequest.impl.js
 import type { StreamDefinition } from '../types/stream/StreamDefinition.js'
 import type { StreamDefinitionListResolved } from '../types/stream/StreamDefinitionList.js'
 import type { StreamFrame } from '../types/stream/StreamFrame.js'
+import type { StreamFunctionContext } from '../types/stream/StreamFunctionContext.js'
 import type { StreamMessage } from '../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
 import type { StreamWriter } from '../types/stream/StreamWriter.js'
 import type { Subscription } from '../types/subscription/Subscription.js'
+import { SubscriptionConsumerControlError } from '../types/subscription/SubscriptionConsumerControlError.js'
 import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 import type { SubscriptionDefinitionListResolved } from '../types/subscription/SubscriptionDefinitionList.js'
 import type { SubscriptionFunctionContext } from '../types/subscription/SubscriptionFunctionContext.js'
+import { isSubscriptionHandlerResult } from '../types/subscription/SubscriptionHandlerResult.js'
 import type { TenantId } from '../types/TenantId.js'
 import type { TraceId } from '../types/TraceId.js'
 import { commandTransformInput } from './commandTransformInput.impl.js'
@@ -100,6 +104,19 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js
 
 type LeaseHeartbeatController = {
 	stop: () => void
+}
+
+type QueueRuntimeCancellation = {
+	controller: AbortController
+	cancelRequested: () => boolean
+	stop: () => void
+}
+
+type ResolvedSubscriptionFailureHandling = {
+	mode: 'strict' | 'best-effort'
+	maxAttempts: number
+	retryDelayMs: number
+	deadLetterTarget?: string
 }
 
 /**
@@ -131,15 +148,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 {
 	protected subscriptions = new Map<
 		string,
-		SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>
+		SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
 	>()
 	protected commands = new Map<
 		string,
-		CommandDefinition<any, any, any, any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>
+		CommandDefinition<any, any, any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
 	>()
 	protected streams = new Map<
 		string,
-		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>
+		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>
 	>()
 	protected queueDefinitionList: QueueDefinitionListResolved<any>
 	protected queueWorkerDefinitionList: QueueWorkerDefinitionListResolved<any>
@@ -155,8 +172,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	private readonly queueDefinitionMap: Map<string, QueueDefinition<any, any, any, any, any>>
 	private queueWorkerTasks = new Set<Promise<void>>()
 	private queueWorkersShouldStop = false
+	private queueWorkerPausedQueues = new Map<string, PausedQueueWorkerState>()
 	private queueMetricsCache = new Map<string, QueueMetrics>()
 	private queueBridgeStarted = false
+	private readonly eventToQueueBindingList: EventToQueueBindingDefinition[]
+	private readonly queueJobStore?: QueueJobStore
+	private readonly activeQueueRuntimeCancellations = new Set<QueueRuntimeCancellation>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -187,9 +208,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		this.queueDefinitionList = config.queueDefinitionList ?? []
 		this.queueWorkerDefinitionList = config.queueWorkerDefinitionList ?? []
 		this.queueBridge = config.queueBridge ?? new DefaultQueueBridge()
+		this.queueJobStore = config.queueJobStore
+		this.eventToQueueBindingList = config.eventToQueueBindingList ?? []
 		this.queueDefinitionMap = new Map(
 			this.queueDefinitionList.map(def => [this.normalizeQueueName(def.queueName), def]),
 		)
+		this.subscriptionDefinitionList = [
+			...this.subscriptionDefinitionList,
+			...this.createEventToQueueSubscriptionDefinitions(this.eventToQueueBindingList),
+		] as SubscriptionDefinitionListResolved<any>
 	}
 
 	get name() {
@@ -229,10 +256,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					{ ...span.spanContext(), puristaVersion },
 					`service ${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} started`,
 				)
-				this.emit(ServiceEventsNames.ServiceStarted)
 			} catch (err) {
 				this.logger.error({ err, ...span.spanContext(), puristaVersion }, 'failed to start service')
-				this.emit(ServiceEventsNames.ServiceUnavailable, err)
 				throw err
 			}
 
@@ -296,6 +321,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			this.logger.error({ err }, 'Queue bridge is not ready - can not start service')
 			throw err
 		}
+		this.validateQueueDefinitionsAgainstCapabilities()
 		this.startQueueWorkers()
 	}
 
@@ -459,273 +485,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return invokeCommand.bind(this)
 	}
 
-	protected getAgentInvokeFunction<Invokes extends AgentInvokeList>(
-		serviceTarget: string,
-		traceId?: TraceId,
-		principalId?: PrincipalId,
-		tenantId?: TenantId,
-		agentInvokes?: Invokes,
-	) {
-		const sender: EBMessageSenderAddress = {
-			serviceName: this.info.serviceName,
-			serviceVersion: this.info.serviceVersion,
-			serviceTarget,
-			instanceId: this.eventBridge.instanceId,
-		}
-
-		const agentInvoke = <
-			InvokeResponseType = AgentProtocolResponse,
-			PayloadType = AgentProtocolPayload,
-			ParameterType = EmptyObject,
-		>(
-			receiver: EBMessageAddress,
-			payload: PayloadType,
-			parameter: ParameterType,
-		) => {
-			const commandMsg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
-				messageType: EBMessageType.Command,
-				traceId,
-				sender,
-				receiver,
-				contentType: 'application/json',
-				contentEncoding: 'utf-8',
-				payload: {
-					payload,
-					parameter,
-				},
-				principalId,
-				tenantId,
-			})
-
-			const descriptor = agentInvokes?.[receiver.serviceName]?.[receiver.serviceVersion]
-			const payloadSchema = descriptor?.payloadSchema
-			const parameterSchema = descriptor?.parameterSchema
-
-			let resolveNext: ((result: IteratorResult<unknown>) => void) | undefined
-			let rejectNext: ((error: unknown) => void) | undefined
-			const bufferedValues: unknown[] = []
-			let iteratorDone = false
-			let iteratorError: unknown
-
-			const emitValue = (value: unknown) => {
-				if (iteratorDone) {
-					return
-				}
-				if (resolveNext) {
-					const resolve = resolveNext
-					resolveNext = undefined
-					rejectNext = undefined
-					resolve({
-						value,
-						done: false,
-					})
-					return
-				}
-				bufferedValues.push(value)
-			}
-
-			const emitDone = () => {
-				if (iteratorDone) {
-					return
-				}
-				iteratorDone = true
-				if (resolveNext) {
-					const resolve = resolveNext
-					resolveNext = undefined
-					rejectNext = undefined
-					resolve({
-						value: undefined,
-						done: true,
-					})
-				}
-			}
-
-			const emitError = (error: unknown) => {
-				if (iteratorDone) {
-					return
-				}
-				iteratorDone = true
-				iteratorError = error
-				if (rejectNext) {
-					const reject = rejectNext
-					resolveNext = undefined
-					rejectNext = undefined
-					reject(error)
-				}
-			}
-
-			const streamOrInvoke = async () => {
-				let sawStreamChunk = false
-
-				const openRequest: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'> = {
-					traceId,
-					sender,
-					receiver,
-					contentType: 'application/json',
-					contentEncoding: 'utf-8',
-					payload: {
-						frameType: 'open',
-						payload,
-						parameter,
-					},
-					principalId,
-					tenantId,
-				}
-
-				try {
-					const handle = await this.eventBridge.openStream<unknown, unknown>(openRequest)
-					let streamFinal: unknown
-					for await (const frame of handle) {
-						if (frame.payload.frameType === 'chunk') {
-							sawStreamChunk = true
-							emitValue(frame.payload.chunk)
-							continue
-						}
-
-						if (frame.payload.frameType === 'complete') {
-							streamFinal = frame.payload.final
-							break
-						}
-
-						if (frame.payload.frameType === 'error') {
-							throw new UnhandledError(
-								StatusCode.InternalServerError,
-								frame.payload.error?.message ?? 'agent stream failed',
-								frame.payload.error,
-							)
-						}
-					}
-
-					if (streamFinal === undefined) {
-						return [] as unknown[]
-					}
-					return streamFinal
-				} catch (error) {
-					if (sawStreamChunk) {
-						throw error
-					}
-
-					const isStreamUnavailable =
-						(error instanceof UnhandledError &&
-							(error.errorCode === StatusCode.NotImplemented || error.errorCode === StatusCode.BadGateway)) ||
-						(error instanceof Error &&
-							(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
-
-					if (!isStreamUnavailable) {
-						throw error
-					}
-
-					const fallback = await this.eventBridge.invoke(commandMsg)
-					if (Array.isArray(fallback)) {
-						for (const value of fallback) {
-							emitValue(value)
-						}
-					} else {
-						emitValue(fallback)
-					}
-					return fallback
-				}
-			}
-
-			const invocationPromise = (async () => {
-				return await this.startActiveSpan(`${serviceTarget}.agentInvoke`, {}, undefined, async span => {
-					span.setAttributes({
-						[PuristaSpanTag.ReceiverServiceName]: receiver.serviceName,
-						[PuristaSpanTag.ReceiverServiceVersion]: receiver.serviceVersion,
-						[PuristaSpanTag.ReceiverServiceTarget]: receiver.serviceTarget,
-					})
-
-					try {
-						if (payloadSchema) {
-							const res = await validate(payloadSchema, payload)
-							if (!res.success) {
-								const err = new UnhandledError(StatusCode.BadRequest, 'agent invoke payload schema validation failed', {
-									issues: res.issues,
-									invokedFrom: sender,
-									responseFrom: receiver,
-								})
-
-								span.recordException(err)
-								span.setStatus({
-									code: SpanStatusCode.ERROR,
-									message: err.message,
-								})
-
-								throw err
-							}
-						}
-
-						if (parameterSchema) {
-							const res = await validate(parameterSchema, parameter)
-							if (!res.success) {
-								const err = new UnhandledError(
-									StatusCode.BadRequest,
-									'agent invoke parameter schema validation failed',
-									{
-										issues: res.issues,
-										invokedFrom: sender,
-										responseFrom: receiver,
-									},
-								)
-
-								span.recordException(err)
-								span.setStatus({
-									code: SpanStatusCode.ERROR,
-									message: err.message,
-								})
-
-								throw err
-							}
-						}
-
-						const result = await streamOrInvoke()
-						emitDone()
-						return result
-					} catch (error) {
-						emitError(error)
-						throw error
-					}
-				})
-			})()
-			// The invocation starts eagerly so schema/bridge failures can happen before `.final()` is awaited.
-			// Attach an internal catch handler to prevent process-level unhandledRejection crashes.
-			void invocationPromise.catch(() => undefined)
-
-			return {
-				final: () => invocationPromise,
-				[Symbol.asyncIterator]: async function* () {
-					while (true) {
-						if (bufferedValues.length > 0) {
-							yield bufferedValues.shift() as unknown
-							continue
-						}
-
-						if (iteratorError) {
-							throw iteratorError
-						}
-
-						if (iteratorDone) {
-							return
-						}
-
-						const next = await new Promise<IteratorResult<unknown>>((resolve, reject) => {
-							resolveNext = resolve
-							rejectNext = reject
-						})
-
-						if (next.done) {
-							return
-						}
-
-						yield next.value
-					}
-				},
-			} as unknown as AgentInvocation<InvokeResponseType>
-		}
-
-		return agentInvoke
-	}
-
 	protected getQueueNamespace(
 		queueInvokes?: QueueInvokeList,
 		traceId?: TraceId,
@@ -799,6 +558,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		lease: QueueLease,
 		lifecycle: QueueLifecycleConfig,
 		logger: Logger,
+		cancellation?: QueueRuntimeCancellation,
 	): LeaseHeartbeatController {
 		if (lifecycle.autoHeartbeat === false || lifecycle.heartbeatIntervalMs <= 0 || lifecycle.maxLeaseExtensions <= 0) {
 			return {
@@ -830,6 +590,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				})
 				.catch(err => {
 					logger.warn({ err, queueName, leaseId: lease.leaseId }, 'failed to extend queue lease')
+					if (this.getQueueDefinition(queueName)?.executionProfile?.onLeaseLost === 'abort') {
+						cancellation?.controller.abort(err instanceof Error ? err : new Error('queue lease extension failed'))
+					}
 				})
 		}, lifecycle.heartbeatIntervalMs)
 
@@ -897,6 +660,301 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return `${prefix}${queueName}${suffix}`
 	}
 
+	private validateQueueDefinitionsAgainstCapabilities() {
+		const capabilities = this.queueBridge.capabilities
+
+		if (!capabilities.strictStartupValidation) {
+			return
+		}
+
+		for (const queueDefinition of this.queueDefinitionList) {
+			const config = queueDefinition.queueBridgeConfig
+
+			if (config.orderingGuarantee === 'fifo' && !capabilities.fifoOrdering) {
+				throw new UnhandledError(
+					StatusCode.NotImplemented,
+					`queue "${queueDefinition.queueName}" requires fifo ordering, but ${this.queueBridge.name} does not support it`,
+				)
+			}
+
+			if (config.prefetch > capabilities.maxBatchSize) {
+				throw new UnhandledError(
+					StatusCode.NotImplemented,
+					`queue "${queueDefinition.queueName}" requests prefetch ${config.prefetch}, but ${this.queueBridge.name} supports at most ${capabilities.maxBatchSize}`,
+				)
+			}
+		}
+
+		for (const binding of this.eventToQueueBindingList) {
+			if (binding.idempotencyMode === 'strict' && !capabilities.idempotencyEnforcement) {
+				throw new UnhandledError(
+					StatusCode.NotImplemented,
+					`event-to-queue binding "${binding.eventName}" -> "${binding.queueName}" requires strict idempotency, but ${this.queueBridge.name} does not enforce idempotency`,
+				)
+			}
+		}
+	}
+
+	private createEventToQueueSubscriptionDefinitions(bindings: EventToQueueBindingDefinition[]) {
+		const supportsDurableManualAck =
+			this.eventBridge.capabilities.durableSubscriptions && this.eventBridge.capabilities.manualAckSupported
+
+		return bindings.map(binding => {
+			const subscriptionName = this.getEventToQueueSubscriptionName(binding)
+			return {
+				subscriptionName,
+				subscriptionDescription: `Enqueue "${binding.queueName}" from "${binding.eventName}"`,
+				metadata: { expose: {} },
+				eventBridgeConfig: {
+					durable: supportsDurableManualAck,
+					autoacknowledge: !supportsDurableManualAck,
+					shared: true,
+				},
+				call: async (_context: SubscriptionFunctionContext, payload: unknown) => {
+					try {
+						const eventPayload = payload as Record<string, unknown>
+						await this.enqueueQueue(
+							binding.queueName,
+							binding.mapPayload ? binding.mapPayload(eventPayload) : eventPayload,
+							binding.mapParameter ? binding.mapParameter(eventPayload) : undefined,
+							undefined,
+							_context.message.traceId,
+							_context.message.principalId,
+							_context.message.tenantId,
+							{
+								idempotencyKey: this.resolveEventToQueueIdempotencyKey(binding, _context.message),
+								headers: {
+									...this.createQueueIdentityHeaders(_context.message.principalId, _context.message.tenantId),
+									'purista.sourceEventName': binding.eventName,
+									'purista.sourceMessageId': _context.message.id,
+								},
+							},
+						)
+						return { status: 'ack' } as const
+					} catch (err) {
+						if (binding.onEnqueueFailure && 'status' in binding.onEnqueueFailure) {
+							return {
+								status: 'deadLetter',
+								reason: binding.onEnqueueFailure.reason,
+							} as const
+						}
+						if (binding.onEnqueueFailure) {
+							return {
+								status: 'retry',
+								reason: binding.onEnqueueFailure.reason,
+								delayMs: binding.onEnqueueFailure.delayMs,
+							} as const
+						}
+						throw err
+					}
+				},
+				eventName: binding.eventName,
+				hooks: {},
+				invokes: {},
+				streamInvokes: {},
+				emitList: {},
+				queueInvokes: {},
+				deprecated: false,
+			} as SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
+		})
+	}
+
+	private getEventToQueueSubscriptionName(binding: EventToQueueBindingDefinition) {
+		return `eventToQueue:${binding.eventName}:${binding.queueName}`
+	}
+
+	private resolveEventToQueueIdempotencyKey(binding: EventToQueueBindingDefinition, message: Readonly<EBMessage>) {
+		const strategy = binding.idempotencyKey
+		if (!strategy || strategy === 'none') {
+			return undefined
+		}
+		if (typeof strategy === 'function') {
+			return strategy(message)
+		}
+		if (strategy === 'messageId') {
+			return message.id
+		}
+		if (strategy === 'correlationId') {
+			return message.correlationId
+		}
+		if (strategy === 'eventField') {
+			const payload = (message as CustomMessage).payload
+			return payload && typeof payload === 'object'
+				? String((payload as Record<string, unknown>).id ?? '') || undefined
+				: undefined
+		}
+		return undefined
+	}
+
+	private resolveSubscriptionFailureHandling(
+		subscriptionDefinition: SubscriptionDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	): ResolvedSubscriptionFailureHandling | undefined {
+		const config = subscriptionDefinition.eventBridgeConfig.consumerFailureHandling
+		if (!config) {
+			return undefined
+		}
+
+		return {
+			mode: config.mode ?? 'strict',
+			maxAttempts: config.maxAttempts ?? 1,
+			retryDelayMs: config.retryDelayMs ?? 0,
+			deadLetterTarget: config.deadLetterTarget,
+		}
+	}
+
+	private validateSubscriptionAgainstCapabilities(
+		subscriptionDefinition: SubscriptionDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	) {
+		const capabilities = this.eventBridge.capabilities
+		const failureHandling = this.resolveSubscriptionFailureHandling(subscriptionDefinition)
+
+		if (subscriptionDefinition.eventBridgeConfig.durable && !capabilities.durableSubscriptions) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires durable delivery, but ${this.eventBridge.name} does not support durable subscriptions`,
+			)
+		}
+
+		if (!subscriptionDefinition.eventBridgeConfig.autoacknowledge && !capabilities.manualAckSupported) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires manual acknowledgement, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (!failureHandling) {
+			return
+		}
+
+		const consumerCapabilities = capabilities.consumerFailureHandling
+		if (failureHandling.mode === 'best-effort') {
+			return
+		}
+
+		if (!consumerCapabilities.strictMode) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`${this.eventBridge.name} does not support strict consumer failure handling for subscription "${subscriptionDefinition.subscriptionName}"`,
+			)
+		}
+
+		if (failureHandling.maxAttempts > 1 && !consumerCapabilities.boundedRetry) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires bounded retry, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (failureHandling.retryDelayMs > 0 && !consumerCapabilities.delayedRetry) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires delayed retry, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (!consumerCapabilities.deadLetterTarget) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`subscription "${subscriptionDefinition.subscriptionName}" requires dead-letter routing, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+	}
+
+	private validateCommandAgainstCapabilities(
+		commandDefinition: CommandDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	) {
+		const capabilities = this.eventBridge.capabilities
+		const commandConfig = commandDefinition.eventBridgeConfig
+
+		if (commandConfig.durable && !capabilities.durableCommands) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`command "${commandDefinition.commandName}" requires durable delivery, but ${this.eventBridge.name} does not support durable commands`,
+			)
+		}
+
+		if (!commandConfig.autoacknowledge && !capabilities.manualAckSupported) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`command "${commandDefinition.commandName}" requires manual acknowledgement, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if ((commandConfig.durable || !commandConfig.autoacknowledge) && !capabilities.commandHandling.strictMode) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`${this.eventBridge.name} does not support strict command delivery handling for command "${commandDefinition.commandName}"`,
+			)
+		}
+	}
+
+	private validateStreamAgainstCapabilities(
+		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>,
+	) {
+		const capabilities = this.eventBridge.capabilities
+		if (!capabilities.supportsStreams) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`stream "${streamDefinition.streamName}" cannot be registered because ${this.eventBridge.name} does not support streams`,
+			)
+		}
+
+		if (!capabilities.streamHandling.incrementalDelivery) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`stream "${streamDefinition.streamName}" requires incremental delivery support, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+
+		if (streamDefinition.aggregateChunks && !capabilities.streamHandling.aggregatedFinalSupported) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`stream "${streamDefinition.streamName}" requires aggregated final payload support, but ${this.eventBridge.name} does not support it`,
+			)
+		}
+	}
+
 	private computeRetryDelay(lifecycle: QueueLifecycleConfig, attempt: number, requestedDelay?: number): number {
 		if (typeof requestedDelay === 'number') {
 			return Math.max(0, Math.min(requestedDelay, lifecycle.retryStrategy.maxDelayMs))
@@ -916,6 +974,83 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 	private hasRetryWindowExpired(lifecycle: QueueLifecycleConfig, message: QueueMessage) {
 		return Date.now() - message.createdAt >= lifecycle.retryWindowMs
+	}
+
+	private shouldPauseQueueWorkerForPoisonMessage(
+		lifecycle: QueueLifecycleConfig,
+		message: QueueMessage,
+		reason: string,
+	) {
+		if (lifecycle.poisonMessageAction !== 'pause-worker') {
+			return false
+		}
+		if (lifecycle.poisonMessageFailureThreshold <= 0) {
+			return false
+		}
+
+		const previousReason = message.headers['x-purista-last-retry-reason']
+		if (!previousReason || previousReason !== reason) {
+			return false
+		}
+
+		return message.attempt >= lifecycle.poisonMessageFailureThreshold
+	}
+
+	private pauseQueueWorkerForPoisonMessage(queueName: string, reason: string) {
+		if (this.queueWorkerPausedQueues.has(queueName)) {
+			return
+		}
+		this.queueWorkerPausedQueues.set(queueName, {
+			pausedAt: Date.now(),
+			reason: this.normalizePauseReason(reason, 'poison_message_detected'),
+		})
+	}
+
+	private normalizePauseReason(reason: string | undefined, fallback: string) {
+		const normalized = reason?.trim()
+		return normalized && normalized.length > 0 ? normalized : fallback
+	}
+
+	private createQueueIdentityHeaders(principalId?: PrincipalId, tenantId?: TenantId) {
+		return {
+			...(principalId ? { 'purista.principalId': principalId } : {}),
+			...(tenantId ? { 'purista.tenantId': tenantId } : {}),
+		}
+	}
+
+	private createQueueRuntimeCancellation(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		logger: Logger,
+	): QueueRuntimeCancellation {
+		const controller = new AbortController()
+		let timer: ReturnType<typeof setTimeout> | undefined
+		const maxRuntimeMs = queueDefinition?.executionProfile?.maxRuntimeMs
+		if (typeof maxRuntimeMs === 'number' && maxRuntimeMs > 0) {
+			timer = setTimeout(() => {
+				if (!controller.signal.aborted) {
+					logger.warn(
+						{ queueName: lease.queueName, jobId: lease.message.id, maxRuntimeMs },
+						'queue job max runtime reached; requesting cooperative cancellation',
+					)
+					controller.abort(new Error('max_runtime_exceeded'))
+				}
+			}, maxRuntimeMs)
+			;(timer as { unref?: () => void }).unref?.()
+		}
+
+		const cancellation: QueueRuntimeCancellation = {
+			controller,
+			cancelRequested: () => controller.signal.aborted,
+			stop: () => {
+				if (timer) {
+					clearTimeout(timer)
+				}
+				this.activeQueueRuntimeCancellations.delete(cancellation)
+			},
+		}
+		this.activeQueueRuntimeCancellations.add(cancellation)
+		return cancellation
 	}
 
 	private async scheduleRetryOrDeadLetter(
@@ -948,8 +1083,29 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		reason?: string,
 	) {
 		const dlq = this.resolveDeadLetterQueueName(queueDefinition, queueName)
+		await this.deliverQueueResult(queueDefinition, lease, 'dead-lettered', { reason }, undefined, this.logger)
 		await this.moveMessageToDeadLetter(dlq, lease.message, reason)
 		await this.ackQueueJob(queueName, lease.leaseId, lease.message.id)
+	}
+
+	private async getQueueMetricsWithResolvedDeadLetter(
+		queueDefinition: QueueDefinition<any, any, any, any, any>,
+	): Promise<QueueMetrics> {
+		const metrics = await this.queueBridge.metrics(queueDefinition.queueName)
+		const deadLetterQueueName = this.resolveDeadLetterQueueName(queueDefinition, queueDefinition.queueName)
+		if (deadLetterQueueName === queueDefinition.queueName) {
+			return metrics
+		}
+
+		try {
+			const deadLetterMetrics = await this.queueBridge.metrics(deadLetterQueueName)
+			return {
+				...metrics,
+				deadLetter: deadLetterMetrics.deadLetter,
+			}
+		} catch {
+			return metrics
+		}
 	}
 
 	private async runQueueWorkerBeforeGuards(
@@ -985,6 +1141,47 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			const guards = Object.entries(afterGuards).map(([name, hook]) =>
 				context.startActiveSpan(`${worker.name}.afterGuard.${name}`, {}, undefined, () =>
 					hook.call(this, context, result, message),
+				),
+			)
+			await Promise.all(guards)
+		})
+	}
+
+	private async runStreamBeforeGuards(
+		stream: StreamDefinition<any, any, any, any, any, any, any, any, any, any, any>,
+		context: StreamFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+	) {
+		const beforeGuards = stream.hooks.beforeGuard
+		if (!beforeGuards || Object.keys(beforeGuards).length === 0) {
+			return
+		}
+		await context.startActiveSpan(`${stream.streamName}.beforeGuardHooks`, {}, undefined, async () => {
+			const guards = Object.entries(beforeGuards).map(([name, hook]) =>
+				context.startActiveSpan(`${stream.streamName}.beforeGuard.${name}`, {}, undefined, () =>
+					hook.call(this, context, payload as never, parameter as never),
+				),
+			)
+			await Promise.all(guards)
+		})
+	}
+
+	private async runStreamAfterGuards(
+		stream: StreamDefinition<any, any, any, any, any, any, any, any, any, any, any>,
+		context: StreamFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+		result: unknown,
+	) {
+		const afterGuards = stream.hooks.afterGuard
+		if (!afterGuards || Object.keys(afterGuards).length === 0) {
+			return
+		}
+		await context.startActiveSpan(`${stream.streamName}.afterGuardHooks`, {}, undefined, async () => {
+			const guards = Object.entries(afterGuards).map(([name, hook]) =>
+				context.startActiveSpan(`${stream.streamName}.afterGuard.${name}`, {}, undefined, () =>
+					hook.call(this, context, result as never, payload as never, parameter as never),
 				),
 			)
 			await Promise.all(guards)
@@ -1599,15 +1796,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									command.streamInvokes,
 								),
 							),
-							invokeAgent: createAgentInvokeFunctionProxy(
-								this.getAgentInvokeFunction(
-									command.commandName,
-									traceId,
-									message.principalId,
-									message.tenantId,
-									command.agentInvokes,
-								),
-							),
 							resources: this.resources,
 						} as unknown as CommandFunctionContext
 						const call = command.call.bind(this, context)
@@ -1649,15 +1837,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										message.principalId,
 										message.tenantId,
 										command.streamInvokes,
-									),
-								),
-								invokeAgent: createAgentInvokeFunctionProxy(
-									this.getAgentInvokeFunction(
-										command.commandName,
-										traceId,
-										message.principalId,
-										message.tenantId,
-										command.agentInvokes,
 									),
 								),
 								resources: this.resources,
@@ -1710,7 +1889,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				return await this.startActiveSpan(`${command.commandName}.success`, {}, undefined, async subSpan => {
 					if (command.eventName) {
 						subSpan.addEvent(command.eventName)
-						this.emit(`custom-${command.eventName}`, result)
 					}
 					return {
 						...createSuccessResponse(this.eventBridge.instanceId, message, result, command.eventName),
@@ -1721,11 +1899,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				span.recordException(error as Error)
 
 				if (error instanceof HandledError) {
-					this.emit(ServiceEventsNames.CommandHandledError, {
-						commandName: command.commandName,
-						error,
-						traceId,
-					})
 					span.setStatus({
 						code: SpanStatusCode.ERROR,
 						message: error.message,
@@ -1735,12 +1908,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						createErrorResponse(this.eventBridge.instanceId, message, error.errorCode, error),
 					)
 				}
-
-				this.emit(ServiceEventsNames.CommandUnhandledError, {
-					commandName: command.commandName,
-					error,
-					traceId,
-				})
 
 				logger.error(
 					{ err: error, message: getCleanedMessage(message), ...span.spanContext() },
@@ -1779,6 +1946,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerCommand', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
+			this.validateCommandAgainstCapabilities(commandDefinition)
 
 			span.setAttributes({
 				serviceName: this.serviceInfo.serviceName,
@@ -1820,6 +1988,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 	protected async stopQueueWorkers() {
 		this.queueWorkersShouldStop = true
+		for (const cancellation of this.activeQueueRuntimeCancellations) {
+			if (!cancellation.controller.signal.aborted) {
+				cancellation.controller.abort(new Error('service_shutdown'))
+			}
+		}
 		await Promise.allSettled(Array.from(this.queueWorkerTasks))
 		this.queueWorkerTasks.clear()
 	}
@@ -1830,9 +2003,21 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		})
 
 		while (!this.queueWorkersShouldStop) {
+			const pauseState = this.queueWorkerPausedQueues.get(worker.queueName)
+			if (pauseState) {
+				workerLogger.warn(
+					{ queueName: worker.queueName, reason: pauseState.reason, pausedAt: pauseState.pausedAt },
+					'queue worker is paused',
+				)
+				await this.waitForNextPoll(worker)
+				continue
+			}
+
 			let lease: QueueLease | undefined
 			let jobState: { handled: boolean } | undefined
 			let heartbeat: LeaseHeartbeatController | undefined
+			let cancellation: QueueRuntimeCancellation | undefined
+			let queueDefinition: QueueDefinition<any, any, any, any, any> | undefined
 			try {
 				lease = await this.wrapInSpan(PuristaSpanName.QueueLease, {}, async span => {
 					span.setAttribute(PuristaSpanTag.QueueName, worker.queueName)
@@ -1849,7 +2034,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				}
 
 				const activeLease = lease
-				const queueDefinition = this.getQueueDefinition(worker.queueName)
+				queueDefinition = this.getQueueDefinition(worker.queueName)
 				activeLease.message = await this.applyQueueBeforeExecuteTransform(
 					queueDefinition,
 					activeLease.message,
@@ -1857,7 +2042,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				)
 				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
 
-				heartbeat = this.startLeaseHeartbeat(worker.queueName, activeLease, lifecycle, workerLogger)
+				cancellation = this.createQueueRuntimeCancellation(queueDefinition, activeLease, workerLogger)
+				heartbeat = this.startLeaseHeartbeat(worker.queueName, activeLease, lifecycle, workerLogger, cancellation)
 				jobState = { handled: false }
 				const stopHeartbeat = () => heartbeat?.stop()
 
@@ -1868,6 +2054,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					workerLogger,
 					jobState,
 					stopHeartbeat,
+					cancellation,
 				)
 				await this.runQueueWorkerBeforeGuards(worker, context, activeLease.message)
 				const result = await this.startActiveSpan(PuristaSpanName.QueueProcess, {}, undefined, async span => {
@@ -1881,19 +2068,21 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				}
 			} catch (err) {
 				heartbeat?.stop()
+				cancellation?.stop()
 				workerLogger.error({ err }, 'queue worker execution failed')
 				if (lease && !jobState?.handled) {
 					try {
-						await this.nackQueueJob(worker.queueName, lease.leaseId, lease.message.id, {
+						await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
 							reason: err instanceof Error ? err.message : 'queue worker failure',
 						})
 					} catch (nackErr) {
-						workerLogger.error({ err: nackErr }, 'nack failed after worker error')
+						workerLogger.error({ err: nackErr }, 'retry or dead-letter failed after worker error')
 					}
 				}
 				await this.waitForNextPoll(worker)
 			} finally {
 				heartbeat?.stop()
+				cancellation?.stop()
 				if (worker.mode === 'interval') {
 					await this.waitForNextPoll(worker)
 				}
@@ -1915,7 +2104,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		logger: Logger,
 		jobState: { handled: boolean },
 		stopHeartbeat: () => void,
+		cancellation: QueueRuntimeCancellation,
 	): QueueJobContext {
+		const readHeader = (key: string) => {
+			const value = lease.message.headers[key]
+			return typeof value === 'string' && value.length > 0 ? value : undefined
+		}
+
 		const settle = () => {
 			if (jobState.handled) {
 				return false
@@ -1926,7 +2121,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		const jobControls = {
-			complete: async (_output?: unknown, _headers?: Record<string, string>) => {
+			complete: async (output?: unknown, headers?: Record<string, string>) => {
+				if (jobState.handled) return
+				stopHeartbeat()
+				await this.deliverQueueResult(queueDefinition, lease, 'success', output, headers, logger)
 				if (!settle()) return
 				await this.ackQueueJob(worker.queueName, lease.leaseId, lease.message.id)
 			},
@@ -1942,21 +2140,29 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, { reason })
 				}
 			},
+			moveToDeadLetter: async (reason?: string) => {
+				if (!settle()) return
+				await this.deadLetterJob(queueDefinition, worker.queueName, lease, reason)
+			},
 			extendLease: async (durationMs: number) => {
 				await this.queueBridge.extendLease(worker.queueName, lease.leaseId, durationMs)
 			},
+			cancelRequested: () => cancellation.cancelRequested(),
 		}
 
 		const traceId = lease.message.traceId
+		const principalId = readHeader('purista.principalId')
+		const tenantId = readHeader('purista.tenantId')
 
 		return {
 			message: lease.message,
 			job: jobControls,
-			emit: this.getEmitFunction(worker.name, traceId, undefined, undefined, {}),
+			signal: cancellation.controller.signal,
+			emit: this.getEmitFunction(worker.name, traceId, principalId, tenantId, {}),
 			...this.getContextFunctions(logger),
-			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, undefined, undefined, {})),
+			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, principalId, tenantId, {})),
 			stream: createOpenStreamFunctionProxy(
-				this.getConsumeStreamFunction(worker.name, traceId, undefined, undefined, {}),
+				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, {}),
 			),
 			resources: this.resources,
 		} as QueueJobContext
@@ -1970,15 +2176,24 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		jobState: { handled: boolean },
 		stopHeartbeat: () => void,
 	) {
-		jobState.handled = true
 		stopHeartbeat()
 
 		if (!result || result.status === 'success') {
+			await this.deliverQueueResult(queueDefinition, lease, 'success', result?.output, result?.headers, this.logger)
+			jobState.handled = true
 			await this.ackQueueJob(worker.queueName, lease.leaseId, lease.message.id)
 			return
 		}
 
 		if (result.status === 'retry') {
+			jobState.handled = true
+			const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+			const retryReason = result.reason ?? 'retry_requested'
+			if (this.shouldPauseQueueWorkerForPoisonMessage(lifecycle, lease.message, retryReason)) {
+				this.pauseQueueWorkerForPoisonMessage(worker.queueName, retryReason)
+				await this.deadLetterJob(queueDefinition, worker.queueName, lease, `poison_message:${retryReason}`)
+				return
+			}
 			await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
 				delayMs: result.delayMs,
 				reason: result.reason,
@@ -1987,9 +2202,25 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		if (result.status === 'fail') {
+			jobState.handled = true
 			if (result.fatal) {
+				await this.deliverQueueResult(
+					queueDefinition,
+					lease,
+					'failed',
+					{ reason: result.reason },
+					undefined,
+					this.logger,
+				)
 				await this.deadLetterJob(queueDefinition, worker.queueName, lease, result.reason)
 			} else {
+				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+				const retryReason = result.reason ?? 'worker_failure'
+				if (this.shouldPauseQueueWorkerForPoisonMessage(lifecycle, lease.message, retryReason)) {
+					this.pauseQueueWorkerForPoisonMessage(worker.queueName, retryReason)
+					await this.deadLetterJob(queueDefinition, worker.queueName, lease, `poison_message:${retryReason}`)
+					return
+				}
 				await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
 					reason: result.reason,
 					delayMs: result.delayMs,
@@ -1998,9 +2229,160 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 	}
 
+	private async deliverQueueResult(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		status: QueueResultStatus,
+		payload: unknown,
+		headers: Record<string, string> | undefined,
+		logger: Logger,
+	) {
+		const policy = queueDefinition?.resultPolicy
+		if (!policy || policy.mode === 'none') {
+			return
+		}
+
+		const delivery = policy.delivery ?? 'best-effort'
+		try {
+			const eventPayload = this.createQueueResultEventPayload(lease, status, payload, headers)
+			if (policy.mode === 'state' || policy.mode === 'state-and-event') {
+				await this.persistQueueResult(policy.ttlMs, eventPayload)
+			}
+			if (policy.mode === 'event' || policy.mode === 'state-and-event') {
+				await this.emitQueueResultEvent(queueDefinition, eventPayload)
+			}
+		} catch (err) {
+			if (delivery === 'required') {
+				throw err
+			}
+			logger.warn({ err, queueName: lease.queueName, jobId: lease.message.id }, 'queue result delivery failed')
+		}
+	}
+
+	private createQueueResultEventPayload(
+		lease: QueueLease,
+		status: QueueResultStatus,
+		payload: unknown,
+		headers?: Record<string, string>,
+	): QueueResultEventPayload {
+		const readHeader = (key: string) => {
+			const value = lease.message.headers[key]
+			return typeof value === 'string' && value.length > 0 ? value : undefined
+		}
+
+		return {
+			jobId: lease.message.id,
+			queueName: lease.queueName,
+			status,
+			attempt: lease.message.attempt,
+			payload,
+			headers,
+			traceId: lease.message.traceId,
+			correlationId: lease.message.correlationId,
+			tenantId: readHeader('purista.tenantId'),
+			principalId: readHeader('purista.principalId'),
+			runId: readHeader('purista.runId'),
+		}
+	}
+
+	private async persistQueueResult(ttlMs: number | undefined, eventPayload: QueueResultEventPayload) {
+		const store = this.queueJobStore
+		if (!store) {
+			return
+		}
+		const now = Date.now()
+		await store.set(
+			{
+				jobId: eventPayload.jobId,
+				queueName: eventPayload.queueName,
+				status: eventPayload.status,
+				attempt: eventPayload.attempt,
+				updatedAt: now,
+				completedAt: eventPayload.status === 'success' ? now : undefined,
+				failedAt: eventPayload.status === 'failed' ? now : undefined,
+				cancelledAt: eventPayload.status === 'cancelled' ? now : undefined,
+				result: eventPayload.status === 'success' ? eventPayload.payload : undefined,
+				error: eventPayload.status === 'failed' ? eventPayload.payload : undefined,
+				traceId: eventPayload.traceId,
+				correlationId: eventPayload.correlationId,
+				tenantId: eventPayload.tenantId,
+				principalId: eventPayload.principalId,
+				runId: eventPayload.runId,
+			},
+			ttlMs,
+		)
+	}
+
+	private async emitQueueResultEvent(
+		queueDefinition: QueueDefinition<any, any, any, any, any>,
+		payload: QueueResultEventPayload,
+	) {
+		const policy = queueDefinition.resultPolicy
+		if (!policy) {
+			return
+		}
+		const eventName =
+			payload.status === 'success'
+				? policy.successEventName
+				: payload.status === 'failed'
+					? policy.failureEventName
+					: payload.status === 'cancelled'
+						? policy.cancelledEventName
+						: payload.status === 'dead-lettered'
+							? policy.deadLetterEventName
+							: policy.progressEventName
+		if (!eventName) {
+			return
+		}
+		await this.eventBridge.emitMessage({
+			id: this.getQueueResultEventId(queueDefinition, payload),
+			messageType: EBMessageType.CustomMessage,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: payload.traceId,
+			correlationId: payload.correlationId,
+			principalId: payload.principalId,
+			tenantId: payload.tenantId,
+			sender: {
+				serviceName: this.info.serviceName,
+				serviceVersion: this.info.serviceVersion,
+				serviceTarget: queueDefinition.queueName,
+				instanceId: this.eventBridge.instanceId,
+			},
+			eventName,
+			payload,
+		} as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+	}
+
+	private getQueueResultEventId(
+		queueDefinition: QueueDefinition<any, any, any, any, any>,
+		payload: QueueResultEventPayload,
+	) {
+		const strategy = queueDefinition.resultPolicy?.eventId ?? 'jobIdAndStatus'
+		if (typeof strategy === 'function') {
+			return strategy({
+				jobId: payload.jobId,
+				queueName: payload.queueName,
+				status: payload.status,
+				attempt: payload.attempt,
+			})
+		}
+		return `${payload.jobId}:${payload.status}`
+	}
+
 	public async getServiceHealth(): Promise<ServiceHealthState> {
 		const eventBridgeHealthy = await this.eventBridge.isHealthy()
 		const hasQueues = this.hasQueueFeatures()
+		const pausedQueueWorkers = Object.entries(this.getQueueWorkerPauseState()).map(([queueName, state]) => ({
+			queueName,
+			...state,
+		}))
+		const pausedSubscriptionConsumers = Object.entries(this.getPausedSubscriptionConsumerState()).map(
+			([registrationKey, state]) => ({
+				registrationKey,
+				...state,
+			}),
+		)
 
 		let queueBridgeHealthy = true
 		let queues: QueueHealthState[] = []
@@ -2010,7 +2392,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			queues = await Promise.all(
 				this.queueDefinitionList.map(async queue => {
 					try {
-						const metrics = await this.queueBridge.metrics(queue.queueName)
+						const metrics = await this.getQueueMetricsWithResolvedDeadLetter(queue)
 						this.queueMetricsCache.set(queue.queueName, metrics)
 						const health = this.evaluateQueueHealth(queue.queueName, metrics)
 						return {
@@ -2036,7 +2418,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		let status: ServiceHealthState['status'] = 'ok'
 		if (!eventBridgeHealthy || !queueBridgeHealthy || queues.some(queue => queue.status === 'error')) {
 			status = 'error'
-		} else if (queues.some(queue => queue.status === 'warn')) {
+		} else if (
+			queues.some(queue => queue.status === 'warn') ||
+			pausedQueueWorkers.length > 0 ||
+			pausedSubscriptionConsumers.length > 0
+		) {
 			status = 'warn'
 		}
 
@@ -2045,7 +2431,45 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			eventBridgeHealthy,
 			queueBridgeHealthy,
 			queues,
+			pausedQueueWorkers,
+			pausedSubscriptionConsumers,
 		}
+	}
+
+	public getInFlightDiagnostics(): InFlightDiagnostics {
+		return {
+			total: this.eventBridge.getInFlightExecutionCount(),
+			byKind: this.eventBridge.getInFlightExecutionCounts(),
+		}
+	}
+
+	public getQueueWorkerPauseState(): QueueWorkerPauseStateByQueue {
+		return Object.fromEntries(this.queueWorkerPausedQueues.entries())
+	}
+
+	public getPausedSubscriptionConsumerState(): PausedSubscriptionConsumersByRegistrationKey {
+		return this.eventBridge.getPausedSubscriptionConsumers()
+	}
+
+	public pauseQueueWorkers(queueName: string, reason = 'paused_by_operator') {
+		this.queueWorkerPausedQueues.set(queueName, {
+			pausedAt: Date.now(),
+			reason: this.normalizePauseReason(reason, 'paused_by_operator'),
+		})
+	}
+
+	public resumeQueueWorkers(queueName: string) {
+		this.queueWorkerPausedQueues.delete(queueName)
+	}
+
+	public async resumeSubscriptionConsumer(registrationKey: string) {
+		if (!this.eventBridge.capabilities.consumerFailureHandling.consumerPauseResume) {
+			throw new UnhandledError(
+				StatusCode.NotImplemented,
+				`${this.eventBridge.name} does not support pausing/resuming subscription consumers`,
+			)
+		}
+		await this.eventBridge.resumeSubscriptionConsumer(registrationKey)
 	}
 
 	public async executeStream(message: Readonly<StreamMessage>) {
@@ -2096,6 +2520,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 			let sequence = 0
 			const chunks: unknown[] = []
+			let finalPayload: unknown
+			let streamClosed = false
 
 			const publishFrame = async (frame: StreamFrame['payload']) => {
 				const streamFrame: Omit<StreamFrame, 'id' | 'timestamp'> = {
@@ -2147,16 +2573,19 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					})
 				},
 				close: async final => {
-					let finalPayload = final
-					if (stream.aggregateChunks && finalPayload === undefined) {
-						finalPayload = {
+					if (streamClosed) {
+						return
+					}
+					let resolvedFinalPayload = final
+					if (stream.aggregateChunks && resolvedFinalPayload === undefined) {
+						resolvedFinalPayload = {
 							chunkCount: chunks.length,
 							chunks,
 						}
 					}
 
 					if (stream.finalValidationEnabled && stream.finalSchema) {
-						const finalValidationResult = await validate(stream.finalSchema, finalPayload)
+						const finalValidationResult = await validate(stream.finalSchema, resolvedFinalPayload)
 						if (!finalValidationResult.success) {
 							throw new UnhandledError(StatusCode.InternalServerError, 'stream final output validation failed', {
 								issues: finalValidationResult.issues,
@@ -2165,30 +2594,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						}
 					}
 
-					if (stream.finalEventName && finalPayload !== undefined) {
-						await this.eventBridge.emitMessage({
-							messageType: EBMessageType.CustomMessage,
-							contentType: 'application/json',
-							contentEncoding: 'utf-8',
-							traceId: message.traceId,
-							principalId: message.principalId,
-							tenantId: message.tenantId,
-							sender: {
-								serviceName: this.info.serviceName,
-								serviceVersion: this.info.serviceVersion,
-								serviceTarget: stream.streamName,
-								instanceId: this.eventBridge.instanceId,
-							},
-							eventName: stream.finalEventName,
-							payload: finalPayload,
-						} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
-					}
-
-					await publishFrame({
-						frameType: 'complete',
-						sequence: sequence++,
-						final: finalPayload,
-					})
+					finalPayload = resolvedFinalPayload
+					streamClosed = true
 				},
 				fail: async error => {
 					const err = error instanceof HandledError ? error : UnhandledError.fromError(error)
@@ -2244,18 +2651,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							stream.streamInvokes,
 						),
 					),
-					invokeAgent: createAgentInvokeFunctionProxy(
-						this.getAgentInvokeFunction(
-							stream.streamName,
-							traceId,
-							message.principalId,
-							message.tenantId,
-							stream.agentInvokes,
-						),
-					),
 					resources: this.resources,
 				}
 
+				await this.runStreamBeforeGuards(stream, streamContext as StreamFunctionContext, payload, parameter)
 				await call(streamContext as any, payload as any, parameter as any, writer)
 
 				if (activeSession.cancelled) {
@@ -2267,9 +2666,42 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					return
 				}
 
-				// If producer did not close explicitly, auto-complete.
-				if (sequence <= 1 || chunks.length > 0) {
+				// If producer did not close explicitly, auto-complete deterministically.
+				if (!streamClosed && !activeSession.cancelled) {
 					await writer.close()
+				}
+
+				if (streamClosed) {
+					await this.runStreamAfterGuards(
+						stream,
+						streamContext as StreamFunctionContext,
+						payload,
+						parameter,
+						finalPayload,
+					)
+					if (stream.finalEventName && finalPayload !== undefined) {
+						await this.eventBridge.emitMessage({
+							messageType: EBMessageType.CustomMessage,
+							contentType: 'application/json',
+							contentEncoding: 'utf-8',
+							traceId: message.traceId,
+							principalId: message.principalId,
+							tenantId: message.tenantId,
+							sender: {
+								serviceName: this.info.serviceName,
+								serviceVersion: this.info.serviceVersion,
+								serviceTarget: stream.streamName,
+								instanceId: this.eventBridge.instanceId,
+							},
+							eventName: stream.finalEventName,
+							payload: finalPayload,
+						} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+					}
+					await publishFrame({
+						frameType: 'complete',
+						sequence: sequence++,
+						final: finalPayload,
+					})
 				}
 			} catch (error) {
 				await writer.fail(error)
@@ -2280,10 +2712,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	public async registerStream(
-		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>,
+		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>,
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerStream', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register stream')
+			this.validateStreamAgainstCapabilities(streamDefinition)
 
 			span.setAttributes({
 				serviceName: this.serviceInfo.serviceName,
@@ -2392,21 +2825,71 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										subscription.streamInvokes,
 									),
 								),
-								invokeAgent: createAgentInvokeFunctionProxy(
-									this.getAgentInvokeFunction(
-										subscriptionName,
-										traceId,
-										message.principalId,
-										message.tenantId,
-										subscription.agentInvokes,
-									),
-								),
 								resources: this.resources,
 							} as unknown as SubscriptionFunctionContext
 							const call2 = subscription.call.bind(this, context)
 							return await call2(payload, parameter)
 						},
 					)
+
+					const consumerFailureHandling = this.resolveSubscriptionFailureHandling(subscription)
+					if (isSubscriptionHandlerResult(result)) {
+						switch (result.status) {
+							case 'ack':
+								return undefined
+							case 'retry': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									result.delayMs &&
+									result.delayMs > 0 &&
+									!this.eventBridge.capabilities.consumerFailureHandling.delayedRetry
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested delayed retry, but ${this.eventBridge.name} does not support delayed retry`,
+									)
+								}
+
+								throw new SubscriptionConsumerControlError('retry', result.reason, result.delayMs)
+							}
+							case 'deadLetter': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									!this.eventBridge.capabilities.consumerFailureHandling.deadLetterTarget
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested dead-letter handling, but ${this.eventBridge.name} does not support dead-letter routing`,
+									)
+								}
+								throw new SubscriptionConsumerControlError('deadLetter', result.reason)
+							}
+							case 'drop': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									!this.eventBridge.capabilities.consumerFailureHandling.drop
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested drop handling, but ${this.eventBridge.name} does not support dropping deliveries`,
+									)
+								}
+								throw new SubscriptionConsumerControlError('drop', result.reason)
+							}
+							case 'stop-consumer': {
+								if (
+									consumerFailureHandling?.mode === 'strict' &&
+									!this.eventBridge.capabilities.consumerFailureHandling.stopConsumer
+								) {
+									throw new UnhandledError(
+										StatusCode.NotImplemented,
+										`subscription "${subscription.subscriptionName}" requested stop-consumer handling, but ${this.eventBridge.name} does not support pausing subscription consumers`,
+									)
+								}
+								throw new SubscriptionConsumerControlError('stop-consumer', result.reason)
+							}
+						}
+					}
 
 					if (Object.keys(subscription.hooks.afterGuard ?? {}).length) {
 						const guards = subscription.hooks.afterGuard
@@ -2441,15 +2924,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 											message.principalId,
 											message.tenantId,
 											subscription.streamInvokes,
-										),
-									),
-									invokeAgent: createAgentInvokeFunctionProxy(
-										this.getAgentInvokeFunction(
-											subscription.subscriptionName,
-											traceId,
-											message.principalId,
-											message.tenantId,
-											subscription.agentInvokes,
 										),
 									),
 									resources: this.resources,
@@ -2502,7 +2976,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							{},
 							undefined,
 							async subSpan => {
-								this.emit(`custom-${subscription.emitEventName}`, result)
 								subSpan.addEvent(subscription.emitEventName as string)
 								const resultMsg: Omit<CustomMessage, 'id' | 'timestamp'> = {
 									messageType: EBMessageType.CustomMessage,
@@ -2524,22 +2997,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					}
 					return undefined
 				} catch (err) {
+					if (err instanceof SubscriptionConsumerControlError) {
+						throw err
+					}
 					logger.error({ err }, 'Error in subscription execution')
 					if (err instanceof HandledError) {
-						this.emit(ServiceEventsNames.SubscriptionHandledError, {
-							subscriptionName,
-							error: err,
-							traceId,
-						})
 						// handled errors prevent that the message is re-delivered for retry
 						return
-					}
-					if (err instanceof UnhandledError) {
-						this.emit(ServiceEventsNames.SubscriptionUnhandledError, {
-							subscriptionName,
-							error: err,
-							traceId,
-						})
 					}
 					span.recordException(err as Error)
 
@@ -2598,6 +3062,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				tenantId: subscriptionDefinition.tenantId,
 			}
 
+			this.validateSubscriptionAgainstCapabilities(subscriptionDefinition)
+
 			await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
 				this.executeSubscription(message, subscriptionDefinition.subscriptionName),
 			)
@@ -2632,9 +3098,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			await this.queueBridge.destroy()
 			this.queueBridgeStarted = false
 		}
-		this.emit(ServiceEventsNames.ServiceDrain)
-		this.emit(ServiceEventsNames.ServiceStopped)
-		this.removeAllListeners()
 		await super.destroy()
 	}
 }

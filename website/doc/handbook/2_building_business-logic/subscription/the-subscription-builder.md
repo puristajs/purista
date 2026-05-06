@@ -77,14 +77,77 @@ const builder = myServiceBuilder
   .getSubscriptionBuilder('mySub', '...')
   .adviceDurable(true)
   .adviceAutoacknowledgeMessage(false)
+  .adviceConsumerFailureHandling({
+    mode: 'strict',
+    maxAttempts: 5,
+    retryDelayMs: 1000,
+    deadLetterTarget: 'billing.userCreated.dead-letter',
+  })
   .receiveMessageOnEveryInstance(true)
 ```
 
 - `adviceDurable(true)` asks the broker to persist messages while subscriber is offline.
 - `adviceAutoacknowledgeMessage(false)` prefers ack after successful execution.
+- `adviceConsumerFailureHandling(...)` declares bounded retry semantics, strictness, and the dead-letter target that exhausted messages should use.
 - `receiveMessageOnEveryInstance(true)` disables shared-consumer mode and fans out to each instance.
 
 Support depends on the selected event bridge/broker.
+
+### Failure handling modes
+
+- `mode: 'strict'` is the recommended default. PURISTA validates the selected event bridge at startup and rejects unsupported retry/DLQ requirements.
+- `mode: 'best-effort'` allows adapter-specific degradation when you explicitly accept weaker semantics.
+- Exhausted subscription messages are dead-lettered. Set `deadLetterTarget` explicitly when you want a stable operator inbox, or rely on the adapter default suffix when the selected bridge documents one.
+
+### Explicit handler outcomes
+
+Subscription handlers can return explicit control outcomes instead of only throwing exceptions:
+
+```typescript
+const builder = myServiceBuilder
+  .getSubscriptionBuilder('mySub', '...')
+  .setSubscriptionFunction(async function (context, payload) {
+    if (payload.temporaryUnavailable) {
+      return { status: 'retry', reason: 'temporary downstream outage', delayMs: 5_000 }
+    }
+
+    if (payload.invalidData) {
+      return { status: 'deadLetter', reason: 'invalid payload for projection' }
+    }
+
+    if (payload.ignoreForNow) {
+      return { status: 'drop', reason: 'known irrelevant event variant' }
+    }
+
+    if (payload.poisonSequenceDetected) {
+      return { status: 'stop-consumer', reason: 'manual operator review required' }
+    }
+
+    return { status: 'ack' }
+  })
+```
+
+- `ack` settles the delivery as successful.
+- `retry` signals transient failure with optional delay hint.
+- `deadLetter` routes immediately to dead-letter handling.
+- `drop` acknowledges and discards the current delivery with warning logging.
+- `stop-consumer` pauses the affected subscription consumer until explicitly resumed by an operator/runtime call.
+- Thrown errors still map through the configured retry/DLQ policy for backward-compatible behavior.
+
+`stop-consumer` support is capability-gated per adapter. In `mode: 'strict'`, unsupported adapters reject this outcome with a startup/runtime validation error instead of silently degrading behavior.
+
+### When to use subscription retries vs queues
+
+Use subscription retry / dead-letter handling for reactive push workloads where the broker should make a bounded number of delivery attempts and then move the message aside for investigation.
+
+Use a queue instead when you need:
+
+- long backoff windows
+- controlled replay / re-drive operations
+- worker heartbeats / leases
+- operator-visible backlog metrics and remediation flows
+
+Queues are the stronger abstraction for workflow-style work. Subscription retries should stay focused on bounded event-consumer hardening.
 
 ## Invoke and emit from subscriptions
 
@@ -118,39 +181,6 @@ const builder = myServiceBuilder
       }
     }
   })
-
-## Invoke AI agents
-
-Subscriptions can invoke AI agents by declaring them as a dependency.
-
-::: info Dependency required
-To use agent invocation, the optional **`@purista/ai`** package must be installed in your project.
-:::
-
-```typescript
-const builder = myServiceBuilder
-  .getSubscriptionBuilder('processFeedback', '...')
-  .canInvokeAgent('sentimentAgent', '1', {
-    payloadSchema: z.object({ text: z.string() })
-  })
-  .setSubscriptionFunction(async function (context, payload) {
-    const result = await context.invokeAgent.sentimentAgent['1']
-      .call({ text: payload.feedback })
-      .final()
-
-    if (result.message === 'negative') {
-      await context.service.SupportService['1'].createTicket({ 
-        reason: 'Negative feedback received' 
-      })
-    }
-  })
-```
-
-By using `.canInvokeAgent(...)`, you get:
-- **Type Safety**: Full inference for payload and parameters.
-- **Traceability**: Traces and correlation IDs flow automatically into the agent.
-- **Metadata**: `principalId` and `tenantId` are forwarded to the agent.
-- **Session**: `sessionId` is managed for conversation history.
 ```
 
 ## Context

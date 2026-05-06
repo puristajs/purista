@@ -22,7 +22,7 @@ Defined in: [natsbridge/src/types/IncomingMessageFunction.ts:5](https://github.c
 
 ### msg
 
-`Msg`
+`Msg` | `JsMsg`
 
 ## Returns
 

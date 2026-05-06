@@ -4,13 +4,14 @@ import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExpose
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
+import {
+	getNamedHook,
+	mergeNamedHooks,
+	registerEmitSchema,
+	registerInvokeCapability,
+	registerStreamInvokeCapability,
+} from '../core/helper/builderRegistry.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type {
-	AgentInvocation,
-	AgentProtocolResponse,
-	agentProtocolPayloadSchema,
-} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { CommandAfterGuardHook } from '../core/types/commandType/CommandAfterGuardHook.js'
@@ -25,12 +26,11 @@ import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js
 import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.js'
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
-import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -39,15 +39,6 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
 
 export type HttpExposureOptions = {
 	mode?: 'sync' | 'async'
-}
-
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
-	payloadSchema?: Payload
-	parameterSchema?: Parameter
-}
-
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
-	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 }
 
 /**
@@ -87,10 +78,10 @@ export class CommandDefinitionBuilder<
 
 	private durable = false
 	private autoacknowledge = true
+	private schedules: ScheduleDefinition[] = []
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
-	private agentInvokes: C['AgentInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 
@@ -102,11 +93,34 @@ export class CommandDefinitionBuilder<
 		}
 		beforeGuard: Record<
 			string,
-			CommandBeforeGuardHook<S, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
+			CommandBeforeGuardHook<
+				S,
+				any,
+				any,
+				any,
+				any,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
 		>
 		afterGuard: Record<
 			string,
-			CommandAfterGuardHook<S, any, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
+			CommandAfterGuardHook<
+				S,
+				any,
+				any,
+				any,
+				any,
+				any,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema
@@ -146,18 +160,7 @@ export class CommandDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'] &
-					Record<
-						QueueName,
-						(
-							payload: InferIn<Payload>,
-							parameter: InferIn<Parameter>,
-							options?: Omit<
-								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
-								'queueName' | 'payload' | 'parameter'
-							>,
-						) => Promise<QueueEnqueueResult>
-					>
+				C['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
 			>
 		>
 	}
@@ -173,7 +176,8 @@ export class CommandDefinitionBuilder<
 		C['Resources'],
 		C['Invokes'],
 		C['StreamInvokes'],
-		C['EmitList']
+		C['EmitList'],
+		C['QueueInvokes']
 	>
 
 	constructor(
@@ -214,20 +218,16 @@ export class CommandDefinitionBuilder<
 			throw new Error('canInvoke requires non-empty service name, version and target')
 		}
 
-		const existingInvokes = this.invokes as Record<
-			string,
-			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
-		>
-
-		const f = {
-			[serviceName]: {
-				...existingInvokes[serviceName],
-				[serviceVersion]: {
-					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
-				},
-			},
-		} as unknown as C['Invokes'] &
+		const f = registerInvokeCapability(
+			this.invokes as Record<
+				string,
+				Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ outputSchema, payloadSchema, parameterSchema },
+		) as unknown as C['Invokes'] &
 			Record<
 				SName,
 				Record<
@@ -260,7 +260,8 @@ export class CommandDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -288,34 +289,29 @@ export class CommandDefinitionBuilder<
 			throw new Error('canConsumeStream requires non-empty service name, version and target')
 		}
 
-		const existingStreams = this.streamInvokes as Record<
-			string,
-			Record<
+		this.streamInvokes = registerStreamInvokeCapability(
+			this.streamInvokes as Record<
 				string,
 				Record<
 					string,
-					{
-						chunkSchema?: Schema
-						finalSchema?: Schema
-						payloadSchema?: Schema
-						parameterSchema?: Schema
-						validateChunk?: boolean
-						validateFinal?: boolean
-					}
+					Record<
+						string,
+						{
+							chunkSchema?: Schema
+							finalSchema?: Schema
+							payloadSchema?: Schema
+							parameterSchema?: Schema
+							validateChunk?: boolean
+							validateFinal?: boolean
+						}
+					>
 				>
-			>
-		>
-
-		this.streamInvokes = {
-			...this.streamInvokes,
-			[serviceName]: {
-				...existingStreams[serviceName],
-				[serviceVersion]: {
-					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
-				},
-			},
-		}
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+		) as C['StreamInvokes']
 
 		return this as unknown as CommandDefinitionBuilder<
 			S,
@@ -351,89 +347,8 @@ export class CommandDefinitionBuilder<
 							>
 						>
 					>,
-				C['EmitList']
-			>
-		>
-	}
-
-	/**
-	 * Define an agent which can be invoked by the current command.
-	 * The agent must follow the PURISTA agent protocol.
-	 *
-	 * @param agentName The name of the agent service
-	 * @param agentVersion The version of the agent service
-	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
-	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
-	 */
-	canInvokeAgent<
-		Payload extends Schema = typeof agentProtocolPayloadSchema,
-		Parameter extends Schema = Schema,
-		SName extends string = string,
-		Version extends string = string,
-	>(
-		agentName: SName,
-		agentVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
-	) {
-		if (agentName.trim() === '' || agentVersion.trim() === '') {
-			throw new Error('canInvokeAgent requires non-empty agent name and version')
-		}
-
-		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.payloadSchema
-			: undefined
-		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.parameterSchema
-			: invokeConfigOrParameterSchema
-
-		this.agentInvokes = {
-			...this.agentInvokes,
-			[agentName]: {
-				...(this.agentInvokes[agentName] as Record<string, any>),
-				[agentVersion]: {
-					payloadSchema,
-					parameterSchema,
-				},
-			},
-		} as unknown as C['AgentInvokes'] &
-			Record<
-				SName,
-				Record<
-					Version,
-					{
-						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
-					}
-				>
-			>
-
-		return this as unknown as CommandDefinitionBuilder<
-			S,
-			CommandDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes'] &
-					Record<
-						SName,
-						Record<
-							Version,
-							{
-								call: (
-									payload: InferIn<Payload>,
-									parameter?: InferIn<Parameter>,
-								) => AgentInvocation<AgentProtocolResponse>
-							}
-						>
-					>
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -446,11 +361,7 @@ export class CommandDefinitionBuilder<
 	 * @returns
 	 */
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
-		if (eventName.trim() === '') {
-			throw new Error('canEmit requires non-empty event name')
-		}
-
-		this.emitList = { ...this.emitList, [eventName]: schema }
+		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 
 		return this as unknown as CommandDefinitionBuilder<
 			S,
@@ -508,7 +419,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -533,7 +445,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -566,7 +479,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -690,7 +604,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -760,7 +675,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -803,14 +719,12 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>,
 	) {
-		for (const [name, hook] of Object.entries(beforeGuards)) {
-			assertNonArrowFunction(hook, `setBeforeGuardHooks.${name}`)
-		}
-		this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
+		this.hooks.beforeGuard = mergeNamedHooks(this.hooks.beforeGuard, beforeGuards, 'setBeforeGuardHooks')
 		return this
 	}
 
@@ -821,7 +735,7 @@ export class CommandDefinitionBuilder<
 	 * @returns The before guard hook, or undefined if not found.
 	 */
 	getBeforeGuardHook(name: keyof typeof this.hooks.beforeGuard) {
-		return this.hooks.beforeGuard[name] as CommandBeforeGuardHook<
+		return getNamedHook(this.hooks.beforeGuard, name) as CommandBeforeGuardHook<
 			S,
 			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
@@ -831,7 +745,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -854,14 +768,12 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>,
 	) {
-		for (const [name, hook] of Object.entries(afterGuards)) {
-			assertNonArrowFunction(hook, `setAfterGuardHooks.${name}`)
-		}
-		this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
+		this.hooks.afterGuard = mergeNamedHooks(this.hooks.afterGuard, afterGuards, 'setAfterGuardHooks')
 		return this
 	}
 
@@ -871,7 +783,7 @@ export class CommandDefinitionBuilder<
 	 * @return The after guard hook, or undefined if not found.
 	 */
 	getAfterGuardHook(name: keyof typeof this.hooks.afterGuard) {
-		return this.hooks.afterGuard[name] as CommandAfterGuardHook<
+		return getNamedHook(this.hooks.afterGuard, name) as CommandAfterGuardHook<
 			S,
 			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
@@ -882,7 +794,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1019,8 +931,7 @@ export class CommandDefinitionBuilder<
 				StreamInvokes,
 				EmitList,
 				CommandDefinitionMetadataBase,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		>,
 	) {
@@ -1045,8 +956,7 @@ export class CommandDefinitionBuilder<
 				StreamInvokes,
 				EmitList,
 				HttpExposedServiceMeta<InferTypeOrEmptyObject<C['ParamsSchema']>>,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		> = {
 			...definition,
@@ -1090,6 +1000,38 @@ export class CommandDefinitionBuilder<
 	}
 
 	/**
+	 * Mark this command as a short, idempotent schedule target.
+	 *
+	 * @example
+	 * ```ts
+	 * command.markSchedulable({
+	 *   name: 'refresh-cache',
+	 *   expression: { kind: 'interval', everyMs: 300_000 },
+	 * })
+	 * ```
+	 */
+	markSchedulable(options: ScheduleOptions & { name: string; description?: string }) {
+		this.schedules.push({
+			name: options.name,
+			description: options.description,
+			targetKind: 'command',
+			targetName: this.commandName,
+			payloadSchema: options.payloadSchema,
+			parameterSchema: options.parameterSchema,
+			expression: options.expression,
+			timezone: options.timezone,
+			concurrencyPolicy: options.concurrencyPolicy ?? 'allow',
+			missedRunPolicy: options.missedRunPolicy ?? 'skip',
+			maxCatchUpCount: options.maxCatchUpCount,
+			jitterWindowMs: options.jitterWindowMs,
+			idempotencyKey: options.idempotencyKey,
+			enabledByDefault: options.enabledByDefault ?? true,
+			providerHints: options.providerHints,
+		})
+		return this
+	}
+
+	/**
 	 * Creates and returns the CommandDefinition used as input for the service.
 	 * @returns CommandDefinition
 	 */
@@ -1110,6 +1052,7 @@ export class CommandDefinitionBuilder<
 			durable: this.durable,
 			autoacknowledge: this.autoacknowledge,
 			shared: true,
+			consumerFailureHandling: undefined,
 		}
 
 		const [inputPayload, parameter, outputPayload] = await Promise.all([
@@ -1135,13 +1078,13 @@ export class CommandDefinitionBuilder<
 				C['StreamInvokes'],
 				C['EmitList'],
 				CommandDefinitionMetadataBase,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		> = {
 			commandName: this.commandName,
 			commandDescription: this.commandDescription,
 			eventBridgeConfig,
+			schedules: this.schedules,
 			metadata: {
 				expose: {
 					contentTypeRequest: this.inputContentType ?? 'application/json',
@@ -1159,7 +1102,6 @@ export class CommandDefinitionBuilder<
 			hooks: this.hooks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
-			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}
@@ -1195,7 +1137,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setCommandFunction')
@@ -1234,7 +1176,7 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1262,50 +1204,8 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
-	}
-
-	/**
-	 *
-	 * @param input
-	 * @returns a mocked command context
-	 */
-	getCommandContextMock<
-		MessagePayloadType = GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
-		MessageParamsType = GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
-		FunctionPayloadType = InferIn<C['PayloadSchema']>,
-		FunctionParamsType = InferIn<C['ParamsSchema']>,
-	>(input: {
-		payload: FunctionPayloadType
-		parameter: FunctionParamsType
-		resources?: Partial<C['Resources']>
-		sandbox?: SinonSandbox
-		message?: {
-			payload: MessagePayloadType
-			parameter: MessageParamsType
-		}
-	}) {
-		return getCommandContextMock<
-			MessagePayloadType,
-			MessageParamsType,
-			FunctionPayloadType,
-			FunctionParamsType,
-			C['Resources'],
-			C['Invokes'],
-			C['StreamInvokes'],
-			C['EmitList'],
-			CommandDefinitionMetadataBase,
-			C['QueueInvokes'],
-			C['AgentInvokes']
-		>({
-			...input,
-			invokes: this.invokes,
-			streamInvokes: this.streamInvokes,
-			emitList: this.emitList,
-			queueInvokes: this.queueInvokes,
-			agentInvokes: this.agentInvokes,
-		})
 	}
 
 	/**

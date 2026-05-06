@@ -1,0 +1,33 @@
+FROM node:22-alpine
+
+RUN apk add --no-cache \
+    bash \
+    curl \
+    wget \
+    git \
+    jq \
+    unzip \
+    zip \
+    tar \
+    ca-certificates \
+    build-base \
+    python3 \
+    py3-pip \
+    diffutils \
+    patch \
+    sed \
+    grep \
+    gawk \
+    findutils \
+    rsync \
+    procps \
+    net-tools \
+    nano \
+    vim
+
+RUN adduser -D -h /home/agent -s /bin/bash agent
+WORKDIR /workspace
+RUN mkdir -p /workspace && chown -R agent:agent /workspace /home/agent
+USER agent
+
+CMD ["tail", "-f", "/dev/null"]

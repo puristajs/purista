@@ -1,10 +1,14 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
+		"baseUrl": ".",
 		"outDir": "./dist",
 		"declaration": true,
 		"sourceMap": false,
 		"declarationMap": true,
+		"paths": {
+			"@purista/core": ["../core/dist/esm/index.d.ts"]
+		},
 		"strictNullChecks": true,
 		"types": ["vitest/globals", "node"]
 	},

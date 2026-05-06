@@ -25,7 +25,7 @@ This client is responsible for the communication to the sidecar service.
 
 > **new DaprClient**(`config`): `DaprClient`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:32
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:32
 
 #### Parameters
 
@@ -282,7 +282,7 @@ Custom trace Id
 
 > `protected` **auth**: [`AuthCredentials`](../../core/type-aliases/AuthCredentials.md)
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:31
 
 #### Inherited from
 
@@ -294,7 +294,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
 
 > **baseUrl**: `URL` \| `undefined`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:28
 
 #### Inherited from
 
@@ -306,7 +306,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:26
 
 #### apiPrefix?
 
@@ -575,7 +575,7 @@ Custom trace Id
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:25
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:25
 
 #### Inherited from
 
@@ -587,7 +587,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:25
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:24
 
 #### Inherited from
 
@@ -599,7 +599,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
 
 > **spanProcessor**: `SpanProcessor` \| `undefined`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:29
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:29
 
 #### Inherited from
 
@@ -611,7 +611,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:29
 
 > **timeout**: `number`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:27
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:27
 
 #### Inherited from
 
@@ -623,7 +623,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:27
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:30
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:30
 
 #### Inherited from
 
@@ -635,7 +635,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:30
 
 > **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:101
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:101
 
 DELETE request
 
@@ -673,7 +673,7 @@ DELETE request
 
 > `protected` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:66
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:66
 
 Helper method
 
@@ -713,7 +713,7 @@ UnhandledError
 
 > **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:73
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:73
 
 GET request
 
@@ -835,7 +835,7 @@ url path of endpoint
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:38
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:38
 
 Returns open telemetry tracer of this service
 
@@ -855,7 +855,7 @@ Tracer
 
 > `protected` **getUrlAndHeader**(`path`, `options?`): `object`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:48
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:48
 
 #### Parameters
 
@@ -1053,7 +1053,7 @@ boolean
 
 > **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:94
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:94
 
 PATCH request
 
@@ -1091,7 +1091,7 @@ PATCH request
 
 > **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:80
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:80
 
 POST request
 
@@ -1129,7 +1129,7 @@ POST request
 
 > **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:87
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:87
 
 PUT request
 
@@ -1195,7 +1195,7 @@ Send a EBMessage as event to the underlaying message infrastructure.
 
 > **setBearerToken**(`token`): `void`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:56
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:56
 
 Set the bearer token for all following requests.
 
@@ -1221,7 +1221,7 @@ the bearer token
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:47
+Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:47
 
 Start a child span for opentelemetry tracking
 

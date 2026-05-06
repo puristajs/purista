@@ -1,5 +1,5 @@
 import { StatusCode, UnhandledError } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 const onboardingWorkflowInputSchema = z.object({
 	name: z.string(),

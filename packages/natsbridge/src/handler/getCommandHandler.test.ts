@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import { getCommandErrorMessageMock, getCommandMessageMock, getLoggerMock } from '@purista/core'
+import { EBMessageType, getCommandErrorMessageMock, getCommandMessageMock, getLoggerMock } from '@purista/core'
 import type { Msg } from 'nats'
 import { JSONCodec } from 'nats'
 import { describe, expect, it, vi } from 'vitest'
@@ -40,7 +40,7 @@ describe('nats getCommandHandler', () => {
 			startActiveSpan: vi
 				.fn()
 				.mockImplementation(async (_name, _options, _context, fn: (span: Span) => Promise<void>) => fn(getSpanMock())),
-			emit: vi.fn(),
+			runInFlight: async <T>(fn: () => Promise<T>) => fn(),
 		} as unknown as INatsBridge
 
 		const handler = getCommandHandler(command.receiver, async () => response, {} as never, {
@@ -83,7 +83,7 @@ describe('nats getCommandHandler', () => {
 			startActiveSpan: vi
 				.fn()
 				.mockImplementation(async (_name, _options, _context, fn: (span: Span) => Promise<void>) => fn(getSpanMock())),
-			emit: vi.fn(),
+			runInFlight: async <T>(fn: () => Promise<T>) => fn(),
 		} as unknown as INatsBridge
 
 		const handler = getCommandHandler(command.receiver, async () => response, {} as never, {
@@ -100,6 +100,57 @@ describe('nats getCommandHandler', () => {
 		await handler(null, msg)
 
 		expect(respond).toHaveBeenCalledOnce()
+		expect(publish).not.toHaveBeenCalled()
+	})
+
+	it('returns command error response when command callback throws', async () => {
+		const sc = JSONCodec()
+		const command = getCommandMessageMock()
+		const respond = vi.fn()
+		const publish = vi.fn()
+		const bridge = {
+			sc,
+			instanceId: 'instance-id',
+			logger: getLoggerMock().mock,
+			connection: {
+				info: { headers: false },
+				publish,
+			},
+			config: {
+				topicPrefix: 'purista',
+				emptyTopicPartString: '__none__',
+				commandResponsePublishTwice: 'never',
+			},
+			startActiveSpan: vi
+				.fn()
+				.mockImplementation(async (_name, _options, _context, fn: (span: Span) => Promise<void>) => fn(getSpanMock())),
+			runInFlight: async <T>(fn: () => Promise<T>) => fn(),
+		} as unknown as INatsBridge
+
+		const handler = getCommandHandler(
+			command.receiver,
+			async () => {
+				throw new Error('boom')
+			},
+			{} as never,
+			{
+				autoacknowledge: true,
+				durable: true,
+				shared: true,
+			},
+		).bind(bridge)
+
+		const msg = {
+			data: sc.encode(command),
+			respond,
+		} as unknown as Msg
+
+		await handler(null, msg)
+
+		expect(respond).toHaveBeenCalledOnce()
+		const response = sc.decode(respond.mock.calls[0]?.[0]) as { messageType: EBMessageType; isHandledError: boolean }
+		expect(response.messageType).toBe(EBMessageType.CommandErrorResponse)
+		expect(response.isHandledError).toBe(false)
 		expect(publish).not.toHaveBeenCalled()
 	})
 })

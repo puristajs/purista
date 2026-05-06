@@ -1,39 +1,30 @@
-import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
+import {
+	getNamedHook,
+	mergeNamedHooks,
+	registerEmitSchema,
+	registerInvokeCapability,
+	registerStreamInvokeCapability,
+} from '../core/helper/builderRegistry.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type {
-	AgentInvocation,
-	AgentProtocolResponse,
-	agentProtocolPayloadSchema,
-} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { StreamAfterGuardHook } from '../core/types/stream/StreamAfterGuardHook.js'
+import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGuardHook.js'
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
-import type { StreamWriter } from '../core/types/stream/StreamWriter.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
-
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
-	payloadSchema?: Payload
-	parameterSchema?: Parameter
-}
-
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
-	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
-}
 
 export class StreamDefinitionBuilder<
 	S extends Service,
@@ -50,7 +41,6 @@ export class StreamDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
-	private agentInvokes: C['AgentInvokes'] = {}
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
 
@@ -71,6 +61,31 @@ export class StreamDefinitionBuilder<
 	private durable = false
 	private autoacknowledge = true
 	private deprecated = false
+	private hooks: {
+		beforeGuard: Record<
+			string,
+			StreamBeforeGuardHook<S, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
+		>
+		afterGuard: Record<
+			string,
+			StreamAfterGuardHook<
+				S,
+				any,
+				any,
+				any,
+				any,
+				any,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	} = {
+		beforeGuard: {},
+		afterGuard: {},
+	}
 
 	private fn?: StreamFunction<
 		S,
@@ -122,18 +137,7 @@ export class StreamDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
-				C['QueueInvokes'] &
-					Record<
-						QueueName,
-						(
-							payload: InferIn<Payload>,
-							parameter: InferIn<Parameter>,
-							options?: Omit<
-								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
-								'queueName' | 'payload' | 'parameter'
-							>,
-						) => Promise<QueueEnqueueResult>
-					>
+				C['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
 			>
 		>
 	}
@@ -153,21 +157,16 @@ export class StreamDefinitionBuilder<
 		payloadSchema?: Payload,
 		parameterSchema?: Parameter,
 	) {
-		const existingInvokes = this.invokes as Record<
-			string,
-			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
-		>
-
-		this.invokes = {
-			...this.invokes,
-			[serviceName]: {
-				...existingInvokes[serviceName],
-				[serviceVersion]: {
-					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
-				},
-			},
-		}
+		this.invokes = registerInvokeCapability(
+			this.invokes as Record<
+				string,
+				Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ outputSchema, payloadSchema, parameterSchema },
+		) as C['Invokes']
 
 		return this as unknown as StreamDefinitionBuilder<
 			S,
@@ -211,34 +210,29 @@ export class StreamDefinitionBuilder<
 		validateChunk = true,
 		validateFinal = true,
 	) {
-		const existingStreams = this.streamInvokes as Record<
-			string,
-			Record<
+		this.streamInvokes = registerStreamInvokeCapability(
+			this.streamInvokes as Record<
 				string,
 				Record<
 					string,
-					{
-						chunkSchema?: Schema
-						finalSchema?: Schema
-						payloadSchema?: Schema
-						parameterSchema?: Schema
-						validateChunk?: boolean
-						validateFinal?: boolean
-					}
+					Record<
+						string,
+						{
+							chunkSchema?: Schema
+							finalSchema?: Schema
+							payloadSchema?: Schema
+							parameterSchema?: Schema
+							validateChunk?: boolean
+							validateFinal?: boolean
+						}
+					>
 				>
-			>
-		>
-
-		this.streamInvokes = {
-			...this.streamInvokes,
-			[serviceName]: {
-				...existingStreams[serviceName],
-				[serviceVersion]: {
-					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
-				},
-			},
-		}
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+		) as C['StreamInvokes']
 
 		return this as unknown as StreamDefinitionBuilder<
 			S,
@@ -278,88 +272,8 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
-	/**
-	 * Define an agent which can be invoked by the current stream.
-	 * The agent must follow the PURISTA agent protocol.
-	 *
-	 * @param agentName The name of the agent service
-	 * @param agentVersion The version of the agent service
-	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
-	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
-	 */
-	canInvokeAgent<
-		Payload extends Schema = typeof agentProtocolPayloadSchema,
-		Parameter extends Schema = Schema,
-		SName extends string = string,
-		Version extends string = string,
-	>(
-		agentName: SName,
-		agentVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
-	) {
-		if (agentName.trim() === '' || agentVersion.trim() === '') {
-			throw new Error('canInvokeAgent requires non-empty agent name and version')
-		}
-
-		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.payloadSchema
-			: undefined
-		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.parameterSchema
-			: invokeConfigOrParameterSchema
-
-		this.agentInvokes = {
-			...this.agentInvokes,
-			[agentName]: {
-				...(this.agentInvokes[agentName] as Record<string, any>),
-				[agentVersion]: {
-					payloadSchema,
-					parameterSchema,
-				},
-			},
-		} as unknown as C['AgentInvokes'] &
-			Record<
-				SName,
-				Record<
-					Version,
-					{
-						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
-					}
-				>
-			>
-
-		return this as unknown as StreamDefinitionBuilder<
-			S,
-			StreamDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['ChunkSchema'],
-				C['FinalSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes'] &
-					Record<
-						SName,
-						Record<
-							Version,
-							{
-								call: (
-									payload: InferIn<Payload>,
-									parameter?: InferIn<Parameter>,
-								) => AgentInvocation<AgentProtocolResponse>
-							}
-						>
-					>
-			>
-		>
-	}
-
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
-		this.emitList = { ...this.emitList, [eventName]: schema }
+		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 		return this as unknown as StreamDefinitionBuilder<
 			S,
 			StreamDefinitionBuilderTypes<
@@ -373,6 +287,131 @@ export class StreamDefinitionBuilder<
 				C['EmitList'] & Record<EventName, InferIn<typeof schema>>,
 				C['QueueInvokes']
 			>
+		>
+	}
+
+	/**
+	 * Set one or more before guard hook(s).
+	 * If there are multiple before guard hooks, they are executed in parallel.
+	 */
+	setBeforeGuardHooks(
+		beforeGuards: Record<
+			string,
+			StreamBeforeGuardHook<
+				S,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>,
+	) {
+		this.hooks.beforeGuard = mergeNamedHooks(
+			this.hooks.beforeGuard,
+			beforeGuards as Record<
+				string,
+				StreamBeforeGuardHook<
+					S,
+					any,
+					any,
+					any,
+					any,
+					C['Resources'],
+					C['Invokes'],
+					C['StreamInvokes'],
+					C['EmitList'],
+					C['QueueInvokes']
+				>
+			>,
+			'setBeforeGuardHooks',
+		)
+		return this
+	}
+
+	/**
+	 * Return a previously registered before-guard hook by name.
+	 */
+	getBeforeGuardHook(name: keyof typeof this.hooks.beforeGuard) {
+		return getNamedHook(this.hooks.beforeGuard, name) as StreamBeforeGuardHook<
+			S,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['StreamInvokes'],
+			C['EmitList'],
+			C['QueueInvokes']
+		>
+	}
+
+	/**
+	 * Set one or more after guard hook(s).
+	 * If there are multiple after guard hooks, they are executed in parallel.
+	 */
+	setAfterGuardHooks(
+		afterGuards: Record<
+			string,
+			StreamAfterGuardHook<
+				S,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				InferIn<C['FinalSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>,
+	) {
+		this.hooks.afterGuard = mergeNamedHooks(
+			this.hooks.afterGuard,
+			afterGuards as Record<
+				string,
+				StreamAfterGuardHook<
+					S,
+					any,
+					any,
+					any,
+					any,
+					any,
+					C['Resources'],
+					C['Invokes'],
+					C['StreamInvokes'],
+					C['EmitList'],
+					C['QueueInvokes']
+				>
+			>,
+			'setAfterGuardHooks',
+		)
+		return this
+	}
+
+	/**
+	 * Return a previously registered after-guard hook by name.
+	 */
+	getAfterGuardHook(name: keyof typeof this.hooks.afterGuard) {
+		return getNamedHook(this.hooks.afterGuard, name) as StreamAfterGuardHook<
+			S,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			InferIn<C['FinalSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['StreamInvokes'],
+			C['EmitList'],
+			C['QueueInvokes']
 		>
 	}
 
@@ -455,6 +494,11 @@ export class StreamDefinitionBuilder<
 				C['QueueInvokes']
 			>
 		>
+	}
+
+	markAsDeprecated() {
+		this.deprecated = true
+		return this
 	}
 
 	enableChunkAggregation(enabled = true) {
@@ -549,8 +593,7 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setStreamFunction')
@@ -577,19 +620,8 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
-	}
-
-	getStreamContextMock(_input: {
-		sandbox?: SinonSandbox
-		resources?: Partial<C['Resources']>
-		writer?: Partial<StreamWriter>
-	}) {
-		return {
-			// currently no dedicated stream context mock helper
-		}
 	}
 
 	async getDefinition() {
@@ -601,6 +633,7 @@ export class StreamDefinitionBuilder<
 			durable: this.durable,
 			autoacknowledge: this.autoacknowledge,
 			shared: true,
+			consumerFailureHandling: undefined,
 		}
 
 		const [inputPayload, parameter, chunkPayload, finalPayload] = await Promise.all([
@@ -683,8 +716,7 @@ export class StreamDefinitionBuilder<
 			C['StreamInvokes'],
 			C['EmitList'],
 			StreamDefinitionMetadataBase,
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		> = {
 			streamName: this.streamName,
 			streamDescription: this.streamDescription,
@@ -694,12 +726,12 @@ export class StreamDefinitionBuilder<
 			finalSchema: this.finalSchema,
 			call: this.getStreamFunction(),
 			finalEventName: this.finalEventName,
+			hooks: this.hooks,
 			chunkValidationEnabled: this.validateChunk,
 			finalValidationEnabled: this.validateFinal,
 			aggregateChunks: this.aggregateChunks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
-			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}

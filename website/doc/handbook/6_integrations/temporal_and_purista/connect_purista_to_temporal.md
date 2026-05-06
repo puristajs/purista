@@ -19,7 +19,7 @@ Ensure, you allready have set up the HTTP server and OpenAPI UI.
 As next step, we will need to add the Temporal configuration to our service `User`, to become available in our command `register`. We need to extend our `userServiceConfig.ts`
 
 ```typescript
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 // define the service config schema and the default service configuration
 

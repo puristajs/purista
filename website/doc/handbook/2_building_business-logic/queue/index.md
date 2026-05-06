@@ -55,7 +55,9 @@ Commands exposed with `{ mode: 'async' }` enqueue work, return `202 Accepted`, a
 
 - [Queue builder](./the-queue-builder.md) – declare schemas, lifecycle overrides, `.canEnqueue`, and CLI scaffolding.
 - [Queue worker builder](./the-queue-worker-builder.md) – configure worker modes (sequential/interval/continuous), heartbeats, and failure handling.
+- [Test a queue worker](./test-a-queue-worker.md) – decide between handler-level mocks and one real worker cycle.
 - [Async HTTP exposure](./queue-http-exposure.md) – return `202 Accepted`, implement status polling commands, and schedule delayed jobs.
+- [Enterprise long-running queues](../../6_integrations/enterprise_interoperability/long-running-queues.md) – event-to-queue handoff, long-running profiles, and result events.
 
 ## Quick facts
 
@@ -90,7 +92,9 @@ Commands exposed with `{ mode: 'async' }` enqueue work, return `202 Accepted`, a
 
 - [Queue builder](./the-queue-builder.md)
 - [Queue worker builder](./the-queue-worker-builder.md)
+- [Test a queue worker](./test-a-queue-worker.md)
 - [Async HTTP exposure](./queue-http-exposure.md)
 - [Queue bridge overview](../../3_eco_system/queue_bridges/index.md)
+- [Enterprise interoperability](../../6_integrations/enterprise_interoperability/)
 - [Expose commands as HTTP endpoints](../command/exposing-a-command-as-http-endpoint.md)
 - [Service builder reference](../service/the-service-builder.md)

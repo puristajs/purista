@@ -1,4 +1,4 @@
-import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import { getNamedHook, mergeNamedHooks } from '../core/helper/builderRegistry.impl.js'
 import type { QueueWorkerAfterGuardHook } from '../core/types/queue/QueueWorkerAfterGuardHook.js'
 import type { QueueWorkerBeforeGuardHook } from '../core/types/queue/QueueWorkerBeforeGuardHook.js'
 import type {
@@ -41,19 +41,27 @@ export class QueueWorkerBuilder {
 	}
 
 	setBeforeGuardHooks(hooks: Record<string, QueueWorkerBeforeGuardHook>) {
-		for (const [name, hook] of Object.entries(hooks)) {
-			assertNonArrowFunction(hook, `setBeforeGuardHooks.${name}`)
-		}
-		this.beforeGuards = { ...this.beforeGuards, ...hooks }
+		this.beforeGuards = mergeNamedHooks(this.beforeGuards, hooks, 'setBeforeGuardHooks')
 		return this
 	}
 
+	/**
+	 * Return a previously registered before-guard hook by name.
+	 */
+	getBeforeGuardHook(name: keyof typeof this.beforeGuards) {
+		return getNamedHook(this.beforeGuards, name)
+	}
+
 	setAfterGuardHooks(hooks: Record<string, QueueWorkerAfterGuardHook>) {
-		for (const [name, hook] of Object.entries(hooks)) {
-			assertNonArrowFunction(hook, `setAfterGuardHooks.${name}`)
-		}
-		this.afterGuards = { ...this.afterGuards, ...hooks }
+		this.afterGuards = mergeNamedHooks(this.afterGuards, hooks, 'setAfterGuardHooks')
 		return this
+	}
+
+	/**
+	 * Return a previously registered after-guard hook by name.
+	 */
+	getAfterGuardHook(name: keyof typeof this.afterGuards) {
+		return getNamedHook(this.afterGuards, name)
 	}
 
 	async getDefinition(): Promise<QueueWorkerDefinition> {

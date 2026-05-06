@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import {
 	getCommandSuccessMessageMock,
 	getEventBridgeMock,
@@ -8,6 +8,7 @@ import {
 	type ServiceInfoType,
 	safeBind,
 } from '../src/index.js'
+import { createCommandContextMock, createSubscriptionContextMock } from '../src/testing/index.js'
 
 describe('service resource test', () => {
 	let sandbox = createSandbox()
@@ -64,7 +65,7 @@ describe('service resource test', () => {
 		const payload = {}
 		const parameter = {}
 
-		const context = commandBuilder.getCommandContextMock({
+		const context = createCommandContextMock(commandBuilder, {
 			payload,
 			parameter,
 			resources: {
@@ -73,7 +74,7 @@ describe('service resource test', () => {
 			sandbox,
 		})
 
-		const result = await command(context.mock, payload, parameter)
+		const result = await command(context.context, payload, parameter)
 
 		expect(result).toBe('mock return')
 	})
@@ -90,13 +91,13 @@ describe('service resource test', () => {
 		const parameter = {}
 		const message = getCommandSuccessMessageMock(payload)
 
-		const context = subscriptionBuilder.getSubscriptionContextMock({
+		const context = createSubscriptionContextMock(subscriptionBuilder, {
 			message,
 			resources: { ...service.resources },
 			sandbox,
 		})
 
-		const result = await subscription(context.mock, payload, parameter)
+		const result = await subscription(context.context, payload, parameter)
 
 		expect(result).toBe('works')
 	})

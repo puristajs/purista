@@ -1,9 +1,10 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { createCommandContextMock } from '../testing/createCommandContextMock.js'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl.js'
 
 describe('CommandDefinitionBuilder', () => {
@@ -199,11 +200,11 @@ describe('CommandDefinitionBuilder', () => {
 
 	it('can build a command with schemas', async () => {
 		const commandFunction = safeBind(builder.getCommandFunction(), service)
-		const context = builder.getCommandContextMock({
+		const { context, stubs } = createCommandContextMock(builder, {
 			payload: JSON.stringify(payload),
 			parameter: JSON.stringify(parameter),
 		})
-		context.stubs.service.OtherService[2].testCommand.callsFake(async (payload, parameter) => {
+		stubs.service.OtherService[2].testCommand.callsFake(async (payload: any, parameter: any) => {
 			return {
 				result: {
 					payload: { ...payload, other: 'added by invoke' },
@@ -212,7 +213,7 @@ describe('CommandDefinitionBuilder', () => {
 			}
 		})
 
-		const result = await commandFunction(context.mock, payload, parameter)
+		const result = await commandFunction(context, payload, parameter)
 
 		expect(result).toStrictEqual({
 			result: {
@@ -221,17 +222,17 @@ describe('CommandDefinitionBuilder', () => {
 			},
 		})
 
-		expect(context.stubs.emit.some.called).toBeTruthy()
+		expect(stubs.emit.some.called).toBeTruthy()
 		expect(beforeOneStub.callCount).toBe(1)
 	})
 
 	it('executes the plain function without hooks and schema validation', async () => {
 		const commandFunction = safeBind(builder.getCommandFunctionPlain(), service)
-		const context = builder.getCommandContextMock({
+		const { context, stubs } = createCommandContextMock(builder, {
 			payload: JSON.stringify(payload),
 			parameter: JSON.stringify(parameter),
 		})
-		context.stubs.service.OtherService[2].testCommand.callsFake(async (payload, parameter) => {
+		stubs.service.OtherService[2].testCommand.callsFake(async (payload: any, parameter: any) => {
 			return {
 				result: {
 					payload: { ...payload, other: 'added by invoke' },
@@ -242,7 +243,7 @@ describe('CommandDefinitionBuilder', () => {
 		})
 
 		const result = await commandFunction(
-			context.mock,
+			context,
 			{ ...payload, def: 'default_value' },
 			{ ...parameter, def: 'default_param' },
 		)
@@ -255,7 +256,7 @@ describe('CommandDefinitionBuilder', () => {
 			},
 		})
 
-		expect(context.stubs.emit.some.called).toBeTruthy()
+		expect(stubs.emit.some.called).toBeTruthy()
 		expect(beforeOneStub.callCount).toBe(0)
 	})
 
@@ -345,13 +346,13 @@ describe('CommandDefinitionBuilder', () => {
 
 		const theFunction = safeBind(fn, service)
 
-		const context = b.getCommandContextMock({
+		const { context } = createCommandContextMock(b, {
 			payload: '',
 			parameter: {},
 			sandbox,
 		})
 
-		const result = await theFunction(context.mock, 'y', 'x')
+		const result = await theFunction(context, 'y', 'x')
 
 		expect(result).toStrictEqual({
 			payload: 'y',

@@ -1,11 +1,12 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { Service } from '../core/Service/Service.impl.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { createSubscriptionContextMock } from '../testing/createSubscriptionContextMock.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl.js'
 
@@ -58,15 +59,15 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({
+		const { context } = createSubscriptionContextMock(builder, {
 			message,
 			sandbox,
 		})
 
-		await expect(wrapped.call(service, context.mock, {}, { wrongParam: 'value' })).rejects.toThrow(HandledError)
+		await expect(wrapped.call(service, context, {}, { wrongParam: 'value' })).rejects.toThrow(HandledError)
 
 		try {
-			await wrapped.call(service, context.mock, {}, { wrongParam: 'value' })
+			await wrapped.call(service, context, {}, { wrongParam: 'value' })
 		} catch (error) {
 			expect(error).toBeInstanceOf(HandledError)
 			expect((error as HandledError).errorCode).toBe(StatusCode.BadRequest)
@@ -93,15 +94,15 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({
+		const { context } = createSubscriptionContextMock(builder, {
 			message,
 			sandbox,
 		})
 
-		await expect(wrapped.call(service, context.mock, { wrongField: 'value' }, {})).rejects.toThrow(HandledError)
+		await expect(wrapped.call(service, context, { wrongField: 'value' }, {})).rejects.toThrow(HandledError)
 
 		try {
-			await wrapped.call(service, context.mock, { wrongField: 'value' }, {})
+			await wrapped.call(service, context, { wrongField: 'value' }, {})
 		} catch (error) {
 			expect(error).toBeInstanceOf(HandledError)
 			expect((error as HandledError).errorCode).toBe(StatusCode.BadRequest)
@@ -125,12 +126,12 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({
+		const { context } = createSubscriptionContextMock(builder, {
 			message,
 			sandbox,
 		})
 
-		const result = await wrapped.call(service, context.mock, { any: 'payload' }, { any: 'parameter' })
+		const result = await wrapped.call(service, context, { any: 'payload' }, { any: 'parameter' })
 
 		expect(result).toStrictEqual(expectedOutput)
 	})
@@ -154,20 +155,50 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({
+		const { context } = createSubscriptionContextMock(builder, {
 			message,
 			sandbox,
 		})
 
-		await expect(wrapped.call(service, context.mock, {}, {})).rejects.toThrow(UnhandledError)
+		await expect(wrapped.call(service, context, {}, {})).rejects.toThrow(UnhandledError)
 
 		try {
-			await wrapped.call(service, context.mock, {}, {})
+			await wrapped.call(service, context, {}, {})
 		} catch (error) {
 			expect(error).toBeInstanceOf(UnhandledError)
 			expect((error as UnhandledError).errorCode).toBe(StatusCode.InternalServerError)
 			expect((error as UnhandledError).message).toContain('output validation failed')
 			expect((error as UnhandledError).data).toHaveProperty('issues')
 		}
+	})
+
+	it('bypasses output schema validation for subscription control results', async () => {
+		const outputSchema = z.object({
+			result: z.string(),
+		})
+
+		const subscriptionFunction = async () => {
+			return { status: 'retry', reason: 'transient issue', delayMs: 120 } as const
+		}
+
+		const wrapped = getSubscriptionFunctionWithValidation(subscriptionFunction, undefined, undefined, outputSchema, {})
+
+		const message = getCommandMessageMock({
+			payload: {
+				payload: {},
+				parameter: {},
+			},
+		})
+
+		const { context } = createSubscriptionContextMock(builder, {
+			message,
+			sandbox,
+		})
+
+		await expect(wrapped.call(service, context, {}, {})).resolves.toEqual({
+			status: 'retry',
+			reason: 'transient issue',
+			delayMs: 120,
+		})
 	})
 })

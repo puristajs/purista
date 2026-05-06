@@ -1,5 +1,11 @@
 import type { Prettify } from '@purista/core'
 import type { ConnectionOptions } from 'nats'
+
+export type NatsConsumerFailureHandlingDefaults = {
+	maxAttempts: number
+	retryDelayMs: number
+	deadLetterSuffix: string
+}
 /**
  * the configuration for the NATS event bridge
  */
@@ -50,5 +56,26 @@ export type NatsBridgeConfig = Prettify<
 		 * @default 10
 		 */
 		maxMessages: number
+
+		/**
+		 * JetStream consumer ack wait in milliseconds for command and subscription consumers.
+		 * This is a broker-level processing timeout used for redelivery when no ack/nak/term is sent.
+		 *
+		 * @default 30000
+		 */
+		jetStreamAckWaitMs: number
+
+		/**
+		 * Controls how durable registrations behave when JetStream durability is not implemented.
+		 *
+		 * @default strict
+		 */
+		durableSubscriptionMode: 'strict' | 'best-effort'
+
+		/**
+		 * Default failure handling for JetStream-backed subscription consumers.
+		 * Per-subscription consumer failure handling hints override these values.
+		 */
+		defaultConsumerFailureHandling: NatsConsumerFailureHandlingDefaults
 	} & ConnectionOptions
 >

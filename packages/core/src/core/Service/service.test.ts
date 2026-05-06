@@ -1,74 +1,13 @@
-import { stub } from 'sinon'
-import { vi } from 'vitest'
-import { z } from 'zod/v4'
-import { getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
+import { describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
+import { getEventBridgeMock, getLoggerMock, getQueueBridgeMock } from '../../mocks/index.js'
 import { getCustomMessageMessageMock } from '../../mocks/messages/getCustomMessage.mock.js'
 import { QueueDefinitionBuilder } from '../../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
 import { QueueWorkerBuilder } from '../../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { SubscriptionDefinitionBuilder } from '../../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
-import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
 import type { ServiceInfoType } from '../types/index.js'
 import { Service } from './Service.impl.js'
-
-const getQueueBridgeMock = () => {
-	const enqueue = stub().resolves({ jobId: 'job', queueName: 'queue' })
-	const leaseNext = stub().resolves(undefined)
-	const extendLease = stub().resolves()
-	const ack = stub().resolves()
-	const nack = stub().resolves()
-	const moveToDeadLetter = stub().resolves()
-	const metrics = stub().resolves({ pending: 0, inflight: 0, deadLetter: 0, retries: 0 })
-	const start = stub().resolves()
-	const destroy = stub().resolves()
-	const isReady = stub().resolves(true)
-	const isHealthy = stub().resolves(true)
-
-	const mock: QueueBridge = {
-		name: 'QueueBridgeMock',
-		instanceId: 'queue-mock',
-		capabilities: {
-			delayedDelivery: true,
-			fifoOrdering: true,
-			partitions: false,
-			priorities: false,
-			deadLetterNative: false,
-			exactlyOnce: false,
-			maxBatchSize: 1,
-			defaultDeadLetterPrefix: '',
-			defaultDeadLetterSuffix: '.dead-letter',
-			deadLetterInspectable: true,
-		},
-		start,
-		destroy,
-		isReady,
-		isHealthy,
-		enqueue,
-		leaseNext,
-		extendLease,
-		ack,
-		nack,
-		moveToDeadLetter,
-		metrics,
-	}
-
-	return {
-		mock,
-		stubs: {
-			enqueue,
-			leaseNext,
-			extendLease,
-			ack,
-			nack,
-			moveToDeadLetter,
-			metrics,
-			start,
-			destroy,
-			isReady,
-			isHealthy,
-		},
-	}
-}
 
 describe('Service', () => {
 	const serviceInfo: ServiceInfoType = {
@@ -93,6 +32,24 @@ describe('Service', () => {
 		await expect(service.start()).resolves.toBeUndefined()
 
 		await expect(service.destroy()).resolves.toBeUndefined()
+	})
+
+	it('does not expose event-emitter methods on service instances', () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock().mock
+
+		const service = new Service({
+			logger,
+			eventBridge,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			config: {},
+		})
+
+		expect('emit' in service).toBe(false)
+		expect('on' in service).toBe(false)
+		expect('removeAllListeners' in service).toBe(false)
 	})
 
 	it('validates invokes in subscription after-guard hooks', async () => {
@@ -711,7 +668,154 @@ describe('Service', () => {
 		expect(health.status).toBe('warn')
 		expect(health.queues).toHaveLength(1)
 		expect(health.queues[0].status).toBe('warn')
-		expect(queueBridge.stubs.metrics.callCount).toBe(1)
+		expect(queueBridge.stubs.metrics.callCount).toBe(2)
+		expect(queueBridge.stubs.metrics.getCall(0)?.args[0]).toBe('orders')
+		expect(queueBridge.stubs.metrics.getCall(1)?.args[0]).toBe('orders.dead-letter')
+	})
+
+	it('exposes in-flight diagnostics grouped by execution kind', () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock()
+
+		eventBridge.stubs.getInFlightExecutionCount.returns(4)
+		eventBridge.stubs.getInFlightExecutionCounts.returns({
+			command: 1,
+			subscription: 2,
+			stream: 0,
+			generic: 1,
+		})
+
+		const service = new Service({
+			logger,
+			eventBridge: eventBridge.mock,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [],
+			config: {},
+		})
+
+		const diagnostics = service.getInFlightDiagnostics()
+		expect(diagnostics.total).toBe(4)
+		expect(diagnostics.byKind).toEqual({
+			command: 1,
+			subscription: 2,
+			stream: 0,
+			generic: 1,
+		})
+	})
+
+	it('marks health as warn and exposes paused queue worker state', async () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock().mock
+		const queueBridge = getQueueBridgeMock()
+
+		queueBridge.stubs.metrics.resolves({
+			pending: 0,
+			inflight: 0,
+			deadLetter: 0,
+			retries: 0,
+		})
+
+		const queueDefinition = await new QueueDefinitionBuilder('orders', 'orders queue').getDefinition()
+
+		const service = new Service({
+			logger,
+			eventBridge,
+			queueBridge: queueBridge.mock,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [],
+			queueDefinitionList: [queueDefinition],
+			queueWorkerDefinitionList: [],
+			config: {},
+		})
+
+		service.pauseQueueWorkers('orders', 'manual_pause')
+		const health = await service.getServiceHealth()
+
+		expect(health.status).toBe('warn')
+		expect(health.pausedQueueWorkers).toEqual([
+			{
+				queueName: 'orders',
+				reason: 'manual_pause',
+				pausedAt: expect.any(Number),
+			},
+		])
+		expect(health.pausedSubscriptionConsumers).toEqual([])
+	})
+
+	it('marks health as warn and exposes paused subscription consumers', async () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock()
+		const queueBridge = getQueueBridgeMock()
+
+		queueBridge.stubs.metrics.resolves({
+			pending: 0,
+			inflight: 0,
+			deadLetter: 0,
+			retries: 0,
+		})
+		eventBridge.stubs.getPausedSubscriptionConsumers.returns({
+			'subscription-key': {
+				pausedAt: Date.now(),
+				reason: 'stop_consumer_requested',
+			},
+		})
+
+		const queueDefinition = await new QueueDefinitionBuilder('orders', 'orders queue').getDefinition()
+		const service = new Service({
+			logger,
+			eventBridge: eventBridge.mock,
+			queueBridge: queueBridge.mock,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [],
+			queueDefinitionList: [queueDefinition],
+			queueWorkerDefinitionList: [],
+			config: {},
+		})
+
+		const health = await service.getServiceHealth()
+		expect(health.status).toBe('warn')
+		expect(health.pausedQueueWorkers).toEqual([])
+		expect(health.pausedSubscriptionConsumers).toEqual([
+			{
+				registrationKey: 'subscription-key',
+				reason: 'stop_consumer_requested',
+				pausedAt: expect.any(Number),
+			},
+		])
+	})
+
+	it('normalizes empty manual queue pause reasons and keeps resume idempotent', () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock().mock
+
+		const service = new Service({
+			logger,
+			eventBridge,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [],
+			config: {},
+		})
+
+		service.pauseQueueWorkers('orders', '   ')
+		expect(service.getQueueWorkerPauseState()).toEqual({
+			orders: {
+				pausedAt: expect.any(Number),
+				reason: 'paused_by_operator',
+			},
+		})
+
+		service.resumeQueueWorkers('missing')
+		service.resumeQueueWorkers('orders')
+		service.resumeQueueWorkers('orders')
+		expect(service.getQueueWorkerPauseState()).toEqual({})
 	})
 
 	it('marks service health as error when queue metrics cannot be fetched', async () => {

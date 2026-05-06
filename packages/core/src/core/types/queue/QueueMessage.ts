@@ -14,6 +14,5 @@ export type QueueMessage<Payload = unknown, Params = unknown> = {
 	traceId?: string
 	parentSpanId?: string
 	correlationId?: string
-	partitionKey?: string
 	idempotencyKey?: string
 }

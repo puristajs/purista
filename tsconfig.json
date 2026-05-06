@@ -26,7 +26,8 @@
 		"noFallthroughCasesInSwitch": true,
 		"useUnknownInCatchVariables": true,
 		"paths": {
-			"@purista/sandbox": ["./packages/sandbox-service/src/index.ts"]
+			"@purista/cli": ["packages/cli/src/api/index.ts"],
+			"@purista/*": ["packages/*/src/index.ts"]
 		}
 	},
 	"exclude": ["node_modules", "dist"]

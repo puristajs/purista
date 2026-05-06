@@ -1,21 +1,21 @@
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
+import {
+	mergeNamedHooks,
+	registerEmitSchema,
+	registerInvokeCapability,
+	registerStreamInvokeCapability,
+} from '../core/helper/builderRegistry.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type {
-	AgentInvocation,
-	AgentProtocolResponse,
-	agentProtocolPayloadSchema,
-} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
+import type { DefinitionEventBridgeConsumerFailureHandling } from '../core/types/DefinitionEventBridgeConsumerFailureHandling.js'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { InstanceId } from '../core/types/InstanceId.js'
 import type { PrincipalId } from '../core/types/PrincipalId.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionAfterGuardHook } from '../core/types/subscription/SubscriptionAfterGuardHook.js'
@@ -27,21 +27,11 @@ import type { SubscriptionTransformInputHook } from '../core/types/subscription/
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
-import { getSubscriptionContextMock } from '../mocks/getSubscriptionContext.mock.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
-
-type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
-	payloadSchema?: Payload
-	parameterSchema?: Parameter
-}
-
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
-	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
-}
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
@@ -106,14 +96,14 @@ export class SubscriptionDefinitionBuilder<
 	private principalId?: PrincipalId
 	private tenantId?: TenantId
 
-	private durable = true
+	private durable = false
 
 	private shared = true
-	private autoacknowledge = false
+	private autoacknowledge = true
+	private consumerFailureHandling?: DefinitionEventBridgeConsumerFailureHandling
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
-	private agentInvokes: C['AgentInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
@@ -158,20 +148,16 @@ export class SubscriptionDefinitionBuilder<
 			throw new Error('canInvoke requires non-empty service name, version and target')
 		}
 
-		const existingInvokes = this.invokes as Record<
-			string,
-			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
-		>
-
-		const f = {
-			[serviceName]: {
-				...existingInvokes[serviceName],
-				[serviceVersion]: {
-					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
-				},
-			},
-		} as unknown as C['Invokes'] &
+		const f = registerInvokeCapability(
+			this.invokes as Record<
+				string,
+				Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ outputSchema, payloadSchema, parameterSchema },
+		) as unknown as C['Invokes'] &
 			Record<
 				SName,
 				Record<
@@ -228,38 +214,29 @@ export class SubscriptionDefinitionBuilder<
 		validateChunk = true,
 		validateFinal = true,
 	) {
-		if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
-			throw new Error('canConsumeStream requires non-empty service name, version and target')
-		}
-
-		const existingStreams = this.streamInvokes as Record<
-			string,
-			Record<
+		this.streamInvokes = registerStreamInvokeCapability(
+			this.streamInvokes as Record<
 				string,
 				Record<
 					string,
-					{
-						chunkSchema?: Schema
-						finalSchema?: Schema
-						payloadSchema?: Schema
-						parameterSchema?: Schema
-						validateChunk?: boolean
-						validateFinal?: boolean
-					}
+					Record<
+						string,
+						{
+							chunkSchema?: Schema
+							finalSchema?: Schema
+							payloadSchema?: Schema
+							parameterSchema?: Schema
+							validateChunk?: boolean
+							validateFinal?: boolean
+						}
+					>
 				>
-			>
-		>
-
-		this.streamInvokes = {
-			...this.streamInvokes,
-			[serviceName]: {
-				...existingStreams[serviceName],
-				[serviceVersion]: {
-					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
-					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
-				},
-			},
-		}
+			>,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			{ chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+		) as C['StreamInvokes']
 
 		return this as unknown as SubscriptionDefinitionBuilder<
 			S,
@@ -301,131 +278,6 @@ export class SubscriptionDefinitionBuilder<
 	}
 
 	/**
-	 * Define an agent which can be invoked by the current subscription.
-	 * The agent must follow the PURISTA agent protocol.
-	 *
-	 * @param agentName The name of the agent service
-	 * @param agentVersion The version of the agent service
-	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
-	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
-	 */
-	canInvokeAgent<
-		Payload extends Schema = typeof agentProtocolPayloadSchema,
-		Parameter extends Schema = Schema,
-		SName extends string = string,
-		Version extends string = string,
-	>(
-		agentName: SName,
-		agentVersion: Version,
-		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
-	) {
-		if (agentName.trim() === '' || agentVersion.trim() === '') {
-			throw new Error('canInvokeAgent requires non-empty agent name and version')
-		}
-
-		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.payloadSchema
-			: undefined
-		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
-			? invokeConfigOrParameterSchema.parameterSchema
-			: invokeConfigOrParameterSchema
-
-		this.agentInvokes = {
-			...this.agentInvokes,
-			[agentName]: {
-				...(this.agentInvokes[agentName] as Record<string, any>),
-				[agentVersion]: {
-					payloadSchema,
-					parameterSchema,
-				},
-			},
-		} as unknown as C['AgentInvokes'] &
-			Record<
-				SName,
-				Record<
-					Version,
-					{
-						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
-					}
-				>
-			>
-
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes'],
-				C['AgentInvokes'] &
-					Record<
-						SName,
-						Record<
-							Version,
-							{
-								call: (
-									payload: InferIn<Payload>,
-									parameter?: InferIn<Parameter>,
-								) => AgentInvocation<AgentProtocolResponse>
-							}
-						>
-					>
-			>
-		>
-	}
-
-	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
-		queueName: QueueName,
-		payloadSchema?: Payload,
-		parameterSchema?: Parameter,
-	) {
-		if (queueName.trim() === '') {
-			throw new Error('canEnqueue requires non-empty queue name')
-		}
-
-		this.queueInvokes = {
-			...this.queueInvokes,
-			[queueName]: { payloadSchema, parameterSchema },
-		}
-
-		return this as unknown as SubscriptionDefinitionBuilder<
-			S,
-			SubscriptionDefinitionBuilderTypes<
-				C['PayloadSchema'],
-				C['ParamsSchema'],
-				C['OutputSchema'],
-				C['TransformInputPayloadSchema'],
-				C['TransformInputParamsSchema'],
-				C['TransformOutputSchema'],
-				C['Resources'],
-				C['Invokes'],
-				C['StreamInvokes'],
-				C['EmitList'],
-				C['QueueInvokes'] &
-					Record<
-						QueueName,
-						(
-							payload: InferIn<Payload>,
-							parameter: InferIn<Parameter>,
-							options?: Omit<
-								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
-								'queueName' | 'payload' | 'parameter'
-							>,
-						) => Promise<QueueEnqueueResult>
-					>
-			>
-		>
-	}
-
-	/**
 	 * Define which custom events the subscription can emit.
 	 *
 	 * @param eventName The custom event name
@@ -433,11 +285,7 @@ export class SubscriptionDefinitionBuilder<
 	 * @returns
 	 */
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
-		if (eventName.trim() === '') {
-			throw new Error('canEmit requires non-empty event name')
-		}
-
-		this.emitList = { ...this.emitList, [eventName]: schema }
+		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 
 		return this as unknown as SubscriptionDefinitionBuilder<
 			S,
@@ -540,6 +388,28 @@ export class SubscriptionDefinitionBuilder<
 	 */
 	adviceDurable(durable: boolean) {
 		this.durable = durable
+		return this
+	}
+
+	/**
+	 * Advise retry and dead-letter handling for this subscription.
+	 *
+	 * The selected event bridge decides which parts it can honor. Production
+	 * adapters should document whether retries are broker-native, bridge-emulated,
+	 * or unsupported.
+	 */
+	adviceConsumerFailureHandling(config: DefinitionEventBridgeConsumerFailureHandling) {
+		if (config.maxAttempts !== undefined && config.maxAttempts < 1) {
+			throw new Error('maxAttempts must be greater than 0')
+		}
+		if (config.retryDelayMs !== undefined && config.retryDelayMs < 0) {
+			throw new Error('retryDelayMs must be greater than or equal to 0')
+		}
+		if (config.mode !== undefined && config.mode !== 'strict' && config.mode !== 'best-effort') {
+			throw new Error('mode must be either "strict" or "best-effort"')
+		}
+
+		this.consumerFailureHandling = { ...config }
 		return this
 	}
 
@@ -871,10 +741,7 @@ export class SubscriptionDefinitionBuilder<
 			>
 		>,
 	) {
-		for (const [name, hook] of Object.entries(beforeGuards)) {
-			assertNonArrowFunction(hook, `setBeforeGuardHooks.${name}`)
-		}
-		this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
+		this.hooks.beforeGuard = mergeNamedHooks(this.hooks.beforeGuard, beforeGuards, 'setBeforeGuardHooks')
 		return this
 	}
 
@@ -899,10 +766,7 @@ export class SubscriptionDefinitionBuilder<
 			>
 		>,
 	) {
-		for (const [name, hook] of Object.entries(afterGuards)) {
-			assertNonArrowFunction(hook, `setAfterGuardHooks.${name}`)
-		}
-		this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
+		this.hooks.afterGuard = mergeNamedHooks(this.hooks.afterGuard, afterGuards, 'setAfterGuardHooks')
 		return this
 	}
 
@@ -932,8 +796,7 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setSubscriptionFunction')
@@ -970,8 +833,7 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -997,8 +859,7 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes'],
-			C['AgentInvokes']
+			C['QueueInvokes']
 		>
 	}
 
@@ -1021,6 +882,7 @@ export class SubscriptionDefinitionBuilder<
 			durable: this.durable,
 			autoacknowledge: this.autoacknowledge,
 			shared: this.shared,
+			consumerFailureHandling: this.consumerFailureHandling,
 		}
 
 		const [inputPayload, parameter, outputPayload] = await Promise.all([
@@ -1044,8 +906,7 @@ export class SubscriptionDefinitionBuilder<
 				C['StreamInvokes'],
 				C['EmitList'],
 				SubscriptionDefinitionMetadataBase,
-				C['QueueInvokes'],
-				C['AgentInvokes']
+				C['QueueInvokes']
 			>
 		> = {
 			subscriptionName: this.subscriptionName,
@@ -1074,40 +935,11 @@ export class SubscriptionDefinitionBuilder<
 			hooks: this.hooks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
-			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}
 
 		return subscription
-	}
-
-	/**
-	 * Returns a mocked command function context, which can be used in unit tests.
-	 *
-	 * @param input Options to create the context mock (message/resources/sandbox)
-	 * @returns a mocked command function context
-	 */
-	getSubscriptionContextMock(input: {
-		message: EBMessage
-		resources?: Partial<C['Resources']>
-		sandbox?: SinonSandbox
-	}) {
-		return getSubscriptionContextMock<
-			C['Resources'],
-			C['Invokes'],
-			C['StreamInvokes'],
-			C['EmitList'],
-			SubscriptionDefinitionMetadataBase,
-			C['QueueInvokes'],
-			C['AgentInvokes']
-		>({
-			...input,
-			invokes: this.invokes,
-			streamInvokes: this.streamInvokes,
-			emitList: this.emitList,
-			agentInvokes: this.agentInvokes,
-		})
 	}
 
 	/**

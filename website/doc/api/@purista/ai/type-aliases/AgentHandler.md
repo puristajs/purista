@@ -2,13 +2,13 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentHandler
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentHandler
 
-# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models\>
+# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output\>
 
-> **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`\> = (`context`, `payload`, `parameter`) => `Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
+> **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`, `CommandTools`, `AgentTools`, `Output`\> = (`context`) => `Promise`\<`Output`\>
 
-Defined in: [ai/src/builder/AgentBuilder.ts:34](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L34)
+Defined in: ai/src/builder/types.ts:192
 
 ## Type Parameters
 
@@ -26,22 +26,26 @@ Defined in: [ai/src/builder/AgentBuilder.ts:34](https://github.com/puristajs/pur
 
 ### Models
 
-`Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\> = `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`string`, `never`\>
+
+### CommandTools
+
+`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`string`, `never`\>
+
+### AgentTools
+
+`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`string`, `never`\>
+
+### Output
+
+`Output` = `unknown`
 
 ## Parameters
 
 ### context
 
-[`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
-
-### payload
-
-`Payload`
-
-### parameter
-
-`Parameter`
+[`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `CommandTools`, `AgentTools`\>
 
 ## Returns
 
-`Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
+`Promise`\<`Output`\>

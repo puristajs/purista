@@ -8,7 +8,7 @@
 
 > **QueueHealthState** = `object`
 
-Defined in: [core/types/ServiceHealthState.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L5)
+Defined in: [core/types/ServiceHealthState.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L6)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [core/types/ServiceHealthState.ts:5](https://github.com/puristajs/pu
 
 > **metrics**: [`QueueMetrics`](QueueMetrics.md)
 
-Defined in: [core/types/ServiceHealthState.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L9)
+Defined in: [core/types/ServiceHealthState.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L10)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/types/ServiceHealthState.ts:9](https://github.com/puristajs/pu
 
 > **queueName**: `string`
 
-Defined in: [core/types/ServiceHealthState.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L6)
+Defined in: [core/types/ServiceHealthState.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L7)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [core/types/ServiceHealthState.ts:6](https://github.com/puristajs/pu
 
 > `optional` **reason**: `string`
 
-Defined in: [core/types/ServiceHealthState.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L8)
+Defined in: [core/types/ServiceHealthState.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L9)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [core/types/ServiceHealthState.ts:8](https://github.com/puristajs/pu
 
 > **status**: [`QueueHealthStatus`](QueueHealthStatus.md)
 
-Defined in: [core/types/ServiceHealthState.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L7)
+Defined in: [core/types/ServiceHealthState.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L8)

@@ -2,13 +2,19 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentManifest
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentManifest
 
-# Type Alias: AgentManifest
+# Type Alias: AgentManifest\<Models\>
 
-> **AgentManifest** = `object`
+> **AgentManifest**\<`Models`\> = `object`
 
-Defined in: [ai/src/types/AgentManifest.ts:41](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L41)
+Defined in: ai/src/builder/types.ts:218
+
+## Type Parameters
+
+### Models
+
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\>
 
 ## Properties
 
@@ -16,152 +22,124 @@ Defined in: [ai/src/types/AgentManifest.ts:41](https://github.com/puristajs/puri
 
 > **agentName**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:42](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L42)
+Defined in: ai/src/builder/types.ts:221
 
 ***
 
-### agentVersion
+### allowedAgents
 
-> **agentVersion**: `string`
+> **allowedAgents**: readonly [`AllowedAgentDefinition`](AllowedAgentDefinition.md)[]
 
-Defined in: [ai/src/types/AgentManifest.ts:43](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L43)
-
-***
-
-### allowedTools
-
-> **allowedTools**: [`AllowedToolDefinition`](AllowedToolDefinition.md)[]
-
-Defined in: [ai/src/types/AgentManifest.ts:52](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L52)
+Defined in: ai/src/builder/types.ts:233
 
 ***
 
-### contextSchema?
+### allowedCommands
 
-> `optional` **contextSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+> **allowedCommands**: readonly [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)[]
 
-Defined in: [ai/src/types/AgentManifest.ts:57](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L57)
-
-***
-
-### description?
-
-> `optional` **description**: `string`
-
-Defined in: [ai/src/types/AgentManifest.ts:44](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L44)
+Defined in: ai/src/builder/types.ts:232
 
 ***
 
-### eventBridge
+### builtInTools
 
-> **eventBridge**: `string`
+> **builtInTools**: readonly `BuiltinToolName`[] \| `false` \| `true`
 
-Defined in: [ai/src/types/AgentManifest.ts:45](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L45)
-
-***
-
-### httpExposure?
-
-> `optional` **httpExposure**: [`AgentHttpExposure`](AgentHttpExposure.md)
-
-Defined in: [ai/src/types/AgentManifest.ts:58](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L58)
+Defined in: ai/src/builder/types.ts:235
 
 ***
 
-### knowledge?
+### description
 
-> `optional` **knowledge**: [`KnowledgeAdapterConfig`](KnowledgeAdapterConfig.md)[]
+> **description**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:49](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L49)
-
-***
-
-### metadata?
-
-> `optional` **metadata**: `Record`\<`string`, `unknown`\>
-
-Defined in: [ai/src/types/AgentManifest.ts:59](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L59)
+Defined in: ai/src/builder/types.ts:222
 
 ***
 
-### modelResource?
+### execution
 
-> `optional` **modelResource**: `object`
+> **execution**: `Required`\<`Pick`\<[`AgentExecutionPolicy`](AgentExecutionPolicy.md), `"maxAttempts"` \| `"maxParallelHandlers"`\>\> & `Omit`\<[`AgentExecutionPolicy`](AgentExecutionPolicy.md), `"maxAttempts"` \| `"maxParallelHandlers"`\>
 
-Defined in: [ai/src/types/AgentManifest.ts:47](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L47)
-
-#### resourceName
-
-> **resourceName**: `string`
-
-#### variant?
-
-> `optional` **variant**: `string`
+Defined in: ai/src/builder/types.ts:226
 
 ***
 
-### models?
+### http?
 
-> `optional` **models**: `string`[]
+> `optional` **http**: [`AgentHttpExposure`](AgentHttpExposure.md)
 
-Defined in: [ai/src/types/AgentManifest.ts:46](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L46)
-
-***
-
-### outputSchema?
-
-> `optional` **outputSchema**: [`Schema`](../../core/type-aliases/Schema.md)
-
-Defined in: [ai/src/types/AgentManifest.ts:56](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L56)
+Defined in: ai/src/builder/types.ts:229
 
 ***
 
-### parameterSchema?
+### models
 
-> `optional` **parameterSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+> **models**: `Models`
 
-Defined in: [ai/src/types/AgentManifest.ts:55](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L55)
-
-***
-
-### payloadSchema?
-
-> `optional` **payloadSchema**: [`Schema`](../../core/type-aliases/Schema.md)
-
-Defined in: [ai/src/types/AgentManifest.ts:54](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L54)
+Defined in: ai/src/builder/types.ts:224
 
 ***
 
-### resources?
+### runtimeRevision
 
-> `optional` **resources**: `Record`\<`string`, \{ `resourceName`: `string`; \}\>
+> **runtimeRevision**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:53](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L53)
-
-***
-
-### retryPolicy?
-
-> `optional` **retryPolicy**: [`RetryPolicy`](RetryPolicy.md)
-
-Defined in: [ai/src/types/AgentManifest.ts:50](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L50)
+Defined in: ai/src/builder/types.ts:223
 
 ***
 
-### session?
+### sandbox?
 
-> `optional` **session**: [`AgentSessionConfig`](AgentSessionConfig.md)
+> `optional` **sandbox**: [`AgentSandboxPolicy`](AgentSandboxPolicy.md)
 
-Defined in: [ai/src/types/AgentManifest.ts:48](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L48)
+Defined in: ai/src/builder/types.ts:228
 
 ***
 
-### telemetry?
+### serviceName
 
-> `optional` **telemetry**: `object`
+> **serviceName**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:51](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L51)
+Defined in: ai/src/builder/types.ts:219
 
-#### attributes?
+***
 
-> `optional` **attributes**: `Record`\<`string`, `string` \| `number` \| `boolean`\>
+### serviceVersion
+
+> **serviceVersion**: `string`
+
+Defined in: ai/src/builder/types.ts:220
+
+***
+
+### session
+
+> **session**: [`AgentSessionPolicy`](AgentSessionPolicy.md)
+
+Defined in: ai/src/builder/types.ts:225
+
+***
+
+### streamingMode
+
+> **streamingMode**: `"stream"` \| `"aggregate"`
+
+Defined in: ai/src/builder/types.ts:230
+
+***
+
+### successEventName?
+
+> `optional` **successEventName**: `string`
+
+Defined in: ai/src/builder/types.ts:231
+
+***
+
+### usedSkills
+
+> **usedSkills**: readonly `object`[]
+
+Defined in: ai/src/builder/types.ts:234

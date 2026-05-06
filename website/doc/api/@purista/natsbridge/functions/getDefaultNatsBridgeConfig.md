@@ -34,6 +34,13 @@ There, we expect, that an event has at least one consumer subscription and the b
 eventOnly
 ```
 
+### defaultConsumerFailureHandling
+
+> **defaultConsumerFailureHandling**: [`NatsConsumerFailureHandlingDefaults`](../type-aliases/NatsConsumerFailureHandlingDefaults.md)
+
+Default failure handling for JetStream-backed subscription consumers.
+Per-subscription consumer failure handling hints override these values.
+
 ### defaultMessageExpiryInterval
 
 > **defaultMessageExpiryInterval**: `number`
@@ -46,6 +53,18 @@ the message expiry interval in seconds
 30 days in seconds
 ```
 
+### durableSubscriptionMode
+
+> **durableSubscriptionMode**: `"strict"` \| `"best-effort"`
+
+Controls how durable registrations behave when JetStream durability is not implemented.
+
+#### Default
+
+```ts
+strict
+```
+
 ### emptyTopicPartString
 
 > **emptyTopicPartString**: `string`
@@ -56,6 +75,19 @@ The string which should be used in topics for parts, which are undefined
 
 ```ts
 __none__
+```
+
+### jetStreamAckWaitMs
+
+> **jetStreamAckWaitMs**: `number`
+
+JetStream consumer ack wait in milliseconds for command and subscription consumers.
+This is a broker-level processing timeout used for redelivery when no ack/nak/term is sent.
+
+#### Default
+
+```ts
+30000
 ```
 
 ### maxMessages

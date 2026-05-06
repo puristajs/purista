@@ -8,9 +8,7 @@
 
 > **PuristaProjectInfo** = `object`
 
-Defined in: [scanPuristaProject.ts:32](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/scanPuristaProject.ts#L32)
-
-Information about a Purista project.
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:13](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L13)
 
 ## Properties
 
@@ -18,9 +16,7 @@ Information about a Purista project.
 
 > **eventEnumFileName**: `string`
 
-Defined in: [scanPuristaProject.ts:38](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/scanPuristaProject.ts#L38)
-
-The file name of the file that contains the event enum
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:16](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L16)
 
 ***
 
@@ -28,9 +24,7 @@ The file name of the file that contains the event enum
 
 > **eventNames**: `object`[]
 
-Defined in: [scanPuristaProject.ts:36](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/scanPuristaProject.ts#L36)
-
-List of event names and their corresponding values
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:15](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L15)
 
 #### name
 
@@ -46,6 +40,4 @@ List of event names and their corresponding values
 
 > **services**: [`PuristaProjectServices`](PuristaProjectServices.md)
 
-Defined in: [scanPuristaProject.ts:34](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/scanPuristaProject.ts#L34)
-
-The information about existing services
+Defined in: [packages/cli/src/api/scanPuristaProject.ts:14](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/scanPuristaProject.ts#L14)

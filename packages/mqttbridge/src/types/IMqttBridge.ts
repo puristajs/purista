@@ -1,8 +1,8 @@
-import type { EBMessageId, EventBridgeBaseClass, PendigInvocation } from '@purista/core'
+import type { EventBridgeBaseClass, PendingInvocationRegistry } from '@purista/core'
 import type { MqttClient } from 'mqtt'
 import type { MqttBridgeConfig } from './MqttBridgeConfig.js'
 
 export type IMqttBridge = {
 	client: MqttClient | undefined
-	pendingInvocations: Map<EBMessageId, PendigInvocation>
+	pendingInvocations: PendingInvocationRegistry<unknown>
 } & EventBridgeBaseClass<MqttBridgeConfig>

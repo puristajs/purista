@@ -29,6 +29,43 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 			[definition.subscriptionName]: definition,
 		}
 	}, {})
+	const streams = (definitionToAdd.streams ?? []).reduce((current, definition) => {
+		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
+			...current,
+			[definition.streamName]: definition,
+		}
+	}, {})
+	const queues = (definitionToAdd.queues ?? []).reduce((current, definition) => {
+		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
+			...current,
+			[definition.queueName]: definition,
+		}
+	}, {})
+	const queueWorkers = (definitionToAdd.queueWorkers ?? []).reduce((current, definition) => {
+		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
+			...current,
+			[definition.name]: definition,
+		}
+	}, {})
+	const commandSchedules = definitionToAdd.commands.flatMap(definition => definition.schedules ?? [])
+	const queueSchedules = (definitionToAdd.queues ?? []).flatMap(definition => definition.schedules ?? [])
+	const schedules = [...(definitionToAdd.schedules ?? []), ...commandSchedules, ...queueSchedules].reduce(
+		(current, definition) => {
+			return {
+				// biome-ignore lint/performance/noAccumulatingSpread: small map construction
+				...current,
+				[definition.name]: {
+					...definition,
+					targetServiceName: definition.targetServiceName ?? definitionToAdd.serviceName,
+					targetServiceVersion: definition.targetServiceVersion ?? definitionToAdd.serviceVersion,
+				},
+			}
+		},
+		{},
+	)
 
 	const ret = { ...existing }
 	const currentServiceName = ret[definitionToAdd.serviceName] ?? {}
@@ -41,6 +78,14 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 			deprecated: currentVersion?.deprecated ?? definitionToAdd.deprecated,
 			commands: { ...commands, ...currentVersion?.commands },
 			subscriptions: { ...subscriptions, ...currentVersion?.subscriptions },
+			streams: { ...streams, ...currentVersion?.streams },
+			queues: { ...queues, ...currentVersion?.queues },
+			queueWorkers: { ...queueWorkers, ...currentVersion?.queueWorkers },
+			schedules: { ...schedules, ...currentVersion?.schedules },
+			eventToQueueBindings: [
+				...(definitionToAdd.eventToQueueBindings ?? []),
+				...(currentVersion?.eventToQueueBindings ?? []),
+			],
 		},
 	}
 

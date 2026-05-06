@@ -15,7 +15,7 @@ export const getCommandTypeFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.commandName}`)
 	const typePrefix = pascalCase(schemaPrefix)
 
-	writer.writeLine(`import type { z } from 'zod/v4'`)
+	writer.writeLine(`import type { z } from 'zod'`)
 	writer.blankLine()
 	writer
 		.write('import type ')

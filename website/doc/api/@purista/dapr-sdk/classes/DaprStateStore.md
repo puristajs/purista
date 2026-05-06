@@ -66,13 +66,9 @@ Enable generally set method
 
 [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 ###### logLevel?
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 ###### stateStoreName?
 
@@ -94,7 +90,7 @@ The name of the state store
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
@@ -136,13 +132,9 @@ Enable generally set method
 
 > `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
 
-A logger instance
-
 #### logLevel?
 
 > `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
-
-A log level for new logger if logger is not set
 
 #### stateStoreName?
 
@@ -160,7 +152,7 @@ The name of the state store
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -172,7 +164,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -184,7 +176,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:27
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:27
 
 #### Returns
 
@@ -200,7 +192,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:27
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -256,7 +248,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://gith
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -300,7 +292,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://gith
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

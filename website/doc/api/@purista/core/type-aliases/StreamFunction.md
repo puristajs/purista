@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamFunction
 
-# Type Alias: StreamFunction()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, ChunkType, FinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: StreamFunction()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, ChunkType, FinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **StreamFunction**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `ChunkType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `payload`, `parameter`, `writer`) => `Promise`\<`void`\>
+> **StreamFunction**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `ChunkType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`, `writer`) => `Promise`\<`void`\>
 
-Defined in: [core/types/stream/StreamFunction.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunction.ts#L11)
+Defined in: [core/types/stream/StreamFunction.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunction.ts#L10)
 
 ## Type Parameters
 
@@ -60,10 +60,6 @@ Defined in: [core/types/stream/StreamFunction.ts:11](https://github.com/puristaj
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Parameters
 
 ### this
@@ -72,7 +68,7 @@ Defined in: [core/types/stream/StreamFunction.ts:11](https://github.com/puristaj
 
 ### context
 
-[`StreamFunctionContext`](StreamFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
+[`StreamFunctionContext`](StreamFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
 ### payload
 

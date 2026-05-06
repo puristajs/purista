@@ -4,9 +4,9 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionFunction
 
-# Type Alias: SubscriptionFunction()\<ServiceClassType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: SubscriptionFunction()\<ServiceClassType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **SubscriptionFunction**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType`\>
+> **SubscriptionFunction**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType` \| [`SubscriptionHandlerResult`](SubscriptionHandlerResult.md)\>
 
 Defined in: [core/types/subscription/SubscriptionFunction.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L14)
 
@@ -50,10 +50,6 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Parameters
 
 ### this
@@ -62,7 +58,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 ### context
 
-[`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\>
+[`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
 
 ### payload
 
@@ -74,4 +70,4 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 ## Returns
 
-`Promise`\<`FunctionOutputType`\>
+`Promise`\<`FunctionOutputType` \| [`SubscriptionHandlerResult`](SubscriptionHandlerResult.md)\>

@@ -168,8 +168,8 @@ describe('openapi helpers', () => {
 					path: 'stream',
 					stream: {
 						mode: 'stream',
-						protocol: 'ai-sdk-ui-message',
-						documentationUrl: 'https://example.com/ui-message',
+						protocol: 'custom-event-stream',
+						documentationUrl: 'https://example.com/stream-events',
 					},
 					openApi: {
 						isSecure: false,
@@ -189,12 +189,73 @@ describe('openapi helpers', () => {
 
 		expect(endpoint?.requestBody).toBeDefined()
 		expect(okResponse.content?.['text/event-stream']?.schema).toMatchObject({
-			type: 'object',
-			required: ['event', 'data'],
+			oneOf: expect.any(Array),
 		})
-		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol']).toBe('ai-sdk-ui-message')
+		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol']).toBe('custom-event-stream')
 		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol-docs']).toBe(
-			'https://example.com/ui-message',
+			'https://example.com/stream-events',
 		)
+	})
+
+	it('adds PURISTA operation extensions and 202 schema for async endpoints', () => {
+		const builder = new OpenApiBuilder({
+			openapi: '3.1.0',
+			info: { title: 'test', version: '1.0.0' },
+		})
+
+		const metadata = {
+			expose: {
+				contentTypeRequest: 'application/json',
+				contentEncodingRequest: 'utf-8',
+				contentTypeResponse: 'application/json',
+				contentEncodingResponse: 'utf-8',
+				inputPayload: {
+					type: 'object',
+					properties: { prompt: { type: 'string' } },
+				},
+				outputPayload: {
+					type: 'object',
+					properties: { priority: { type: 'string' } },
+				},
+				http: {
+					method: 'POST',
+					path: 'agents/triage',
+					mode: 'async',
+					openApi: {
+						isSecure: true,
+						description: 'async agent endpoint',
+						summary: 'Async agent',
+						additionalStatusCodes: [StatusCode.Accepted],
+					},
+				},
+			},
+		} as unknown as HttpExposedServiceMeta
+
+		addPathToOpenApi(
+			builder,
+			metadata,
+			'/api/v1/agents/triage',
+			{},
+			{
+				serviceName: 'support',
+				serviceVersion: '1',
+				serviceTarget: 'triage',
+			},
+		)
+
+		const endpoint = builder.getSpec().paths?.['/api/v1/agents/triage']?.post
+		const acceptedResponse = endpoint?.responses?.['202'] as {
+			content?: Record<string, { schema?: { properties?: Record<string, unknown> } }>
+		}
+
+		expect(endpoint?.['x-purista-service-name']).toBe('support')
+		expect(endpoint?.['x-purista-service-version']).toBe('1')
+		expect(endpoint?.['x-purista-command-name']).toBe('triage')
+		expect(endpoint?.['x-purista-runtime-mode']).toBe('async-job')
+		expect(endpoint?.['x-purista-endpoint-security']).toBe('protected-application-middleware')
+		expect(endpoint?.responses?.['202']).toBeDefined()
+		expect(endpoint?.responses?.['202']).not.toHaveProperty('content.application/problem+json')
+		expect(acceptedResponse.content?.['application/json']?.schema?.properties?.jobId).toBeDefined()
+		expect(acceptedResponse.content?.['application/json']?.schema?.properties?.runId).toBeDefined()
 	})
 })

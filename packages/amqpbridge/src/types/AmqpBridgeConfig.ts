@@ -15,6 +15,12 @@ export type AmqpBridgeConfig = {
 	namePrefix?: string
 	/** the AMQP exchange options */
 	exchangeOptions?: Options.AssertExchange | undefined
+	/** max unacked messages per consumer channel */
+	prefetch?: number
+	/** optional dead letter exchange name used for durable command/subscription queues */
+	deadLetterExchangeName?: string
+	/** optional dead letter routing key used for durable command/subscription queues */
+	deadLetterRoutingKey?: string
 	/** the AMQP broker url @default amqp://localhost */
 	url?: string | Options.Connect
 	/** socket options */

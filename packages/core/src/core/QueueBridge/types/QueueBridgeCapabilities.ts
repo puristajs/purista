@@ -9,4 +9,12 @@ export type QueueBridgeCapabilities = {
 	defaultDeadLetterPrefix?: string
 	defaultDeadLetterSuffix?: string
 	deadLetterInspectable: boolean
+	deadLetterInspectSupported: boolean
+	deadLetterReplaySupported: boolean
+	deadLetterPurgeSupported: boolean
+	leaseInspectionSupported: boolean
+	idempotencyEnforcement: boolean
+	partitionOrdering: boolean
+	providerManagedDelayedDelivery: boolean
+	strictStartupValidation: boolean
 }

@@ -1,11 +1,12 @@
 import { fail } from 'node:assert'
 import { createSandbox } from 'sinon'
-import { vi } from 'vitest'
-import { z } from 'zod/v4'
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 
 import type { ServiceInfoType } from '../src/index.js'
 import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode, safeBind } from '../src/index.js'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../src/mocks/index.js'
+import { createCommandContextMock, createSubscriptionContextMock } from '../src/testing/index.js'
 
 describe('integration test', () => {
 	const sandbox = createSandbox()
@@ -209,7 +210,7 @@ describe('integration test', () => {
 
 			const invokePayload = 'input for command two'
 
-			const contextMock = commandOneDefinitionBuilder.getCommandContextMock({
+			const contextMock = createCommandContextMock(commandOneDefinitionBuilder, {
 				payload: messagePayload,
 				parameter: messageParameter,
 				resources: {
@@ -222,7 +223,7 @@ describe('integration test', () => {
 				output: invokePayload.toUpperCase(),
 			})
 
-			const result = await commandOne(contextMock.mock, payload, parameter)
+			const result = await commandOne(contextMock.context, payload, parameter)
 
 			expect(result.output.commandOne).toBe('RECEIVED:MY INPUT')
 			expect(result.output.commandTwo).toStrictEqual(invokePayload.toUpperCase())
@@ -398,14 +399,14 @@ describe('integration test', () => {
 				},
 			})
 
-			const contextMock = subscriptionOneBuilder.getSubscriptionContextMock({
+			const contextMock = createSubscriptionContextMock(subscriptionOneBuilder, {
 				message,
 				sandbox,
 			})
 
-			const result = await subscriptionOne(contextMock.mock, payload, parameter)
+			const result = await subscriptionOne(contextMock.context, payload, parameter)
 
-			expect(result.result).toBe('SUBSCRIPTION:MY INPUT')
+			expect(result).toMatchObject({ result: 'SUBSCRIPTION:MY INPUT' })
 			expect(contextMock.stubs.logger.debug.calledWith('subscription one')).toBeTruthy()
 		})
 

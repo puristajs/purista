@@ -13,7 +13,6 @@ Here is a list of tools for PURISTA.
 | name           | category                                                               | package   | documentation |
 |---             |---                                                                     |---        |---        |
 | Kubernetes SDK | deployment | [@purista/k8s-sdk](../../api/@purista/k8s-sdk/README.md) | [Handbook](../5_deploy_and_scale/microservice_style/kubernetes.md) |
-| Sandbox | secure execution runtime | [@purista/sandbox](https://github.com/puristajs/purista/blob/master/website/doc/api/@purista/sandbox/README.md) | [Handbook](./sandbox.md) |
 
 ## Community tools
 

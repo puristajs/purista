@@ -79,4 +79,5 @@ await context.queue.scheduleAt.pingJob(Date.now() + 5 * 60_000, payload, paramet
 
 - [Queue worker builder](./the-queue-worker-builder.md)
 - [Async HTTP exposure](./queue-http-exposure.md)
+- [Enterprise long-running queues](../../6_integrations/enterprise_interoperability/long-running-queues.md)
 - [Queue bridge overview](../../3_eco_system/queue_bridges/index.md)

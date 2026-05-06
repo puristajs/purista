@@ -1,4 +1,4 @@
-import type { z } from 'zod/v4'
+import type { z } from 'zod'
 
 import type { configFullSchema, configSchema } from '../schema/configSchema.js'
 

@@ -1,5 +1,4 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
@@ -23,10 +22,9 @@ export type SubscriptionAfterGuardHook<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = (
 	this: ServiceClassType,
-	context: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes>,
+	context: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes>,
 	result: Readonly<FunctionResultType>,
 	payload: Readonly<FunctionPayloadOutputType>,
 	parameter: Readonly<FunctionParameterType>,

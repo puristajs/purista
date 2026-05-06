@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { emailV1Service } from '../../emailV1Service.js'
@@ -28,7 +28,7 @@ describe('service Email version 1 - command sendVerificationEmail', () => {
 
 		const parameter: EmailV1SendVerificationEmailInputParameter = {}
 
-		const context = sendVerificationEmailCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+		const context = createCommandContextMock(sendVerificationEmailCommandBuilder, { payload, parameter, sandbox })
 
 		context.stubs.setState.resolves()
 

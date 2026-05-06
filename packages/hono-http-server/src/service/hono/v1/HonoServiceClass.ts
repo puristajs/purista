@@ -6,7 +6,6 @@ import {
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
 	ATTR_HTTP_ROUTE,
 } from '@opentelemetry/semantic-conventions'
-
 import type {
 	Command,
 	CommandDefinitionMetadataBase,
@@ -55,8 +54,13 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 		jobId: candidate.jobId,
 		queueName: candidate.queueName,
 		scheduledAt: candidate.scheduledAt,
+		...(typeof (candidate as { runId?: unknown }).runId === 'string'
+			? { runId: (candidate as { runId: string }).runId }
+			: {}),
 	}
 }
+
+type AnyService = Service<any>
 
 import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
@@ -84,9 +88,10 @@ import type { HonoServiceV1Config } from './honoServiceConfig.js'
  *
  * const honoService = await honoV1Service.getInstance(eventBridge, {
  *   serviceConfig: {
- *     services: [pingService]
+ *     enableDynamicRoutes: false,
  *   }
  * })
+ * honoService.registerService(pingService)
  * await honoService.start()
  *
  * const _serverInstance = serve({
@@ -111,6 +116,7 @@ export class HonoServiceClass<
 	public openApi: OpenApiBuilder
 
 	private knownServices: Set<string> = new Set()
+	private knownEndpoints: Map<string, string> = new Map()
 
 	private isAvailable = false
 
@@ -202,8 +208,7 @@ export class HonoServiceClass<
 			this.openApi.addPath(this.config.healthPath, {
 				get: {
 					summary: 'server health check',
-					description:
-						'Returns a 200 response as long as given health function does not throw and the server is connected to the event bridge',
+					description: 'Returns a 200 response as long as the configured health function does not throw',
 					responses: {
 						'200': {
 							'application/json': {},
@@ -217,17 +222,10 @@ export class HonoServiceClass<
 				return await this.startActiveSpan('healthHandler', { kind: SpanKind.SERVER }, con, async span => {
 					span.setAttribute(ATTR_HTTP_ROUTE, this.config.healthPath)
 					span.setAttribute(ATTR_HTTP_REQUEST_METHOD, 'GET')
-					const isEventBridgeReady = await this.eventBridge.isHealthy()
 
 					const traceId = c.req.header(this.config.traceHeaderField)
 					if (traceId) {
 						c.header(this.config.traceHeaderField, traceId)
-					}
-
-					if (!isEventBridgeReady) {
-						const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
-						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-						return this.sendProblemResponse(c, err, StatusCode.InternalServerError)
 					}
 
 					if (!this.isAvailable) {
@@ -331,7 +329,9 @@ export class HonoServiceClass<
 			})
 		})
 
-		this.registerService(...this.config.services)
+		if (this.config.autoRegisterServicesFromConfig) {
+			this.registerService(...this.config.services)
+		}
 
 		await this.setServiceAvailable()
 
@@ -344,7 +344,14 @@ export class HonoServiceClass<
 	 * Adds the endpoints of the service commands to the Hono router
 	 * @param services
 	 */
-	registerService(...services: Service[]) {
+	registerService(...services: AnyService[]) {
+		if (this.isStarted) {
+			throw new UnhandledError(
+				StatusCode.BadRequest,
+				'registerService must be called before start (or use addEndpoint for explicit runtime registration)',
+			)
+		}
+
 		for (const service of services) {
 			for (const command of service.commandDefinitionList) {
 				this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
@@ -373,6 +380,7 @@ export class HonoServiceClass<
 		if (this.knownServices.has(`${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`)) {
 			return
 		}
+		const serviceRegistrationKey = `${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`
 
 		const httpMetadata = metadata as HttpExposedServiceMeta
 		const expose = httpMetadata.expose
@@ -380,6 +388,7 @@ export class HonoServiceClass<
 
 		const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 		const path = posix.join(this.config.apiMountPath, `v${service.serviceVersion}`, expose.http.path)
+		const endpointKey = `${method}:${path}`
 
 		const requestContentType = expose.contentTypeRequest ?? 'application/json'
 		const requestEncodingType = expose.contentEncodingRequest ?? 'utf-8'
@@ -397,9 +406,17 @@ export class HonoServiceClass<
 			responseContentType,
 		})
 
-		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
+		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config, service)
 
 		const isStreamEndpoint = isDeclaredStreamDefinition || responseContentType.toLowerCase() === 'text/event-stream'
+
+		const endpointOwner = this.knownEndpoints.get(endpointKey)
+		if (endpointOwner && endpointOwner !== serviceRegistrationKey) {
+			throw new UnhandledError(
+				StatusCode.Conflict,
+				`HTTP endpoint already registered for ${endpointKey}. Configure a unique http path/method combination.`,
+			)
+		}
 
 		const handler: Handler = async c => {
 			const parentContext = propagation.extract(context.active(), c.req.raw.headers)
@@ -462,6 +479,7 @@ export class HonoServiceClass<
 								contentEncoding: expose.contentEncodingRequest ?? 'utf-8',
 							},
 							`${method}:${path}`,
+							this.config.streamRequestTimeoutMs,
 						)
 
 						if (streamMode === 'aggregate') {
@@ -485,8 +503,8 @@ export class HonoServiceClass<
 						const stream = new ReadableStream<Uint8Array>({
 							start: controller => {
 								const run = async (activeHandle: StreamHandle) => {
-									let protocolPassthrough = false
 									try {
+										let protocolPassthrough = false
 										for await (const frame of activeHandle) {
 											const payload = frame.payload as StreamTransportFramePayload
 											if (isTransportControlFrame(payload.frameType)) {
@@ -559,8 +577,11 @@ export class HonoServiceClass<
 
 					if (httpMode === 'async') {
 						const job = assertAsyncHttpResult(result)
+						const jobRunId = (job as unknown as { runId?: unknown }).runId
 						responsePayload = {
 							jobId: job.jobId,
+							...(typeof jobRunId === 'string' ? { runId: jobRunId } : {}),
+							status: 'queued',
 							queue: job.queueName,
 							queueName: job.queueName,
 							scheduledAt: job.scheduledAt,
@@ -614,7 +635,8 @@ export class HonoServiceClass<
 		} else {
 			this.app[method](path, handler)
 		}
-		this.knownServices.add(`${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`)
+		this.knownServices.add(serviceRegistrationKey)
+		this.knownEndpoints.set(endpointKey, serviceRegistrationKey)
 	}
 
 	async invoke<T>(
@@ -635,24 +657,28 @@ export class HonoServiceClass<
 	async openStream(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
 		endpoint: string,
+		timeoutMs = this.config.streamRequestTimeoutMs,
 	) {
 		if (!this.eventBridge.openStream) {
 			throw new UnhandledError(StatusCode.NotImplemented, 'Event bridge does not support streams')
 		}
-		return this.eventBridge.openStream({
-			sender: {
-				serviceName: this.serviceInfo.serviceName,
-				serviceVersion: this.serviceInfo.serviceVersion,
-				serviceTarget: `$$endpoint:${endpoint}`,
-				instanceId: this.eventBridge.instanceId,
+		return this.eventBridge.openStream(
+			{
+				sender: {
+					serviceName: this.serviceInfo.serviceName,
+					serviceVersion: this.serviceInfo.serviceVersion,
+					serviceTarget: `$$endpoint:${endpoint}`,
+					instanceId: this.eventBridge.instanceId,
+				},
+				...input,
+				payload: {
+					frameType: 'open',
+					payload: input.payload.payload,
+					parameter: input.payload.parameter,
+				},
 			},
-			...input,
-			payload: {
-				frameType: 'open',
-				payload: input.payload.payload,
-				parameter: input.payload.parameter,
-			},
-		})
+			timeoutMs,
+		)
 	}
 
 	/**

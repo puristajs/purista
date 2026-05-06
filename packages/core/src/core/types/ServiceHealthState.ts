@@ -1,4 +1,5 @@
 import type { QueueMetrics } from './queue/QueueMetrics.js'
+import type { PausedSubscriptionConsumerHealthState, QueueWorkerPauseHealthState } from './ServiceOperatorState.js'
 
 export type QueueHealthStatus = 'ok' | 'warn' | 'error'
 
@@ -16,4 +17,6 @@ export type ServiceHealthState = {
 	eventBridgeHealthy: boolean
 	queueBridgeHealthy: boolean
 	queues: QueueHealthState[]
+	pausedQueueWorkers: QueueWorkerPauseHealthState[]
+	pausedSubscriptionConsumers: PausedSubscriptionConsumerHealthState[]
 }

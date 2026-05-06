@@ -1,5 +1,4 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
@@ -18,7 +17,6 @@ export type StreamFunctionContextEnhancements<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = {
 	message: Readonly<StreamOpenRequest<MessagePayloadType, MessageParamsType>>
 	emit: EmitCustomMessageFunction<EmitList>
@@ -26,10 +24,6 @@ export type StreamFunctionContextEnhancements<
 	stream: StreamInvokes
 	queue: QueueContext<QueueInvokes>
 	resources: Resources
-	/**
-	 * Invokes an agent and returns the result.
-	 */
-	invokeAgent: AgentInvokes
 }
 
 export type StreamFunctionContext<
@@ -40,7 +34,6 @@ export type StreamFunctionContext<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = Prettify<
 	ContextBase &
 		StreamFunctionContextEnhancements<
@@ -50,7 +43,6 @@ export type StreamFunctionContext<
 			Invokes,
 			StreamInvokes,
 			EmitList,
-			QueueInvokes,
-			AgentInvokes
+			QueueInvokes
 		>
 >

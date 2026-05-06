@@ -6,9 +6,9 @@
 
 # Function: getErrorResponseSchema()
 
-> **getErrorResponseSchema**(`code`, `message`, `schema?`): `SchemaObject`
+> **getErrorResponseSchema**(`code`, `message`, `schema?`, `problemTypeConfig?`): `SchemaObject`
 
-Defined in: [hono-http-server/src/helper/getErrorResponseSchema.ts:55](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getErrorResponseSchema.ts#L55)
+Defined in: [hono-http-server/src/helper/getErrorResponseSchema.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getErrorResponseSchema.ts#L6)
 
 ## Parameters
 
@@ -23,6 +23,10 @@ Defined in: [hono-http-server/src/helper/getErrorResponseSchema.ts:55](https://g
 ### schema?
 
 `SchemaObject`
+
+### problemTypeConfig?
+
+[`ProblemTypeConfig`](../type-aliases/ProblemTypeConfig.md)
 
 ## Returns
 

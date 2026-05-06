@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest'
 import {
 	collectAggregateStreamResult,
 	encodeProtocolSseEvent,
-	isAgentEnvelopeLike,
 	isProtocolSseEvent,
 	isStreamErrorPayload,
 	isTransportControlFrame,
@@ -27,11 +26,6 @@ describe('streamTransport helpers', () => {
 		expect(isTransportControlFrame('open')).toBe(true)
 		expect(isTransportControlFrame('complete')).toBe(true)
 		expect(isTransportControlFrame('chunk')).toBe(false)
-	})
-
-	it('detects envelope-like chunks', () => {
-		expect(isAgentEnvelopeLike({ version: 'purista.ai/1.0', frame: { kind: 'message' } })).toBe(true)
-		expect(isAgentEnvelopeLike({ frame: { kind: 'message' } })).toBe(false)
 	})
 
 	it('detects stream error payloads', () => {
@@ -66,9 +60,9 @@ describe('streamTransport helpers', () => {
 	it('returns declared final payload for aggregate success', async () => {
 		const result = await collectAggregateStreamResult({
 			async *[Symbol.asyncIterator]() {
-				yield { payload: { frameType: 'chunk', chunk: { version: 'purista.ai/1.0', frame: { kind: 'message' } } } }
+				yield { payload: { frameType: 'chunk', chunk: { partial: 'o' } } }
 				yield {
-					payload: { frameType: 'complete', final: { message: 'ok', envelopes: [{ frame: { kind: 'message' } }] } },
+					payload: { frameType: 'complete', final: { message: 'ok', chunks: [{ partial: 'o' }] } },
 				}
 			},
 		} as any)
@@ -76,7 +70,7 @@ describe('streamTransport helpers', () => {
 		expect(result).toEqual({
 			status: 'success',
 			statusCode: 200,
-			payload: { message: 'ok', envelopes: [{ frame: { kind: 'message' } }] },
+			payload: { message: 'ok', chunks: [{ partial: 'o' }] },
 		})
 	})
 
@@ -94,19 +88,15 @@ describe('streamTransport helpers', () => {
 		})
 	})
 
-	it('maps final error envelope to 500 while preserving final payload', async () => {
+	it('treats final payload content as successful aggregate output', async () => {
 		const result = await collectAggregateStreamResult({
 			async *[Symbol.asyncIterator]() {
 				yield {
 					payload: {
 						frameType: 'complete',
 						final: {
-							envelopes: [
-								{
-									version: 'purista.ai/1.0',
-									frame: { kind: 'error', message: 'failed' },
-								},
-							],
+							status: 'domain-error',
+							message: 'preserved as output',
 						},
 					},
 				}
@@ -114,15 +104,11 @@ describe('streamTransport helpers', () => {
 		} as any)
 
 		expect(result).toEqual({
-			status: 'error',
-			statusCode: 500,
+			status: 'success',
+			statusCode: 200,
 			payload: {
-				envelopes: [
-					{
-						version: 'purista.ai/1.0',
-						frame: { kind: 'error', message: 'failed' },
-					},
-				],
+				status: 'domain-error',
+				message: 'preserved as output',
 			},
 		})
 	})

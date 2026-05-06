@@ -17,7 +17,7 @@ export const getSubscriptionTypeFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.subscriptionName}`)
 	const typePrefix = pascalCase(schemaPrefix)
 
-	writer.writeLine(`import type { z } from 'zod/v4'`)
+	writer.writeLine(`import type { z } from 'zod'`)
 	writer.blankLine()
 	writer
 		.write('import type ')

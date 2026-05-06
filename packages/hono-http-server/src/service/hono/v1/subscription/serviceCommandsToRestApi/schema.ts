@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 // define the input payload
 export const honoV1ServiceCommandsToRestApiInputPayloadSchema = z.record(z.string(), z.unknown())

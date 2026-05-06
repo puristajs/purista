@@ -16,7 +16,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts
 
 > `optional` **apiPrefix**: `string`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:54](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L54)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:49](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L49)
 
 the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 needs to `enableRestApiExpose` set to `true`
@@ -33,7 +33,7 @@ needs to `enableRestApiExpose` set to `true`
 
 > `optional` **commandPayloadAsCloudEvent**: `boolean`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:79](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L79)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:74](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L74)
 
 command invocations are wrapped in CloudEvent
 
@@ -51,7 +51,7 @@ false
 
 > `optional` **enableHttpCompression**: `boolean`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:84](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L84)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:79](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L79)
 
 enable HTTP compression in web server
 
@@ -67,7 +67,7 @@ true
 
 > `optional` **enableRestApiExpose**: `boolean`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:61](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L61)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:56](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L56)
 
 expose commands as regular REST endpoints when they are configured as endpoints
 
@@ -83,15 +83,7 @@ true
 
 > `optional` **name**: `string`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:10](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L10)
-
-name of the bridge
-
-#### Default
-
-```ts
-HttpEventBridge
-```
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:5](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L5)
 
 ***
 
@@ -99,7 +91,7 @@ HttpEventBridge
 
 > `optional` **pathPrefix**: `string`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:46](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L46)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:41](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L41)
 
 the prefix to be used for exposing commands as endpoints expecting a event bus message
 
@@ -115,7 +107,7 @@ purista
 
 > **serve**: (`options`) => `Server` \| `Http2Server` \| `Http2SecureServer`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:21](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L21)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:16](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L16)
 
 The serve function is depending on the runtime.
 
@@ -153,7 +145,7 @@ https://hono.dev
 
 > `optional` **serverHost**: `string`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:32](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L32)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:27](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L27)
 
 Host of the server.
 
@@ -169,7 +161,7 @@ Host of the server.
 
 > `optional` **serverPort**: `number`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:39](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L39)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:34](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L34)
 
 Port of the server.
 
@@ -185,7 +177,7 @@ Port of the server.
 
 > `optional` **subscriptionPayloadAsCloudEvent**: `boolean`
 
-Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:70](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L70)
+Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:65](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L65)
 
 subscription invocations are wrapped in CloudEvent
 

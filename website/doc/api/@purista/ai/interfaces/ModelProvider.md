@@ -2,36 +2,166 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / ModelProvider
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / ModelProvider
 
 # Interface: ModelProvider
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:26](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L26)
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:261
 
-Minimal interface providers must satisfy so they can be swapped at runtime.
+Provider adapter interface implemented by packages such as `@purista/harness-openai`.
 
 ## Properties
 
-### name
+### genAiSystem
 
-> `readonly` **name**: `string`
+> `readonly` **genAiSystem**: `string`
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:27](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L27)
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:263
+
+***
+
+### id
+
+> `readonly` **id**: `string`
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:262
+
+***
+
+### info?
+
+> `readonly` `optional` **info**: `ModelProviderInfo`
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:264
 
 ## Methods
 
-### generate()
+### close()?
 
-> **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
+> `optional` **close**(): `Promise`\<`void`\>
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:28](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L28)
-
-#### Parameters
-
-##### request
-
-[`ProviderRequest`](../type-aliases/ProviderRequest.md)
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:271
 
 #### Returns
 
-`Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
+`Promise`\<`void`\>
+
+***
+
+### embed()?
+
+> `optional` **embed**(`req`): `Promise`\<[`EmbeddingResponse`](EmbeddingResponse.md)\>
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:269
+
+#### Parameters
+
+##### req
+
+[`EmbeddingRequest`](EmbeddingRequest.md)
+
+#### Returns
+
+`Promise`\<[`EmbeddingResponse`](EmbeddingResponse.md)\>
+
+***
+
+### object()?
+
+> `optional` **object**\<`T`\>(`req`): `Promise`\<`ObjectResponse`\<`T`\>\>
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:267
+
+#### Type Parameters
+
+##### T
+
+`T` *extends* `JsonValue` = `JsonValue`
+
+#### Parameters
+
+##### req
+
+`ObjectRequest`\<`T`\>
+
+#### Returns
+
+`Promise`\<`ObjectResponse`\<`T`\>\>
+
+***
+
+### objectStream()?
+
+> `optional` **objectStream**\<`T`\>(`req`): `AsyncIterable`\<`ObjectStreamChunk`\<`T`\>\>
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:268
+
+#### Type Parameters
+
+##### T
+
+`T` *extends* `JsonValue` = `JsonValue`
+
+#### Parameters
+
+##### req
+
+`ObjectRequest`\<`T`\>
+
+#### Returns
+
+`AsyncIterable`\<`ObjectStreamChunk`\<`T`\>\>
+
+***
+
+### rerank()?
+
+> `optional` **rerank**(`req`): `Promise`\<[`RerankResponse`](RerankResponse.md)\>
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:270
+
+#### Parameters
+
+##### req
+
+[`RerankRequest`](RerankRequest.md)
+
+#### Returns
+
+`Promise`\<[`RerankResponse`](RerankResponse.md)\>
+
+***
+
+### text()?
+
+> `optional` **text**(`req`): `Promise`\<`TextResponse`\>
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:265
+
+#### Parameters
+
+##### req
+
+`TextRequest`
+
+#### Returns
+
+`Promise`\<`TextResponse`\>
+
+***
+
+### textStream()?
+
+> `optional` **textStream**(`req`): `AsyncIterable`\<`TextStreamChunk`\>
+
+Defined in: ai/node\_modules/@purista/harness/dist/ports/model-provider.d.ts:266
+
+#### Parameters
+
+##### req
+
+`TextRequest`
+
+#### Returns
+
+`AsyncIterable`\<`TextStreamChunk`\>

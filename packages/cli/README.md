@@ -1,42 +1,82 @@
 # @purista/cli
 
-A cli wizard package for PURISTA typescript backend framework.  
+`@purista/cli` is the canonical PURISTA CLI engine. It supports:
 
-Open your preferred terminal, create a new folder for your project and inside this folder execute:
+- interactive human usage
+- non-interactive shell and CI execution
+- programmatic access for scripts and agents
+- local blueprint-driven project generation without cloning `starter`
+
+Create a new project:
 
 ```bash
 npx @purista/cli init
 ```
 
-**Choose global install of the cli during the init process to be able to access the CLI tool directly from your command line later on**
-
-After you've initiated your project, you can:
-
-Add a new service:
+Or use the dedicated wrapper:
 
 ```bash
-purista add service
+npm create purista@latest
 ```
 
-Add a new command to a service:
+Scaffold artifacts inside an existing PURISTA project:
 
 ```bash
-purista add command
+purista add service user --description "User service"
+purista add command sign-up --service user --service-version 1 --description "Register a user"
+purista add queue process-jobs --service user --service-version 1 --description "Background jobs"
+purista add agent triage --service user --service-version 1 --description "Review tickets"
 ```
 
-Add a new subscription to a service:
+Non-interactive mode fails fast when a required value has no declared default:
 
 ```bash
-purista add subscription
+purista add service user --description "User service" --non-interactive
+purista init my-app --defaults --non-interactive
 ```
 
-There is the option to use the `add` functionality more shorthand:
+Programmatic usage:
 
-This will create a new service named "user"
+```ts
+import { runPuristaCommand } from '@purista/cli'
 
-```bash
-purista add command user
+await runPuristaCommand(
+  'add-service',
+  { name: 'user', description: 'User service' },
+  { cwd: process.cwd(), mode: 'programmatic' },
+)
 ```
+
+Project creation can also be planned and materialized directly:
+
+```ts
+import { planProjectGeneration, materializeProjectGeneration } from '@purista/cli'
+
+const plan = planProjectGeneration({
+  target: 'my-app',
+  projectName: 'my-app',
+  runtime: 'node',
+  eventBridge: 'default',
+  useWebserver: true,
+  fileConvention: 'camel',
+  eventConvention: 'dotCase',
+  linter: 'biome',
+  formatter: 'biome',
+  type: 'module',
+  packageManager: 'npm',
+  installDependencies: false,
+})
+
+await materializeProjectGeneration(plan)
+```
+
+Generated tests follow the public testing helpers:
+
+- `createCommandContextMock(...)` for command handler tests
+- `createSubscriptionContextMock(...)` for subscription handler tests
+- `createStreamTestHarness(...)` for runtime stream tests
+- `createQueueWorkerTestHarness(...)` for runtime queue worker tests
+- `createAgentTestHarness(...)` and `ScriptedModel` for agent runtime tests
 
 **Visit [purista.dev](https://purista.dev)**
 

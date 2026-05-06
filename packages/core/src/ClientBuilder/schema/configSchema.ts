@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { eventBridgeClientConfigSchema } from './eventBridgeClientConfigSchema.js'
 import { httpClientConfigSchema } from './httpClientConfigSchema.js'

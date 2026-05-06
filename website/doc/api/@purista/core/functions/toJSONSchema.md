@@ -8,7 +8,7 @@
 
 > **toJSONSchema**(`schema`, `options?`): `Promise`\<`SchemaObject`\>
 
-Defined in: [schema/standardSchema.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/schema/standardSchema.ts#L54)
+Defined in: [schema/standardSchema.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/schema/standardSchema.ts#L81)
 
 Converts supported schema formats into OpenAPI-compatible JSON Schema.
 

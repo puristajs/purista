@@ -1,5 +1,4 @@
 import type { Schema } from '../../../schema/index.js'
-import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
@@ -28,7 +27,6 @@ export type CommandFunctionContextEnhancements<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = {
 	/** the original message */
 	message: Readonly<Command<MessagePayloadType, MessageParamsType>>
@@ -58,10 +56,6 @@ export type CommandFunctionContextEnhancements<
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
 	resources: Resources
-	/**
-	 * Invokes an agent and returns the result.
-	 */
-	invokeAgent: AgentInvokes
 }
 
 /**
@@ -77,7 +71,6 @@ export type CommandFunctionContext<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
-	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = Prettify<
 	ContextBase &
 		CommandFunctionContextEnhancements<
@@ -87,7 +80,6 @@ export type CommandFunctionContext<
 			Invokes,
 			StreamInvokes,
 			EmitList,
-			QueueInvokes,
-			AgentInvokes
+			QueueInvokes
 		>
 >

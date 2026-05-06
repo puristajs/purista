@@ -1,23 +1,38 @@
 ---
-title: Unit Test a Subscription
-description: How to unit test a subscription with PURISTA typescript helpers
+title: Test a Subscription
+description: Test subscription handlers with typed subscription context mocks and focus on the handler logic first.
 order: 203020
 ---
 
-# Unit test a subscription
+# Test a subscription
 
-Subscriptions can be tested as plain functions with typed test helpers.
+Subscriptions are usually tested at the handler level.
 
-## Minimal example
+That means:
 
-```typescript
-import { getCommandMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+- bind the subscription to a real service instance
+- create a typed subscription context mock
+- call the handler directly
+
+This is usually enough because subscriptions are event-driven adapters around handler logic, not request/response endpoints.
+
+## Typical subscription test
+
+```ts
+import {
+  createSubscriptionContextMock,
+  getCommandSuccessMessageMock,
+  getEventBridgeMock,
+  getLoggerMock,
+  safeBind,
+} from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { myV1Service } from '../../myV1Service'
-import { mySubscriptionBuilder } from './mySubscriptionBuilder'
+import { pingV1Service } from '../../pingV1Service.js'
+import { logSubscriptionBuilder } from './logSubscriptionBuilder.js'
+import type { PingV1LogInputPayload } from './types.js'
 
-describe('service My version 1 - subscription mySubscription', () => {
+describe('service Ping version 1 - subscription log', () => {
   let sandbox = createSandbox()
 
   beforeEach(() => {
@@ -28,47 +43,63 @@ describe('service My version 1 - subscription mySubscription', () => {
     sandbox.restore()
   })
 
-  test('executes subscription with validated context', async () => {
-    const service = await myV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+  test('handles the incoming event', async () => {
+    const service = await pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 
-    const subscriptionFn = safeBind(mySubscriptionBuilder.getSubscriptionFunction(), service)
+    const log = safeBind(logSubscriptionBuilder.getSubscriptionFunction(), service)
 
-    const message = getCommandMessageMock({
-      payload: {
-        payload: { id: 'user_1' },
-        parameter: {},
-      },
-    })
+    const payload: PingV1LogInputPayload = {
+      pong: 'test',
+    }
 
-    const context = mySubscriptionBuilder.getSubscriptionContextMock({
+    const message = getCommandSuccessMessageMock(payload)
+
+    const { context } = createSubscriptionContextMock(logSubscriptionBuilder, {
       message,
       sandbox,
-      resources: service.resources,
+      resources: { ...service.resources },
     })
 
-    const result = await subscriptionFn(context.mock, { id: 'user_1' }, {})
+    const result = await log(context, payload, {})
 
-    expect(result).toStrictEqual({ done: true })
+    expect(result).toBeUndefined()
   })
 })
 ```
 
-## Mocking invoke and emit
+## Mock invokes and emits
 
-If your subscription uses `canInvoke` or `canEmit`, the context mock includes typed stubs:
+The subscription mock follows the same idea as the command mock: only declared dependencies are available.
 
-```typescript
-const context = mySubscriptionBuilder.getSubscriptionContextMock({ message, sandbox })
+```ts
+const { context, stubs } = createSubscriptionContextMock(auditSubscriptionBuilder, {
+  message,
+  sandbox,
+})
 
-context.stubs.service.AuditService['1'].writeAudit.resolves({ ok: true })
-context.stubs.emit.auditWritten.returns(undefined)
+stubs.service.AuditService['1'].writeAudit.resolves({ ok: true })
+
+await auditSubscription(context, payload, {})
+
+expect(stubs.service.AuditService['1'].writeAudit.calledOnce).toBe(true)
+expect(stubs.emit.auditWritten.calledOnce).toBe(true)
 ```
 
-## `getSubscriptionFunction` vs `getSubscriptionFunctionPlain`
+## When is this enough?
 
-- `getSubscriptionFunction()`:
-  includes validation and guard execution.
-- `getSubscriptionFunctionPlain()`:
-  raw function only (no validation/guards), useful for focused unit tests.
+Use `createSubscriptionContextMock(...)` when you want to verify:
+
+- event handling logic
+- resource usage
+- emits
+- service invokes
+- state/config/secret access
+
+If your real concern is the command or stream that emits the source event, test that workload at its own level instead.
+
+## Related guides
+
+- [The subscription builder](./the-subscription-builder.md)
+- [Test a command](../command/test-a-command.md)

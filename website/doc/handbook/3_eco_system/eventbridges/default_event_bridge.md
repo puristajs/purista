@@ -20,6 +20,8 @@ order: 301010
 - retries: none
 - typical delivery mode: at-most-once
 - cross-instance routing: not supported
+- durable subscriptions: not supported
+- manual acknowledgement: not supported
 
 ## Stream support
 
@@ -42,10 +44,12 @@ order: 301010
 ```typescript
 import { DefaultEventBridge } from '@purista/core'
 
-const eventBridge = new DefaultEventBridge({ emitMessagesAsEventBridgeEvents: true })
+const eventBridge = new DefaultEventBridge()
 await eventBridge.start()
 ```
 
 ## Notes
 
 For production systems with multi-instance delivery guarantees, use an external broker bridge (AMQP/MQTT/NATS/Dapr).
+
+`bindEventToQueue(...)` works with `DefaultEventBridge` for local development and tests, but the generated binding uses auto-ack in-memory delivery because this bridge has no durable/manual-ack consumer protocol. Use an event bridge with both capabilities when a source event must only be acknowledged after the queue enqueue succeeds.

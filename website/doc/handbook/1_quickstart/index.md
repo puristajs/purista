@@ -6,7 +6,7 @@ order: 100000
 
 # PURISTA Quickstart
 
-In this quickstart example, you will learn how to install and use the **PURISTA CLI** (`npm i -g @purista/cli` or `npx @purista/cli ...`). The CLI is the standard way to add services, commands, subscriptions, **and queues**—every tutorial step references the command to run so you can follow the same workflow in real projects.
+In this quickstart example, you will use the PURISTA CLI to create a project and then extend it with generated business artifacts. Start with `npm create purista@latest` or `purista init my-app`, then use `purista add ...` commands as you work through the guide.
 
 We will build a simple application with synchronous + asynchronous flows (service, command, subscription, stream, and a queue-powered async endpoint).  
 

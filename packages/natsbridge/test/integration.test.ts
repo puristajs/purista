@@ -1,33 +1,48 @@
+import { emitWarning } from 'node:process'
+
 import type { Service, ServiceInfoType } from '@purista/core'
 import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, ServiceBuilder } from '@purista/core'
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
+import { connect } from 'nats'
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { z } from 'zod'
 
+import { describeSubscriptionReliabilityContract } from '../../core/test/helpers/subscriptionReliabilityContractSuite.js'
 import { NatsBridge } from '../src/index.js'
+import { getSubscriptionTopic } from '../src/topic/getSubscriptionTopic.impl.js'
 
 const EXAMPLE_EVENT = 'exampleEvent'
-const natsTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_NATSBRIDGE_TESTS ?? '')
-const describeWithNats = natsTestsEnabled ? describe : describe.skip
 const NATS_IMAGE = 'nats:2.10-alpine'
+
 const serviceInfo = {
 	serviceName: 'TheService',
 	serviceVersion: '1',
 	serviceDescription: 'test service',
 } as const satisfies ServiceInfoType
 
-describeWithNats('@purista/natsbridge', () => {
-	let container: StartedNatsContainer
-	let eventbridge: NatsBridge
-	const sandbox = createSandbox()
-	const subscriptionStub = sandbox.stub().resolves()
-	const logger = getLoggerMock(sandbox)
-	let service: Service
-	const serviceConfigSchema = z.object({}).default({})
+let container: StartedNatsContainer
+let eventbridge: NatsBridge
+const sandbox = createSandbox()
+const subscriptionStub = sandbox.stub().resolves()
+const logger = getLoggerMock(sandbox)
+let service: Service
+const serviceConfigSchema = z.object({}).default({})
+let dockerAvailable = true
 
+describe('@purista/natsbridge', () => {
 	beforeAll(async () => {
-		container = await new NatsContainer(NATS_IMAGE).withStartupTimeout(30000).start()
+		try {
+			container = await new NatsContainer(NATS_IMAGE).withJetStream().withStartupTimeout(30000).start()
+		} catch (err) {
+			dockerAvailable = false
+			emitWarning(
+				`Skipping nats bridge integration tests because Docker is unavailable: ${err instanceof Error ? err.message : String(err)}`,
+				'NatsBridge',
+			)
+			return
+		}
 
 		eventbridge = new NatsBridge({
 			logger: logger.mock,
@@ -74,6 +89,10 @@ describeWithNats('@purista/natsbridge', () => {
 	})
 
 	it('can invoke ping command', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
 		const command = getCommandMessageMock({
 			receiver: {
 				serviceName: service.info.serviceName,
@@ -102,7 +121,60 @@ describeWithNats('@purista/natsbridge', () => {
 		expect(true).toBeTruthy()
 	})
 
+	it('times out delayed command invocations and keeps later command calls healthy', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const address = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `delayedCommand_${Date.now()}`,
+		} as const
+
+		await eventbridge.registerCommand(
+			address,
+			async message => {
+				await new Promise(resolve => setTimeout(resolve, 150))
+				return getCommandSuccessMessageMock({ delayed: true }, undefined, message)
+			},
+			{} as never,
+			{
+				durable: false,
+				autoacknowledge: true,
+				shared: true,
+			},
+		)
+
+		const command = getCommandMessageMock({
+			receiver: address,
+			sender: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: 'timeout-check',
+				instanceId: eventbridge.instanceId,
+			},
+			payload: {
+				payload: undefined,
+				parameter: {},
+			},
+		})
+
+		try {
+			await expect(eventbridge.invoke(command, 50)).rejects.toBeInstanceOf(Error)
+			await new Promise(resolve => setTimeout(resolve, 220))
+			await expect(eventbridge.invoke(command, 1_000)).resolves.toEqual({ delayed: true })
+		} finally {
+			await eventbridge.unregisterCommand(address).catch(() => undefined)
+		}
+	}, 20_000)
+
 	it('receives subscriptions', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
 		const payload = { example: 'payload' }
 		const commandResponse = getCommandSuccessMessageMock(payload, {
 			eventName: EXAMPLE_EVENT,
@@ -113,5 +185,216 @@ describeWithNats('@purista/natsbridge', () => {
 		await new Promise(resolve => setTimeout(resolve, 3000))
 
 		expect(subscriptionStub.called).toBeTruthy()
+	})
+
+	it('configures JetStream consumer ackWait at broker level', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const ackWaitMs = 2_000
+		const bridge = new NatsBridge({
+			logger: logger.mock,
+			...container.getConnectionOptions(),
+			jetStreamAckWaitMs: ackWaitMs,
+		})
+		await bridge.start()
+
+		const subscription = {
+			subscriber: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: `ackwait_${Date.now()}`,
+			},
+			eventName: `ackwait.event.${Date.now()}`,
+			eventBridgeConfig: {
+				durable: true,
+				autoacknowledge: false,
+				shared: true,
+				consumerFailureHandling: {
+					maxAttempts: 2,
+					retryDelayMs: 100,
+					deadLetterTarget: `ackwait.dead-letter.${Date.now()}`,
+				},
+			},
+		} as const
+
+		await bridge.registerSubscription(subscription, async () => undefined)
+		try {
+			if (!bridge.jsm) {
+				throw new Error('JetStream manager was not initialized')
+			}
+			const subject = getSubscriptionTopic.call(bridge, subscription)
+			const streamName = await bridge.jsm.streams.find(subject)
+			const durableName = `subscription_${subscription.subscriber.serviceName}_${subscription.subscriber.serviceVersion}_${subscription.subscriber.serviceTarget}`
+			const info = await bridge.jsm.consumers.info(streamName, durableName)
+			expect(info.config.ack_wait).toBe(ackWaitMs * 1_000_000)
+		} finally {
+			await bridge.unregisterSubscription(subscription.subscriber)
+			await bridge.destroy()
+		}
+	})
+
+	it('does not terminate the original JetStream message when dead-letter publish fails', async () => {
+		if (!dockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const eventName = `subscription.dlq.failure.${Date.now()}`
+		const deadLetterTarget = `${eventName}.dead-letter`
+		const subscriber = {
+			serviceName: service.info.serviceName,
+			serviceVersion: service.info.serviceVersion,
+			serviceTarget: `subscription_dlq_failure_${Date.now()}`,
+		} as const
+
+		let attempts = 0
+		const originalPublishDeadLetterMessage = (
+			eventbridge as unknown as {
+				publishDeadLetterMessage: (...args: unknown[]) => Promise<void>
+			}
+		).publishDeadLetterMessage.bind(eventbridge)
+		let failOnce = true
+		const publishDeadLetterSpy = vi
+			.spyOn(
+				eventbridge as unknown as { publishDeadLetterMessage: (...args: unknown[]) => Promise<void> },
+				'publishDeadLetterMessage',
+			)
+			.mockImplementation(async (...args: unknown[]) => {
+				if (failOnce) {
+					failOnce = false
+					throw new Error('simulated dead-letter publish failure')
+				}
+				await originalPublishDeadLetterMessage(...args)
+			})
+
+		await eventbridge.registerSubscription(
+			{
+				subscriber,
+				eventName,
+				eventBridgeConfig: {
+					durable: true,
+					autoacknowledge: false,
+					shared: true,
+					consumerFailureHandling: {
+						maxAttempts: 2,
+						retryDelayMs: 100,
+						deadLetterTarget,
+					},
+				},
+			},
+			async () => {
+				attempts += 1
+				throw new Error('poison for dead-letter')
+			},
+		)
+
+		const dlqConnection = await connect(container.getConnectionOptions())
+		const deadLetterReceived = new Promise<void>(resolve => {
+			dlqConnection.subscribe(deadLetterTarget, {
+				callback: (_error, msg) => {
+					if (msg) {
+						resolve()
+					}
+				},
+			})
+		})
+
+		try {
+			await eventbridge.emitMessage(
+				getCommandSuccessMessageMock(
+					{ dlqFailure: true },
+					{
+						eventName,
+					},
+				),
+			)
+
+			await deadLetterReceived
+			expect(attempts).toBeGreaterThanOrEqual(2)
+			expect(publishDeadLetterSpy).toHaveBeenCalledTimes(2)
+		} finally {
+			publishDeadLetterSpy.mockRestore()
+			await eventbridge.unregisterSubscription(subscriber)
+			await dlqConnection.drain()
+			await dlqConnection.close()
+		}
+	}, 20_000)
+
+	describeSubscriptionReliabilityContract('@purista/natsbridge subscription reliability', {
+		shouldSkip: () => !dockerAvailable,
+		createHarness: async () => {
+			return {
+				registerSubscription: async options => {
+					const subscriber = {
+						serviceName: service.info.serviceName,
+						serviceVersion: service.info.serviceVersion,
+						serviceTarget: `subscription_${options.eventName.replace(/[^a-zA-Z0-9]/g, '_')}`,
+					} as const
+
+					await eventbridge.registerSubscription(
+						{
+							subscriber,
+							eventName: options.eventName,
+							eventBridgeConfig: {
+								durable: true,
+								autoacknowledge: false,
+								shared: true,
+								consumerFailureHandling: {
+									maxAttempts: options.maxAttempts,
+									retryDelayMs: options.retryDelayMs,
+									deadLetterTarget: options.deadLetterTarget,
+								},
+							},
+						},
+						async () => {
+							await options.handler()
+							return undefined
+						},
+					)
+
+					return {
+						unregister: () => eventbridge.unregisterSubscription(subscriber),
+					}
+				},
+				emitEvent: async (eventName, payload) => {
+					await eventbridge.emitMessage(
+						getCommandSuccessMessageMock(payload, {
+							eventName,
+						}),
+					)
+				},
+				observeDeadLetter: async target => {
+					const dlqConnection = await connect(container.getConnectionOptions())
+					const next = new Promise<{ payload: unknown; headers?: Record<string, string | undefined> }>(resolve => {
+						dlqConnection.subscribe(target, {
+							callback: (_error, msg) => {
+								if (msg) {
+									resolve({
+										payload: JSON.parse(new TextDecoder().decode(msg.data)),
+										headers: msg.headers
+											? {
+													'x-purista-dead-letter-attempt': msg.headers.get('x-purista-dead-letter-attempt'),
+													'x-purista-dead-letter-reason': msg.headers.get('x-purista-dead-letter-reason'),
+												}
+											: undefined,
+									})
+								}
+							},
+						})
+					})
+
+					return {
+						next: () => next,
+						destroy: async () => {
+							await dlqConnection.drain()
+							await dlqConnection.close()
+						},
+					}
+				},
+			}
+		},
 	})
 })

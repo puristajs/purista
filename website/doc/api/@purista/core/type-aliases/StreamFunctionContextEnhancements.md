@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamFunctionContextEnhancements
 
-# Type Alias: StreamFunctionContextEnhancements\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
+# Type Alias: StreamFunctionContextEnhancements\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **StreamFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = `object`
+> **StreamFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L13)
+Defined in: [core/types/stream/StreamFunctionContext.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L12)
 
 ## Type Parameters
 
@@ -40,27 +40,13 @@ Defined in: [core/types/stream/StreamFunctionContext.ts:13](https://github.com/p
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
-### AgentInvokes
-
-`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
-
 ## Properties
 
 ### emit
 
 > **emit**: [`EmitCustomMessageFunction`](EmitCustomMessageFunction.md)\<`EmitList`\>
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L24)
-
-***
-
-### invokeAgent
-
-> **invokeAgent**: `AgentInvokes`
-
-Defined in: [core/types/stream/StreamFunctionContext.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L32)
-
-Invokes an agent and returns the result.
+Defined in: [core/types/stream/StreamFunctionContext.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L22)
 
 ***
 
@@ -68,7 +54,7 @@ Invokes an agent and returns the result.
 
 > **message**: `Readonly`\<[`StreamOpenRequest`](StreamOpenRequest.md)\<`MessagePayloadType`, `MessageParamsType`\>\>
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L23)
+Defined in: [core/types/stream/StreamFunctionContext.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L21)
 
 ***
 
@@ -76,7 +62,7 @@ Defined in: [core/types/stream/StreamFunctionContext.ts:23](https://github.com/p
 
 > **queue**: [`QueueContext`](QueueContext.md)\<`QueueInvokes`\>
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L27)
+Defined in: [core/types/stream/StreamFunctionContext.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L25)
 
 ***
 
@@ -84,7 +70,7 @@ Defined in: [core/types/stream/StreamFunctionContext.ts:27](https://github.com/p
 
 > **resources**: `Resources`
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L28)
+Defined in: [core/types/stream/StreamFunctionContext.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L26)
 
 ***
 
@@ -92,7 +78,7 @@ Defined in: [core/types/stream/StreamFunctionContext.ts:28](https://github.com/p
 
 > **service**: `Invokes`
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L25)
+Defined in: [core/types/stream/StreamFunctionContext.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L23)
 
 ***
 
@@ -100,4 +86,4 @@ Defined in: [core/types/stream/StreamFunctionContext.ts:25](https://github.com/p
 
 > **stream**: `StreamInvokes`
 
-Defined in: [core/types/stream/StreamFunctionContext.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L26)
+Defined in: [core/types/stream/StreamFunctionContext.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFunctionContext.ts#L24)

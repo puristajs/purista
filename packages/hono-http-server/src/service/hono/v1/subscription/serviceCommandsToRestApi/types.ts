@@ -1,4 +1,4 @@
-import type { z } from 'zod/v4'
+import type { z } from 'zod'
 
 import type { honoV1ServiceCommandsToRestApiInputPayloadSchema } from './schema.js'
 

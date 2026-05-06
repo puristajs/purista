@@ -15,15 +15,23 @@ export type Config = {
 	}
 }
 
+export type PuristaOpenApiOperationOwner = {
+	serviceName: string
+	serviceVersion: string
+	serviceTarget: string
+}
+
 export const addPathToOpenApi = (
 	openApiBuilder: OpenApiBuilder,
 	metadata: HttpExposedServiceMeta,
 	path: string,
 	config: Config,
+	owner?: PuristaOpenApiOperationOwner,
 ) => {
 	const expose = metadata.expose
 
 	const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
+	const httpMode = expose.http.mode ?? 'sync'
 
 	const requestContentType = expose.contentTypeRequest ?? 'application/json'
 	const _requestEncodingType = expose.contentEncodingRequest ?? 'utf-8'
@@ -67,13 +75,17 @@ export const addPathToOpenApi = (
 	const streamProtocol = expose.http.stream?.protocol
 	const streamProtocolDoc = expose.http.stream?.documentationUrl
 	const okCode =
-		isStreamResponse || isAggregateStream
-			? StatusCode.OK
-			: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+		httpMode === 'async'
+			? StatusCode.Accepted
+			: isStreamResponse || isAggregateStream
 				? StatusCode.OK
-				: StatusCode.NoContent
+				: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+					? StatusCode.OK
+					: StatusCode.NoContent
 
-	const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes ?? [])])
+	const errorCodes: Set<StatusCode> = new Set(
+		(expose.http.openApi?.additionalStatusCodes ?? []).filter(code => code !== StatusCode.Accepted),
+	)
 
 	if (expose.http.openApi?.isSecure) {
 		errorCodes.add(StatusCode.Unauthorized)
@@ -121,6 +133,13 @@ export const addPathToOpenApi = (
 		deprecated: expose.deprecated,
 		operationId: expose.http.openApi?.operationId,
 		security: securitySchema.length > 0 && expose.http.openApi?.isSecure ? securitySchema : [],
+		...getPuristaOperationExtensions({
+			metadata,
+			owner,
+			hasSecurityScheme: securitySchema.length > 0,
+			isStream: isStreamResponse,
+			isAggregateStream,
+		}),
 		parameters: [
 			...getParameterDefinition(path, expose.parameter),
 			...getQueryDefinition(expose.http.openApi?.query, expose.parameter),
@@ -153,58 +172,52 @@ export const addPathToOpenApi = (
 						? undefined
 						: {
 								[responseContentType]: {
-									schema: isStreamResponse
-										? streamProtocol && streamProtocol !== 'purista'
-											? {
-													type: 'object',
-													properties: {
-														event: { type: 'string' },
-														data: {},
-													},
-													required: ['event', 'data'],
-												}
-											: {
-													oneOf: [
-														{
-															type: 'object',
-															properties: {
-																frameType: {
-																	type: 'string',
-																	enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
-																},
-																sequence: {
-																	type: 'integer',
-																},
-																chunk: exposeWithSchemas.chunkPayload,
-																final: exposeWithSchemas.finalPayload,
-																error: {
-																	type: 'object',
-																	properties: {
-																		status: { type: 'integer' },
-																		message: { type: 'string' },
-																		isHandledError: { type: 'boolean' },
-																		traceId: { type: 'string' },
+									schema:
+										httpMode === 'async'
+											? acceptedJobResponseSchema
+											: isStreamResponse
+												? {
+														oneOf: [
+															{
+																type: 'object',
+																properties: {
+																	frameType: {
+																		type: 'string',
+																		enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
 																	},
+																	sequence: {
+																		type: 'integer',
+																	},
+																	chunk: exposeWithSchemas.chunkPayload,
+																	final: exposeWithSchemas.finalPayload,
+																	error: {
+																		type: 'object',
+																		properties: {
+																			status: { type: 'integer' },
+																			message: { type: 'string' },
+																			isHandledError: { type: 'boolean' },
+																			traceId: { type: 'string' },
+																		},
+																	},
+																	reason: { type: 'string' },
 																},
-																reason: { type: 'string' },
 															},
-														},
-														{
+															{
+																type: 'object',
+																properties: {
+																	event: { type: 'string' },
+																	data: {},
+																},
+																required: ['event', 'data'],
+															},
+														],
+													}
+												: isAggregateStream
+													? (exposeWithSchemas.finalPayload ?? {
 															type: 'object',
-															properties: {
-																event: { type: 'string' },
-																data: {},
-															},
-															required: ['event', 'data'],
-														},
-													],
-												}
-										: isAggregateStream
-											? (exposeWithSchemas.finalPayload ?? {
-													type: 'object',
-													additionalProperties: true,
-												})
-											: exposeWithSchemas.outputPayload,
+															additionalProperties: true,
+														})
+													: exposeWithSchemas.outputPayload,
 									encoding: responseEncodingType,
 									...(isStreamResponse && streamProtocol
 										? ({ 'x-purista-stream-protocol': streamProtocol } as Record<string, unknown>)
@@ -227,4 +240,61 @@ export const addPathToOpenApi = (
 	openApiBuilder.addPath(pathConverted, {
 		[method]: operation,
 	})
+}
+
+const acceptedJobResponseSchema = {
+	type: 'object',
+	properties: {
+		jobId: { type: 'string', description: 'Queue job identifier for retry and ownership.' },
+		runId: { type: 'string', description: 'Agent run identifier when the endpoint enqueues an agent job.' },
+		status: { type: 'string', enum: ['queued'] },
+		queue: { type: 'string', deprecated: true },
+		queueName: { type: 'string' },
+		scheduledAt: { type: 'number' },
+		statusUrl: { type: 'string' },
+		streamUrl: { type: 'string' },
+	},
+	required: ['jobId', 'status', 'queueName'],
+	additionalProperties: true,
+} as const
+
+function getPuristaOperationExtensions(input: {
+	metadata: HttpExposedServiceMeta
+	owner?: PuristaOpenApiOperationOwner
+	hasSecurityScheme: boolean
+	isStream: boolean
+	isAggregateStream: boolean
+}): Record<string, unknown> {
+	const expose = input.metadata.expose
+	const isSecure = expose.http.openApi?.isSecure ?? true
+	const runtimeMode =
+		expose.http.mode === 'async'
+			? 'async-job'
+			: input.isStream
+				? 'stream'
+				: input.isAggregateStream
+					? 'stream-aggregate'
+					: 'sync'
+	const endpointSecurity = !isSecure
+		? 'public'
+		: input.hasSecurityScheme
+			? 'protected-with-security-scheme'
+			: 'protected-application-middleware'
+	const targetKey = input.isStream || input.isAggregateStream ? 'x-purista-stream-name' : 'x-purista-command-name'
+
+	return {
+		...(input.owner
+			? {
+					'x-purista-service-name': input.owner.serviceName,
+					'x-purista-service-version': input.owner.serviceVersion,
+					[targetKey]: input.owner.serviceTarget,
+				}
+			: {}),
+		'x-purista-endpoint-security': endpointSecurity,
+		'x-purista-tenant-aware': true,
+		'x-purista-principal-aware': true,
+		'x-purista-event-bridge': true,
+		...(expose.http.mode === 'async' ? { 'x-purista-queue-bridge': true } : {}),
+		'x-purista-runtime-mode': runtimeMode,
+	}
 }

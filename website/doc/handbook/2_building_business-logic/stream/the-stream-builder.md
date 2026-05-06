@@ -17,7 +17,7 @@ purista add stream
 ## Minimal example
 
 ```ts
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { serviceBuilder } from '../yourServiceBuilder.js'
 
 const chunkSchema = z.object({
@@ -68,6 +68,34 @@ A stream function receives:
 - `context.resources`: typed service resources
 - `writer`: stream writer (`write`, `close`, `fail`, `onCancel`)
 
+## Guards
+
+Streams now follow the same guard philosophy as commands:
+
+```ts
+.setBeforeGuardHooks({
+  requirePrompt: async (_context, payload) => {
+    if (!payload.prompt.trim()) {
+      throw new Error('prompt is required')
+    }
+  },
+})
+.setAfterGuardHooks({
+  audit: async (_context, final) => {
+    console.log('stream completed with final payload', final)
+  },
+})
+```
+
+Use guard hooks for short request-policy work:
+
+- auth and tenant checks
+- quota and rate policy checks
+- cheap audit side effects
+
+Do not put long-running business logic into stream guards. Keep that in the
+stream handler itself.
+
 ## Validation and aggregation
 
 - `addChunkSchema(schema, validateChunks = true)` validates each `writer.write(...)` payload.
@@ -100,40 +128,17 @@ for await (const frame of handle) {
 }
 ```
 
-## Invoke AI agents
+## Custom events
 
-Streams can invoke AI agents by declaring them as a dependency.
+Streams can emit normal PURISTA custom events:
 
-::: info Dependency required
-To use agent invocation, the optional **`@purista/ai`** package must be installed in your project.
-:::
-
-```typescript
-const builder = myServiceBuilder
-.getStreamBuilder('chat', '...')
-.canInvokeAgent('supportAgent', '1', {
-  payloadSchema: z.object({ prompt: z.string() })
-})
+```ts
+.canEmit('search.completed', z.object({ chunkCount: z.number() }))
 .setStreamFunction(async function (context, payload, parameter, writer) {
-  const invocation = context.invokeAgent.supportAgent['1'].call({ 
-    prompt: payload.prompt 
-  })
-
-  for await (const frame of invocation) {
-    // Forward agent frames to stream writer
-    await writer.write(frame)
-  }
-
-  const final = await invocation.final()
-  await writer.close(final)
+  await writer.close({ chunkCount: 3 })
+  await context.emit('search.completed', { chunkCount: 3 })
 })
 ```
-
-By using `.canInvokeAgent(...)`, you get:
-- **Type Safety**: Full inference for payload and parameters.
-- **Traceability**: Traces and correlation IDs flow automatically into the agent.
-- **Metadata**: `principalId` and `tenantId` are forwarded to the agent.
-- **Session**: `sessionId` is managed for conversation history.
 ## Testing streams
 
 For unit tests, bind the stream function to the service instance and provide a writer stub:

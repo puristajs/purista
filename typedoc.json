@@ -13,20 +13,25 @@
 		"./packages/dapr-sdk",
 		"./packages/gcloud-secret-store",
 		"./packages/hono-http-server",
-		"./packages/httpserver",
 		"./packages/infisical-secret-store",
 		"./packages/k8s-sdk",
 		"./packages/mqttbridge",
 		"./packages/nats-config-store",
+		"./packages/nats-queue-bridge",
 		"./packages/nats-state-store",
 		"./packages/natsbridge",
-		"./packages/sandbox-service",
 		"./packages/redis-queue-bridge",
 		"./packages/redis-config-store",
 		"./packages/redis-state-store",
 		"./packages/vault-secret-store"
 	],
 	"plugin": ["typedoc-plugin-markdown"],
+	"externalSymbolLinkMappings": {
+		"ai": {
+			"LanguageModel": "https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text"
+		}
+	},
+	"tsconfig": "tsconfig.typedoc.json",
 	"out": "website/doc/api",
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,

@@ -6,11 +6,16 @@ import type { CommandSuccessResponse } from '../../types/commandType/CommandSucc
 import type { DefinitionEventBridgeConfig } from '../../types/DefinitionEventBridgeConfig.js'
 import type { EBMessage } from '../../types/EBMessage.js'
 import type { EBMessageAddress } from '../../types/EBMessageAddress.js'
+import type {
+	InFlightExecutionCounts,
+	PausedSubscriptionConsumersByRegistrationKey,
+} from '../../types/ServiceOperatorState.js'
 import type { StreamDefinitionMetadataBase } from '../../types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamHandle } from '../../types/stream/StreamHandle.js'
 import type { StreamMessage } from '../../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../../types/stream/StreamOpenRequest.js'
 import type { Subscription } from '../../types/subscription/Subscription.js'
+import type { EventBridgeCapabilities } from './EventBridgeCapabilities.js'
 
 /**
  * Event bridge interface
@@ -20,6 +25,7 @@ import type { Subscription } from '../../types/subscription/Subscription.js'
  */
 export interface EventBridge {
 	readonly name: string
+	readonly capabilities: EventBridgeCapabilities
 
 	readonly instanceId: string
 	/**
@@ -121,4 +127,24 @@ export interface EventBridge {
 	 * Shut down event bridge as gracefully as possible
 	 */
 	destroy(): Promise<void>
+
+	/**
+	 * Number of currently running handlers across all work kinds.
+	 */
+	getInFlightExecutionCount(): number
+
+	/**
+	 * Number of currently running handlers grouped by work kind.
+	 */
+	getInFlightExecutionCounts(): InFlightExecutionCounts
+
+	/**
+	 * Returns paused subscription consumer states keyed by adapter registration key.
+	 */
+	getPausedSubscriptionConsumers(): PausedSubscriptionConsumersByRegistrationKey
+
+	/**
+	 * Resumes a paused subscription consumer by registration key.
+	 */
+	resumeSubscriptionConsumer(registrationKey: string): Promise<void>
 }

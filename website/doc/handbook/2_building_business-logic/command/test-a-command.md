@@ -1,22 +1,38 @@
 ---
 title: Test a Command
-description: How to test a command with PURISTA typescript helpers
+description: Test command handlers with typed context mocks or run them through the real PURISTA runtime.
 order: 202040
 ---
 
 # Test a command
 
-A unit test for a command looks like this:
+The first testing decision is simple:
 
-```typescript
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+- Use `createCommandContextMock(...)` when you want to test the handler logic directly.
+- Use `createCommandTestHarness(...)` when you want to test validation, guards, emits, and runtime wiring together.
+
+That maps to the normal PURISTA flow:
+
+1. define with the builder
+2. implement the handler
+3. test the handler in isolation
+4. test the runtime only when the runtime behavior matters
+
+## Handler test
+
+This is the normal starting point.
+
+```ts
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { pingV1Service } from '../../pingV1Service'
-import { fooCommandBuilder } from './fooCommandBuilder'
+import { pingV1Service } from '../../pingV1Service.js'
+import { pingCommandBuilder } from './pingCommandBuilder.js'
+import type { PingV1PingInputParameter, PingV1PingInputPayload } from './types.js'
 
-describe('service Ping version 1 - command foo', () => {
+describe('service Ping version 1 - command ping', () => {
   let sandbox = createSandbox()
+
   beforeEach(() => {
     sandbox = createSandbox()
   })
@@ -25,64 +41,94 @@ describe('service Ping version 1 - command foo', () => {
     sandbox.restore()
   })
 
-  test('does not throw', async () => {
-    const service = await pingV1Service.getInstance(
-      getEventBridgeMock(sandbox).mock, 
-      { 
-        logger: getLoggerMock(sandbox).mock 
-      }
-    )
+  test('returns the pong response', async () => {
+    const service = await pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
-    // use safeBind to keep the typescript types
-    const foo = safeBind(fooCommandBuilder.getCommandFunction(), service)
-    // alternative without
-    // const foo = fooCommandBuilder.getCommandFunction().bind(service)
+    const ping = safeBind(pingCommandBuilder.getCommandFunction(), service)
 
-    const payload: Parameters<typeof foo>[1] = {}
+    const payload: PingV1PingInputPayload = { ping: 'test' }
+    const parameter: PingV1PingInputParameter = {}
 
-    const parameter: Parameters<typeof foo>[2] = {}
-
-    // get a mocked command context
-    const context = fooCommandBuilder.getCommandContextMock({
+    const { context } = createCommandContextMock(pingCommandBuilder, {
       payload,
       parameter,
       sandbox,
-      resources: service.resources,
+      resources: { ...service.resources },
     })
 
-    // execute the command including the validations and hooks
-    const result = await foo(context.mock, payload, parameter)
+    const result = await ping(context, payload, parameter)
 
-    expect(result).toStrictEqual({ foo: 'foo' })
+    expect(result).toStrictEqual({ pong: 'test' })
   })
 })
 ```
 
-The interesting part is the mocked command context.  
-The `getCommandContextMock` method of the command builder returns an object, which has two entries.
+Use this level when you want to verify:
 
-The `mock` entry is the mocked context, which can be passed to the command function.
+- business logic
+- service or stream invokes
+- emitted events
+- resource usage
+- branching logic
 
-The `stubs` entry contains [Sinon stubs](https://sinonjs.org/releases/latest/stubs/) for every context method.  
+## Mock invokes and emitted events
 
-As an example, a command might invoke other services and we need to mock the returned data.
+Only dependencies declared in the builder are available in the mock.
 
-```typescript
-const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
+```ts
+const { context, stubs } = createCommandContextMock(signUpCommandBuilder, {
+  payload: { email: 'user@example.com' },
+  parameter: {},
+  sandbox,
+})
 
-context.stubs.service.OtherService[1].otherCommand.resolves('mock data')
+stubs.service.UserService['1'].findUser.resolves({ exists: false })
+
+const result = await signUp(context, { email: 'user@example.com' }, {})
+
+expect(stubs.emit.userSignedUp.calledOnce).toBe(true)
 ```
 
-## Testing
+That is the main advantage of the helper: the test stays aligned with the builder contract.
 
-During unit tests, you will need to mock command invokes.  
-PURISTA provides the `getCommandContextMock` in the command builder, which allows you to easily mock service invocations.
+## Runtime test
 
-Only services defined with `canInvoke` are available in the context mock.
+Use the harness when you care about the real PURISTA runtime path.
 
-```typescript
-const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
+```ts
+import { createCommandTestHarness } from '@purista/core'
 
-// type/autocomplete is done magically
-context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value' })
+const harness = await createCommandTestHarness(userV1Service, signUpCommandBuilder)
+
+try {
+  const result = await harness.run({
+    payload: { email: 'user@example.com' },
+    parameter: {},
+  })
+
+  expect(result.result).toStrictEqual({ accepted: true })
+} finally {
+  await harness.destroy()
+}
 ```
+
+Use this level when you want to verify:
+
+- schema validation
+- before and after guards
+- final runtime result shape
+- event bridge wiring
+
+## Which one should you choose?
+
+- “I am testing handler logic.”
+  Use `createCommandContextMock(...)`.
+- “I am testing validation, guards, or runtime execution.”
+  Use `createCommandTestHarness(...)`.
+
+## Related guides
+
+- [The command builder](./the-command-builder.md)
+- [Service builder](../service/the-service-builder.md)

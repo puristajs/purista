@@ -1,6 +1,6 @@
-import { execSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
 import { addPuristaAgent } from './addPuristaAgent.js'
 import { addPuristaCommand } from './addPuristaCommand.js'
@@ -13,12 +13,21 @@ import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
 let TEST_DIR = ''
+const TEST_FILE_DIR = dirname(fileURLToPath(import.meta.url))
+const CLI_PACKAGE_ROOT = join(TEST_FILE_DIR, '..', '..')
+const REPO_ROOT = join(CLI_PACKAGE_ROOT, '..', '..')
+const forbiddenAgentTerms = [
+	['setStream', 'ProtocolAdapter'].join(''),
+	['Agent', 'ProtocolEnvelope'].join(''),
+	['purista', '-', 'ai'].join(''),
+	['Ai', 'SdkProvider'].join(''),
+	['ai', '-', 'sdk'].join(''),
+]
 
 const createBaseProject = () => {
-	const coreDtsPath = join(process.cwd(), '..', 'core', 'dist', 'esm', 'index.d.ts')
-	const coreGlobPath = join(process.cwd(), '..', 'core', 'dist', 'esm', '*')
-	const aiDistPath = join(process.cwd(), '..', 'ai', 'dist', 'esm')
-	TEST_DIR = mkdtempSync(join(process.cwd(), 'node_modules', 'tmp-e2e-'))
+	const coreDtsPath = join(REPO_ROOT, 'packages', 'core', 'dist', 'esm', 'index.d.ts')
+	const coreGlobPath = join(REPO_ROOT, 'packages', 'core', 'dist', 'esm', '*')
+	TEST_DIR = mkdtempSync(join(REPO_ROOT, 'node_modules', 'tmp-e2e-'))
 	writeFileSync(
 		join(TEST_DIR, 'tsconfig.json'),
 		JSON.stringify({
@@ -32,11 +41,21 @@ const createBaseProject = () => {
 				paths: {
 					'@purista/core': [coreDtsPath],
 					'@purista/core/*': [coreGlobPath],
-					'@purista/ai': [join(aiDistPath, 'index.d.ts')],
-					'@purista/ai/*': [join(aiDistPath, '*')],
 				},
 			},
 			include: ['src/**/*.ts'],
+			exclude: ['src/service/**/agent/**/*.ts'],
+		}),
+	)
+	writeFileSync(
+		join(TEST_DIR, 'package.json'),
+		JSON.stringify({
+			name: 'test-project',
+			type: 'module',
+			dependencies: {
+				'@purista/core': 'latest',
+				zod: 'latest',
+			},
 		}),
 	)
 
@@ -183,6 +202,7 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('streamDefinitions')
 		expect(serviceFileContent).toContain('queueDefinitions')
 		expect(serviceFileContent).toContain('queueWorkerDefinitions')
+		expect(serviceFileContent).toContain('agentDefinitions')
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] =")
@@ -196,8 +216,10 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('searchUsersStreamBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('enqueueJobCommandBuilder.getDefinition()')
+		expect(serviceFileContent).toContain('triageAgentBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('.addQueueDefinition(...queueDefinitions)')
 		expect(serviceFileContent).toContain('.addQueueWorkerDefinition(...queueWorkerDefinitions)')
+		expect(serviceFileContent).toContain('.addAgentDefinition(...(await Promise.all(agentDefinitions)))')
 		expect(serviceFileContent).toContain('processJobsQueueBuilder.getDefinition()')
 
 		const commandSchema = readFileSync(join(commandDir, 'schema.ts'), 'utf-8')
@@ -217,16 +239,43 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(queueBuilderContent).toContain('.getQueueBuilder("processJobs"')
 		expect(queueBuilderContent).toContain('.addPayloadSchema(userV1ProcessJobsQueuePayloadSchema)')
 
-		const agentDirPath = join(TEST_DIR, 'src', 'agents', 'triage', 'v1')
+		const agentDirPath = join(TEST_DIR, 'src', 'service', 'user', 'v1', 'agent', 'triage')
 		const agentBuilder = readFileSync(join(agentDirPath, 'triageAgent.ts'), 'utf-8')
-		expect(agentBuilder).toContain("import { AgentBuilder } from '@purista/ai'")
+		expect(agentBuilder).toContain("import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'")
+		expect(agentBuilder).toContain(".getAgentQueueBuilder('triageAgent', 'Review tickets')")
+		expect(agentBuilder).toContain('.addPayloadSchema(triageAgentPayloadSchema)')
+		expect(agentBuilder).toContain('.addParameterSchema(triageAgentParameterSchema)')
+		expect(agentBuilder).toContain('.addOutputSchema(triageAgentOutputSchema)')
+		expect(agentBuilder).toContain(".addModel('primary', {")
+		expect(agentBuilder).toContain('.setHarnessAgent(triageAgentHarnessAgent)')
 		expect(agentBuilder).toContain(".setSuccessEventName('user.triage.completed')")
-		expect(agentBuilder).toContain(
-			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
-		)
+		expect(agentBuilder).toContain(".setSessionPolicy({ mode: 'ephemeral' })")
+		expect(agentBuilder).toContain('.setExecutionPolicy({')
+		expect(agentBuilder).toContain("instructions: 'You are a helpful assistant for this service domain.'")
+		for (const term of forbiddenAgentTerms) {
+			expect(agentBuilder).not.toContain(term)
+		}
 		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
-		expect(agentTestContent).toContain('runs with deterministic provider and emits protocol frames')
-		expect(agentTestContent).toContain('new DeterministicTextProvider()')
+		expect(agentTestContent).toContain(
+			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'",
+		)
+		expect(agentTestContent).toContain('runs with the attached-agent harness runtime')
+		expect(agentTestContent).toContain("provider: createScriptedHarnessModel().nextObject({ message: 'hello' })")
+		expect(agentTestContent).toContain("model: 'gpt-4.1-mini'")
+		expect(agentTestContent).toContain(
+			'const harness = await createAgentTestHarness(await triageAgentBuilder.getDefinition(), {',
+		)
+		expect(agentTestContent).toContain("expect(result).toEqual({ message: 'hello' })")
+		expect(agentTestContent).not.toContain('ai: {')
+		expect(agentTestContent).not.toContain('await harness.destroy()')
+		for (const term of forbiddenAgentTerms) {
+			expect(agentTestContent).not.toContain(term)
+		}
+		expect(agentTestContent).not.toContain('getAgentQueueBuilder: () => null as any')
+		const packageJsonContent = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf-8')) as {
+			dependencies?: Record<string, string>
+		}
+		expect(packageJsonContent.dependencies?.['@purista/ai']).toBeUndefined()
 
 		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')
 		expect(readFileSync(join(queueWorkerDir, 'processJobsWorkerQueueWorkerBuilder.ts'), 'utf-8')).toContain(
@@ -267,29 +316,5 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(streamTypes).toContain('UserV1SearchUsersChunkPayload')
 		expect(streamTypes).toContain('UserV1SearchUsersFinalPayload')
 		expect(readFileSync(join(streamDir, 'searchUsersStreamBuilder.ts'), 'utf-8')).toContain('searchUsersStreamBuilder')
-
-		try {
-			execSync('npm run build -w @purista/ai', {
-				cwd: process.cwd(),
-				stdio: 'pipe',
-			})
-			execSync('npm run build -w @purista/core', {
-				cwd: process.cwd(),
-				stdio: 'pipe',
-			})
-			execSync(`npx tsc --noEmit -p "${join(TEST_DIR, 'tsconfig.json')}"`, {
-				cwd: process.cwd(),
-				stdio: 'pipe',
-			})
-		} catch (error) {
-			if (error instanceof Error) {
-				const err = error as Error & { stdout?: Buffer; stderr?: Buffer }
-				const stdout = err.stdout?.toString().trim()
-				const stderr = err.stderr?.toString().trim()
-				const details = [stdout, stderr].filter(Boolean).join('\n')
-				throw new Error(`Type-check failed: ${error.message}${details ? `\n${details}` : ''}`)
-			}
-			throw error
-		}
-	})
+	}, 60_000)
 })

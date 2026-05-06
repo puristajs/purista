@@ -15,7 +15,7 @@ export const getQueueSchemaFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.queueName} queue`)
 
 	writer.writeLine(`import { extendApi } from '@purista/core'`)
-	writer.writeLine(`import { z } from 'zod/v4'`)
+	writer.writeLine(`import { z } from 'zod'`)
 	writer.blankLine()
 	writer.writeLine(
 		`export const ${schemaPrefix}PayloadSchema = extendApi(z.unknown(), { title: 'queue payload schema' })`,

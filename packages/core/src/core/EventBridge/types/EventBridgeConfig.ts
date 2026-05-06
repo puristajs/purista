@@ -10,13 +10,8 @@ import type { Prettify } from '../../types/Prettify.js'
  */
 export type EventBridgeConfig<CustomConfig> = Prettify<
 	{
-		/** A logger instance */
 		logger?: Logger
-		/**
-		 * If no logger instance is given, use this log level
-		 */
 		logLevel?: LogLevelName
-		/** A OpenTelemetry span processor */
 		spanProcessor?: SpanProcessor | undefined
 		/** The instance id of the event bridge.
 		 * If not set, a id will generated each time a instance is created.

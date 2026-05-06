@@ -28,6 +28,57 @@ End-to-end message delivery guarantees are a combination of:
 - set timeout and retry budgets intentionally
 - persist important business state outside process memory
 
+## Safe defaults
+
+PURISTA now defaults to strict startup validation for reliability-sensitive command and subscription semantics.
+
+- if a handler requests delivery behavior a bridge cannot honor, startup fails in strict mode
+- late command responses after timeout are ignored with warning where applicable
+- stream sessions use bounded timeout handling and terminal-frame enforcement instead of open-ended waits
+- queue workers apply bounded retries and dead-letter routing using lifecycle defaults unless you override them
+
+### Canonical defaults table
+
+| area | default | behavior |
+| --- | --- | --- |
+| command invocation timeout | bridge `defaultCommandTimeout` (30s unless configured) | caller timeout is terminal; late responses are ignored with warning |
+| stream invocation timeout | bridge `defaultCommandTimeout` (unless stream timeout override is configured) | late frames after timeout/terminal are ignored with warning |
+| subscription failure handling | `mode: 'strict'`, `maxAttempts: 1`, `retryDelayMs: 0` when configured without overrides | startup rejects unsupported semantics; exhausted attempts dead-letter when configured |
+| queue lifecycle retry | `maxAttempts: 10`, exponential retry strategy, `retryWindowMs: 24h` | retries stay bounded and route to DLQ after budget/window exhaustion |
+
+## Drain observability
+
+Event bridges expose in-flight diagnostics by work kind (`command`, `subscription`, `stream`, `generic`).
+Services can use this during shutdown and operator diagnostics to verify that drain reached zero before teardown.
+
+For service-level operators, use `Service.getInFlightDiagnostics()` as the canonical API:
+
+- `total`: all in-flight handlers
+- `byKind`: in-flight handlers split by `command`, `subscription`, `stream`, `generic`
+
+## Subscription control outcomes
+
+Subscription handlers can return explicit outcomes:
+
+- `ack`: settle as successful
+- `retry`: request retry, optionally with `delayMs`
+- `deadLetter`: route directly to dead-letter handling
+- `drop`: settle and discard the current delivery with a warning
+- `stop-consumer`: pause the subscription consumer and require explicit operator resume
+
+`stop-consumer` is implemented as consumer pause (not service shutdown).  
+Use `Service.getPausedSubscriptionConsumerState()` for diagnostics and `Service.resumeSubscriptionConsumer(registrationKey)` to resume.
+
+## Health and paused-state semantics
+
+Service health now includes paused operational state as first-class observability:
+
+- paused queue workers are exposed in `ServiceHealthState.pausedQueueWorkers`
+- paused subscription consumers are exposed in `ServiceHealthState.pausedSubscriptionConsumers`
+- if either list is non-empty, service health is `warn`
+
+This is additive observability: event bridge health, queue bridge health, and queue metrics evaluation keep their existing behavior.
+
 ## Streams and reliability
 
 Current stream runtime support is available in `DefaultEventBridge` only.
@@ -38,6 +89,7 @@ For stream consumers:
 - treat cancellation as a normal control path
 - validate chunk/final payloads where needed
 - keep chunk processing resilient to partial interruptions
+- expect exactly one terminal state (`complete`, `error`, or `cancel`) per session
 
 ## Minimal acceptance checklist
 

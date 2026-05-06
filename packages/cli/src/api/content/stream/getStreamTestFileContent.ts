@@ -21,14 +21,13 @@ export const getStreamTestFileContent = (input: {
 	const streamFunctionName = camelCase(input.streamName)
 	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
 
-	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
-	writer.writeLine(`import { getCommandMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`)
-	writer.writeLine(`import { createSandbox } from 'sinon'`)
+	writer.writeLine(`import { describe, expect, test } from '${testLib}'`)
+	writer.writeLine(`import { createStreamTestHarness } from '@purista/core'`)
 	writer.blankLine()
 	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
 	writer.writeLine(`import { ${streamBuilderName} } from './${streamBuilderFileName}.js'`)
 	writer.writeLine(
-		`import type { ${typePrefix}ChunkPayload, ${typePrefix}FinalPayload, ${typePrefix}InputParameter, ${typePrefix}InputPayload } from './types.js'`,
+		`import type { ${typePrefix}FinalPayload, ${typePrefix}InputParameter, ${typePrefix}InputPayload } from './types.js'`,
 	)
 	writer.blankLine()
 
@@ -37,62 +36,27 @@ export const getStreamTestFileContent = (input: {
 			`describe('service ${capitalCase(input.serviceName)} version ${input.serviceVersion} - stream ${streamFunctionName}',() => `,
 		)
 		.block(() => {
-			writer.writeLine('let sandbox = createSandbox()')
 			writer
-				.write('beforeEach(() =>')
+				.write(`test('streams frames through the runtime harness', async () => `)
 				.inlineBlock(() => {
-					writer.writeLine('sandbox = createSandbox()')
-				})
-				.write(')')
-			writer.blankLine()
-			writer
-				.write('afterEach(() =>')
-				.inlineBlock(() => {
-					writer.writeLine('sandbox.restore()')
-				})
-				.write(')')
-			writer.blankLine()
-			writer
-				.write(`test('does not throw', async () => `)
-				.inlineBlock(() => {
-					writer
-						.write(`const service = await ${serviceName}.getInstance(getEventBridgeMock(sandbox).mock,`)
-						.inlineBlock(() => {
-							writer.writeLine('logger: getLoggerMock(sandbox).mock,')
-						})
-						.write(')')
-					writer.blankLine()
-					writer.writeLine(`const ${streamFunctionName} = safeBind(${streamBuilderName}.getStreamFunction(), service)`)
-					writer.blankLine()
 					writer.writeLine(`const payload: ${typePrefix}InputPayload = undefined`)
 					writer.blankLine()
 					writer.writeLine(`const parameter: ${typePrefix}InputParameter = {}`)
 					writer.blankLine()
-					writer.writeLine('const write = sandbox.stub().resolves()')
-					writer.writeLine('const close = sandbox.stub().resolves()')
-					writer.writeLine('const fail = sandbox.stub().resolves()')
+					writer.writeLine(`const harness = await createStreamTestHarness(${serviceName}, ${streamBuilderName})`)
 					writer.blankLine()
-					writer.writeLine('const writer = {')
+					writer.writeLine('try {')
 					writer.withIndentationLevel(1, () => {
-						writer.writeLine('cancelled: false,')
-						writer.writeLine(`write: write as (chunk: ${typePrefix}ChunkPayload) => Promise<void>,`)
-						writer.writeLine(`close: close as (final?: ${typePrefix}FinalPayload) => Promise<void>,`)
-						writer.writeLine('fail,')
-						writer.writeLine('onCancel: (_cb: (reason?: string) => void) => {},')
+						writer.writeLine('const result = await harness.run({ payload, parameter })')
+						writer.blankLine()
+						writer.writeLine('expect(result.frames.length).toBeGreaterThan(0)')
+						writer.writeLine(`expect(result.final as ${typePrefix}FinalPayload | undefined).toBeDefined()`)
+					})
+					writer.writeLine('} finally {')
+					writer.withIndentationLevel(1, () => {
+						writer.writeLine('await harness.destroy()')
 					})
 					writer.writeLine('}')
-					writer.blankLine()
-					writer.writeLine('const message = getCommandMessageMock(payload)')
-					writer.writeLine(
-						'const context = { resources: service.resources, message, service: {}, stream: {}, emit: sandbox.stub() }',
-					)
-					writer.blankLine()
-					writer.writeLine(
-						`const result = await ${streamFunctionName}(context as never, payload, parameter, writer as never)`,
-					)
-					writer.blankLine()
-					writer.writeLine('expect(result).toBeUndefined()')
-					writer.writeLine('expect(fail.called).toBe(false)')
 				})
 				.write(')')
 		})

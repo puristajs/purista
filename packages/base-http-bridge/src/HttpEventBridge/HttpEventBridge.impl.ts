@@ -21,7 +21,10 @@ import {
 	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
-	EventBridgeEventNames,
+	EventBridgeCommandTransport,
+	EventBridgeLateResponseHandling,
+	EventBridgeResponseConfirmationLevel,
+	EventBridgeStreamLateFrameHandling,
 	getErrorMessageForCode,
 	getNewCorrelationId,
 	getNewEBMessageId,
@@ -82,6 +85,40 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		}
 
 		super(conf.name ?? 'HttpEventBridge', conf)
+		this.capabilities = {
+			supportsStreams: false,
+			durableCommands: false,
+			durableSubscriptions: false,
+			manualAckSupported: false,
+			lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
+			gracefulDrainSupported: true,
+			nativeDeadLettering: false,
+			commandHandling: {
+				transport: EventBridgeCommandTransport.HttpRequest,
+				pendingInvocationCancellation: false,
+				responseConfirmation: EventBridgeResponseConfirmationLevel.ProtocolLevel,
+				strictMode: false,
+			},
+			streamHandling: {
+				incrementalDelivery: false,
+				consumerCancellation: false,
+				gracefulStreamDrain: false,
+				aggregatedFinalSupported: false,
+				lateFrameHandling: EventBridgeStreamLateFrameHandling.NotApplicable,
+			},
+			consumerFailureHandling: {
+				boundedRetry: false,
+				delayedRetry: false,
+				deadLetterTarget: false,
+				drop: false,
+				stopConsumer: false,
+				consumerPauseResume: false,
+				bridgeManagedDeadLettering: false,
+				nativeDeadLettering: false,
+				fatalClassification: false,
+				strictMode: true,
+			},
+		}
 
 		this.client = client
 
@@ -132,17 +169,19 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			port: this.config.serverPort,
 			hostname: this.config.serverHost,
 		})
+		this.isShuttingDown = false
+		this.isStarted = true
 
 		this.server.on('listening', () => {
-			this.emit(EventBridgeEventNames.EventbridgeConnected)
+			this.logger.info('http event bridge listening')
 		})
 
 		this.server.on('close', () => {
-			this.emit(EventBridgeEventNames.EventbridgeDisconnected)
+			this.logger.info('http event bridge closed')
 		})
 
 		this.server.on('error', err => {
-			this.emit(EventBridgeEventNames.EventbridgeError, err)
+			this.logger.error({ err }, 'http event bridge server error')
 		})
 	}
 
@@ -194,12 +233,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 				const headers: Record<string, string> = {}
 				propagation.inject(context.active(), headers)
 
-				try {
-					await this.client.sendEvent(msg as EBMessage)
-				} catch (err) {
-					this.emit(EventBridgeEventNames.EventbridgeError, err)
-					throw err
-				}
+				await this.client.sendEvent(msg as EBMessage)
 
 				return msg as Readonly<T>
 			},
@@ -236,13 +270,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			const headers: Record<string, string> = {}
 			propagation.inject(context.active(), headers)
 
-			let message: CommandResponse
-			try {
-				message = await this.client.invoke(command, headers, ttl)
-			} catch (error) {
-				this.emit(EventBridgeEventNames.EventbridgeError, error)
-				throw error
-			}
+			const message: CommandResponse = await this.client.invoke(command, headers, ttl)
 
 			if (message === undefined) {
 				return undefined as T
@@ -278,8 +306,16 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		metadata: HttpExposedServiceMeta,
 		eventBridgeConfig: DefinitionEventBridgeConfig,
 	): Promise<string> {
-		const fn = getCommandHandler.bind(this)
-		const handler = fn(address, cb, metadata, eventBridgeConfig, this.config.commandPayloadAsCloudEvent)
+		const rawHandler = getCommandHandler.call(
+			this,
+			address,
+			cb,
+			metadata,
+			eventBridgeConfig,
+			this.config.commandPayloadAsCloudEvent,
+		)
+		const handler = ((...args: Parameters<typeof rawHandler>) =>
+			this.runInFlight(() => rawHandler.call(this, ...args))) as typeof rawHandler
 
 		const path = this.client.getInternalPathForCommand(address)
 
@@ -292,8 +328,9 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
 			this.logger.debug({ apiPath })
 
-			const fnRest = getCommandHandlerRestApi.bind(this)
-			const handlerRest = fnRest(address, cb, metadata, eventBridgeConfig)
+			const rawHandlerRest = getCommandHandlerRestApi.call(this, address, cb, metadata, eventBridgeConfig)
+			const handlerRest = ((...args: Parameters<typeof rawHandlerRest>) =>
+				this.runInFlight(() => rawHandlerRest.call(this, ...args))) as typeof rawHandlerRest
 
 			switch (httpMeta.method) {
 				case 'DELETE':
@@ -333,8 +370,9 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			)
 		}
 
-		const fn = getSubscriptionHandler.bind(this)
-		const handler = fn(subscription, cb, this.config.subscriptionPayloadAsCloudEvent)
+		const rawHandler = getSubscriptionHandler.call(this, subscription, cb, this.config.subscriptionPayloadAsCloudEvent)
+		const handler = ((...args: Parameters<typeof rawHandler>) =>
+			this.runInFlight(() => rawHandler.call(this, ...args))) as typeof rawHandler
 
 		const path = this.client.getInternalPathForSubscription(subscription.subscriber)
 
@@ -365,10 +403,17 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		if (!this.server) {
 			return
 		}
+		this.isShuttingDown = true
 		if (this.server instanceof Server) {
 			this.server.closeIdleConnections()
 		}
+		const drained = await this.waitForInFlightDrain()
+		if (!drained) {
+			this.logger.error('Some HTTP bridge requests did not finish before shutdown')
+		}
 		const server = this.server
 		await new Promise(resolve => server.close(resolve))
+		this.isStarted = false
+		this.server = undefined
 	}
 }

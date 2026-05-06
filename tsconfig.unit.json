@@ -1,5 +1,14 @@
 {
 	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@purista/cli": ["packages/cli/src/api/index.ts"],
+			"@purista/ai/testing": ["packages/ai/src/testing/index.ts"],
+			"@purista/harness/testing": ["packages/ai/node_modules/@purista/harness/dist/testing/index.d.ts"],
+			"@purista/*": ["packages/*/src/index.ts"]
+		}
+	},
 	"exclude": [
 		"node_modules",
 		"dist",

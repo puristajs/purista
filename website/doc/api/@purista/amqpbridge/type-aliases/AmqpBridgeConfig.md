@@ -18,11 +18,31 @@ AmqpBridge bridge config
 
 ## Properties
 
+### deadLetterExchangeName?
+
+> `optional` **deadLetterExchangeName**: `string`
+
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:21](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L21)
+
+optional dead letter exchange name used for durable command/subscription queues
+
+***
+
+### deadLetterRoutingKey?
+
+> `optional` **deadLetterRoutingKey**: `string`
+
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:23](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L23)
+
+optional dead letter routing key used for durable command/subscription queues
+
+***
+
 ### encoder?
 
 > `optional` **encoder**: [`Encoder`](Encoder.md)
 
-Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:23](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L23)
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:29](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L29)
 
 the encoder(s) to be used for AMQP messages
 
@@ -38,7 +58,7 @@ jsonEncoder
 
 > `optional` **encrypter**: [`Encrypter`](Encrypter.md)
 
-Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:25](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L25)
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:31](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L31)
 
 the encrypter(s) to be used for AMQP messages
 
@@ -92,11 +112,21 @@ purista
 
 ***
 
+### prefetch?
+
+> `optional` **prefetch**: `number`
+
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:19](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L19)
+
+max unacked messages per consumer channel
+
+***
+
 ### socketOptions?
 
 > `optional` **socketOptions**: `unknown`
 
-Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:21](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L21)
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:27](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L27)
 
 socket options
 
@@ -106,7 +136,7 @@ socket options
 
 > `optional` **url**: `string` \| `Options.Connect`
 
-Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:19](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L19)
+Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:25](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L25)
 
 the AMQP broker url
 

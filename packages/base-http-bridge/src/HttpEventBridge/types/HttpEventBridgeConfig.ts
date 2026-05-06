@@ -2,11 +2,6 @@ import type { Server } from 'node:http'
 import type { Http2SecureServer, Http2Server } from 'node:http2'
 
 export type HttpEventBridgeConfig = {
-	/**
-	 * name of the bridge
-	 *
-	 * @default HttpEventBridge
-	 * */
 	name?: string
 
 	/**

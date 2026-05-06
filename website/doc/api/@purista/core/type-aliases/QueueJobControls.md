@@ -38,7 +38,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:11](https://github.com/puristaj
 
 > **extendLease**(`durationMs`): `Promise`\<`void`\>
 
-Defined in: [core/types/queue/QueueJobContext.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L14)
+Defined in: [core/types/queue/QueueJobContext.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L15)
 
 #### Parameters
 
@@ -67,6 +67,24 @@ Defined in: [core/types/queue/QueueJobContext.ts:13](https://github.com/puristaj
 ##### fatal?
 
 `boolean`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### moveToDeadLetter()
+
+> **moveToDeadLetter**(`reason?`): `Promise`\<`void`\>
+
+Defined in: [core/types/queue/QueueJobContext.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L14)
+
+#### Parameters
+
+##### reason?
+
+`string`
 
 #### Returns
 

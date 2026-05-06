@@ -1,0 +1,20 @@
+# PURISTA LLM Context
+
+PURISTA is a TypeScript framework for message-driven backend systems.
+
+## Core guidance
+- Prefer `ServiceBuilder`, `CommandBuilder`, and schema-first design with Zod.
+- Keep handlers orchestration-focused; inject infrastructure via resources.
+- Use versioned service folders: `src/service/<Service>/v<Number>/...`.
+- Declare and emit events explicitly.
+- Add/update tests for every behavioral change.
+
+## Extended context
+- Deep context: `/llms/llms-full.txt`
+- Sandbox context: `/llms/sandbox.txt`
+- Sandbox deep context: `/llms/sandbox-full.txt`
+
+## Canonical markdown sources
+- https://github.com/puristajs/purista/blob/master/website/doc/handbook/index.md
+- https://github.com/puristajs/purista/blob/master/website/doc/handbook/2_building_business-logic/agent/index.md
+- https://github.com/puristajs/purista/blob/master/website/doc/handbook/3_eco_system/index.md

@@ -11,36 +11,80 @@ import { getNewInstanceId } from '../helper/getNewInstanceId.impl.js'
 import type { Complete } from '../types/Complete.js'
 import type { DefinitionEventBridgeConfig } from '../types/DefinitionEventBridgeConfig.js'
 import type { EBMessageAddress } from '../types/EBMessageAddress.js'
-import { GenericEventEmitter } from '../types/GenericEventEmitter.js'
 import type { InstanceId } from '../types/InstanceId.js'
 import type { Logger } from '../types/Logger.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
+import type {
+	InFlightExecutionCounts,
+	PausedSubscriptionConsumersByRegistrationKey,
+} from '../types/ServiceOperatorState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StreamDefinitionMetadataBase } from '../types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamHandle } from '../types/stream/StreamHandle.js'
 import type { StreamMessage } from '../types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
+import { InFlightExecutionTracker } from './InFlightExecutionTracker.impl.js'
+import type { EventBridgeCapabilities } from './types/EventBridgeCapabilities.js'
+import {
+	EventBridgeCommandTransport,
+	EventBridgeResponseConfirmationLevel,
+} from './types/EventBridgeCommandCapabilities.js'
 import type { EventBridgeConfig } from './types/EventBridgeConfig.js'
-import type { EventBridgeEvents } from './types/EventBridgeEvents.js'
+import { EventBridgeLateResponseHandling } from './types/EventBridgeLateResponseHandling.js'
+import { EventBridgeStreamLateFrameHandling } from './types/EventBridgeStreamLateFrameHandling.js'
 
 /**
  * The base class to be extended by event bridge implementations
  *
  * @group Event bridge
  */
-export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventBridgeEvents> {
+export class EventBridgeBaseClass<ConfigType> {
 	logger: Logger
 	traceProvider: NodeTracerProvider
 
 	config: Complete<EventBridgeConfig<ConfigType>>
 
 	name: string
+	capabilities: EventBridgeCapabilities = {
+		supportsStreams: false,
+		durableCommands: false,
+		durableSubscriptions: false,
+		manualAckSupported: false,
+		lateResponseHandling: EventBridgeLateResponseHandling.NotApplicable,
+		gracefulDrainSupported: true,
+		nativeDeadLettering: false,
+		commandHandling: {
+			transport: EventBridgeCommandTransport.InMemory,
+			pendingInvocationCancellation: true,
+			responseConfirmation: EventBridgeResponseConfirmationLevel.None,
+			strictMode: true,
+		},
+		streamHandling: {
+			incrementalDelivery: false,
+			consumerCancellation: false,
+			gracefulStreamDrain: true,
+			aggregatedFinalSupported: false,
+			lateFrameHandling: EventBridgeStreamLateFrameHandling.NotApplicable,
+		},
+		consumerFailureHandling: {
+			boundedRetry: false,
+			delayedRetry: false,
+			deadLetterTarget: false,
+			drop: false,
+			stopConsumer: false,
+			consumerPauseResume: false,
+			bridgeManagedDeadLettering: false,
+			nativeDeadLettering: false,
+			fatalClassification: false,
+			strictMode: true,
+		},
+	}
 
 	instanceId: Readonly<InstanceId>
 
 	defaultCommandTimeout: Readonly<number>
+	protected readonly inFlightExecutions = new InFlightExecutionTracker()
 	constructor(name: string, config: EventBridgeConfig<ConfigType>) {
-		super()
 		this.name = name
 		const logger = config?.logger ?? initLogger(config?.logLevel)
 		this.logger = logger.getChildLogger({ name })
@@ -163,6 +207,31 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 
 	async destroy() {}
 	async start() {}
+
+	runInFlight<T>(
+		fn: () => Promise<T>,
+		kind: 'command' | 'subscription' | 'stream' | 'generic' = 'generic',
+	): Promise<T> {
+		return this.inFlightExecutions.run(fn, kind)
+	}
+
+	async waitForInFlightDrain(timeoutMs = this.defaultCommandTimeout) {
+		return this.inFlightExecutions.waitForIdle(timeoutMs)
+	}
+
+	getInFlightExecutionCount() {
+		return this.inFlightExecutions.size
+	}
+
+	getInFlightExecutionCounts(): InFlightExecutionCounts {
+		return this.inFlightExecutions.getCounts()
+	}
+
+	getPausedSubscriptionConsumers(): PausedSubscriptionConsumersByRegistrationKey {
+		return {}
+	}
+
+	async resumeSubscriptionConsumer(_registrationKey: string) {}
 
 	async openStream<Chunk = unknown, Final = unknown>(
 		_input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,

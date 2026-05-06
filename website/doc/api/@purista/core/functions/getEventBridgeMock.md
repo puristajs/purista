@@ -6,17 +6,17 @@
 
 # Function: getEventBridgeMock()
 
-> **getEventBridgeMock**(`sandbox?`): `object`
+> **getEventBridgeMock**(`sandboxOrOptions?`): `object`
 
-Defined in: [mocks/getEventBridge.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L11)
+Defined in: [mocks/getEventBridge.mock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L22)
 
 Mocks the eventBridge and stubs the methods
 
 ## Parameters
 
-### sandbox?
+### sandboxOrOptions?
 
-`SinonSandbox`
+`SinonSandbox` | \{ `capabilities?`: `EventBridgeCapabilityOverrides`; `sandbox?`: `SinonSandbox`; \}
 
 ## Returns
 

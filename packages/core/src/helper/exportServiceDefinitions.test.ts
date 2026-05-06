@@ -9,12 +9,28 @@ const createDefinitions = (input: {
 	deprecated?: boolean
 	commandNames?: string[]
 	subscriptionNames?: string[]
+	queueNames?: string[]
+	scheduleNames?: string[]
 }): ServiceDefinitions => {
 	const commands = (input.commandNames ?? []).map(commandName => {
 		return { commandName } as ServiceDefinitions['commands'][number]
 	})
 	const subscriptions = (input.subscriptionNames ?? []).map(subscriptionName => {
 		return { subscriptionName } as ServiceDefinitions['subscriptions'][number]
+	})
+	const queues = (input.queueNames ?? []).map(queueName => {
+		return { queueName } as NonNullable<ServiceDefinitions['queues']>[number]
+	})
+	const schedules = (input.scheduleNames ?? []).map(name => {
+		return {
+			name,
+			targetKind: 'event' as const,
+			targetName: `${name}.event`,
+			expression: { kind: 'cron' as const, value: '* * * * *' },
+			concurrencyPolicy: 'allow' as const,
+			missedRunPolicy: 'skip' as const,
+			enabledByDefault: true,
+		}
 	})
 
 	return {
@@ -24,6 +40,11 @@ const createDefinitions = (input: {
 		deprecated: input.deprecated ?? false,
 		commands,
 		subscriptions,
+		streams: [],
+		queues,
+		queueWorkers: [],
+		schedules,
+		eventToQueueBindings: [],
 	}
 }
 
@@ -63,5 +84,19 @@ describe('mergeServiceDefinition', () => {
 		expect(merged.UserService['1'].description).toBe('original description')
 		expect(merged.UserService['1'].deprecated).toBe(true)
 		expect(Object.keys(merged.UserService['1'].commands).sort()).toEqual(['create', 'update'])
+	})
+
+	it('merges queues and schedules into exported service definitions', () => {
+		const merged = mergeServiceDefinition(
+			{},
+			createDefinitions({ queueNames: ['billing.monthlyClosing'], scheduleNames: ['monthlyBillingCycle'] }),
+		)
+
+		expect(Object.keys(merged.UserService['1'].queues ?? {})).toEqual(['billing.monthlyClosing'])
+		expect(merged.UserService['1'].schedules?.monthlyBillingCycle).toMatchObject({
+			targetName: 'monthlyBillingCycle.event',
+			targetServiceName: 'UserService',
+			targetServiceVersion: '1',
+		})
 	})
 })

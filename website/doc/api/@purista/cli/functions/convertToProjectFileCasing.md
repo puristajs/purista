@@ -8,7 +8,7 @@
 
 > **convertToProjectFileCasing**(`input`, `puristaProjectConfig`): `string`
 
-Defined in: [convertToProjectFileCasing.ts:4](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/convertToProjectFileCasing.ts#L4)
+Defined in: [packages/cli/src/api/convertToProjectFileCasing.ts:4](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/convertToProjectFileCasing.ts#L4)
 
 ## Parameters
 
@@ -40,11 +40,11 @@ Defined in: [convertToProjectFileCasing.ts:4](https://github.com/puristajs/puris
 
 #### formatter
 
-`"biome"` \| `"none"` \| `"prettier"` = `...`
+`"biome"` \| `"prettier"` \| `"none"` = `...`
 
 #### linter
 
-`"biome"` \| `"eslint"` \| `"none"` = `...`
+`"biome"` \| `"none"` \| `"eslint"` = `...`
 
 #### runtime
 

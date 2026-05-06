@@ -133,7 +133,7 @@ The schema file contains the schemas for input and output validation.
 
 ```typescript [schema.ts]
 import { extendApi } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 // define the input parameters
 export const userV1SignUpInputParameterSchema = extendApi(z.object({}), { title: 'sign up input parameter schema' })
@@ -160,7 +160,7 @@ The types are not used by PURISTA or one of the builders. The types can be used 
 ::: code-group
 
 ```typescript [types.ts]
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import {
   userV1SignUpInputParameterSchema,
@@ -185,7 +185,7 @@ It contains a real test, which can then be extended and aligned to your actual i
 ::: code-group
 
 ```typescript [signUpCommandBuilder.test.ts]
-import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service'
@@ -210,9 +210,9 @@ describe('service User version 1 - command signUp', () => {
 
     const parameter: Parameters<typeof signUp>[2] = {}
 
-    const context = signUpCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+    const { context } = createCommandContextMock(signUpCommandBuilder, { payload, parameter, sandbox })
 
-    const result = await signUp(context.mock, payload, parameter)
+    const result = await signUp(context, payload, parameter)
 
     expect(result).toBeUndefined()
   })

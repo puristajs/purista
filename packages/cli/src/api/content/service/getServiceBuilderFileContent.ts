@@ -46,8 +46,10 @@ export const getServiceBuilderFileContent = (input: {
 		.write(' as const satisfies ServiceInfoType')
 	writer.newLineIfLastNot()
 	writer.blankLine()
-	writer.writeLine(`export const ${serviceBuilderName} = new ServiceBuilder(${serviceInfoName}).setConfigSchema(${serviceConfigSchema})
-`)
+	writer.writeLine(`const ${serviceBuilderName}Instance = new ServiceBuilder(${serviceInfoName})`)
+	writer.writeLine(`${serviceBuilderName}Instance.setConfigSchema(${serviceConfigSchema})`)
+	writer.blankLine()
+	writer.writeLine(`export const ${serviceBuilderName} = ${serviceBuilderName}Instance`)
 
 	return writer.toString()
 }

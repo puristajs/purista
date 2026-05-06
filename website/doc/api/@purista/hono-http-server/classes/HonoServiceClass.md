@@ -6,7 +6,7 @@
 
 # Class: HonoServiceClass\<Bindings, Variables\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:86](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L86)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:101](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L101)
 
 A service which creates a Hono server, adds the command endpoints of given services.
 The webserver needs to be started programmatically, after the `.start` method.
@@ -30,9 +30,10 @@ await pingService.start()
 
 const honoService = await honoV1Service.getInstance(eventBridge, {
   serviceConfig: {
-    services: [pingService]
+    enableDynamicRoutes: false,
   }
 })
+honoService.registerService(pingService)
 await honoService.start()
 
 const _serverInstance = serve({
@@ -62,13 +63,13 @@ const _serverInstance = serve({
 
 > **new HonoServiceClass**\<`Bindings`, `Variables`\>(`config`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:104](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L104)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:120](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L120)
 
 #### Parameters
 
 ##### config
 
-[`ServiceConstructorInput`](../../core/type-aliases/ServiceConstructorInput.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<\{ `apiMountPath`: `string`; `enableDynamicRoutes`: `boolean`; `enableHealth`: `boolean`; `healthFunction?`: `any`; `healthPath`: `string`; `logLevel`: `"error"` \| `"info"` \| `"warn"` \| `"debug"` \| `"trace"` \| `"fatal"`; `openApi?`: \{ `components?`: `any`; `enabled`: `boolean`; `externalDocs?`: \{ `description?`: `string`; `url`: `string`; \}; `info`: \{ `contact?`: \{ `email?`: `string`; `name?`: `string`; `url?`: `string`; \}; `description`: `string`; `license?`: \{ `name`: `string`; `url?`: `string`; \}; `termsOfService?`: `string`; `title`: `string`; `version`: `string`; \}; `openapi`: `string`; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\>; `security?`: `any`[]; `servers?`: `object`[]; `tags?`: `object`[]; \}; `protectHandler?`: `any`; `services`: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]; `traceHeaderField`: `string`; \}, [`EmptyObject`](../../core/type-aliases/EmptyObject.md)\>\>
+[`ServiceConstructorInput`](../../core/type-aliases/ServiceConstructorInput.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<\{ `apiMountPath`: `string`; `autoRegisterServicesFromConfig`: `boolean`; `enableDynamicRoutes`: `boolean`; `enableHealth`: `boolean`; `healthFunction?`: `any`; `healthPath`: `string`; `logLevel`: `"error"` \| `"info"` \| `"warn"` \| `"debug"` \| `"trace"` \| `"fatal"`; `openApi?`: \{ `components?`: `any`; `enabled`: `boolean`; `externalDocs?`: \{ `description?`: `string`; `url`: `string`; \}; `info`: \{ `contact?`: \{ `email?`: `string`; `name?`: `string`; `url?`: `string`; \}; `description`: `string`; `license?`: \{ `name`: `string`; `url?`: `string`; \}; `termsOfService?`: `string`; `title`: `string`; `version`: `string`; \}; `openapi`: `string`; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\>; `security?`: `any`[]; `servers?`: `object`[]; `tags?`: `object`[]; \}; `problemDetails?`: \{ `typeBaseUri?`: `string`; \}; `protectHandler?`: `any`; `services`: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]; `streamRequestTimeoutMs`: `number`; `traceHeaderField`: `string`; \}, [`EmptyObject`](../../core/type-aliases/EmptyObject.md)\>\>
 
 #### Returns
 
@@ -96,7 +97,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:65
 
 > **app**: `Hono`\<\{ `Bindings`: `Bindings`; `Variables`: `Variables`; \}, `BlankSchema`, `"/"`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:93](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L93)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:108](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L108)
 
 The Hono instance
 
@@ -106,7 +107,7 @@ The Hono instance
 
 > **commandDefinitionList**: [`CommandDefinitionListResolved`](../../core/type-aliases/CommandDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:76
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:77
 
 #### Inherited from
 
@@ -116,7 +117,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:76
 
 ### commands
 
-> `protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../../core/type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
+> `protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../../core/type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`\>\>
 
 Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:61
 
@@ -130,11 +131,15 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:61
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:80
 
 #### apiMountPath
 
 > **apiMountPath**: `string`
+
+#### autoRegisterServicesFromConfig
+
+> **autoRegisterServicesFromConfig**: `boolean`
 
 #### enableDynamicRoutes
 
@@ -248,6 +253,14 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
 
 > `optional` **tags**: `object`[]
 
+#### problemDetails?
+
+> `optional` **problemDetails**: `object`
+
+##### problemDetails.typeBaseUri?
+
+> `optional` **typeBaseUri**: `string`
+
 #### protectHandler?
 
 > `optional` **protectHandler**: `any`
@@ -255,6 +268,10 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
 #### services
 
 > **services**: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]
+
+#### streamRequestTimeoutMs
+
+> **streamRequestTimeoutMs**: `number`
 
 #### traceHeaderField
 
@@ -270,7 +287,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
 
 > `protected` **configSchema**: [`Schema`](../../core/type-aliases/Schema.md) \| `undefined`
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:31
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:29
 
 #### Inherited from
 
@@ -282,7 +299,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `protected` **configStore**: [`ConfigStore`](../../core/interfaces/ConfigStore.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:29
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:27
 
 #### Inherited from
 
@@ -294,7 +311,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `protected` **eventBridge**: [`EventBridge`](../../core/interfaces/EventBridge.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:24
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -306,7 +323,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `readonly` **info**: [`ServiceInfoType`](../../core/type-aliases/ServiceInfoType.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:23
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:21
 
 #### Inherited from
 
@@ -318,7 +335,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **isStarted**: `boolean`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:81
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:82
 
 #### Inherited from
 
@@ -330,7 +347,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:81
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:25
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -342,7 +359,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **openApi**: `OpenApiBuilder`
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:98](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L98)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:113](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L113)
 
 The OpenApiBuilder instance
 
@@ -376,7 +393,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:64
 
 > **resources**: [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:80
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:81
 
 #### Inherited from
 
@@ -388,7 +405,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:80
 
 > `protected` **secretStore**: [`SecretStore`](../../core/interfaces/SecretStore.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:28
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:26
 
 #### Inherited from
 
@@ -400,7 +417,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **spanProcessor**: `SpanProcessor` \| `undefined`
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:26
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:24
 
 #### Inherited from
 
@@ -412,7 +429,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `protected` **stateStore**: [`StateStore`](../../core/interfaces/StateStore.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:30
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:28
 
 #### Inherited from
 
@@ -424,7 +441,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **streamDefinitionList**: [`StreamDefinitionListResolved`](../../core/type-aliases/StreamDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:78
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
 
 #### Inherited from
 
@@ -434,7 +451,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:78
 
 ### streams
 
-> `protected` **streams**: `Map`\<`string`, [`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
+> `protected` **streams**: `Map`\<`string`, [`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`\>\>
 
 Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:62
 
@@ -448,7 +465,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:62
 
 > **subscriptionDefinitionList**: [`SubscriptionDefinitionListResolved`](../../core/type-aliases/SubscriptionDefinitionListResolved.md)\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:77
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:78
 
 #### Inherited from
 
@@ -458,7 +475,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:77
 
 ### subscriptions
 
-> `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../../core/type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
+> `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../../core/type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`\>\>
 
 Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:60
 
@@ -472,7 +489,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:60
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:27
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:25
 
 #### Inherited from
 
@@ -486,7 +503,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **get** **name**(): `string`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:83
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:84
 
 ##### Returns
 
@@ -504,7 +521,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:83
 
 > **get** **serviceInfo**(): [`ServiceInfoType`](../../core/type-aliases/ServiceInfoType.md)
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:45
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:43
 
 Get service info
 
@@ -522,7 +539,7 @@ Get service info
 
 > **addEndpoint**(`metadata`, `service`): `void`
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:332](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L332)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:372](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L372)
 
 Adds a single service command endpoint to the Hono router
 
@@ -550,7 +567,7 @@ Address of the service hosting the command
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:611](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L611)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:719](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L719)
 
 Stop and destroy the current service
 
@@ -564,43 +581,11 @@ Stop and destroy the current service
 
 ***
 
-### emit()
-
-> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
-
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:16
-
-#### Type Parameters
-
-##### K
-
-`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<[`ServiceEvents`](../../core/type-aliases/ServiceEvents.md)\>
-
-#### Parameters
-
-##### eventName
-
-`K`
-
-##### parameter?
-
-[`ServiceEvents`](../../core/type-aliases/ServiceEvents.md)\[`K`\]
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`Service`](../../core/classes/Service.md).[`emit`](../../core/classes/Service.md#emit)
-
-***
-
 ### executeCommand()
 
 > **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:140
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:142
 
 Called when a command is received by the service
 
@@ -626,7 +611,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:184
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:192
 
 #### Parameters
 
@@ -648,7 +633,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:184
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:186
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:194
 
 #### Parameters
 
@@ -670,87 +655,11 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:186
 
 ***
 
-### getAgentInvokeFunction()
-
-> `protected` **getAgentInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `agentInvokes?`): \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`receiver`, `payload`, `parameter`) => [`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
-
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
-
-#### Type Parameters
-
-##### Invokes
-
-`Invokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
-
-#### Parameters
-
-##### serviceTarget
-
-`string`
-
-##### traceId?
-
-`string`
-
-##### principalId?
-
-`string`
-
-##### tenantId?
-
-`string`
-
-##### agentInvokes?
-
-`Invokes`
-
-#### Returns
-
-> \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`receiver`, `payload`, `parameter`): [`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
-
-##### Type Parameters
-
-###### InvokeResponseType
-
-`InvokeResponseType` = \{ `history`: `any`[]; `message`: `any`; \}
-
-###### PayloadType
-
-`PayloadType` = \{\[`x`: `string`\]: `unknown`; `attachments`: `any`[]; `conversationId?`: `string`; `history`: `any`[]; `message`: `string`; \}
-
-###### ParameterType
-
-`ParameterType` = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
-
-##### Parameters
-
-###### receiver
-
-[`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
-
-###### payload
-
-`PayloadType`
-
-###### parameter
-
-`ParameterType`
-
-##### Returns
-
-[`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
-
-#### Inherited from
-
-[`Service`](../../core/classes/Service.md).[`getAgentInvokeFunction`](../../core/classes/Service.md#getagentinvokefunction)
-
-***
-
 ### getConsumeStreamFunction()
 
 > `protected` **getConsumeStreamFunction**\<`StreamInvokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `streamInvokes?`): [`OpenStreamFunction`](../../core/type-aliases/OpenStreamFunction.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:132
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:134
 
 #### Type Parameters
 
@@ -794,7 +703,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:132
 
 > **getContextFunctions**(`logger`, `queueNamespace?`): [`ContextBase`](../../core/type-aliases/ContextBase.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:134
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:136
 
 #### Parameters
 
@@ -820,7 +729,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:134
 
 > `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `emitList?`): \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`) => `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:133
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:135
 
 #### Type Parameters
 
@@ -892,11 +801,27 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:133
 
 ***
 
+### getInFlightDiagnostics()
+
+> **getInFlightDiagnostics**(): [`InFlightDiagnostics`](../../core/type-aliases/InFlightDiagnostics.md)
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:186
+
+#### Returns
+
+[`InFlightDiagnostics`](../../core/type-aliases/InFlightDiagnostics.md)
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getInFlightDiagnostics`](../../core/classes/Service.md#getinflightdiagnostics)
+
+***
+
 ### getInvokeFunction()
 
 > `protected` **getInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `invokes?`): \<`Payload`, `Parameter`\>(`receiver`, `invokePayload`, `invokeparameter`, `contentType?`, `contentEncoding?`) => `Promise`\<`any`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:99
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
 
 #### Type Parameters
 
@@ -972,11 +897,27 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:99
 
 ***
 
+### getPausedSubscriptionConsumerState()
+
+> **getPausedSubscriptionConsumerState**(): [`PausedSubscriptionConsumersByRegistrationKey`](../../core/type-aliases/PausedSubscriptionConsumersByRegistrationKey.md)
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:188
+
+#### Returns
+
+[`PausedSubscriptionConsumersByRegistrationKey`](../../core/type-aliases/PausedSubscriptionConsumersByRegistrationKey.md)
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getPausedSubscriptionConsumerState`](../../core/classes/Service.md#getpausedsubscriptionconsumerstate)
+
+***
+
 ### getQueueNamespace()
 
 > `protected` **getQueueNamespace**(`queueInvokes?`, `traceId?`, `principalId?`, `tenantId?`): `object`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:110
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:101
 
 #### Parameters
 
@@ -1014,11 +955,27 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:110
 
 ***
 
+### getQueueWorkerPauseState()
+
+> **getQueueWorkerPauseState**(): [`QueueWorkerPauseStateByQueue`](../../core/type-aliases/QueueWorkerPauseStateByQueue.md)
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:187
+
+#### Returns
+
+[`QueueWorkerPauseStateByQueue`](../../core/type-aliases/QueueWorkerPauseStateByQueue.md)
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getQueueWorkerPauseState`](../../core/classes/Service.md#getqueueworkerpausestate)
+
+***
+
 ### getServiceHealth()
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../../core/type-aliases/ServiceHealthState.md)\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:183
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:185
 
 #### Returns
 
@@ -1034,7 +991,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:183
 
 > **getTracer**(`name?`, `version?`): `Tracer`
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:51
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:49
 
 Returns open telemetry tracer of this service
 
@@ -1064,7 +1021,7 @@ Tracer
 
 > `protected` **initializeEventbridgeConnect**(`commandDefinitionList`, `subscriptions`, `streams`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:91
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:92
 
 Connect service to event bridge to receive commands and command responses
 
@@ -1096,7 +1053,7 @@ Connect service to event bridge to receive commands and command responses
 
 > `protected` **initializeQueues**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:92
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:93
 
 #### Returns
 
@@ -1112,7 +1069,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:92
 
 > **invoke**\<`T`\>(`input`, `endpoint`): `Promise`\<`T`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:534](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L534)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:638](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L638)
 
 #### Type Parameters
 
@@ -1136,75 +1093,11 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:534](https
 
 ***
 
-### off()
-
-> **off**\<`K`\>(`eventName`, `fn`): `void`
-
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:15
-
-#### Type Parameters
-
-##### K
-
-`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<[`ServiceEvents`](../../core/type-aliases/ServiceEvents.md)\>
-
-#### Parameters
-
-##### eventName
-
-`K`
-
-##### fn
-
-[`EventReceiver`](../../core/type-aliases/EventReceiver.md)\<[`ServiceEvents`](../../core/type-aliases/ServiceEvents.md)\[`K`\]\>
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`Service`](../../core/classes/Service.md).[`off`](../../core/classes/Service.md#off)
-
-***
-
-### on()
-
-> **on**\<`K`\>(`eventName`, `fn`): `void`
-
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
-
-#### Type Parameters
-
-##### K
-
-`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<[`ServiceEvents`](../../core/type-aliases/ServiceEvents.md)\>
-
-#### Parameters
-
-##### eventName
-
-`K`
-
-##### fn
-
-[`EventReceiver`](../../core/type-aliases/EventReceiver.md)\<[`ServiceEvents`](../../core/type-aliases/ServiceEvents.md)\[`K`\]\>
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`Service`](../../core/classes/Service.md).[`on`](../../core/classes/Service.md#on)
-
-***
-
 ### openStream()
 
-> **openStream**(`input`, `endpoint`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`unknown`, `unknown`\>\>
+> **openStream**(`input`, `endpoint`, `timeoutMs?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`unknown`, `unknown`\>\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:549](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L549)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:653](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L653)
 
 #### Parameters
 
@@ -1216,9 +1109,39 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:549](https
 
 `string`
 
+##### timeoutMs?
+
+`number` = `...`
+
 #### Returns
 
 `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`unknown`, `unknown`\>\>
+
+***
+
+### pauseQueueWorkers()
+
+> **pauseQueueWorkers**(`queueName`, `reason?`): `void`
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:189
+
+#### Parameters
+
+##### queueName
+
+`string`
+
+##### reason?
+
+`string`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`pauseQueueWorkers`](../../core/classes/Service.md#pausequeueworkers)
 
 ***
 
@@ -1226,7 +1149,7 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:549](https
 
 > **prepareDestroy**(): `object`
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:604](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L604)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:712](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L712)
 
 Helper function to be used in gracefulShutdown.
 It prevents to handle new requests during shut down.
@@ -1266,7 +1189,7 @@ honoService
 
 > **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:176
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:178
 
 #### Parameters
 
@@ -1288,7 +1211,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:176
 
 > **registerService**(...`services`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:311](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L311)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:344](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L344)
 
 Register a service instance.
 Must be called before `.start`.
@@ -1298,7 +1221,7 @@ Adds the endpoints of the service commands to the Hono router
 
 ##### services
 
-...[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]
+...`AnyService`[]
 
 #### Returns
 
@@ -1310,13 +1233,13 @@ Adds the endpoints of the service commands to the Hono router
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:185
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:193
 
 #### Parameters
 
 ##### streamDefinition
 
-[`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>
+[`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`\>
 
 #### Returns
 
@@ -1332,7 +1255,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:185
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:187
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:195
 
 #### Parameters
 
@@ -1350,11 +1273,17 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:187
 
 ***
 
-### removeAllListeners()
+### resumeQueueWorkers()
 
-> **removeAllListeners**(): `void`
+> **resumeQueueWorkers**(`queueName`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:17
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:190
+
+#### Parameters
+
+##### queueName
+
+`string`
 
 #### Returns
 
@@ -1362,7 +1291,29 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:17
 
 #### Inherited from
 
-[`Service`](../../core/classes/Service.md).[`removeAllListeners`](../../core/classes/Service.md#removealllisteners)
+[`Service`](../../core/classes/Service.md).[`resumeQueueWorkers`](../../core/classes/Service.md#resumequeueworkers)
+
+***
+
+### resumeSubscriptionConsumer()
+
+> **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:191
+
+#### Parameters
+
+##### registrationKey
+
+`string`
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`resumeSubscriptionConsumer`](../../core/classes/Service.md#resumesubscriptionconsumer)
 
 ***
 
@@ -1370,7 +1321,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:17
 
 > `protected` **sendServiceInfo**(`infoType`, `target?`, `payload?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:98
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:99
 
 Broadcast service info message
 
@@ -1406,7 +1357,7 @@ function name is need in messages like InfoServiceFunctionAdded
 
 > **setHealthFunction**(`fn`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:141](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L141)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:157](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L157)
 
 Set a custom health function
 
@@ -1426,7 +1377,7 @@ Set a custom health function
 
 > **setHonoTypes**\<`E`\>(): `HonoServiceClass`\<`Bindings` & `E`\[`"Bindings"`\], `Variables` & `E`\[`"Variables"`\]\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:128](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L128)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:144](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L144)
 
 Set the Hono types for Variables and Bindings.
 
@@ -1448,7 +1399,7 @@ The service instance with propper types
 
 > **setProtectMiddleware**(`fn`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:161](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L161)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:177](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L177)
 
 Set the middleware which will be executed on all endpoints which are marked as secured/protected.
 It can also be used to enhance input information.
@@ -1479,7 +1430,7 @@ return auth(c, next)
 
 > **setServiceAvailable**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:584](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L584)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:692](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L692)
 
 Set the service available
 Request will be processed.
@@ -1494,7 +1445,7 @@ Request will be processed.
 
 > **setServiceUnavailable**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:576](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L576)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:684](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L684)
 
 Set the service unavailable
 The webserver will return 503 Service Unavailable
@@ -1509,7 +1460,7 @@ The webserver will return 503 Service Unavailable
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:166](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L166)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:203](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L203)
 
 It connects to the event bridge and subscribes to the topics that are in the subscription list.
 
@@ -1527,7 +1478,7 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:60
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:58
 
 Start a child span for opentelemetry tracking
 
@@ -1579,7 +1530,7 @@ return value of fn
 
 > `protected` **startQueueWorkers**(): `void`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:177
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:179
 
 #### Returns
 
@@ -1595,7 +1546,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:177
 
 > `protected` **stopQueueWorkers**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:178
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:180
 
 #### Returns
 
@@ -1611,7 +1562,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:178
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:76
+Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:74
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

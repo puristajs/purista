@@ -1,3 +1,5 @@
+import type { DefinitionEventBridgeConsumerFailureHandling } from './DefinitionEventBridgeConsumerFailureHandling.js'
+
 /**
  * Settings and advices for the event bridge, which are set in the command or subscription builder.
  * The properties are advices and hints.
@@ -12,7 +14,7 @@ export type DefinitionEventBridgeConfig = {
 	/**
 	 * Send the acknowledge to message broker as soon as the message arrives
 	 * - defaults to true for commands
-	 * - defaults to false for subscriptions
+	 * - defaults to true for subscriptions
 	 *
 	 * */
 	autoacknowledge: boolean
@@ -28,4 +30,12 @@ export type DefinitionEventBridgeConfig = {
 	 * @default true
 	 */
 	shared: boolean
+	/**
+	 * Advisory retry and dead-letter handling for consumer-style registrations.
+	 *
+	 * This is primarily relevant for subscriptions and other push consumers.
+	 * Adapters may ignore or partially honor these settings when the provider
+	 * lacks broker-side retry or dead-letter support.
+	 */
+	consumerFailureHandling?: DefinitionEventBridgeConsumerFailureHandling
 }
