@@ -9,11 +9,10 @@
 	},
 	"author": "Sebastian Wessel",
 	"license": "ISC",
-	"preferGlobal": "true",
-	"main": "./dist/commonjs/api/index.js",
-	"type": "module",
+	"main": "./dist/api/index.js",
+	"type": "commonjs",
 	"bin": {
-		"purista": "./dist/commonjs/bin.js"
+		"purista": "./dist/bin.js"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -24,38 +23,28 @@
 	"scripts": {
 		"start": "./dist/bin.js",
 		"dev": "tsx src/bin.ts",
-		"build": "rimraf dist .tshy .tshy-build && tshy && chmod 755 dist/commonjs/bin.js",
+		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json && chmod 755 dist/bin.js",
 		"lint": "npx @biomejs/biome check --write",
 		"test": "vitest"
 	},
-	"tshy": {
-		"exclude": [
-			"src/**/*.test.ts"
-		],
-		"exports": {
-			"./package.json": "./package.json",
-			".": "./src/api/index.ts"
-		}
-	},
 	"devDependencies": {
 		"@types/minimist": "^1.2.5",
-		"@types/node": "^25.2.1",
-		"@types/sinon": "^21.0.0",
-		"esbuild": "^0.27.3",
-		"rimraf": "^6.1.2",
-		"tshy": "^3.1.3",
+		"@types/node": "^25.6.0",
+		"@types/sinon": "^21.0.1",
+		"esbuild": "^0.28.0",
+		"rimraf": "^6.1.3",
 		"tsx": "^4.21.0",
-		"type-fest": "^5.4.3"
+		"type-fest": "^5.6.0"
 	},
 	"dependencies": {
-		"@inquirer/confirm": "^6.0.4",
-		"@inquirer/input": "^5.0.4",
-		"@inquirer/select": "^5.0.4",
+		"@inquirer/confirm": "^6.0.12",
+		"@inquirer/input": "^5.0.12",
+		"@inquirer/select": "^5.1.4",
 		"code-block-writer": "^13.0.3",
 		"commander": "^14.0.3",
-		"sinon": "^21.0.1",
-		"ts-morph": "^27.0.2",
-		"zod": "^4.3.6"
+		"sinon": "^22.0.0",
+		"ts-morph": "^28.0.0",
+		"zod": "^4.4.3"
 	},
 	"peerDependenciesMeta": {},
 	"files": [
@@ -64,16 +53,10 @@
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
-			"import": {
-				"types": "./dist/esm/api/index.d.ts",
-				"default": "./dist/esm/api/index.js"
-			},
-			"require": {
-				"types": "./dist/commonjs/api/index.d.ts",
-				"default": "./dist/commonjs/api/index.js"
-			}
+			"types": "./dist/api/index.d.ts",
+			"require": "./dist/api/index.js",
+			"default": "./dist/api/index.js"
 		}
 	},
-	"types": "./dist/commonjs/api/index.d.ts",
-	"module": "./dist/esm/api/index.js"
+	"types": "./dist/api/index.d.ts"
 }

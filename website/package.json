@@ -17,15 +17,15 @@
 		"vanilla-cookieconsent": "^3.1.0"
 	},
 	"devDependencies": {
-		"@types/node": "^25.2.1",
+		"@types/node": "^25.6.0",
 		"date-fns": "^4.1.0",
-		"feed": "^5.2.0",
+		"feed": "^5.2.1",
 		"gray-matter": "^4.0.3",
-		"mermaid": "^11.12.3",
-		"typescript": "^5.9.3",
+		"mermaid": "^11.14.0",
+		"typescript": "^6.0.3",
 		"vitepress": "^2.0.0-alpha.16",
-		"vitepress-mermaid-renderer": "^1.1.11",
-		"vitepress-sidebar": "^1.33.1",
-		"vue": "^3.5.27"
+		"vitepress-mermaid-renderer": "^1.1.23",
+		"vitepress-sidebar": "^1.33.2",
+		"vue": "^3.5.34"
 	}
 }

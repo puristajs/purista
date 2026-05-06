@@ -7,7 +7,7 @@
 		"sourceMap": false,
 		"declarationMap": true,
 		"paths": {
-			"@purista/core": ["../core/dist/esm/index.d.ts"]
+			"@purista/core": ["../core/dist/index.d.ts"]
 		},
 		"strictNullChecks": true,
 		"types": ["vitest/globals", "node"]

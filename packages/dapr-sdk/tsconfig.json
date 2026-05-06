@@ -5,8 +5,8 @@
 		"outDir": "./dist",
 		"declaration": true,
 		"paths": {
-			"@purista/base-http-bridge": ["../base-http-bridge/dist/esm/index.d.ts"],
-			"@purista/core": ["../core/dist/esm/index.d.ts"]
+			"@purista/base-http-bridge": ["../base-http-bridge/dist/index.d.ts"],
+			"@purista/core": ["../core/dist/index.d.ts"]
 		},
 		"sourceMap": false,
 		"declarationMap": true,

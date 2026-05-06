@@ -20,12 +20,12 @@
 		"test": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@types/node": "^25.2.1",
+		"@types/node": "^25.6.0",
 		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
+		"typescript": "^6.0.3"
 	},
 	"dependencies": {
 		"@purista/core": "*",
-		"zod": "^4.3.6"
+		"zod": "^4.4.3"
 	}
 }

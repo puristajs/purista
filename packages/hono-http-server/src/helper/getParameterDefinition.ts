@@ -24,7 +24,7 @@ export const getParameterDefinition = (path: string, parameterschema?: SchemaObj
 
 		const schema = parameterschema?.properties?.[name]
 
-		if (!!schema && isReferenceObject(schema)) {
+		if (schema && isReferenceObject(schema)) {
 			return {
 				in: 'path',
 				name,

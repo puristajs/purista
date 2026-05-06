@@ -2,8 +2,10 @@
 	"$schema": "https://json.schemastore.org/tsconfig",
 	"display": "Node 18",
 	"compilerOptions": {
+		"rootDir": "./src",
 		"outDir": "dist",
 		"strict": true,
+		"ignoreDeprecations": "6.0",
 		"module": "es2022",
 		"declaration": true,
 		"removeComments": false,

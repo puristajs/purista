@@ -12,9 +12,10 @@ export const getInvoke =
 		parameter = {},
 	): Promise<Output> => {
 		const ctx = Context.current()
+		const senderServiceName = ctx.info.workflowType ?? 'temporal'
 		return eventBridge.invoke<Output>({
 			sender: {
-				serviceName: ctx.info.workflowType,
+				serviceName: senderServiceName,
 				serviceVersion: '1',
 				serviceTarget: ctx.info.activityType,
 				instanceId: eventBridge.instanceId,

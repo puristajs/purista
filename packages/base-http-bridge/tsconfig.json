@@ -5,7 +5,7 @@
 		"outDir": "./dist",
 		"declaration": true,
 		"paths": {
-			"@purista/core": ["../core/dist/esm/index.d.ts"]
+			"@purista/core": ["../core/dist/index.d.ts"]
 		},
 		"sourceMap": false,
 		"declarationMap": true,

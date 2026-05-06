@@ -27,6 +27,6 @@ export default defineConfig({
 			'**/test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
 			'**/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
 		],
-		exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**', '**/.tshy-build/**', 'website/**'],
+		exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**', 'website/**'],
 	},
 })
