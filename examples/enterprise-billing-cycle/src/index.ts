@@ -95,8 +95,10 @@ const billingServiceInfo = {
 	serviceDescription: 'Enterprise billing cycle example',
 } as const satisfies ServiceInfoType
 
-const billingServiceBuilder = new ServiceBuilder(billingServiceInfo)
-	.defineResource<'ledger', BillingResources['ledger']>()
+const billingServiceBuilder = new ServiceBuilder(billingServiceInfo).defineResource<
+	'ledger',
+	BillingResources['ledger']
+>()
 
 const monthlyBillingSchedule = billingServiceBuilder
 	.getScheduleBuilder('monthlyBillingCycle', 'Monthly billing cycle trigger')

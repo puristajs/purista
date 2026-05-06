@@ -1,8 +1,8 @@
 import type { Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../../types/EmptyObject.js'
 import type { InvokeList } from '../../types/InvokeList.js'
-import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../../types/StreamInvokeList.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 
 import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandFunctionContext } from './CommandFunctionContext.js'

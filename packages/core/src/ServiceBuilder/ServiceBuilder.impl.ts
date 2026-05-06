@@ -22,11 +22,10 @@ import type { Logger } from '../core/types/Logger.js'
 import type { LogLevelName } from '../core/types/LogLevelName.js'
 import type { NeverObject } from '../core/types/NeverObject.js'
 import type { Prettify } from '../core/types/Prettify.js'
-import type { QueueDefinitionList, QueueDefinitionListResolved } from '../core/types/queue/QueueDefinitionList.js'
-import type { QueueJobStore } from '../core/types/queue/QueueJobStore.js'
-import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { EventToQueueBindingDefinition } from '../core/types/queue/EventToQueueBindingDefinition.js'
-import type { ScheduleDefinition } from '../core/types/schedule/index.js'
+import type { QueueDefinitionList, QueueDefinitionListResolved } from '../core/types/queue/QueueDefinitionList.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueJobStore } from '../core/types/queue/QueueJobStore.js'
 import type {
 	QueueWorkerDefinitionList,
 	QueueWorkerDefinitionListResolved,
@@ -37,6 +36,7 @@ import type { ServiceConstructorInput } from '../core/types/ServiceConstructorIn
 import type { SetNewTypeValue, SetNewTypeValues } from '../core/types/SetNewTypeValue.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { ScheduleDefinition } from '../core/types/schedule/index.js'
 import type { StreamDefinitionList, StreamDefinitionListResolved } from '../core/types/stream/StreamDefinitionList.js'
 import type {
 	SubscriptionDefinitionList,
@@ -212,7 +212,13 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * })
 	 * ```
 	 */
-	bindEventToQueue(eventName: string, queueName: string, options: Omit<EventToQueueBindingDefinition, 'eventName' | 'queueName' | 'idempotencyMode'> & { idempotencyMode?: EventToQueueBindingDefinition['idempotencyMode'] } = {}) {
+	bindEventToQueue(
+		eventName: string,
+		queueName: string,
+		options: Omit<EventToQueueBindingDefinition, 'eventName' | 'queueName' | 'idempotencyMode'> & {
+			idempotencyMode?: EventToQueueBindingDefinition['idempotencyMode']
+		} = {},
+	) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,

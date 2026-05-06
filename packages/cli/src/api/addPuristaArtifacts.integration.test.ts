@@ -256,11 +256,15 @@ describe('CLI artifact generation (e2e)', () => {
 			expect(agentBuilder).not.toContain(term)
 		}
 		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
-		expect(agentTestContent).toContain("import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'")
+		expect(agentTestContent).toContain(
+			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'",
+		)
 		expect(agentTestContent).toContain('runs with the attached-agent harness runtime')
 		expect(agentTestContent).toContain("provider: createScriptedHarnessModel().nextObject({ message: 'hello' })")
 		expect(agentTestContent).toContain("model: 'gpt-4.1-mini'")
-		expect(agentTestContent).toContain('const harness = await createAgentTestHarness(await triageAgentBuilder.getDefinition(), {')
+		expect(agentTestContent).toContain(
+			'const harness = await createAgentTestHarness(await triageAgentBuilder.getDefinition(), {',
+		)
 		expect(agentTestContent).toContain("expect(result).toEqual({ message: 'hello' })")
 		expect(agentTestContent).not.toContain('ai: {')
 		expect(agentTestContent).not.toContain('await harness.destroy()')
@@ -312,6 +316,5 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(streamTypes).toContain('UserV1SearchUsersChunkPayload')
 		expect(streamTypes).toContain('UserV1SearchUsersFinalPayload')
 		expect(readFileSync(join(streamDir, 'searchUsersStreamBuilder.ts'), 'utf-8')).toContain('searchUsersStreamBuilder')
-
 	}, 60_000)
 })

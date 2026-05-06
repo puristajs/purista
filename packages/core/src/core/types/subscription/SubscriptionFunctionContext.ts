@@ -66,6 +66,5 @@ export type SubscriptionFunctionContext<
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = Prettify<
-	ContextBase &
-		SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes>
+	ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes>
 >

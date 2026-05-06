@@ -1,7 +1,7 @@
 import type { DefinitionQueueBridgeConfig } from '../core/types/DefinitionQueueBridgeConfig.js'
 import { defaultQueueLifecycleConfig } from '../core/types/queue/defaultQueueLifecycleConfig.js'
-import type { QueueLongRunningExecutionProfile } from '../core/types/queue/QueueExecutionProfile.js'
 import type { QueueDefinition } from '../core/types/queue/QueueDefinition.js'
+import type { QueueLongRunningExecutionProfile } from '../core/types/queue/QueueExecutionProfile.js'
 import type { QueueLifecycleConfig } from '../core/types/queue/QueueLifecycleConfig.js'
 import type { QueueResultPolicy } from '../core/types/queue/QueueResultPolicy.js'
 import type { QueueTransformHook } from '../core/types/queue/QueueTransformHook.js'

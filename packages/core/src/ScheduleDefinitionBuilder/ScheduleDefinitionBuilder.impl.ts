@@ -36,7 +36,11 @@ export class ScheduleDefinitionBuilder {
 		return this.createDefinition('command', commandName, options)
 	}
 
-	private createDefinition(targetKind: ScheduleTargetKind, targetName: string, options: ScheduleOptions): ScheduleDefinition {
+	private createDefinition(
+		targetKind: ScheduleTargetKind,
+		targetName: string,
+		options: ScheduleOptions,
+	): ScheduleDefinition {
 		if (targetName.trim() === '') {
 			throw new Error('ScheduleDefinitionBuilder requires a non-empty target name')
 		}

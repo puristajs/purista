@@ -27,9 +27,9 @@ import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
-import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -173,12 +173,12 @@ export class CommandDefinitionBuilder<
 		any,
 		any,
 		any,
-			C['Resources'],
-			C['Invokes'],
-			C['StreamInvokes'],
-			C['EmitList'],
-			C['QueueInvokes']
-		>
+		C['Resources'],
+		C['Invokes'],
+		C['StreamInvokes'],
+		C['EmitList'],
+		C['QueueInvokes']
+	>
 
 	constructor(
 		private commandName: Exclude<string, ''>,

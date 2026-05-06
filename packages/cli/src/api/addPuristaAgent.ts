@@ -111,7 +111,6 @@ export const addPuristaAgent = async (input: {
 	const serviceEntry = input.puristaProject.services[input.serviceName][input.serviceVersion]
 	const agentDirName = convertToProjectFileCasing(input.agentName, input.puristaConfig)
 	const serviceBuilderTemplate = `${input.serviceName} v${input.serviceVersion} service builder`
-	const serviceBuilderFileName = convertToProjectFileCasing(serviceBuilderTemplate, input.puristaConfig)
 	const serviceBuilderName = camelCase(serviceBuilderTemplate)
 	const agentPath = join(
 		projectPath,
@@ -170,10 +169,7 @@ export const addPuristaAgent = async (input: {
 		}),
 	)
 
-	await writeFile(
-		join(agentPath, 'index.ts'),
-		`export { ${agentBuilderName} } from './${builderFileName}.js'\n`,
-	)
+	await writeFile(join(agentPath, 'index.ts'), `export { ${agentBuilderName} } from './${builderFileName}.js'\n`)
 
 	await addAgentDefinitionToService({
 		serviceFile: join(projectPath, serviceBasePath, serviceEntry.serviceFile),

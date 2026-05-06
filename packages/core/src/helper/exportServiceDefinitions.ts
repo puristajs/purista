@@ -31,18 +31,21 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 	}, {})
 	const streams = (definitionToAdd.streams ?? []).reduce((current, definition) => {
 		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.streamName]: definition,
 		}
 	}, {})
 	const queues = (definitionToAdd.queues ?? []).reduce((current, definition) => {
 		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.queueName]: definition,
 		}
 	}, {})
 	const queueWorkers = (definitionToAdd.queueWorkers ?? []).reduce((current, definition) => {
 		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.name]: definition,
 		}
@@ -52,6 +55,7 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 	const schedules = [...(definitionToAdd.schedules ?? []), ...commandSchedules, ...queueSchedules].reduce(
 		(current, definition) => {
 			return {
+				// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 				...current,
 				[definition.name]: {
 					...definition,

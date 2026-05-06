@@ -2,9 +2,9 @@ import type { Schema } from '../../../schema/index.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
-import type { ScheduleDefinition } from '../schedule/index.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
+import type { ScheduleDefinition } from '../schedule/index.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
@@ -84,12 +84,12 @@ export type CommandDefinition<
 				MessageParamsType,
 				FunctionPayloadType,
 				FunctionParamsType,
-					Resources,
-					Invokes,
-					StreamInvokes,
-					EmitList,
-					QueueInvokes
-				>
+				Resources,
+				Invokes,
+				StreamInvokes,
+				EmitList,
+				QueueInvokes
+			>
 		>
 		afterGuard?: Record<
 			string,
@@ -100,12 +100,12 @@ export type CommandDefinition<
 				FunctionPayloadType,
 				FunctionParamsType,
 				FunctionOutputType,
-					Resources,
-					Invokes,
-					StreamInvokes,
-					EmitList,
-					QueueInvokes
-				>
+				Resources,
+				Invokes,
+				StreamInvokes,
+				EmitList,
+				QueueInvokes
+			>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema

@@ -12,12 +12,7 @@ import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.j
 import type { StreamWriter } from '../core/types/stream/StreamWriter.js'
 import type { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/StreamDefinitionBuilder.impl.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
-import {
-	createBaseContextStubs,
-	createInvokeProxy,
-	createMockSpan,
-	createResourceProxy,
-} from './sharedContextMocks.js'
+import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResourceProxy } from './sharedContextMocks.js'
 
 /**
  * Infer the internal builder type configuration from a stream builder.
@@ -73,13 +68,13 @@ export type StreamContextMockResult<TBuilder extends StreamDefinitionBuilder<any
 			Infer<StreamContextMockBuilderTypes<TBuilder>['PayloadSchema']>,
 			Infer<StreamContextMockBuilderTypes<TBuilder>['ParamsSchema']>,
 			StreamContextMockBuilderTypes<TBuilder>['Resources'],
-				StreamContextMockBuilderTypes<TBuilder>['Invokes'],
-				StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
-				StreamContextMockBuilderTypes<TBuilder>['EmitList'],
-				StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
-			>['service']
-			resources: Partial<StreamContextMockBuilderTypes<TBuilder>['Resources']>
-			writer: {
+			StreamContextMockBuilderTypes<TBuilder>['Invokes'],
+			StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
+			StreamContextMockBuilderTypes<TBuilder>['EmitList'],
+			StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		>['service']
+		resources: Partial<StreamContextMockBuilderTypes<TBuilder>['Resources']>
+		writer: {
 			write: SinonStub
 			close: SinonStub
 			fail: SinonStub
@@ -221,10 +216,10 @@ export const createStreamContextMock = <TBuilder extends StreamDefinitionBuilder
 			void opts
 			void contextValue
 			return fn(createMockSpan(input.sandbox))
-			}),
-			service: invokeProxy.api,
-			stream: streamProxy.api,
-			secrets: {
+		}),
+		service: invokeProxy.api,
+		stream: streamProxy.api,
+		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
 			removeSecret: base.stubs.removeSecret.rejects(new Error('removeSecret is not stubbed')),
@@ -257,13 +252,13 @@ export const createStreamContextMock = <TBuilder extends StreamDefinitionBuilder
 						Infer<StreamContextMockBuilderTypes<TBuilder>['PayloadSchema']>,
 						Infer<StreamContextMockBuilderTypes<TBuilder>['ParamsSchema']>,
 						StreamContextMockBuilderTypes<TBuilder>['Resources'],
-							StreamContextMockBuilderTypes<TBuilder>['Invokes'],
-							StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
-							StreamContextMockBuilderTypes<TBuilder>['EmitList'],
-							StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
-						>['service']
-					>(),
-				writer: writerStubs,
+						StreamContextMockBuilderTypes<TBuilder>['Invokes'],
+						StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
+						StreamContextMockBuilderTypes<TBuilder>['EmitList'],
+						StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
+					>['service']
+				>(),
+			writer: writerStubs,
 		},
 		chunks,
 		get finalValue() {

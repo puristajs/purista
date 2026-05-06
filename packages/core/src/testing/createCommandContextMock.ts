@@ -11,12 +11,7 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import type { Schema } from '../schema/index.js'
-import {
-	createBaseContextStubs,
-	createInvokeProxy,
-	createMockSpan,
-	createResourceProxy,
-} from './sharedContextMocks.js'
+import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResourceProxy } from './sharedContextMocks.js'
 
 /**
  * Infer the internal builder type configuration from a command builder.
@@ -185,10 +180,10 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 			void opts
 			void contextValue
 			return fn(createMockSpan(input.sandbox))
-			}),
-			service: invokeProxy.api,
-			stream: streamProxy.api,
-			secrets: {
+		}),
+		service: invokeProxy.api,
+		stream: streamProxy.api,
+		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
 			removeSecret: base.stubs.removeSecret.rejects(new Error('removeSecret is not stubbed')),
