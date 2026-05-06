@@ -2,6 +2,7 @@ import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
+import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
 const toAgentIdentifier = (name: string) => {
@@ -12,7 +13,8 @@ const toAgentIdentifier = (name: string) => {
 export const getAgentBuilderFileContent = (input: {
 	agentName: string
 	agentDescription: string
-	agentVersion: string
+	serviceName: string
+	serviceVersion: string
 	responseEventName?: string
 	puristaConfig: PuristaConfig
 	codeWriterOptions?: Partial<Options>
@@ -20,9 +22,14 @@ export const getAgentBuilderFileContent = (input: {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const schemaName = `${agentIdentifier}InputSchema`
-	const addSuccessEvent = !!input.responseEventName?.trim()
+	const serviceBuilderTemplate = `${input.serviceName} v${input.serviceVersion} service builder`
+	const serviceBuilderName = camelCase(serviceBuilderTemplate)
+	const serviceBuilderFileName = convertToProjectFileCasing(serviceBuilderTemplate, input.puristaConfig)
+	const successEventName = input.responseEventName?.trim()
+		? convertToProjectEventCasing(input.responseEventName, input.puristaConfig)
+		: undefined
 
-	writer.writeLine("import { AgentBuilder } from '@purista/ai'")
+	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceBuilderFileName}.js'`)
 	writer.writeLine("import { extendApi } from '@purista/core'")
 	writer.writeLine("import { z } from 'zod'").blankLine()
 
@@ -39,60 +46,40 @@ export const getAgentBuilderFileContent = (input: {
 	})
 	writer.writeLine(')').blankLine()
 
-	writer.writeLine(`export const ${agentIdentifier} = new AgentBuilder({`)
+	writer.writeLine(`export const ${agentIdentifier}Builder = ${serviceBuilderName}`)
 	writer.indent(() => {
-		writer.writeLine(`agentName: '${agentIdentifier}',`)
-		writer.writeLine(`agentVersion: '${input.agentVersion}',`)
-		writer.writeLine(`description: '${input.agentDescription}',`)
-	})
-	writer.writeLine('})')
-	writer.indent(() => {
-		if (addSuccessEvent) {
-			writer.writeLine(
-				`.setSuccessEventName('${convertToProjectEventCasing(input.responseEventName as string, input.puristaConfig)}')`,
-			)
+		writer.write(`.getAgentQueueBuilder('${agentIdentifier}', '${input.agentDescription}'`)
+		if (successEventName) {
+			writer.write(`, '${successEventName}'`)
 		}
+		writer.writeLine(')')
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
-		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
-		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
+		writer.writeLine(`.addModel('openai:gpt-4o-mini')`)
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
-		writer.writeLine(
-			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
-		)
+		writer.writeLine('.setAgentFunction(async function (context, payload) {')
 		writer.indent(() => {
-			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
-			writer.writeLine('await context.memory.conversation.addUser(payload.prompt)')
-			writer.writeLine('// This template is inline by default. Keep it for short interactive work.')
-			writer.writeLine(
-				"// For long-running work switch to .setExecutionMode('queued') and provide a queueBridge at runtime.",
-			)
-			writer.writeLine(
-				'// In queued mode PURISTA creates the run before the handler starts, so update it with context.memory.run.get(),',
-			)
-			writer.writeLine(
-				'// context.memory.run.plan(...), context.memory.run.step(...), and context.memory.run.finish(...).',
-			)
-			writer.writeLine('const prompt = await context.memory.conversation.buildPromptInput()')
-			writer.writeLine("const model = context.ai.models['openai:gpt-4o-mini']")
-			writer.writeLine('if (!model.generate) {')
+			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'planning agent execution')")
+			writer.writeLine('const worker = context.ai.createModelExecutor({')
 			writer.indent(() => {
-				writer.writeLine("throw new Error('Model alias openai:gpt-4o-mini does not provide generate()')")
+				writer.writeLine("model: 'openai:gpt-4o-mini',")
+				writer.writeLine("systemPrompt: 'You are a helpful assistant for this service domain.',")
 			})
-			writer.writeLine('}')
-			writer.writeLine('const result = await model.generate({ prompt, context: payload.context })')
-			writer.writeLine('if (result.reasoningText?.trim()) {')
+			writer.writeLine('})')
+			writer.writeLine('const plan = await context.plan.generate({')
 			writer.indent(() => {
-				writer.writeLine('context.io.stream.sendReasoning(result.reasoningText)')
+				writer.writeLine("model: 'openai:gpt-4o-mini',")
+				writer.writeLine('request: payload.prompt,')
+				writer.writeLine("instructions: 'Break the request into executable tasks.',")
+				writer.writeLine('worker,')
 			})
-			writer.writeLine('}')
-			writer.writeLine('const answer = result.output')
-			writer.writeLine('await context.memory.conversation.addAssistant(answer)')
-			writer.writeLine('context.io.stream.sendFinal(answer)')
-			writer.writeLine('return { message: answer }')
+			writer.writeLine('})')
+			writer.writeLine('const { results, plan: executedPlan } = await context.plan.execute(plan)')
+			writer.writeLine('const lastTask = executedPlan.tasks.at(-1)')
+			writer.writeLine("const message = lastTask ? String(results[lastTask.id] ?? '') : 'No task result.'")
+			writer.writeLine('return { message }')
 		})
 		writer.writeLine('})')
 	})
-	writer.writeLine('.build()')
 
 	return writer.toString()
 }

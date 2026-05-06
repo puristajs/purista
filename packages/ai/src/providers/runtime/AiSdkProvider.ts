@@ -18,7 +18,6 @@ import {
 	wrapLanguageModel,
 } from 'ai'
 import { createAiSdkRequest } from '../../bridge/aiSdk.js'
-import { generateText as generateTextWithBounds } from './generateText.js'
 import type {
 	ModelProvider,
 	ModelProviderCapabilities,
@@ -28,6 +27,7 @@ import type {
 	ProviderEmbedResponse,
 	ProviderGenerateTextRequest,
 	ProviderInvocationPolicy,
+	ProviderJsonOutputFromSchema,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
 	ProviderObjectStream,
@@ -87,7 +87,7 @@ export type AiSdkProviderOptions = {
  *
  * @example
  * ```ts
- * await provider.generate({
+ * await provider.generateText({
  *   prompt: 'Summarise the ticket',
  *   metadata: {
  *     aiSdk: {
@@ -105,7 +105,7 @@ export type AiSdkProviderMetadata = {
 				embed?: AiSdkEmbedOverrides
 				embedMany?: AiSdkEmbedManyOverrides
 				rerank?: AiSdkRerankOverrides
-				generateJson?: AiSdkGenerateJsonOverrides
+				generateObject?: AiSdkGenerateJsonOverrides
 		  })
 		| undefined
 }
@@ -223,8 +223,8 @@ const resolveObjectSections = <T>(
  *   systemPrompt: 'You are a helpful support engineer',
  * })
  *
- * const result = await provider.generate({ prompt: 'Reset password instructions?' })
- * console.log(result.output)
+ * const result = await provider.generateText({ prompt: 'Reset password instructions?' })
+ * console.log(result)
  * ```
  */
 export class AiSdkProvider implements ModelProvider {
@@ -247,12 +247,18 @@ export class AiSdkProvider implements ModelProvider {
 			typeof options.model !== 'string' &&
 			!!options.middleware &&
 			(Array.isArray(options.middleware) ? options.middleware.length > 0 : true)
-		this.model = shouldWrapModel
-			? (wrapLanguageModel({
-					model: options.model as any,
-					middleware: options.middleware as LanguageModelMiddleware | LanguageModelMiddleware[],
-				}) as LanguageModel)
-			: options.model
+		const middleware = options.middleware
+			? Array.isArray(options.middleware)
+				? options.middleware
+				: [options.middleware]
+			: undefined
+		this.model =
+			shouldWrapModel && middleware
+				? (wrapLanguageModel({
+						model: options.model as Parameters<typeof wrapLanguageModel>[0]['model'],
+						middleware: middleware as Parameters<typeof wrapLanguageModel>[0]['middleware'],
+					}) as LanguageModel)
+				: options.model
 		this.embeddingModel = options.embeddingModel
 		this.rerankingModel = options.rerankingModel
 		this.systemPrompt = options.systemPrompt
@@ -265,8 +271,9 @@ export class AiSdkProvider implements ModelProvider {
 		this.name = options.name ?? (typeof options.model === 'string' ? options.model : 'ai-sdk-provider')
 		this.capabilities = {
 			text: true,
-			stream: true,
-			json: true,
+			'text-stream': true,
+			object: true,
+			'object-stream': true,
 			embedding: !!this.embeddingModel,
 			rerank: !!this.rerankingModel,
 		}
@@ -332,16 +339,16 @@ export class AiSdkProvider implements ModelProvider {
 			: {}
 	}
 
-	private getGenerateJsonOverrides(metadata: Record<string, unknown> | undefined): AiSdkGenerateJsonOverrides {
+	private getGenerateObjectOverrides(metadata: Record<string, unknown> | undefined): AiSdkGenerateJsonOverrides {
 		if (!isMetadata(metadata)) {
 			return {}
 		}
 		const aiSdk = metadata.aiSdk
-		if (!aiSdk || typeof aiSdk !== 'object' || !('generateJson' in aiSdk)) {
+		if (!aiSdk || typeof aiSdk !== 'object' || !('generateObject' in aiSdk)) {
 			return {}
 		}
-		return typeof aiSdk.generateJson === 'object' && aiSdk.generateJson
-			? stripInvocationField(aiSdk.generateJson as Record<string, unknown>)
+		return typeof aiSdk.generateObject === 'object' && aiSdk.generateObject
+			? stripInvocationField(aiSdk.generateObject as Record<string, unknown>)
 			: {}
 	}
 
@@ -465,33 +472,10 @@ export class AiSdkProvider implements ModelProvider {
 		}
 	}
 
-	async generate(request: ProviderRequest): Promise<ProviderResponse> {
-		const callInput = this.getCallInput(request)
-		const result = await runBoundedModelInvocation({
-			label: `${this.name}:generate`,
-			policy: this.getInvocationPolicy(request.metadata),
-			operation: async () => await aiGenerateText(callInput),
-		})
-		const { usage } = result
-
-		return {
-			output: result.text,
-			reasoningText: result.reasoningText,
-			tokens: {
-				prompt: usage?.inputTokens ?? 0,
-				completion: usage?.outputTokens ?? 0,
-			},
-			metadata: {
-				request: result.request,
-				response: result.response,
-				providerMetadata: result.providerMetadata,
-				warnings: (result as { warnings?: unknown }).warnings,
-			},
-		}
-	}
-
-	async generateJson<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
-		const metadataOverrides = this.getGenerateJsonOverrides(request.metadata)
+	async generateObject<T = unknown, OutputSchema = unknown>(
+		request: ProviderJsonRequest<OutputSchema>,
+	): Promise<ProviderJsonResponse<ProviderJsonOutputFromSchema<OutputSchema, T>>> {
+		const metadataOverrides = this.getGenerateObjectOverrides(request.metadata)
 		const {
 			output: _ignoredOutput,
 			invocation: _ignoredInvocation,
@@ -499,13 +483,13 @@ export class AiSdkProvider implements ModelProvider {
 		} = this.defaults as Record<string, unknown>
 		const { output: _ignoredOverrideOutput, ...metadataWithoutOutput } = metadataOverrides as Record<string, unknown>
 		const result = await runBoundedModelInvocation({
-			label: `${this.name}:generateJson`,
+			label: `${this.name}:generateObject`,
 			policy: this.getInvocationPolicy(request.metadata),
 			operation: async () => {
 				const compiledSchema = await compileProviderAiSdkSchema(request.schema)
 				const objectRequest = compiledSchema
 					? {
-							schema: compiledSchema as never,
+							schema: compiledSchema,
 						}
 					: {
 							output: 'no-schema' as const,
@@ -560,7 +544,7 @@ export class AiSdkProvider implements ModelProvider {
 			(result as { reasoningText?: string }).reasoningText ??
 			(reasoningFromParts && reasoningFromParts.length > 0 ? reasoningFromParts : undefined)
 		return {
-			data: result.object as T,
+			data: result.object as ProviderJsonOutputFromSchema<OutputSchema, T>,
 			text: JSON.stringify(result.object ?? {}),
 			reasoningText,
 			tokens: {
@@ -576,67 +560,84 @@ export class AiSdkProvider implements ModelProvider {
 		}
 	}
 
-	stream(request: ProviderRequest): ProviderStream {
+	streamText(request: ProviderRequest): ProviderStream {
 		const callInput = this.getCallInput(request)
 		const result = streamText(callInput)
+		const policy = this.getInvocationPolicy(request.metadata)
+		const providerName = this.name
 		let finalResponsePromise: Promise<ProviderResponse> | undefined
 
 		return {
 			async final() {
-				finalResponsePromise ??= (async () => {
-					const [usage, outputText, requestMetadata, responseMetadata, providerMetadata, warnings] = await Promise.all([
-						result.usage,
-						result.text,
-						result.request,
-						result.response,
-						result.providerMetadata,
-						(result as { warnings?: Promise<unknown> | unknown }).warnings,
-					])
+				finalResponsePromise ??= runBoundedModelInvocation({
+					label: `${providerName}:stream.final`,
+					policy,
+					operation: async () => {
+						const [usage, outputText, requestMetadata, responseMetadata, providerMetadata, warnings] =
+							await Promise.all([
+								result.usage,
+								result.text,
+								result.request,
+								result.response,
+								result.providerMetadata,
+								(result as { warnings?: Promise<unknown> | unknown }).warnings,
+							])
 
-					return {
-						output: outputText,
-						reasoningText: undefined,
-						tokens: {
-							prompt: usage?.inputTokens ?? 0,
-							completion: usage?.outputTokens ?? 0,
-						},
-						metadata: {
-							request: requestMetadata,
-							response: responseMetadata,
-							providerMetadata,
-							warnings,
-						},
-					}
-				})()
+						return {
+							output: outputText,
+							reasoningText: undefined,
+							tokens: {
+								prompt: usage?.inputTokens ?? 0,
+								completion: usage?.outputTokens ?? 0,
+							},
+							metadata: {
+								request: requestMetadata,
+								response: responseMetadata,
+								providerMetadata,
+								warnings,
+							},
+						}
+					},
+				})
 
 				return finalResponsePromise
 			},
 			async *[Symbol.asyncIterator]() {
-				for await (const part of result.fullStream) {
-					if (part.type === 'text-delta' && part.text.length > 0) {
-						yield textDelta(part.text)
-					}
-					const normalizedReasoningDelta = part.type === 'reasoning-delta' ? normalizeReasoningDelta(part) : ''
-					if (part.type === 'reasoning-delta' && normalizedReasoningDelta.length > 0) {
-						yield reasoningDelta(normalizedReasoningDelta)
-					}
-					if (part.type === 'error') {
-						yield {
-							type: 'error',
-							error: part.error,
+				try {
+					for await (const part of result.fullStream) {
+						if (part.type === 'text-delta' && part.text.length > 0) {
+							yield textDelta(part.text)
 						}
+						const normalizedReasoningDelta = part.type === 'reasoning-delta' ? normalizeReasoningDelta(part) : ''
+						if (part.type === 'reasoning-delta' && normalizedReasoningDelta.length > 0) {
+							yield reasoningDelta(normalizedReasoningDelta)
+						}
+						if (part.type === 'error') {
+							yield {
+								type: 'error',
+								error: part.error,
+							}
+						}
+					}
+				} catch (error) {
+					yield {
+						type: 'error',
+						error,
 					}
 				}
 			},
 		}
 	}
 
-	streamObject<T = unknown>(request: ProviderObjectStreamRequest<T>): ProviderObjectStream<T> {
-		let finalResponsePromise: Promise<ProviderJsonResponse<T>> | undefined
+	streamObject<T = unknown, OutputSchema = unknown>(
+		request: ProviderObjectStreamRequest<ProviderJsonOutputFromSchema<OutputSchema, T>, OutputSchema>,
+	): ProviderObjectStream<ProviderJsonOutputFromSchema<OutputSchema, T>> {
+		type JsonOutput = ProviderJsonOutputFromSchema<OutputSchema, T>
+		let finalResponsePromise: Promise<ProviderJsonResponse<JsonOutput>> | undefined
 		let aiStreamPromise: Promise<Awaited<ReturnType<typeof aiStreamObject>>> | undefined
 
-		const resolveFallbackFinal = async () => {
-			finalResponsePromise ??= this.generateJson<T>(request)
+		const resolveFallbackFinal = async (): Promise<ProviderJsonResponse<JsonOutput>> => {
+			finalResponsePromise ??= this.generateObject<T, OutputSchema>(request)
 			return await finalResponsePromise
 		}
 
@@ -645,7 +646,7 @@ export class AiSdkProvider implements ModelProvider {
 				label: `${this.name}:streamObject`,
 				policy: this.getInvocationPolicy(request.metadata),
 				operation: async () => {
-					const metadataOverrides = this.getGenerateJsonOverrides(request.metadata)
+					const metadataOverrides = this.getGenerateObjectOverrides(request.metadata)
 					const {
 						output: _ignoredOutput,
 						invocation: _ignoredInvocation,
@@ -658,7 +659,7 @@ export class AiSdkProvider implements ModelProvider {
 					const compiledSchema = await compileProviderAiSdkSchema(request.schema)
 					const objectRequest = compiledSchema
 						? ({
-								schema: compiledSchema as never,
+								schema: compiledSchema,
 							} as const)
 						: ({
 								output: 'no-schema' as const,
@@ -699,7 +700,7 @@ export class AiSdkProvider implements ModelProvider {
 		}
 
 		return {
-			async final() {
+			async final(): Promise<ProviderJsonResponse<JsonOutput>> {
 				if (finalResponsePromise) {
 					return await finalResponsePromise
 				}
@@ -713,8 +714,8 @@ export class AiSdkProvider implements ModelProvider {
 						result.providerMetadata,
 						(result as { warnings?: Promise<unknown> | unknown }).warnings,
 					])
-					finalResponsePromise = Promise.resolve({
-						data: object as T,
+					const finalResponse: ProviderJsonResponse<JsonOutput> = {
+						data: object as JsonOutput,
 						text: JSON.stringify(object ?? {}),
 						tokens: {
 							prompt: usage?.inputTokens ?? 0,
@@ -726,8 +727,9 @@ export class AiSdkProvider implements ModelProvider {
 							providerMetadata,
 							warnings,
 						},
-					})
-					return await finalResponsePromise
+					}
+					finalResponsePromise = Promise.resolve(finalResponse)
+					return finalResponse
 				} catch {
 					return await resolveFallbackFinal()
 				}
@@ -737,7 +739,7 @@ export class AiSdkProvider implements ModelProvider {
 					const result = await resolveAiStream()
 					const seen = new Map<string, string>()
 					for await (const partial of result.partialObjectStream) {
-						const sections = resolveObjectSections(request.sections, partial as T)
+						const sections = resolveObjectSections(request.sections, partial as JsonOutput)
 						for (const [section, content] of Object.entries(sections)) {
 							if (content === undefined) {
 								continue
@@ -790,27 +792,19 @@ export class AiSdkProvider implements ModelProvider {
 	}
 
 	async generateText(request: ProviderGenerateTextRequest): Promise<string> {
-		return await generateTextWithBounds({
-			model: {
-				generate: this.generate.bind(this),
-				stream: this.stream.bind(this),
-			},
-			request: {
-				prompt: request.prompt,
-				input: request.input,
-				attachments: request.attachments,
-				context: request.context,
-				developerInstruction: request.developerInstruction,
-				skills: request.skills,
-				references: request.references,
-				bindings: request.bindings,
-				metadata: request.metadata,
-			},
-			onReasoning: request.onReasoning,
-			onTextDelta: request.onTextDelta,
-			policy: this.getInvocationPolicy(request.metadata),
+		const callInput = this.getCallInput(request)
+		const result = await runBoundedModelInvocation({
 			label: `${this.name}:generateText`,
+			policy: this.getInvocationPolicy(request.metadata),
+			operation: async () => await aiGenerateText(callInput),
 		})
+		if (result.reasoningText?.trim()) {
+			await request.onReasoning?.(result.reasoningText)
+		}
+		if (result.text.length > 0) {
+			await request.onTextDelta?.(result.text)
+		}
+		return result.text
 	}
 
 	async embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse> {

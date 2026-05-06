@@ -18,7 +18,7 @@ This protocol is designed to:
 
 Every piece of communication from an agent is wrapped in an `AgentProtocolEnvelope`.
 
-- **`agentName` / `agentVersion`**: The source of the frame.
+- **`agentName` / `serviceVersion`**: The source of the frame.
 - **`sessionId`**: The stable conversation identity.
 - **`tenantId` / `principalId`**: Security and separation metadata.
 - **`frame`**: The actual payload of the communication.

@@ -27,10 +27,11 @@ export const executeBashCommandBuilder: any = sandboxServiceBuilder
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
-		assertSandboxAccess(context, metadata)
+		assertSandboxAccess(context, metadata, payload.projectId)
 
 		// 2. Execute command via driver
-		const result = await context.resources.driver.executeBash(payload)
+		const { projectId: _projectId, ...driverPayload } = payload
+		const result = await context.resources.driver.executeBash(driverPayload)
 		if (result.exitCode === 124) {
 			throw new HandledError(StatusCode.GatewayTimeout, 'Sandbox command timed out', {
 				sandboxId: payload.sandboxId,

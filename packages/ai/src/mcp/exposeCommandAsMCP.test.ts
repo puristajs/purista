@@ -1,21 +1,29 @@
 import { describe, expect, it } from 'vitest'
+import type { AgentDefinition } from '../types/AgentDefinition.js'
 
 import { exposeAgentAsMCP } from './exposeAgentAsMCP.js'
 import { exposeCommandAsMCP, exposeCommandsAsMCP, exposeToolsAsMCP } from './exposeCommandAsMCP.js'
 
-const agentDefinition = {
+const agentDefinition: AgentDefinition = {
 	info: {
 		agentName: 'supportAgent',
-		agentVersion: '1',
+		serviceVersion: '1',
 	},
 	manifest: {
 		agentName: 'supportAgent',
-		agentVersion: '1',
+		serviceVersion: '1',
 		description: 'Support agent',
 		eventBridge: 'default',
 		allowedTools: [],
 	},
-} as const as any
+	schemas: {},
+	getManifest: () => agentDefinition.manifest,
+	getExternalRuntimeMetadata: () => ({ commands: [], agents: [] }),
+	getInstance: async () => {
+		throw new Error('not implemented in test fixture')
+	},
+	getDefaultConfig: () => undefined,
+}
 
 describe('exposeCommandAsMCP', () => {
 	it('maps a command descriptor to MCP shape', () => {

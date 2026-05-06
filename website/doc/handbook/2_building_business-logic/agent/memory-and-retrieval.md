@@ -22,13 +22,6 @@ If those stay separated, the rest of the AI runtime becomes much easier to reaso
 
 Use conversation memory for LLM-visible history.
 
-Declare it in the builder:
-
-```ts
-export const supportAgent = new AgentBuilder({ ... })
-  .persistConversation('user')
-```
-
 Use it in the handler:
 
 ```ts
@@ -56,7 +49,7 @@ Use `context.memory.run` for operational workflow state.
 ```ts
 const run = await context.memory.run.start({
   title: 'Simulation review',
-  extraScope: { projectId: payload.projectId },
+  scope: { projectId: payload.projectId },
   lock: { key: 'simulation' },
 })
 
@@ -122,11 +115,11 @@ Use retrieval when the agent needs external facts, not just prior chat or workfl
 
 When you are unsure where something belongs, ask:
 
-- “Should the model see this as part of the conversation?”
+- "Should the model see this as part of the conversation?"
   Use `context.memory.conversation`.
-- “Should the workflow resume from this after reconnect or retry?”
+- "Should the workflow resume from this after reconnect or retry?"
   Use `context.memory.run`.
-- “Is this external data or search infrastructure?”
+- "Is this external data or search infrastructure?"
   Use `context.app.resources`.
 
 That rule is more useful than memorizing APIs.
@@ -163,7 +156,7 @@ That keeps retrieval inside the same command and telemetry model as the rest of 
 - Storing workflow progress in conversation memory.
 - Treating retrieval as a hidden framework subsystem.
 - Using `context.runtime.stores.states` directly when `context.memory.run` already expresses the workflow.
-- Mixing skill catalogs and retrieval systems into one vague “knowledge” bucket.
+- Mixing skill catalogs and retrieval systems into one vague "knowledge" bucket.
 
 ## Related Guides
 

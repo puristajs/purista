@@ -1,4 +1,5 @@
 import { PuristaSpanTag } from '@purista/core'
+import type { JsonValue } from '../protocol/types.js'
 import type { ReflectionPolicy } from '../types/AgentManifest.js'
 import type { ProtocolContext, ProtocolEmitter } from './context.js'
 import type { AgentPolicyHelpers } from './policy.js'
@@ -60,12 +61,16 @@ type CreateAgentReflectionHelpersInput = {
 	serviceContext: ProtocolContext<any, any, Record<string, unknown>, any, any>
 }
 
-const toArtifactContent = (value: unknown): string | Record<string, unknown> => {
-	if (typeof value === 'string') {
-		return value
-	}
-	if (value && typeof value === 'object') {
-		return value as Record<string, unknown>
+const toArtifactContent = (value: unknown): JsonValue => {
+	if (
+		value === null ||
+		typeof value === 'string' ||
+		typeof value === 'number' ||
+		typeof value === 'boolean' ||
+		Array.isArray(value) ||
+		(typeof value === 'object' && value !== null)
+	) {
+		return value as JsonValue
 	}
 	return JSON.stringify(value)
 }

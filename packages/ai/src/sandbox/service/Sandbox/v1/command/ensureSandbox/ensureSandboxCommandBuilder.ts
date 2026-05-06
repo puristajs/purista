@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import type { z } from 'zod'
+import { createSanitizedErrorDiagnostics } from '../../../../../../runtime/errorDiagnostics.js'
 import { resolveSandboxOwnerFromMessage } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { EnsureSandboxInputSchema, EnsureSandboxOutputSchema } from './schema.js'
@@ -14,6 +15,16 @@ const getDeterministicSandboxId = (input: {
 		.update(`${input.organizationId}:${input.projectId}:${input.userId}:${input.scopePart}`)
 		.digest('hex')
 	return `sb-${hash.slice(0, 32)}`
+}
+
+const summarizeTextForLog = (value: string | undefined) => {
+	if (!value) {
+		return undefined
+	}
+	return {
+		bytes: Buffer.byteLength(value, 'utf8'),
+		sha256: createHash('sha256').update(value).digest('hex').slice(0, 16),
+	}
 }
 
 export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
@@ -41,13 +52,23 @@ export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
 				}
 
 				context.logger.warn(
-					{ sandboxId: existing.sandboxId, stderr: health.stderr, exitCode: health.exitCode },
+					{
+						sandboxId: existing.sandboxId,
+						exitCode: health.exitCode,
+						stderr: summarizeTextForLog(health.stderr),
+					},
 					'Sandbox health check failed, recreating sandbox.',
 				)
 				try {
 					await context.resources.driver.destroySandbox({ sandboxId: existing.sandboxId })
 				} catch (error) {
-					context.logger.warn({ err: error, sandboxId: existing.sandboxId }, 'Failed to destroy unhealthy sandbox.')
+					context.logger.warn(
+						{
+							sandboxId: existing.sandboxId,
+							error: createSanitizedErrorDiagnostics(error, { fallbackKind: 'sandbox' }),
+						},
+						'Failed to destroy unhealthy sandbox.',
+					)
 				}
 				await context.resources.registry.unregister(existing.sandboxId)
 			}

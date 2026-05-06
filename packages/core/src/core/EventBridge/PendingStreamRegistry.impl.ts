@@ -34,18 +34,29 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 
 	register(correlationId: string, timeoutMs: number, traceId: string | undefined): PendingStreamSession<Chunk, Final> {
 		const queue: StreamFrame<Chunk, Final>[] = []
-		const waiters: Array<(value: IteratorResult<StreamFrame<Chunk, Final>>) => void> = []
+		const waiters: Array<{
+			resolve: (value: IteratorResult<StreamFrame<Chunk, Final>>) => void
+			reject: (reason?: unknown) => void
+		}> = []
 		let ownerInstanceId: string | undefined
 		let pendingCancelReason: string | undefined
 		let isDone = false
 		let streamError: unknown
+		let timeout: ReturnType<typeof setTimeout> | undefined
 
 		const flushDone = () => {
 			while (waiters.length > 0) {
-				const resolve = waiters.shift()
-				if (resolve) {
-					resolve({ done: true, value: undefined })
+				const waiter = waiters.shift()
+				if (waiter) {
+					waiter.resolve({ done: true, value: undefined })
 				}
+			}
+		}
+
+		const rejectWaiters = (error: unknown) => {
+			while (waiters.length > 0) {
+				const waiter = waiters.shift()
+				waiter?.reject(error)
 			}
 		}
 
@@ -53,22 +64,33 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 			this.pending.delete(correlationId)
 		}
 
-		const timeout = setTimeout(() => {
-			if (isDone) {
-				return
+		const scheduleTimeout = () => {
+			if (timeout !== undefined) {
+				clearTimeout(timeout)
 			}
+			timeout = setTimeout(() => {
+				if (isDone) {
+					return
+				}
 
-			streamError = new UnhandledError(StatusCode.GatewayTimeout, 'stream invocation timed out', undefined, traceId)
-			isDone = true
-			this.timedOut.set(correlationId, Date.now())
-			this.cleanupTimedOut()
-			clearSession()
-			flushDone()
-		}, timeoutMs)
+				streamError = new UnhandledError(StatusCode.GatewayTimeout, 'stream invocation timed out', undefined, traceId)
+				isDone = true
+				this.timedOut.set(correlationId, Date.now())
+				this.cleanupTimedOut()
+				clearSession()
+				rejectWaiters(streamError)
+			}, timeoutMs)
+		}
+
+		scheduleTimeout()
 
 		const push = (frame: StreamFrame<Chunk, Final>): PushResult => {
 			if (isDone) {
 				return this.handleMissing(correlationId)
+			}
+
+			if (timeout !== undefined) {
+				clearTimeout(timeout)
 			}
 
 			queue.push(frame)
@@ -76,20 +98,21 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 			if (waiter) {
 				const nextFrame = queue.shift()
 				if (nextFrame) {
-					waiter({ done: false, value: nextFrame })
+					waiter.resolve({ done: false, value: nextFrame })
 				}
 			}
 
 			const frameType = frame.payload.frameType
 			if (frameType === 'complete' || frameType === 'error' || frameType === 'cancel') {
 				isDone = true
-				clearTimeout(timeout)
 				clearSession()
 				if (queue.length === 0) {
 					flushDone()
 				}
+				return 'accepted'
 			}
 
+			scheduleTimeout()
 			return 'accepted'
 		}
 
@@ -100,9 +123,11 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 
 			streamError = error
 			isDone = true
-			clearTimeout(timeout)
+			if (timeout !== undefined) {
+				clearTimeout(timeout)
+			}
 			clearSession()
-			flushDone()
+			rejectWaiters(error)
 		}
 
 		const requestCancel = (reason?: string) => {
@@ -165,8 +190,8 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 							return { done: true, value: undefined }
 						}
 
-						return await new Promise<IteratorResult<StreamFrame<Chunk, Final>>>(resolve => {
-							waiters.push(resolve)
+						return await new Promise<IteratorResult<StreamFrame<Chunk, Final>>>((resolve, reject) => {
+							waiters.push({ resolve, reject })
 						})
 					},
 				}

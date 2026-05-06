@@ -8,7 +8,7 @@
 
 > **AgentHandlerResultObject** = `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:165](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L165)
+Defined in: packages/ai/src/types/AgentHandler.ts:46
 
 ## Properties
 
@@ -16,7 +16,15 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:165](https://github.com/pur
 
 > **message**: `string`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:166](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L166)
+Defined in: packages/ai/src/types/AgentHandler.ts:47
+
+***
+
+### output?
+
+> `optional` **output**: `unknown`
+
+Defined in: packages/ai/src/types/AgentHandler.ts:48
 
 ***
 
@@ -24,7 +32,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:166](https://github.com/pur
 
 > `optional` **summary**: `string`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:167](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L167)
+Defined in: packages/ai/src/types/AgentHandler.ts:49
 
 ***
 
@@ -32,7 +40,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:167](https://github.com/pur
 
 > `optional` **usage**: `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:168](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L168)
+Defined in: packages/ai/src/types/AgentHandler.ts:50
 
 #### completionTokens?
 

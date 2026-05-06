@@ -8,7 +8,7 @@
 
 > **ExternalRuntimeMetadata** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:146](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L146)
+Defined in: [packages/ai/src/types/AgentManifest.ts:130](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L130)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:146](https://github.com/puri
 
 > **agents**: [`AllowedAgentDefinition`](AllowedAgentDefinition.md)[]
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:148](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L148)
+Defined in: [packages/ai/src/types/AgentManifest.ts:132](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L132)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:148](https://github.com/puri
 
 > **commands**: [`AllowedToolDefinition`](AllowedToolDefinition.md)[]
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:147](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L147)
+Defined in: [packages/ai/src/types/AgentManifest.ts:131](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L131)

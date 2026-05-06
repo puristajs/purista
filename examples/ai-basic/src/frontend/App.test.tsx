@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getStoredTheme, THEME_KEY, uniqueEnvelopes } from './App'
+import { getStoredTheme, THEME_KEY, uniqueEnvelopes } from './lib/app-state'
 
 vi.mock('@xyflow/react', () => ({
 	ReactFlow: ({ children }: { children: ReactNode }) => <div>{children}</div>,

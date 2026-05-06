@@ -1,5 +1,5 @@
 import { createActor, createProtocolEnvelope } from './helpers.js'
-import { type AgentProtocolEnvelope, type AgentProtocolFrame, protocolVersion } from './types.js'
+import { type AgentProtocolEnvelope, type AgentProtocolFrame, type JsonValue, protocolVersion } from './types.js'
 
 /**
  * Reference shape that can be used as a bridge model for Agent-to-Agent style integrations.
@@ -65,7 +65,7 @@ export type McpReferenceContent =
 	  }
 	| {
 			type: 'json'
-			json: Record<string, unknown>
+			json: JsonValue
 	  }
 
 /**
@@ -97,8 +97,8 @@ export const toMcpReferenceToolResult = (envelopes: AgentProtocolEnvelope[]): Mc
 			content.push({ type: 'text', text: frame.content })
 		}
 
-		if (frame.kind === 'artifact' && typeof frame.content === 'object' && frame.content !== null) {
-			content.push({ type: 'json', json: frame.content as Record<string, unknown> })
+		if (frame.kind === 'artifact') {
+			content.push({ type: 'json', json: frame.content })
 		}
 
 		if (frame.kind === 'error') {

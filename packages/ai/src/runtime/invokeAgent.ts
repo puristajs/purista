@@ -9,7 +9,7 @@ export type InvokeAgentOptions = {
 	/** Target agent service name. */
 	agentName: string
 	/** Target agent service version. */
-	agentVersion: string
+	serviceVersion: string
 	/** Payload delivered to the target agent run command. */
 	payload: unknown
 	/** Optional invoke parameter metadata passed alongside payload. */
@@ -18,6 +18,8 @@ export type InvokeAgentOptions = {
 	principalId?: string
 	/** Optional tenant id forwarded for scoped memory and auditing. */
 	tenantId?: string
+	/** Optional OTEL parent trace header forwarded across agent boundaries. */
+	otp?: string
 	/** Optional timeout passed to stream open/invoke calls. */
 	timeoutMs?: number
 	/** Optional correlation id used for distributed trace chaining. */

@@ -8,20 +8,20 @@
 
 > **AgentRunGetInput** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:212](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L212)
+Defined in: [packages/ai/src/runtime/runState.ts:354](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L354)
 
 ## Properties
-
-### extraScope?
-
-> `optional` **extraScope**: `Record`\<`string`, `string`\>
-
-Defined in: [packages/ai/src/runtime/runState.ts:214](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L214)
-
-***
 
 ### runId?
 
 > `optional` **runId**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:213](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L213)
+Defined in: [packages/ai/src/runtime/runState.ts:355](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L355)
+
+***
+
+### scope?
+
+> `optional` **scope**: `Record`\<`string`, `string`\>
+
+Defined in: [packages/ai/src/runtime/runState.ts:356](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L356)

@@ -6,7 +6,7 @@
 
 # Class: PodmanSandboxDriver
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:26](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L26)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:31](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L31)
 
 PodmanSandboxDriver - A driver for Podman (daemonless, rootless containers).
 Podman is Docker-CLI compatible but has nuances in connection management
@@ -22,7 +22,7 @@ and user-mode networking.
 
 > **new PodmanSandboxDriver**(`config`): `PodmanSandboxDriver`
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:30](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L30)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:35](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L35)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDri
 
 > **name**: `string` = `'PodmanSandboxDriver'`
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L27)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:32](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L32)
 
 The unique name of the driver implementation
 
@@ -54,7 +54,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:38](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L38)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:76](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L76)
 
 Provisions and starts a new sandbox environment.
 
@@ -92,6 +92,10 @@ Configuration for the new sandbox
 
 `string`
 
+###### scope?
+
+\{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}
+
 ###### userId
 
 `string`
@@ -112,7 +116,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:124](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L124)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:165](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L165)
 
 Permanently removes a sandbox and its resources.
 
@@ -140,7 +144,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:135](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L135)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:176](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L176)
 
 Executes a bash command within the specified sandbox.
 
@@ -162,6 +166,10 @@ Command and execution context
 
 `string`
 
+###### timeoutMs?
+
+`number`
+
 #### Returns
 
 `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
@@ -178,7 +186,7 @@ The result of the command execution
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:157](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L157)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:209](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L209)
 
 Reads the content of a file from the sandbox.
 
@@ -210,7 +218,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:173](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L173)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:237](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L237)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -229,7 +237,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:163](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L163)
+Defined in: [packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:217](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L217)
 
 Writes one or more files to the sandbox workspace.
 
@@ -241,7 +249,7 @@ Map of file paths to their contents
 
 ###### files
 
-`Record`\<`string`, `string`\>
+`Record`\<`string`, [`SandboxFileContent`](../type-aliases/SandboxFileContent.md)\>
 
 ###### sandboxId
 

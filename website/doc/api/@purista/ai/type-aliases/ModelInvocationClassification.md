@@ -8,7 +8,7 @@
 
 > **ModelInvocationClassification** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:15](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L15)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:16](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L16)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:15](https://gi
 
 > **handled**: `boolean`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:18](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L18)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:19](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L19)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:18](https://gi
 
 > **kind**: `"timeout"` \| `"schema"` \| `"transient"` \| `"unexpected"`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:16](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L16)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:17](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L17)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:16](https://gi
 
 > **message**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:20](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L20)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:21](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L21)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:20](https://gi
 
 > **retryable**: `boolean`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:19](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L19)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:20](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L20)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:19](https://gi
 
 > **statusCode**: [`StatusCode`](../../core/enumerations/StatusCode.md)
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:17](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L17)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:18](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L18)

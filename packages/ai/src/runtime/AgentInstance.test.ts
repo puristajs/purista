@@ -1,22 +1,30 @@
-import { StatusCode, UnhandledError } from '@purista/core'
+import { DefaultQueueBridge, type EventBridge, StatusCode, UnhandledError } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
-
-import type { AgentHandler } from '../builder/AgentBuilder.js'
 import { PoolManager } from '../pools/PoolManager.js'
+import type { AgentHandler } from '../types/AgentHandler.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
-import { AgentInstance } from './AgentInstance.js'
+import { AgentInstance, type AgentInstanceDependencies } from './AgentInstance.js'
 
 const baseManifest: AgentManifest = {
 	agentName: 'supportAgent',
-	agentVersion: '1',
+	serviceVersion: '1',
 	eventBridge: 'default',
 	allowedTools: [],
 }
 
-const baseDependencies = {
+const createEventBridge = (overrides: Partial<EventBridge> = {}): EventBridge => {
+	return {
+		instanceId: 'bridge-1',
+		invoke: vi.fn(),
+		openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
+		...overrides,
+	} as unknown as EventBridge
+}
+
+const baseDependencies: AgentInstanceDependencies = {
 	info: {
 		agentName: 'supportAgent',
-		agentVersion: '1',
+		serviceVersion: '1',
 	},
 	manifest: baseManifest,
 	serviceBuilder: {
@@ -25,7 +33,7 @@ const baseDependencies = {
 			serviceVersion: '1',
 		},
 		getInstance: vi.fn(),
-	},
+	} as unknown as AgentInstanceDependencies['serviceBuilder'],
 	handler: (async () => ({ message: 'ok' })) as AgentHandler,
 }
 
@@ -38,56 +46,64 @@ describe('AgentInstance', () => {
 
 		expect(
 			() =>
-				new AgentInstance({ ...baseDependencies, manifest } as any, { instanceId: 'bridge-1' } as any, {
+				new AgentInstance({ ...baseDependencies, manifest }, createEventBridge(), {
 					models: {},
 				}),
 		).toThrow('Missing model provider for alias "openai:"')
 	})
 
-	it('fails fast when a declared object generation capability is missing', () => {
+	it('assumes the full attached-agent model surface when capabilities are omitted', () => {
 		const manifest: AgentManifest = {
 			...baseManifest,
-			models: [{ alias: 'openai:gpt-4o-mini', capabilities: ['json'] }],
+			models: [{ alias: 'openai:gpt-4o-mini' }],
 		}
 
 		expect(
 			() =>
-				new AgentInstance({ ...baseDependencies, manifest } as any, { instanceId: 'bridge-1' } as any, {
+				new AgentInstance({ ...baseDependencies, manifest }, createEventBridge(), {
+					models: {
+						'openai:gpt-4o-mini': {
+							name: 'test-provider',
+							capabilities: { text: true, object: true },
+							generateText: vi.fn(),
+							generateObject: vi.fn(),
+						},
+					},
+				}),
+		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "object-stream"')
+	})
+
+	it('fails fast when a declared object generation capability is missing', () => {
+		const manifest: AgentManifest = {
+			...baseManifest,
+			models: [{ alias: 'openai:gpt-4o-mini', capabilities: ['object'] }],
+		}
+
+		expect(
+			() =>
+				new AgentInstance({ ...baseDependencies, manifest }, createEventBridge(), {
 					models: {
 						'openai:gpt-4o-mini': {
 							name: 'test-provider',
 							capabilities: { text: true },
-							generate: vi.fn(),
+							generateText: vi.fn(),
 						},
 					},
 				}),
-		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "json"')
+		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "object"')
 	})
 
 	it('requires a queue bridge for queued execution mode', async () => {
-		const manifest: AgentManifest = {
-			...baseManifest,
-			executionMode: 'queued',
-		}
-		const eventBridge = { instanceId: 'bridge-1', invoke: vi.fn() } as any
-		const instance = new AgentInstance(
-			{
-				...baseDependencies,
-				manifest,
-			} as any,
-			eventBridge,
-			{ models: {} },
-		)
+		const eventBridge = createEventBridge({ openStream: undefined })
+		const instance = new AgentInstance(baseDependencies, eventBridge, { models: {} })
 
-		await expect(instance.start()).rejects.toThrow(
-			'Agent "supportAgent" is configured for queued execution but no queueBridge was provided',
-		)
+		await expect(instance.start()).rejects.toThrow('Agent "supportAgent" requires a queueBridge for execution')
 	})
 
 	it('notifies stream responders for successful invocations', async () => {
 		const invoke = vi.fn().mockResolvedValue([{ frame: { kind: 'message', content: 'ok', role: 'assistant' } }])
 		const openStream = vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable'))
-		const eventBridge = { instanceId: 'bridge-1', openStream, invoke } as any
+		const eventBridge = createEventBridge({ openStream, invoke })
 		const service = {
 			start: vi.fn().mockResolvedValue(undefined),
 			destroy: vi.fn().mockResolvedValue(undefined),
@@ -101,9 +117,9 @@ describe('AgentInstance', () => {
 					...baseDependencies.serviceBuilder,
 					getInstance,
 				},
-			} as any,
+			} as AgentInstanceDependencies,
 			eventBridge,
-			{ models: {} },
+			{ models: {}, queueBridge: new DefaultQueueBridge() },
 		)
 
 		const onFrame = vi.fn()
@@ -121,7 +137,7 @@ describe('AgentInstance', () => {
 	it('injects sessionId into payload for runtime invokes', async () => {
 		const invoke = vi.fn().mockResolvedValue([])
 		const openStream = vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable'))
-		const eventBridge = { instanceId: 'bridge-1', openStream, invoke } as any
+		const eventBridge = createEventBridge({ openStream, invoke })
 		const service = {
 			start: vi.fn().mockResolvedValue(undefined),
 			destroy: vi.fn().mockResolvedValue(undefined),
@@ -135,9 +151,9 @@ describe('AgentInstance', () => {
 					...baseDependencies.serviceBuilder,
 					getInstance,
 				},
-			} as any,
+			} as AgentInstanceDependencies,
 			eventBridge,
-			{ models: {} },
+			{ models: {}, queueBridge: new DefaultQueueBridge() },
 		)
 
 		await instance.invoke({
@@ -154,7 +170,7 @@ describe('AgentInstance', () => {
 
 	it('exposes read-only runtime concurrency status', async () => {
 		const poolManager = new PoolManager()
-		const instance = new AgentInstance({ ...baseDependencies } as any, { instanceId: 'bridge-1' } as any, {
+		const instance = new AgentInstance({ ...baseDependencies }, createEventBridge(), {
 			models: {},
 			poolManager,
 			poolConfig: {
@@ -172,7 +188,7 @@ describe('AgentInstance', () => {
 
 		expect(status).toEqual({
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			poolId: 'support-pool',
 			maxConcurrencyPerInstance: 2,
 			activeWorkers: 1,
@@ -185,7 +201,7 @@ describe('AgentInstance', () => {
 	})
 
 	it('exposes external runtime metadata', () => {
-		const instance = new AgentInstance({ ...baseDependencies } as any, { instanceId: 'bridge-1' } as any, {
+		const instance = new AgentInstance({ ...baseDependencies }, createEventBridge(), {
 			models: {},
 		})
 
@@ -216,10 +232,11 @@ describe('AgentInstance', () => {
 					...baseDependencies.serviceBuilder,
 					getInstance,
 				},
-			} as any,
-			{ instanceId: 'bridge-1' } as any,
+			} as AgentInstanceDependencies,
+			createEventBridge(),
 			{
 				models: {},
+				queueBridge: new DefaultQueueBridge(),
 				skills: {
 					'spec-elicitation': {
 						content: 'Ask for missing requirements first.',

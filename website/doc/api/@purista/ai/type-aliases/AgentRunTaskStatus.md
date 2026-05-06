@@ -8,4 +8,4 @@
 
 > **AgentRunTaskStatus** = `z.infer`\<*typeof* [`agentRunTaskStatusSchema`](../variables/agentRunTaskStatusSchema.md)\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:37](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L37)
+Defined in: [packages/ai/src/runtime/runState.ts:58](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L58)

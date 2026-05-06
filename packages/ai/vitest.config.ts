@@ -13,7 +13,7 @@ export default defineConfig({
 		coverage: {
 			provider: 'v8',
 			reporter: ['text-summary'],
-			include: ['src/bridge/**/*.ts', 'src/platform/runtime/AIWorkerService/queue/executeWorkload.ts'],
+			include: ['src/bridge/**/*.ts'],
 			exclude: ['**/*.test.ts', '**/index.ts'],
 			thresholds: {
 				lines: 0,
@@ -21,12 +21,6 @@ export default defineConfig({
 				statements: 0,
 				branches: 0,
 				'src/bridge/**/*.ts': {
-					lines: 80,
-					functions: 80,
-					statements: 80,
-					branches: 80,
-				},
-				'src/platform/runtime/AIWorkerService/queue/executeWorkload.ts': {
 					lines: 80,
 					functions: 80,
 					statements: 80,

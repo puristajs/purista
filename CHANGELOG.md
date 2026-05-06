@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - Apply skills to structured model calls
 - Reject empty streamed public replies
 - Stabilize package builds and bridge typing
+- Make command handling single-shot without retries
 
 ### Documentation
 
@@ -41,6 +42,11 @@ All notable changes to this project will be documented in this file.
 - Add dynamic skill reference selection
 - Harden bridge reliability handling
 - Harden queue and subscription reliability
+- Add drop/stop-consumer outcomes and harden broker failure paths
+- Formalize operator runtime APIs and paused-state health
+- Align command timeout reliability across adapters
+- Unify stream-first agent invocation runtime
+- Harden sandbox runtime and converge execution path
 
 ### Refactor
 
@@ -59,6 +65,7 @@ All notable changes to this project will be documented in this file.
 - Consolidate framework catalog
 - Add modular blueprint init engine
 - Remove runtime js events
+- Decouple health and route registration defaults
 
 ### Styling
 

@@ -8,11 +8,12 @@ export const readFileCommandBuilder = sandboxServiceBuilder
 	.addPayloadSchema(ReadFileInputSchema)
 	.addOutputSchema(ReadFileOutputSchema)
 	.exposeAsHttpEndpoint('GET', 'sandbox/:sandboxId/file')
-	.setCommandFunction(async function (context: any, payload: { sandboxId: string; path: string }) {
+	.setCommandFunction(async function (context: any, payload: { sandboxId: string; projectId: string; path: string }) {
 		const metadata = await context.resources.registry.getMetadata(payload.sandboxId)
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
-		assertSandboxAccess(context, metadata)
-		return await context.resources.driver.readFile(payload)
+		assertSandboxAccess(context, metadata, payload.projectId)
+		const { projectId: _projectId, ...driverPayload } = payload
+		return await context.resources.driver.readFile(driverPayload)
 	})

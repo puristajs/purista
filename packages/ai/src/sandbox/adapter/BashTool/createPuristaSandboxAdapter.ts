@@ -9,6 +9,7 @@ export type SandboxAdapter = {
 
 export type SandboxAdapterIdentity = {
 	sandboxId: string
+	projectId: string
 	tenantId: string
 	principalId: string
 }
@@ -22,7 +23,7 @@ export const createPuristaSandboxAdapter = (
 	eventBridge: EventBridge,
 	identity: SandboxAdapterIdentity,
 ): SandboxAdapter => {
-	const { sandboxId, principalId, tenantId } = identity
+	const { sandboxId, projectId, principalId, tenantId } = identity
 
 	return {
 		async executeCommand(command: string, options?: { cwd?: string; timeoutMs?: number }) {
@@ -39,7 +40,7 @@ export const createPuristaSandboxAdapter = (
 					serviceTarget: 'executeBash',
 				},
 				payload: {
-					payload: { sandboxId, command, cwd: options?.cwd, timeoutMs: options?.timeoutMs },
+					payload: { sandboxId, projectId, command, cwd: options?.cwd, timeoutMs: options?.timeoutMs },
 					parameter: {},
 				},
 				principalId,
@@ -63,7 +64,7 @@ export const createPuristaSandboxAdapter = (
 					serviceTarget: 'readFile',
 				},
 				payload: {
-					payload: { sandboxId, path },
+					payload: { sandboxId, projectId, path },
 					parameter: {},
 				},
 				principalId,
@@ -102,7 +103,7 @@ export const createPuristaSandboxAdapter = (
 					serviceTarget: 'writeFiles',
 				},
 				payload: {
-					payload: { sandboxId, files: filesRecord },
+					payload: { sandboxId, projectId, files: filesRecord },
 					parameter: {},
 				},
 				principalId,

@@ -34,6 +34,7 @@ export class AppleContainerSandboxDriver implements SandboxDriver {
 		organizationId: string
 		projectId: string
 		userId: string
+		scope?: import('../../types/SandboxDriver.js').SandboxScope
 		sandboxId: string
 		gitConfig?: {
 			username: string

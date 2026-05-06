@@ -1,13 +1,33 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { HandledError, StatusCode } from '@purista/core'
-import { describe, expect, it, vi } from 'vitest'
+import { type EventBridge, HandledError, StatusCode } from '@purista/core'
+import { describe, expect, expectTypeOf, it, vi } from 'vitest'
+import { z } from 'zod'
+import type { ConversationStore } from '../memory/conversationStore.js'
 import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { createArtifactFrame, createProtocolEnvelope } from '../protocol/helpers.js'
+import { buildTaskChunkArtifactId, PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID } from '../protocol/taskArtifacts.js'
+import type { AgentProtocolEnvelope } from '../protocol/types.js'
+import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { FileSkillResource } from '../skills/fileSystem.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createAgentHandlerContext, createProtocolBuffer } from './context.js'
+import { normalizeAgentInvocationFinalResult } from './terminalResult.js'
+
+const createLoggerMock = () => {
+	const logger = {
+		error: vi.fn(),
+		warn: vi.fn(),
+		info: vi.fn(),
+		debug: vi.fn(),
+		trace: vi.fn(),
+		fatal: vi.fn(),
+		getChildLogger: vi.fn(),
+	}
+	logger.getChildLogger.mockReturnValue(logger)
+	return logger
+}
 
 const childPayload = (prompt: string) => ({
 	message: prompt,
@@ -28,7 +48,7 @@ const baseMessage = {
 	},
 	principalId: 'principal-1',
 	tenantId: 'tenant-1',
-} as any
+}
 
 const startedSpans: Array<{ name: string; span: { setAttribute: ReturnType<typeof vi.fn> } }> = []
 
@@ -70,7 +90,7 @@ const baseAgentInvoke = {
 			payloadSchema: {
 				'~standard': {
 					vendor: 'test',
-					version: 1,
+					version: 1 as const,
 					validate: async (value: unknown) =>
 						typeof (value as { prompt?: unknown })?.prompt === 'string'
 							? { value }
@@ -100,12 +120,7 @@ const baseAgentInvoke = {
 } as const
 
 const baseServiceContext = {
-	logger: {
-		error: vi.fn(),
-		warn: vi.fn(),
-		info: vi.fn(),
-		debug: vi.fn(),
-	},
+	logger: createLoggerMock(),
 	startActiveSpan: vi.fn(async (_name, _opts, _ctx, fn) => {
 		const span = {
 			setAttribute: vi.fn(),
@@ -143,22 +158,25 @@ const baseServiceContext = {
 		setState: vi.fn(),
 		removeState: vi.fn(),
 	},
-} as any
+} as unknown as import('./context.js').ProtocolContext
 
 const baseEventBridge = {
 	instanceId: 'bridge-1',
 	invoke: vi.fn(),
 	openStream: vi.fn(),
-} as any
+} as EventBridge & {
+	invoke: ReturnType<typeof vi.fn>
+	openStream: ReturnType<typeof vi.fn>
+}
 
 const manifest: AgentManifest = {
 	agentName: 'supportAgent',
-	agentVersion: '1',
+	serviceVersion: '1',
 	eventBridge: 'default',
 	allowedTools: [{ serviceName: 'ToolService', serviceVersion: '1', commandName: 'createTicket' }],
 	allowedAgents: [
-		{ agentName: 'childAgent', agentVersion: '1' },
-		{ agentName: 'typedAgent', agentVersion: '1' },
+		{ agentName: 'childAgent', serviceVersion: '1' },
+		{ agentName: 'typedAgent', serviceVersion: '1' },
 	],
 }
 
@@ -263,6 +281,138 @@ describe('runtime context helpers', () => {
 		expect(toolSpan?.span.setAttribute).toHaveBeenCalledWith('purista.tenantId', 'tenant-1')
 	})
 
+	it('provisions sandbox access through the runtime helper using the manifest policy', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const ensureSandbox = vi.fn().mockResolvedValue({
+			sandboxId: 'sb-runtime-1',
+			subject: {
+				tenantId: 'tenant-1',
+				principalId: 'principal-1',
+				projectId: 'project-1',
+			},
+			scope: { kind: 'shared-project-user' as const },
+			status: 'ready' as const,
+			created: false,
+		})
+		const adapter = {
+			executeCommand: vi.fn(),
+			readFile: vi.fn(),
+			writeFiles: vi.fn(),
+		}
+		const createAdapter = vi.fn().mockReturnValue(adapter)
+		const resolveSubject = vi.fn().mockResolvedValue({
+			tenantId: 'tenant-1',
+			principalId: 'principal-1',
+			projectId: 'project-1',
+		})
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: { locale: 'en' },
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest: {
+				...manifest,
+				sandbox: {
+					mode: 'optional',
+					scope: 'shared-project-user',
+				},
+			},
+			sandbox: {
+				provider: {
+					ensureSandbox,
+					createAdapter,
+				},
+				resolveSubject,
+			},
+		})
+
+		const descriptor = await context.runtime.sandbox.ensure()
+		expect(descriptor.sandboxId).toBe('sb-runtime-1')
+		expect(resolveSubject).toHaveBeenCalledOnce()
+		expect(ensureSandbox).toHaveBeenCalledWith({
+			subject: {
+				tenantId: 'tenant-1',
+				principalId: 'principal-1',
+				projectId: 'project-1',
+			},
+			scope: { kind: 'shared-project-user' },
+			gitConfig: undefined,
+		})
+
+		const resolvedAdapter = await context.runtime.sandbox.adapter()
+		expect(resolvedAdapter).toBe(adapter)
+		expect(createAdapter).toHaveBeenCalledWith({ descriptor })
+	})
+
+	it('allows explicit custom sandbox scope overrides even without a manifest sandbox policy', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const ensureSandbox = vi.fn().mockResolvedValue({
+			sandboxId: 'sb-runtime-2',
+			subject: {
+				tenantId: 'tenant-1',
+				principalId: 'principal-1',
+				projectId: 'project-1',
+			},
+			scope: { kind: 'custom' as const, key: 'review-123' },
+			status: 'ready' as const,
+			created: true,
+		})
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: { locale: 'en' },
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+			sandbox: {
+				provider: {
+					ensureSandbox,
+					createAdapter: vi.fn().mockReturnValue({
+						executeCommand: vi.fn(),
+						readFile: vi.fn(),
+						writeFiles: vi.fn(),
+					}),
+				},
+				resolveSubject: async () => ({
+					tenantId: 'tenant-1',
+					principalId: 'principal-1',
+					projectId: 'project-1',
+				}),
+			},
+		})
+
+		const descriptor = await context.runtime.sandbox.ensure({
+			scope: {
+				kind: 'custom',
+				key: 'review-123',
+			},
+		})
+
+		expect(descriptor.scope).toEqual({ kind: 'custom', key: 'review-123' })
+		expect(ensureSandbox).toHaveBeenCalledWith({
+			subject: {
+				tenantId: 'tenant-1',
+				principalId: 'principal-1',
+				projectId: 'project-1',
+			},
+			scope: { kind: 'custom', key: 'review-123' },
+			gitConfig: undefined,
+		})
+	})
+
 	it('exposes durable run state helpers on the handler context', async () => {
 		const stateStore = new Map<string, unknown>()
 		const buffer = createProtocolBuffer({
@@ -307,10 +457,10 @@ describe('runtime context helpers', () => {
 
 		const run = await context.memory.run.start({
 			title: 'Example run',
-			extraScope: { projectId: 'demo' },
+			scope: { projectId: 'demo' },
 		})
 		await run.plan([{ id: 'step-1', title: 'Collect facts' }])
-		const persisted = await context.memory.run.get({ extraScope: { projectId: 'demo' } })
+		const persisted = await context.memory.run.get({ scope: { projectId: 'demo' } })
 
 		expect(persisted?.title).toBe('Example run')
 		expect(persisted?.tasks[0]?.title).toBe('Collect facts')
@@ -361,9 +511,25 @@ describe('runtime context helpers', () => {
 
 	it('creates structured error frames', () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
-		buffer.protocol.emitError(new Error('boom'))
+		const error = new Error('boom')
+		error.cause = { requestBodyValues: { prompt: 'secret prompt' } }
+		buffer.protocol.emitError(error)
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes[0]?.frame.kind).toBe('error')
+		if (envelopes[0]?.frame.kind === 'error') {
+			expect(envelopes[0].frame.details).toEqual({
+				kind: 'provider',
+				statusCode: undefined,
+				provider: undefined,
+				providerCode: undefined,
+				requestId: undefined,
+				retryable: undefined,
+				attempts: undefined,
+				reason: undefined,
+			})
+			expect(JSON.stringify(envelopes[0].frame.details)).not.toContain('secret prompt')
+			expect(JSON.stringify(envelopes[0].frame.details)).not.toContain('stack')
+		}
 	})
 
 	it('validates allowlisted tools', async () => {
@@ -382,7 +548,8 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await expect(context.invoke.tools.invoke.Unknown['1'].run({})).rejects.toBeInstanceOf(HandledError)
+		expect(context.invoke.tools.invoke.ToolService).toBeDefined()
+		expect(context.invoke.tools.invoke.Unknown).toBeUndefined()
 	})
 
 	it('supports message emission for primitive values and has() checks', () => {
@@ -441,7 +608,7 @@ describe('runtime context helpers', () => {
 
 		const envelopes = await context.invoke.agents.invoke({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 		})
 		expect(envelopes).toHaveLength(1)
@@ -452,12 +619,16 @@ describe('runtime context helpers', () => {
 			throw new Error('expected child agent api to be defined')
 		}
 		const chainedInvocation = childAgentApi.call(childPayload('go-again'))
-		const chainedEnvelopes = await chainedInvocation.final()
+		const chainedEnvelopes = normalizeAgentInvocationFinalResult({
+			result: await chainedInvocation.final(),
+			agentName: 'childAgent',
+			serviceVersion: '1',
+		}).envelopes
 		expect(chainedEnvelopes).toHaveLength(1)
 
 		const text = await context.invoke.agents.runText({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 		})
 		expect(text).toBe('child result')
@@ -468,10 +639,21 @@ describe('runtime context helpers', () => {
 				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
 				frame: { kind: 'message', role: 'assistant', content: '{"ok":true}', final: true },
 			}),
+			createProtocolEnvelope({
+				conversationId: 'sub-4',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: createArtifactFrame({
+					artifactId: 'output',
+					phase: 'final',
+					content: { ok: true },
+					mimeType: 'application/json',
+					lastChunk: true,
+				}),
+			}),
 		])
 		const obj = await context.invoke.agents.runObject<{ ok: boolean }>({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 		})
 		expect(obj).toEqual({ ok: true })
@@ -485,19 +667,80 @@ describe('runtime context helpers', () => {
 		expect(agentSpan?.span.setAttribute).toHaveBeenCalledWith('purista.tenantId', 'tenant-1')
 	})
 
+	it('provides a composable stream pipeline for child-agent invocation', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const tapped: string[] = []
+		const written: AgentProtocolEnvelope[] = []
+		const pipeline = context.invoke.agents
+			.stream({
+				agentName: 'childAgent',
+				serviceVersion: '1',
+				payload: childPayload('pipeline'),
+			})
+			.tap(envelope => {
+				if (envelope.frame.kind === 'message') {
+					tapped.push(String(envelope.frame.content))
+				}
+			})
+			.forwardToCurrentStream(true)
+
+		const collected = await pipeline.toWriter({
+			write: async envelope => {
+				written.push(envelope)
+			},
+		})
+
+		expect(tapped).toEqual(['child result'])
+		expect(written).toHaveLength(1)
+		expect(collected).toHaveLength(1)
+		expect(buffer.toEnvelopes()).toHaveLength(3)
+		const forwarded = buffer.toEnvelopes().filter(envelope => envelope.actor?.agent === 'childAgent')
+		expect(forwarded).toHaveLength(1)
+		expect(forwarded[0]?.actor).toMatchObject({
+			service: 'child',
+			version: '1',
+			agent: 'childAgent',
+		})
+	})
+
 	it('validates runObject output against declared canInvokeAgent outputSchema', async () => {
 		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
 		baseEventBridge.invoke.mockResolvedValueOnce([
 			createProtocolEnvelope({
 				conversationId: 'sub-schema-1',
 				actor: { service: 'child', version: '1', agent: 'typedAgent', instanceId: 'i1' },
-				frame: { kind: 'message', role: 'assistant', content: '{"ok":true}', final: true },
+				frame: { kind: 'message', role: 'assistant', content: 'typed result', final: true },
+			}),
+			createProtocolEnvelope({
+				conversationId: 'sub-schema-1',
+				actor: { service: 'child', version: '1', agent: 'typedAgent', instanceId: 'i1' },
+				frame: createArtifactFrame({
+					artifactId: 'output',
+					phase: 'final',
+					content: { ok: true },
+					mimeType: 'application/json',
+					lastChunk: true,
+				}),
 			}),
 		])
 		const outputSchema = {
 			'~standard': {
 				vendor: 'test',
-				version: 1,
+				version: 1 as const,
 				validate: async (value: unknown) =>
 					typeof (value as { ok?: unknown })?.ok === 'boolean'
 						? { value }
@@ -518,15 +761,15 @@ describe('runtime context helpers', () => {
 			manifest: {
 				...manifest,
 				allowedAgents: [
-					{ agentName: 'childAgent', agentVersion: '1' },
-					{ agentName: 'typedAgent', agentVersion: '1', outputSchema },
+					{ agentName: 'childAgent', serviceVersion: '1' },
+					{ agentName: 'typedAgent', serviceVersion: '1', outputSchema },
 				],
 			},
 		})
 
 		const obj = await context.invoke.agents.runObject<{ ok: boolean }>({
 			agentName: 'typedAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 		})
 		expect(obj).toEqual({ ok: true })
@@ -538,7 +781,18 @@ describe('runtime context helpers', () => {
 			createProtocolEnvelope({
 				conversationId: 'sub-schema-2',
 				actor: { service: 'child', version: '1', agent: 'typedAgent', instanceId: 'i1' },
-				frame: { kind: 'message', role: 'assistant', content: '{"status":"wrong"}', final: true },
+				frame: { kind: 'message', role: 'assistant', content: 'wrong shape', final: true },
+			}),
+			createProtocolEnvelope({
+				conversationId: 'sub-schema-2',
+				actor: { service: 'child', version: '1', agent: 'typedAgent', instanceId: 'i1' },
+				frame: createArtifactFrame({
+					artifactId: 'output',
+					phase: 'final',
+					content: { status: 'wrong' },
+					mimeType: 'application/json',
+					lastChunk: true,
+				}),
 			}),
 		])
 		const context = createAgentHandlerContext({
@@ -555,14 +809,14 @@ describe('runtime context helpers', () => {
 			manifest: {
 				...manifest,
 				allowedAgents: [
-					{ agentName: 'childAgent', agentVersion: '1' },
+					{ agentName: 'childAgent', serviceVersion: '1' },
 					{
 						agentName: 'typedAgent',
-						agentVersion: '1',
+						serviceVersion: '1',
 						outputSchema: {
 							'~standard': {
 								vendor: 'test',
-								version: 1,
+								version: 1 as const,
 								validate: async (value: unknown) =>
 									typeof (value as { ok?: unknown })?.ok === 'boolean'
 										? { value }
@@ -577,7 +831,7 @@ describe('runtime context helpers', () => {
 		await expect(
 			context.invoke.agents.runObject({
 				agentName: 'typedAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: childPayload('go'),
 			}),
 		).rejects.toMatchObject({
@@ -598,8 +852,8 @@ describe('runtime context helpers', () => {
 		const context = createAgentHandlerContext({
 			serviceContext: {
 				...baseServiceContext,
-				invokeAgent: undefined,
-			},
+				invokeAgent: undefined as never,
+			} as typeof baseServiceContext,
 			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello', sessionId: 'chat-queue' },
 			parameter: {},
@@ -614,7 +868,7 @@ describe('runtime context helpers', () => {
 
 		const text = await context.invoke.agents.runText({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('queue child'),
 		})
 		expect(text).toBe('direct child result')
@@ -625,7 +879,11 @@ describe('runtime context helpers', () => {
 			throw new Error('expected child agent api to be defined')
 		}
 
-		const chainedEnvelopes = await childAgentApi.call(childPayload('queue child chained')).final()
+		const chainedEnvelopes = normalizeAgentInvocationFinalResult({
+			result: await childAgentApi.call(childPayload('queue child chained')).final(),
+			agentName: 'childAgent',
+			serviceVersion: '1',
+		}).envelopes
 		expect(chainedEnvelopes).toHaveLength(1)
 		expect(baseEventBridge.invoke).toHaveBeenCalled()
 	})
@@ -648,7 +906,7 @@ describe('runtime context helpers', () => {
 		await expect(
 			context.invoke.agents.invoke({
 				agentName: 'missingAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'go' },
 			}),
 		).rejects.toMatchObject({
@@ -675,7 +933,7 @@ describe('runtime context helpers', () => {
 		await expect(
 			context.invoke.agents.invoke({
 				agentName: 'typedAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { wrong: true },
 			}),
 		).rejects.toMatchObject({
@@ -780,13 +1038,14 @@ describe('runtime context helpers', () => {
 
 		await context.invoke.agents.invoke({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 			forwardToCurrentStream: true,
 			emitInvocationToolEvents: false,
 		})
 
-		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		const envelopes = buffer.toEnvelopes()
+		const frames = envelopes.map(envelope => envelope.frame)
 		const assistantFrames = frames.filter(
 			(frame): frame is Extract<(typeof frames)[number], { kind: 'message' }> =>
 				frame.kind === 'message' && frame.role === 'assistant',
@@ -800,6 +1059,12 @@ describe('runtime context helpers', () => {
 		expect(assistantFrames.map(frame => frame.content)).toEqual(['hello ', 'world'])
 		expect(reasoningFrames).toHaveLength(1)
 		expect(toolFrames).toHaveLength(0)
+		expect(envelopes[0]?.actor).toMatchObject({
+			service: 'child',
+			version: '1',
+			agent: 'childAgent',
+		})
+		expect(envelopes[0]?.conversationId).toBe('sub-forward')
 	})
 
 	it('can suppress invocation telemetry while still returning envelopes', async () => {
@@ -820,7 +1085,7 @@ describe('runtime context helpers', () => {
 
 		await context.invoke.agents.invoke({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('typed'),
 			emitInvocationToolEvents: false,
 		})
@@ -880,11 +1145,12 @@ describe('runtime context helpers', () => {
 
 		await context.invoke.agents.forward({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 		})
 
-		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		const envelopes = buffer.toEnvelopes()
+		const frames = envelopes.map(envelope => envelope.frame)
 		const assistantFrames = frames.filter(
 			(frame): frame is Extract<(typeof frames)[number], { kind: 'message' }> =>
 				frame.kind === 'message' && frame.role === 'assistant',
@@ -893,6 +1159,12 @@ describe('runtime context helpers', () => {
 
 		expect(assistantFrames.map(frame => frame.content)).toEqual(['forwarded text'])
 		expect(toolFrames).toHaveLength(0)
+		expect(envelopes[0]?.actor).toMatchObject({
+			service: 'child',
+			version: '1',
+			agent: 'childAgent',
+		})
+		expect(envelopes[0]?.conversationId).toBe('sub-forward-defaults')
 	})
 
 	it('fails fast for forward() when stream transport is unavailable', async () => {
@@ -924,7 +1196,7 @@ describe('runtime context helpers', () => {
 		await expect(
 			context.invoke.agents.forward({
 				agentName: 'childAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: childPayload('go'),
 			}),
 		).rejects.toThrow('does not support streams')
@@ -968,21 +1240,24 @@ describe('runtime context helpers', () => {
 
 		await context.invoke.agents.forward({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 			forward: {
 				toolEvents: true,
 			},
 		})
 
-		const toolFrames = buffer
-			.toEnvelopes()
-			.map(envelope => envelope.frame)
-			.filter(frame => frame.kind === 'tool')
+		const envelopes = buffer.toEnvelopes()
+		const toolFrames = envelopes.map(envelope => envelope.frame).filter(frame => frame.kind === 'tool')
 		expect(toolFrames).toHaveLength(1)
 		expect(toolFrames[0]).toMatchObject({
 			toolName: 'readSpec',
 			status: 'invoked',
+		})
+		expect(envelopes[0]?.actor).toMatchObject({
+			service: 'child',
+			version: '1',
+			agent: 'childAgent',
 		})
 	})
 
@@ -1031,14 +1306,12 @@ describe('runtime context helpers', () => {
 
 		await context.invoke.agents.forward({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: childPayload('go'),
 		})
 
-		const artifactFrames = buffer
-			.toEnvelopes()
-			.map(envelope => envelope.frame)
-			.filter(frame => frame.kind === 'artifact')
+		const envelopes = buffer.toEnvelopes()
+		const artifactFrames = envelopes.map(envelope => envelope.frame).filter(frame => frame.kind === 'artifact')
 
 		expect(artifactFrames).toHaveLength(1)
 		expect(artifactFrames[0]).toMatchObject({
@@ -1049,6 +1322,11 @@ describe('runtime context helpers', () => {
 			runId: 'run-1',
 			title: 'Architecture draft',
 			status: 'running',
+		})
+		expect(envelopes[0]?.actor).toMatchObject({
+			service: 'child',
+			version: '1',
+			agent: 'childAgent',
 		})
 	})
 
@@ -1099,7 +1377,7 @@ describe('runtime context helpers', () => {
 		await expect(
 			context.invoke.agents.invoke({
 				agentName: 'childAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'go' },
 			}),
 		).rejects.toBeInstanceOf(HandledError)
@@ -1131,7 +1409,7 @@ describe('runtime context helpers', () => {
 
 		const envelopes = await context.invoke.agents.invoke({
 			agentName: 'childAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'go' },
 			failOnErrorFrame: false,
 		})
@@ -1139,7 +1417,7 @@ describe('runtime context helpers', () => {
 		expect(envelopes[0]?.frame.kind).toBe('error')
 	})
 
-	it('fails runObject when final assistant text is not valid JSON', async () => {
+	it('fails runObject when the invoked agent does not emit an output artifact', async () => {
 		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
 		baseEventBridge.invoke.mockResolvedValue([
 			createProtocolEnvelope({
@@ -1166,7 +1444,7 @@ describe('runtime context helpers', () => {
 		await expect(
 			context.invoke.agents.runObject({
 				agentName: 'childAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'go' },
 			}),
 		).rejects.toMatchObject({
@@ -1174,7 +1452,7 @@ describe('runtime context helpers', () => {
 		})
 	})
 
-	it('ignores empty stream chunks and finals', async () => {
+	it('sends stream chunks and finals', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
@@ -1190,9 +1468,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		context.io.stream.sendChunk('')
-		context.io.stream.sendFinal('')
-		context.io.stream.sendChunk('chunk')
+		context.io.stream.sendDelta('chunk')
 		context.io.stream.sendFinal('final')
 
 		const messageFrames = buffer
@@ -1202,8 +1478,511 @@ describe('runtime context helpers', () => {
 		expect(messageFrames).toHaveLength(2)
 		if (messageFrames[0]?.kind === 'message' && messageFrames[1]?.kind === 'message') {
 			expect(messageFrames[0].content).toBe('chunk')
+			expect(messageFrames[0].partial).toBe(true)
 			expect(messageFrames[1].content).toBe('final')
+			expect(messageFrames[1].final).toBe(true)
 		}
+	})
+
+	it('provides a high-level ai.streamObject helper that publishes sections and returns the final object', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'object-stream-model',
+					capabilities: { object: true, 'object-stream': true },
+					streamObject: ((_request: any) => ({
+						async final() {
+							return {
+								data: { urgency: 'high', explanation: 'final explanation', nextSteps: 'page on-call' },
+								text: 'final object',
+							}
+						},
+						async *[Symbol.asyncIterator]() {
+							yield { type: 'status' as const, message: 'thinking' }
+							yield { type: 'section' as const, section: 'urgency', content: 'high' }
+							yield { type: 'section' as const, section: 'explanation', content: 'final explanation' }
+							yield {
+								type: 'final-object' as const,
+								data: { urgency: 'high', explanation: 'final explanation', nextSteps: 'page on-call' },
+								text: 'final object',
+							}
+						},
+					})) as NonNullable<ModelProvider['streamObject']>,
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const result = await context.ai.streamObject({
+			model: 'primary',
+			prompt: 'triage this',
+			publishToCurrentStream: {
+				taskId: 'classify-urgency',
+				artifactIdPrefix: 'triage',
+				renderSectionDelta: ({ section, content }) => `${section}:${String(content)}`,
+			},
+		})
+
+		expect(result).toEqual({
+			urgency: 'high',
+			explanation: 'final explanation',
+			nextSteps: 'page on-call',
+		})
+
+		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		expect(frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'reasoning')).toBe(true)
+		expect(frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'triage-urgency')).toBe(true)
+		expect(
+			frames.some(
+				frame => frame.kind === 'artifact' && frame.artifactId === buildTaskChunkArtifactId('classify-urgency'),
+			),
+		).toBe(true)
+		expect(
+			frames.some(
+				frame =>
+					frame.kind === 'message' && frame.role === 'assistant' && String(frame.content).includes('urgency:high'),
+			),
+		).toBe(true)
+	})
+
+	it('streams text deltas to the current protocol stream from true provider streaming', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'text-stream-model',
+					capabilities: { text: true, 'text-stream': true },
+					streamText: ((_request: any) => ({
+						async final() {
+							return {
+								output: 'hello world',
+								reasoningText: 'thinking',
+							}
+						},
+						async *[Symbol.asyncIterator]() {
+							yield { type: 'reasoning-delta' as const, reasoningDelta: 'thinking' }
+							yield { type: 'text-delta' as const, textDelta: 'hello ' }
+							yield { type: 'text-delta' as const, textDelta: 'world' }
+						},
+					})) as NonNullable<ModelProvider['streamText']>,
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const result = await context.ai.streamText({
+			model: 'primary',
+			prompt: 'say hello',
+			publishToCurrentStream: {
+				taskId: 'draft-answer',
+			},
+		})
+
+		expect(result).toBe('hello world')
+
+		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		expect(frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'reasoning')).toBe(true)
+		expect(
+			frames.some(frame => frame.kind === 'artifact' && frame.artifactId === buildTaskChunkArtifactId('draft-answer')),
+		).toBe(true)
+		expect(
+			frames.some(
+				frame => frame.kind === 'message' && frame.role === 'assistant' && String(frame.content).includes('hello '),
+			),
+		).toBe(true)
+		expect(
+			frames.some(
+				frame => frame.kind === 'message' && frame.role === 'assistant' && String(frame.content).includes('world'),
+			),
+		).toBe(true)
+	})
+
+	it('provides worker and delegate based planning helpers for sequential autonomous execution', async () => {
+		const stateStore = new Map<string, unknown>()
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: {
+				...baseServiceContext,
+				states: {
+					getState: async (...stateNames: string[]) =>
+						Object.fromEntries(stateNames.map(stateName => [stateName, stateStore.get(stateName)])),
+					setState: async (stateName: string, value: unknown) => {
+						stateStore.set(stateName, value)
+					},
+					removeState: async (stateName: string) => {
+						stateStore.delete(stateName)
+					},
+				},
+			} as typeof baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'plan this support request' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'planner-model',
+					capabilities: { text: true, object: true },
+					generateText: (async request => `EXECUTOR:${request.prompt}`) as NonNullable<ModelProvider['generateText']>,
+					generateObject: (async () => ({
+						data: {
+							title: 'Demo plan',
+							summary: 'Execute the planned steps sequentially.',
+							tasks: [{ id: 'draft-reply', title: 'Draft the reply', instruction: 'Write the final support reply.' }],
+						},
+						text: 'plan',
+					})) as NonNullable<ModelProvider['generateObject']>,
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const worker = context.ai.createModelExecutor({
+			model: 'primary',
+		})
+
+		const resultPlan = await context.plan.generate({
+			model: 'primary',
+			worker,
+		})
+
+		const result = await context.plan.execute(resultPlan)
+		expectTypeOf(result.results).toEqualTypeOf<Record<string, string>>()
+
+		expect(result.plan.tasks.map(task => task.id)).toEqual(['draft-reply'])
+		expect(result.results['draft-reply']).toBe('EXECUTOR:Write the final support reply.')
+		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		expect(frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'purista-ai:plan')).toBe(true)
+		expect(frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'purista-ai:task:draft-reply')).toBe(
+			true,
+		)
+		expect(
+			frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'purista-ai:task-chunk:draft-reply'),
+		).toBe(true)
+		const completedTaskIndex = frames.findIndex(
+			frame =>
+				frame.kind === 'artifact' &&
+				frame.artifactId === 'purista-ai:task:draft-reply' &&
+				typeof frame.content === 'object' &&
+				frame.content !== null &&
+				'status' in frame.content &&
+				(frame.content as { status?: unknown }).status === 'completed',
+		)
+		const finalChunkIndex = frames.findIndex(
+			frame =>
+				frame.kind === 'artifact' &&
+				frame.artifactId === 'purista-ai:task-chunk:draft-reply' &&
+				frame.phase === 'final',
+		)
+		expect(completedTaskIndex).toBeGreaterThanOrEqual(0)
+		expect(finalChunkIndex).toBeGreaterThanOrEqual(0)
+		expect(completedTaskIndex).toBeLessThan(finalChunkIndex)
+	})
+
+	it('treats default-worker planner aliases as the default worker', async () => {
+		const stateStore = new Map<string, unknown>()
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: {
+				...baseServiceContext,
+				states: {
+					getState: async (...stateNames: string[]) =>
+						Object.fromEntries(stateNames.map(stateName => [stateName, stateStore.get(stateName)])),
+					setState: async (stateName: string, value: unknown) => {
+						stateStore.set(stateName, value)
+					},
+					removeState: async (stateName: string) => {
+						stateStore.delete(stateName)
+					},
+				},
+			} as typeof baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'plan this implementation workflow' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'planner-model',
+					capabilities: { text: true, object: true },
+					generateText: (async request => `EXECUTOR:${request.prompt}`) as NonNullable<ModelProvider['generateText']>,
+					generateObject: (async () => ({
+						data: {
+							title: 'Alias plan',
+							tasks: [
+								{
+									id: 'default-step',
+									title: 'Do the core work',
+									instruction: 'Implement the primary task.',
+									delegate: '/default-worker',
+								},
+							],
+						},
+						text: 'plan',
+					})) as NonNullable<ModelProvider['generateObject']>,
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const worker = context.ai.createModelExecutor({
+			model: 'primary',
+		})
+
+		const plan = await context.plan.generate({
+			model: 'primary',
+			worker,
+		})
+		const result = await context.plan.execute(plan)
+
+		expect(plan.tasks[0]?.delegate).toBeUndefined()
+		expect(result.results['default-step']).toBe('EXECUTOR:Implement the primary task.')
+	})
+
+	it('filters delegated agent forwarding according to forwardToCurrentStream options', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'delegate this task' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const delegatedEnvelopes = [
+			createProtocolEnvelope({
+				conversationId: 'delegated-1',
+				actor: { service: 'child', version: '1', agent: 'researchAgent', instanceId: 'i1' },
+				frame: createArtifactFrame({
+					artifactId: PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID,
+					phase: 'chunk',
+					content: {
+						type: 'purista-ai-workflow-stage',
+						name: 'child-finalization',
+						status: 'running',
+						summary: 'Synthesizing child result.',
+					},
+					mimeType: 'application/json',
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'delegated-1',
+				actor: { service: 'child', version: '1', agent: 'researchAgent', instanceId: 'i1' },
+				frame: {
+					kind: 'tool',
+					toolName: 'desk.1.fetchWebsite',
+					status: 'success',
+					input: { url: 'https://purista.dev/handbook' },
+					output: { ok: true },
+				},
+			}),
+			createProtocolEnvelope({
+				conversationId: 'delegated-1',
+				actor: { service: 'child', version: '1', agent: 'researchAgent', instanceId: 'i1' },
+				frame: {
+					kind: 'message',
+					role: 'assistant',
+					content: 'Delegated assistant text should stay hidden.',
+					final: true,
+				},
+			}),
+			createProtocolEnvelope({
+				conversationId: 'delegated-1',
+				actor: { service: 'child', version: '1', agent: 'researchAgent', instanceId: 'i1' },
+				frame: createArtifactFrame({
+					artifactId: 'output',
+					phase: 'final',
+					content: { answer: 'child output should stay hidden' },
+					mimeType: 'application/json',
+				}),
+			}),
+		]
+
+		const executor = context.ai.createAgentExecutorFromInvoke(
+			() => ({
+				async *[Symbol.asyncIterator]() {},
+				async final() {
+					return delegatedEnvelopes
+				},
+			}),
+			{
+				id: 'research-agent',
+				description: 'Delegated research agent',
+				resultMode: 'text',
+				forwardToCurrentStream: {
+					assistant: false,
+					artifacts: {
+						workflow: true,
+						output: false,
+					},
+					toolEvents: true,
+				},
+			},
+		)
+
+		const delegatedText = await executor.call({
+			context,
+			request: 'delegate this task',
+			task: {
+				id: 'task-1',
+				title: 'Research',
+				instruction: 'Fetch the handbook and summarize it.',
+				order: 0,
+				status: 'pending',
+				kind: 'agent',
+			},
+			run: {} as never,
+			results: {},
+		})
+
+		expect(delegatedText).toBe('Delegated assistant text should stay hidden.')
+		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		expect(
+			frames.some(frame => frame.kind === 'artifact' && frame.artifactId === PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID),
+		).toBe(true)
+		expect(frames.some(frame => frame.kind === 'tool' && frame.toolName === 'desk.1.fetchWebsite')).toBe(true)
+		expect(
+			frames.some(
+				frame =>
+					frame.kind === 'message' &&
+					frame.role === 'assistant' &&
+					String(frame.content).includes('Delegated assistant text should stay hidden.'),
+			),
+		).toBe(false)
+		expect(frames.some(frame => frame.kind === 'artifact' && frame.artifactId === 'output')).toBe(false)
+	})
+
+	it('falls back to output.message when delegated text runs do not expose a final assistant message', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'delegate this task' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const executor = context.ai.createAgentExecutorFromInvoke(
+			() => ({
+				async *[Symbol.asyncIterator]() {},
+				async final() {
+					return [
+						createProtocolEnvelope({
+							conversationId: 'delegated-1',
+							actor: { service: 'child', version: '1', agent: 'researchAgent', instanceId: 'i1' },
+							frame: createArtifactFrame({
+								artifactId: 'output',
+								phase: 'final',
+								content: { message: 'output-derived summary' },
+								mimeType: 'application/json',
+							}),
+						}),
+					]
+				},
+			}),
+			{
+				id: 'research-agent',
+				description: 'Delegated research agent',
+				resultMode: 'text',
+			},
+		)
+
+		const delegatedText = await executor.call({
+			context,
+			request: 'delegate this task',
+			task: {
+				id: 'task-1',
+				title: 'Research',
+				instruction: 'Fetch the handbook and summarize it.',
+				order: 0,
+				status: 'pending',
+				kind: 'agent',
+			},
+			run: {} as never,
+			results: {},
+		})
+
+		expect(delegatedText).toBe('output-derived summary')
+	})
+
+	it('emits workflow stage artifacts through context.io.workflow.emitStage', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'finalize' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		context.io.workflow.emitStage({
+			name: 'final-answer',
+			runId: 'run-1',
+			status: 'running',
+			summary: 'Synthesizing final answer.',
+		})
+
+		const workflowArtifact = buffer
+			.toEnvelopes()
+			.find(
+				envelope =>
+					envelope.frame.kind === 'artifact' && envelope.frame.artifactId === PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID,
+			)
+
+		expect(workflowArtifact?.frame).toMatchObject({
+			kind: 'artifact',
+			artifactId: PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID,
+			content: {
+				type: 'purista-ai-workflow-stage',
+				name: 'final-answer',
+				runId: 'run-1',
+				status: 'running',
+				summary: 'Synthesizing final answer.',
+			},
+		})
 	})
 
 	it('streams public assistant replies through context.ai.reply.generate', async () => {
@@ -1232,7 +2011,8 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const reply = await context.ai.reply.generate({
+		const reply = await context.ai.reply({
+			type: 'model',
 			model: 'primary',
 			prompt: 'Say hello',
 		})
@@ -1255,6 +2035,59 @@ describe('runtime context helpers', () => {
 			expect(messageFrames[2].content).toBe('')
 			expect(messageFrames[2].final).toBe(true)
 		}
+	})
+
+	it('provides a conversation-aware ai.replyObject helper', async () => {
+		const conversationStore = new InMemoryConversationStore()
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore,
+			protocol: buffer.protocol,
+			resources: {},
+			models: {
+				primary: {
+					name: 'reply-object-model',
+					capabilities: { object: true, text: true },
+					generateObject: (async request => ({
+						data: {
+							message: request.prompt.includes('Conversation history:') ? 'history-aware reply' : 'plain reply',
+							mode: 'summary',
+						},
+						text: 'object',
+					})) as NonNullable<ModelProvider['generateObject']>,
+				},
+			},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.memory.conversation.addUser('Prior user message', { sessionId: 'session-1' })
+		const result = await context.ai.replyObject({
+			model: 'primary',
+			schema: z.object({
+				message: z.string(),
+				mode: z.string(),
+			}),
+			prompt: 'Summarize the conversation.',
+			sessionId: 'session-1',
+			includeConversationHistory: true,
+			persistAssistantMessage: true,
+			selectMessage: output => output.message,
+			assistantMetadata: { source: 'test' },
+		})
+
+		expect(result).toEqual({
+			message: 'history-aware reply',
+			mode: 'summary',
+		})
+		expect(await context.memory.conversation.buildPromptInput({ sessionId: 'session-1' })).toContain(
+			'assistant: history-aware reply',
+		)
 	})
 
 	it('composes internal assistant replies without streaming them', async () => {
@@ -1282,9 +2115,11 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const reply = await context.ai.reply.compose({
+		const reply = await context.ai.reply({
+			type: 'model',
 			model: 'primary',
 			prompt: 'Draft internally',
+			stream: false,
 		})
 
 		expect(reply).toBe('Internal draft')
@@ -1295,7 +2130,7 @@ describe('runtime context helpers', () => {
 		expect(messageFrames).toHaveLength(0)
 	})
 
-	it('fails public assistant replies when the selected model does not support streamed text', async () => {
+	it('fails public assistant replies when the selected model does not support streamed text', () => {
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
 			eventBridge: baseEventBridge,
@@ -1315,14 +2150,13 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await expect(
-			context.ai.reply.generate({
+		expect(() =>
+			context.ai.reply({
+				type: 'model',
 				model: 'primary',
 				prompt: 'Say hello',
 			}),
-		).rejects.toMatchObject({
-			errorCode: StatusCode.InternalServerError,
-		})
+		).toThrow()
 	})
 
 	it('fails public assistant replies when the model returns an empty reply', async () => {
@@ -1347,7 +2181,8 @@ describe('runtime context helpers', () => {
 		})
 
 		await expect(
-			context.ai.reply.generate({
+			context.ai.reply({
+				type: 'model',
 				model: 'primary',
 				prompt: 'Say hello',
 			}),
@@ -1357,7 +2192,7 @@ describe('runtime context helpers', () => {
 		})
 	})
 
-	it('fails internal assistant composition when the selected model does not support text', async () => {
+	it('fails internal assistant composition when the selected model does not support text', () => {
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
 			eventBridge: baseEventBridge,
@@ -1377,14 +2212,13 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await expect(
-			context.ai.reply.compose({
+		expect(() =>
+			context.ai.reply({
+				type: 'model',
 				model: 'primary',
-				prompt: 'Draft internally',
+				prompt: 'Say hello',
 			}),
-		).rejects.toMatchObject({
-			errorCode: StatusCode.InternalServerError,
-		})
+		).toThrow()
 	})
 
 	it('publishes deterministic public assistant replies through context.ai.reply.publish', () => {
@@ -1403,7 +2237,10 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const reply = context.ai.reply.publish('First sentence. Second sentence.\n\nFinal paragraph.')
+		const reply = context.ai.reply({
+			type: 'text',
+			content: 'First sentence. Second sentence.\n\nFinal paragraph.',
+		})
 
 		expect(reply).toBe('First sentence. Second sentence.\n\nFinal paragraph.')
 		const messageFrames = buffer
@@ -1430,7 +2267,7 @@ describe('runtime context helpers', () => {
 
 	it('passes tenantId and principalId to conversation store', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
-		const conversationStore = {
+		const conversationStore: ConversationStore = {
 			load: vi.fn().mockResolvedValue(undefined),
 			save: vi.fn().mockResolvedValue(undefined),
 			delete: vi.fn().mockResolvedValue(undefined),
@@ -1441,7 +2278,7 @@ describe('runtime context helpers', () => {
 			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello' },
 			parameter: {},
-			conversationStore: conversationStore as any,
+			conversationStore,
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -1453,7 +2290,7 @@ describe('runtime context helpers', () => {
 		await context.memory.session.save({ conversationId: 's1', data: { value: 1 } })
 		expect(conversationStore.save).toHaveBeenCalledWith(expect.objectContaining({ conversationId: 's1' }), {
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			tenantId: 'tenant-1',
 			principalId: 'principal-1',
 		})
@@ -1461,7 +2298,7 @@ describe('runtime context helpers', () => {
 		await context.memory.session.load('s1')
 		expect(conversationStore.load).toHaveBeenCalledWith('s1', {
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			tenantId: 'tenant-1',
 			principalId: 'principal-1',
 		})
@@ -1469,7 +2306,7 @@ describe('runtime context helpers', () => {
 		await context.memory.session.delete('s1')
 		expect(conversationStore.delete).toHaveBeenCalledWith('s1', {
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			tenantId: 'tenant-1',
 			principalId: 'principal-1',
 		})
@@ -1497,7 +2334,7 @@ describe('runtime context helpers', () => {
 					...baseMessage,
 					tenantId: 'tenant-2',
 				},
-			},
+			} as typeof baseServiceContext,
 			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello', sessionId: 'shared' },
 			parameter: {},

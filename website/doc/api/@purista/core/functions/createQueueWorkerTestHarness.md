@@ -34,7 +34,7 @@ and queue bridge interactions instead of calling the handler directly.
 
 ### options?
 
-\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; queueBridge?: QueueBridge; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] extends NeverObject ? \{ resources?: undefined \} : \{ resources: InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] \}) & (keyof InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] extends NeverObject ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] \}))\[K\] \} & `object` = `...`
+\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; queueBridge?: QueueBridge; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] extends never ? \{ resources?: undefined \} : \{ resources: InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] \}) & (keyof InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] extends never ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: InferQueueWorkerHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] \}))\[K\] \} & `object` = `...`
 
 ## Returns
 

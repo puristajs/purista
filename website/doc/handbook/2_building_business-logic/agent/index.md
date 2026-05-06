@@ -17,7 +17,7 @@ This handbook section is organized around that exact flow.
 
 ## The Mental Model
 
-- `AgentBuilder` defines what the agent is allowed to do.
+- `AgentQueueBuilder` defines what the agent is allowed to do.
 - The handler uses `context` to call models, commands, child agents, stores, skills, and streaming.
 - `getInstance(...)` binds the definition to real models, stores, queues, skills, and sandbox execution.
 - Adapters such as the Vercel AI SDK integration sit at the edge. They do not own your business logic.
@@ -28,7 +28,7 @@ If you keep those boundaries clean, the API becomes much easier to understand.
 
 ```mermaid
 flowchart LR
-    A["1. Define with AgentBuilder"] --> B["2. Implement in handler(context, payload)"]
+    A["1. Define with AgentQueueBuilder"] --> B["2. Implement in handler(context, payload)"]
     B --> C["3. Create instance with getInstance(eventBridge, options)"]
     C --> D["4. Adapt at HTTP / SSE / AI SDK boundary"]
 ```
@@ -40,19 +40,14 @@ The most important rule is: do not jump straight into SDK adapters or sandbox de
 Across the pages below, the same example is used repeatedly:
 
 - a queued durable `supportAgent`
-- one inline `triageAgent`
 - one allowlisted command `support.1.lookupFaq`
 - one allowlisted child agent `triageAgent.1`
-- two declared skills:
-  - `spec-elicitation`
-  - `support-workflow`
 
 That example is intentionally small, but it exercises the main PURISTA concerns:
 
 - builder declaration
 - handler logic
 - typed instance creation
-- skills
 - streaming
 - queued durable execution
 - model-provider adapter usage
@@ -64,9 +59,7 @@ That example is intentionally small, but it exercises the main PURISTA concerns:
 - [Quick Start](./getting-started.md)
   Builds one complete working agent path end to end.
 - [Builder](./agent-builder.md)
-  Explains what belongs in `AgentBuilder` and what does not.
-- [Skills](./skills.md)
-  Shows how to define skills and declare them in the builder.
+  Explains what belongs in `AgentQueueBuilder` and what does not.
 
 ### 2. Implement
 
@@ -107,7 +100,7 @@ That example is intentionally small, but it exercises the main PURISTA concerns:
 
 ## Common Mistakes
 
-- Treating agents as “just prompts” instead of normal PURISTA workloads with explicit dependencies.
+- Treating agents as "just prompts" instead of normal PURISTA workloads with explicit dependencies.
 - Mixing builder-time declaration with runtime provisioning.
 - Loading tools or skills implicitly instead of declaring them and providing them at `getInstance(...)`.
 - Starting with SDK adapters before the core PURISTA flow is implemented.
@@ -120,5 +113,4 @@ If you want one coherent walkthrough, read in this order:
 2. [Builder](./agent-builder.md)
 3. [Context](./handler-context.md)
 4. [Runtime](./runtime.md)
-5. [Skills](./skills.md)
-6. [AI SDK Adapter](./ai-sdk-adapter.md)
+5. [AI SDK Adapter](./ai-sdk-adapter.md)

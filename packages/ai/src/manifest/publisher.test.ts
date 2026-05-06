@@ -9,7 +9,7 @@ describe('publishAgentManifest', () => {
 		const definition = {
 			manifest: {
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				eventBridge: 'default',
 				allowedTools: [],
 			},

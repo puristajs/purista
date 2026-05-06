@@ -17,11 +17,11 @@ describe('InMemoryConversationStore', () => {
 
 		await store.save(
 			{ conversationId: 's1', data: { owner: 'tenant-a' }, updatedAt: Date.now() },
-			{ tenantId: 'tenant-a', principalId: 'user-1', agentName: 'supportAgent', agentVersion: '1' },
+			{ tenantId: 'tenant-a', principalId: 'user-1', agentName: 'supportAgent', serviceVersion: '1' },
 		)
 		await store.save(
 			{ conversationId: 's1', data: { owner: 'tenant-b' }, updatedAt: Date.now() },
-			{ tenantId: 'tenant-b', principalId: 'user-1', agentName: 'supportAgent', agentVersion: '1' },
+			{ tenantId: 'tenant-b', principalId: 'user-1', agentName: 'supportAgent', serviceVersion: '1' },
 		)
 
 		expect(
@@ -29,7 +29,7 @@ describe('InMemoryConversationStore', () => {
 				tenantId: 'tenant-a',
 				principalId: 'user-1',
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			}),
 		).toMatchObject({
 			conversationId: 's1',
@@ -40,7 +40,7 @@ describe('InMemoryConversationStore', () => {
 				tenantId: 'tenant-b',
 				principalId: 'user-1',
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			}),
 		).toMatchObject({
 			conversationId: 's1',
@@ -51,7 +51,7 @@ describe('InMemoryConversationStore', () => {
 				tenantId: 'tenant-c',
 				principalId: 'user-1',
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			}),
 		).toBeUndefined()
 	})

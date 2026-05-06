@@ -6,9 +6,9 @@
 
 # Type Alias: InstanceConfigType\<S\>
 
-> **InstanceConfigType**\<`S`\> = [`Prettify`](Prettify.md)\<`object` & keyof `S`\[`"Resources"`\] *extends* [`NeverObject`](NeverObject.md) ? `object` : `object` & keyof `S`\[`"ConfigInputType"`\] *extends* [`NeverObject`](NeverObject.md) ? `object` : `object`\>
+> **InstanceConfigType**\<`S`\> = [`Prettify`](Prettify.md)\<`object` & keyof `S`\[`"Resources"`\] *extends* `never` ? `object` : `object` & keyof `S`\[`"ConfigInputType"`\] *extends* `never` ? `object` : `object`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L59)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L63)
 
 ## Type Parameters
 

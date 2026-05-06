@@ -8,7 +8,7 @@
 
 > **ResolvedReflectionConfig** = `object`
 
-Defined in: [packages/ai/src/runtime/policy.ts:3](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L3)
+Defined in: [packages/ai/src/runtime/policy.ts:3](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L3)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:3](https://github.com/puristajs/p
 
 > **artifacts**: `object`
 
-Defined in: [packages/ai/src/runtime/policy.ts:8](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L8)
+Defined in: [packages/ai/src/runtime/policy.ts:8](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L8)
 
 #### artifactPrefix
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:8](https://github.com/puristajs/p
 
 > **enabled**: `boolean`
 
-Defined in: [packages/ai/src/runtime/policy.ts:4](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L4)
+Defined in: [packages/ai/src/runtime/policy.ts:4](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L4)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:4](https://github.com/puristajs/p
 
 > **maxIterations**: `number`
 
-Defined in: [packages/ai/src/runtime/policy.ts:6](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L6)
+Defined in: [packages/ai/src/runtime/policy.ts:6](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L6)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:6](https://github.com/puristajs/p
 
 > `optional` **preset**: `string`
 
-Defined in: [packages/ai/src/runtime/policy.ts:5](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L5)
+Defined in: [packages/ai/src/runtime/policy.ts:5](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L5)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [packages/ai/src/runtime/policy.ts:5](https://github.com/puristajs/p
 
 > **stopOnStagnation**: `boolean`
 
-Defined in: [packages/ai/src/runtime/policy.ts:7](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L7)
+Defined in: [packages/ai/src/runtime/policy.ts:7](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L7)

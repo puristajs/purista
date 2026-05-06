@@ -6,18 +6,16 @@ order: 203704
 
 # Runtime
 
-`AgentBuilder` definitions are inert. They become real, running workloads only when you call `getInstance(eventBridge, options)`. This is the instance-creation phase of the PURISTA lifecycle, where the abstract definitions from the builder meet concrete, environment-specific dependencies.
+`AgentQueueBuilder` definitions are inert. They become real, running workloads only when you call `getInstance(eventBridge, options)`. This is the instance-creation phase of the PURISTA lifecycle, where the abstract definitions from the builder meet concrete, environment-specific dependencies.
 
 ## What Belongs In `getInstance(...)`
 
 Provide all concrete runtime dependencies here:
 
 - **Model Providers**: Bind model aliases to actual provider instances (e.g., `AiSdkProvider`).
-- **Queue Bridge**: Required for agents in `'queued'` execution mode.
+- **Queue Bridge**: Required for queued agents (all agents are queue workers).
 - **Stores**: Provide implementations for `conversationStore`, `stateStore`, etc.
-- **Resources**: Provide implementations for any custom resources declared with `defineResource(...)`.
 - **Skills**: Provide the actual skill content, either inline or as a `SkillResource`.
-- **Runtime Config**: Pass environment-specific values for the schema defined by `setConfigSchema(...)`.
 - **Pool Configuration**: Configure concurrency and resource pools.
 - **Sandbox Execution**: Provide a sandbox runtime if the agent needs an isolated workspace.
 
@@ -44,15 +42,7 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
       model: openai('gpt-4o-mini'),
     }),
   },
-  resources: {
-    supportPolicy: {
-      developerInstruction: 'Answer concisely and always include next steps.',
-    },
-  },
   skills: supportSkills,
-  config: {
-    locale: 'en',
-  },
   poolConfig: {
     poolId: 'support',
     maxConcurrencyPerInstance: 4,
@@ -79,7 +69,7 @@ The builder declares aliases; `getInstance(...)` binds them to real providers. T
 
 ### Skills
 
-Provide skill implementations for the names declared with `.useSkills([...])`.
+Provide skill implementations at instance creation.
 
 - **Inline Skills**: Good for tests or small, self-contained agents.
   ```ts
@@ -97,8 +87,8 @@ Provide skill implementations for the names declared with `.useSkills([...])`.
 
 ### Stores and Queue Bridge
 
-- **`queueBridge`**: A queue bridge instance is **required** if the agent's execution mode is `'queued'`.
-- **`stateStore`**: A persistent state store (like `@purista/redis-state-store`) is highly recommended for durable agents to store run state.
+- **`queueBridge`**: A queue bridge instance is **required** for all agents.
+- **`stateStore`**: A persistent state store (like `@purista/redis-state-store`) is recommended for durable agents to store run state.
 - **`conversationStore`**: Manages chat history. If not provided, it **defaults to an in-memory store**, which is not suitable for production use with durable or multi-instance agents.
 
 ### Pools
@@ -111,19 +101,6 @@ poolConfig: {
   maxConcurrencyPerInstance: 4,
 }
 ```
-
-### Runtime Config
-
-Provide environment-specific values for the schema you defined with `setConfigSchema(...)`.
-
-```ts
-.getInstance(eventBridge, {
-  config: {
-    locale: process.env.AGENT_LOCALE || 'en',
-  },
-})
-```
-The handler can access this resolved, validated config via `context.runtime.service.config`.
 
 ### The `AgentInstance` Object
 
@@ -146,18 +123,16 @@ The runtime also adds explicit orchestration spans to your traces, such as `ai.t
 When `getInstance(...)` feels unclear, run through this checklist:
 
 1.  Which **model aliases** need to be bound to providers?
-2.  Is the agent `inline` or `queued`? If queued, is a **`queueBridge`** provided?
+2.  Is a **`queueBridge`** provided?
 3.  Does it need a persistent **`stateStore`** or **`conversationStore`**?
-4.  Does it use declared **skills**, and where do they come from (inline or file)?
-5.  Does it need **runtime config** values?
-6.  Are there any custom **resources** to provide?
-7.  Does it need a **sandbox** workspace for shell execution or file system access?
+4.  Does it use **skills**, and where do they come from (inline or file)?
+5.  Are there any custom **resources** to provide?
+6.  Does it need a **sandbox** workspace for shell execution or file system access?
 
 ## Common Mistakes
-- **Forgetting the `queueBridge`**: Queued agents will fail to start without it.
+- **Forgetting the `queueBridge`**: Agents will fail to start without it.
 - **Using Default In-Memory Stores in Production**: Forgetting to provide a persistent `conversationStore` or `stateStore` can lead to state loss.
 - **Provider/Capability Mismatch**: Not providing a model provider for a declared alias, or providing one that lacks a required capability.
-- **Forgetting to Provide Resources**: If you use `defineResource(...)`, you must provide an implementation here.
 
 ## Related Guides
 - [Quick Start](./getting-started.md)

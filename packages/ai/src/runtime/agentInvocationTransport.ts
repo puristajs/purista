@@ -16,11 +16,12 @@ import { withSessionIdInPayload } from './sessionPayload.js'
 export type AgentInvocationTransportOptions = {
 	eventBridge: EventBridge
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 	payload: unknown
 	parameter?: unknown
 	principalId?: string
 	tenantId?: string
+	otp?: string
 	timeoutMs?: number
 	correlationId?: string
 	traceId?: string
@@ -83,7 +84,7 @@ const isStreamUnavailableError = (error: unknown) =>
 		(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
 
 export const invokeAgentInternal = async (options: AgentInvocationTransportOptions) => {
-	const receiver = getAgentReceiverAddress(options.agentName, options.agentVersion)
+	const receiver = getAgentReceiverAddress(options.agentName, options.serviceVersion)
 	const payload = withSessionIdInPayload(options.payload, options.sessionId)
 	const sender = options.sender ?? {
 		serviceName: 'agent.invoke',
@@ -102,6 +103,7 @@ export const invokeAgentInternal = async (options: AgentInvocationTransportOptio
 		contentEncoding: 'utf-8',
 		principalId: options.principalId,
 		tenantId: options.tenantId,
+		otp: options.otp,
 		sender: {
 			serviceName: sender.serviceName,
 			serviceVersion: sender.serviceVersion,
@@ -123,6 +125,7 @@ export const invokeAgentInternal = async (options: AgentInvocationTransportOptio
 		contentEncoding: message.contentEncoding,
 		principalId: message.principalId,
 		tenantId: message.tenantId,
+		otp: message.otp,
 		payload: {
 			frameType: 'open' as const,
 			payload: message.payload.payload,

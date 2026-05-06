@@ -56,6 +56,7 @@ export const ProblemDetailsObjectSchema = z.object({
 export const honoServiceV1ConfigSchema = z.object({
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	enableDynamicRoutes: z.boolean().default(false),
+	streamRequestTimeoutMs: z.number().int().positive().optional().default(300000),
 	apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
 	enableHealth: z.boolean().optional().default(false),
 	healthPath: z.string().optional().default('/healthz'),

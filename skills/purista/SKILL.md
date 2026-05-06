@@ -35,6 +35,12 @@ Safe defaults matter. Prefer the path that gives a new user predictable producti
 - Prefer consumer-local schemas that only select the fields the consumer really uses; Zod will strip the rest and keep payloads smaller.
 - Treat transports, bridges, stores, sandbox, and providers as runtime wiring, not service definition.
 - Keep runtime guarantees capability-driven and truthful. If an adapter cannot honor a requested guarantee in strict mode, startup should fail instead of silently degrading.
+- Keep workflow truth separated: planner run-state tracks plan/task execution, workflow-stage artifacts track post-plan synthesis/finalization, and final `output` artifacts carry the machine-readable result.
+- Keep transport truth separated from AI workflow truth:
+  - transport ids: `message.id`, `traceId`, `otp`, `correlationId`
+  - AI ids: `baseSessionId`, `scopedSessionId`, `conversationId`, optional `runId`
+- Treat `conversationId` as logical AI conversation identity, never as a synonym for transport `correlationId`.
+- For exported TypeScript APIs, ship TSDoc/JSDoc that is IDE-hover friendly and TypeDoc-ready; add concise `@example` blocks for non-trivial public helpers.
 
 ## Decision rules
 - Use commands for direct business actions.
@@ -44,11 +50,31 @@ Safe defaults matter. Prefer the path that gives a new user predictable producti
 - Use agents when the flow is model-driven, conversational, or tool-loop oriented.
 - Use services when a capability owns invariants, state, or integrations.
 
+## AI planning rule
+For sequential agent planning, keep planning and execution separate:
+- `const plan = await context.plan.generate(...)`
+- `await context.plan.execute(plan)`
+
+Use one required `worker` for normal reasoning and optional named `delegates` for specialized handoffs. Planner-produced tasks should stay business-level:
+- `id`
+- `title`
+- `instruction`
+- optional `delegate`
+
+Do not teach or reintroduce technical task-definition tables as the primary planner DX.
+Treat `context.memory.run.plan(...)` and `run.task(...)` as advanced low-level workflow primitives, not the canonical planner UX.
+
 ## Adapter rules
 - Event bridges and queue bridges stay separate abstractions. Do not bend push-style event transports into queue semantics.
 - Prefer queue-backed execution for durable retries, leases, dead-letter handling, and operator replay workflows.
 - Only add new queue adapters when the provider fits pull + lease + ack semantics cleanly.
 - Hono-based HTTP server surfaces are the active HTTP runtime. Do not model new work around the removed legacy `@purista/httpserver` package.
+- Use one canonical AI runtime path. Do not keep alternate prompt-only worker/orchestrator helpers alive once `AgentExecutor` can own identity, protocol emission, conversation persistence, tracing, and child-agent forwarding.
+
+## Observability rules
+- Every model capability call should sit inside a PURISTA-owned outer span and let Vercel AI SDK telemetry run underneath it on the same active trace.
+- Propagate `tenantId`, `principalId`, `traceId`, `correlationId`, `baseSessionId`, and `conversationId` through child-agent calls, queue-backed execution, stored history, and logs.
+- Prefer one shared identity derivation point at request ingress over re-deriving ids in protocol, run-state, or provider helpers later.
 
 ## Definition pattern
 Keep service and agent boundaries versioned and explicit.

@@ -6,7 +6,7 @@
 
 # Class: ScriptedModel
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:36](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L36)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:37](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L37)
 
 Minimal interface providers must satisfy so they can be swapped at runtime.
 
@@ -28,9 +28,9 @@ Minimal interface providers must satisfy so they can be swapped at runtime.
 
 ### calls
 
-> `readonly` **calls**: (\{ `method`: `"stream"` \| `"generateText"` \| `"generate"`; `request`: [`ProviderRequest`](../type-aliases/ProviderRequest.md); \} \| \{ `method`: `"generateJson"`; `request`: [`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md); \})[] = `[]`
+> `readonly` **calls**: (\{ `method`: `"generateText"` \| `"streamText"`; `request`: [`ProviderRequest`](../type-aliases/ProviderRequest.md); \} \| \{ `method`: `"generateObject"`; `request`: [`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md); \})[] = `[]`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:43](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L43)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:44](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L44)
 
 ***
 
@@ -38,19 +38,19 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:43](https://github.com/pur
 
 > `readonly` **capabilities**: `object`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:38](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L38)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:39](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L39)
 
-#### json
+#### object
 
-> **json**: `boolean` = `true`
-
-#### stream
-
-> **stream**: `boolean` = `true`
+> **object**: `boolean` = `true`
 
 #### text
 
 > **text**: `boolean` = `true`
+
+#### text-stream
+
+> **text-stream**: `boolean` = `true`
 
 #### Implementation of
 
@@ -62,7 +62,7 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:38](https://github.com/pur
 
 > `readonly` **name**: `"scripted-model"` = `'scripted-model'`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:37](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L37)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:38](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L38)
 
 #### Implementation of
 
@@ -70,33 +70,11 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:37](https://github.com/pur
 
 ## Methods
 
-### generate()
+### generateObject()
 
-> **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
+> **generateObject**\<`T`, `OutputSchema`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>\>
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:113](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L113)
-
-#### Parameters
-
-##### request
-
-[`ProviderRequest`](../type-aliases/ProviderRequest.md)
-
-#### Returns
-
-`Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
-
-#### Implementation of
-
-[`ModelProvider`](../interfaces/ModelProvider.md).[`generate`](../interfaces/ModelProvider.md#generate)
-
-***
-
-### generateJson()
-
-> **generateJson**\<`T`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
-
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:182](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L182)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:176](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L176)
 
 #### Type Parameters
 
@@ -104,19 +82,23 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:182](https://github.com/pu
 
 `T` = `unknown`
 
+##### OutputSchema
+
+`OutputSchema` = `unknown`
+
 #### Parameters
 
 ##### request
 
-[`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md)
+[`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md)\<`OutputSchema`\>
 
 #### Returns
 
-`Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
+`Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>\>
 
 #### Implementation of
 
-[`ModelProvider`](../interfaces/ModelProvider.md).[`generateJson`](../interfaces/ModelProvider.md#generatejson)
+[`ModelProvider`](../interfaces/ModelProvider.md).[`generateObject`](../interfaces/ModelProvider.md#generateobject)
 
 ***
 
@@ -124,10 +106,10 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:182](https://github.com/pu
 
 > **generateText**(`request`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:167](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L167)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:161](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L161)
 
 High-level helper that yields one final text output while automatically
-preferring `stream()` and falling back to `generate()`.
+preferring `streamText()` when available.
 
 #### Parameters
 
@@ -145,7 +127,7 @@ preferring `stream()` and falling back to `generate()`.
 const answer = await context.models['openai:primary'].generateText({
   developerInstruction: 'Use the available tools before answering.',
   prompt: payload.prompt,
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.stream.sendDelta(delta),
 })
 ```
 
@@ -162,7 +144,7 @@ allowlisted bindings automatically when you omit them.
 
 > **nextError**(`error`): `ScriptedModel`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:71](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L71)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:72](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L72)
 
 #### Parameters
 
@@ -180,7 +162,7 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:71](https://github.com/pur
 
 > **nextJson**(`reply`): `ScriptedModel`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:66](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L66)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:67](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L67)
 
 #### Parameters
 
@@ -198,7 +180,7 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:66](https://github.com/pur
 
 > **nextStream**(`chunks`, `options?`): `ScriptedModel`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:56](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L56)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:57](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L57)
 
 #### Parameters
 
@@ -226,7 +208,7 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:56](https://github.com/pur
 
 > **nextText**(`reply`, `options?`): `ScriptedModel`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:51](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L51)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:52](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L52)
 
 #### Parameters
 
@@ -254,7 +236,7 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:51](https://github.com/pur
 
 > **reset**(): `ScriptedModel`
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:76](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L76)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:77](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L77)
 
 #### Returns
 
@@ -262,11 +244,11 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:76](https://github.com/pur
 
 ***
 
-### stream()
+### streamText()
 
-> **stream**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
+> **streamText**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
 
-Defined in: [packages/ai/src/testing/ScriptedModel.ts:120](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/ScriptedModel.ts#L120)
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:114](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/ScriptedModel.ts#L114)
 
 #### Parameters
 
@@ -280,4 +262,4 @@ Defined in: [packages/ai/src/testing/ScriptedModel.ts:120](https://github.com/pu
 
 #### Implementation of
 
-[`ModelProvider`](../interfaces/ModelProvider.md).[`stream`](../interfaces/ModelProvider.md#stream)
+[`ModelProvider`](../interfaces/ModelProvider.md).[`streamText`](../interfaces/ModelProvider.md#streamtext)

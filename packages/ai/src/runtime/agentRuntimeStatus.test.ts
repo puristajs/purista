@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import type { AgentRuntimeInstance } from '../types/AgentDefinition.js'
 import { getAgentRuntimeStatuses } from './agentRuntimeStatus.js'
 
 describe('getAgentRuntimeStatuses', () => {
@@ -7,7 +8,7 @@ describe('getAgentRuntimeStatuses', () => {
 		const a = {
 			getStatus: () => ({
 				agentName: 'a',
-				agentVersion: '1',
+				serviceVersion: '1',
 				poolId: 'p1',
 				maxConcurrencyPerInstance: 1,
 				activeWorkers: 0,
@@ -17,7 +18,7 @@ describe('getAgentRuntimeStatuses', () => {
 		const b = {
 			getStatus: () => ({
 				agentName: 'b',
-				agentVersion: '1',
+				serviceVersion: '1',
 				poolId: 'p2',
 				maxConcurrencyPerInstance: 2,
 				activeWorkers: 1,
@@ -25,7 +26,9 @@ describe('getAgentRuntimeStatuses', () => {
 			}),
 		}
 
-		expect(getAgentRuntimeStatuses([a, b] as any)).toEqual([a.getStatus(), b.getStatus()])
-		expect(getAgentRuntimeStatuses({ a, b } as any)).toEqual([a.getStatus(), b.getStatus()])
+		const agentA = a as unknown as AgentRuntimeInstance
+		const agentB = b as unknown as AgentRuntimeInstance
+		expect(getAgentRuntimeStatuses([agentA, agentB])).toEqual([a.getStatus(), b.getStatus()])
+		expect(getAgentRuntimeStatuses({ a: agentA, b: agentB })).toEqual([a.getStatus(), b.getStatus()])
 	})
 })

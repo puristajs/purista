@@ -8,7 +8,7 @@
 
 > **SandboxRuntimeDiagnostics** = `object`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:8](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L8)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:8](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L8)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:8](https://git
 
 > **driverName**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:9](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L9)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:9](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L9)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:9](https://git
 
 > `optional` **imageAvailable**: `boolean`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:13](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L13)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:13](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L13)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:13](https://gi
 
 > `optional` **imageName**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:11](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L11)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:11](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L11)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:11](https://gi
 
 > **message**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:15](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L15)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:15](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L15)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:15](https://gi
 
 > **runtimeAvailable**: `boolean`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:12](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L12)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:12](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L12)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:12](https://gi
 
 > **runtimeCommand**: `string` \| `null`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:10](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L10)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:10](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L10)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:10](https://gi
 
 > `optional` **runtimeVersion**: `string`
 
-Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:14](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L14)
+Defined in: [packages/ai/src/sandbox/driver/runtimeDiagnostics.ts:14](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/runtimeDiagnostics.ts#L14)

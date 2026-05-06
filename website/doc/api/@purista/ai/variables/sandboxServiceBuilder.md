@@ -8,7 +8,7 @@
 
 > `const` **sandboxServiceBuilder**: [`ServiceBuilder`](../../core/classes/ServiceBuilder.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<[`SetNewTypeValues`](../../core/type-aliases/SetNewTypeValues.md)\<[`SetNewTypeValue`](../../core/type-aliases/SetNewTypeValue.md)\<[`ServiceBuilderTypes`](../../core/type-aliases/ServiceBuilderTypes.md), `"ServiceClassType"`, [`SandboxService`](../classes/SandboxService.md)\>, \{ `ConfigInputType`: \{ `driver?`: [`SandboxDriver`](../interfaces/SandboxDriver.md); \}; `ConfigType`: \{ `driver?`: [`SandboxDriver`](../interfaces/SandboxDriver.md); \}; `ServiceClassType`: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<\{ `driver?`: [`SandboxDriver`](../interfaces/SandboxDriver.md); \}, [`EmptyObject`](../../core/type-aliases/EmptyObject.md)\>\>; \}\>, `"Resources"`, \{ `driver`: [`SandboxDriver`](../interfaces/SandboxDriver.md); \}\>, `"Resources"`, `object` & `object`\>\>
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxServiceBuilder.ts:17](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/service/Sandbox/v1/SandboxServiceBuilder.ts#L17)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/SandboxServiceBuilder.ts:17](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/service/Sandbox/v1/SandboxServiceBuilder.ts#L17)
 
 sandboxServiceBuilder
 

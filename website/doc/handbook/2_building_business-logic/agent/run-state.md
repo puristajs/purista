@@ -14,6 +14,8 @@ Use `context.memory.run` when the work must survive beyond one in-memory process
 - recovery metadata
 - single-active-run locks
 
+`scope` is the durable run partition key. It participates in run lookup and lock isolation together with tenant, principal, conversation, agent name, service version, and any configured `scopeFromPayload` fields.
+
 `context.memory.run` is backed by the runtime state store, so it is durable application state, not transient memory.
 
 ## Why It Exists
@@ -36,7 +38,7 @@ For queued durable agents, PURISTA creates the run record before the handler sta
 ```ts
 const run = await context.memory.run.start({
   title: 'Architecture synthesis',
-  extraScope: { projectId: payload.projectId },
+  scope: { projectId: payload.projectId },
   lock: { key: 'architecture' },
 })
 
@@ -83,6 +85,8 @@ Use `run.plan(...)` or `replaceTasks(...)` when you want the UI and recovery sta
 - verify outputs
 
 This is the right place to express the workflow the user should see.
+
+For autonomous sequential planning, prefer `context.plan.generate(...)` plus `context.plan.execute(...)`. `run.plan(...)` remains the low-level durable workflow primitive.
 
 ### 3. Mark progress while work happens
 
@@ -157,10 +161,10 @@ If only one run should be active for a scope, acquire a lock when the run starts
 ```ts
 const run = await context.memory.run.start({
   title: 'Simulation',
-  extraScope: { projectId: payload.projectId },
+  scope: { projectId: payload.projectId },
   lock: {
     key: 'simulation',
-    extraScope: { projectId: payload.projectId },
+    scope: { projectId: payload.projectId },
   },
 })
 ```
@@ -181,10 +185,25 @@ The queue worker owns run creation, heartbeats, and final release. The handler s
 
 Every persisted update emits the standard `run-state` artifact. In `ai-sdk-ui-message` mode PURISTA maps that to `data-run-state`.
 
+When you use `run.plan(...)`, `run.step(...)`, or `run.task(...)`, PURISTA also emits the reserved live task lane:
+
+- `purista-ai:plan`
+- `purista-ai:task:<taskId>`
+- `purista-ai:task-chunk:<taskId>`
+- `purista-ai:plan-status`
+
+In `ai-sdk-ui-message` mode those become:
+
+- `data-purista-ai-plan`
+- `data-purista-ai-task`
+- `data-purista-ai-task-chunk`
+- `data-purista-ai-plan-status`
+
 That allows the UI to render:
 
 - title and current phase
 - ordered tasks with statuses
+- active task-local progress chunks
 - checkpoints and recovery metadata
 - completion or failure summary
 - input locking while work is active
@@ -209,7 +228,7 @@ If a parent agent forwards a child agent with:
 ```ts
 await context.invoke.agents.forward({
   agentName: 'projectArchitectureAgent',
-  agentVersion: '1',
+  serviceVersion: '1',
   payload,
 })
 ```

@@ -25,6 +25,11 @@ describe('workspaceLayout', () => {
 		expect(toSandboxSkillPath('purista', 'scripts/plan.sh')).toBe('/workspace/skills/purista/scripts/plan.sh')
 	})
 
+	it('normalizes repo and skill paths so they cannot escape the canonical roots', () => {
+		expect(toSandboxRepoPath('../specs/../architecture/index.md')).toBe('/workspace/repo/architecture/index.md')
+		expect(toSandboxSkillPath('../purista', '../../scripts/plan.sh')).toBe('/workspace/skills/purista/scripts/plan.sh')
+	})
+
 	it('creates seed files for repo and skill bundles', () => {
 		expect(createSandboxRepoSeedFiles([{ path: 'architecture/index.md', content: '# Architecture' }])).toEqual([
 			{ path: '/workspace/repo/architecture/index.md', content: '# Architecture' },
@@ -38,5 +43,20 @@ describe('workspaceLayout', () => {
 			{ path: '/workspace/skills/purista/SKILL.md', content: '# Skill' },
 			{ path: '/workspace/skills/purista/references/guide.md', content: 'guide' },
 		])
+	})
+
+	it('supports custom sandbox workspace roots', () => {
+		const layout = createSandboxWorkspaceLayout('/tmp/purista-sandbox')
+		expect(layout).toEqual({
+			root: '/tmp/purista-sandbox',
+			repoRoot: '/tmp/purista-sandbox/repo',
+			skillsRoot: '/tmp/purista-sandbox/skills',
+			tmpRoot: '/tmp/purista-sandbox/tmp',
+			outputsRoot: '/tmp/purista-sandbox/outputs',
+		})
+		expect(toSandboxRepoPath('docs/spec.md', layout)).toBe('/tmp/purista-sandbox/repo/docs/spec.md')
+		expect(toSandboxSkillPath('purista', 'scripts/plan.sh', layout)).toBe(
+			'/tmp/purista-sandbox/skills/purista/scripts/plan.sh',
+		)
 	})
 })

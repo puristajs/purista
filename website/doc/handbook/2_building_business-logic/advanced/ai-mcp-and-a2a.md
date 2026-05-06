@@ -13,13 +13,17 @@ One of the unique features of PURISTA agents is their ability to speak "standard
 MCP is an open standard that enables AI models to connect to data sources and tools. You can expose any PURISTA command or agent as an MCP tool.
 
 ### Exposing an Agent via MCP
-Simply use `.setSseProtocol('mcp')` in your agent builder. PURISTA will automatically map the agent's input/output schemas into the MCP tool definition.
+
+Use `exposeAgentAsMCP` from `@purista/ai` to expose an agent as an MCP server:
 
 ```ts
-export const supportAgent = new AgentBuilder({ ... })
-  .exposeAsHttpEndpoint('POST', 'agents/support/mcp')
-  .setSseProtocol('mcp')
-  .build()
+import { exposeAgentAsMCP } from '@purista/ai'
+import { supportAgent } from './agents/supportAgent/v1/supportAgent'
+
+const mcpServer = await exposeAgentAsMCP(supportAgent, {
+  name: 'support-agent',
+  version: '1.0.0',
+})
 ```
 
 ### Why use MCP?
@@ -32,29 +36,19 @@ export const supportAgent = new AgentBuilder({ ... })
 A2A is a protocol designed for direct agent-to-agent communication. It focuses on higher-level task hand-offs and collaboration.
 
 ### Exposing an Agent via A2A
-Set the SSE protocol to `'agent2agent'`:
 
-```ts
-export const supportAgent = new AgentBuilder({ ... })
-  .exposeAsHttpEndpoint('POST', 'agents/support/a2a')
-  .setSseProtocol('agent2agent')
-  .build()
-```
-
-### Why use A2A?
-- **Task Delegation**: A high-level orchestrator agent can "hand off" a specific sub-task to your specialized PURISTA agent.
-- **Cross-Organization Collaboration**: Securely expose agents across different PURISTA instances or even different companies.
+Agents are automatically exposed via HTTP. A2A support depends on the specific transport implementation.
 
 ## 3. How Protocols are Mapped
 
-When you set an SSE protocol other than `purista`, the internal agent frames are transformed in the background:
+When you use MCP, PURISTA frames are transformed into MCP tool definitions:
 
-| PURISTA Frame | MCP Mapping | A2A Mapping |
-| :--- | :--- | :--- |
-| **`message`** | Tool response text | Agent response message |
-| **`artifact`** | Tool response data | Agent attachment |
-| **`error`** | Tool error code | Agent error frame |
-| **`telemetry`** | Ignored | Agent metadata |
+| PURISTA Frame | MCP Mapping |
+| :--- | :--- |
+| **`message`** | Tool response text |
+| **`artifact`** | Tool response data |
+| **`error`** | Tool error code |
+| **`telemetry`** | Ignored |
 
 ## 4. External Runtime Bindings vs Standard Protocols
 
@@ -67,7 +61,7 @@ External runtime bindings are different:
 - adapters then turn those bindings into external SDK tools
 - it keeps execution local to PURISTA runtime instead of publishing a public wire protocol
 
-Use external runtime bindings plus an adapter for Vercel AI SDK style tool loops. Use MCP or A2A when another process or organization should consume your capabilities over a standard protocol.
+Use external runtime bindings plus an adapter for Vercel AI SDK style tool loops. Use MCP when another process or organization should consume your capabilities over a standard protocol.
 
 ## 5. When to use which?
 
@@ -75,7 +69,7 @@ Use external runtime bindings plus an adapter for Vercel AI SDK style tool loops
 | :--- | :--- |
 | Connecting to **Claude Desktop** or **IDE Assistants** | MCP |
 | **B2B Agent collaboration** | A2A |
-| **Vercel AI SDK** / **Next.js UI** | `ai-sdk-ui-message` |
-| **Internal PURISTA-to-PURISTA** | `purista` (Default) |
+| **Vercel AI SDK** / **Next.js UI** | HTTP/SSE |
+| **Internal PURISTA-to-PURISTA** | Direct invoke |
 
 By leveraging these protocols, your PURISTA agents become part of a larger, global ecosystem of AI agents and tools.

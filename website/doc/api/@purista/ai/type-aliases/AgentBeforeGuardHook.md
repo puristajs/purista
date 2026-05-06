@@ -8,12 +8,7 @@
 
 > **AgentBeforeGuardHook**\<`Payload`, `Parameter`\> = (`context`, `payload`, `parameter`) => `Promise`\<`void`\> \| `void`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:83](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L83)
-
-Guard hook that runs before the agent handler executes.
-
-Use before-guards for short request policy checks such as auth, quota, or
-lightweight validation that is more specific than payload schema validation.
+Defined in: packages/ai/src/types/AgentHandler.ts:5
 
 ## Type Parameters
 

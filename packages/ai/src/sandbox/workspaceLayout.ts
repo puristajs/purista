@@ -25,6 +25,25 @@ const normalizeRelativePath = (relativePath: string) => {
 	return normalized.replace(/^\/+/, '')
 }
 
+const normalizeSkillName = (skillName: string) => normalizeRelativePath(skillName.trim()).replaceAll('/', '')
+
+const normalizeSkillBundlePath = (relativePath: string) => {
+	const raw = relativePath.replaceAll('\\', '/').replace(/^\/+/, '')
+	if (raw === 'SKILL.md') {
+		return raw
+	}
+	for (const topLevel of ['references', 'scripts', 'assets'] as const) {
+		if (raw.startsWith(`${topLevel}/`)) {
+			let nestedPath = normalizeRelativePath(raw.slice(topLevel.length + 1))
+			while (nestedPath.startsWith(`${topLevel}/`)) {
+				nestedPath = nestedPath.slice(topLevel.length + 1)
+			}
+			return pathPosix.join(topLevel, nestedPath)
+		}
+	}
+	return normalizeRelativePath(pathPosix.normalize(raw))
+}
+
 export const createSandboxWorkspaceLayout = (root = DEFAULT_SANDBOX_WORKSPACE_ROOT): SandboxWorkspaceLayout => {
 	const normalizedRoot = normalizeRoot(root)
 	return {
@@ -45,7 +64,7 @@ export const toSandboxSkillPath = (
 	skillName: string,
 	relativePath: string,
 	layout: SandboxWorkspaceLayout = createSandboxWorkspaceLayout(),
-) => pathPosix.join(layout.skillsRoot, skillName.trim(), normalizeRelativePath(relativePath))
+) => pathPosix.join(layout.skillsRoot, normalizeSkillName(skillName), normalizeRelativePath(relativePath))
 
 export const createSandboxRepoSeedFiles = (
 	files: Array<{ path: string; content: string | Buffer }>,
@@ -58,6 +77,6 @@ export const createSandboxSkillSeedFiles = (
 	layout: SandboxWorkspaceLayout = createSandboxWorkspaceLayout(),
 ): SandboxSeedFile[] =>
 	files.map(file => ({
-		path: toSandboxSkillPath(skillName, file.relativePath, layout),
+		path: toSandboxSkillPath(skillName, normalizeSkillBundlePath(file.relativePath), layout),
 		content: file.content,
 	}))

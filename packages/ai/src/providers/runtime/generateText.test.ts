@@ -6,10 +6,9 @@ import type { ModelProvider } from './ModelProvider.js'
 describe('generateText', () => {
 	it('prefers the provider-native generateText helper when available', async () => {
 		const generateTextFn = vi.fn(async () => 'provider-native')
-		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
+		const model: Pick<ModelProvider, 'generateText' | 'streamText'> = {
 			generateText: generateTextFn,
-			stream: vi.fn(),
-			generate: vi.fn(),
+			streamText: vi.fn(),
 		}
 
 		const result = await generateText({
@@ -24,8 +23,8 @@ describe('generateText', () => {
 	it('prefers stream and emits callbacks', async () => {
 		const onReasoning = vi.fn()
 		const onTextDelta = vi.fn()
-		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
-			stream: () => ({
+		const model: Pick<ModelProvider, 'generateText' | 'streamText'> = {
+			streamText: () => ({
 				async final() {
 					return {
 						output: 'hello world',
@@ -51,26 +50,13 @@ describe('generateText', () => {
 		expect(onTextDelta).toHaveBeenCalledTimes(2)
 	})
 
-	it('falls back to generate when stream is missing', async () => {
-		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
-			generate: async () => ({
-				output: 'fallback',
-			}),
-		}
-		const result = await generateText({
-			model,
-			request: { prompt: 'x' },
-		})
-		expect(result).toBe('fallback')
-	})
-
 	it('honors bounded invocation policy', async () => {
 		vi.useFakeTimers()
 		try {
-			const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {
-				generate: async () =>
+			const model: Pick<ModelProvider, 'generateText' | 'streamText'> = {
+				generateText: async () =>
 					await new Promise(resolve => {
-						setTimeout(() => resolve({ output: 'late' }), 50)
+						setTimeout(() => resolve('late'), 50)
 					}),
 			}
 			const promise = generateText({
@@ -91,8 +77,8 @@ describe('generateText', () => {
 		}
 	})
 
-	it('throws UnhandledError when neither stream nor generate is available', async () => {
-		const model: Pick<ModelProvider, 'generateText' | 'stream' | 'generate'> = {}
+	it('throws UnhandledError when neither streamText nor generateText is available', async () => {
+		const model: Pick<ModelProvider, 'generateText' | 'streamText'> = {}
 		await expect(
 			generateText({
 				model,

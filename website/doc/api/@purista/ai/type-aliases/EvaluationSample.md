@@ -8,7 +8,7 @@
 
 > **EvaluationSample** = `object`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:8](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L8)
+Defined in: [packages/ai/src/evaluation/helpers.ts:8](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L8)
 
 Individual test case captured inside an evaluation run.
 
@@ -18,7 +18,7 @@ Individual test case captured inside an evaluation run.
 
 > `optional` **actual**: `unknown`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:11](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L11)
+Defined in: [packages/ai/src/evaluation/helpers.ts:11](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L11)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:11](https://github.com/purist
 
 > `optional` **durationMs**: `number`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:13](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L13)
+Defined in: [packages/ai/src/evaluation/helpers.ts:13](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L13)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:13](https://github.com/purist
 
 > **expected**: `unknown`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:10](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L10)
+Defined in: [packages/ai/src/evaluation/helpers.ts:10](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L10)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:10](https://github.com/purist
 
 > **input**: `unknown`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:9](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L9)
+Defined in: [packages/ai/src/evaluation/helpers.ts:9](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L9)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:9](https://github.com/purista
 
 > `optional` **success**: `boolean`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:12](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L12)
+Defined in: [packages/ai/src/evaluation/helpers.ts:12](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L12)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:12](https://github.com/purist
 
 > `optional` **tokens**: `number`
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:14](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L14)
+Defined in: [packages/ai/src/evaluation/helpers.ts:14](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L14)
 
 ***
 
@@ -66,4 +66,4 @@ Defined in: [packages/ai/src/evaluation/helpers.ts:14](https://github.com/purist
 
 > `optional` **trajectory**: [`TrajectoryEvaluationResult`](TrajectoryEvaluationResult.md)
 
-Defined in: [packages/ai/src/evaluation/helpers.ts:15](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/evaluation/helpers.ts#L15)
+Defined in: [packages/ai/src/evaluation/helpers.ts:15](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/evaluation/helpers.ts#L15)

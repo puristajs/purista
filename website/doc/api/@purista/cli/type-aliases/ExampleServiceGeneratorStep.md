@@ -8,7 +8,7 @@
 
 > **ExampleServiceGeneratorStep** = `object`
 
-Defined in: [packages/cli/src/blueprints/types.ts:35](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L35)
+Defined in: [packages/cli/src/blueprints/types.ts:35](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L35)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:35](https://github.com/purista
 
 > **commandDescription**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:41](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L41)
+Defined in: [packages/cli/src/blueprints/types.ts:41](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L41)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:41](https://github.com/purista
 
 > **commandName**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:40](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L40)
+Defined in: [packages/cli/src/blueprints/types.ts:40](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L40)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:40](https://github.com/purista
 
 > **serviceDescription**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:38](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L38)
+Defined in: [packages/cli/src/blueprints/types.ts:38](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L38)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:38](https://github.com/purista
 
 > **serviceName**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:37](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L37)
+Defined in: [packages/cli/src/blueprints/types.ts:37](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L37)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:37](https://github.com/purista
 
 > **serviceVersion**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:39](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L39)
+Defined in: [packages/cli/src/blueprints/types.ts:39](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L39)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [packages/cli/src/blueprints/types.ts:39](https://github.com/purista
 
 > **type**: `"example-service"`
 
-Defined in: [packages/cli/src/blueprints/types.ts:36](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/blueprints/types.ts#L36)
+Defined in: [packages/cli/src/blueprints/types.ts:36](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/blueprints/types.ts#L36)

@@ -8,4 +8,4 @@
 
 > **ExternalResultMode** = `"text"` \| `"object"` \| `"protocol"`
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:14](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L14)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:15](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/bridge/externalRuntime.ts#L15)

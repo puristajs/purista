@@ -6,7 +6,7 @@
 
 # Class: InMemoryConversationStore
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:42](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/memory/conversationStore.ts#L42)
+Defined in: [packages/ai/src/memory/conversationStore.ts:41](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/memory/conversationStore.ts#L41)
 
 Simple development-friendly conversation store that keeps state in memory.
 
@@ -14,7 +14,7 @@ Simple development-friendly conversation store that keeps state in memory.
 
 ```ts
 const store = new InMemoryConversationStore()
-await store.save({ conversationId: 'demo', data: { lastOutput: 'hi' }, updatedAt: Date.now() })
+await store.save({ conversationId: 'demo', data: { conversation: { messages: [] } }, updatedAt: Date.now() })
 ```
 
 ## Implements
@@ -37,7 +37,7 @@ await store.save({ conversationId: 'demo', data: { lastOutput: 'hi' }, updatedAt
 
 > **delete**(`conversationId`, `scope?`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:65](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/memory/conversationStore.ts#L65)
+Defined in: [packages/ai/src/memory/conversationStore.ts:64](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/memory/conversationStore.ts#L64)
 
 #### Parameters
 
@@ -63,7 +63,7 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:65](https://github.com/
 
 > **load**(`conversationId`, `scope?`): `Promise`\<[`ConversationStoreRecord`](../type-aliases/ConversationStoreRecord.md) \| `undefined`\>
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:57](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/memory/conversationStore.ts#L57)
+Defined in: [packages/ai/src/memory/conversationStore.ts:56](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/memory/conversationStore.ts#L56)
 
 #### Parameters
 
@@ -89,7 +89,7 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:57](https://github.com/
 
 > **save**(`record`, `scope?`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:61](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/memory/conversationStore.ts#L61)
+Defined in: [packages/ai/src/memory/conversationStore.ts:60](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/memory/conversationStore.ts#L60)
 
 #### Parameters
 

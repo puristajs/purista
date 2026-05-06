@@ -1,5 +1,6 @@
 import { DefaultStateStore } from '@purista/core'
 import { afterEach, describe, expect, it } from 'vitest'
+import type { SandboxMetadata } from '../types/SandboxDriver.js'
 import { SandboxRegistry } from './SandboxRegistry.js'
 
 describe('SandboxRegistry', () => {
@@ -94,16 +95,15 @@ describe('SandboxRegistry', () => {
 	it('rejects invalid metadata on register', async () => {
 		const registry = new SandboxRegistry(store)
 
-		await expect(
-			registry.register({
-				sandboxId: '',
-				organizationId: 'org',
-				projectId: 'proj',
-				userId: 'user',
-				containerName: 'purista-sb-1',
-				createdAt: Date.now(),
-			} as any),
-		).rejects.toThrow()
+		const invalidMetadata = {
+			sandboxId: '',
+			organizationId: 'org',
+			projectId: 'proj',
+			userId: 'user',
+			containerName: 'purista-sb-1',
+			createdAt: Date.now(),
+		} as unknown as SandboxMetadata
+		await expect(registry.register(invalidMetadata)).rejects.toThrow()
 	})
 
 	it('cleans stale owner index entries pointing to mismatched metadata', async () => {
@@ -135,16 +135,15 @@ describe('SandboxRegistry', () => {
 	it('skips incomplete recovered sandboxes during reconcile', async () => {
 		const registry = new SandboxRegistry(store)
 
-		await registry.reconcile([
-			{
-				sandboxId: 'sb-1',
-				organizationId: '',
-				projectId: 'proj',
-				userId: 'user',
-				containerName: 'purista-sb-1',
-				createdAt: Date.now(),
-			} as any,
-		])
+		const recovered = {
+			sandboxId: 'sb-1',
+			organizationId: '',
+			projectId: 'proj',
+			userId: 'user',
+			containerName: 'purista-sb-1',
+			createdAt: Date.now(),
+		} as unknown as SandboxMetadata
+		await registry.reconcile([recovered])
 
 		expect(await registry.getMetadata('sb-1')).toBeUndefined()
 	})

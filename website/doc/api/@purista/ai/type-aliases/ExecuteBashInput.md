@@ -8,4 +8,4 @@
 
 > **ExecuteBashInput** = `z.infer`\<*typeof* [`ExecuteBashInputSchema`](../variables/ExecuteBashInputSchema.md)\>
 
-Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts:11](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts#L11)
+Defined in: [packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts:18](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/service/Sandbox/v1/command/executeBash/schema.ts#L18)

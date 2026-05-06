@@ -6,7 +6,7 @@
 
 # Class: AppleContainerSandboxDriver
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:21](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L21)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:21](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L21)
 
 AppleContainerSandboxDriver - macOS-focused local container driver.
 
@@ -23,7 +23,7 @@ OrbStack/Colima-based development without changing sandbox command contracts.
 
 > **new AppleContainerSandboxDriver**(`config`): `AppleContainerSandboxDriver`
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:25](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L25)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:25](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L25)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleCon
 
 > **name**: `string` = `'AppleContainerSandboxDriver'`
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:22](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L22)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:22](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L22)
 
 The unique name of the driver implementation
 
@@ -55,7 +55,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:33](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L33)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:33](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L33)
 
 Provisions and starts a new sandbox environment.
 
@@ -93,6 +93,10 @@ Configuration for the new sandbox
 
 `string`
 
+###### scope?
+
+\{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}
+
 ###### userId
 
 `string`
@@ -113,7 +117,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:47](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L47)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:48](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L48)
 
 Permanently removes a sandbox and its resources.
 
@@ -141,7 +145,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:51](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L51)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:52](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L52)
 
 Executes a bash command within the specified sandbox.
 
@@ -163,6 +167,10 @@ Command and execution context
 
 `string`
 
+###### timeoutMs?
+
+`number`
+
 #### Returns
 
 `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
@@ -179,7 +187,7 @@ The result of the command execution
 
 > **getImageName**(): `string`
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:29](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L29)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:29](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L29)
 
 #### Returns
 
@@ -191,7 +199,7 @@ Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleCon
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:59](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L59)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:61](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L61)
 
 Reads the content of a file from the sandbox.
 
@@ -223,7 +231,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:67](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L67)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:69](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L69)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -242,7 +250,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:63](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L63)
+Defined in: [packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:65](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L65)
 
 Writes one or more files to the sandbox workspace.
 
@@ -254,7 +262,7 @@ Map of file paths to their contents
 
 ###### files
 
-`Record`\<`string`, `string`\>
+`Record`\<`string`, [`SandboxFileContent`](../type-aliases/SandboxFileContent.md)\>
 
 ###### sandboxId
 

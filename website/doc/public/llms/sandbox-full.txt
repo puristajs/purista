@@ -9,9 +9,6 @@
 ## Drivers
 - https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts
 - https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts
-- https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/driver/LimaSandboxDriver/LimaSandboxDriver.ts
-- https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/driver/TartSandboxDriver/TartSandboxDriver.ts
-- https://github.com/puristajs/purista/blob/master/packages/ai/src/sandbox/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts
 
 ## Docker image
 - https://github.com/puristajs/purista/blob/master/packages/ai/Dockerfile.sandbox

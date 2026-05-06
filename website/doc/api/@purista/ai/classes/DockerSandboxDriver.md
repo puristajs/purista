@@ -6,7 +6,7 @@
 
 # Class: DockerSandboxDriver
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:33](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L33)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:35](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L35)
 
 DockerSandboxDriver - A robust driver for Docker, OrbStack, and Colima.
 It provides secure execution environments using Docker containers.
@@ -21,7 +21,7 @@ It provides secure execution environments using Docker containers.
 
 > **new DockerSandboxDriver**(`config`): `DockerSandboxDriver`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:40](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L40)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:42](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L42)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Driver configuration
 
 > **name**: `string` = `'DockerSandboxDriver'`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:34](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L34)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:36](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L36)
 
 The unique name of the driver implementation
 
@@ -55,7 +55,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:62](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L62)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:97](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L97)
 
 Provisions and starts a new Docker container.
 Securely configures Git identity and GitHub CLI inside the container.
@@ -92,6 +92,10 @@ Securely configures Git identity and GitHub CLI inside the container.
 
 `string`
 
+###### scope?
+
+\{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}
+
 ###### userId
 
 `string`
@@ -110,7 +114,7 @@ Securely configures Git identity and GitHub CLI inside the container.
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:169](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L169)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:205](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L205)
 
 Forcefully removes the Docker container.
 
@@ -136,7 +140,7 @@ Forcefully removes the Docker container.
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:183](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L183)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:219](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L219)
 
 Executes a command via 'docker exec'.
 
@@ -156,6 +160,10 @@ Executes a command via 'docker exec'.
 
 `string`
 
+###### timeoutMs?
+
+`number`
+
 #### Returns
 
 `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
@@ -170,7 +178,7 @@ Executes a command via 'docker exec'.
 
 > **getContainerName**(`sandboxId`): `string`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:54](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L54)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:56](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L56)
 
 Generates the standardized container name for a sandbox.
 
@@ -192,7 +200,7 @@ Unique sandbox ID
 
 > **getImageName**(): `string`
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:46](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L46)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:48](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L48)
 
 #### Returns
 
@@ -204,7 +212,7 @@ Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDri
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:216](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L216)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:263](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L263)
 
 Reads a file from the container using 'cat'.
 
@@ -234,7 +242,7 @@ Reads a file from the container using 'cat'.
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:254](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L254)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:305](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L305)
 
 Scans for running containers and recovers metadata from labels.
 
@@ -252,7 +260,7 @@ Scans for running containers and recovers metadata from labels.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:229](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L229)
+Defined in: [packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts:278](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L278)
 
 Writes files to the container by creating a local temp file and using 'docker cp'.
 
@@ -262,7 +270,7 @@ Writes files to the container by creating a local temp file and using 'docker cp
 
 ###### files
 
-`Record`\<`string`, `string`\>
+`Record`\<`string`, [`SandboxFileContent`](../type-aliases/SandboxFileContent.md)\>
 
 ###### sandboxId
 

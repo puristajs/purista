@@ -40,6 +40,7 @@ export const SandboxScopeSchema = z.discriminatedUnion('kind', [
  */
 export const SandboxPayloadSchema = z.object({
 	sandboxId: NonEmptyIdentifierSchema.describe('The unique identifier of the sandbox'),
+	projectId: NonEmptyIdentifierSchema.describe('The project that owns the sandbox'),
 })
 
 /**
@@ -121,6 +122,7 @@ export interface SandboxDriver {
 		organizationId: string
 		projectId: string
 		userId: string
+		scope?: SandboxScope
 		sandboxId: string
 		gitConfig?: {
 			username: string

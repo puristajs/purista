@@ -41,7 +41,7 @@ const createContext = <TPayload>(
 			payload,
 			parameter: {},
 		},
-	}) as any
+	}) as unknown as typeof context.context.message
 	return context
 }
 
@@ -165,15 +165,20 @@ describe('sandbox command ownership', () => {
 	})
 
 	it.each([
-		['execute', executeBashCommandBuilder, { sandboxId: 'sb-1', command: 'pwd' }, 'executeBash'],
-		['read', readFileCommandBuilder, { sandboxId: 'sb-1', path: '/tmp/file.txt' }, 'readFile'],
+		[
+			'execute',
+			executeBashCommandBuilder,
+			{ sandboxId: 'sb-1', projectId: 'project-2', command: 'pwd' },
+			'executeBash',
+		],
+		['read', readFileCommandBuilder, { sandboxId: 'sb-1', projectId: 'project-2', path: '/tmp/file.txt' }, 'readFile'],
 		[
 			'write',
 			writeFilesCommandBuilder,
-			{ sandboxId: 'sb-1', files: { '/tmp/file.txt': { encoding: 'utf-8', content: 'x' } } },
+			{ sandboxId: 'sb-1', projectId: 'project-2', files: { '/tmp/file.txt': { encoding: 'utf-8', content: 'x' } } },
 			'writeFiles',
 		],
-		['destroy', destroySandboxCommandBuilder, { sandboxId: 'sb-1' }, 'destroySandbox'],
+		['destroy', destroySandboxCommandBuilder, { sandboxId: 'sb-1', projectId: 'project-2' }, 'destroySandbox'],
 	] as const)('rejects %s access for the wrong owner', async (_name, builder, payload, driverMethod) => {
 		const driver = {
 			executeBash: sandbox.stub().resolves({ stdout: '', stderr: '', exitCode: 0 }),
@@ -222,13 +227,17 @@ describe('sandbox command ownership', () => {
 
 		const context = createContext(
 			executeBashCommandBuilder,
-			{ sandboxId: 'sb-1', command: 'pwd' },
+			{ sandboxId: 'sb-1', projectId: 'project-1', command: 'pwd' },
 			{ driver, registry },
 			{ tenantId: undefined, principalId: undefined },
 		)
 
 		await expect(
-			executeBashCommandBuilder.getCommandFunction()(context.context, { sandboxId: 'sb-1', command: 'pwd' }, {}),
+			executeBashCommandBuilder.getCommandFunction()(
+				context.context,
+				{ sandboxId: 'sb-1', projectId: 'project-1', command: 'pwd' },
+				{},
+			),
 		).rejects.toMatchObject({ errorCode: StatusCode.Unauthorized })
 	})
 
@@ -248,14 +257,14 @@ describe('sandbox command ownership', () => {
 		}
 		const context = createContext(
 			executeBashCommandBuilder,
-			{ sandboxId: 'sb-1', command: 'sleep 10', timeoutMs: 100 },
+			{ sandboxId: 'sb-1', projectId: 'project-1', command: 'sleep 10', timeoutMs: 100 },
 			{ driver, registry },
 		)
 
 		await expect(
 			executeBashCommandBuilder.getCommandFunction()(
 				context.context,
-				{ sandboxId: 'sb-1', command: 'sleep 10', timeoutMs: 100 },
+				{ sandboxId: 'sb-1', projectId: 'project-1', command: 'sleep 10', timeoutMs: 100 },
 				{},
 			),
 		).rejects.toMatchObject({ errorCode: StatusCode.GatewayTimeout })

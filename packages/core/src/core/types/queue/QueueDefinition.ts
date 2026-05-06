@@ -26,8 +26,6 @@ export type QueueDefinition<
 	workers: QueueWorkerDefinition<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes>[]
 	deadLetter?: {
 		queueName?: string
-		eventName?: string
-		emitEvent?: boolean
 	}
 	transformBeforeEnqueue?: QueueTransformHook<ServiceClass, Infer<PayloadSchema>, Infer<ParamsSchema>, Resources>
 	transformBeforeExecute?: QueueTransformHook<ServiceClass, Infer<PayloadSchema>, Infer<ParamsSchema>, Resources>

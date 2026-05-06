@@ -8,7 +8,7 @@
 
 > **AgentRunUpdateInput** = `object`
 
-Defined in: [packages/ai/src/runtime/runState.ts:198](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L198)
+Defined in: [packages/ai/src/runtime/runState.ts:340](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L340)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:198](https://github.com/purista
 
 > `optional` **attempt**: `number`
 
-Defined in: [packages/ai/src/runtime/runState.ts:208](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L208)
+Defined in: [packages/ai/src/runtime/runState.ts:350](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L350)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:208](https://github.com/purista
 
 > `optional` **error**: [`AgentRunError`](AgentRunError.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:207](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L207)
+Defined in: [packages/ai/src/runtime/runState.ts:349](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L349)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:207](https://github.com/purista
 
 > `optional` **finalMessage**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:202](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L202)
+Defined in: [packages/ai/src/runtime/runState.ts:344](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L344)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:202](https://github.com/purista
 
 > `optional` **heartbeat**: `boolean`
 
-Defined in: [packages/ai/src/runtime/runState.ts:209](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L209)
+Defined in: [packages/ai/src/runtime/runState.ts:351](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L351)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:209](https://github.com/purista
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:203](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L203)
+Defined in: [packages/ai/src/runtime/runState.ts:345](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L345)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:203](https://github.com/purista
 
 > `optional` **owner**: [`AgentRunOwner`](AgentRunOwner.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:204](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L204)
+Defined in: [packages/ai/src/runtime/runState.ts:346](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L346)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:204](https://github.com/purista
 
 > `optional` **phase**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:199](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L199)
+Defined in: [packages/ai/src/runtime/runState.ts:341](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L341)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:199](https://github.com/purista
 
 > `optional` **recovery**: [`AgentRunRecovery`](AgentRunRecovery.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:205](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L205)
+Defined in: [packages/ai/src/runtime/runState.ts:347](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L347)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:205](https://github.com/purista
 
 > `optional` **retention**: [`AgentRunRetention`](AgentRunRetention.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:206](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L206)
+Defined in: [packages/ai/src/runtime/runState.ts:348](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L348)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [packages/ai/src/runtime/runState.ts:206](https://github.com/purista
 
 > `optional` **status**: [`AgentRunStatus`](AgentRunStatus.md)
 
-Defined in: [packages/ai/src/runtime/runState.ts:200](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L200)
+Defined in: [packages/ai/src/runtime/runState.ts:342](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L342)
 
 ***
 
@@ -96,4 +96,4 @@ Defined in: [packages/ai/src/runtime/runState.ts:200](https://github.com/purista
 
 > `optional` **summary**: `string`
 
-Defined in: [packages/ai/src/runtime/runState.ts:201](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L201)
+Defined in: [packages/ai/src/runtime/runState.ts:343](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L343)

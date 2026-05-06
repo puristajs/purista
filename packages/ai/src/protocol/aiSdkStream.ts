@@ -1,5 +1,11 @@
 import { randomUUID } from 'node:crypto'
-
+import {
+	isPuristaAiTaskArtifactId,
+	isPuristaAiTaskChunkArtifactId,
+	PURISTA_AI_PLAN_ARTIFACT_ID,
+	PURISTA_AI_PLAN_STATUS_ARTIFACT_ID,
+	PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID,
+} from './taskArtifacts.js'
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from './types.js'
 
 export type AiSdkStreamEvent = {
@@ -157,6 +163,21 @@ const trimDash = (value: string): string => {
 }
 
 const toUiDataType = (artifactId: string) => {
+	if (artifactId === PURISTA_AI_PLAN_ARTIFACT_ID) {
+		return 'data-purista-ai-plan' as const
+	}
+	if (artifactId === PURISTA_AI_PLAN_STATUS_ARTIFACT_ID) {
+		return 'data-purista-ai-plan-status' as const
+	}
+	if (artifactId === PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID) {
+		return 'data-purista-ai-workflow-stage' as const
+	}
+	if (isPuristaAiTaskArtifactId(artifactId)) {
+		return 'data-purista-ai-task' as const
+	}
+	if (isPuristaAiTaskChunkArtifactId(artifactId)) {
+		return 'data-purista-ai-task-chunk' as const
+	}
 	const collapsed = artifactId
 		.trim()
 		.toLowerCase()
@@ -199,16 +220,84 @@ export const toAiSdkStreamEvents = async function* (
 	let summary: string | undefined
 	let telemetry: Record<string, unknown> | undefined
 	let textId = `text-${randomUUID()}`
+	let startedMessage = false
 	let startedText = false
+	let stepOpen = false
 	let reasoningId = `reasoning-${randomUUID()}`
 	let startedReasoning = false
 	const toolCallByName = new Map<string, string>()
 	let toolSequence = 0
 
+	const ensureUiMessageStarted = async function* () {
+		if (startedMessage) {
+			return
+		}
+		yield {
+			event: 'data',
+			data: {
+				type: 'start',
+			},
+		}
+		startedMessage = true
+	}
+
+	const ensureUiTextStarted = async function* () {
+		yield* ensureUiStepStarted()
+		if (startedText) {
+			return
+		}
+		textId = `text-${randomUUID()}`
+		yield {
+			event: 'data',
+			data: {
+				type: 'text-start',
+				id: textId,
+			},
+		}
+		startedText = true
+	}
+
+	const ensureUiStepStarted = async function* () {
+		yield* ensureUiMessageStarted()
+		if (stepOpen) {
+			return
+		}
+		yield {
+			event: 'data',
+			data: {
+				type: 'start-step',
+			},
+		}
+		stepOpen = true
+	}
+
+	const finishUiStep = async function* () {
+		if (!stepOpen) {
+			return
+		}
+		if (startedText) {
+			yield {
+				event: 'data',
+				data: {
+					type: 'text-end',
+					id: textId,
+				},
+			}
+			startedText = false
+			textId = `text-${randomUUID()}`
+		}
+		yield {
+			event: 'data',
+			data: {
+				type: 'finish-step',
+			},
+		}
+		stepOpen = false
+	}
+
 	for await (const envelope of iterateEnvelopes(source)) {
 		if (!responseMeta) {
 			responseMeta = createResponseMeta(envelope)
-			textId = envelope.messageId
 		}
 
 		if (!created) {
@@ -237,20 +326,7 @@ export const toAiSdkStreamEvents = async function* (
 					}
 				} else {
 					if (!startedText && envelope.frame.content.length > 0) {
-						yield {
-							event: 'data',
-							data: {
-								type: 'start',
-							},
-						}
-						yield {
-							event: 'data',
-							data: {
-								type: 'text-start',
-								id: textId,
-							},
-						}
-						startedText = true
+						yield* ensureUiTextStarted()
 					}
 					if (envelope.frame.content.length > 0) {
 						yield {
@@ -264,20 +340,7 @@ export const toAiSdkStreamEvents = async function* (
 					}
 					if (envelope.frame.final) {
 						if (!startedText) {
-							yield {
-								event: 'data',
-								data: {
-									type: 'start',
-								},
-							}
-							yield {
-								event: 'data',
-								data: {
-									type: 'text-start',
-									id: textId,
-								},
-							}
-							startedText = true
+							yield* ensureUiTextStarted()
 						}
 						yield {
 							event: 'data',
@@ -286,6 +349,9 @@ export const toAiSdkStreamEvents = async function* (
 								id: textId,
 							},
 						}
+						startedText = false
+						textId = `text-${randomUUID()}`
+						yield* finishUiStep()
 					}
 				}
 				if (envelope.frame.final) {
@@ -355,27 +421,6 @@ export const toAiSdkStreamEvents = async function* (
 							},
 						}
 					} else {
-						if (url) {
-							yield {
-								event: 'data',
-								data: {
-									type: 'source-url',
-									sourceId,
-									url,
-								},
-							}
-						}
-						if (mediaType && title) {
-							yield {
-								event: 'data',
-								data: {
-									type: 'source-document',
-									sourceId,
-									mediaType,
-									title,
-								},
-							}
-						}
 						const shouldEmitFile = Boolean(
 							url &&
 								mediaType &&
@@ -474,12 +519,7 @@ export const toAiSdkStreamEvents = async function* (
 						toolCallByName.set(toolName, toolCallId)
 					}
 					if (envelope.frame.status === 'invoked') {
-						yield {
-							event: 'data',
-							data: {
-								type: 'start-step',
-							},
-						}
+						yield* ensureUiStepStarted()
 						yield {
 							event: 'data',
 							data: {
@@ -508,6 +548,7 @@ export const toAiSdkStreamEvents = async function* (
 								type: 'tool-input-available',
 								toolCallId,
 								toolName,
+								input: envelope.frame.input,
 							},
 						}
 					}
@@ -517,14 +558,10 @@ export const toAiSdkStreamEvents = async function* (
 							data: {
 								type: 'tool-output-available',
 								toolCallId,
+								output: envelope.frame.output,
 							},
 						}
-						yield {
-							event: 'data',
-							data: {
-								type: 'finish-step',
-							},
-						}
+						yield* finishUiStep()
 					}
 					if (envelope.frame.status === 'error') {
 						yield {
@@ -535,12 +572,7 @@ export const toAiSdkStreamEvents = async function* (
 								errorText: envelope.frame.message || 'Tool execution failed',
 							},
 						}
-						yield {
-							event: 'data',
-							data: {
-								type: 'finish-step',
-							},
-						}
+						yield* finishUiStep()
 					}
 					for (const mapped of mapUiDataPartEvents(
 						options.uiMessage?.mapDataParts?.({
@@ -690,6 +722,17 @@ export const toAiSdkStreamEvents = async function* (
 			},
 		}
 	} else {
+		if (startedText) {
+			yield {
+				event: 'data',
+				data: {
+					type: 'text-end',
+					id: textId,
+				},
+			}
+			startedText = false
+		}
+		yield* finishUiStep()
 		if (startedReasoning) {
 			yield {
 				event: 'data',

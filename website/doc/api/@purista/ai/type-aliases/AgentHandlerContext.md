@@ -4,11 +4,19 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentHandlerContext
 
-# Type Alias: AgentHandlerContext\<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads\>
+# Type Alias: AgentHandlerContext\<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes\>
 
-> **AgentHandlerContext**\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`\> = `object`
+> **AgentHandlerContext**\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\> = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:655](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L655)
+Defined in: [packages/ai/src/runtime/context.ts:1136](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1136)
+
+Typed runtime context injected into attached-agent handlers.
+
+This is the canonical public surface for:
+- run-state + session memory helpers
+- typed tool/agent invocation
+- model execution and planner executor factories
+- protocol stream emission
 
 ## Type Parameters
 
@@ -36,17 +44,21 @@ Defined in: [packages/ai/src/runtime/context.ts:655](https://github.com/puristaj
 
 `EmitPayloads` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
 
+### ToolInvokes
+
+`ToolInvokes` *extends* [`ToolInvokeMap`](ToolInvokeMap.md) = [`ToolInvokeMap`](ToolInvokeMap.md)
+
 ## Properties
 
 ### ai
 
 > **ai**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:704](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L704)
+Defined in: [packages/ai/src/runtime/context.ts:1167](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1167)
 
 #### embeddings
 
-> **embeddings**: `{ [Alias in keyof Models as Models[Alias] extends { embed: (args: any[]) => any } ? Alias : never]: { name: string; embed: any; embedMany?: any } }`
+> **embeddings**: [`ModelEmbeddings`](ModelEmbeddings.md)\<`Models`\>
 
 #### models
 
@@ -60,67 +72,9 @@ Defined in: [packages/ai/src/runtime/context.ts:704](https://github.com/puristaj
 
 > **reflect**: [`AgentReflectionHelpers`](AgentReflectionHelpers.md)
 
-#### reply
-
-> **reply**: `object`
-
-##### reply.compose()
-
-> **compose**\<`Alias`\>(`request`): `Promise`\<`string`\>
-
-###### Type Parameters
-
-###### Alias
-
-`Alias` *extends* `string`
-
-###### Parameters
-
-###### request
-
-`object` & [`ProviderRequest`](ProviderRequest.md) & `object`
-
-###### Returns
-
-`Promise`\<`string`\>
-
-##### reply.generate()
-
-> **generate**\<`Alias`\>(`request`): `Promise`\<`string`\>
-
-###### Type Parameters
-
-###### Alias
-
-`Alias` *extends* `string`
-
-###### Parameters
-
-###### request
-
-`object` & [`ProviderRequest`](ProviderRequest.md) & `object`
-
-###### Returns
-
-`Promise`\<`string`\>
-
-##### reply.publish()
-
-> **publish**(`input`): `string`
-
-###### Parameters
-
-###### input
-
-`string` | \{ `chunked?`: `boolean`; `summary?`: `string`; `text`: `string`; \}
-
-###### Returns
-
-`string`
-
 #### rerankers
 
-> **rerankers**: `{ [Alias in keyof Models as Models[Alias] extends { rerank: (args: any[]) => any } ? Alias : never]: { name: string; rerank: any } }`
+> **rerankers**: [`ModelRerankers`](ModelRerankers.md)\<`Models`\>
 
 #### skills
 
@@ -224,13 +178,261 @@ Defined in: [packages/ai/src/runtime/context.ts:704](https://github.com/puristaj
 
 `Promise`\<[`SkillReferenceDocument`](SkillReferenceDocument.md)[]\>
 
+#### createAgentExecutorFromInvoke()
+
+> **createAgentExecutorFromInvoke**(`call`, `options`): [`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+Wrap an allowed child-agent invoke call as a planner delegate executor.
+
+##### Parameters
+
+###### call
+
+(`payload`, `parameter?`) => `object`
+
+###### options
+
+[`AgentAgentExecutorFromInvokeOptions`](AgentAgentExecutorFromInvokeOptions.md)
+
+##### Returns
+
+[`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+#### createModelExecutor()
+
+> **createModelExecutor**\<`Alias`, `OutputSchema`\>(`options`): [`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>, `AgentModelExecutorResult`\<`OutputSchema`\>\>
+
+Create a reusable planner executor backed by a declared model alias.
+
+This is the default worker/delegate path for planner execution.
+
+##### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+###### OutputSchema
+
+`OutputSchema` = `undefined`
+
+##### Parameters
+
+###### options
+
+[`AgentModelExecutorOptions`](AgentModelExecutorOptions.md)\<`Alias`, `OutputSchema`\>
+
+##### Returns
+
+[`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>, `AgentModelExecutorResult`\<`OutputSchema`\>\>
+
+##### Example
+
+```ts
+const worker = context.ai.createModelExecutor({
+  model: 'openai:gpt-4o-mini',
+  systemPrompt: 'You are a support worker.',
+})
+```
+
+#### createToolExecutorFromInvoke()
+
+> **createToolExecutorFromInvoke**\<`InvokePayload`, `InvokeParameter`\>(`call`, `options`): [`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+Wrap a typed tool invoke call as a planner delegate executor.
+
+##### Type Parameters
+
+###### InvokePayload
+
+`InvokePayload` = `unknown`
+
+###### InvokeParameter
+
+`InvokeParameter` = `unknown`
+
+##### Parameters
+
+###### call
+
+(`payload`, `parameter?`) => `Promise`\<`unknown`\>
+
+###### options
+
+[`AgentToolExecutorFromInvokeOptions`](AgentToolExecutorFromInvokeOptions.md)
+
+##### Returns
+
+[`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+#### createToolExecutorLogic()
+
+> **createToolExecutorLogic**(`options`): [`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+Advanced escape hatch for custom planner executor logic.
+
+##### Parameters
+
+###### options
+
+[`AgentToolExecutorLogicOptions`](AgentToolExecutorLogicOptions.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+##### Returns
+
+[`AgentPlanExecutor`](AgentPlanExecutor.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>\>
+
+#### reply()
+
+##### Call Signature
+
+> **reply**(`options`): `string`
+
+###### Parameters
+
+###### options
+
+[`AgentReplyTextOptions`](AgentReplyTextOptions.md)
+
+###### Returns
+
+`string`
+
+##### Call Signature
+
+> **reply**\<`Alias`\>(`options`): `Promise`\<`string`\>
+
+###### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+###### Parameters
+
+###### options
+
+[`AgentReplyModelOptions`](AgentReplyModelOptions.md)\<`Alias`\>
+
+###### Returns
+
+`Promise`\<`string`\>
+
+##### Call Signature
+
+> **reply**(`options`): `string`
+
+###### Parameters
+
+###### options
+
+[`AgentReplyStructuredOptions`](AgentReplyStructuredOptions.md)
+
+###### Returns
+
+`string`
+
+##### Call Signature
+
+> **reply**(`options`): `string` \| `Promise`\<`string`\>
+
+###### Parameters
+
+###### options
+
+[`AgentReplyOptions`](AgentReplyOptions.md)\<`Extract`\<keyof `Models`, `string`\>\>
+
+###### Returns
+
+`string` \| `Promise`\<`string`\>
+
+#### replyObject()
+
+> **replyObject**\<`Alias`, `OutputSchema`\>(`options`): `Promise`\<[`ProviderJsonOutputFromSchema`](ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `unknown`\>\>
+
+Generate a typed structured reply, optionally grounding it in the current
+conversation history and persisting the assistant-visible message.
+
+##### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+###### OutputSchema
+
+`OutputSchema`
+
+##### Parameters
+
+###### options
+
+[`AgentReplyObjectOptions`](AgentReplyObjectOptions.md)\<`Alias`, `OutputSchema`\>
+
+##### Returns
+
+`Promise`\<[`ProviderJsonOutputFromSchema`](ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `unknown`\>\>
+
+#### streamObject()
+
+> **streamObject**\<`Alias`, `T`, `OutputSchema`\>(`options`): `Promise`\<[`ProviderJsonOutputFromSchema`](ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>
+
+Stream structured sections/final output and return the validated final object.
+Use `schema` in options for typed validation.
+
+##### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+###### T
+
+`T` = `unknown`
+
+###### OutputSchema
+
+`OutputSchema` = `unknown`
+
+##### Parameters
+
+###### options
+
+[`AgentStreamObjectOptions`](AgentStreamObjectOptions.md)\<`Alias`, `T`, `OutputSchema`\>
+
+##### Returns
+
+`Promise`\<[`ProviderJsonOutputFromSchema`](ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>
+
+#### streamText()
+
+> **streamText**\<`Alias`\>(`options`): `Promise`\<`string`\>
+
+Stream text deltas + final message into the current protocol stream and
+return the final text value.
+
+##### Type Parameters
+
+###### Alias
+
+`Alias` *extends* `string`
+
+##### Parameters
+
+###### options
+
+[`AgentStreamTextOptions`](AgentStreamTextOptions.md)\<`Alias`\>
+
+##### Returns
+
+`Promise`\<`string`\>
+
 ***
 
 ### app
 
 > **app**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:749](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L749)
+Defined in: [packages/ai/src/runtime/context.ts:1272](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1272)
 
 #### manifest
 
@@ -246,7 +448,7 @@ Defined in: [packages/ai/src/runtime/context.ts:749](https://github.com/puristaj
 
 > **input**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:664](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L664)
+Defined in: [packages/ai/src/runtime/context.ts:1149](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1149)
 
 #### message
 
@@ -266,76 +468,11 @@ Defined in: [packages/ai/src/runtime/context.ts:664](https://github.com/puristaj
 
 > **invoke**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:677](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L677)
+Defined in: [packages/ai/src/runtime/context.ts:1162](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1162)
 
 #### agents
 
-> **agents**: `object`
-
-##### agents.invoke
-
-> **invoke**: `AgentInvokes` & (`options`) => `Promise`\<[`AgentProtocolEnvelope`](AgentProtocolEnvelope.md)[]\>
-
-Invokes another agent via EventBridge and returns its emitted envelopes.
-Supports both direct options-based calls and typed chained access:
-`context.invoke.agents.invoke({ agentName, agentVersion, payload })`
-and `context.invoke.agents.invoke.someAgent['1'].call(payload, parameter)`.
-
-##### agents.forward()
-
-> **forward**(`options`): `Promise`\<`object`[]\>
-
-Invokes another agent and forwards its live output into the current stream.
-Defaults to forwarding assistant text, reasoning, artifacts, and errors while suppressing
-synthetic outer `agent.run` tool telemetry.
-
-###### Parameters
-
-###### options
-
-[`AgentForwardInvocationOptions`](AgentForwardInvocationOptions.md)
-
-###### Returns
-
-`Promise`\<`object`[]\>
-
-##### agents.runObject()
-
-> **runObject**\<`T`\>(`options`): `Promise`\<`T`\>
-
-Invokes another agent and parses the final assistant message as JSON.
-
-###### Type Parameters
-
-###### T
-
-`T` = `unknown`
-
-###### Parameters
-
-###### options
-
-[`AgentInvocationOptions`](AgentInvocationOptions.md)
-
-###### Returns
-
-`Promise`\<`T`\>
-
-##### agents.runText()
-
-> **runText**(`options`): `Promise`\<`string`\>
-
-Invokes another agent and extracts a best-effort assistant text output from message frames.
-
-###### Parameters
-
-###### options
-
-[`AgentInvocationOptions`](AgentInvocationOptions.md)
-
-###### Returns
-
-`Promise`\<`string`\>
+> **agents**: [`AgentInvokeHelpers`](AgentInvokeHelpers.md)\<`AgentInvokes`\>
 
 #### expose
 
@@ -343,7 +480,7 @@ Invokes another agent and extracts a best-effort assistant text output from mess
 
 #### tools
 
-> **tools**: [`ToolInvoker`](ToolInvoker.md)
+> **tools**: [`ToolInvoker`](ToolInvoker.md)\<`ToolInvokes`\>
 
 ***
 
@@ -351,7 +488,7 @@ Invokes another agent and extracts a best-effort assistant text output from mess
 
 > **io**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:745](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L745)
+Defined in: [packages/ai/src/runtime/context.ts:1266](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1266)
 
 #### protocol
 
@@ -361,13 +498,23 @@ Defined in: [packages/ai/src/runtime/context.ts:745](https://github.com/puristaj
 
 > **stream**: [`AgentStreamEmitter`](AgentStreamEmitter.md)
 
+#### tasks
+
+> **tasks**: [`AgentTaskEmitter`](AgentTaskEmitter.md)
+
+#### workflow
+
+> **workflow**: [`AgentWorkflowEmitter`](AgentWorkflowEmitter.md)
+
 ***
 
 ### logger
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:663](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L663)
+Defined in: [packages/ai/src/runtime/context.ts:1148](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1148)
+
+Structured logger scoped to the current invocation.
 
 ***
 
@@ -375,7 +522,7 @@ Defined in: [packages/ai/src/runtime/context.ts:663](https://github.com/puristaj
 
 > **memory**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:672](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L672)
+Defined in: [packages/ai/src/runtime/context.ts:1157](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1157)
 
 #### conversation
 
@@ -395,7 +542,7 @@ Defined in: [packages/ai/src/runtime/context.ts:672](https://github.com/puristaj
 
 > **output**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:669](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L669)
+Defined in: [packages/ai/src/runtime/context.ts:1154](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1154)
 
 #### emit
 
@@ -403,15 +550,27 @@ Defined in: [packages/ai/src/runtime/context.ts:669](https://github.com/puristaj
 
 ***
 
+### plan
+
+> **plan**: [`AgentPlanHelpers`](AgentPlanHelpers.md)\<`AgentHandlerContext`\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>, `Models`\>
+
+Defined in: [packages/ai/src/runtime/context.ts:1262](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1262)
+
+***
+
 ### runtime
 
 > **runtime**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:753](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L753)
+Defined in: [packages/ai/src/runtime/context.ts:1276](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1276)
 
 #### approvals
 
 > **approvals**: [`AgentApprovalHelpers`](AgentApprovalHelpers.md)
+
+#### sandbox
+
+> **sandbox**: `AgentSandboxHelpers`
 
 #### service
 

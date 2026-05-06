@@ -1,12 +1,17 @@
 import { type HandledError, StatusCode } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
+import {
+	buildTaskArtifactId,
+	PURISTA_AI_PLAN_ARTIFACT_ID,
+	PURISTA_AI_PLAN_STATUS_ARTIFACT_ID,
+} from '../protocol/taskArtifacts.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createAgentRunStateHelpers } from './runState.js'
 
 const manifest: AgentManifest = {
 	agentName: 'plannerAgent',
-	agentVersion: '1',
+	serviceVersion: '1',
 	eventBridge: 'default',
 	allowedTools: [],
 }
@@ -57,7 +62,7 @@ describe('agent run state helpers', () => {
 		const first = createRunState(shared.api)
 		const run = await first.helper.start({
 			title: 'Architecture Draft',
-			extraScope: { projectId: 'voyage' },
+			scope: { projectId: 'voyage' },
 		})
 
 		await run.plan([
@@ -68,7 +73,7 @@ describe('agent run state helpers', () => {
 		await run.completeTask('analyze', 'Workspace captured')
 
 		const second = createRunState(shared.api)
-		const persisted = await second.helper.get({ extraScope: { projectId: 'voyage' } })
+		const persisted = await second.helper.get({ scope: { projectId: 'voyage' } })
 		expect(persisted?.title).toBe('Architecture Draft')
 		expect(persisted?.tasks[0]).toMatchObject({ id: 'analyze', status: 'completed', detail: 'Workspace captured' })
 		expect(second.artifacts).toHaveLength(0)
@@ -78,16 +83,41 @@ describe('agent run state helpers', () => {
 		const { helper, artifacts } = createRunState(createInMemoryStates().api)
 		const run = await helper.start({
 			title: 'Simulation Review',
-			extraScope: { projectId: 'voyage' },
+			scope: { projectId: 'voyage' },
 		})
 		await run.plan([{ id: 'review', title: 'Review architecture' }])
 		await run.startTask('review')
 		await run.finishSuccess('Simulation ready for planning')
 
 		expect(artifacts.some(item => item.artifactId === 'run-state')).toBe(true)
-		const last = artifacts.at(-1)
-		expect(last).toMatchObject({ artifactId: 'run-state', final: true })
-		expect(last?.content).toMatchObject({ status: 'completed', summary: 'Simulation ready for planning' })
+		const runStateArtifact = artifacts.filter(item => item.artifactId === 'run-state').at(-1)
+		expect(runStateArtifact).toMatchObject({ artifactId: 'run-state', final: true })
+		expect(runStateArtifact?.content).toMatchObject({ status: 'completed', summary: 'Simulation ready for planning' })
+	})
+
+	it('emits reserved plan and task artifacts for consumer-facing progress', async () => {
+		const { helper, artifacts } = createRunState(createInMemoryStates().api)
+		const run = await helper.start({
+			title: 'Simulation Review',
+			scope: { projectId: 'voyage' },
+		})
+		await run.plan([{ id: 'review', title: 'Review architecture' }])
+		await run.startTask('review', 'Reading current state')
+		await run.completeTask('review', 'Review complete')
+		await run.finishSuccess('Simulation ready for planning')
+
+		expect(artifacts.some(item => item.artifactId === PURISTA_AI_PLAN_ARTIFACT_ID)).toBe(true)
+		expect(artifacts.some(item => item.artifactId === PURISTA_AI_PLAN_STATUS_ARTIFACT_ID)).toBe(true)
+		expect(artifacts.some(item => item.artifactId === buildTaskArtifactId('review'))).toBe(true)
+		expect(artifacts.find(item => item.artifactId === PURISTA_AI_PLAN_ARTIFACT_ID)?.content).toMatchObject({
+			type: 'purista-ai-plan',
+			tasks: [{ id: 'review', title: 'Review architecture' }],
+		})
+		expect(artifacts.filter(item => item.artifactId === buildTaskArtifactId('review')).at(-1)?.content).toMatchObject({
+			type: 'purista-ai-task',
+			taskId: 'review',
+			status: 'completed',
+		})
 	})
 
 	it('prevents duplicate lock acquisition until expiry', async () => {
@@ -95,14 +125,14 @@ describe('agent run state helpers', () => {
 		const first = createRunState(shared.api)
 		const second = createRunState(shared.api)
 
-		const lock = await first.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 })
+		const lock = await first.helper.lock({ scope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 })
 		await expect(
-			second.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 }),
+			second.helper.lock({ scope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 }),
 		).rejects.toMatchObject({ errorCode: StatusCode.Conflict } satisfies Partial<HandledError>)
 
 		await lock.release()
 		await expect(
-			second.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 }),
+			second.helper.lock({ scope: { projectId: 'voyage' }, key: 'validation', ttlMs: 50 }),
 		).resolves.toBeDefined()
 	})
 
@@ -110,10 +140,10 @@ describe('agent run state helpers', () => {
 		const shared = createInMemoryStates()
 		const first = createRunState(shared.api)
 		const second = createRunState(shared.api)
-		await first.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'architecture', ttlMs: 1 })
+		await first.helper.lock({ scope: { projectId: 'voyage' }, key: 'architecture', ttlMs: 1 })
 		await new Promise(resolve => setTimeout(resolve, 5))
 		await expect(
-			second.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'architecture', ttlMs: 50 }),
+			second.helper.lock({ scope: { projectId: 'voyage' }, key: 'architecture', ttlMs: 50 }),
 		).resolves.toBeDefined()
 	})
 
@@ -121,7 +151,7 @@ describe('agent run state helpers', () => {
 		const { helper } = createRunState(createInMemoryStates().api)
 		const run = await helper.start({
 			title: 'Architecture Draft',
-			extraScope: { projectId: 'voyage' },
+			scope: { projectId: 'voyage' },
 		})
 
 		await run.plan([{ id: 'write', title: 'Write artifacts' }])

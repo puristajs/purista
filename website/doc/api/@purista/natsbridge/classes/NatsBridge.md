@@ -193,7 +193,7 @@ purista
 
 > **capabilities**: [`EventBridgeCapabilities`](../../core/type-aliases/EventBridgeCapabilities.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 #### Implementation of
 
@@ -217,7 +217,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:122](https://github.com/puristajs/puri
 
 > **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 #### Inherited from
 
@@ -237,7 +237,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:115](https://github.com/puristajs/puri
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -255,7 +255,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `protected` `readonly` **inFlightExecutions**: [`InFlightExecutionTracker`](../../core/classes/InFlightExecutionTracker.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 #### Inherited from
 
@@ -267,7 +267,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
 
 > **instanceId**: `string`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 #### Implementation of
 
@@ -307,7 +307,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:119](https://github.com/puristajs/puri
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:21
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -319,7 +319,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:21
 
 > **name**: `string`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 #### Implementation of
 
@@ -351,7 +351,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:123](https://github.com/puristajs/puri
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -363,7 +363,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:853](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L853)
+Defined in: [natsbridge/src/NatsBridge.ts:859](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L859)
 
 Shut down event bridge as gracefully as possible
 
@@ -385,7 +385,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:520](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L520)
+Defined in: [natsbridge/src/NatsBridge.ts:526](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L526)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -425,7 +425,7 @@ the message
 
 > **getInFlightExecutionCount**(): `number`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
 
 Number of currently running handlers across all work kinds.
 
@@ -445,31 +445,15 @@ Number of currently running handlers across all work kinds.
 
 ### getInFlightExecutionCounts()
 
-> **getInFlightExecutionCounts**(): `object`
+> **getInFlightExecutionCounts**(): [`InFlightExecutionCounts`](../../core/type-aliases/InFlightExecutionCounts.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
 
 Number of currently running handlers grouped by work kind.
 
 #### Returns
 
-`object`
-
-##### command
-
-> **command**: `number`
-
-##### generic
-
-> **generic**: `number`
-
-##### stream
-
-> **stream**: `number`
-
-##### subscription
-
-> **subscription**: `number`
+[`InFlightExecutionCounts`](../../core/type-aliases/InFlightExecutionCounts.md)
 
 #### Implementation of
 
@@ -485,7 +469,7 @@ Number of currently running handlers grouped by work kind.
 
 > **getPausedSubscriptionConsumers**(): `object`
 
-Defined in: [natsbridge/src/NatsBridge.ts:841](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L841)
+Defined in: [natsbridge/src/NatsBridge.ts:847](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L847)
 
 Returns paused subscription consumer states keyed by adapter registration key.
 
@@ -507,7 +491,7 @@ Returns paused subscription consumer states keyed by adapter registration key.
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:35
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
 
 Returns open telemetry tracer of this service
 
@@ -527,7 +511,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:593](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L593)
+Defined in: [natsbridge/src/NatsBridge.ts:599](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L599)
 
 Call a command of a service and return the result of this command
 
@@ -565,7 +549,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:516](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L516)
+Defined in: [natsbridge/src/NatsBridge.ts:522](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L522)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -583,7 +567,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:512](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L512)
+Defined in: [natsbridge/src/NatsBridge.ts:518](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L518)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -601,7 +585,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -644,7 +628,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:735](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L735)
+Defined in: [natsbridge/src/NatsBridge.ts:741](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L741)
 
 #### Parameters
 
@@ -682,7 +666,7 @@ the function to be called if a matching command arrives
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:75
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
 
 Register a service stream.
 
@@ -722,7 +706,7 @@ Register a service stream.
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:791](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L791)
+Defined in: [natsbridge/src/NatsBridge.ts:797](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L797)
 
 Register a new subscription
 
@@ -754,7 +738,7 @@ the function to be called if a matching message arrives
 
 > **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:845](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L845)
+Defined in: [natsbridge/src/NatsBridge.ts:851](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L851)
 
 Resumes a paused subscription consumer by registration key.
 
@@ -782,7 +766,7 @@ Resumes a paused subscription consumer by registration key.
 
 > **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 #### Type Parameters
 
@@ -814,7 +798,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:494](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L494)
+Defined in: [natsbridge/src/NatsBridge.ts:500](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L500)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -836,7 +820,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:44
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:45
 
 Start a child span for opentelemetry tracking
 
@@ -888,7 +872,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:773](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L773)
+Defined in: [natsbridge/src/NatsBridge.ts:779](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L779)
 
 Unregister a service command
 
@@ -914,7 +898,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:76
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
 
 Unregister a service stream
 
@@ -942,7 +926,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:822](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L822)
+Defined in: [natsbridge/src/NatsBridge.ts:828](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L828)
 
 #### Parameters
 
@@ -964,7 +948,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:822](https://github.com/puristajs/puri
 
 > **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
 #### Parameters
 
@@ -986,7 +970,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:60
+Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

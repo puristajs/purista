@@ -4,17 +4,41 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentInstanceDependencies
 
-# Type Alias: AgentInstanceDependencies\<EmitPayloads\>
+# Type Alias: AgentInstanceDependencies\<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes\>
 
-> **AgentInstanceDependencies**\<`EmitPayloads`\> = `object`
+> **AgentInstanceDependencies**\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\> = `object`
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:44](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L44)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:67](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L67)
 
 ## Type Parameters
+
+### Payload
+
+`Payload` = `unknown`
+
+### Parameter
+
+`Parameter` = `unknown`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = `Record`\<`string`, `unknown`\>
+
+### Models
+
+`Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\> = `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>
+
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
 
 ### EmitPayloads
 
 `EmitPayloads` *extends* `Record`\<`string`, `unknown`\> = `Record`\<`string`, `unknown`\>
+
+### ToolInvokes
+
+`ToolInvokes` *extends* [`ToolInvokeMap`](ToolInvokeMap.md) = [`ToolInvokeMap`](ToolInvokeMap.md)
 
 ## Properties
 
@@ -22,7 +46,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:44](https://github.com/pur
 
 > `optional` **callOptionsSchema**: `ZodType`
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:51](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L51)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:80](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L80)
 
 ***
 
@@ -30,7 +54,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:51](https://github.com/pur
 
 > `optional` **configSchema**: [`Schema`](../../core/type-aliases/Schema.md)
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:54](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L54)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:83](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L83)
 
 ***
 
@@ -38,15 +62,15 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:54](https://github.com/pur
 
 > `optional` **defaultConfig**: [`Complete`](../../core/type-aliases/Complete.md)\<`Record`\<`string`, `unknown`\>\>
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:55](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L55)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:84](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L84)
 
 ***
 
 ### handler
 
-> **handler**: [`AgentHandler`](AgentHandler.md)\<`any`, `any`, `Record`\<`string`, `unknown`\>, `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>, `any`, `EmitPayloads`\>
+> **handler**: [`AgentHandler`](AgentHandler.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `AgentInvokes`, `EmitPayloads`, `ToolInvokes`\>
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:50](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L50)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:79](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L79)
 
 ***
 
@@ -54,7 +78,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:50](https://github.com/pur
 
 > **info**: [`AgentInfo`](AgentInfo.md)
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:45](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L45)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:76](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L76)
 
 ***
 
@@ -62,7 +86,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:45](https://github.com/pur
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:46](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L46)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:77](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L77)
 
 ***
 
@@ -70,7 +94,7 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:46](https://github.com/pur
 
 > `optional` **prepareCall**: [`AgentPrepareCallHook`](AgentPrepareCallHook.md)
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:52](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L52)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:81](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L81)
 
 ***
 
@@ -78,12 +102,12 @@ Defined in: [packages/ai/src/runtime/AgentInstance.ts:52](https://github.com/pur
 
 > `optional` **prepareStep**: [`AgentPrepareStepHook`](AgentPrepareStepHook.md)
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:53](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L53)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:82](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L82)
 
 ***
 
 ### serviceBuilder
 
-> **serviceBuilder**: [`ServiceBuilder`](../../core/classes/ServiceBuilder.md)\<[`ServiceBuilderTypes`](../../core/type-aliases/ServiceBuilderTypes.md)\<`Record`\<`string`, `unknown`\>, `Record`\<`string`, `unknown`\>, `Record`\<`string`, `unknown`\>\>\>
+> **serviceBuilder**: `AgentRuntimeServiceBuilder`
 
-Defined in: [packages/ai/src/runtime/AgentInstance.ts:47](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/AgentInstance.ts#L47)
+Defined in: [packages/ai/src/runtime/AgentInstance.ts:78](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/AgentInstance.ts#L78)

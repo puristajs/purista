@@ -2,6 +2,7 @@ import { emitWarning } from 'node:process'
 
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
+import type { ConnectionOptions } from 'nats'
 import { afterAll } from 'vitest'
 
 import { describeQueueBridgeContract } from '../../core/test/helpers/queueBridgeContractSuite.js'
@@ -11,7 +12,7 @@ const NATS_IMAGE = 'nats:2.10-alpine'
 
 let container: StartedNatsContainer | undefined
 let dockerAvailable = true
-let connectionOptions: { servers: string[] } | undefined
+let connectionOptions: ConnectionOptions | undefined
 
 describeQueueBridgeContract('@purista/nats-queue-bridge contract', {
 	beforeAll: async () => {

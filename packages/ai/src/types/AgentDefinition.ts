@@ -16,12 +16,13 @@ import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
+import type { AgentSandboxRuntimeConfig } from '../sandbox/provider.js'
 import type { SkillResource, SkillSourceMap } from '../skills/fileSystem.js'
 import type { AgentManifest, ExternalRuntimeMetadata } from './AgentManifest.js'
 
 export type AgentInfo = {
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 	description?: string
 	successEventName?: string
 }
@@ -50,6 +51,7 @@ export type BaseAgentInstanceOptions<
 	 */
 	skills?: SkillResource | SkillSourceMap<SkillNames>
 	resources?: keyof Resources extends never ? never : Resources
+	sandbox?: AgentSandboxRuntimeConfig<Resources>
 	poolConfig?: {
 		poolId?: string
 		/**
@@ -102,6 +104,7 @@ export type AgentDefinition<
 export type AgentRuntimeInstance<EmitPayloads extends Record<string, unknown> = EmptyObject> = {
 	start(): Promise<void>
 	stop(): Promise<void>
+	getManifest(): AgentManifest
 	/**
 	 * Return the underlying PURISTA service instance backing this agent runtime.
 	 *
@@ -136,6 +139,8 @@ export type AgentInvokeRequest = {
 	timeoutMs?: number
 	principalId?: string
 	tenantId?: string
+	projectId?: string
+	otp?: string
 	deliveryMode?: AgentInvocationDeliveryMode
 }
 
@@ -153,7 +158,8 @@ export type AgentStreamResponder<_EmitPayloads extends Record<string, unknown> =
 
 export type AgentTerminalResult = {
 	status: 'completed' | 'failed' | 'cancelled'
-	finalMessage?: string
+	message?: string
+	output?: unknown
 	summary?: string
 	usage?: {
 		promptTokens?: number
@@ -164,16 +170,19 @@ export type AgentTerminalResult = {
 	runId?: string
 	conversationId?: string
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 }
 
-export type AgentInvokeResult = {
+export type AgentInvocationFinalResult<Output = unknown> = AgentTerminalResult & {
 	envelopes: AgentProtocolEnvelope[]
+	output?: Output
 }
+
+export type AgentInvokeResult = AgentInvocationFinalResult
 
 export type AgentRuntimeStatus = {
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 	poolId: string
 	/** Per-process/per-replica execution cap for this pool. */
 	maxConcurrencyPerInstance: number

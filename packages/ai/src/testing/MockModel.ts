@@ -1,6 +1,7 @@
 import type {
 	ModelProvider,
 	ProviderGenerateTextRequest,
+	ProviderJsonOutputFromSchema,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
 	ProviderRequest,
@@ -54,8 +55,8 @@ export class MockModel implements ModelProvider {
 	readonly name = 'mock-model'
 	readonly capabilities = {
 		text: true,
-		stream: true,
-		json: true,
+		'text-stream': true,
+		object: true,
 	}
 
 	private readonly textRules: Array<{ matcher: MockTextMatcher; reply: MockTextReply }> = []
@@ -95,11 +96,7 @@ export class MockModel implements ModelProvider {
 		return typeof rule.reply === 'function' ? await rule.reply(request) : rule.reply
 	}
 
-	async generate(request: ProviderRequest): Promise<ProviderResponse> {
-		return toProviderResponse(await this.resolveText(request))
-	}
-
-	stream(request: ProviderRequest): ProviderStream {
+	streamText(request: ProviderRequest): ProviderStream {
 		let outputPromise: Promise<string> | undefined
 		const resolveOutput = async () => {
 			outputPromise ??= this.resolveText(request)
@@ -129,8 +126,10 @@ export class MockModel implements ModelProvider {
 		return output
 	}
 
-	async generateJson<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
-		const data = (await this.resolveJson(request)) as T
+	async generateObject<T = unknown, OutputSchema = unknown>(
+		request: ProviderJsonRequest<OutputSchema>,
+	): Promise<ProviderJsonResponse<ProviderJsonOutputFromSchema<OutputSchema, T>>> {
+		const data = (await this.resolveJson(request)) as ProviderJsonOutputFromSchema<OutputSchema, T>
 		return {
 			data,
 			text: JSON.stringify(data),

@@ -1,5 +1,11 @@
 import type { AgentDefinition } from '../types/AgentDefinition.js'
 
+export type MCPAgentManifestInput = {
+	agentName: string
+	description?: string
+	payloadSchema?: unknown
+}
+
 /**
  * Descriptor emitted when an agent should be exposed as an MCP tool.
  */
@@ -18,6 +24,19 @@ export const exposeAgentAsMCP = (definition: AgentDefinition): MCPToolDescriptor
 		description: definition.manifest.description,
 		parameters: {
 			inputSchema: definition.manifest.payloadSchema,
+		},
+	}
+}
+
+/**
+ * Converts a manifest-like object into a Model Context Protocol descriptor.
+ */
+export const exposeAgentAsMCPFromManifest = (manifest: MCPAgentManifestInput): MCPToolDescriptor => {
+	return {
+		name: manifest.agentName,
+		description: manifest.description,
+		parameters: {
+			inputSchema: manifest.payloadSchema,
 		},
 	}
 }

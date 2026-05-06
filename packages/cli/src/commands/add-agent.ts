@@ -71,7 +71,14 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 		}
 
 		const mutationSnapshot = captureMutationSnapshot([
-			join(context.cwd, puristaConfig.agentPath ?? 'src/agents', resolvedInput.name),
+			join(
+				context.cwd,
+				puristaConfig.servicePath ?? 'src/service',
+				resolvedInput.serviceName,
+				`v${resolvedInput.serviceVersion}`,
+				'agent',
+				resolvedInput.name,
+			),
 		])
 		await addPuristaAgent({
 			projectRootPath: context.cwd,

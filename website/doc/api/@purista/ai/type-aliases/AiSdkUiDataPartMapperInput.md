@@ -8,7 +8,7 @@
 
 > **AiSdkUiDataPartMapperInput** = `object`
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:30](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/aiSdkStream.ts#L30)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:36](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/aiSdkStream.ts#L36)
 
 Context passed to UI data-part mappers.
 
@@ -18,7 +18,7 @@ Context passed to UI data-part mappers.
 
 > **envelope**: [`AgentProtocolEnvelope`](AgentProtocolEnvelope.md)
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:31](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/aiSdkStream.ts#L31)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:37](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/aiSdkStream.ts#L37)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/protocol/aiSdkStream.ts:31](https://github.com/puri
 
 > **frame**: [`AgentProtocolFrame`](AgentProtocolFrame.md)
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:32](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/aiSdkStream.ts#L32)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:38](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/aiSdkStream.ts#L38)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/protocol/aiSdkStream.ts:32](https://github.com/puri
 
 > **response**: `object`
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:33](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/aiSdkStream.ts#L33)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:39](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/aiSdkStream.ts#L39)
 
 #### agent?
 

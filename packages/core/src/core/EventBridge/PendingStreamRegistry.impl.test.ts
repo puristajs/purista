@@ -65,10 +65,37 @@ describe('PendingStreamRegistry', () => {
 		const session = registry.register('stream-1', 1, 'trace-id')
 		const iterator = session.handle[Symbol.asyncIterator]()
 
-		await expect(iterator.next()).resolves.toEqual({ done: true, value: undefined })
+		await expect(iterator.next()).rejects.toThrow('stream invocation timed out')
 
 		const result = session.push(createFrame('stream-1', 'chunk', 1))
 		expect(result).toBe('late')
 		expect(onLateFrame).toHaveBeenCalledWith('stream-1')
+	})
+
+	it('refreshes stream timeout whenever a frame is received', async () => {
+		const registry = new PendingStreamRegistry()
+		const session = registry.register('stream-1', 25, 'trace-id')
+		const iterator = session.handle[Symbol.asyncIterator]()
+
+		session.push(createFrame('stream-1', 'start', 0))
+		await expect(iterator.next()).resolves.toMatchObject({
+			done: false,
+			value: { payload: { frameType: 'start' } },
+		})
+
+		await new Promise(resolve => setTimeout(resolve, 10))
+		session.push(createFrame('stream-1', 'chunk', 1))
+		await expect(iterator.next()).resolves.toMatchObject({
+			done: false,
+			value: { payload: { frameType: 'chunk' } },
+		})
+
+		await new Promise(resolve => setTimeout(resolve, 10))
+		session.push(createFrame('stream-1', 'complete', 2))
+		await expect(iterator.next()).resolves.toMatchObject({
+			done: false,
+			value: { payload: { frameType: 'complete' } },
+		})
+		await expect(iterator.next()).resolves.toEqual({ done: true, value: undefined })
 	})
 })

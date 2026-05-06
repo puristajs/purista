@@ -156,14 +156,6 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:57](https://g
 
 ##### options
 
-###### emitEvent?
-
-`boolean`
-
-###### eventName?
-
-`string`
-
 ###### queueName?
 
 `string`

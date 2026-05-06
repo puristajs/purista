@@ -8,7 +8,7 @@
 
 > **AgentModelBinding** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:167](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L167)
+Defined in: [packages/ai/src/types/AgentManifest.ts:151](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L151)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:167](https://github.com/puri
 
 > **alias**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:168](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L168)
+Defined in: [packages/ai/src/types/AgentManifest.ts:152](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L152)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:168](https://github.com/puri
 
 > `optional` **capabilities**: [`AgentModelCapability`](AgentModelCapability.md)[]
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:169](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L169)
+Defined in: [packages/ai/src/types/AgentManifest.ts:153](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L153)

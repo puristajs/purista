@@ -6,8 +6,8 @@ describe('ScriptedModel', () => {
 	it('supports ordered text and json replies', async () => {
 		const model = new ScriptedModel().nextText('hello').nextJson({ ok: true })
 
-		await expect(model.generate?.({ prompt: 'hi' })).resolves.toMatchObject({ output: 'hello' })
-		await expect(model.generateJson?.({ prompt: 'json', schema: { type: 'object' } })).resolves.toMatchObject({
+		await expect(model.generateText?.({ prompt: 'hi' })).resolves.toBe('hello')
+		await expect(model.generateObject?.({ prompt: 'json', schema: { type: 'object' } })).resolves.toMatchObject({
 			data: { ok: true },
 		})
 		expect(model.calls).toHaveLength(2)
@@ -17,7 +17,7 @@ describe('ScriptedModel', () => {
 		const model = new ScriptedModel().nextStream(['alpha', 'beta'], { reasoning: ['plan'] })
 		const chunks: string[] = []
 		const reasoning: string[] = []
-		const stream = model.stream({ prompt: 'stream' })
+		const stream = model.streamText({ prompt: 'stream' })
 
 		for await (const item of stream) {
 			if (item.type === 'text-delta') {
@@ -36,6 +36,6 @@ describe('ScriptedModel', () => {
 	it('raises configured errors in order', async () => {
 		const model = new ScriptedModel().nextError(() => new Error('boom'))
 
-		await expect(model.generate?.({ prompt: 'fail' })).rejects.toThrow('boom')
+		await expect(model.generateText?.({ prompt: 'fail' })).rejects.toThrow('boom')
 	})
 })

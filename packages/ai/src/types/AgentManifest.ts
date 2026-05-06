@@ -1,19 +1,20 @@
-import type { Schema } from '@purista/core'
+import type { QueryParameter, Schema, SupportedHttpMethod } from '@purista/core'
+import type { AgentSandboxPolicy } from '../sandbox/provider.js'
+
+export const defaultAgentModelCapabilities = ['text', 'object', 'object-stream', 'text-stream'] as const
 
 export type AgentHttpExposure = {
-	method: string
+	method: SupportedHttpMethod
 	path: string
 	streamingMode?: 'stream' | 'aggregate'
-	sseProtocol?: AgentSseProtocol
+	streamProtocolAdapter?: AgentStreamProtocolAdapterId
 	requestContentType?: string
 	requestEncoding?: string
 	responseContentType?: string
 	responseEncoding?: string
 	public?: boolean
-	queryParameters?: Array<{ name: string; required: boolean }>
+	queryParameters?: QueryParameter[]
 }
-
-export type AgentExecutionMode = 'inline' | 'queued'
 
 export type AgentExecutionRecoveryPolicy = 'resume-from-checkpoints' | 'retry-from-start' | 'fail-stale'
 
@@ -103,24 +104,7 @@ export type AgentPolicy = {
 	resources?: AgentResourcePolicy
 }
 
-/**
- * Controls how agent stream chunks should be serialized when the endpoint uses SSE.
- * - `purista`: native PURISTA stream frames (canonical source protocol)
- * - `ai-sdk-responses`: OpenAI Responses-style stream events
- * - `ai-sdk-ui-message`: Vercel AI SDK UI message stream protocol
- * - `ai-sdk-data`: alias for AI SDK UI message data stream protocol
- * - `ai-sdk-json-render`: AI SDK UI message stream with `data-spec` parts for json-render
- * - `agent2agent`: reference Agent-to-Agent message events
- * - `mcp`: reference MCP tool-result events
- */
-export type AgentSseProtocol =
-	| 'purista'
-	| 'ai-sdk-responses'
-	| 'ai-sdk-ui-message'
-	| 'ai-sdk-data'
-	| 'ai-sdk-json-render'
-	| 'agent2agent'
-	| 'mcp'
+export type AgentStreamProtocolAdapterId = 'purista' | 'ai-sdk.responses' | 'ai-sdk.ui-message'
 
 export type AllowedToolDefinition = {
 	serviceName: string
@@ -135,7 +119,7 @@ export type AllowedToolDefinition = {
 
 export type AllowedAgentDefinition = {
 	agentName: string
-	agentVersion: string
+	serviceVersion?: string
 	description?: string
 	payloadSchema?: Schema
 	parameterSchema?: Schema
@@ -162,7 +146,7 @@ export type RetryPolicy = {
 	delayMs?: number
 }
 
-export type AgentModelCapability = 'text' | 'stream' | 'embedding' | 'rerank' | 'json'
+export type AgentModelCapability = 'text' | 'text-stream' | 'object' | 'object-stream' | 'embedding' | 'rerank'
 
 export type AgentModelBinding = {
 	alias: string
@@ -176,11 +160,11 @@ export type AgentSkillConfig = {
 
 export type AgentManifest = {
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 	description?: string
 	deprecated?: boolean
 	eventBridge: string
-	executionMode?: AgentExecutionMode
+	sandbox?: AgentSandboxPolicy
 	executionPolicy?: AgentExecutionPolicy
 	reflection?: ReflectionPolicy
 	agentPolicy?: AgentPolicy
@@ -198,5 +182,6 @@ export type AgentManifest = {
 	outputSchema?: Schema
 	contextSchema?: Schema
 	httpExposure?: AgentHttpExposure
+	successEventName?: string
 	metadata?: Record<string, unknown>
 }

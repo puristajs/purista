@@ -6,7 +6,12 @@ import {
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
 	ATTR_HTTP_ROUTE,
 } from '@opentelemetry/semantic-conventions'
-
+import {
+	type AgentProtocolEnvelope,
+	type AgentStreamProtocolAdapterId,
+	createAgentTerminalResult,
+	toProtocolSseEvents,
+} from '@purista/ai'
 import type {
 	Command,
 	CommandDefinitionMetadataBase,
@@ -55,6 +60,155 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 		jobId: candidate.jobId,
 		queueName: candidate.queueName,
 		scheduledAt: candidate.scheduledAt,
+	}
+}
+
+const attachedAgentsSymbol = Symbol.for('@purista/ai/attachedAgentInstances')
+const attachedAgentRunTarget = 'run'
+
+type AttachedAgentManifestLike = {
+	agentName: string
+	serviceVersion: string
+	description?: string
+	httpExposure?: {
+		method: string
+		path: string
+		streamingMode?: 'stream' | 'aggregate'
+		streamProtocolAdapter?: AgentStreamProtocolAdapterId
+		requestContentType?: string
+		requestEncoding?: string
+		responseContentType?: string
+		responseEncoding?: string
+		public?: boolean
+		queryParameters?: Array<{ name: string; required: boolean }>
+	}
+	outputSchema?: unknown
+}
+
+type AttachedAgentInstanceLike = {
+	getManifest: () => AttachedAgentManifestLike
+}
+
+type AnyService = Service<any>
+
+type ServiceWithAttachedAgents = AnyService & {
+	[attachedAgentsSymbol]?: AttachedAgentInstanceLike[]
+}
+
+const isAttachedAgentInstance = (value: unknown): value is AttachedAgentInstanceLike =>
+	typeof value === 'object' && value !== null && typeof (value as AttachedAgentInstanceLike).getManifest === 'function'
+
+const isServiceLike = (value: unknown): value is AnyService =>
+	typeof value === 'object' &&
+	value !== null &&
+	'serviceInfo' in value &&
+	'commandDefinitionList' in value &&
+	'streamDefinitionList' in value
+
+const getAttachedAgents = (service: AnyService): AttachedAgentInstanceLike[] => {
+	const instances = (service as ServiceWithAttachedAgents)[attachedAgentsSymbol]
+	if (!Array.isArray(instances)) {
+		return []
+	}
+	return instances.filter(isAttachedAgentInstance)
+}
+
+const toAttachedAgentHttpMetadata = (manifest: AttachedAgentManifestLike): HttpExposedServiceMeta | undefined => {
+	const httpExposure = manifest.httpExposure
+	if (!httpExposure) {
+		return undefined
+	}
+
+	const isStreamEndpoint = (httpExposure.streamingMode ?? 'stream') === 'stream'
+
+	return {
+		expose: {
+			contentTypeRequest: httpExposure.requestContentType ?? 'application/json',
+			contentEncodingRequest: httpExposure.requestEncoding ?? 'utf-8',
+			contentTypeResponse:
+				httpExposure.responseContentType ?? (isStreamEndpoint ? 'text/event-stream' : 'application/json'),
+			contentEncodingResponse: httpExposure.responseEncoding ?? 'utf-8',
+			outputPayload: isStreamEndpoint
+				? undefined
+				: {
+						type: 'object',
+						additionalProperties: true,
+					},
+			deprecated: false,
+			http: {
+				method: httpExposure.method.toUpperCase() as 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
+				path: httpExposure.path,
+				stream: {
+					protocol: httpExposure.streamProtocolAdapter ?? 'purista',
+					mode: httpExposure.streamingMode ?? 'stream',
+				},
+				openApi: {
+					isSecure: httpExposure.public !== true,
+					summary: manifest.description ?? `Invoke attached agent ${manifest.agentName}`,
+					description: manifest.description ?? `Invoke attached agent ${manifest.agentName}`,
+					operationId: `${manifest.agentName}Run`,
+					tags: ['agents'],
+				},
+			},
+		},
+	}
+}
+
+const isAgentEnvelope = (value: unknown): value is AgentProtocolEnvelope =>
+	typeof value === 'object' && value !== null && typeof (value as AgentProtocolEnvelope).version === 'string'
+
+const toAgentEnvelopeBatch = (value: unknown): AgentProtocolEnvelope[] => {
+	if (Array.isArray(value)) {
+		return value.filter(isAgentEnvelope)
+	}
+	return isAgentEnvelope(value) ? [value] : []
+}
+
+const streamProtocolEventsFromAgentHandle = async function* (
+	handle: StreamHandle,
+	adapter: AgentStreamProtocolAdapterId,
+) {
+	const envelopeStream = (async function* () {
+		for await (const frame of handle) {
+			const payload = frame.payload as StreamTransportFramePayload
+			if (isTransportControlFrame(payload.frameType)) {
+				continue
+			}
+			if (payload.frameType === 'chunk' && isProtocolSseEvent(payload.chunk)) {
+				continue
+			}
+			if (payload.frameType === 'error') {
+				throw payload.error instanceof Error
+					? payload.error
+					: new Error(JSON.stringify(payload.error ?? { message: 'stream error' }))
+			}
+
+			const envelopes =
+				payload.frameType === 'chunk'
+					? toAgentEnvelopeBatch(payload.chunk)
+					: payload.frameType === 'complete'
+						? toAgentEnvelopeBatch(payload.final)
+						: []
+
+			for (const envelope of envelopes) {
+				yield envelope
+			}
+
+			if (payload.frameType === 'complete') {
+				return
+			}
+		}
+	})()
+
+	try {
+		for await (const event of toProtocolSseEvents(envelopeStream, adapter)) {
+			yield event
+		}
+	} catch (error) {
+		yield {
+			event: 'error',
+			data: error instanceof Error ? { message: error.message } : (error ?? { message: 'stream error' }),
+		}
 	}
 }
 
@@ -340,7 +494,7 @@ export class HonoServiceClass<
 	 * Adds the endpoints of the service commands to the Hono router
 	 * @param services
 	 */
-	registerService(...services: Service[]) {
+	registerService(...services: Array<AnyService | AttachedAgentInstanceLike>) {
 		if (this.isStarted) {
 			throw new UnhandledError(
 				StatusCode.BadRequest,
@@ -349,6 +503,20 @@ export class HonoServiceClass<
 		}
 
 		for (const service of services) {
+			if (isAttachedAgentInstance(service) && !isServiceLike(service)) {
+				const manifest = service.getManifest()
+				const metadata = toAttachedAgentHttpMetadata(manifest)
+				if (!metadata) {
+					continue
+				}
+				this.addEndpoint(metadata, {
+					serviceName: manifest.agentName,
+					serviceVersion: manifest.serviceVersion,
+					serviceTarget: attachedAgentRunTarget,
+				})
+				continue
+			}
+
 			for (const command of service.commandDefinitionList) {
 				this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
 			}
@@ -356,6 +524,18 @@ export class HonoServiceClass<
 				this.addEndpoint(stream.metadata as unknown as CommandDefinitionMetadataBase, {
 					...service.serviceInfo,
 					serviceTarget: stream.streamName,
+				})
+			}
+			for (const attachedAgent of getAttachedAgents(service)) {
+				const manifest = attachedAgent.getManifest()
+				const metadata = toAttachedAgentHttpMetadata(manifest)
+				if (!metadata) {
+					continue
+				}
+				this.addEndpoint(metadata, {
+					serviceName: manifest.agentName,
+					serviceVersion: manifest.serviceVersion,
+					serviceTarget: attachedAgentRunTarget,
 				})
 			}
 		}
@@ -381,6 +561,7 @@ export class HonoServiceClass<
 		const httpMetadata = metadata as HttpExposedServiceMeta
 		const expose = httpMetadata.expose
 		const httpMode = (expose.http as { mode?: 'sync' | 'async' }).mode ?? 'sync'
+		const isAttachedAgentEndpoint = service.serviceTarget === attachedAgentRunTarget
 
 		const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 		const path = posix.join(this.config.apiMountPath, `v${service.serviceVersion}`, expose.http.path)
@@ -475,6 +656,7 @@ export class HonoServiceClass<
 								contentEncoding: expose.contentEncodingRequest ?? 'utf-8',
 							},
 							`${method}:${path}`,
+							this.config.streamRequestTimeoutMs,
 						)
 
 						if (streamMode === 'aggregate') {
@@ -491,41 +673,59 @@ export class HonoServiceClass<
 
 							span.setStatus({ code: SpanStatusCode.OK })
 							c.header('content-type', `${responseContentType}; charset=${responseEncodingType}`)
-							return c.json(aggregateResult.payload, aggregateResult.statusCode)
+							const payload =
+								isAttachedAgentEndpoint && Array.isArray(aggregateResult.payload)
+									? createAgentTerminalResult({
+											envelopes: aggregateResult.payload.filter(isAgentEnvelope),
+											agentName: service.serviceName,
+											serviceVersion: service.serviceVersion,
+										})
+									: aggregateResult.payload
+							return c.json(payload, aggregateResult.statusCode)
 						}
 
 						const encoder = new TextEncoder()
 						const stream = new ReadableStream<Uint8Array>({
 							start: controller => {
 								const run = async (activeHandle: StreamHandle) => {
-									let protocolPassthrough = false
 									try {
-										for await (const frame of activeHandle) {
-											const payload = frame.payload as StreamTransportFramePayload
-											if (isTransportControlFrame(payload.frameType)) {
-												continue
+										if (isAttachedAgentEndpoint) {
+											const adapter =
+												(expose.http.stream?.protocol as AgentStreamProtocolAdapterId | undefined) ?? 'purista'
+											for await (const event of streamProtocolEventsFromAgentHandle(activeHandle, adapter)) {
+												controller.enqueue(encodeProtocolSseEvent(encoder, event))
 											}
-
-											if (payload.frameType === 'chunk' && isProtocolSseEvent(payload.chunk)) {
-												protocolPassthrough = true
-												controller.enqueue(encodeProtocolSseEvent(encoder, payload.chunk))
-												continue
-											}
-
-											if (protocolPassthrough) {
-												if (payload.frameType === 'error') {
-													controller.enqueue(
-														encoder.encode(
-															`event: error\ndata: ${JSON.stringify(payload.error ?? { message: 'stream error' })}\n\n`,
-														),
-													)
+										} else {
+											let protocolPassthrough = false
+											for await (const frame of activeHandle) {
+												const payload = frame.payload as StreamTransportFramePayload
+												if (isTransportControlFrame(payload.frameType)) {
+													continue
 												}
-												continue
-											}
 
-											controller.enqueue(
-												encoder.encode(`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`),
-											)
+												if (payload.frameType === 'chunk' && isProtocolSseEvent(payload.chunk)) {
+													protocolPassthrough = true
+													controller.enqueue(encodeProtocolSseEvent(encoder, payload.chunk))
+													continue
+												}
+
+												if (protocolPassthrough) {
+													if (payload.frameType === 'error') {
+														controller.enqueue(
+															encoder.encode(
+																`event: error\ndata: ${JSON.stringify(payload.error ?? { message: 'stream error' })}\n\n`,
+															),
+														)
+													}
+													continue
+												}
+
+												controller.enqueue(
+													encoder.encode(
+														`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`,
+													),
+												)
+											}
 										}
 										controller.close()
 									} catch (error) {
@@ -649,24 +849,28 @@ export class HonoServiceClass<
 	async openStream(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
 		endpoint: string,
+		timeoutMs = this.config.streamRequestTimeoutMs,
 	) {
 		if (!this.eventBridge.openStream) {
 			throw new UnhandledError(StatusCode.NotImplemented, 'Event bridge does not support streams')
 		}
-		return this.eventBridge.openStream({
-			sender: {
-				serviceName: this.serviceInfo.serviceName,
-				serviceVersion: this.serviceInfo.serviceVersion,
-				serviceTarget: `$$endpoint:${endpoint}`,
-				instanceId: this.eventBridge.instanceId,
+		return this.eventBridge.openStream(
+			{
+				sender: {
+					serviceName: this.serviceInfo.serviceName,
+					serviceVersion: this.serviceInfo.serviceVersion,
+					serviceTarget: `$$endpoint:${endpoint}`,
+					instanceId: this.eventBridge.instanceId,
+				},
+				...input,
+				payload: {
+					frameType: 'open',
+					payload: input.payload.payload,
+					parameter: input.payload.parameter,
+				},
 			},
-			...input,
-			payload: {
-				frameType: 'open',
-				payload: input.payload.payload,
-				parameter: input.payload.parameter,
-			},
-		})
+			timeoutMs,
+		)
 	}
 
 	/**

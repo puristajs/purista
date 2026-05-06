@@ -1,6 +1,7 @@
 import type { AgentInvokeList } from '@purista/core'
 import { HandledError, type Schema, StatusCode } from '@purista/core'
 
+import { extractArtifactContent, extractFinalAssistantText } from '../protocol/index.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import type { AgentDefinition } from '../types/AgentDefinition.js'
 import type {
@@ -96,17 +97,17 @@ export type ExposeHelpers = {
 	metadata(): ExternalRuntimeMetadata
 }
 
-export type AgentContextLike = {
+export type AgentContextLike<AgentInvokes extends AgentInvokeList = AgentInvokeList> = {
 	app: Pick<
-		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>['app'],
+		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokes>['app'],
 		'manifest'
 	>
 	invoke: Pick<
-		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>['invoke'],
+		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokes>['invoke'],
 		'tools' | 'agents'
 	>
 	io: Pick<
-		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>['io'],
+		AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokes>['io'],
 		'protocol'
 	>
 }
@@ -115,28 +116,9 @@ const getCommandBindingName = (command: AllowedToolDefinition, explicitName?: st
 	explicitName ?? command.toolName ?? `${command.serviceName}.${command.serviceVersion}.${command.commandName}`
 
 const getAgentBindingName = (agent: AllowedAgentDefinition, explicitName?: string) =>
-	explicitName ?? agent.toolName ?? `${agent.agentName}.${agent.agentVersion}.run`
+	explicitName ?? agent.toolName ?? `${agent.agentName}.${agent.serviceVersion}.run`
 
 const ensureSchema = (schema: Schema | undefined) => schema ?? undefined
-
-const extractAssistantText = (
-	envelopes: Array<{ frame: { kind: string; role?: string; content?: unknown; final?: boolean } }>,
-) => {
-	const assistantFrames = envelopes
-		.map(envelope => envelope.frame)
-		.filter(
-			(frame): frame is { kind: 'message'; role: 'assistant'; content: string; final?: boolean } =>
-				frame.kind === 'message' && frame.role === 'assistant' && typeof frame.content === 'string',
-		)
-	if (assistantFrames.length === 0) {
-		return ''
-	}
-	const finalFrame = [...assistantFrames].reverse().find(frame => frame.final === true)
-	if (finalFrame?.content.trim()) {
-		return finalFrame.content
-	}
-	return assistantFrames.map(frame => frame.content).join('')
-}
 
 export const createCommandBinding = (input: CreateCommandBindingInput): ExternalCommandBinding => {
 	const name = getCommandBindingName(input.command, input.name)
@@ -196,7 +178,10 @@ export const createExternalBindings = (input: CreateExternalBindingsInput): Exte
 	return result
 }
 
-const findAllowedCommand = (context: AgentContextLike, input: AllowedToolDefinition) => {
+const findAllowedCommand = <AgentInvokes extends AgentInvokeList = AgentInvokeList>(
+	context: AgentContextLike<AgentInvokes>,
+	input: AllowedToolDefinition,
+) => {
 	const descriptor = context.app.manifest.allowedTools.find(
 		(entry: AllowedToolDefinition) =>
 			entry.serviceName === input.serviceName &&
@@ -212,21 +197,25 @@ const findAllowedCommand = (context: AgentContextLike, input: AllowedToolDefinit
 	return descriptor
 }
 
-const findAllowedAgent = (context: AgentContextLike, input: AllowedAgentDefinition) => {
+const findAllowedAgent = <AgentInvokes extends AgentInvokeList = AgentInvokeList>(
+	context: AgentContextLike<AgentInvokes>,
+	input: AllowedAgentDefinition,
+) => {
 	const descriptor = (context.app.manifest.allowedAgents ?? []).find(
-		(entry: AllowedAgentDefinition) => entry.agentName === input.agentName && entry.agentVersion === input.agentVersion,
+		(entry: AllowedAgentDefinition) =>
+			entry.agentName === input.agentName && (entry.serviceVersion ?? '1') === (input.serviceVersion ?? '1'),
 	)
 	if (!descriptor) {
 		throw new HandledError(
 			StatusCode.BadRequest,
-			`Agent ${input.agentName}.${input.agentVersion} is not declared via canInvokeAgent(...)`,
+			`Agent ${input.agentName}.${input.serviceVersion ?? '1'} is not declared via canInvokeAgent(...)`,
 		)
 	}
 	return descriptor
 }
 
-const invokeBoundAgent = async (
-	context: AgentContextLike,
+const invokeBoundAgent = async <AgentInvokes extends AgentInvokeList = AgentInvokeList>(
+	context: AgentContextLike<AgentInvokes>,
 	agent: AllowedAgentDefinition,
 	options: { parameter?: unknown; name?: string; resultMode?: ExternalResultMode },
 	payload: unknown,
@@ -239,12 +228,11 @@ const invokeBoundAgent = async (
 	})
 	const envelopes = await context.invoke.agents.invoke({
 		agentName: agent.agentName,
-		agentVersion: agent.agentVersion,
+		serviceVersion: agent.serviceVersion ?? '1',
 		payload,
 		parameter: options.parameter,
 		emitInvocationToolEvents: false,
 	})
-	const assistantText = extractAssistantText(envelopes)
 	if ((options.resultMode ?? 'text') === 'protocol') {
 		context.io.protocol.emitToolEvent({
 			toolName: bindingName,
@@ -255,7 +243,13 @@ const invokeBoundAgent = async (
 		return envelopes
 	}
 	if ((options.resultMode ?? 'text') === 'object') {
-		const result = JSON.parse(assistantText) as unknown
+		const result = extractArtifactContent(envelopes, 'output')
+		if (result === null) {
+			throw new HandledError(
+				StatusCode.BadGateway,
+				`Agent ${agent.agentName}.${agent.serviceVersion ?? '1'} did not emit the required final output artifact`,
+			)
+		}
 		context.io.protocol.emitToolEvent({
 			toolName: bindingName,
 			status: 'success',
@@ -264,6 +258,7 @@ const invokeBoundAgent = async (
 		})
 		return result
 	}
+	const assistantText = extractFinalAssistantText(envelopes)
 	context.io.protocol.emitToolEvent({
 		toolName: bindingName,
 		status: 'success',
@@ -273,7 +268,9 @@ const invokeBoundAgent = async (
 	return assistantText
 }
 
-export const createExposeHelpers = (context: AgentContextLike): ExposeHelpers => ({
+export const createExposeHelpers = <AgentInvokes extends AgentInvokeList = AgentInvokeList>(
+	context: AgentContextLike<AgentInvokes>,
+): ExposeHelpers => ({
 	metadata() {
 		return {
 			commands: context.app.manifest.allowedTools,

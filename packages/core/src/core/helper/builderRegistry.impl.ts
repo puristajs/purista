@@ -85,6 +85,7 @@ export const registerStreamInvokeCapability = <
 type AgentInvokeSchemaConfig = {
 	payloadSchema?: unknown
 	parameterSchema?: unknown
+	outputSchema?: unknown
 }
 
 export const registerAgentInvokeCapability = <
@@ -92,10 +93,10 @@ export const registerAgentInvokeCapability = <
 >(
 	existing: TExisting,
 	agentName: string,
-	agentVersion: string,
+	serviceVersion: string,
 	config: AgentInvokeSchemaConfig,
 ) => {
-	if (agentName.trim() === '' || agentVersion.trim() === '') {
+	if (agentName.trim() === '' || serviceVersion.trim() === '') {
 		throw new Error('canInvokeAgent requires non-empty agent name and version')
 	}
 
@@ -103,7 +104,7 @@ export const registerAgentInvokeCapability = <
 		...existing,
 		[agentName]: {
 			...(existing[agentName] ?? {}),
-			[agentVersion]: config,
+			[serviceVersion]: config,
 		},
 	}
 }

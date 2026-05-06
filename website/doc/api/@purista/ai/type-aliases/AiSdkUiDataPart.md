@@ -8,7 +8,7 @@
 
 > **AiSdkUiDataPart** = `object` & `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:22](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/aiSdkStream.ts#L22)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:28](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/aiSdkStream.ts#L28)
 
 Generic AI SDK UI data part.
 The `type` must follow the `data-*` convention used by AI SDK UI message streams.

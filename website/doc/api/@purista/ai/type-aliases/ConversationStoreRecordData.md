@@ -8,16 +8,12 @@
 
 > **ConversationStoreRecordData** = `Record`\<`string`, `unknown`\> & `object`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:6](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/memory/conversationStore.ts#L6)
+Defined in: [packages/ai/src/memory/conversationStore.ts:6](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/memory/conversationStore.ts#L6)
 
-Optional metadata stored alongside a session.
+Canonical conversation record persisted by session helpers.
 
 ## Type Declaration
 
-### history?
+### conversation?
 
-> `optional` **history**: [`ConversationHistory`](ConversationHistory.md)
-
-### lastOutput?
-
-> `optional` **lastOutput**: `string`
+> `optional` **conversation**: [`ConversationState`](ConversationState.md)

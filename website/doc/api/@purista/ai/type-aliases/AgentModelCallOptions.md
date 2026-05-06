@@ -8,9 +8,7 @@
 
 > **AgentModelCallOptions** = `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:122](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L122)
-
-Normalized call options that can be prepared by hooks and merged into provider request metadata.
+Defined in: packages/ai/src/types/AgentHandler.ts:27
 
 ## Properties
 
@@ -18,9 +16,7 @@ Normalized call options that can be prepared by hooks and merged into provider r
 
 > `optional` **aiSdk**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:130](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L130)
-
-AI SDK specific call options merged into `request.metadata.aiSdk`.
+Defined in: packages/ai/src/types/AgentHandler.ts:29
 
 ***
 
@@ -28,6 +24,4 @@ AI SDK specific call options merged into `request.metadata.aiSdk`.
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:126](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/builder/AgentBuilder.ts#L126)
-
-Additional request metadata merged into `request.metadata`.
+Defined in: packages/ai/src/types/AgentHandler.ts:28

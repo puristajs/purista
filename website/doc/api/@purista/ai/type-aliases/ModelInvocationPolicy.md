@@ -8,7 +8,7 @@
 
 > **ModelInvocationPolicy** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:10](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L10)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:11](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L11)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:10](https://gi
 
 > `optional` **retry**: [`ModelInvocationRetryPolicy`](ModelInvocationRetryPolicy.md)
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:12](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L12)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:13](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L13)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:12](https://gi
 
 > `optional` **timeoutMs**: `number`
 
-Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:11](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/modelInvocation.ts#L11)
+Defined in: [packages/ai/src/providers/runtime/modelInvocation.ts:12](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/modelInvocation.ts#L12)

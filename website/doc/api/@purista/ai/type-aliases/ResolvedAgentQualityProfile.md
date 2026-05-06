@@ -8,7 +8,7 @@
 
 > **ResolvedAgentQualityProfile** = `object`
 
-Defined in: [packages/ai/src/runtime/policy.ts:14](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L14)
+Defined in: [packages/ai/src/runtime/policy.ts:14](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L14)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:14](https://github.com/puristajs/
 
 > **execution**: `object`
 
-Defined in: [packages/ai/src/runtime/policy.ts:19](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L19)
+Defined in: [packages/ai/src/runtime/policy.ts:19](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L19)
 
 #### maxModelSteps?
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:19](https://github.com/puristajs/
 
 > `optional` **name**: `string`
 
-Defined in: [packages/ai/src/runtime/policy.ts:15](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L15)
+Defined in: [packages/ai/src/runtime/policy.ts:15](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L15)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:15](https://github.com/puristajs/
 
 > **reflection**: [`ResolvedReflectionConfig`](ResolvedReflectionConfig.md)
 
-Defined in: [packages/ai/src/runtime/policy.ts:23](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L23)
+Defined in: [packages/ai/src/runtime/policy.ts:23](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L23)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/runtime/policy.ts:23](https://github.com/puristajs/
 
 > **verification**: `object`
 
-Defined in: [packages/ai/src/runtime/policy.ts:16](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/policy.ts#L16)
+Defined in: [packages/ai/src/runtime/policy.ts:16](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/policy.ts#L16)
 
 #### required
 

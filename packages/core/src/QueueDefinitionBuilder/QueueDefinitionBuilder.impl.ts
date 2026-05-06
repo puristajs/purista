@@ -15,7 +15,7 @@ export class QueueDefinitionBuilder {
 	private tags: string[] = []
 	private deprecated = false
 	private workers: QueueWorkerDefinition[] = []
-	private deadLetter?: { queueName?: string; eventName?: string; emitEvent?: boolean }
+	private deadLetter?: { queueName?: string }
 	private queueBridgeConfig: DefinitionQueueBridgeConfig = {
 		prefetch: 1,
 		orderingGuarantee: 'fifo',
@@ -54,7 +54,7 @@ export class QueueDefinitionBuilder {
 		return this
 	}
 
-	setDeadLetterOptions(options: { queueName?: string; eventName?: string; emitEvent?: boolean }) {
+	setDeadLetterOptions(options: { queueName?: string }) {
 		this.deadLetter = options
 		return this
 	}
@@ -98,8 +98,6 @@ export class QueueDefinitionBuilder {
 			deadLetter: this.deadLetter
 				? {
 						queueName: this.deadLetter.queueName,
-						eventName: this.deadLetter.eventName,
-						emitEvent: this.deadLetter.emitEvent,
 					}
 				: undefined,
 			transformBeforeEnqueue: this.beforeEnqueueTransform,

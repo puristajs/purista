@@ -17,14 +17,14 @@ export default defineConfig({
 		coverage: {
 			provider: 'v8',
 			reporter: ['text-summary'],
-			include: ['src/agents/bridgeDemoAgent/**/*.ts'],
+			include: ['src/service/desk/v1/agent/**/*.ts'],
 			exclude: ['**/*.test.ts'],
 			thresholds: {
 				lines: 0,
 				functions: 0,
 				statements: 0,
 				branches: 0,
-				'src/agents/bridgeDemoAgent/**/*.ts': {
+				'src/service/desk/v1/agent/**/*.ts': {
 					lines: 80,
 					functions: 80,
 					statements: 80,

@@ -1,6 +1,6 @@
 import { extendApi } from '@purista/core'
 import { z } from 'zod'
-import type { AgentSseProtocol } from '../types/AgentManifest.js'
+import type { AgentStreamProtocolAdapterId } from '../types/AgentManifest.js'
 
 export const sseProtocolEventSchema = extendApi(
 	z.object({
@@ -10,18 +10,12 @@ export const sseProtocolEventSchema = extendApi(
 	{ title: 'AgentSseProtocolEvent' },
 )
 
-export const getSseProtocolDocumentationUrl = (protocol: AgentSseProtocol): string | undefined => {
-	if (protocol === 'ai-sdk-responses') {
-		return 'https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol#openai-compatible-stream'
-	}
-	if (protocol === 'ai-sdk-ui-message' || protocol === 'ai-sdk-data' || protocol === 'ai-sdk-json-render') {
+export const getSseProtocolDocumentationUrl = (protocol: AgentStreamProtocolAdapterId): string | undefined => {
+	if (protocol === 'ai-sdk.ui-message') {
 		return 'https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol'
 	}
-	if (protocol === 'agent2agent') {
-		return 'https://google.github.io/A2A/'
-	}
-	if (protocol === 'mcp') {
-		return 'https://modelcontextprotocol.io/specification/2025-06-18/'
+	if (protocol === 'ai-sdk.responses') {
+		return 'https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text'
 	}
 	return undefined
 }

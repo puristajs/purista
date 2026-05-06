@@ -8,113 +8,23 @@
 
 > **AgentStreamEmitter** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:131](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L131)
+Defined in: [packages/ai/src/runtime/context.ts:440](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L440)
+
+Stream helper API exposed via `context.io.stream`.
 
 ## Methods
 
-### endStructuredObject()
+### sendDelta()
 
-> **endStructuredObject**(`input`): `void`
+> **sendDelta**(`content`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:154](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L154)
-
-#### Parameters
-
-##### input
-
-###### data
-
-`unknown`
-
-###### source?
-
-`string`
-
-###### streamId
-
-`string`
-
-###### summary?
-
-`string`
-
-#### Returns
-
-`void`
-
-***
-
-### endText()
-
-> **endText**(`options?`): `void`
-
-Defined in: [packages/ai/src/runtime/context.ts:133](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L133)
-
-#### Parameters
-
-##### options?
-
-###### summary?
-
-`string`
-
-#### Returns
-
-`void`
-
-***
-
-### sendArtifact()
-
-> **sendArtifact**(`input`): `void`
-
-Defined in: [packages/ai/src/runtime/context.ts:137](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L137)
-
-#### Parameters
-
-##### input
-
-###### artifactId
-
-`string`
-
-###### content
-
-`string` \| `Record`\<`string`, `unknown`\>
-
-###### final?
-
-`boolean`
-
-###### mimeType?
-
-`string`
-
-###### sequence?
-
-`number`
-
-###### total?
-
-`number`
-
-#### Returns
-
-`void`
-
-***
-
-### sendChunk()
-
-> **sendChunk**(`content`): `void`
-
-Defined in: [packages/ai/src/runtime/context.ts:134](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L134)
+Defined in: [packages/ai/src/runtime/context.ts:441](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L441)
 
 #### Parameters
 
 ##### content
 
-`string`
+[`JsonValue`](JsonValue.md)
 
 #### Returns
 
@@ -126,13 +36,13 @@ Defined in: [packages/ai/src/runtime/context.ts:134](https://github.com/puristaj
 
 > **sendError**(`error`, `overrides?`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:155](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L155)
+Defined in: [packages/ai/src/runtime/context.ts:444](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L444)
 
 #### Parameters
 
 ##### error
 
-`unknown`
+`Error`
 
 ##### overrides?
 
@@ -154,13 +64,13 @@ Defined in: [packages/ai/src/runtime/context.ts:155](https://github.com/puristaj
 
 > **sendFinal**(`content`, `options?`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:135](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L135)
+Defined in: [packages/ai/src/runtime/context.ts:442](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L442)
 
 #### Parameters
 
 ##### content
 
-`string`
+[`JsonValue`](JsonValue.md)
 
 ##### options?
 
@@ -176,77 +86,9 @@ Defined in: [packages/ai/src/runtime/context.ts:135](https://github.com/puristaj
 
 ### sendReasoning()
 
-> **sendReasoning**(`content`, `options?`): `void`
+> **sendReasoning**(`content`): `void`
 
-Defined in: [packages/ai/src/runtime/context.ts:136](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L136)
-
-#### Parameters
-
-##### content
-
-`string`
-
-##### options?
-
-###### artifactId?
-
-`string`
-
-#### Returns
-
-`void`
-
-***
-
-### sendStructuredSection()
-
-> **sendStructuredSection**(`input`): `void`
-
-Defined in: [packages/ai/src/runtime/context.ts:145](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L145)
-
-#### Parameters
-
-##### input
-
-###### content
-
-`unknown`
-
-###### order?
-
-`number`
-
-###### section
-
-`string`
-
-###### source?
-
-`string`
-
-###### streamId
-
-`string`
-
-###### summary?
-
-`string`
-
-###### title?
-
-`string`
-
-#### Returns
-
-`void`
-
-***
-
-### sendTextDelta()
-
-> **sendTextDelta**(`content`): `void`
-
-Defined in: [packages/ai/src/runtime/context.ts:132](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L132)
+Defined in: [packages/ai/src/runtime/context.ts:443](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L443)
 
 #### Parameters
 

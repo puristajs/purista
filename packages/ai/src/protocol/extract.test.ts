@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractAgentErrorMessage, extractArtifactJson, extractFinalAssistantText, toFrameRecord } from './extract.js'
+import {
+	extractAgentErrorMessage,
+	extractArtifactContent,
+	extractArtifactJson,
+	extractFinalAssistantText,
+	toFrameRecord,
+} from './extract.js'
 
 describe('protocol extract helpers', () => {
 	it('returns null for missing or invalid frames', () => {
@@ -105,5 +111,37 @@ describe('protocol extract helpers', () => {
 				'deliverable:test',
 			),
 		).toEqual({ ok: true })
+	})
+
+	it('keeps arrays and scalar values as first-class artifact payloads', () => {
+		expect(
+			extractArtifactContent(
+				[
+					{
+						frame: {
+							kind: 'artifact',
+							artifactId: 'plan',
+							content: ['step-1', 'step-2'],
+						},
+					},
+				] as never,
+				'plan',
+			),
+		).toEqual(['step-1', 'step-2'])
+
+		expect(
+			extractArtifactContent(
+				[
+					{
+						frame: {
+							kind: 'artifact',
+							artifactId: 'score',
+							content: 0.98,
+						},
+					},
+				] as never,
+				'score',
+			),
+		).toBe(0.98)
 	})
 })

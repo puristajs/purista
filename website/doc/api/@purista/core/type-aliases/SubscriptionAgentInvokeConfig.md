@@ -22,6 +22,14 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts
 
 ## Properties
 
+### outputSchema?
+
+> `optional` **outputSchema**: [`Schema`](Schema.md)
+
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L47)
+
+***
+
 ### parameterSchema?
 
 > `optional` **parameterSchema**: `Parameter`

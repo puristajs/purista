@@ -8,4 +8,4 @@
 
 > **NestedSpyMap** = `Record`\<`string`, `Record`\<`string`, `Record`\<`string`, [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[`unknown`, `unknown`?\], `Promise`\<`unknown`\>\>\>\>\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:67](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L67)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:74](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L74)

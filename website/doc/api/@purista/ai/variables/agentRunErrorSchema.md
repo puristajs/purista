@@ -8,4 +8,4 @@
 
 > `const` **agentRunErrorSchema**: `ZodObject`\<\{ `code`: `ZodString`; `handled`: `ZodDefault`\<`ZodBoolean`\>; `message`: `ZodString`; \}, `$strip`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:125](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L125)
+Defined in: [packages/ai/src/runtime/runState.ts:255](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L255)

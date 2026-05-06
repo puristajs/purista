@@ -8,7 +8,7 @@
 
 > **ConversationState** = `object`
 
-Defined in: [packages/ai/src/runtime/conversation.ts:20](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/conversation.ts#L20)
+Defined in: [packages/ai/src/runtime/conversation.ts:20](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/conversation.ts#L20)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/conversation.ts:20](https://github.com/puri
 
 > **messages**: [`ConversationMessage`](ConversationMessage.md)[]
 
-Defined in: [packages/ai/src/runtime/conversation.ts:21](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/conversation.ts#L21)
+Defined in: [packages/ai/src/runtime/conversation.ts:21](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/conversation.ts#L21)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/conversation.ts:21](https://github.com/puri
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/runtime/conversation.ts:23](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/conversation.ts#L23)
+Defined in: [packages/ai/src/runtime/conversation.ts:23](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/conversation.ts#L23)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/runtime/conversation.ts:23](https://github.com/puri
 
 > `optional` **summary**: `string`
 
-Defined in: [packages/ai/src/runtime/conversation.ts:22](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/conversation.ts#L22)
+Defined in: [packages/ai/src/runtime/conversation.ts:22](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/conversation.ts#L22)

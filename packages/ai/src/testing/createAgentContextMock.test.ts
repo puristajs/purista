@@ -80,7 +80,7 @@ describe('createAgentContextMock', () => {
 			parameter: { locale: 'en' },
 			manifest: {
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				skills: {
 					resourceName: 'skills',
 					names: ['purista-architecture'],
@@ -121,7 +121,7 @@ describe('createAgentContextMock', () => {
 		await expect(
 			mock.context.invoke.agents.runText({
 				agentName: 'triageAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'reset password' },
 			}),
 		).resolves.toBe('urgent')
@@ -135,7 +135,7 @@ describe('createAgentContextMock', () => {
 		expect(mock.context.invoke.expose.metadata().agents).toHaveLength(1)
 		expect(mock.context.invoke.expose.metadata().agents[0]).toMatchObject({
 			agentName: 'triageAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			parameterSchema: undefined,
 		})
 		expect(mock.context.invoke.expose.metadata().agents[0]?.payloadSchema).toBeDefined()
@@ -175,7 +175,7 @@ describe('createAgentContextMock', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'strictAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			},
 		})
 

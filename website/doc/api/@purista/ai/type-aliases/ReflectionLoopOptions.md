@@ -8,7 +8,7 @@
 
 > **ReflectionLoopOptions**\<`TDraft`, `TCritique`\> = `object`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:28](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L28)
+Defined in: [packages/ai/src/runtime/reflection.ts:29](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L29)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:28](https://github.com/purist
 
 > **accept**: [`ReflectionAcceptFn`](ReflectionAcceptFn.md)\<`TDraft`, `TCritique`\>
 
-Defined in: [packages/ai/src/runtime/reflection.ts:36](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L36)
+Defined in: [packages/ai/src/runtime/reflection.ts:37](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L37)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:36](https://github.com/purist
 
 > **critique**: [`ReflectionCritiqueFn`](ReflectionCritiqueFn.md)\<`TDraft`, `TCritique`\>
 
-Defined in: [packages/ai/src/runtime/reflection.ts:35](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L35)
+Defined in: [packages/ai/src/runtime/reflection.ts:36](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L36)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:35](https://github.com/purist
 
 > **draft**: [`ReflectionDraftFn`](ReflectionDraftFn.md)\<`TDraft`\>
 
-Defined in: [packages/ai/src/runtime/reflection.ts:34](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L34)
+Defined in: [packages/ai/src/runtime/reflection.ts:35](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L35)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:34](https://github.com/purist
 
 > `optional` **maxIterations**: `number`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:32](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L32)
+Defined in: [packages/ai/src/runtime/reflection.ts:33](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L33)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:32](https://github.com/purist
 
 > **name**: `string`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:29](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L29)
+Defined in: [packages/ai/src/runtime/reflection.ts:30](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L30)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:29](https://github.com/purist
 
 > `optional` **preset**: `string`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:31](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L31)
+Defined in: [packages/ai/src/runtime/reflection.ts:32](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L32)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:31](https://github.com/purist
 
 > `optional` **profile**: `string`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:30](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L30)
+Defined in: [packages/ai/src/runtime/reflection.ts:31](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L31)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [packages/ai/src/runtime/reflection.ts:30](https://github.com/purist
 
 > `optional` **refine**: [`ReflectionRefineFn`](ReflectionRefineFn.md)\<`TDraft`, `TCritique`\>
 
-Defined in: [packages/ai/src/runtime/reflection.ts:37](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L37)
+Defined in: [packages/ai/src/runtime/reflection.ts:38](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L38)
 
 ***
 
@@ -90,4 +90,4 @@ Defined in: [packages/ai/src/runtime/reflection.ts:37](https://github.com/purist
 
 > `optional` **stopOnStagnation**: `boolean`
 
-Defined in: [packages/ai/src/runtime/reflection.ts:33](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/reflection.ts#L33)
+Defined in: [packages/ai/src/runtime/reflection.ts:34](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/reflection.ts#L34)

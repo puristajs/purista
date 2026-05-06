@@ -8,7 +8,7 @@
 
 > **SessionHelpers** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:573](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L573)
+Defined in: [packages/ai/src/runtime/context.ts:1045](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1045)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:573](https://github.com/puristaj
 
 > **identity**: `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:597](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L597)
+Defined in: [packages/ai/src/runtime/context.ts:1069](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1069)
 
 Identity metadata used to build scoped session ids.
 
@@ -24,21 +24,37 @@ Identity metadata used to build scoped session ids.
 
 > **agentName**: `string`
 
-#### agentVersion
-
-> **agentVersion**: `string`
-
 #### baseSessionId
 
 > **baseSessionId**: `string`
+
+#### conversationId
+
+> **conversationId**: `string`
+
+#### correlationId
+
+> **correlationId**: `string`
 
 #### principalId?
 
 > `optional` **principalId**: `string`
 
+#### scopedSessionId
+
+> **scopedSessionId**: `string`
+
+#### serviceVersion
+
+> **serviceVersion**: `string`
+
 #### tenantId?
 
 > `optional` **tenantId**: `string`
+
+#### traceId
+
+> **traceId**: `string`
 
 ## Methods
 
@@ -46,7 +62,7 @@ Identity metadata used to build scoped session ids.
 
 > **delete**(`sessionId?`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:589](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L589)
+Defined in: [packages/ai/src/runtime/context.ts:1061](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1061)
 
 Delete a session. If no id is provided, the default scoped id is used.
 
@@ -66,7 +82,7 @@ Delete a session. If no id is provided, the default scoped id is used.
 
 > **load**(`sessionId?`): `Promise`\<[`ConversationStoreRecord`](ConversationStoreRecord.md) \| `undefined`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:577](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L577)
+Defined in: [packages/ai/src/runtime/context.ts:1049](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1049)
 
 Load the session record. If no id is provided, the default scoped id is used.
 
@@ -86,7 +102,7 @@ Load the session record. If no id is provided, the default scoped id is used.
 
 > **resolveSessionId**(`sessionId?`): `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:593](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L593)
+Defined in: [packages/ai/src/runtime/context.ts:1065](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1065)
 
 Returns the effective scoped session id for explicit or implicit usage.
 
@@ -106,7 +122,7 @@ Returns the effective scoped session id for explicit or implicit usage.
 
 > **save**(`record`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:581](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L581)
+Defined in: [packages/ai/src/runtime/context.ts:1053](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L1053)
 
 Save session data. If `sessionId` is omitted, the default scoped id is used.
 

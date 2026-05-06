@@ -6,7 +6,7 @@
 
 # Interface: SandboxDriver
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:99](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L99)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:111](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L111)
 
 Interface for sandbox drivers.
 Implement this interface to add support for new virtualization backends.
@@ -17,7 +17,7 @@ Implement this interface to add support for new virtualization backends.
 
 > **name**: `string`
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:101](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L101)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:113](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L113)
 
 The unique name of the driver implementation
 
@@ -27,7 +27,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:109](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L109)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:121](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L121)
 
 Provisions and starts a new sandbox environment.
 
@@ -65,6 +65,10 @@ Configuration for the new sandbox
 
 `string`
 
+###### scope?
+
+\{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}
+
 ###### userId
 
 `string`
@@ -81,7 +85,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:126](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L126)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:139](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L139)
 
 Permanently removes a sandbox and its resources.
 
@@ -105,7 +109,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:134](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L134)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:147](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L147)
 
 Executes a bash command within the specified sandbox.
 
@@ -127,6 +131,10 @@ Command and execution context
 
 `string`
 
+###### timeoutMs?
+
+`number`
+
 #### Returns
 
 `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
@@ -139,7 +147,7 @@ The result of the command execution
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:141](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L141)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:159](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L159)
 
 Reads the content of a file from the sandbox.
 
@@ -167,7 +175,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:154](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L154)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:172](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L172)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -182,7 +190,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:148](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/sandbox/types/SandboxDriver.ts#L148)
+Defined in: [packages/ai/src/sandbox/types/SandboxDriver.ts:166](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/sandbox/types/SandboxDriver.ts#L166)
 
 Writes one or more files to the sandbox workspace.
 
@@ -194,7 +202,7 @@ Map of file paths to their contents
 
 ###### files
 
-`Record`\<`string`, `string`\>
+`Record`\<`string`, [`SandboxFileContent`](../type-aliases/SandboxFileContent.md)\>
 
 ###### sandboxId
 

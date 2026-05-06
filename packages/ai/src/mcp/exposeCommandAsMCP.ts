@@ -1,5 +1,5 @@
 import type { AgentDefinition } from '../types/AgentDefinition.js'
-import { exposeAgentAsMCP, type MCPToolDescriptor } from './exposeAgentAsMCP.js'
+import { exposeAgentAsMCP, exposeAgentAsMCPFromManifest, type MCPToolDescriptor } from './exposeAgentAsMCP.js'
 
 export type MCPCommandDescriptorInput = {
 	serviceName: string
@@ -30,8 +30,14 @@ export const exposeCommandAsMCP = (input: MCPCommandDescriptorInput): MCPToolDes
 export const exposeCommandsAsMCP = (inputs: MCPCommandDescriptorInput[]): MCPToolDescriptor[] =>
 	inputs.map(exposeCommandAsMCP)
 
+export type MCPManifestInput = {
+	agentName: string
+	description?: string
+	payloadSchema?: unknown
+}
+
 export type MCPExposeInput = {
-	agents?: AgentDefinition[]
+	agents?: (AgentDefinition | { manifest: MCPManifestInput })[]
 	commands?: MCPCommandDescriptorInput[]
 }
 
@@ -41,7 +47,12 @@ export type MCPExposeInput = {
  */
 export const exposeToolsAsMCP = (input: MCPExposeInput): MCPToolDescriptor[] => {
 	const tools = [
-		...(input.agents?.map(agent => exposeAgentAsMCP(agent)) ?? []),
+		...(input.agents?.map(agent => {
+			if ('manifest' in agent && 'agentName' in agent.manifest) {
+				return exposeAgentAsMCPFromManifest(agent.manifest)
+			}
+			return exposeAgentAsMCP(agent as AgentDefinition)
+		}) ?? []),
 		...exposeCommandsAsMCP(input.commands ?? []),
 	]
 

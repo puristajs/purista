@@ -6,15 +6,21 @@
 
 # Function: createExposeHelpers()
 
-> **createExposeHelpers**(`context`): [`ExposeHelpers`](../type-aliases/ExposeHelpers.md)
+> **createExposeHelpers**\<`AgentInvokes`\>(`context`): [`ExposeHelpers`](../type-aliases/ExposeHelpers.md)
 
-Defined in: [packages/ai/src/bridge/externalRuntime.ts:276](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/externalRuntime.ts#L276)
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:271](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/bridge/externalRuntime.ts#L271)
+
+## Type Parameters
+
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
 
 ## Parameters
 
 ### context
 
-[`AgentContextLike`](../type-aliases/AgentContextLike.md)
+[`AgentContextLike`](../type-aliases/AgentContextLike.md)\<`AgentInvokes`\>
 
 ## Returns
 

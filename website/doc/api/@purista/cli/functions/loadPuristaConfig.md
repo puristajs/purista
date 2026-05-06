@@ -8,7 +8,7 @@
 
 > **loadPuristaConfig**(`projectRootPath?`): `Promise`\<\{ `$schema`: `string`; `agentPath`: `string`; `eventBridge`: `"default"` \| `"amqp"` \| `"nats"` \| `"mqtt"` \| `"dapr"`; `eventConvention`: `"camel"` \| `"snake"` \| `"kebab"` \| `"pascal"` \| `"pascalSnake"` \| `"constantCase"` \| `"dotCase"` \| `"pathCase"` \| `"trainCase"`; `fileConvention`: `"camel"` \| `"snake"` \| `"kebab"` \| `"pascal"` \| `"pascalSnake"`; `formatter`: `"biome"` \| `"prettier"` \| `"none"`; `linter`: `"biome"` \| `"none"` \| `"eslint"`; `runtime`: `"node"` \| `"bun"`; `servicePath`: `string`; \}\>
 
-Defined in: [packages/cli/src/api/loadPuristaConfig.ts:47](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/api/loadPuristaConfig.ts#L47)
+Defined in: [packages/cli/src/api/loadPuristaConfig.ts:47](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/api/loadPuristaConfig.ts#L47)
 
 Load the project configuration file purista.json
 This file must be placed in the project root (or workspace root).

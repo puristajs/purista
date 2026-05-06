@@ -1,3 +1,4 @@
+import type { Infer, Schema } from '@purista/core'
 import type { ExternalBinding, ExternalBindingSet } from '../../bridge/externalRuntime.js'
 import type { AgentAttachment, AgentInputPart } from '../../input/types.js'
 import type { SkillDocument, SkillReferenceDocument } from '../../skills/fileSystem.js'
@@ -67,7 +68,7 @@ export type ProviderGenerateTextRequest = ProviderRequest & {
  * `input` and `attachments` follow the same multimodal rules as
  * {@link ProviderRequest}.
  */
-export type ProviderJsonRequest = {
+export type ProviderJsonRequest<OutputSchema = unknown> = {
 	prompt: string
 	input?: AgentInputPart[]
 	attachments?: AgentAttachment[]
@@ -76,15 +77,19 @@ export type ProviderJsonRequest = {
 	skills?: Array<Pick<SkillDocument, 'name' | 'content'>>
 	references?: Array<Pick<SkillReferenceDocument, 'skillName' | 'relativePath' | 'content'>>
 	bindings?: ExternalBindingSet | ExternalBinding[]
-	schema?: unknown
+	schema?: OutputSchema
 	metadata?: Record<string, unknown>
 }
+
+export type ProviderJsonOutputFromSchema<OutputSchema, Fallback = unknown> = OutputSchema extends Schema
+	? Infer<OutputSchema>
+	: Fallback
 
 export type ProviderObjectSections<T = unknown> =
 	| Record<string, unknown | undefined>
 	| ((partial: T) => Record<string, unknown | undefined>)
 
-export type ProviderObjectStreamRequest<T = unknown> = ProviderJsonRequest & {
+export type ProviderObjectStreamRequest<T = unknown, OutputSchema = unknown> = ProviderJsonRequest<OutputSchema> & {
 	sections?: ProviderObjectSections<T>
 }
 
@@ -212,19 +217,16 @@ export type ProviderRerankResponse<Document = string | Record<string, unknown>> 
 	metadata?: Record<string, unknown>
 }
 
-export type ModelProviderCapability =
-	| 'text'
-	| 'stream'
-	| 'embedding'
-	| 'rerank'
-	| 'json'
-	| 'image'
-	| 'audio'
-	| 'moderation'
+export type ModelProviderCapability = 'text' | 'text-stream' | 'object' | 'object-stream' | 'embedding' | 'rerank'
 
 export type ModelProviderCapabilities = Partial<Record<ModelProviderCapability, boolean>>
 
-export type ProviderInvocationMode = 'text' | 'json' | 'stream' | 'structured-json-strict' | 'structured-json-relaxed'
+export type ProviderInvocationMode =
+	| 'text'
+	| 'object'
+	| 'text-stream'
+	| 'structured-object-strict'
+	| 'structured-object-relaxed'
 
 export type ProviderInvocationPolicy = ModelInvocationPolicy & {
 	mode?: ProviderInvocationMode
@@ -232,7 +234,7 @@ export type ProviderInvocationPolicy = ModelInvocationPolicy & {
 }
 
 /**
- * Incremental events emitted by {@link ModelProvider.stream}.
+ * Incremental events emitted by {@link ModelProvider.streamText}.
  */
 export type ProviderStreamChunk =
 	| {
@@ -249,7 +251,7 @@ export type ProviderStreamChunk =
 	  }
 
 /**
- * Stream handle returned by {@link ModelProvider.stream}.
+ * Stream handle returned by {@link ModelProvider.streamText}.
  * Consumers iterate chunks and call `final()` to obtain usage/metadata.
  */
 export type ProviderStream = AsyncIterable<ProviderStreamChunk> & {
@@ -262,18 +264,16 @@ export type ProviderStream = AsyncIterable<ProviderStreamChunk> & {
 export interface ModelProvider {
 	readonly name: string
 	readonly capabilities: ModelProviderCapabilities
-	generate?(request: ProviderRequest): Promise<ProviderResponse>
-	stream?(request: ProviderRequest): ProviderStream
 	/**
 	 * High-level helper that yields one final text output while automatically
-	 * preferring `stream()` and falling back to `generate()`.
+	 * preferring `streamText()` when available.
 	 *
 	 * @example
 	 * ```ts
 	 * const answer = await context.models['openai:primary'].generateText({
 	 *   developerInstruction: 'Use the available tools before answering.',
 	 *   prompt: payload.prompt,
-	 *   onTextDelta: delta => context.stream.sendChunk(delta),
+	 *   onTextDelta: delta => context.stream.sendDelta(delta),
 	 * })
 	 * ```
 	 *
@@ -281,11 +281,38 @@ export interface ModelProvider {
 	 * allowlisted bindings automatically when you omit them.
 	 */
 	generateText?(request: ProviderGenerateTextRequest): Promise<string>
-	generateJson?<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>>
-	streamObject?<T = unknown>(request: ProviderObjectStreamRequest<T>): ProviderObjectStream<T>
+	streamText?(request: ProviderRequest): ProviderStream
+	generateObject?<T = unknown, OutputSchema = unknown>(
+		request: ProviderJsonRequest<OutputSchema>,
+	): Promise<ProviderJsonResponse<ProviderJsonOutputFromSchema<OutputSchema, T>>>
+	streamObject?<T = unknown, OutputSchema = unknown>(
+		request: ProviderObjectStreamRequest<ProviderJsonOutputFromSchema<OutputSchema, T>, OutputSchema>,
+	): ProviderObjectStream<ProviderJsonOutputFromSchema<OutputSchema, T>>
 	embed?(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
 	embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
 	rerank?<Document = string | Record<string, unknown>>(
 		request: ProviderRerankRequest<Document>,
 	): Promise<ProviderRerankResponse<Document>>
 }
+
+type CapabilityMethodKeys = {
+	text: 'generateText'
+	'text-stream': 'streamText' | 'generateText'
+	object: 'generateObject'
+	'object-stream': 'streamObject'
+	embedding: 'embed'
+	rerank: 'rerank'
+}
+
+type MethodKeysForCapabilities<Capabilities extends readonly ModelProviderCapability[]> =
+	Capabilities[number] extends infer Capability
+		? Capability extends keyof CapabilityMethodKeys
+			? CapabilityMethodKeys[Capability]
+			: never
+		: never
+
+export type ModelProviderForCapabilities<Capabilities extends readonly ModelProviderCapability[]> = Pick<
+	ModelProvider,
+	'name' | 'capabilities'
+> &
+	Required<Pick<ModelProvider, MethodKeysForCapabilities<Capabilities>>>

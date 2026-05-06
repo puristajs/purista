@@ -6,7 +6,7 @@
 
 # Interface: ModelProvider
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:262](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L262)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:264](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L264)
 
 Minimal interface providers must satisfy so they can be swapped at runtime.
 
@@ -16,7 +16,7 @@ Minimal interface providers must satisfy so they can be swapped at runtime.
 
 > `readonly` **capabilities**: [`ModelProviderCapabilities`](../type-aliases/ModelProviderCapabilities.md)
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:264](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L264)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:266](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L266)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:264](https://git
 
 > `readonly` **name**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:263](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L263)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:265](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L265)
 
 ## Methods
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:263](https://git
 
 > `optional` **embed**(`request`): `Promise`\<[`ProviderEmbedResponse`](../type-aliases/ProviderEmbedResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:286](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L286)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:291](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L291)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:286](https://git
 
 > `optional` **embedMany**(`request`): `Promise`\<[`ProviderEmbedManyResponse`](../type-aliases/ProviderEmbedManyResponse.md)\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:287](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L287)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:292](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L292)
 
 #### Parameters
 
@@ -64,29 +64,11 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:287](https://git
 
 ***
 
-### generate()?
+### generateObject()?
 
-> `optional` **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
+> `optional` **generateObject**\<`T`, `OutputSchema`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:265](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L265)
-
-#### Parameters
-
-##### request
-
-[`ProviderRequest`](../type-aliases/ProviderRequest.md)
-
-#### Returns
-
-`Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
-
-***
-
-### generateJson()?
-
-> `optional` **generateJson**\<`T`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
-
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L284)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:285](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L285)
 
 #### Type Parameters
 
@@ -94,15 +76,19 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://git
 
 `T` = `unknown`
 
+##### OutputSchema
+
+`OutputSchema` = `unknown`
+
 #### Parameters
 
 ##### request
 
-[`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md)
+[`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md)\<`OutputSchema`\>
 
 #### Returns
 
-`Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
+`Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>\>
 
 ***
 
@@ -110,10 +96,10 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://git
 
 > `optional` **generateText**(`request`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:283](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L283)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:283](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L283)
 
 High-level helper that yields one final text output while automatically
-preferring `stream()` and falling back to `generate()`.
+preferring `streamText()` when available.
 
 #### Parameters
 
@@ -131,7 +117,7 @@ preferring `stream()` and falling back to `generate()`.
 const answer = await context.models['openai:primary'].generateText({
   developerInstruction: 'Use the available tools before answering.',
   prompt: payload.prompt,
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.stream.sendDelta(delta),
 })
 ```
 
@@ -144,7 +130,7 @@ allowlisted bindings automatically when you omit them.
 
 > `optional` **rerank**\<`Document`\>(`request`): `Promise`\<[`ProviderRerankResponse`](../type-aliases/ProviderRerankResponse.md)\<`Document`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:288](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L288)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:293](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L293)
 
 #### Type Parameters
 
@@ -164,11 +150,39 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:288](https://git
 
 ***
 
-### stream()?
+### streamObject()?
 
-> `optional` **stream**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
+> `optional` **streamObject**\<`T`, `OutputSchema`\>(`request`): [`ProviderObjectStream`](../type-aliases/ProviderObjectStream.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:266](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L266)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:288](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L288)
+
+#### Type Parameters
+
+##### T
+
+`T` = `unknown`
+
+##### OutputSchema
+
+`OutputSchema` = `unknown`
+
+#### Parameters
+
+##### request
+
+[`ProviderObjectStreamRequest`](../type-aliases/ProviderObjectStreamRequest.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>, `OutputSchema`\>
+
+#### Returns
+
+[`ProviderObjectStream`](../type-aliases/ProviderObjectStream.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>
+
+***
+
+### streamText()?
+
+> `optional` **streamText**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
+
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:284](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L284)
 
 #### Parameters
 
@@ -179,27 +193,3 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:266](https://git
 #### Returns
 
 [`ProviderStream`](../type-aliases/ProviderStream.md)
-
-***
-
-### streamObject()?
-
-> `optional` **streamObject**\<`T`\>(`request`): [`ProviderObjectStream`](../type-aliases/ProviderObjectStream.md)\<`T`\>
-
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:285](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L285)
-
-#### Type Parameters
-
-##### T
-
-`T` = `unknown`
-
-#### Parameters
-
-##### request
-
-[`ProviderObjectStreamRequest`](../type-aliases/ProviderObjectStreamRequest.md)\<`T`\>
-
-#### Returns
-
-[`ProviderObjectStream`](../type-aliases/ProviderObjectStream.md)\<`T`\>

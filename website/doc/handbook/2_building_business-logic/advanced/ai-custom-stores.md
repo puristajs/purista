@@ -40,7 +40,7 @@ export class MyCustomStore implements ConversationStore {
 
 Important:
 - `conversationId` is no longer pre-scoped by the runtime. It is the raw logical conversation/session id.
-- The runtime passes isolation metadata in `scope`, currently `tenantId`, `principalId`, `agentName`, and `agentVersion`.
+- The runtime passes isolation metadata in `scope`, currently `tenantId`, `principalId`, `agentName`, and `serviceVersion`.
 - Custom stores should either use that full scope as part of their compound key or ignore only the fields they intentionally do not support.
 
 ## 2. Custom Retrieval Resource

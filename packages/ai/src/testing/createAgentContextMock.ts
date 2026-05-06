@@ -4,7 +4,14 @@ import { type ConversationStore, InMemoryConversationStore } from '../memory/con
 import { createMessageFrame, createProtocolEnvelope } from '../protocol/helpers.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
-import { type AgentHandlerContext, createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
+import {
+	type AgentHandlerContext,
+	createAgentHandlerContext,
+	createProtocolBuffer,
+	type ModelEmbeddings,
+	type ModelRerankers,
+} from '../runtime/context.js'
+import { normalizeAgentInvocationFinalResult } from '../runtime/terminalResult.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createDefaultMessage, createResolvedAsyncSpy, createTestSpy, envelopesToAsyncIterator } from './shared.js'
 
@@ -51,7 +58,7 @@ export type CreateAgentContextMockInput<
 > = {
 	payload: Payload
 	parameter?: Parameter
-	manifest?: Partial<AgentManifest> & Pick<AgentManifest, 'agentName' | 'agentVersion'>
+	manifest?: Partial<AgentManifest> & Pick<AgentManifest, 'agentName' | 'serviceVersion'>
 	commands?: CommandMap
 	agents?: AgentMap
 	resources?: Partial<Resources>
@@ -143,9 +150,9 @@ export const createAgentContextMock = <
 		),
 	)
 	const defaultAllowedAgents = Object.entries(agents).flatMap(([agentName, versions]) =>
-		Object.entries(versions).map(([agentVersion, binding]) => ({
+		Object.entries(versions).map(([serviceVersion, binding]) => ({
 			agentName,
-			agentVersion,
+			serviceVersion,
 			payloadSchema: binding.payloadSchema,
 			parameterSchema: binding.parameterSchema,
 		})),
@@ -153,7 +160,7 @@ export const createAgentContextMock = <
 
 	const manifest: AgentManifest = {
 		agentName: input.manifest?.agentName ?? 'testAgent',
-		agentVersion: input.manifest?.agentVersion ?? '1',
+		serviceVersion: input.manifest?.serviceVersion ?? '1',
 		eventBridge: input.manifest?.eventBridge ?? 'default',
 		allowedTools: input.manifest?.allowedTools ?? defaultAllowedTools,
 		allowedAgents: input.manifest?.allowedAgents ?? defaultAllowedAgents,
@@ -213,13 +220,13 @@ export const createAgentContextMock = <
 	for (const [agentName, versions] of Object.entries(agents)) {
 		agentSpies[agentName] = {}
 		invokeAgentApi[agentName] = {}
-		for (const [agentVersion, binding] of Object.entries(versions)) {
+		for (const [serviceVersion, binding] of Object.entries(versions)) {
 			const spy = createTestSpy(
 				async (payload: unknown, parameter?: unknown) =>
-					await resolveAgentBinding(agentName, agentVersion, binding, payload, parameter),
+					await resolveAgentBinding(agentName, serviceVersion, binding, payload, parameter),
 			)
-			agentSpies[agentName][agentVersion] = spy
-			invokeAgentApi[agentName][agentVersion] = {
+			agentSpies[agentName][serviceVersion] = spy
+			invokeAgentApi[agentName][serviceVersion] = {
 				call: (payload: unknown, parameter?: unknown) => ({
 					final: () => spy(payload, parameter),
 					[Symbol.asyncIterator]: () => envelopesToAsyncIteratorFromPromise(spy(payload, parameter)),
@@ -337,8 +344,8 @@ export const createAgentContextMock = <
 		protocol: protocolBuffer.protocol,
 		resources,
 		models: (input.models ?? ({} as Models)) as Models,
-		embeddings: {},
-		rerankers: {},
+		embeddings: {} as ModelEmbeddings<Models>,
+		rerankers: {} as ModelRerankers<Models>,
 		manifest,
 	})
 
@@ -363,7 +370,7 @@ export const createAgentContextMock = <
 
 const resolveAgentBinding = async (
 	agentName: string,
-	agentVersion: string,
+	serviceVersion: string,
 	binding: AgentBindingConfig,
 	payload: unknown,
 	parameter?: unknown,
@@ -378,8 +385,8 @@ const resolveAgentBinding = async (
 		const data = typeof binding.object === 'function' ? await binding.object(payload, parameter) : binding.object
 		return [
 			createProtocolEnvelope({
-				conversationId: `${agentName}.${agentVersion}`,
-				actor: { service: agentName, version: agentVersion, agent: agentName, instanceId: 'test-agent-instance' },
+				conversationId: `${agentName}.${serviceVersion}`,
+				actor: { service: agentName, version: serviceVersion, agent: agentName, instanceId: 'test-agent-instance' },
 				frame: createMessageFrame({
 					role: 'assistant',
 					content: JSON.stringify(data),
@@ -392,8 +399,8 @@ const resolveAgentBinding = async (
 		const content = typeof binding.text === 'function' ? await binding.text(payload, parameter) : binding.text
 		return [
 			createProtocolEnvelope({
-				conversationId: `${agentName}.${agentVersion}`,
-				actor: { service: agentName, version: agentVersion, agent: agentName, instanceId: 'test-agent-instance' },
+				conversationId: `${agentName}.${serviceVersion}`,
+				actor: { service: agentName, version: serviceVersion, agent: agentName, instanceId: 'test-agent-instance' },
 				frame: createMessageFrame({
 					role: 'assistant',
 					content,
@@ -404,7 +411,7 @@ const resolveAgentBinding = async (
 	}
 	throw new HandledError(
 		StatusCode.BadRequest,
-		`Agent ${agentName}.${agentVersion} is declared but no mock response is configured`,
+		`Agent ${agentName}.${serviceVersion} is declared but no mock response is configured`,
 	)
 }
 
@@ -419,7 +426,7 @@ const resolveEventBridgeInvocation = async (
 					payload: unknown,
 					parameter?: unknown,
 				) => {
-					final(): Promise<AgentProtocolEnvelope[]>
+					final(): Promise<unknown>
 				}
 			}
 		>
@@ -441,7 +448,17 @@ const resolveEventBridgeInvocation = async (
 		throw new Error(`eventBridge.invoke is not stubbed for ${serviceName}.${serviceVersion}`)
 	}
 
-	return agent.call(typedMessage.payload?.payload, typedMessage.payload?.parameter).final()
+	return agent
+		.call(typedMessage.payload?.payload, typedMessage.payload?.parameter)
+		.final()
+		.then(
+			result =>
+				normalizeAgentInvocationFinalResult({
+					result,
+					agentName: serviceName,
+					serviceVersion,
+				}).envelopes,
+		)
 }
 
 const envelopesToAsyncIteratorFromPromise = async function* (promise: Promise<AgentProtocolEnvelope[]>) {

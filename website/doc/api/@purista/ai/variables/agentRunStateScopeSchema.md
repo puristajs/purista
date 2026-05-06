@@ -6,6 +6,6 @@
 
 # Variable: agentRunStateScopeSchema
 
-> `const` **agentRunStateScopeSchema**: `ZodObject`\<\{ `agentName`: `ZodString`; `agentVersion`: `ZodString`; `conversationId`: `ZodOptional`\<`ZodString`\>; `extra`: `ZodDefault`\<`ZodRecord`\<`ZodString`, `ZodString`\>\>; `principalId`: `ZodOptional`\<`ZodString`\>; `tenantId`: `ZodOptional`\<`ZodString`\>; \}, `$strip`\>
+> `const` **agentRunStateScopeSchema**: `ZodObject`\<\{ `agentName`: `ZodString`; `conversationId`: `ZodOptional`\<`ZodString`\>; `extra`: `ZodDefault`\<`ZodRecord`\<`ZodString`, `ZodString`\>\>; `principalId`: `ZodOptional`\<`ZodString`\>; `serviceVersion`: `ZodString`; `tenantId`: `ZodOptional`\<`ZodString`\>; \}, `$strip`\>
 
-Defined in: [packages/ai/src/runtime/runState.ts:135](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/runState.ts#L135)
+Defined in: [packages/ai/src/runtime/runState.ts:265](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/runState.ts#L265)

@@ -4,6 +4,7 @@ import {
 	type AgentProtocolEnvelope,
 	type AgentProtocolFrame,
 	agentProtocolEnvelopeSchema,
+	type JsonValue,
 	type ProtocolActor,
 	protocolActorSchema,
 	protocolVersion,
@@ -66,7 +67,7 @@ export const createMessageFrame = (input: {
 export const createArtifactFrame = (input: {
 	artifactId: string
 	phase?: 'chunk' | 'final'
-	content: string | Record<string, unknown>
+	content: JsonValue
 	sequence?: number
 	total?: number
 	mimeType?: string
@@ -78,10 +79,27 @@ export const createArtifactFrame = (input: {
 		phase: input.phase ?? 'chunk',
 		sequence: input.sequence,
 		total: input.total,
-		content: input.content,
+		content: normalizeJsonValue(input.content),
 		mimeType: input.mimeType,
 		lastChunk: input.lastChunk,
 	}) as const satisfies AgentProtocolFrame
+
+const normalizeJsonValue = (value: unknown): JsonValue => {
+	if (value === undefined) {
+		return null
+	}
+	if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+		return value
+	}
+	if (Array.isArray(value)) {
+		return value.map(entry => normalizeJsonValue(entry ?? null)) as JsonValue
+	}
+	return Object.fromEntries(
+		Object.entries(value)
+			.filter(([, entry]) => entry !== undefined)
+			.map(([key, entry]) => [key, normalizeJsonValue(entry)]),
+	) as JsonValue
+}
 
 export const createToolEventFrame = (input: {
 	toolName: string

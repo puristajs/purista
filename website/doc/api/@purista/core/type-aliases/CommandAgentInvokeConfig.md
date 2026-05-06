@@ -22,6 +22,14 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:51](https
 
 ## Properties
 
+### outputSchema?
+
+> `optional` **outputSchema**: [`Schema`](Schema.md)
+
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L54)
+
+***
+
 ### parameterSchema?
 
 > `optional` **parameterSchema**: `Parameter`

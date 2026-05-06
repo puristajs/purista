@@ -8,7 +8,7 @@
 
 > **OutputAdapter** = `object`
 
-Defined in: [packages/cli/src/core/types.ts:92](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L92)
+Defined in: [packages/cli/src/core/types.ts:92](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L92)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/core/types.ts:92](https://github.com/puristajs/pur
 
 > **renderError**: (`error`) => `void`
 
-Defined in: [packages/cli/src/core/types.ts:94](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L94)
+Defined in: [packages/cli/src/core/types.ts:94](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L94)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/cli/src/core/types.ts:94](https://github.com/puristajs/pur
 
 > **renderResult**: (`result`) => `void`
 
-Defined in: [packages/cli/src/core/types.ts:93](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L93)
+Defined in: [packages/cli/src/core/types.ts:93](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L93)
 
 #### Parameters
 

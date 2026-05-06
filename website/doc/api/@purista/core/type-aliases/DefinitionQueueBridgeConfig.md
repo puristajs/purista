@@ -10,9 +10,9 @@
 
 Defined in: [core/types/DefinitionQueueBridgeConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionQueueBridgeConfig.ts#L8)
 
-Advisory settings for queue bridges. Similar to `DefinitionEventBridgeConfig`,
-these values are hints that individual bridge implementations may or may not
-be able to honor depending on their provider capabilities.
+Queue bridge delivery requirements requested by the service definition.
+In strict mode, startup validation rejects queues when a bridge cannot
+satisfy these settings with its declared capabilities.
 
 ## Properties
 

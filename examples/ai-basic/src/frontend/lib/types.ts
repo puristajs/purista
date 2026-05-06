@@ -47,16 +47,92 @@ export type StreamFrameEvent = StreamFrameStart | StreamFrameChunk | StreamFrame
 
 export type StreamPayload = {
 	event: string
-	raw: string
-	parsed?: StreamFrameEvent
+	raw?: string
+	parsed?: unknown
 }
 
 export type AgentRunTask = {
 	id: string
 	title: string
-	status: 'pending' | 'running' | 'completed' | 'failed'
+	status: 'pending' | 'running' | 'blocked' | 'waiting-approval' | 'completed' | 'failed' | 'cancelled'
 	order: number
+	kind?: 'tool' | 'agent' | 'model' | 'reasoning' | 'checkpoint' | 'approval' | 'custom'
 	detail?: string
+	summary?: string
+	input?: unknown
+	output?: unknown
+	executor?: unknown
+	handoff?: unknown
+	dependsOn?: string[]
+	approval?: unknown
+	retryPolicy?: unknown
+	timeoutMs?: number
+	startedAt?: string
+	updatedAt?: string
+	completedAt?: string
+}
+
+export type PuristaAiPlan = {
+	type: 'purista-ai-plan'
+	runId: string
+	title: string
+	phase: string
+	status: AgentRunState['status']
+	tasks: AgentRunTask[]
+}
+
+export type PuristaAiTask = {
+	type: 'purista-ai-task'
+	runId: string
+	taskId: string
+	title: string
+	status: AgentRunTask['status']
+	order: number
+	kind?: AgentRunTask['kind']
+	detail?: string
+	startedAt?: string
+	updatedAt?: string
+	completedAt?: string
+	summary?: string
+	input?: unknown
+	output?: unknown
+	executor?: unknown
+	handoff?: unknown
+	dependsOn?: string[]
+	approval?: unknown
+	retryPolicy?: unknown
+	timeoutMs?: number
+}
+
+export type PuristaAiTaskChunk = {
+	type: 'purista-ai-task-chunk'
+	runId?: string
+	taskId: string
+	kind: string
+	content: unknown
+	sequence?: number
+	metadata?: Record<string, unknown>
+}
+
+export type PuristaAiPlanStatus = {
+	type: 'purista-ai-plan-status'
+	runId: string
+	title: string
+	phase: string
+	status: AgentRunState['status']
+	activeTaskId?: string
+	summary?: string
+	finalMessage?: string
+}
+
+export type PuristaAiWorkflowStage = {
+	type: 'purista-ai-workflow-stage'
+	runId?: string
+	name: string
+	status: 'running' | 'completed' | 'failed'
+	summary?: string
+	finalMessage?: string
+	updatedAt?: string
 }
 
 export type AgentRunState = {
@@ -111,4 +187,14 @@ export type WorkflowStep = {
 	timestamp: string
 	details?: unknown
 	depth: number
+}
+
+export type ConversationHistoryMessage = {
+	id: string
+	role: 'system' | 'developer' | 'user' | 'assistant' | 'tool' | 'tool_result'
+	content: string
+	createdAt: number
+	toolName?: string
+	toolCallId?: string
+	metadata?: Record<string, unknown>
 }

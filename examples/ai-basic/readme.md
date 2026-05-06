@@ -1,91 +1,90 @@
 # AI Basic Example
 
-This example shows the two agent execution styles side by side:
+`examples/ai-basic` is now a **Developer Desk showcase** for `@purista/ai`.
 
-- `triageAgent` runs **inline** for fast classification.
-- `supportAgent` runs as a **queued durable agent** with `run-state`, checkpoints, recovery, and attach-and-stream HTTP behavior.
+Instead of forcing one single scenario to demonstrate every feature, the example is organized as one polished split-pane app with multiple intentional flows:
 
-The React UI renders `data-run-state` separately from chat so the composer can be locked while a durable run is active.
+- **Chat**
+  - attached-agent chat with conversation memory and real text streaming
+- **Research**
+  - tool-backed and skill-aware research flow with visible tool lifecycle
+- **Planner**
+  - worker + delegates planning with `context.plan.generate(...)` and `context.plan.execute(plan)`
+- **Structured Output**
+  - direct schema-first `streamObject(...)` example with progressive sections and final validated output
+- **Reflection**
+  - propose / reflect / refine loop with reflection artifacts and final synthesis
+- **Interop**
+  - MCP and A2A projections are still available, but now shown as secondary interoperability views
 
-It also demonstrates the PURISTA AI flow:
+The browser UI is intentionally split:
 
-- define agent behavior in the builder
-- provide models and skills at `getInstance(...)`
-- use skills from the handler context
-- adapt tools for AI SDK only at the external runtime boundary
+- **left / center**
+  - live interaction, transcript, tools, plan/task progress, artifacts, protocol stream
+- **right**
+  - permanent explanation pane that describes what is being demonstrated, how it works, where the code lives, which protocol lanes are involved, and how to extend it
 
 ## Quick Start
 
-Install dependencies:
-
 ```bash
 npm install
+OPENAI_API_KEY=... npm run dev -w @purista/example-ai-basic
 ```
 
-Run the backend:
+Optional environment:
+
+- `PORT` defaults to `3001` in dev for the backend
+- `VITE_API_PROXY_TARGET` defaults to `http://localhost:3001`
+
+Open [http://localhost:3000](http://localhost:3000)
+
+### Dev Mode
+
+`npm run dev -w @purista/example-ai-basic` starts:
+
+- Vite frontend dev server on `http://localhost:3000`
+- backend with `tsx watch` on `http://localhost:3001`
+- Vite proxying `/api` to the backend
+
+This is the canonical local development workflow.
+
+### Built Mode
 
 ```bash
-npm run start -w @purista/example-ai-basic
+npm run build -w @purista/example-ai-basic
+OPENAI_API_KEY=... npm run start -w @purista/example-ai-basic
 ```
 
-Build the frontend into `public/`:
+In built mode, the backend serves the compiled frontend from `public/` and defaults to `http://localhost:3000`.
 
-```bash
-npm run frontend:build -w @purista/example-ai-basic
-```
+## Key Runtime Pieces
 
-Required environment:
-
-- `OPENAI_API_KEY`
-- `PORT` (optional, default `3000`)
-
-Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
-
-## What The Example Demonstrates
-
-### Runtime bootstrap
-
-- `src/index.ts`
-  - creates the shared `EventBridge`
-  - creates a `DefaultQueueBridge`
-  - starts `triageAgent` inline
-  - starts `supportAgent` in queued durable mode
-  - exposes both agents and service endpoints through `honoV1Service`
-
-### Agents
-
-- `src/agents/triageAgent/v1/triageAgent.ts`
-  - inline JSON classification
-  - best for quick, deterministic routing
-
-- `src/agents/supportAgent/v1/supportAgent.ts`
-  - queued durable execution
-  - `.useSkills(['spec-elicitation', 'support-workflow'])`
-  - `context.memory.run` planning, checkpoints, and task updates
-  - `context.ai.skills.loadAvailable()` and `context.ai.skills.loadReferences(...)`
-  - `context.ai.reply.compose(...)`, `generate(...)`, and `publish(...)` for internal drafting vs public reply publication
-  - attach-and-stream HTTP behavior
-  - optional delegation to `triageAgent`
-
-- `src/agents/bridgeDemoAgent/v1/bridgeDemoAgent.ts`
-  - `.useSkills(['spec-elicitation', 'tool-loop-discipline'])`
-  - `context.ai.reply.generate(...)` for streamed public replies on the model-owned adapter path
-  - explicit `context.invoke.expose.tools(...)` bindings for commands
-
-### Frontend
-
+- `src/service/desk/v1/agent/deskChatAgent/deskChatAgentBuilder.ts`
+  - direct stream-first attached agent with conversation history
+- `src/service/desk/v1/agent/researchAgent/researchAgentBuilder.ts`
+  - demonstrates typed tool invokes plus optional skill references
+- `src/service/desk/v1/agent/architectureReviewAgent/architectureReviewAgentBuilder.ts`
+  - demonstrates schema-first `streamObject(...)`
+- `src/service/desk/v1/agent/deliveryPlannerAgent/deliveryPlannerAgentBuilder.ts`
+  - demonstrates planner-first worker + delegates + child-agent delegation
+- `src/service/desk/v1/agent/reflectionAgent/reflectionAgentBuilder.ts`
+  - demonstrates `context.ai.reflect.run(...)`
 - `src/frontend/App.tsx`
-  - listens for `data-run-state`
-  - renders progress tasks and recovery metadata
-  - disables input while the durable run is active
-  - keeps the final assistant answer in chat
+  - renders the scenario switcher, transcript, live operational lanes, interop panes, and permanent explanation pane
+- `src/frontend/lib/showcase.ts`
+  - repo-owned scenario metadata for the explanation pane
+- `packages/ai/src/runtime/context.ts`
+  - now also provides `context.ai.replyObject(...)` for conversation-aware structured finalization
 
-## Execution Modes
+## What This Example Emphasizes
 
-Use the simplest mode that fits the job:
-
-- **Inline**: short, fast, user-facing classification or formatting.
-- **Queued durable**: long-running work that should survive restarts, support checkpoints, and keep progress visible in the UI.
+- direct attached-agent HTTP endpoints are the primary product-facing path
+- planner generation and execution are separate phases
+- `purista-ai:*` artifacts are the live UX contract for plan/task rendering
+- `purista-ai:workflow-stage` is used for post-plan synthesis instead of stretching planner run-state
+- final machine-readable results come from the canonical `output` artifact
+- child-agent forwarding preserves child identity
+- UI rendering stays protocol-aware instead of inventing a parallel event model
 
 ## Tests
 
@@ -93,15 +92,4 @@ Use the simplest mode that fits the job:
 npm run test -w @purista/example-ai-basic
 ```
 
-Key tests:
-
-- `src/agents/supportAgent/v1/supportAgent.test.ts`
-- `src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`
-- `src/integration/httpInteroperability.test.ts`
-- `src/frontend/lib/api.test.ts`
-
-## Notes
-
-- The example intentionally uses deterministic tests and mock model replies.
-- `attach-and-stream` keeps the HTTP endpoint responsive while the queue worker does the durable work.
-- Progress belongs in run-state, not in the chat transcript.
+The example includes frontend, backend, and integration tests with deterministic model fixtures so the showcase stays stable as `@purista/ai` evolves.

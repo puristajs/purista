@@ -6,9 +6,9 @@
 
 # Function: readApprovalDecision()
 
-> **readApprovalDecision**(`states`, `agentName`, `agentVersion`, `checkpoint`): `Promise`\<[`ApprovalDecision`](../type-aliases/ApprovalDecision.md) \| `undefined`\>
+> **readApprovalDecision**(`states`, `agentName`, `serviceVersion`, `checkpoint`): `Promise`\<[`ApprovalDecision`](../type-aliases/ApprovalDecision.md) \| `undefined`\>
 
-Defined in: [packages/ai/src/runtime/approvals.ts:61](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/approvals.ts#L61)
+Defined in: [packages/ai/src/runtime/approvals.ts:61](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/approvals.ts#L61)
 
 ## Parameters
 
@@ -20,7 +20,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:61](https://github.com/purista
 
 `string`
 
-### agentVersion
+### serviceVersion
 
 `string`
 

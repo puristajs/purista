@@ -1,11 +1,10 @@
-import type { ConversationHistory } from './historyHelpers.js'
+import type { ConversationState } from '../runtime/conversation.js'
 
 /**
- * Optional metadata stored alongside a session.
+ * Canonical conversation record persisted by session helpers.
  */
 export type ConversationStoreRecordData = Record<string, unknown> & {
-	history?: ConversationHistory
-	lastOutput?: string
+	conversation?: ConversationState
 }
 
 /**
@@ -21,7 +20,7 @@ export type ConversationStoreScope = {
 	tenantId?: string
 	principalId?: string
 	agentName?: string
-	agentVersion?: string
+	serviceVersion?: string
 }
 
 export interface ConversationStore {
@@ -36,17 +35,17 @@ export interface ConversationStore {
  * @example
  * ```ts
  * const store = new InMemoryConversationStore()
- * await store.save({ conversationId: 'demo', data: { lastOutput: 'hi' }, updatedAt: Date.now() })
+ * await store.save({ conversationId: 'demo', data: { conversation: { messages: [] } }, updatedAt: Date.now() })
  * ```
  */
 export class InMemoryConversationStore implements ConversationStore {
 	private readonly store = new Map<string, ConversationStoreRecord>()
 
 	private getScopeKey(scope?: ConversationStoreScope) {
-		if (!scope?.tenantId && !scope?.principalId && !scope?.agentName && !scope?.agentVersion) {
+		if (!scope?.tenantId && !scope?.principalId && !scope?.agentName && !scope?.serviceVersion) {
 			return undefined
 		}
-		return [scope.tenantId ?? '', scope.principalId ?? '', scope.agentName ?? '', scope.agentVersion ?? ''].join(':')
+		return [scope.tenantId ?? '', scope.principalId ?? '', scope.agentName ?? '', scope.serviceVersion ?? ''].join(':')
 	}
 
 	private getKey(conversationId: string, scope?: ConversationStoreScope) {

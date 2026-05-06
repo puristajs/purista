@@ -1,9 +1,9 @@
 export type QueueOrderingGuarantee = 'none' | 'fifo' | 'partition'
 
 /**
- * Advisory settings for queue bridges. Similar to `DefinitionEventBridgeConfig`,
- * these values are hints that individual bridge implementations may or may not
- * be able to honor depending on their provider capabilities.
+ * Queue bridge delivery requirements requested by the service definition.
+ * In strict mode, startup validation rejects queues when a bridge cannot
+ * satisfy these settings with its declared capabilities.
  */
 export type DefinitionQueueBridgeConfig = {
 	/**

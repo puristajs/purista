@@ -5,6 +5,12 @@ Use this reference when turning a PURISTA architecture into executable work.
 ## Planning rule
 Slice work by owned boundaries, not by arbitrary file groups.
 
+For AI planner flows inside one agent, use a reusable planner/executor split:
+- planner model + prompt generate the task list
+- one required worker executes undelegated tasks
+- optional delegates handle specialized handoffs
+- the task payload is the planner-written `instruction`
+
 Good work-package anchors:
 - one service boundary
 - one queue-backed workflow

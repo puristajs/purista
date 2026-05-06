@@ -1,8 +1,8 @@
 export const AGENT_RUN_TARGET = 'run' as const
 
-export const getAgentReceiverAddress = (agentName: string, agentVersion: string) =>
+export const getAgentReceiverAddress = (agentName: string, serviceVersion: string) =>
 	({
 		serviceName: agentName,
-		serviceVersion: agentVersion,
+		serviceVersion: serviceVersion,
 		serviceTarget: AGENT_RUN_TARGET,
 	}) as const

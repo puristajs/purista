@@ -62,4 +62,70 @@ describe('runBoundedModelInvocation', () => {
 		await expect(result).rejects.toBeInstanceOf(UnhandledError)
 		await expect(result).rejects.toMatchObject({ errorCode: StatusCode.InternalServerError })
 	})
+
+	it('treats DNS resolver failures as retryable transient provider errors', async () => {
+		const result = runBoundedModelInvocation({
+			label: 'model:test',
+			policy: {
+				retry: {
+					maxAttempts: 1,
+				},
+			},
+			operation: async () => {
+				const error = new Error('Cannot connect to API: getaddrinfo ENOTFOUND api.openai.com') as Error & {
+					code?: string
+				}
+				error.code = 'ENOTFOUND'
+				throw error
+			},
+		})
+
+		await expect(result).rejects.toBeInstanceOf(UnhandledError)
+		await expect(result).rejects.toMatchObject({
+			errorCode: StatusCode.BadGateway,
+			data: expect.objectContaining({ kind: 'transient' }),
+		})
+	})
+
+	it('does not place raw provider request payloads into unhandled error data', async () => {
+		const result = runBoundedModelInvocation({
+			label: 'model:test',
+			operation: async () => {
+				throw Object.assign(new Error('Provider request failed'), {
+					name: 'AI_APICallError',
+					url: 'https://api.openai.com/v1/responses',
+					statusCode: 429,
+					code: 'rate_limit_exceeded',
+					isRetryable: true,
+					requestBodyValues: {
+						prompt: 'secret prompt',
+						messages: [{ role: 'user', content: 'secret message' }],
+					},
+					responseHeaders: {
+						'x-request-id': 'req_123',
+					},
+				})
+			},
+		})
+
+		await expect(result).rejects.toBeInstanceOf(UnhandledError)
+		await expect(result).rejects.toMatchObject({
+			data: expect.objectContaining({
+				details: expect.objectContaining({
+					providerCode: 'rate_limit_exceeded',
+					requestId: 'req_123',
+				}),
+			}),
+		})
+		await expect(result).rejects.not.toMatchObject({
+			data: expect.objectContaining({
+				cause: expect.anything(),
+			}),
+		})
+		await expect(result).rejects.not.toMatchObject({
+			data: expect.objectContaining({
+				requestBodyValues: expect.anything(),
+			}),
+		})
+	})
 })

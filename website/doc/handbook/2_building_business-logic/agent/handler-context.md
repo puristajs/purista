@@ -18,41 +18,28 @@ Assuming the builder has already declared models, skills, and invocations, the h
 
 ```ts
 .setHandler(async (context, payload) => {
-  // Start a durable run for observability and recovery
-  const run = await context.memory.run.start({
-    title: 'Support Response',
-    extraScope: { sessionId: payload.sessionId },
-  });
-
-  // Add user message to conversation history
-  await context.memory.conversation.addUser(payload.prompt);
-  await run.plan([
-    { id: 'triage', title: 'Classify urgency' },
-    { id: 'faq', title: 'Load FAQ guidance' },
-    { id: 'answer', title: 'Write final answer' },
-  ]);
-
-  // Use allowlisted tools and agents
-  const triage = await context.invoke.agents.runText({
-    agentName: 'triageAgent',
-    agentVersion: '1',
-    payload: { prompt: payload.prompt },
-  });
-
-  const faq = await context.invoke.tools.invoke.support['1'].lookupFaq({
-    question: payload.prompt,
-  });
-
-  // Use declared skills and models
-  const skills = await context.ai.skills.loadAvailable();
-  const answer = await context.ai.reply.generate({
+  const worker = context.ai.createModelExecutor({
     model: 'openai:primary',
-    prompt: `...`,
-  });
+  })
 
-  // Persist the response and finalize the run
-  await context.memory.conversation.addAssistant(answer);
-  await run.finishSuccess(answer);
+  const faq = context.ai.createToolExecutorFromInvoke(
+    context.invoke.tools.invoke.support['1'].lookupFaq,
+    {
+      id: 'faq',
+      description: 'Loads factual support guidance.',
+      buildPayload: ({ task }) => ({ question: task.instruction }),
+    },
+  )
+
+  const plan = await context.plan.generate({
+    model: 'openai:primary',
+    worker,
+    delegates: [faq],
+  })
+
+  const { plan: executedPlan, results } = await context.plan.execute(plan)
+  const lastTask = executedPlan.tasks.at(-1)
+  const answer = lastTask ? String(results[lastTask.id] ?? '') : ''
 
   return { message: answer };
 })
@@ -74,6 +61,7 @@ Handles state management for the agent.
 
 - `context.memory.conversation`: Manages the LLM-visible chat history (`addUser`, `addAssistant`).
 - `context.memory.run`: Controls the durable workflow state for observability and recovery (`start`, `plan`, `step`, `finishSuccess`). See [Durable Run State](./run-state.md).
+- `context.plan`: High-level sequential planning and execution helpers (`generate`, `execute`) built on top of durable run-state.
 - `context.memory.session`: Provides low-level access to the underlying session store.
 
 ### 3. `context.invoke`
@@ -93,7 +81,30 @@ This is the central hub for AI-related functionality.
   ```ts
   const draft = await context.ai.models['openai:primary'].generateText({ prompt });
   ```
-  Declared skills from `useSkills([...])` are injected automatically for `generateText(...)`, `generateJson(...)`, and `streamObject(...)`.
+  For public streaming model work, prefer the higher-level helpers:
+  ```ts
+  const finalText = await context.ai.streamText({
+    model: 'openai:primary',
+    prompt,
+    publishToCurrentStream: { taskId: 'draft-answer' },
+  });
+  ```
+  ```ts
+  const finalObject = await context.ai.streamObject({
+    model: 'openai:primary',
+    prompt,
+    schema,
+    publishToCurrentStream: { taskId: 'classify' },
+  });
+  ```
+  Declared skills from `useSkills([...])` are injected automatically for `generateText(...)`, `generateObject(...)`, and `streamObject(...)`.
+  Capability declarations drive truthful handler typing:
+  - text models guarantee `generateText(...)`
+  - text-stream models guarantee `streamText(...)` and `generateText(...)`
+  - object models guarantee `generateObject(...)`
+  - object-stream models guarantee `streamObject(...)`
+  - embedding models guarantee `embed(...)`
+  - rerank models guarantee `rerank(...)`
   Load deeper reference files explicitly when the handler needs targeted framework knowledge:
   ```ts
   const references = await context.ai.skills.selectReferences({
@@ -102,7 +113,7 @@ This is the central hub for AI-related functionality.
     relativePathPrefixes: ['references/'],
     limit: 3,
   });
-  const result = await context.ai.models['openai:primary'].generateJson({
+  const result = await context.ai.models['openai:primary'].generateObject({
     prompt,
     schema,
     references,
@@ -151,6 +162,7 @@ ts
   ```ts
   const reflection = await context.ai.reflect.run({ name: 'support-answer', ... });
   ```
+- **`context.ai.createModelExecutor(...)` / `createToolExecutorFromInvoke(...)` / `createAgentExecutorFromInvoke(...)`**: Build planner executors from the current typed context. Use a required worker for normal reasoning and optional delegates for specialized handoffs. Treat `createToolExecutorLogic(...)` as an advanced escape hatch rather than the default planner path.
 
 ### 5. `context.io`
 
@@ -204,12 +216,14 @@ Avoid putting environment setup or provider construction in the handler. That be
 - Use `context.ai.reply.publish(...)` when you already have the final public reply text and only need PURISTA to stream it correctly.
 - Use `context.ai.skills.selectReferences(...)` when the agent needs focused sub-documents from a declared umbrella skill.
 - Use `context.memory.run` for durable, resumable workflows.
+- Use `context.plan.generate(...)` and `context.plan.execute(...)` when one agent should generate and execute a sequential plan autonomously.
 - Use `context.ai.reflect` and `context.runtime.approvals` for tasks requiring high quality or human oversight.
 - Use `context.invoke.expose` only when adapting to an external tool loop (like the Vercel AI SDK).
 
 ## Common Mistakes
 
 - **Mixing Concerns**: Putting runtime bootstrapping (like creating providers) inside the handler.
+- **Defensive Capability Checks In Typed Handlers**: If the builder declared `addModel(..., { capabilities: [...] })`, avoid repeating `if (!model.generateObject)` style guards in the handler. Missing capabilities should fail at startup, not leak into implementation code.
 - **Global Thinking**: Treating `context.ai.skills` as a global registry instead of a per-agent declared scope.
 - **Manual Exposure**: Re-implementing tool exposure manually instead of using `context.invoke.expose`.
 - **State Mismanagement**: Using conversation history (`context.memory.conversation`) to store workflow checkpoints, which belong in `context.memory.run`.

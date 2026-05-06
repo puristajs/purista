@@ -6,9 +6,9 @@
 
 # Function: writeApprovalDecision()
 
-> **writeApprovalDecision**(`states`, `agentName`, `agentVersion`, `checkpoint`, `decision`): `Promise`\<[`ApprovalDecision`](../type-aliases/ApprovalDecision.md)\>
+> **writeApprovalDecision**(`states`, `agentName`, `serviceVersion`, `checkpoint`, `decision`): `Promise`\<[`ApprovalDecision`](../type-aliases/ApprovalDecision.md)\>
 
-Defined in: [packages/ai/src/runtime/approvals.ts:80](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/approvals.ts#L80)
+Defined in: [packages/ai/src/runtime/approvals.ts:80](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/approvals.ts#L80)
 
 ## Parameters
 
@@ -20,7 +20,7 @@ Defined in: [packages/ai/src/runtime/approvals.ts:80](https://github.com/purista
 
 `string`
 
-### agentVersion
+### serviceVersion
 
 `string`
 

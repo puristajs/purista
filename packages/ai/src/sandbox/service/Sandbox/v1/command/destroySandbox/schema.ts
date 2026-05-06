@@ -1,7 +1,9 @@
 import { z } from 'zod'
 import { SandboxPayloadSchema } from '../../../../../types/SandboxDriver.js'
 
-export const DestroySandboxInputSchema = SandboxPayloadSchema
+export const DestroySandboxInputSchema = SandboxPayloadSchema.extend({
+	projectId: z.string().min(1),
+})
 
 export const DestroySandboxOutputSchema = z.object({
 	sandboxId: z.string(),

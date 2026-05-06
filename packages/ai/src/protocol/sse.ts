@@ -1,11 +1,18 @@
-import type { AgentSseProtocol } from '../types/AgentManifest.js'
+import type { AgentStreamProtocolAdapterId } from '../types/AgentManifest.js'
 import { toAiSdkStreamEvents } from './aiSdkStream.js'
-import { toAgent2AgentReferenceMessage, toMcpReferenceToolResult } from './interoperability.js'
-import type { AgentProtocolEnvelope } from './types.js'
+import type { AgentProtocolEnvelope, WireEvent } from './types.js'
 
 export type ProtocolSseEvent = {
 	event: string
 	data: unknown
+}
+
+export type AiSdkMode = 'responses' | 'ui-message'
+
+export interface AiSdkStreamOptions {
+	mode?: AiSdkMode
+	emitMessageMetadata?: boolean
+	mapDataParts?: (envelope: AgentProtocolEnvelope) => { type: `data-${string}`; data: unknown } | undefined
 }
 
 /**
@@ -14,83 +21,34 @@ export type ProtocolSseEvent = {
  * without app-layer custom adapters.
  */
 export const toProtocolSseEvents = async function* (
-	envelopes: AgentProtocolEnvelope[],
-	protocol: Exclude<AgentSseProtocol, 'purista'>,
-): AsyncGenerator<ProtocolSseEvent> {
-	if (protocol === 'ai-sdk-responses') {
-		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'responses' })) {
-			yield event
-		}
-		return
-	}
+	envelopes: AsyncIterable<AgentProtocolEnvelope> | Iterable<AgentProtocolEnvelope>,
+	protocol: AgentStreamProtocolAdapterId,
+	options?: AiSdkStreamOptions,
+): AsyncGenerator<WireEvent> {
+	if (protocol === 'ai-sdk.responses' || protocol === 'ai-sdk.ui-message') {
+		const mode = protocol === 'ai-sdk.responses' ? 'responses' : 'ui-message'
+		const useMetadata = options?.emitMessageMetadata ?? false
+		const mapParts = options?.mapDataParts
 
-	const mapJsonRenderDataPart = (envelope: AgentProtocolEnvelope) => {
-		const frame = envelope.frame
-		if (frame.kind !== 'artifact') {
-			return undefined
-		}
-		const content = frame.content
-		if (typeof content === 'object' && content !== null) {
-			if ('op' in content && 'path' in content) {
-				return {
-					type: 'data-spec' as const,
-					data: {
-						type: 'patch' as const,
-						patch: content,
-					},
-				}
-			}
-			if ('root' in content && 'elements' in content) {
-				return {
-					type: 'data-spec' as const,
-					data: {
-						type: 'flat' as const,
-						spec: content,
-					},
-				}
-			}
-			return {
-				type: 'data-spec' as const,
-				data: {
-					type: 'nested' as const,
-					spec: content,
-				},
-			}
-		}
-		return undefined
-	}
-
-	if (protocol === 'ai-sdk-ui-message' || protocol === 'ai-sdk-data' || protocol === 'ai-sdk-json-render') {
 		for await (const event of toAiSdkStreamEvents(envelopes, {
-			mode: 'ui-message',
-			uiMessage:
-				protocol === 'ai-sdk-json-render'
-					? {
-							emitMessageMetadata: true,
-							mapDataParts: ({ envelope }) => mapJsonRenderDataPart(envelope),
-						}
-					: {
-							emitMessageMetadata: false,
-						},
+			mode,
+			uiMessage: {
+				emitMessageMetadata: useMetadata,
+				mapDataParts: mapParts ? ({ envelope }) => mapParts(envelope) : undefined,
+			},
 		})) {
 			yield event
 		}
-		yield { event: 'data', data: '[DONE]' }
-		return
-	}
-
-	if (protocol === 'agent2agent') {
-		for (const envelope of envelopes) {
-			yield {
-				event: 'message',
-				data: toAgent2AgentReferenceMessage(envelope) as Record<string, unknown>,
-			}
+		if (mode === 'ui-message') {
+			yield { event: 'data', data: '[DONE]' }
 		}
 		return
 	}
 
-	yield {
-		event: 'result',
-		data: toMcpReferenceToolResult(envelopes) as Record<string, unknown>,
+	for await (const envelope of envelopes) {
+		yield {
+			event: 'message',
+			data: envelope,
+		}
 	}
 }

@@ -20,7 +20,7 @@ describe('conversation helpers', () => {
 	it('appends and returns messages with standard shape', async () => {
 		const manifest: AgentManifest = {
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			eventBridge: 'default',
 			allowedTools: [],
 			session: { storeName: 'history', strategy: 'full', maxFrames: 10 },
@@ -43,7 +43,7 @@ describe('conversation helpers', () => {
 	it('creates and uses summary automatically for summary strategy', async () => {
 		const manifest: AgentManifest = {
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			eventBridge: 'default',
 			allowedTools: [],
 			session: { storeName: 'history', strategy: 'summary', maxFrames: 2 },
@@ -67,7 +67,7 @@ describe('conversation helpers', () => {
 	it('can revert the last staged message to keep retries idempotent', async () => {
 		const manifest: AgentManifest = {
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			eventBridge: 'default',
 			allowedTools: [],
 			session: { storeName: 'history', strategy: 'full', maxFrames: 10 },

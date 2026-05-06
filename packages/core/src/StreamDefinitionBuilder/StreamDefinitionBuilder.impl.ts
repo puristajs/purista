@@ -37,10 +37,15 @@ import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderType
 export type StreamAgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
+	outputSchema?: Schema
 }
 
 const isAgentInvokeConfig = (value: unknown): value is StreamAgentInvokeConfig<Schema, Schema> => {
-	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		('payloadSchema' in value || 'parameterSchema' in value || 'outputSchema' in value)
+	)
 }
 
 export class StreamDefinitionBuilder<
@@ -307,10 +312,11 @@ export class StreamDefinitionBuilder<
 	 * The agent must follow the PURISTA agent protocol.
 	 *
 	 * @param agentName The name of the agent service
-	 * @param agentVersion The version of the agent service
+	 * @param serviceVersion The version of the agent service
 	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
 	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-	 * - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
+	 * - `{ payloadSchema, parameterSchema, outputSchema }` validates `.call(payload, parameter)` arguments
+	 *   and declares expected final response envelopes for higher-level helpers.
 	 */
 	canInvokeAgent<
 		Payload extends Schema = typeof agentProtocolPayloadSchema,
@@ -319,10 +325,10 @@ export class StreamDefinitionBuilder<
 		Version extends string = string,
 	>(
 		agentName: SName,
-		agentVersion: Version,
+		serviceVersion: Version,
 		invokeConfigOrParameterSchema?: Parameter | StreamAgentInvokeConfig<Payload, Parameter>,
 	) {
-		if (agentName.trim() === '' || agentVersion.trim() === '') {
+		if (agentName.trim() === '' || serviceVersion.trim() === '') {
 			throw new Error('canInvokeAgent requires non-empty agent name and version')
 		}
 
@@ -332,12 +338,18 @@ export class StreamDefinitionBuilder<
 		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
 			? invokeConfigOrParameterSchema.parameterSchema
 			: invokeConfigOrParameterSchema
+		const outputSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
+			? invokeConfigOrParameterSchema.outputSchema
+			: undefined
 
 		this.agentInvokes = registerAgentInvokeCapability(
-			this.agentInvokes as Record<string, Record<string, { payloadSchema?: Schema; parameterSchema?: Schema }>>,
+			this.agentInvokes as Record<
+				string,
+				Record<string, { payloadSchema?: Schema; parameterSchema?: Schema; outputSchema?: Schema }>
+			>,
 			agentName,
-			agentVersion,
-			{ payloadSchema, parameterSchema },
+			serviceVersion,
+			{ payloadSchema, parameterSchema, outputSchema },
 		) as unknown as C['AgentInvokes'] &
 			Record<
 				SName,

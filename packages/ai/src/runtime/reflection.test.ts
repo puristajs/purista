@@ -7,7 +7,7 @@ describe('reflection helpers', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'reflectionAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				reflection: {
 					enabledByDefault: true,
 					presets: {
@@ -61,7 +61,7 @@ describe('reflection helpers', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'reflectionAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				reflection: {
 					presets: {
 						wide: {
@@ -99,7 +99,7 @@ describe('reflection helpers', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'reflectionAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			},
 		})
 		await mock.context.memory.run.start({ title: 'Reflection run' })

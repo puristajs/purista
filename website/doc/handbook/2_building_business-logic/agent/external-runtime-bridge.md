@@ -43,7 +43,7 @@ Do not use bindings when the handler itself already owns the loop. In that case,
 ```ts
 const bindings = context.invoke.expose.tools({
   commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
-  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
+  agents: [{ agentName: 'triageAgent', serviceVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
 })
 ```
 
@@ -85,7 +85,7 @@ If the external loop should be able to call a child agent:
 const triageBinding = context.invoke.expose.agent(
   {
     agentName: 'triageAgent',
-    agentVersion: '1',
+    serviceVersion: '1',
     toolName: 'triageEscalation',
   },
   { resultMode: 'text' },

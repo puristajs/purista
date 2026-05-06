@@ -62,7 +62,7 @@ Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:31](https://github.c
 
 > **clear**(): `void`
 
-Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:208](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L208)
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:233](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L233)
 
 #### Returns
 
@@ -74,7 +74,7 @@ Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:208](https://github.
 
 > **get**(`correlationId`): `PendingStreamSession`\<`Chunk`, `Final`\> \| `undefined`
 
-Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:187](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L187)
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:212](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L212)
 
 #### Parameters
 
@@ -118,7 +118,7 @@ Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:35](https://github.c
 
 > **reject**(`correlationId`, `error`): `"rejected"` \| `PushResult`
 
-Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:191](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L191)
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:216](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L216)
 
 #### Parameters
 
@@ -140,7 +140,7 @@ Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:191](https://github.
 
 > **rejectAll**(`error`): `void`
 
-Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:200](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L200)
+Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:225](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingStreamRegistry.impl.ts#L225)
 
 #### Parameters
 

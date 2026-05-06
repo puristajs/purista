@@ -1,3 +1,4 @@
+import type { execa as ExecaRunner } from 'execa'
 import { describe, expect, it, vi } from 'vitest'
 import { AppleContainerSandboxDriver } from './AppleContainerSandboxDriver/AppleContainerSandboxDriver.js'
 import { DockerSandboxDriver } from './DockerSandboxDriver/DockerSandboxDriver.js'
@@ -7,15 +8,17 @@ import {
 	SandboxRuntimeUnavailableError,
 } from './runtimeDiagnostics.js'
 
+type CommandRunner = typeof ExecaRunner
+
 describe('runtime diagnostics', () => {
 	it('reports available docker runtime and image', async () => {
 		const driver = new DockerSandboxDriver({ imageName: 'voyage-sandbox:latest' })
 		const commandRunner = vi
 			.fn()
-			.mockResolvedValueOnce({ stdout: '27.0.1', stderr: '', exitCode: 0 } as any)
-			.mockResolvedValueOnce({ stdout: '[]', stderr: '', exitCode: 0 } as any)
+			.mockResolvedValueOnce({ stdout: '27.0.1', stderr: '', exitCode: 0 })
+			.mockResolvedValueOnce({ stdout: '[]', stderr: '', exitCode: 0 })
 
-		const result = await getSandboxRuntimeDiagnostics(driver, commandRunner as any)
+		const result = await getSandboxRuntimeDiagnostics(driver, commandRunner as unknown as CommandRunner)
 
 		expect(result.runtimeAvailable).toBe(true)
 		expect(result.imageAvailable).toBe(true)
@@ -29,10 +32,10 @@ describe('runtime diagnostics', () => {
 		})
 		const commandRunner = vi
 			.fn()
-			.mockResolvedValueOnce({ stdout: '27.0.1', stderr: '', exitCode: 0 } as any)
-			.mockResolvedValueOnce({ stdout: '', stderr: 'missing', exitCode: 1 } as any)
+			.mockResolvedValueOnce({ stdout: '27.0.1', stderr: '', exitCode: 0 })
+			.mockResolvedValueOnce({ stdout: '', stderr: 'missing', exitCode: 1 })
 
-		const result = await getSandboxRuntimeDiagnostics(driver, commandRunner as any)
+		const result = await getSandboxRuntimeDiagnostics(driver, commandRunner as unknown as CommandRunner)
 
 		expect(result.runtimeAvailable).toBe(true)
 		expect(result.imageAvailable).toBe(false)
@@ -43,8 +46,8 @@ describe('runtime diagnostics', () => {
 		const driver = new DockerSandboxDriver({ imageName: 'voyage-sandbox:latest' })
 		const commandRunner = vi.fn().mockRejectedValueOnce(new Error('spawn docker ENOENT'))
 
-		await expect(assertSandboxRuntimeAvailable(driver, commandRunner as any)).rejects.toBeInstanceOf(
-			SandboxRuntimeUnavailableError,
-		)
+		await expect(
+			assertSandboxRuntimeAvailable(driver, commandRunner as unknown as CommandRunner),
+		).rejects.toBeInstanceOf(SandboxRuntimeUnavailableError)
 	})
 })

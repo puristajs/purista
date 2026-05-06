@@ -1,6 +1,7 @@
 import type {
 	ModelProvider,
 	ProviderGenerateTextRequest,
+	ProviderJsonOutputFromSchema,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
 	ProviderRequest,
@@ -37,12 +38,12 @@ export class ScriptedModel implements ModelProvider {
 	readonly name = 'scripted-model'
 	readonly capabilities = {
 		text: true,
-		stream: true,
-		json: true,
+		'text-stream': true,
+		object: true,
 	}
 	readonly calls: Array<
-		| { method: 'generate' | 'stream' | 'generateText'; request: ProviderRequest }
-		| { method: 'generateJson'; request: ProviderJsonRequest }
+		| { method: 'streamText' | 'generateText'; request: ProviderRequest }
+		| { method: 'generateObject'; request: ProviderJsonRequest }
 	> = []
 
 	private readonly steps: ScriptedStep[] = []
@@ -110,15 +111,8 @@ export class ScriptedModel implements ModelProvider {
 		return step
 	}
 
-	async generate(request: ProviderRequest): Promise<ProviderResponse> {
-		this.calls.push({ method: 'generate', request })
-		const step = await this.resolveTextStep(request)
-		const output = await resolveText(step.reply, request)
-		return toProviderResponse(output)
-	}
-
-	stream(request: ProviderRequest): ProviderStream {
-		this.calls.push({ method: 'stream', request })
+	streamText(request: ProviderRequest): ProviderStream {
+		this.calls.push({ method: 'streamText', request })
 		let resolved:
 			| {
 					output: string
@@ -179,10 +173,12 @@ export class ScriptedModel implements ModelProvider {
 		return output
 	}
 
-	async generateJson<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
-		this.calls.push({ method: 'generateJson', request })
+	async generateObject<T = unknown, OutputSchema = unknown>(
+		request: ProviderJsonRequest<OutputSchema>,
+	): Promise<ProviderJsonResponse<ProviderJsonOutputFromSchema<OutputSchema, T>>> {
+		this.calls.push({ method: 'generateObject', request })
 		const step = await this.resolveJsonStep(request)
-		const data = (await resolveJson(step.reply, request)) as T
+		const data = (await resolveJson(step.reply, request)) as ProviderJsonOutputFromSchema<OutputSchema, T>
 		return {
 			data,
 			text: JSON.stringify(data),

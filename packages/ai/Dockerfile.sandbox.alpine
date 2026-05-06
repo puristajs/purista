@@ -26,8 +26,8 @@ RUN apk add --no-cache \
     vim
 
 RUN adduser -D -h /home/agent -s /bin/bash agent
-WORKDIR /home/agent/workspace
-RUN chown -R agent:agent /home/agent
+WORKDIR /workspace
+RUN mkdir -p /workspace && chown -R agent:agent /workspace /home/agent
 USER agent
 
 CMD ["tail", "-f", "/dev/null"]

@@ -1,4 +1,4 @@
-import type { AgentProtocolEnvelope } from './types.js'
+import type { AgentProtocolEnvelope, JsonValue } from './types.js'
 
 export const toFrameRecord = (envelope: AgentProtocolEnvelope | undefined): Record<string, unknown> | null => {
 	const frame = envelope?.frame
@@ -128,16 +128,11 @@ export const extractAgentErrorMessage = (envelopes: AgentProtocolEnvelope[]): st
 	return ''
 }
 
-export const extractArtifactContent = (envelopes: AgentProtocolEnvelope[], artifactId: string): string | null => {
+export const extractArtifactContent = (envelopes: AgentProtocolEnvelope[], artifactId: string): JsonValue | null => {
 	for (let index = envelopes.length - 1; index >= 0; index -= 1) {
 		const frame = toFrameRecord(envelopes[index])
 		if (frame?.kind === 'artifact' && frame.artifactId === artifactId) {
-			if (typeof frame.content === 'string') {
-				return frame.content
-			}
-			if (typeof frame.content === 'object' && frame.content !== null) {
-				return JSON.stringify(frame.content)
-			}
+			return frame.content as JsonValue
 		}
 	}
 	return null
@@ -145,12 +140,15 @@ export const extractArtifactContent = (envelopes: AgentProtocolEnvelope[], artif
 
 export const extractArtifactJson = <T>(envelopes: AgentProtocolEnvelope[], artifactId: string): T | null => {
 	const content = extractArtifactContent(envelopes, artifactId)
-	if (!content) {
+	if (content === null) {
 		return null
 	}
-	try {
-		return JSON.parse(content) as T
-	} catch {
-		return null
+	if (typeof content === 'string') {
+		try {
+			return JSON.parse(content) as T
+		} catch {
+			return null
+		}
 	}
+	return content as T
 }

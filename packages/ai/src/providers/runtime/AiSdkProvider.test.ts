@@ -1,6 +1,6 @@
 import { StatusCode, UnhandledError } from '@purista/core'
-import type { LanguageModel } from 'ai'
-import { describe, expect, it, vi } from 'vitest'
+import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel } from 'ai'
+import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { z } from 'zod'
 import { createCommandBinding } from '../../bridge/externalRuntime.js'
 
@@ -47,14 +47,15 @@ describe('AiSdkProvider', () => {
 	it('wraps language model when middleware is configured', async () => {
 		const { AiSdkProvider } = await loadModule()
 		wrapLanguageModelMock.mockReturnValueOnce(mockModel)
+		const middleware = {} as unknown as LanguageModelMiddleware
 		void new AiSdkProvider({
 			model: mockModel,
-			middleware: {} as any,
+			middleware,
 		})
 		expect(wrapLanguageModelMock).toHaveBeenCalledOnce()
 	})
 
-	it('maps generateText responses into provider response', async () => {
+	it('returns final text from generateText', async () => {
 		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'hello',
@@ -69,18 +70,13 @@ describe('AiSdkProvider', () => {
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
-		const result = await provider.generate({ prompt: 'test' })
-		expect(result.output).toBe('hello')
-		expect(result.reasoningText).toBeUndefined()
-		expect(result.tokens).toEqual({
-			prompt: 11,
-			completion: 7,
-		})
-		expect(result.metadata?.warnings).toEqual([{ type: 'unsupported-setting', setting: 'temperature' }])
+		const result = await provider.generateText({ prompt: 'test' })
+		expect(result).toBe('hello')
 		expect(provider.capabilities).toMatchObject({
 			text: true,
-			stream: true,
-			json: true,
+			'text-stream': true,
+			object: true,
+			'object-stream': true,
 			embedding: false,
 			rerank: false,
 		})
@@ -100,7 +96,7 @@ describe('AiSdkProvider', () => {
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
-		await provider.generate({
+		await provider.generateText({
 			prompt: 'Analyze the uploaded assets',
 			input: [
 				{
@@ -174,7 +170,7 @@ describe('AiSdkProvider', () => {
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
-		const stream = provider.stream({ prompt: 'test stream' })
+		const stream = provider.streamText({ prompt: 'test stream' })
 		const deltas: string[] = []
 		const reasoning: string[] = []
 		for await (const chunk of stream) {
@@ -211,17 +207,20 @@ describe('AiSdkProvider', () => {
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
-		const result = await provider.generateJson<{ urgency: string }>({
-			prompt: 'classify',
-			schema: z.object({
-				urgency: z.string(),
-				settings: z
-					.object({
-						enabled: z.boolean(),
-					})
-					.optional(),
-			}),
+		const triageJsonSchema = z.object({
+			urgency: z.string(),
+			settings: z
+				.object({
+					enabled: z.boolean(),
+				})
+				.optional(),
 		})
+
+		const result = await provider.generateObject({
+			prompt: 'classify',
+			schema: triageJsonSchema,
+		})
+		expectTypeOf(result.data).toEqualTypeOf<z.infer<typeof triageJsonSchema>>()
 		expect(result.data.urgency).toBe('low')
 		expect(result.reasoningText).toBe('reasoning')
 		expect(result.text).toContain('"urgency"')
@@ -265,7 +264,7 @@ describe('AiSdkProvider', () => {
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
-		await provider.generateJson({
+		await provider.generateObject({
 			prompt: 'Extract the visible fields',
 			input: [
 				{
@@ -362,7 +361,7 @@ describe('AiSdkProvider', () => {
 		])
 	})
 
-	it('falls back to generateJson when object streaming is unavailable', async () => {
+	it('falls back to generateObject when object streaming is unavailable', async () => {
 		const { AiSdkProvider } = await loadModule()
 		streamObjectMock.mockRejectedValueOnce(new Error('no native object stream'))
 		generateObjectMock.mockResolvedValueOnce({
@@ -406,7 +405,7 @@ describe('AiSdkProvider', () => {
 		generateObjectMock.mockRejectedValueOnce(new Error("Invalid schema for response_format 'response'"))
 
 		const provider = new AiSdkProvider({ model: mockModel })
-		const result = provider.generateJson({
+		const result = provider.generateObject({
 			prompt: 'classify',
 			schema: { type: 'object' },
 		})
@@ -445,13 +444,14 @@ describe('AiSdkProvider', () => {
 
 		const provider = new AiSdkProvider({
 			model: mockModel,
-			embeddingModel: {} as any,
-			rerankingModel: {} as any,
+			embeddingModel: {} as unknown as EmbeddingModel,
+			rerankingModel: {} as unknown as RerankingModel,
 		})
 		expect(provider.capabilities).toMatchObject({
 			text: true,
-			stream: true,
-			json: true,
+			'text-stream': true,
+			object: true,
+			'object-stream': true,
 			embedding: true,
 			rerank: true,
 		})
@@ -497,7 +497,7 @@ describe('AiSdkProvider', () => {
 			defaults: { temperature: 0.2 },
 		})
 
-		await provider.generate({
+		await provider.generateText({
 			prompt: 'hello',
 			context: 'ctx',
 			metadata: {
@@ -515,11 +515,11 @@ describe('AiSdkProvider', () => {
 			}),
 		)
 
-		const jsonResult = await provider.generateJson({
+		const jsonResult = await provider.generateObject({
 			prompt: 'route this',
 			metadata: {
 				aiSdk: {
-					generateJson: {
+					generateObject: {
 						temperature: 0,
 					},
 				},
@@ -547,7 +547,7 @@ describe('AiSdkProvider', () => {
 		const provider = new AiSdkProvider({ model: mockModel })
 		const tools = { writeSpecFile: { description: 'writes spec', inputSchema: {}, execute: vi.fn() } }
 
-		await provider.generate({
+		await provider.generateText({
 			prompt: 'apply updates',
 			metadata: {
 				aiSdk: {
@@ -591,7 +591,7 @@ describe('AiSdkProvider', () => {
 			execute: async () => ({ answer: 'ok' }),
 		})
 
-		await provider.generate({
+		await provider.generateText({
 			prompt: 'Customer prompt',
 			developerInstruction: 'Use tools before answering.',
 			skills: [{ name: 'spec-elicitation', content: 'Ask clarifying questions first.' }],
@@ -621,7 +621,7 @@ describe('AiSdkProvider', () => {
 		)
 	})
 
-	it('maps per-call developer instructions to provider system messages in generate/stream/generateJson', async () => {
+	it('maps per-call developer instructions to provider system messages in generateText/streamText/generateObject', async () => {
 		const { AiSdkProvider } = await loadModule()
 		generateTextMock.mockResolvedValueOnce({
 			text: 'ok',
@@ -650,7 +650,7 @@ describe('AiSdkProvider', () => {
 
 		const provider = new AiSdkProvider({ model: mockModel, systemPrompt: 'static-system' })
 
-		await provider.generate({
+		await provider.generateText({
 			prompt: 'hello',
 			context: 'ctx',
 			developerInstruction: 'always ask for persistence details',
@@ -671,7 +671,7 @@ describe('AiSdkProvider', () => {
 			}),
 		)
 
-		const stream = provider.stream({
+		const stream = provider.streamText({
 			prompt: 'stream please',
 			developerInstruction: ['developer rule 1', 'developer rule 2'],
 		})
@@ -694,7 +694,7 @@ describe('AiSdkProvider', () => {
 			}),
 		)
 
-		await provider.generateJson({
+		await provider.generateObject({
 			prompt: 'json please',
 			developerInstruction: 'developer-json',
 		})

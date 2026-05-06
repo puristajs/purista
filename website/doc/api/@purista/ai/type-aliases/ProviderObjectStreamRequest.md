@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / ProviderObjectStreamRequest
 
-# Type Alias: ProviderObjectStreamRequest\<T\>
+# Type Alias: ProviderObjectStreamRequest\<T, OutputSchema\>
 
-> **ProviderObjectStreamRequest**\<`T`\> = [`ProviderJsonRequest`](ProviderJsonRequest.md) & `object`
+> **ProviderObjectStreamRequest**\<`T`, `OutputSchema`\> = [`ProviderJsonRequest`](ProviderJsonRequest.md)\<`OutputSchema`\> & `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:87](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L87)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:92](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L92)
 
 ## Type Declaration
 
@@ -21,3 +21,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:87](https://gith
 ### T
 
 `T` = `unknown`
+
+### OutputSchema
+
+`OutputSchema` = `unknown`

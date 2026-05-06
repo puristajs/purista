@@ -49,11 +49,11 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # Create a non-root 'agent' user with a home directory
 RUN useradd -m -s /bin/bash agent
 
-# Set the working directory to the agent's home
-WORKDIR /home/agent/workspace
+# Use the canonical PURISTA sandbox workspace root
+WORKDIR /workspace
 
-# Ensure the workspace is owned by the agent user
-RUN chown -R agent:agent /home/agent
+# Ensure the canonical workspace and the agent home are writable by the agent user
+RUN mkdir -p /workspace && chown -R agent:agent /workspace /home/agent
 
 # Switch to the non-root user
 USER agent

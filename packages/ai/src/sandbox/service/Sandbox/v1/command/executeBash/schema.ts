@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { BashResultSchema, SandboxPayloadSchema } from '../../../../../types/SandboxDriver.js'
 
 export const ExecuteBashInputSchema = SandboxPayloadSchema.extend({
+	projectId: z.string().min(1),
 	command: z.string(),
 	cwd: z.string().optional(),
 	timeoutMs: z

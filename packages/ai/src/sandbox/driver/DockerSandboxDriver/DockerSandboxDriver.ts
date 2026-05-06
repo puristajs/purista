@@ -9,6 +9,7 @@ import {
 	type SandboxFileContent,
 	type SandboxMetadata,
 	SandboxMetadataSchema,
+	type SandboxScope,
 } from '../../types/SandboxDriver.js'
 
 /**
@@ -56,6 +57,39 @@ export class DockerSandboxDriver implements SandboxDriver {
 		return `purista-${sandboxId}`
 	}
 
+	private serializeScope(scope?: SandboxScope): Record<string, string> {
+		if (!scope || scope.kind === 'shared-project-user') {
+			return {
+				'purista.scope.kind': 'shared-project-user',
+			}
+		}
+		return {
+			'purista.scope.kind': scope.kind,
+			'purista.scope.key': scope.key,
+		}
+	}
+
+	private deserializeScope(labels: Record<string, string | undefined>): SandboxScope | undefined {
+		const kind = labels['purista.scope.kind']
+		if (!kind || kind === 'shared-project-user') {
+			return kind === 'shared-project-user' ? { kind: 'shared-project-user' } : undefined
+		}
+		const key = labels['purista.scope.key']
+		if (!key) {
+			return undefined
+		}
+		switch (kind) {
+			case 'agent-run':
+			case 'agent-instance':
+			case 'conversation':
+			case 'runtime-instance':
+			case 'custom':
+				return { kind, key }
+			default:
+				return undefined
+		}
+	}
+
 	/**
 	 * Provisions and starts a new Docker container.
 	 * Securely configures Git identity and GitHub CLI inside the container.
@@ -64,6 +98,7 @@ export class DockerSandboxDriver implements SandboxDriver {
 		organizationId: string
 		projectId: string
 		userId: string
+		scope?: SandboxScope
 		sandboxId: string
 		gitConfig?: {
 			username: string
@@ -73,26 +108,20 @@ export class DockerSandboxDriver implements SandboxDriver {
 	}): Promise<{ sandboxId: string; containerName: string }> {
 		const sandboxId = params.sandboxId
 		const containerName = this.getContainerName(sandboxId)
+		const labels = {
+			'purista.organizationId': params.organizationId,
+			'purista.projectId': params.projectId,
+			'purista.userId': params.userId,
+			'purista.sandboxId': sandboxId,
+			'purista.createdAt': String(Date.now()),
+			'purista.gitConfigured': String(!!params.gitConfig),
+			...this.serializeScope(params.scope),
+		}
 
-		const args = [
-			'run',
-			'-d',
-			'--name',
-			containerName,
-			'--init',
-			'--label',
-			`purista.organizationId=${params.organizationId}`,
-			'--label',
-			`purista.projectId=${params.projectId}`,
-			'--label',
-			`purista.userId=${params.userId}`,
-			'--label',
-			`purista.sandboxId=${sandboxId}`,
-			'--label',
-			`purista.createdAt=${Date.now()}`,
-			'--label',
-			`purista.gitConfigured=${!!params.gitConfig}`,
-		]
+		const args = ['run', '-d', '--name', containerName, '--init']
+		for (const [key, value] of Object.entries(labels)) {
+			args.push('--label', `${key}=${value}`)
+		}
 
 		if (this.config.memory) {
 			args.push('--memory', this.config.memory)
@@ -228,7 +257,9 @@ export class DockerSandboxDriver implements SandboxDriver {
 	async readFile(params: { sandboxId: string; path: string }): Promise<string> {
 		const containerName = this.getContainerName(params.sandboxId)
 		try {
-			const { stdout } = await execa('docker', ['exec', containerName, 'cat', params.path])
+			const { stdout } = await execa('docker', ['exec', containerName, 'cat', params.path], {
+				stripFinalNewline: false,
+			})
 			return stdout
 		} catch (error: any) {
 			throw new Error(`Failed to read file ${params.path} in sandbox ${params.sandboxId}: ${error.message}`)
@@ -282,6 +313,7 @@ export class DockerSandboxDriver implements SandboxDriver {
 							organizationId: labels['purista.organizationId'] || '',
 							projectId: labels['purista.projectId'] || '',
 							userId: labels['purista.userId'] || '',
+							scope: this.deserializeScope(labels),
 							containerName: this.getContainerName(labels['purista.sandboxId']),
 							createdAt: Number.parseInt(labels['purista.createdAt'] || '0', 10),
 							gitConfigured: labels['purista.gitConfigured'] === 'true',

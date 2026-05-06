@@ -1,28 +1,28 @@
 import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { AgentInvokeList } from '@purista/core'
 import {
 	type Complete,
 	type ConfigStore,
 	type EmptyObject,
 	type EventBridge,
 	HandledError,
+	initLogger,
 	type Logger,
 	type QueueBridge,
 	type Schema,
 	type SecretStore,
 	type Service,
-	type ServiceBuilder,
-	type ServiceBuilderTypes,
 	type StateStore,
 	StatusCode,
 	validate,
 } from '@purista/core'
-import type { AgentHandler } from '../builder/AgentBuilder.js'
 import type { ConversationStore } from '../memory/conversationStore.js'
 import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
+import type { AgentSandboxRuntimeConfig } from '../sandbox/provider.js'
 import { createInlineSkillResource, type SkillResource, type SkillSourceMap } from '../skills/fileSystem.js'
 import type {
 	AgentInfo,
@@ -35,19 +35,51 @@ import type {
 	AgentRuntimeStatus,
 	AgentStreamResponder,
 } from '../types/AgentDefinition.js'
-import type { AgentManifest } from '../types/AgentManifest.js'
+import type { AgentHandler } from '../types/AgentHandler.js'
+import { type AgentManifest, defaultAgentModelCapabilities } from '../types/AgentManifest.js'
+import { AgentExecutor } from './AgentExecutor.js'
 import { invokeAgentInternal } from './agentInvocationTransport.js'
+import { attachAgentExecutor } from './attachedAgentExecutor.js'
+import type { ToolInvokeMap } from './context.js'
+import { createAgentInvocationFinalResult } from './terminalResult.js'
 
-export type AgentInstanceDependencies<EmitPayloads extends Record<string, unknown> = Record<string, unknown>> = {
+type AgentRuntimeServiceBuilder = {
+	info: {
+		serviceName: string
+		serviceVersion: string
+	}
+	getInstance(
+		eventBridge: EventBridge,
+		options?: {
+			logLevel?: import('@purista/core').LogLevelName
+			logger?: Logger
+			spanProcessor?: SpanProcessor
+			secretStore?: SecretStore
+			configStore?: ConfigStore
+			stateStore?: StateStore
+			queueBridge?: QueueBridge
+			serviceConfig?: Record<string, unknown>
+			resources?: Record<string, unknown>
+		},
+	): Promise<Service>
+}
+
+export type AgentInstanceDependencies<
+	Payload = unknown,
+	Parameter = unknown,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitPayloads extends Record<string, unknown> = Record<string, unknown>,
+	ToolInvokes extends ToolInvokeMap = ToolInvokeMap,
+> = {
 	info: AgentInfo
 	manifest: AgentManifest
-	serviceBuilder: ServiceBuilder<
-		ServiceBuilderTypes<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>>
-	>
-	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any, EmitPayloads>
-	callOptionsSchema?: import('zod').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
-	prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
-	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
+	serviceBuilder: AgentRuntimeServiceBuilder
+	handler: AgentHandler<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes>
+	callOptionsSchema?: import('zod').ZodType<import('../types/AgentHandler.js').AgentModelCallOptions>
+	prepareCall?: import('../types/AgentHandler.js').AgentPrepareCallHook
+	prepareStep?: import('../types/AgentHandler.js').AgentPrepareStepHook
 	configSchema?: Schema
 	defaultConfig?: Complete<Record<string, unknown>>
 }
@@ -76,6 +108,7 @@ type ResolvedAgentRuntimeDependencies = {
 	poolManager: PoolManager
 	models: Record<string, ModelProvider>
 	resources: Record<string, unknown>
+	sandbox?: AgentSandboxRuntimeConfig<Record<string, unknown>>
 	poolId: string
 	maxConcurrencyPerInstance: number
 	concurrencyHints?: {
@@ -84,20 +117,29 @@ type ResolvedAgentRuntimeDependencies = {
 	config?: Record<string, unknown>
 }
 
-type AgentServiceConfig<EmitPayloads extends Record<string, unknown> = Record<string, unknown>> = {
+type AgentServiceConfig<
+	Payload = unknown,
+	Parameter = unknown,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitPayloads extends Record<string, unknown> = Record<string, unknown>,
+	ToolInvokes extends ToolInvokeMap = ToolInvokeMap,
+> = {
 	runtime?: Record<string, unknown>
 	__agentRuntime: {
-		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any, EmitPayloads>
+		handler: AgentHandler<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes>
 		manifest: AgentManifest
 		conversationStore: ConversationStore
 		poolManager: PoolManager
 		models: Record<string, ModelProvider>
 		eventBridge: EventBridge
-		callOptionsSchema?: import('zod').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
-		prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
-		prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
+		callOptionsSchema?: import('zod').ZodType<import('../types/AgentHandler.js').AgentModelCallOptions>
+		prepareCall?: import('../types/AgentHandler.js').AgentPrepareCallHook
+		prepareStep?: import('../types/AgentHandler.js').AgentPrepareStepHook
 		tracer?: Tracer
 		resources: Record<string, unknown>
+		sandbox?: AgentSandboxRuntimeConfig<Record<string, unknown>>
 		poolId: string
 		maxConcurrencyPerInstance: number
 		concurrencyHints?: {
@@ -108,7 +150,7 @@ type AgentServiceConfig<EmitPayloads extends Record<string, unknown> = Record<st
 
 const supportsCapability = (
 	provider: ModelProvider,
-	capability: 'text' | 'stream' | 'embedding' | 'rerank' | 'json',
+	capability: 'text' | 'text-stream' | 'embedding' | 'rerank' | 'object' | 'object-stream',
 ) => {
 	const declared = provider.capabilities?.[capability]
 	if (declared === true) {
@@ -116,15 +158,17 @@ const supportsCapability = (
 	}
 	switch (capability) {
 		case 'text':
-			return typeof provider.generate === 'function'
-		case 'stream':
-			return typeof provider.stream === 'function'
+			return typeof provider.generateText === 'function'
+		case 'text-stream':
+			return typeof provider.streamText === 'function'
 		case 'embedding':
 			return typeof provider.embed === 'function'
 		case 'rerank':
 			return typeof provider.rerank === 'function'
-		case 'json':
-			return typeof provider.generateJson === 'function'
+		case 'object':
+			return typeof provider.generateObject === 'function'
+		case 'object-stream':
+			return typeof provider.streamObject === 'function'
 		default:
 			return false
 	}
@@ -149,15 +193,30 @@ const resolveSkillResource = <SkillNames extends string>(
 	return createInlineSkillResource(skills)
 }
 
-export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record<string, unknown>>
-	implements AgentInstanceContract<EmitPayloads>
+export class AgentInstance<
+	Payload = unknown,
+	Parameter = unknown,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
+	EmitPayloads extends Record<string, unknown> = Record<string, unknown>,
+	ToolInvokes extends ToolInvokeMap = ToolInvokeMap,
+> implements AgentInstanceContract<EmitPayloads>
 {
 	private service?: Service
-	private readonly dependencies: AgentInstanceDependencies<EmitPayloads>
+	private readonly dependencies: AgentInstanceDependencies<
+		Payload,
+		Parameter,
+		Resources,
+		Models,
+		AgentInvokes,
+		EmitPayloads,
+		ToolInvokes
+	>
 	private readonly runtime: ResolvedAgentRuntimeDependencies
 
 	constructor(
-		deps: AgentInstanceDependencies<EmitPayloads>,
+		deps: AgentInstanceDependencies<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes>,
 		eventBridge: EventBridge,
 		runtime: AgentRuntimeDependencies = {},
 	) {
@@ -184,6 +243,7 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 				...(runtime.resources ?? {}),
 				...(skillResource ? { skills: skillResource } : {}),
 			},
+			sandbox: runtime.sandbox as AgentSandboxRuntimeConfig<Record<string, unknown>> | undefined,
 			poolId,
 			maxConcurrencyPerInstance,
 			concurrencyHints: runtime.concurrencyHints,
@@ -194,7 +254,7 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 			if (!provider) {
 				throw new Error(`Missing model provider for alias "${model.alias}"`)
 			}
-			for (const capability of model.capabilities ?? ['text']) {
+			for (const capability of model.capabilities ?? defaultAgentModelCapabilities) {
 				if (!supportsCapability(provider, capability)) {
 					throw new Error(`Model provider "${model.alias}" does not support required capability "${capability}"`)
 				}
@@ -208,10 +268,8 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 		if (this.service) {
 			return
 		}
-		if (this.dependencies.manifest.executionMode === 'queued' && !this.runtime.queueBridge) {
-			throw new Error(
-				`Agent "${this.dependencies.info.agentName}" is configured for queued execution but no queueBridge was provided`,
-			)
+		if (!this.runtime.queueBridge) {
+			throw new Error(`Agent "${this.dependencies.info.agentName}" requires a queueBridge for execution`)
 		}
 
 		const runtimeConfigInput = {
@@ -231,7 +289,15 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 			resolvedRuntimeConfig = validationResult.data as Record<string, unknown>
 		}
 
-		const serviceConfig: AgentServiceConfig<EmitPayloads> = {
+		const serviceConfig: AgentServiceConfig<
+			Payload,
+			Parameter,
+			Resources,
+			Models,
+			AgentInvokes,
+			EmitPayloads,
+			ToolInvokes
+		> = {
 			runtime: resolvedRuntimeConfig,
 			__agentRuntime: {
 				handler: this.dependencies.handler,
@@ -245,14 +311,34 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 				prepareStep: this.dependencies.prepareStep,
 				tracer: this.runtime.tracer,
 				resources: this.runtime.resources,
+				sandbox: this.runtime.sandbox,
 				poolId: this.runtime.poolId,
 				maxConcurrencyPerInstance: this.runtime.maxConcurrencyPerInstance,
 				concurrencyHints: this.runtime.concurrencyHints,
 			},
 		}
-		const instanceResources = Object.keys(this.runtime.resources).length > 0 ? this.runtime.resources : undefined
 
-		this.service = await this.dependencies.serviceBuilder.getInstance(this.runtime.eventBridge, {
+		const executor = new AgentExecutor<Payload, Parameter, Resources, Models, AgentInvokes, EmitPayloads, ToolInvokes>({
+			manifest: this.dependencies.manifest,
+			handler: this.dependencies.handler,
+			models: this.runtime.models as Models,
+			poolManager: this.runtime.poolManager,
+			conversationStore: this.runtime.conversationStore,
+			logger: this.runtime.logger ?? initLogger(),
+			eventBridge: this.runtime.eventBridge,
+			tracer: this.runtime.tracer,
+			callOptionsSchema: this.dependencies.callOptionsSchema,
+			prepareCall: this.dependencies.prepareCall,
+			prepareStep: this.dependencies.prepareStep,
+			poolId: this.runtime.poolId,
+			maxConcurrencyPerInstance: this.runtime.maxConcurrencyPerInstance,
+			concurrencyHints: this.runtime.concurrencyHints,
+			resources: this.runtime.resources as Resources,
+			sandbox: this.runtime.sandbox as AgentSandboxRuntimeConfig<Resources> | undefined,
+		})
+		attachAgentExecutor(this.runtime.resources, executor)
+		type ServiceInstanceOptions = Parameters<AgentRuntimeServiceBuilder['getInstance']>[1]
+		const serviceInstanceOptions: ServiceInstanceOptions = {
 			logger: this.runtime.logger,
 			spanProcessor: this.runtime.spanProcessor,
 			secretStore: this.runtime.secretStore,
@@ -260,8 +346,10 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 			stateStore: this.runtime.stateStore,
 			queueBridge: this.runtime.queueBridge,
 			serviceConfig,
-			...(instanceResources ? { resources: instanceResources } : {}),
-		} as never)
+			resources: this.runtime.resources,
+		}
+
+		this.service = await this.dependencies.serviceBuilder.getInstance(this.runtime.eventBridge, serviceInstanceOptions)
 
 		await this.service.start()
 	}
@@ -288,7 +376,7 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 
 		return {
 			agentName: this.dependencies.info.agentName,
-			agentVersion: this.dependencies.info.agentVersion,
+			serviceVersion: this.dependencies.info.serviceVersion,
 			poolId: this.runtime.poolId,
 			maxConcurrencyPerInstance: this.runtime.maxConcurrencyPerInstance,
 			activeWorkers: pool.activeWorkers,
@@ -301,6 +389,10 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 						}
 					: undefined,
 		}
+	}
+
+	getManifest(): AgentManifest {
+		return this.dependencies.manifest
 	}
 
 	getExternalRuntimeMetadata() {
@@ -360,7 +452,7 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 			const envelopes = await invokeAgentInternal({
 				eventBridge: this.runtime.eventBridge,
 				agentName: this.dependencies.serviceBuilder.info.serviceName,
-				agentVersion: this.dependencies.serviceBuilder.info.serviceVersion,
+				serviceVersion: this.dependencies.serviceBuilder.info.serviceVersion,
 				payload: request.payload,
 				parameter: request.parameter,
 				correlationId: request.correlationId,
@@ -369,6 +461,7 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 				timeoutMs: request.timeoutMs,
 				principalId: request.principalId,
 				tenantId: request.tenantId,
+				otp: request.otp,
 				deliveryMode,
 				sender: {
 					serviceName: 'agent.runtime',
@@ -381,7 +474,11 @@ export class AgentInstance<EmitPayloads extends Record<string, unknown> = Record
 				await this.notifyStream(contextOverrides?.stream, envelopes)
 				await this.notifyStream(request.stream, envelopes)
 			}
-			return { envelopes }
+			return createAgentInvocationFinalResult({
+				envelopes,
+				agentName: this.dependencies.info.agentName,
+				serviceVersion: this.dependencies.serviceBuilder.info.serviceVersion,
+			})
 		} catch (error) {
 			await contextOverrides?.stream?.onError(error)
 			await request.stream?.onError(error)

@@ -10,6 +10,10 @@ import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
 import { Service } from '../core/Service/Service.impl.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
+import type {
+	AgentQueueDefinitionList,
+	AgentQueueDefinitionListResolved,
+} from '../core/types/agent/AgentQueueDefinition.js'
 import type { Complete } from '../core/types/Complete.js'
 import type {
 	CommandDefinitionList,
@@ -65,10 +69,8 @@ export type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 		configStore?: ConfigStore
 		stateStore?: StateStore
 		queueBridge?: QueueBridge
-	} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] }) &
-		(keyof S['ConfigInputType'] extends NeverObject
-			? { serviceConfig?: never }
-			: { serviceConfig?: S['ConfigInputType'] })
+	} & (keyof S['Resources'] extends never ? { resources?: never } : { resources: S['Resources'] }) &
+		(keyof S['ConfigInputType'] extends never ? { serviceConfig?: never } : { serviceConfig?: S['ConfigInputType'] })
 >
 
 /**
@@ -82,12 +84,14 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
 	private queueDefinitionList: QueueDefinitionList<S['ServiceClassType']> = []
 	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
+	private agentDefinitionList: AgentQueueDefinitionList = []
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
 	private streamDefinitionListResolved: StreamDefinitionListResolved<S['ServiceClassType']> = []
 	private queueDefinitionListResolved: QueueDefinitionListResolved<S['ServiceClassType']> = []
 	private queueWorkerDefinitionListResolved: QueueWorkerDefinitionListResolved<S['ServiceClassType']> = []
+	private agentDefinitionListResolved: AgentQueueDefinitionListResolved = []
 
 	private configSchema?: Schema
 	private defaultConfig?: Complete<S['ConfigType']>
@@ -184,6 +188,17 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this
 	}
 
+	addAgentDefinition(...agentDefinitions: AgentQueueDefinitionList) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add agents after resolveDefinitions is called.',
+			)
+		}
+		this.agentDefinitionList.push(...(agentDefinitions as AgentQueueDefinitionList))
+		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'AgentDefinitions', { __hasAgents: true }>>
+	}
+
 	public async resolveDefinitions() {
 		if (this.definitionsResolved) {
 			return {
@@ -192,6 +207,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				streams: this.streamDefinitionListResolved,
 				queues: this.queueDefinitionListResolved,
 				queueWorkers: this.queueWorkerDefinitionListResolved,
+				agents: this.agentDefinitionListResolved,
 			}
 		}
 
@@ -200,12 +216,14 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		this.streamDefinitionListResolved = await Promise.all(this.streamDefinitionList)
 		this.queueDefinitionListResolved = await Promise.all(this.queueDefinitionList)
 		this.queueWorkerDefinitionListResolved = await Promise.all(this.queueWorkerDefinitionList)
+		this.agentDefinitionListResolved = await Promise.all(this.agentDefinitionList)
 
 		this.subscriptionDefinitionList = []
 		this.commandDefinitionList = []
 		this.streamDefinitionList = []
 		this.queueDefinitionList = []
 		this.queueWorkerDefinitionList = []
+		this.agentDefinitionList = []
 
 		this.definitionsResolved = true
 		return {
@@ -214,6 +232,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			streams: this.streamDefinitionListResolved,
 			queues: this.queueDefinitionListResolved,
 			queueWorkers: this.queueWorkerDefinitionListResolved,
+			agents: this.agentDefinitionListResolved,
 		}
 	}
 

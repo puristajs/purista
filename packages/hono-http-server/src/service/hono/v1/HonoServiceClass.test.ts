@@ -213,6 +213,100 @@ describe('HonoServiceClass', () => {
 		).toThrowError(/already registered/i)
 	})
 
+	it('registers attached agent HTTP endpoints from ai-attached services', async () => {
+		const attachedAgentsSymbol = Symbol.for('@purista/ai/attachedAgentInstances')
+		const server = await createServer()
+		const addEndpointSpy = vi.spyOn(server, 'addEndpoint')
+		const endpointService = {
+			serviceInfo: {
+				serviceName: 'SupportService',
+				serviceVersion: '1',
+				serviceDescription: 'support service',
+			},
+			commandDefinitionList: [],
+			streamDefinitionList: [],
+			[attachedAgentsSymbol]: [
+				{
+					getManifest: () => ({
+						agentName: 'supportAgent',
+						serviceVersion: '1',
+						description: 'Support assistant',
+						httpExposure: {
+							method: 'POST',
+							path: 'agents/supportAgent',
+							streamingMode: 'stream',
+							streamProtocolAdapter: 'ai-sdk.ui-message',
+						},
+					}),
+				},
+			],
+		}
+
+		server.registerService(endpointService as any)
+
+		expect(addEndpointSpy).toHaveBeenCalledWith(
+			expect.objectContaining({
+				expose: expect.objectContaining({
+					contentTypeResponse: 'text/event-stream',
+					http: expect.objectContaining({
+						method: 'POST',
+						path: 'agents/supportAgent',
+						stream: expect.objectContaining({
+							mode: 'stream',
+							protocol: 'ai-sdk.ui-message',
+						}),
+					}),
+				}),
+			}),
+			{
+				serviceName: 'supportAgent',
+				serviceVersion: '1',
+				serviceTarget: 'run',
+			},
+		)
+	})
+
+	it('registers standalone agent runtime HTTP endpoints', async () => {
+		const server = await createServer()
+		const addEndpointSpy = vi.spyOn(server, 'addEndpoint')
+		const standaloneAgent = {
+			getManifest: () => ({
+				agentName: 'conductorAgent',
+				serviceVersion: '1',
+				description: 'Public conductor',
+				httpExposure: {
+					method: 'POST',
+					path: 'agents/conductorAgent',
+					streamingMode: 'stream',
+					streamProtocolAdapter: 'ai-sdk.ui-message',
+				},
+			}),
+		}
+
+		server.registerService(standaloneAgent as any)
+
+		expect(addEndpointSpy).toHaveBeenCalledWith(
+			expect.objectContaining({
+				expose: expect.objectContaining({
+					contentTypeResponse: 'text/event-stream',
+					http: expect.objectContaining({
+						method: 'POST',
+						path: 'agents/conductorAgent',
+						stream: expect.objectContaining({
+							mode: 'stream',
+							protocol: 'ai-sdk.ui-message',
+						}),
+					}),
+				}),
+			}),
+			{
+				serviceName: 'conductorAgent',
+				serviceVersion: '1',
+				serviceTarget: 'run',
+			},
+		)
+	})
+
 	it('accepts duplicate method+path registrations for the same logical service target', async () => {
 		const server = await createServer()
 		const plainTextDefinition = await plainTextCommand.getDefinition()

@@ -56,8 +56,7 @@ export const createAgentTestHarness = async <
 	stream(request: AgentInvokeRequest, contextOverrides?: Partial<AgentInvokeContext>): Promise<AgentStreamHarnessResult>
 	destroy(): Promise<void>
 }> => {
-	const queueBridge =
-		options.queueBridge ?? (definition.manifest.executionMode === 'queued' ? new DefaultQueueBridge() : undefined)
+	const queueBridge = options.queueBridge ?? new DefaultQueueBridge()
 	const ownedQueueBridge = queueBridge !== undefined && queueBridge !== options.queueBridge
 	const { instance, eventBridge, destroy } = await testAgent(definition, {
 		...options,

@@ -9,7 +9,7 @@ describe('approval helpers', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'approvalAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			},
 		})
 
@@ -40,7 +40,7 @@ describe('approval helpers', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'approvalAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			},
 		})
 
@@ -68,7 +68,7 @@ describe('approval helpers', () => {
 			payload: { prompt: 'hello' },
 			manifest: {
 				agentName: 'approvalAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 			},
 		})
 

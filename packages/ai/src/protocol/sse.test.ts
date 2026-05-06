@@ -20,16 +20,16 @@ const envelopes = [
 describe('toProtocolSseEvents', () => {
 	it('converts to ai-sdk responses stream events', async () => {
 		const events = []
-		for await (const event of toProtocolSseEvents(envelopes, 'ai-sdk-responses')) {
+		for await (const event of toProtocolSseEvents(envelopes, 'ai-sdk.responses')) {
 			events.push(event)
 		}
 		expect(events.some(event => event.event === 'response.created')).toBe(true)
 		expect(events.some(event => event.event === 'response.completed')).toBe(true)
 	})
 
-	it('supports ai-sdk data protocol alias and emits done marker', async () => {
+	it('supports ai-sdk ui-message mode and emits done marker', async () => {
 		const events = []
-		for await (const event of toProtocolSseEvents(envelopes, 'ai-sdk-data')) {
+		for await (const event of toProtocolSseEvents(envelopes, 'ai-sdk.ui-message')) {
 			events.push(event)
 		}
 		expect(events.some(event => event.event === 'data')).toBe(true)
@@ -60,38 +60,34 @@ describe('toProtocolSseEvents', () => {
 		})
 
 		const events = []
-		for await (const event of toProtocolSseEvents([artifactEnvelope], 'ai-sdk-json-render')) {
+		for await (const event of toProtocolSseEvents([artifactEnvelope], 'ai-sdk.ui-message', {
+			mapDataParts: envelope => {
+				const frame = envelope.frame
+				if (frame.kind !== 'artifact') return undefined
+				const content = frame.content
+				if (typeof content === 'object' && content !== null && 'root' in content && 'elements' in content) {
+					return {
+						type: 'data-spec',
+						data: { type: 'flat', spec: content },
+					}
+				}
+				return undefined
+			},
+		})) {
 			events.push(event)
 		}
 		expect(events.some(event => (event.data as { type?: string })?.type === 'data-spec')).toBe(true)
 		expect(events.at(-1)).toEqual({ event: 'data', data: '[DONE]' })
 	})
 
-	it('converts to reference agent2agent message events', async () => {
+	it('converts to purista native protocol', async () => {
 		const events = []
-		for await (const event of toProtocolSseEvents(envelopes, 'agent2agent')) {
+		for await (const event of toProtocolSseEvents(envelopes, 'purista')) {
 			events.push(event)
 		}
 		expect(events).toHaveLength(1)
 		expect(events[0]).toMatchObject({
 			event: 'message',
-			data: {
-				threadId: 'conv-1',
-			},
-		})
-	})
-
-	it('converts to a single reference mcp result event', async () => {
-		const events = []
-		for await (const event of toProtocolSseEvents(envelopes, 'mcp')) {
-			events.push(event)
-		}
-		expect(events).toHaveLength(1)
-		expect(events[0]).toMatchObject({
-			event: 'result',
-			data: {
-				content: [{ type: 'text', text: 'hello' }],
-			},
 		})
 	})
 })

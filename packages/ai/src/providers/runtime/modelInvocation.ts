@@ -1,4 +1,5 @@
 import { HandledError, StatusCode, UnhandledError } from '@purista/core'
+import { createProtocolSafeErrorDetails } from '../../runtime/errorDiagnostics.js'
 
 export type ModelInvocationRetryPolicy = {
 	maxAttempts: number
@@ -67,8 +68,20 @@ const isTransientLikeError = (error: unknown) => {
 	if (isSchemaLikeError(error) || isTimeoutLikeError(error)) {
 		return false
 	}
+	const code =
+		isRecord(error) && typeof error.code === 'string'
+			? toLower(error.code)
+			: error instanceof Error && 'code' in error && typeof error.code === 'string'
+				? toLower(error.code)
+				: isRecord(error) && isRecord(error.cause) && typeof error.cause.code === 'string'
+					? toLower(error.cause.code)
+					: undefined
 	return (
 		message.includes('fetch failed') ||
+		message.includes('enotfound') ||
+		message.includes('econnrefused') ||
+		message.includes('enetunreach') ||
+		message.includes('eai_again') ||
 		message.includes('econnreset') ||
 		message.includes('etimedout') ||
 		message.includes('socket hang up') ||
@@ -79,6 +92,10 @@ const isTransientLikeError = (error: unknown) => {
 		message.includes('gateway timeout') ||
 		message.includes('503') ||
 		message.includes('429') ||
+		code === 'enotfound' ||
+		code === 'econnrefused' ||
+		code === 'enetunreach' ||
+		code === 'eai_again' ||
 		(isRecord(error) && error.isRetryable === true)
 	)
 }
@@ -220,19 +237,27 @@ export const runBoundedModelInvocation = async <T>(input: {
 					attempts: attempt,
 				})
 			}
-			throw new UnhandledError(classification.statusCode, classification.message, {
+			const wrappedError = new UnhandledError(classification.statusCode, classification.message, {
 				label: input.label,
 				attempts: attempt,
 				timeoutMs,
-				cause: error,
 				kind: classification.kind,
+				details: createProtocolSafeErrorDetails(error),
 			})
+			wrappedError.cause = error
+			throw wrappedError
 		}
 	}
 
-	throw new UnhandledError(StatusCode.InternalServerError, `Model invocation for ${input.label} failed`, {
-		label: input.label,
-		cause: lastError,
-		attempts: maxAttempts,
-	})
+	const fallbackError = new UnhandledError(
+		StatusCode.InternalServerError,
+		`Model invocation for ${input.label} failed`,
+		{
+			label: input.label,
+			attempts: maxAttempts,
+			details: createProtocolSafeErrorDetails(lastError),
+		},
+	)
+	fallbackError.cause = lastError
+	throw fallbackError
 }

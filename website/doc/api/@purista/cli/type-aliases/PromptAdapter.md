@@ -8,7 +8,7 @@
 
 > **PromptAdapter** = `object`
 
-Defined in: [packages/cli/src/core/types.ts:85](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L85)
+Defined in: [packages/cli/src/core/types.ts:85](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L85)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/core/types.ts:85](https://github.com/puristajs/pur
 
 > **confirm**: (`request`) => `Promise`\<`boolean`\>
 
-Defined in: [packages/cli/src/core/types.ts:87](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L87)
+Defined in: [packages/cli/src/core/types.ts:87](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L87)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [packages/cli/src/core/types.ts:87](https://github.com/puristajs/pur
 
 > **input**: (`request`) => `Promise`\<`string`\>
 
-Defined in: [packages/cli/src/core/types.ts:86](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L86)
+Defined in: [packages/cli/src/core/types.ts:86](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L86)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/cli/src/core/types.ts:86](https://github.com/puristajs/pur
 
 > `optional` **note**: (`message`) => `Promise`\<`void`\> \| `void`
 
-Defined in: [packages/cli/src/core/types.ts:89](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L89)
+Defined in: [packages/cli/src/core/types.ts:89](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L89)
 
 #### Parameters
 
@@ -70,7 +70,7 @@ Defined in: [packages/cli/src/core/types.ts:89](https://github.com/puristajs/pur
 
 > **select**: (`request`) => `Promise`\<`string`\>
 
-Defined in: [packages/cli/src/core/types.ts:88](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/cli/src/core/types.ts#L88)
+Defined in: [packages/cli/src/core/types.ts:88](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/cli/src/core/types.ts#L88)
 
 #### Parameters
 

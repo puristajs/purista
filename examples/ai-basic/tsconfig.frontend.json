@@ -3,7 +3,10 @@
 	"compilerOptions": {
 		"rootDir": "src/frontend",
 		"jsx": "react-jsx",
-		"types": ["vite/client", "vitest/globals"]
+		"types": ["vite/client", "vitest/globals"],
+		"paths": {
+			"@/*": ["src/frontend/*"]
+		}
 	},
 	"include": ["src/frontend/**/*"],
 	"exclude": []

@@ -5,7 +5,7 @@ import { runBoundedModelInvocation } from './modelInvocation.js'
 import { collectStreamText } from './streamNormalization.js'
 
 export type GenerateTextOptions = {
-	model: Pick<ModelProvider, 'generate' | 'stream' | 'generateText'>
+	model: Pick<ModelProvider, 'streamText' | 'generateText'>
 	request: ProviderRequest
 	onReasoning?: (text: string) => void | Promise<void>
 	onTextDelta?: (delta: string) => void | Promise<void>
@@ -34,23 +34,18 @@ export const generateText = async (input: GenerateTextOptions): Promise<string> 
 				})
 			}
 
-			if (typeof model.stream === 'function') {
-				const final = await collectStreamText(model.stream(request), {
+			if (typeof model.streamText === 'function') {
+				const final = await collectStreamText(model.streamText(request), {
 					onReasoning,
 					onTextDelta,
 				})
 				return final.output
 			}
 
-			if (typeof model.generate === 'function') {
-				const result = await model.generate(request)
-				if (result.reasoningText?.trim()) {
-					await onReasoning?.(result.reasoningText)
-				}
-				return result.output
-			}
-
-			throw new UnhandledError(StatusCode.InternalServerError, 'Model provider must support stream() or generate()')
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Model provider must support streamText() or generateText()',
+			)
 		},
 	})
 }

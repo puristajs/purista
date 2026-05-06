@@ -13,11 +13,9 @@ import {
 	type Service,
 } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
-
-import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
-import { triageAgent } from './agents/triageAgent/v1/triageAgent.js'
-import { supportV1Service } from './service/support/v1/index.js'
-import { exampleSkills } from './skills.js'
+import { cors } from 'hono/cors'
+import { resetExampleConversationStore } from './service/desk/v1/exampleConversationStore.js'
+import { deskV1Service } from './service/desk/v1/index.js'
 
 const buildOpenAiProvider = (apiKey: string) => {
 	const openai = createOpenAI({ apiKey })
@@ -41,53 +39,44 @@ export async function main() {
 
 	const provider = buildOpenAiProvider(apiKey)
 	const queueBridge = new DefaultQueueBridge()
-	const supportService = await supportV1Service.getInstance(eventBridge, { logger, queueBridge })
-	await supportService.start()
+	const conversationStore = resetExampleConversationStore()
 
-	const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
-		logger,
-		models: {
-			'openai:gpt-4o-mini': provider,
-		},
-		poolConfig: {
-			maxConcurrencyPerInstance: 1,
-		},
-	})
-	await triageAgentInstance.start()
-
-	const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+	const deskService = await deskV1Service.getInstance(eventBridge, {
 		logger,
 		queueBridge,
-		models: {
-			'openai:gpt-4o-mini': provider,
-		},
-		resources: {
-			supportPolicy: {
-				developerInstruction:
-					'Keep answers short, operational, and grounded in the retrieved support facts and tool outputs.',
+		ai: {
+			conversationStore,
+			model: {
+				'openai:gpt-4o-mini': provider,
 			},
 		},
-		skills: exampleSkills,
-		poolConfig: {
-			poolId: 'support',
-			maxConcurrencyPerInstance: 2,
-		},
 	})
-	await supportAgentInstance.start()
 
-	const triageAgentService = (triageAgentInstance as unknown as { service?: Service }).service
-	const supportAgentService = (supportAgentInstance as unknown as { service?: Service }).service
+	await deskService.start()
 
 	const httpService = await honoV1Service.getInstance(eventBridge, {
 		logger,
 		serviceConfig: {
-			services: [supportService, supportAgentService, triageAgentService].filter(
-				(service): service is Service => service !== undefined,
-			),
+			services: [],
 		},
 	})
 
-	httpService.app.get('*', serveStatic({ root: './public' }))
+	if (process.env.FRONTEND_DEV === '1') {
+		httpService.app.use(
+			'/api/*',
+			cors({
+				origin: process.env.FRONTEND_DEV_ORIGIN ?? 'http://localhost:3000',
+				allowMethods: ['GET', 'POST', 'OPTIONS'],
+				allowHeaders: ['Content-Type', 'Accept'],
+			}),
+		)
+	}
+
+	httpService.registerService(...[deskService].filter((service): service is Service => service !== undefined))
+
+	if (process.env.FRONTEND_DEV !== '1') {
+		httpService.app.get('*', serveStatic({ root: './public' }))
+	}
 	await httpService.start()
 
 	const port = Number(process.env.PORT ?? 3000)
@@ -97,14 +86,24 @@ export async function main() {
 	})
 
 	logger.info(`ai-basic example started on http://localhost:${port}`)
-	logger.info('UI: /index.html')
-	logger.info('Command endpoint: POST /api/v1/support/ask')
-	logger.info('Agent stream endpoint: POST /api/v1/support/ask/stream')
-	logger.info('Conversation endpoint: POST /api/v1/support/conversation')
-	logger.info('MCP endpoint: POST /api/v1/support/mcp/call')
-	logger.info('MCP tools endpoint: GET /api/v1/support/mcp/tools')
-	logger.info('Agent2Agent endpoint: POST /api/v1/support/a2a/call')
-	logger.info('Direct agent endpoint: POST /api/v1/agents/supportAgent')
+	if (process.env.FRONTEND_DEV === '1') {
+		logger.info(
+			'Frontend dev mode active. Run the Vite app on http://localhost:3000 and use the backend on this port for /api proxying.',
+		)
+	} else {
+		logger.info('UI: /index.html')
+	}
+	logger.info('Command endpoint: POST /api/v1/desk/ask')
+	logger.info('Chat agent endpoint: POST /api/v1/agents/deskChatAgent')
+	logger.info('Research agent endpoint: POST /api/v1/agents/researchAgent')
+	logger.info('Planner agent endpoint: POST /api/v1/agents/deliveryPlannerAgent')
+	logger.info('Structured output endpoint: POST /api/v1/agents/architectureReviewAgent')
+	logger.info('Reflection endpoint: POST /api/v1/agents/reflectionAgent')
+	logger.info('MCP endpoint: POST /api/v1/desk/mcp/call')
+	logger.info('MCP tools endpoint: GET /api/v1/desk/mcp/tools')
+	logger.info('Agent2Agent endpoint: POST /api/v1/desk/a2a/call')
+	logger.info('History load endpoint: POST /api/v1/desk/history/load')
+	logger.info('History recent endpoint: POST /api/v1/desk/history/recent')
 
 	gracefulShutdown(logger, [
 		{
@@ -121,9 +120,7 @@ export async function main() {
 				}),
 		},
 		{ name: 'honoV1Service', destroy: () => httpService.destroy() },
-		{ name: 'supportAgent', destroy: () => supportAgentInstance.stop() },
-		{ name: 'triageAgent', destroy: () => triageAgentInstance.stop() },
-		{ name: 'supportService', destroy: () => supportService.destroy() },
+		{ name: 'deskService', destroy: () => deskService.destroy() },
 		{ name: 'queueBridge', destroy: () => queueBridge.destroy() },
 		{ name: eventBridge.name, destroy: () => eventBridge.destroy() },
 	])

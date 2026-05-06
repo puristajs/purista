@@ -49,17 +49,17 @@ export const toAiSdkToolName = (bindingName: string) => {
 	return sanitized.length > 0 ? sanitized : 'tool'
 }
 
-export const toAiSdkTool = (binding: ExternalBinding): AiSdkTool =>
-	Object.assign(
-		tool({
-			description: binding.description,
-			inputSchema: binding.inputSchema as any,
-			execute: async (payload: unknown) => await binding.execute(payload),
-		} as any),
-		{
-			externalRuntime: binding.externalRuntime,
-		},
-	)
+export const toAiSdkTool = (binding: ExternalBinding): AiSdkTool => {
+	const toolInput = {
+		description: binding.description,
+		inputSchema: binding.inputSchema,
+		execute: async (payload: unknown) => await binding.execute(payload),
+	}
+
+	return Object.assign(tool(toolInput as unknown as Parameters<typeof tool>[0]), {
+		externalRuntime: binding.externalRuntime,
+	})
+}
 
 export const toAiSdkTools = (bindings: ExternalBindingSet | ExternalBinding[]): AiSdkToolSet => {
 	const result: AiSdkToolSet = {}

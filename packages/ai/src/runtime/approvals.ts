@@ -44,7 +44,7 @@ type CreateAgentApprovalHelpersInput = {
 	protocol: ProtocolEmitter
 	approvalPolicy?: AgentApprovalPolicy
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 	serviceContext: ProtocolContext<any, any, Record<string, unknown>, any, any>
 }
 
@@ -55,16 +55,16 @@ const encode = (value: string) =>
 		.replaceAll(/-+/g, '-')
 		.replace(/^-|-$/g, '') || 'value'
 
-export const getApprovalStateKey = (agentName: string, agentVersion: string, checkpoint: string) =>
-	`purista:ai:approval:${encode(agentName)}:${encode(agentVersion)}:${encode(checkpoint)}`
+export const getApprovalStateKey = (agentName: string, serviceVersion: string, checkpoint: string) =>
+	`purista:ai:approval:${encode(agentName)}:${encode(serviceVersion)}:${encode(checkpoint)}`
 
 export const readApprovalDecision = async (
 	states: StateStoreHelpers,
 	agentName: string,
-	agentVersion: string,
+	serviceVersion: string,
 	checkpoint: string,
 ): Promise<ApprovalDecision | undefined> => {
-	const key = getApprovalStateKey(agentName, agentVersion, checkpoint)
+	const key = getApprovalStateKey(agentName, serviceVersion, checkpoint)
 	const result = await states.getState(key)
 	const decision = result[key]
 	if (!decision || typeof decision !== 'object') {
@@ -80,11 +80,11 @@ export const readApprovalDecision = async (
 export const writeApprovalDecision = async (
 	states: StateStoreHelpers,
 	agentName: string,
-	agentVersion: string,
+	serviceVersion: string,
 	checkpoint: string,
 	decision: ApprovalDecision,
 ) => {
-	await states.setState(getApprovalStateKey(agentName, agentVersion, checkpoint), decision)
+	await states.setState(getApprovalStateKey(agentName, serviceVersion, checkpoint), decision)
 	return decision
 }
 
@@ -135,7 +135,7 @@ export const createAgentApprovalHelpers = (input: CreateAgentApprovalHelpersInpu
 				const decision = await readApprovalDecision(
 					input.states,
 					input.agentName,
-					input.agentVersion,
+					input.serviceVersion,
 					options.checkpoint,
 				)
 				if (decision) {
@@ -197,10 +197,10 @@ export const createAgentApprovalHelpers = (input: CreateAgentApprovalHelpersInpu
 			reason: decisionInput.reason,
 			updatedAt: decisionInput.updatedAt,
 		}
-		await writeApprovalDecision(input.states, input.agentName, input.agentVersion, decisionInput.checkpoint, decision)
+		await writeApprovalDecision(input.states, input.agentName, input.serviceVersion, decisionInput.checkpoint, decision)
 		return decision
 	},
 	stateKey(checkpoint) {
-		return getApprovalStateKey(input.agentName, input.agentVersion, checkpoint)
+		return getApprovalStateKey(input.agentName, input.serviceVersion, checkpoint)
 	},
 })

@@ -9,6 +9,7 @@ import {
 	createTelemetryFrame,
 	createToolEventFrame,
 } from './helpers.js'
+import { PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID } from './taskArtifacts.js'
 
 describe('toAiSdkStreamEvents', () => {
 	const baseEnvelope = () =>
@@ -86,15 +87,113 @@ describe('toAiSdkStreamEvents', () => {
 			events.push(event)
 		}
 
-		expect(events.map(item => item.event)).toEqual(['data', 'data', 'data', 'data', 'data', 'data'])
+		expect(events.map(item => item.event)).toEqual(['data', 'data', 'data', 'data', 'data', 'data', 'data', 'data'])
 		expect(events.map(item => item.data.type)).toEqual([
 			'start',
+			'start-step',
 			'text-start',
 			'text-delta',
 			'text-delta',
 			'text-end',
+			'finish-step',
 			'finish',
 		])
+	})
+
+	it('keeps a stable UI text-part id across streamed assistant message envelopes', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-stable-text-id',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createArtifactFrame({
+					artifactId: 'voyage-status',
+					phase: 'chunk',
+					content: { phase: 'spec-update', status: 'running' },
+					mimeType: 'application/json',
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-stable-text-id',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({ role: 'assistant', content: 'Hello ', partial: true }),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-stable-text-id',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({ role: 'assistant', content: 'world', final: true }),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const textStart = events.find(item => item.data.type === 'text-start')
+		const textDeltas = events.filter(item => item.data.type === 'text-delta')
+		const textEnd = events.find(item => item.data.type === 'text-end')
+
+		expect(textStart?.data.id).toBeTruthy()
+		expect(textDeltas).toHaveLength(2)
+		expect(textDeltas[0]?.data.id).toBe(textStart?.data.id)
+		expect(textDeltas[1]?.data.id).toBe(textStart?.data.id)
+		expect(textEnd?.data.id).toBe(textStart?.data.id)
+	})
+
+	it('closes the current text part before finishing a tool step and starts a new one afterwards', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-text-tool-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({ role: 'assistant', content: 'Lead-in', partial: true }),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-text-tool-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createToolEventFrame({
+					toolName: 'demo.tool',
+					status: 'invoked',
+					args: { hello: 'world' },
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-text-tool-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createToolEventFrame({
+					toolName: 'demo.tool',
+					status: 'success',
+					result: { ok: true },
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-text-tool-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({ role: 'assistant', content: 'Final answer', final: true }),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const textStarts = events.filter(item => item.data.type === 'text-start')
+		const textEnds = events.filter(item => item.data.type === 'text-end')
+		const textDeltas = events.filter(item => item.data.type === 'text-delta')
+		const toolInputStartIndex = events.findIndex(item => item.data.type === 'tool-input-start')
+		const firstTextEndIndex = events.findIndex(item => item.data.type === 'text-end')
+		const secondTextStartIndex = events.findIndex(
+			(item, index) => item.data.type === 'text-start' && index > toolInputStartIndex,
+		)
+
+		expect(textStarts).toHaveLength(2)
+		expect(textEnds).toHaveLength(2)
+		expect(textStarts[0]?.data.id).not.toBe(textStarts[1]?.data.id)
+		expect(textDeltas[0]?.data.id).toBe(textStarts[0]?.data.id)
+		expect(textDeltas.at(-1)?.data.id).toBe(textStarts[1]?.data.id)
+		expect(firstTextEndIndex).toBeGreaterThan(-1)
+		expect(firstTextEndIndex).toBeGreaterThan(toolInputStartIndex)
+		expect(secondTextStartIndex).toBeGreaterThan(firstTextEndIndex)
 	})
 
 	it('can map protocol frames to custom data-* UI parts', async () => {
@@ -225,6 +324,44 @@ describe('toAiSdkStreamEvents', () => {
 		})
 	})
 
+	it('maps workflow-stage artifacts to data-purista-ai-workflow-stage parts', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-workflow',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createArtifactFrame({
+					artifactId: PURISTA_AI_WORKFLOW_STAGE_ARTIFACT_ID,
+					phase: 'chunk',
+					content: {
+						type: 'purista-ai-workflow-stage',
+						name: 'final-answer',
+						status: 'running',
+						summary: 'Synthesizing final answer.',
+					},
+					mimeType: 'application/json',
+				}),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const workflowEvent = events.find(
+			item => item.event === 'data' && item.data.type === 'data-purista-ai-workflow-stage',
+		)
+		expect(workflowEvent?.data).toMatchObject({
+			type: 'data-purista-ai-workflow-stage',
+			data: {
+				type: 'purista-ai-workflow-stage',
+				name: 'final-answer',
+				status: 'running',
+				summary: 'Synthesizing final answer.',
+			},
+		})
+	})
+
 	it('maps reasoning artifacts to reasoning-* ui-message events', async () => {
 		const envelopes = [
 			createProtocolEnvelope({
@@ -283,12 +420,64 @@ describe('toAiSdkStreamEvents', () => {
 		}
 
 		const types = events.map(item => item.data.type)
+		expect(types.indexOf('start')).toBeLessThan(types.indexOf('tool-input-start'))
+		expect(types).not.toContain('text-start')
 		expect(types).toContain('start-step')
 		expect(types).toContain('tool-input-start')
 		expect(types).toContain('tool-input-delta')
 		expect(types).toContain('tool-input-available')
 		expect(types).toContain('tool-output-available')
 		expect(types).toContain('finish-step')
+		expect(events.some(item => item.data.type === 'tool-input-available' && item.data.input !== undefined)).toBe(true)
+		expect(events.some(item => item.data.type === 'tool-output-available' && item.data.output !== undefined)).toBe(true)
+	})
+
+	it('starts text only when assistant text actually arrives after tool steps', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-tool-then-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createToolEventFrame({
+					toolName: 'researchAgent.1.run',
+					status: 'invoked',
+					args: { prompt: 'find docs' },
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-tool-then-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createToolEventFrame({
+					toolName: 'researchAgent.1.run',
+					status: 'success',
+					result: { ok: true },
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-tool-then-text',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({
+					role: 'assistant',
+					content: 'Final synthesized answer.',
+					final: true,
+				}),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const types = events.filter(item => item.event === 'data').map(item => String(item.data.type))
+		const finishStepIndexes = types
+			.map((type, index) => (type === 'finish-step' ? index : -1))
+			.filter(index => index >= 0)
+		expect(types.indexOf('start')).toBeLessThan(types.indexOf('tool-input-start'))
+		expect(types.indexOf('tool-input-start')).toBeLessThan(types.indexOf('text-start'))
+		expect(finishStepIndexes[0]).toBeLessThan(types.indexOf('text-start'))
+		expect(types.indexOf('text-end')).toBeLessThan(finishStepIndexes.at(-1) ?? -1)
+		expect(types.indexOf('text-start')).toBeLessThan(types.indexOf('text-delta'))
+		expect(types.indexOf('text-delta')).toBeLessThan(types.indexOf('text-end'))
 	})
 
 	it('maps source and file artifacts to source-url/source-document/file events', async () => {

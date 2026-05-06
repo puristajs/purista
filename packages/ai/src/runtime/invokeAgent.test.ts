@@ -1,8 +1,28 @@
-import { HandledError, StatusCode, UnhandledError } from '@purista/core'
+import { type EventBridge, HandledError, StatusCode, UnhandledError } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import { invokeAgent } from './invokeAgent.js'
+
+type MockEventBridge = Pick<EventBridge, 'instanceId' | 'openStream' | 'invoke'>
+
+type MockedEventBridge = EventBridge & {
+	openStream: ReturnType<typeof vi.fn>
+	invoke: ReturnType<typeof vi.fn>
+}
+
+const createEventBridge = (overrides: Partial<MockEventBridge> = {}): MockedEventBridge => {
+	const fallbackOpenStream = vi
+		.fn()
+		.mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable'))
+	const bridge: MockEventBridge = {
+		instanceId: 'instance-1',
+		openStream: fallbackOpenStream,
+		invoke: vi.fn(),
+		...overrides,
+	}
+	return bridge as MockedEventBridge
+}
 
 describe('invokeAgent', () => {
 	it('opens an agent stream by default and returns collected envelopes', async () => {
@@ -15,16 +35,15 @@ describe('invokeAgent', () => {
 				yield { payload: { frameType: 'complete', sequence: 2, final: envelopes } }
 			},
 		})
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream,
 			invoke: vi.fn(),
-		} as any
+		})
 
 		const result = await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 			parameter: { locale: 'en' },
 		})
@@ -37,8 +56,7 @@ describe('invokeAgent', () => {
 	})
 
 	it('reuses the provided trace id for child-agent invocation', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -47,12 +65,12 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 			traceId: 'trace-parent-1',
 		})
@@ -60,13 +78,35 @@ describe('invokeAgent', () => {
 		expect(eventBridge.openStream.mock.calls[0][0].traceId).toBe('trace-parent-1')
 	})
 
+	it('forwards otp for child-agent invocation', async () => {
+		const eventBridge = createEventBridge({
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'complete', sequence: 1, final: [] } }
+				},
+			}),
+			invoke: vi.fn(),
+		})
+
+		await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			serviceVersion: '1',
+			payload: { prompt: 'hello' },
+			otp: 'serialized-parent-span',
+		})
+
+		expect(eventBridge.openStream.mock.calls[0][0].otp).toBe('serialized-parent-span')
+	})
+
 	it('streams envelopes incrementally when a stream responder is provided', async () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'one', role: 'assistant' } },
 			{ frame: { kind: 'message', content: 'two', role: 'assistant' } },
 		] as AgentProtocolEnvelope[]
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -77,7 +117,7 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		const onFrame = vi.fn()
 		const onComplete = vi.fn()
@@ -86,7 +126,7 @@ describe('invokeAgent', () => {
 		await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'stream' },
 			stream: { onFrame, onComplete, onError },
 		})
@@ -101,8 +141,7 @@ describe('invokeAgent', () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'final', role: 'assistant', final: true } },
 		] as AgentProtocolEnvelope[]
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -112,12 +151,12 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'stream' },
 			stream: {
 				onFrame: async envelope => {
@@ -140,16 +179,15 @@ describe('invokeAgent', () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'fallback', role: 'assistant' } },
 		] as AgentProtocolEnvelope[]
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue(envelopes),
-		} as any
+		})
 
 		const result = await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 		})
 
@@ -159,17 +197,16 @@ describe('invokeAgent', () => {
 	})
 
 	it('fails fast in require-stream mode when stream is unavailable', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		await expect(
 			invokeAgent({
 				eventBridge,
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'hello' },
 				deliveryMode: 'require-stream',
 			}),
@@ -182,8 +219,7 @@ describe('invokeAgent', () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'final-only', role: 'assistant' } },
 		] as AgentProtocolEnvelope[]
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -192,7 +228,7 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		const onFrame = vi.fn()
 		const onComplete = vi.fn()
@@ -201,7 +237,7 @@ describe('invokeAgent', () => {
 		const result = await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 			stream: { onFrame, onComplete, onError },
 		})
@@ -215,12 +251,11 @@ describe('invokeAgent', () => {
 	it('merges completion envelopes even when chunk frames were already streamed', async () => {
 		const statusEnvelope = {
 			frame: { kind: 'artifact', artifactId: 'status', mimeType: 'application/json', content: '{}' },
-		} as AgentProtocolEnvelope
+		} as unknown as AgentProtocolEnvelope
 		const finalMessageEnvelope = {
 			frame: { kind: 'message', content: '{"ok":true}', role: 'assistant', final: true },
-		} as AgentProtocolEnvelope
-		const eventBridge = {
-			instanceId: 'instance-1',
+		} as unknown as AgentProtocolEnvelope
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -236,13 +271,13 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		const onFrame = vi.fn()
 		const result = await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 			stream: { onFrame, onComplete: vi.fn(), onError: vi.fn() },
 		})
@@ -252,8 +287,7 @@ describe('invokeAgent', () => {
 	})
 
 	it('throws stream error frames as UnhandledError', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -262,7 +296,7 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		const onError = vi.fn()
 
@@ -270,7 +304,7 @@ describe('invokeAgent', () => {
 			invokeAgent({
 				eventBridge,
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'hello' },
 				stream: { onFrame: vi.fn(), onComplete: vi.fn(), onError },
 			}),
@@ -279,8 +313,7 @@ describe('invokeAgent', () => {
 	})
 
 	it('throws when agent returns protocol error envelope in stream chunks', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockResolvedValue({
 				sessionId: 'stream-1',
 				cancel: vi.fn(),
@@ -302,21 +335,20 @@ describe('invokeAgent', () => {
 				},
 			}),
 			invoke: vi.fn(),
-		} as any
+		})
 
 		await expect(
 			invokeAgent({
 				eventBridge,
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'hello' },
 			}),
 		).rejects.toBeInstanceOf(HandledError)
 	})
 
 	it('throws when fallback invoke returns protocol error envelope', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue([
 				{
@@ -328,21 +360,20 @@ describe('invokeAgent', () => {
 					},
 				},
 			]),
-		} as any
+		})
 
 		await expect(
 			invokeAgent({
 				eventBridge,
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'hello' },
 			}),
 		).rejects.toThrow('Sub-agent failed')
 	})
 
 	it('keeps unhandled protocol error envelopes as UnhandledError', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue([
 				{
@@ -354,13 +385,13 @@ describe('invokeAgent', () => {
 					},
 				},
 			]),
-		} as any
+		})
 
 		await expect(
 			invokeAgent({
 				eventBridge,
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'hello' },
 			}),
 		).rejects.toBeInstanceOf(UnhandledError)
@@ -377,16 +408,15 @@ describe('invokeAgent', () => {
 				},
 			},
 		] as AgentProtocolEnvelope[]
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue(envelopes),
-		} as any
+		})
 
 		const result = await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 			failOnErrorFrame: false,
 		})
@@ -396,18 +426,17 @@ describe('invokeAgent', () => {
 
 	it('propagates fallback invoke failure to stream responder', async () => {
 		const fallbackError = new Error('fallback invoke failed')
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockRejectedValue(fallbackError),
-		} as any
+		})
 
 		const onError = vi.fn()
 		await expect(
 			invokeAgent({
 				eventBridge,
 				agentName: 'supportAgent',
-				agentVersion: '1',
+				serviceVersion: '1',
 				payload: { prompt: 'hello' },
 				stream: { onFrame: vi.fn(), onComplete: vi.fn(), onError },
 			}),
@@ -416,16 +445,15 @@ describe('invokeAgent', () => {
 	})
 
 	it('injects sessionId into object payloads when provided', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue([]),
-		} as any
+		})
 
 		await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello' },
 			sessionId: 'chat-123',
 		})
@@ -438,16 +466,15 @@ describe('invokeAgent', () => {
 	})
 
 	it('does not override payload sessionId when already present', async () => {
-		const eventBridge = {
-			instanceId: 'instance-1',
+		const eventBridge = createEventBridge({
 			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue([]),
-		} as any
+		})
 
 		await invokeAgent({
 			eventBridge,
 			agentName: 'supportAgent',
-			agentVersion: '1',
+			serviceVersion: '1',
 			payload: { prompt: 'hello', sessionId: 'existing' },
 			sessionId: 'chat-123',
 		})

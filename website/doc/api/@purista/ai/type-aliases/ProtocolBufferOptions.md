@@ -8,15 +8,23 @@
 
 > **ProtocolBufferOptions** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:277](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L277)
+Defined in: [packages/ai/src/runtime/context.ts:683](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L683)
 
 ## Properties
+
+### identity?
+
+> `optional` **identity**: `AgentInvocationIdentity`
+
+Defined in: [packages/ai/src/runtime/context.ts:685](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L685)
+
+***
 
 ### onEnvelope()?
 
 > `optional` **onEnvelope**: (`envelope`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/ai/src/runtime/context.ts:278](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/runtime/context.ts#L278)
+Defined in: [packages/ai/src/runtime/context.ts:684](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/runtime/context.ts#L684)
 
 #### Parameters
 

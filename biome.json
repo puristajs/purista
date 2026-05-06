@@ -108,6 +108,14 @@
 	},
 	"overrides": [
 		{
+			"includes": ["**/examples/ai-basic/src/frontend/styles.css"],
+			"css": {
+				"parser": {
+					"tailwindDirectives": true
+				}
+			}
+		},
+		{
 			"includes": ["**/packages/cli/**"],
 			"linter": {
 				"rules": {

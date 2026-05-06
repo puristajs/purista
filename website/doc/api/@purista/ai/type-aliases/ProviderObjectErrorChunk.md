@@ -8,7 +8,7 @@
 
 > **ProviderObjectErrorChunk** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:165](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L165)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:170](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L170)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:165](https://git
 
 > **error**: `unknown`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:167](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L167)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:172](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L172)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:167](https://git
 
 > **type**: `"error"`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:166](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L166)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:171](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L171)

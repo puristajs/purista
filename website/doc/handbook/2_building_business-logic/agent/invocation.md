@@ -73,33 +73,52 @@ For most internal orchestration, you only need the final result of the child age
   ```ts
   const triageSummary = await context.invoke.agents.runText({
     agentName: 'triageAgent',
-    agentVersion: '1',
+    serviceVersion: '1',
     payload: { prompt: payload.prompt },
   });
   ```
-- **`runObject<T>(...)`**: Use when the child agent returns a structured JSON object in its final message.
+- **`runObject<T>(...)`**: Use when the child agent declares structured output. PURISTA reads the final `output` artifact as the canonical machine result instead of parsing assistant text.
   ```ts
   const triageData = await context.invoke.agents.runObject<{
     urgency: 'low' | 'medium' | 'high';
   }>({
     agentName: 'triageAgent',
-    agentVersion: '1',
+    serviceVersion: '1',
     payload: { prompt: payload.prompt },
   });
   ```
 
-### Forwarding for UI-Visible Children
+### Stream Pipelines for UI-Visible Children
 
-Use `forward(...)` only when the child agent's progress should be streamed directly to the end user. This is common for orchestrator or supervisor agents.
+Use `stream(...)` when the parent needs live control over a child agent's canonical envelopes. This is the preferred composition API because it avoids hand-written `for await` loops and keeps forwarding, tapping, and collection in one place.
+
+```ts
+const childEnvelopes = await context.invoke.agents
+  .stream({
+    agentName: 'projectArchitectureAgent',
+    serviceVersion: '1',
+    payload: { prompt: 'Design a new microservice' },
+    emitInvocationToolEvents: false,
+  })
+  .forwardToCurrentStream({
+    assistant: true,
+    reasoning: true,
+    artifacts: true,
+    errors: true,
+  })
+  .collect()
+```
+
+Use `forward(...)` when you want the same forwarding behavior with the default orchestration settings and do not need extra composition steps.
 
 ```ts
 await context.invoke.agents.forward({
   agentName: 'projectArchitectureAgent',
-  agentVersion: '1',
+  serviceVersion: '1',
   payload: { prompt: 'Design a new microservice' },
 });
 ```
-Forwarding streams the child agent's assistant text, reasoning, artifacts, and run state directly into the parent's output stream. It requires stream-capable transport and fails fast when streams are unavailable. For internal-only child agents, prefer `runText` or `runObject`.
+Forwarding streams the child agent's assistant text, reasoning, artifacts, run state, tool frames, and errors directly into the parent's output stream when enabled. Forwarded envelopes keep the original child identity and lineage; the parent only adds separate orchestration frames of its own. For internal-only child agents, prefer `runText` or `runObject`.
 
 ### Full Control with `invoke(...)`
 
@@ -108,7 +127,7 @@ For advanced use cases where you need raw access to the child agent's protocol e
 ```ts
 const envelopes = await context.invoke.agents.invoke({
   agentName: 'triageAgent',
-  agentVersion: '1',
+  serviceVersion: '1',
   payload: { prompt: payload.prompt },
   forwardToCurrentStream: {
     assistant: true, // Forward assistant messages
@@ -129,7 +148,7 @@ import { invokeAgent } from '@purista/ai';
 const result = await invokeAgent({
   eventBridge,
   agentName: 'supportAgent',
-  agentVersion: '1',
+  serviceVersion: '1',
   payload: { prompt: 'A customer was charged twice.' },
   sessionId: 'manual-session-123',
   deliveryMode: 'prefer-stream', // default
@@ -154,7 +173,7 @@ When calling child agents via `context.invoke.agents`, you can pass several opti
 | `forwardToCurrentStream` | Forwards frames from the child to the parent's stream. Can be `true` or an object for fine-grained control. |
 | `emitInvocationToolEvents` | If `true` (default), the child agent call will appear as a `tool` event in the parent's protocol stream.      |
 
-For `runObject(...)`, you can also pass `outputSchema` to validate parsed JSON at call time. If omitted, PURISTA uses any `outputSchema` declared via `.canInvokeAgent(...)`.
+For `runObject(...)`, you can also pass `outputSchema` to validate the canonical final `output` artifact at call time. If omitted, PURISTA uses any `outputSchema` declared via `.canInvokeAgent(...)`.
 
 ## Error Handling
 
@@ -167,7 +186,8 @@ PURISTA's standard error handling applies to agent invocations:
 
 - **Service-to-Agent**: Use `context.invokeAgent`.
 - **Internal Agent-to-Agent**: Use `context.invoke.agents.runText(...)` or `runObject<T>(...)`.
-- **UI-Visible Child Agent**: Use `context.invoke.agents.forward(...)`.
+- **UI-Visible Child Agent**: Use `context.invoke.agents.stream(...).forwardToCurrentStream(...).collect()`.
+- **Simple UI Relay**: Use `context.invoke.agents.forward(...)`.
 - **Full Control Needed**: Use `context.invoke.agents.invoke(...)` with custom options.
 - **External Runtime Caller**: Use `invokeAgent(...)` with explicit `deliveryMode` when needed.
 

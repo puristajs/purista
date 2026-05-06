@@ -8,7 +8,7 @@
 
 > **TestSpan** = `object`
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:75](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L75)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:82](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L82)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:75](https://githu
 
 > **addEvent**: [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[`string`, `Record`\<`string`, `unknown`\>?\], `void`\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:78](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L78)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:85](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L85)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:78](https://githu
 
 > **end**: [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[\], `void`\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:81](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L81)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:88](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L88)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:81](https://githu
 
 > **recordException**: [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[`unknown`\], `void`\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:80](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L80)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:87](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L87)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:80](https://githu
 
 > **setAttribute**: [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[`string`, `unknown`\], `void`\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:76](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L76)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:83](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L83)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:76](https://githu
 
 > **setAttributes**: [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[`Record`\<`string`, `unknown`\>\], `void`\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:77](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L77)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:84](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L84)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:77](https://githu
 
 > **setStatus**: [`AgentContextMockSpy`](AgentContextMockSpy.md)\<\[`unknown`\], `void`\>
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:79](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L79)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:86](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L86)
 
 ## Methods
 
@@ -64,7 +64,7 @@ Defined in: [packages/ai/src/testing/createAgentContextMock.ts:79](https://githu
 
 > **spanContext**(): `object`
 
-Defined in: [packages/ai/src/testing/createAgentContextMock.ts:82](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/createAgentContextMock.ts#L82)
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:89](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/createAgentContextMock.ts#L89)
 
 #### Returns
 

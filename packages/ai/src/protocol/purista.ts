@@ -1,16 +1,14 @@
 import type { ContextBase, EBMessage } from '@purista/core'
-import { HandledError, PuristaSpanName } from '@purista/core'
+import { PuristaSpanName } from '@purista/core'
 
-import type { AgentExecutionResult } from '../runtime/executeAgentWorkload.js'
+import { createProtocolSafeErrorDetails } from '../runtime/errorDiagnostics.js'
+import { resolveConversationId } from '../runtime/invocationIdentity.js'
 import {
 	type AgentProtocolEnvelope,
 	type AgentProtocolFrame,
 	createActor,
 	createErrorFrame,
-	createMessageFrame,
 	createProtocolEnvelope,
-	createTelemetryFrame,
-	createTokenUsage,
 	type ProtocolActor,
 } from './index.js'
 
@@ -31,7 +29,12 @@ const deriveActor = (message: EBMessage): ProtocolActor =>
 		instanceId: message.sender.instanceId,
 	})
 
-const deriveConversationId = (message: EBMessage) => message.correlationId ?? message.id
+const deriveConversationId = (message: EBMessage) =>
+	resolveConversationId({
+		payload: message.payload,
+		transportMessageId: message.id,
+		sessionId: undefined,
+	})
 
 export const createEnvelopeFromContext = (
 	context: ContextBase & { message: EBMessage },
@@ -66,10 +69,7 @@ export const createErrorEnvelopeFromContext = (
 		code: overrides?.code ?? 'AgentError',
 		message: err.message,
 		handled: overrides?.handled ?? false,
-		details: {
-			stack: err.stack,
-			cause: err.cause,
-		},
+		details: createProtocolSafeErrorDetails(error),
 	})
 
 	return createEnvelopeFromContext(context, frame, overrides)
@@ -87,67 +87,4 @@ export const recordProtocolFrameAsSpan = async (
 		span.setAttribute('purista.ai.frame', frame.kind)
 		return envelope
 	})
-}
-
-export type AgentProtocolRunOptions = PuristaProtocolOptions & {
-	summary?: string
-	role?: AgentProtocolEnvelope['role']
-}
-
-/**
- * Utility used by commands and subscriptions to wrap an agent workload execution call
- * so protocol envelopes (message + telemetry + errors) are emitted consistently.
- */
-export const runAgentWithProtocol = async (
-	context: ContextBase & { message: EBMessage },
-	runner: () => Promise<AgentExecutionResult>,
-	options?: AgentProtocolRunOptions,
-) => {
-	const started = Date.now()
-	try {
-		const result = await runner()
-		const envelopes: AgentProtocolEnvelope[] = [
-			createEnvelopeFromContext(
-				context,
-				createMessageFrame({
-					role: options?.role ?? 'assistant',
-					content: result.output,
-					summary: options?.summary,
-					final: true,
-				}),
-				options,
-			),
-		]
-
-		if (result.tokens || result.durationMs) {
-			envelopes.push(
-				createEnvelopeFromContext(
-					context,
-					createTelemetryFrame({
-						usage: result.tokens
-							? createTokenUsage({
-									promptTokens: result.tokens.prompt,
-									completionTokens: result.tokens.completion,
-									totalTokens: (result.tokens.prompt ?? 0) + (result.tokens.completion ?? 0),
-								})
-							: undefined,
-						durationMs: result.durationMs ?? Date.now() - started,
-						poolId: options?.metadata?.poolId as string | undefined,
-						provider: options?.metadata?.provider as string | undefined,
-					}),
-					options,
-				),
-			)
-		}
-
-		return envelopes
-	} catch (error) {
-		context.logger?.error({ err: error, agent: context.message.sender.serviceTarget }, 'agent execution failed')
-		const envelope = createErrorEnvelopeFromContext(context, error, {
-			...options,
-			handled: error instanceof HandledError,
-		})
-
-		return [envelope]
-	}
 }

@@ -8,13 +8,13 @@ export const destroySandboxCommandBuilder = sandboxServiceBuilder
 	.addPayloadSchema(DestroySandboxInputSchema)
 	.addOutputSchema(DestroySandboxOutputSchema)
 	.exposeAsHttpEndpoint('DELETE', 'sandbox/:sandboxId')
-	.setCommandFunction(async function (context: any, payload: { sandboxId: string }) {
+	.setCommandFunction(async function (context: any, payload: { sandboxId: string; projectId: string }) {
 		const metadata = await context.resources.registry.getMetadata(payload.sandboxId)
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
-		assertSandboxAccess(context, metadata)
-		await context.resources.driver.destroySandbox(payload)
+		assertSandboxAccess(context, metadata, payload.projectId)
+		await context.resources.driver.destroySandbox({ sandboxId: payload.sandboxId })
 		await context.resources.registry.unregister(payload.sandboxId)
 		return { sandboxId: payload.sandboxId, destroyed: true }
 	})

@@ -10,7 +10,7 @@ export type DurableAgentQueuePayload = {
 	correlationId?: string
 	principalId?: string
 	tenantId?: string
-	extraScope?: Record<string, string>
+	scope?: Record<string, string>
 }
 
 export type DurableAgentQueueResult = AgentTerminalResult & {
@@ -26,7 +26,7 @@ export const durableAgentQueuePayloadSchema = extendApi(
 		correlationId: z.string().optional(),
 		principalId: z.string().optional(),
 		tenantId: z.string().optional(),
-		extraScope: z.record(z.string(), z.string()).optional(),
+		scope: z.record(z.string(), z.string()).optional(),
 	}),
 	{ title: 'DurableAgentQueuePayload' },
 )

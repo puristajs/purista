@@ -37,6 +37,19 @@ export const messageFrameSchema = extendApi(
 	{ title: 'Agent message frame' },
 )
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | Record<string, unknown>
+
+export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+	z.union([
+		z.null(),
+		z.boolean(),
+		z.number(),
+		z.string(),
+		z.array(jsonValueSchema),
+		z.record(z.string(), jsonValueSchema),
+	]),
+)
+
 export const artifactFrameSchema = extendApi(
 	z.object({
 		kind: z.literal('artifact'),
@@ -44,7 +57,7 @@ export const artifactFrameSchema = extendApi(
 		phase: z.enum(['chunk', 'final']),
 		sequence: z.number().int().nonnegative().optional(),
 		total: z.number().int().positive().optional(),
-		content: z.union([z.string(), z.record(z.string(), z.unknown())]),
+		content: jsonValueSchema,
 		mimeType: z.string().optional(),
 		lastChunk: z.boolean().optional(),
 	}),
@@ -118,3 +131,16 @@ export const agentProtocolEnvelopeSchema = extendApi(
 	{ title: 'Agent protocol envelope' },
 )
 export type AgentProtocolEnvelope = z.infer<typeof agentProtocolEnvelopeSchema>
+
+export type WireEvent = {
+	event: string
+	data: unknown
+}
+
+export interface StreamProtocolAdapter {
+	readonly name: string
+	readonly contentType: string
+	toWire(envelopes: AgentProtocolEnvelope[]): AsyncGenerator<WireEvent>
+	fromWire?(event: unknown): AgentProtocolEnvelope | null
+	getOpenApiSpec?(): { contentType: string; encoding?: string }
+}

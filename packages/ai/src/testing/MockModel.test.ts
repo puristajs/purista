@@ -9,13 +9,13 @@ describe('MockModel', () => {
 			.on(/hello/)
 			.reply(request => `second:${request.prompt}`)
 
-		const generated = await model.generate?.({ prompt: 'hello world' })
-		expect(generated?.output).toBe('first')
+		const generated = await model.generateText?.({ prompt: 'hello world' })
+		expect(generated).toBe('first')
 	})
 
 	it('supports json matcher and function replies', async () => {
 		const model = new MockModel().onJson({ type: 'object' }).reply(() => ({ ok: true }))
-		const result = await model.generateJson?.({
+		const result = await model.generateObject?.({
 			prompt: 'return json',
 			schema: { type: 'object' },
 		})

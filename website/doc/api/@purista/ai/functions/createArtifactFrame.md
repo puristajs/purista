@@ -8,7 +8,7 @@
 
 > **createArtifactFrame**(`input`): `object`
 
-Defined in: [packages/ai/src/protocol/helpers.ts:66](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/helpers.ts#L66)
+Defined in: [packages/ai/src/protocol/helpers.ts:67](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/helpers.ts#L67)
 
 ## Parameters
 
@@ -20,7 +20,7 @@ Defined in: [packages/ai/src/protocol/helpers.ts:66](https://github.com/puristaj
 
 #### content
 
-`string` \| `Record`\<`string`, `unknown`\>
+[`JsonValue`](../type-aliases/JsonValue.md)
 
 #### lastChunk?
 
@@ -52,7 +52,7 @@ Defined in: [packages/ai/src/protocol/helpers.ts:66](https://github.com/puristaj
 
 ### content
 
-> `readonly` **content**: `string` \| `Record`\<`string`, `unknown`\> = `input.content`
+> `readonly` **content**: [`JsonValue`](../type-aliases/JsonValue.md)
 
 ### kind
 

@@ -8,7 +8,7 @@
 
 > **AgentQualityProfile** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:62](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L62)
+Defined in: [packages/ai/src/types/AgentManifest.ts:63](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L63)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:62](https://github.com/puris
 
 > `optional` **execution**: `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:72](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L72)
+Defined in: [packages/ai/src/types/AgentManifest.ts:73](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L73)
 
 #### maxModelSteps?
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:72](https://github.com/puris
 
 > `optional` **reflection**: `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:63](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L63)
+Defined in: [packages/ai/src/types/AgentManifest.ts:64](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L64)
 
 #### enabled?
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:63](https://github.com/puris
 
 > `optional` **verification**: `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:69](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L69)
+Defined in: [packages/ai/src/types/AgentManifest.ts:70](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L70)
 
 #### required?
 

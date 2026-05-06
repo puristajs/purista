@@ -8,7 +8,7 @@
 
 > **publishAgentManifest**(`configSetter`, `definition`): `Promise`\<\{ `configKey`: `string`; `manifest`: [`AgentManifest`](../type-aliases/AgentManifest.md); \}\>
 
-Defined in: [packages/ai/src/manifest/publisher.ts:14](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/manifest/publisher.ts#L14)
+Defined in: [packages/ai/src/manifest/publisher.ts:14](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/manifest/publisher.ts#L14)
 
 Publishes a built agent manifest to a managed config store.
 
@@ -29,6 +29,6 @@ Publishes a built agent manifest to a managed config store.
 ## Example
 
 ```ts
-const definition = new AgentBuilder({ agentName: 'planner', agentVersion: '1' }).build()
+const definition = new AgentBuilder({ agentName: 'planner', serviceVersion: '1' }).build()
 await publishAgentManifest(service.configs.setConfig.bind(service.configs), definition)
 ```

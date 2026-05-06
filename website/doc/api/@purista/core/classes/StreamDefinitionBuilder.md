@@ -6,7 +6,7 @@
 
 # Class: StreamDefinitionBuilder\<S, C\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L46)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L51)
 
 ## Type Parameters
 
@@ -24,7 +24,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:46](https:/
 
 > **new StreamDefinitionBuilder**\<`S`, `C`\>(`streamName`, `streamDescription`, `finalEventName?`, `deprecated?`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:124](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L124)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:129](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L129)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:124](https:
 
 > **addChunkSchema**\<`ChunkSchema`\>(`chunkSchema`, `validateChunks?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `ChunkSchema`, `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:573](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L573)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:585](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L585)
 
 #### Type Parameters
 
@@ -82,7 +82,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:573](https:
 
 > **addFinalSchema**\<`FinalSchema`\>(`finalSchema`, `validateFinal?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `FinalSchema`, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:592](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L592)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:604](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L604)
 
 #### Type Parameters
 
@@ -110,7 +110,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:592](https:
 
 > **addOpenApiErrorStatusCodes**(...`codes`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:685](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L685)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:697](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L697)
 
 #### Parameters
 
@@ -128,7 +128,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:685](https:
 
 > **addOpenApiTags**(...`tags`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:675](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L675)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:687](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L687)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:675](https:
 
 > **addParameterSchema**\<`ParamsSchema`\>(`parameterSchema`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `ParamsSchema`, `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:555](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L555)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:567](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L567)
 
 #### Type Parameters
 
@@ -170,7 +170,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:555](https:
 
 > **addPayloadSchema**\<`PayloadSchema`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`PayloadSchema`, `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:530](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L530)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:542](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L542)
 
 #### Type Parameters
 
@@ -202,7 +202,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:530](https:
 
 > **addQueryParameters**(...`queryParams`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:690](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L690)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:702](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L702)
 
 #### Parameters
 
@@ -220,7 +220,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:690](https:
 
 > **canConsumeStream**\<`Chunk`, `Final`, `Payload`, `Parameter`, `SName`, `Version`, `Fname`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `chunkSchema?`, `payloadSchema?`, `parameterSchema?`, `finalSchema?`, `validateChunk?`, `validateFinal?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`, `parameter`) => `Promise`\<\{ `sessionId`: `string`; `[asyncIterator]`: `AsyncIterator`\<\{ `payload`: ...; \}\>; `cancel`: `Promise`\<`void`\>; \}\>\>\>\>, `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:224](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L224)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:229](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L229)
 
 #### Type Parameters
 
@@ -300,7 +300,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:224](https:
 
 > **canEmit**\<`EventName`, `T`\>(`eventName`, `schema`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\] & `Record`\<`EventName`, [`InferIn`](../type-aliases/InferIn.md)\<`T`\>\>, `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:381](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L381)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:393](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L393)
 
 #### Type Parameters
 
@@ -332,7 +332,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:381](https:
 
 > **canEnqueue**\<`Payload`, `Parameter`, `QueueName`\>(`queueName`, `payloadSchema?`, `parameterSchema?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\] & `Record`\<`QueueName`, (`payload`, `parameter`, `options?`) => `Promise`\<[`QueueEnqueueResult`](../type-aliases/QueueEnqueueResult.md)\>\>\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:134](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L134)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:139](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L139)
 
 #### Type Parameters
 
@@ -372,7 +372,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:134](https:
 
 > **canInvoke**\<`Output`, `Payload`, `Parameter`, `SName`, `Version`, `Fname`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `outputSchema?`, `payloadSchema?`, `parameterSchema?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\] & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`, `parameter`) => `Promise`\<[`Infer`](../type-aliases/Infer.md)\<`Output`\>\>\>\>\>, `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:175](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L175)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:180](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L180)
 
 #### Type Parameters
 
@@ -434,9 +434,9 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:175](https:
 
 ### canInvokeAgent()
 
-> **canInvokeAgent**\<`Payload`, `Parameter`, `SName`, `Version`\>(`agentName`, `agentVersion`, `invokeConfigOrParameterSchema?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter?`) => [`AgentInvocation`](../interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>\>\>
+> **canInvokeAgent**\<`Payload`, `Parameter`, `SName`, `Version`\>(`agentName`, `serviceVersion`, `invokeConfigOrParameterSchema?`): `StreamDefinitionBuilder`\<`S`, [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"ChunkSchema"`\], `C`\[`"FinalSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter?`) => [`AgentInvocation`](../interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:315](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L315)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:321](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L321)
 
 Define an agent which can be invoked by the current stream.
 The agent must follow the PURISTA agent protocol.
@@ -467,7 +467,7 @@ The agent must follow the PURISTA agent protocol.
 
 The name of the agent service
 
-##### agentVersion
+##### serviceVersion
 
 `Version`
 
@@ -477,7 +477,8 @@ The version of the agent service
 
 Optional invoke configuration:
 - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
-- `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
+- `{ payloadSchema, parameterSchema, outputSchema }` validates `.call(payload, parameter)` arguments
+  and declares expected final response envelopes for higher-level helpers.
 
 `Parameter` | [`StreamAgentInvokeConfig`](../type-aliases/StreamAgentInvokeConfig.md)\<`Payload`, `Parameter`\>
 
@@ -491,7 +492,7 @@ Optional invoke configuration:
 
 > **enableChunkAggregation**(`enabled?`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:616](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L616)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:628](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L628)
 
 #### Parameters
 
@@ -509,7 +510,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:616](https:
 
 > **enableHttpSecurity**(`enabled?`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:665](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L665)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:677](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L677)
 
 #### Parameters
 
@@ -527,7 +528,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:665](https:
 
 > **exposeAsHttpStreamEndpoint**(`method`, `path`, `contentTypeRequest?`, `contentEncodingRequest?`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:626](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L626)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:638](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L638)
 
 #### Parameters
 
@@ -557,7 +558,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:626](https:
 
 > **getAfterGuardHook**(`name`): [`StreamAfterGuardHook`](../type-aliases/StreamAfterGuardHook.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"FinalSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:513](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L513)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:525](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L525)
 
 Return a previously registered after-guard hook by name.
 
@@ -577,7 +578,7 @@ Return a previously registered after-guard hook by name.
 
 > **getBeforeGuardHook**(`name`): [`StreamBeforeGuardHook`](../type-aliases/StreamBeforeGuardHook.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:447](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L447)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:459](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L459)
 
 Return a previously registered before-guard hook by name.
 
@@ -597,7 +598,7 @@ Return a previously registered before-guard hook by name.
 
 > **getDefinition**(): `Promise`\<[`StreamDefinition`](../type-aliases/StreamDefinition.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"ChunkSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"FinalSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], [`StreamDefinitionMetadataBase`](../type-aliases/StreamDefinitionMetadataBase.md), `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:741](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L741)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:753](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L753)
 
 #### Returns
 
@@ -609,7 +610,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:741](https:
 
 > **getStreamFunction**(): [`StreamFunction`](../type-aliases/StreamFunction.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"ChunkSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"FinalSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:717](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L717)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:729](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L729)
 
 #### Returns
 
@@ -621,7 +622,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:717](https:
 
 > **makeEndpointPublic**(): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:660](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L660)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:672](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L672)
 
 #### Returns
 
@@ -633,7 +634,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:660](https:
 
 > **markAsDeprecated**(): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:611](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L611)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:623](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L623)
 
 #### Returns
 
@@ -645,7 +646,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:611](https:
 
 > **setAfterGuardHooks**(`afterGuards`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:467](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L467)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:479](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L479)
 
 Set one or more after guard hook(s).
 If there are multiple after guard hooks, they are executed in parallel.
@@ -666,7 +667,7 @@ If there are multiple after guard hooks, they are executed in parallel.
 
 > **setBeforeGuardHooks**(`beforeGuards`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:403](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L403)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:415](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L415)
 
 Set one or more before guard hook(s).
 If there are multiple before guard hooks, they are executed in parallel.
@@ -687,7 +688,7 @@ If there are multiple before guard hooks, they are executed in parallel.
 
 > **setFinalEventName**\<`N`\>(`eventName`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:621](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L621)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:633](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L633)
 
 #### Type Parameters
 
@@ -711,7 +712,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:621](https:
 
 > **setHttpStreamingMode**(`mode`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:655](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L655)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:667](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L667)
 
 #### Parameters
 
@@ -729,7 +730,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:655](https:
 
 > **setHttpStreamProtocol**(`protocol`, `documentationUrl?`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:647](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L647)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:659](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L659)
 
 #### Parameters
 
@@ -751,7 +752,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:647](https:
 
 > **setOpenApiOperationId**(`operationId`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:680](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L680)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:692](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L692)
 
 #### Parameters
 
@@ -769,7 +770,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:680](https:
 
 > **setOpenApiSummary**(`summary`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:670](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L670)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:682](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L682)
 
 #### Parameters
 
@@ -787,7 +788,7 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:670](https:
 
 > **setStreamFunction**(`fn`): `StreamDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:695](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L695)
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:707](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L707)
 
 #### Parameters
 

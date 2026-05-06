@@ -1,4 +1,5 @@
 import { Service } from '@purista/core'
+import { createSanitizedErrorDiagnostics } from '../../../../runtime/errorDiagnostics.js'
 import type { SandboxRegistry } from '../../../resources/SandboxRegistry.js'
 import type { SandboxDriver } from '../../../types/SandboxDriver.js'
 
@@ -23,7 +24,12 @@ export class SandboxService extends Service {
 			await this.sandboxResources.registry.reconcile(runningSandboxes)
 			this.logger.info('Sandbox reconciliation completed.')
 		} catch (error) {
-			this.logger.error({ err: error }, 'Sandbox reconciliation failed')
+			this.logger.error(
+				{
+					error: createSanitizedErrorDiagnostics(error, { fallbackKind: 'sandbox' }),
+				},
+				'Sandbox reconciliation failed',
+			)
 		}
 	}
 }

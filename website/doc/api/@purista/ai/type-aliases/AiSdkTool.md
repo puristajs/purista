@@ -8,7 +8,7 @@
 
 > **AiSdkTool** = `ReturnType`\<*typeof* `tool`\> & `object`
 
-Defined in: [packages/ai/src/bridge/aiSdk.ts:18](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/bridge/aiSdk.ts#L18)
+Defined in: [packages/ai/src/bridge/aiSdk.ts:18](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/bridge/aiSdk.ts#L18)
 
 ## Type Declaration
 

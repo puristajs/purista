@@ -2222,6 +2222,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		jobState: { handled: boolean },
 		stopHeartbeat: () => void,
 	): QueueJobContext {
+		const readHeader = (key: string) => {
+			const value = lease.message.headers[key]
+			return typeof value === 'string' && value.length > 0 ? value : undefined
+		}
+
 		const settle = () => {
 			if (jobState.handled) {
 				return false
@@ -2258,15 +2263,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		const traceId = lease.message.traceId
+		const principalId = readHeader('purista.principalId')
+		const tenantId = readHeader('purista.tenantId')
 
 		return {
 			message: lease.message,
 			job: jobControls,
-			emit: this.getEmitFunction(worker.name, traceId, undefined, undefined, {}),
+			emit: this.getEmitFunction(worker.name, traceId, principalId, tenantId, {}),
 			...this.getContextFunctions(logger),
-			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, undefined, undefined, {})),
+			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, principalId, tenantId, {})),
 			stream: createOpenStreamFunctionProxy(
-				this.getConsumeStreamFunction(worker.name, traceId, undefined, undefined, {}),
+				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, {}),
 			),
 			resources: this.resources,
 		} as QueueJobContext

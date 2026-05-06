@@ -6,6 +6,6 @@
 
 # Type Alias: ModelProviderCapability
 
-> **ModelProviderCapability** = `"text"` \| `"stream"` \| `"embedding"` \| `"rerank"` \| `"json"` \| `"image"` \| `"audio"` \| `"moderation"`
+> **ModelProviderCapability** = `"text"` \| `"text-stream"` \| `"object"` \| `"object-stream"` \| `"embedding"` \| `"rerank"`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:215](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L215)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:220](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L220)

@@ -8,7 +8,7 @@
 
 > **createMessageFrame**(`input`): `object`
 
-Defined in: [packages/ai/src/protocol/helpers.ts:50](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/protocol/helpers.ts#L50)
+Defined in: [packages/ai/src/protocol/helpers.ts:51](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/protocol/helpers.ts#L51)
 
 ## Parameters
 
@@ -28,7 +28,7 @@ Defined in: [packages/ai/src/protocol/helpers.ts:50](https://github.com/puristaj
 
 #### role
 
-`"user"` \| `"assistant"` \| `"system"` \| `"developer"` \| `"tool"` \| `undefined`
+`"user"` \| `"assistant"` \| `"tool"` \| `"system"` \| `"developer"` \| `undefined`
 
 #### summary?
 
@@ -56,7 +56,7 @@ Defined in: [packages/ai/src/protocol/helpers.ts:50](https://github.com/puristaj
 
 ### role
 
-> `readonly` **role**: `"user"` \| `"assistant"` \| `"system"` \| `"developer"` \| `"tool"`
+> `readonly` **role**: `"user"` \| `"assistant"` \| `"tool"` \| `"system"` \| `"developer"`
 
 ### summary
 

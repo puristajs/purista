@@ -8,15 +8,15 @@
 
 > **AgentHttpExposure** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:3](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L3)
+Defined in: [packages/ai/src/types/AgentManifest.ts:6](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L6)
 
 ## Properties
 
 ### method
 
-> **method**: `string`
+> **method**: [`SupportedHttpMethod`](../../core/type-aliases/SupportedHttpMethod.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:4](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L4)
+Defined in: [packages/ai/src/types/AgentManifest.ts:7](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L7)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:4](https://github.com/purist
 
 > **path**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:5](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L5)
+Defined in: [packages/ai/src/types/AgentManifest.ts:8](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L8)
 
 ***
 
@@ -32,23 +32,15 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:5](https://github.com/purist
 
 > `optional` **public**: `boolean`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:12](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L12)
+Defined in: [packages/ai/src/types/AgentManifest.ts:15](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L15)
 
 ***
 
 ### queryParameters?
 
-> `optional` **queryParameters**: `object`[]
+> `optional` **queryParameters**: [`QueryParameter`](../../core/type-aliases/QueryParameter.md)[]
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:13](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L13)
-
-#### name
-
-> **name**: `string`
-
-#### required
-
-> **required**: `boolean`
+Defined in: [packages/ai/src/types/AgentManifest.ts:16](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L16)
 
 ***
 
@@ -56,7 +48,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:13](https://github.com/puris
 
 > `optional` **requestContentType**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:8](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L8)
+Defined in: [packages/ai/src/types/AgentManifest.ts:11](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L11)
 
 ***
 
@@ -64,7 +56,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:8](https://github.com/purist
 
 > `optional` **requestEncoding**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:9](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L9)
+Defined in: [packages/ai/src/types/AgentManifest.ts:12](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L12)
 
 ***
 
@@ -72,7 +64,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:9](https://github.com/purist
 
 > `optional` **responseContentType**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:10](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L10)
+Defined in: [packages/ai/src/types/AgentManifest.ts:13](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L13)
 
 ***
 
@@ -80,15 +72,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:10](https://github.com/puris
 
 > `optional` **responseEncoding**: `string`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:11](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L11)
-
-***
-
-### sseProtocol?
-
-> `optional` **sseProtocol**: [`AgentSseProtocol`](AgentSseProtocol.md)
-
-Defined in: [packages/ai/src/types/AgentManifest.ts:7](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L7)
+Defined in: [packages/ai/src/types/AgentManifest.ts:14](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L14)
 
 ***
 
@@ -96,4 +80,12 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:7](https://github.com/purist
 
 > `optional` **streamingMode**: `"stream"` \| `"aggregate"`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:6](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L6)
+Defined in: [packages/ai/src/types/AgentManifest.ts:9](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L9)
+
+***
+
+### streamProtocolAdapter?
+
+> `optional` **streamProtocolAdapter**: [`AgentStreamProtocolAdapterId`](AgentStreamProtocolAdapterId.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:10](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L10)

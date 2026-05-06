@@ -1,6 +1,7 @@
 import { extractFinalAssistantText } from '../protocol/extract.js'
+import { agentProtocolEnvelopeSchema } from '../protocol/index.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
-import type { AgentTerminalResult } from '../types/AgentDefinition.js'
+import type { AgentInvocationFinalResult, AgentTerminalResult } from '../types/AgentDefinition.js'
 
 const getFinalRunStateArtifact = (envelopes: AgentProtocolEnvelope[]) => {
 	for (let index = envelopes.length - 1; index >= 0; index -= 1) {
@@ -43,6 +44,16 @@ const getLastTelemetryUsage = (envelopes: AgentProtocolEnvelope[]) => {
 	return undefined
 }
 
+const getFinalOutput = (envelopes: AgentProtocolEnvelope[]) => {
+	for (let index = envelopes.length - 1; index >= 0; index -= 1) {
+		const frame = envelopes[index]?.frame
+		if (frame?.kind === 'artifact' && frame.artifactId === 'output' && frame.phase === 'final') {
+			return frame.content
+		}
+	}
+	return undefined
+}
+
 const getStatus = (envelopes: AgentProtocolEnvelope[], runState: Record<string, unknown> | undefined) => {
 	const runStatus = runState?.status
 	if (runStatus === 'completed' || runStatus === 'failed' || runStatus === 'cancelled') {
@@ -54,17 +65,18 @@ const getStatus = (envelopes: AgentProtocolEnvelope[], runState: Record<string, 
 export const createAgentTerminalResult = (input: {
 	envelopes: AgentProtocolEnvelope[]
 	agentName: string
-	agentVersion: string
+	serviceVersion: string
 }): AgentTerminalResult => {
 	const runState = getFinalRunStateArtifact(input.envelopes)
 	const usage = getLastTelemetryUsage(input.envelopes)
 
 	return {
 		status: getStatus(input.envelopes, runState),
-		finalMessage:
+		message:
 			typeof runState?.finalMessage === 'string'
 				? runState.finalMessage
 				: extractFinalAssistantText(input.envelopes) || undefined,
+		output: getFinalOutput(input.envelopes),
 		summary:
 			typeof runState?.summary === 'string'
 				? runState.summary
@@ -82,6 +94,47 @@ export const createAgentTerminalResult = (input: {
 		runId: typeof runState?.runId === 'string' ? runState.runId : undefined,
 		conversationId: input.envelopes[0]?.conversationId,
 		agentName: input.agentName,
-		agentVersion: input.agentVersion,
+		serviceVersion: input.serviceVersion,
+	}
+}
+
+export const createAgentInvocationFinalResult = <Output = unknown>(input: {
+	envelopes: AgentProtocolEnvelope[]
+	agentName: string
+	serviceVersion: string
+}): AgentInvocationFinalResult<Output> => {
+	const terminal = createAgentTerminalResult(input)
+	return {
+		...terminal,
+		envelopes: input.envelopes,
+		output: terminal.output as Output | undefined,
+	}
+}
+
+export const normalizeAgentInvocationFinalResult = <Output = unknown>(input: {
+	result: unknown
+	agentName: string
+	serviceVersion: string
+}): AgentInvocationFinalResult<Output> => {
+	const asObject = typeof input.result === 'object' && input.result !== null ? input.result : undefined
+	const envelopesCandidate = Array.isArray(input.result)
+		? input.result
+		: Array.isArray((asObject as { envelopes?: unknown[] } | undefined)?.envelopes)
+			? (asObject as { envelopes: unknown[] }).envelopes
+			: Array.isArray((asObject as { history?: unknown[] } | undefined)?.history)
+				? (asObject as { history: unknown[] }).history
+				: []
+	const envelopes = agentProtocolEnvelopeSchema.array().parse(envelopesCandidate)
+	const terminal = createAgentTerminalResult({
+		envelopes,
+		agentName: input.agentName,
+		serviceVersion: input.serviceVersion,
+	})
+
+	return {
+		...terminal,
+		...(asObject ?? {}),
+		envelopes,
+		output: ((asObject as { output?: Output } | undefined)?.output ?? terminal.output) as Output | undefined,
 	}
 }

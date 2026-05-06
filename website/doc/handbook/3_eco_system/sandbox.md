@@ -22,7 +22,7 @@ Sandbox adds:
 - tenant-aware sandbox lifecycle (`tenantId` + `principalId` from PURISTA message metadata, plus `projectId`)
 - optional scope-based sandbox isolation for parallel runs
 - command execution and file read/write inside isolated runtimes
-- pluggable backends (Docker, Podman, Lima, Tart, Firecracker)
+- pluggable runtime backends with Docker-compatible and Podman support in `@purista/ai`
 - registry reconciliation on service startup
 
 ## When To Use
@@ -51,14 +51,13 @@ Use it only when the agent needs:
 | AppleContainerSandboxDriver | supported | local macOS developer setups | Docker-compatible runtimes such as OrbStack/Colima | [OrbStack](https://orbstack.dev/), [Colima](https://github.com/abiosoft/colima) |
 | Docker | supported | most teams starting out | widely available, broad ecosystem | [Docker Docs](https://docs.docker.com/) |
 | Podman | supported | rootless/container-security setups | daemonless model | [Podman Docs](https://podman.io/docs) |
-| Lima | experimental | open-source VM approach on macOS | VM workflow works, but startup reconciliation is disabled because owner metadata cannot be recovered safely | [Lima Docs](https://lima-vm.io/docs/) |
-| Tart | experimental | Apple virtualization heavy setups | VM workflow works, but startup reconciliation is disabled because owner metadata cannot be recovered safely | [Tart Docs](https://tart.run/) |
-| Firecracker | experimental | high-isolation Linux microVMs | requires Linux + KVM ops maturity; execution/file operations are incomplete | [Firecracker Docs](https://firecracker-microvm.github.io/) |
 
 Related runtimes often used with Docker driver:
 
 - [OrbStack](https://orbstack.dev/)
 - [Colima](https://github.com/abiosoft/colima)
+
+Future VM and microVM backends such as Lima, Tart, and Firecracker are intentionally not shipped as in-package drivers anymore. When they are implemented to production quality, they should arrive as dedicated sandbox adapter packages with their own dependency and readiness contracts.
 
 ## Base Image Guidance
 
@@ -80,7 +79,7 @@ The simplest sandbox adoption path is:
 Use a hardened image with `bash`, `git`, `gh`, and tooling required by your agents.
 
 ```bash
-docker build -t purista-sandbox-agent:latest -f packages/ai/Dockerfile.sandbox .
+npm run sandbox:image:build -w packages/ai
 ```
 
 Optional Alpine variant:
@@ -201,6 +200,20 @@ Typical flow:
 3. Read/write generated artifacts
 4. Destroy sandbox on completion or idle timeout
 
+If you need filesystem skills inside the sandbox, use the framework helper:
+
+```ts
+import { seedSandboxSkills } from '@purista/ai'
+
+await seedSandboxSkills({
+  adapter,
+  skillResource,
+})
+```
+
+This materializes skill bundles into the canonical `/workspace/skills/<skill-name>/...`
+layout without pushing app-specific workspace sync logic into the framework.
+
 If you are wiring this from an AI application, keep the concern split clear:
 
 - builder declares that the agent may use sandbox-backed resources or scripts
@@ -211,7 +224,7 @@ If you are wiring this from an AI application, keep the concern split clear:
 
 You configure two required resources:
 
-- `driver`: runtime implementation (Docker, Podman, Lima, Tart, Firecracker)
+- `driver`: runtime implementation (Docker, Apple container, Podman)
 - `registry`: metadata persistence (backed by your state store)
 
 The registry is used for:
@@ -255,8 +268,44 @@ Sandbox access commands (`executeBash`, `readFile`, `writeFiles`, `destroySandbo
 - Start with **Docker** unless you already have a stronger infra requirement.
 - On macOS local dev, prefer **AppleContainerSandboxDriver** (OrbStack/Colima).
 - Move to **Podman** when rootless/container hardening is a priority.
-- Use **Lima** or **Tart** only if you accept the current experimental status and do not rely on restart reconciliation yet.
-- Use **Firecracker** only if you plan to finish the missing execution/file-transfer parts yourself.
+- Treat Lima, Tart, and Firecracker as future separate adapter-package work, not as current `@purista/ai` runtime choices.
+
+## Integration Testing
+
+`@purista/ai` ships a real sandbox integration suite for docker-compatible runtimes.
+
+Rules:
+
+- tests detect a usable local runtime instead of assuming Docker is always present
+- on macOS, the suite prefers `AppleContainerSandboxDriver`, which also covers OrbStack through the docker-compatible CLI contract
+- on other platforms, the suite defaults to `DockerSandboxDriver`
+- tests are skipped cleanly when no docker-compatible runtime is available locally
+- when the runtime is available but the canonical sandbox image is missing, the suite builds `purista-sandbox-agent:latest` automatically from `packages/ai/Dockerfile.sandbox`
+- the live suite also verifies skill-bundle seeding and seeded script execution under `/workspace/skills`
+
+Environment variables for local verification:
+
+```bash
+PURISTA_SANDBOX_TEST_RUNTIME=apple-container
+PURISTA_SANDBOX_TEST_IMAGE=purista-sandbox-agent:latest
+PURISTA_SANDBOX_TEST_SKIP_IMAGE_BUILD=false
+```
+
+Supported values for `PURISTA_SANDBOX_TEST_RUNTIME`:
+
+- `apple-container`
+- `docker`
+
+Optional build-control variables:
+
+- `PURISTA_SANDBOX_TEST_SKIP_IMAGE_BUILD=true` disables the automatic image build and keeps the old skip-only behavior
+- `PURISTA_SANDBOX_TEST_FORCE_IMAGE_BUILD=true` rebuilds the canonical image before the suite continues
+
+Packaging guidance:
+
+- docker-compatible adapters stay in `@purista/ai`
+- do not create a separate OrbStack package
+- only split adapter packages when a backend introduces real optional npm dependencies or native integration complexity
 
 ## Service Operations
 
@@ -338,9 +387,9 @@ Reference:
 Use adapters based on deployment mode:
 
 - **Service adapter** (`createPuristaSandboxAdapter`): use when sandbox runtime is provided by a running PURISTA service.
-- **Local filesystem adapter** (`createLocalFilesystemSandboxAdapter`): use for local dev/testing where direct workspace operations are acceptable.
+- **Unsafe local filesystem adapter** (`createUnsafeLocalFilesystemSandboxAdapter`): use only for local dev/testing where direct host workspace operations are acceptable and real sandbox isolation is not required.
 
-When using the service adapter, always forward `tenantId` and `principalId`. The sandbox service uses those message fields for access control.
+When using the service adapter, always forward `tenantId` and `principalId`, and include `projectId` in sandbox operations. The sandbox service uses the full `{ tenantId, principalId, projectId }` owner tuple for access control.
 
 ## Scope patterns
 
@@ -423,40 +472,40 @@ Use `ensureSandbox` as default and derive identity from `context.message` instea
 
 ```ts
 import { stepCountIs } from 'ai'
-import { AgentBuilder } from '@purista/ai'
+import { createAgentQueueBuilder } from '@purista/ai'
 import { createBashTool } from 'just-bash'
 import { z } from 'zod'
 
-export const codingAgent = new AgentBuilder({
-  agentName: 'codingAgent',
-  agentVersion: '1',
-  description: 'Runs coding tasks in a sandbox',
-})
+export const codingAgent = createAgentQueueBuilder(
+  'codingAgent',
+  '1',
+  'Runs coding tasks in a sandbox',
+)
   .addPayloadSchema(
     z.object({
       projectId: z.string(),
       prompt: z.string().min(1),
     }),
   )
-  .defineModel('openai:primary', { capabilities: ['text', 'stream'] })
+  .addModel('openai:primary', { capabilities: ['text', 'stream'] })
   .canInvoke('Sandbox', '1', 'ensureSandbox')
   .canInvoke('Sandbox', '1', 'executeBash')
   .canInvoke('Sandbox', '1', 'readFile')
   .canInvoke('Sandbox', '1', 'writeFiles')
   .canInvoke('Sandbox', '1', 'destroySandbox')
-  .setHandler(async function (context, payload) {
-    const ensured = await context.tools.invoke.Sandbox['1'].ensureSandbox({
+  .setAgentFunction(async function (context, payload) {
+    const ensured = await context.invoke.tools.invoke.Sandbox['1'].ensureSandbox({
       projectId: payload.projectId,
     })
 
     try {
       const sandbox = {
         executeCommand: async (command: string) =>
-          await context.tools.invoke.Sandbox['1'].executeBash({ sandboxId: ensured.sandboxId, command }),
+          await context.invoke.tools.invoke.Sandbox['1'].executeBash({ sandboxId: ensured.sandboxId, command }),
         readFile: async (path: string) =>
-          await context.tools.invoke.Sandbox['1'].readFile({ sandboxId: ensured.sandboxId, path }),
+          await context.invoke.tools.invoke.Sandbox['1'].readFile({ sandboxId: ensured.sandboxId, path }),
         writeFiles: async (files: Array<{ path: string; content: string | Buffer }>) =>
-          await context.tools.invoke.Sandbox['1'].writeFiles({
+          await context.invoke.tools.invoke.Sandbox['1'].writeFiles({
             sandboxId: ensured.sandboxId,
             files: Object.fromEntries(
               files.map((file) => [
@@ -478,24 +527,15 @@ export const codingAgent = new AgentBuilder({
         ].join('\n'),
       })
 
-      const answer = await context.ai.reply.generate({
-        model: 'openai:primary',
+      const answer = await context.ai.models['openai:primary'].generate({
         prompt: payload.prompt,
-        metadata: {
-          aiSdk: {
-            tools: bashToolkit.tools,
-            stopWhen: stepCountIs(20),
-            toolChoice: 'auto',
-          },
-        },
       })
 
-      return { message: answer }
+      return { message: answer.output }
     } finally {
-      await context.tools.invoke.Sandbox['1'].destroySandbox({ sandboxId: ensured.sandboxId })
+      await context.invoke.tools.invoke.Sandbox['1'].destroySandbox({ sandboxId: ensured.sandboxId })
     }
   })
-  .build()
 ```
 
 Minimal baseline:
@@ -529,8 +569,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     && apt-get install gh -y \
     && rm -rf /var/lib/apt/lists/*
 RUN useradd -m -s /bin/bash agent
-WORKDIR /home/agent/workspace
-RUN chown -R agent:agent /home/agent
+WORKDIR /workspace
+RUN mkdir -p /workspace && chown -R agent:agent /workspace /home/agent
 USER agent
 ENTRYPOINT ["/bin/bash"]
 ```
@@ -549,4 +589,4 @@ ENTRYPOINT ["/bin/bash"]
 - forgetting to destroy sandboxes after use
 - using one shared sandbox across multiple users/tenants
 - skipping ownership checks in caller workflows
-- jumping to Firecracker before Linux/KVM operations are in place
+- designing around future VM backends before the dedicated adapter packages exist

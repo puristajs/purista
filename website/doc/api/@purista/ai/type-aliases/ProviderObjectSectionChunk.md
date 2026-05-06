@@ -8,7 +8,7 @@
 
 > **ProviderObjectSectionChunk** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:142](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L142)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:147](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L147)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:142](https://git
 
 > **content**: `unknown`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:145](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L145)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:150](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L150)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:145](https://git
 
 > **section**: `string`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:144](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L144)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:149](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L149)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:144](https://git
 
 > **type**: `"section"`
 
-Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:143](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/ModelProvider.ts#L143)
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:148](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/ModelProvider.ts#L148)

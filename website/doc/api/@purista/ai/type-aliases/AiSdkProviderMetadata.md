@@ -8,7 +8,7 @@
 
 > **AiSdkProviderMetadata** = `object`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:101](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/AiSdkProvider.ts#L101)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:101](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/AiSdkProvider.ts#L101)
 
 Request metadata field understood by [AiSdkProvider](../classes/AiSdkProvider.md). Attach it to [ProviderRequest.metadata](ProviderRequest.md#metadata)
 to override call settings per invocation, including bounded invocation policy.
@@ -16,7 +16,7 @@ to override call settings per invocation, including bounded invocation policy.
 ## Example
 
 ```ts
-await provider.generate({
+await provider.generateText({
   prompt: 'Summarise the ticket',
   metadata: {
     aiSdk: {
@@ -33,7 +33,7 @@ await provider.generate({
 
 > `optional` **aiSdk**: [`AiSdkProviderDefaults`](AiSdkProviderDefaults.md) & `object`
 
-Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:102](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/providers/runtime/AiSdkProvider.ts#L102)
+Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:102](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/providers/runtime/AiSdkProvider.ts#L102)
 
 #### Type Declaration
 
@@ -49,9 +49,9 @@ Defined in: [packages/ai/src/providers/runtime/AiSdkProvider.ts:102](https://git
 
 > `optional` **generate**: [`AiSdkProviderOverrides`](AiSdkProviderOverrides.md)
 
-##### generateJson?
+##### generateObject?
 
-> `optional` **generateJson**: [`AiSdkGenerateJsonOverrides`](AiSdkGenerateJsonOverrides.md)
+> `optional` **generateObject**: [`AiSdkGenerateJsonOverrides`](AiSdkGenerateJsonOverrides.md)
 
 ##### rerank?
 

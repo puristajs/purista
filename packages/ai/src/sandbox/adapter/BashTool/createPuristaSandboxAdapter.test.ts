@@ -9,6 +9,7 @@ describe('createPuristaSandboxAdapter', () => {
 
 		const adapter = createPuristaSandboxAdapter(eventBridge, {
 			sandboxId: 'sb-1',
+			projectId: 'project-1',
 			tenantId: 'tenant-1',
 			principalId: 'user-1',
 		})
@@ -20,7 +21,7 @@ describe('createPuristaSandboxAdapter', () => {
 				tenantId: 'tenant-1',
 				principalId: 'user-1',
 				payload: {
-					payload: { sandboxId: 'sb-1', command: 'pwd' },
+					payload: { sandboxId: 'sb-1', projectId: 'project-1', command: 'pwd' },
 					parameter: {},
 				},
 			}),
@@ -32,6 +33,7 @@ describe('createPuristaSandboxAdapter', () => {
 		const eventBridge = { invoke } as unknown as EventBridge
 		const adapter = createPuristaSandboxAdapter(eventBridge, {
 			sandboxId: 'sb-1',
+			projectId: 'project-1',
 			tenantId: 'tenant-1',
 			principalId: 'user-1',
 		})
@@ -46,6 +48,7 @@ describe('createPuristaSandboxAdapter', () => {
 				payload: {
 					payload: {
 						sandboxId: 'sb-1',
+						projectId: 'project-1',
 						files: {
 							'/tmp/a.txt': { encoding: 'utf-8', content: 'hello' },
 							'/tmp/b.bin': { encoding: 'base64', content: Buffer.from([0, 1, 2]).toString('base64') },

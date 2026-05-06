@@ -8,7 +8,7 @@
 
 > **getCommandHandler**(`address`, `cb`, `_metadata`, `_eventBridgeConfig`): [`IncomingMessageFunction`](../type-aliases/IncomingMessageFunction.md)
 
-Defined in: [mqttbridge/src/handler/getCommandHandler.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/getCommandHandler.impl.ts#L28)
+Defined in: [mqttbridge/src/handler/getCommandHandler.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/getCommandHandler.impl.ts#L29)
 
 ## Parameters
 

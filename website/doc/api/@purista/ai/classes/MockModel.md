@@ -6,7 +6,7 @@
 
 # Class: MockModel
 
-Defined in: [packages/ai/src/testing/MockModel.ts:53](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L53)
+Defined in: [packages/ai/src/testing/MockModel.ts:54](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L54)
 
 Minimal interface providers must satisfy so they can be swapped at runtime.
 
@@ -30,19 +30,19 @@ Minimal interface providers must satisfy so they can be swapped at runtime.
 
 > `readonly` **capabilities**: `object`
 
-Defined in: [packages/ai/src/testing/MockModel.ts:55](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L55)
+Defined in: [packages/ai/src/testing/MockModel.ts:56](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L56)
 
-#### json
+#### object
 
-> **json**: `boolean` = `true`
-
-#### stream
-
-> **stream**: `boolean` = `true`
+> **object**: `boolean` = `true`
 
 #### text
 
 > **text**: `boolean` = `true`
+
+#### text-stream
+
+> **text-stream**: `boolean` = `true`
 
 #### Implementation of
 
@@ -54,7 +54,7 @@ Defined in: [packages/ai/src/testing/MockModel.ts:55](https://github.com/purista
 
 > `readonly` **name**: `"mock-model"` = `'mock-model'`
 
-Defined in: [packages/ai/src/testing/MockModel.ts:54](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L54)
+Defined in: [packages/ai/src/testing/MockModel.ts:55](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L55)
 
 #### Implementation of
 
@@ -62,33 +62,11 @@ Defined in: [packages/ai/src/testing/MockModel.ts:54](https://github.com/purista
 
 ## Methods
 
-### generate()
+### generateObject()
 
-> **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
+> **generateObject**\<`T`, `OutputSchema`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>\>
 
-Defined in: [packages/ai/src/testing/MockModel.ts:98](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L98)
-
-#### Parameters
-
-##### request
-
-[`ProviderRequest`](../type-aliases/ProviderRequest.md)
-
-#### Returns
-
-`Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
-
-#### Implementation of
-
-[`ModelProvider`](../interfaces/ModelProvider.md).[`generate`](../interfaces/ModelProvider.md#generate)
-
-***
-
-### generateJson()
-
-> **generateJson**\<`T`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
-
-Defined in: [packages/ai/src/testing/MockModel.ts:132](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L132)
+Defined in: [packages/ai/src/testing/MockModel.ts:129](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L129)
 
 #### Type Parameters
 
@@ -96,19 +74,23 @@ Defined in: [packages/ai/src/testing/MockModel.ts:132](https://github.com/purist
 
 `T` = `unknown`
 
+##### OutputSchema
+
+`OutputSchema` = `unknown`
+
 #### Parameters
 
 ##### request
 
-[`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md)
+[`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md)\<`OutputSchema`\>
 
 #### Returns
 
-`Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
+`Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<[`ProviderJsonOutputFromSchema`](../type-aliases/ProviderJsonOutputFromSchema.md)\<`OutputSchema`, `T`\>\>\>
 
 #### Implementation of
 
-[`ModelProvider`](../interfaces/ModelProvider.md).[`generateJson`](../interfaces/ModelProvider.md#generatejson)
+[`ModelProvider`](../interfaces/ModelProvider.md).[`generateObject`](../interfaces/ModelProvider.md#generateobject)
 
 ***
 
@@ -116,10 +98,10 @@ Defined in: [packages/ai/src/testing/MockModel.ts:132](https://github.com/purist
 
 > **generateText**(`request`): `Promise`\<`string`\>
 
-Defined in: [packages/ai/src/testing/MockModel.ts:124](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L124)
+Defined in: [packages/ai/src/testing/MockModel.ts:121](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L121)
 
 High-level helper that yields one final text output while automatically
-preferring `stream()` and falling back to `generate()`.
+preferring `streamText()` when available.
 
 #### Parameters
 
@@ -137,7 +119,7 @@ preferring `stream()` and falling back to `generate()`.
 const answer = await context.models['openai:primary'].generateText({
   developerInstruction: 'Use the available tools before answering.',
   prompt: payload.prompt,
-  onTextDelta: delta => context.stream.sendChunk(delta),
+  onTextDelta: delta => context.stream.sendDelta(delta),
 })
 ```
 
@@ -154,7 +136,7 @@ allowlisted bindings automatically when you omit them.
 
 > **on**(`matcher`): `object`
 
-Defined in: [packages/ai/src/testing/MockModel.ts:64](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L64)
+Defined in: [packages/ai/src/testing/MockModel.ts:65](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L65)
 
 #### Parameters
 
@@ -186,7 +168,7 @@ Defined in: [packages/ai/src/testing/MockModel.ts:64](https://github.com/purista
 
 > **onJson**(`matcher`): `object`
 
-Defined in: [packages/ai/src/testing/MockModel.ts:73](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L73)
+Defined in: [packages/ai/src/testing/MockModel.ts:74](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L74)
 
 #### Parameters
 
@@ -214,11 +196,11 @@ Defined in: [packages/ai/src/testing/MockModel.ts:73](https://github.com/purista
 
 ***
 
-### stream()
+### streamText()
 
-> **stream**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
+> **streamText**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
 
-Defined in: [packages/ai/src/testing/MockModel.ts:102](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/testing/MockModel.ts#L102)
+Defined in: [packages/ai/src/testing/MockModel.ts:99](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/testing/MockModel.ts#L99)
 
 #### Parameters
 
@@ -232,4 +214,4 @@ Defined in: [packages/ai/src/testing/MockModel.ts:102](https://github.com/purist
 
 #### Implementation of
 
-[`ModelProvider`](../interfaces/ModelProvider.md).[`stream`](../interfaces/ModelProvider.md#stream)
+[`ModelProvider`](../interfaces/ModelProvider.md).[`streamText`](../interfaces/ModelProvider.md#streamtext)

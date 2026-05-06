@@ -8,7 +8,7 @@
 
 > **AgentPolicy** = `object`
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:100](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L100)
+Defined in: [packages/ai/src/types/AgentManifest.ts:101](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L101)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:100](https://github.com/puri
 
 > `optional` **approvals**: [`AgentApprovalPolicy`](AgentApprovalPolicy.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:102](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L102)
+Defined in: [packages/ai/src/types/AgentManifest.ts:103](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L103)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:102](https://github.com/puri
 
 > `optional` **quality**: [`AgentQualityPolicy`](AgentQualityPolicy.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:101](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L101)
+Defined in: [packages/ai/src/types/AgentManifest.ts:102](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L102)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/ai/src/types/AgentManifest.ts:101](https://github.com/puri
 
 > `optional` **resources**: [`AgentResourcePolicy`](AgentResourcePolicy.md)
 
-Defined in: [packages/ai/src/types/AgentManifest.ts:103](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/types/AgentManifest.ts#L103)
+Defined in: [packages/ai/src/types/AgentManifest.ts:104](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/types/AgentManifest.ts#L104)

@@ -57,13 +57,22 @@ export const resolveSandboxOwnerFromMessage = (
 	}
 }
 
-export const assertSandboxAccess = (context: MessageIdentityContext, metadata: SandboxMetadata): void => {
+export const assertSandboxAccess = (
+	context: MessageIdentityContext,
+	metadata: SandboxMetadata,
+	projectId: string,
+): void => {
 	const caller = getCallerIdentity(context)
 
-	if (caller.organizationId !== metadata.organizationId || caller.userId !== metadata.userId) {
+	if (
+		caller.organizationId !== metadata.organizationId ||
+		caller.userId !== metadata.userId ||
+		projectId !== metadata.projectId
+	) {
 		throw new HandledError(StatusCode.Forbidden, 'Caller is not allowed to access this sandbox.', {
 			sandboxId: metadata.sandboxId,
 			organizationId: metadata.organizationId,
+			projectId: metadata.projectId,
 			userId: metadata.userId,
 		})
 	}

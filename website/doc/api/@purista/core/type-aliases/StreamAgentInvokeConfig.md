@@ -22,6 +22,14 @@ Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:37](https:/
 
 ## Properties
 
+### outputSchema?
+
+> `optional` **outputSchema**: [`Schema`](Schema.md)
+
+Defined in: [StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts#L40)
+
+***
+
 ### parameterSchema?
 
 > `optional` **parameterSchema**: `Parameter`

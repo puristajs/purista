@@ -8,7 +8,7 @@
 
 > **exposeToolsAsMCP**(`input`): [`MCPToolDescriptor`](../type-aliases/MCPToolDescriptor.md)[]
 
-Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:42](https://github.com/puristajs/purista/blob/28d9337ab7fa6d33001a8b6c36fb84bb9236b736/packages/ai/src/mcp/exposeCommandAsMCP.ts#L42)
+Defined in: [packages/ai/src/mcp/exposeCommandAsMCP.ts:48](https://github.com/puristajs/purista/blob/9cd53c1e49bdea4c772d707ebf60458f2dc7435f/packages/ai/src/mcp/exposeCommandAsMCP.ts#L48)
 
 Exposes mixed agent + command descriptors as MCP tools.
 Throws if duplicate tool names are detected.
