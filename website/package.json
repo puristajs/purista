@@ -21,7 +21,7 @@
 		"date-fns": "^4.1.0",
 		"feed": "^5.2.0",
 		"gray-matter": "^4.0.3",
-		"mermaid": "^11.12.3",
+		"mermaid": "^11.15.0",
 		"typescript": "^5.9.3",
 		"vitepress": "^2.0.0-alpha.16",
 		"vitepress-mermaid-renderer": "^1.1.11",
