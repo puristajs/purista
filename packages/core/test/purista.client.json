@@ -3,7 +3,6 @@
 	"definitionPath": "./definitions",
 	"outputPath": "./tmp/dist",
 	"httpClient": {
-		"buildAs": "both",
 		"clientName": "HttpClient"
 	},
 	"eventBridgeClient": {}

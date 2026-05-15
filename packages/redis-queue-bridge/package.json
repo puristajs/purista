@@ -25,7 +25,7 @@
 		"access": "public"
 	},
 	"engines": {
-		"node": ">=18.15"
+		"node": ">=24.15.0"
 	},
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",

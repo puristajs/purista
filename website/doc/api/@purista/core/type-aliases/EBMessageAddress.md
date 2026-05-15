@@ -16,7 +16,7 @@ A event bridge message address describes the sender or receiver of a message.
 
 ### instanceId?
 
-> `optional` **instanceId**: `Exclude`\<[`InstanceId`](InstanceId.md), `""`\>
+> `optional` **instanceId?**: `Exclude`\<[`InstanceId`](InstanceId.md), `""`\>
 
 Defined in: [core/types/EBMessageAddress.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageAddress.ts#L14)
 

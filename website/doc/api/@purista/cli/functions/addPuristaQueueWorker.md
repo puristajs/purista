@@ -8,7 +8,7 @@
 
 > **addPuristaQueueWorker**(`input`): `Promise`\<`void`\>
 
-Defined in: [packages/cli/src/api/addPuristaQueueWorker.ts:30](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/addPuristaQueueWorker.ts#L30)
+Defined in: [packages/cli/src/api/addPuristaQueueWorker.ts:30](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/api/addPuristaQueueWorker.ts#L30)
 
 ## Parameters
 

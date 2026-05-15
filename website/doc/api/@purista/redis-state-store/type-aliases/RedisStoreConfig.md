@@ -39,6 +39,6 @@ It will extend the StoreBaseConfig.
 
 ### config?
 
-> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`, `RESP`, `TYPE_MAPPING`\>
+> `optional` **config?**: `RedisClientOptions`\<`M`, `F`, `S`, `RESP`, `TYPE_MAPPING`\>
 
 Defined in: [redis-state-store/src/types.ts:21](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/types.ts#L21)

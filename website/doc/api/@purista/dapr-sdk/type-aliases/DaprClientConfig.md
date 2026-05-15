@@ -14,7 +14,7 @@ Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:1](https://github
 
 ### appPrefix?
 
-> `optional` **appPrefix**: `string`
+> `optional` **appPrefix?**: `string`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L22)
 
@@ -28,7 +28,7 @@ The prefix to generate the app-ID of other services.
 
 ### daprApiToken?
 
-> `optional` **daprApiToken**: `string`
+> `optional` **daprApiToken?**: `string`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:28](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L28)
 
@@ -55,7 +55,7 @@ v1.0
 
 ### daprHost?
 
-> `optional` **daprHost**: `string`
+> `optional` **daprHost?**: `string`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:11](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L11)
 
@@ -71,7 +71,7 @@ Host location of the Dapr sidecar.
 
 ### daprPort?
 
-> `optional` **daprPort**: `string`
+> `optional` **daprPort?**: `string`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:16](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L16)
 
@@ -87,7 +87,7 @@ Port of the Dapr sidecar.
 
 ### isKeepAlive?
 
-> `optional` **isKeepAlive**: `boolean`
+> `optional` **isKeepAlive?**: `boolean`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:34](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L34)
 
@@ -103,7 +103,7 @@ true
 
 ### pubSubName?
 
-> `optional` **pubSubName**: `string`
+> `optional` **pubSubName?**: `string`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:40](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L40)
 

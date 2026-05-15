@@ -8,7 +8,7 @@
 
 > **AgentQueueBuilderTypes**\<`PayloadSchema`, `ParameterSchema`, `OutputSchema`, `Resources`, `Models`, `CommandTools`, `AgentTools`, `Execution`\> = `object`
 
-Defined in: ai/src/builder/types.ts:292
+Defined in: [builder/types.ts:350](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L350)
 
 ## Type Parameters
 
@@ -30,15 +30,15 @@ Defined in: ai/src/builder/types.ts:292
 
 ### Models
 
-`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`string`, `never`\>
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`never`, `never`\>
 
 ### CommandTools
 
-`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`string`, `never`\>
+`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`never`, `never`\>
 
 ### AgentTools
 
-`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`string`, `never`\>
+`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`never`, `never`\>
 
 ### Execution
 
@@ -50,7 +50,7 @@ Defined in: ai/src/builder/types.ts:292
 
 > **AgentTools**: `AgentTools`
 
-Defined in: ai/src/builder/types.ts:308
+Defined in: [builder/types.ts:366](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L366)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: ai/src/builder/types.ts:308
 
 > **CommandTools**: `CommandTools`
 
-Defined in: ai/src/builder/types.ts:307
+Defined in: [builder/types.ts:365](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L365)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: ai/src/builder/types.ts:307
 
 > **Execution**: `Execution`
 
-Defined in: ai/src/builder/types.ts:309
+Defined in: [builder/types.ts:367](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L367)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: ai/src/builder/types.ts:309
 
 > **Models**: `Models`
 
-Defined in: ai/src/builder/types.ts:306
+Defined in: [builder/types.ts:364](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L364)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: ai/src/builder/types.ts:306
 
 > **OutputSchema**: `OutputSchema`
 
-Defined in: ai/src/builder/types.ts:304
+Defined in: [builder/types.ts:362](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L362)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: ai/src/builder/types.ts:304
 
 > **ParameterSchema**: `ParameterSchema`
 
-Defined in: ai/src/builder/types.ts:303
+Defined in: [builder/types.ts:361](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L361)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: ai/src/builder/types.ts:303
 
 > **PayloadSchema**: `PayloadSchema`
 
-Defined in: ai/src/builder/types.ts:302
+Defined in: [builder/types.ts:360](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L360)
 
 ***
 
@@ -106,4 +106,4 @@ Defined in: ai/src/builder/types.ts:302
 
 > **Resources**: `Resources`
 
-Defined in: ai/src/builder/types.ts:305
+Defined in: [builder/types.ts:363](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L363)

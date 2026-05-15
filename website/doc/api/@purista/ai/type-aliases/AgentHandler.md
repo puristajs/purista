@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / [](../README.md) / AgentHandler
 
-# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output\>
+# Type Alias: AgentHandler\<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output\>
 
 > **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`, `CommandTools`, `AgentTools`, `Output`\> = (`context`) => `Promise`\<`Output`\>
 
-Defined in: ai/src/builder/types.ts:192
+Defined in: [builder/types.ts:244](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L244)
 
 ## Type Parameters
 
@@ -26,15 +26,15 @@ Defined in: ai/src/builder/types.ts:192
 
 ### Models
 
-`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`string`, `never`\>
+`Models` *extends* `Record`\<`string`, [`AgentModelBinding`](AgentModelBinding.md)\> = `Record`\<`never`, `never`\>
 
 ### CommandTools
 
-`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`string`, `never`\>
+`CommandTools` *extends* `Record`\<`string`, [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)\> = `Record`\<`never`, `never`\>
 
 ### AgentTools
 
-`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`string`, `never`\>
+`AgentTools` *extends* `Record`\<`string`, [`AllowedAgentDefinition`](AllowedAgentDefinition.md)\> = `Record`\<`never`, `never`\>
 
 ### Output
 

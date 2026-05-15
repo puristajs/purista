@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueWorkerAfterGuardHook
 
-# Type Alias: QueueWorkerAfterGuardHook()\<S, MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
+# Type Alias: QueueWorkerAfterGuardHook\<S, MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
 
 > **QueueWorkerAfterGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\> = (`this`, `context`, `result`, `message`) => `Promise`\<`void`\>
 

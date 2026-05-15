@@ -42,18 +42,22 @@ export function createAgentHandlerContext<
 >(
 	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models>,
 ): AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools> {
+	const resources = (input.appContext.resources ?? {}) as Resources
+	const message = input.appContext.message
+	const emit = input.appContext.emit
+	const service = input.appContext.service
+	const stream = input.appContext.stream
+	const queue = input.appContext.queue
 	return {
 		payload: input.payload,
 		parameter: input.parameter,
 		identity: input.identity,
-		app: {
-			message: input.appContext.message,
-			resources: (input.appContext.resources ?? {}) as Resources,
-			emit: input.appContext.emit,
-			service: input.appContext.service,
-			stream: input.appContext.stream,
-			queue: input.appContext.queue,
-		},
+		message,
+		emit,
+		service,
+		stream,
+		queue,
+		resources,
 		harness: {
 			session: input.session,
 			models: input.models,

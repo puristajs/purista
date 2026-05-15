@@ -84,7 +84,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:33](https://github.com/purist
 
 ### chunkSchema?
 
-> `optional` **chunkSchema**: [`Schema`](Schema.md)
+> `optional` **chunkSchema?**: [`Schema`](Schema.md)
 
 Defined in: [core/types/stream/StreamDefinition.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L31)
 
@@ -116,7 +116,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:30](https://github.com/purist
 
 ### finalEventName?
 
-> `optional` **finalEventName**: `string`
+> `optional` **finalEventName?**: `string`
 
 Defined in: [core/types/stream/StreamDefinition.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L47)
 
@@ -124,7 +124,7 @@ Defined in: [core/types/stream/StreamDefinition.ts:47](https://github.com/purist
 
 ### finalSchema?
 
-> `optional` **finalSchema**: [`Schema`](Schema.md)
+> `optional` **finalSchema?**: [`Schema`](Schema.md)
 
 Defined in: [core/types/stream/StreamDefinition.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinition.ts#L32)
 
@@ -146,11 +146,11 @@ Defined in: [core/types/stream/StreamDefinition.ts:48](https://github.com/purist
 
 #### afterGuard?
 
-> `optional` **afterGuard**: `Record`\<`string`, [`StreamAfterGuardHook`](StreamAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
+> `optional` **afterGuard?**: `Record`\<`string`, [`StreamAfterGuardHook`](StreamAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
 #### beforeGuard?
 
-> `optional` **beforeGuard**: `Record`\<`string`, [`StreamBeforeGuardHook`](StreamBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
+> `optional` **beforeGuard?**: `Record`\<`string`, [`StreamBeforeGuardHook`](StreamBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
 ***
 

@@ -16,7 +16,7 @@ Mocks the eventBridge and stubs the methods
 
 ### sandboxOrOptions?
 
-`SinonSandbox` | \{ `capabilities?`: `EventBridgeCapabilityOverrides`; `sandbox?`: `SinonSandbox`; \}
+`SinonSandbox` \| \{ `capabilities?`: `EventBridgeCapabilityOverrides`; `sandbox?`: `SinonSandbox`; \}
 
 ## Returns
 

@@ -14,7 +14,7 @@ Defined in: [hono-http-server/src/helper/streamTransport.ts:10](https://github.c
 
 ### chunk?
 
-> `optional` **chunk**: `unknown`
+> `optional` **chunk?**: `unknown`
 
 Defined in: [hono-http-server/src/helper/streamTransport.ts:13](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L13)
 
@@ -22,35 +22,35 @@ Defined in: [hono-http-server/src/helper/streamTransport.ts:13](https://github.c
 
 ### error?
 
-> `optional` **error**: `object`
+> `optional` **error?**: `object`
 
 Defined in: [hono-http-server/src/helper/streamTransport.ts:15](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L15)
 
 #### data?
 
-> `optional` **data**: `unknown`
+> `optional` **data?**: `unknown`
 
 #### isHandledError?
 
-> `optional` **isHandledError**: `boolean`
+> `optional` **isHandledError?**: `boolean`
 
 #### message?
 
-> `optional` **message**: `string`
+> `optional` **message?**: `string`
 
 #### status?
 
-> `optional` **status**: `number`
+> `optional` **status?**: `number`
 
 #### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 ***
 
 ### final?
 
-> `optional` **final**: `unknown`
+> `optional` **final?**: `unknown`
 
 Defined in: [hono-http-server/src/helper/streamTransport.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L14)
 
@@ -58,7 +58,7 @@ Defined in: [hono-http-server/src/helper/streamTransport.ts:14](https://github.c
 
 ### frameType?
 
-> `optional` **frameType**: `string`
+> `optional` **frameType?**: `string`
 
 Defined in: [hono-http-server/src/helper/streamTransport.ts:11](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L11)
 
@@ -66,6 +66,6 @@ Defined in: [hono-http-server/src/helper/streamTransport.ts:11](https://github.c
 
 ### sequence?
 
-> `optional` **sequence**: `number`
+> `optional` **sequence?**: `number`
 
 Defined in: [hono-http-server/src/helper/streamTransport.ts:12](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/streamTransport.ts#L12)

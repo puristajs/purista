@@ -16,7 +16,7 @@ PubSubSubscriptionOptionsType defines the options we can pass while subscribing
 
 ### bulkSubscribe?
 
-> `optional` **bulkSubscribe**: [`BulkSubscribeConfig`](BulkSubscribeConfig.md)
+> `optional` **bulkSubscribe?**: [`BulkSubscribeConfig`](BulkSubscribeConfig.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:39](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L39)
 
@@ -24,7 +24,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:39](htt
 
 ### callback?
 
-> `optional` **callback**: [`TypeDaprPubSubCallback`](TypeDaprPubSubCallback.md)
+> `optional` **callback?**: [`TypeDaprPubSubCallback`](TypeDaprPubSubCallback.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:33](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L33)
 
@@ -32,7 +32,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:33](htt
 
 ### deadLetterCallback?
 
-> `optional` **deadLetterCallback**: [`TypeDaprPubSubCallback`](TypeDaprPubSubCallback.md)
+> `optional` **deadLetterCallback?**: [`TypeDaprPubSubCallback`](TypeDaprPubSubCallback.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:30](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L30)
 
@@ -40,7 +40,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:30](htt
 
 ### deadLetterTopic?
 
-> `optional` **deadLetterTopic**: `string`
+> `optional` **deadLetterTopic?**: `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:27](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L27)
 
@@ -48,7 +48,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:27](htt
 
 ### metadata?
 
-> `optional` **metadata**: [`KeyValueType`](KeyValueType.md)
+> `optional` **metadata?**: [`KeyValueType`](KeyValueType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:24](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L24)
 
@@ -56,6 +56,6 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:24](htt
 
 ### route?
 
-> `optional` **route**: `string` \| [`DaprPubSubRouteType`](DaprPubSubRouteType.md)
+> `optional` **route?**: `string` \| [`DaprPubSubRouteType`](DaprPubSubRouteType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:36](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L36)

@@ -104,7 +104,7 @@ The name of the secret store
 
 > **cache**: [`SecretStoreCacheMap`](../../core/type-aliases/SecretStoreCacheMap.md)
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -116,67 +116,67 @@ Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 > **config**: `object`
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### clientConfig?
 
-> `optional` **clientConfig**: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md)
+> `optional` **clientConfig?**: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md)
 
 The Dapr client config to interact with Dapr sidecar
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 #### metadata?
 
-> `optional` **metadata**: `object`
+> `optional` **metadata?**: `object`
 
 Dapr secret store metadata
 
 ##### metadata.namespace?
 
-> `optional` **namespace**: `string`
+> `optional` **namespace?**: `string`
 
 In case of deploying into namespace other than default, the namespace (e.g. production) must be set
 
 #### secretStoreName?
 
-> `optional` **secretStoreName**: `string`
+> `optional` **secretStoreName?**: `string`
 
 The name of the secret store
 
@@ -190,7 +190,7 @@ The name of the secret store
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 #### Inherited from
 
@@ -202,7 +202,7 @@ Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 > **name**: `string`
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -214,7 +214,7 @@ Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 #### Returns
 
@@ -230,7 +230,7 @@ Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 > **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
@@ -286,7 +286,7 @@ Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:55](https://gi
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 #### Parameters
 
@@ -330,7 +330,7 @@ Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://gi
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 #### Parameters
 

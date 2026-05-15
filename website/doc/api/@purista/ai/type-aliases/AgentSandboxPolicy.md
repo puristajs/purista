@@ -8,20 +8,20 @@
 
 > **AgentSandboxPolicy** = `object`
 
-Defined in: ai/src/builder/types.ts:97
+Defined in: [builder/types.ts:129](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L129)
 
 ## Properties
 
 ### adapter?
 
-> `optional` **adapter**: `unknown`
+> `optional` **adapter?**: `unknown`
 
-Defined in: ai/src/builder/types.ts:99
+Defined in: [builder/types.ts:131](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L131)
 
 ***
 
 ### enabled?
 
-> `optional` **enabled**: `boolean`
+> `optional` **enabled?**: `boolean`
 
-Defined in: ai/src/builder/types.ts:98
+Defined in: [builder/types.ts:130](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L130)

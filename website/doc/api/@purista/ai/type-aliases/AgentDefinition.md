@@ -8,7 +8,7 @@
 
 > **AgentDefinition**\<`S`\> = `object`
 
-Defined in: ai/src/builder/types.ts:263
+Defined in: [builder/types.ts:321](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L321)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: ai/src/builder/types.ts:263
 
 > **execution**: `AgentExecutionDefinition`\<[`InferIn`](../../core/type-aliases/InferIn.md)\<`S`\[`"PayloadSchema"`\]\>, [`InferIn`](../../core/type-aliases/InferIn.md)\<`S`\[`"ParameterSchema"`\]\>, `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], [`Infer`](../../core/type-aliases/Infer.md)\<`S`\[`"OutputSchema"`\]\>\>
 
-Defined in: ai/src/builder/types.ts:268
+Defined in: [builder/types.ts:326](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L326)
 
 ***
 
@@ -30,31 +30,31 @@ Defined in: ai/src/builder/types.ts:268
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)\<`S`\[`"Models"`\]\>
 
-Defined in: ai/src/builder/types.ts:264
+Defined in: [builder/types.ts:322](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L322)
 
 ***
 
 ### outputSchema?
 
-> `optional` **outputSchema**: `S`\[`"OutputSchema"`\]
+> `optional` **outputSchema?**: `S`\[`"OutputSchema"`\]
 
-Defined in: ai/src/builder/types.ts:267
+Defined in: [builder/types.ts:325](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L325)
 
 ***
 
 ### parameterSchema?
 
-> `optional` **parameterSchema**: `S`\[`"ParameterSchema"`\]
+> `optional` **parameterSchema?**: `S`\[`"ParameterSchema"`\]
 
-Defined in: ai/src/builder/types.ts:266
+Defined in: [builder/types.ts:324](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L324)
 
 ***
 
 ### payloadSchema?
 
-> `optional` **payloadSchema**: `S`\[`"PayloadSchema"`\]
+> `optional` **payloadSchema?**: `S`\[`"PayloadSchema"`\]
 
-Defined in: ai/src/builder/types.ts:265
+Defined in: [builder/types.ts:323](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L323)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: ai/src/builder/types.ts:265
 
 > **runtime**: `AgentRuntimeRef`\<[`Infer`](../../core/type-aliases/Infer.md)\<`S`\[`"OutputSchema"`\]\>\>
 
-Defined in: ai/src/builder/types.ts:277
+Defined in: [builder/types.ts:335](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L335)

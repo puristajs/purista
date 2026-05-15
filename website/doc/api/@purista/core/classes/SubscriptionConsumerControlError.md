@@ -44,7 +44,7 @@ Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:12](htt
 
 ##### outcome
 
-`"deadLetter"` | `"retry"` | `"drop"` | `"stop-consumer"`
+`"deadLetter"` \| `"retry"` \| `"drop"` \| `"stop-consumer"`
 
 ##### reason?
 
@@ -66,7 +66,7 @@ Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:12](htt
 
 ### delayMs?
 
-> `readonly` `optional` **delayMs**: `number`
+> `readonly` `optional` **delayMs?**: `number`
 
 Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L9)
 
@@ -82,6 +82,6 @@ Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:7](http
 
 ### reason?
 
-> `readonly` `optional` **reason**: `string`
+> `readonly` `optional` **reason?**: `string`
 
 Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L8)

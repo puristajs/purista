@@ -16,7 +16,7 @@ Google Secret Manager store config
 
 ### client?
 
-> `optional` **client**: `ClientOptions`
+> `optional` **client?**: `ClientOptions`
 
 Defined in: [gcloud-secret-store/src/types.ts:15](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/types.ts#L15)
 

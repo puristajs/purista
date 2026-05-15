@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / InvokeFunction
 
-# Type Alias: InvokeFunction()
+# Type Alias: InvokeFunction
 
 > **InvokeFunction** = \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`address`, `payload`, `parameter`) => `Promise`\<`InvokeResponseType`\>
 

@@ -14,7 +14,7 @@ Defined in: [core/QueueBridge/types/QueueRetryRequest.ts:1](https://github.com/p
 
 ### delayMs?
 
-> `optional` **delayMs**: `number`
+> `optional` **delayMs?**: `number`
 
 Defined in: [core/QueueBridge/types/QueueRetryRequest.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueRetryRequest.ts#L3)
 
@@ -22,6 +22,6 @@ Defined in: [core/QueueBridge/types/QueueRetryRequest.ts:3](https://github.com/p
 
 ### reason?
 
-> `optional` **reason**: `string`
+> `optional` **reason?**: `string`
 
 Defined in: [core/QueueBridge/types/QueueRetryRequest.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueRetryRequest.ts#L2)

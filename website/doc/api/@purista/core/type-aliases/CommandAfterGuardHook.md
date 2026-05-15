@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandAfterGuardHook
 
-# Type Alias: CommandAfterGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: CommandAfterGuardHook\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
 > **CommandAfterGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `result`, `originalPayload`, `originalParameter`) => `Promise`\<`void`\>
 

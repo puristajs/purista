@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueInvokeFunction
 
-# Type Alias: QueueInvokeFunction()
+# Type Alias: QueueInvokeFunction
 
 > **QueueInvokeFunction** = \<`Payload`, `Params`\>(`queueName`, `payload`, `parameter?`, `options?`) => `Promise`\<[`QueueEnqueueResult`](QueueEnqueueResult.md)\>
 

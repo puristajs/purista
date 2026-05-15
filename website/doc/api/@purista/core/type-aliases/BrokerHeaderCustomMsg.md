@@ -14,7 +14,7 @@ Defined in: [core/types/BrokerHeaderCustomMsg.ts:6](https://github.com/puristajs
 
 ### eventName?
 
-> `optional` **eventName**: `string`
+> `optional` **eventName?**: `string`
 
 Defined in: [core/types/BrokerHeaderCustomMsg.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L12)
 
@@ -30,7 +30,7 @@ Defined in: [core/types/BrokerHeaderCustomMsg.ts:7](https://github.com/puristajs
 
 ### principalId?
 
-> `optional` **principalId**: [`PrincipalId`](PrincipalId.md)
+> `optional` **principalId?**: [`PrincipalId`](PrincipalId.md)
 
 Defined in: [core/types/BrokerHeaderCustomMsg.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L13)
 
@@ -70,6 +70,6 @@ Defined in: [core/types/BrokerHeaderCustomMsg.ts:9](https://github.com/puristajs
 
 ### tenantId?
 
-> `optional` **tenantId**: [`TenantId`](TenantId.md)
+> `optional` **tenantId?**: [`TenantId`](TenantId.md)
 
 Defined in: [core/types/BrokerHeaderCustomMsg.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L14)

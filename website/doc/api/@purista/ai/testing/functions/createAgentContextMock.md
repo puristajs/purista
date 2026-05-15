@@ -8,7 +8,7 @@
 
 > **createAgentContextMock**\<`Payload`, `Parameter`, `Resources`, `Models`\>(`input?`): [`AgentHandlerContext`](../../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
 
-Defined in: ai/src/testing/index.ts:27
+Defined in: [testing/index.ts:27](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L27)
 
 ## Type Parameters
 

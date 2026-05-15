@@ -206,14 +206,26 @@ export type AgentHandlerContext<
 	payload: Payload
 	parameter: Parameter
 	identity: AgentRunIdentity
-	app: {
-		message: unknown
-		resources: Resources
-		emit: unknown
-		service: unknown
-		stream: unknown
-		queue: unknown
-	}
+	/** the original PURISTA message context */
+	message: unknown
+	/** emit a custom message through the owning PURISTA service */
+	emit: unknown
+	/** typed PURISTA command invocation proxy when declarations are available */
+	service: unknown
+	/** typed PURISTA stream invocation proxy when declarations are available */
+	stream: unknown
+	/** PURISTA queue helpers from the owning handler context */
+	queue: unknown
+	/**
+	 * Provides resources defined on the service builder and supplied during
+	 * service instantiation.
+	 *
+	 * @example
+	 * ```ts
+	 * const result = await context.resources.repository.findById(context.payload.id)
+	 * ```
+	 */
+	resources: Resources
 	harness: {
 		session: Session<any>
 		models: AgentHandlerModelBindings<Models>

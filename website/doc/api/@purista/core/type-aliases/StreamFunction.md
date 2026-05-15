@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamFunction
 
-# Type Alias: StreamFunction()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, ChunkType, FinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: StreamFunction\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, ChunkType, FinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
 > **StreamFunction**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `ChunkType`, `FinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`, `writer`) => `Promise`\<`void`\>
 

@@ -16,7 +16,7 @@ Dapr state store configuration
 
 ### clientConfig?
 
-> `optional` **clientConfig**: [`DaprClientConfig`](DaprClientConfig.md)
+> `optional` **clientConfig?**: [`DaprClientConfig`](DaprClientConfig.md)
 
 Defined in: [dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts:15](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts#L15)
 
@@ -26,7 +26,7 @@ The Dapr client config to interact with Dapr sidecar
 
 ### stateStoreName?
 
-> `optional` **stateStoreName**: `string`
+> `optional` **stateStoreName?**: `string`
 
 Defined in: [dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts:10](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts#L10)
 

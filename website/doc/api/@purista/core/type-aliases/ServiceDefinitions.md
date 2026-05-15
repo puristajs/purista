@@ -8,7 +8,7 @@
 
 > **ServiceDefinitions** = `object`
 
-Defined in: [helper/types/ServiceDefinitions.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L4)
+Defined in: [helper/types/ServiceDefinitions.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L9)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [helper/types/ServiceDefinitions.ts:4](https://github.com/puristajs/
 
 > **commands**: [`CommandDefinitionListResolved`](CommandDefinitionListResolved.md)\<`any`\>
 
-Defined in: [helper/types/ServiceDefinitions.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L5)
+Defined in: [helper/types/ServiceDefinitions.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L10)
 
 ***
 
@@ -24,7 +24,39 @@ Defined in: [helper/types/ServiceDefinitions.ts:5](https://github.com/puristajs/
 
 > **deprecated**: `boolean`
 
-Defined in: [helper/types/ServiceDefinitions.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L10)
+Defined in: [helper/types/ServiceDefinitions.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L20)
+
+***
+
+### eventToQueueBindings?
+
+> `optional` **eventToQueueBindings?**: [`EventToQueueBindingDefinition`](EventToQueueBindingDefinition.md)[]
+
+Defined in: [helper/types/ServiceDefinitions.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L16)
+
+***
+
+### queues?
+
+> `optional` **queues?**: [`QueueDefinitionListResolved`](QueueDefinitionListResolved.md)\<`any`\>
+
+Defined in: [helper/types/ServiceDefinitions.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L13)
+
+***
+
+### queueWorkers?
+
+> `optional` **queueWorkers?**: [`QueueWorkerDefinitionListResolved`](QueueWorkerDefinitionListResolved.md)\<`any`\>
+
+Defined in: [helper/types/ServiceDefinitions.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L14)
+
+***
+
+### schedules?
+
+> `optional` **schedules?**: [`ScheduleDefinition`](ScheduleDefinition.md)[]
+
+Defined in: [helper/types/ServiceDefinitions.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L15)
 
 ***
 
@@ -32,7 +64,7 @@ Defined in: [helper/types/ServiceDefinitions.ts:10](https://github.com/puristajs
 
 > **serviceDescription**: `string`
 
-Defined in: [helper/types/ServiceDefinitions.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L9)
+Defined in: [helper/types/ServiceDefinitions.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L19)
 
 ***
 
@@ -40,7 +72,7 @@ Defined in: [helper/types/ServiceDefinitions.ts:9](https://github.com/puristajs/
 
 > **serviceName**: `string`
 
-Defined in: [helper/types/ServiceDefinitions.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L7)
+Defined in: [helper/types/ServiceDefinitions.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L17)
 
 ***
 
@@ -48,7 +80,15 @@ Defined in: [helper/types/ServiceDefinitions.ts:7](https://github.com/puristajs/
 
 > **serviceVersion**: `string`
 
-Defined in: [helper/types/ServiceDefinitions.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L8)
+Defined in: [helper/types/ServiceDefinitions.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L18)
+
+***
+
+### streams?
+
+> `optional` **streams?**: [`StreamDefinitionListResolved`](StreamDefinitionListResolved.md)\<`any`\>
+
+Defined in: [helper/types/ServiceDefinitions.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L12)
 
 ***
 
@@ -56,4 +96,4 @@ Defined in: [helper/types/ServiceDefinitions.ts:8](https://github.com/puristajs/
 
 > **subscriptions**: [`SubscriptionDefinitionListResolved`](SubscriptionDefinitionListResolved.md)\<`any`\>
 
-Defined in: [helper/types/ServiceDefinitions.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L6)
+Defined in: [helper/types/ServiceDefinitions.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L11)

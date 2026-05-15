@@ -16,7 +16,7 @@ BulkSubscribeOptions enlists the options for bulk subscribe
 
 ### maxAwaitDurationMs?
 
-> `optional` **maxAwaitDurationMs**: `number`
+> `optional` **maxAwaitDurationMs?**: `number`
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:31](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts#L31)
 
@@ -24,7 +24,7 @@ Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:31](https://
 
 ### maxMessagesCount?
 
-> `optional` **maxMessagesCount**: `number`
+> `optional` **maxMessagesCount?**: `number`
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:28](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts#L28)
 
@@ -32,7 +32,7 @@ Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:28](https://
 
 ### metadata?
 
-> `optional` **metadata**: [`KeyValueType`](KeyValueType.md)
+> `optional` **metadata?**: [`KeyValueType`](KeyValueType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:25](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts#L25)
 
@@ -40,6 +40,6 @@ Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:25](https://
 
 ### route?
 
-> `optional` **route**: `string` \| [`DaprPubSubRouteType`](DaprPubSubRouteType.md)
+> `optional` **route?**: `string` \| [`DaprPubSubRouteType`](DaprPubSubRouteType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts#L22)

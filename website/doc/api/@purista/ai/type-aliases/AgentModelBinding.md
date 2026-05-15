@@ -8,7 +8,7 @@
 
 > **AgentModelBinding**\<`Capabilities`, `Model`\> = `object`
 
-Defined in: ai/src/builder/types.ts:37
+Defined in: [builder/types.ts:38](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L38)
 
 Declares a model alias required by an attached PURISTA agent.
 
@@ -41,15 +41,15 @@ builder.addModel('primary', {
 
 > **capabilities**: `Capabilities`
 
-Defined in: ai/src/builder/types.ts:42
+Defined in: [builder/types.ts:43](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L43)
 
 ***
 
 ### defaults?
 
-> `optional` **defaults**: `ModelDefaults`
+> `optional` **defaults?**: `ModelDefaults`
 
-Defined in: ai/src/builder/types.ts:43
+Defined in: [builder/types.ts:44](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L44)
 
 ***
 
@@ -57,4 +57,4 @@ Defined in: ai/src/builder/types.ts:43
 
 > **model**: `Model`
 
-Defined in: ai/src/builder/types.ts:41
+Defined in: [builder/types.ts:42](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L42)

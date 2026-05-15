@@ -1,5 +1,6 @@
 export { AgentQueueBuilder } from './AgentQueueBuilder.js'
-export { ServiceBuilder } from './ServiceBuilder.js'
+import './ServiceBuilder.js'
+
 export type {
 	AgentDefinition,
 	AgentExecutionPolicy,

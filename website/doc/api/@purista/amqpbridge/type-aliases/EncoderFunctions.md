@@ -14,7 +14,7 @@ Encode/decode contract for one content-type codec.
 
 ## Properties
 
-### decode()
+### decode
 
 > **decode**: \<`T`\>(`input`) => `Promise`\<`T`\>
 
@@ -40,7 +40,7 @@ Decodes a binary payload into a JavaScript value.
 
 ***
 
-### encode()
+### encode
 
 > **encode**: \<`T`\>(`input`) => `Promise`\<`Buffer`\>
 

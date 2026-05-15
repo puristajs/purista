@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/dapr-sdk](../README.md) / TypeDaprPubSubCallback
 
-# Type Alias: TypeDaprPubSubCallback()
+# Type Alias: TypeDaprPubSubCallback
 
 > **TypeDaprPubSubCallback** = (`data`, `headers`) => `Promise`\<`unknown` \| `undefined`\>
 

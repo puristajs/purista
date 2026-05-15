@@ -6,7 +6,7 @@
 
 # Type Alias: CommandDefinitionList\<S\>
 
-> **CommandDefinitionList**\<`S`\> = `Promise`\<[`CommandDefinition`](CommandDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)\>\>[]
+> **CommandDefinitionList**\<`S`\> = `Promise`\<[`CommandDefinition`](CommandDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md), `any`\>\>[]
 
 Defined in: [core/types/commandType/CommandDefinitionList.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L12)
 

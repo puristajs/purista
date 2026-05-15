@@ -40,17 +40,7 @@ The function
 
 ## Returns
 
-> (...`args`): `ReturnType`
-
-### Parameters
-
-#### args
-
-...`Args`
-
-### Returns
-
-`ReturnType`
+(...`args`) => `ReturnType`
 
 ## Example
 

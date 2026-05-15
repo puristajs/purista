@@ -8,7 +8,7 @@
 
 > **AllowedAgentDefinition**\<`Output`, `Payload`, `Parameter`\> = `object`
 
-Defined in: ai/src/builder/types.ts:75
+Defined in: [builder/types.ts:76](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L76)
 
 ## Type Parameters
 
@@ -30,31 +30,31 @@ Defined in: ai/src/builder/types.ts:75
 
 > **agentName**: `string`
 
-Defined in: ai/src/builder/types.ts:80
+Defined in: [builder/types.ts:81](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L81)
 
 ***
 
 ### outputSchema?
 
-> `optional` **outputSchema**: `Output`
+> `optional` **outputSchema?**: `Output`
 
-Defined in: ai/src/builder/types.ts:82
+Defined in: [builder/types.ts:83](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L83)
 
 ***
 
 ### parameterSchema?
 
-> `optional` **parameterSchema**: `Parameter`
+> `optional` **parameterSchema?**: `Parameter`
 
-Defined in: ai/src/builder/types.ts:84
+Defined in: [builder/types.ts:85](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L85)
 
 ***
 
 ### payloadSchema?
 
-> `optional` **payloadSchema**: `Payload`
+> `optional` **payloadSchema?**: `Payload`
 
-Defined in: ai/src/builder/types.ts:83
+Defined in: [builder/types.ts:84](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L84)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: ai/src/builder/types.ts:83
 
 > **serviceVersion**: `string`
 
-Defined in: ai/src/builder/types.ts:81
+Defined in: [builder/types.ts:82](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L82)

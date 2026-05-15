@@ -14,11 +14,11 @@ Defined in: [testing/createCommandTestHarness.ts:25](https://github.com/puristaj
 
 ### eventBridge?
 
-> `optional` **eventBridge**: [`EventBridge`](../interfaces/EventBridge.md)
+> `optional` **eventBridge?**: [`EventBridge`](../interfaces/EventBridge.md)
 
 ### queueBridge?
 
-> `optional` **queueBridge**: [`QueueBridge`](../interfaces/QueueBridge.md)
+> `optional` **queueBridge?**: [`QueueBridge`](../interfaces/QueueBridge.md)
 
 ## Type Parameters
 

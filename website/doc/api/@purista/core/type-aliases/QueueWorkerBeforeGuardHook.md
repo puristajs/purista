@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueWorkerBeforeGuardHook
 
-# Type Alias: QueueWorkerBeforeGuardHook()\<S, MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
+# Type Alias: QueueWorkerBeforeGuardHook\<S, MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
 
 > **QueueWorkerBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\> = (`this`, `context`, `message`) => `Promise`\<`void`\>
 

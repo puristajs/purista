@@ -206,7 +206,7 @@ Custom trace Id
 
 > **cache**: [`SecretStoreCacheMap`](../../core/type-aliases/SecretStoreCacheMap.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -226,11 +226,11 @@ Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:40](https:/
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
 #### baseUrl?
 
-> `optional` **baseUrl**: `string`
+> `optional` **baseUrl?**: `string`
 
 the base url to be used
 
@@ -246,7 +246,7 @@ const config = {
 
 #### basicAuth?
 
-> `optional` **basicAuth**: `object`
+> `optional` **basicAuth?**: `object`
 
 Basic-Auth information
 
@@ -270,13 +270,13 @@ Auth-Bearer token
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### defaultHeaders?
 
-> `optional` **defaultHeaders**: `Record`\<`string`, `string`\>
+> `optional` **defaultHeaders?**: `Record`\<`string`, `string`\>
 
 Add your default headers here
 These headers will be part of every request.
@@ -284,7 +284,7 @@ They can be overwritten per request option
 
 #### defaultTimeout?
 
-> `optional` **defaultTimeout**: `number`
+> `optional` **defaultTimeout?**: `number`
 
 set global timeout for requests in ms
 
@@ -296,69 +296,69 @@ set global timeout for requests in ms
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableOpentelemetry?
 
-> `optional` **enableOpentelemetry**: `boolean`
+> `optional` **enableOpentelemetry?**: `boolean`
 
 enable Opentelemetry tracing.
 The client will be handled as own resource.
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### isKeepAlive?
 
-> `optional` **isKeepAlive**: `boolean`
+> `optional` **isKeepAlive?**: `boolean`
 
 If set to false, the HTTP client will not reuse the same connection for multiple requests.
 Default is true.
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 A logger instance
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 the loglevel if no logger instance is given
 
 #### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Name of the client
 
 #### spanProcessor?
 
-> `optional` **spanProcessor**: `SpanProcessor`
+> `optional` **spanProcessor?**: `SpanProcessor`
 
 Opentelemetry span processor
 
 #### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 Custom trace Id
 
@@ -372,7 +372,7 @@ Custom trace Id
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 #### Inherited from
 
@@ -384,7 +384,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -396,7 +396,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 #### Returns
 
@@ -412,7 +412,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
@@ -468,7 +468,7 @@ Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:51](https:/
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 #### Parameters
 
@@ -512,7 +512,7 @@ Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:67](https:/
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 #### Parameters
 

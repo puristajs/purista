@@ -14,7 +14,7 @@ Defined in: [schema/standardSchema.ts:22](https://github.com/puristajs/purista/b
 
 ### mode?
 
-> `optional` **mode**: `"input"` \| `"output"`
+> `optional` **mode?**: `"input"` \| `"output"`
 
 Defined in: [schema/standardSchema.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/schema/standardSchema.ts#L24)
 
@@ -22,6 +22,6 @@ Defined in: [schema/standardSchema.ts:24](https://github.com/puristajs/purista/b
 
 ### target?
 
-> `optional` **target**: `StandardJSONSchemaV1.Target`
+> `optional` **target?**: `StandardJSONSchemaV1.Target`
 
 Defined in: [schema/standardSchema.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/schema/standardSchema.ts#L23)

@@ -32,13 +32,24 @@ The runtime emits harness `RunEvent` values. It does not emit a PURISTA-specific
 AI protocol envelope and it does not adapt streams to Vercel AI SDK message
 formats.
 
+HTTP stream endpoints emit standard SSE `event`/`data` frames. The `data`
+payload follows provider-familiar semantic event names such as
+`response.created`, `response.output_text.delta`, `response.output_json.delta`,
+and `response.completed`, with `type` and `sequence_number` fields included in
+each chunk.
+
 ## Builder
 
 ```ts
-import { ServiceBuilder } from '@purista/ai'
+import '@purista/ai'
+import { ServiceBuilder } from '@purista/core'
 import { z } from 'zod'
 
-export const supportService = new ServiceBuilder('support', '1')
+export const supportService = new ServiceBuilder({
+  serviceName: 'support',
+  serviceVersion: '1',
+  serviceDescription: 'Support service',
+})
 
 export const triageAgent = supportService
   .getAgentQueueBuilder('triage', 'Classifies incoming support tickets')
@@ -77,16 +88,22 @@ Builder declarations cascade into handler types:
 Applications bind concrete harness providers at service startup:
 
 ```ts
-const instance = await supportService.getInstance(eventBridge, {
-  ai: {
-    models: {
-      primary: {
-        provider,
-        model: 'gpt-4.1-mini',
+const instance = await supportService
+  .addAgentDefinition(await triageAgent.getDefinition())
+  .getInstance(eventBridge, {
+    queueBridge,
+    ai: {
+      telemetry: {
+        captureContent: false,
+      },
+      models: {
+        primary: {
+          provider,
+          model: 'gpt-4.1-mini',
+        },
       },
     },
-  },
-})
+  })
 ```
 
 Startup fails fast when a declared alias is missing or the runtime provider does
@@ -99,15 +116,45 @@ Use `@purista/ai/testing` for credential-free tests:
 ```ts
 import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'
 
-const model = createScriptedHarnessModel({
-  object: [{ object: { priority: 'high' } }],
+const model = createScriptedHarnessModel()
+
+model.enqueueObject({
+  object: { priority: 'high' },
+  usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+  finishReason: 'stop',
 })
 
-const harness = createAgentTestHarness({ models: { primary: model } })
+const harness = createAgentTestHarness(await triageAgent.getDefinition(), {
+  models: {
+    primary: {
+      provider: model,
+      model: 'gpt-4.1-mini',
+      capabilities: ['object'],
+    },
+  },
+})
+
+const output = await harness.run({ payload: { text: 'urgent customer issue' } })
 ```
 
 Tests should assert harness events and validated final output, not transport
 protocol envelopes.
+
+## Stream Events
+
+`agentSseEventSchema` describes the chunk payload exposed in OpenAPI for AI
+stream endpoints. It supports text deltas, JSON/object deltas, tool lifecycle
+events, embedding/rerank completion events, errors, and final response
+completion.
+
+```ts
+import { agentContentPartSchema, agentSseEventSchema } from '@purista/ai'
+
+agentContentPartSchema.parse({
+  kind: 'image_url',
+  url: 'https://example.com/image.png',
+})
+```
 
 ## Modules
 

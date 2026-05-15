@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / EmitCustomMessageFunction
 
-# Type Alias: EmitCustomMessageFunction()\<EmitList\>
+# Type Alias: EmitCustomMessageFunction\<EmitList\>
 
 > **EmitCustomMessageFunction**\<`EmitList`\> = \<`K`\>(`eventName`, `payload`, `contentType?`, `contentEncoding?`) => `Promise`\<`void`\>
 

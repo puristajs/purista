@@ -400,9 +400,9 @@ Set the bearer token for all following requests.
 
 ##### token
 
-the bearer token
+`string` \| `undefined`
 
-`string` | `undefined`
+the bearer token
 
 #### Returns
 
@@ -444,9 +444,9 @@ span options
 
 ##### context
 
-optional context
+`Context` \| `undefined`
 
-`Context` | `undefined`
+optional context
 
 ##### fn
 

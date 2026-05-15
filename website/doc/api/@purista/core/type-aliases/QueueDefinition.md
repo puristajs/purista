@@ -8,7 +8,7 @@
 
 > **QueueDefinition**\<`PayloadSchema`, `ParamsSchema`, `Resources`, `Invokes`, `StreamInvokes`\> = `object`
 
-Defined in: [core/types/queue/QueueDefinition.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L11)
+Defined in: [core/types/queue/QueueDefinition.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L14)
 
 ## Type Parameters
 
@@ -36,13 +36,13 @@ Defined in: [core/types/queue/QueueDefinition.ts:11](https://github.com/puristaj
 
 ### deadLetter?
 
-> `optional` **deadLetter**: `object`
+> `optional` **deadLetter?**: `object`
 
-Defined in: [core/types/queue/QueueDefinition.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L27)
+Defined in: [core/types/queue/QueueDefinition.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L33)
 
 #### queueName?
 
-> `optional` **queueName**: `string`
+> `optional` **queueName?**: `string`
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [core/types/queue/QueueDefinition.ts:27](https://github.com/puristaj
 
 > **deprecated**: `boolean`
 
-Defined in: [core/types/queue/QueueDefinition.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L23)
+Defined in: [core/types/queue/QueueDefinition.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L26)
 
 ***
 
@@ -58,31 +58,39 @@ Defined in: [core/types/queue/QueueDefinition.ts:23](https://github.com/puristaj
 
 > **description**: `string`
 
-Defined in: [core/types/queue/QueueDefinition.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L19)
+Defined in: [core/types/queue/QueueDefinition.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L22)
+
+***
+
+### executionProfile?
+
+> `optional` **executionProfile?**: [`QueueLongRunningExecutionProfile`](QueueLongRunningExecutionProfile.md)
+
+Defined in: [core/types/queue/QueueDefinition.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L28)
 
 ***
 
 ### lifecycle?
 
-> `optional` **lifecycle**: [`QueueLifecycleConfig`](QueueLifecycleConfig.md)
+> `optional` **lifecycle?**: [`QueueLifecycleConfig`](QueueLifecycleConfig.md)
 
-Defined in: [core/types/queue/QueueDefinition.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L24)
+Defined in: [core/types/queue/QueueDefinition.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L27)
 
 ***
 
 ### parameterSchema?
 
-> `optional` **parameterSchema**: `ParamsSchema`
+> `optional` **parameterSchema?**: `ParamsSchema`
 
-Defined in: [core/types/queue/QueueDefinition.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L21)
+Defined in: [core/types/queue/QueueDefinition.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L24)
 
 ***
 
 ### payloadSchema?
 
-> `optional` **payloadSchema**: `PayloadSchema`
+> `optional` **payloadSchema?**: `PayloadSchema`
 
-Defined in: [core/types/queue/QueueDefinition.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L20)
+Defined in: [core/types/queue/QueueDefinition.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L23)
 
 ***
 
@@ -90,7 +98,7 @@ Defined in: [core/types/queue/QueueDefinition.ts:20](https://github.com/puristaj
 
 > **queueBridgeConfig**: [`DefinitionQueueBridgeConfig`](DefinitionQueueBridgeConfig.md)
 
-Defined in: [core/types/queue/QueueDefinition.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L25)
+Defined in: [core/types/queue/QueueDefinition.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L31)
 
 ***
 
@@ -98,7 +106,23 @@ Defined in: [core/types/queue/QueueDefinition.ts:25](https://github.com/puristaj
 
 > **queueName**: `string`
 
-Defined in: [core/types/queue/QueueDefinition.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L18)
+Defined in: [core/types/queue/QueueDefinition.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L21)
+
+***
+
+### resultPolicy?
+
+> `optional` **resultPolicy?**: [`QueueResultPolicy`](QueueResultPolicy.md)
+
+Defined in: [core/types/queue/QueueDefinition.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L29)
+
+***
+
+### schedules?
+
+> `optional` **schedules?**: [`ScheduleDefinition`](ScheduleDefinition.md)[]
+
+Defined in: [core/types/queue/QueueDefinition.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L30)
 
 ***
 
@@ -106,23 +130,23 @@ Defined in: [core/types/queue/QueueDefinition.ts:18](https://github.com/puristaj
 
 > **tags**: `string`[]
 
-Defined in: [core/types/queue/QueueDefinition.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L22)
+Defined in: [core/types/queue/QueueDefinition.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L25)
 
 ***
 
 ### transformBeforeEnqueue?
 
-> `optional` **transformBeforeEnqueue**: [`QueueTransformHook`](QueueTransformHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`Infer`](Infer.md)\<`PayloadSchema`\>, [`Infer`](Infer.md)\<`ParamsSchema`\>, `Resources`\>
+> `optional` **transformBeforeEnqueue?**: [`QueueTransformHook`](QueueTransformHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`Infer`](Infer.md)\<`PayloadSchema`\>, [`Infer`](Infer.md)\<`ParamsSchema`\>, `Resources`\>
 
-Defined in: [core/types/queue/QueueDefinition.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L30)
+Defined in: [core/types/queue/QueueDefinition.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L36)
 
 ***
 
 ### transformBeforeExecute?
 
-> `optional` **transformBeforeExecute**: [`QueueTransformHook`](QueueTransformHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`Infer`](Infer.md)\<`PayloadSchema`\>, [`Infer`](Infer.md)\<`ParamsSchema`\>, `Resources`\>
+> `optional` **transformBeforeExecute?**: [`QueueTransformHook`](QueueTransformHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`Infer`](Infer.md)\<`PayloadSchema`\>, [`Infer`](Infer.md)\<`ParamsSchema`\>, `Resources`\>
 
-Defined in: [core/types/queue/QueueDefinition.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L31)
+Defined in: [core/types/queue/QueueDefinition.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L37)
 
 ***
 
@@ -130,4 +154,4 @@ Defined in: [core/types/queue/QueueDefinition.ts:31](https://github.com/puristaj
 
 > **workers**: [`QueueWorkerDefinition`](QueueWorkerDefinition.md)\<`PayloadSchema`, `ParamsSchema`, `Resources`, `Invokes`, `StreamInvokes`\>[]
 
-Defined in: [core/types/queue/QueueDefinition.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L26)
+Defined in: [core/types/queue/QueueDefinition.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L32)

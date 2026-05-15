@@ -8,7 +8,7 @@
 
 > **StreamContextMockResult**\<`TBuilder`\> = `object`
 
-Defined in: [testing/createStreamContextMock.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L42)
+Defined in: [testing/createStreamContextMock.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L37)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [testing/createStreamContextMock.ts:42](https://github.com/puristajs
 
 > **chunks**: [`InferIn`](InferIn.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ChunkSchema"`\]\>[]
 
-Defined in: [testing/createStreamContextMock.ts:88](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L88)
+Defined in: [testing/createStreamContextMock.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L83)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [testing/createStreamContextMock.ts:88](https://github.com/puristajs
 
 > **context**: [`StreamFunctionContext`](StreamFunctionContext.md)\<[`Infer`](Infer.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"PayloadSchema"`\]\>, [`Infer`](Infer.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ParamsSchema"`\]\>, [`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\]\>
 
-Defined in: [testing/createStreamContextMock.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L43)
+Defined in: [testing/createStreamContextMock.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L38)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [testing/createStreamContextMock.ts:43](https://github.com/puristajs
 
 > **failedWith**: `unknown`[]
 
-Defined in: [testing/createStreamContextMock.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L90)
+Defined in: [testing/createStreamContextMock.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L85)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [testing/createStreamContextMock.ts:90](https://github.com/puristajs
 
 > **finalValue**: [`InferIn`](InferIn.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"FinalSchema"`\]\> \| `undefined`
 
-Defined in: [testing/createStreamContextMock.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L89)
+Defined in: [testing/createStreamContextMock.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L84)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [testing/createStreamContextMock.ts:89](https://github.com/puristajs
 
 > **stubs**: `object`
 
-Defined in: [testing/createStreamContextMock.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L56)
+Defined in: [testing/createStreamContextMock.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L51)
 
 #### emit
 
@@ -146,7 +146,7 @@ Defined in: [testing/createStreamContextMock.ts:56](https://github.com/puristajs
 
 > **writer**: [`StreamWriter`](../interfaces/StreamWriter.md)\<[`InferIn`](InferIn.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ChunkSchema"`\]\>, [`InferIn`](InferIn.md)\<[`StreamContextMockBuilderTypes`](StreamContextMockBuilderTypes.md)\<`TBuilder`\>\[`"FinalSchema"`\]\>\>
 
-Defined in: [testing/createStreamContextMock.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L52)
+Defined in: [testing/createStreamContextMock.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L47)
 
 ## Methods
 
@@ -154,7 +154,7 @@ Defined in: [testing/createStreamContextMock.ts:52](https://github.com/puristajs
 
 > **cancel**(`reason?`): `void`
 
-Defined in: [testing/createStreamContextMock.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L91)
+Defined in: [testing/createStreamContextMock.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createStreamContextMock.ts#L86)
 
 #### Parameters
 

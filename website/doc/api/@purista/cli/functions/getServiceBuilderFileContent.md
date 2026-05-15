@@ -8,7 +8,7 @@
 
 > **getServiceBuilderFileContent**(`input`): `string`
 
-Defined in: [packages/cli/src/api/content/service/getServiceBuilderFileContent.ts:12](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/api/content/service/getServiceBuilderFileContent.ts#L12)
+Defined in: [packages/cli/src/api/content/service/getServiceBuilderFileContent.ts:12](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/api/content/service/getServiceBuilderFileContent.ts#L12)
 
 Generate the builder file, which contains the creation of the service builder.
 This basic service builder is than used in the service file, where commands and services are added.

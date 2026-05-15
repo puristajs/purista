@@ -20,28 +20,28 @@ Defined in: [core/types/subscription/SubscriptionDefinitionMetadataBase.ts:6](ht
 
 #### contentEncodingRequest?
 
-> `optional` **contentEncodingRequest**: `string`
+> `optional` **contentEncodingRequest?**: `string`
 
 #### contentEncodingResponse?
 
-> `optional` **contentEncodingResponse**: `string`
+> `optional` **contentEncodingResponse?**: `string`
 
 #### contentTypeRequest?
 
-> `optional` **contentTypeRequest**: [`ContentType`](ContentType.md)
+> `optional` **contentTypeRequest?**: [`ContentType`](ContentType.md)
 
 #### contentTypeResponse?
 
-> `optional` **contentTypeResponse**: [`ContentType`](ContentType.md)
+> `optional` **contentTypeResponse?**: [`ContentType`](ContentType.md)
 
 #### inputPayload?
 
-> `optional` **inputPayload**: `SchemaObject`
+> `optional` **inputPayload?**: `SchemaObject`
 
 #### outputPayload?
 
-> `optional` **outputPayload**: `SchemaObject`
+> `optional` **outputPayload?**: `SchemaObject`
 
 #### parameter?
 
-> `optional` **parameter**: `SchemaObject`
+> `optional` **parameter?**: `SchemaObject`

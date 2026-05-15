@@ -25,15 +25,24 @@ export const getAgentTestFileContent = (input: {
 	writer.indent(() => {
 		writer.writeLine("it('runs with the attached-agent harness runtime', async () => {")
 		writer.indent(() => {
+			writer.writeLine('const model = createScriptedHarnessModel()')
+			writer.writeLine('model.enqueueObject({')
+			writer.indent(() => {
+				writer.writeLine("object: { message: 'hello' },")
+				writer.writeLine('usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },')
+				writer.writeLine("finishReason: 'stop',")
+			})
+			writer.writeLine('})')
+			writer.blankLine()
 			writer.writeLine(`const harness = await createAgentTestHarness(await ${builderName}.getDefinition(), {`)
 			writer.indent(() => {
 				writer.writeLine('models: {')
 				writer.indent(() => {
 					writer.writeLine('primary: {')
 					writer.indent(() => {
-						writer.writeLine("provider: createScriptedHarnessModel().nextObject({ message: 'hello' }),")
+						writer.writeLine('provider: model,')
 						writer.writeLine("model: 'gpt-4.1-mini',")
-						writer.writeLine("capabilities: ['object', 'text_stream', 'tool_use'],")
+						writer.writeLine("capabilities: ['object'],")
 					})
 					writer.writeLine('},')
 				})

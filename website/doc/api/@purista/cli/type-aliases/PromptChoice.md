@@ -8,7 +8,7 @@
 
 > **PromptChoice**\<`TValue`\> = `object`
 
-Defined in: [packages/cli/src/core/types.ts:46](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L46)
+Defined in: [packages/cli/src/core/types.ts:50](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L50)
 
 ## Type Parameters
 
@@ -20,9 +20,9 @@ Defined in: [packages/cli/src/core/types.ts:46](https://github.com/puristajs/pur
 
 ### description?
 
-> `optional` **description**: `string`
+> `optional` **description?**: `string`
 
-Defined in: [packages/cli/src/core/types.ts:49](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L49)
+Defined in: [packages/cli/src/core/types.ts:53](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L53)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [packages/cli/src/core/types.ts:49](https://github.com/puristajs/pur
 
 > **name**: `string`
 
-Defined in: [packages/cli/src/core/types.ts:47](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L47)
+Defined in: [packages/cli/src/core/types.ts:51](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L51)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [packages/cli/src/core/types.ts:47](https://github.com/puristajs/pur
 
 > **value**: `TValue`
 
-Defined in: [packages/cli/src/core/types.ts:48](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/types.ts#L48)
+Defined in: [packages/cli/src/core/types.ts:52](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L52)

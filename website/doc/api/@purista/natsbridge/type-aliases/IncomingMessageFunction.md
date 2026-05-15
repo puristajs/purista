@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/natsbridge](../README.md) / IncomingMessageFunction
 
-# Type Alias: IncomingMessageFunction()
+# Type Alias: IncomingMessageFunction
 
 > **IncomingMessageFunction** = (`this`, `error`, `msg`) => `Promise`\<`void`\>
 
@@ -18,11 +18,11 @@ Defined in: [natsbridge/src/types/IncomingMessageFunction.ts:5](https://github.c
 
 ### error
 
-`NatsError` | `null`
+`NatsError` \| `null`
 
 ### msg
 
-`Msg` | `JsMsg`
+`Msg` \| `JsMsg`
 
 ## Returns
 

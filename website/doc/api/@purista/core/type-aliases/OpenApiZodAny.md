@@ -14,4 +14,4 @@ Defined in: [zodOpenApi/extendApi.ts:4](https://github.com/puristajs/purista/blo
 
 ### metaOpenApi?
 
-> `optional` **metaOpenApi**: `SchemaObject` \| `SchemaObject`[]
+> `optional` **metaOpenApi?**: `SchemaObject` \| `SchemaObject`[]

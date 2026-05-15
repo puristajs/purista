@@ -6,7 +6,7 @@
 
 # Class: PuristaCliPromptError
 
-Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/errors.ts#L27)
+Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L27)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/pu
 
 > **new PuristaCliPromptError**(`message`, `options?`): `PuristaCliPromptError`
 
-Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/errors.ts#L28)
+Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L28)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/pu
 
 ###### command?
 
-`"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"init-project"`
+`"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-cloudevents-schema"` \| `"init-project"`
 
 ###### issues?
 
@@ -48,9 +48,9 @@ Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/pu
 
 ### cause?
 
-> `optional` **cause**: `unknown`
+> `optional` **cause?**: `unknown`
 
-Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:26
+Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 #### Inherited from
 
@@ -60,9 +60,9 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 ### command?
 
-> `readonly` `optional` **command**: `"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"init-project"`
+> `readonly` `optional` **command?**: `"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-cloudevents-schema"` \| `"init-project"`
 
-Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/errors.ts#L4)
+Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L4)
 
 #### Inherited from
 
@@ -74,7 +74,7 @@ Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/pur
 
 > `readonly` **exitCode**: `number`
 
-Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/errors.ts#L6)
+Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L6)
 
 #### Inherited from
 
@@ -86,7 +86,7 @@ Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/pur
 
 > `readonly` **issues**: [`PuristaCommandIssue`](../type-aliases/PuristaCommandIssue.md)[]
 
-Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/errors.ts#L5)
+Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L5)
 
 #### Inherited from
 
@@ -98,7 +98,7 @@ Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/pur
 
 > **message**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1077
+Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1075
 
 #### Inherited from
 
@@ -110,7 +110,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1077
 
 > **name**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
+Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1074
 
 #### Inherited from
 
@@ -120,9 +120,9 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 ### stack?
 
-> `optional` **stack**: `string`
+> `optional` **stack?**: `string`
 
-Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1078
+Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 #### Inherited from
 

@@ -43,18 +43,22 @@ export function createAgentContextMock<
 		...input.identity,
 	}
 
+	const resources = (input.resources ?? {}) as Resources
+	const message = { id: identity.transportMessageId }
+	const emit = async () => undefined
+	const service = {}
+	const stream = {}
+	const queue = {}
 	return {
 		payload: input.payload as Payload,
 		parameter: input.parameter as Parameter,
 		identity,
-		app: {
-			message: { id: identity.transportMessageId },
-			resources: (input.resources ?? {}) as Resources,
-			emit: async () => undefined,
-			service: {},
-			stream: {},
-			queue: {},
-		},
+		message,
+		emit,
+		service,
+		stream,
+		queue,
+		resources,
 		harness: {
 			session: createSessionMock(identity.harnessSessionId),
 			models: (input.models ?? {}) as AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models'],

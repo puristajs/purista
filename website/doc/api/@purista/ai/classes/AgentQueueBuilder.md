@@ -6,7 +6,7 @@
 
 # Class: AgentQueueBuilder\<S\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:54](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L54)
+Defined in: [builder/AgentQueueBuilder.ts:76](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L76)
 
 Builds an attached PURISTA agent from normal core queue, worker, command, and
 stream definitions plus an AI manifest consumed by `@purista/ai`.
@@ -32,7 +32,7 @@ const triage = service
 
 > **new AgentQueueBuilder**\<`S`\>(`serviceName`, `serviceVersion`, `agentName`, `description`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:71](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L71)
+Defined in: [builder/AgentQueueBuilder.ts:95](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L95)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:71](https://github.com/puristaj
 
 > **addModel**\<`Alias`, `Binding`\>(`alias`, `binding`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\] & `Record`\<`Alias`, `Binding`\>, `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:126](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L126)
+Defined in: [builder/AgentQueueBuilder.ts:150](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L150)
 
 #### Type Parameters
 
@@ -94,7 +94,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:126](https://github.com/purista
 
 > **addOutputSchema**\<`OutputSchema`\>(`schema`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `OutputSchema`, `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:110](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L110)
+Defined in: [builder/AgentQueueBuilder.ts:134](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L134)
 
 #### Type Parameters
 
@@ -118,7 +118,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:110](https://github.com/purista
 
 > **addParameterSchema**\<`ParameterSchema`\>(`schema`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `ParameterSchema`, `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:94](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L94)
+Defined in: [builder/AgentQueueBuilder.ts:118](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L118)
 
 #### Type Parameters
 
@@ -142,7 +142,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:94](https://github.com/puristaj
 
 > **addPayloadSchema**\<`PayloadSchema`\>(`schema`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`PayloadSchema`, `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:78](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L78)
+Defined in: [builder/AgentQueueBuilder.ts:102](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L102)
 
 #### Type Parameters
 
@@ -166,7 +166,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:78](https://github.com/puristaj
 
 > **canInvoke**\<`Output`, `Payload`, `Parameter`, `ServiceName`, `Version`, `CommandName`\>(`serviceName`, `serviceVersion`, `commandName`, `schemas?`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\] & `Record`\<`` `${ServiceName}.${Version}.${CommandName}` ``, [`AllowedCommandToolDefinition`](../type-aliases/AllowedCommandToolDefinition.md)\<`Output`, `Payload`, `Parameter`\>\>, `S`\[`"AgentTools"`\], `S`\[`"Execution"`\]\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:153](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L153)
+Defined in: [builder/AgentQueueBuilder.ts:177](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L177)
 
 #### Type Parameters
 
@@ -232,7 +232,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:153](https://github.com/purista
 
 > **canInvokeAgent**\<`Output`, `Payload`, `Parameter`, `AgentName`, `Version`\>(`agentName`, `serviceVersion`, `schemas?`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\] & `Record`\<`` `${AgentName}.${Version}` ``, [`AllowedAgentDefinition`](../type-aliases/AllowedAgentDefinition.md)\<`Output`, `Payload`, `Parameter`\>\>, `S`\[`"Execution"`\]\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:189](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L189)
+Defined in: [builder/AgentQueueBuilder.ts:213](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L213)
 
 #### Type Parameters
 
@@ -290,7 +290,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:189](https://github.com/purista
 
 > **exposeAsHttpEndpoint**(`method`, `path`, `options?`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:337](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L337)
+Defined in: [builder/AgentQueueBuilder.ts:403](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L403)
 
 #### Parameters
 
@@ -316,7 +316,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:337](https://github.com/purista
 
 > **getDefinition**(): `Promise`\<[`AttachedAgentDefinition`](../type-aliases/AttachedAgentDefinition.md)\<`S`\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:372](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L372)
+Defined in: [builder/AgentQueueBuilder.ts:438](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L438)
 
 #### Returns
 
@@ -328,7 +328,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:372](https://github.com/purista
 
 > **getManifest**(): [`AgentManifest`](../type-aliases/AgentManifest.md)\<`S`\[`"Models"`\]\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:368](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L368)
+Defined in: [builder/AgentQueueBuilder.ts:434](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L434)
 
 #### Returns
 
@@ -340,7 +340,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:368](https://github.com/purista
 
 > **makeEndpointPublic**(): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:354](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L354)
+Defined in: [builder/AgentQueueBuilder.ts:420](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L420)
 
 #### Returns
 
@@ -352,7 +352,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:354](https://github.com/purista
 
 > **setExecutionPolicy**(`policy`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:322](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L322)
+Defined in: [builder/AgentQueueBuilder.ts:346](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L346)
 
 #### Parameters
 
@@ -366,11 +366,49 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:322](https://github.com/purista
 
 ***
 
+### setExecutionProfile()
+
+> **setExecutionProfile**(`profile`, `options`): `AgentQueueBuilder`\<`S`\>
+
+Defined in: [builder/AgentQueueBuilder.ts:361](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L361)
+
+Apply a core queue execution profile to the generated agent queue.
+
+#### Parameters
+
+##### profile
+
+`"longRunning"`
+
+##### options
+
+###### maxRuntimeMs
+
+`number`
+
+###### strict?
+
+`boolean`
+
+#### Returns
+
+`AgentQueueBuilder`\<`S`\>
+
+#### Example
+
+```ts
+agent.setExecutionProfile('longRunning', {
+  maxRuntimeMs: 30 * 60_000,
+})
+```
+
+***
+
 ### setHarnessAgent()
 
 > **setHarnessAgent**(`this`, `definition`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"harnessAgent"`\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:221](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L221)
+Defined in: [builder/AgentQueueBuilder.ts:245](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L245)
 
 #### Parameters
 
@@ -392,7 +430,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:221](https://github.com/purista
 
 > **setHarnessWorkflow**(`this`, `definition`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"harnessWorkflow"`\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:252](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L252)
+Defined in: [builder/AgentQueueBuilder.ts:276](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L276)
 
 #### Parameters
 
@@ -410,11 +448,46 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:252](https://github.com/purista
 
 ***
 
+### setResponseMode()
+
+> **setResponseMode**(`mode`, `options?`): `AgentQueueBuilder`\<`S`\>
+
+Defined in: [builder/AgentQueueBuilder.ts:388](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L388)
+
+Configure how a queued agent run exposes its final result contract.
+
+Long-running response modes enqueue the agent queue and keep `jobId` and
+agent `runId` as separate metadata in the generated definitions.
+
+#### Parameters
+
+##### mode
+
+`AgentResponseMode`
+
+##### options?
+
+`AgentResponseModeOptions`
+
+#### Returns
+
+`AgentQueueBuilder`\<`S`\>
+
+#### Example
+
+```ts
+agent.setResponseMode('accepted', {
+  resultPolicy: 'state-and-event',
+})
+```
+
+***
+
 ### setRunFunction()
 
 > **setRunFunction**(`this`, `handler`): `AgentQueueBuilder`\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<`S`\[`"PayloadSchema"`\], `S`\[`"ParameterSchema"`\], `S`\[`"OutputSchema"`\], `S`\[`"Resources"`\], `S`\[`"Models"`\], `S`\[`"CommandTools"`\], `S`\[`"AgentTools"`\], `"runFunction"`\>\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:283](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L283)
+Defined in: [builder/AgentQueueBuilder.ts:307](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L307)
 
 #### Parameters
 
@@ -436,7 +509,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:283](https://github.com/purista
 
 > **setSandboxPolicy**(`policy`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:332](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L332)
+Defined in: [builder/AgentQueueBuilder.ts:398](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L398)
 
 #### Parameters
 
@@ -454,7 +527,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:332](https://github.com/purista
 
 > **setSessionPolicy**(`policy`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:327](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L327)
+Defined in: [builder/AgentQueueBuilder.ts:393](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L393)
 
 #### Parameters
 
@@ -472,13 +545,13 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:327](https://github.com/purista
 
 > **setStreamingMode**(`mode`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:349](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L349)
+Defined in: [builder/AgentQueueBuilder.ts:415](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L415)
 
 #### Parameters
 
 ##### mode
 
-`"stream"` | `"aggregate"`
+`"stream"` \| `"aggregate"`
 
 #### Returns
 
@@ -490,7 +563,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:349](https://github.com/purista
 
 > **setSuccessEventName**(`eventName`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:362](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L362)
+Defined in: [builder/AgentQueueBuilder.ts:428](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L428)
 
 #### Parameters
 
@@ -508,13 +581,13 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:362](https://github.com/purista
 
 > **useBuiltInTools**(`namesOrFalse`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:148](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L148)
+Defined in: [builder/AgentQueueBuilder.ts:172](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L172)
 
 #### Parameters
 
 ##### namesOrFalse
 
-`false` | readonly `BuiltinToolName`[]
+`false` \| readonly `BuiltinToolName`[]
 
 #### Returns
 
@@ -526,7 +599,7 @@ Defined in: [ai/src/builder/AgentQueueBuilder.ts:148](https://github.com/purista
 
 > **useSkills**(`names`, `resourceName?`): `AgentQueueBuilder`\<`S`\>
 
-Defined in: [ai/src/builder/AgentQueueBuilder.ts:143](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/ai/src/builder/AgentQueueBuilder.ts#L143)
+Defined in: [builder/AgentQueueBuilder.ts:167](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/AgentQueueBuilder.ts#L167)
 
 #### Parameters
 

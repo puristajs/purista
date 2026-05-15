@@ -16,7 +16,7 @@ Mocks the queue bridge and stubs the methods.
 
 ### sandboxOrOptions?
 
-`SinonSandbox` | \{ `capabilities?`: `Partial`\<[`QueueBridgeCapabilities`](../type-aliases/QueueBridgeCapabilities.md)\>; `sandbox?`: `SinonSandbox`; \}
+`SinonSandbox` \| \{ `capabilities?`: `Partial`\<[`QueueBridgeCapabilities`](../type-aliases/QueueBridgeCapabilities.md)\>; `sandbox?`: `SinonSandbox`; \}
 
 ## Returns
 

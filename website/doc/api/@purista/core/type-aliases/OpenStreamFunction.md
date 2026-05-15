@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / OpenStreamFunction
 
-# Type Alias: OpenStreamFunction()
+# Type Alias: OpenStreamFunction
 
 > **OpenStreamFunction** = \<`Chunk`, `Final`, `PayloadType`, `ParameterType`\>(`address`, `payload`, `parameter`) => `Promise`\<[`StreamHandle`](../interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 

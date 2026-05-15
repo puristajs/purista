@@ -56,7 +56,7 @@ Defined in: [core/Error/UnhandledError.impl.ts:16](https://github.com/puristajs/
 
 ### data?
 
-> `optional` **data**: `unknown`
+> `optional` **data?**: `unknown`
 
 Defined in: [core/Error/UnhandledError.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L19)
 
@@ -72,7 +72,7 @@ Defined in: [core/Error/UnhandledError.impl.ts:17](https://github.com/puristajs/
 
 ### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 Defined in: [core/Error/UnhandledError.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L20)
 
@@ -120,7 +120,7 @@ Defined in: [core/Error/UnhandledError.impl.ts:96](https://github.com/puristajs/
 
 ##### data?
 
-> `optional` **data**: `unknown`
+> `optional` **data?**: `unknown`
 
 addition data
 
@@ -146,7 +146,7 @@ the error status code
 
 ##### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 the trace if of the request
 

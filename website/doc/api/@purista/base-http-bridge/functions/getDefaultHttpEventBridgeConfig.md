@@ -14,7 +14,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfi
 
 ### apiPrefix?
 
-> `optional` **apiPrefix**: `string`
+> `optional` **apiPrefix?**: `string`
 
 the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 needs to `enableRestApiExpose` set to `true`
@@ -27,7 +27,7 @@ needs to `enableRestApiExpose` set to `true`
 
 ### commandPayloadAsCloudEvent?
 
-> `optional` **commandPayloadAsCloudEvent**: `boolean`
+> `optional` **commandPayloadAsCloudEvent?**: `boolean`
 
 command invocations are wrapped in CloudEvent
 
@@ -41,13 +41,13 @@ false
 
 ### defaultCommandTimeout?
 
-> `optional` **defaultCommandTimeout**: `number`
+> `optional` **defaultCommandTimeout?**: `number`
 
 Overwrite the hardcoded default timeout of command invocations
 
 ### enableHttpCompression?
 
-> `optional` **enableHttpCompression**: `boolean`
+> `optional` **enableHttpCompression?**: `boolean`
 
 enable HTTP compression in web server
 
@@ -59,7 +59,7 @@ true
 
 ### enableRestApiExpose?
 
-> `optional` **enableRestApiExpose**: `boolean`
+> `optional` **enableRestApiExpose?**: `boolean`
 
 expose commands as regular REST endpoints when they are configured as endpoints
 
@@ -71,7 +71,7 @@ true
 
 ### instanceId?
 
-> `optional` **instanceId**: `string`
+> `optional` **instanceId?**: `string`
 
 The instance id of the event bridge.
 If not set, a id will generated each time a instance is created.
@@ -79,19 +79,19 @@ Use this if there is a need to always have the same instance id.
 
 ### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 ### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 ### pathPrefix?
 
-> `optional` **pathPrefix**: `string`
+> `optional` **pathPrefix?**: `string`
 
 the prefix to be used for exposing commands as endpoints expecting a event bus message
 
@@ -103,7 +103,7 @@ purista
 
 ### serverHost?
 
-> `optional` **serverHost**: `string`
+> `optional` **serverHost?**: `string`
 
 Host of the server.
 
@@ -115,7 +115,7 @@ Host of the server.
 
 ### serverPort?
 
-> `optional` **serverPort**: `number`
+> `optional` **serverPort?**: `number`
 
 Port of the server.
 
@@ -127,11 +127,11 @@ Port of the server.
 
 ### spanProcessor?
 
-> `optional` **spanProcessor**: `SpanProcessor`
+> `optional` **spanProcessor?**: `SpanProcessor`
 
 ### subscriptionPayloadAsCloudEvent?
 
-> `optional` **subscriptionPayloadAsCloudEvent**: `boolean`
+> `optional` **subscriptionPayloadAsCloudEvent?**: `boolean`
 
 subscription invocations are wrapped in CloudEvent
 

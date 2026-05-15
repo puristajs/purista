@@ -12,7 +12,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/IHttpEventBridge.ts:4](h
 
 ## Type Declaration
 
-### emitMessage()
+### emitMessage
 
 > **emitMessage**: (`message`) => `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
@@ -26,7 +26,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/IHttpEventBridge.ts:4](h
 
 `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-### isHealthy()
+### isHealthy
 
 > **isHealthy**: () => `Promise`\<`boolean`\>
 

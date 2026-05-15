@@ -6,9 +6,9 @@
 
 # Type Alias: SubscriptionDefinitionListResolved\<ServiceClassType\>
 
-> **SubscriptionDefinitionListResolved**\<`ServiceClassType`\> = [`SubscriptionDefinition`](SubscriptionDefinition.md)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md)\>[]
+> **SubscriptionDefinitionListResolved**\<`ServiceClassType`\> = [`SubscriptionDefinition`](SubscriptionDefinition.md)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md), `any`\>[]
 
-Defined in: [core/types/subscription/SubscriptionDefinitionList.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L30)
+Defined in: [core/types/subscription/SubscriptionDefinitionList.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L31)
 
 ## Type Parameters
 

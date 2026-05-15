@@ -14,7 +14,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:16](http
 
 ### contentType?
 
-> `optional` **contentType**: `string`
+> `optional` **contentType?**: `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts#L20)
 
@@ -22,7 +22,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:20](http
 
 ### entryID?
 
-> `optional` **entryID**: `string`
+> `optional` **entryID?**: `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:17](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts#L17)
 
@@ -38,6 +38,6 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:18](http
 
 ### metadata?
 
-> `optional` **metadata**: [`KeyValueType`](KeyValueType.md)
+> `optional` **metadata?**: [`KeyValueType`](KeyValueType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts#L19)

@@ -24,7 +24,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:1](https://github.com/puris
 
 ### delayMs?
 
-> `optional` **delayMs**: `number`
+> `optional` **delayMs?**: `number`
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L5)
 
@@ -32,7 +32,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:5](https://github.com/puris
 
 ### headers?
 
-> `optional` **headers**: `Record`\<`string`, `string`\>
+> `optional` **headers?**: `Record`\<`string`, `string`\>
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L7)
 
@@ -40,7 +40,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:7](https://github.com/puris
 
 ### idempotencyKey?
 
-> `optional` **idempotencyKey**: `string`
+> `optional` **idempotencyKey?**: `string`
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L6)
 
@@ -48,7 +48,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:6](https://github.com/puris
 
 ### leaseTtlMs?
 
-> `optional` **leaseTtlMs**: `number`
+> `optional` **leaseTtlMs?**: `number`
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L10)
 
@@ -56,7 +56,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:10](https://github.com/puri
 
 ### maxAttempts?
 
-> `optional` **maxAttempts**: `number`
+> `optional` **maxAttempts?**: `number`
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L8)
 
@@ -64,7 +64,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:8](https://github.com/puris
 
 ### parameter?
 
-> `optional` **parameter**: `Params`
+> `optional` **parameter?**: `Params`
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L4)
 
@@ -80,7 +80,7 @@ Defined in: [core/types/queue/QueueEnqueueOptions.ts:3](https://github.com/puris
 
 ### priority?
 
-> `optional` **priority**: `number`
+> `optional` **priority?**: `number`
 
 Defined in: [core/types/queue/QueueEnqueueOptions.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueEnqueueOptions.ts#L9)
 

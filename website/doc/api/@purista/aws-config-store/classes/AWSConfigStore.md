@@ -94,7 +94,7 @@ Enable generally set method
 
 > **cache**: [`ConfigStoreCacheMap`](../../core/type-aliases/ConfigStoreCacheMap.md)
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -114,11 +114,11 @@ Defined in: [aws-config-store/src/AWSConfigStore.impl.ts:28](https://github.com/
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
@@ -130,35 +130,35 @@ AWS client options
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 #### Inherited from
 
@@ -170,7 +170,7 @@ Enable generally set method
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -182,7 +182,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:1
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:21
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:21
 
 #### Inherited from
 
@@ -194,7 +194,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:2
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:72
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:72
 
 #### Returns
 
@@ -210,7 +210,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:7
 
 > **getConfig**\<`ConfigNames`\>(...`configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`ConfigNames`\>\>
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:39
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:39
 
 Returns the values for given config properties.
 This function **SHOULD NOT** be overwritten by store implementation.
@@ -278,7 +278,7 @@ an object of { [configName]: value | undefined }
 
 > **removeConfig**(`configName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:54
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:54
 
 Removes the config item given by config name.
 This function **SHOULD NOT** be overwritten by store implementation.
@@ -328,7 +328,7 @@ This method must be overwritten by actual store implementation.
 
 > **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:71
+Defined in: core/dist/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:71
 
 Sets a config value
 This function **SHOULD NOT** be overwritten by store implementation.

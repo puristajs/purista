@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / EventReceiver
 
-# Type Alias: EventReceiver()\<T\>
+# Type Alias: EventReceiver\<T\>
 
 > **EventReceiver**\<`T`\> = (`parameter`) => `void`
 

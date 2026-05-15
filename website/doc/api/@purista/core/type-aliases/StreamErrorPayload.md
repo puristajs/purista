@@ -14,7 +14,7 @@ Defined in: [core/types/stream/StreamErrorPayload.ts:4](https://github.com/puris
 
 ### data?
 
-> `optional` **data**: `unknown`
+> `optional` **data?**: `unknown`
 
 Defined in: [core/types/stream/StreamErrorPayload.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamErrorPayload.ts#L8)
 
@@ -46,6 +46,6 @@ Defined in: [core/types/stream/StreamErrorPayload.ts:5](https://github.com/puris
 
 ### traceId?
 
-> `optional` **traceId**: [`TraceId`](TraceId.md)
+> `optional` **traceId?**: [`TraceId`](TraceId.md)
 
 Defined in: [core/types/stream/StreamErrorPayload.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamErrorPayload.ts#L9)

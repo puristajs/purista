@@ -10,8 +10,9 @@ export type {
 	RunEvent,
 	Session,
 } from '@purista/harness'
+import './builder/ServiceBuilder.js'
+
 export { AgentQueueBuilder } from './builder/AgentQueueBuilder.js'
-export { ServiceBuilder } from './builder/ServiceBuilder.js'
 export type {
 	AgentDefinition,
 	AgentExecutionPolicy,

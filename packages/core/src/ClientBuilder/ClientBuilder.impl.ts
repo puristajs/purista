@@ -54,7 +54,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			version: puristaVersion,
 			definitionPath: './definitions',
 			outputPath: './dist',
-			buildAs: 'both',
+			buildAs: 'esm',
 			...config,
 			httpClient: {
 				clientName: 'HttpClient',

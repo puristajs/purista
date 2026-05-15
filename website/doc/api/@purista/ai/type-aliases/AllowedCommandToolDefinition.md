@@ -8,7 +8,7 @@
 
 > **AllowedCommandToolDefinition**\<`Output`, `Payload`, `Parameter`\> = `object`
 
-Defined in: ai/src/builder/types.ts:62
+Defined in: [builder/types.ts:63](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L63)
 
 ## Type Parameters
 
@@ -30,31 +30,31 @@ Defined in: ai/src/builder/types.ts:62
 
 > **commandName**: `string`
 
-Defined in: ai/src/builder/types.ts:69
+Defined in: [builder/types.ts:70](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L70)
 
 ***
 
 ### outputSchema?
 
-> `optional` **outputSchema**: `Output`
+> `optional` **outputSchema?**: `Output`
 
-Defined in: ai/src/builder/types.ts:70
+Defined in: [builder/types.ts:71](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L71)
 
 ***
 
 ### parameterSchema?
 
-> `optional` **parameterSchema**: `Parameter`
+> `optional` **parameterSchema?**: `Parameter`
 
-Defined in: ai/src/builder/types.ts:72
+Defined in: [builder/types.ts:73](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L73)
 
 ***
 
 ### payloadSchema?
 
-> `optional` **payloadSchema**: `Payload`
+> `optional` **payloadSchema?**: `Payload`
 
-Defined in: ai/src/builder/types.ts:71
+Defined in: [builder/types.ts:72](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L72)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: ai/src/builder/types.ts:71
 
 > **serviceName**: `string`
 
-Defined in: ai/src/builder/types.ts:67
+Defined in: [builder/types.ts:68](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L68)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: ai/src/builder/types.ts:67
 
 > **serviceVersion**: `string`
 
-Defined in: ai/src/builder/types.ts:68
+Defined in: [builder/types.ts:69](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L69)

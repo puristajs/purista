@@ -8,15 +8,15 @@
 
 > **ProjectBlueprint** = `object`
 
-Defined in: [packages/cli/src/blueprints/types.ts:56](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L56)
+Defined in: [packages/cli/src/blueprints/types.ts:56](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L56)
 
 ## Properties
 
-### applies()?
+### applies?
 
-> `optional` **applies**: (`context`) => `boolean`
+> `optional` **applies?**: (`context`) => `boolean`
 
-Defined in: [packages/cli/src/blueprints/types.ts:62](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L62)
+Defined in: [packages/cli/src/blueprints/types.ts:62](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L62)
 
 #### Parameters
 
@@ -32,17 +32,17 @@ Defined in: [packages/cli/src/blueprints/types.ts:62](https://github.com/purista
 
 ### conflicts?
 
-> `optional` **conflicts**: [`BlueprintId`](BlueprintId.md)[]
+> `optional` **conflicts?**: [`BlueprintId`](BlueprintId.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:61](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L61)
+Defined in: [packages/cli/src/blueprints/types.ts:61](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L61)
 
 ***
 
-### create()
+### create
 
 > **create**: (`context`) => [`ProjectBlueprintContribution`](ProjectBlueprintContribution.md)
 
-Defined in: [packages/cli/src/blueprints/types.ts:63](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L63)
+Defined in: [packages/cli/src/blueprints/types.ts:63](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L63)
 
 #### Parameters
 
@@ -58,9 +58,9 @@ Defined in: [packages/cli/src/blueprints/types.ts:63](https://github.com/purista
 
 ### dependencies?
 
-> `optional` **dependencies**: [`BlueprintId`](BlueprintId.md)[]
+> `optional` **dependencies?**: [`BlueprintId`](BlueprintId.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:60](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L60)
+Defined in: [packages/cli/src/blueprints/types.ts:60](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L60)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:60](https://github.com/purista
 
 > **description**: `string`
 
-Defined in: [packages/cli/src/blueprints/types.ts:58](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L58)
+Defined in: [packages/cli/src/blueprints/types.ts:58](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L58)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:58](https://github.com/purista
 
 > **id**: [`BlueprintId`](BlueprintId.md)
 
-Defined in: [packages/cli/src/blueprints/types.ts:57](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L57)
+Defined in: [packages/cli/src/blueprints/types.ts:57](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L57)
 
 ***
 
@@ -84,4 +84,4 @@ Defined in: [packages/cli/src/blueprints/types.ts:57](https://github.com/purista
 
 > **tags**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:59](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/types.ts#L59)
+Defined in: [packages/cli/src/blueprints/types.ts:59](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L59)

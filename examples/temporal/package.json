@@ -4,7 +4,7 @@
 	"version": "2.2.0",
 	"description": "PURISTA blueprint project",
 	"engines": {
-		"node": ">=18"
+		"node": ">=24.15.0"
 	},
 	"main": "src/index.ts",
 	"type": "module",

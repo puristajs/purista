@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StateGetterFunction
 
-# Type Alias: StateGetterFunction()
+# Type Alias: StateGetterFunction
 
 > **StateGetterFunction** = \<`StateNames`\>(...`stateNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 

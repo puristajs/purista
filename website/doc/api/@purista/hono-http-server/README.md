@@ -131,6 +131,7 @@ const _serverInstance = serve({
 - [ProblemDetails](type-aliases/ProblemDetails.md)
 - [ProblemTypeConfig](type-aliases/ProblemTypeConfig.md)
 - [ProtocolSseEvent](type-aliases/ProtocolSseEvent.md)
+- [PuristaOpenApiOperationOwner](type-aliases/PuristaOpenApiOperationOwner.md)
 - [StreamTransportFramePayload](type-aliases/StreamTransportFramePayload.md)
 - [VariablesBase](type-aliases/VariablesBase.md)
 

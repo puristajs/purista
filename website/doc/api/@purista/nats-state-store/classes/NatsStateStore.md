@@ -105,35 +105,35 @@ Enable generally set method
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
@@ -143,11 +143,11 @@ Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 #### Inherited from
 
@@ -175,7 +175,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:35](https://github.com/
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -187,7 +187,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -223,7 +223,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:118](https://github.com
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -291,7 +291,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:45](https://github.com/
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -335,7 +335,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:94](https://github.com/
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

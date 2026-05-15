@@ -8,7 +8,7 @@
 
 > **AgentManifest**\<`Models`\> = `object`
 
-Defined in: ai/src/builder/types.ts:218
+Defined in: [builder/types.ts:270](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L270)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: ai/src/builder/types.ts:218
 
 > **agentName**: `string`
 
-Defined in: ai/src/builder/types.ts:221
+Defined in: [builder/types.ts:273](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L273)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: ai/src/builder/types.ts:221
 
 > **allowedAgents**: readonly [`AllowedAgentDefinition`](AllowedAgentDefinition.md)[]
 
-Defined in: ai/src/builder/types.ts:233
+Defined in: [builder/types.ts:291](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L291)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: ai/src/builder/types.ts:233
 
 > **allowedCommands**: readonly [`AllowedCommandToolDefinition`](AllowedCommandToolDefinition.md)[]
 
-Defined in: ai/src/builder/types.ts:232
+Defined in: [builder/types.ts:290](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L290)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: ai/src/builder/types.ts:232
 
 > **builtInTools**: readonly `BuiltinToolName`[] \| `false` \| `true`
 
-Defined in: ai/src/builder/types.ts:235
+Defined in: [builder/types.ts:293](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L293)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: ai/src/builder/types.ts:235
 
 > **description**: `string`
 
-Defined in: ai/src/builder/types.ts:222
+Defined in: [builder/types.ts:274](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L274)
 
 ***
 
@@ -62,15 +62,15 @@ Defined in: ai/src/builder/types.ts:222
 
 > **execution**: `Required`\<`Pick`\<[`AgentExecutionPolicy`](AgentExecutionPolicy.md), `"maxAttempts"` \| `"maxParallelHandlers"`\>\> & `Omit`\<[`AgentExecutionPolicy`](AgentExecutionPolicy.md), `"maxAttempts"` \| `"maxParallelHandlers"`\>
 
-Defined in: ai/src/builder/types.ts:226
+Defined in: [builder/types.ts:278](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L278)
 
 ***
 
 ### http?
 
-> `optional` **http**: [`AgentHttpExposure`](AgentHttpExposure.md)
+> `optional` **http?**: [`AgentHttpExposure`](AgentHttpExposure.md)
 
-Defined in: ai/src/builder/types.ts:229
+Defined in: [builder/types.ts:281](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L281)
 
 ***
 
@@ -78,7 +78,43 @@ Defined in: ai/src/builder/types.ts:229
 
 > **models**: `Models`
 
-Defined in: ai/src/builder/types.ts:224
+Defined in: [builder/types.ts:276](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L276)
+
+***
+
+### response?
+
+> `optional` **response?**: `object`
+
+Defined in: [builder/types.ts:282](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L282)
+
+#### jobId
+
+> **jobId**: `object`
+
+##### jobId.source
+
+> **source**: `"queue-job-id"`
+
+#### mode
+
+> **mode**: `AgentResponseMode`
+
+#### options?
+
+> `optional` **options?**: `AgentResponseModeOptions`
+
+#### runId
+
+> **runId**: `object`
+
+##### runId.prefix
+
+> **prefix**: `"run:"`
+
+##### runId.source
+
+> **source**: `"queue-job-id"`
 
 ***
 
@@ -86,15 +122,15 @@ Defined in: ai/src/builder/types.ts:224
 
 > **runtimeRevision**: `string`
 
-Defined in: ai/src/builder/types.ts:223
+Defined in: [builder/types.ts:275](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L275)
 
 ***
 
 ### sandbox?
 
-> `optional` **sandbox**: [`AgentSandboxPolicy`](AgentSandboxPolicy.md)
+> `optional` **sandbox?**: [`AgentSandboxPolicy`](AgentSandboxPolicy.md)
 
-Defined in: ai/src/builder/types.ts:228
+Defined in: [builder/types.ts:280](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L280)
 
 ***
 
@@ -102,7 +138,7 @@ Defined in: ai/src/builder/types.ts:228
 
 > **serviceName**: `string`
 
-Defined in: ai/src/builder/types.ts:219
+Defined in: [builder/types.ts:271](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L271)
 
 ***
 
@@ -110,7 +146,7 @@ Defined in: ai/src/builder/types.ts:219
 
 > **serviceVersion**: `string`
 
-Defined in: ai/src/builder/types.ts:220
+Defined in: [builder/types.ts:272](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L272)
 
 ***
 
@@ -118,7 +154,7 @@ Defined in: ai/src/builder/types.ts:220
 
 > **session**: [`AgentSessionPolicy`](AgentSessionPolicy.md)
 
-Defined in: ai/src/builder/types.ts:225
+Defined in: [builder/types.ts:277](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L277)
 
 ***
 
@@ -126,15 +162,15 @@ Defined in: ai/src/builder/types.ts:225
 
 > **streamingMode**: `"stream"` \| `"aggregate"`
 
-Defined in: ai/src/builder/types.ts:230
+Defined in: [builder/types.ts:288](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L288)
 
 ***
 
 ### successEventName?
 
-> `optional` **successEventName**: `string`
+> `optional` **successEventName?**: `string`
 
-Defined in: ai/src/builder/types.ts:231
+Defined in: [builder/types.ts:289](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L289)
 
 ***
 
@@ -142,4 +178,4 @@ Defined in: ai/src/builder/types.ts:231
 
 > **usedSkills**: readonly `object`[]
 
-Defined in: ai/src/builder/types.ts:234
+Defined in: [builder/types.ts:292](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L292)

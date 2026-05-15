@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/mqttbridge](../README.md) / GetCommandTopicFn
 
-# Type Alias: GetCommandTopicFn()
+# Type Alias: GetCommandTopicFn
 
 > **GetCommandTopicFn** = (`this`, `address`) => `string`
 

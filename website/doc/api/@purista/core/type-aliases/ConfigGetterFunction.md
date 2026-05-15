@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / ConfigGetterFunction
 
-# Type Alias: ConfigGetterFunction()
+# Type Alias: ConfigGetterFunction
 
 > **ConfigGetterFunction** = \<`ConfigNames`\>(...`configNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`ConfigNames`\>\>
 

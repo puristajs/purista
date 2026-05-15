@@ -25,7 +25,7 @@ This client is responsible for the communication to the sidecar service.
 
 > **new DaprClient**(`config`): `DaprClient`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:32
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:32
 
 #### Parameters
 
@@ -282,7 +282,7 @@ Custom trace Id
 
 > `protected` **auth**: [`AuthCredentials`](../../core/type-aliases/AuthCredentials.md)
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:31
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:31
 
 #### Inherited from
 
@@ -294,7 +294,7 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:31
 
 > **baseUrl**: `URL` \| `undefined`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:28
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:28
 
 #### Inherited from
 
@@ -306,11 +306,11 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:28
 
 > **config**: `object`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:26
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:26
 
 #### apiPrefix?
 
-> `optional` **apiPrefix**: `string`
+> `optional` **apiPrefix?**: `string`
 
 the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 needs to `enableRestApiExpose` set to `true`
@@ -323,7 +323,7 @@ needs to `enableRestApiExpose` set to `true`
 
 #### baseUrl?
 
-> `optional` **baseUrl**: `string`
+> `optional` **baseUrl?**: `string`
 
 the base url to be used
 
@@ -339,7 +339,7 @@ const config = {
 
 #### basicAuth?
 
-> `optional` **basicAuth**: `object`
+> `optional` **basicAuth?**: `object`
 
 Basic-Auth information
 
@@ -357,17 +357,17 @@ Basic-Auth username
 
 #### bearerToken?
 
-> `optional` **bearerToken**: `string`
+> `optional` **bearerToken?**: `string`
 
 Auth-Bearer token
 
 #### clientConfig?
 
-> `optional` **clientConfig**: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md)
+> `optional` **clientConfig?**: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md)
 
 #### commandPayloadAsCloudEvent?
 
-> `optional` **commandPayloadAsCloudEvent**: `boolean`
+> `optional` **commandPayloadAsCloudEvent?**: `boolean`
 
 command invocations are wrapped in CloudEvent
 
@@ -381,13 +381,13 @@ false
 
 #### defaultCommandTimeout?
 
-> `optional` **defaultCommandTimeout**: `number`
+> `optional` **defaultCommandTimeout?**: `number`
 
 Overwrite the hardcoded default timeout of command invocations
 
 #### defaultHeaders?
 
-> `optional` **defaultHeaders**: `Record`\<`string`, `string`\>
+> `optional` **defaultHeaders?**: `Record`\<`string`, `string`\>
 
 Add your default headers here
 These headers will be part of every request.
@@ -395,7 +395,7 @@ They can be overwritten per request option
 
 #### defaultTimeout?
 
-> `optional` **defaultTimeout**: `number`
+> `optional` **defaultTimeout?**: `number`
 
 set global timeout for requests in ms
 
@@ -407,7 +407,7 @@ set global timeout for requests in ms
 
 #### enableHttpCompression?
 
-> `optional` **enableHttpCompression**: `boolean`
+> `optional` **enableHttpCompression?**: `boolean`
 
 enable HTTP compression in web server
 
@@ -419,14 +419,14 @@ true
 
 #### enableOpentelemetry?
 
-> `optional` **enableOpentelemetry**: `boolean`
+> `optional` **enableOpentelemetry?**: `boolean`
 
 enable Opentelemetry tracing.
 The client will be handled as own resource.
 
 #### enableRestApiExpose?
 
-> `optional` **enableRestApiExpose**: `boolean`
+> `optional` **enableRestApiExpose?**: `boolean`
 
 expose commands as regular REST endpoints when they are configured as endpoints
 
@@ -438,7 +438,7 @@ true
 
 #### instanceId?
 
-> `optional` **instanceId**: `string`
+> `optional` **instanceId?**: `string`
 
 The instance id of the event bridge.
 If not set, a id will generated each time a instance is created.
@@ -446,32 +446,32 @@ Use this if there is a need to always have the same instance id.
 
 #### isKeepAlive?
 
-> `optional` **isKeepAlive**: `boolean`
+> `optional` **isKeepAlive?**: `boolean`
 
 If set to false, the HTTP client will not reuse the same connection for multiple requests.
 Default is true.
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 A logger instance
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 the loglevel if no logger instance is given
 
 #### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Name of the client
 
 #### pathPrefix?
 
-> `optional` **pathPrefix**: `string`
+> `optional` **pathPrefix?**: `string`
 
 the prefix to be used for exposing commands as endpoints expecting a event bus message
 
@@ -481,7 +481,7 @@ the prefix to be used for exposing commands as endpoints expecting a event bus m
 purista
 ```
 
-#### serve()
+#### serve
 
 > **serve**: (`options`) => `Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`\> \| `Http2Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `Http2SecureServer`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\>
 
@@ -517,7 +517,7 @@ https://hono.dev
 
 #### serverHost?
 
-> `optional` **serverHost**: `string`
+> `optional` **serverHost?**: `string`
 
 Host of the server.
 
@@ -529,7 +529,7 @@ Host of the server.
 
 #### serverPort?
 
-> `optional` **serverPort**: `number`
+> `optional` **serverPort?**: `number`
 
 Port of the server.
 
@@ -541,13 +541,13 @@ Port of the server.
 
 #### spanProcessor?
 
-> `optional` **spanProcessor**: `SpanProcessor`
+> `optional` **spanProcessor?**: `SpanProcessor`
 
 Opentelemetry span processor
 
 #### subscriptionPayloadAsCloudEvent?
 
-> `optional` **subscriptionPayloadAsCloudEvent**: `boolean`
+> `optional` **subscriptionPayloadAsCloudEvent?**: `boolean`
 
 subscription invocations are wrapped in CloudEvent
 
@@ -561,7 +561,7 @@ false
 
 #### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 Custom trace Id
 
@@ -575,7 +575,7 @@ Custom trace Id
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:25
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:25
 
 #### Inherited from
 
@@ -587,7 +587,7 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:25
 
 > **name**: `string`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:24
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:24
 
 #### Inherited from
 
@@ -599,7 +599,7 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:24
 
 > **spanProcessor**: `SpanProcessor` \| `undefined`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:29
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:29
 
 #### Inherited from
 
@@ -611,7 +611,7 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:29
 
 > **timeout**: `number`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:27
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:27
 
 #### Inherited from
 
@@ -623,7 +623,7 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:27
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:30
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:30
 
 #### Inherited from
 
@@ -635,7 +635,7 @@ Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:30
 
 > **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:101
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:101
 
 DELETE request
 
@@ -673,7 +673,7 @@ DELETE request
 
 > `protected` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:66
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:66
 
 Helper method
 
@@ -713,7 +713,7 @@ UnhandledError
 
 > **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:73
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:73
 
 GET request
 
@@ -835,7 +835,7 @@ url path of endpoint
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:38
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:38
 
 Returns open telemetry tracer of this service
 
@@ -855,7 +855,7 @@ Tracer
 
 > `protected` **getUrlAndHeader**(`path`, `options?`): `object`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:48
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:48
 
 #### Parameters
 
@@ -1053,7 +1053,7 @@ boolean
 
 > **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:94
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:94
 
 PATCH request
 
@@ -1091,7 +1091,7 @@ PATCH request
 
 > **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:80
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:80
 
 POST request
 
@@ -1129,7 +1129,7 @@ POST request
 
 > **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:87
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:87
 
 PUT request
 
@@ -1195,7 +1195,7 @@ Send a EBMessage as event to the underlaying message infrastructure.
 
 > **setBearerToken**(`token`): `void`
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:56
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:56
 
 Set the bearer token for all following requests.
 
@@ -1203,9 +1203,9 @@ Set the bearer token for all following requests.
 
 ##### token
 
-the bearer token
+`string` \| `undefined`
 
-`string` | `undefined`
+the bearer token
 
 #### Returns
 
@@ -1221,7 +1221,7 @@ the bearer token
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/HttpClient/HttpClient.impl.d.ts:47
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:47
 
 Start a child span for opentelemetry tracking
 
@@ -1247,9 +1247,9 @@ span options
 
 ##### context
 
-optional context
+`Context` \| `undefined`
 
-`Context` | `undefined`
+optional context
 
 ##### fn
 

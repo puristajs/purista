@@ -20,35 +20,35 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 #### chunkPayload?
 
-> `optional` **chunkPayload**: `SchemaObject`
+> `optional` **chunkPayload?**: `SchemaObject`
 
 #### contentEncodingRequest?
 
-> `optional` **contentEncodingRequest**: `string`
+> `optional` **contentEncodingRequest?**: `string`
 
 #### contentEncodingResponse?
 
-> `optional` **contentEncodingResponse**: `string`
+> `optional` **contentEncodingResponse?**: `string`
 
 #### contentTypeRequest?
 
-> `optional` **contentTypeRequest**: [`ContentType`](ContentType.md)
+> `optional` **contentTypeRequest?**: [`ContentType`](ContentType.md)
 
 #### contentTypeResponse?
 
-> `optional` **contentTypeResponse**: `"text/event-stream"` \| `"application/json"`
+> `optional` **contentTypeResponse?**: `"text/event-stream"` \| `"application/json"`
 
 #### deprecated?
 
-> `optional` **deprecated**: `boolean`
+> `optional` **deprecated?**: `boolean`
 
 #### finalPayload?
 
-> `optional` **finalPayload**: `SchemaObject`
+> `optional` **finalPayload?**: `SchemaObject`
 
 #### http?
 
-> `optional` **http**: `object`
+> `optional` **http?**: `object`
 
 ##### http.method
 
@@ -56,11 +56,11 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 ##### http.openApi?
 
-> `optional` **openApi**: `object`
+> `optional` **openApi?**: `object`
 
 ##### http.openApi.additionalStatusCodes?
 
-> `optional` **additionalStatusCodes**: [`StatusCode`](../enumerations/StatusCode.md)[]
+> `optional` **additionalStatusCodes?**: [`StatusCode`](../enumerations/StatusCode.md)[]
 
 ##### http.openApi.description
 
@@ -72,11 +72,11 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 ##### http.openApi.operationId?
 
-> `optional` **operationId**: `string`
+> `optional` **operationId?**: `string`
 
 ##### http.openApi.query?
 
-> `optional` **query**: [`QueryParameter`](QueryParameter.md)\<`Record`\<`string`, `unknown`\>\>[]
+> `optional` **query?**: [`QueryParameter`](QueryParameter.md)\<`Record`\<`string`, `unknown`\>\>[]
 
 ##### http.openApi.summary
 
@@ -84,7 +84,7 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 ##### http.openApi.tags?
 
-> `optional` **tags**: `string`[]
+> `optional` **tags?**: `string`[]
 
 ##### http.path
 
@@ -92,15 +92,15 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 ##### http.stream?
 
-> `optional` **stream**: `object`
+> `optional` **stream?**: `object`
 
 ##### http.stream.documentationUrl?
 
-> `optional` **documentationUrl**: `string`
+> `optional` **documentationUrl?**: `string`
 
 ##### http.stream.mode?
 
-> `optional` **mode**: `"stream"` \| `"aggregate"`
+> `optional` **mode?**: `"stream"` \| `"aggregate"`
 
 ##### http.stream.protocol
 
@@ -108,8 +108,8 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 #### inputPayload?
 
-> `optional` **inputPayload**: `SchemaObject`
+> `optional` **inputPayload?**: `SchemaObject`
 
 #### parameter?
 
-> `optional` **parameter**: `SchemaObject`
+> `optional` **parameter?**: `SchemaObject`

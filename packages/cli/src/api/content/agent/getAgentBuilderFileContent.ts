@@ -32,6 +32,7 @@ export const getAgentBuilderFileContent = (input: {
 		? convertToProjectEventCasing(input.responseEventName, input.puristaConfig)
 		: undefined
 
+	writer.writeLine("import '@purista/ai'")
 	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceBuilderFileName}.js'`)
 	writer.writeLine("import { extendApi } from '@purista/core'")
 	writer.writeLine("import { z } from 'zod'").blankLine()
@@ -89,7 +90,7 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(".addModel('primary', {")
 		writer.indent(() => {
 			writer.writeLine("model: 'gpt-4.1-mini',")
-			writer.writeLine("capabilities: ['object', 'text_stream', 'tool_use'],")
+			writer.writeLine("capabilities: ['object'],")
 			writer.writeLine('defaults: { temperature: 0.2 },')
 		})
 		writer.writeLine('})')

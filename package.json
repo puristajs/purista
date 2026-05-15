@@ -59,5 +59,8 @@
 	"packageManager": "npm@11.14.0",
 	"dependencies": {
 		"npm": "^11.2.0"
+	},
+	"engines": {
+		"node": ">=24.15.0"
 	}
 }

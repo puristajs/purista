@@ -13,7 +13,7 @@
 	"type": "module",
 	"main": "src/index.ts",
 	"engines": {
-		"node": ">=18.15"
+		"node": ">=24.15.0"
 	},
 	"scripts": {
 		"start": "tsx src/index.ts | pino-pretty",

@@ -13,7 +13,7 @@
 	"main": "src/index.ts",
 	"type": "module",
 	"engines": {
-		"node": ">=18.15"
+		"node": ">=24.15.0"
 	},
 	"scripts": {
 		"start": "dapr run -f ./deployment",

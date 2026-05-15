@@ -6,7 +6,7 @@
 
 # Type Alias: StreamDefinitionListResolved\<S\>
 
-> **StreamDefinitionListResolved**\<`S`\> = [`StreamDefinition`](StreamDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`StreamDefinitionMetadataBase`](StreamDefinitionMetadataBase.md)\>[]
+> **StreamDefinitionListResolved**\<`S`\> = [`StreamDefinition`](StreamDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`StreamDefinitionMetadataBase`](StreamDefinitionMetadataBase.md), `any`\>[]
 
 Defined in: [core/types/stream/StreamDefinitionList.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinitionList.ts#L9)
 

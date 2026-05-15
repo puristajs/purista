@@ -1,3 +1,4 @@
+import { context, trace } from '@opentelemetry/api'
 import type { Logger as PuristaLogger } from '@purista/core'
 import type { Logger as HarnessLogger } from '@purista/harness'
 
@@ -23,11 +24,46 @@ export function createPuristaHarnessLogger(logger?: PuristaLogger): HarnessLogge
 }
 
 function write(logger: PuristaLogger, level: Level, msg: string, fields?: Record<string, unknown>) {
-	if (fields && Object.keys(fields).length > 0) {
-		logger[level](fields, msg)
+	const logFields = createPuristaLogFields(fields)
+	if (Object.keys(logFields).length > 0) {
+		logger[level](logFields, msg)
 		return
 	}
 	logger[level](msg)
+}
+
+function createPuristaLogFields(fields?: Record<string, unknown>) {
+	const spanContext = trace.getSpan(context.active())?.spanContext() ?? trace.getSpanContext(context.active())
+	const result: Record<string, unknown> = {}
+
+	if (spanContext?.traceId) {
+		result.traceId = spanContext.traceId
+	}
+	if (spanContext?.spanId) {
+		result.spanId = spanContext.spanId
+	}
+	if (spanContext?.traceFlags !== undefined) {
+		result.traceFlags = spanContext.traceFlags
+	}
+
+	for (const [key, value] of Object.entries(fields ?? {})) {
+		result[normalizeHarnessLogFieldName(key)] = value
+	}
+
+	return result
+}
+
+function normalizeHarnessLogFieldName(key: string) {
+	if (key === 'trace_id') {
+		return 'traceId'
+	}
+	if (key === 'span_id') {
+		return 'spanId'
+	}
+	if (key === 'trace_flags') {
+		return 'traceFlags'
+	}
+	return key
 }
 
 function stringifyBindings(bindings: Record<string, unknown>) {

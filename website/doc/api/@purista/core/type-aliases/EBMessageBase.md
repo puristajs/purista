@@ -36,7 +36,7 @@ content type of message payload
 
 ### correlationId?
 
-> `optional` **correlationId**: [`CorrelationId`](CorrelationId.md)
+> `optional` **correlationId?**: [`CorrelationId`](CorrelationId.md)
 
 Defined in: [core/types/EBMessageBase.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L24)
 
@@ -46,7 +46,7 @@ correlation id to know which command response referrs to which command
 
 ### eventName?
 
-> `optional` **eventName**: `string`
+> `optional` **eventName?**: `string`
 
 Defined in: [core/types/EBMessageBase.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L30)
 
@@ -66,7 +66,7 @@ global unique id of message
 
 ### otp?
 
-> `optional` **otp**: `string`
+> `optional` **otp?**: `string`
 
 Defined in: [core/types/EBMessageBase.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L32)
 
@@ -76,7 +76,7 @@ stringified Opentelemetry parent trace id
 
 ### principalId?
 
-> `optional` **principalId**: [`PrincipalId`](PrincipalId.md)
+> `optional` **principalId?**: [`PrincipalId`](PrincipalId.md)
 
 Defined in: [core/types/EBMessageBase.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L26)
 
@@ -94,7 +94,7 @@ Defined in: [core/types/EBMessageBase.ts:33](https://github.com/puristajs/purist
 
 ### tenantId?
 
-> `optional` **tenantId**: [`TenantId`](TenantId.md)
+> `optional` **tenantId?**: [`TenantId`](TenantId.md)
 
 Defined in: [core/types/EBMessageBase.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L28)
 
@@ -114,7 +114,7 @@ timestamp of message creation time
 
 ### traceId?
 
-> `optional` **traceId**: [`TraceId`](TraceId.md)
+> `optional` **traceId?**: [`TraceId`](TraceId.md)
 
 Defined in: [core/types/EBMessageBase.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L22)
 

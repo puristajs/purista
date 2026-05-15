@@ -37,3 +37,7 @@ Focus first on:
 3. [Subscription builder](./2_building_business-logic/subscription/the-subscription-builder.md)
 4. [Event bridges](./3_eco_system/eventbridges/index.md)
 5. [Deployment options](./5_deploy_and_scale/index.md)
+
+## If you are adding AI agents
+
+Start with [AI agents](./2_building_business-logic/ai/index.md), then read [Queues](./2_building_business-logic/queue/index.md) and [Streams](./2_building_business-logic/stream/index.md). Agents use normal PURISTA queues, workers, commands, and streams under the hood.

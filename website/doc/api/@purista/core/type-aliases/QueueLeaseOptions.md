@@ -14,7 +14,7 @@ Defined in: [core/QueueBridge/types/QueueLeaseOptions.ts:1](https://github.com/p
 
 ### batchSize?
 
-> `optional` **batchSize**: `number`
+> `optional` **batchSize?**: `number`
 
 Defined in: [core/QueueBridge/types/QueueLeaseOptions.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseOptions.ts#L2)
 
@@ -22,6 +22,6 @@ Defined in: [core/QueueBridge/types/QueueLeaseOptions.ts:2](https://github.com/p
 
 ### waitTimeMs?
 
-> `optional` **waitTimeMs**: `number`
+> `optional` **waitTimeMs?**: `number`
 
 Defined in: [core/QueueBridge/types/QueueLeaseOptions.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseOptions.ts#L3)

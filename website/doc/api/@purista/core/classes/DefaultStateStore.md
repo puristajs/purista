@@ -91,41 +91,41 @@ Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](Logger.md)
+> `optional` **logger?**: [`Logger`](Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../type-aliases/LogLevelName.md)
 
 #### Inherited from
 

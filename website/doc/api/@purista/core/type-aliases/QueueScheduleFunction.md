@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueScheduleFunction
 
-# Type Alias: QueueScheduleFunction()
+# Type Alias: QueueScheduleFunction
 
 > **QueueScheduleFunction** = \<`Payload`, `Params`\>(`queueName`, `runAt`, `payload`, `parameter?`, `options?`) => `Promise`\<[`QueueEnqueueResult`](QueueEnqueueResult.md)\>
 
@@ -28,7 +28,7 @@ Defined in: [core/types/queue/QueueScheduleFunction.ts:4](https://github.com/pur
 
 ### runAt
 
-`Date` | `number`
+`Date` \| `number`
 
 ### payload
 

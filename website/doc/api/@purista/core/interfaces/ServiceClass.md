@@ -231,9 +231,9 @@ the additional span options
 
 ##### context
 
-the span context
+`Context` \| `undefined`
 
-`Context` | `undefined`
+the span context
 
 ##### fn
 

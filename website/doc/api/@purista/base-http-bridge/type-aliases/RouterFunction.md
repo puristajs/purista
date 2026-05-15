@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/base-http-bridge](../README.md) / RouterFunction
 
-# Type Alias: RouterFunction()\<T\>
+# Type Alias: RouterFunction\<T\>
 
 > **RouterFunction**\<`T`\> = (`this`, `c`) => `Promise`\<`Response`\>
 

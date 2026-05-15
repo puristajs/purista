@@ -2,7 +2,7 @@
 	"version": "2.2.0",
 	"type": "module",
 	"engines": {
-		"node": ">=18"
+		"node": ">=24.15.0"
 	},
 	"private": true,
 	"scripts": {

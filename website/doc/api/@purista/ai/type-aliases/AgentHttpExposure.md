@@ -8,7 +8,7 @@
 
 > **AgentHttpExposure** = `object`
 
-Defined in: ai/src/builder/types.ts:102
+Defined in: [builder/types.ts:134](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L134)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: ai/src/builder/types.ts:102
 
 > **method**: `SupportedHttpMethod`
 
-Defined in: ai/src/builder/types.ts:103
+Defined in: [builder/types.ts:135](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L135)
 
 ***
 
@@ -24,36 +24,36 @@ Defined in: ai/src/builder/types.ts:103
 
 > **path**: `string`
 
-Defined in: ai/src/builder/types.ts:104
+Defined in: [builder/types.ts:136](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L136)
 
 ***
 
 ### public?
 
-> `optional` **public**: `boolean`
+> `optional` **public?**: `boolean`
 
-Defined in: ai/src/builder/types.ts:106
+Defined in: [builder/types.ts:138](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L138)
 
 ***
 
 ### requestContentType?
 
-> `optional` **requestContentType**: `string`
+> `optional` **requestContentType?**: `string`
 
-Defined in: ai/src/builder/types.ts:107
+Defined in: [builder/types.ts:139](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L139)
 
 ***
 
 ### responseContentType?
 
-> `optional` **responseContentType**: `string`
+> `optional` **responseContentType?**: `string`
 
-Defined in: ai/src/builder/types.ts:108
+Defined in: [builder/types.ts:140](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L140)
 
 ***
 
 ### streamingMode?
 
-> `optional` **streamingMode**: `"stream"` \| `"aggregate"`
+> `optional` **streamingMode?**: `"stream"` \| `"aggregate"`
 
-Defined in: ai/src/builder/types.ts:105
+Defined in: [builder/types.ts:137](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L137)

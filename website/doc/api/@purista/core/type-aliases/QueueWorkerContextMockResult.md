@@ -68,6 +68,10 @@ Defined in: [testing/createQueueWorkerContextMock.ts:31](https://github.com/puri
 
 > **job**: `object`
 
+##### job.cancelRequested
+
+> **cancelRequested**: `SinonStub`
+
 ##### job.complete
 
 > **complete**: `SinonStub`

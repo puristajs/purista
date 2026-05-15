@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/mqttbridge](../README.md) / GetTopicNameFn
 
-# Type Alias: GetTopicNameFn()
+# Type Alias: GetTopicNameFn
 
 > **GetTopicNameFn** = (`this`, `message`) => `string`
 

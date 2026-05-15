@@ -8,7 +8,7 @@
 
 > **AttachedAgentDefinition**\<`S`\> = [`AgentDefinition`](AgentDefinition.md)\<`S`\> & `object`
 
-Defined in: ai/src/builder/types.ts:284
+Defined in: [builder/types.ts:342](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L342)
 
 ## Type Declaration
 

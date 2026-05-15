@@ -8,15 +8,15 @@
 
 > **AgentRunEvent** = `object`
 
-Defined in: ai/src/builder/types.ts:126
+Defined in: [builder/types.ts:158](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L158)
 
 ## Properties
 
 ### event
 
-> **event**: [`RunEvent`](RunEvent.md)
+> **event**: `RunEvent`
 
-Defined in: ai/src/builder/types.ts:128
+Defined in: [builder/types.ts:160](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L160)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: ai/src/builder/types.ts:128
 
 > **identity**: [`AgentRunIdentity`](AgentRunIdentity.md)
 
-Defined in: ai/src/builder/types.ts:127
+Defined in: [builder/types.ts:159](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/builder/types.ts#L159)

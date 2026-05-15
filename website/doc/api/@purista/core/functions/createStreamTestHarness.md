@@ -37,7 +37,7 @@ and guard behavior.
 
 ### options?
 
-\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; queueBridge?: QueueBridge; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] extends never ? \{ resources?: undefined \} : \{ resources: InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] \}) & (keyof InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] extends never ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] \}))\[K\] \} & `object` = `...`
+\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; queueBridge?: QueueBridge; queueJobStore?: QueueJobStore; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] extends never ? \{ resources?: undefined \} : \{ resources: InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["Resources"\] \}) & (keyof InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] extends never ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: InferStreamHarnessServiceBuilderConfig\<TServiceBuilder\>\["ConfigInputType"\] \}))\[K\] \} & `object` = `...`
 
 ## Returns
 

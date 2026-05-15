@@ -8,7 +8,7 @@
 
 > **CreateAgentTestHarnessOptions**\<`Models`\> = `object`
 
-Defined in: ai/src/testing/index.ts:78
+Defined in: [testing/index.ts:82](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L82)
 
 ## Type Parameters
 
@@ -20,9 +20,9 @@ Defined in: ai/src/testing/index.ts:78
 
 ### logger?
 
-> `optional` **logger**: [`Logger`](../../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../../core/classes/Logger.md)
 
-Defined in: ai/src/testing/index.ts:80
+Defined in: [testing/index.ts:84](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L84)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: ai/src/testing/index.ts:80
 
 > **models**: `AgentRuntimeModelBindings`\<`Models`\>
 
-Defined in: ai/src/testing/index.ts:79
+Defined in: [testing/index.ts:83](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L83)

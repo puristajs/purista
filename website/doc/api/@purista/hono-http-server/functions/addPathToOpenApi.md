@@ -6,9 +6,9 @@
 
 # Function: addPathToOpenApi()
 
-> **addPathToOpenApi**(`openApiBuilder`, `metadata`, `path`, `config`): `void`
+> **addPathToOpenApi**(`openApiBuilder`, `metadata`, `path`, `config`, `owner?`): `void`
 
-Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:18](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L18)
+Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:24](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L24)
 
 ## Parameters
 
@@ -29,6 +29,10 @@ Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:18](https://github.
 ### config
 
 [`Config`](../type-aliases/Config.md)
+
+### owner?
+
+[`PuristaOpenApiOperationOwner`](../type-aliases/PuristaOpenApiOperationOwner.md)
 
 ## Returns
 

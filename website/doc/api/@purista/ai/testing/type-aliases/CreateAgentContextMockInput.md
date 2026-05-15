@@ -8,7 +8,7 @@
 
 > **CreateAgentContextMockInput**\<`Payload`, `Parameter`, `Resources`, `Models`\> = `object`
 
-Defined in: ai/src/testing/index.ts:13
+Defined in: [testing/index.ts:13](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L13)
 
 ## Type Parameters
 
@@ -32,46 +32,46 @@ Defined in: ai/src/testing/index.ts:13
 
 ### identity?
 
-> `optional` **identity**: `Partial`\<[`AgentRunIdentity`](../../type-aliases/AgentRunIdentity.md)\>
+> `optional` **identity?**: `Partial`\<[`AgentRunIdentity`](../../type-aliases/AgentRunIdentity.md)\>
 
-Defined in: ai/src/testing/index.ts:23
+Defined in: [testing/index.ts:23](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L23)
 
 ***
 
 ### logger?
 
-> `optional` **logger**: [`Logger`](../../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../../core/classes/Logger.md)
 
-Defined in: ai/src/testing/index.ts:24
+Defined in: [testing/index.ts:24](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L24)
 
 ***
 
 ### models?
 
-> `optional` **models**: [`AgentHandlerContext`](../../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>\[`"harness"`\]\[`"models"`\]
+> `optional` **models?**: [`AgentHandlerContext`](../../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>\[`"harness"`\]\[`"models"`\]
 
-Defined in: ai/src/testing/index.ts:22
+Defined in: [testing/index.ts:22](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L22)
 
 ***
 
 ### parameter?
 
-> `optional` **parameter**: `Parameter`
+> `optional` **parameter?**: `Parameter`
 
-Defined in: ai/src/testing/index.ts:20
+Defined in: [testing/index.ts:20](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L20)
 
 ***
 
 ### payload?
 
-> `optional` **payload**: `Payload`
+> `optional` **payload?**: `Payload`
 
-Defined in: ai/src/testing/index.ts:19
+Defined in: [testing/index.ts:19](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L19)
 
 ***
 
 ### resources?
 
-> `optional` **resources**: `Resources`
+> `optional` **resources?**: `Resources`
 
-Defined in: ai/src/testing/index.ts:21
+Defined in: [testing/index.ts:21](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/ai/src/testing/index.ts#L21)

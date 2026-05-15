@@ -35,7 +35,8 @@ each chunk.
 ## Builder
 
 ```ts
-import { ServiceBuilder } from '@purista/ai'
+import '@purista/ai'
+import { ServiceBuilder } from '@purista/core'
 import { z } from 'zod'
 
 export const supportService = new ServiceBuilder({
@@ -109,7 +110,9 @@ Use `@purista/ai/testing` for credential-free tests:
 ```ts
 import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'
 
-const model = createScriptedHarnessModel().nextObject({
+const model = createScriptedHarnessModel()
+
+model.enqueueObject({
   object: { priority: 'high' },
   usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
   finishReason: 'stop',
@@ -120,7 +123,7 @@ const harness = createAgentTestHarness(await triageAgent.getDefinition(), {
     primary: {
       provider: model,
       model: 'gpt-4.1-mini',
-      capabilities: ['object', 'text'],
+      capabilities: ['object'],
     },
   },
 })

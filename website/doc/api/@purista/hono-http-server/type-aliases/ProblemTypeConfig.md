@@ -14,6 +14,6 @@ Defined in: [hono-http-server/src/helper/problemDetails.ts:17](https://github.co
 
 ### typeBaseUri?
 
-> `optional` **typeBaseUri**: `string`
+> `optional` **typeBaseUri?**: `string`
 
 Defined in: [hono-http-server/src/helper/problemDetails.ts:18](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/problemDetails.ts#L18)

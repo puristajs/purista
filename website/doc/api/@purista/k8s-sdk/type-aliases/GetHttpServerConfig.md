@@ -16,7 +16,7 @@ The configuration object for creating the k8s http server
 
 ### apiMountPath?
 
-> `optional` **apiMountPath**: `string`
+> `optional` **apiMountPath?**: `string`
 
 Defined in: [types.ts:18](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/types.ts#L18)
 
@@ -32,7 +32,7 @@ the api mount path
 
 ### disableEndpointExposing?
 
-> `optional` **disableEndpointExposing**: `boolean`
+> `optional` **disableEndpointExposing?**: `boolean`
 
 Defined in: [types.ts:16](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/types.ts#L16)
 
@@ -42,7 +42,7 @@ disables adding of all  endpoints for commands which are marked to be exposed as
 
 ### enableHttpCompression?
 
-> `optional` **enableHttpCompression**: `boolean`
+> `optional` **enableHttpCompression?**: `boolean`
 
 Defined in: [types.ts:20](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/types.ts#L20)
 
@@ -56,7 +56,7 @@ true
 
 ***
 
-### healthFn()
+### healthFn
 
 > **healthFn**: () => `Promise`\<`boolean`\>
 
@@ -72,7 +72,7 @@ health function to be executed on health check
 
 ### hostname?
 
-> `optional` **hostname**: `string`
+> `optional` **hostname?**: `string`
 
 Defined in: [types.ts:10](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/types.ts#L10)
 
@@ -92,7 +92,7 @@ a logger instance
 
 ### services?
 
-> `optional` **services**: [`Service`](../../core/classes/Service.md) \| [`Service`](../../core/classes/Service.md)[]
+> `optional` **services?**: [`Service`](../../core/classes/Service.md) \| [`Service`](../../core/classes/Service.md)[]
 
 Defined in: [types.ts:14](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/types.ts#L14)
 

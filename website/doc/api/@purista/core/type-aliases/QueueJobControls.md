@@ -12,6 +12,18 @@ Defined in: [core/types/queue/QueueJobContext.ts:10](https://github.com/puristaj
 
 ## Methods
 
+### cancelRequested()
+
+> **cancelRequested**(): `boolean`
+
+Defined in: [core/types/queue/QueueJobContext.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L16)
+
+#### Returns
+
+`boolean`
+
+***
+
 ### complete()
 
 > **complete**(`output?`, `headers?`): `Promise`\<`void`\>

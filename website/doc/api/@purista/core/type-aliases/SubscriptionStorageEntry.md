@@ -12,7 +12,7 @@ Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:9](https://git
 
 ## Properties
 
-### cb()
+### cb
 
 > **cb**: (`message`) => `Promise`\<`Omit`\<[`CustomMessage`](CustomMessage.md), `"id"` \| `"timestamp"`\> \| `undefined`\>
 
@@ -32,7 +32,7 @@ Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:23](https://gi
 
 ### emitEventName?
 
-> `optional` **emitEventName**: `string`
+> `optional` **emitEventName?**: `string`
 
 Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L22)
 

@@ -1,15 +1,17 @@
 import * as aiExports from '@purista/ai'
-import { AgentQueueBuilder, ServiceBuilder } from '@purista/ai'
+import { AgentQueueBuilder } from '@purista/ai'
 import * as testingExports from '@purista/ai/testing'
 import { createAgentContextMock, createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'
-import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
-import { describe, expect, expectTypeOf, it } from 'vitest'
+import { DefaultEventBridge, DefaultQueueBridge, ServiceBuilder } from '@purista/core'
+import { describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { z } from 'zod'
 import { createAgentHandlerContext } from './runtime/context.js'
 import { createAgentRunEvent } from './runtime/events.js'
 import { createAgentExecutor } from './runtime/executor.js'
 import { deriveAgentRunIdentity } from './runtime/identity.js'
-import { agentContentPartSchema, agentSseEventSchema } from './runtime/sseEvents.js'
+import { createPuristaHarnessLogger } from './runtime/logger.js'
+import { resolveRuntimeModelBindings } from './runtime/modelBindings.js'
+import { agentContentPartSchema, agentSseEventSchema, createProviderSseEvent } from './runtime/sseEvents.js'
 
 const usage = { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
 
@@ -26,7 +28,7 @@ describe('clean public package surface', () => {
 			expect(aiExports).not.toHaveProperty(name)
 		}
 
-		expect(aiExports).toHaveProperty('ServiceBuilder', ServiceBuilder)
+		expect(aiExports).not.toHaveProperty('ServiceBuilder')
 		expect(aiExports).toHaveProperty('AgentQueueBuilder', AgentQueueBuilder)
 		expect(aiExports).not.toHaveProperty('createAgentContextMock')
 		expect(aiExports).not.toHaveProperty('createAgentTestHarness')
@@ -204,6 +206,132 @@ describe('AgentQueueBuilder', () => {
 		})
 		expect(model.requests).toHaveLength(1)
 		expect(model.requests[0]).toMatchObject({ model: 'fake-object' })
+	})
+
+	it('executes text, embedding, and rerank calls through the fake model provider', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueueText({ content: 'classified', usage, finishReason: 'stop' })
+		model.enqueueEmbedding({
+			embeddings: [{ index: 0, vector: [0.1, 0.2] }],
+			usage,
+		})
+		model.enqueueRerank({
+			results: [{ id: 'doc-2', index: 1, score: 0.9 }],
+			usage,
+		})
+
+		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify support tickets')
+			.addPayloadSchema(z.object({ text: z.string() }))
+			.addOutputSchema(z.object({ summary: z.string(), embeddingCount: z.number(), topDocument: z.string() }))
+			.addModel('primary', {
+				model: 'fake-multi',
+				capabilities: ['text', 'embeddings', 'rerank'] as const,
+				defaults: { temperature: 0.2 },
+			})
+			.setRunFunction(async context => {
+				const text = await context.harness.models.primary.text(
+					{ messages: [{ role: 'user', content: context.payload.text }] },
+					context.signal,
+				)
+				const embedding = await context.harness.models.primary.embed({ input: context.payload.text }, context.signal)
+				const rerank = await context.harness.models.primary.rerank(
+					{
+						query: context.payload.text,
+						documents: [
+							{ id: 'doc-1', text: 'low priority' },
+							{ id: 'doc-2', text: 'high priority' },
+						],
+						topN: 1,
+					},
+					context.signal,
+				)
+
+				return {
+					summary: text.content,
+					embeddingCount: embedding.embeddings.length,
+					topDocument: rerank.results[0]?.id ?? 'none',
+				}
+			})
+			.getDefinition()
+
+		const harness = createAgentTestHarness(definition, {
+			models: {
+				primary: {
+					provider: model,
+					model: 'fake-multi',
+					capabilities: ['text', 'embeddings', 'rerank'],
+				},
+			},
+		})
+
+		await expect(harness.run({ payload: { text: 'Please classify T-2' }, message: { id: 'msg-1' } })).resolves.toEqual({
+			summary: 'classified',
+			embeddingCount: 1,
+			topDocument: 'doc-2',
+		})
+		expect(model.requests.map(request => request.model)).toEqual(['fake-multi', 'fake-multi', 'fake-multi'])
+		expect(model.requests[0]).toMatchObject({ defaults: { temperature: 0.2, providerOptions: {} } })
+	})
+
+	it('surfaces fake provider fallback output as schema validation failure', async () => {
+		const model = createScriptedHarnessModel()
+		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify support tickets')
+			.addOutputSchema(outputSchema)
+			.addModel('primary', { model: 'fake-object', capabilities: ['object'] as const })
+			.setRunFunction(async context => {
+				const response = await context.harness.models.primary.object(
+					{ messages: [{ role: 'user', content: 'classify' }], schema: { type: 'object' } },
+					context.signal,
+				)
+				return response.object as { priority: 'low' | 'high' }
+			})
+			.getDefinition()
+
+		const harness = createAgentTestHarness(definition, {
+			models: {
+				primary: {
+					provider: model,
+					model: 'fake-object',
+					capabilities: ['object'],
+				},
+			},
+		})
+
+		await expect(harness.run({ message: { id: 'msg-1' } })).rejects.toThrow(/output validation failed/i)
+		expect(model.requests).toHaveLength(1)
+	})
+
+	it('rejects runtime bindings when provider-detected capabilities do not satisfy the manifest', async () => {
+		const model = createScriptedHarnessModel() as ReturnType<typeof createScriptedHarnessModel> & {
+			info: {
+				providerId: string
+				genAiSystem: string
+				models: {
+					'fake-object': { capabilities: readonly ['text'] }
+				}
+			}
+		}
+		model.info = {
+			providerId: 'fake',
+			genAiSystem: 'fake',
+			models: {
+				'fake-object': { capabilities: ['text'] },
+			},
+		}
+
+		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify support tickets')
+			.addModel('primary', { model: 'fake-object', capabilities: ['object'] as const })
+			.setRunFunction(async () => ({ ok: true }))
+			.getDefinition()
+
+		expect(() =>
+			resolveRuntimeModelBindings(definition.manifest, {
+				primary: {
+					provider: model,
+					model: 'fake-object',
+				},
+			}),
+		).toThrow(/missing required capabilities/i)
 	})
 
 	it('infers typed command-tool and child-agent invoke maps', async () => {
@@ -436,6 +564,122 @@ describe('runtime identity and events', () => {
 		})
 		expect(result.final).toEqual({ priority: 'high' })
 	})
+
+	it('maps provider SSE branches for tool, object, embedding, rerank, and error events', () => {
+		const at = '2026-05-06T00:00:00.000Z'
+		const events = [
+			{ type: 'run.started', runId: 'run-1', at },
+			{ type: 'agent.started', runId: 'run-1', agentId: 'triage', at },
+			{ type: 'model.object.partial', runId: 'run-1', agentId: 'triage', partial: { priority: 'h' } },
+			{ type: 'model.object', runId: 'run-1', agentId: 'triage', object: { priority: 'high' } },
+			{ type: 'tool.started', runId: 'run-1', agentId: 'triage', callId: 'call-1', toolId: 'lookup', input: {} },
+			{
+				type: 'tool.finished',
+				runId: 'run-1',
+				agentId: 'triage',
+				callId: 'call-1',
+				toolId: 'lookup',
+				output: { ok: true },
+			},
+			{ type: 'model.embedding.completed', runId: 'run-1', agentId: 'triage', count: 2, dimensions: 3, usage },
+			{ type: 'model.rerank.completed', runId: 'run-1', agentId: 'triage', count: 3, topN: 1, usage },
+			{ type: 'agent.finished', runId: 'run-1', agentId: 'triage', at, output: { priority: 'high' } },
+			{ type: 'model.message', runId: 'run-1', agentId: 'triage', message: { role: 'assistant', content: 'done' } },
+			{ type: 'stream.overflow', runId: 'run-1', agentId: 'triage', dropped: 4 },
+			{ type: 'run.finished', runId: 'run-1', at, output: { priority: 'high' } },
+			{
+				type: 'run.finished',
+				runId: 'run-1',
+				at,
+				error: { code: 'MODEL_FAILED', category: 'model', retriable: true, message: 'model failed' },
+			},
+		]
+
+		const mapped = events.map((event, index) =>
+			agentSseEventSchema.parse(createProviderSseEvent({ identity: { runId: 'run-1' }, event } as never, index + 1)),
+		)
+
+		expect(mapped.map(event => event.event)).toEqual([
+			'response.created',
+			'response.in_progress',
+			'response.output_json.delta',
+			'response.output_json.done',
+			'response.tool_call.started',
+			'response.tool_call.completed',
+			'response.model_embedding.completed',
+			'response.model_rerank.completed',
+			'response.in_progress',
+			'response.output_json.delta',
+			'error',
+			'response.completed',
+			'error',
+		])
+		expect(mapped[10]?.data).toMatchObject({
+			error: {
+				code: 'STREAM_OVERFLOW',
+				retriable: true,
+			},
+		})
+	})
+
+	it('routes stream execution failures to the writer fail path', async () => {
+		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify')
+			.addOutputSchema(z.object({ priority: z.literal('high') }))
+			.setRunFunction(async () => ({ priority: 'low' }) as never)
+			.getDefinition()
+		const executor = createAgentExecutor({
+			definition,
+			manifest: definition.manifest,
+			models: {},
+		})
+		const fail = vi.fn(async (error: unknown) => {
+			throw error
+		})
+
+		await expect(
+			executor.executeStream({
+				appContext: { message: { id: 'msg-1' } },
+				message: { id: 'msg-1' },
+				payload: {},
+				parameter: {},
+				writer: {
+					write: async () => undefined,
+					close: async () => undefined,
+					fail,
+					onCancel: () => undefined,
+				},
+			}),
+		).rejects.toThrow(/output validation failed/i)
+		expect(fail).toHaveBeenCalledOnce()
+		await executor.shutdown()
+	})
+
+	it('propagates success event emit failures after validating output', async () => {
+		const definition = await new AgentQueueBuilder('support', '1', 'triage', 'Classify')
+			.addOutputSchema(z.object({ priority: z.literal('high') }))
+			.setSuccessEventName('support.triage.completed')
+			.setRunFunction(async () => ({ priority: 'high' }))
+			.getDefinition()
+		const emit = vi.fn(async () => {
+			throw new Error('event bridge down')
+		})
+		const executor = createAgentExecutor({
+			definition,
+			manifest: definition.manifest,
+			models: {},
+		})
+
+		await expect(
+			executor.executeAggregate({
+				appContext: { emit },
+				message: { id: 'msg-1' },
+				payload: {},
+				parameter: {},
+			}),
+		).rejects.toThrow(/event bridge down/)
+		expect(emit).toHaveBeenCalledWith('support.triage.completed', { priority: 'high' })
+		await executor.shutdown()
+	})
 })
 
 function createEventBridgeMock() {
@@ -447,6 +691,70 @@ function createQueueBridgeMock() {
 }
 
 describe('testing helpers', () => {
+	it('forwards harness logs and child bindings into PURISTA logger methods', () => {
+		const childLogger = {
+			trace: vi.fn(),
+			debug: vi.fn(),
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			fatal: vi.fn(),
+			getChildLogger: vi.fn(),
+		}
+		const puristaLogger = {
+			trace: vi.fn(),
+			debug: vi.fn(),
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			fatal: vi.fn(),
+			getChildLogger: vi.fn(() => childLogger),
+		}
+		childLogger.getChildLogger.mockReturnValue(childLogger)
+
+		const logger = createPuristaHarnessLogger(puristaLogger as never)
+		logger.info('started')
+		logger.warn('with fields', { runId: 'run-1' })
+		logger.child({ agent: 'triage', run: 'run-1' }).error('failed')
+
+		expect(puristaLogger.info).toHaveBeenCalledWith('started')
+		expect(puristaLogger.warn).toHaveBeenCalledWith({ runId: 'run-1' }, 'with fields')
+		expect(puristaLogger.getChildLogger).toHaveBeenCalledWith({ module: 'agent:triage,run:run-1' })
+		expect(childLogger.error).toHaveBeenCalledWith('failed')
+		expect(createPuristaHarnessLogger().child({}).debug('ignored')).toBeUndefined()
+	})
+
+	it('normalizes harness OpenTelemetry ids to PURISTA field names', () => {
+		const puristaLogger = {
+			trace: vi.fn(),
+			debug: vi.fn(),
+			info: vi.fn(),
+			warn: vi.fn(),
+			error: vi.fn(),
+			fatal: vi.fn(),
+			getChildLogger: vi.fn(),
+		}
+
+		const logger = createPuristaHarnessLogger(puristaLogger as never)
+
+		logger.error('failed', {
+			trace_id: 'legacy-trace-id',
+			span_id: 'legacy-span-id',
+			trace_flags: 1,
+			run_id: 'run-1',
+		})
+
+		expect(puristaLogger.error).toHaveBeenCalledWith(
+			{
+				traceId: 'legacy-trace-id',
+				spanId: 'legacy-span-id',
+				traceFlags: 1,
+				run_id: 'run-1',
+			},
+			'failed',
+		)
+	})
+
 	it('provide fake model and context helpers without real credentials', async () => {
 		const model = createScriptedHarnessModel()
 		model.enqueueObject({
@@ -463,6 +771,31 @@ describe('testing helpers', () => {
 		})
 
 		expect(response.object).toEqual({ priority: 'low' })
+
+		const fallbackText = await model.text({
+			model: 'fake-text',
+			messages: [],
+			signal: new AbortController().signal,
+		})
+		const fallbackEmbedding = await model.embed({
+			model: 'fake-embedding',
+			input: ['one', 'two'],
+			signal: new AbortController().signal,
+		})
+		const fallbackRerank = await model.rerank({
+			model: 'fake-rerank',
+			query: 'priority',
+			documents: [
+				{ id: 'doc-1', text: 'one' },
+				{ id: 'doc-2', text: 'two' },
+			],
+			topN: 1,
+			signal: new AbortController().signal,
+		})
+
+		expect(fallbackText.content).toBe('')
+		expect(fallbackEmbedding.embeddings).toHaveLength(2)
+		expect(fallbackRerank.results).toHaveLength(1)
 
 		const context = createAgentContextMock({
 			payload: { ticketId: 'T-1' },
@@ -500,7 +833,12 @@ describe('testing helpers', () => {
 			signal: new AbortController().signal,
 		})
 
-		expect(context.app.resources).toEqual({ repository: { id: 'repo-1' } })
+		expect(context.resources).toEqual({ repository: { id: 'repo-1' } })
+		expect(context.message).toEqual({ id: 'msg-1' })
+		expect(context.emit).toBe(context.emit)
+		expect(context.service).toEqual({ 'inventory.1.reserve': { call: expect.any(Function) } })
+		expect(context.stream).toEqual({})
+		expect(context.queue).toEqual({})
 		expect(testingExports).not.toHaveProperty('createAgentHandlerContext')
 	})
 

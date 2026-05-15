@@ -14,7 +14,7 @@ Defined in: [helper/types/FullDefinition.ts:3](https://github.com/puristajs/puri
 
 ### rest?
 
-> `optional` **rest**: `object`
+> `optional` **rest?**: `object`
 
 Defined in: [helper/types/FullDefinition.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullDefinition.ts#L5)
 

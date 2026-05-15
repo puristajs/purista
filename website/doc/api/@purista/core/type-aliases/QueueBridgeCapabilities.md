@@ -54,7 +54,7 @@ Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:13](https://githu
 
 ### defaultDeadLetterPrefix?
 
-> `optional` **defaultDeadLetterPrefix**: `string`
+> `optional` **defaultDeadLetterPrefix?**: `string`
 
 Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L9)
 
@@ -62,7 +62,7 @@ Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:9](https://github
 
 ### defaultDeadLetterSuffix?
 
-> `optional` **defaultDeadLetterSuffix**: `string`
+> `optional` **defaultDeadLetterSuffix?**: `string`
 
 Defined in: [core/QueueBridge/types/QueueBridgeCapabilities.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueBridgeCapabilities.ts#L10)
 

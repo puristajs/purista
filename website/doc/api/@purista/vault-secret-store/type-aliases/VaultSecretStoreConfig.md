@@ -32,7 +32,7 @@ Vault HTTP endpoint
 
 ### mount?
 
-> `optional` **mount**: `string`
+> `optional` **mount?**: `string`
 
 Defined in: [vault-secret-store/src/types.ts:18](https://github.com/puristajs/purista/blob/master/packages/vault-secret-store/src/types.ts#L18)
 

@@ -14,7 +14,7 @@ Encrypt/decrypt contract for one content-encoding implementation.
 
 ## Properties
 
-### decrypt()
+### decrypt
 
 > **decrypt**: (`input`) => `Promise`\<`Buffer`\>
 
@@ -34,7 +34,7 @@ Decrypts a payload after it is received from AMQP.
 
 ***
 
-### encrypt()
+### encrypt
 
 > **encrypt**: (`input`) => `Promise`\<`Buffer`\>
 

@@ -29,7 +29,7 @@
 		"access": "public"
 	},
 	"engines": {
-		"node": ">=18.15"
+		"node": ">=24.15.0"
 	},
 	"scripts": {
 		"lint": "npx @biomejs/biome check src/index.ts src/clean-package.test.ts src/builder src/runtime src/testing src/types package.json vitest.config.ts",

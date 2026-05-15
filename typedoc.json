@@ -31,6 +31,19 @@
 			"LanguageModel": "https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text"
 		}
 	},
+	"packageOptions": {
+		"tsconfig": "tsconfig.build.json",
+		"exclude": [
+			"**/*.test.ts",
+			"**/*.spec.ts",
+			"**/*.e2e.ts",
+			"**/test/**",
+			"**/tests/**",
+			"dist/**",
+			"lib/**",
+			"node_modules/**"
+		]
+	},
 	"tsconfig": "tsconfig.typedoc.json",
 	"out": "website/doc/api",
 	"readme": "CHANGELOG.md",

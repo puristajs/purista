@@ -14,7 +14,7 @@ Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:23](https://github.co
 
 ### defaultLeaseTtlMs?
 
-> `optional` **defaultLeaseTtlMs**: `number`
+> `optional` **defaultLeaseTtlMs?**: `number`
 
 Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L25)
 
@@ -22,7 +22,7 @@ Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:25](https://github.co
 
 ### instanceId?
 
-> `optional` **instanceId**: `string`
+> `optional` **instanceId?**: `string`
 
 Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L24)
 
@@ -30,6 +30,6 @@ Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:24](https://github.co
 
 ### maxAttempts?
 
-> `optional` **maxAttempts**: `number`
+> `optional` **maxAttempts?**: `number`
 
 Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L26)

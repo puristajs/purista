@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/natsbridge](../README.md) / GetSubscriptionTopicFn
 
-# Type Alias: GetSubscriptionTopicFn()
+# Type Alias: GetSubscriptionTopicFn
 
 > **GetSubscriptionTopicFn** = (`this`, `subscription`) => `string`
 

@@ -6,7 +6,7 @@
 
 # Class: QueueDefinitionBuilder
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L9)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L12)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:9](https://gi
 
 > **new QueueDefinitionBuilder**(`queueName`, `queueDescription`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L24)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L30)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:24](https://g
 
 > **addParameterSchema**(`schema`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L34)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L40)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:34](https://g
 
 > **addPayloadSchema**(`schema`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L29)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L35)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:29](https://g
 
 > **addWorkerDefinition**(...`workers`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L80)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:178](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L178)
 
 #### Parameters
 
@@ -86,11 +86,35 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:80](https://g
 
 ***
 
+### emitResultAsEvent()
+
+> **emitResultAsEvent**(`successEventName`, `options?`): `QueueDefinitionBuilder`
+
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:113](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L113)
+
+Convenience helper for emitting successful worker output as a PURISTA event.
+
+#### Parameters
+
+##### successEventName
+
+`string`
+
+##### options?
+
+`Omit`\<[`QueueResultPolicy`](../type-aliases/QueueResultPolicy.md), `"mode"` \| `"successEventName"`\>
+
+#### Returns
+
+`QueueDefinitionBuilder`
+
+***
+
 ### getDefinition()
 
 > **getDefinition**(): `Promise`\<[`QueueDefinition`](../type-aliases/QueueDefinition.md)\>
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L85)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:183](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L183)
 
 #### Returns
 
@@ -102,7 +126,27 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:85](https://g
 
 > **markAsDeprecated**(): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L67)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:165](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L165)
+
+#### Returns
+
+`QueueDefinitionBuilder`
+
+***
+
+### markSchedulable()
+
+> **markSchedulable**(`options`): `QueueDefinitionBuilder`
+
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:124](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L124)
+
+Mark this queue as a direct schedule target.
+
+#### Parameters
+
+##### options
+
+[`ScheduleOptions`](../type-aliases/ScheduleOptions.md) & `object`
 
 #### Returns
 
@@ -114,7 +158,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:67](https://g
 
 > **setBeforeEnqueueTransform**(`transform`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L47)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:145](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L145)
 
 #### Parameters
 
@@ -132,7 +176,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:47](https://g
 
 > **setBeforeExecuteTransform**(`transform`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L52)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:150](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L150)
 
 #### Parameters
 
@@ -150,7 +194,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:52](https://g
 
 > **setDeadLetterOptions**(`options`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L57)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:155](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L155)
 
 #### Parameters
 
@@ -166,11 +210,49 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:57](https://g
 
 ***
 
+### setExecutionProfile()
+
+> **setExecutionProfile**(`profile`, `options`): `QueueDefinitionBuilder`
+
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L63)
+
+Apply the built-in long-running queue execution profile.
+
+#### Parameters
+
+##### profile
+
+`"longRunning"`
+
+##### options
+
+###### maxRuntimeMs
+
+`number`
+
+###### strict?
+
+`boolean`
+
+#### Returns
+
+`QueueDefinitionBuilder`
+
+#### Example
+
+```ts
+queue.setExecutionProfile('longRunning', {
+  maxRuntimeMs: 6 * 60 * 60_000,
+})
+```
+
+***
+
 ### setLifecycleConfig()
 
 > **setLifecycleConfig**(`config`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L39)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L45)
 
 #### Parameters
 
@@ -188,7 +270,7 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:39](https://g
 
 > **setQueueBridgeConfig**(`config`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L72)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:170](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L170)
 
 #### Parameters
 
@@ -202,11 +284,40 @@ Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:72](https://g
 
 ***
 
+### setResultPolicy()
+
+> **setResultPolicy**(`policy`): `QueueDefinitionBuilder`
+
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:101](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L101)
+
+Persist or emit queue worker completion metadata.
+
+#### Parameters
+
+##### policy
+
+[`QueueResultPolicy`](../type-aliases/QueueResultPolicy.md)
+
+#### Returns
+
+`QueueDefinitionBuilder`
+
+#### Example
+
+```ts
+queue.setResultPolicy({
+  mode: 'event',
+  successEventName: 'billing.monthlyClosing.completed',
+})
+```
+
+***
+
 ### setTags()
 
 > **setTags**(`tags`): `QueueDefinitionBuilder`
 
-Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L62)
+Defined in: [QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:160](https://github.com/puristajs/purista/blob/master/packages/core/src/QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts#L160)
 
 #### Parameters
 
