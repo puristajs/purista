@@ -33,10 +33,10 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@types/node": "^25.6.0",
+		"@types/node": "^25.8.0",
 		"@types/sinon": "^21.0.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.5"
+		"vitest": "^4.1.6"
 	},
 	"dependencies": {
 		"@google-cloud/secret-manager": "^6.1.2",

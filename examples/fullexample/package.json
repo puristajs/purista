@@ -39,17 +39,17 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^25.6.0",
+		"@types/node": "^25.8.0",
 		"sinon": "^22.0.0",
-		"tsx": "^4.21.0",
+		"tsx": "^4.22.0",
 		"typescript": "^6.0.3",
-		"vitest": "^4.1.5"
+		"vitest": "^4.1.6"
 	},
 	"dependencies": {
-		"@hono/node-server": "^2.0.1",
+		"@hono/node-server": "^2.0.2",
 		"@opentelemetry/api": "^1.9.1",
-		"@opentelemetry/exporter-metrics-otlp-http": "^0.217.0",
-		"@opentelemetry/exporter-trace-otlp-http": "^0.217.0",
+		"@opentelemetry/exporter-metrics-otlp-http": "^0.218.0",
+		"@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
 		"@opentelemetry/exporter-zipkin": "^2.7.1",
 		"@opentelemetry/sdk-metrics": "^2.7.1",
 		"@opentelemetry/sdk-trace-node": "^2.7.1",

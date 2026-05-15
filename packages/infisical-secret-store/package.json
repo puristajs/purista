@@ -35,10 +35,10 @@
 		"env:down": "docker compose -f docker-compose.yml down"
 	},
 	"devDependencies": {
-		"@types/node": "^25.6.0",
+		"@types/node": "^25.8.0",
 		"@types/sinon": "^21.0.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.5"
+		"vitest": "^4.1.6"
 	},
 	"dependencies": {
 		"@purista/core": "*"
