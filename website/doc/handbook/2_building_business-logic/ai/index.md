@@ -98,6 +98,10 @@ Each attached agent uses exactly one execution definition:
 
 Start with `setRunFunction(...)` when you are building normal PURISTA application code. Use harness agent/workflow definitions when you want the lower-level harness loop or workflow semantics directly.
 
+The repository example at `examples/agent-example` shows the smallest
+provider-neutral version of this flow with `createAgentTestHarness(...)` and a
+scripted model provider.
+
 ## Typical implementation order
 
 1. Create the service with `ServiceBuilder` from `@purista/core`.

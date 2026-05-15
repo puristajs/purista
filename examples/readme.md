@@ -4,6 +4,9 @@ In this folder, you will find some examples how to use PURISTA for your project.
 
 The examples are referenced in the handbook at [purista.dev](https://purista.dev).
 
+- `agent-example` shows the core-native PURISTA agent builder backed by the
+  provider-neutral harness runtime.
+
 ## How to
 
 To try out the examples and to play around, please:

@@ -345,3 +345,16 @@ Expected result:
 - no Vercel AI SDK protocol
 - no provider dependency in core
 - `@purista/harness` appears in core as the provider-neutral runtime dependency
+
+## 6. Implementation Status
+
+The migration has been implemented in `@purista/core` and the standalone
+`@purista/ai` package has been removed. The canonical lightweight example is
+`examples/agent-example`; it demonstrates core-native agent definitions,
+scripted harness model testing, generated queue/worker/command/stream
+definitions, and provider-neutral application dependencies.
+
+The canonical PURISTA skill catalog was updated in `skills/purista/**` and
+`skills/purista-skill-maintainer/**`. Future skill maintenance must keep
+`examples/agent-example`, the AI handbook pages, and this spec aligned whenever
+the core agent builder or harness runtime contract changes.

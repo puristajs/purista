@@ -32,6 +32,12 @@ Generated code should:
 - Defaults should align with current Hono/EventBridge/QueueBridge decisions.
 - When framework behavior changes, update `purista` first, then starter/create-purista.
 
+## Examples
+- `purista/examples/agent-example` is the canonical lightweight example for
+  core-native agents. It must stay provider-neutral, use
+  `createAgentTestHarness(...)`, and avoid direct app dependencies on
+  `@purista/harness`.
+
 ## Review Cues
 - CLI generated tests compile against current APIs.
 - Generated agents use core agent testing helpers.
