@@ -1,12 +1,12 @@
 ---
 title: AI Agents
-description: Build queue-backed AI agents and workflows with @purista/ai.
+description: Build queue-backed AI agents and workflows with @purista/core.
 order: 207000
 ---
 
 # AI agents
 
-`@purista/ai` adds AI agents to PURISTA services without moving AI runtime behavior into `@purista/core`.
+PURISTA agents are core business-logic primitives from `@purista/core`, backed by `@purista/harness` for model calls, lower-level agent loops, workflows, tools, skills, memory, history, state, sandboxing, telemetry, and streaming events.
 
 Use an AI agent when a service capability is model-driven, conversational, tool-loop oriented, or needs provider operations such as structured generation, embeddings, reranking, or multimodal input.
 
@@ -19,31 +19,31 @@ An attached PURISTA agent expands into normal PURISTA business-logic artifacts:
 
 This is the most important design point: AI is not a separate application lane. It is declared as business logic and then operated through the same service, queue, command, stream, logging, OpenTelemetry, and HTTP exposure model as the rest of PURISTA.
 
-## Install
+## Provider packages
 
-Install the AI package only in applications that declare agents:
+Agent builders and test helpers come from `@purista/core`. Core is provider-neutral; install provider packages only in applications that bind live model providers at runtime. For example, an OpenAI-backed application can add:
 
 ::: code-group
 
 ```bash [npm]
-npm install @purista/ai
+npm install @purista/harness-openai
 ```
 
 ```bash [bun]
-bun add @purista/ai
+bun add @purista/harness-openai
 ```
 
 ```bash [yarn]
-yarn add @purista/ai
+yarn add @purista/harness-openai
 ```
 
 ```bash [pnpm]
-pnpm add @purista/ai
+pnpm add @purista/harness-openai
 ```
 
 :::
 
-`@purista/ai` wraps `@purista/harness`. You still bind a concrete model provider at runtime. Install provider packages such as `@purista/harness-openai` only in applications that need them.
+The service definition declares aliases and required capabilities. The application runtime supplies concrete provider instances, credentials, model names, and endpoint options.
 
 ## Mental model
 
@@ -100,22 +100,20 @@ Start with `setRunFunction(...)` when you are building normal PURISTA applicatio
 
 ## Typical implementation order
 
-1. Import `@purista/ai` once in the service module to register the AI builder extension.
-2. Create the service with `ServiceBuilder` from `@purista/core`.
-3. Add an agent builder with `getAgentQueueBuilder(agentName, description)`.
-4. Add payload, parameter, and output schemas.
-5. Declare model aliases with the smallest required capabilities.
-6. Declare command tools, child agents, skills, built-in tools, session policy, and sandbox policy as needed.
-7. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
-8. Add HTTP exposure, streaming mode, execution policy, or long-running response mode if needed.
-9. Add the attached agent definition to the service.
-10. Instantiate the service with `queueBridge` and `ai.models`.
-11. Test with `@purista/ai/testing` fake providers before any live-provider smoke test.
+1. Create the service with `ServiceBuilder` from `@purista/core`.
+2. Add an agent builder with `getAgentQueueBuilder(agentName, description)`.
+3. Add payload, parameter, and output schemas.
+4. Declare model aliases with the smallest required capabilities.
+5. Declare command tools, child agents, skills, built-in tools, session policy, and sandbox policy as needed.
+6. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
+7. Add HTTP exposure, streaming mode, execution policy, or long-running response mode if needed.
+8. Add the attached agent definition to the service.
+9. Instantiate the service with `queueBridge` and `ai.models`.
+10. Test with `@purista/core/testing` fake providers before any live-provider smoke test.
 
 ## Smallest useful agent
 
 ```ts
-import '@purista/ai'
 import { ServiceBuilder } from '@purista/core'
 import { z } from 'zod'
 
@@ -267,4 +265,4 @@ Use PURISTA-level orchestration when agents need independent runtime boundaries.
 - command tools and child agents are explicitly allowlisted
 - session identity is deliberate (`ephemeral` or `conversation`)
 - long-running work uses queue execution profile and response mode
-- unit tests use fake providers from `@purista/ai/testing`
+- unit tests use fake providers from `@purista/core/testing`

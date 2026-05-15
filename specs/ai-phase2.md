@@ -1,4 +1,10 @@
-# PURISTA AI Realignment Wave (Status Mirror)
+# PURISTA AI Realignment Wave (Superseded Status Mirror)
+
+Status: superseded by `specs/20-agents/80-core-ai-migration-plan.md`.
+
+This file is historical context only. Do not implement the `@purista/ai`
+runtime contract, `invokeAgent`, `context.invoke.agents.*`, sandbox drivers,
+protocol artifacts, or standalone compatibility wrappers described below.
 
 This file mirrors the current AI runtime contract after the stream-first realignment in `@purista/ai`.
 Canonical long-form architecture remains in `/Users/sebastianwessel/projekte/@purista/specs/20-agents/`.

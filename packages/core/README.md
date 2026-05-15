@@ -25,8 +25,15 @@ PURISTA addresses developers which want to simply focus on implementation, while
 - easy to test with ready to go mocks & stubs
 - clean error handling
 - low learning curve
+- queue-backed agents as a core primitive, backed by `@purista/harness`
 
 **The main goal is to let developers keep focusing on solving business requirements while building robust & maintainable software fast and efficient.**
+
+## Agents
+
+`@purista/core` includes agent builders and testing helpers. Agents attach to normal PURISTA services and expand into queue, queue worker, command, and stream definitions so model-driven work runs through the same runtime boundaries as other business logic.
+
+Core is provider-neutral. Applications bind live model providers at runtime with provider packages such as `@purista/harness-openai`; tests can use `createAgentTestHarness(...)` and `createScriptedHarnessModel(...)` from `@purista/core/testing`.
 
 **Visit [purista.dev](https://purista.dev)**
 

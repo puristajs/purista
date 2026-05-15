@@ -8,7 +8,6 @@
 		"./packages/azure-secret-store",
 		"./packages/base-http-bridge",
 		"./packages/cli",
-		"./packages/ai",
 		"./packages/core",
 		"./packages/dapr-sdk",
 		"./packages/gcloud-secret-store",

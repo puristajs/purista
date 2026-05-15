@@ -171,15 +171,6 @@ export default defineConfig({
 			]),
 			api: [
 				{
-					text: 'AI',
-					items: [
-						{
-							text: 'AI Agents (@purista/ai)',
-							link: '/api/@purista/ai/README.md',
-						},
-					],
-				},
-				{
 					text: 'Core',
 					items: [
 						{

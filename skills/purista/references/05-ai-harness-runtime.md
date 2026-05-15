@@ -1,9 +1,9 @@
 # AI Harness Runtime
 
-Use this reference when implementing optional PURISTA agents.
+Use this reference when implementing PURISTA agents.
 
 ## Current Model
-`@purista/ai` wraps published `@purista/harness` and integrates agents into PURISTA services. It does not expose the removed PURISTA AI protocol and does not adapt to Vercel AI SDK UI messages.
+`@purista/core` uses published `@purista/harness` to integrate agents into PURISTA services. Core does not expose the removed PURISTA AI protocol and does not adapt to Vercel AI SDK UI messages.
 
 An attached agent is represented as normal PURISTA artifacts:
 - queue for controlled concurrency/background execution
@@ -80,7 +80,7 @@ OpenAPI chunk schema comes from `agentSseEventSchema`.
 Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, and file content. Multimodal methods are capability-gated by model aliases such as `vision_input`, `audio_input`, and `file_input`.
 
 ## Testing
-Use `@purista/ai/testing`:
+Use core testing helpers:
 - `createAgentTestHarness(...)`
 - `createScriptedHarnessModel()`
 - `createAgentContextMock(...)`

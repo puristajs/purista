@@ -19,10 +19,9 @@ The builder collects the AI contract and generates four core definitions: queue,
 
 ## Service builder
 
-Import `@purista/ai` once to register the AI builder extension, but keep `ServiceBuilder` from `@purista/core`:
+Import `ServiceBuilder` from `@purista/core`. Agent builders are part of core and do not require a side-effect registration import:
 
 ```ts
-import '@purista/ai'
 import { ServiceBuilder } from '@purista/core'
 
 export const supportService = new ServiceBuilder({

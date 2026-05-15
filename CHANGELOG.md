@@ -11,7 +11,6 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Add Queue Handling to PURISTA ([#248](https://github.com/orhun/git-cliff/issues/248))
-- Add @purista/ai package ([#250](https://github.com/orhun/git-cliff/issues/250))
 - [**breaking**] Ship plain ESM library packages
 
 ## [2.2.0] - 2026-02-13

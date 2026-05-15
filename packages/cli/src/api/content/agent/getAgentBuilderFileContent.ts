@@ -32,7 +32,6 @@ export const getAgentBuilderFileContent = (input: {
 		? convertToProjectEventCasing(input.responseEventName, input.puristaConfig)
 		: undefined
 
-	writer.writeLine("import '@purista/ai'")
 	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceBuilderFileName}.js'`)
 	writer.writeLine("import { extendApi } from '@purista/core'")
 	writer.writeLine("import { z } from 'zod'").blankLine()

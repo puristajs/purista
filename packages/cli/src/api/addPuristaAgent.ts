@@ -95,22 +95,6 @@ const addAgentDefinitionToService = async (input: {
 	await sourceFile.save()
 }
 
-const addAiDependencyToProject = async (projectRootPath: string) => {
-	const packageJsonPath = join(projectRootPath, 'package.json')
-	if (!existsSync(packageJsonPath)) {
-		return
-	}
-
-	const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf-8')) as {
-		dependencies?: Record<string, string>
-	}
-	packageJson.dependencies = {
-		...(packageJson.dependencies ?? {}),
-		'@purista/ai': packageJson.dependencies?.['@purista/ai'] ?? 'latest',
-	}
-	await writeFile(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`)
-}
-
 export const addPuristaAgent = async (input: {
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
@@ -145,10 +129,7 @@ export const addPuristaAgent = async (input: {
 
 	const serviceBuilderFilePath = join(projectPath, serviceBasePath, serviceEntry.builderFile)
 	const serviceBuilderContent = await readFile(serviceBuilderFilePath, 'utf-8')
-	const builderContentWithAiRegistration = serviceBuilderContent.includes("import '@purista/ai'")
-		? serviceBuilderContent
-		: `import '@purista/ai'\n${serviceBuilderContent}`
-	const normalizedBuilderContent = builderContentWithAiRegistration.replace(
+	const normalizedBuilderContent = serviceBuilderContent.replace(
 		/export const (\w+) = new ServiceBuilder\(([^)]+)\)\.setConfigSchema\(([^)]+)\)\s*$/m,
 		(_match, builderName: string, serviceInfoName: string, configSchemaName: string) =>
 			`const ${builderName}Instance = new ServiceBuilder(${serviceInfoName})\n${builderName}Instance.setConfigSchema(${configSchemaName})\n\nexport const ${builderName} = ${builderName}Instance`,
@@ -185,7 +166,6 @@ export const addPuristaAgent = async (input: {
 	)
 
 	await writeFile(join(agentPath, 'index.ts'), `export { ${agentBuilderName} } from './${builderFileName}.js'\n`)
-	await addAiDependencyToProject(projectPath)
 
 	await addAgentDefinitionToService({
 		serviceFile: join(projectPath, serviceBasePath, serviceEntry.serviceFile),

@@ -6,9 +6,9 @@ order: 207020
 
 # Harness agents and workflows
 
-`@purista/ai` embeds `@purista/harness` behind a PURISTA service boundary. The harness provides lower-level agent loops, workflows, model providers, tools, skills, memory, history, state, sandboxing, telemetry, and streaming events.
+`@purista/core` exposes PURISTA agents as queue-backed service capabilities backed by `@purista/harness`. The harness provides lower-level agent loops, workflows, model providers, tools, skills, memory, history, state, sandboxing, telemetry, and streaming events.
 
-The PURISTA package exposes those capabilities as queue-backed business logic.
+Core remains provider-neutral. Applications bind concrete provider packages, such as `@purista/harness-openai`, when the service starts.
 
 ## Choose the orchestration level
 

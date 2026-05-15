@@ -24,7 +24,7 @@ Generated code should:
 - keep schemas beside their command/subscription/stream/queue/agent boundary
 - import service builders rather than duplicating service setup
 - update service definitions automatically
-- avoid adding optional AI dependencies unless an agent is explicitly generated
+- avoid adding provider dependencies unless provider wiring is explicitly generated
 
 ## Starter And create-purista
 - `starter` must remain AI-free by default.
@@ -34,6 +34,6 @@ Generated code should:
 
 ## Review Cues
 - CLI generated tests compile against current APIs.
-- Generated agents use `@purista/ai/testing`.
-- Generated apps do not import `@purista/ai` unless they contain agents.
+- Generated agents use core agent testing helpers.
+- Generated apps do not install provider packages unless provider wiring is generated.
 - Binary files and compiled CLI output are rebuilt when source templates change.

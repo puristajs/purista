@@ -197,7 +197,7 @@ describe('CLI artifact generation (e2e)', () => {
 
 		expect(readFileSync(builderFile, 'utf-8')).toContain('new ServiceBuilder')
 		expect(readFileSync(builderFile, 'utf-8')).toContain("import { ServiceBuilder } from '@purista/core'")
-		expect(readFileSync(builderFile, 'utf-8')).toContain("import '@purista/ai'")
+		expect(readFileSync(builderFile, 'utf-8')).not.toContain('@purista/ai')
 		const serviceFileContent = readFileSync(serviceFile, 'utf-8')
 		expect(serviceFileContent).toContain('commandDefinitions')
 		expect(serviceFileContent).toContain('subscriptionDefinitions')
@@ -243,8 +243,10 @@ describe('CLI artifact generation (e2e)', () => {
 
 		const agentDirPath = join(TEST_DIR, 'src', 'service', 'user', 'v1', 'agent', 'triage')
 		const agentBuilder = readFileSync(join(agentDirPath, 'triageAgent.ts'), 'utf-8')
-		expect(agentBuilder).toContain("import '@purista/ai'")
 		expect(agentBuilder).toContain("import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'")
+		expect(agentBuilder).toContain("import { extendApi } from '@purista/core'")
+		expect(agentBuilder).not.toContain('@purista/ai')
+		expect(agentBuilder).not.toContain('@purista/harness')
 		expect(agentBuilder).toContain(".getAgentQueueBuilder('triageAgent', 'Review tickets')")
 		expect(agentBuilder).toContain('.addPayloadSchema(triageAgentPayloadSchema)')
 		expect(agentBuilder).toContain('.addParameterSchema(triageAgentParameterSchema)')
@@ -261,8 +263,10 @@ describe('CLI artifact generation (e2e)', () => {
 		}
 		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
 		expect(agentTestContent).toContain(
-			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'",
+			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'",
 		)
+		expect(agentTestContent).not.toContain('@purista/ai')
+		expect(agentTestContent).not.toContain('@purista/harness')
 		expect(agentTestContent).toContain('runs with the attached-agent harness runtime')
 		expect(agentTestContent).toContain('const model = createScriptedHarnessModel()')
 		expect(agentTestContent).toContain("object: { message: 'hello' }")
@@ -282,7 +286,7 @@ describe('CLI artifact generation (e2e)', () => {
 		const packageJsonContent = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf-8')) as {
 			dependencies?: Record<string, string>
 		}
-		expect(packageJsonContent.dependencies?.['@purista/ai']).toBe('latest')
+		expect(packageJsonContent.dependencies?.['@purista/ai']).toBeUndefined()
 		expect(packageJsonContent.dependencies?.['@purista/harness']).toBeUndefined()
 
 		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')

@@ -16,7 +16,7 @@ export const getAgentTestFileContent = (input: {
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const builderName = `${agentIdentifier}Builder`
 
-	writer.writeLine("import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'")
+	writer.writeLine("import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
 	writer.blankLine()
 	writer.writeLine(`const { ${builderName} } = await import('${input.builderImportName}')`).blankLine()

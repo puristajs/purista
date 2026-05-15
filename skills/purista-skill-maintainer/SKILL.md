@@ -62,4 +62,3 @@ Read sources in this order before changing a skill:
 - `references/catalog-audit-wave1.md`
 - `references/maintenance-checklist.md`
 - `voyage/apps/server/skills/README.md`
-- `purista/packages/ai/src/skills/filesystem.ts`

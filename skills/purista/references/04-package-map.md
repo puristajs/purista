@@ -8,11 +8,11 @@ Use this reference when choosing packages or checking dependency boundaries.
 - `packages/hono-http-server`: active HTTP runtime and OpenAPI/SSE surface.
 - `packages/base-http-bridge`: base HTTP bridge infrastructure.
 
-## Optional AI Package
-- `packages/ai`: optional harness-backed service-agent integration.
-- Depends on `@purista/harness`.
-- Must not be required by `packages/core`, `packages/hono-http-server`, `packages/cli` runtime, `starter`, or `create-purista` defaults.
-- Exports `ServiceBuilder`, `AgentQueueBuilder`, selected agent types, testing helpers under `@purista/ai/testing`, harness contract types, logger/state adapters, and provider-style stream event schemas.
+## AI Runtime
+- `packages/core`: owns native harness-backed service-agent integration.
+- Core depends on provider-neutral `@purista/harness`.
+- Provider packages such as `@purista/harness-openai` stay app-level dependencies.
+- Core exports `ServiceBuilder`, `AgentQueueBuilder`, selected agent types, testing helpers, harness contract types, logger/state adapters, and provider-style stream event schemas.
 
 ## Bridges
 - `packages/amqpbridge`: AMQP event bridge.
@@ -38,6 +38,6 @@ Stores are runtime wiring. Service builders declare needs; service instances rec
 
 ## Dependency Rules
 - Shared packages may depend on `@purista/core`.
-- Transport packages should not depend on `@purista/ai`.
-- AI depends on core and harness, not the other way around.
-- CLI may generate source that imports `@purista/ai`, but CLI package/runtime code must not require AI to run.
+- Transport packages should not depend on provider packages.
+- Harness must not import PURISTA packages.
+- CLI may generate source that uses core agent builders, but CLI package/runtime code must not require provider packages to run.

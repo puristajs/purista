@@ -41,7 +41,7 @@ purista add queue-worker invoiceProcessor --service billing --service-version 1 
 Use queue-backed execution when work needs leases, retries, delay, dead-letter handling, or operator replay.
 
 ## Agent
-Use `@purista/ai` only in applications that need agents. Generated agents attach to a service and expand into:
+Agents are native core service components. Generated agents attach to a service and expand into:
 - queue
 - queue worker
 - aggregate command

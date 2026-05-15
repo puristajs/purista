@@ -6,7 +6,7 @@ order: 207040
 
 # Test an agent
 
-Use `@purista/ai/testing` for deterministic tests. Unit and integration tests should not call real model providers.
+Use `@purista/core/testing` for deterministic tests. Unit and integration tests should not call real model providers.
 
 The testing helpers let you:
 
@@ -18,7 +18,7 @@ The testing helpers let you:
 ## Success path
 
 ```ts
-import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai/testing'
+import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core/testing'
 
 const model = createScriptedHarnessModel()
 model.enqueueObject({
