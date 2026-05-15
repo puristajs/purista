@@ -8,10 +8,9 @@ import {
 	type Session,
 	type TelemetryOptions,
 } from '@purista/harness'
-
+import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
-import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type {
 	AgentDefinition,
 	AgentManifest,

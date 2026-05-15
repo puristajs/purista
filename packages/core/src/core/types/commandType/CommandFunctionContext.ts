@@ -4,6 +4,7 @@ import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
+import type { PuristaMetricContextProperty, PuristaMetricDefinitions } from '../PuristaMetrics.js'
 import type { QueueContext } from '../queue/QueueContext.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
@@ -71,8 +72,10 @@ export type CommandFunctionContext<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = Prettify<
-	ContextBase &
+	ContextBase<Metrics> &
+		PuristaMetricContextProperty<Metrics> &
 		CommandFunctionContextEnhancements<
 			MessagePayloadType,
 			MessageParamsType,

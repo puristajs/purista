@@ -1,6 +1,7 @@
 import type { RunEvent, Session } from '@purista/harness'
-
+import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
+import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
 import type {
 	AgentHandlerContext,
 	AgentHandlerModelBindings,
@@ -17,11 +18,13 @@ export type CreateAgentHandlerContextInput<
 	Parameter,
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, AgentModelBinding>,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = {
 	payload: Payload
 	parameter: Parameter
 	identity: AgentRunIdentity
 	appContext: Record<string, unknown> & { resources?: Resources }
+	metrics?: PuristaMetricContext<Metrics>
 	session: Session<any>
 	models: AgentHandlerModelBindings<Models>
 	commandTools?: readonly AllowedCommandToolDefinition[]
@@ -39,9 +42,10 @@ export function createAgentHandlerContext<
 	Models extends Record<string, AgentModelBinding>,
 	CommandTools extends Record<string, AllowedCommandToolDefinition>,
 	AgentTools extends Record<string, AllowedAgentDefinition>,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 >(
-	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models>,
-): AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools> {
+	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, Metrics>,
+): AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Metrics> {
 	const resources = (input.appContext.resources ?? {}) as Resources
 	const message = input.appContext.message
 	const emit = input.appContext.emit
@@ -58,6 +62,7 @@ export function createAgentHandlerContext<
 		stream,
 		queue,
 		resources,
+		metrics: (input.metrics ?? {}) as PuristaMetricContext<Metrics>,
 		harness: {
 			session: input.session,
 			models: input.models,

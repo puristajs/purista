@@ -12,8 +12,10 @@ import type {
 	TextResponse,
 	TextStreamChunk,
 } from '@purista/harness'
-
+import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
+import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
+import { createAgentExecutor } from '../runtime/executor.js'
 import type {
 	AgentHandlerContext,
 	AgentModelBinding,
@@ -21,18 +23,19 @@ import type {
 	AgentRuntimeModelBindings,
 	AttachedAgentDefinition,
 } from '../types.js'
-import { createAgentExecutor } from '../runtime/executor.js'
 
 export type CreateAgentContextMockInput<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, AgentModelBinding> = Record<string, never>,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = {
 	payload?: Payload
 	parameter?: Parameter
 	resources?: Resources
 	models?: AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models']
+	metrics?: PuristaMetricContext<Metrics>
 	identity?: Partial<AgentRunIdentity>
 	logger?: PuristaLogger
 }
@@ -42,9 +45,10 @@ export function createAgentContextMock<
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, AgentModelBinding> = Record<string, never>,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 >(
-	input: CreateAgentContextMockInput<Payload, Parameter, Resources, Models> = {},
-): AgentHandlerContext<Payload, Parameter, Resources, Models> {
+	input: CreateAgentContextMockInput<Payload, Parameter, Resources, Models, Metrics> = {},
+): AgentHandlerContext<Payload, Parameter, Resources, Models, Record<never, never>, Record<never, never>, Metrics> {
 	const identity: AgentRunIdentity = {
 		transportMessageId: 'test-message',
 		serviceName: 'test',
@@ -72,6 +76,7 @@ export function createAgentContextMock<
 		stream,
 		queue,
 		resources,
+		metrics: (input.metrics ?? {}) as PuristaMetricContext<Metrics>,
 		harness: {
 			session: createSessionMock(identity.harnessSessionId),
 			models: (input.models ?? {}) as AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models'],
@@ -172,6 +177,7 @@ function createAppContext(logger?: PuristaLogger) {
 		service: {},
 		stream: {},
 		queue: {},
+		metrics: {},
 		logger: logger ?? createNoopPuristaLogger(),
 	}
 }

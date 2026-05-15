@@ -318,10 +318,7 @@ export class HonoServiceClass<
 					return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
 				}
 
-				this.logger.error(
-					createHttpLogFields({ err }, span.spanContext(), c.get('traceId')),
-					'General error handler',
-				)
+				this.logger.error(createHttpLogFields({ err }, span.spanContext(), c.get('traceId')), 'General error handler')
 
 				if (err instanceof HTTPException) {
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.status)

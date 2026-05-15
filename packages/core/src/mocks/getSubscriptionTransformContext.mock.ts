@@ -8,6 +8,7 @@ import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunctio
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
 import type { SubscriptionTransformFunctionContext } from '../core/types/subscription/SubscriptionTransformFunctionContext.js'
+import { createMetricContextMock } from '../testing/sharedContextMocks.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 
@@ -64,6 +65,7 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 
 	const mock: SubscriptionTransformFunctionContext = {
 		logger: logger.mock,
+		metrics: createMetricContextMock(input.sandbox),
 		message: input.message,
 		wrapInSpan: stubs.wrapInSpan.callsFake((name, opts, fn) => {
 			void name

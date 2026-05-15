@@ -54,6 +54,11 @@ describe('AgentQueueBuilder', () => {
 			.addPayloadSchema(payloadSchema)
 			.addParameterSchema(parameterSchema)
 			.addOutputSchema(outputSchema)
+			.defineMetric('app.support.runs', {
+				kind: 'counter',
+				unit: '{run}',
+				description: 'Support agent runs',
+			})
 			.addModel('primary', { model: 'test-model', capabilities: ['object'] as const })
 			.canInvoke('ticket', '1', 'getTicket', {
 				outputSchema: commandOutputSchema,
@@ -68,6 +73,7 @@ describe('AgentQueueBuilder', () => {
 			.setRunFunction(async context => {
 				const ticketId: string = context.payload.ticketId
 				const tenantId: string = context.parameter.tenantId
+				context.metrics['app.support.runs'].add(1)
 				const loaded = await context.resources.repository.load(ticketId)
 				const toolResult: { status: 'open' | 'closed' } = await context.invoke.tools['ticket.1.getTicket'].call(
 					{ id: loaded.ticketId },
@@ -80,6 +86,8 @@ describe('AgentQueueBuilder', () => {
 				expectTypeOf(context.harness.models.primary).toHaveProperty('object')
 				expectTypeOf(toolResult.status).toEqualTypeOf<'open' | 'closed'>()
 				expectTypeOf(childResult.sentiment).toEqualTypeOf<'negative' | 'neutral' | 'positive'>()
+				// @ts-expect-error counters do not expose histogram record
+				context.metrics['app.support.runs'].record(1)
 
 				return {
 					priority: toolResult.status === 'open' && childResult.sentiment === 'negative' ? 'high' : 'normal',
@@ -90,5 +98,39 @@ describe('AgentQueueBuilder', () => {
 		expect(definition.manifest.models.primary.model).toBe('test-model')
 		expect(definition.manifest.allowedCommands).toHaveLength(1)
 		expect(definition.manifest.allowedAgents).toHaveLength(1)
+	})
+
+	it('keeps agent-local metrics scoped to that agent handler', async () => {
+		const service = new ServiceBuilder(serviceInfo).defineMetric('app.support.requests', {
+			kind: 'counter',
+			unit: '{request}',
+			description: 'Support requests',
+		})
+
+		await service
+			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+			.defineMetric('app.agent.escalations', {
+				kind: 'histogram',
+				unit: 'ms',
+				description: 'Agent escalation duration',
+			})
+			.setRunFunction(async context => {
+				context.metrics['app.support.requests'].add(1)
+				context.metrics['app.agent.escalations'].record(12)
+				// @ts-expect-error histograms do not expose counter add
+				context.metrics['app.agent.escalations'].add(1)
+				return { status: 'ok' }
+			})
+			.getDefinition()
+
+		await service
+			.getAgentQueueBuilder('auditTicket', 'Audit a support ticket')
+			.setRunFunction(async context => {
+				context.metrics['app.support.requests'].add(1)
+				// @ts-expect-error agent-local metrics do not cascade to other agents
+				context.metrics['app.agent.escalations'].record(12)
+				return { status: 'ok' }
+			})
+			.getDefinition()
 	})
 })

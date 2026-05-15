@@ -13,6 +13,7 @@
 			"!**/*.d.ts",
 			"!**/coverage/**/*",
 			"!**/docs/**/*",
+			"!**/website_new/**/*",
 			"!**/.vitepress/cache",
 			"!**/doc/public/**/*",
 			"!**/examples/fullexample/signoz",

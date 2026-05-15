@@ -39,11 +39,14 @@ export const pingStreamBuilder = pingV1ServiceBuilder
   .addFinalPayloadSchema(livePingFinalSchema)
   .exposeAsHttpEndpoint('GET', 'ping/live', { contentTypeResponse: 'text/event-stream' })
   .setStreamFunction(async function (context, payload) {
+    const latencies: number[] = []
     context.stream.start({ hostname: payload.hostname })
     for await (const latency of pingHost(payload.hostname)) {
+      latencies.push(latency)
       context.stream.chunk({ latency })
     }
-    context.stream.complete({ averageLatency: context.metrics.latencyAvg })
+    const averageLatency = latencies.reduce((sum, value) => sum + value, 0) / latencies.length
+    context.stream.complete({ averageLatency })
   })
 ```
 

@@ -64,7 +64,10 @@ export const honoServiceV1ConfigSchema = z.object({
 	// Keep `any`: app-specific health/protection hooks are intentionally framework-agnostic.
 	healthFunction: z.any().optional(),
 	protectHandler: z.any().optional(),
-	services: z.array(z.instanceof(Service)).optional().default([]),
+	services: z
+		.array(z.custom<Service<any>>(value => value instanceof Service, 'Expected a PURISTA service instance'))
+		.optional()
+		.default([]),
 	traceHeaderField: z.string().default('x-trace-id'),
 	problemDetails: ProblemDetailsObjectSchema.optional(),
 	openApi: z

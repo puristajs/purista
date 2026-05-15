@@ -1,5 +1,6 @@
 import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
+import { z } from 'zod'
 
 import { generalPingServiceInfo } from '../generalPingServiceInfo.js'
 import { pingServiceV1ConfigSchema } from './pingServiceConfig.js'
@@ -11,4 +12,15 @@ export const pingServiceInfo = {
 
 // create a service builder instance and assign service config schema and default config.
 
-export const pingV1ServiceBuilder = new ServiceBuilder(pingServiceInfo).setConfigSchema(pingServiceV1ConfigSchema)
+const pingMetricAttributesSchema = z.object({
+	route: z.enum(['ping']),
+})
+
+export const pingV1ServiceBuilder = new ServiceBuilder(pingServiceInfo)
+	.setConfigSchema(pingServiceV1ConfigSchema)
+	.defineMetric('app.hono.requests', {
+		kind: 'counter',
+		unit: '{request}',
+		description: 'Ping requests handled by the Hono example',
+		attributes: pingMetricAttributesSchema,
+	})

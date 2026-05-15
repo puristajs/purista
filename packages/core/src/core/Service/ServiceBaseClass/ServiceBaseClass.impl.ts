@@ -9,6 +9,15 @@ import type { Schema } from '../../../schema/index.js'
 import { puristaVersion } from '../../../version.js'
 import type { ConfigStore } from '../../ConfigStore/types/ConfigStore.js'
 import type { EventBridge } from '../../EventBridge/types/EventBridge.js'
+import { createMetricContext } from '../../metrics/createMetricContext.js'
+import { createNoopMetricsRecorder } from '../../metrics/createNoopMetricsRecorder.js'
+import { PuristaMetricsRecorder as OpenTelemetryMetricsRecorder } from '../../metrics/PuristaMetricsRecorder.js'
+import type {
+	PuristaMetricContext,
+	PuristaMetricDefinitions,
+	PuristaMetricsRecorder,
+	PuristaMetricsRuntimeOptions,
+} from '../../metrics/types.js'
 import type { SecretStore } from '../../SecretStore/types/SecretStore.js'
 import type { StateStore } from '../../StateStore/types/StateStore.js'
 import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
@@ -41,6 +50,9 @@ export class ServiceBaseClass {
 	protected stateStore: StateStore
 
 	protected configSchema: Schema | undefined
+	protected metricsRecorder: PuristaMetricsRecorder
+	protected metricDefinitions: PuristaMetricDefinitions
+	protected metricContext: PuristaMetricContext<PuristaMetricDefinitions>
 
 	constructor(options: {
 		logger: Logger
@@ -51,6 +63,9 @@ export class ServiceBaseClass {
 		configStore: ConfigStore
 		stateStore: StateStore
 		configSchema?: Schema
+		metrics?: PuristaMetricsRuntimeOptions
+		metricsRecorder?: PuristaMetricsRecorder
+		metricDefinitionList?: PuristaMetricDefinitions
 	}) {
 		this.info = new Proxy(
 			{
@@ -92,6 +107,20 @@ export class ServiceBaseClass {
 		this.secretStore = options.secretStore
 		this.configStore = options.configStore
 		this.stateStore = options.stateStore
+		this.metricDefinitions = options.metricDefinitionList ?? {}
+		this.metricsRecorder =
+			options.metricsRecorder ??
+			(options.metrics?.enabled === false
+				? createNoopMetricsRecorder()
+				: new OpenTelemetryMetricsRecorder({
+						...options.metrics,
+						defaultAttributes: {
+							'purista.service.name': this.info.serviceName,
+							'purista.service.version': this.info.serviceVersion,
+							...options.metrics?.defaultAttributes,
+						},
+					}))
+		this.metricContext = createMetricContext(this.metricDefinitions, this.metricsRecorder)
 	}
 
 	/**

@@ -1,10 +1,5 @@
+import type { AgentModelBinding, AgentRuntimeOptions, AgentRuntimeRef, AttachedAgentDefinition } from '../types.js'
 import { createAgentExecutor } from './executor.js'
-import type {
-	AgentModelBinding,
-	AgentRuntimeOptions,
-	AgentRuntimeRef,
-	AttachedAgentDefinition,
-} from '../types.js'
 
 export type AgentRuntimeExecutor<Output = unknown> = NonNullable<AgentRuntimeRef<Output>['current']>
 

@@ -15,7 +15,14 @@ import type {
  *
  * @group Service
  */
-export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
+export interface ServiceClass<S extends ServiceClassTypes<any, any, any> = ServiceClassTypes<any, any, any>> {
+	/**
+	 * Type-only anchor used to preserve cascading service builder types.
+	 *
+	 * This property is never read at runtime.
+	 */
+	readonly __serviceClassTypes?: S
+
 	config: S['ConfigType']
 	resources: S['Resources']
 
@@ -80,7 +87,7 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 	): Promise<void>
   */
 
-	getContextFunctions(logger: Logger): ContextBase
+	getContextFunctions(logger: Logger): ContextBase<S['Metrics']>
 	getServiceHealth(): Promise<ServiceHealthState>
 	getInFlightDiagnostics(): InFlightDiagnostics
 	getQueueWorkerPauseState(): QueueWorkerPauseStateByQueue

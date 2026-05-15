@@ -1,0 +1,34 @@
+{
+	"name": "@purista/metrics-example",
+	"version": "2.2.0",
+	"description": "Minimal PURISTA custom metrics example",
+	"homepage": "https://purista.dev",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"main": "src/index.ts",
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"start": "tsx src/index.ts",
+		"lint": "npx @biomejs/biome check --write",
+		"test": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/node": "^25.6.0",
+		"tsx": "^4.21.0",
+		"typescript": "^6.0.3"
+	},
+	"dependencies": {
+		"@opentelemetry/api": "^1.9.1",
+		"@opentelemetry/sdk-metrics": "^2.7.1",
+		"@purista/core": "*",
+		"zod": "^4.4.3"
+	}
+}

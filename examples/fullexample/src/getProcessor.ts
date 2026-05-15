@@ -1,5 +1,7 @@
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin'
+import { ConsoleMetricExporter, type MetricReader, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
 import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import { jaegerExporterOptions } from './config/jaegerConfig.js'
@@ -39,4 +41,20 @@ export const uptraceTraceExporter = () => {
 	const exporter = new OTLPTraceExporter(uptraceConfig)
 
 	return new SimpleSpanProcessor(exporter)
+}
+
+export const getConsoleMetricReader = (): MetricReader => {
+	return new PeriodicExportingMetricReader({
+		exporter: new ConsoleMetricExporter(),
+		exportIntervalMillis: 5000,
+	})
+}
+
+export const getOtlpMetricReader = (): MetricReader => {
+	return new PeriodicExportingMetricReader({
+		exporter: new OTLPMetricExporter({
+			url: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
+		}),
+		exportIntervalMillis: 5000,
+	})
 }

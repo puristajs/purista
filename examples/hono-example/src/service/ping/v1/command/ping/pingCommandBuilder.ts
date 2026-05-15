@@ -15,7 +15,9 @@ export const pingCommandBuilder = pingV1ServiceBuilder
 	.exposeAsHttpEndpoint('POST', 'ping')
 	.addQueryParameters({ name: 'query', required: false })
 	.disableHttpSecurity()
-	.setCommandFunction(async function (_context, payload, _parameter) {
+	.setCommandFunction(async function (context, payload, _parameter) {
+		context.metrics['app.hono.requests'].add(1, { route: 'ping' })
+
 		// add your business logic here
 		return {
 			pong: payload.ping,

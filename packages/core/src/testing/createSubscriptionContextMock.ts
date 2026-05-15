@@ -1,10 +1,19 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
+import type { Service } from '../core/Service/Service.impl.js'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
+import type { ServiceClass } from '../core/types/ServiceClass.js'
+import type { ServiceClassMetrics } from '../core/types/ServiceClassMetrics.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
 import type { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import type { Schema } from '../schema/index.js'
-import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResourceProxy } from './sharedContextMocks.js'
+import {
+	createBaseContextStubs,
+	createInvokeProxy,
+	createMetricContextMock,
+	createMockSpan,
+	createResourceProxy,
+} from './sharedContextMocks.js'
 
 /**
  * Infer the internal builder type configuration from a subscription builder.
@@ -12,6 +21,8 @@ import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResour
  * @group Unit test helper
  */
 export type SubscriptionContextMockBuilderTypes<T> = T extends SubscriptionDefinitionBuilder<any, infer C> ? C : never
+export type SubscriptionContextMockServiceClass<T> =
+	T extends SubscriptionDefinitionBuilder<infer S extends Service, any> ? S : ServiceClass
 
 export type CreateSubscriptionContextMockInput<TBuilder extends SubscriptionDefinitionBuilder<any, any>> = {
 	message: EBMessage
@@ -25,14 +36,16 @@ export type SubscriptionContextMockResult<TBuilder extends SubscriptionDefinitio
 		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<SubscriptionContextMockServiceClass<TBuilder>>
 	>
 	mock: SubscriptionFunctionContext<
 		SubscriptionContextMockBuilderTypes<TBuilder>['Resources'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<SubscriptionContextMockServiceClass<TBuilder>>
 	>
 	stubs: {
 		logger: Record<string, SinonStub>
@@ -90,9 +103,11 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 		SubscriptionContextMockBuilderTypes<TBuilder>['Invokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		SubscriptionContextMockBuilderTypes<TBuilder>['EmitList'],
-		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		SubscriptionContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<SubscriptionContextMockServiceClass<TBuilder>>
 	> = {
 		logger: base.logger.mock,
+		metrics: createMetricContextMock<ServiceClassMetrics<SubscriptionContextMockServiceClass<TBuilder>>>(input.sandbox),
 		message: input.message,
 		emit: async (eventName, payload) => base.stubs.emit[eventName](eventName, payload),
 		wrapInSpan: base.stubs.wrapInSpan.callsFake((name, opts, fn) => {

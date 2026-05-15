@@ -5,6 +5,7 @@ import type {
 } from '@purista/harness'
 import { z } from 'zod'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
+import type { PuristaMetricDefinition } from '../core/types/PuristaMetrics.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/index.js'
 import { QueueWorkerBuilder } from '../QueueWorkerBuilder/index.js'
 import { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/index.js'
@@ -103,6 +104,37 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		private readonly description: string,
 	) {}
 
+	/**
+	 * Declare a custom application metric available only in this agent handler.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.defineMetric('app.agent.escalations', {
+	 *   kind: 'counter',
+	 *   unit: '{escalation}',
+	 *   description: 'Escalated agent runs',
+	 * })
+	 * ```
+	 */
+	defineMetric<const MetricName extends string, const Definition extends PuristaMetricDefinition<any>>(
+		_name: MetricName,
+		_definition: Definition,
+	) {
+		return this as unknown as AgentQueueBuilder<
+			AgentQueueBuilderTypes<
+				S['PayloadSchema'],
+				S['ParameterSchema'],
+				S['OutputSchema'],
+				S['Resources'],
+				S['Models'],
+				S['CommandTools'],
+				S['AgentTools'],
+				S['Execution'],
+				S['Metrics'] & { [K in MetricName]: Definition }
+			>
+		>
+	}
+
 	addPayloadSchema<PayloadSchema extends Schema>(schema: PayloadSchema) {
 		this.payloadSchema = schema
 		return this as unknown as AgentQueueBuilder<
@@ -114,7 +146,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				S['Execution']
+				S['Execution'],
+				S['Metrics']
 			>
 		>
 	}
@@ -130,7 +163,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				S['Execution']
+				S['Execution'],
+				S['Metrics']
 			>
 		>
 	}
@@ -146,7 +180,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				S['Execution']
+				S['Execution'],
+				S['Metrics']
 			>
 		>
 	}
@@ -163,7 +198,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'] & Record<Alias, Binding>,
 				S['CommandTools'],
 				S['AgentTools'],
-				S['Execution']
+				S['Execution'],
+				S['Metrics']
 			>
 		>
 	}
@@ -209,7 +245,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['CommandTools'] &
 					Record<`${ServiceName}.${Version}.${CommandName}`, AllowedCommandToolDefinition<Output, Payload, Parameter>>,
 				S['AgentTools'],
-				S['Execution']
+				S['Execution'],
+				S['Metrics']
 			>
 		>
 	}
@@ -241,7 +278,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'] & Record<`${AgentName}.${Version}`, AllowedAgentDefinition<Output, Payload, Parameter>>,
-				S['Execution']
+				S['Execution'],
+				S['Metrics']
 			>
 		>
 	}
@@ -256,7 +294,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				undefined
+				undefined,
+				S['Metrics']
 			>
 		>,
 		definition: HarnessAgentDefinition<any>,
@@ -272,7 +311,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				'harnessAgent'
+				'harnessAgent',
+				S['Metrics']
 			>
 		>
 	}
@@ -287,7 +327,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				undefined
+				undefined,
+				S['Metrics']
 			>
 		>,
 		definition: HarnessWorkflowDefinition<any>,
@@ -303,7 +344,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				'harnessWorkflow'
+				'harnessWorkflow',
+				S['Metrics']
 			>
 		>
 	}
@@ -318,7 +360,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				undefined
+				undefined,
+				S['Metrics']
 			>
 		>,
 		handler: AgentHandler<
@@ -328,7 +371,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			S['Models'],
 			S['CommandTools'],
 			S['AgentTools'],
-			Infer<S['OutputSchema']>
+			Infer<S['OutputSchema']>,
+			S['Metrics']
 		>,
 	) {
 		this.assertNoExecutionDefinition()
@@ -342,7 +386,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Models'],
 				S['CommandTools'],
 				S['AgentTools'],
-				'runFunction'
+				'runFunction',
+				S['Metrics']
 			>
 		>
 	}
@@ -744,7 +789,8 @@ function withAgentQueueMetadata(
 }
 
 function getRuntime<Output>(definition: AgentDefinition<any>, owner?: object) {
-	const runtime = getBoundAgentRuntime<Output>(owner, definition as AttachedAgentDefinition<any>) ?? definition.runtime.current
+	const runtime =
+		getBoundAgentRuntime<Output>(owner, definition as AttachedAgentDefinition<any>) ?? definition.runtime.current
 	if (!runtime) {
 		throw new Error(
 			'Attached agent runtime is not initialized. Call service.getInstance(...) before executing the agent.',

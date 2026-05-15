@@ -1,46 +1,184 @@
 ---
-title: Open Telemetry
-description: Tracing and metrics with Opentelemetry in PURISTA typescript nodejs backend framework applications and how to use them.
+title: OpenTelemetry
+description: Tracing and metrics with OpenTelemetry in PURISTA TypeScript backend applications and how to use them.
 order: 400000
 ---
 
-# Open Telemetry
+# OpenTelemetry
 
-PURISTA has built-in support for [OpenTelemetry](https://opentelemetry.io/) and it is deeply integrated into the framework.
+PURISTA records traces and metrics through [OpenTelemetry](https://opentelemetry.io/) APIs.
+The framework stays provider-neutral: your application owns the OpenTelemetry SDK, readers, exporters, collector endpoints, and backend-specific configuration.
 
-This means there is an industry-standard way of tracing and metrics out of the box. This not only allows you to use third-party applications for analysis and alerting.
-It is also a huge benefit when it comes to integration. This enables you to trace and collect metrics across your whole setup and not be restricted only to the PURISTA part.
+This lets one application send PURISTA framework telemetry, custom application metrics, and AI harness telemetry to the same OpenTelemetry provider without coupling `@purista/core` to a vendor or exporter.
 
 ## Tracing
 
-Traceability becomes essential when something does not work as expected.
+Tracing follows message flow through commands, subscriptions, streams, queues, bridges, resources, and HTTP surfaces.
+Existing tracing setup still uses `spanProcessor`; metrics are configured separately through `metrics`.
 
-One kind of issues are the ones, which are the more technical ones. Some function is throwing some error.
-In other software designs, you often end up with some code line number, and you start digging into the code, follow all the logic through a lot of files. You jump from one abstraction to the next one. You check wrapper by wrapper, interfaces and all that stuff.
-This can become quite challenging, if for example in production only bundled and compiled javascript code is deployed. In this case line numbers and even function names might completely differ from your source typescript code.
-
-The other kind of issues are even harder to track: things work from a technical point of view, but not from a business point of view.
-In this case, you need to walk through the code logic, and check if the business logic is matching the implementation logic. And depending on your abstractions, layers and wrappers you will quickly blow up your head.
-
-The concept of PURISTA will help you in both cases. You simply follow the message flow. Check the input/output of the functions, and you will find the root cause quickly.
-You are able to follow single requests, because each one has a unique trace id all the way down. You can attach external providers and software solutions to track errors on each of your functions. You can track metrics on each of your functions.
+```typescript
+const service = await userV1Service.getInstance(eventBridge, {
+	spanProcessor,
+	metrics: { meter: meterProvider.getMeter('purista.app') },
+})
+```
 
 ## Metrics
 
-Collecting metrics becomes necessary at a certain scale.
+PURISTA framework metrics are emitted through the OpenTelemetry Metrics API.
+If your application configures a global OTel `MeterProvider`, PURISTA and `@purista/harness` can use the same provider.
+You can also pass an explicit metrics runtime option when constructing services or bridges.
 
-Metrics should also be categorized into two big topics.
+PURISTA does not start a collector, exporter, Prometheus endpoint, or `/metrics` route automatically.
 
-There are technical and functional metric values. Examples include time and resource consumption, failure and success counts, response times, and so on.
+### Minimal local setup
 
-On the other side, you will have business-related metrics. This includes customer- and user-centric values. For example, active user count, daily active users, or average order amount.
+Use a console reader for local development or tests that should run without external telemetry infrastructure.
 
-### Technical metric values
+```typescript
+import { metrics } from '@opentelemetry/api'
+import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
 
-For technical metric values, PURISTA tries to provide simple, first-class connectivity to standard third-party solutions. In most cases, this is just configuration.
+export const meterProvider = new MeterProvider({
+	readers: [
+		new PeriodicExportingMetricReader({
+			exporter: new ConsoleMetricExporter(),
+			exportIntervalMillis: 1000,
+		}),
+	],
+})
 
-### Business metric values
+metrics.setGlobalMeterProvider(meterProvider)
+```
 
-When it comes to business metrics, things become more challenging, because this highly depends on your business, the metrics you want to collect, and the third-party solution you want to use for analysis.
-This means there cannot be an out-of-the-box solution for every need.
-But PURISTA can help you quickly aggregate the values you need because of its core concept.
+Pass the provider into PURISTA runtime options when you do not want to rely on the global provider:
+
+```typescript
+const service = await orderV1Service.getInstance(eventBridge, {
+	metrics: { meter: meterProvider.getMeter('purista.app') },
+})
+```
+
+### OTLP setup
+
+OTLP exporters are application dependencies. Configure them beside your tracing setup and keep endpoint selection in application configuration.
+
+```typescript
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+
+const metricReader = new PeriodicExportingMetricReader({
+	exporter: new OTLPMetricExporter({
+		url: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
+	}),
+})
+```
+
+### Prometheus
+
+Prometheus support should be configured outside PURISTA core.
+Use either an OpenTelemetry Collector that exports Prometheus metrics or an application-owned OTel Prometheus exporter.
+Do not add `prom-client` to PURISTA services and do not expose request headers, request bodies, raw URLs, prompts, completions, tokens, user IDs, tenant IDs, or other high-cardinality data as metric attributes.
+
+### Custom service metrics
+
+Declare custom metrics on `ServiceBuilder`.
+Custom metric names must start with `app.` and use low-cardinality attributes.
+
+```typescript
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { z } from 'zod'
+
+const checkoutServiceInfo = {
+	serviceName: 'Checkout',
+	serviceVersion: '1',
+	serviceDescription: 'Checkout workflow',
+} as const satisfies ServiceInfoType
+
+const checkoutMetricAttributes = z.object({
+	channel: z.enum(['web', 'api']),
+})
+
+export const checkoutV1ServiceBuilder = new ServiceBuilder(checkoutServiceInfo)
+	.defineMetric('app.checkout.started', {
+		kind: 'counter',
+		unit: '{checkout}',
+		description: 'Started checkout flows',
+		attributes: checkoutMetricAttributes,
+	})
+	.defineMetric('app.checkout.duration', {
+		kind: 'histogram',
+		unit: 'ms',
+		description: 'Checkout command duration',
+		attributes: checkoutMetricAttributes,
+	})
+```
+
+Handlers receive typed metric handles through `context.metrics`.
+Counters and up-down counters use `add`; histograms use `record`.
+
+```typescript
+setCommandFunction(async context => {
+	const started = Date.now()
+
+	context.metrics['app.checkout.started'].add(1, { channel: 'web' })
+
+	try {
+		return await runCheckout()
+	} finally {
+		context.metrics['app.checkout.duration'].record(Date.now() - started, { channel: 'web' })
+	}
+})
+```
+
+The handler context does not expose a raw metric recorder.
+Unknown metric names, wrong metric methods, and wrong attributes are type errors when the service builder types are preserved.
+
+### Agent custom metrics
+
+Service-level custom metrics are visible to commands, subscriptions, streams, queue workers, and attached agents.
+Agent-local metrics are declared on `AgentQueueBuilder` and are only visible inside that agent handler.
+
+```typescript
+const triageAgent = supportServiceBuilder
+	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
+	.defineMetric('app.agent.escalations', {
+		kind: 'counter',
+		unit: '{escalation}',
+		description: 'Tickets escalated by the triage agent',
+		attributes: z.object({ priority: z.enum(['normal', 'high']) }),
+	})
+	.setRunFunction(async context => {
+		context.metrics['app.agent.escalations'].add(1, { priority: 'high' })
+		return await triageTicket(context)
+	})
+```
+
+### AI harness alignment
+
+PURISTA records service and agent wrapper metrics, such as agent run count, duration, and active runs.
+`@purista/harness` owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics.
+Do not duplicate token or model-call metrics in PURISTA handlers.
+
+When you pass `ai.telemetry` to a service, PURISTA forwards those options to the harness runtime:
+
+```typescript
+const service = await supportService.getInstance(eventBridge, {
+	metrics: { meter: meterProvider.getMeter('purista.app') },
+	ai: {
+		telemetry: { captureContent: false },
+		models,
+	},
+})
+```
+
+Keep these setup points separate:
+
+- tracing: `spanProcessor`
+- PURISTA metrics: `metrics`
+- harness telemetry: `ai.telemetry`
+
+### Migration from tracing-only applications
+
+Existing tracing-only applications can keep their `spanProcessor` setup unchanged.
+Add an application-owned OTel metrics SDK setup, pass the metrics runtime option to services and bridges that should emit metrics, then add custom `app.*` metric declarations where business metrics are needed.

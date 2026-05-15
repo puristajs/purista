@@ -1,14 +1,10 @@
 import { createSandbox } from 'sinon'
 
-import type { Logger, LogFnParamType, LoggerOptions } from '../../core/types/Logger.js'
+import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Logger.js'
 import { getEventBridgeMock } from '../../mocks/index.js'
 import { ServiceBuilder } from '../../ServiceBuilder/ServiceBuilder.impl.js'
 import type { AgentRuntimeOptions, AttachedAgentDefinition } from '../types.js'
-import {
-	createAgentRuntimeScope,
-	getScopedAgentRuntime,
-	initializeAttachedAgentRuntimes,
-} from './scopedRuntime.js'
+import { createAgentRuntimeScope, getScopedAgentRuntime, initializeAttachedAgentRuntimes } from './scopedRuntime.js'
 
 describe('attached agent scoped runtime', () => {
 	const sandbox = createSandbox()

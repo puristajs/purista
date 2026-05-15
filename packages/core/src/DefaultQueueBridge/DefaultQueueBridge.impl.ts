@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
+import type { PuristaMetricsRecorder } from '../core/metrics/types.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { QueueBridgeCapabilities } from '../core/QueueBridge/types/QueueBridgeCapabilities.js'
 import type { QueueDeadLetterListOptions } from '../core/QueueBridge/types/QueueDeadLetterListOptions.js'
@@ -24,6 +25,7 @@ export type DefaultQueueBridgeOptions = {
 	instanceId?: string
 	defaultLeaseTtlMs?: number
 	maxAttempts?: number
+	metricsRecorder?: PuristaMetricsRecorder
 }
 
 export class DefaultQueueBridge implements QueueBridge {
@@ -54,6 +56,7 @@ export class DefaultQueueBridge implements QueueBridge {
 
 	private readonly defaultLeaseTtlMs: number
 	private readonly defaultMaxAttempts: number
+	private readonly metricsRecorder?: PuristaMetricsRecorder
 	private readonly queues = new Map<string, QueueMessage[]>()
 	private readonly leases = new Map<string, Map<string, LeaseEntry>>()
 	private readonly deadLetters = new Map<string, QueueMessage[]>()
@@ -62,6 +65,7 @@ export class DefaultQueueBridge implements QueueBridge {
 		this.instanceId = options?.instanceId ?? randomUUID()
 		this.defaultLeaseTtlMs = options?.defaultLeaseTtlMs ?? 30_000
 		this.defaultMaxAttempts = options?.maxAttempts ?? 5
+		this.metricsRecorder = options?.metricsRecorder
 	}
 
 	async start() {}
@@ -81,6 +85,7 @@ export class DefaultQueueBridge implements QueueBridge {
 	}
 
 	async enqueue(options: QueueEnqueueOptions<unknown, unknown>): Promise<QueueEnqueueResult> {
+		const startedAt = Date.now()
 		const queueName = options.queueName
 		const scheduledAt = options.delayMs ? Date.now() + options.delayMs : Date.now()
 		const leaseTtlMs = options.leaseTtlMs ?? this.defaultLeaseTtlMs
@@ -105,14 +110,18 @@ export class DefaultQueueBridge implements QueueBridge {
 		const queue = this.queues.get(queueName) ?? []
 		queue.push(message)
 		this.queues.set(queueName, queue)
+		this.recordQueueOperation(queueName, 'enqueue', startedAt, 'success')
+		this.recordQueueJobs(queueName, 'pending', 1)
 
 		return { jobId, queueName, scheduledAt }
 	}
 
 	async leaseNext(queueName: string, _opts?: QueueLeaseOptions): Promise<QueueLease | undefined> {
+		const startedAt = Date.now()
 		this.recoverExpiredLeases(queueName)
 		const queue = this.queues.get(queueName)
 		if (!queue || queue.length === 0) {
+			this.recordQueueOperation(queueName, 'poll', startedAt, 'success')
 			return undefined
 		}
 		const now = Date.now()
@@ -120,6 +129,7 @@ export class DefaultQueueBridge implements QueueBridge {
 		// find first scheduled job ready to run
 		const idx = queue.findIndex(item => (item.scheduledAt ?? 0) <= now)
 		if (idx === -1) {
+			this.recordQueueOperation(queueName, 'poll', startedAt, 'success')
 			return undefined
 		}
 
@@ -145,6 +155,9 @@ export class DefaultQueueBridge implements QueueBridge {
 			queueName,
 		})
 		this.leases.set(queueName, leaseEntries)
+		this.recordQueueOperation(queueName, 'poll', startedAt, 'success')
+		this.recordQueueJobs(queueName, 'pending', -1)
+		this.recordQueueJobs(queueName, 'inflight', 1)
 
 		return lease
 	}
@@ -160,14 +173,19 @@ export class DefaultQueueBridge implements QueueBridge {
 	}
 
 	async ack(queueName: string, leaseId: string): Promise<void> {
+		const startedAt = Date.now()
 		const leaseEntries = this.leases.get(queueName)
 		leaseEntries?.delete(leaseId)
+		this.recordQueueOperation(queueName, 'ack', startedAt, 'success')
+		this.recordQueueJobs(queueName, 'inflight', -1)
 	}
 
 	async nack(queueName: string, leaseId: string, request: QueueRetryRequest): Promise<void> {
+		const startedAt = Date.now()
 		const leaseEntries = this.leases.get(queueName)
 		const lease = leaseEntries?.get(leaseId)
 		if (!leaseEntries || !lease) {
+			this.recordQueueOperation(queueName, 'nack', startedAt, 'success')
 			return
 		}
 
@@ -180,15 +198,20 @@ export class DefaultQueueBridge implements QueueBridge {
 
 		if (message.attempt >= message.maxAttempts) {
 			await this.moveToDeadLetter(queueName, message, request.reason ?? 'max_attempts_exceeded')
+			this.recordQueueOperation(queueName, 'dead_letter', startedAt, 'success')
 			return
 		}
 
 		const queue = this.queues.get(queueName) ?? []
 		queue.push(message)
 		this.queues.set(queueName, queue)
+		this.recordQueueOperation(queueName, 'retry', startedAt, 'success')
+		this.recordQueueJobs(queueName, 'inflight', -1)
+		this.recordQueueJobs(queueName, 'retry', 1)
 	}
 
 	async moveToDeadLetter(queueName: string, message: QueueMessage, reason?: string): Promise<void> {
+		const startedAt = Date.now()
 		const dlq = this.deadLetters.get(queueName) ?? []
 		if (reason) {
 			message.headers = {
@@ -199,6 +222,8 @@ export class DefaultQueueBridge implements QueueBridge {
 		message.leaseExpiresAt = 0
 		dlq.push(message)
 		this.deadLetters.set(queueName, dlq)
+		this.recordQueueOperation(queueName, 'dead_letter', startedAt, 'success')
+		this.recordQueueJobs(queueName, 'dead_letter', 1)
 	}
 
 	async peekDeadLetter(queueName: string, options?: QueueDeadLetterListOptions): Promise<QueueMessage[]> {
@@ -244,6 +269,7 @@ export class DefaultQueueBridge implements QueueBridge {
 	}
 
 	async metrics(queueName: string): Promise<QueueMetrics> {
+		const startedAt = Date.now()
 		this.recoverExpiredLeases(queueName)
 		const queue = this.queues.get(queueName) ?? []
 		const inflight = this.leases.get(queueName) ?? new Map()
@@ -255,12 +281,46 @@ export class DefaultQueueBridge implements QueueBridge {
 			Array.from(inflight.values()).reduce((count, lease) => count + Math.max(0, lease.message.attempt - 1), 0)
 		const oldestAgeMs = queue.length > 0 ? now - (queue[0].createdAt ?? now) : undefined
 
-		return {
+		const result = {
 			pending,
 			inflight: inflight.size,
 			deadLetter: dlq.length,
 			retries,
 			oldestAgeMs,
+		}
+		this.recordQueueOperation(queueName, 'metrics', startedAt, 'success')
+		this.recordQueueJobs(queueName, 'pending', result.pending)
+		this.recordQueueJobs(queueName, 'inflight', result.inflight)
+		this.recordQueueJobs(queueName, 'dead_letter', result.deadLetter)
+		this.recordQueueJobs(queueName, 'retry', result.retries)
+		if (typeof result.oldestAgeMs === 'number') {
+			this.recordFrameworkMetric('purista.queue.oldest_job_age', result.oldestAgeMs, {
+				'purista.queue.name': queueName,
+			})
+		}
+		return result
+	}
+
+	private recordQueueOperation(queueName: string, operation: string, startedAt: number, outcome: string) {
+		this.recordFrameworkMetric('purista.queue.operation.duration', Math.max(0, Date.now() - startedAt), {
+			'purista.queue.name': queueName,
+			'purista.queue.operation': operation,
+			'purista.outcome': outcome,
+		})
+	}
+
+	private recordQueueJobs(queueName: string, state: string, value: number) {
+		this.recordFrameworkMetric('purista.queue.jobs', value, {
+			'purista.queue.name': queueName,
+			'purista.queue.state': state,
+		})
+	}
+
+	private recordFrameworkMetric(name: string, value: number, attributes: Record<string, string | number | boolean>) {
+		try {
+			this.metricsRecorder?.recordFrameworkMetric(name, value, attributes)
+		} catch {
+			return
 		}
 	}
 

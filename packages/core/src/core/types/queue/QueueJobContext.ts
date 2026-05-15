@@ -4,7 +4,10 @@ import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
+import type { PuristaMetricContextProperty, PuristaMetricDefinitions } from '../PuristaMetrics.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
+import type { QueueContext } from './QueueContext.js'
+import type { QueueInvokeList } from './QueueInvokeList.js'
 import type { QueueMessage } from './QueueMessage.js'
 
 export type QueueJobControls = {
@@ -23,12 +26,16 @@ export type QueueJobContext<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = Record<string, never>,
-> = ContextBase & {
-	message: Readonly<QueueMessage<MessagePayloadType, MessageParamsType>>
-	job: QueueJobControls
-	signal: AbortSignal
-	emit: EmitCustomMessageFunction<EmitList>
-	service: Invokes
-	stream: StreamInvokes
-	resources: Resources
-}
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
+> = ContextBase<Metrics> &
+	PuristaMetricContextProperty<Metrics> & {
+		message: Readonly<QueueMessage<MessagePayloadType, MessageParamsType>>
+		job: QueueJobControls
+		signal: AbortSignal
+		emit: EmitCustomMessageFunction<EmitList>
+		service: Invokes
+		stream: StreamInvokes
+		queue: QueueContext<QueueInvokes>
+		resources: Resources
+	}

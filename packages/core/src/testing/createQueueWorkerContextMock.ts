@@ -6,7 +6,13 @@ import type { QueueRetryRequest } from '../core/QueueBridge/types/QueueRetryRequ
 import type { QueueJobContext } from '../core/types/queue/QueueJobContext.js'
 import type { QueueMessage } from '../core/types/queue/QueueMessage.js'
 import type { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
-import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResourceProxy } from './sharedContextMocks.js'
+import {
+	createBaseContextStubs,
+	createInvokeProxy,
+	createMetricContextMock,
+	createMockSpan,
+	createResourceProxy,
+} from './sharedContextMocks.js'
 
 export type CreateQueueWorkerContextMockInput<
 	Payload = unknown,
@@ -106,6 +112,7 @@ export const createQueueWorkerContextMock = <
 
 	const context: QueueJobContext<Payload, Parameter, Resources> = {
 		logger: base.logger.mock,
+		metrics: createMetricContextMock(input.sandbox),
 		message,
 		signal: abortController.signal,
 		emit: async (_eventName, _payload) => undefined,

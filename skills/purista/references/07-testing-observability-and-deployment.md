@@ -13,12 +13,27 @@ Test declared boundaries and runtime wiring:
 Avoid tests that only validate raw helper functions while skipping builder metadata and runtime wiring.
 
 ## Observability
-PURISTA core wraps service, command, stream, subscription, queue, and HTTP execution with logger and OpenTelemetry context. Package code should preserve those context surfaces.
+PURISTA core wraps service, command, stream, subscription, queue, and HTTP execution with logger, OpenTelemetry trace context, and OpenTelemetry Metrics API recording. Package code should preserve those context surfaces.
+
+Metrics guidance:
+- core records through the OTel Metrics API and stays SDK/exporter-neutral
+- applications own MeterProvider, metric readers, exporters, collectors, and backend setup
+- Prometheus is configured outside core through the OTel Collector or an application-owned OTel Prometheus exporter
+- custom metrics are declared with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`
+- handlers record custom metrics through typed `context.metrics`
+- custom metric names must use `app.*`
+- avoid high-cardinality or sensitive attributes such as headers, raw URLs, prompts, completions, tokens, user IDs, tenant IDs, and payload data
+
+```ts
+context.metrics['app.orders.created'].add(1, { channel: 'web' })
+context.metrics['app.orders.duration'].record(42, { channel: 'web' })
+```
 
 For AI:
 - core bridges PURISTA logger into harness logger
 - `ai.telemetry` passes harness telemetry options into `@purista/harness`
-- harness model/tool calls can emit spans and metrics through its OpenTelemetry shim
+- harness owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics
+- PURISTA records only service and agent wrapper metrics around attached agent execution
 - stream chunks preserve run identity and provider-style event names
 
 ## Logging

@@ -3,6 +3,11 @@ import type { Schema } from '../../schema/index.js'
 
 import type { ConfigStore } from '../ConfigStore/types/ConfigStore.js'
 import type { EventBridge } from '../EventBridge/types/EventBridge.js'
+import type {
+	PuristaMetricDefinitions,
+	PuristaMetricsRecorder,
+	PuristaMetricsRuntimeOptions,
+} from '../metrics/types.js'
 import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../SecretStore/types/SecretStore.js'
 import type { StateStore } from '../StateStore/types/StateStore.js'
@@ -47,6 +52,12 @@ export type ServiceConstructorInput<S extends ServiceClassTypes = ServiceClassTy
 	stateStore?: StateStore
 	/** The opentelemetry span processor instance */
 	spanProcessor?: SpanProcessor
+	/** OpenTelemetry metrics runtime options for the service instance */
+	metrics?: PuristaMetricsRuntimeOptions
+	/** Optional preconfigured recorder, mainly used by tests or advanced runtime wiring */
+	metricsRecorder?: PuristaMetricsRecorder
+	/** Custom metric definitions exposed on handler contexts */
+	metricDefinitionList?: PuristaMetricDefinitions
 	/** Queue bridge implementation */
 	queueBridge?: QueueBridge
 	/** Optional queue job status/result store */

@@ -12,8 +12,9 @@ import type {
 	Session,
 	TelemetryOptions,
 } from '@purista/harness'
-
+import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../core/types/Logger.js'
+import type { PuristaMetricContext, PuristaMetricDefinitions } from '../core/types/PuristaMetrics.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 
 export type AgentModelCapability = ModelCapability
@@ -204,6 +205,7 @@ export type AgentHandlerContext<
 	Models extends Record<string, AgentModelBinding> = Record<never, never>,
 	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
 	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = {
 	payload: Payload
 	parameter: Parameter
@@ -228,6 +230,8 @@ export type AgentHandlerContext<
 	 * ```
 	 */
 	resources: Resources
+	/** typed custom metrics declared on the service and this agent builder */
+	metrics: PuristaMetricContext<Metrics>
 	harness: {
 		session: Session<any>
 		models: AgentHandlerModelBindings<Models>
@@ -251,7 +255,10 @@ export type AgentHandler<
 	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
 	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Output = unknown,
-> = (context: AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools>) => Promise<Output>
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
+> = (
+	context: AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Metrics>,
+) => Promise<Output>
 
 export type AgentExecutionDefinition<
 	Payload = unknown,
@@ -261,12 +268,13 @@ export type AgentExecutionDefinition<
 	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
 	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Output = unknown,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > =
 	| { kind: 'harnessAgent'; definition: HarnessAgentDefinition<any, any, any> }
 	| { kind: 'harnessWorkflow'; definition: HarnessWorkflowDefinition<any, any, any> }
 	| {
 			kind: 'runFunction'
-			handler: AgentHandler<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output>
+			handler: AgentHandler<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output, Metrics>
 	  }
 
 export type AgentManifest<Models extends Record<string, AgentModelBinding> = Record<string, AgentModelBinding>> = {
@@ -332,7 +340,8 @@ export type AgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQueueBuil
 		S['Models'],
 		S['CommandTools'],
 		S['AgentTools'],
-		Infer<S['OutputSchema']>
+		Infer<S['OutputSchema']>,
+		S['Metrics']
 	>
 	runtime: AgentRuntimeRef<Infer<S['OutputSchema']>>
 }
@@ -358,6 +367,7 @@ export type AgentQueueBuilderTypes<
 	CommandTools extends Record<string, AllowedCommandToolDefinition> = Record<never, never>,
 	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Execution extends AgentExecutionKind | undefined = undefined,
+	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = {
 	PayloadSchema: PayloadSchema
 	ParameterSchema: ParameterSchema
@@ -367,6 +377,7 @@ export type AgentQueueBuilderTypes<
 	CommandTools: CommandTools
 	AgentTools: AgentTools
 	Execution: Execution
+	Metrics: Metrics
 }
 
 export type AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes<
@@ -377,7 +388,8 @@ export type AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes<
 	Record<string, AgentModelBinding>,
 	Record<string, AllowedCommandToolDefinition>,
 	Record<string, AllowedAgentDefinition>,
-	AgentExecutionKind | undefined
+	AgentExecutionKind | undefined,
+	PuristaMetricDefinitions
 >
 
 export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ? S['Models'] : Record<never, never>

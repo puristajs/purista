@@ -32,6 +32,7 @@ Read sources in this order before changing a skill:
 - Do not split the framework back into many sibling skills unless there is a genuinely separate non-runtime concern.
 - When teaching schemas and contracts, prefer consumer-local schema definitions over one shared cross-service Zod schema unless every consumer truly needs the exact same shape.
 - Keep current platform decisions visible, especially safe defaults, strict capability validation, Hono as the active HTTP server runtime, and the current queue/event bridge reliability model.
+- Keep observability guidance aligned: OTel Metrics API is canonical for metrics, app code owns SDK/exporters, Prometheus stays outside core, and `@purista/harness` owns GenAI/model/token/tool metrics.
 
 ## Decision rules
 - Keep one framework skill and split depth into references instead of adding more framework skill folders.
@@ -57,6 +58,7 @@ Read sources in this order before changing a skill:
 - Snippet relevance and duplicate-content risk
 - Drift in `starter`, `create-purista`, `voyage`, `specs`, and published docs
 - Drift between repo-local skills and installed mirror copies under `$CODEX_HOME/skills`
+- Drift between metric catalog, observability docs, examples, and skill snippets
 
 ## Read if needed
 - `references/catalog-audit-wave1.md`

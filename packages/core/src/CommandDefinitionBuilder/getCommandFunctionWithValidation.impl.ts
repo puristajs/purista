@@ -5,6 +5,7 @@ import type { Service } from '../core/Service/Service.impl.js'
 import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
 import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
 import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
+import type { ServiceClassMetrics } from '../core/types/ServiceClassMetrics.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { type Schema, validate } from '../schema/index.js'
 
@@ -21,7 +22,7 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 ) {
 	const wrapped = async function (
 		this: S,
-		context: CommandFunctionContext<unknown, unknown>,
+		context: CommandFunctionContext<unknown, unknown, any, any, any, any, any, ServiceClassMetrics<S>>,
 		payload: unknown,
 		parameter: unknown,
 	): Promise<unknown> {

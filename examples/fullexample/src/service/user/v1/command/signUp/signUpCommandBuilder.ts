@@ -36,6 +36,8 @@ export const signUpCommandBuilder = userV1ServiceBuilder
 
 		await context.states.setState(StateStoreKey.Users, users)
 
+		context.metrics['app.users.signup'].add(1, { source: 'http' })
+
 		// add your business logic here
 		context.logger.info('new user added')
 
