@@ -10,12 +10,16 @@ provider-neutral and can run in CI without API keys.
 
 ```bash
 npm test -w @purista/agent-example
+npm start -w @purista/agent-example
 ```
+
+Open <http://localhost:3000/api> and run `POST /api/v1/triage-ticket` from the OpenAPI UI.
 
 ## What it demonstrates
 
 - `ServiceBuilder.getAgentQueueBuilder(...)`
 - schema-driven payload and output types
 - capability-gated model handles on `context.harness.models`
+- Hono HTTP exposure with OpenAPI documentation
 - `createAgentTestHarness(...)` with a scripted model provider
 - no direct application dependency on `@purista/harness`

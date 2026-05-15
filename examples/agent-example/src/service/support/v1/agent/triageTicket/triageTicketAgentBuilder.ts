@@ -14,6 +14,8 @@ export const triageTicketAgentBuilder = supportV1ServiceBuilder
 		capabilities: ['object'] as const,
 		defaults: { temperature: 0 },
 	})
+	.exposeAsHttpEndpoint('POST', 'triage-ticket', { streamingMode: 'aggregate' })
+	.makeEndpointPublic()
 	.setRunFunction(async context => {
 		const result = await context.harness.models.primary.object(
 			{
