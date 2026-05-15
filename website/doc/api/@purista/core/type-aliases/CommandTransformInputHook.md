@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandTransformInputHook
 
-# Type Alias: CommandTransformInputHook()\<S, MessagePayloadType, MessageParamsType, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, Resources\>
+# Type Alias: CommandTransformInputHook\<S, MessagePayloadType, MessageParamsType, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, Resources\>
 
 > **CommandTransformInputHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<\{ `parameter`: `FunctionParamsType`; `payload`: `FunctionPayloadType`; \}\>
 

@@ -38,7 +38,7 @@ Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:7](https
 
 ### secretCommentCiphertext?
 
-> `optional` **secretCommentCiphertext**: `string`
+> `optional` **secretCommentCiphertext?**: `string`
 
 Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:14](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Secret.ts#L14)
 
@@ -46,7 +46,7 @@ Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:14](http
 
 ### secretCommentIV?
 
-> `optional` **secretCommentIV**: `string`
+> `optional` **secretCommentIV?**: `string`
 
 Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:15](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Secret.ts#L15)
 
@@ -54,7 +54,7 @@ Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:15](http
 
 ### secretCommentTag?
 
-> `optional` **secretCommentTag**: `string`
+> `optional` **secretCommentTag?**: `string`
 
 Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:16](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Secret.ts#L16)
 
@@ -126,7 +126,7 @@ Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:18](http
 
 ### user?
 
-> `optional` **user**: `string`
+> `optional` **user?**: `string`
 
 Defined in: [infisical-secret-store/src/InfisicalClient/types/Secret.ts:5](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Secret.ts#L5)
 

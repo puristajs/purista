@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/hono-http-server](../README.md) / HealthFunction
 
-# Type Alias: HealthFunction()\<T\>
+# Type Alias: HealthFunction\<T\>
 
 > **HealthFunction**\<`T`\> = (`this`) => `Promise`\<`void`\>
 

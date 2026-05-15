@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/hono-http-server](../README.md) / getQueryDefintion
 
-# ~~Variable: getQueryDefintion()~~
+# ~~Variable: getQueryDefintion~~
 
 > `const` **getQueryDefintion**: (`queryDefinition`, `parameterschema?`) => `ParameterObject`[] = `getQueryDefinition`
 
@@ -14,7 +14,7 @@ Defined in: [hono-http-server/src/helper/getQueryDefinition.ts:40](https://githu
 
 ### queryDefinition
 
-[`QueryParameter`](../../core/type-aliases/QueryParameter.md)\<`Record`\<`string`, `unknown`\>\>[] | `undefined`
+[`QueryParameter`](../../core/type-aliases/QueryParameter.md)\<`Record`\<`string`, `unknown`\>\>[] \| `undefined`
 
 ### parameterschema?
 

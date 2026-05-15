@@ -36,7 +36,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:25](https://github.com/pu
 
 ### afterGuards?
 
-> `optional` **afterGuards**: `Record`\<`string`, [`QueueWorkerAfterGuardHook`](QueueWorkerAfterGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
+> `optional` **afterGuards?**: `Record`\<`string`, [`QueueWorkerAfterGuardHook`](QueueWorkerAfterGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
 
 Defined in: [core/types/queue/QueueWorkerDefinition.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L49)
 
@@ -44,7 +44,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:49](https://github.com/pu
 
 ### beforeGuards?
 
-> `optional` **beforeGuards**: `Record`\<`string`, [`QueueWorkerBeforeGuardHook`](QueueWorkerBeforeGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
+> `optional` **beforeGuards?**: `Record`\<`string`, [`QueueWorkerBeforeGuardHook`](QueueWorkerBeforeGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
 
 Defined in: [core/types/queue/QueueWorkerDefinition.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L38)
 
@@ -60,7 +60,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:37](https://github.com/pu
 
 ### intervalMs?
 
-> `optional` **intervalMs**: `number`
+> `optional` **intervalMs?**: `number`
 
 Defined in: [core/types/queue/QueueWorkerDefinition.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L35)
 

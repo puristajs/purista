@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionFunction
 
-# Type Alias: SubscriptionFunction()\<ServiceClassType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: SubscriptionFunction\<ServiceClassType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
 > **SubscriptionFunction**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType` \| [`SubscriptionHandlerResult`](SubscriptionHandlerResult.md)\>
 

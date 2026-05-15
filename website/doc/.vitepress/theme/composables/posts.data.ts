@@ -23,6 +23,7 @@ export interface Post {
 }
 
 declare const data: Post[]
+
 export { data }
 
 async function load(): Promise<Post[]>

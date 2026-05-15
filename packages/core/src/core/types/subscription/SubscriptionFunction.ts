@@ -3,6 +3,7 @@ import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { ServiceClassMetrics } from '../ServiceClassMetrics.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 import type { SubscriptionHandlerResult } from './SubscriptionHandlerResult.js'
@@ -23,7 +24,14 @@ export type SubscriptionFunction<
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = (
 	this: ServiceClassType,
-	context: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes>,
+	context: SubscriptionFunctionContext<
+		Resources,
+		Invokes,
+		StreamInvokes,
+		EmitList,
+		QueueInvokes,
+		ServiceClassMetrics<ServiceClassType>
+	>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionOutputType | SubscriptionHandlerResult>

@@ -22,7 +22,7 @@ Defined in: [hono-http-server/src/helper/problemDetails.ts:10](https://github.co
 
 ### details?
 
-> `optional` **details**: `unknown`
+> `optional` **details?**: `unknown`
 
 Defined in: [hono-http-server/src/helper/problemDetails.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/problemDetails.ts#L14)
 
@@ -30,7 +30,7 @@ Defined in: [hono-http-server/src/helper/problemDetails.ts:14](https://github.co
 
 ### errors?
 
-> `optional` **errors**: `unknown`[]
+> `optional` **errors?**: `unknown`[]
 
 Defined in: [hono-http-server/src/helper/problemDetails.ts:13](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/problemDetails.ts#L13)
 
@@ -38,7 +38,7 @@ Defined in: [hono-http-server/src/helper/problemDetails.ts:13](https://github.co
 
 ### instance?
 
-> `optional` **instance**: `string`
+> `optional` **instance?**: `string`
 
 Defined in: [hono-http-server/src/helper/problemDetails.ts:11](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/problemDetails.ts#L11)
 
@@ -62,7 +62,7 @@ Defined in: [hono-http-server/src/helper/problemDetails.ts:8](https://github.com
 
 ### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 Defined in: [hono-http-server/src/helper/problemDetails.ts:12](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/problemDetails.ts#L12)
 

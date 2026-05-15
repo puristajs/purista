@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionTransformOutputHook
 
-# Type Alias: SubscriptionTransformOutputHook()\<S, FinalFunctionOutputType, FunctionParamsType, TransformOutputHookOutput\>
+# Type Alias: SubscriptionTransformOutputHook\<S, FinalFunctionOutputType, FunctionParamsType, TransformOutputHookOutput\>
 
 > **SubscriptionTransformOutputHook**\<`S`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`TransformOutputHookOutput`\>
 

@@ -2,6 +2,7 @@
 	"extends": "../../tsconfig.json",
 
 	"compilerOptions": {
+		"rootDir": "../..",
 		"outDir": "./build",
 		"types": ["vitest/globals", "node"]
 	},

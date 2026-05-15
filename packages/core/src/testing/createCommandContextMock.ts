@@ -2,6 +2,7 @@ import type { SinonSandbox, SinonStub } from 'sinon'
 import type { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import { createQueueEnqueueProxy } from '../core/helper/createQueueEnqueueProxy.impl.js'
 import { createQueueScheduleProxy } from '../core/helper/createQueueScheduleProxy.impl.js'
+import type { Service } from '../core/Service/Service.impl.js'
 import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js'
@@ -9,9 +10,17 @@ import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.
 import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
+import type { ServiceClass } from '../core/types/ServiceClass.js'
+import type { ServiceClassMetrics } from '../core/types/ServiceClassMetrics.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import type { Schema } from '../schema/index.js'
-import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResourceProxy } from './sharedContextMocks.js'
+import {
+	createBaseContextStubs,
+	createInvokeProxy,
+	createMetricContextMock,
+	createMockSpan,
+	createResourceProxy,
+} from './sharedContextMocks.js'
 
 /**
  * Infer the internal builder type configuration from a command builder.
@@ -19,6 +28,8 @@ import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResour
  * @group Unit test helper
  */
 export type CommandContextMockBuilderTypes<T> = T extends CommandDefinitionBuilder<any, infer C> ? C : never
+export type CommandContextMockServiceClass<T> =
+	T extends CommandDefinitionBuilder<infer S extends Service, any> ? S : ServiceClass
 
 export type CreateCommandContextMockInput<TBuilder extends CommandDefinitionBuilder<any, any>> = {
 	payload: GetMessagePayloadType<
@@ -57,7 +68,8 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
 		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
-		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<CommandContextMockServiceClass<TBuilder>>
 	>
 	mock: CommandFunctionContext<
 		GetMessagePayloadType<
@@ -72,7 +84,8 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
 		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
-		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<CommandContextMockServiceClass<TBuilder>>
 	>
 	stubs: {
 		logger: Record<string, SinonStub>
@@ -165,9 +178,11 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		CommandContextMockBuilderTypes<TBuilder>['Invokes'],
 		CommandContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		CommandContextMockBuilderTypes<TBuilder>['EmitList'],
-		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		CommandContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<CommandContextMockServiceClass<TBuilder>>
 	> = {
 		logger: base.logger.mock,
+		metrics: createMetricContextMock<ServiceClassMetrics<CommandContextMockServiceClass<TBuilder>>>(input.sandbox),
 		message,
 		emit: async (eventName, payload) => base.stubs.emit[eventName](eventName, payload),
 		wrapInSpan: base.stubs.wrapInSpan.callsFake((name, opts, fn) => {

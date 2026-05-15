@@ -16,7 +16,7 @@ Azure Key Vault store config
 
 ### allowInsecureConnection?
 
-> `optional` **allowInsecureConnection**: `boolean`
+> `optional` **allowInsecureConnection?**: `boolean`
 
 Defined in: [azure-secret-store/src/types.ts:16](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/types.ts#L16)
 
@@ -27,7 +27,7 @@ Never enable this in production.
 
 ### options?
 
-> `optional` **options**: `SecretClientOptions`
+> `optional` **options?**: `SecretClientOptions`
 
 Defined in: [azure-secret-store/src/types.ts:17](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/types.ts#L17)
 

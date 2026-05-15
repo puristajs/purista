@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamBeforeGuardHook
 
-# Type Alias: StreamBeforeGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: StreamBeforeGuardHook\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
 > **StreamBeforeGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`void`\>
 

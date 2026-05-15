@@ -16,6 +16,6 @@ PubSubPublishResponseType defines the response from a publish.
 
 ### error?
 
-> `optional` **error**: `Error`
+> `optional` **error?**: `Error`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts#L19)

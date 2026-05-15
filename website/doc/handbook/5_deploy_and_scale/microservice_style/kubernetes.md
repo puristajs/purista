@@ -390,9 +390,13 @@ But, here we only focus on the PURISTA related stuff, and not go into details of
 ## Add custom endpoints
 
 There might be the need, that you want to add some custom endpoints.
-As an example, in [2.1 Service - Advanced](../../2_building_business-logic/advanced/index.md) we add [Prometheus](https://prometheus.io) to our service.  To allow Prometheus to collect the data, we need an additional `/metrics` endpoint.
+Custom endpoints should stay application-owned and should not expose request payloads, headers, tokens, raw URLs, prompts, completions, or user identifiers as metric attributes.
 
-We can simply extend our file `/src/index.ts`, to provide the endpoint `/metrics`
+For metrics, PURISTA records through the OpenTelemetry Metrics API.
+Prometheus scraping is configured outside PURISTA core, either through an OpenTelemetry Collector that exports Prometheus metrics or through an application-owned OTel Prometheus exporter.
+PURISTA does not create a `/metrics` route automatically.
+
+You can still extend `/src/index.ts` for application-specific endpoints:
 
 ```typescript
 
@@ -407,12 +411,4 @@ const server = getHttpServer({
   // defaults to /api
   apiMountPath: '/api',
 })
-
-// add the metrics route
-server.router.add('GET', '/metrics', async (_request, response) => {
-  response.setHeader('content-type', register.contentType)
-  response.end(await register.metrics())
-})
 ```
-
-The new endpoint `/metrics` can now be added to the __deployment.yaml__ file for Kubernetes.

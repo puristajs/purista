@@ -89,7 +89,7 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(".addModel('primary', {")
 		writer.indent(() => {
 			writer.writeLine("model: 'gpt-4.1-mini',")
-			writer.writeLine("capabilities: ['object', 'text_stream', 'tool_use'],")
+			writer.writeLine("capabilities: ['object'],")
 			writer.writeLine('defaults: { temperature: 0.2 },')
 		})
 		writer.writeLine('})')

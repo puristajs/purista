@@ -11,10 +11,8 @@ PURISTA is a TypeScript framework for message-driven backend systems.
 
 ## Extended context
 - Deep context: `/llms/llms-full.txt`
-- Sandbox context: `/llms/sandbox.txt`
-- Sandbox deep context: `/llms/sandbox-full.txt`
 
 ## Canonical markdown sources
 - https://github.com/puristajs/purista/blob/master/website/doc/handbook/index.md
-- https://github.com/puristajs/purista/blob/master/website/doc/handbook/2_building_business-logic/agent/index.md
 - https://github.com/puristajs/purista/blob/master/website/doc/handbook/3_eco_system/index.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/SKILL.md

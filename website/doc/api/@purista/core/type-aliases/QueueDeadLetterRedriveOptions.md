@@ -14,7 +14,7 @@ Defined in: [core/QueueBridge/types/QueueDeadLetterRedriveOptions.ts:1](https://
 
 ### delayMs?
 
-> `optional` **delayMs**: `number`
+> `optional` **delayMs?**: `number`
 
 Defined in: [core/QueueBridge/types/QueueDeadLetterRedriveOptions.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueDeadLetterRedriveOptions.ts#L3)
 
@@ -22,6 +22,6 @@ Defined in: [core/QueueBridge/types/QueueDeadLetterRedriveOptions.ts:3](https://
 
 ### limit?
 
-> `optional` **limit**: `number`
+> `optional` **limit?**: `number`
 
 Defined in: [core/QueueBridge/types/QueueDeadLetterRedriveOptions.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueDeadLetterRedriveOptions.ts#L2)

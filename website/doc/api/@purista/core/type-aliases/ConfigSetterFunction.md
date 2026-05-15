@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / ConfigSetterFunction
 
-# Type Alias: ConfigSetterFunction()
+# Type Alias: ConfigSetterFunction
 
 > **ConfigSetterFunction** = (`configName`, `configValue`) => `Promise`\<`void`\>
 

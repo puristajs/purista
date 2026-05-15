@@ -4,15 +4,24 @@ import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
 import { getNewEBMessageId } from '../core/helper/getNewEBMessageId.impl.js'
 import { getNewInstanceId } from '../core/helper/getNewInstanceId.impl.js'
 import { getNewTraceId } from '../core/helper/getNewTraceId.impl.js'
+import type { Service } from '../core/Service/Service.impl.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
+import type { ServiceClass } from '../core/types/ServiceClass.js'
+import type { ServiceClassMetrics } from '../core/types/ServiceClassMetrics.js'
 import type { StreamFunctionContext } from '../core/types/stream/StreamFunctionContext.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import type { StreamWriter } from '../core/types/stream/StreamWriter.js'
 import type { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/StreamDefinitionBuilder.impl.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
-import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResourceProxy } from './sharedContextMocks.js'
+import {
+	createBaseContextStubs,
+	createInvokeProxy,
+	createMetricContextMock,
+	createMockSpan,
+	createResourceProxy,
+} from './sharedContextMocks.js'
 
 /**
  * Infer the internal builder type configuration from a stream builder.
@@ -20,6 +29,8 @@ import { createBaseContextStubs, createInvokeProxy, createMockSpan, createResour
  * @group Unit test helper
  */
 export type StreamContextMockBuilderTypes<T> = T extends StreamDefinitionBuilder<any, infer C> ? C : never
+export type StreamContextMockServiceClass<T> =
+	T extends StreamDefinitionBuilder<infer S extends Service, any> ? S : ServiceClass
 
 export type CreateStreamContextMockInput<TBuilder extends StreamDefinitionBuilder<any, any>> = {
 	payload: InferIn<StreamContextMockBuilderTypes<TBuilder>['PayloadSchema']>
@@ -42,7 +53,8 @@ export type StreamContextMockResult<TBuilder extends StreamDefinitionBuilder<any
 		StreamContextMockBuilderTypes<TBuilder>['Invokes'],
 		StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		StreamContextMockBuilderTypes<TBuilder>['EmitList'],
-		StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		StreamContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<StreamContextMockServiceClass<TBuilder>>
 	>
 	writer: StreamWriter<
 		InferIn<StreamContextMockBuilderTypes<TBuilder>['ChunkSchema']>,
@@ -71,7 +83,8 @@ export type StreamContextMockResult<TBuilder extends StreamDefinitionBuilder<any
 			StreamContextMockBuilderTypes<TBuilder>['Invokes'],
 			StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 			StreamContextMockBuilderTypes<TBuilder>['EmitList'],
-			StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
+			StreamContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+			ServiceClassMetrics<StreamContextMockServiceClass<TBuilder>>
 		>['service']
 		resources: Partial<StreamContextMockBuilderTypes<TBuilder>['Resources']>
 		writer: {
@@ -191,9 +204,11 @@ export const createStreamContextMock = <TBuilder extends StreamDefinitionBuilder
 		StreamContextMockBuilderTypes<TBuilder>['Invokes'],
 		StreamContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		StreamContextMockBuilderTypes<TBuilder>['EmitList'],
-		StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
+		StreamContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		ServiceClassMetrics<StreamContextMockServiceClass<TBuilder>>
 	> = {
 		logger: base.logger.mock,
+		metrics: createMetricContextMock<ServiceClassMetrics<StreamContextMockServiceClass<TBuilder>>>(input.sandbox),
 		message: createStreamOpenRequestMock(
 			{
 				serviceName: 'mocked_receiver',

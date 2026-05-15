@@ -14,6 +14,7 @@ In the following section, we'll illustrate how you can seamlessly integrate PURI
 ## Available integrations
 
 - [Temporal and PURISTA](./temporal_and_purista/index.md)
+- [Enterprise interoperability](./enterprise_interoperability/index.md)
 
 ## Integration pattern
 

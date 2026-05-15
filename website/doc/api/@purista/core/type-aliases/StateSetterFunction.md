@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StateSetterFunction
 
-# Type Alias: StateSetterFunction()
+# Type Alias: StateSetterFunction
 
 > **StateSetterFunction** = (`stateName`, `stateValue`) => `Promise`\<`void`\>
 

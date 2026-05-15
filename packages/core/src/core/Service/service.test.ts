@@ -6,6 +6,8 @@ import { QueueDefinitionBuilder } from '../../QueueDefinitionBuilder/QueueDefini
 import { QueueWorkerBuilder } from '../../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { SubscriptionDefinitionBuilder } from '../../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
+import { createMemoryMetricsRecorder } from '../metrics/index.js'
+import type { CommandDefinition } from '../types/commandType/CommandDefinition.js'
 import type { ServiceInfoType } from '../types/index.js'
 import { Service } from './Service.impl.js'
 
@@ -32,6 +34,72 @@ describe('Service', () => {
 		await expect(service.start()).resolves.toBeUndefined()
 
 		await expect(service.destroy()).resolves.toBeUndefined()
+	})
+
+	it('records command execution metrics with safe framework attributes', async () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock().mock
+		const metricsRecorder = createMemoryMetricsRecorder()
+		const commandDefinition = {
+			commandName: 'ping',
+			commandDescription: 'ping',
+			metadata: { expose: {} },
+			eventBridgeConfig: { autoacknowledge: true },
+			hooks: {},
+			invokes: {},
+			streamInvokes: {},
+			emitList: {},
+			queueInvokes: {},
+			call: async () => ({ ok: true }),
+		} as unknown as CommandDefinition<any, any, any, any, any, any, any, any, any, any, any, any, any, any>
+
+		const service = new Service({
+			logger,
+			eventBridge,
+			info: serviceInfo,
+			commandDefinitionList: [commandDefinition],
+			subscriptionDefinitionList: [],
+			config: {},
+			metricsRecorder,
+		})
+		await service.registerCommand(commandDefinition)
+
+		await service.executeCommand({
+			id: 'message-1',
+			timestamp: Date.now(),
+			messageType: 'command',
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			correlationId: 'correlation-1',
+			traceId: 'trace-1',
+			sender: { serviceName: 'Caller', serviceVersion: '1', serviceTarget: 'test', instanceId: 'caller-1' },
+			receiver: { serviceName: 'TestService', serviceVersion: '1', serviceTarget: 'ping' },
+			payload: {},
+			parameter: {},
+		} as any)
+
+		expect(metricsRecorder.records).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: 'purista.command.executions',
+					value: 1,
+					attributes: expect.objectContaining({
+						'purista.command.name': 'ping',
+						'purista.outcome': 'success',
+						'purista.service.name': 'TestService',
+						'purista.service.version': '1',
+					}),
+				}),
+				expect.objectContaining({
+					name: 'purista.command.duration',
+					attributes: expect.objectContaining({
+						'purista.command.name': 'ping',
+						'purista.outcome': 'success',
+					}),
+				}),
+			]),
+		)
+		expect(metricsRecorder.records.flatMap(record => Object.keys(record.attributes))).not.toContain('trace_id')
 	})
 
 	it('does not expose event-emitter methods on service instances', () => {
@@ -671,6 +739,64 @@ describe('Service', () => {
 		expect(queueBridge.stubs.metrics.callCount).toBe(2)
 		expect(queueBridge.stubs.metrics.getCall(0)?.args[0]).toBe('orders')
 		expect(queueBridge.stubs.metrics.getCall(1)?.args[0]).toBe('orders.dead-letter')
+	})
+
+	it('records health and queue snapshot metrics during service health checks', async () => {
+		const logger = getLoggerMock().mock
+		const eventBridge = getEventBridgeMock().mock
+		const queueBridge = getQueueBridgeMock()
+		const metricsRecorder = createMemoryMetricsRecorder()
+
+		const queueDefinition = await new QueueDefinitionBuilder('orders', 'orders queue').getDefinition()
+		queueBridge.stubs.metrics.callsFake(async (queueName: string) => ({
+			pending: queueName === 'orders' ? 3 : 0,
+			inflight: 1,
+			deadLetter: queueName === 'orders.dead-letter' ? 2 : 0,
+			retries: 1,
+			oldestAgeMs: 42,
+		}))
+
+		const service = new Service({
+			logger,
+			eventBridge,
+			queueBridge: queueBridge.mock,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			streamDefinitionList: [],
+			queueDefinitionList: [queueDefinition],
+			queueWorkerDefinitionList: [],
+			config: {},
+			metricsRecorder,
+		})
+
+		await service.getServiceHealth()
+
+		expect(metricsRecorder.records).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: 'purista.health.check.duration',
+					attributes: expect.objectContaining({ 'purista.outcome': 'success' }),
+				}),
+				expect.objectContaining({
+					name: 'purista.health.status',
+					attributes: expect.objectContaining({
+						'purista.health.component': 'service',
+						'purista.health.state': 'warn',
+					}),
+				}),
+				expect.objectContaining({
+					name: 'purista.queue.jobs',
+					value: 3,
+					attributes: expect.objectContaining({ 'purista.queue.name': 'orders', 'purista.queue.state': 'pending' }),
+				}),
+				expect.objectContaining({
+					name: 'purista.queue.oldest_job_age',
+					value: 42,
+					attributes: expect.objectContaining({ 'purista.queue.name': 'orders' }),
+				}),
+			]),
+		)
 	})
 
 	it('exposes in-flight diagnostics grouped by execution kind', () => {

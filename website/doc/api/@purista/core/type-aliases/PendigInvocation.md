@@ -22,7 +22,7 @@ Defined in: [DefaultEventBridge/types/PendingInvocations.ts:6](https://github.co
 
 ##### error
 
-[`HandledError`](../classes/HandledError.md) | [`UnhandledError`](../classes/UnhandledError.md)
+[`HandledError`](../classes/HandledError.md) \| [`UnhandledError`](../classes/UnhandledError.md)
 
 #### Returns
 

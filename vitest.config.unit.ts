@@ -29,7 +29,6 @@ export default defineConfig({
 			'**/test/**',
 			'**/node_modules/**',
 			'**/dist/**',
-			'**/.tshy-build/**',
 			'examples/ai-basic/src/frontend/**',
 			'website/**',
 		],

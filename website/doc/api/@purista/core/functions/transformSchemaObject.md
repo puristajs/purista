@@ -14,7 +14,7 @@ Defined in: [helper/schemaObjectToTsType/transform.ts:55](https://github.com/pur
 
 ### schemaObject
 
-`SchemaObject` | `ReferenceObject`
+`SchemaObject` \| `ReferenceObject`
 
 ### ctx
 

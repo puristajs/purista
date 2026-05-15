@@ -14,7 +14,7 @@ Defined in: [hono-http-server/src/helper/getQueryDefinition.ts:5](https://github
 
 ### queryDefinition
 
-[`QueryParameter`](../../core/type-aliases/QueryParameter.md)\<`Record`\<`string`, `unknown`\>\>[] | `undefined`
+[`QueryParameter`](../../core/type-aliases/QueryParameter.md)\<`Record`\<`string`, `unknown`\>\>[] \| `undefined`
 
 ### parameterschema?
 

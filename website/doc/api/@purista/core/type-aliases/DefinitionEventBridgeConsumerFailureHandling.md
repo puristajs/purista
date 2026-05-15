@@ -21,7 +21,7 @@ the degradation explicitly.
 
 ### deadLetterTarget?
 
-> `optional` **deadLetterTarget**: `string`
+> `optional` **deadLetterTarget?**: `string`
 
 Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L38)
 
@@ -36,7 +36,7 @@ The meaning depends on the adapter:
 
 ### maxAttempts?
 
-> `optional` **maxAttempts**: `number`
+> `optional` **maxAttempts?**: `number`
 
 Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L23)
 
@@ -48,7 +48,7 @@ If omitted, the adapter default applies.
 
 ### mode?
 
-> `optional` **mode**: [`DefinitionEventBridgeConsumerFailureMode`](DefinitionEventBridgeConsumerFailureMode.md)
+> `optional` **mode?**: [`DefinitionEventBridgeConsumerFailureMode`](DefinitionEventBridgeConsumerFailureMode.md)
 
 Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L17)
 
@@ -64,7 +64,7 @@ strict
 
 ### retryDelayMs?
 
-> `optional` **retryDelayMs**: `number`
+> `optional` **retryDelayMs?**: `number`
 
 Defined in: [core/types/DefinitionEventBridgeConsumerFailureHandling.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConsumerFailureHandling.ts#L29)
 

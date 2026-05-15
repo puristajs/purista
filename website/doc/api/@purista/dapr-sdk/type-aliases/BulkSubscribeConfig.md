@@ -24,7 +24,7 @@ Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts:21](https://g
 
 ### maxAwaitDurationMs?
 
-> `optional` **maxAwaitDurationMs**: `number`
+> `optional` **maxAwaitDurationMs?**: `number`
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts:27](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts#L27)
 
@@ -32,6 +32,6 @@ Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts:27](https://g
 
 ### maxMessagesCount?
 
-> `optional` **maxMessagesCount**: `number`
+> `optional` **maxMessagesCount?**: `number`
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts:24](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts#L24)

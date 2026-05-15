@@ -30,7 +30,7 @@ Defined in: [core/types/ServiceHealthState.ts:7](https://github.com/puristajs/pu
 
 ### reason?
 
-> `optional` **reason**: `string`
+> `optional` **reason?**: `string`
 
 Defined in: [core/types/ServiceHealthState.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceHealthState.ts#L9)
 

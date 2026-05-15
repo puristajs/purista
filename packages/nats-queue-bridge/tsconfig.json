@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": {
-			"@purista/core": ["../core/dist/esm/index.d.ts"]
+			"@purista/core": ["../core/dist/index.d.ts"]
 		}
 	},
 	"include": ["./src/**/*"]

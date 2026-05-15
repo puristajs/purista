@@ -16,7 +16,7 @@ A function that returns a mocked command error response message
 
 ### error?
 
-[`HandledError`](../classes/HandledError.md) | [`UnhandledError`](../classes/UnhandledError.md)
+[`HandledError`](../classes/HandledError.md) \| [`UnhandledError`](../classes/UnhandledError.md)
 
 ### input?
 

@@ -122,7 +122,7 @@ delete a secret from the secret store
 
 set a secret in the secret store
 
-#### mock.startActiveSpan()
+#### mock.startActiveSpan
 
 > **startActiveSpan**: \<`F`\>(`name`, `opts`, `context`, `fn`) => `Promise`\<`F`\>
 
@@ -146,7 +146,7 @@ wrap given function in an opentelemetry active span
 
 ###### context
 
-`Context` | `undefined`
+`Context` \| `undefined`
 
 ###### fn
 
@@ -180,7 +180,7 @@ delete a state value from the state store
 
 set a state value in the state store
 
-#### mock.wrapInSpan()
+#### mock.wrapInSpan
 
 > **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 

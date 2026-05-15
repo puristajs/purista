@@ -20,7 +20,7 @@ Reconstructs OpenTelemetry context from AMQP headers or message payload.
 
 ### message
 
-`ConsumeMessage` | `null`
+`ConsumeMessage` \| `null`
 
 ### encrypter
 

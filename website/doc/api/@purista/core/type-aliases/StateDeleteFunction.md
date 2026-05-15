@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StateDeleteFunction
 
-# Type Alias: StateDeleteFunction()
+# Type Alias: StateDeleteFunction
 
 > **StateDeleteFunction** = (`stateName`) => `Promise`\<`void`\>
 

@@ -6,7 +6,7 @@
 
 # Type Alias: StreamDefinitionList\<S\>
 
-> **StreamDefinitionList**\<`S`\> = `Promise`\<[`StreamDefinition`](StreamDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`StreamDefinitionMetadataBase`](StreamDefinitionMetadataBase.md)\>\>[]
+> **StreamDefinitionList**\<`S`\> = `Promise`\<[`StreamDefinition`](StreamDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`StreamDefinitionMetadataBase`](StreamDefinitionMetadataBase.md), `any`\>\>[]
 
 Defined in: [core/types/stream/StreamDefinitionList.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamDefinitionList.ts#L5)
 

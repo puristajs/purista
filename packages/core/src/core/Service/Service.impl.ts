@@ -22,6 +22,8 @@ import { createQueueScheduleProxy } from '../helper/createQueueScheduleProxy.imp
 import { createSuccessResponse } from '../helper/createSuccessResponse.impl.js'
 import { getCleanedMessage } from '../helper/getCleanedMessage.impl.js'
 import { deserializeOtp, serializeOtp } from '../helper/serializeOtp.impl.js'
+import type { PuristaFrameworkMetricName } from '../metrics/frameworkMetrics.js'
+import type { PuristaMetricAttributes } from '../metrics/types.js'
 import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
 import type { QueueEnqueueResult } from '../QueueBridge/types/QueueEnqueueResult.js'
 import type { QueueRetryRequest } from '../QueueBridge/types/QueueRetryRequest.js'
@@ -119,6 +121,8 @@ type ResolvedSubscriptionFailureHandling = {
 	deadLetterTarget?: string
 }
 
+type PuristaMetricOutcome = 'success' | 'handled_error' | 'unhandled_error' | 'timeout' | 'cancelled'
+
 /**
  * Base class for all services.
  * This class provides base functions to work with the event bridge, logging and so on
@@ -142,10 +146,12 @@ type ResolvedSubscriptionFailureHandling = {
  *
  * @group Service
  */
-export class Service<S extends ServiceClassTypes = ServiceClassTypes>
+export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTypes<any, any, any>>
 	extends ServiceBaseClass
 	implements ServiceClass<S>
 {
+	declare readonly __serviceClassTypes?: S
+
 	protected subscriptions = new Map<
 		string,
 		SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
@@ -198,6 +204,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			configStore: config.configStore ?? new DefaultConfigStore(),
 			stateStore: config.stateStore ?? new DefaultStateStore(),
 			configSchema: config.configSchema,
+			metrics: config.metrics,
+			metricsRecorder: config.metricsRecorder,
+			metricDefinitionList: config.metricDefinitionList,
 		})
 
 		this.config = config.config
@@ -221,6 +230,40 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 	get name() {
 		return `${this.info.serviceName}V${this.info.serviceVersion}`
+	}
+
+	private getServiceMetricAttributes(serviceTarget?: string): PuristaMetricAttributes {
+		return {
+			'purista.service.name': this.info.serviceName,
+			'purista.service.version': this.info.serviceVersion,
+			...(serviceTarget ? { 'purista.service.target': serviceTarget } : {}),
+		}
+	}
+
+	private getErrorType(error: unknown): string {
+		if (error instanceof HandledError || error instanceof UnhandledError) {
+			return StatusCode[error.errorCode] ?? error.name
+		}
+		if (error instanceof SubscriptionConsumerControlError) {
+			return 'SubscriptionConsumerControlError'
+		}
+		return error instanceof Error && error.name ? error.name : 'unknown'
+	}
+
+	private recordFrameworkMetric(name: PuristaFrameworkMetricName, value: number, attributes?: PuristaMetricAttributes) {
+		try {
+			this.metricsRecorder.recordFrameworkMetric(name, value, attributes)
+		} catch {
+			return
+		}
+	}
+
+	private recordDurationMetric(
+		name: PuristaFrameworkMetricName,
+		startedAt: number,
+		attributes: PuristaMetricAttributes,
+	) {
+		this.recordFrameworkMetric(name, Math.max(0, Date.now() - startedAt), attributes)
 	}
 
 	/**
@@ -1206,6 +1249,19 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		attributes: Record<string, string | number | boolean | undefined> | undefined,
 		fn: () => Promise<T>,
 	) {
+		const operation =
+			name === PuristaSpanName.QueueEnqueue
+				? 'enqueue'
+				: name === PuristaSpanName.QueueAck
+					? 'ack'
+					: name === PuristaSpanName.QueueNack
+						? 'nack'
+						: name === PuristaSpanName.QueueDeadLetter
+							? 'dead_letter'
+							: name === PuristaSpanName.QueueLease
+								? 'poll'
+								: undefined
+		const startedAt = Date.now()
 		return this.wrapInSpan(name, {}, async span => {
 			this.annotateQueueSpan(span, queueName, jobId)
 			if (attributes) {
@@ -1215,14 +1271,42 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					}
 				}
 			}
-			return fn()
+			try {
+				const result = await fn()
+				if (operation) {
+					this.recordDurationMetric('purista.queue.operation.duration', startedAt, {
+						...this.getServiceMetricAttributes(),
+						'purista.queue.name': queueName,
+						'purista.queue.operation': operation,
+						'purista.outcome': 'success',
+					})
+				}
+				return result
+			} catch (error) {
+				if (operation) {
+					this.recordDurationMetric('purista.queue.operation.duration', startedAt, {
+						...this.getServiceMetricAttributes(),
+						'purista.queue.name': queueName,
+						'purista.queue.operation': operation,
+						'purista.outcome': error instanceof HandledError ? 'handled_error' : 'unhandled_error',
+						'error.type': this.getErrorType(error),
+					})
+				}
+				throw error
+			}
 		})
 	}
 
 	private ackQueueJob(queueName: string, leaseId: string, jobId?: string) {
-		return this.queueSpan(PuristaSpanName.QueueAck, queueName, jobId, undefined, () =>
-			this.queueBridge.ack(queueName, leaseId),
-		)
+		return this.queueSpan(PuristaSpanName.QueueAck, queueName, jobId, undefined, async () => {
+			const result = await this.queueBridge.ack(queueName, leaseId)
+			this.recordFrameworkMetric('purista.queue.jobs', -1, {
+				...this.getServiceMetricAttributes(),
+				'purista.queue.name': queueName,
+				'purista.queue.state': 'inflight',
+			})
+			return result
+		})
 	}
 
 	private nackQueueJob(queueName: string, leaseId: string, jobId: string | undefined, request: QueueRetryRequest = {}) {
@@ -1230,18 +1314,35 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			[PuristaSpanTag.QueueReason]: request.reason,
 			[PuristaSpanTag.QueueDelay]: request.delayMs,
 		}
-		return this.queueSpan(PuristaSpanName.QueueNack, queueName, jobId, attrs, () =>
-			this.queueBridge.nack(queueName, leaseId, request),
-		)
+		return this.queueSpan(PuristaSpanName.QueueNack, queueName, jobId, attrs, async () => {
+			const result = await this.queueBridge.nack(queueName, leaseId, request)
+			this.recordFrameworkMetric('purista.queue.jobs', -1, {
+				...this.getServiceMetricAttributes(),
+				'purista.queue.name': queueName,
+				'purista.queue.state': 'inflight',
+			})
+			this.recordFrameworkMetric('purista.queue.jobs', 1, {
+				...this.getServiceMetricAttributes(),
+				'purista.queue.name': queueName,
+				'purista.queue.state': 'retry',
+			})
+			return result
+		})
 	}
 
 	private moveMessageToDeadLetter(targetQueue: string, message: QueueMessage, reason?: string) {
 		const attrs = {
 			[PuristaSpanTag.QueueReason]: reason,
 		}
-		return this.queueSpan(PuristaSpanName.QueueDeadLetter, targetQueue, message.id, attrs, () =>
-			this.queueBridge.moveToDeadLetter(targetQueue, message, reason),
-		)
+		return this.queueSpan(PuristaSpanName.QueueDeadLetter, targetQueue, message.id, attrs, async () => {
+			const result = await this.queueBridge.moveToDeadLetter(targetQueue, message, reason)
+			this.recordFrameworkMetric('purista.queue.jobs', 1, {
+				...this.getServiceMetricAttributes(),
+				'purista.queue.name': targetQueue,
+				'purista.queue.state': 'dead_letter',
+			})
+			return result
+		})
 	}
 
 	private getQueueWorkerParallelism(queueName: string) {
@@ -1348,6 +1449,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				leaseTtlMs: options?.leaseTtlMs ?? lifecycle.visibilityTimeoutMs,
 			})
 			span.setAttribute(PuristaSpanTag.QueueJobId, result.jobId)
+			this.recordFrameworkMetric('purista.queue.jobs', 1, {
+				...this.getServiceMetricAttributes(),
+				'purista.queue.name': queueName,
+				'purista.queue.state': 'pending',
+			})
 			return result
 		})
 	}
@@ -1542,6 +1648,37 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return emitCustomEvent.bind(this)
 	}
 
+	private async recordStoreOperation<T>(
+		storeKind: 'state' | 'config' | 'secret',
+		storeName: string,
+		operation: string,
+		fn: () => Promise<T>,
+	): Promise<T> {
+		const startedAt = Date.now()
+		const baseAttributes = {
+			...this.getServiceMetricAttributes(),
+			'purista.store.kind': storeKind,
+			'purista.store.name': storeName,
+			'purista.store.operation': operation,
+		}
+		try {
+			const result = await fn()
+			const attributes = { ...baseAttributes, 'purista.outcome': 'success' }
+			this.recordFrameworkMetric('purista.store.operations', 1, attributes)
+			this.recordDurationMetric('purista.store.operation.duration', startedAt, attributes)
+			return result
+		} catch (error) {
+			const attributes = {
+				...baseAttributes,
+				'purista.outcome': error instanceof HandledError ? 'handled_error' : 'unhandled_error',
+				'error.type': this.getErrorType(error),
+			}
+			this.recordFrameworkMetric('purista.store.operations', 1, attributes)
+			this.recordDurationMetric('purista.store.operation.duration', startedAt, attributes)
+			throw error
+		}
+	}
+
 	public getContextFunctions(logger: Logger, queueNamespace?: QueueContext): ContextBase {
 		const getSecretFunction = async function (this: Service<S>, ...secretNames: string[]) {
 			return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async span => {
@@ -1550,7 +1687,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.secretStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.SecretStore,
 					})
-					return this.secretStore.getSecret(...secretNames)
+					return this.recordStoreOperation('secret', this.secretStore.name, 'get', () =>
+						this.secretStore.getSecret(...secretNames),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1566,7 +1705,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.secretStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.SecretStore,
 					})
-					return this.secretStore.setSecret(secretName, value)
+					return this.recordStoreOperation('secret', this.secretStore.name, 'set', () =>
+						this.secretStore.setSecret(secretName, value),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1582,7 +1723,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.secretStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.SecretStore,
 					})
-					return this.secretStore.removeSecret(secretName)
+					return this.recordStoreOperation('secret', this.secretStore.name, 'remove', () =>
+						this.secretStore.removeSecret(secretName),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1598,7 +1741,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.configStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.ConfigStore,
 					})
-					return this.configStore.getConfig(...configNames)
+					return this.recordStoreOperation('config', this.configStore.name, 'get', () =>
+						this.configStore.getConfig(...configNames),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1614,7 +1759,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.configStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.ConfigStore,
 					})
-					return this.configStore.setConfig(configName, value)
+					return this.recordStoreOperation('config', this.configStore.name, 'set', () =>
+						this.configStore.setConfig(configName, value),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1630,7 +1777,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.configStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.ConfigStore,
 					})
-					return this.configStore.removeConfig(configName)
+					return this.recordStoreOperation('config', this.configStore.name, 'remove', () =>
+						this.configStore.removeConfig(configName),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1646,7 +1795,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.stateStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.StateStore,
 					})
-					return this.stateStore.getState(...stateNames)
+					return this.recordStoreOperation('state', this.stateStore.name, 'get', () =>
+						this.stateStore.getState(...stateNames),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1662,7 +1813,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.stateStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.StateStore,
 					})
-					return this.stateStore.setState(stateName, value)
+					return this.recordStoreOperation('state', this.stateStore.name, 'set', () =>
+						this.stateStore.setState(stateName, value),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1678,7 +1831,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.StoreName]: this.stateStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.StateStore,
 					})
-					return this.stateStore.removeState(stateName)
+					return this.recordStoreOperation('state', this.stateStore.name, 'remove', () =>
+						this.stateStore.removeState(stateName),
+					)
 				} catch (err) {
 					span.recordException(err as Error)
 					throw err
@@ -1691,6 +1846,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 		return {
 			logger,
+			metrics: this.metricContext,
 			wrapInSpan: this.wrapInSpan.bind(this),
 			startActiveSpan: this.startActiveSpan.bind(this),
 			secrets: {
@@ -1723,6 +1879,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		const context = deserializeOtp(this.logger, message.otp)
 
 		return this.startActiveSpan(command?.commandName ?? 'purista.executeCommand', {}, context, async span => {
+			const startedAt = Date.now()
+			const baseMetricAttributes = {
+				...this.getServiceMetricAttributes(command?.commandName ?? message.receiver.serviceTarget),
+				'purista.command.name': command?.commandName ?? message.receiver.serviceTarget,
+			}
 			const traceId = message.traceId
 
 			const logger = this.logger.getChildLogger({
@@ -1748,6 +1909,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					code: SpanStatusCode.ERROR,
 					message: 'received invalid command',
 				})
+				const metricAttributes = {
+					...baseMetricAttributes,
+					'purista.outcome': 'unhandled_error',
+					'error.type': 'NotImplemented',
+				}
+				this.recordFrameworkMetric('purista.command.executions', 1, metricAttributes)
+				this.recordDurationMetric('purista.command.duration', startedAt, metricAttributes)
 				return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
 					createErrorResponse(this.eventBridge.instanceId, message, StatusCode.NotImplemented),
 				)
@@ -1890,6 +2058,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					if (command.eventName) {
 						subSpan.addEvent(command.eventName)
 					}
+					const metricAttributes = { ...baseMetricAttributes, 'purista.outcome': 'success' }
+					this.recordFrameworkMetric('purista.command.executions', 1, metricAttributes)
+					this.recordDurationMetric('purista.command.duration', startedAt, metricAttributes)
 					return {
 						...createSuccessResponse(this.eventBridge.instanceId, message, result, command.eventName),
 						otp: serializeOtp(),
@@ -1904,6 +2075,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						message: error.message,
 					})
 
+					const metricAttributes = {
+						...baseMetricAttributes,
+						'purista.outcome': 'handled_error',
+						'error.type': this.getErrorType(error),
+					}
+					this.recordFrameworkMetric('purista.command.executions', 1, metricAttributes)
+					this.recordDurationMetric('purista.command.duration', startedAt, metricAttributes)
 					return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
 						createErrorResponse(this.eventBridge.instanceId, message, error.errorCode, error),
 					)
@@ -1919,6 +2097,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					message: 'executeCommand unhandled error',
 				})
 
+				const metricAttributes = {
+					...baseMetricAttributes,
+					'purista.outcome': 'unhandled_error',
+					'error.type': this.getErrorType(error),
+				}
+				this.recordFrameworkMetric('purista.command.executions', 1, metricAttributes)
+				this.recordDurationMetric('purista.command.duration', startedAt, metricAttributes)
 				return await this.startActiveSpan(`${command.commandName}.error`, {}, undefined, async () =>
 					createErrorResponse(this.eventBridge.instanceId, message, StatusCode.InternalServerError, error),
 				)
@@ -2018,7 +2203,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			let heartbeat: LeaseHeartbeatController | undefined
 			let cancellation: QueueRuntimeCancellation | undefined
 			let queueDefinition: QueueDefinition<any, any, any, any, any> | undefined
+			let workerStartedAt: number | undefined
+			let workerOutcome: PuristaMetricOutcome | undefined
+			let workerError: unknown
 			try {
+				const pollStartedAt = Date.now()
 				lease = await this.wrapInSpan(PuristaSpanName.QueueLease, {}, async span => {
 					span.setAttribute(PuristaSpanTag.QueueName, worker.queueName)
 					span.setAttribute(PuristaSpanTag.QueueBridge, this.queueBridge.name)
@@ -2028,10 +2217,27 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					}
 					return result
 				})
+				this.recordDurationMetric('purista.queue.operation.duration', pollStartedAt, {
+					...this.getServiceMetricAttributes(worker.name),
+					'purista.queue.name': worker.queueName,
+					'purista.queue.operation': 'poll',
+					'purista.outcome': 'success',
+				})
 				if (!lease) {
 					await this.waitForNextPoll(worker)
 					continue
 				}
+				this.recordFrameworkMetric('purista.queue.jobs', -1, {
+					...this.getServiceMetricAttributes(worker.name),
+					'purista.queue.name': worker.queueName,
+					'purista.queue.state': 'pending',
+				})
+				this.recordFrameworkMetric('purista.queue.jobs', 1, {
+					...this.getServiceMetricAttributes(worker.name),
+					'purista.queue.name': worker.queueName,
+					'purista.queue.state': 'inflight',
+				})
+				workerStartedAt = Date.now()
 
 				const activeLease = lease
 				queueDefinition = this.getQueueDefinition(worker.queueName)
@@ -2062,11 +2268,14 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					return worker.handler.call(this, context, activeLease.message)
 				})
 				await this.runQueueWorkerAfterGuards(worker, context, activeLease.message, result)
+				workerOutcome = !result || result.status === 'success' ? 'success' : 'handled_error'
 
 				if (!jobState.handled) {
 					await this.handleQueueResult(worker, queueDefinition, activeLease, result, jobState, stopHeartbeat)
 				}
 			} catch (err) {
+				workerError = err
+				workerOutcome = err instanceof HandledError ? 'handled_error' : 'unhandled_error'
 				heartbeat?.stop()
 				cancellation?.stop()
 				workerLogger.error({ err }, 'queue worker execution failed')
@@ -2083,6 +2292,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			} finally {
 				heartbeat?.stop()
 				cancellation?.stop()
+				if (workerStartedAt !== undefined && workerOutcome) {
+					const attributes = {
+						...this.getServiceMetricAttributes(worker.name),
+						'purista.queue.name': worker.queueName,
+						'purista.queue.worker.name': worker.name,
+						'purista.outcome': workerOutcome,
+						...(workerError ? { 'error.type': this.getErrorType(workerError) } : {}),
+					}
+					this.recordFrameworkMetric('purista.queue.worker.executions', 1, attributes)
+					this.recordDurationMetric('purista.queue.worker.duration', workerStartedAt, attributes)
+				}
 				if (worker.mode === 'interval') {
 					await this.waitForNextPoll(worker)
 				}
@@ -2371,6 +2591,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	public async getServiceHealth(): Promise<ServiceHealthState> {
+		const startedAt = Date.now()
+		let healthOutcome: PuristaMetricOutcome = 'success'
 		const eventBridgeHealthy = await this.eventBridge.isHealthy()
 		const hasQueues = this.hasQueueFeatures()
 		const pausedQueueWorkers = Object.entries(this.getQueueWorkerPauseState()).map(([queueName, state]) => ({
@@ -2394,6 +2616,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					try {
 						const metrics = await this.getQueueMetricsWithResolvedDeadLetter(queue)
 						this.queueMetricsCache.set(queue.queueName, metrics)
+						this.recordQueueSnapshotMetrics(queue.queueName, metrics)
 						const health = this.evaluateQueueHealth(queue.queueName, metrics)
 						return {
 							queueName: queue.queueName,
@@ -2402,6 +2625,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							metrics,
 						} as QueueHealthState
 					} catch (error) {
+						healthOutcome = 'unhandled_error'
 						const fallback: QueueMetrics = { pending: 0, inflight: 0, deadLetter: 0, retries: 0 }
 						const reason = error instanceof Error ? error.message : 'queue metrics unavailable'
 						return {
@@ -2426,6 +2650,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			status = 'warn'
 		}
 
+		this.recordFrameworkMetric('purista.health.status', status === 'ok' ? 1 : 0, {
+			...this.getServiceMetricAttributes(),
+			'purista.health.component': 'service',
+			'purista.health.state': status,
+		})
+		this.recordDurationMetric('purista.health.check.duration', startedAt, {
+			...this.getServiceMetricAttributes(),
+			'purista.outcome': healthOutcome,
+			...(healthOutcome === 'success' ? {} : { 'error.type': 'unknown' }),
+		})
+
 		return {
 			status,
 			eventBridgeHealthy,
@@ -2433,6 +2668,32 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			queues,
 			pausedQueueWorkers,
 			pausedSubscriptionConsumers,
+		}
+	}
+
+	private recordQueueSnapshotMetrics(queueName: string, metrics: QueueMetrics) {
+		const baseAttributes = {
+			...this.getServiceMetricAttributes(),
+			'purista.queue.name': queueName,
+		}
+		this.recordFrameworkMetric('purista.queue.jobs', metrics.pending, {
+			...baseAttributes,
+			'purista.queue.state': 'pending',
+		})
+		this.recordFrameworkMetric('purista.queue.jobs', metrics.inflight, {
+			...baseAttributes,
+			'purista.queue.state': 'inflight',
+		})
+		this.recordFrameworkMetric('purista.queue.jobs', metrics.deadLetter, {
+			...baseAttributes,
+			'purista.queue.state': 'dead_letter',
+		})
+		this.recordFrameworkMetric('purista.queue.jobs', metrics.retries, {
+			...baseAttributes,
+			'purista.queue.state': 'retry',
+		})
+		if (typeof metrics.oldestAgeMs === 'number') {
+			this.recordFrameworkMetric('purista.queue.oldest_job_age', metrics.oldestAgeMs, baseAttributes)
 		}
 	}
 
@@ -2494,6 +2755,20 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		const context = deserializeOtp(this.logger, message.otp)
 
 		return this.startActiveSpan(stream?.streamName ?? 'purista.executeStream', {}, context, async span => {
+			const startedAt = Date.now()
+			const baseMetricAttributes = {
+				...this.getServiceMetricAttributes(stream?.streamName ?? message.receiver.serviceTarget),
+				'purista.stream.name': stream?.streamName ?? message.receiver.serviceTarget,
+			}
+			const recordStreamMetrics = (outcome: PuristaMetricOutcome, error?: unknown) => {
+				const attributes = {
+					...baseMetricAttributes,
+					'purista.outcome': outcome,
+					...(error ? { 'error.type': this.getErrorType(error) } : {}),
+				}
+				this.recordFrameworkMetric('purista.stream.executions', 1, attributes)
+				this.recordDurationMetric('purista.stream.duration', startedAt, attributes)
+			}
 			const traceId = message.traceId
 			const logger = this.logger.getChildLogger({
 				serviceTarget: stream?.streamName,
@@ -2505,6 +2780,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 			if (!stream) {
 				logger.error({ message: getCleanedMessage(message) }, 'received invalid stream open request')
+				recordStreamMetrics('unhandled_error', new UnhandledError(StatusCode.NotFound))
 				return
 			}
 
@@ -2546,6 +2822,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				await this.eventBridge.emitMessage(
 					streamFrame as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
 				)
+				this.recordFrameworkMetric('purista.stream.frames', 1, {
+					...baseMetricAttributes,
+					'purista.stream.direction': 'out',
+					'purista.outcome': frame.frameType === 'error' ? 'handled_error' : 'success',
+				})
 			}
 
 			const writer: StreamWriter = {
@@ -2617,6 +2898,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			}
 
 			try {
+				this.recordFrameworkMetric('purista.stream.active', 1, baseMetricAttributes)
 				const streamQueue = this.getQueueNamespace(
 					this.resolveQueueInvokes(stream.queueInvokes),
 					traceId,
@@ -2663,6 +2945,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						sequence: sequence++,
 						reason: activeSession.cancelReason,
 					})
+					recordStreamMetrics('cancelled')
 					return
 				}
 
@@ -2702,10 +2985,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						sequence: sequence++,
 						final: finalPayload,
 					})
+					recordStreamMetrics('success')
 				}
 			} catch (error) {
 				await writer.fail(error)
+				recordStreamMetrics(error instanceof HandledError ? 'handled_error' : 'unhandled_error', error)
 			} finally {
+				this.recordFrameworkMetric('purista.stream.active', -1, baseMetricAttributes)
 				this.activeStreamSessions.delete(message.correlationId)
 			}
 		})
@@ -2755,6 +3041,20 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			{ links: spanContext ? [{ context: spanContext }] : [] },
 			undefined,
 			async span => {
+				const startedAt = Date.now()
+				const baseMetricAttributes = {
+					...this.getServiceMetricAttributes(subscriptionName),
+					'purista.subscription.name': subscriptionName,
+				}
+				const recordSubscriptionMetrics = (outcome: PuristaMetricOutcome, error?: unknown) => {
+					const attributes = {
+						...baseMetricAttributes,
+						'purista.outcome': outcome,
+						...(error ? { 'error.type': this.getErrorType(error) } : {}),
+					}
+					this.recordFrameworkMetric('purista.subscription.executions', 1, attributes)
+					this.recordDurationMetric('purista.subscription.duration', startedAt, attributes)
+				}
 				const traceId = message.traceId
 
 				const logger = this.logger.getChildLogger({
@@ -2780,6 +3080,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						code: SpanStatusCode.ERROR,
 						message: 'received message for invalid subscription',
 					})
+					recordSubscriptionMetrics('unhandled_error', new UnhandledError(StatusCode.NotFound))
 					return
 				}
 
@@ -2836,6 +3137,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					if (isSubscriptionHandlerResult(result)) {
 						switch (result.status) {
 							case 'ack':
+								recordSubscriptionMetrics('success')
 								return undefined
 							case 'retry': {
 								if (
@@ -2977,6 +3279,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							undefined,
 							async subSpan => {
 								subSpan.addEvent(subscription.emitEventName as string)
+								recordSubscriptionMetrics('success')
 								const resultMsg: Omit<CustomMessage, 'id' | 'timestamp'> = {
 									messageType: EBMessageType.CustomMessage,
 									contentType: subscription.metadata.expose.contentTypeResponse ?? 'application/json',
@@ -2995,14 +3298,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							},
 						)
 					}
+					recordSubscriptionMetrics('success')
 					return undefined
 				} catch (err) {
 					if (err instanceof SubscriptionConsumerControlError) {
+						recordSubscriptionMetrics('handled_error', err)
 						throw err
 					}
 					logger.error({ err }, 'Error in subscription execution')
 					if (err instanceof HandledError) {
 						// handled errors prevent that the message is re-delivered for retry
+						recordSubscriptionMetrics('handled_error', err)
 						return
 					}
 					span.recordException(err as Error)
@@ -3013,6 +3319,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					})
 
 					// re-throw error here, so the underlaying event bridge driver can handle ack/re-delivery for retry
+					recordSubscriptionMetrics('unhandled_error', err)
 					throw err
 				}
 			},

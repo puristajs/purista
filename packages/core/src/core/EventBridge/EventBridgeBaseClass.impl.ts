@@ -8,6 +8,9 @@ import { initLogger } from '../../DefaultLogger/initLogger.impl.js'
 import { puristaVersion } from '../../version.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import { getNewInstanceId } from '../helper/getNewInstanceId.impl.js'
+import { createNoopMetricsRecorder } from '../metrics/createNoopMetricsRecorder.js'
+import { PuristaMetricsRecorder as OpenTelemetryMetricsRecorder } from '../metrics/PuristaMetricsRecorder.js'
+import type { PuristaMetricAttributes, PuristaMetricsRecorder } from '../metrics/types.js'
 import type { Complete } from '../types/Complete.js'
 import type { DefinitionEventBridgeConfig } from '../types/DefinitionEventBridgeConfig.js'
 import type { EBMessageAddress } from '../types/EBMessageAddress.js'
@@ -41,6 +44,7 @@ import { EventBridgeStreamLateFrameHandling } from './types/EventBridgeStreamLat
 export class EventBridgeBaseClass<ConfigType> {
 	logger: Logger
 	traceProvider: NodeTracerProvider
+	protected metricsRecorder: PuristaMetricsRecorder
 
 	config: Complete<EventBridgeConfig<ConfigType>>
 
@@ -95,8 +99,22 @@ export class EventBridgeBaseClass<ConfigType> {
 			instanceId: this.instanceId,
 			defaultCommandTimeout: config.defaultCommandTimeout ?? 30000,
 			spanProcessor: undefined,
+			metrics: undefined,
+			metricsRecorder: undefined,
 			...config,
 		}
+		this.metricsRecorder =
+			config.metricsRecorder ??
+			(config.metrics?.enabled === false
+				? createNoopMetricsRecorder()
+				: new OpenTelemetryMetricsRecorder({
+						...config.metrics,
+						defaultAttributes: {
+							'purista.bridge.name': name,
+							'purista.bridge.type': 'event',
+							...config.metrics?.defaultAttributes,
+						},
+					}))
 
 		this.defaultCommandTimeout = config.defaultCommandTimeout ?? 30000
 
@@ -139,12 +157,15 @@ export class EventBridgeBaseClass<ConfigType> {
 		fn: (span: Span) => Promise<F>,
 	): Promise<F> {
 		const tracer = this.getTracer()
+		const startedAt = Date.now()
 
 		const callback = async (span: Span) => {
 			span.setAttribute(PuristaSpanTag.PuristaVersion, puristaVersion)
+			let outcome: 'success' | 'unhandled_error' = 'success'
 			try {
 				return await fn(span)
 			} catch (error) {
+				outcome = 'unhandled_error'
 				let message = 'error'
 				if (error instanceof Error) {
 					message = error.message
@@ -158,6 +179,7 @@ export class EventBridgeBaseClass<ConfigType> {
 
 				throw error
 			} finally {
+				this.recordBridgeOperation(name, startedAt, outcome)
 				span.end()
 			}
 		}
@@ -165,6 +187,25 @@ export class EventBridgeBaseClass<ConfigType> {
 		return context
 			? tracer.startActiveSpan(name, opts, context, callback)
 			: tracer.startActiveSpan(name, opts, callback)
+	}
+
+	private recordBridgeOperation(name: string, startedAt: number, outcome: 'success' | 'unhandled_error') {
+		const attributes: PuristaMetricAttributes = {
+			'purista.bridge.name': this.name,
+			'purista.bridge.type': 'event',
+			'purista.bridge.operation': name,
+			'purista.outcome': outcome,
+			...(outcome === 'success' ? {} : { 'error.type': 'unknown' }),
+		}
+		try {
+			this.metricsRecorder.recordFrameworkMetric(
+				'purista.bridge.operation.duration',
+				Math.max(0, Date.now() - startedAt),
+				attributes,
+			)
+		} catch {
+			return
+		}
 	}
 
 	/**

@@ -89,7 +89,7 @@ set a secret in the secret store
 
 ***
 
-### startActiveSpan()
+### startActiveSpan
 
 > **startActiveSpan**: \<`F`\>(`name`, `opts`, `context`, `fn`) => `Promise`\<`F`\>
 
@@ -115,7 +115,7 @@ wrap given function in an opentelemetry active span
 
 ##### context
 
-`Context` | `undefined`
+`Context` \| `undefined`
 
 ##### fn
 
@@ -155,7 +155,7 @@ set a state value in the state store
 
 ***
 
-### wrapInSpan()
+### wrapInSpan
 
 > **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 

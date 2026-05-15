@@ -136,49 +136,49 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:53](https://github.co
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### config?
 
-> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`, `RedisSocketOptions`\>
+> `optional` **config?**: `RedisClientOptions`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`, `RedisSocketOptions`\>
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 #### Inherited from
 
@@ -190,7 +190,7 @@ Enable generally set method
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -202,7 +202,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -242,7 +242,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:61](https://github.co
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -298,7 +298,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:68](https://github.co
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -342,7 +342,7 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:87](https://github.co
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

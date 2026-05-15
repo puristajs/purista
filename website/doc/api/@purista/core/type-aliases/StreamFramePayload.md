@@ -24,7 +24,7 @@ Defined in: [core/types/stream/StreamFrame.ts:9](https://github.com/puristajs/pu
 
 ### chunk?
 
-> `optional` **chunk**: `Chunk`
+> `optional` **chunk?**: `Chunk`
 
 Defined in: [core/types/stream/StreamFrame.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFrame.ts#L12)
 
@@ -32,7 +32,7 @@ Defined in: [core/types/stream/StreamFrame.ts:12](https://github.com/puristajs/p
 
 ### error?
 
-> `optional` **error**: [`StreamErrorPayload`](StreamErrorPayload.md)
+> `optional` **error?**: [`StreamErrorPayload`](StreamErrorPayload.md)
 
 Defined in: [core/types/stream/StreamFrame.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFrame.ts#L14)
 
@@ -40,7 +40,7 @@ Defined in: [core/types/stream/StreamFrame.ts:14](https://github.com/puristajs/p
 
 ### final?
 
-> `optional` **final**: `Final`
+> `optional` **final?**: `Final`
 
 Defined in: [core/types/stream/StreamFrame.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFrame.ts#L13)
 
@@ -56,7 +56,7 @@ Defined in: [core/types/stream/StreamFrame.ts:10](https://github.com/puristajs/p
 
 ### reason?
 
-> `optional` **reason**: `string`
+> `optional` **reason?**: `string`
 
 Defined in: [core/types/stream/StreamFrame.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamFrame.ts#L15)
 

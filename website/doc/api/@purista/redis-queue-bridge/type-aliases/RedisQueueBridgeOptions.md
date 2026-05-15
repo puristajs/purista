@@ -36,7 +36,7 @@ Defined in: [types.ts:10](https://github.com/puristajs/purista/blob/master/packa
 
 ### config?
 
-> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`, `RESP`, `TYPE_MAPPING`\>
+> `optional` **config?**: `RedisClientOptions`\<`M`, `F`, `S`, `RESP`, `TYPE_MAPPING`\>
 
 Defined in: [types.ts:17](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/types.ts#L17)
 
@@ -44,7 +44,7 @@ Defined in: [types.ts:17](https://github.com/puristajs/purista/blob/master/packa
 
 ### keyPrefix?
 
-> `optional` **keyPrefix**: `string`
+> `optional` **keyPrefix?**: `string`
 
 Defined in: [types.ts:18](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/types.ts#L18)
 
@@ -52,7 +52,7 @@ Defined in: [types.ts:18](https://github.com/puristajs/purista/blob/master/packa
 
 ### recoveryBatchSize?
 
-> `optional` **recoveryBatchSize**: `number`
+> `optional` **recoveryBatchSize?**: `number`
 
 Defined in: [types.ts:20](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/types.ts#L20)
 
@@ -60,6 +60,6 @@ Defined in: [types.ts:20](https://github.com/puristajs/purista/blob/master/packa
 
 ### scheduleBatchSize?
 
-> `optional` **scheduleBatchSize**: `number`
+> `optional` **scheduleBatchSize?**: `number`
 
 Defined in: [types.ts:19](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/types.ts#L19)

@@ -3,6 +3,7 @@ import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { ServiceClassMetrics } from '../ServiceClassMetrics.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { StreamFunctionContext } from './StreamFunctionContext.js'
 import type { StreamWriter } from './StreamWriter.js'
@@ -29,7 +30,8 @@ export type StreamFunction<
 		Invokes,
 		StreamInvokes,
 		EmitList,
-		QueueInvokes
+		QueueInvokes,
+		ServiceClassMetrics<S>
 	>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,

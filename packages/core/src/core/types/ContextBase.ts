@@ -9,16 +9,20 @@ import type { SecretSetterFunction } from '../SecretStore/types/SecretSetterFunc
 import type { StateDeleteFunction } from '../StateStore/types/StateDeleteFunction.js'
 import type { StateGetterFunction } from '../StateStore/types/StateGetterFunction.js'
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
+import type { EmptyObject } from './EmptyObject.js'
 import type { Logger } from './Logger.js'
+import type { PuristaMetricContext, PuristaMetricDefinitions } from './PuristaMetrics.js'
 import type { QueueContext } from './queue/QueueContext.js'
 
 /**
  * The ContextBase provides is a basic type.
  * Each context for command function, subscription function and all Hooks and transformers will have at least the properties of this type.
  */
-export type ContextBase = {
+export type ContextBase<Metrics extends PuristaMetricDefinitions = EmptyObject> = {
 	/** the logger instance */
 	logger: Logger
+	/** typed custom metrics declared on the current builder scope */
+	metrics: PuristaMetricContext<Metrics>
 	/** wrap given function in an opentelemetry span */
 	wrapInSpan: <F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context) => Promise<F>
 	/** wrap given function in an opentelemetry active span */

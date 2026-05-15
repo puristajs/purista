@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SecretSetterFunction
 
-# Type Alias: SecretSetterFunction()
+# Type Alias: SecretSetterFunction
 
 > **SecretSetterFunction** = (`secretName`, `secretValue`) => `Promise`\<`void`\>
 

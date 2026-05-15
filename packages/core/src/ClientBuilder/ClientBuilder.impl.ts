@@ -54,7 +54,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			version: puristaVersion,
 			definitionPath: './definitions',
 			outputPath: './dist',
-			buildAs: 'both',
+			buildAs: 'esm',
 			...config,
 			httpClient: {
 				clientName: 'HttpClient',
@@ -154,8 +154,6 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * Is used in generated package.json
 	 */
 	async createIndex() {
-		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
-
 		const writer = getWriter()
 
 		const path = join(this.getOutputPath(), 'src')
@@ -165,7 +163,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			if (!file.endsWith('.ts')) {
 				continue
 			}
-			writer.writeLine(`export * from './${file.replace('.ts', ext)}'`)
+			writer.writeLine(`export * from './${file.replace('.ts', '.js')}'`)
 		}
 
 		await writeFile(join(path, 'index.ts'), writer.toString())
@@ -176,31 +174,36 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * Exports the files which are build by tsc based on generated client files
 	 */
 	async createPackageJson() {
-		const hasEsm = this.config.buildAs !== 'commonjs'
-		const hasCommonJs = this.config.buildAs !== 'esm'
-
 		const packageJson: {
 			name: string
 			description: string
 			private: boolean
-			type: 'module' | 'commonjs'
+			type: 'module'
 			exports: {
 				'./package.json': string
-				'.': Record<string, unknown>
+				'.': {
+					types: string
+					default: string
+				}
 			}
 			devDependencies: {
 				'@purista/core': string
 			}
-			main?: string
-			types?: string
+			main: string
+			types: string
 		} = {
 			name: 'my-client',
 			description: 'The client library package for a PURISTA based application',
 			private: true,
-			type: hasEsm ? 'module' : 'commonjs',
+			type: 'module',
+			main: './dist/index.js',
+			types: './dist/index.d.ts',
 			exports: {
 				'./package.json': './package.json',
-				'.': {},
+				'.': {
+					types: './dist/index.d.ts',
+					default: './dist/index.js',
+				},
 			},
 			devDependencies: {
 				'@purista/core': 'latest',
@@ -208,68 +211,29 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			...this.config.package,
 		}
 
-		if (hasCommonJs) {
-			packageJson.main = './dist/commonjs/index.js'
-			packageJson.types = './dist/commonjs/index.d.ts'
-			packageJson.exports['.'] = {
-				...packageJson.exports['.'],
-				require: {
-					types: './dist/commonjs/index.d.ts',
-					default: './dist/commonjs/index.js',
-				},
-			}
-		}
-
-		if (hasEsm) {
-			packageJson.exports['.'] = {
-				...packageJson.exports['.'],
-				import: {
-					types: './dist/esm/index.d.ts',
-					default: './dist/esm/index.js',
-				},
-			}
-		}
-
 		await writeFile(join(this.getOutputPath(), 'package.json'), JSON.stringify(packageJson, null, 2))
 	}
 
 	/**
 	 * Runs the tsc against the generated ts source files.
-	 * Depending on settings, it will generate ESM and/or commonJS files
+	 * Generates plain ESM output.
 	 */
 	async build() {
-		const hasEsm = this.config.buildAs !== 'commonjs'
-		const hasCommonJs = this.config.buildAs !== 'esm'
-
 		await loadTypeScript()
 		if (!ts) {
 			throw new Error('TypeScript is required for this operation. Please install it using `npm install typescript`.')
 		}
 
-		if (hasEsm) {
-			const esmOptions: TS.CompilerOptions = {
-				declaration: true,
-				outDir: join(this.getOutputPath(), 'dist', 'esm'),
-				target: ts.ScriptTarget.ES2022,
-				module: ts.ModuleKind.NodeNext,
-				skipLibCheck: true,
-				moduleResolution: ts.ModuleResolutionKind.NodeNext,
-			}
-
-			await this.compile([join(this.getOutputPath(), 'src', 'index.ts')], esmOptions, 'ESM')
+		const esmOptions: TS.CompilerOptions = {
+			declaration: true,
+			outDir: join(this.getOutputPath(), 'dist'),
+			target: ts.ScriptTarget.ES2022,
+			module: ts.ModuleKind.NodeNext,
+			skipLibCheck: true,
+			moduleResolution: ts.ModuleResolutionKind.NodeNext,
 		}
 
-		if (hasCommonJs) {
-			const commonJsOptions: TS.CompilerOptions = {
-				declaration: true,
-				outDir: join(this.getOutputPath(), 'dist', 'commonjs'),
-				skipLibCheck: true,
-				target: ts.ScriptTarget.ES2015,
-				module: ts.ModuleKind.CommonJS,
-			}
-
-			await this.compile([join(this.getOutputPath(), 'src', 'index.ts')], commonJsOptions, 'CommonJs')
-		}
+		await this.compile([join(this.getOutputPath(), 'src', 'index.ts')], esmOptions, 'ESM')
 	}
 
 	/**
@@ -360,8 +324,6 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * ```
 	 */
 	async generateHttpClient(serviceDefinition: FullServiceDefinition) {
-		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
-
 		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'http_client.ts'))
 		const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_http_client.ts'))
 
@@ -370,7 +332,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		const clientWriter = getWriter()
 
 		clientWriter
-			.writeLine(`import * as ClientType from './types_http_client${ext}'`)
+			.writeLine(`import * as ClientType from './types_http_client.js'`)
 			.blankLine()
 			.writeLine(`export class ${this.config.httpClient.clientName} {`)
 			.blankLine()
@@ -740,8 +702,6 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * @param serviceDefinition
 	 */
 	async generateEventBridgeClient(serviceDefinition: FullServiceDefinition) {
-		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
-
 		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'eventbridge_client.ts'))
 		const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_eventbridge_client.ts'))
 
@@ -750,7 +710,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		clientWriter
 			.writeLine(`import type { EventBridge } from '@purista/core'`)
 			.blankLine()
-			.writeLine(`import * as ClientType from './types_eventbridge_client${ext}'`)
+			.writeLine(`import * as ClientType from './types_eventbridge_client.js'`)
 			.blankLine()
 			.writeLine(`export class ${this.config.eventBridgeClient.clientName} {`)
 			.blankLine()

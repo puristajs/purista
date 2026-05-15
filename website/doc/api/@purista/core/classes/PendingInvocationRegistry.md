@@ -96,7 +96,7 @@ Defined in: [core/EventBridge/PendingInvocationRegistry.impl.ts:29](https://gith
 
 ##### traceId
 
-`string` | `undefined`
+`string` \| `undefined`
 
 #### Returns
 

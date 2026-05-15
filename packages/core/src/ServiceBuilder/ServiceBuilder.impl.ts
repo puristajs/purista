@@ -1,6 +1,18 @@
 import { fail } from 'node:assert'
 
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { AgentQueueBuilder } from '../AgentQueueBuilder/AgentQueueBuilder.js'
+import {
+	bindAgentRuntimeScope,
+	createAgentRuntimeScope,
+	initializeAttachedAgentRuntimes,
+} from '../AgentQueueBuilder/runtime/scopedRuntime.js'
+import type {
+	AgentModelBinding,
+	AgentQueueBuilderTypes,
+	AgentRuntimeOptions,
+	AttachedAgentDefinition,
+} from '../AgentQueueBuilder/types.js'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
 import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
@@ -22,6 +34,12 @@ import type { Logger } from '../core/types/Logger.js'
 import type { LogLevelName } from '../core/types/LogLevelName.js'
 import type { NeverObject } from '../core/types/NeverObject.js'
 import type { Prettify } from '../core/types/Prettify.js'
+import type {
+	PuristaMetricDefinition,
+	PuristaMetricDefinitions,
+	PuristaMetricsRecorder,
+	PuristaMetricsRuntimeOptions,
+} from '../core/types/PuristaMetrics.js'
 import type { EventToQueueBindingDefinition } from '../core/types/queue/EventToQueueBindingDefinition.js'
 import type { QueueDefinitionList, QueueDefinitionListResolved } from '../core/types/queue/QueueDefinitionList.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
@@ -60,7 +78,7 @@ import { type Infer, type InferIn, type Schema, validate } from '../schema/index
 
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
-export type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
+export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any, any>> = Prettify<
 	{
 		logLevel?: LogLevelName
 		logger?: Logger
@@ -70,6 +88,9 @@ export type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 		stateStore?: StateStore
 		queueBridge?: QueueBridge
 		queueJobStore?: QueueJobStore
+		metrics?: PuristaMetricsRuntimeOptions
+		metricsRecorder?: PuristaMetricsRecorder
+		ai?: AgentRuntimeOptions<Record<string, AgentModelBinding>>
 	} & (keyof S['Resources'] extends never ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends never ? { serviceConfig?: never } : { serviceConfig?: S['ConfigInputType'] })
 >
@@ -79,7 +100,7 @@ export type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
  *
  * @group Service
  */
-export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes> {
+export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, any> = ServiceBuilderTypes> {
 	private commandDefinitionList: CommandDefinitionList<S['ServiceClassType']> = []
 	private subscriptionDefinitionList: SubscriptionDefinitionList<S['ServiceClassType']> = []
 	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
@@ -87,6 +108,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
 	private scheduleDefinitionList: ScheduleDefinition[] = []
 	private eventToQueueBindingList: EventToQueueBindingDefinition[] = []
+	private agentDefinitionList: AttachedAgentDefinition<any>[] = []
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
@@ -105,7 +127,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 	private requiresResources = false
 
-	SClass: Newable<S['ServiceClassType'], ServiceClassTypes<S['ConfigType'], S['Resources']>> = Service
+	private customMetricDefinitions: PuristaMetricDefinitions = {}
+
+	SClass: Newable<S['ServiceClassType'], ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>> = Service
 
 	// eslint-disable-next-line no-useless-constructor
 	constructor(public info: ServiceInfoType) {}
@@ -119,7 +143,11 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 					ConfigType: Infer<T> extends Record<string, unknown> ? Infer<T> : NeverObject
 					ConfigInputType: InferIn<T> extends Record<string, unknown> ? InferIn<T> : NeverObject
 					ServiceClassType: Service<
-						ServiceClassTypes<Infer<T> extends Record<string, unknown> ? Infer<T> : EmptyObject, S['Resources']>
+						ServiceClassTypes<
+							Infer<T> extends Record<string, unknown> ? Infer<T> : EmptyObject,
+							S['Resources'],
+							S['Metrics']
+						>
 					>
 				}
 			>
@@ -188,6 +216,43 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			)
 		}
 		this.queueWorkerDefinitionList.push(...workers)
+		return this
+	}
+
+	/**
+	 * Add one or more attached agent definitions to this service.
+	 *
+	 * The attached agent is expanded into normal queue, queue worker, command,
+	 * and stream definitions so the rest of core can treat it like any other
+	 * declared PURISTA boundary.
+	 *
+	 * @example
+	 * ```ts
+	 * const triage = await service
+	 *   .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+	 *   .setRunFunction(async context => ({ priority: 'normal' }))
+	 *   .getDefinition()
+	 *
+	 * service.addAgentDefinition(triage)
+	 * ```
+	 */
+	addAgentDefinition<const Definition extends AttachedAgentDefinition<any>>(...definitions: Definition[]) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add agents after resolveDefinitions is called.',
+			)
+		}
+
+		this.agentDefinitionList.push(...definitions)
+
+		for (const definition of definitions) {
+			this.queueDefinitionList.push(definition.queue as never)
+			this.queueWorkerDefinitionList.push(definition.worker as never)
+			this.commandDefinitionList.push(definition.command as never)
+			this.streamDefinitionList.push(definition.stream as never)
+		}
+
 		return this
 	}
 
@@ -285,8 +350,37 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		>
 	}
 
-	setCustomClass<T extends Service<ServiceClassTypes<S['ConfigType'], S['Resources']>>>(
-		customClass: Newable<T, ServiceClassTypes<S['ConfigType'], S['Resources']>>,
+	/**
+	 * Declare a custom application metric available in every service handler.
+	 *
+	 * @example
+	 * ```ts
+	 * const service = new ServiceBuilder(serviceInfo).defineMetric('app.orders.created', {
+	 *   kind: 'counter',
+	 *   unit: '{order}',
+	 *   description: 'Created orders',
+	 * })
+	 * ```
+	 */
+	defineMetric<const MetricName extends string, const Definition extends PuristaMetricDefinition<any>>(
+		name: MetricName,
+		definition: Definition,
+	) {
+		this.customMetricDefinitions[name] = definition
+		type Metrics = S['Metrics'] & { [K in MetricName]: Definition }
+		return this as unknown as ServiceBuilder<
+			SetNewTypeValues<
+				S,
+				{
+					Metrics: Metrics
+					ServiceClassType: Service<ServiceClassTypes<S['ConfigType'], S['Resources'], Metrics>>
+				}
+			>
+		>
+	}
+
+	setCustomClass<T extends Service<ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>>>(
+		customClass: Newable<T, ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>>,
 	) {
 		this.SClass = customClass
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>>
@@ -298,6 +392,17 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
+		const agentRuntimeScope = createAgentRuntimeScope()
+		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
+			agentRuntimeScope,
+			this.agentDefinitionList,
+			options?.ai
+				? {
+						...options.ai,
+						logger: options.ai.logger ?? logger,
+					}
+				: undefined,
+		)
 
 		const cfg: S['ConfigInputType'] = {
 			...this.defaultConfig,
@@ -353,7 +458,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 		const C = this.getCustomClass()
 
-		return new C({
+		const service = new C({
 			logger,
 			eventBridge,
 			info: this.info,
@@ -371,8 +476,22 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			queueJobStore: options?.queueJobStore,
 			eventToQueueBindingList: eventToQueueBindings,
 			configSchema: this.configSchema,
+			metrics: options?.metrics,
+			metricsRecorder: options?.metricsRecorder,
+			metricDefinitionList: this.customMetricDefinitions,
 			resources: options?.resources,
 		})
+		bindAgentRuntimeScope(service, agentRuntimeScope)
+
+		if (this.agentDefinitionList.length > 0) {
+			const destroy = service.destroy.bind(service)
+			service.destroy = async () => {
+				await agentRuntimeShutdown.shutdown()
+				await destroy()
+			}
+		}
+
+		return service
 	}
 
 	getCommandBuilder<T extends string, N extends string>(
@@ -454,6 +573,41 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				QueueInvokeList
 			>
 		>(streamName, description, finalEventName, this.deprecated)
+	}
+
+	/**
+	 * Create a native core builder for a queue-backed PURISTA agent.
+	 *
+	 * The returned builder preserves this service builder's resource type and
+	 * cascades payload, parameter, output, model, command-tool, and child-agent
+	 * declarations into the agent handler context.
+	 *
+	 * @example
+	 * ```ts
+	 * const triage = service
+	 *   .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+	 * ```
+	 */
+	getAgentQueueBuilder<const AgentName extends string>(agentName: NonEmptyString<AgentName>, description: string) {
+		return new AgentQueueBuilder(
+			this.info.serviceName,
+			this.info.serviceVersion,
+			agentName,
+			description,
+		) as AgentQueueBuilder<
+			AgentQueueBuilderTypes<
+				Schema,
+				Schema,
+				Schema,
+				S['Resources'] extends Record<string, unknown> ? S['Resources'] : Record<string, never>,
+				Record<never, never>,
+				Record<never, never>,
+				Record<never, never>,
+				undefined,
+				S['Metrics']
+			>
+		>
 	}
 
 	getCommandDefinitions() {

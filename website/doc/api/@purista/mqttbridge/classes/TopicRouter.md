@@ -106,7 +106,7 @@ Defined in: [mqttbridge/src/topic/TopicRouter.ts:26](https://github.com/puristaj
 
 ##### topic
 
-`string` | `number`
+`string` \| `number`
 
 #### Returns
 

@@ -24,7 +24,7 @@ Defined in: [zodOpenApi/extendApi.ts:8](https://github.com/puristajs/purista/blo
 
 ### meta
 
-`SchemaObject` | `SchemaObject`[]
+`SchemaObject` \| `SchemaObject`[]
 
 ## Returns
 

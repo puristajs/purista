@@ -30,7 +30,7 @@ Defined in: [core/types/queue/QueueMetrics.ts:3](https://github.com/puristajs/pu
 
 ### oldestAgeMs?
 
-> `optional` **oldestAgeMs**: `number`
+> `optional` **oldestAgeMs?**: `number`
 
 Defined in: [core/types/queue/QueueMetrics.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMetrics.ts#L6)
 

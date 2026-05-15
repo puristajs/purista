@@ -4,7 +4,7 @@
 	"version": "2.2.0",
 	"description": "HTTP base eventbridge core functions for PURISTA backend framework",
 	"keywords": ["purista", "http", "typescript", "javascript"],
-	"exports": "./dist/esm/index.js",
+	"exports": "./dist/index.js",
 	"publish": {
 		"include": ["dist/**/*.js", "dist/**/*.d.ts", "README.md", "package.json"],
 		"exclude": [
@@ -15,8 +15,6 @@
 			"!dist",
 			"!dist/**/*.js",
 			"!dist/**/*.d.ts",
-			".tshy",
-			".tshy-build",
 			"vendor",
 			"docs",
 			"typedoc.json",

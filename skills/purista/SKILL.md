@@ -25,9 +25,11 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Keep schemas explicit on every boundary. Prefer consumer-local schemas over one oversized shared schema.
 - Keep external systems behind resources or runtime bindings.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
-- Keep `@purista/ai` optional. Core, Hono, starter, and create-purista must not require `@purista/ai` or `@purista/harness`.
+- Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.
+- Metrics use the OpenTelemetry Metrics API. Core stays SDK/exporter-neutral; applications own MeterProvider, readers, exporters, collectors, and Prometheus exposure.
+- Declare custom application metrics with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record them through typed `context.metrics`, and keep names under `app.*`.
 
 ## Primitive Decisions
 - service: owns a versioned business capability, invariants, resources, and contracts
@@ -39,12 +41,16 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - agent: optional model-driven loop, harness agent/workflow, or custom run function attached to a service
 
 ## Current AI Decision
-`@purista/ai` is a clean harness-backed optional package. Agents attach to services and expand into normal PURISTA queue, worker, command, and stream definitions. They do not use a PURISTA AI protocol or Vercel AI SDK adapter. HTTP streaming emits provider-style SSE events with OpenAPI-described chunks.
+AI agent integration lives in `@purista/core`. Agents attach to services and expand into normal PURISTA queue, worker, command, and stream definitions. Core depends only on provider-neutral `@purista/harness`; model providers remain explicit application dependencies. Agents do not use a PURISTA AI protocol or Vercel AI SDK adapter.
+
+PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics.
 
 ## Verification Cues
 - The design can name one owner for each capability and source of truth.
 - Every handler dependency is reachable through resources, stores, context, or declared runtime bindings.
 - Runtime wiring names required bridges, stores, providers, telemetry, queue bridges, and HTTP servers.
+- Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.
+- Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
 - Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
 - Package dependencies do not introduce optional AI or transport coupling into core packages.
 

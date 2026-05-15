@@ -16,7 +16,7 @@ Error message payload
 
 ### data?
 
-> `optional` **data**: `unknown`
+> `optional` **data?**: `unknown`
 
 Defined in: [core/types/ErrorResponsePayload.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L15)
 
@@ -46,7 +46,7 @@ the error status code
 
 ### traceId?
 
-> `optional` **traceId**: [`TraceId`](TraceId.md)
+> `optional` **traceId?**: [`TraceId`](TraceId.md)
 
 Defined in: [core/types/ErrorResponsePayload.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L13)
 

@@ -220,7 +220,7 @@ false
 
 > **app**: `Hono`
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:25
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:25
 
 #### Inherited from
 
@@ -232,7 +232,7 @@ Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:
 
 > **capabilities**: [`EventBridgeCapabilities`](../../core/type-aliases/EventBridgeCapabilities.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 #### Implementation of
 
@@ -248,7 +248,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 > **client**: [`HttpEventBridgeClient`](../../base-http-bridge/interfaces/HttpEventBridgeClient.md)
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:28
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:28
 
 #### Inherited from
 
@@ -260,7 +260,7 @@ Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:
 
 > **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 #### Inherited from
 
@@ -272,7 +272,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -290,7 +290,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `protected` `readonly` **inFlightExecutions**: [`InFlightExecutionTracker`](../../core/classes/InFlightExecutionTracker.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 #### Inherited from
 
@@ -302,7 +302,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 > **instanceId**: `string`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 #### Implementation of
 
@@ -318,7 +318,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 > **isShuttingDown**: `boolean`
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:26
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:26
 
 #### Inherited from
 
@@ -330,7 +330,7 @@ Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:
 
 > **isStarted**: `boolean`
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:27
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:27
 
 #### Inherited from
 
@@ -342,7 +342,7 @@ Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -354,7 +354,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > **name**: `string`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 #### Implementation of
 
@@ -370,7 +370,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 > **server**: `Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`\> \| `Http2Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `Http2SecureServer`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `undefined`
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:24
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:24
 
 #### Inherited from
 
@@ -382,7 +382,7 @@ Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -394,7 +394,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:42
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:42
 
 Shut down event bridge as gracefully as possible
 
@@ -416,7 +416,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**\<`T`\>(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:31
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:31
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -452,7 +452,7 @@ the message
 
 > **getInFlightExecutionCount**(): `number`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
 
 Number of currently running handlers across all work kinds.
 
@@ -474,7 +474,7 @@ Number of currently running handlers across all work kinds.
 
 > **getInFlightExecutionCounts**(): [`InFlightExecutionCounts`](../../core/type-aliases/InFlightExecutionCounts.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
 
 Number of currently running handlers grouped by work kind.
 
@@ -496,7 +496,7 @@ Number of currently running handlers grouped by work kind.
 
 > **getPausedSubscriptionConsumers**(): [`PausedSubscriptionConsumersByRegistrationKey`](../../core/type-aliases/PausedSubscriptionConsumersByRegistrationKey.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:68
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:68
 
 Returns paused subscription consumer states keyed by adapter registration key.
 
@@ -518,7 +518,7 @@ Returns paused subscription consumer states keyed by adapter registration key.
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
 
 Returns open telemetry tracer of this service
 
@@ -538,7 +538,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:32
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:32
 
 Call a command of a service and return the result of this command
 
@@ -580,7 +580,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:38
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:38
 
 Indicates if the eventbridge is running and works correctly
 
@@ -602,7 +602,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:37
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:37
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -624,7 +624,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -667,7 +667,7 @@ The returned handle can be consumed via async iteration and can be cancelled by 
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:33
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:33
 
 #### Parameters
 
@@ -711,7 +711,7 @@ the function to be called if a matching command arrives
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
 
 Register a service stream.
 
@@ -787,7 +787,7 @@ the function to be called if a matching message arrives
 
 > **resumeSubscriptionConsumer**(`_registrationKey`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:69
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:69
 
 Resumes a paused subscription consumer by registration key.
 
@@ -815,7 +815,7 @@ Resumes a paused subscription consumer by registration key.
 
 > **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 #### Type Parameters
 
@@ -831,7 +831,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 ##### kind?
 
-`"command"` | `"subscription"` | `"stream"` | `"generic"`
+`"command"` \| `"subscription"` \| `"stream"` \| `"generic"`
 
 #### Returns
 
@@ -869,7 +869,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:45
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:45
 
 Start a child span for opentelemetry tracking
 
@@ -895,9 +895,9 @@ span options
 
 ##### context
 
-optional context
+`Context` \| `undefined`
 
-`Context` | `undefined`
+optional context
 
 ##### fn
 
@@ -921,7 +921,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:34
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:34
 
 Unregister a service command
 
@@ -951,7 +951,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
 
 Unregister a service stream
 
@@ -979,7 +979,7 @@ Unregister a service stream
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:36
+Defined in: base-http-bridge/dist/HttpEventBridge/HttpEventBridge.impl.d.ts:36
 
 #### Parameters
 
@@ -1005,7 +1005,7 @@ Defined in: base-http-bridge/dist/esm/HttpEventBridge/HttpEventBridge.impl.d.ts:
 
 > **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
 #### Parameters
 
@@ -1027,7 +1027,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

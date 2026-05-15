@@ -16,7 +16,7 @@ export default defineConfig({
 			'packages/cli/src/api/addPuristaService.integration.test.ts',
 			'packages/cli/src/api/addPuristaArtifacts.integration.test.ts',
 		],
-		exclude: ['**/node_modules/**', '**/dist/**', '**/.tshy-build/**'],
+		exclude: ['**/node_modules/**', '**/dist/**'],
 		coverage: {
 			enabled: true,
 			reporter: ['text-summary', 'json-summary'],

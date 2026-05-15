@@ -1,4 +1,5 @@
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { PuristaMetricsRecorder } from '../../core/metrics/types.js'
 import type { Logger } from '../../core/types/Logger.js'
 import type { LogLevelName } from '../../core/types/LogLevelName.js'
 import type { Prettify } from '../../core/types/Prettify.js'
@@ -65,6 +66,8 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
 		 * Opentelemetry span processor
 		 */
 		spanProcessor?: SpanProcessor
+		/** Optional metrics recorder for HTTP client framework metrics. */
+		metricsRecorder?: PuristaMetricsRecorder
 		/**
 		 * enable Opentelemetry tracing.
 		 * The client will be handled as own resource.

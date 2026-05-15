@@ -32,6 +32,9 @@ Use this checklist when creating or updating a skill.
 - The PURISTA concept is taught, not only referenced
 - The builder role is clear where relevant: definition, implementation, configuration, instantiation
 - Schema guidance reinforces boundary-local consumer schemas instead of one oversized shared cross-service schema
+- Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)` and `AgentQueueBuilder.defineMetric(...)`
+- Handler guidance uses typed `context.metrics` and does not expose raw metric recording
+- AI guidance states that `@purista/harness` owns GenAI, model, token, and tool metrics
 - Related skill links exist where they help the model navigate prerequisite or next-step concepts
 - File structures and package paths exist
 - “Read if needed” links point to real files
@@ -52,6 +55,7 @@ Use this checklist when creating or updating a skill.
 - `create-purista` aligned when scaffolding or templates changed
 - `voyage` aligned when framework capability assumptions changed
 - `specs` updated when guidance or migration expectations changed
+- Observability handbook, metric catalog, examples, and skills agree on metric names, attributes, and ownership boundaries
 - Public handbook and published LLM knowledge files point to the canonical single skill path
 - Voyage still works correctly with one shared framework skill plus local overlays
 

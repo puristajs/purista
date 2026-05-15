@@ -13,7 +13,7 @@ This client is responsible for the communication to the sidecar service.
 
 ## Properties
 
-### getApiPathForCommand()
+### getApiPathForCommand
 
 > **getApiPathForCommand**: (`address`, `metadata`) => `string`
 
@@ -42,7 +42,7 @@ url path of endpoint
 
 ***
 
-### getInternalPathForCommand()
+### getInternalPathForCommand
 
 > **getInternalPathForCommand**: (`address`) => `string`
 
@@ -65,7 +65,7 @@ url path of endpoint
 
 ***
 
-### getInternalPathForSubscription()
+### getInternalPathForSubscription
 
 > **getInternalPathForSubscription**: (`address`) => `string`
 
@@ -89,7 +89,7 @@ url path of endpoint
 
 ***
 
-### invoke()
+### invoke
 
 > **invoke**: (`command`, `headers?`, `timeout?`) => `Promise`\<[`CommandResponse`](../../core/type-aliases/CommandResponse.md)\>
 
@@ -229,7 +229,7 @@ the command timeout
 
 ***
 
-### isSidecarAvailable()
+### isSidecarAvailable
 
 > **isSidecarAvailable**: () => `Promise`\<`boolean`\>
 
@@ -245,7 +245,7 @@ boolean
 
 ***
 
-### sendEvent()
+### sendEvent
 
 > **sendEvent**: (`message`, `headers?`) => `Promise`\<`void`\>
 

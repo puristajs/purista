@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandTransformOutputHook
 
-# Type Alias: CommandTransformOutputHook()\<S, MessagePayloadType, MessageParamsType, FinalFunctionOutputType, FunctionParamsType, TransformOutputHookOutput, Resources\>
+# Type Alias: CommandTransformOutputHook\<S, MessagePayloadType, MessageParamsType, FinalFunctionOutputType, FunctionParamsType, TransformOutputHookOutput, Resources\>
 
 > **CommandTransformOutputHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`, `Resources`\> = (`this`, `context`, `input`, `params`) => `Promise`\<`TransformOutputHookOutput`\>
 

@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / Constructor
 
-# Type Alias: Constructor()\<T, A\>
+# Type Alias: Constructor\<T, A\>
 
 > **Constructor**\<`T`, `A`\> = (...`args`) => `T`
 

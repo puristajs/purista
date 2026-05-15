@@ -16,7 +16,7 @@ HTTP authentication information
 
 ### basicAuth?
 
-> `optional` **basicAuth**: `object`
+> `optional` **basicAuth?**: `object`
 
 Defined in: [HttpClient/types/AuthCredentials.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L6)
 
@@ -38,7 +38,7 @@ Basic-Auth username
 
 ### bearerToken?
 
-> `optional` **bearerToken**: `string`
+> `optional` **bearerToken?**: `string`
 
 Defined in: [HttpClient/types/AuthCredentials.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L13)
 

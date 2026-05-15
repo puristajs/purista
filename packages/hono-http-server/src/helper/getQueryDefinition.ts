@@ -15,7 +15,7 @@ export const getQueryDefinition = (
 		const schema = parameterschema?.properties?.[name]
 		const required = queryParam.required
 
-		if (!!schema && isReferenceObject(schema)) {
+		if (schema && isReferenceObject(schema)) {
 			return {
 				in: 'query',
 				name,

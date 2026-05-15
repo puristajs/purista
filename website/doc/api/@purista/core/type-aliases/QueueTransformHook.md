@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueTransformHook
 
-# Type Alias: QueueTransformHook()\<S, Payload, Params, Resources\>
+# Type Alias: QueueTransformHook\<S, Payload, Params, Resources\>
 
 > **QueueTransformHook**\<`S`, `Payload`, `Params`, `Resources`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<\{ `parameter?`: `Params`; `payload`: `Payload`; \}\>
 

@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/mqttbridge](../README.md) / GetSubscriptionTopicFn
 
-# Type Alias: GetSubscriptionTopicFn()
+# Type Alias: GetSubscriptionTopicFn
 
 > **GetSubscriptionTopicFn** = (`this`, `subscription`) => `string`
 

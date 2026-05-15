@@ -20,32 +20,32 @@ Defined in: [core/types/commandType/CommandDefinitionMetadataBase.ts:6](https://
 
 #### contentEncodingRequest?
 
-> `optional` **contentEncodingRequest**: `string`
+> `optional` **contentEncodingRequest?**: `string`
 
 #### contentEncodingResponse?
 
-> `optional` **contentEncodingResponse**: `string`
+> `optional` **contentEncodingResponse?**: `string`
 
 #### contentTypeRequest?
 
-> `optional` **contentTypeRequest**: [`ContentType`](ContentType.md)
+> `optional` **contentTypeRequest?**: [`ContentType`](ContentType.md)
 
 #### contentTypeResponse?
 
-> `optional` **contentTypeResponse**: [`ContentType`](ContentType.md)
+> `optional` **contentTypeResponse?**: [`ContentType`](ContentType.md)
 
 #### deprecated?
 
-> `optional` **deprecated**: `boolean`
+> `optional` **deprecated?**: `boolean`
 
 #### inputPayload?
 
-> `optional` **inputPayload**: `SchemaObject`
+> `optional` **inputPayload?**: `SchemaObject`
 
 #### outputPayload?
 
-> `optional` **outputPayload**: `SchemaObject`
+> `optional` **outputPayload?**: `SchemaObject`
 
 #### parameter?
 
-> `optional` **parameter**: `SchemaObject`
+> `optional` **parameter?**: `SchemaObject`

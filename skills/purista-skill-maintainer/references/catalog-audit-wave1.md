@@ -17,6 +17,7 @@ The old fragmented framework skill set is folded into `purista`:
 - agents, runtime, testing, and AI integration
 - HTTP, sandbox, MCP, and external bindings
 - observability and deployment
+- OTel Metrics API guidance, custom metric builders, typed `context.metrics`, and ai-harness telemetry ownership
 - scaffolding and implementation planning
 - spec-to-architecture guidance
 

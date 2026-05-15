@@ -13,6 +13,8 @@ import {
 } from '@opentelemetry/semantic-conventions'
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { createNoopMetricsRecorder } from '../core/metrics/createNoopMetricsRecorder.js'
+import type { PuristaMetricsRecorder } from '../core/metrics/types.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { Logger } from '../core/types/Logger.js'
 import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
@@ -48,6 +50,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 
 	spanProcessor: SpanProcessor | undefined
 	traceProvider: NodeTracerProvider
+	private readonly metricsRecorder: PuristaMetricsRecorder
 
 	protected auth: AuthCredentials
 	constructor(config: HttpClientConfig<CustomConfig>) {
@@ -73,6 +76,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 		}
 		this.timeout = this.config.defaultTimeout ?? 30000
 		this.logger = logger
+		this.metricsRecorder = config.metricsRecorder ?? createNoopMetricsRecorder()
 
 		const resource = defaultResource().merge(
 			resourceFromAttributes({
@@ -139,6 +143,18 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 			: tracer.startActiveSpan(name, opts, callback)
 	}
 
+	private recordHttpClientDuration(startedAt: number, attributes: Record<string, string | number | boolean>) {
+		try {
+			this.metricsRecorder.recordFrameworkMetric(
+				'http.client.request.duration',
+				Math.max(0, Date.now() - startedAt) / 1000,
+				attributes,
+			)
+		} catch {
+			return
+		}
+	}
+
 	protected getUrlAndHeader(path: string, options?: HttpClientRequestOptions) {
 		let fullPath = this.baseUrl ? join(this.baseUrl.pathname, path) : path
 
@@ -192,6 +208,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	 * @returns
 	 */
 	protected async execute(method: string, path: string, options?: HttpClientRequestOptions, payload?: unknown) {
+		const startedAt = Date.now()
 		const controller = new AbortController()
 		const timeout = setTimeout(() => {
 			controller.abort(
@@ -213,11 +230,20 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 
 		return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async span => {
 			span.setAttribute(ATTR_HTTP_REQUEST_METHOD, method)
+			let metricAttributes: Record<string, string | number | boolean> = {
+				'http.request.method': method,
+				'purista.package.name': this.name,
+			}
 
 			const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: this.config.traceId })
 
 			try {
 				const { url, headers } = this.getUrlAndHeader(path, options)
+				metricAttributes = {
+					...metricAttributes,
+					'server.address': url.hostname,
+					...(url.port ? { 'server.port': Number(url.port) } : {}),
+				}
 				span.setAttribute(ATTR_URL_FULL, url.toString())
 
 				const response = await fetch(url, {
@@ -230,6 +256,10 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 				})
 
 				span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, response.status)
+				metricAttributes = {
+					...metricAttributes,
+					'http.response.status_code': response.status,
+				}
 
 				if (!response.ok) {
 					let body = ''
@@ -257,12 +287,15 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 				}
 
 				if (response.status === StatusCode.NoContent) {
+					this.recordHttpClientDuration(startedAt, { ...metricAttributes, 'purista.outcome': 'success' })
 					return undefined
 				}
 
 				if (response.headers.get('content-type')?.startsWith('application/json')) {
+					this.recordHttpClientDuration(startedAt, { ...metricAttributes, 'purista.outcome': 'success' })
 					return await response.json()
 				}
+				this.recordHttpClientDuration(startedAt, { ...metricAttributes, 'purista.outcome': 'success' })
 				return response.text()
 			} catch (error) {
 				const err =
@@ -273,6 +306,11 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 				span.setStatus({
 					code: SpanStatusCode.ERROR,
 					message: err.message,
+				})
+				this.recordHttpClientDuration(startedAt, {
+					...metricAttributes,
+					'purista.outcome': err instanceof HandledError ? 'handled_error' : 'unhandled_error',
+					'error.type': StatusCode[err.errorCode] ?? err.name,
 				})
 				throw err
 			} finally {

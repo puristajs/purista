@@ -8,7 +8,7 @@
 
 > **QueueJobContext**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`\> = [`ContextBase`](ContextBase.md) & `object`
 
-Defined in: [core/types/queue/QueueJobContext.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L18)
+Defined in: [core/types/queue/QueueJobContext.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L19)
 
 ## Type Declaration
 
@@ -31,6 +31,10 @@ Defined in: [core/types/queue/QueueJobContext.ts:18](https://github.com/puristaj
 ### service
 
 > **service**: `Invokes`
+
+### signal
+
+> **signal**: `AbortSignal`
 
 ### stream
 

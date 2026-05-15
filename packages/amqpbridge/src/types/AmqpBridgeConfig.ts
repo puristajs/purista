@@ -1,4 +1,4 @@
-import type { Options } from 'amqplib'
+import type { Options, SocketOptions } from 'amqplib'
 
 import type { Encoder } from './Encoder.js'
 import type { Encrypter } from './Encrypter.js'
@@ -24,7 +24,7 @@ export type AmqpBridgeConfig = {
 	/** the AMQP broker url @default amqp://localhost */
 	url?: string | Options.Connect
 	/** socket options */
-	socketOptions?: unknown
+	socketOptions?: SocketOptions
 	/** the encoder(s) to be used for AMQP messages @default jsonEncoder  */
 	encoder?: Encoder
 	/** the encrypter(s) to be used for AMQP messages @default plain  */

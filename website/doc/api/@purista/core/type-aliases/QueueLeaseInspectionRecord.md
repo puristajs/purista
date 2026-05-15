@@ -22,7 +22,7 @@ Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:4](https://git
 
 ### leasedAt?
 
-> `optional` **leasedAt**: `number`
+> `optional` **leasedAt?**: `number`
 
 Defined in: [core/QueueBridge/types/QueueLeaseInspectionRecord.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/QueueBridge/types/QueueLeaseInspectionRecord.ts#L5)
 

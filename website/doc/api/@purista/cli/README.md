@@ -82,7 +82,7 @@ Generated tests follow the public testing helpers:
 - `createSubscriptionContextMock(...)` for subscription handler tests
 - `createStreamTestHarness(...)` for runtime stream tests
 - `createQueueWorkerTestHarness(...)` for runtime queue worker tests
-- `createAgentTestHarness(...)` and `ScriptedModel` for agent runtime tests
+- `createAgentTestHarness(...)` and `createScriptedHarnessModel(...)` for agent runtime tests
 
 **Visit [purista.dev](https://purista.dev)**
 

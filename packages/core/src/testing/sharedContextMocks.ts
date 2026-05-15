@@ -3,6 +3,7 @@ import { stub } from 'sinon'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { PuristaMetricContext, PuristaMetricDefinitions } from '../core/types/PuristaMetrics.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import { getLoggerMock } from '../mocks/getLogger.mock.js'
 import type { Schema } from '../schema/index.js'
@@ -127,6 +128,37 @@ export const createEmitStubMap = <EmitList extends Record<string, Schema>>(
 	}
 
 	return emitStubs
+}
+
+/**
+ * Creates a permissive no-op metric context for low-level handler tests.
+ *
+ * Test helpers do not have access to the service builder's full metric
+ * registry, but handler tests should still be able to exercise code that
+ * records declared metrics without manually stubbing every metric name.
+ */
+export const createMetricContextMock = <Metrics extends PuristaMetricDefinitions = PuristaMetricDefinitions>(
+	sandbox?: SinonSandbox,
+): PuristaMetricContext<Metrics> => {
+	const handles: Record<string, { add: SinonStub; record: SinonStub }> = {}
+
+	return new Proxy(
+		{},
+		{
+			get(_target: object, name) {
+				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
+					return undefined
+				}
+
+				handles[name] ??= {
+					add: sandbox?.stub() ?? stub(),
+					record: sandbox?.stub() ?? stub(),
+				}
+
+				return handles[name]
+			},
+		},
+	) as PuristaMetricContext<Metrics>
 }
 
 export const createBaseContextStubs = <

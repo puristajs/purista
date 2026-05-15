@@ -1,3 +1,4 @@
+export * from '../AgentQueueBuilder/testing/index.js'
 export * from './createCommandContextMock.js'
 export * from './createCommandTestHarness.js'
 export * from './createQueueWorkerContextMock.js'

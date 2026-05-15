@@ -14,7 +14,7 @@ Defined in: [dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts:16](https://
 
 ### contentType?
 
-> `optional` **contentType**: `string`
+> `optional` **contentType?**: `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts:21](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts#L21)
 
@@ -25,7 +25,7 @@ This is optional and will be inferred from the payload if not provided.
 
 ### metadata?
 
-> `optional` **metadata**: [`KeyValueType`](KeyValueType.md)
+> `optional` **metadata?**: [`KeyValueType`](KeyValueType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts:26](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts#L26)
 

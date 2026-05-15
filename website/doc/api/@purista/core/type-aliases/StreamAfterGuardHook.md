@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StreamAfterGuardHook
 
-# Type Alias: StreamAfterGuardHook()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionFinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: StreamAfterGuardHook\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionFinalType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
 > **StreamAfterGuardHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionFinalType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `result`, `originalPayload`, `originalParameter`) => `Promise`\<`void`\>
 

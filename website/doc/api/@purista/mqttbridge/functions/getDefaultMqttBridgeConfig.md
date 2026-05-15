@@ -14,7 +14,7 @@ Defined in: [mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts:5](https://github
 
 ### allowRetries?
 
-> `optional` **allowRetries**: `boolean`
+> `optional` **allowRetries?**: `boolean`
 
 allow retry of the initial connect
 

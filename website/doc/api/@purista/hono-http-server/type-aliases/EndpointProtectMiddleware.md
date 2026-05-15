@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/hono-http-server](../README.md) / EndpointProtectMiddleware
 
-# Type Alias: EndpointProtectMiddleware()\<T, Bindings, Variables\>
+# Type Alias: EndpointProtectMiddleware\<T, Bindings, Variables\>
 
 > **EndpointProtectMiddleware**\<`T`, `Bindings`, `Variables`\> = (`this`, `c`, `next`) => `Promise`\<`void` \| `Response`\>
 

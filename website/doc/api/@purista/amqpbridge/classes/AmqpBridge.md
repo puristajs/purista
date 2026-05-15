@@ -175,7 +175,7 @@ amqp://localhost
 
 > **capabilities**: [`EventBridgeCapabilities`](../../core/type-aliases/EventBridgeCapabilities.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 #### Implementation of
 
@@ -189,7 +189,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 ### channel?
 
-> `protected` `optional` **channel**: `ConfirmChannel`
+> `protected` `optional` **channel?**: `ConfirmChannel`
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:94](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L94)
 
@@ -199,7 +199,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:94](https://github.com/puristajs/
 
 > **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 #### Inherited from
 
@@ -209,7 +209,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 ### connection?
 
-> `protected` `optional` **connection**: `ChannelModel`
+> `protected` `optional` **connection?**: `ChannelModel`
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L93)
 
@@ -235,7 +235,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:99](https://github.com/puristajs/
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -277,7 +277,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:96](https://github.com/puristajs/
 
 > `protected` `readonly` **inFlightExecutions**: [`InFlightExecutionTracker`](../../core/classes/InFlightExecutionTracker.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 #### Inherited from
 
@@ -289,7 +289,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 > **instanceId**: `string`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 #### Implementation of
 
@@ -305,7 +305,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -317,7 +317,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 > **name**: `string`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 #### Implementation of
 
@@ -355,7 +355,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:97](https://github.com/puristajs/
 
 ### replyQueueName?
 
-> `protected` `optional` **replyQueueName**: `string`
+> `protected` `optional` **replyQueueName?**: `string`
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:101](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L101)
 
@@ -381,7 +381,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:116](https://github.com/puristajs
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -641,7 +641,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:163](https://github.com/puristajs
 
 > **getInFlightExecutionCount**(): `number`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
 
 Number of currently running handlers across all work kinds.
 
@@ -663,7 +663,7 @@ Number of currently running handlers across all work kinds.
 
 > **getInFlightExecutionCounts**(): [`InFlightExecutionCounts`](../../core/type-aliases/InFlightExecutionCounts.md)
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
 
 Number of currently running handlers grouped by work kind.
 
@@ -765,7 +765,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:236](https://github.com/puristajs
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
 
 Returns open telemetry tracer of this service
 
@@ -856,7 +856,7 @@ Indicates if the bridge finished startup and is ready to process traffic.
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -941,7 +941,7 @@ the id of command function queue
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
 
 Register a service stream.
 
@@ -1115,7 +1115,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:204](https://github.com/puristajs
 
 > **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 #### Type Parameters
 
@@ -1131,7 +1131,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 ##### kind?
 
-`"command"` | `"subscription"` | `"stream"` | `"generic"`
+`"command"` \| `"subscription"` \| `"stream"` \| `"generic"`
 
 #### Returns
 
@@ -1165,7 +1165,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:141](https://github.com/puristajs
 
 ##### options
 
-`Publish` | `undefined`
+`Publish` \| `undefined`
 
 #### Returns
 
@@ -1199,7 +1199,7 @@ Connect to RabbitMQ broker, ensure exchange, call back queue
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:45
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:45
 
 Start a child span for opentelemetry tracking
 
@@ -1225,9 +1225,9 @@ span options
 
 ##### context
 
-optional context
+`Context` \| `undefined`
 
-`Context` | `undefined`
+optional context
 
 ##### fn
 
@@ -1275,7 +1275,7 @@ Unregisters a command consumer and closes the dedicated command channel.
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
 
 Unregister a service stream
 
@@ -1327,7 +1327,7 @@ Unregisters a subscription consumer and closes its channel.
 
 > **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
 #### Parameters
 
@@ -1349,7 +1349,7 @@ Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: core/dist/esm/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

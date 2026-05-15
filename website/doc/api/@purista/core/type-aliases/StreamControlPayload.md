@@ -22,6 +22,6 @@ Defined in: [core/types/stream/StreamControl.ts:8](https://github.com/puristajs/
 
 ### reason?
 
-> `optional` **reason**: `string`
+> `optional` **reason?**: `string`
 
 Defined in: [core/types/stream/StreamControl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/stream/StreamControl.ts#L9)

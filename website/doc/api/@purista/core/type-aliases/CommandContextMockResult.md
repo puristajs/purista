@@ -8,7 +8,7 @@
 
 > **CommandContextMockResult**\<`TBuilder`\> = `object`
 
-Defined in: [testing/createCommandContextMock.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L51)
+Defined in: [testing/createCommandContextMock.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L46)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [testing/createCommandContextMock.ts:51](https://github.com/puristaj
 
 > **context**: [`CommandFunctionContext`](CommandFunctionContext.md)\<[`GetMessagePayloadType`](GetMessagePayloadType.md)\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"PayloadSchema"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"TransformInputPayloadSchema"`\]\>, [`GetMessageParamsType`](GetMessageParamsType.md)\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ParamsSchema"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"TransformInputParamsSchema"`\]\>, [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\]\>
 
-Defined in: [testing/createCommandContextMock.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L52)
+Defined in: [testing/createCommandContextMock.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L47)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [testing/createCommandContextMock.ts:52](https://github.com/puristaj
 
 > **mock**: [`CommandFunctionContext`](CommandFunctionContext.md)\<[`GetMessagePayloadType`](GetMessagePayloadType.md)\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"PayloadSchema"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"TransformInputPayloadSchema"`\]\>, [`GetMessageParamsType`](GetMessageParamsType.md)\<[`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"ParamsSchema"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"TransformInputParamsSchema"`\]\>, [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`CommandContextMockBuilderTypes`](CommandContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\]\>
 
-Defined in: [testing/createCommandContextMock.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L67)
+Defined in: [testing/createCommandContextMock.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L62)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [testing/createCommandContextMock.ts:67](https://github.com/puristaj
 
 > **stubs**: `object`
 
-Defined in: [testing/createCommandContextMock.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L82)
+Defined in: [testing/createCommandContextMock.ts:77](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createCommandContextMock.ts#L77)
 
 #### emit
 

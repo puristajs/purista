@@ -7,7 +7,7 @@ const clientGenerateBaseConfigSchema = z.object({
 	version: z.string(),
 	definitionPath: z.string(),
 	outputPath: z.string(),
-	buildAs: z.enum(['esm', 'commonjs', 'both']).default('both'),
+	buildAs: z.literal('esm').default('esm'),
 	package: z
 		.object({
 			name: z.string(),

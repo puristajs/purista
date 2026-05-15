@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / ConfigDeleteFunction
 
-# Type Alias: ConfigDeleteFunction()
+# Type Alias: ConfigDeleteFunction
 
 > **ConfigDeleteFunction** = (`configName`) => `Promise`\<`void`\>
 

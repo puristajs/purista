@@ -11,69 +11,11 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - Escape changelog angle brackets for api docs build ([#240](https://github.com/orhun/git-cliff/issues/240))
-- Sanitize provider tool names and refresh skills
-- Apply skills to structured model calls
-- Reject empty streamed public replies
-- Stabilize package builds and bridge typing
-- Make command handling single-shot without retries
-
-### Documentation
-
-- Sync generated site and api artifacts
-- Clarify nested agent orchestration
-- Refresh canonical PURISTA skill catalog
-- Document multimodal file hooks
-- Align examples with reply helpers
-- Align handbook with reply decision model
-- Prefer consumer-local schemas
 
 ### Features
 
 - Add Queue Handling to PURISTA ([#248](https://github.com/orhun/git-cliff/issues/248))
-- Add @purista/ai package ([#250](https://github.com/orhun/git-cliff/issues/250))
-- Forward nested agent streams
-- Add nested agent forwarding helper
-- Feat sandbox runtime diagnostics and preflight
-- Feat ai filesystem skills and sandbox contract
-- Feat ai skill metadata selection helpers
-- Harden agent runtime and grouped context
-- Harden model runtime and agent guidance
-- Add protocol extraction helpers
-- Add multimodal input ingestion
-- Add structured output streaming
-- Add streamed public reply helper
-- Add internal reply composition helper
-- Add dynamic skill reference selection
-- Harden bridge reliability handling
-- Harden queue and subscription reliability
-- Add drop/stop-consumer outcomes and harden broker failure paths
-- Formalize operator runtime APIs and paused-state health
-- Align command timeout reliability across adapters
-- Unify stream-first agent invocation runtime
-- Harden sandbox runtime and converge execution path
-
-### Refactor
-
-- Refactor ai external runtime dx
-- Refactor ai runtime and testing foundations
-- Refactor ai runtime defaults and docs
-- Refactor ai agent builder parity and docs
-- Refactor builder parity across core and ai
-- Refactor ai dx typing and api docs
-- Reframe purista skills as builder memory
-- Refactor ai expose typed agent service handle
-- Refactor testing helpers and scaffolding
-- Make stream protocol delta-first
-- Standardize public reply publishing
-- Align support agent reply flow
-- Consolidate framework catalog
-- Add modular blueprint init engine
-- Remove runtime js events
-- Decouple health and route registration defaults
-
-### Styling
-
-- Format nested agent forwarding helpers
+- [**breaking**] Ship plain ESM library packages
 
 ## [2.2.0] - 2026-02-13
 

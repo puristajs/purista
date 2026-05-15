@@ -129,11 +129,7 @@ export const addPuristaAgent = async (input: {
 
 	const serviceBuilderFilePath = join(projectPath, serviceBasePath, serviceEntry.builderFile)
 	const serviceBuilderContent = await readFile(serviceBuilderFilePath, 'utf-8')
-	const upgradedImportContent = serviceBuilderContent.replace(
-		"import { ServiceBuilder } from '@purista/core'",
-		"import { ServiceBuilder } from '@purista/ai'",
-	)
-	const normalizedBuilderContent = upgradedImportContent.replace(
+	const normalizedBuilderContent = serviceBuilderContent.replace(
 		/export const (\w+) = new ServiceBuilder\(([^)]+)\)\.setConfigSchema\(([^)]+)\)\s*$/m,
 		(_match, builderName: string, serviceInfoName: string, configSchemaName: string) =>
 			`const ${builderName}Instance = new ServiceBuilder(${serviceInfoName})\n${builderName}Instance.setConfigSchema(${configSchemaName})\n\nexport const ${builderName} = ${builderName}Instance`,

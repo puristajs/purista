@@ -16,7 +16,7 @@ The configuration for the DefaultEventBridge.
 
 ### logWarnOnMessagesWithoutReceiver?
 
-> `optional` **logWarnOnMessagesWithoutReceiver**: `boolean`
+> `optional` **logWarnOnMessagesWithoutReceiver?**: `boolean`
 
 Defined in: [DefaultEventBridge/types/DefaultEventBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L6)
 

@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueWorkerHandler
 
-# Type Alias: QueueWorkerHandler()\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
+# Type Alias: QueueWorkerHandler\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
 
 > **QueueWorkerHandler**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\> = (`context`, `message`) => `Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `undefined`\>
 

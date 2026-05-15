@@ -3,7 +3,6 @@
 	"definitionPath": "./definitions",
 	"outputPath": "./generateClient",
 	"httpClient": {
-		"buildAs": "both",
 		"clientName": "HttpClient"
 	}
 }

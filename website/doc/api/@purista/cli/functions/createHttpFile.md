@@ -8,13 +8,13 @@
 
 > **createHttpFile**(`runtime`): "import type \{ EventBridge, Logger, Service \} from '@purista/core'\nimport \{ honoV1Service \} from '@purista/hono-http-server'\nimport \{ apiReference \} from '@scalar/hono-api-reference'\nimport \{ serveStatic \} from 'hono/bun'\nimport httpConfig from './config/http.js'\n\nexport const getHttpServer = async (input: \{ eventBridge: EventBridge; logger: Logger; services: Service\[\] \}) =\> \{\n\tconst honoService = await honoV1Service.getInstance(input.eventBridge, \{\n\t\tlogger: input.logger,\n\t\tserviceConfig: \{ ...httpConfig.serviceConfig, services: input.services \},\n\t\})\n\n\thonoService.app.get(\n\t\thttpConfig.serviceConfig.apiMountPath,\n\t\tapiReference(\{\n\t\t\tpageTitle: httpConfig.serviceConfig.openApi.info.title,\n\t\t\tspec: \{\n\t\t\t\turl: \`$\{httpConfig.serviceConfig.apiMountPath\}/openapi.json\`,\n\t\t\t\},\n\t\t\}),\n\t)\n\n\thonoService.app.get('\*', serveStatic(\{ root: httpConfig.root \}))\n\thonoService.openApi.addServer(\{\n\t\turl: \`http://localhost:$\{httpConfig.port\}\`,\n\t\tdescription: 'the local server',\n\t\})\n\n\tawait honoService.start()\n\n\tconst serverInstance = Bun.serve(\{\n\t\tfetch: honoService.app.fetch,\n\t\tport: httpConfig.port,\n\t\})\n\n\treturn \{ honoService, serverInstance \}\n\}\n" \| "import \{ serve \} from '@hono/node-server'\nimport \{ serveStatic \} from '@hono/node-server/serve-static'\nimport type \{ EventBridge, Logger, Service \} from '@purista/core'\nimport \{ honoV1Service \} from '@purista/hono-http-server'\nimport \{ apiReference \} from '@scalar/hono-api-reference'\nimport httpConfig from './config/http.js'\n\nexport const getHttpServer = async (input: \{ eventBridge: EventBridge; logger: Logger; services: Service\[\] \}) =\> \{\n\tconst honoService = await honoV1Service.getInstance(input.eventBridge, \{\n\t\tlogger: input.logger,\n\t\tserviceConfig: \{ ...httpConfig.serviceConfig, services: input.services \},\n\t\})\n\n\thonoService.app.get(\n\t\thttpConfig.serviceConfig.apiMountPath,\n\t\tapiReference(\{\n\t\t\tpageTitle: httpConfig.serviceConfig.openApi.info.title,\n\t\t\tspec: \{\n\t\t\t\turl: \`$\{httpConfig.serviceConfig.apiMountPath\}/openapi.json\`,\n\t\t\t\},\n\t\t\}),\n\t)\n\n\thonoService.app.get('\*', serveStatic(\{ root: httpConfig.root \}))\n\thonoService.openApi.addServer(\{ url: \`http://localhost:$\{httpConfig.port\}\`, description: 'the local server' \})\n\n\tawait honoService.start()\n\n\tconst serverInstance = serve(\{\n\t\tfetch: honoService.app.fetch,\n\t\tport: httpConfig.port,\n\t\})\n\n\treturn \{ honoService, serverInstance \}\n\}\n"
 
-Defined in: [packages/cli/src/blueprints/content.ts:179](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/blueprints/content.ts#L179)
+Defined in: [packages/cli/src/blueprints/content.ts:179](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/content.ts#L179)
 
 ## Parameters
 
 ### runtime
 
-`"node"` | `"bun"`
+`"node"` \| `"bun"`
 
 ## Returns
 

@@ -19,9 +19,9 @@ connects them with the corresponding service commands.
 
 ### services
 
-Instance or array of services whose commands should be exposed.
+[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> \| [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[] \| `undefined`
 
-[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> | [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[] | `undefined`
+Instance or array of services whose commands should be exposed.
 
 ### app
 

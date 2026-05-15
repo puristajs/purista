@@ -16,7 +16,7 @@ Dapr secret store configuration
 
 ### clientConfig?
 
-> `optional` **clientConfig**: [`DaprClientConfig`](DaprClientConfig.md)
+> `optional` **clientConfig?**: [`DaprClientConfig`](DaprClientConfig.md)
 
 Defined in: [dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts:15](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts#L15)
 
@@ -26,7 +26,7 @@ The Dapr client config to interact with Dapr sidecar
 
 ### metadata?
 
-> `optional` **metadata**: `object`
+> `optional` **metadata?**: `object`
 
 Defined in: [dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts#L20)
 
@@ -34,7 +34,7 @@ Dapr secret store metadata
 
 #### namespace?
 
-> `optional` **namespace**: `string`
+> `optional` **namespace?**: `string`
 
 In case of deploying into namespace other than default, the namespace (e.g. production) must be set
 
@@ -42,7 +42,7 @@ In case of deploying into namespace other than default, the namespace (e.g. prod
 
 ### secretStoreName?
 
-> `optional` **secretStoreName**: `string`
+> `optional` **secretStoreName?**: `string`
 
 Defined in: [dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts:10](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts#L10)
 

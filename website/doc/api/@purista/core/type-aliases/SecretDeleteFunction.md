@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SecretDeleteFunction
 
-# Type Alias: SecretDeleteFunction()
+# Type Alias: SecretDeleteFunction
 
 > **SecretDeleteFunction** = (`secretName`) => `Promise`\<`void`\>
 

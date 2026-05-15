@@ -6,6 +6,7 @@
 		"outDir": "dist",
 		"baseUrl": ".",
 		"strict": true,
+		"ignoreDeprecations": "6.0",
 		"module": "es2022",
 		"declaration": true,
 		"removeComments": false,

@@ -2,6 +2,7 @@ import { SpanStatusCode } from '@opentelemetry/api'
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
+import type { ServiceClassMetrics } from '../core/types/ServiceClassMetrics.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionBeforeGuardHook } from '../core/types/subscription/SubscriptionBeforeGuardHook.js'
 import type { SubscriptionFunction } from '../core/types/subscription/SubscriptionFunction.js'
@@ -23,7 +24,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 ) {
 	const wrapped = async function (
 		this: S,
-		context: SubscriptionFunctionContext,
+		context: SubscriptionFunctionContext<any, any, any, any, any, ServiceClassMetrics<S>>,
 		payload: unknown,
 		parameter: unknown,
 	): Promise<unknown> {

@@ -13,6 +13,10 @@ This is a full example of PURISTA.
 You will find in the folder `grafana`, a ready to go `docker-compose` for [grafana](https://grafana.com).  
 This docker compose spins up [Grafana](https://grafana.com/grafana/) itself, [Tempo](https://grafana.com/traces/) for traces, [Loki](https://grafana.com/logs/) for logs and [Prometheus](https://grafana.com/metrics/) for metrics.
 
+Metrics are emitted through the OpenTelemetry Metrics API.
+The example configures the OTel SDK in application code: it uses a console metric reader by default so the app starts without external telemetry infrastructure, and switches to OTLP metrics when `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` is set.
+PURISTA does not create a Prometheus `/metrics` endpoint; Prometheus ingestion is handled by the OTel Collector setup in the Grafana/SigNoz profiles.
+
 The docker compose file also includes a RabbitMQ broker.
 
 ```bash

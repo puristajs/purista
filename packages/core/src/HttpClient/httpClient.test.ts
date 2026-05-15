@@ -1,5 +1,6 @@
 import { createSandbox } from 'sinon'
 
+import { createMemoryMetricsRecorder } from '../core/metrics/index.js'
 import { getLoggerMock } from '../mocks/index.js'
 import { HttpClient } from './HttpClient.impl.js'
 
@@ -129,6 +130,30 @@ describe('HttpClient', () => {
 		})
 
 		await expect(client.get('/example')).resolves.toStrictEqual(response)
+	})
+
+	it('records HTTP client request duration without raw URL attributes', async () => {
+		const logger = getLoggerMock()
+		const metricsRecorder = createMemoryMetricsRecorder()
+		const client = new HttpClient({ baseUrl: 'http://example.com:8080', logger: logger.mock, metricsRecorder })
+
+		sandbox.stub(global, 'fetch').resolves(createJsonResponse({ ok: true }, { status: 201 }))
+
+		await expect(client.post('/example?secret=yes', { some: 'data' })).resolves.toStrictEqual({ ok: true })
+
+		expect(metricsRecorder.records).toEqual([
+			expect.objectContaining({
+				name: 'http.client.request.duration',
+				attributes: expect.objectContaining({
+					'http.request.method': 'POST',
+					'server.address': 'example.com',
+					'server.port': 8080,
+					'http.response.status_code': 201,
+					'purista.outcome': 'success',
+				}),
+			}),
+		])
+		expect(Object.keys(metricsRecorder.records[0].attributes)).not.toContain('url.full')
 	})
 
 	it('throws', async () => {

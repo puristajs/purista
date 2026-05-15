@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SecretGetterFunction
 
-# Type Alias: SecretGetterFunction()
+# Type Alias: SecretGetterFunction
 
 > **SecretGetterFunction** = \<`SecretNames`\>(...`secretNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 

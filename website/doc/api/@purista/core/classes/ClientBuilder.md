@@ -26,7 +26,7 @@ Defined in: [ClientBuilder/ClientBuilder.impl.ts:51](https://github.com/puristaj
 
 ##### config?
 
-`Partial`\<\{ `buildAs`: `"esm"` \| `"commonjs"` \| `"both"`; `definitionPath`: `string`; `eventBridgeClient?`: \{ `clientName`: `string`; \}; `httpClient?`: \{ `clientName`: `string`; \}; `outputPath`: `string`; `package?`: \{ `description`: `string`; `name`: `string`; `private`: `boolean`; \}; `version`: `string`; \}\>
+`Partial`\<\{ `buildAs`: `"esm"`; `definitionPath`: `string`; `eventBridgeClient?`: \{ `clientName`: `string`; \}; `httpClient?`: \{ `clientName`: `string`; \}; `outputPath`: `string`; `package?`: \{ `description`: `string`; `name`: `string`; `private`: `boolean`; \}; `version`: `string`; \}\>
 
 #### Returns
 
@@ -46,7 +46,7 @@ Defined in: [ClientBuilder/ClientBuilder.impl.ts:43](https://github.com/puristaj
 
 #### buildAs
 
-> **buildAs**: `"esm"` \| `"commonjs"` \| `"both"`
+> **buildAs**: `"esm"`
 
 #### definitionPath
 
@@ -74,7 +74,7 @@ Defined in: [ClientBuilder/ClientBuilder.impl.ts:43](https://github.com/puristaj
 
 #### package?
 
-> `optional` **package**: `object`
+> `optional` **package?**: `object`
 
 ##### package.description
 
@@ -109,10 +109,10 @@ Defaults to the current working directory (`process.cwd()`).
 
 > **build**(): `Promise`\<`void`\>
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:240](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L240)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:221](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L221)
 
 Runs the tsc against the generated ts source files.
-Depending on settings, it will generate ESM and/or commonJS files
+Generates plain ESM output.
 
 #### Returns
 
@@ -154,7 +154,7 @@ Is used in generated package.json
 
 > **createPackageJson**(): `Promise`\<`void`\>
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:178](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L178)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:176](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L176)
 
 Creates a package.json file in the output folder.
 Exports the files which are build by tsc based on generated client files
@@ -169,7 +169,7 @@ Exports the files which are build by tsc based on generated client files
 
 > **destroy**(): `void`
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:853](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L853)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:813](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L813)
 
 Destroys the builder and cleans the event listeners
 
@@ -215,7 +215,7 @@ Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/
 
 > **generateEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:742](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L742)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:704](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L704)
 
 Generates the zero-dependency EventBridge client source files.
 
@@ -235,7 +235,7 @@ Generates the zero-dependency EventBridge client source files.
 
 > **generateHEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:786](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L786)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:746](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L746)
 
 #### Parameters
 
@@ -257,7 +257,7 @@ Use `generateEventBridgeClient` instead.
 
 > **generateHttpClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:362](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L362)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:326](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L326)
 
 Generate zero‑dependency HTTP client source files from the given definition.
 
@@ -359,7 +359,7 @@ If no path is provided, it loads `purista.client.json` from `rootPath`.
 
 > **loadDefinitionFiles**(`path?`): `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
 
-Defined in: [ClientBuilder/ClientBuilder.impl.ts:322](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L322)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:286](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L286)
 
 Load service definitions from JSON files.
 

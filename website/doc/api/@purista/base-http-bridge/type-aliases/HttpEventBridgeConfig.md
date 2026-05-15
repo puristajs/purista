@@ -14,7 +14,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts
 
 ### apiPrefix?
 
-> `optional` **apiPrefix**: `string`
+> `optional` **apiPrefix?**: `string`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:49](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L49)
 
@@ -31,7 +31,7 @@ needs to `enableRestApiExpose` set to `true`
 
 ### commandPayloadAsCloudEvent?
 
-> `optional` **commandPayloadAsCloudEvent**: `boolean`
+> `optional` **commandPayloadAsCloudEvent?**: `boolean`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:74](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L74)
 
@@ -49,7 +49,7 @@ false
 
 ### enableHttpCompression?
 
-> `optional` **enableHttpCompression**: `boolean`
+> `optional` **enableHttpCompression?**: `boolean`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:79](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L79)
 
@@ -65,7 +65,7 @@ true
 
 ### enableRestApiExpose?
 
-> `optional` **enableRestApiExpose**: `boolean`
+> `optional` **enableRestApiExpose?**: `boolean`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:56](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L56)
 
@@ -81,7 +81,7 @@ true
 
 ### name?
 
-> `optional` **name**: `string`
+> `optional` **name?**: `string`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:5](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L5)
 
@@ -89,7 +89,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts
 
 ### pathPrefix?
 
-> `optional` **pathPrefix**: `string`
+> `optional` **pathPrefix?**: `string`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:41](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L41)
 
@@ -103,7 +103,7 @@ purista
 
 ***
 
-### serve()
+### serve
 
 > **serve**: (`options`) => `Server` \| `Http2Server` \| `Http2SecureServer`
 
@@ -143,7 +143,7 @@ https://hono.dev
 
 ### serverHost?
 
-> `optional` **serverHost**: `string`
+> `optional` **serverHost?**: `string`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:27](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L27)
 
@@ -159,7 +159,7 @@ Host of the server.
 
 ### serverPort?
 
-> `optional` **serverPort**: `number`
+> `optional` **serverPort?**: `number`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:34](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L34)
 
@@ -175,7 +175,7 @@ Port of the server.
 
 ### subscriptionPayloadAsCloudEvent?
 
-> `optional` **subscriptionPayloadAsCloudEvent**: `boolean`
+> `optional` **subscriptionPayloadAsCloudEvent?**: `boolean`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:65](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L65)
 

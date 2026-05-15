@@ -30,7 +30,7 @@ Send the acknowledge to message broker as soon as the message arrives
 
 ### consumerFailureHandling?
 
-> `optional` **consumerFailureHandling**: [`DefinitionEventBridgeConsumerFailureHandling`](DefinitionEventBridgeConsumerFailureHandling.md)
+> `optional` **consumerFailureHandling?**: [`DefinitionEventBridgeConsumerFailureHandling`](DefinitionEventBridgeConsumerFailureHandling.md)
 
 Defined in: [core/types/DefinitionEventBridgeConfig.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L40)
 

@@ -8,23 +8,23 @@
 
 > **PuristaCommandContext** = `object`
 
-Defined in: [packages/cli/src/core/command.ts:13](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L13)
+Defined in: [packages/cli/src/core/command.ts:13](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L13)
 
 ## Properties
 
 ### applyDefaults?
 
-> `optional` **applyDefaults**: `boolean`
+> `optional` **applyDefaults?**: `boolean`
 
-Defined in: [packages/cli/src/core/command.ts:21](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L21)
+Defined in: [packages/cli/src/core/command.ts:21](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L21)
 
 ***
 
 ### codeWriterOptions?
 
-> `optional` **codeWriterOptions**: `Partial`\<`Options`\>
+> `optional` **codeWriterOptions?**: `Partial`\<`Options`\>
 
-Defined in: [packages/cli/src/core/command.ts:18](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L18)
+Defined in: [packages/cli/src/core/command.ts:18](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L18)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/cli/src/core/command.ts:18](https://github.com/puristajs/p
 
 > **cwd**: `string`
 
-Defined in: [packages/cli/src/core/command.ts:14](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L14)
+Defined in: [packages/cli/src/core/command.ts:14](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L14)
 
 ***
 
@@ -40,23 +40,23 @@ Defined in: [packages/cli/src/core/command.ts:14](https://github.com/puristajs/p
 
 > **mode**: [`PuristaCommandMode`](PuristaCommandMode.md)
 
-Defined in: [packages/cli/src/core/command.ts:15](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L15)
+Defined in: [packages/cli/src/core/command.ts:15](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L15)
 
 ***
 
 ### output?
 
-> `optional` **output**: [`OutputAdapter`](OutputAdapter.md)
+> `optional` **output?**: [`OutputAdapter`](OutputAdapter.md)
 
-Defined in: [packages/cli/src/core/command.ts:17](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L17)
+Defined in: [packages/cli/src/core/command.ts:17](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L17)
 
 ***
 
 ### projectSnapshot?
 
-> `optional` **projectSnapshot**: [`ProjectSnapshot`](ProjectSnapshot.md)
+> `optional` **projectSnapshot?**: [`ProjectSnapshot`](ProjectSnapshot.md)
 
-Defined in: [packages/cli/src/core/command.ts:20](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L20)
+Defined in: [packages/cli/src/core/command.ts:20](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L20)
 
 ***
 
@@ -64,12 +64,12 @@ Defined in: [packages/cli/src/core/command.ts:20](https://github.com/puristajs/p
 
 > **prompt**: [`PromptAdapter`](PromptAdapter.md)
 
-Defined in: [packages/cli/src/core/command.ts:16](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L16)
+Defined in: [packages/cli/src/core/command.ts:16](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L16)
 
 ***
 
 ### puristaConfig?
 
-> `optional` **puristaConfig**: [`PuristaConfig`](PuristaConfig.md)
+> `optional` **puristaConfig?**: [`PuristaConfig`](PuristaConfig.md)
 
-Defined in: [packages/cli/src/core/command.ts:19](https://github.com/puristajs/purista/blob/8c08324bf0ba639acf59c53779ee90a07cf82be5/packages/cli/src/core/command.ts#L19)
+Defined in: [packages/cli/src/core/command.ts:19](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/command.ts#L19)

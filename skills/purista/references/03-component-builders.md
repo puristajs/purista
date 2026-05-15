@@ -5,6 +5,20 @@ Use this reference when implementing or reviewing service components.
 ## Service
 Use `ServiceBuilder` for a versioned capability. It declares config, resources, and child definitions. Runtime infrastructure is supplied later through `getInstance(...)`.
 
+Declare service-level custom metrics on the service builder. Custom names must use the `app.` prefix and low-cardinality attributes.
+
+```ts
+const orderService = new ServiceBuilder(orderServiceInfo)
+	.defineMetric('app.orders.created', {
+		kind: 'counter',
+		unit: '{order}',
+		description: 'Created orders',
+		attributes: z.object({ channel: z.enum(['web', 'api']) }),
+	})
+```
+
+Declared service metrics cascade into commands, subscriptions, streams, queue workers, and attached agent handlers through typed `context.metrics`.
+
 ## Command
 Use commands for direct business actions. Generated command files are the preferred starting point.
 
@@ -41,7 +55,7 @@ purista add queue-worker invoiceProcessor --service billing --service-version 1 
 Use queue-backed execution when work needs leases, retries, delay, dead-letter handling, or operator replay.
 
 ## Agent
-Use `@purista/ai` only in applications that need agents. Generated agents attach to a service and expand into:
+Agents are native core service components. Generated agents attach to a service and expand into:
 - queue
 - queue worker
 - aggregate command
@@ -55,6 +69,19 @@ Agents execute exactly one of:
 - `setHarnessAgent(...)`
 - `setHarnessWorkflow(...)`
 - `setRunFunction(...)`
+
+Agent-local custom metrics are declared on `AgentQueueBuilder.defineMetric(...)` and are visible only inside that agent handler. Service-level metrics remain visible to the agent handler too.
+
+```ts
+const triageAgent = supportService
+	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
+	.defineMetric('app.agent.escalations', {
+		kind: 'counter',
+		unit: '{escalation}',
+		description: 'Tickets escalated by the triage agent',
+		attributes: z.object({ priority: z.enum(['normal', 'high']) }),
+	})
+```
 
 ## Contract Rule
 Every component boundary owns its schema. Consumers should define a narrow local schema for the fields they read instead of importing an oversized producer schema.

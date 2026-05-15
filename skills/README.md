@@ -18,7 +18,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - Split architecture guidance from implementation guidance.
 - Split package guidance from component/builder guidance.
 - Prefer CLI-generated skeletons whenever possible; document lower-level builder usage as the refinement path.
-- Keep current platform decisions visible: Hono as active HTTP runtime, EventBridge/QueueBridge separation, optional `@purista/ai`, and harness-backed AI agents.
+- Keep current platform decisions visible: Hono as active HTTP runtime, EventBridge/QueueBridge separation, core-owned harness-backed agents, and provider packages as app-level dependencies.
 - Contract guidance should prefer boundary-local consumer schemas over one oversized shared schema reused across many services.
 
 ## Layering

@@ -111,7 +111,7 @@ https://[KEY_VAULT_NAME].vault.azure.net
 
 > **cache**: [`SecretStoreCacheMap`](../../core/type-aliases/SecretStoreCacheMap.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -131,56 +131,56 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:27](https://github.
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
 #### allowInsecureConnection?
 
-> `optional` **allowInsecureConnection**: `boolean`
+> `optional` **allowInsecureConnection?**: `boolean`
 
 Allow connections to self-signed / insecure endpoints (useful for local emulators).
 Never enable this in production.
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 #### options?
 
-> `optional` **options**: `SecretClientOptions`
+> `optional` **options?**: `SecretClientOptions`
 
 #### vaultUrl
 
@@ -204,7 +204,7 @@ https://[KEY_VAULT_NAME].vault.azure.net
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 #### Inherited from
 
@@ -216,7 +216,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -228,7 +228,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 #### Returns
 
@@ -244,7 +244,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
@@ -300,7 +300,7 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:55](https://github.
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 #### Parameters
 
@@ -344,7 +344,7 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:78](https://github.
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
+Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 #### Parameters
 

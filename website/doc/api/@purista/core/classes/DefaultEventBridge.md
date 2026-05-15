@@ -675,7 +675,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:211](https://github.c
 
 ##### kind?
 
-`"stream"` | `"command"` | `"subscription"` | `"generic"`
+`"stream"` \| `"command"` \| `"subscription"` \| `"generic"`
 
 #### Returns
 
@@ -739,9 +739,9 @@ span options
 
 ##### context
 
-optional context
+`Context` \| `undefined`
 
-`Context` | `undefined`
+optional context
 
 ##### fn
 

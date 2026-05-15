@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/mqttbridge](../README.md) / IncomingMessageFunction
 
-# Type Alias: IncomingMessageFunction()
+# Type Alias: IncomingMessageFunction
 
 > **IncomingMessageFunction** = (`this`, `payload`, `packet`) => `Promise`\<`void`\>
 

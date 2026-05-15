@@ -26,6 +26,7 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
+import { createHttpLogFields } from '../../../helper/logging.js'
 import {
 	negotiateProblemRepresentation,
 	renderProblemDetailsMarkdown,
@@ -295,7 +296,7 @@ export class HonoServiceClass<
 					message: (err as Error).message,
 				})
 
-				this.logger.debug({ path: c.req.path, ...span.spanContext(), customTraceId: c.get('traceId') }, 'not found')
+				this.logger.debug(createHttpLogFields({ path: c.req.path }, span.spanContext(), c.get('traceId')), 'not found')
 				return this.sendProblemResponse(c, err, StatusCode.NotFound)
 			})
 		})
@@ -317,7 +318,7 @@ export class HonoServiceClass<
 					return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
 				}
 
-				this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'General error handler')
+				this.logger.error(createHttpLogFields({ err }, span.spanContext(), c.get('traceId')), 'General error handler')
 
 				if (err instanceof HTTPException) {
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.status)
@@ -613,7 +614,7 @@ export class HonoServiceClass<
 					})
 
 					if (err instanceof HandledError) {
-						this.logger.debug({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, err.message)
+						this.logger.debug(createHttpLogFields({ err }, span.spanContext(), c.get('traceId')), err.message)
 
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
 						return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
@@ -623,7 +624,7 @@ export class HonoServiceClass<
 					unhandledError.errorCode = StatusCode.InternalServerError
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, unhandledError.errorCode)
 
-					this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'unhandled error')
+					this.logger.error(createHttpLogFields({ err }, span.spanContext(), c.get('traceId')), 'unhandled error')
 					return this.sendProblemResponse(c, unhandledError, unhandledError.errorCode)
 				}
 			})

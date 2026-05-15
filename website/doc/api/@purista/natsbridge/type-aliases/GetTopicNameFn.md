@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/natsbridge](../README.md) / GetTopicNameFn
 
-# Type Alias: GetTopicNameFn()
+# Type Alias: GetTopicNameFn
 
 > **GetTopicNameFn** = (`this`, `message`) => `string`
 

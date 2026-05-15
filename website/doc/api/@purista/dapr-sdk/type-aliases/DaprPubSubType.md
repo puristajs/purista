@@ -16,7 +16,7 @@ DaprPubSubType is the Type used by the Dapr API to interface with its PubSub com
 
 ### bulkSubscribe?
 
-> `optional` **bulkSubscribe**: [`BulkSubscribeConfig`](BulkSubscribeConfig.md)
+> `optional` **bulkSubscribe?**: [`BulkSubscribeConfig`](BulkSubscribeConfig.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:42](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L42)
 
@@ -24,7 +24,7 @@ Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:42](https://github.com
 
 ### deadLetterTopic?
 
-> `optional` **deadLetterTopic**: `string`
+> `optional` **deadLetterTopic?**: `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:39](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L39)
 
@@ -32,7 +32,7 @@ Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:39](https://github.com
 
 ### metadata?
 
-> `optional` **metadata**: [`KeyValueType`](KeyValueType.md)
+> `optional` **metadata?**: [`KeyValueType`](KeyValueType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:30](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L30)
 
@@ -48,7 +48,7 @@ Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:24](https://github.com
 
 ### route?
 
-> `optional` **route**: `string`
+> `optional` **route?**: `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:33](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L33)
 
@@ -56,7 +56,7 @@ Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:33](https://github.com
 
 ### routes?
 
-> `optional` **routes**: [`DaprPubSubRouteType`](DaprPubSubRouteType.md)
+> `optional` **routes?**: [`DaprPubSubRouteType`](DaprPubSubRouteType.md)
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:36](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L36)
 

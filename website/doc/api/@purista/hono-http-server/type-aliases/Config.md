@@ -14,18 +14,18 @@ Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:11](https://github.
 
 ### problemDetails?
 
-> `optional` **problemDetails**: `object`
+> `optional` **problemDetails?**: `object`
 
 Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:13](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L13)
 
 #### typeBaseUri?
 
-> `optional` **typeBaseUri**: `string`
+> `optional` **typeBaseUri?**: `string`
 
 ***
 
 ### traceHeaderField?
 
-> `optional` **traceHeaderField**: `string`
+> `optional` **traceHeaderField?**: `string`
 
 Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:12](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L12)

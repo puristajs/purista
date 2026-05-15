@@ -106,7 +106,7 @@ Defined in: [core/EventBridge/PendingStreamRegistry.impl.ts:35](https://github.c
 
 ##### traceId
 
-`string` | `undefined`
+`string` \| `undefined`
 
 #### Returns
 

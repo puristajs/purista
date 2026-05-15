@@ -32,7 +32,7 @@ Defined in: [core/types/queue/QueueMessage.ts:10](https://github.com/puristajs/p
 
 ### correlationId?
 
-> `optional` **correlationId**: `string`
+> `optional` **correlationId?**: `string`
 
 Defined in: [core/types/queue/QueueMessage.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L16)
 
@@ -64,7 +64,7 @@ Defined in: [core/types/queue/QueueMessage.ts:2](https://github.com/puristajs/pu
 
 ### idempotencyKey?
 
-> `optional` **idempotencyKey**: `string`
+> `optional` **idempotencyKey?**: `string`
 
 Defined in: [core/types/queue/QueueMessage.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L17)
 
@@ -96,7 +96,7 @@ Defined in: [core/types/queue/QueueMessage.ts:11](https://github.com/puristajs/p
 
 ### parameter?
 
-> `optional` **parameter**: `Params`
+> `optional` **parameter?**: `Params`
 
 Defined in: [core/types/queue/QueueMessage.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L5)
 
@@ -104,7 +104,7 @@ Defined in: [core/types/queue/QueueMessage.ts:5](https://github.com/puristajs/pu
 
 ### parentSpanId?
 
-> `optional` **parentSpanId**: `string`
+> `optional` **parentSpanId?**: `string`
 
 Defined in: [core/types/queue/QueueMessage.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L15)
 
@@ -120,7 +120,7 @@ Defined in: [core/types/queue/QueueMessage.ts:4](https://github.com/puristajs/pu
 
 ### priority?
 
-> `optional` **priority**: `number`
+> `optional` **priority?**: `number`
 
 Defined in: [core/types/queue/QueueMessage.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L9)
 
@@ -136,7 +136,7 @@ Defined in: [core/types/queue/QueueMessage.ts:3](https://github.com/puristajs/pu
 
 ### scheduledAt?
 
-> `optional` **scheduledAt**: `number`
+> `optional` **scheduledAt?**: `number`
 
 Defined in: [core/types/queue/QueueMessage.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L8)
 
@@ -144,6 +144,6 @@ Defined in: [core/types/queue/QueueMessage.ts:8](https://github.com/puristajs/pu
 
 ### traceId?
 
-> `optional` **traceId**: `string`
+> `optional` **traceId?**: `string`
 
 Defined in: [core/types/queue/QueueMessage.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueMessage.ts#L14)

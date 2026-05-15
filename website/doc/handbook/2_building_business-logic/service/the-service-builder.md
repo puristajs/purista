@@ -34,6 +34,55 @@ export const myServiceInfo = {
 export const myServiceV1ServiceBuilder = new ServiceBuilder(myServiceInfo)
 ```
 
+## Add custom metrics
+
+Declare application metrics on the service builder.
+PURISTA records them through the OpenTelemetry Metrics API, but the application owns the OTel SDK, readers, and exporters.
+
+```typescript [myServiceV1ServiceBuilder.ts]
+import { ServiceBuilder, ServiceInfoType } from '@purista/core'
+import { z } from 'zod'
+
+const metricAttributes = z.object({
+	channel: z.enum(['web', 'api']),
+})
+
+export const myServiceV1ServiceBuilder = new ServiceBuilder(myServiceInfo)
+	.defineMetric('app.orders.created', {
+		kind: 'counter',
+		unit: '{order}',
+		description: 'Created orders',
+		attributes: metricAttributes,
+	})
+	.defineMetric('app.orders.processing.duration', {
+		kind: 'histogram',
+		unit: 'ms',
+		description: 'Order processing duration',
+		attributes: metricAttributes,
+	})
+```
+
+Handlers use typed metric handles from `context.metrics`.
+Counter and up-down-counter metrics use `add`; histogram metrics use `record`.
+
+```typescript
+.setCommandFunction(async function (context, payload) {
+	const started = Date.now()
+
+	context.metrics['app.orders.created'].add(1, { channel: 'web' })
+
+	try {
+		return await createOrder(payload)
+	} finally {
+		context.metrics['app.orders.processing.duration'].record(Date.now() - started, { channel: 'web' })
+	}
+})
+```
+
+Custom metric names must start with `app.`.
+Keep attributes low-cardinality and never record secrets, tokens, request headers, raw URLs, prompts, completions, user IDs, tenant IDs, or payload data.
+PURISTA does not expose a raw metric recorder on handler contexts.
+
 ## Add command/subscription/stream definitions
 
 Keep definition lists in the service file and spread them into the builder.
@@ -82,3 +131,11 @@ await myService.start()
 ```
 
 Use `start()` so definitions are registered at the event bridge and startup hooks can run.
+
+When metrics are enabled, pass the application-owned OTel provider through runtime options or configure it globally before creating service instances.
+
+```typescript
+const myService = await myServiceV1Service.getInstance(eventBridge, {
+	metrics: { meter: meterProvider.getMeter('purista.app') },
+})
+```

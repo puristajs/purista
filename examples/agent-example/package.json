@@ -1,0 +1,36 @@
+{
+	"name": "@purista/agent-example",
+	"version": "2.2.0",
+	"description": "PURISTA core agent builder example",
+	"homepage": "https://purista.dev",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"main": "src/index.ts",
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"start": "tsx src/index.ts",
+		"lint": "npx @biomejs/biome check --write",
+		"test": "tsc --noEmit && vitest"
+	},
+	"devDependencies": {
+		"@types/node": "^25.8.0",
+		"tsx": "^4.22.0",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.6"
+	},
+	"dependencies": {
+		"@hono/node-server": "^2.0.2",
+		"@purista/core": "*",
+		"@purista/hono-http-server": "*",
+		"@scalar/hono-api-reference": "^0.10.16",
+		"zod": "^4.4.3"
+	}
+}

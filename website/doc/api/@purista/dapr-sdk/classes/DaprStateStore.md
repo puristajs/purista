@@ -90,55 +90,55 @@ The name of the state store
 
 > **config**: `object`
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:18
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
-> `optional` **cacheTtl**: `number`
+> `optional` **cacheTtl?**: `number`
 
 Cache time to live in ms
 
 #### clientConfig?
 
-> `optional` **clientConfig**: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md)
+> `optional` **clientConfig?**: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md)
 
 The Dapr client config to interact with Dapr sidecar
 
 #### enableCache?
 
-> `optional` **enableCache**: `boolean`
+> `optional` **enableCache?**: `boolean`
 
 Enable cache
 
 #### enableGet?
 
-> `optional` **enableGet**: `boolean`
+> `optional` **enableGet?**: `boolean`
 
 Enable generally get method
 
 #### enableRemove?
 
-> `optional` **enableRemove**: `boolean`
+> `optional` **enableRemove?**: `boolean`
 
 Enable generally remove method
 
 #### enableSet?
 
-> `optional` **enableSet**: `boolean`
+> `optional` **enableSet?**: `boolean`
 
 Enable generally set method
 
 #### logger?
 
-> `optional` **logger**: [`Logger`](../../core/classes/Logger.md)
+> `optional` **logger?**: [`Logger`](../../core/classes/Logger.md)
 
 #### logLevel?
 
-> `optional` **logLevel**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
+> `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 #### stateStoreName?
 
-> `optional` **stateStoreName**: `string`
+> `optional` **stateStoreName?**: `string`
 
 The name of the state store
 
@@ -152,7 +152,7 @@ The name of the state store
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -164,7 +164,7 @@ Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 > **name**: `string`
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:19
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -176,7 +176,7 @@ Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:27
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:27
 
 #### Returns
 
@@ -192,7 +192,7 @@ Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:27
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -248,7 +248,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://gith
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -292,7 +292,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://gith
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/esm/core/StateStore/StateStoreBaseClass.impl.d.ts:26
+Defined in: core/dist/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

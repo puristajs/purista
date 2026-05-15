@@ -8,7 +8,7 @@
 
 > **exportServiceDefinitions**(`serviceBuilders`): `Promise`\<[`FullDefinition`](../type-aliases/FullDefinition.md)\>
 
-Defined in: [helper/exportServiceDefinitions.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/exportServiceDefinitions.ts#L59)
+Defined in: [helper/exportServiceDefinitions.ts:104](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/exportServiceDefinitions.ts#L104)
 
 Exports the service definitions.
 Includes the information about commands and subscriptions.

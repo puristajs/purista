@@ -6,6 +6,7 @@ import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/que
 import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
+import { createMetricContextMock } from '../testing/sharedContextMocks.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
@@ -75,6 +76,7 @@ export const getCommandTransformContextMock = <
 
 	const mock: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType, Resources> = {
 		logger: logger.mock,
+		metrics: createMetricContextMock(input.sandbox),
 		message,
 		wrapInSpan: stubs.wrapInSpan.callsFake((name, opts, fn) => {
 			void name

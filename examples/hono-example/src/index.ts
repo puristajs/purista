@@ -1,5 +1,7 @@
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
+import { metrics } from '@opentelemetry/api'
+import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 import { apiReference } from '@scalar/hono-api-reference'
@@ -11,18 +13,30 @@ import { pingV1Service } from './service/ping/v1/index.js'
 
 export const main = async () => {
 	const logger = initLogger('debug')
+	const meterProvider = new MeterProvider({
+		readers: [
+			new PeriodicExportingMetricReader({
+				exporter: new ConsoleMetricExporter(),
+				exportIntervalMillis: 1000,
+			}),
+		],
+	})
+
+	metrics.setGlobalMeterProvider(meterProvider)
+	const meter = meterProvider.getMeter('purista.hono.example')
 
 	// initiate the event bridge as first step
 	const eventBridge = new DefaultEventBridge()
 	await eventBridge.start()
 
 	// add your service
-	const pingService = await pingV1Service.getInstance(eventBridge, {})
+	const pingService = await pingV1Service.getInstance(eventBridge, { metrics: { meter } })
 	await pingService.start()
 
 	// initiate the webserver service as second step
 	const honoService = await honoV1Service.getInstance(eventBridge, {
 		logger,
+		metrics: { meter },
 		serviceConfig: { services: [pingService], enableDynamicRoutes: true, openApi: { enabled: true, info: {} } },
 	})
 

@@ -4,7 +4,7 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionAfterGuardHook
 
-# Type Alias: SubscriptionAfterGuardHook()\<ServiceClassType, FunctionResultType, FunctionPayloadOutputType, FunctionParameterType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: SubscriptionAfterGuardHook\<ServiceClassType, FunctionResultType, FunctionPayloadOutputType, FunctionParameterType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
 > **SubscriptionAfterGuardHook**\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `result`, `payload`, `parameter`) => `Promise`\<`void`\>
 

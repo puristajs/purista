@@ -14,7 +14,7 @@ Entry of thing you like to shutdown gracefully
 
 ## Properties
 
-### destroy()
+### destroy
 
 > **destroy**: () => `Promise`\<`void`\>
 

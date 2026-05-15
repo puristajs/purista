@@ -197,9 +197,9 @@ Set the Auth-Bearer-Token for all following requests
 
 ##### token
 
-the bearer token
+`string` \| `undefined`
 
-`string` | `undefined`
+the bearer token
 
 #### Returns
 
