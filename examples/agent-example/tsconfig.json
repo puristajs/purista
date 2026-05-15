@@ -5,5 +5,5 @@
 		"rootDir": "../..",
 		"outDir": "./build"
 	},
-	"files": ["src/index.ts", "src/index.test.ts"]
+	"files": ["src/index.ts"]
 }

@@ -1,11 +1,12 @@
 import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
-import { supportServiceBuilder, triageAgentDefinition } from './index.js'
+import { supportV1Service } from '../../supportV1Service.js'
+import { triageTicketAgentBuilder } from './triageTicketAgentBuilder.js'
 
-describe('agent example', () => {
+describe('triageTicketAgentBuilder', () => {
 	it('expands the attached agent into core PURISTA definitions', async () => {
-		const definitions = await supportServiceBuilder.resolveDefinitions()
+		const definitions = await supportV1Service.resolveDefinitions()
 
 		expect(definitions.queues[0]?.queueName).toBe('agent:Support:1:triageTicket')
 		expect(definitions.queueWorkers[0]?.queueName).toBe('agent:Support:1:triageTicket')
@@ -24,7 +25,8 @@ describe('agent example', () => {
 			finishReason: 'stop',
 		})
 
-		const harness = createAgentTestHarness(triageAgentDefinition, {
+		const triageTicketAgentDefinition = await triageTicketAgentBuilder.getDefinition()
+		const harness = createAgentTestHarness(triageTicketAgentDefinition, {
 			models: {
 				primary: {
 					provider: model,
