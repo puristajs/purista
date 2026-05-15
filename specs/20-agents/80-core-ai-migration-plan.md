@@ -1,6 +1,6 @@
 # Core AI Migration Plan
 
-Status: implementation plan for autonomous agents.
+Status: active implementation plan for autonomous agents.
 
 Date: 2026-05-15
 
@@ -26,6 +26,17 @@ and use `@purista/harness` as a direct provider-neutral dependency of core.
 
 There is no backward compatibility requirement for the unreleased `@purista/ai`
 package. Delete obsolete code instead of preserving wrappers.
+
+This file supersedes all previous `specs/20-agents` guidance that placed
+PURISTA agent integration in `@purista/ai`, kept AI-specific behavior outside
+core, treated `@purista/ai/protocol` as an active package boundary, used
+`context.ai` as the canonical handler grouping, or made the Vercel AI SDK stream
+protocol part of the PURISTA runtime design.
+
+Historical terms such as `purista-ai:*`, `AiSdkProvider`,
+`AgentProtocolEnvelope`, `streamProtocolAdapter`, `ui-message`, and
+`context.ai` may appear in migration notes only as removed or forbidden
+concepts. They are not active implementation guidance.
 
 ## 2. Rules For Every Agent
 
@@ -334,4 +345,3 @@ Expected result:
 - no Vercel AI SDK protocol
 - no provider dependency in core
 - `@purista/harness` appears in core as the provider-neutral runtime dependency
-
