@@ -1,11 +1,11 @@
 /* eslint-disable simple-import-sort/exports */
 /**
  *
- * SDK and helper to run PURISTA services in Kubernetes.
+ * SDK and helper to run PURISTA services with Dapr.
  *
  * This package provides the Dapr event bridge and adapters for secret, state and config stores provided by Dapr.
  *
- * Here is a full example, how the index file might look like, if you want to deploy a service to Kubernetes.
+ * Here is a compact example of wiring a PURISTA service to the Dapr sidecar.
  *
  * @example
  * ```typescript

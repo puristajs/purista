@@ -7,11 +7,14 @@ import { triageTicketAgentBuilder } from './triageTicketAgentBuilder.js'
 describe('triageTicketAgentBuilder', () => {
 	it('expands the attached agent into core PURISTA definitions', async () => {
 		const definitions = await supportV1Service.resolveDefinitions()
+		const queueNames = definitions.queues.map(queue => queue.queueName)
+		const commandNames = definitions.commands.map(command => command.commandName)
+		const streamNames = definitions.streams.map(stream => stream.streamName)
 
-		expect(definitions.queues[0]?.queueName).toBe('agent:Support:1:triageTicket')
-		expect(definitions.queueWorkers[0]?.queueName).toBe('agent:Support:1:triageTicket')
-		expect(definitions.commands[0]?.commandName).toBe('triageTicket')
-		expect(definitions.streams[0]?.streamName).toBe('triageTicketStream')
+		expect(queueNames).toContain('agent:Support:1:triageTicket')
+		expect(definitions.queueWorkers.map(worker => worker.queueName)).toContain('agent:Support:1:triageTicket')
+		expect(commandNames).toContain('triageTicket')
+		expect(streamNames).toContain('triageTicketStream')
 	})
 
 	it('runs with the provider-neutral scripted harness model', async () => {

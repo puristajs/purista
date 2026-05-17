@@ -1,4 +1,4 @@
-# @purista/aws-secret-store
+# @purista/azure-secret-store
 
 A secret store for using [Azure Key Vault](https://azure.microsoft.com/products/key-vault/) as storage.  
 

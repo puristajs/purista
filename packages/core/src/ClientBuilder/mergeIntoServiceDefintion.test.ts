@@ -34,6 +34,11 @@ describe('mergeIntoServiceDefinition', () => {
 	it('merges definitions for an existing service version', () => {
 		type CommandEntry = FullServiceDefinition[string][string]['commands'][string]
 		type SubscriptionEntry = FullServiceDefinition[string][string]['subscriptions'][string]
+		type StreamEntry = NonNullable<FullServiceDefinition[string][string]['streams']>[string]
+		type QueueEntry = NonNullable<FullServiceDefinition[string][string]['queues']>[string]
+		type QueueWorkerEntry = NonNullable<FullServiceDefinition[string][string]['queueWorkers']>[string]
+		type ScheduleEntry = NonNullable<FullServiceDefinition[string][string]['schedules']>[string]
+		type EventToQueueBindingEntry = NonNullable<FullServiceDefinition[string][string]['eventToQueueBindings']>[number]
 
 		const current: FullServiceDefinition = {
 			UserService: {
@@ -46,6 +51,19 @@ describe('mergeIntoServiceDefinition', () => {
 					subscriptions: {
 						currentSubscription: { subscriptionName: 'currentSubscription' } as SubscriptionEntry,
 					},
+					streams: {
+						currentStream: { streamName: 'currentStream' } as StreamEntry,
+					},
+					queues: {
+						currentQueue: { queueName: 'currentQueue' } as QueueEntry,
+					},
+					queueWorkers: {
+						currentWorker: { name: 'currentWorker' } as unknown as QueueWorkerEntry,
+					},
+					schedules: {
+						currentSchedule: { name: 'currentSchedule' } as ScheduleEntry,
+					},
+					eventToQueueBindings: [{ name: 'currentBinding' } as unknown as EventToQueueBindingEntry],
 				},
 			},
 		}
@@ -61,6 +79,19 @@ describe('mergeIntoServiceDefinition', () => {
 					subscriptions: {
 						incomingSubscription: { subscriptionName: 'incomingSubscription' } as SubscriptionEntry,
 					},
+					streams: {
+						incomingStream: { streamName: 'incomingStream' } as StreamEntry,
+					},
+					queues: {
+						incomingQueue: { queueName: 'incomingQueue' } as QueueEntry,
+					},
+					queueWorkers: {
+						incomingWorker: { name: 'incomingWorker' } as unknown as QueueWorkerEntry,
+					},
+					schedules: {
+						incomingSchedule: { name: 'incomingSchedule' } as ScheduleEntry,
+					},
+					eventToQueueBindings: [{ name: 'incomingBinding' } as unknown as EventToQueueBindingEntry],
 				},
 			},
 		}
@@ -77,6 +108,26 @@ describe('mergeIntoServiceDefinition', () => {
 			currentSubscription: { subscriptionName: 'currentSubscription' },
 			incomingSubscription: { subscriptionName: 'incomingSubscription' },
 		})
+		expect(current.UserService['1'].streams).toMatchObject({
+			currentStream: { streamName: 'currentStream' },
+			incomingStream: { streamName: 'incomingStream' },
+		})
+		expect(current.UserService['1'].queues).toMatchObject({
+			currentQueue: { queueName: 'currentQueue' },
+			incomingQueue: { queueName: 'incomingQueue' },
+		})
+		expect(current.UserService['1'].queueWorkers).toMatchObject({
+			currentWorker: { name: 'currentWorker' },
+			incomingWorker: { name: 'incomingWorker' },
+		})
+		expect(current.UserService['1'].schedules).toMatchObject({
+			currentSchedule: { name: 'currentSchedule' },
+			incomingSchedule: { name: 'incomingSchedule' },
+		})
+		expect(current.UserService['1'].eventToQueueBindings).toMatchObject([
+			{ name: 'incomingBinding' },
+			{ name: 'currentBinding' },
+		])
 	})
 
 	it('keeps deprecated alias for backward compatibility', () => {

@@ -5,7 +5,7 @@
 	"description": "PURISTA website source code based on vitepress",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "echo \"No website tests configured\"",
 		"dev": "vitepress dev doc",
 		"build:doc": "vitepress build doc",
 		"preview": "vitepress preview doc"

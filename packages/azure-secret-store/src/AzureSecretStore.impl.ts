@@ -29,10 +29,6 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
 	constructor(config: StoreBaseConfig<AzureSecretStoreConfig>) {
 		super('AzureSecretStore', { enableCache: true, ...config })
 
-		if (this.config.allowInsecureConnection && process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0') {
-			process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-		}
-
 		const credential = new DefaultAzureCredential()
 		const allowInsecureConnection = this.config.allowInsecureConnection ?? this.config.options?.allowInsecureConnection
 

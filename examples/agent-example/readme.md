@@ -1,25 +1,50 @@
-# PURISTA Agent Example
+# PURISTA Multi-Agent Incident Response Example
 
-This example shows the core-native PURISTA agent builder.
+This example shows a real-world, core-native PURISTA agent workflow.
 
-It intentionally does not install a live model provider. The runtime test uses
-`createScriptedHarnessModel` from `@purista/core`, so the example stays
-provider-neutral and can run in CI without API keys.
+The running demo uses OpenAI through `@purista/harness-openai` and reads the
+API key from `.env`. Tests use `createScriptedHarnessModel` from `@purista/core`,
+so CI stays provider-neutral and does not require API keys.
+
+## Use case
+
+The `Support` service models an incident response desk for a checkout outage:
+
+- deterministic PURISTA command tools load incident evidence, runbooks, and store the final brief
+- `analyzeSignals` reviews alerts, logs, deployments, and metrics
+- `assessRollbackRisk` reviews rollback safety with a sandbox policy
+- `coordinateIncidentResponse` invokes both specialist agents, calls the command tools, and stores an operator brief
+- the coordinator is exposed through Hono/OpenAPI as `POST /api/v1/incident-response`
 
 ## Run
 
 ```bash
+cp examples/agent-example/.env.example examples/agent-example/.env
+# edit examples/agent-example/.env and set OPENAI_API_KEY
 npm test -w @purista/agent-example
 npm start -w @purista/agent-example
 ```
 
-Open <http://localhost:3000/api> and run `POST /api/v1/triage-ticket` from the OpenAPI UI.
+Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from the OpenAPI UI:
+
+```json
+{
+  "incidentId": "INC-2026-042",
+  "businessContext": "EU checkout revenue is materially impacted during business hours."
+}
+```
 
 ## What it demonstrates
 
 - `ServiceBuilder.getAgentQueueBuilder(...)`
 - schema-driven payload and output types
 - capability-gated model handles on `context.harness.models`
+- OpenAI as the default live model provider via `.env`
+- command tools through `context.invoke.tools`
+- child-agent delegation through `context.invoke.agents`
+- declared skills in agent manifests
+- sandbox policy for risk analysis
+- generated queue, worker, command, and stream definitions for each agent
 - Hono HTTP exposure with OpenAPI documentation
 - `createAgentTestHarness(...)` with a scripted model provider
 - no direct application dependency on `@purista/harness`

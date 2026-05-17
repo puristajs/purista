@@ -120,7 +120,7 @@ yarn add @purista/harness-openai
 ## Project structure
 
 The generated app shape is intentionally minimal. The initializer creates the runtime/bootstrap files,
-the project config, and an example `ping` service with one starter command. Follow-up CLI commands then extend that structure.
+the project config, and an example `ping` service with starter commands plus the queue and worker artifacts used by the base template. Follow-up CLI commands then extend that structure.
 
 ```text
 |-public/                     # only when --webserver is enabled
