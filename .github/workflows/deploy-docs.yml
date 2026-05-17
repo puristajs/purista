@@ -4,7 +4,7 @@ on:
   push:
     branches:
       # make sure this is the branch you are using
-      - master
+      - main
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
