@@ -1,25 +1,37 @@
+import 'dotenv/config'
+
 import { serve } from '@hono/node-server'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 import { apiReference } from '@scalar/hono-api-reference'
 
-import { createSupportTriageModel } from './model/createSupportTriageModel.js'
+import { createOpenAiIncidentModel } from './model/createOpenAiIncidentModel.js'
+import { IncidentRepository } from './resource/incidentRepository.js'
 import { supportV1Service } from './service/support/v1/index.js'
 
 export const main = async () => {
 	const logger = initLogger('debug')
+	const model = process.env.OPENAI_MODEL ?? 'gpt-4.1-mini'
 	const eventBridge = new DefaultEventBridge()
 	await eventBridge.start()
 
 	const supportService = await supportV1Service.getInstance(eventBridge, {
 		logger,
+		resources: {
+			incidentRepository: new IncidentRepository(),
+		},
 		ai: {
 			models: {
 				primary: {
-					provider: createSupportTriageModel(),
-					model: 'support-triage',
+					provider: createOpenAiIncidentModel(),
+					model,
 					capabilities: ['object'],
 				},
+			},
+			sandbox: {
+				kind: 'example-readonly-sandbox',
+				network: false,
+				filesystem: 'ephemeral',
 			},
 		},
 	})
@@ -55,13 +67,11 @@ export const main = async () => {
 	logger.info(
 		{
 			service: supportV1Service.info.serviceName,
-			agent: 'triageTicket',
-			queue: definitions.queues[0]?.queueName,
-			command: definitions.commands[0]?.commandName,
-			stream: definitions.streams[0]?.streamName,
+			agents: definitions.queues.map(queue => queue.queueName),
+			commands: definitions.commands.map(command => command.commandName),
 			openApi: 'http://localhost:3000/api',
 		},
-		'PURISTA agent example started',
+		'PURISTA multi-agent incident response example started',
 	)
 }
 

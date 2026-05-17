@@ -1,5 +1,5 @@
 /**
- * Package for using a MQTT broker like rabbitMQ as event bridge.
+ * Package for using an MQTT broker as event bridge.
  *
  * Example usage:
  *
@@ -27,7 +27,6 @@ export * from './topic/getSharedTopicName.impl.js'
 export * from './topic/getSubscriptionTopic.impl.js'
 export * from './topic/getTopicName.impl.js'
 export * from './topic/isMatchingTopic.impl.js'
-export * from './topic/TopicRouter.js'
 export * from './topic/TopicRouter.js'
 export * from './types/IMqttBridge.js'
 export * from './types/IncomingMessageFunction.js'

@@ -17,6 +17,6 @@ To try out the examples and to play around, please:
 
 ## Requirements
 
-You will need to have Node >=18.15 installed on your machine and most examples will require Docker/Docker Compose to provide needed third party solutions.
+You will need to have Node >=24.15 installed on your machine and most examples will require Docker/Docker Compose to provide needed third party solutions.
 
 __You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__

@@ -1,6 +1,6 @@
 # @purista/mqttbridge
 
-Package for using a MQTT broker like rabbitMQ as event bridge.
+Package for using an MQTT broker as event bridge.
 
 Example usage:
 

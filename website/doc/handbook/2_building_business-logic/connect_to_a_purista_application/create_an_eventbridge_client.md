@@ -57,7 +57,7 @@ import { EventBridgeClient } from '@company/generated-client'
 
 const client = new EventBridgeClient(eventBridge)
 
-// client.[serviceName].v[serviceVersion].[commandName](payload, parameter, options?)
+// client.<serviceName>.v<serviceVersion>.<commandName>(payload, parameter, options?)
 const result = await client.user.v1.signUp(
   { email: 'john@example.com' },
   { source: 'landing-page' },

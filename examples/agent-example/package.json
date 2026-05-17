@@ -1,7 +1,7 @@
 {
 	"name": "@purista/agent-example",
 	"version": "2.2.0",
-	"description": "PURISTA core agent builder example",
+	"description": "PURISTA multi-agent incident response example",
 	"homepage": "https://purista.dev",
 	"private": true,
 	"repository": {
@@ -17,6 +17,7 @@
 	},
 	"scripts": {
 		"start": "tsx src/index.ts",
+		"build": "tsc --noEmit",
 		"lint": "npx @biomejs/biome check --write",
 		"test": "tsc --noEmit && vitest"
 	},
@@ -29,8 +30,10 @@
 	"dependencies": {
 		"@hono/node-server": "^2.0.2",
 		"@purista/core": "*",
+		"@purista/harness-openai": "^1.0.0",
 		"@purista/hono-http-server": "*",
 		"@scalar/hono-api-reference": "^0.10.16",
+		"dotenv": "^17.4.2",
 		"zod": "^4.4.3"
 	}
 }

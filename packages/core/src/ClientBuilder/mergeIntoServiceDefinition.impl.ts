@@ -14,6 +14,14 @@ export const mergeIntoServiceDefinition = (current: FullServiceDefinition, add: 
 					deprecated: current[serviceName][serviceVersion].deprecated ?? val.deprecated,
 					commands: { ...val.commands, ...current[serviceName][serviceVersion].commands },
 					subscriptions: { ...val.subscriptions, ...current[serviceName][serviceVersion].subscriptions },
+					streams: { ...val.streams, ...current[serviceName][serviceVersion].streams },
+					queues: { ...val.queues, ...current[serviceName][serviceVersion].queues },
+					queueWorkers: { ...val.queueWorkers, ...current[serviceName][serviceVersion].queueWorkers },
+					schedules: { ...val.schedules, ...current[serviceName][serviceVersion].schedules },
+					eventToQueueBindings: [
+						...(val.eventToQueueBindings ?? []),
+						...(current[serviceName][serviceVersion].eventToQueueBindings ?? []),
+					],
 				}
 			}
 		} else {

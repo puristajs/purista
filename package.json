@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "npm run dev -w examples/fullexample",
-		"build": "npm run build --workspaces --if-present && npm run lint:fix",
+		"build": "npm run build --workspaces --if-present && npm run lint",
 		"lint": "npx @biomejs/biome check",
 		"lint:fix": "npx @biomejs/biome check --write",
 		"test": "node ./scripts/runWithDockerHost.mjs vitest",
@@ -59,6 +59,9 @@
 	"packageManager": "npm@11.14.1",
 	"dependencies": {
 		"npm": "^11.14.1"
+	},
+	"overrides": {
+		"protobufjs": "7.5.8"
 	},
 	"engines": {
 		"node": ">=24.15.0"
