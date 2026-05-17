@@ -4,6 +4,7 @@ node_modules
 
 /lib
 dist
+/docs/
 
 .eslintcache
 .dccache
