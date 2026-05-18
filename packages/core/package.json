@@ -1,6 +1,6 @@
 {
 	"name": "@purista/core",
-	"version": "2.2.0",
+	"version": "3.0.0",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -37,7 +37,7 @@
 		"@opentelemetry/resources": "^2.7.1",
 		"@opentelemetry/sdk-trace-node": "^2.7.1",
 		"@opentelemetry/semantic-conventions": "^1.41.1",
-		"@purista/harness": "^1.0.0",
+		"@purista/harness": "^1.1.0",
 		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@standard-schema/spec": "^1.1.0",
 		"code-block-writer": "^13.0.3",

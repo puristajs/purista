@@ -8,7 +8,7 @@
 
 > **SubscriptionFunction**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType` \| [`SubscriptionHandlerResult`](SubscriptionHandlerResult.md)\>
 
-Defined in: [core/types/subscription/SubscriptionFunction.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L14)
+Defined in: [core/types/subscription/SubscriptionFunction.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L15)
 
 CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
 
@@ -58,7 +58,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 ### context
 
-[`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>
+[`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, [`ServiceClassMetrics`](ServiceClassMetrics.md)\<`ServiceClassType`\>\>
 
 ### payload
 

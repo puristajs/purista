@@ -8,7 +8,7 @@
 
 > **getSubscriptionTransformContextMock**\<`Resources`\>(`input`): `object`
 
-Defined in: [mocks/getSubscriptionTransformContext.mock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L19)
+Defined in: [mocks/getSubscriptionTransformContext.mock.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L20)
 
 A function that returns a mock object for subscription transform function context
 
@@ -77,6 +77,12 @@ the logger instance
 > **message**: `Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>
 
 the original received message
+
+#### mock.metrics
+
+> **metrics**: `PuristaMetricContext`\<`Metrics`\>
+
+typed custom metrics declared on the current builder scope
 
 #### mock.queue
 

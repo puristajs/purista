@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / SubscriptionFunctionContext
 
-# Type Alias: SubscriptionFunctionContext\<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: SubscriptionFunctionContext\<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, Metrics\>
 
-> **SubscriptionFunctionContext**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = [`Prettify`](Prettify.md)\<[`ContextBase`](ContextBase.md) & [`SubscriptionFunctionContextEnhancements`](SubscriptionFunctionContextEnhancements.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
+> **SubscriptionFunctionContext**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `Metrics`\> = [`Prettify`](Prettify.md)\<[`ContextBase`](ContextBase.md)\<`Metrics`\> & `PuristaMetricContextProperty`\<`Metrics`\> & [`SubscriptionFunctionContextEnhancements`](SubscriptionFunctionContextEnhancements.md)\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\>\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L62)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L63)
 
 The subscription function context which will be passed into subscription function.
 
@@ -33,3 +33,7 @@ The subscription function context which will be passed into subscription functio
 ### QueueInvokes
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
+
+### Metrics
+
+`Metrics` *extends* `PuristaMetricDefinitions` = [`EmptyObject`](EmptyObject.md)

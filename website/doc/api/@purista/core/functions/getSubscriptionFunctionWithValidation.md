@@ -8,7 +8,7 @@
 
 > **getSubscriptionFunctionWithValidation**\<`S`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): (`this`, `context`, `payload`, `parameter`) => `Promise`\<`unknown`\>
 
-Defined in: [SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L17)
+Defined in: [SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L18)
 
 Wraps a subscription handler with schema validation and guard execution.
 Input payload/parameter is validated before execution and output can be validated after execution.
@@ -17,7 +17,7 @@ Input payload/parameter is validated before execution and output can be validate
 
 ### S
 
-`S` *extends* [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\>
+`S` *extends* [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`any`, `any`, `any`\>\>
 
 ## Parameters
 
