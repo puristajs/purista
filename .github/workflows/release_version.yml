@@ -78,8 +78,8 @@ jobs:
         run: |
           RELEASE_BRANCH="${{ steps.commit.outputs.branch }}"
           VERSION="${{ steps.version.outputs.value }}"
-          COMPARE_URL="https://github.com/${{ github.repository }}/compare/master...$RELEASE_BRANCH?expand=1"
-          PR_NUMBER="$(gh pr list --head "$RELEASE_BRANCH" --base master --json number --jq '.[0].number' || true)"
+          COMPARE_URL="https://github.com/${{ github.repository }}/compare/main...$RELEASE_BRANCH?expand=1"
+          PR_NUMBER="$(gh pr list --head "$RELEASE_BRANCH" --base main --json number --jq '.[0].number' || true)"
           if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
             if ! gh pr edit "$PR_NUMBER" \
               --title "chore(release): v$VERSION" \
@@ -89,7 +89,7 @@ jobs:
             fi
           else
             if ! gh pr create \
-              --base master \
+              --base main \
               --head "$RELEASE_BRANCH" \
               --title "chore(release): v$VERSION" \
               --body "Automated release preparation PR for v$VERSION."; then

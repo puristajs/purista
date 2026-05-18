@@ -16,10 +16,10 @@ jobs:
     environment: publish_version
     runs-on: ubuntu-latest
     steps:
-      - name: Ensure workflow runs on master
-        if: github.ref != 'refs/heads/master'
+      - name: Ensure workflow runs on main
+        if: github.ref != 'refs/heads/main'
         run: |
-          echo "Release publish must run on master. Current ref: ${{ github.ref }}"
+          echo "Release publish must run on main. Current ref: ${{ github.ref }}"
           exit 1
 
       - name: Checkout
