@@ -57,9 +57,6 @@
 		"vitest": "^4.1.6"
 	},
 	"packageManager": "npm@11.14.1",
-	"dependencies": {
-		"npm": "^11.14.1"
-	},
 	"overrides": {
 		"protobufjs": "7.5.8"
 	},
