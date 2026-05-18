@@ -27,7 +27,7 @@ console.log(value) // outputs: undefined
 
 ```
 
-See the [NATS JavaScript client documentation](https://github.com/nats-io/nats.js) for detailed connection options.
+ See documentation of underlaying redis lib package for detailed configuration options - [NODE-REDIS](https://redis.js.org).
 
 **Visit [purista.dev](https://purista.dev)**
 

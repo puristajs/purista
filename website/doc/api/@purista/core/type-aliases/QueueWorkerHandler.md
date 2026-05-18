@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueWorkerHandler
 
-# Type Alias: QueueWorkerHandler\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, Metrics\>
+# Type Alias: QueueWorkerHandler\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
 
-> **QueueWorkerHandler**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `Metrics`\> = (`context`, `message`) => `Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `undefined`\>
+> **QueueWorkerHandler**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\> = (`context`, `message`) => `Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `undefined`\>
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L16)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L14)
 
 ## Type Parameters
 
@@ -32,23 +32,11 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:16](https://github.com/pu
 
 `StreamInvokes` *extends* [`StreamInvokeList`](StreamInvokeList.md) = [`EmptyObject`](EmptyObject.md)
 
-### EmitList
-
-`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = `Record`\<`string`, `never`\>
-
-### QueueInvokes
-
-`QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
-
-### Metrics
-
-`Metrics` *extends* `PuristaMetricDefinitions` = [`EmptyObject`](EmptyObject.md)
-
 ## Parameters
 
 ### context
 
-[`QueueJobContext`](QueueJobContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `Metrics`\>
+[`QueueJobContext`](QueueJobContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\>
 
 ### message
 

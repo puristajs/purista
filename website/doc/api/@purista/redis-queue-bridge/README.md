@@ -12,9 +12,6 @@ A pull-based queue bridge that persists jobs inside Redis lists. It implements t
 - Delayed delivery via a Redis sorted set
 - Lease renewal + crash recovery using per-lease bookkeeping
 - Dead-letter queue stored in Redis for later inspection
-- Strict idempotency enforcement for stable enqueue keys
-
-When `idempotencyKey` is provided, Redis stores the original enqueue result atomically with the job. Repeating enqueue for the same queue and key returns the original `jobId` and does not create another job. Missing keys keep normal enqueue behavior.
 
 ## Usage
 

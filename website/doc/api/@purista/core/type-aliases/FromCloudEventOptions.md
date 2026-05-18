@@ -8,7 +8,7 @@
 
 > **FromCloudEventOptions** = `object`
 
-Defined in: [helper/enterpriseInterop.ts:141](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L141)
+Defined in: [helper/enterpriseInterop.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L53)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [helper/enterpriseInterop.ts:141](https://github.com/puristajs/puris
 
 > **mode**: `"strict"` \| `"compat"`
 
-Defined in: [helper/enterpriseInterop.ts:142](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L142)
+Defined in: [helper/enterpriseInterop.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L54)

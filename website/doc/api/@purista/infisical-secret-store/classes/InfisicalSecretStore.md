@@ -174,12 +174,6 @@ A logger instance
 
 the loglevel if no logger instance is given
 
-###### metricsRecorder?
-
-[`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
-Optional metrics recorder for HTTP client framework metrics.
-
 ###### name?
 
 `string`
@@ -349,12 +343,6 @@ A logger instance
 > `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
 the loglevel if no logger instance is given
-
-#### metricsRecorder?
-
-> `optional` **metricsRecorder?**: [`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
-Optional metrics recorder for HTTP client framework metrics.
 
 #### name?
 

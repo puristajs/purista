@@ -8,7 +8,7 @@
 
 > **DefaultQueueBridgeOptions** = `object`
 
-Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L24)
+Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L23)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:24](https://github.co
 
 > `optional` **defaultLeaseTtlMs?**: `number`
 
-Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L26)
+Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L25)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:26](https://github.co
 
 > `optional` **instanceId?**: `string`
 
-Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L25)
+Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L24)
 
 ***
 
@@ -32,12 +32,4 @@ Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:25](https://github.co
 
 > `optional` **maxAttempts?**: `number`
 
-Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L27)
-
-***
-
-### metricsRecorder?
-
-> `optional` **metricsRecorder?**: [`PuristaMetricsRecorderInterface`](../interfaces/PuristaMetricsRecorderInterface.md)
-
-Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L28)
+Defined in: [DefaultQueueBridge/DefaultQueueBridge.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultQueueBridge/DefaultQueueBridge.impl.ts#L26)

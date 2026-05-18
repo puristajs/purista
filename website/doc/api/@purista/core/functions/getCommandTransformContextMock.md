@@ -8,7 +8,7 @@
 
 > **getCommandTransformContextMock**\<`MessagePayloadType`, `MessageParamsType`, `Resources`\>(`input`): `object`
 
-Defined in: [mocks/getCommandTransformContext.mock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L19)
+Defined in: [mocks/getCommandTransformContext.mock.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L18)
 
 A function that returns a mock object for command transform function context
 
@@ -89,12 +89,6 @@ the logger instance
 > **message**: `Readonly`\<[`Command`](../type-aliases/Command.md)\<`PayloadType`, `ParameterType`\>\>
 
 the original message
-
-#### mock.metrics
-
-> **metrics**: `PuristaMetricContext`\<`Metrics`\>
-
-typed custom metrics declared on the current builder scope
 
 #### mock.queue
 

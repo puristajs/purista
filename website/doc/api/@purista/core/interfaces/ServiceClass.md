@@ -14,27 +14,15 @@ The ServiceClass interface
 
 ### S
 
-`S` *extends* [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`any`, `any`, `any`\> = [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`any`, `any`, `any`\>
+`S` *extends* [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md) = [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)
 
 ## Properties
-
-### \_\_serviceClassTypes?
-
-> `readonly` `optional` **\_\_serviceClassTypes?**: `S`
-
-Defined in: [core/types/ServiceClass.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L24)
-
-Type-only anchor used to preserve cascading service builder types.
-
-This property is never read at runtime.
-
-***
 
 ### config
 
 > **config**: `S`\[`"ConfigType"`\]
 
-Defined in: [core/types/ServiceClass.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L26)
+Defined in: [core/types/ServiceClass.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L19)
 
 ***
 
@@ -42,7 +30,7 @@ Defined in: [core/types/ServiceClass.ts:26](https://github.com/puristajs/purista
 
 > **resources**: `S`\[`"Resources"`\]
 
-Defined in: [core/types/ServiceClass.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L27)
+Defined in: [core/types/ServiceClass.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L20)
 
 ## Methods
 
@@ -50,7 +38,7 @@ Defined in: [core/types/ServiceClass.ts:27](https://github.com/puristajs/purista
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/types/ServiceClass.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L32)
+Defined in: [core/types/ServiceClass.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L25)
 
 Stop and destroy the current service
 
@@ -62,9 +50,9 @@ Stop and destroy the current service
 
 ### getContextFunctions()
 
-> **getContextFunctions**(`logger`): [`ContextBase`](../type-aliases/ContextBase.md)\<`S`\[`"Metrics"`\]\>
+> **getContextFunctions**(`logger`): [`ContextBase`](../type-aliases/ContextBase.md)
 
-Defined in: [core/types/ServiceClass.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L90)
+Defined in: [core/types/ServiceClass.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L83)
 
 #### Parameters
 
@@ -74,7 +62,7 @@ Defined in: [core/types/ServiceClass.ts:90](https://github.com/puristajs/purista
 
 #### Returns
 
-[`ContextBase`](../type-aliases/ContextBase.md)\<`S`\[`"Metrics"`\]\>
+[`ContextBase`](../type-aliases/ContextBase.md)
 
 ***
 
@@ -82,7 +70,7 @@ Defined in: [core/types/ServiceClass.ts:90](https://github.com/puristajs/purista
 
 > **getInFlightDiagnostics**(): [`InFlightDiagnostics`](../type-aliases/InFlightDiagnostics.md)
 
-Defined in: [core/types/ServiceClass.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L92)
+Defined in: [core/types/ServiceClass.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L85)
 
 #### Returns
 
@@ -94,7 +82,7 @@ Defined in: [core/types/ServiceClass.ts:92](https://github.com/puristajs/purista
 
 > **getPausedSubscriptionConsumerState**(): [`PausedSubscriptionConsumersByRegistrationKey`](../type-aliases/PausedSubscriptionConsumersByRegistrationKey.md)
 
-Defined in: [core/types/ServiceClass.ts:96](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L96)
+Defined in: [core/types/ServiceClass.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L89)
 
 #### Returns
 
@@ -106,7 +94,7 @@ Defined in: [core/types/ServiceClass.ts:96](https://github.com/puristajs/purista
 
 > **getQueueWorkerPauseState**(): [`QueueWorkerPauseStateByQueue`](../type-aliases/QueueWorkerPauseStateByQueue.md)
 
-Defined in: [core/types/ServiceClass.ts:93](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L93)
+Defined in: [core/types/ServiceClass.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L86)
 
 #### Returns
 
@@ -118,7 +106,7 @@ Defined in: [core/types/ServiceClass.ts:93](https://github.com/puristajs/purista
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../type-aliases/ServiceHealthState.md)\>
 
-Defined in: [core/types/ServiceClass.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L91)
+Defined in: [core/types/ServiceClass.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L84)
 
 #### Returns
 
@@ -130,7 +118,7 @@ Defined in: [core/types/ServiceClass.ts:91](https://github.com/puristajs/purista
 
 > **getTracer**(): `Tracer`
 
-Defined in: [core/types/ServiceClass.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L69)
+Defined in: [core/types/ServiceClass.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L62)
 
 get the opentelemetry tracer of the service
 
@@ -144,7 +132,7 @@ get the opentelemetry tracer of the service
 
 > **pauseQueueWorkers**(`queueName`, `reason?`): `void`
 
-Defined in: [core/types/ServiceClass.ts:94](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L94)
+Defined in: [core/types/ServiceClass.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L87)
 
 #### Parameters
 
@@ -166,7 +154,7 @@ Defined in: [core/types/ServiceClass.ts:94](https://github.com/puristajs/purista
 
 > **resumeQueueWorkers**(`queueName`): `void`
 
-Defined in: [core/types/ServiceClass.ts:95](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L95)
+Defined in: [core/types/ServiceClass.ts:88](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L88)
 
 #### Parameters
 
@@ -184,7 +172,7 @@ Defined in: [core/types/ServiceClass.ts:95](https://github.com/puristajs/purista
 
 > **resumeSubscriptionConsumer**(`registrationKey`): `Promise`\<`void`\>
 
-Defined in: [core/types/ServiceClass.ts:97](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L97)
+Defined in: [core/types/ServiceClass.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L90)
 
 #### Parameters
 
@@ -202,7 +190,7 @@ Defined in: [core/types/ServiceClass.ts:97](https://github.com/puristajs/purista
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [core/types/ServiceClass.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L37)
+Defined in: [core/types/ServiceClass.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L30)
 
 Start the service
 
@@ -216,7 +204,7 @@ Start the service
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [core/types/ServiceClass.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L59)
+Defined in: [core/types/ServiceClass.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L52)
 
 Start a new active opentelemetry span with given options.
 A active span will be below the current span in hierarchy
@@ -263,7 +251,7 @@ the function to be wrapped into the span
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: [core/types/ServiceClass.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L48)
+Defined in: [core/types/ServiceClass.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L41)
 
 Wrap the given function in an OpenTelemetry span.
 The span will be on same hierarchy level as the current span.

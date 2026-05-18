@@ -8,7 +8,7 @@
 
 > **runPuristaCommand**\<`TInput`\>(`commandId`, `input`, `options?`): `Promise`\<[`PuristaCommandResult`](../type-aliases/PuristaCommandResult.md)\>
 
-Defined in: [packages/cli/src/engine.ts:107](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/engine.ts#L107)
+Defined in: [packages/cli/src/engine.ts:107](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/engine.ts#L107)
 
 ## Type Parameters
 
@@ -20,7 +20,7 @@ Defined in: [packages/cli/src/engine.ts:107](https://github.com/puristajs/purist
 
 ### commandId
 
-`"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-kubernetes-cronjob"` \| `"export-cloudevents-schema"` \| `"init-project"`
+`"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-cloudevents-schema"` \| `"init-project"`
 
 ### input
 

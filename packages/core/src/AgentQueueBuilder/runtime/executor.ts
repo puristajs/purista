@@ -227,12 +227,10 @@ function createLocalSession(id: string): Session<any> {
 			write: async () => undefined,
 			delete: async () => undefined,
 			list: async () => [],
-			search: async () => [],
 		},
 		history: {
 			list: async () => [],
 		},
-		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
 		close: async () => undefined,

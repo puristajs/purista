@@ -44,7 +44,7 @@ Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:12](htt
 
 ##### outcome
 
-`"retry"` \| `"deadLetter"` \| `"drop"` \| `"stop-consumer"`
+`"deadLetter"` \| `"retry"` \| `"drop"` \| `"stop-consumer"`
 
 ##### reason?
 
@@ -74,7 +74,7 @@ Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:9](http
 
 ### outcome
 
-> `readonly` **outcome**: `"retry"` \| `"deadLetter"` \| `"drop"` \| `"stop-consumer"`
+> `readonly` **outcome**: `"deadLetter"` \| `"retry"` \| `"drop"` \| `"stop-consumer"`
 
 Defined in: [core/types/subscription/SubscriptionConsumerControlError.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionConsumerControlError.ts#L7)
 

@@ -6,9 +6,9 @@
 
 # Function: exportScheduleManifest()
 
-> **exportScheduleManifest**(`options`): `Promise`\<[`ScheduleManifest`](../type-aliases/ScheduleManifest.md)\>
+> **exportScheduleManifest**(`options`): `Promise`\<\{ `schedules`: `JsonRecord`[]; `title`: `string` \| `undefined`; `version`: `string`; \}\>
 
-Defined in: [helper/enterpriseInterop.ts:424](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L424)
+Defined in: [helper/enterpriseInterop.ts:336](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L336)
 
 Export provider-neutral schedule metadata from service definitions.
 
@@ -20,7 +20,7 @@ Export provider-neutral schedule metadata from service definitions.
 
 ## Returns
 
-`Promise`\<[`ScheduleManifest`](../type-aliases/ScheduleManifest.md)\>
+`Promise`\<\{ `schedules`: `JsonRecord`[]; `title`: `string` \| `undefined`; `version`: `string`; \}\>
 
 ## Example
 

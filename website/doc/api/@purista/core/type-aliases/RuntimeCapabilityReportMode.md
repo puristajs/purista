@@ -8,4 +8,4 @@
 
 > **RuntimeCapabilityReportMode** = `"definition-only"` \| `"runtime-inspect"`
 
-Defined in: [helper/enterpriseInterop.ts:122](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L122)
+Defined in: [helper/enterpriseInterop.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L34)

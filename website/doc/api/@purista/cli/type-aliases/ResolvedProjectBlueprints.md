@@ -8,7 +8,7 @@
 
 > **ResolvedProjectBlueprints** = `object`
 
-Defined in: [packages/cli/src/blueprints/types.ts:66](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/blueprints/types.ts#L66)
+Defined in: [packages/cli/src/blueprints/types.ts:66](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L66)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:66](https://github.com/purista
 
 > **conflicts**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:69](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/blueprints/types.ts#L69)
+Defined in: [packages/cli/src/blueprints/types.ts:69](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L69)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/blueprints/types.ts:69](https://github.com/purista
 
 > **selectedBlueprints**: [`BlueprintId`](BlueprintId.md)[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:67](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/blueprints/types.ts#L67)
+Defined in: [packages/cli/src/blueprints/types.ts:67](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L67)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/cli/src/blueprints/types.ts:67](https://github.com/purista
 
 > **warnings**: `string`[]
 
-Defined in: [packages/cli/src/blueprints/types.ts:68](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/blueprints/types.ts#L68)
+Defined in: [packages/cli/src/blueprints/types.ts:68](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/types.ts#L68)

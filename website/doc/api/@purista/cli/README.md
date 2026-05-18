@@ -34,8 +34,6 @@ purista add queue process-jobs --service user --service-version 1 --description 
 purista add agent triage --service user --service-version 1 --description "Review tickets"
 ```
 
-Generated agents use the core-native PURISTA agent builders from `@purista/core`. Live model providers stay app-level dependencies; add provider packages such as `@purista/harness-openai` only when the generated application binds real models at runtime.
-
 Non-interactive mode fails fast when a required value has no declared default:
 
 ```bash
@@ -78,7 +76,7 @@ const plan = planProjectGeneration({
 await materializeProjectGeneration(plan)
 ```
 
-Generated tests import the public testing helpers from `@purista/core`:
+Generated tests follow the public testing helpers:
 
 - `createCommandContextMock(...)` for command handler tests
 - `createSubscriptionContextMock(...)` for subscription handler tests
@@ -169,12 +167,10 @@ Generated tests import the public testing helpers from `@purista/core`:
 - [createAmqpConfigFile](functions/createAmqpConfigFile.md)
 - [createBiomeConfigFile](functions/createBiomeConfigFile.md)
 - [createDaprConfigFile](functions/createDaprConfigFile.md)
-- [createDefinitionsFile](functions/createDefinitionsFile.md)
 - [createEntrypointFile](functions/createEntrypointFile.md)
 - [createEslintCommonJsConfigFile](functions/createEslintCommonJsConfigFile.md)
 - [createEslintModuleConfigFile](functions/createEslintModuleConfigFile.md)
 - [createEventBridgeFile](functions/createEventBridgeFile.md)
-- [createExportDefinitionsFile](functions/createExportDefinitionsFile.md)
 - [createGitIgnoreFile](functions/createGitIgnoreFile.md)
 - [createHttpConfigFile](functions/createHttpConfigFile.md)
 - [createHttpFile](functions/createHttpFile.md)

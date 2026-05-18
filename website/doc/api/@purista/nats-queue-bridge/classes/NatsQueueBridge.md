@@ -6,7 +6,7 @@
 
 # Class: NatsQueueBridge
 
-Defined in: [NatsQueueBridge.impl.ts:45](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L45)
+Defined in: [NatsQueueBridge.impl.ts:37](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L37)
 
 ## Implements
 
@@ -18,7 +18,7 @@ Defined in: [NatsQueueBridge.impl.ts:45](https://github.com/puristajs/purista/bl
 
 > **new NatsQueueBridge**(`options?`): `NatsQueueBridge`
 
-Defined in: [NatsQueueBridge.impl.ts:89](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L89)
+Defined in: [NatsQueueBridge.impl.ts:78](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L78)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [NatsQueueBridge.impl.ts:89](https://github.com/puristajs/purista/bl
 
 > `readonly` **capabilities**: [`QueueBridgeCapabilities`](../../core/type-aliases/QueueBridgeCapabilities.md)
 
-Defined in: [NatsQueueBridge.impl.ts:48](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L48)
+Defined in: [NatsQueueBridge.impl.ts:40](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L40)
 
 #### Implementation of
 
@@ -48,7 +48,7 @@ Defined in: [NatsQueueBridge.impl.ts:48](https://github.com/puristajs/purista/bl
 
 > `readonly` **instanceId**: `` `${string}-${string}-${string}-${string}-${string}` ``
 
-Defined in: [NatsQueueBridge.impl.ts:69](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L69)
+Defined in: [NatsQueueBridge.impl.ts:61](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L61)
 
 #### Implementation of
 
@@ -60,7 +60,7 @@ Defined in: [NatsQueueBridge.impl.ts:69](https://github.com/puristajs/purista/bl
 
 > `readonly` **name**: `"NatsQueueBridge"` = `'NatsQueueBridge'`
 
-Defined in: [NatsQueueBridge.impl.ts:46](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L46)
+Defined in: [NatsQueueBridge.impl.ts:38](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L38)
 
 #### Implementation of
 
@@ -72,7 +72,7 @@ Defined in: [NatsQueueBridge.impl.ts:46](https://github.com/puristajs/purista/bl
 
 > **ack**(`queueName`, `leaseId`): `Promise`\<`void`\>
 
-Defined in: [NatsQueueBridge.impl.ts:214](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L214)
+Defined in: [NatsQueueBridge.impl.ts:192](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L192)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Defined in: [NatsQueueBridge.impl.ts:214](https://github.com/puristajs/purista/b
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [NatsQueueBridge.impl.ts:106](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L106)
+Defined in: [NatsQueueBridge.impl.ts:94](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L94)
 
 #### Returns
 
@@ -114,7 +114,7 @@ Defined in: [NatsQueueBridge.impl.ts:106](https://github.com/puristajs/purista/b
 
 > **enqueue**(`options`): `Promise`\<[`QueueEnqueueResult`](../../core/type-aliases/QueueEnqueueResult.md)\>
 
-Defined in: [NatsQueueBridge.impl.ts:136](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L136)
+Defined in: [NatsQueueBridge.impl.ts:123](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L123)
 
 #### Parameters
 
@@ -136,7 +136,7 @@ Defined in: [NatsQueueBridge.impl.ts:136](https://github.com/puristajs/purista/b
 
 > **extendLease**(`queueName`, `leaseId`, `extensionMs`): `Promise`\<`void`\>
 
-Defined in: [NatsQueueBridge.impl.ts:203](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L203)
+Defined in: [NatsQueueBridge.impl.ts:181](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L181)
 
 #### Parameters
 
@@ -166,7 +166,7 @@ Defined in: [NatsQueueBridge.impl.ts:203](https://github.com/puristajs/purista/b
 
 > **inspectLeases**(`queueName`, `options?`): `Promise`\<[`QueueLeaseInspectionRecord`](../../core/type-aliases/QueueLeaseInspectionRecord.md)[]\>
 
-Defined in: [NatsQueueBridge.impl.ts:300](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L300)
+Defined in: [NatsQueueBridge.impl.ts:278](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L278)
 
 #### Parameters
 
@@ -192,7 +192,7 @@ Defined in: [NatsQueueBridge.impl.ts:300](https://github.com/puristajs/purista/b
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [NatsQueueBridge.impl.ts:124](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L124)
+Defined in: [NatsQueueBridge.impl.ts:111](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L111)
 
 #### Returns
 
@@ -208,7 +208,7 @@ Defined in: [NatsQueueBridge.impl.ts:124](https://github.com/puristajs/purista/b
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [NatsQueueBridge.impl.ts:120](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L120)
+Defined in: [NatsQueueBridge.impl.ts:107](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L107)
 
 #### Returns
 
@@ -224,7 +224,7 @@ Defined in: [NatsQueueBridge.impl.ts:120](https://github.com/puristajs/purista/b
 
 > **leaseNext**(`queueName`, `options?`): `Promise`\<[`QueueLease`](../../core/type-aliases/QueueLease.md) \| `undefined`\>
 
-Defined in: [NatsQueueBridge.impl.ts:169](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L169)
+Defined in: [NatsQueueBridge.impl.ts:147](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L147)
 
 #### Parameters
 
@@ -250,7 +250,7 @@ Defined in: [NatsQueueBridge.impl.ts:169](https://github.com/puristajs/purista/b
 
 > **metrics**(`queueName`): `Promise`\<[`QueueMetrics`](../../core/type-aliases/QueueMetrics.md)\>
 
-Defined in: [NatsQueueBridge.impl.ts:314](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L314)
+Defined in: [NatsQueueBridge.impl.ts:292](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L292)
 
 #### Parameters
 
@@ -272,7 +272,7 @@ Defined in: [NatsQueueBridge.impl.ts:314](https://github.com/puristajs/purista/b
 
 > **moveToDeadLetter**(`queueName`, `message`, `reason?`): `Promise`\<`void`\>
 
-Defined in: [NatsQueueBridge.impl.ts:251](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L251)
+Defined in: [NatsQueueBridge.impl.ts:229](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L229)
 
 #### Parameters
 
@@ -302,7 +302,7 @@ Defined in: [NatsQueueBridge.impl.ts:251](https://github.com/puristajs/purista/b
 
 > **nack**(`queueName`, `leaseId`, `request`): `Promise`\<`void`\>
 
-Defined in: [NatsQueueBridge.impl.ts:223](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L223)
+Defined in: [NatsQueueBridge.impl.ts:201](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L201)
 
 #### Parameters
 
@@ -332,7 +332,7 @@ Defined in: [NatsQueueBridge.impl.ts:223](https://github.com/puristajs/purista/b
 
 > **peekDeadLetter**(`queueName`, `options?`): `Promise`\<[`QueueMessage`](../../core/type-aliases/QueueMessage.md)[]\>
 
-Defined in: [NatsQueueBridge.impl.ts:265](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L265)
+Defined in: [NatsQueueBridge.impl.ts:243](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L243)
 
 #### Parameters
 
@@ -358,7 +358,7 @@ Defined in: [NatsQueueBridge.impl.ts:265](https://github.com/puristajs/purista/b
 
 > **purgeDeadLetter**(`queueName`): `Promise`\<`number`\>
 
-Defined in: [NatsQueueBridge.impl.ts:291](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L291)
+Defined in: [NatsQueueBridge.impl.ts:269](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L269)
 
 #### Parameters
 
@@ -380,7 +380,7 @@ Defined in: [NatsQueueBridge.impl.ts:291](https://github.com/puristajs/purista/b
 
 > **redriveDeadLetter**(`queueName`, `options?`): `Promise`\<`number`\>
 
-Defined in: [NatsQueueBridge.impl.ts:272](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L272)
+Defined in: [NatsQueueBridge.impl.ts:250](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L250)
 
 #### Parameters
 
@@ -406,7 +406,7 @@ Defined in: [NatsQueueBridge.impl.ts:272](https://github.com/puristajs/purista/b
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [NatsQueueBridge.impl.ts:98](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L98)
+Defined in: [NatsQueueBridge.impl.ts:86](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/nats-queue-bridge/src/NatsQueueBridge.impl.ts#L86)
 
 #### Returns
 

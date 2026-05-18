@@ -4,7 +4,7 @@
 
 [PURISTA API](../../packages.md) / @purista/azure-secret-store
 
-# @purista/azure-secret-store
+# @purista/aws-secret-store
 
 A secret store for using [Azure Key Vault](https://azure.microsoft.com/products/key-vault/) as storage.  
 

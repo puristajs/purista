@@ -6,6 +6,6 @@
 
 # Variable: puristaCommandIds
 
-> `const` **puristaCommandIds**: readonly \[`"add-service"`, `"add-command"`, `"add-subscription"`, `"add-stream"`, `"add-queue"`, `"add-queue-worker"`, `"add-agent"`, `"export-asyncapi"`, `"export-runtime-capabilities"`, `"export-schedule-manifest"`, `"export-kubernetes-cronjob"`, `"export-cloudevents-schema"`, `"init-project"`\]
+> `const` **puristaCommandIds**: readonly \[`"add-service"`, `"add-command"`, `"add-subscription"`, `"add-stream"`, `"add-queue"`, `"add-queue-worker"`, `"add-agent"`, `"export-asyncapi"`, `"export-runtime-capabilities"`, `"export-schedule-manifest"`, `"export-cloudevents-schema"`, `"init-project"`\]
 
-Defined in: [packages/cli/src/core/types.ts:1](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/types.ts#L1)
+Defined in: [packages/cli/src/core/types.ts:1](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L1)

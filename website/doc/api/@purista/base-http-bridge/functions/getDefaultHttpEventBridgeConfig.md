@@ -85,14 +85,6 @@ Use this if there is a need to always have the same instance id.
 
 > `optional` **logLevel?**: [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
-### metrics?
-
-> `optional` **metrics?**: [`PuristaMetricsRuntimeOptions`](../../core/interfaces/PuristaMetricsRuntimeOptions.md)
-
-### metricsRecorder?
-
-> `optional` **metricsRecorder?**: [`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
 ### name?
 
 > `optional` **name?**: `string`

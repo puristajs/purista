@@ -6,7 +6,7 @@
 
 # Class: PuristaCliPromptError
 
-Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/errors.ts#L27)
+Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L27)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [packages/cli/src/core/errors.ts:27](https://github.com/puristajs/pu
 
 > **new PuristaCliPromptError**(`message`, `options?`): `PuristaCliPromptError`
 
-Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/errors.ts#L28)
+Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L28)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [packages/cli/src/core/errors.ts:28](https://github.com/puristajs/pu
 
 ###### command?
 
-`"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-kubernetes-cronjob"` \| `"export-cloudevents-schema"` \| `"init-project"`
+`"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-cloudevents-schema"` \| `"init-project"`
 
 ###### issues?
 
@@ -60,9 +60,9 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 ### command?
 
-> `readonly` `optional` **command?**: `"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-kubernetes-cronjob"` \| `"export-cloudevents-schema"` \| `"init-project"`
+> `readonly` `optional` **command?**: `"add-service"` \| `"add-command"` \| `"add-subscription"` \| `"add-stream"` \| `"add-queue"` \| `"add-queue-worker"` \| `"add-agent"` \| `"export-asyncapi"` \| `"export-runtime-capabilities"` \| `"export-schedule-manifest"` \| `"export-cloudevents-schema"` \| `"init-project"`
 
-Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/errors.ts#L4)
+Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L4)
 
 #### Inherited from
 
@@ -74,7 +74,7 @@ Defined in: [packages/cli/src/core/errors.ts:4](https://github.com/puristajs/pur
 
 > `readonly` **exitCode**: `number`
 
-Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/errors.ts#L6)
+Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L6)
 
 #### Inherited from
 
@@ -86,7 +86,7 @@ Defined in: [packages/cli/src/core/errors.ts:6](https://github.com/puristajs/pur
 
 > `readonly` **issues**: [`PuristaCommandIssue`](../type-aliases/PuristaCommandIssue.md)[]
 
-Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/errors.ts#L5)
+Defined in: [packages/cli/src/core/errors.ts:5](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/errors.ts#L5)
 
 #### Inherited from
 

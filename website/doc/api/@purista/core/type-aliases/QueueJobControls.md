@@ -8,7 +8,7 @@
 
 > **QueueJobControls** = `object`
 
-Defined in: [core/types/queue/QueueJobContext.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L13)
+Defined in: [core/types/queue/QueueJobContext.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L10)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:13](https://github.com/puristaj
 
 > **cancelRequested**(): `boolean`
 
-Defined in: [core/types/queue/QueueJobContext.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L19)
+Defined in: [core/types/queue/QueueJobContext.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L16)
 
 #### Returns
 
@@ -28,7 +28,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:19](https://github.com/puristaj
 
 > **complete**(`output?`, `headers?`): `Promise`\<`void`\>
 
-Defined in: [core/types/queue/QueueJobContext.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L14)
+Defined in: [core/types/queue/QueueJobContext.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L11)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:14](https://github.com/puristaj
 
 > **extendLease**(`durationMs`): `Promise`\<`void`\>
 
-Defined in: [core/types/queue/QueueJobContext.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L18)
+Defined in: [core/types/queue/QueueJobContext.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L15)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:18](https://github.com/puristaj
 
 > **fail**(`reason`, `fatal?`): `Promise`\<`void`\>
 
-Defined in: [core/types/queue/QueueJobContext.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L16)
+Defined in: [core/types/queue/QueueJobContext.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L13)
 
 #### Parameters
 
@@ -90,7 +90,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:16](https://github.com/puristaj
 
 > **moveToDeadLetter**(`reason?`): `Promise`\<`void`\>
 
-Defined in: [core/types/queue/QueueJobContext.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L17)
+Defined in: [core/types/queue/QueueJobContext.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L14)
 
 #### Parameters
 
@@ -108,7 +108,7 @@ Defined in: [core/types/queue/QueueJobContext.ts:17](https://github.com/puristaj
 
 > **retry**(`request?`): `Promise`\<`void`\>
 
-Defined in: [core/types/queue/QueueJobContext.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L15)
+Defined in: [core/types/queue/QueueJobContext.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueJobContext.ts#L12)
 
 #### Parameters
 

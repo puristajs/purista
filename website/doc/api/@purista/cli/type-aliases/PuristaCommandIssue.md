@@ -8,7 +8,7 @@
 
 > **PuristaCommandIssue** = `object`
 
-Defined in: [packages/cli/src/core/types.ts:26](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/types.ts#L26)
+Defined in: [packages/cli/src/core/types.ts:25](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L25)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/core/types.ts:26](https://github.com/puristajs/pur
 
 > **code**: `string`
 
-Defined in: [packages/cli/src/core/types.ts:27](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/types.ts#L27)
+Defined in: [packages/cli/src/core/types.ts:26](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L26)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/core/types.ts:27](https://github.com/puristajs/pur
 
 > **message**: `string`
 
-Defined in: [packages/cli/src/core/types.ts:28](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/types.ts#L28)
+Defined in: [packages/cli/src/core/types.ts:27](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L27)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/cli/src/core/types.ts:28](https://github.com/puristajs/pur
 
 > `optional` **path?**: `string`[]
 
-Defined in: [packages/cli/src/core/types.ts:29](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/types.ts#L29)
+Defined in: [packages/cli/src/core/types.ts:28](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L28)

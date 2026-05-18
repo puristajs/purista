@@ -106,7 +106,7 @@ Defined in: [core/EventBridge/PendingInvocationRegistry.impl.ts:29](https://gith
 
 ### reject()
 
-> **reject**(`correlationId`, `error`): `"rejected"` \| `"late"` \| `"missing"`
+> **reject**(`correlationId`, `error`): `"late"` \| `"missing"` \| `"rejected"`
 
 Defined in: [core/EventBridge/PendingInvocationRegistry.impl.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/PendingInvocationRegistry.impl.ts#L64)
 
@@ -122,7 +122,7 @@ Defined in: [core/EventBridge/PendingInvocationRegistry.impl.ts:64](https://gith
 
 #### Returns
 
-`"rejected"` \| `"late"` \| `"missing"`
+`"late"` \| `"missing"` \| `"rejected"`
 
 ***
 

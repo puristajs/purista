@@ -19,7 +19,7 @@ connects them with the corresponding service commands.
 
 ### services
 
-[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<`any`, `any`, `any`\>\> \| [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<`any`, `any`, `any`\>\>[] \| `undefined`
+[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> \| [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[] \| `undefined`
 
 Instance or array of services whose commands should be exposed.
 

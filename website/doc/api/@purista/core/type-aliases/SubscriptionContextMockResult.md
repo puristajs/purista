@@ -8,7 +8,7 @@
 
 > **SubscriptionContextMockResult**\<`TBuilder`\> = `object`
 
-Defined in: [testing/createSubscriptionContextMock.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L33)
+Defined in: [testing/createSubscriptionContextMock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L22)
 
 ## Type Parameters
 
@@ -20,17 +20,17 @@ Defined in: [testing/createSubscriptionContextMock.ts:33](https://github.com/pur
 
 ### context
 
-> **context**: [`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<[`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\], [`ServiceClassMetrics`](ServiceClassMetrics.md)\<[`SubscriptionContextMockServiceClass`](SubscriptionContextMockServiceClass.md)\<`TBuilder`\>\>\>
+> **context**: [`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<[`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\]\>
 
-Defined in: [testing/createSubscriptionContextMock.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L34)
+Defined in: [testing/createSubscriptionContextMock.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L23)
 
 ***
 
 ### mock
 
-> **mock**: [`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<[`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\], [`ServiceClassMetrics`](ServiceClassMetrics.md)\<[`SubscriptionContextMockServiceClass`](SubscriptionContextMockServiceClass.md)\<`TBuilder`\>\>\>
+> **mock**: [`SubscriptionFunctionContext`](SubscriptionFunctionContext.md)\<[`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Invokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"StreamInvokes"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"EmitList"`\], [`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"QueueInvokes"`\]\>
 
-Defined in: [testing/createSubscriptionContextMock.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L42)
+Defined in: [testing/createSubscriptionContextMock.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L30)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [testing/createSubscriptionContextMock.ts:42](https://github.com/pur
 
 > **stubs**: `object`
 
-Defined in: [testing/createSubscriptionContextMock.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L50)
+Defined in: [testing/createSubscriptionContextMock.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L37)
 
 #### emit
 

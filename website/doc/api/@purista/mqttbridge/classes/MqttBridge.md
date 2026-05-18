@@ -104,14 +104,6 @@ Use this if there is a need to always have the same instance id.
 
 [`LogLevelName`](../../core/type-aliases/LogLevelName.md)
 
-###### metrics?
-
-[`PuristaMetricsRuntimeOptions`](../../core/interfaces/PuristaMetricsRuntimeOptions.md)
-
-###### metricsRecorder?
-
-[`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
 ###### qosCommand?
 
 `QoS`
@@ -190,7 +182,7 @@ purista
 
 > **capabilities**: [`EventBridgeCapabilities`](../../core/type-aliases/EventBridgeCapabilities.md)
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 #### Implementation of
 
@@ -214,7 +206,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:69](https://github.com/puristajs/
 
 > **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 #### Inherited from
 
@@ -226,7 +218,7 @@ Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:30
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:28
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -244,7 +236,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `protected` `readonly` **inFlightExecutions**: [`InFlightExecutionTracker`](../../core/classes/InFlightExecutionTracker.md)
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:31
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 #### Inherited from
 
@@ -256,7 +248,7 @@ Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:31
 
 > **instanceId**: `string`
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 #### Implementation of
 
@@ -272,7 +264,7 @@ Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:29
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -280,23 +272,11 @@ Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 ***
 
-### metricsRecorder
-
-> `protected` **metricsRecorder**: [`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
-
-#### Inherited from
-
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`metricsRecorder`](../../core/classes/EventBridgeBaseClass.md#metricsrecorder)
-
-***
-
 ### name
 
 > **name**: `string`
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 #### Implementation of
 
@@ -320,7 +300,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:70](https://github.com/puristajs/
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -394,7 +374,7 @@ the message
 
 > **getInFlightExecutionCount**(): `number`
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:69
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:66
 
 Number of currently running handlers across all work kinds.
 
@@ -416,7 +396,7 @@ Number of currently running handlers across all work kinds.
 
 > **getInFlightExecutionCounts**(): [`InFlightExecutionCounts`](../../core/type-aliases/InFlightExecutionCounts.md)
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
 
 Number of currently running handlers grouped by work kind.
 
@@ -438,7 +418,7 @@ Number of currently running handlers grouped by work kind.
 
 > **getPausedSubscriptionConsumers**(): [`PausedSubscriptionConsumersByRegistrationKey`](../../core/type-aliases/PausedSubscriptionConsumersByRegistrationKey.md)
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:68
 
 Returns paused subscription consumer states keyed by adapter registration key.
 
@@ -460,7 +440,7 @@ Returns paused subscription consumer states keyed by adapter registration key.
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:38
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
 
 Returns open telemetry tracer of this service
 
@@ -554,7 +534,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:73
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:70
 
 Open a stream invocation.
 The returned handle can be consumed via async iteration and can be cancelled by caller.
@@ -635,7 +615,7 @@ the function to be called if a matching command arrives
 
 > **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:74
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:71
 
 Register a service stream.
 
@@ -707,7 +687,7 @@ the function to be called if a matching message arrives
 
 > **resumeSubscriptionConsumer**(`_registrationKey`): `Promise`\<`void`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:69
 
 Resumes a paused subscription consumer by registration key.
 
@@ -735,7 +715,7 @@ Resumes a paused subscription consumer by registration key.
 
 > **runInFlight**\<`T`\>(`fn`, `kind?`): `Promise`\<`T`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:67
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
 
 #### Type Parameters
 
@@ -789,7 +769,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:47
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:45
 
 Start a child span for opentelemetry tracking
 
@@ -867,7 +847,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterStream**(`_address`): `Promise`\<`void`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:75
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:72
 
 Unregister a service stream
 
@@ -917,7 +897,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:405](https://github.com/puristajs
 
 > **waitForInFlightDrain**(`timeoutMs?`): `Promise`\<`boolean`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:68
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:65
 
 #### Parameters
 
@@ -939,7 +919,7 @@ Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:68
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:64
+Defined in: core/dist/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

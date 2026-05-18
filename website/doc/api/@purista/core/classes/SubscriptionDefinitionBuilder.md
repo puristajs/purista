@@ -773,12 +773,6 @@ the logger instance
 
 the original received message
 
-###### mock.metrics
-
-> **metrics**: `PuristaMetricContext`\<`Metrics`\>
-
-typed custom metrics declared on the current builder scope
-
 ###### mock.queue
 
 > **queue**: [`QueueContext`](../type-aliases/QueueContext.md)

@@ -8,4 +8,4 @@
 
 > **QueueWorkerMode** = `"continuous"` \| `"interval"` \| `"sequential"`
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L14)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L12)

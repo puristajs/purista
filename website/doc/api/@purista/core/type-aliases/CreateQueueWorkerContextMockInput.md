@@ -8,7 +8,7 @@
 
 > **CreateQueueWorkerContextMockInput**\<`Payload`, `Parameter`, `Resources`\> = `object`
 
-Defined in: [testing/createQueueWorkerContextMock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L17)
+Defined in: [testing/createQueueWorkerContextMock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L11)
 
 ## Type Parameters
 
@@ -30,7 +30,7 @@ Defined in: [testing/createQueueWorkerContextMock.ts:17](https://github.com/puri
 
 > `optional` **message?**: `Partial`\<[`QueueMessage`](QueueMessage.md)\<`Payload`, `Parameter`\>\>
 
-Defined in: [testing/createQueueWorkerContextMock.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L27)
+Defined in: [testing/createQueueWorkerContextMock.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L21)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [testing/createQueueWorkerContextMock.ts:27](https://github.com/puri
 
 > `optional` **parameter?**: `Parameter`
 
-Defined in: [testing/createQueueWorkerContextMock.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L24)
+Defined in: [testing/createQueueWorkerContextMock.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L18)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [testing/createQueueWorkerContextMock.ts:24](https://github.com/puri
 
 > **payload**: `Payload`
 
-Defined in: [testing/createQueueWorkerContextMock.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L23)
+Defined in: [testing/createQueueWorkerContextMock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L17)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [testing/createQueueWorkerContextMock.ts:23](https://github.com/puri
 
 > **queueName**: `string`
 
-Defined in: [testing/createQueueWorkerContextMock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L22)
+Defined in: [testing/createQueueWorkerContextMock.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L16)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [testing/createQueueWorkerContextMock.ts:22](https://github.com/puri
 
 > `optional` **resources?**: `Partial`\<`Resources`\>
 
-Defined in: [testing/createQueueWorkerContextMock.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L26)
+Defined in: [testing/createQueueWorkerContextMock.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L20)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [testing/createQueueWorkerContextMock.ts:26](https://github.com/puri
 
 > `optional` **sandbox?**: `SinonSandbox`
 
-Defined in: [testing/createQueueWorkerContextMock.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L25)
+Defined in: [testing/createQueueWorkerContextMock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createQueueWorkerContextMock.ts#L19)

@@ -8,7 +8,7 @@
 
 > **RuntimeBridgeCapabilities**\<`TCapabilities`\> = `object`
 
-Defined in: [helper/enterpriseInterop.ts:117](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L117)
+Defined in: [helper/enterpriseInterop.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L29)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [helper/enterpriseInterop.ts:117](https://github.com/puristajs/puris
 
 > `optional` **capabilities?**: `TCapabilities`
 
-Defined in: [helper/enterpriseInterop.ts:119](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L119)
+Defined in: [helper/enterpriseInterop.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L31)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [helper/enterpriseInterop.ts:119](https://github.com/puristajs/puris
 
 > **name**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:118](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L118)
+Defined in: [helper/enterpriseInterop.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L30)

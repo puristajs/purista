@@ -8,7 +8,7 @@
 
 > **exportRuntimeCapabilities**(`options`): `object`
 
-Defined in: [helper/enterpriseInterop.ts:721](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L721)
+Defined in: [helper/enterpriseInterop.ts:381](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L381)
 
 Export a normalized runtime capability report from bridge declarations.
 

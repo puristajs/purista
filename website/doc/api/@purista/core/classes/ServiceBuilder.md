@@ -6,7 +6,7 @@
 
 # Class: ServiceBuilder\<S\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:103](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L103)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L82)
 
 This class is used to build a service.
 
@@ -14,7 +14,7 @@ This class is used to build a service.
 
 ### S
 
-`S` *extends* [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md)\<`any`, `any`, `any`, `any`, `any`\> = [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md)
+`S` *extends* [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md) = [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md)
 
 ## Constructors
 
@@ -22,7 +22,7 @@ This class is used to build a service.
 
 > **new ServiceBuilder**\<`S`\>(`info`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L135)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:111](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L111)
 
 #### Parameters
 
@@ -40,64 +40,23 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:135](https://github.com/puris
 
 > **info**: [`ServiceInfoType`](../type-aliases/ServiceInfoType.md)
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L135)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:111](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L111)
 
 ***
 
 ### SClass
 
-> **SClass**: [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\> = `Service`
+> **SClass**: [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\> = `Service`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:132](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L132)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:108](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L108)
 
 ## Methods
-
-### addAgentDefinition()
-
-> **addAgentDefinition**\<`Definition`\>(...`definitions`): `ServiceBuilder`\<`S`\>
-
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:239](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L239)
-
-Add one or more attached agent definitions to this service.
-
-The attached agent is expanded into normal queue, queue worker, command,
-and stream definitions so the rest of core can treat it like any other
-declared PURISTA boundary.
-
-#### Type Parameters
-
-##### Definition
-
-`Definition` *extends* [`AttachedAgentDefinition`](../type-aliases/AttachedAgentDefinition.md)\<`any`\>
-
-#### Parameters
-
-##### definitions
-
-...`Definition`[]
-
-#### Returns
-
-`ServiceBuilder`\<`S`\>
-
-#### Example
-
-```ts
-const triage = await service
-  .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-  .setRunFunction(async context => ({ priority: 'normal' }))
-  .getDefinition()
-
-service.addAgentDefinition(triage)
-```
-
-***
 
 ### addCommandDefinition()
 
 > **addCommandDefinition**(...`commands`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:167](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L167)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:139](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L139)
 
 #### Parameters
 
@@ -115,7 +74,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:167](https://github.com/puris
 
 > **addQueueDefinition**(...`queues`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:200](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L200)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:172](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L172)
 
 #### Parameters
 
@@ -133,7 +92,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:200](https://github.com/puris
 
 > **addQueueWorkerDefinition**(...`workers`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:211](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L211)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:183](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L183)
 
 #### Parameters
 
@@ -151,7 +110,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:211](https://github.com/puris
 
 > **addScheduleDefinition**(...`schedules`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:259](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L259)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:194](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L194)
 
 #### Parameters
 
@@ -169,7 +128,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:259](https://github.com/puris
 
 > **addStreamDefinition**(...`streams`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:189](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L189)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:161](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L161)
 
 #### Parameters
 
@@ -187,7 +146,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:189](https://github.com/puris
 
 > **addSubscriptionDefinition**(...`subscription`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:178](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L178)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:150](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L150)
 
 #### Parameters
 
@@ -205,7 +164,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:178](https://github.com/puris
 
 > **bindEventToQueue**(`eventName`, `queueName`, `options?`): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:280](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L280)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:215](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L215)
 
 Bind a custom event to a durable queue job through a generated bounded subscription.
 
@@ -237,55 +196,11 @@ service.bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
 
 ***
 
-### defineMetric()
-
-> **defineMetric**\<`MetricName`, `Definition`\>(`name`, `definition`): `ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `Metrics`: `Metrics`; `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `Metrics`\>\>; \}\>\>
-
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:365](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L365)
-
-Declare a custom application metric available in every service handler.
-
-#### Type Parameters
-
-##### MetricName
-
-`MetricName` *extends* `string`
-
-##### Definition
-
-`Definition` *extends* `PuristaMetricDefinition`\<`any`\>
-
-#### Parameters
-
-##### name
-
-`MetricName`
-
-##### definition
-
-`Definition`
-
-#### Returns
-
-`ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `Metrics`: `Metrics`; `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `Metrics`\>\>; \}\>\>
-
-#### Example
-
-```ts
-const service = new ServiceBuilder(serviceInfo).defineMetric('app.orders.created', {
-  kind: 'counter',
-  unit: '{order}',
-  description: 'Created orders',
-})
-```
-
-***
-
 ### defineResource()
 
 > **defineResource**\<`ResourceName`, `ResourcesType`\>(): `ServiceBuilder`\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"Resources"`, `S`\[`"Resources"`\] & `{ [K in string]: InstanceOrType<ResourcesType> }`\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:346](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L346)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:281](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L281)
 
 #### Type Parameters
 
@@ -303,53 +218,11 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:346](https://github.com/puris
 
 ***
 
-### getAgentQueueBuilder()
-
-> **getAgentQueueBuilder**\<`AgentName`\>(`agentName`, `description`): [`AgentQueueBuilder`](AgentQueueBuilder.md)\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<[`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), `S`\[`"Resources"`\] *extends* `Record`\<`string`, `unknown`\> ? `any`\[`any`\] : `Record`\<`string`, `never`\>, `Record`\<`never`, `never`\>, `Record`\<`never`, `never`\>, `Record`\<`never`, `never`\>, `undefined`, `S`\[`"Metrics"`\]\>\>
-
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:592](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L592)
-
-Create a native core builder for a queue-backed PURISTA agent.
-
-The returned builder preserves this service builder's resource type and
-cascades payload, parameter, output, model, command-tool, and child-agent
-declarations into the agent handler context.
-
-#### Type Parameters
-
-##### AgentName
-
-`AgentName` *extends* `string`
-
-#### Parameters
-
-##### agentName
-
-[`NonEmptyString`](../type-aliases/NonEmptyString.md)\<`AgentName`\>
-
-##### description
-
-`string`
-
-#### Returns
-
-[`AgentQueueBuilder`](AgentQueueBuilder.md)\<[`AgentQueueBuilderTypes`](../type-aliases/AgentQueueBuilderTypes.md)\<[`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), `S`\[`"Resources"`\] *extends* `Record`\<`string`, `unknown`\> ? `any`\[`any`\] : `Record`\<`string`, `never`\>, `Record`\<`never`, `never`\>, `Record`\<`never`, `never`\>, `Record`\<`never`, `never`\>, `undefined`, `S`\[`"Metrics"`\]\>\>
-
-#### Example
-
-```ts
-const triage = service
-  .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-  .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
-```
-
-***
-
 ### getCommandBuilder()
 
 > **getCommandBuilder**\<`T`, `N`\>(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](CommandDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`CommandDefinitionBuilderTypes`](../type-aliases/CommandDefinitionBuilderTypes.md)\<[`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), [`StreamInvokeList`](../type-aliases/StreamInvokeList.md), `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>, [`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:497](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L497)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:378](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L378)
 
 #### Type Parameters
 
@@ -385,7 +258,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:497](https://github.com/puris
 
 > **getCommandDefinitions**(): [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:613](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L613)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:459](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L459)
 
 #### Returns
 
@@ -395,13 +268,13 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:613](https://github.com/puris
 
 ### getCustomClass()
 
-> **getCustomClass**(): [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\>
+> **getCustomClass**(): [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:389](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L389)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:295](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L295)
 
 #### Returns
 
-[`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\>
+[`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
 ***
 
@@ -409,7 +282,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:389](https://github.com/puris
 
 > **getEventToQueueBindings**(): [`EventToQueueBindingDefinition`](../type-aliases/EventToQueueBindingDefinition.md)[]
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:685](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L685)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:531](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L531)
 
 #### Returns
 
@@ -421,7 +294,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:685](https://github.com/puris
 
 > **getFullServiceDefinition**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `eventToQueueBindings`: [`EventToQueueBindingDefinition`](../type-aliases/EventToQueueBindingDefinition.md)[]; `queues`: [`QueueDefinitionListResolved`](../type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `schedules`: [`ScheduleDefinition`](../type-aliases/ScheduleDefinition.md)[]; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `streams`: [`StreamDefinitionListResolved`](../type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:782](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L782)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:628](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L628)
 
 #### Returns
 
@@ -433,7 +306,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:782](https://github.com/puris
 
 > **getInstance**(`eventBridge`, `options?`): `Promise`\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:393](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L393)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:299](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L299)
 
 #### Parameters
 
@@ -443,7 +316,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:393](https://github.com/puris
 
 ##### options?
 
-\{ \[K in string \| number \| symbol\]: (\{ ai?: AgentRuntimeOptions\<Record\<string, AgentModelBinding\>\>; configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; metrics?: PuristaMetricsRuntimeOptions; metricsRecorder?: PuristaMetricsRecorderInterface; queueBridge?: QueueBridge; queueJobStore?: QueueJobStore; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof S\["Resources"\] extends never ? \{ resources?: undefined \} : \{ resources: S\["Resources"\] \}) & (keyof S\["ConfigInputType"\] extends never ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: S\["ConfigInputType"\] \}))\[K\] \}
+\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; queueBridge?: QueueBridge; queueJobStore?: QueueJobStore; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof S\["Resources"\] extends never ? \{ resources?: undefined \} : \{ resources: S\["Resources"\] \}) & (keyof S\["ConfigInputType"\] extends never ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: S\["ConfigInputType"\] \}))\[K\] \}
 
 #### Returns
 
@@ -455,7 +328,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:393](https://github.com/puris
 
 > **getQueueBuilder**\<`T`\>(`queueName`, `description`): [`QueueDefinitionBuilder`](QueueDefinitionBuilder.md)
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:643](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L643)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:489](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L489)
 
 #### Type Parameters
 
@@ -483,7 +356,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:643](https://github.com/puris
 
 > **getQueueDefinitions**(): [`QueueDefinitionListResolved`](../type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:655](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L655)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:501](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L501)
 
 #### Returns
 
@@ -495,7 +368,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:655](https://github.com/puris
 
 > **getQueueWorkerBuilder**\<`T`\>(`queueName`, `workerName`): [`QueueWorkerBuilder`](QueueWorkerBuilder.md)
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:647](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L647)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:493](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L493)
 
 #### Type Parameters
 
@@ -523,7 +396,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:647](https://github.com/puris
 
 > **getQueueWorkerDefinitions**(): [`QueueWorkerDefinitionListResolved`](../type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:665](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L665)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:511](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L511)
 
 #### Returns
 
@@ -535,7 +408,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:665](https://github.com/puris
 
 > **getScheduleBuilder**\<`T`\>(`scheduleName`, `description`): [`ScheduleDefinitionBuilder`](ScheduleDefinitionBuilder.md)
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:651](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L651)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:497](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L497)
 
 #### Type Parameters
 
@@ -563,7 +436,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:651](https://github.com/puris
 
 > **getScheduleDefinitions**(): [`ScheduleDefinition`](../type-aliases/ScheduleDefinition.md)[]
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:675](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L675)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:521](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L521)
 
 #### Returns
 
@@ -575,7 +448,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:675](https://github.com/puris
 
 > **getStreamBuilder**\<`T`, `N`\>(`streamName`, `description`, `finalEventName?`): [`StreamDefinitionBuilder`](StreamDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`StreamDefinitionBuilderTypes`](../type-aliases/StreamDefinitionBuilderTypes.md)\<[`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), [`StreamInvokeList`](../type-aliases/StreamInvokeList.md), `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>, [`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:557](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L557)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:438](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L438)
 
 #### Type Parameters
 
@@ -611,7 +484,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:557](https://github.com/puris
 
 > **getStreamDefinitions**(): [`StreamDefinitionListResolved`](../type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:633](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L633)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:479](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L479)
 
 #### Returns
 
@@ -623,7 +496,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:633](https://github.com/puris
 
 > **getSubscriptionBuilder**\<`T`\>(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](SubscriptionDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), [`StreamInvokeList`](../type-aliases/StreamInvokeList.md), `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>, [`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:520](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L520)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:401](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L401)
 
 #### Type Parameters
 
@@ -651,7 +524,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:520](https://github.com/puris
 
 > **getSubscriptionDefinitions**(): [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:623](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L623)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:469](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L469)
 
 #### Returns
 
@@ -663,7 +536,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:623](https://github.com/puris
 
 > **markAsDeprecated**(): `ServiceBuilder`\<`S`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:162](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L162)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:134](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L134)
 
 #### Returns
 
@@ -675,7 +548,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:162](https://github.com/puris
 
 > **resolveDefinitions**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `eventToQueueBindings`: [`EventToQueueBindingDefinition`](../type-aliases/EventToQueueBindingDefinition.md)[]; `queues`: [`QueueDefinitionListResolved`](../type-aliases/QueueDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `queueWorkers`: [`QueueWorkerDefinitionListResolved`](../type-aliases/QueueWorkerDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `schedules`: [`ScheduleDefinition`](../type-aliases/ScheduleDefinition.md)[]; `streams`: [`StreamDefinitionListResolved`](../type-aliases/StreamDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:305](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L305)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:240](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L240)
 
 #### Returns
 
@@ -685,9 +558,9 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:305](https://github.com/puris
 
 ### setConfigSchema()
 
-> **setConfigSchema**\<`T`\>(`schema`): `ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../type-aliases/InferIn.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\>; \}\>\>
+> **setConfigSchema**\<`T`\>(`schema`): `ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../type-aliases/InferIn.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L137)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:113](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L113)
 
 #### Type Parameters
 
@@ -703,7 +576,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:137](https://github.com/puris
 
 #### Returns
 
-`ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../type-aliases/InferIn.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\>; \}\>\>
+`ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../type-aliases/InferIn.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md) : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
 
 ***
 
@@ -711,19 +584,19 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:137](https://github.com/puris
 
 > **setCustomClass**\<`T`\>(`customClass`): `ServiceBuilder`\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"ServiceClassType"`, `T`\>\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:382](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L382)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:288](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L288)
 
 #### Type Parameters
 
 ##### T
 
-`T` *extends* [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\>
+`T` *extends* [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
 #### Parameters
 
 ##### customClass
 
-[`Newable`](../type-aliases/Newable.md)\<`T`, [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\], `S`\[`"Metrics"`\]\>\>
+[`Newable`](../type-aliases/Newable.md)\<`T`, [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
 #### Returns
 
@@ -735,7 +608,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:382](https://github.com/puris
 
 > **setDefaultConfig**(`config`): `this`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:157](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L157)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:129](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L129)
 
 #### Parameters
 
@@ -753,7 +626,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:157](https://github.com/puris
 
 > **testServiceSetup**(): `Promise`\<`boolean`\>
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:695](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L695)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:541](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L541)
 
 #### Returns
 
@@ -765,7 +638,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:695](https://github.com/puris
 
 > **validateCommandDefinitions**(): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:795](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L795)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:641](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L641)
 
 #### Returns
 
@@ -781,7 +654,7 @@ Use testServiceSetup() instead
 
 > `protected` **validateCommands**(`commandDefinitions`): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:707](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L707)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:553](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L553)
 
 #### Parameters
 
@@ -799,7 +672,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:707](https://github.com/puris
 
 > `protected` **validateQueues**(`queueDefinitions`): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:752](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L752)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:598](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L598)
 
 #### Parameters
 
@@ -817,7 +690,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:752](https://github.com/puris
 
 > `protected` **validateQueueWorkers**(`queueWorkers`, `queues`): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:763](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L763)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:609](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L609)
 
 #### Parameters
 
@@ -839,7 +712,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:763](https://github.com/puris
 
 > `protected` **validateStreams**(`streamDefinitions`): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:741](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L741)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:587](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L587)
 
 #### Parameters
 
@@ -857,7 +730,7 @@ Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:741](https://github.com/puris
 
 > **validateSubscriptionDefinitions**(): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:803](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L803)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:649](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L649)
 
 #### Returns
 
@@ -873,7 +746,7 @@ Use testServiceSetup() instead
 
 > `protected` **validateSubscriptions**(`subscriptionDefinitions`): `void`
 
-Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:729](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L729)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:575](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L575)
 
 #### Parameters
 

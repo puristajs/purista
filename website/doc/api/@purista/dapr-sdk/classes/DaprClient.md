@@ -25,7 +25,7 @@ This client is responsible for the communication to the sidecar service.
 
 > **new DaprClient**(`config`): `DaprClient`
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:33
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:32
 
 #### Parameters
 
@@ -186,16 +186,6 @@ A logger instance
 
 the loglevel if no logger instance is given
 
-###### metrics?
-
-[`PuristaMetricsRuntimeOptions`](../../core/interfaces/PuristaMetricsRuntimeOptions.md)
-
-###### metricsRecorder?
-
-[`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
-Optional metrics recorder for HTTP client framework metrics.
-
 ###### name?
 
 `string`
@@ -292,7 +282,7 @@ Custom trace Id
 
 > `protected` **auth**: [`AuthCredentials`](../../core/type-aliases/AuthCredentials.md)
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:32
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:31
 
 #### Inherited from
 
@@ -473,16 +463,6 @@ A logger instance
 
 the loglevel if no logger instance is given
 
-#### metrics?
-
-> `optional` **metrics?**: [`PuristaMetricsRuntimeOptions`](../../core/interfaces/PuristaMetricsRuntimeOptions.md)
-
-#### metricsRecorder?
-
-> `optional` **metricsRecorder?**: [`PuristaMetricsRecorderInterface`](../../core/interfaces/PuristaMetricsRecorderInterface.md)
-
-Optional metrics recorder for HTTP client framework metrics.
-
 #### name?
 
 > `optional` **name?**: `string`
@@ -655,7 +635,7 @@ Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:30
 
 > **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:103
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:101
 
 DELETE request
 
@@ -693,7 +673,7 @@ DELETE request
 
 > `protected` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:68
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:66
 
 Helper method
 
@@ -733,7 +713,7 @@ UnhandledError
 
 > **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:75
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:73
 
 GET request
 
@@ -855,7 +835,7 @@ url path of endpoint
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:39
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:38
 
 Returns open telemetry tracer of this service
 
@@ -875,7 +855,7 @@ Tracer
 
 > `protected` **getUrlAndHeader**(`path`, `options?`): `object`
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:50
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:48
 
 #### Parameters
 
@@ -1073,7 +1053,7 @@ boolean
 
 > **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:96
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:94
 
 PATCH request
 
@@ -1111,7 +1091,7 @@ PATCH request
 
 > **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:82
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:80
 
 POST request
 
@@ -1149,7 +1129,7 @@ POST request
 
 > **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:89
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:87
 
 PUT request
 
@@ -1215,7 +1195,7 @@ Send a EBMessage as event to the underlaying message infrastructure.
 
 > **setBearerToken**(`token`): `void`
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:58
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:56
 
 Set the bearer token for all following requests.
 
@@ -1241,7 +1221,7 @@ the bearer token
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:48
+Defined in: core/dist/HttpClient/HttpClient.impl.d.ts:47
 
 Start a child span for opentelemetry tracking
 

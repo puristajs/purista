@@ -11,13 +11,7 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Add Queue Handling to PURISTA ([#248](https://github.com/orhun/git-cliff/issues/248))
-- Add @purista/ai package ([#250](https://github.com/orhun/git-cliff/issues/250))
-- [**breaking**] Migrate agents into core with ai-harness ([#288](https://github.com/orhun/git-cliff/issues/288))
-
-### Miscellaneous Tasks
-
-- Clean framework docs and examples ([#289](https://github.com/orhun/git-cliff/issues/289))
-- Remove generated docs output ([#290](https://github.com/orhun/git-cliff/issues/290))
+- [**breaking**] Ship plain ESM library packages
 
 ## [2.2.0] - 2026-02-13
 
