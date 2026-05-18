@@ -54,6 +54,49 @@ purista add queue-worker invoiceProcessor --service billing --service-version 1 
 
 Use queue-backed execution when work needs leases, retries, delay, dead-letter handling, or operator replay.
 
+## Schedules
+Use schedules to declare external time-trigger intent. Schedules do not run inside PURISTA.
+
+```ts
+const schedule = service
+	.getScheduleBuilder('monthlyBillingCycle', 'Monthly billing cycle trigger')
+	.emitEvent('billing.monthlyCycleDue', {
+		expression: { kind: 'cron', value: '0 2 1 * *', timezone: 'Europe/Berlin' },
+		concurrencyPolicy: 'forbid',
+		missedRunPolicy: 'runOnce',
+		idempotencyKey: 'payload.cycleId',
+	})
+
+service.addScheduleDefinition(schedule)
+```
+
+Queue and command builders can be direct schedule targets:
+
+```ts
+queue.markSchedulable({
+	name: 'monthly-invoice-generation',
+	expression: { kind: 'cron', value: '0 2 1 * *' },
+	concurrencyPolicy: 'forbid',
+})
+
+command.markSchedulable({
+	name: 'refresh-cache',
+	expression: { kind: 'interval', everyMs: 300_000 },
+	concurrencyPolicy: 'replace',
+})
+```
+
+Do not schedule subscriptions directly. Emit an event and let the subscription or an event-to-queue binding react.
+
+```ts
+service.bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
+	idempotencyMode: 'strict',
+	idempotencyKey: event => `billing-cycle:${event.cycleId}`,
+	mapPayload: event => ({ cycleId: event.cycleId }),
+	mapParameter: event => ({ tenantId: event.tenantId }),
+})
+```
+
 ## Agent
 Agents are native core service components. Generated agents attach to a service and expand into:
 - queue

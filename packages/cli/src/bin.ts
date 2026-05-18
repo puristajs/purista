@@ -126,6 +126,7 @@ const main = async () => {
 					'cloudevents-schema',
 					'runtime-capabilities',
 					'schedule-manifest',
+					'kubernetes-cronjob',
 				]),
 			)
 			.option('--definitions <path>', 'service definitions JSON file', 'purista.definitions.json')
@@ -133,6 +134,12 @@ const main = async () => {
 			.option('--title <title>', 'export title')
 			.option('--export-version <version>', 'exported document version')
 			.option('--mode <mode>', 'runtime capability export mode')
+			.option('--trigger-image <image>', 'Kubernetes CronJob trigger container image')
+			.option('--trigger-command <command>', 'Kubernetes CronJob trigger command')
+			.option('--trigger-arg <arg...>', 'Kubernetes CronJob trigger command argument')
+			.option('--trigger-url <url>', 'Kubernetes CronJob HTTP trigger URL template')
+			.option('--trigger-method <method>', 'Kubernetes CronJob HTTP trigger method')
+			.option('--namespace <namespace>', 'Kubernetes namespace for CronJob manifests')
 			.action(async (contract, options) => {
 				const commandId =
 					contract === 'asyncapi'
@@ -141,7 +148,9 @@ const main = async () => {
 							? 'export-cloudevents-schema'
 							: contract === 'schedule-manifest'
 								? 'export-schedule-manifest'
-								: 'export-runtime-capabilities'
+								: contract === 'kubernetes-cronjob'
+									? 'export-kubernetes-cronjob'
+									: 'export-runtime-capabilities'
 				const engine = createEngineForOptions(options)
 				const result = await engine.runPuristaCommand(commandId, {
 					definitions: options.definitions,
@@ -149,6 +158,12 @@ const main = async () => {
 					title: options.title,
 					version: options.exportVersion,
 					mode: options.mode,
+					triggerImage: options.triggerImage,
+					triggerCommand: options.triggerCommand,
+					triggerArgs: options.triggerArg,
+					triggerUrl: options.triggerUrl,
+					triggerMethod: options.triggerMethod,
+					namespace: options.namespace,
 				})
 
 				createTerminalOutputAdapter().renderResult(result)

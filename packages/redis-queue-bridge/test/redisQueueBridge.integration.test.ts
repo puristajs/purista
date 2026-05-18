@@ -221,4 +221,112 @@ describe('RedisQueueBridge specific behaviour', () => {
 			await bridgeB.destroy()
 		}
 	})
+
+	it('enforces idempotency keys by returning the original enqueue result without creating duplicate jobs', async () => {
+		if (!metricsDockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const bridge = new RedisQueueBridge({
+			config: {
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+			},
+			keyPrefix: `idempotency:${randomUUID()}:`,
+		})
+		await bridge.start()
+
+		try {
+			const queueName = `idempotency-${randomUUID()}`
+			const first = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 1 },
+				idempotencyKey: 'same-key',
+			})
+			const duplicate = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 2 },
+				idempotencyKey: 'same-key',
+			})
+			const differentKey = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 3 },
+				idempotencyKey: 'different-key',
+			})
+			const missingKeyA = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 4 },
+			})
+			const missingKeyB = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 5 },
+			})
+
+			expect(duplicate).toStrictEqual(first)
+			expect(differentKey.jobId).not.toBe(first.jobId)
+			expect(missingKeyA.jobId).not.toBe(missingKeyB.jobId)
+
+			const metrics = await bridge.metrics(queueName)
+			expect(metrics.pending).toBe(4)
+		} finally {
+			await bridge.destroy()
+		}
+	})
+
+	it('enforces idempotency keys for delayed jobs', async () => {
+		if (!metricsDockerAvailable) {
+			expect(true).toBe(true)
+			return
+		}
+
+		const bridge = new RedisQueueBridge({
+			config: {
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+			},
+			keyPrefix: `delayed-idempotency:${randomUUID()}:`,
+		})
+		await bridge.start()
+
+		try {
+			const queueName = `delayed-idempotency-${randomUUID()}`
+			const first = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 1 },
+				delayMs: 120,
+				idempotencyKey: 'same-delayed-key',
+			})
+			const duplicate = await bridge.enqueue({
+				queueName,
+				payload: { attempt: 2 },
+				delayMs: 120,
+				idempotencyKey: 'same-delayed-key',
+			})
+
+			expect(duplicate).toStrictEqual(first)
+
+			const immediateLease = await bridge.leaseNext(queueName, { waitTimeMs: 10 })
+			expect(immediateLease).toBeUndefined()
+
+			await new Promise(resolve => setTimeout(resolve, 150))
+
+			const lease = await bridge.leaseNext(queueName, { waitTimeMs: 50 })
+			expect(lease?.message.id).toBe(first.jobId)
+			expect(lease?.message.payload).toStrictEqual({ attempt: 1 })
+
+			const secondLease = await bridge.leaseNext(queueName, { waitTimeMs: 10 })
+			expect(secondLease).toBeUndefined()
+
+			if (lease) {
+				await bridge.ack(queueName, lease.leaseId)
+			}
+		} finally {
+			await bridge.destroy()
+		}
+	})
+
+	it('advertises durable idempotency enforcement', () => {
+		const bridge = new RedisQueueBridge()
+
+		expect(bridge.capabilities.idempotencyEnforcement).toBe(true)
+	})
 })

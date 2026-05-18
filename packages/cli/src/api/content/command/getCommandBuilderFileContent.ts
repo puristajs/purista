@@ -105,7 +105,10 @@ export const getCommandBuilderFileContent = (input: {
 				'// biome-ignore lint/complexity/useArrowFunction: use function as the this-context contains the service',
 			)
 		}
-		writer.write('.setCommandFunction(async function (context, payload, parameter)')
+		const contextParameter = input.enqueueOptions?.length ? 'context' : '_context'
+		const payloadParameter = input.enqueueOptions?.length ? 'payload' : '_payload'
+		const commandParameter = input.enqueueOptions?.length ? 'parameter' : '_parameter'
+		writer.write(`.setCommandFunction(async function (${contextParameter}, ${payloadParameter}, ${commandParameter})`)
 		writer.inlineBlock(() => {
 			writer.writeLine(`// implementation of the command ${camelCase(input.commandName)} goes here`)
 			if (input.enqueueOptions?.length) {

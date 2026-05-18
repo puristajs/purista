@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 
 import type {
 	QueueBridge,
@@ -15,7 +15,7 @@ import type {
 	QueueRetryRequest,
 } from '@purista/core'
 import { StatusCode, UnhandledError } from '@purista/core'
-import type { Consumer, JetStreamClient, JetStreamManager, JsMsg, NatsConnection, StoredMsg } from 'nats'
+import type { Consumer, JetStreamClient, JetStreamManager, JsMsg, KV, NatsConnection, StoredMsg } from 'nats'
 import { AckPolicy, connect, DeliverPolicy, JSONCodec, nanos, RetentionPolicy, StorageType } from 'nats'
 
 import type { NatsQueueBridgeOptions } from './types.js'
@@ -24,6 +24,7 @@ const DEFAULT_SUBJECT_PREFIX = 'purista.queue'
 const DEFAULT_MAX_ATTEMPTS = 10
 const DEFAULT_LEASE_TTL_MS = 30_000
 const DEFAULT_RELEASE_BATCH_SIZE = 25
+const DEFAULT_IDEMPOTENCY_PENDING_TIMEOUT_MS = 5_000
 const LAST_RETRY_HEADER = 'x-purista-last-retry-reason'
 const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
 
@@ -32,6 +33,13 @@ type LeaseEntry = {
 	message: QueueMessage
 	msg: JsMsg
 	leaseExpiresAt: number
+}
+
+type IdempotencyRecord = {
+	state: 'publishing' | 'published'
+	result: QueueEnqueueResult
+	message: QueueMessage
+	updatedAt: number
 }
 
 export class NatsQueueBridge implements QueueBridge {
@@ -52,7 +60,7 @@ export class NatsQueueBridge implements QueueBridge {
 		deadLetterReplaySupported: true,
 		deadLetterPurgeSupported: true,
 		leaseInspectionSupported: true,
-		idempotencyEnforcement: false,
+		idempotencyEnforcement: true,
 		partitionOrdering: false,
 		providerManagedDelayedDelivery: true,
 		strictStartupValidation: true,
@@ -63,8 +71,10 @@ export class NatsQueueBridge implements QueueBridge {
 	private connection?: NatsConnection
 	private jsm?: JetStreamManager
 	private js?: JetStreamClient
+	private idempotencyKv?: KV
 
 	private readonly codec = JSONCodec<QueueMessage>()
+	private readonly idempotencyCodec = JSONCodec<IdempotencyRecord>()
 	private readonly leases = new Map<string, LeaseEntry>()
 	private readonly pendingConsumers = new Map<string, Consumer>()
 	private readonly scheduledConsumers = new Map<string, Consumer>()
@@ -74,6 +84,7 @@ export class NatsQueueBridge implements QueueBridge {
 	private readonly defaultMaxAttempts: number
 	private readonly storageType: StorageType
 	private readonly releaseBatchSize: number
+	private readonly idempotencyPendingTimeoutMs: number
 
 	constructor(private readonly options: NatsQueueBridgeOptions = {}) {
 		this.subjectPrefix = options.subjectPrefix ?? DEFAULT_SUBJECT_PREFIX
@@ -81,6 +92,7 @@ export class NatsQueueBridge implements QueueBridge {
 		this.defaultMaxAttempts = options.defaultMaxAttempts ?? DEFAULT_MAX_ATTEMPTS
 		this.storageType = options.storageType === 'memory' ? StorageType.Memory : StorageType.File
 		this.releaseBatchSize = options.releaseBatchSize ?? DEFAULT_RELEASE_BATCH_SIZE
+		this.idempotencyPendingTimeoutMs = options.idempotencyPendingTimeoutMs ?? DEFAULT_IDEMPOTENCY_PENDING_TIMEOUT_MS
 	}
 
 	async start() {
@@ -101,6 +113,7 @@ export class NatsQueueBridge implements QueueBridge {
 			this.connection = undefined
 			this.jsm = undefined
 			this.js = undefined
+			this.idempotencyKv = undefined
 		}
 	}
 
@@ -124,8 +137,11 @@ export class NatsQueueBridge implements QueueBridge {
 		await this.ensureQueueTopology(options.queueName, options.leaseTtlMs)
 		const now = Date.now()
 		const scheduledAt = options.delayMs ? now + options.delayMs : now
+		const jobId = options.idempotencyKey
+			? this.idempotencyJobId(options.queueName, options.idempotencyKey)
+			: randomUUID()
 		const message: QueueMessage = {
-			id: randomUUID(),
+			id: jobId,
 			queueName: options.queueName,
 			payload: options.payload,
 			parameter: options.parameter,
@@ -140,8 +156,14 @@ export class NatsQueueBridge implements QueueBridge {
 			idempotencyKey: options.idempotencyKey,
 		}
 
-		await this.publishQueueMessage(options.queueName, message)
-		return { jobId: message.id, queueName: options.queueName, scheduledAt }
+		const result = { jobId, queueName: options.queueName, scheduledAt }
+
+		if (!options.idempotencyKey) {
+			await this.publishQueueMessage(options.queueName, message)
+			return result
+		}
+
+		return this.publishIdempotentQueueMessage(options.queueName, options.idempotencyKey, message, result)
 	}
 
 	async leaseNext(queueName: string, options?: QueueLeaseOptions): Promise<QueueLease | undefined> {
@@ -356,6 +378,74 @@ export class NatsQueueBridge implements QueueBridge {
 		await js.publish(this.scheduledSubject(queueName), this.codec.encode(message))
 	}
 
+	private async publishIdempotentQueueMessage(
+		queueName: string,
+		idempotencyKey: string,
+		message: QueueMessage,
+		result: QueueEnqueueResult,
+	) {
+		const kv = await this.getIdempotencyStore()
+		const key = this.idempotencyRecordKey(queueName, idempotencyKey)
+		const record: IdempotencyRecord = {
+			state: 'publishing',
+			result,
+			message,
+			updatedAt: Date.now(),
+		}
+
+		try {
+			const revision = await kv.create(key, this.idempotencyCodec.encode(record))
+			try {
+				await this.publishQueueMessage(queueName, message)
+			} catch (err) {
+				await kv.delete(key)
+				throw err
+			}
+			await kv.update(
+				key,
+				this.idempotencyCodec.encode({
+					...record,
+					state: 'published',
+					updatedAt: Date.now(),
+				}),
+				revision,
+			)
+			return result
+		} catch (err) {
+			if (!this.isIdempotencyConflict(err)) {
+				throw err
+			}
+		}
+
+		return this.resolveExistingIdempotentResult(kv, key)
+	}
+
+	private async resolveExistingIdempotentResult(kv: KV, key: string) {
+		const deadline = Date.now() + this.idempotencyPendingTimeoutMs
+		let lastRecord: IdempotencyRecord | undefined
+
+		while (Date.now() <= deadline) {
+			const existing = await kv.get(key)
+			if (existing) {
+				const record = this.idempotencyCodec.decode(existing.value)
+				lastRecord = record
+				if (record.state === 'published') {
+					return record.result
+				}
+			}
+			await this.delay(25)
+		}
+
+		if (lastRecord) {
+			throw new UnhandledError(
+				StatusCode.ServiceUnavailable,
+				`NATS idempotent enqueue for key "${key}" is still pending and could not be confirmed`,
+			)
+		}
+
+		throw new UnhandledError(StatusCode.InternalServerError, 'NATS idempotency record could not be read')
+	}
+
 	private decodeJsMessage(msg: JsMsg) {
 		return this.codec.decode(msg.data)
 	}
@@ -401,6 +491,18 @@ export class NatsQueueBridge implements QueueBridge {
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'JetStream client is not available')
 		}
 		return this.js
+	}
+
+	private async getIdempotencyStore() {
+		if (this.idempotencyKv) {
+			return this.idempotencyKv
+		}
+		const js = this.getJetStreamClient()
+		this.idempotencyKv = await js.views.kv(this.idempotencyBucketName(), {
+			storage: this.storageType,
+			history: 1,
+		})
+		return this.idempotencyKv
 	}
 
 	private async getStream(streamName: string) {
@@ -527,6 +629,27 @@ export class NatsQueueBridge implements QueueBridge {
 
 	private sanitize(value: string) {
 		return value.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 200)
+	}
+
+	private idempotencyBucketName() {
+		return this.sanitize(`${this.subjectPrefix}_idempotency`)
+	}
+
+	private idempotencyRecordKey(queueName: string, idempotencyKey: string) {
+		return createHash('sha256').update(`${queueName}\0${idempotencyKey}`).digest('hex')
+	}
+
+	private idempotencyJobId(queueName: string, idempotencyKey: string) {
+		return `idem-${this.idempotencyRecordKey(queueName, idempotencyKey)}`
+	}
+
+	private isIdempotencyConflict(err: unknown) {
+		const candidate = err as { api_error?: { err_code?: number }; message?: string }
+		return candidate.api_error?.err_code === 10071 || candidate.message?.includes('wrong last sequence') === true
+	}
+
+	private delay(ms: number) {
+		return new Promise(resolve => setTimeout(resolve, ms))
 	}
 
 	private pendingSubject(queueName: string) {

@@ -10,7 +10,16 @@ import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { FullDefinition } from './types/FullDefinition.js'
 import type { FullServiceDefinition } from './types/FullServiceDefinition.js'
 
-type JsonRecord = Record<string, unknown>
+/**
+ * JSON object shape used by provider export helpers for provider-native
+ * manifest fragments.
+ *
+ * @example
+ * ```ts
+ * const annotations: JsonRecord = { 'purista.dev/source': 'billing' }
+ * ```
+ */
+export type JsonRecord = Record<string, unknown>
 
 export type ServiceContractInput = FullDefinition | FullServiceDefinition
 
@@ -24,6 +33,85 @@ export type ExportScheduleManifestOptions = {
 	title?: string
 	version: string
 	services: ServiceContractInput
+}
+
+export type ScheduleManifest = {
+	title?: string
+	version: string
+	schedules: KubernetesCronJobScheduleInput[]
+}
+
+export type KubernetesCronJobScheduleInput = {
+	name: string
+	description?: string
+	targetKind: string
+	targetServiceName?: string
+	targetServiceVersion?: string
+	targetName: string
+	payloadSchema?: SchemaObject
+	parameterSchema?: SchemaObject
+	expression: ScheduleDefinition['expression']
+	timezone?: string
+	concurrencyPolicy?: ScheduleDefinition['concurrencyPolicy']
+	missedRunPolicy?: ScheduleDefinition['missedRunPolicy']
+	maxCatchUpCount?: number
+	jitterWindowMs?: number
+	idempotencyKey?: string
+	enabledByDefault?: boolean
+	providerHints?: Record<string, unknown>
+}
+
+export type KubernetesCronJobTriggerTemplate = {
+	image: string
+	name?: string
+	command?: string[]
+	args?: string[]
+	http?: {
+		method?: string
+		url: string
+		headers?: Record<string, string>
+		body?: unknown
+	}
+	env?: JsonRecord[]
+	envFrom?: JsonRecord[]
+	imagePullPolicy?: string
+}
+
+export type ExportKubernetesCronJobsOptions = {
+	services?: ServiceContractInput
+	manifest?: ScheduleManifest
+	trigger: KubernetesCronJobTriggerTemplate
+	namespace?: string
+	labels?: Record<string, string>
+	annotations?: Record<string, string>
+	restartPolicy?: 'Never' | 'OnFailure'
+}
+
+export type KubernetesCronJobManifest = {
+	apiVersion: 'batch/v1'
+	kind: 'CronJob'
+	metadata: {
+		name: string
+		namespace?: string
+		labels?: Record<string, string>
+		annotations: Record<string, string>
+	}
+	spec: JsonRecord & {
+		schedule: string
+		timeZone?: string
+		concurrencyPolicy?: 'Allow' | 'Forbid' | 'Replace'
+		suspend?: boolean
+		jobTemplate: {
+			spec: {
+				template: {
+					spec: {
+						restartPolicy: 'Never' | 'OnFailure'
+						containers: JsonRecord[]
+					}
+				}
+			}
+		}
+	}
 }
 
 export type RuntimeBridgeCapabilities<TCapabilities> = {
@@ -333,8 +421,8 @@ const serializeResultPolicy = (policy?: QueueResultPolicy) => {
  * })
  * ```
  */
-export const exportScheduleManifest = async (options: ExportScheduleManifestOptions) => {
-	const schedules: JsonRecord[] = []
+export const exportScheduleManifest = async (options: ExportScheduleManifestOptions): Promise<ScheduleManifest> => {
+	const schedules: KubernetesCronJobScheduleInput[] = []
 	for (const [serviceName, versions] of sortEntries(getServices(options.services))) {
 		for (const [serviceVersion, definition] of sortEntries(versions)) {
 			for (const [, schedule] of sortEntries(definition.schedules)) {
@@ -348,6 +436,258 @@ export const exportScheduleManifest = async (options: ExportScheduleManifestOpti
 		version: options.version,
 		schedules: schedules.sort((a, b) => String(a.name).localeCompare(String(b.name))),
 	})
+}
+
+const kubernetesConcurrencyPolicy = (policy?: ScheduleDefinition['concurrencyPolicy']) => {
+	switch (policy) {
+		case 'allow':
+			return 'Allow'
+		case 'forbid':
+			return 'Forbid'
+		case 'replace':
+			return 'Replace'
+		default:
+			return undefined
+	}
+}
+
+const sanitizeKubernetesMetadataName = (input: string) => {
+	const sanitized = input
+		.toLowerCase()
+		.replace(/[^a-z0-9-]/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/^-|-$/g, '')
+	const name = sanitized || 'purista-schedule'
+	return name.slice(0, 63).replace(/-$/g, '') || 'purista-schedule'
+}
+
+const deterministicHash = (input: string) => {
+	let hash = 0x811c9dc5
+	for (const char of input) {
+		hash ^= char.charCodeAt(0)
+		hash = Math.imul(hash, 0x01000193)
+	}
+	return (hash >>> 0).toString(36)
+}
+
+const uniqueKubernetesName = (baseName: string, identity: string, usedNames: Set<string>) => {
+	const sanitized = sanitizeKubernetesMetadataName(baseName)
+	if (!usedNames.has(sanitized)) {
+		usedNames.add(sanitized)
+		return sanitized
+	}
+
+	const suffix = deterministicHash(identity)
+	const maxBaseLength = 63 - suffix.length - 1
+	const candidate = `${sanitizeKubernetesMetadataName(sanitized.slice(0, maxBaseLength))}-${suffix}`
+	usedNames.add(candidate)
+	return candidate
+}
+
+const annotationValue = (value: unknown) => {
+	if (value === undefined) {
+		return undefined
+	}
+	if (typeof value === 'string') {
+		return value
+	}
+	return JSON.stringify(value)
+}
+
+const scheduleTemplateValues = (schedule: KubernetesCronJobScheduleInput) => ({
+	scheduleName: schedule.name,
+	targetKind: schedule.targetKind,
+	targetName: schedule.targetName,
+	targetServiceName: schedule.targetServiceName ?? '',
+	targetServiceVersion: schedule.targetServiceVersion ?? '',
+})
+
+const renderTemplate = (template: string, schedule: KubernetesCronJobScheduleInput) => {
+	const values = scheduleTemplateValues(schedule)
+	return template.replace(
+		/\{\{(scheduleName|targetKind|targetName|targetServiceName|targetServiceVersion)\}\}/g,
+		(_, key) => String(values[key as keyof typeof values]),
+	)
+}
+
+const shellQuote = (input: string) => `'${input.replace(/'/g, "'\\''")}'`
+
+const renderJsonTemplate = (input: unknown, schedule: KubernetesCronJobScheduleInput): unknown => {
+	if (typeof input === 'string') {
+		return renderTemplate(input, schedule)
+	}
+	if (Array.isArray(input)) {
+		return input.map(item => renderJsonTemplate(item, schedule))
+	}
+	if (input && typeof input === 'object') {
+		return Object.fromEntries(
+			Object.entries(input as JsonRecord).map(([key, value]) => [key, renderJsonTemplate(value, schedule)]),
+		)
+	}
+	return input
+}
+
+const buildHttpCurlArgs = (trigger: KubernetesCronJobTriggerTemplate, schedule: KubernetesCronJobScheduleInput) => {
+	if (!trigger.http) {
+		return undefined
+	}
+
+	const method = trigger.http.method ?? 'POST'
+	const renderedUrl = renderTemplate(trigger.http.url, schedule)
+	const parts = ['curl', '--fail', '--silent', '--show-error', '--request', method]
+	for (const [name, value] of Object.entries(trigger.http.headers ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+		parts.push('--header', `${name}: ${renderTemplate(value, schedule)}`)
+	}
+	if (trigger.http.body !== undefined) {
+		parts.push('--data', JSON.stringify(renderJsonTemplate(trigger.http.body, schedule)))
+	}
+	parts.push(shellQuote(renderedUrl))
+	return [parts.map(shellQuoteIfNeeded).join(' ')]
+}
+
+const shellQuoteIfNeeded = (input: string) => {
+	if (input.startsWith("'") && input.endsWith("'")) {
+		return input
+	}
+	if (/^[a-zA-Z0-9_./:=@-]+$/.test(input)) {
+		return input
+	}
+	return shellQuote(input)
+}
+
+const buildTriggerContainer = (
+	trigger: KubernetesCronJobTriggerTemplate,
+	schedule: KubernetesCronJobScheduleInput,
+): JsonRecord => {
+	if (!trigger.image?.trim()) {
+		throw new Error('Kubernetes CronJob export requires an explicit trigger image')
+	}
+	if (!trigger.command?.length && !trigger.args?.length && !trigger.http) {
+		throw new Error('Kubernetes CronJob export requires command/args or http trigger configuration')
+	}
+
+	const httpArgs = buildHttpCurlArgs(trigger, schedule)
+	return omitUndefined({
+		name: trigger.name ?? 'purista-trigger',
+		image: trigger.image,
+		imagePullPolicy: trigger.imagePullPolicy,
+		command: trigger.http ? ['sh', '-c'] : trigger.command?.map(item => renderTemplate(item, schedule)),
+		args: trigger.http ? httpArgs : trigger.args?.map(item => renderTemplate(item, schedule)),
+		env: trigger.env,
+		envFrom: trigger.envFrom,
+	})
+}
+
+const puristaScheduleAnnotations = (schedule: KubernetesCronJobScheduleInput) =>
+	omitUndefined({
+		'purista.dev/schedule-name': schedule.name,
+		'purista.dev/schedule-description': schedule.description,
+		'purista.dev/target-kind': schedule.targetKind,
+		'purista.dev/target-name': schedule.targetName,
+		'purista.dev/target-service-name': schedule.targetServiceName,
+		'purista.dev/target-service-version': schedule.targetServiceVersion,
+		'purista.dev/missed-run-policy': schedule.missedRunPolicy,
+		'purista.dev/max-catch-up-count': annotationValue(schedule.maxCatchUpCount),
+		'purista.dev/jitter-window-ms': annotationValue(schedule.jitterWindowMs),
+		'purista.dev/idempotency-key': schedule.idempotencyKey,
+		'purista.dev/provider-hints': annotationValue(schedule.providerHints),
+	}) as Record<string, string>
+
+const getKubernetesSchedules = async (options: ExportKubernetesCronJobsOptions) => {
+	if (options.manifest) {
+		return options.manifest.schedules
+	}
+	if (options.services) {
+		const manifest = await exportScheduleManifest({ version: '1.0.0', services: options.services })
+		return manifest.schedules as KubernetesCronJobScheduleInput[]
+	}
+	throw new Error('Kubernetes CronJob export requires services or a schedule manifest')
+}
+
+/**
+ * Export cron-based PURISTA schedule metadata as Kubernetes `batch/v1`
+ * `CronJob` manifest objects.
+ *
+ * The exporter is a pure JSON manifest generator. It requires the caller to
+ * supply the trigger container image and command/args or HTTP request template;
+ * it never invents URLs, images, credentials, namespaces, service accounts, or
+ * cluster policy.
+ *
+ * @example
+ * ```ts
+ * const cronJobs = await exportKubernetesCronJobs({
+ *   services: exportedDefinitions,
+ *   trigger: {
+ *     image: 'registry.example.com/purista-trigger:1.0.0',
+ *     command: ['/app/trigger'],
+ *     args: ['--kind', '{{targetKind}}', '--target', '{{targetName}}'],
+ *   },
+ * })
+ * ```
+ */
+export const exportKubernetesCronJobs = async (
+	options: ExportKubernetesCronJobsOptions,
+): Promise<KubernetesCronJobManifest[]> => {
+	if (!options.trigger.command?.length && !options.trigger.args?.length && !options.trigger.http) {
+		throw new Error('Kubernetes CronJob export requires command/args or http trigger configuration')
+	}
+	const schedules = await getKubernetesSchedules(options)
+	const usedNames = new Set<string>()
+
+	return schedules
+		.slice()
+		.sort((a, b) => a.name.localeCompare(b.name))
+		.map(schedule => {
+			if (!['event', 'queue', 'command'].includes(schedule.targetKind)) {
+				if (schedule.targetKind === 'subscription') {
+					throw new Error('Kubernetes CronJob export direct subscription targets are not supported')
+				}
+				throw new Error(`Kubernetes CronJob export does not support schedule target kind "${schedule.targetKind}"`)
+			}
+			if (schedule.expression.kind !== 'cron') {
+				throw new Error(
+					`Kubernetes CronJob export only supports cron schedules; schedule "${schedule.name}" uses "${schedule.expression.kind}"`,
+				)
+			}
+
+			const identity = [
+				schedule.name,
+				schedule.targetKind,
+				schedule.targetServiceName,
+				schedule.targetServiceVersion,
+				schedule.targetName,
+			].join('|')
+
+			return omitUndefined({
+				apiVersion: 'batch/v1',
+				kind: 'CronJob',
+				metadata: {
+					name: uniqueKubernetesName(schedule.name, identity, usedNames),
+					namespace: options.namespace,
+					labels: options.labels,
+					annotations: {
+						...(options.annotations ?? {}),
+						...puristaScheduleAnnotations(schedule),
+					},
+				},
+				spec: {
+					schedule: schedule.expression.value,
+					timeZone: schedule.expression.timezone ?? schedule.timezone,
+					concurrencyPolicy: kubernetesConcurrencyPolicy(schedule.concurrencyPolicy),
+					suspend: schedule.enabledByDefault === false ? true : undefined,
+					jobTemplate: {
+						spec: {
+							template: {
+								spec: {
+									restartPolicy: options.restartPolicy ?? 'OnFailure',
+									containers: [buildTriggerContainer(options.trigger, schedule)],
+								},
+							},
+						},
+					},
+				},
+			}) as KubernetesCronJobManifest
+		})
 }
 
 const serializeSchedule = async (schedule: ScheduleDefinition, serviceName: string, serviceVersion: string) =>

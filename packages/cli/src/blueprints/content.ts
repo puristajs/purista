@@ -26,6 +26,10 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn dev' : `${input.packageManager} run dev`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn build' : `${input.packageManager} run build`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`
+- \`${input.packageManager === 'yarn' ? 'yarn export:asyncapi' : `${input.packageManager} run export:asyncapi`}\`
+- \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\`
+
+Contract exporters refresh \`purista.definitions.json\` before writing provider-neutral outputs. Update \`src/definitions.ts\` when you add service builders that should be exported.
 `
 
 export const createServiceEventEnumFile = (input: CreateProjectInput) => {
@@ -46,6 +50,39 @@ export const createServiceEventEnumFile = (input: CreateProjectInput) => {
 }
 `
 }
+
+export const createDefinitionsFile = (input: CreateProjectInput) => {
+	const puristaConfig: PuristaConfig = {
+		$schema: 'https://purista.dev/schemas/1.12.0/schema.json',
+		runtime: input.runtime,
+		eventBridge: input.eventBridge,
+		fileConvention: input.fileConvention,
+		eventConvention: input.eventConvention,
+		linter: input.linter,
+		formatter: input.formatter,
+		servicePath: 'src/service',
+		agentPath: 'src/agents',
+	}
+	const serviceDirectory = convertToProjectFileCasing('ping', puristaConfig)
+	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)
+	const serviceBuilderName = camelCase('ping v1 service')
+
+	return `import { exportServiceDefinitions } from '@purista/core'
+import { ${serviceBuilderName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
+
+export const serviceBuilders = [${serviceBuilderName}] as const
+
+export const exportPuristaDefinitions = () => exportServiceDefinitions([...serviceBuilders])
+`
+}
+
+export const createExportDefinitionsFile = () => `import { writeFile } from 'node:fs/promises'
+import { exportPuristaDefinitions } from './definitions.js'
+
+const definitions = await exportPuristaDefinitions()
+
+await writeFile('purista.definitions.json', \`\${JSON.stringify(definitions, null, 2)}\\n\`, 'utf-8')
+`
 
 const createDefaultEventBridgeFile = () => `import { DefaultEventBridge, type Logger } from '@purista/core'
 
@@ -299,10 +336,8 @@ export const createPublicIndexHtml = (input: CreateProjectInput) => `<!doctype h
 `
 
 export const createBiomeConfigFile = () => `{
-	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
+	"$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "off" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
@@ -310,7 +345,7 @@ export const createBiomeConfigFile = () => `{
 		}
 	},
 	"formatter": {
-		"enabled": true,
+		"enabled": false,
 		"formatWithErrors": false,
 		"attributePosition": "auto",
 		"indentStyle": "tab",
@@ -320,7 +355,7 @@ export const createBiomeConfigFile = () => `{
 	},
 	"javascript": {
 		"formatter": {
-			"enabled": true,
+			"enabled": false,
 			"quoteStyle": "single",
 			"arrowParentheses": "asNeeded",
 			"bracketSameLine": false,
@@ -339,6 +374,7 @@ export const createBiomeConfigFile = () => `{
 	},
 	"json": {
 		"formatter": {
+			"enabled": false,
 			"trailingCommas": "none"
 		}
 	}

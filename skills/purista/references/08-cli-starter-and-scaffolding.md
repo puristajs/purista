@@ -14,6 +14,8 @@ purista add stream <name> --service <serviceName> --service-version <version>
 purista add queue <name> --service <serviceName> --service-version <version>
 purista add queue-worker <name> --service <serviceName> --service-version <version> --queue <queueName>
 purista add agent <name> --service <serviceName> --service-version <version>
+purista export schedule-manifest --out schedules.json
+purista export kubernetes-cronjob --out kubernetes-cronjobs.json --trigger-image curlimages/curl:8.8.0 --trigger-url 'https://api.example.com/purista/schedules/{{targetKind}}/{{targetName}}'
 ```
 
 Use `--non-interactive` in automation when all required values are known. Use interactive mode when the project context should drive prompts.
@@ -30,6 +32,8 @@ Generated code should:
 - `starter` must remain AI-free by default.
 - `create-purista` should initialize projects through CLI blueprint behavior.
 - Defaults should align with current Hono/EventBridge/QueueBridge decisions.
+- Starter may include disabled-by-default schedule contracts and export scripts, but must not assume a scheduler, broker, cluster, URL, auth policy, or provider account exists.
+- Kubernetes CronJob export scripts must use explicit placeholder trigger configuration that users replace before applying manifests.
 - When framework behavior changes, update `purista` first, then starter/create-purista.
 
 ## Examples
@@ -42,4 +46,5 @@ Generated code should:
 - CLI generated tests compile against current APIs.
 - Generated agents use core agent testing helpers.
 - Generated apps do not install provider packages unless provider wiring is generated.
+- Schedule exports do not target subscriptions directly; event targets trigger subscriptions indirectly.
 - Binary files and compiled CLI output are rebuilt when source templates change.

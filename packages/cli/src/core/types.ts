@@ -9,6 +9,7 @@ export const puristaCommandIds = [
 	'export-asyncapi',
 	'export-runtime-capabilities',
 	'export-schedule-manifest',
+	'export-kubernetes-cronjob',
 	'export-cloudevents-schema',
 	'init-project',
 ] as const

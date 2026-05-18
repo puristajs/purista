@@ -86,9 +86,11 @@ export const getCommandTestFileContent = (input: {
 					})
 					writer.writeLine('})')
 					writer.blankLine()
-					writer.writeLine(`const result = await ${camelCase(input.commandName)}(context, payload, parameter)`)
+					writer.writeLine(
+						`const result = await ${camelCase(input.commandName)}(context, payload as Parameters<typeof ${camelCase(input.commandName)}>[1], parameter as Parameters<typeof ${camelCase(input.commandName)}>[2])`,
+					)
 					writer.blankLine()
-					writer.writeLine('expect(result).toBe(undefined)')
+					writer.writeLine('expect(result).toBeUndefined()')
 				})
 				.write(')')
 		})
