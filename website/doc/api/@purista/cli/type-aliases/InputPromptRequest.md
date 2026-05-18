@@ -8,7 +8,7 @@
 
 > **InputPromptRequest**\<`TKey`\> = [`BasePromptRequest`](BasePromptRequest.md)\<`TKey`\> & `object`
 
-Defined in: [packages/cli/src/core/types.ts:63](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/core/types.ts#L63)
+Defined in: [packages/cli/src/core/types.ts:64](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/core/types.ts#L64)
 
 ## Type Declaration
 

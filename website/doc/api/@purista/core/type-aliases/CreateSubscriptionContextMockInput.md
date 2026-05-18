@@ -8,7 +8,7 @@
 
 > **CreateSubscriptionContextMockInput**\<`TBuilder`\> = `object`
 
-Defined in: [testing/createSubscriptionContextMock.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L16)
+Defined in: [testing/createSubscriptionContextMock.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L27)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [testing/createSubscriptionContextMock.ts:16](https://github.com/pur
 
 > **message**: [`EBMessage`](EBMessage.md)
 
-Defined in: [testing/createSubscriptionContextMock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L17)
+Defined in: [testing/createSubscriptionContextMock.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L28)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [testing/createSubscriptionContextMock.ts:17](https://github.com/pur
 
 > `optional` **resources?**: `Partial`\<[`SubscriptionContextMockBuilderTypes`](SubscriptionContextMockBuilderTypes.md)\<`TBuilder`\>\[`"Resources"`\]\>
 
-Defined in: [testing/createSubscriptionContextMock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L19)
+Defined in: [testing/createSubscriptionContextMock.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L30)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [testing/createSubscriptionContextMock.ts:19](https://github.com/pur
 
 > `optional` **sandbox?**: `SinonSandbox`
 
-Defined in: [testing/createSubscriptionContextMock.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L18)
+Defined in: [testing/createSubscriptionContextMock.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L29)

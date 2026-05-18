@@ -8,7 +8,7 @@
 
 > **ExportAsyncApiOptions** = `object`
 
-Defined in: [helper/enterpriseInterop.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L17)
+Defined in: [helper/enterpriseInterop.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L26)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [helper/enterpriseInterop.ts:17](https://github.com/puristajs/purist
 
 > **services**: [`ServiceContractInput`](ServiceContractInput.md)
 
-Defined in: [helper/enterpriseInterop.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L20)
+Defined in: [helper/enterpriseInterop.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L29)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [helper/enterpriseInterop.ts:20](https://github.com/puristajs/purist
 
 > **title**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L18)
+Defined in: [helper/enterpriseInterop.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L27)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [helper/enterpriseInterop.ts:18](https://github.com/puristajs/purist
 
 > **version**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L19)
+Defined in: [helper/enterpriseInterop.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L28)

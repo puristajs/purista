@@ -8,7 +8,7 @@
 
 > **SubscriptionFunctionContextEnhancements**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L21)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L22)
 
 It provides the original command message.
 Also, the methods:
@@ -44,7 +44,7 @@ Also, the methods:
 
 > **emit**: [`EmitCustomMessageFunction`](EmitCustomMessageFunction.md)\<`EmitList`\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L31)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L32)
 
 emit a custom message
 
@@ -54,7 +54,7 @@ emit a custom message
 
 > **message**: `Readonly`\<[`EBMessage`](EBMessage.md)\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L29)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L30)
 
 the original message
 
@@ -64,7 +64,7 @@ the original message
 
 > **queue**: [`QueueContext`](QueueContext.md)\<`QueueInvokes`\>
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L50)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L51)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:50](https://
 
 > **resources**: `Resources`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L54)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L55)
 
 Provides resources defined in service builder and set via config during service creation
 
@@ -82,7 +82,7 @@ Provides resources defined in service builder and set via config during service 
 
 > **service**: `Invokes`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L47)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L48)
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.
@@ -105,6 +105,6 @@ It is recommended to validate the result against a schema which only contains th
 
 > **stream**: `StreamInvokes`
 
-Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L49)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L50)
 
 consumes stream responses from other service stream endpoints

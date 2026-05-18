@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / QueueWorkerDefinition
 
-# Type Alias: QueueWorkerDefinition\<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes\>
+# Type Alias: QueueWorkerDefinition\<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, Metrics\>
 
-> **QueueWorkerDefinition**\<`PayloadSchema`, `ParamsSchema`, `Resources`, `Invokes`, `StreamInvokes`\> = `object`
+> **QueueWorkerDefinition**\<`PayloadSchema`, `ParamsSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `Metrics`\> = `object`
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L25)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L39)
 
 ## Type Parameters
 
@@ -32,13 +32,25 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:25](https://github.com/pu
 
 `StreamInvokes` *extends* [`StreamInvokeList`](StreamInvokeList.md) = [`EmptyObject`](EmptyObject.md)
 
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = `Record`\<`string`, `never`\>
+
+### QueueInvokes
+
+`QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
+
+### Metrics
+
+`Metrics` *extends* `PuristaMetricDefinitions` = [`EmptyObject`](EmptyObject.md)
+
 ## Properties
 
 ### afterGuards?
 
 > `optional` **afterGuards?**: `Record`\<`string`, [`QueueWorkerAfterGuardHook`](QueueWorkerAfterGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L49)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:75](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L75)
 
 ***
 
@@ -46,15 +58,15 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:49](https://github.com/pu
 
 > `optional` **beforeGuards?**: `Record`\<`string`, [`QueueWorkerBeforeGuardHook`](QueueWorkerBeforeGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L38)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L64)
 
 ***
 
 ### handler
 
-> **handler**: [`QueueWorkerHandler`](QueueWorkerHandler.md)\<`PayloadSchema`, `ParamsSchema`, `Resources`, `Invokes`, `StreamInvokes`\>
+> **handler**: [`QueueWorkerHandler`](QueueWorkerHandler.md)\<`PayloadSchema`, `ParamsSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `Metrics`\>
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L37)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L54)
 
 ***
 
@@ -62,7 +74,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:37](https://github.com/pu
 
 > `optional` **intervalMs?**: `number`
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L35)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L52)
 
 ***
 
@@ -70,7 +82,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:35](https://github.com/pu
 
 > **maxParallelHandlers**: `number`
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L36)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L53)
 
 ***
 
@@ -78,7 +90,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:36](https://github.com/pu
 
 > **mode**: [`QueueWorkerMode`](QueueWorkerMode.md)
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L34)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L51)
 
 ***
 
@@ -86,7 +98,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:34](https://github.com/pu
 
 > **name**: `string`
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L32)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L49)
 
 ***
 
@@ -94,4 +106,4 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:32](https://github.com/pu
 
 > **queueName**: `string`
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L33)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L50)

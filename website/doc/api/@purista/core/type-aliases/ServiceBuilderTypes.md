@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / ServiceBuilderTypes
 
-# Type Alias: ServiceBuilderTypes\<ConfigType, ConfigInputType, Resources, ServiceClassType\>
+# Type Alias: ServiceBuilderTypes\<ConfigType, ConfigInputType, Resources, ServiceClassType, Metrics\>
 
-> **ServiceBuilderTypes**\<`ConfigType`, `ConfigInputType`, `Resources`, `ServiceClassType`\> = `object`
+> **ServiceBuilderTypes**\<`ConfigType`, `ConfigInputType`, `Resources`, `ServiceClassType`, `Metrics`\> = `object`
 
-Defined in: [core/types/ServiceBuilderTypes.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceBuilderTypes.ts#L6)
+Defined in: [core/types/ServiceBuilderTypes.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceBuilderTypes.ts#L7)
 
 ## Type Parameters
 
@@ -26,7 +26,11 @@ Defined in: [core/types/ServiceBuilderTypes.ts:6](https://github.com/puristajs/p
 
 ### ServiceClassType
 
-`ServiceClassType` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)\<[`ServiceClassTypes`](ServiceClassTypes.md)\<`ConfigType`, `Resources`\>\> = [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](ServiceClassTypes.md)\<`ConfigType`, `Resources`\>\>
+`ServiceClassType` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)\<`any`\> = [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](ServiceClassTypes.md)\<`ConfigType`, `Resources`\>\>
+
+### Metrics
+
+`Metrics` *extends* `PuristaMetricDefinitions` = [`EmptyObject`](EmptyObject.md)
 
 ## Properties
 
@@ -43,6 +47,14 @@ Defined in: [core/types/ServiceBuilderTypes.ts:15](https://github.com/puristajs/
 > **ConfigType**: `ConfigType`
 
 Defined in: [core/types/ServiceBuilderTypes.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceBuilderTypes.ts#L14)
+
+***
+
+### Metrics
+
+> **Metrics**: `Metrics`
+
+Defined in: [core/types/ServiceBuilderTypes.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceBuilderTypes.ts#L18)
 
 ***
 

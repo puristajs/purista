@@ -272,7 +272,7 @@ Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 > `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L55)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L51)
 
 #### Type Parameters
 
@@ -322,7 +322,7 @@ Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 > `protected` **removeSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L78)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L74)
 
 #### Parameters
 
@@ -370,7 +370,7 @@ Defined in: core/dist/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 > `protected` **setSecretImpl**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L82)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L78)
 
 #### Parameters
 

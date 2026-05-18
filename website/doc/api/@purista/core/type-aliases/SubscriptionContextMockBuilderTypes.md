@@ -8,7 +8,7 @@
 
 > **SubscriptionContextMockBuilderTypes**\<`T`\> = `T` *extends* [`SubscriptionDefinitionBuilder`](../classes/SubscriptionDefinitionBuilder.md)\<`any`, infer C\> ? `C` : `never`
 
-Defined in: [testing/createSubscriptionContextMock.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L14)
+Defined in: [testing/createSubscriptionContextMock.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/testing/createSubscriptionContextMock.ts#L23)
 
 Infer the internal builder type configuration from a subscription builder.
 

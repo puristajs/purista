@@ -4,14 +4,20 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / ContextBase
 
-# Type Alias: ContextBase
+# Type Alias: ContextBase\<Metrics\>
 
-> **ContextBase** = `object`
+> **ContextBase**\<`Metrics`\> = `object`
 
-Defined in: [core/types/ContextBase.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L19)
+Defined in: [core/types/ContextBase.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L21)
 
 The ContextBase provides is a basic type.
 Each context for command function, subscription function and all Hooks and transformers will have at least the properties of this type.
+
+## Type Parameters
+
+### Metrics
+
+`Metrics` *extends* `PuristaMetricDefinitions` = [`EmptyObject`](EmptyObject.md)
 
 ## Properties
 
@@ -19,7 +25,7 @@ Each context for command function, subscription function and all Hooks and trans
 
 > **configs**: `object`
 
-Defined in: [core/types/ContextBase.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L41)
+Defined in: [core/types/ContextBase.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L45)
 
 the config store
 
@@ -47,9 +53,19 @@ set a config value in the config store
 
 > **logger**: [`Logger`](../classes/Logger.md)
 
-Defined in: [core/types/ContextBase.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L21)
+Defined in: [core/types/ContextBase.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L23)
 
 the logger instance
+
+***
+
+### metrics
+
+> **metrics**: `PuristaMetricContext`\<`Metrics`\>
+
+Defined in: [core/types/ContextBase.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L25)
+
+typed custom metrics declared on the current builder scope
 
 ***
 
@@ -57,7 +73,7 @@ the logger instance
 
 > **queue**: [`QueueContext`](QueueContext.md)
 
-Defined in: [core/types/ContextBase.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L58)
+Defined in: [core/types/ContextBase.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L62)
 
 ***
 
@@ -65,7 +81,7 @@ Defined in: [core/types/ContextBase.ts:58](https://github.com/puristajs/purista/
 
 > **secrets**: `object`
 
-Defined in: [core/types/ContextBase.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L32)
+Defined in: [core/types/ContextBase.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L36)
 
 the secret store
 
@@ -93,7 +109,7 @@ set a secret in the secret store
 
 > **startActiveSpan**: \<`F`\>(`name`, `opts`, `context`, `fn`) => `Promise`\<`F`\>
 
-Defined in: [core/types/ContextBase.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L25)
+Defined in: [core/types/ContextBase.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L29)
 
 wrap given function in an opentelemetry active span
 
@@ -131,7 +147,7 @@ wrap given function in an opentelemetry active span
 
 > **states**: `object`
 
-Defined in: [core/types/ContextBase.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L50)
+Defined in: [core/types/ContextBase.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L54)
 
 the state store
 
@@ -159,7 +175,7 @@ set a state value in the state store
 
 > **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 
-Defined in: [core/types/ContextBase.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L23)
+Defined in: [core/types/ContextBase.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L27)
 
 wrap given function in an opentelemetry span
 

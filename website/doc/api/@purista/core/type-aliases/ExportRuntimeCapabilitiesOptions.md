@@ -8,7 +8,7 @@
 
 > **ExportRuntimeCapabilitiesOptions** = `object`
 
-Defined in: [helper/enterpriseInterop.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L36)
+Defined in: [helper/enterpriseInterop.ts:124](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L124)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [helper/enterpriseInterop.ts:36](https://github.com/puristajs/purist
 
 > `optional` **eventBridge?**: [`RuntimeBridgeCapabilities`](RuntimeBridgeCapabilities.md)\<[`EventBridgeCapabilities`](EventBridgeCapabilities.md)\>
 
-Defined in: [helper/enterpriseInterop.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L38)
+Defined in: [helper/enterpriseInterop.ts:126](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L126)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [helper/enterpriseInterop.ts:38](https://github.com/puristajs/purist
 
 > `optional` **mode?**: [`RuntimeCapabilityReportMode`](RuntimeCapabilityReportMode.md)
 
-Defined in: [helper/enterpriseInterop.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L37)
+Defined in: [helper/enterpriseInterop.ts:125](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L125)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [helper/enterpriseInterop.ts:37](https://github.com/puristajs/purist
 
 > `optional` **queueBridge?**: [`RuntimeBridgeCapabilities`](RuntimeBridgeCapabilities.md)\<[`QueueBridgeCapabilities`](QueueBridgeCapabilities.md)\>
 
-Defined in: [helper/enterpriseInterop.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L39)
+Defined in: [helper/enterpriseInterop.ts:127](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L127)
