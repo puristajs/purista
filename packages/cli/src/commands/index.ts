@@ -9,6 +9,7 @@ import { addSubscriptionCommand } from './add-subscription.js'
 import {
 	exportAsyncApiCommand,
 	exportCloudEventsSchemaCommand,
+	exportKubernetesCronJobCommand,
 	exportRuntimeCapabilitiesCommand,
 	exportScheduleManifestCommand,
 } from './export.js'
@@ -25,6 +26,7 @@ export const commandRegistry = {
 	'export-asyncapi': exportAsyncApiCommand,
 	'export-runtime-capabilities': exportRuntimeCapabilitiesCommand,
 	'export-schedule-manifest': exportScheduleManifestCommand,
+	'export-kubernetes-cronjob': exportKubernetesCronJobCommand,
 	'export-cloudevents-schema': exportCloudEventsSchemaCommand,
 	'init-project': initProjectCommand,
 } as const

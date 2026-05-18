@@ -8,6 +8,8 @@ Test declared boundaries and runtime wiring:
 - subscription tests should assert consumed event behavior
 - stream tests should verify chunks and final payloads
 - queue worker tests should cover retry/ack/dead-letter behavior when relevant
+- schedule export tests should assert deterministic manifests and unsupported expression failures without a live scheduler or cluster
+- strict queue idempotency tests should assert duplicate enqueue returns the original job id and does not create a second job
 - agent tests should use core agent testing helpers
 
 Avoid tests that only validate raw helper functions while skipping builder metadata and runtime wiring.
@@ -47,6 +49,7 @@ Use context logger surfaces instead of ad hoc loggers:
 Choose topology after architecture:
 - event bridge selection follows delivery semantics
 - queue bridge selection follows durability semantics
+- scheduler selection stays external; Kubernetes CronJob export is manifest generation for an explicit trigger container/script
 - HTTP server selection follows exposed contracts
 - AI provider selection stays optional app runtime wiring
 
@@ -57,3 +60,4 @@ Name the commands used:
 - package lint
 - dependency-cycle checks for shared packages
 - stale-reference scans when removing protocols or optional dependencies
+- live Redis/NATS idempotency checks where container infrastructure is available

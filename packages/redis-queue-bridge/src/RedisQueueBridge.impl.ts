@@ -59,7 +59,7 @@ export class RedisQueueBridge<
 		deadLetterReplaySupported: true,
 		deadLetterPurgeSupported: true,
 		leaseInspectionSupported: true,
-		idempotencyEnforcement: false,
+		idempotencyEnforcement: true,
 		partitionOrdering: false,
 		providerManagedDelayedDelivery: true,
 		strictStartupValidation: true,
@@ -138,6 +138,16 @@ export class RedisQueueBridge<
 			idempotencyKey: options.idempotencyKey,
 		}
 
+		const result = {
+			jobId,
+			queueName,
+			scheduledAt,
+		}
+
+		if (options.idempotencyKey) {
+			return this.enqueueWithIdempotency(queueName, message, result, now, scheduledAt, options.idempotencyKey)
+		}
+
 		await client.hSet(this.jobsKey(queueName), jobId, JSON.stringify(message))
 
 		if (scheduledAt > now) {
@@ -149,11 +159,7 @@ export class RedisQueueBridge<
 			await client.lPush(this.pendingKey(queueName), jobId)
 		}
 
-		return {
-			jobId,
-			queueName,
-			scheduledAt,
-		}
+		return result
 	}
 
 	async leaseNext(queueName: string, options?: QueueLeaseOptions): Promise<QueueLease | undefined> {
@@ -392,6 +398,51 @@ export class RedisQueueBridge<
 
 	private statsKey(queueName: string) {
 		return `${this.keyPrefix}${queueName}:stats`
+	}
+
+	private idempotencyKey(queueName: string, idempotencyKey: string) {
+		return `${this.keyPrefix}${queueName}:idempotency:${idempotencyKey}`
+	}
+
+	private async enqueueWithIdempotency(
+		queueName: string,
+		message: QueueMessage,
+		result: QueueEnqueueResult,
+		now: number,
+		scheduledAt: number,
+		idempotencyKey: string,
+	): Promise<QueueEnqueueResult> {
+		const client = await this.getClient()
+		const encodedResult = JSON.stringify(result)
+		const encodedMessage = JSON.stringify(message)
+		const rawResult = await client.eval(
+			[
+				"local existing = redis.call('GET', KEYS[1])",
+				'if existing then return existing end',
+				"redis.call('HSET', KEYS[2], ARGV[1], ARGV[2])",
+				'if tonumber(ARGV[4]) > tonumber(ARGV[5]) then',
+				"  redis.call('ZADD', KEYS[3], ARGV[4], ARGV[1])",
+				'else',
+				"  redis.call('LPUSH', KEYS[4], ARGV[1])",
+				'end',
+				"redis.call('SET', KEYS[1], ARGV[3])",
+				'return ARGV[3]',
+			].join('\n'),
+			{
+				keys: [
+					this.idempotencyKey(queueName, idempotencyKey),
+					this.jobsKey(queueName),
+					this.scheduledKey(queueName),
+					this.pendingKey(queueName),
+				],
+				arguments: [message.id, encodedMessage, encodedResult, String(scheduledAt), String(now)],
+			},
+		)
+		const decodedResult = this.decodeBulkString(rawResult as string | Buffer | null | undefined)
+		if (!decodedResult) {
+			throw new Error('Redis idempotent enqueue did not return a result')
+		}
+		return JSON.parse(decodedResult) as QueueEnqueueResult
 	}
 
 	private decodeBulkString(value: string | Buffer | null | undefined) {

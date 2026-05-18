@@ -8,6 +8,7 @@ import {
 import { EBMessageType } from '../core/types/index.js'
 import {
 	exportAsyncApi,
+	exportKubernetesCronJobs,
 	exportRuntimeCapabilities,
 	exportScheduleManifest,
 	fromCloudEvent,
@@ -118,6 +119,21 @@ const fixtureDefinition: FullDefinition = {
 						concurrencyPolicy: 'forbid',
 						missedRunPolicy: 'runOnce',
 						enabledByDefault: true,
+					},
+					refreshCache: {
+						name: 'Refresh Cache!',
+						description: 'Refresh cache trigger',
+						targetKind: 'command',
+						targetName: 'refreshCache',
+						targetServiceName: 'BillingService',
+						targetServiceVersion: '1',
+						expression: { kind: 'cron', value: '*/5 * * * *' },
+						concurrencyPolicy: 'replace',
+						missedRunPolicy: 'skip',
+						enabledByDefault: false,
+						jitterWindowMs: 1000,
+						idempotencyKey: 'schedule-name-and-timestamp',
+						providerHints: { kubernetes: { startingDeadlineSeconds: 120 } },
 					},
 				},
 				eventToQueueBindings: [
@@ -255,11 +271,266 @@ describe('enterprise interoperability helpers', () => {
 			      "targetServiceName": "BillingService",
 			      "targetServiceVersion": "1",
 			    },
+			    {
+			      "concurrencyPolicy": "replace",
+			      "description": "Refresh cache trigger",
+			      "enabledByDefault": false,
+			      "expression": {
+			        "kind": "cron",
+			        "value": "*/5 * * * *",
+			      },
+			      "idempotencyKey": "schedule-name-and-timestamp",
+			      "jitterWindowMs": 1000,
+			      "missedRunPolicy": "skip",
+			      "name": "Refresh Cache!",
+			      "providerHints": {
+			        "kubernetes": {
+			          "startingDeadlineSeconds": 120,
+			        },
+			      },
+			      "targetKind": "command",
+			      "targetName": "refreshCache",
+			      "targetServiceName": "BillingService",
+			      "targetServiceVersion": "1",
+			    },
 			  ],
 			  "title": "Billing schedules",
 			  "version": "1.0.0",
 			}
 		`)
+	})
+
+	it('exports deterministic Kubernetes CronJob manifests for cron schedules', async () => {
+		const manifests = await exportKubernetesCronJobs({
+			services: fixtureDefinition,
+			trigger: {
+				image: 'registry.example.com/purista-trigger:1.0.0',
+				command: ['/app/trigger'],
+				args: ['--kind', '{{targetKind}}', '--service', '{{targetServiceName}}', '--target', '{{targetName}}'],
+			},
+			labels: { 'app.kubernetes.io/part-of': 'billing' },
+			annotations: { 'example.com/owner': 'platform' },
+		})
+		const normalized = JSON.parse(JSON.stringify(manifests))
+
+		expect(
+			JSON.parse(
+				JSON.stringify(
+					await exportKubernetesCronJobs({
+						services: fixtureDefinition,
+						trigger: {
+							image: 'registry.example.com/purista-trigger:1.0.0',
+							command: ['/app/trigger'],
+							args: ['--kind', '{{targetKind}}', '--service', '{{targetServiceName}}', '--target', '{{targetName}}'],
+						},
+						labels: { 'app.kubernetes.io/part-of': 'billing' },
+						annotations: { 'example.com/owner': 'platform' },
+					}),
+				),
+			),
+		).toStrictEqual(normalized)
+
+		expect(normalized).toMatchObject([
+			{
+				apiVersion: 'batch/v1',
+				kind: 'CronJob',
+				metadata: {
+					name: 'monthlybilling',
+					labels: { 'app.kubernetes.io/part-of': 'billing' },
+					annotations: {
+						'example.com/owner': 'platform',
+						'purista.dev/schedule-name': 'monthlyBilling',
+						'purista.dev/target-kind': 'event',
+						'purista.dev/target-name': 'billing.monthly.due',
+						'purista.dev/target-service-name': 'BillingService',
+						'purista.dev/target-service-version': '1',
+						'purista.dev/missed-run-policy': 'runOnce',
+					},
+				},
+				spec: {
+					schedule: '0 2 1 * *',
+					timeZone: 'Europe/Berlin',
+					concurrencyPolicy: 'Forbid',
+					jobTemplate: {
+						spec: {
+							template: {
+								spec: {
+									restartPolicy: 'OnFailure',
+									containers: [
+										{
+											name: 'purista-trigger',
+											image: 'registry.example.com/purista-trigger:1.0.0',
+											command: ['/app/trigger'],
+											args: ['--kind', 'event', '--service', 'BillingService', '--target', 'billing.monthly.due'],
+										},
+									],
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				metadata: {
+					name: 'refresh-cache',
+					annotations: {
+						'purista.dev/schedule-name': 'Refresh Cache!',
+						'purista.dev/target-kind': 'command',
+						'purista.dev/jitter-window-ms': '1000',
+						'purista.dev/idempotency-key': 'schedule-name-and-timestamp',
+						'purista.dev/provider-hints': '{"kubernetes":{"startingDeadlineSeconds":120}}',
+					},
+				},
+				spec: {
+					schedule: '*/5 * * * *',
+					concurrencyPolicy: 'Replace',
+					suspend: true,
+				},
+			},
+		])
+	})
+
+	it('exports Kubernetes CronJob manifests from provider-neutral schedule manifests and HTTP trigger config', async () => {
+		const scheduleManifest = await exportScheduleManifest({
+			title: 'Billing schedules',
+			version: '1.0.0',
+			services: fixtureDefinition,
+		})
+
+		const manifests = await exportKubernetesCronJobs({
+			manifest: scheduleManifest,
+			namespace: 'jobs',
+			trigger: {
+				image: 'curlimages/curl:8.8.0',
+				http: {
+					method: 'POST',
+					url: 'https://purista.example.test/schedules/{{targetKind}}/{{targetName}}',
+					headers: { 'content-type': 'application/json' },
+					body: { schedule: '{{scheduleName}}', target: '{{targetName}}' },
+				},
+			},
+		})
+
+		expect(manifests[0]).toMatchObject({
+			metadata: { namespace: 'jobs' },
+			spec: {
+				concurrencyPolicy: 'Forbid',
+				jobTemplate: {
+					spec: {
+						template: {
+							spec: {
+								containers: [
+									{
+										command: ['sh', '-c'],
+										args: [
+											`curl --fail --silent --show-error --request POST --header 'content-type: application/json' --data '{"schedule":"monthlyBilling","target":"billing.monthly.due"}' 'https://purista.example.test/schedules/event/billing.monthly.due'`,
+										],
+									},
+								],
+							},
+						},
+					},
+				},
+			},
+		})
+	})
+
+	it('maps allow concurrency policy to Kubernetes Allow', async () => {
+		const manifests = await exportKubernetesCronJobs({
+			manifest: {
+				version: '1.0.0',
+				schedules: [
+					{
+						name: 'allow-policy',
+						targetKind: 'queue',
+						targetName: 'billing.invoice.generate',
+						targetServiceName: 'BillingService',
+						targetServiceVersion: '1',
+						expression: { kind: 'cron', value: '* * * * *' },
+						concurrencyPolicy: 'allow',
+						missedRunPolicy: 'skip',
+						enabledByDefault: true,
+					},
+				],
+			},
+			trigger: {
+				image: 'registry.example.com/purista-trigger:1.0.0',
+				command: ['/app/trigger'],
+			},
+		})
+
+		expect(manifests[0]?.spec.concurrencyPolicy).toBe('Allow')
+	})
+
+	it('rejects interval and one-shot schedules for Kubernetes CronJob export', async () => {
+		const baseSchedule = {
+			name: 'unsupported',
+			targetKind: 'event' as const,
+			targetName: 'billing.monthly.due',
+			targetServiceName: 'BillingService',
+			targetServiceVersion: '1',
+			concurrencyPolicy: 'forbid' as const,
+			missedRunPolicy: 'skip' as const,
+			enabledByDefault: true,
+		}
+		const trigger = {
+			image: 'registry.example.com/purista-trigger:1.0.0',
+			command: ['/app/trigger'],
+		}
+
+		await expect(
+			exportKubernetesCronJobs({
+				manifest: {
+					version: '1.0.0',
+					schedules: [{ ...baseSchedule, expression: { kind: 'interval' as const, everyMs: 300_000 } }],
+				},
+				trigger,
+			}),
+		).rejects.toThrow('Kubernetes CronJob export only supports cron schedules')
+
+		await expect(
+			exportKubernetesCronJobs({
+				manifest: {
+					version: '1.0.0',
+					schedules: [{ ...baseSchedule, expression: { kind: 'oneShot' as const, runAt: '2026-06-01T00:00:00.000Z' } }],
+				},
+				trigger,
+			}),
+		).rejects.toThrow('Kubernetes CronJob export only supports cron schedules')
+	})
+
+	it('rejects missing trigger configuration and subscription schedule targets', async () => {
+		await expect(
+			exportKubernetesCronJobs({
+				manifest: {
+					version: '1.0.0',
+					schedules: [
+						{
+							name: 'subscription-target',
+							targetKind: 'subscription' as never,
+							targetName: 'sendReceipt',
+							targetServiceName: 'BillingService',
+							targetServiceVersion: '1',
+							expression: { kind: 'cron', value: '* * * * *' },
+							concurrencyPolicy: 'forbid',
+							missedRunPolicy: 'skip',
+							enabledByDefault: true,
+						},
+					],
+				},
+				trigger: {
+					image: 'registry.example.com/purista-trigger:1.0.0',
+					command: ['/app/trigger'],
+				},
+			}),
+		).rejects.toThrow('direct subscription targets are not supported')
+
+		await expect(
+			exportKubernetesCronJobs({
+				manifest: { version: '1.0.0', schedules: [] },
+				trigger: { image: 'registry.example.com/purista-trigger:1.0.0' },
+			}),
+		).rejects.toThrow('requires command/args or http trigger configuration')
 	})
 
 	it('maps PURISTA custom messages to and from CloudEvents', () => {

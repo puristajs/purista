@@ -30,6 +30,9 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.
 - Metrics use the OpenTelemetry Metrics API. Core stays SDK/exporter-neutral; applications own MeterProvider, readers, exporters, collectors, and Prometheus exposure.
 - Declare custom application metrics with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record them through typed `context.metrics`, and keep names under `app.*`.
+- Schedules are contracts, not a PURISTA production scheduler runtime. Kubernetes CronJob export is manifest generation for an explicit trigger container/script.
+- Do not create or reference `@purista/contracts`; contract/export helpers for this release live in `@purista/core`.
+- Redis and NATS queue bridges support strict idempotency. Duplicate strict enqueue returns the original queue job id. The default queue bridge remains advisory for local development/tests.
 
 ## Primitive Decisions
 - service: owns a versioned business capability, invariants, resources, and contracts
@@ -39,6 +42,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - queue: durable background work contract
 - queue worker: execution logic for queue work
 - agent: optional model-driven loop, harness agent/workflow, or custom run function attached to a service
+- schedule: external time-trigger contract targeting an event, queue, or short command
 
 ## Current AI Decision
 AI agent integration lives in `@purista/core`. Agents attach to services and expand into normal PURISTA queue, worker, command, and stream definitions. Core depends only on provider-neutral `@purista/harness`; model providers remain explicit application dependencies. Agents do not use a PURISTA AI protocol or Vercel AI SDK adapter.

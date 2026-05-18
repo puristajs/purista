@@ -4,6 +4,7 @@ Use this reference when choosing packages or checking dependency boundaries.
 
 ## Core Packages
 - `packages/core`: builders, service runtime, schemas, messages, stores, event bridge contracts, queue contracts, testing helpers.
+- `packages/core`: also owns enterprise export helpers such as AsyncAPI, CloudEvents mapping, provider-neutral schedule manifests, Kubernetes CronJob manifest export, and runtime capability reports. Do not add `@purista/contracts` for this release line.
 - `packages/cli`: project and artifact scaffolding. Use it for app-level services, commands, subscriptions, streams, queues, workers, and agents.
 - `packages/hono-http-server`: active HTTP runtime and OpenAPI/SSE surface.
 - `packages/base-http-bridge`: base HTTP bridge infrastructure.
@@ -22,6 +23,8 @@ Use this reference when choosing packages or checking dependency boundaries.
 - `packages/nats-queue-bridge`: NATS queue bridge.
 - `packages/redis-queue-bridge`: Redis queue bridge.
 
+Redis and NATS queue bridges support strict idempotency for queues. With the same queue and `idempotencyKey`, duplicate enqueue returns the original enqueue result/job id and does not create a second job. `DefaultQueueBridge` stays advisory for local development/tests.
+
 Event bridges and queue bridges are separate package categories. Do not use an event bridge as a queue bridge unless the adapter implements the queue contract.
 
 ## Stores
@@ -33,6 +36,7 @@ Stores are runtime wiring. Service builders declare needs; service instances rec
 
 ## Platform Helpers
 - `packages/k8s-sdk`: Kubernetes helper package.
+- Kubernetes CronJob schedule export currently lives in core export helpers and CLI; it generates manifests for an explicit trigger container/script, not a runtime adapter.
 - `starter`: default application template; keep AI-free by default.
 - `create-purista`: project generator; keep AI-free by default unless the generated application explicitly requests agents.
 

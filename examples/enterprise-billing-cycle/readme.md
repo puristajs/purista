@@ -23,3 +23,15 @@ npm run test -w examples/enterprise-billing-cycle
 ```
 
 The queue and event bridge are `DefaultQueueBridge` and `DefaultEventBridge`, so no broker, database, scheduler, or HTTP server is required.
+
+For production scheduling, keep the same contract shape and let an external scheduler own time:
+
+```text
+Kubernetes CronJob
+  -> trigger container/script
+  -> PURISTA billing.monthlyCycleDue event
+  -> event-to-queue binding
+  -> billing.monthlyClosing queue worker
+```
+
+When the queue bridge is Redis or NATS, the event-to-queue binding can use `idempotencyMode: 'strict'` with the existing `billing-cycle:<cycleId>` key. Duplicate event delivery then returns the original queue job id instead of creating another closing job. The default in-memory bridge used by this example stays advisory for local development.

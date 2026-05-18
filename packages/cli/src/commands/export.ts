@@ -7,6 +7,7 @@ import {
 	EventBridgeStreamLateFrameHandling,
 	exportAsyncApi,
 	exportCloudEventsSchema,
+	exportKubernetesCronJobs,
 	exportRuntimeCapabilities,
 	exportScheduleManifest,
 } from '@purista/core'
@@ -24,6 +25,26 @@ const exportDefinitionsInputSchema = z.object({
 	format: outputFormatSchema,
 })
 
+const stringArrayInput = z
+	.union([z.string(), z.array(z.string())])
+	.optional()
+	.transform(value => {
+		if (!value) {
+			return []
+		}
+		return Array.isArray(value) ? value : [value]
+	})
+
+const exportKubernetesCronJobInputSchema = exportDefinitionsInputSchema.extend({
+	out: z.string().trim().default('kubernetes-cronjobs.json'),
+	triggerImage: z.string().trim().min(1, 'triggerImage is required'),
+	triggerCommand: z.string().trim().optional(),
+	triggerArgs: stringArrayInput,
+	triggerUrl: z.string().trim().optional(),
+	triggerMethod: z.string().trim().default('POST'),
+	namespace: z.string().trim().optional(),
+})
+
 const exportRuntimeCapabilitiesInputSchema = z.object({
 	out: z.string().trim().default('purista-runtime-capabilities.json'),
 	mode: z.enum(['definition-only', 'runtime-inspect']).default('definition-only'),
@@ -37,6 +58,8 @@ const exportCloudEventsSchemaInputSchema = z.object({
 
 type ExportDefinitionsInput = z.input<typeof exportDefinitionsInputSchema>
 type ExportDefinitionsResolved = z.output<typeof exportDefinitionsInputSchema>
+type ExportKubernetesCronJobInput = z.input<typeof exportKubernetesCronJobInputSchema>
+type ExportKubernetesCronJobResolved = z.output<typeof exportKubernetesCronJobInputSchema>
 type ExportRuntimeCapabilitiesInput = z.input<typeof exportRuntimeCapabilitiesInputSchema>
 type ExportRuntimeCapabilitiesResolved = z.output<typeof exportRuntimeCapabilitiesInputSchema>
 type ExportCloudEventsSchemaInput = z.input<typeof exportCloudEventsSchemaInputSchema>
@@ -66,6 +89,44 @@ const resolveDefinitionsExport = async <TInput extends ExportDefinitionsInput>(
 		)
 	}
 	return createPendingResolution<TInput, ExportDefinitionsResolved>(command, input, [], [], [], parsed.data)
+}
+
+const resolveKubernetesCronJobExport = async (input: ExportKubernetesCronJobInput) => {
+	const parsed = exportKubernetesCronJobInputSchema.safeParse(input)
+	if (!parsed.success) {
+		return createPendingResolution<ExportKubernetesCronJobInput, ExportKubernetesCronJobResolved>(
+			'export-kubernetes-cronjob',
+			input,
+			[],
+			createIssuesFromZod(parsed.error),
+		)
+	}
+
+	const hasCommand = !!parsed.data.triggerCommand
+	const hasUrl = !!parsed.data.triggerUrl
+	if (hasCommand === hasUrl) {
+		return createPendingResolution<ExportKubernetesCronJobInput, ExportKubernetesCronJobResolved>(
+			'export-kubernetes-cronjob',
+			input,
+			[],
+			[
+				{
+					code: 'invalid_input',
+					message: 'Provide exactly one of triggerCommand or triggerUrl.',
+					path: ['triggerCommand'],
+				},
+			],
+		)
+	}
+
+	return createPendingResolution<ExportKubernetesCronJobInput, ExportKubernetesCronJobResolved>(
+		'export-kubernetes-cronjob',
+		input,
+		[],
+		[],
+		[],
+		parsed.data,
+	)
 }
 
 export const exportAsyncApiCommand: PuristaExecutableCommand<ExportDefinitionsInput, ExportDefinitionsResolved> = {
@@ -100,6 +161,46 @@ export const exportScheduleManifestCommand: PuristaExecutableCommand<
 		const outPath = resolvePath(context.cwd, input.out)
 		await writeJsonFile(outPath, document)
 		return createResult('export-schedule-manifest', context.mode, { createdFiles: [outPath], updatedFiles: [] })
+	},
+}
+
+export const exportKubernetesCronJobCommand: PuristaExecutableCommand<
+	ExportKubernetesCronJobInput,
+	ExportKubernetesCronJobResolved
+> = {
+	id: 'export-kubernetes-cronjob',
+	resolve: input => resolveKubernetesCronJobExport(input),
+	execute: async (input, context) => {
+		const definitions = await readDefinitions(context.cwd, input.definitions)
+		const trigger = input.triggerUrl
+			? {
+					image: input.triggerImage,
+					http: {
+						method: input.triggerMethod,
+						url: input.triggerUrl,
+						headers: { 'content-type': 'application/json' },
+						body: {
+							schedule: '{{scheduleName}}',
+							targetKind: '{{targetKind}}',
+							targetName: '{{targetName}}',
+							targetServiceName: '{{targetServiceName}}',
+							targetServiceVersion: '{{targetServiceVersion}}',
+						},
+					},
+				}
+			: {
+					image: input.triggerImage,
+					command: [input.triggerCommand as string],
+					args: input.triggerArgs,
+				}
+		const document = await exportKubernetesCronJobs({
+			services: definitions,
+			namespace: input.namespace,
+			trigger,
+		})
+		const outPath = resolvePath(context.cwd, input.out)
+		await writeJsonFile(outPath, document)
+		return createResult('export-kubernetes-cronjob', context.mode, { createdFiles: [outPath], updatedFiles: [] })
 	},
 }
 

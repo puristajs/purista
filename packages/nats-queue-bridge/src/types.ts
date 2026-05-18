@@ -7,4 +7,5 @@ export type NatsQueueBridgeOptions = {
 	defaultMaxAttempts?: number
 	storageType?: 'file' | 'memory'
 	releaseBatchSize?: number
+	idempotencyPendingTimeoutMs?: number
 }
