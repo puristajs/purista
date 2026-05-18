@@ -8,7 +8,7 @@
 
 > **exportCloudEventsSchema**(): `object`
 
-Defined in: [helper/enterpriseInterop.ts:504](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L504)
+Defined in: [helper/enterpriseInterop.ts:844](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L844)
 
 ## Returns
 

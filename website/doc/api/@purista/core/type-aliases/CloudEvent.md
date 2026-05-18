@@ -8,7 +8,7 @@
 
 > **CloudEvent** = `object`
 
-Defined in: [helper/enterpriseInterop.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L42)
+Defined in: [helper/enterpriseInterop.ts:130](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L130)
 
 ## Indexable
 
@@ -20,7 +20,7 @@ Defined in: [helper/enterpriseInterop.ts:42](https://github.com/puristajs/purist
 
 > `optional` **data?**: `unknown`
 
-Defined in: [helper/enterpriseInterop.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L49)
+Defined in: [helper/enterpriseInterop.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L137)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [helper/enterpriseInterop.ts:49](https://github.com/puristajs/purist
 
 > `optional` **datacontenttype?**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L48)
+Defined in: [helper/enterpriseInterop.ts:136](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L136)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [helper/enterpriseInterop.ts:48](https://github.com/puristajs/purist
 
 > **id**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L44)
+Defined in: [helper/enterpriseInterop.ts:132](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L132)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [helper/enterpriseInterop.ts:44](https://github.com/puristajs/purist
 
 > **source**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L45)
+Defined in: [helper/enterpriseInterop.ts:133](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L133)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [helper/enterpriseInterop.ts:45](https://github.com/puristajs/purist
 
 > **specversion**: `"1.0"`
 
-Defined in: [helper/enterpriseInterop.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L43)
+Defined in: [helper/enterpriseInterop.ts:131](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L131)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: [helper/enterpriseInterop.ts:43](https://github.com/puristajs/purist
 
 > `optional` **time?**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L47)
+Defined in: [helper/enterpriseInterop.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L135)
 
 ***
 
@@ -68,4 +68,4 @@ Defined in: [helper/enterpriseInterop.ts:47](https://github.com/puristajs/purist
 
 > **type**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L46)
+Defined in: [helper/enterpriseInterop.ts:134](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L134)

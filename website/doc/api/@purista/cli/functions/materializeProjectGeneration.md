@@ -8,7 +8,7 @@
 
 > **materializeProjectGeneration**(`plan`): `Promise`\<\{ `files`: `string`[]; `targetDirectoryPath`: `string`; \}\>
 
-Defined in: [packages/cli/src/blueprints/materializeProjectGeneration.ts:50](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/blueprints/materializeProjectGeneration.ts#L50)
+Defined in: [packages/cli/src/blueprints/materializeProjectGeneration.ts:50](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/blueprints/materializeProjectGeneration.ts#L50)
 
 ## Parameters
 

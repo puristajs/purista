@@ -124,7 +124,7 @@ max unacked messages per consumer channel
 
 ### socketOptions?
 
-> `optional` **socketOptions?**: `unknown`
+> `optional` **socketOptions?**: `SocketOptions`
 
 Defined in: [amqpbridge/src/types/AmqpBridgeConfig.ts:27](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L27)
 

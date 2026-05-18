@@ -8,7 +8,7 @@
 
 > **fromCloudEvent**\<`Payload`\>(`cloudEvent`, `options`): `object`
 
-Defined in: [helper/enterpriseInterop.ts:456](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L456)
+Defined in: [helper/enterpriseInterop.ts:796](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L796)
 
 Convert a CloudEvents 1.0 object into a PURISTA custom event message.
 
@@ -25,7 +25,7 @@ external CloudEvents and derives explicit external sender defaults.
 
 ### cloudEvent
 
-`JsonRecord` \| [`CloudEvent`](../type-aliases/CloudEvent.md)
+[`JsonRecord`](../type-aliases/JsonRecord.md) \| [`CloudEvent`](../type-aliases/CloudEvent.md)
 
 ### options
 

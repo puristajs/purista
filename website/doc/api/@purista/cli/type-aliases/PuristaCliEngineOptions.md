@@ -8,7 +8,7 @@
 
 > **PuristaCliEngineOptions** = `object`
 
-Defined in: [packages/cli/src/engine.ts:17](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/engine.ts#L17)
+Defined in: [packages/cli/src/engine.ts:17](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/engine.ts#L17)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/cli/src/engine.ts:17](https://github.com/puristajs/purista
 
 > `optional` **cwd?**: `string`
 
-Defined in: [packages/cli/src/engine.ts:18](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/engine.ts#L18)
+Defined in: [packages/cli/src/engine.ts:18](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/engine.ts#L18)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/cli/src/engine.ts:18](https://github.com/puristajs/purista
 
 > `optional` **mode?**: [`PuristaCommandMode`](PuristaCommandMode.md)
 
-Defined in: [packages/cli/src/engine.ts:19](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/engine.ts#L19)
+Defined in: [packages/cli/src/engine.ts:19](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/engine.ts#L19)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/cli/src/engine.ts:19](https://github.com/puristajs/purista
 
 > `optional` **prompt?**: [`PromptAdapter`](PromptAdapter.md)
 
-Defined in: [packages/cli/src/engine.ts:20](https://github.com/puristajs/purista/blob/f2e3a6db680e071c6caf952d6c1ae37cec6523d9/packages/cli/src/engine.ts#L20)
+Defined in: [packages/cli/src/engine.ts:20](https://github.com/puristajs/purista/blob/26267b98f9adfa85c2bf732383fb98c6a2225b0f/packages/cli/src/engine.ts#L20)

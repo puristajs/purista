@@ -8,7 +8,7 @@
 
 > **ExportScheduleManifestOptions** = `object`
 
-Defined in: [helper/enterpriseInterop.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L23)
+Defined in: [helper/enterpriseInterop.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L32)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [helper/enterpriseInterop.ts:23](https://github.com/puristajs/purist
 
 > **services**: [`ServiceContractInput`](ServiceContractInput.md)
 
-Defined in: [helper/enterpriseInterop.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L26)
+Defined in: [helper/enterpriseInterop.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L35)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [helper/enterpriseInterop.ts:26](https://github.com/puristajs/purist
 
 > `optional` **title?**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L24)
+Defined in: [helper/enterpriseInterop.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L33)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [helper/enterpriseInterop.ts:24](https://github.com/puristajs/purist
 
 > **version**: `string`
 
-Defined in: [helper/enterpriseInterop.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L25)
+Defined in: [helper/enterpriseInterop.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L34)

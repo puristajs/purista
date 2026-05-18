@@ -8,7 +8,7 @@
 
 > **toCloudEvent**\<`Payload`\>(`message`): [`CloudEvent`](../type-aliases/CloudEvent.md)
 
-Defined in: [helper/enterpriseInterop.ts:429](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L429)
+Defined in: [helper/enterpriseInterop.ts:769](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L769)
 
 Convert a PURISTA custom event message to a CloudEvents 1.0 structured object.
 

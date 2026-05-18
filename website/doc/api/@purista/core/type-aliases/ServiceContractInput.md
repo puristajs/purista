@@ -8,4 +8,4 @@
 
 > **ServiceContractInput** = [`FullDefinition`](FullDefinition.md) \| [`FullServiceDefinition`](FullServiceDefinition.md)
 
-Defined in: [helper/enterpriseInterop.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L15)
+Defined in: [helper/enterpriseInterop.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/enterpriseInterop.ts#L24)
