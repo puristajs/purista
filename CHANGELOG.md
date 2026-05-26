@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Documentation
+
+- Add website open graph assets ([#298](https://github.com/orhun/git-cliff/issues/298))
+
+### Ci
+
+- Update GitHub actions to Node 24 ([#295](https://github.com/orhun/git-cliff/issues/295))
+- Switch website workflows to Astro site ([#297](https://github.com/orhun/git-cliff/issues/297))
+
+## [3.0.0] - 2026-05-18
+
 ### Bug Fixes
 
 - Escape changelog angle brackets for api docs build ([#240](https://github.com/orhun/git-cliff/issues/240))
@@ -18,6 +29,10 @@ All notable changes to this project will be documented in this file.
 
 - Clean framework docs and examples ([#289](https://github.com/orhun/git-cliff/issues/289))
 - Remove generated docs output ([#290](https://github.com/orhun/git-cliff/issues/290))
+
+### Ci
+
+- Align release workflows with main ([#294](https://github.com/orhun/git-cliff/issues/294))
 
 ## [2.2.0] - 2026-02-13
 
