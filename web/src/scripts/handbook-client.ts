@@ -310,7 +310,16 @@ async function renderMermaidBlocks() {
 			console.error('Mermaid render error:', err)
 			const errorDiv = document.createElement('div')
 			errorDiv.className = 'mermaid-error'
-			errorDiv.innerHTML = `<div style="font-weight:600;margin-bottom:0.5rem">Mermaid Error</div><div style="opacity:0.8">${err instanceof Error ? err.message : 'Failed to render diagram'}</div>`
+			const title = document.createElement('div')
+			title.style.fontWeight = '600'
+			title.style.marginBottom = '0.5rem'
+			title.textContent = 'Mermaid Error'
+
+			const message = document.createElement('div')
+			message.style.opacity = '0.8'
+			message.textContent = err instanceof Error ? err.message : 'Failed to render diagram'
+
+			errorDiv.append(title, message)
 			pre.before(errorDiv)
 		}
 	})
