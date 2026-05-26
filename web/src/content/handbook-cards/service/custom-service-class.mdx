@@ -1,0 +1,92 @@
+---
+title: Custom Service Class
+description: Extend the PURISTA service base class for rare cases like third-party gateway adapters.
+---
+
+In general, a service should not contain business logic. Its role is to act as a logical container for commands and subscriptions.
+
+The primary reason for this separation is to prevent handlers from becoming tightly coupled to the service and its state. Tight coupling increases complexity, makes unit testing harder, and reduces the flexibility to deploy individual functions as FaaS.
+
+<div class="callout callout--warning">
+  <div class="callout__title">Prefer resources over custom classes</div>
+  <p>Whenever possible, use resources instead of custom classes. Resources offer better decoupling, a higher level of abstraction, and improved scalability.</p>
+</div>
+
+## When a custom class is justified
+
+A custom service class makes sense when your service needs to act as an adapter or gateway to a third-party solution, and there is no viable infrastructure-level alternative. In these cases, be aware that the service will run as a continuously active instance and cannot be deployed as FaaS.
+
+## Example: third-party gateway
+
+```typescript [CustomUserClass.ts]
+import {
+  CustomMessage,
+  EBMessageAddress,
+  EBMessageType,
+  getNewTraceId,
+  Service,
+} from '@purista/core'
+import { customConnect, CustomProvider } from 'custom-provider'
+import { UserServiceV1Config } from './userServiceConfig'
+
+export class CustomUserClass extends Service<UserServiceV1Config> {
+  private customProvider?: CustomProvider
+
+  async start() {
+    await super.start()
+    this.customProvider = await customConnect(this.config)
+
+    this.customProvider.on('data', async (data: unknown) => {
+      const sender: EBMessageAddress = {
+        serviceName: this.info.serviceName,
+        serviceVersion: this.info.serviceVersion,
+        serviceTarget: '',
+      }
+
+      const message = Object.freeze({
+        messageType: EBMessageType.CustomMessage,
+        traceId: getNewTraceId(),
+        contentType: 'application/json',
+        contentEncoding: 'utf-8',
+        sender,
+        eventName: 'myCustomEvent',
+        payload: data,
+      })
+
+      await this.eventBridge.emitMessage(message)
+    })
+  }
+
+  async destroy() {
+    await this.customProvider?.close()
+    await super.destroy()
+  }
+}
+```
+
+Register the custom class in the service builder:
+
+```typescript [userV1ServiceBuilder.ts]
+import { ServiceBuilder, ServiceInfoType } from '@purista/core'
+import { CustomUserClass } from './CustomUserClass'
+
+export const userV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
+  .setConfigSchema(userServiceV1ConfigSchema)
+  .setCustomClass(CustomUserClass)
+```
+
+## Bidirectional gateway
+
+To push data from PURISTA back to the third-party provider, create a command or subscription:
+
+```typescript [command.ts]
+.setCommandFunction(async function (_context, payload) {
+  const response = await this.customProvider.send(payload)
+  return { response }
+})
+```
+
+<div class="callout callout--info">
+  <div class="callout__title">Keep it minimal</div>
+  <p>If you need a custom service class, try to avoid adding many subscriptions or commands here. Reduce it to the bare minimum, and consider an additional service for handlers that do not directly need the custom functionality.</p>
+</div>

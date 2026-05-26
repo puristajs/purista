@@ -1,0 +1,112 @@
+/**
+ * PURISTA Base Styles
+ * Global resets, typography, and base element styling.
+ */
+
+@layer base {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	p,
+	ul {
+		margin: 0;
+	}
+
+	ul {
+		padding: 0;
+		list-style: none;
+	}
+
+	svg {
+		display: block;
+		max-width: 100%;
+	}
+
+	button {
+		font: inherit;
+		color: inherit;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	body {
+		font-family: var(--font-sans);
+		font-weight: 400;
+		font-size: 16px;
+		color: var(--color-fg);
+		background: var(--color-bg);
+		line-height: 1.55;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+		overflow-x: hidden;
+	}
+
+	/* Dot grid background */
+	body::before {
+		content: "";
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+		z-index: 0;
+		background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+		background-size: 28px 28px;
+		mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 80%);
+		-webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 30%, transparent 80%);
+	}
+
+	/* Noise texture overlay */
+	body::after {
+		content: "";
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+		z-index: 1;
+		opacity: 0.3;
+		mix-blend-mode: overlay;
+		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+	}
+
+	html[data-theme="dark"] body::after {
+		opacity: 0.12;
+		mix-blend-mode: screen;
+	}
+
+	/* Scrollbar styling */
+	body::-webkit-scrollbar {
+		width: 12px;
+	}
+
+	body::-webkit-scrollbar-track {
+		background: var(--color-bg);
+	}
+
+	body::-webkit-scrollbar-thumb {
+		background: var(--color-line-strong);
+		border-radius: 6px;
+		border: 3px solid var(--color-bg);
+	}
+
+	body::-webkit-scrollbar-thumb:hover {
+		background: var(--color-fg-subtle);
+	}
+}

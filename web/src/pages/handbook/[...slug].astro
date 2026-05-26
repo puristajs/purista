@@ -1,0 +1,31 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+import HandbookLayout from '../../layouts/HandbookLayout.astro'
+import { getHandbookSidebar } from '../../lib/sidebar'
+
+export async function getStaticPaths() {
+	const entries = await getCollection('handbook')
+	return entries.map(entry => ({
+		params: { slug: entry.id },
+		props: { entry },
+	}))
+}
+
+type Props = {
+	entry: CollectionEntry<'handbook'>
+}
+
+const { entry } = Astro.props
+const { Content, headings } = await render(entry)
+const sidebar = await getHandbookSidebar()
+---
+
+<HandbookLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  sidebar={sidebar}
+  currentId={entry.id}
+  headings={headings}
+>
+  <Content />
+</HandbookLayout>

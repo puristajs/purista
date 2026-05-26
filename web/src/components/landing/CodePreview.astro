@@ -1,0 +1,155 @@
+---
+/**
+ * Site code preview — a glass-effect terminal frame with line numbers,
+ * shimmer header, and a typing cursor on the last line.
+ *
+ * Renders the code as-is (pre-formatted). Syntax tokens are added via
+ * inline span coloring so it's framework-free.
+ */
+interface Token {
+	t: 'kw' | 'fn' | 'str' | 'cmt' | 'num' | 'type' | 'plain' | 'op'
+	v: string
+}
+interface Line {
+	tokens: Token[]
+}
+
+interface Props {
+	filename?: string
+	lines: Line[]
+	caption?: string
+}
+
+const { filename = 'order.service.ts', lines, caption } = Astro.props
+
+function escapeHtml(s: string): string {
+	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+const colors: Record<Token['t'], string> = {
+	kw: 'var(--color-con-hi)',
+	fn: 'var(--color-found-hi)',
+	str: 'var(--color-pilot-hi)',
+	cmt: 'var(--color-fg-subtle)',
+	num: 'var(--color-pilot-hi)',
+	type: 'var(--color-found-hi)',
+	plain: 'var(--color-fg)',
+	op: 'var(--color-fg-muted)',
+}
+---
+
+<figure class="site-code">
+  <header class="site-code-header">
+    <div class="site-code-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <span class="site-code-filename">{filename}</span>
+    <span class="site-code-tag site-mono">TYPESCRIPT</span>
+  </header>
+  <div class="site-code-body">
+    <div class="site-code-gutter">
+      {lines.map((_, i) => <span>{i + 1}</span>)}
+    </div>
+    <pre class="site-code-pre"><code set:html={
+      lines.map((line, lineIdx) => {
+        const tokens = line.tokens
+          .map((tok) => `<span style="color:${colors[tok.t]}">${escapeHtml(tok.v)}</span>`)
+          .join('');
+        const cursor = lineIdx === lines.length - 1 ? '<span class="site-code-cursor"></span>' : '';
+        return `<span class="site-code-line">${tokens || '&nbsp;'}${cursor}</span>`;
+      }).join('')
+    } /></pre>
+  </div>
+  {caption && <figcaption class="site-code-caption">{caption}</figcaption>}
+</figure>
+
+<style is:global>
+  .site-code {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    isolation: isolate;
+    margin: 0;
+  }
+  .site-code-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-deep) 60%, transparent);
+  }
+  .site-code-dots {
+    display: inline-flex;
+    gap: 0.45rem;
+  }
+  .site-code-dots span {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--color-line-vivid);
+  }
+  .site-code-dots span:nth-child(1) { background: #FF5F57; }
+  .site-code-dots span:nth-child(2) { background: #FEBC2E; }
+  .site-code-dots span:nth-child(3) { background: #28C840; }
+  .site-code-filename {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-fg-muted);
+  }
+  .site-code-tag {
+    margin-left: auto;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    color: var(--color-fg-subtle);
+  }
+  .site-code-body {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    align-items: flex-start;
+    padding: 1.1rem 0 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+  .site-code-gutter {
+    display: flex;
+    flex-direction: column;
+    padding-right: 0.6rem;
+    color: var(--color-fg-subtle);
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid var(--color-line);
+  }
+  .site-code-pre {
+    margin: 0;
+    padding: 0 1.2rem;
+    color: var(--color-fg);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .site-code-line {
+    display: block;
+  }
+  .site-code-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.2em;
+    vertical-align: -2px;
+    background: var(--color-found);
+    margin-left: 4px;
+    animation: site-code-blink 1.1s steps(1) infinite;
+  }
+  @keyframes site-code-blink {
+    50% { opacity: 0; }
+  }
+  .site-code-caption {
+    padding: 0.85rem 1.2rem;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-fg-muted);
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--color-bg-deep) 50%, transparent);
+  }
+</style>

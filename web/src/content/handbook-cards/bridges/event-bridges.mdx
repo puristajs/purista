@@ -1,0 +1,156 @@
+---
+title: Event Bridges
+description: Default, AMQP, NATS, MQTT, Dapr — the transport layer that routes messages between services without coupling business logic to any specific broker.
+---
+
+The **event bridge** is the transport layer for command, subscription, and stream traffic between services. It routes push-based messages, handles retries, manages subscriptions, and abstracts the underlying broker — so your business logic never knows whether it's running on RabbitMQ, NATS, or an in-memory queue.
+
+Event bridges are distinct from [queue bridges](/handbook/bridges/queue-bridges/): event bridges carry real-time service-to-service messages; queue bridges provide pull-based, leased worker queues for durable background jobs. Both can coexist — and your choice of event bridge does not restrict your choice of queue bridge.
+
+## Available bridges
+
+| Bridge | Package | Broker | Best for |
+|---|---|---|---|
+| **DefaultEventBridge** | `@purista/core` | In-memory | Local development, testing, CI |
+| **AmqpBridge** | `@purista/amqpbridge` | RabbitMQ / Amazon MQ / Azure Service Bus | Durable queues, complex routing, enterprise |
+| **NatsBridge** | `@purista/natsbridge` | NATS | Low latency, high throughput, cloud-native |
+| **MqttBridge** | `@purista/mqttbridge` | MQTT | IoT, edge, constrained networks |
+| **DaprEventBridge** | `@purista/dapr-sdk` | Dapr pub/sub | Sidecar pattern, multi-cloud portability |
+
+## The DefaultEventBridge
+
+Start with no broker, no Docker, no setup:
+
+```typescript [local.ts]
+import { DefaultEventBridge } from '@purista/core'
+
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+```
+
+The default bridge routes messages in-memory within the same process. Perfect for:
+
+- Local development
+- Unit and integration tests
+- CI pipelines
+- Prototyping
+
+## Switching to AMQP (RabbitMQ, Amazon MQ, Azure Service Bus)
+
+`AmqpBridge` implements the AMQP 0-9-1 protocol, which means it works with any AMQP-compatible broker — not just RabbitMQ. Amazon MQ (RabbitMQ-flavored) and Azure Service Bus both speak AMQP and work as drop-in replacements. Only the connection URL changes:
+
+```typescript [amqp.ts]
+import { AmqpBridge } from '@purista/amqpbridge'
+
+const eventBridge = new AmqpBridge({
+  url: process.env.AMQP_URL,   // amqp://... for RabbitMQ, amqps://... for Amazon MQ / Azure
+  exchangeName: 'purista',
+  defaultCommandTimeout: 30000,
+})
+await eventBridge.start()
+```
+
+## Switching to NATS
+
+For low-latency, high-throughput messaging:
+
+```typescript [nats.ts]
+import { NatsBridge } from '@purista/natsbridge'
+
+const eventBridge = new NatsBridge({
+  url: process.env.NATS_URL,
+  defaultCommandTimeout: 30000,
+})
+await eventBridge.start()
+```
+
+## Switching to MQTT
+
+For IoT and edge deployments:
+
+```typescript [mqtt.ts]
+import { MqttBridge } from '@purista/mqttbridge'
+
+const eventBridge = new MqttBridge({
+  url: process.env.MQTT_URL,
+  clientId: 'edge-device-001',
+})
+await eventBridge.start()
+```
+
+## The bridge abstraction
+
+Your service code never changes:
+
+```typescript [service.ts]
+const userService = await userServiceV1Service.getInstance(eventBridge)
+await userService.start()
+```
+
+Whether `eventBridge` is `DefaultEventBridge`, `AmqpBridge`, or `NatsBridge` — the service code is identical.
+
+## Bridge capabilities
+
+Different bridges support different features:
+
+| Feature | Default | AMQP | NATS | MQTT | Dapr |
+|---|---|---|---|---|---|
+| In-memory routing | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Durable messages | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Message persistence | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Subscription retry | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Dead-letter queues | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Shared consumers | ❌ | ✅ | ✅ | ❌ | ✅ |
+| Fan-out to all instances | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+## Health and diagnostics
+
+Event bridges expose in-flight diagnostics:
+
+```typescript [diagnostics.ts]
+const diagnostics = eventBridge.getInFlightDiagnostics()
+console.log(diagnostics.total)      // All in-flight messages
+console.log(diagnostics.byKind)     // { command: 3, subscription: 1, stream: 0, generic: 0 }
+```
+
+Use this during graceful shutdown to verify all messages complete before teardown.
+
+## When to choose each bridge
+
+| Scenario | Bridge |
+|---|---|
+| Local development, testing | DefaultEventBridge |
+| Enterprise with durable queues | AmqpBridge |
+| Cloud-native, low latency | NatsBridge |
+| IoT, edge, constrained networks | MqttBridge |
+| Multi-cloud, sidecar pattern | DaprEventBridge |
+
+## Companion queue bridges
+
+Every event bridge can be paired with a queue bridge for pull-based background work. The event bridge handles real-time service-to-service traffic; the queue bridge handles durable worker queues. The two are independent — mix them to match your infrastructure.
+
+| Event Bridge | Recommended Queue Bridge | Notes |
+|---|---|---|
+| `DefaultEventBridge` | `DefaultQueueBridge` (built-in) | In-memory; local dev and testing only |
+| `AmqpBridge` | [`@purista/redis-queue-bridge`](/handbook/ecosystem/queue-bridges/redis/) | Redis provides durable leased queues alongside RabbitMQ events |
+| `NatsBridge` | [`@purista/nats-queue-bridge`](/handbook/ecosystem/queue-bridges/nats/) | JetStream as queue backend on the same NATS cluster |
+| `MqttBridge` | [`@purista/redis-queue-bridge`](/handbook/ecosystem/queue-bridges/redis/) | Redis handles worker queues; MQTT handles IoT events |
+| `DaprEventBridge` | [`@purista/redis-queue-bridge`](/handbook/ecosystem/queue-bridges/redis/) or [`@purista/nats-queue-bridge`](/handbook/ecosystem/queue-bridges/nats/) | Choose based on what your Dapr components expose |
+
+See the [Queue Bridges](/handbook/bridges/queue-bridges/) page for setup details, lifecycle diagrams, and capability comparisons.
+
+## Common pitfalls
+
+- **Using DefaultEventBridge in production.** It is in-memory and loses messages on restart.
+- **Assuming all bridges support the same features.** Check the capability matrix before relying on retries or DLQ.
+- **Hardcoding bridge configuration.** Use environment variables and config stores for broker URLs.
+- **Not monitoring bridge health.** Use `getInFlightDiagnostics()` and health checks.
+
+## Checklist
+
+- [ ] Bridge choice matches deployment environment and reliability needs
+- [ ] Bridge configuration is externalized (env vars, config stores)
+- [ ] Graceful shutdown waits for in-flight messages
+- [ ] Health checks verify bridge connectivity
+- [ ] Retry and DLQ semantics are tested against the actual bridge
+- [ ] Bridge capabilities are documented for the operations team

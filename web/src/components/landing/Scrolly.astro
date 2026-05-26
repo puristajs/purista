@@ -1,0 +1,337 @@
+---
+/**
+ * Pinned scroll-driven story. Five stages, each with title, body, and
+ * a real animated visualization. Driven by data-scrolly in motion.ts via
+ * ScrollTrigger; the per-stage scenes live in StageViz.
+ */
+import StageViz from './visualizations/StageViz.astro'
+
+const stages = [
+	{
+		key: 'declare',
+		eyebrow: 'Step 01 · Declare',
+		title: 'Contracts before code.',
+		body: 'Every service starts with a typed schema, owners, and explicit boundaries. The intent is reviewed once — and locked in code.',
+		tone: 'found',
+		icon: 'contract',
+	},
+	{
+		key: 'verify',
+		eyebrow: 'Step 02 · Verify',
+		title: 'Review becomes verification.',
+		body: 'Security, ops, compliance, architecture: each reviews the structure, not the code. The questions become checks.',
+		tone: 'found',
+		icon: 'check',
+	},
+	{
+		key: 'observe',
+		eyebrow: 'Step 03 · Observe',
+		title: 'Observable by default.',
+		body: 'Every service ships with logs, traces, and metrics aligned to its declared contract. Outage triage becomes navigation.',
+		tone: 'pilot',
+		icon: 'graph',
+	},
+	{
+		key: 'operate',
+		eyebrow: 'Step 04 · Operate',
+		title: 'Runtime control, on principle.',
+		body: 'Bind HTTP, queues, secrets, and state stores at runtime. Swap providers without touching business logic.',
+		tone: 'pilot',
+		icon: 'plug',
+	},
+	{
+		key: 'approve',
+		eyebrow: 'Step 05 · Approve',
+		title: 'Approval-ready by design.',
+		body: 'CISO, CTO, CFO get a single inspectable surface. AI accelerates implementation. PURISTA accelerates approval.',
+		tone: 'con',
+		icon: 'shield',
+	},
+]
+
+function icon(name: string) {
+	switch (name) {
+		case 'contract':
+			return '<path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v6h6"/><path d="M9 13h6M9 17h6"/>'
+		case 'check':
+			return '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 6-6"/>'
+		case 'graph':
+			return '<path d="M3 21h18"/><path d="M5 17l4-6 4 3 6-9"/>'
+		case 'plug':
+			return '<path d="M9 7V3M15 7V3M7 7h10v5a5 5 0 0 1-10 0V7zM12 17v4"/>'
+		case 'shield':
+			return '<path d="M12 3l8 4v6c0 4.5-3.5 8.2-8 9-4.5-.8-8-4.5-8-9V7l8-4z"/><path d="M9 12l2.2 2.2L15 10"/>'
+		default:
+			return ''
+	}
+}
+---
+
+<section class="site-scrolly-section" data-scrolly>
+  <div class="site-scrolly-pin" data-pin>
+    <div class="site-wrap site-scrolly-grid">
+      {/* Left: text stages */}
+      <div class="site-scrolly-text">
+        <div class="site-scrolly-eyebrow">
+          <span class="site-eyebrow-dot"></span>
+          <span class="site-mono">Definition → Implementation</span>
+        </div>
+        <div class="site-scrolly-stages">
+          {
+            stages.map((s, i) => (
+              <article
+                class="site-scrolly-stage"
+                data-stage
+                data-stage-key={s.key}
+                data-stage-index={i}
+              >
+                <header class="site-scrolly-stage-eyebrow" data-tone={s.tone}>
+                  <span class="site-scrolly-stage-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{s.eyebrow}</span>
+                </header>
+                <h3 class="site-scrolly-stage-title">{s.title}</h3>
+                <p class="site-scrolly-stage-body">{s.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+
+      {/* Right: visualization stack */}
+      <div class="site-scrolly-viz">
+        <div class="site-scrolly-viz-inner">
+          {
+            stages.map((s, i) => (
+              <div
+                class="site-scrolly-viz-frame"
+                data-stage-frame-key={s.key}
+                style={`--frame-tone: var(--color-${s.tone}); --frame-index: ${i};`}
+              >
+                <div class="site-scrolly-viz-label site-mono">{s.eyebrow}</div>
+                <div class="site-scrolly-viz-scene">
+                  <StageViz stage={s.key as 'declare' | 'verify' | 'observe' | 'operate' | 'approve'} />
+                </div>
+                <div class="site-scrolly-viz-rings" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+        <div class="site-scrolly-progress" aria-hidden="true">
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .site-scrolly-section {
+    position: relative;
+    background:
+      radial-gradient(ellipse at top, color-mix(in srgb, var(--color-found) 8%, transparent), transparent 60%),
+      var(--color-bg-sunk);
+    border-block: 1px solid var(--color-line);
+  }
+  .site-scrolly-pin {
+    height: 100vh;
+    display: grid;
+    place-items: center;
+  }
+  .site-scrolly-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .site-scrolly-grid { grid-template-columns: 1fr; }
+    .site-scrolly-viz { display: none; }
+  }
+  .site-scrolly-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.3rem 0.85rem 0.3rem 0.3rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
+    background: color-mix(in srgb, var(--color-bg-elev) 60%, transparent);
+    margin-bottom: 1.8rem;
+  }
+  .site-scrolly-stages {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .site-scrolly-stage {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.6s var(--site-ease-out),
+      transform 0.6s var(--site-ease-out);
+    pointer-events: none;
+  }
+  .site-scrolly-stage.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .site-scrolly-stage-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
+  }
+  .site-scrolly-stage-eyebrow[data-tone="found"]  { color: var(--color-found-hi); }
+  .site-scrolly-stage-eyebrow[data-tone="con"]    { color: var(--color-con-hi); }
+  .site-scrolly-stage-eyebrow[data-tone="pilot"]  { color: var(--color-pilot-hi); }
+  .site-scrolly-stage-num {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .site-scrolly-stage-title {
+    margin: 1rem 0 1.2rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    line-height: 1.04;
+    letter-spacing: 0;
+    max-width: 18ch;
+  }
+  .site-scrolly-stage-body {
+    color: var(--color-fg-muted);
+    font-size: 1.1rem;
+    line-height: 1.55;
+    max-width: 38ch;
+  }
+
+  .site-scrolly-viz {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    max-height: 70vh;
+    display: grid;
+    place-items: center;
+  }
+  .site-scrolly-viz-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .site-scrolly-viz-frame {
+    grid-area: 1 / 1;
+    width: 100%;
+    max-width: 540px;
+    aspect-ratio: 1;
+    border-radius: 28px;
+    border: 1px solid var(--color-line-strong);
+    background:
+      radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--frame-tone) 22%, transparent), transparent 55%),
+      color-mix(in srgb, var(--color-bg-elev) 78%, transparent);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 0.6rem;
+    padding: 1.5rem 1.5rem 1.2rem;
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+    transition:
+      opacity 0.7s var(--site-ease-out),
+      transform 0.7s var(--site-ease-out);
+    box-shadow:
+      0 30px 80px -30px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+  }
+  .site-scrolly-viz-scene {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .site-scrolly-viz-frame.is-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .site-scrolly-viz-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    width: max-content;
+    background: color-mix(in srgb, var(--color-bg-elev) 60%, transparent);
+  }
+  .site-scrolly-viz-label::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--frame-tone);
+    box-shadow: 0 0 12px var(--frame-tone);
+  }
+  .site-scrolly-viz-rings {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .site-scrolly-viz-rings span {
+    position: absolute;
+    inset: -10%;
+    border: 1px solid color-mix(in srgb, var(--frame-tone) 25%, transparent);
+    border-radius: 50%;
+    animation: vsf-ring 5s linear infinite;
+    opacity: 0;
+  }
+  .site-scrolly-viz-rings span:nth-child(2) {
+    animation-delay: 1.5s;
+  }
+  .site-scrolly-viz-rings span:nth-child(3) {
+    animation-delay: 3s;
+  }
+  @keyframes vsf-ring {
+    0%   { transform: scale(0.6); opacity: 0; }
+    30%  { opacity: 0.6; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  .site-scrolly-progress {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-line);
+    overflow: hidden;
+  }
+  .site-scrolly-progress span {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, var(--color-found), var(--color-con), var(--color-pilot));
+    transform-origin: left center;
+    transform: scaleX(var(--scrolly-progress, 0));
+    transition: transform 0.2s linear;
+  }
+</style>

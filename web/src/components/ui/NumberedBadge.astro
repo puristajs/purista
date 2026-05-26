@@ -1,0 +1,27 @@
+---
+interface Props {
+	number: string | number
+	color?: 'found' | 'con' | 'pilot'
+	size?: 'sm' | 'md' | 'lg'
+}
+
+const { number, color = 'found', size = 'md' } = Astro.props
+
+const colorVar = `var(--color-${color})`
+
+const sizeClasses: Record<string, string> = {
+	sm: 'w-7 h-7 text-[10px]',
+	md: 'w-8 h-8 text-xs',
+	lg: 'w-10 h-10 text-sm',
+}
+---
+
+<div
+  class:list={[
+    'rounded-lg flex items-center justify-center font-mono font-bold flex-shrink-0',
+    sizeClasses[size],
+  ]}
+  style={`background: ${colorVar}; color: var(--color-bg);`}
+>
+  {number}
+</div>

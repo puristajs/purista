@@ -1,0 +1,359 @@
+---
+/**
+ * Provider freedom matrix — one service.ts, three vendor profiles.
+ *
+ * A pinned source card on the left. On the right, three "vendor profile"
+ * columns (e.g. AWS / Azure / Open stack) — at any given moment one is
+ * highlighted as the active wiring. The active profile rotates on a timer,
+ * showing the same service running on different stacks without changing
+ * a single line of business code.
+ */
+
+interface Profile {
+	k: string
+	label: string
+	sub: string
+	rows: { kind: string; vendor: string }[]
+}
+
+const profiles: Profile[] = [
+	{
+		k: 'aws',
+		label: 'AWS',
+		sub: 'cloud-native',
+		rows: [
+			{ kind: 'broker',  vendor: 'AmqpBridge → Amazon MQ' },
+			{ kind: 'secrets', vendor: 'aws-secret-store' },
+			{ kind: 'config',  vendor: 'aws-config-store' },
+			{ kind: 'tracing', vendor: 'OTLP → CloudWatch' },
+		],
+	},
+	{
+		k: 'azure',
+		label: 'Azure',
+		sub: 'enterprise stack',
+		rows: [
+			{ kind: 'broker',  vendor: 'AmqpBridge → Service Bus' },
+			{ kind: 'secrets', vendor: 'azure-secret-store' },
+			{ kind: 'state',   vendor: 'redis-state-store' },
+			{ kind: 'tracing', vendor: 'OTLP → Azure Monitor' },
+		],
+	},
+	{
+		k: 'oss',
+		label: 'Open stack',
+		sub: 'self-hosted',
+		rows: [
+			{ kind: 'broker',  vendor: 'NatsBridge' },
+			{ kind: 'secrets', vendor: 'vault-secret-store' },
+			{ kind: 'state',   vendor: 'redis-state-store' },
+			{ kind: 'tracing', vendor: 'OTLP → Grafana' },
+		],
+	},
+]
+---
+
+<div class="vps">
+  {/* ─── Pinned source ─── */}
+  <aside class="vps-source">
+    <header class="vps-src-head">
+      <span class="vps-dots"><span></span><span></span><span></span></span>
+      <span class="vps-mono">order.service.ts</span>
+      <span class="vps-src-tag site-mono">UNCHANGED</span>
+    </header>
+    <pre class="vps-src-body"><code><span class="vps-kw">import</span> {`{`} ServiceBuilder {`}`} <span class="vps-kw">from</span> <span class="vps-str">'@purista/core'</span>
+
+<span class="vps-kw">export const</span> orderV1ServiceBuilder = <span class="vps-kw">new</span> <span class="vps-fn">ServiceBuilder</span>({`{`}
+  serviceName: <span class="vps-str">'Order'</span>,
+  serviceVersion: <span class="vps-str">'1'</span>,
+{`}`} <span class="vps-kw">as const</span>)
+  .<span class="vps-fn">addCommandDefinition</span>(createOrder, cancel)
+  .<span class="vps-fn">addSubscriptionDefinition</span>(onPaid)</code></pre>
+    <footer class="vps-src-foot">
+      <span class="vps-mono">↳</span>
+      <span>three profiles below. zero diffs above.</span>
+    </footer>
+  </aside>
+
+  {/* ─── Vendor matrix ─── */}
+  <section class="vps-matrix" data-vps>
+    {profiles.map((p, i) => (
+      <article
+        class="vps-profile"
+        data-active={i === 0 ? 'true' : 'false'}
+        data-vps-profile={p.k}
+        style={`--i:${i}`}
+      >
+        <header class="vps-prof-head">
+          <span class="vps-prof-label">{p.label}</span>
+          <span class="vps-prof-sub site-mono">{p.sub}</span>
+          <span class="vps-prof-dot" aria-hidden="true"></span>
+        </header>
+
+        <ul class="vps-rows">
+          {p.rows.map((r) => (
+            <li class="vps-row">
+              <span class="vps-row-kind site-mono">{r.kind}</span>
+              <span class="vps-row-vendor">{r.vendor}</span>
+            </li>
+          ))}
+        </ul>
+
+        <footer class="vps-prof-foot">
+          <span class="vps-mono">// only index.ts changes</span>
+        </footer>
+      </article>
+    ))}
+  </section>
+</div>
+
+<script>
+  // Rotate the "active" profile so the user sees the swap happen.
+  function bind() {
+    const root = document.querySelector<HTMLElement>('[data-vps]');
+    if (!root) return;
+    if (root.dataset.vpsBound === '1') return;
+    root.dataset.vpsBound = '1';
+
+    const cards = root.querySelectorAll<HTMLElement>('[data-vps-profile]');
+    if (cards.length === 0) return;
+    let idx = 0;
+    function tick() {
+      cards.forEach((c, i) => c.setAttribute('data-active', i === idx ? 'true' : 'false'));
+      idx = (idx + 1) % cards.length;
+    }
+    tick();
+    const interval = window.setInterval(tick, 2800);
+    // Pause when offscreen
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          if (!(root as any).__vpsTimer) (root as any).__vpsTimer = window.setInterval(tick, 2800);
+        } else {
+          if ((root as any).__vpsTimer) {
+            clearInterval((root as any).__vpsTimer);
+            (root as any).__vpsTimer = null;
+          }
+        }
+      });
+    }, { threshold: 0.1 });
+    io.observe(root);
+    (root as any).__vpsInitialTimer = interval;
+  }
+  bind();
+  document.addEventListener('astro:page-load', bind);
+</script>
+
+<style>
+  .vps {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.4fr);
+    gap: 1.2rem;
+    align-items: stretch;
+  }
+  @media (max-width: 980px) {
+    .vps { grid-template-columns: 1fr; }
+  }
+
+  /* ============ source card ============ */
+  .vps-source {
+    border-radius: 18px;
+    border: 1px solid var(--color-line-strong);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-bg-elev) 96%, transparent),
+      color-mix(in srgb, var(--color-bg-sunk) 92%, transparent));
+    box-shadow:
+      0 24px 50px -22px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .vps-src-head {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-deep) 60%, transparent);
+  }
+  .vps-dots { display: inline-flex; gap: 0.4rem; }
+  .vps-dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--color-line-vivid); }
+  .vps-dots span:nth-child(1) { background: #FF5F57; }
+  .vps-dots span:nth-child(2) { background: #FEBC2E; }
+  .vps-dots span:nth-child(3) { background: #28C840; }
+  .vps-mono {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-fg-muted);
+  }
+  .vps-src-tag {
+    margin-left: auto;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--color-found-hi);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--color-found) 35%, transparent);
+    background: color-mix(in srgb, var(--color-found) 12%, transparent);
+  }
+  .vps-src-body {
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 1rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: var(--color-fg);
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+  .vps-kw  { color: var(--color-con-hi); }
+  .vps-fn  { color: var(--color-found-hi); }
+  .vps-str { color: var(--color-pilot-hi); }
+  .vps-cmt { color: var(--color-fg-subtle); }
+  .vps-src-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.75rem 1.2rem;
+    border-top: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-deep) 50%, transparent);
+    color: var(--color-fg-muted);
+    font-size: 0.82rem;
+  }
+  .vps-src-foot .vps-mono { color: var(--color-fg-subtle); }
+
+  /* ============ matrix ============ */
+  .vps-matrix {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.7rem;
+  }
+  @media (max-width: 720px) {
+    .vps-matrix { grid-template-columns: 1fr; }
+  }
+
+  .vps-profile {
+    position: relative;
+    padding: 1.1rem 1.1rem 0.95rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-line-strong);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-bg-elev) 80%, transparent),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+    transition:
+      border-color 0.5s var(--site-ease-out),
+      transform 0.5s var(--site-ease-out),
+      box-shadow 0.5s var(--site-ease-out),
+      background 0.5s var(--site-ease-out);
+    opacity: 0.55;
+  }
+  .vps-profile[data-active="true"] {
+    opacity: 1;
+    border-color: color-mix(in srgb, var(--color-found) 55%, transparent);
+    transform: translateY(-2px);
+    box-shadow:
+      0 22px 50px -24px var(--color-found-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-found) 8%, var(--color-bg-elev)),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+  }
+
+  .vps-prof-head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+  .vps-prof-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0;
+    color: var(--color-fg-strong);
+  }
+  .vps-prof-sub {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+  }
+  .vps-prof-dot {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-line-vivid);
+    transition: background 0.4s var(--site-ease-out), box-shadow 0.4s var(--site-ease-out);
+  }
+  .vps-profile[data-active="true"] .vps-prof-dot {
+    background: var(--color-found-hi);
+    box-shadow: 0 0 12px var(--color-found-glow);
+    animation: vps-blink 1.4s ease-in-out infinite;
+  }
+  @keyframes vps-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  .vps-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+  }
+  .vps-row {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-elev) 60%, transparent);
+    transition: border-color 0.4s var(--site-ease-out), background 0.4s var(--site-ease-out);
+  }
+  .vps-profile[data-active="true"] .vps-row {
+    border-color: color-mix(in srgb, var(--color-found) 32%, transparent);
+    background: color-mix(in srgb, var(--color-found) 6%, var(--color-bg-elev));
+  }
+  .vps-row-kind {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+  }
+  .vps-row-vendor {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-fg);
+  }
+  .vps-profile[data-active="true"] .vps-row-vendor {
+    color: var(--color-fg-strong);
+  }
+
+  .vps-prof-foot {
+    margin-top: 0.85rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed var(--color-line);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-fg-subtle);
+    overflow-x: auto;
+  }
+  .vps-profile[data-active="true"] .vps-prof-foot {
+    color: var(--color-fg-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vps-profile { transition: none; opacity: 1; }
+    .vps-prof-dot { animation: none; }
+  }
+</style>

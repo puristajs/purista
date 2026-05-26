@@ -1,0 +1,109 @@
+---
+import CodePreview from '../CodePreview.astro'
+
+interface Props {
+	commandCode: unknown[]
+}
+
+const { commandCode } = Astro.props
+---
+
+<div class="site-fwk-side site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+  <div>
+    <ul class="site-fwk-steps">
+      <li>
+        <span class="site-fwk-step-num">01</span>
+        <div>
+          <h4>Get the builder from the service</h4>
+          <p><code>orderService.getCommandBuilder(name, description)</code> — locked to that service's typed surface.</p>
+        </div>
+      </li>
+      <li>
+        <span class="site-fwk-step-num">02</span>
+        <div>
+          <h4>Attach Zod schemas</h4>
+          <p><code>addPayloadSchema</code>, <code>addParameterSchema</code>, <code>addOutputSchema</code>. Validated at the boundary, inferred everywhere downstream.</p>
+        </div>
+      </li>
+      <li>
+        <span class="site-fwk-step-num">03</span>
+        <div>
+          <h4>Declare exposure & events</h4>
+          <p><code>exposeAsHttpEndpoint</code>, <code>canEmit</code>, <code>canInvoke</code> — the framework auto-generates OpenAPI and gates cross-service calls.</p>
+        </div>
+      </li>
+      <li>
+        <span class="site-fwk-step-num">04</span>
+        <div>
+          <h4>Wire the handler</h4>
+          <p><code>setCommandFunction(async function (ctx, payload, parameter) {'{...}'})</code>. Returns are validated against the output schema.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <CodePreview filename="createOrder.builder.ts" lines={commandCode} caption="Real builder API — every method is type-checked against the schemas above it." />
+</div>
+
+<style>
+  .site-fwk-side {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr);
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: start;
+  }
+  @media (max-width: 1024px) {
+    .site-fwk-side { grid-template-columns: 1fr; }
+  }
+  .site-fwk-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.9rem;
+  }
+  .site-fwk-steps li {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 0.9rem;
+    padding: 0.95rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+  }
+  .site-fwk-step-num {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--color-con) 14%, transparent);
+    color: var(--color-con-hi);
+    border: 1px solid color-mix(in srgb, var(--color-con) 32%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    align-self: start;
+  }
+  .site-fwk-steps h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: 0;
+    color: var(--color-fg-strong);
+    margin-bottom: 0.2rem;
+  }
+  .site-fwk-steps p {
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .site-fwk-steps code {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-fg);
+    background: color-mix(in srgb, var(--color-bg-deep) 60%, transparent);
+    padding: 0.05rem 0.35rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-line);
+  }
+</style>

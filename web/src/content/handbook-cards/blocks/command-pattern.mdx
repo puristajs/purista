@@ -1,0 +1,66 @@
+---
+title: Command
+description: Synchronous request/response handlers with typed schemas, validation, and a strict execution pipeline.
+---
+
+A **command** is the foundational building block of PURISTA. It is a synchronous request-response function inside a service that receives a request, performs work, and returns a result. Commands are how you expose business logic to the outside world — whether through HTTP, cross-service calls, or programmatic APIs.
+
+Commands live inside services. A service groups related commands (and [subscriptions](/handbook/blocks/subscription-pattern/) and [streams](/handbook/blocks/stream-pattern/)) around a single domain boundary like "User Management" or "Billing." The service builder collects command definitions, and the event bridge routes incoming requests to the right handler.
+
+<div class="callout callout--info">
+  <div class="callout__title">Request/response semantics</div>
+  <p>A command always returns a result or an error. If you need fire-and-forget behavior, use a <a href="/handbook/blocks/subscription-pattern/">subscription</a> instead. If you need continuous data flow, use a <a href="/handbook/blocks/stream-pattern/">stream</a>. If you need background work with retries, use a <a href="/handbook/blocks/queue-pattern/">queue</a>.</p>
+</div>
+
+## In this section
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+  <a href="/handbook/blocks/command-pattern/what-is-command/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">What is a Command?</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Understand the command lifecycle, context, and when to use commands.</div>
+  </a>
+  <a href="/handbook/blocks/command-pattern/command-builder/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">The Command Builder</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Define schemas, transforms, guards, events, and the business function with full type inference.</div>
+  </a>
+  <a href="/handbook/blocks/command-pattern/cross-service/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Cross-Service Calls</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Call commands across services through the event bridge with full type safety.</div>
+  </a>
+  <a href="/handbook/blocks/command-pattern/http-exposure/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">HTTP Exposure</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Expose commands as REST endpoints with path parameters, query strings, and OpenAPI docs.</div>
+  </a>
+  <a href="/handbook/blocks/command-pattern/testing/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Testing</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Unit test handlers in isolation or validate the full runtime path with typed mocks.</div>
+  </a>
+</div>
+
+## Quick reference
+
+### Command lifecycle
+
+```mermaid
+flowchart LR
+    A[Incoming Request] --> B[Input Transform]
+    B --> C[Payload & Parameter Validation]
+    C --> D[Before Guards]
+    D --> E[Command Function]
+    E --> F[Output Validation]
+    F --> G[After Guards]
+    G --> H[Output Transform]
+    H --> I[Response]
+    C -.->|Invalid| J[Bad Request]
+    D -.->|Denied| K[Unauthorized]
+    E -.->|Error| L[Handled or Unhandled]
+    F -.->|Invalid| M[Internal Error]
+```
+
+### Key principles
+
+- Commands are **request/response** — they always return a result or error.
+- Schemas drive **TypeScript inference** throughout the pipeline.
+- Use **`async function`**, not arrow functions, to preserve `this` context.
+- Keep **auth logic in guards**, not inside the command function.
+- Choose the right handler: commands for sync work, [queues](/handbook/blocks/queue-pattern/) for background work, [subscriptions](/handbook/blocks/subscription-pattern/) for events, [streams](/handbook/blocks/stream-pattern/) for data flow.

@@ -1,0 +1,72 @@
+---
+title: Agent
+description: AI-powered service participants that use language models, tools, and skills to reason and act.
+---
+
+An **agent** is an AI-powered participant in your PURISTA system. Unlike a command (deterministic code) or a subscription (fire-and-forget handler), an agent uses a language model to reason about inputs, choose tools, and produce structured outputs.
+
+Agents require the `@purista/ai-harness` package. Install it alongside `@purista/core` to get `getAgentBuilder` on `ServiceBuilder` and the AI harness infrastructure.
+
+<div class="callout callout--warning">
+  <div class="callout__title">Requires @purista/ai-harness</div>
+  <p>Agent support is provided by <code>@purista/ai-harness</code>, a separate package from <code>@purista/core</code>. Install it with <code>npm install @purista/ai-harness</code> and import it to unlock <code>getAgentBuilder</code> on your service builders.</p>
+</div>
+
+<div class="callout callout--info">
+  <div class="callout__title">AI on top of core</div>
+  <p>Agents reuse the same service and event bridge infrastructure as the rest of PURISTA. They are not a separate runtime — they are handlers that happen to use AI models.</p>
+</div>
+
+## In this section
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+  <a href="/handbook/blocks/agent-pattern/what-is-agent/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">What is an Agent?</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Understand agent types, model capabilities, session policies, and runtime requirements.</div>
+  </a>
+  <a href="/handbook/blocks/agent-pattern/agent-builder/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">The Agent Builder</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Define typed agents with models, tools, skills, execution policies, and streaming modes.</div>
+  </a>
+  <a href="/handbook/blocks/agent-pattern/agent-workflows/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Agent Workflows</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Chain agents, orchestrate multi-step reasoning, and manage state across agent boundaries.</div>
+  </a>
+  <a href="/handbook/blocks/agent-pattern/agent-testing/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Testing</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Test agents with harnesses, scripted models, and deterministic tool responses.</div>
+  </a>
+</div>
+
+## Quick reference
+
+### Agent lifecycle
+
+```mermaid
+flowchart LR
+    A[Input Received] --> B[Input Validation]
+    B --> C[Before Guards]
+    C --> D[Invoke Agent]
+    D --> E[Model Reasoning]
+    E --> F[Tool Calls]
+    F --> G[Structured Output]
+    G --> H[Return Result]
+    E -.->|Streaming| I[writer.write chunk]
+    I --> J[writer.close final]
+```
+
+### Key principles
+
+- Agents are commands/streams that use **AI models** for reasoning.
+- Agents require `@purista/ai-harness` in addition to `@purista/core`.
+- Use `getAgentBuilder(agentName, description)` to define an agent.
+- Schema methods: `addPayloadSchema`, `addParameterSchema`, `addOutputSchema`.
+- Set the agent logic with `setAgentFunction(async (ctx, payload) => { ... })`.
+- Model capabilities gate which methods are available on `context.harness.models`.
+- Tools: `canInvoke` for command tools, `canInvokeAgent` for child agents.
+- Skills: `useSkills(names)`, `useBuiltInTools(names|false)`.
+- Session: `setSessionPolicy({ mode: 'ephemeral'|'conversation', payloadPath? })`.
+- Runtime requires `queueBridge` and `ai.models` in service instance options.
+- `canEmit` and `canConsumeStream` are **not implemented** on AgentQueueBuilder.
+- Context: `context.invoke.tools['serviceName.version.command'].call(payload, parameter?)`.
+- Context: `context.invoke.agents['agentName.version'].run(payload, parameter?)`.

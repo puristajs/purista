@@ -1,0 +1,1043 @@
+{
+  "assetGroup": "aws-3d",
+  "source": "assets_raw/assets.drawio.svg",
+  "assets": [
+    {
+      "id": "ami",
+      "shape": "ami",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-1",
+      "path": "ami.svg",
+      "viewBox": [
+        87,
+        87,
+        98,
+        66
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "ami2",
+      "shape": "ami2",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-2",
+      "path": "ami2.svg",
+      "viewBox": [
+        97,
+        97,
+        80,
+        56
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "application",
+      "shape": "application",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-3",
+      "path": "application.svg",
+      "viewBox": [
+        97,
+        87,
+        68,
+        74.8
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "application2",
+      "shape": "application2",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-4",
+      "path": "application2.svg",
+      "viewBox": [
+        97,
+        87,
+        68,
+        59
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "application-server",
+      "shape": "application_server",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-5",
+      "path": "application-server.svg",
+      "viewBox": [
+        67,
+        57,
+        129,
+        130
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "client",
+      "shape": "client",
+      "category": "people",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-6",
+      "path": "client.svg",
+      "viewBox": [
+        97,
+        67,
+        66,
+        110.01
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "cloudfront",
+      "shape": "cloudfront",
+      "category": "network",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-7",
+      "path": "cloudfront.svg",
+      "viewBox": [
+        77,
+        37,
+        109.8,
+        175.8
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "file",
+      "shape": "file",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-8",
+      "path": "file.svg",
+      "viewBox": [
+        117,
+        77,
+        36.8,
+        76.6
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "customer-gateway",
+      "shape": "customerGateway",
+      "category": "network",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-9",
+      "path": "customer-gateway.svg",
+      "viewBox": [
+        77,
+        67,
+        122.7,
+        108.8
+      ],
+      "anchor": [
+        0.125,
+        1
+      ]
+    },
+    {
+      "id": "data-center",
+      "shape": "dataCenter",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-10",
+      "path": "data-center.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        148
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "data-server",
+      "shape": "dataServer",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-11",
+      "path": "data-server.svg",
+      "viewBox": [
+        67,
+        67,
+        129,
+        112
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "decider",
+      "shape": "decider",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-12",
+      "path": "decider.svg",
+      "viewBox": [
+        97,
+        97,
+        80,
+        56
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "dynamo-db",
+      "shape": "dynamoDb",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-13",
+      "path": "dynamo-db.svg",
+      "viewBox": [
+        37,
+        17,
+        187.5,
+        216
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "ebs",
+      "shape": "ebs",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-14",
+      "path": "ebs.svg",
+      "viewBox": [
+        87,
+        87,
+        98,
+        66
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "ebs2",
+      "shape": "ebs2",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-15",
+      "path": "ebs2.svg",
+      "viewBox": [
+        87,
+        87,
+        98,
+        66
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "elastic-beanstalk",
+      "shape": "elasticBeanstalk",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-16",
+      "path": "elastic-beanstalk.svg",
+      "viewBox": [
+        37,
+        47,
+        188,
+        146
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "elastic-load-balancing",
+      "shape": "elasticLoadBalancing",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-17",
+      "path": "elastic-load-balancing.svg",
+      "viewBox": [
+        87,
+        77,
+        98,
+        94.17
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "elastic-map-reduce",
+      "shape": "elasticMapReduce",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-18",
+      "path": "elastic-map-reduce.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        139
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "email",
+      "shape": "email",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-23",
+      "path": "email.svg",
+      "viewBox": [
+        107,
+        87,
+        49,
+        63
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "email-service",
+      "shape": "email_service",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-24",
+      "path": "email-service.svg",
+      "viewBox": [
+        57,
+        17,
+        157,
+        198
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "glacier",
+      "shape": "glacier",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-26",
+      "path": "glacier.svg",
+      "viewBox": [
+        37,
+        17,
+        187,
+        198
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "image",
+      "shape": "image",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-27",
+      "path": "image.svg",
+      "viewBox": [
+        107,
+        77.03,
+        56,
+        91.97
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "internet-gateway",
+      "shape": "internetGateway",
+      "category": "network",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-28",
+      "path": "internet-gateway.svg",
+      "viewBox": [
+        77,
+        67,
+        122.7,
+        108.8
+      ],
+      "anchor": [
+        0.125,
+        1
+      ]
+    },
+    {
+      "id": "lambda",
+      "shape": "lambda",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-29",
+      "path": "lambda.svg",
+      "viewBox": [
+        87,
+        67,
+        98,
+        115.5
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "mobile-worker",
+      "shape": "mobile_worker",
+      "category": "people",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-30",
+      "path": "mobile-worker.svg",
+      "viewBox": [
+        117,
+        77,
+        42,
+        96
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "oracle-data-center",
+      "shape": "oracleDataCenter",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-31",
+      "path": "oracle-data-center.svg",
+      "viewBox": [
+        -1822,
+        -1393.5,
+        2018,
+        1588.5
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "oracle-db-server",
+      "shape": "oracleDbServer",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-32",
+      "path": "oracle-db-server.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        139
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "oracle-server",
+      "shape": "oracleServer",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-33",
+      "path": "oracle-server.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        148
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "rds",
+      "shape": "rds",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-34",
+      "path": "rds.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        139
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "rds-master",
+      "shape": "rdsMaster",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-35",
+      "path": "rds-master.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        139
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "rds-slave",
+      "shape": "rdsSlave",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-36",
+      "path": "rds-slave.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        139
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "redshift",
+      "shape": "redshift",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-37",
+      "path": "redshift.svg",
+      "viewBox": [
+        57,
+        27,
+        156,
+        196
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "route53",
+      "shape": "route53",
+      "category": "network",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-38",
+      "path": "route53.svg",
+      "viewBox": [
+        67,
+        47,
+        123.17,
+        140.4
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "s3",
+      "shape": "s3",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-39",
+      "path": "s3.svg",
+      "viewBox": [
+        17,
+        -3,
+        237.5,
+        245
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "s3-bucket",
+      "shape": "s3Bucket",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-40",
+      "path": "s3-bucket.svg",
+      "viewBox": [
+        97,
+        87,
+        67.5,
+        69.8
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "search-engine",
+      "shape": "searchEngine",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-41",
+      "path": "search-engine.svg",
+      "viewBox": [
+        37,
+        17,
+        186,
+        198
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "secure-connection",
+      "shape": "secureConnection",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-42",
+      "path": "secure-connection.svg",
+      "viewBox": [
+        107.01,
+        96.99,
+        63,
+        40.02
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "security-token-service",
+      "shape": "securityTokenService",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-43",
+      "path": "security-token-service.svg",
+      "viewBox": [
+        37,
+        17,
+        186,
+        198
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "simple-db",
+      "shape": "simpleDb",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-44",
+      "path": "simple-db.svg",
+      "viewBox": [
+        67,
+        47,
+        129,
+        139
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "simple-db2",
+      "shape": "simpleDb2",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-45",
+      "path": "simple-db2.svg",
+      "viewBox": [
+        37,
+        17,
+        187.5,
+        198.6
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "snapshot",
+      "shape": "snapshot",
+      "category": "storage",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-46",
+      "path": "snapshot.svg",
+      "viewBox": [
+        87,
+        87,
+        98,
+        66
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "instance",
+      "shape": "instance",
+      "category": "compute",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-47",
+      "path": "instance.svg",
+      "viewBox": [
+        67,
+        67,
+        129,
+        103
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "sqs",
+      "shape": "sqs",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-48",
+      "path": "sqs.svg",
+      "viewBox": [
+        37,
+        7,
+        190,
+        218.75
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "end-user",
+      "shape": "end_user",
+      "category": "people",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-49",
+      "path": "end-user.svg",
+      "viewBox": [
+        107,
+        67,
+        55,
+        106.46
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "vpc-gateway",
+      "shape": "vpcGateway",
+      "category": "network",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-50",
+      "path": "vpc-gateway.svg",
+      "viewBox": [
+        77,
+        67,
+        122.7,
+        108.8
+      ],
+      "anchor": [
+        0.875,
+        1
+      ]
+    },
+    {
+      "id": "worker",
+      "shape": "worker",
+      "category": "people",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-51",
+      "path": "worker.svg",
+      "viewBox": [
+        97,
+        97,
+        80,
+        56
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "workflow-service",
+      "shape": "workflowService",
+      "category": "service",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-52",
+      "path": "workflow-service.svg",
+      "viewBox": [
+        37,
+        47,
+        188.2,
+        154.4
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "arrow-ne",
+      "shape": "arrowNE",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-53",
+      "path": "arrow-ne.svg",
+      "viewBox": [
+        106.75,
+        107,
+        51.75,
+        32.42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "arrow-se",
+      "shape": "arrowSE",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-54",
+      "path": "arrow-se.svg",
+      "viewBox": [
+        106.75,
+        106.58,
+        51.75,
+        32.42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "arrow-sw",
+      "shape": "arrowSW",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-55",
+      "path": "arrow-sw.svg",
+      "viewBox": [
+        107,
+        106.58,
+        51.75,
+        32.42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "arrow-nw",
+      "shape": "arrowNW",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-56",
+      "path": "arrow-nw.svg",
+      "viewBox": [
+        107,
+        107,
+        51.75,
+        32.42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "arrowless-ne",
+      "shape": "arrowlessNE",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-57",
+      "path": "arrowless-ne.svg",
+      "viewBox": [
+        116.75,
+        107,
+        37.85,
+        24.42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "dashed-edge-double2",
+      "shape": "dashedEdgeDouble2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-58",
+      "path": "dashed-edge-double2.svg",
+      "viewBox": [
+        117,
+        107,
+        37.6,
+        24
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "dashed-arrowless-edge2",
+      "shape": "dashedArrowlessEdge2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-59",
+      "path": "dashed-arrowless-edge2.svg",
+      "viewBox": [
+        117,
+        107,
+        37.6,
+        24
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "dashed-edge2",
+      "shape": "dashedEdge2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-60",
+      "path": "dashed-edge2.svg",
+      "viewBox": [
+        117,
+        107,
+        37.6,
+        24
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "flat-edge2",
+      "shape": "flatEdge2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-61",
+      "path": "flat-edge2.svg",
+      "viewBox": [
+        97,
+        97,
+        69.2,
+        42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "flat-double-edge2",
+      "shape": "flatDoubleEdge2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-62",
+      "path": "flat-double-edge2.svg",
+      "viewBox": [
+        7,
+        47,
+        258.8,
+        150
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "arrowhead2",
+      "shape": "arrowhead2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-63",
+      "path": "arrowhead2.svg",
+      "viewBox": [
+        117,
+        107,
+        25,
+        17
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "edge2",
+      "shape": "edge2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-64",
+      "path": "edge2.svg",
+      "viewBox": [
+        87,
+        67,
+        103,
+        113.4
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "reference2",
+      "shape": "reference2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-65",
+      "path": "reference2.svg",
+      "viewBox": [
+        117,
+        107,
+        35.5,
+        25.5
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    },
+    {
+      "id": "spot2",
+      "shape": "spot2",
+      "category": "arrows",
+      "sourceCellId": "5rwNdDhWUcEjUXHjMVE5-66",
+      "path": "spot2.svg",
+      "viewBox": [
+        97,
+        97,
+        68,
+        42
+      ],
+      "anchor": [
+        0.5,
+        1
+      ]
+    }
+  ]
+}

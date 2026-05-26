@@ -1,0 +1,316 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessFlow from '../../components/harness/HarnessFlow.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import HarnessStory from '../../components/harness/HarnessStory.astro'
+import SecurityBoundary from '../../components/harness/SecurityBoundary.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout title="Security & Production Readiness | AI Harness | PURISTA" description="Sandboxed execution, human review gates, content policies, and production checklist for deploying the AI Harness.">
+
+  <HarnessHero
+    lines={[
+      { text: 'Secure by' },
+      { text: 'design,', color: 'con' },
+      { text: 'not by accident.' },
+    ]}
+    lede="The Harness treats security as infrastructure, not an afterthought. Sandboxed execution, explicit review gates, content capture disabled by default, and a clear production checklist."
+  />
+
+  {/* ── The boundary that matters ─────────────────────────────────── */}
+  <HarnessStory
+    id="in-process"
+    layout="viz-right"
+    eyebrow="Security Architecture"
+    headline={[{ text: 'The harness lives ' }, { text: 'outside the sandbox.', color: 'con' }]}
+    lede="Most AI agent frameworks place the orchestration layer — credentials, API keys, access policies — inside or alongside the execution environment. When the model can reach them through tool calls or environment variables, so can an attacker with a prompt injection. PURISTA takes the opposite approach: the Harness runs in your application process. Only typed tool inputs ever cross the process boundary. Secrets never enter the sandbox."
+    items={[
+      'API keys and credentials stay in your application process — never injected into the sandbox environment.',
+      'Only typed, schema-validated tool inputs cross the boundary. No raw strings, no env vars, no secrets.',
+      'The sandbox handles execution only: LLM calls, file ops, and commands — nothing sensitive is visible there.',
+      'Even under successful prompt injection, the model cannot reach keys it was never given.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <SecurityBoundary />
+    </div>
+  </HarnessStory>
+
+  {/* ── Security Pillars ─────────────────────────────────────────── */}
+  <section class="section-pad soft-gradient">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Security Model</div>
+        <h2 class="display display-lg">Four pillars of safe AI</h2>
+      </div>
+      <div class="sec-pillars">
+        <div class="sec-pillar">
+          <span class="sec-pillar-label site-mono">Sandboxed Execution</span>
+          <p>Every agent runs in a controlled sandbox with explicit resource limits and timeout boundaries. File operations, tool calls, and MCP servers all respect the same boundary.</p>
+          <ul class="sec-pillar-list">
+            <li>inMemorySandbox() — file-only, no command execution</li>
+            <li>bashSandbox() — command execution through just-bash</li>
+            <li>Custom adapters for containers or remote execution</li>
+            <li>Explicit executor availability: unavailable vs available</li>
+          </ul>
+        </div>
+        <div class="sec-pillar">
+          <span class="sec-pillar-label site-mono">Human-in-the-Loop</span>
+          <p>No mutation before approval. Review gates block write tools until a human explicitly approves. Full OTel trace for every decision.</p>
+          <ul class="sec-pillar-list">
+            <li>Visible review questions with recommended answers</li>
+            <li>Immediate answer capture on selection</li>
+            <li>Idempotent final decision submission</li>
+            <li>Stale run/review IDs fail with clear errors</li>
+          </ul>
+        </div>
+        <div class="sec-pillar">
+          <span class="sec-pillar-label site-mono">Content Privacy</span>
+          <p>Content capture is disabled by default. Prompts and responses are not persisted in traces or logs unless explicitly enabled for local diagnostics.</p>
+          <ul class="sec-pillar-list">
+            <li>captureContent: false by default</li>
+            <li>Enable only for deliberate local diagnostics</li>
+            <li>OTel spans include metadata, not content</li>
+            <li>Application owns data residency decisions</li>
+          </ul>
+        </div>
+        <div class="sec-pillar">
+          <span class="sec-pillar-label site-mono">Type Safety & Validation</span>
+          <p>Every agent input, output, and tool call is schema-validated. No unvalidated data flows from the model to your application code.</p>
+          <ul class="sec-pillar-list">
+            <li>Zod schemas for all inputs and outputs</li>
+            <li>TypeScript inference through the entire chain</li>
+            <li>Tool input/output validation with normalized errors</li>
+            <li>MCP schema validation before tool registration</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Sandbox Detail ───────────────────────────────────────────── */}
+  <HarnessStory
+    id="sandbox"
+    layout="viz-left"
+    eyebrow="Sandbox"
+    headline={[{ text: 'Controlled ' }, { text: 'execution', color: 'con' }]}
+    lede="Choose the right sandbox for your risk profile. File-only for safe agents. Command execution only where needed. Custom adapters for containers or remote isolation."
+    items={[
+      'inMemorySandbox() — file operations, no commands',
+      'bashSandbox() — command execution through just-bash',
+      'Custom Sandbox/SandboxSession for containers',
+      'Snapshot, resume, and hibernate capabilities opt-in',
+      'Preview ports and browser routing stay application-owned',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="sandbox" />
+    </div>
+  </HarnessStory>
+
+  {/* ── Review Gate ──────────────────────────────────────────────── */}
+  <HarnessStory
+    id="review-gate"
+    layout="viz-right"
+    eyebrow="Review Gates"
+    headline={[
+      { text: 'No mutations ' },
+      { text: 'without approval', color: 'found' },
+    ]}
+    lede="When an agent proposes a change, the workflow creates a ReviewRequest. The user sees questions, selects answers, and submits a decision. Only approved changes execute write tools."
+    items={[
+      'Proposal agent drafts the change',
+      'Workflow creates ReviewRequest with questions',
+      'User selects answers in questionnaire UI',
+      'Decision submitted — approved, revise, or reject',
+      'Write tool executes only on approved',
+      'All steps traced and logged',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="review" />
+    </div>
+  </HarnessStory>
+
+  {/* ── Production Checklist ─────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-16">
+        <div class="eyebrow">Production Checklist</div>
+        <h2 class="display display-lg">Eight decisions before go-live</h2>
+        <p class="lede">
+          Each item is a boundary. Get it right once, and every agent you build inherits the safety.
+        </p>
+      </div>
+
+      <div class="sec-checklist">
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">01</span>
+          <div>
+            <div class="sec-check-title">Durable StateStore</div>
+            <p>Use a durable adapter so sessions, run history, and OTel traces survive process restart. In-memory state is fine for local development. Production needs persistence.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">02</span>
+          <div>
+            <div class="sec-check-title">Tenant-safe Session IDs</div>
+            <p>Define session IDs that include tenant boundaries. A session ID like <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">tenant-a:user-42</code> prevents cross-tenant data leakage by design.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">03</span>
+          <div>
+            <div class="sec-check-title">Explicit Timeout Budgets</div>
+            <p>Set <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">runTimeoutMs</code>, <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">modelTimeoutMs</code>, and <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">toolTimeoutMs</code> for each path. User-facing routes get smaller budgets. Background research gets larger ones.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">04</span>
+          <div>
+            <div class="sec-check-title">Content Capture Off</div>
+            <p>Keep <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">captureContent: false</code> outside local diagnostics. Never log PII, secrets, or model prompts in production traces. OTel spans include metadata, not content.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">05</span>
+          <div>
+            <div class="sec-check-title">Permission Gates for Mutations</div>
+            <p>Use review gates or explicit permission checks before any mutating built-in tool. No write should happen without either workflow approval or explicit authorization.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">06</span>
+          <div>
+            <div class="sec-check-title">Minimal Sandbox Permissions</div>
+            <p>Use <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">inMemorySandbox()</code> unless command execution is explicitly required. Never grant more than needed. The sandbox is an adapter — choose the right isolation level.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">07</span>
+          <div>
+            <div class="sec-check-title">Test Failure Modes</div>
+            <p>Test provider failures, validation failures, cancellation mid-run, and graceful shutdown paths. The Harness provides test harnesses and scripted models for deterministic failure simulation.</p>
+          </div>
+        </div>
+        <div class="sec-check-row">
+          <span class="sec-check-num site-mono">08</span>
+          <div>
+            <div class="sec-check-title">Validate Tool Outputs</div>
+            <p>Never trust model-generated tool inputs. The Harness validates with Zod before execution, but your tool handler should also defend against edge cases. Return structured data. Respect signals.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[
+      { text: 'Build AI that ' },
+      { text: 'your team trusts', color: 'con' },
+      { text: '.' },
+    ]}
+    lede="The Harness gives you the structure, safety, and observability that enterprise AI requires — without the SaaS lock-in."
+    ctas={[
+      {
+        label: 'Get started',
+        href: '/harness/get-started/',
+        variant: 'primary',
+      },
+      {
+        label: 'Explore Use Cases',
+        href: '/harness/use-cases/',
+        variant: 'ghost',
+      },
+    ]}
+  />
+</HarnessLayout>
+
+<style is:global>
+  /* ── Security pillars: 2-col border-grid ── */
+  .sec-pillars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+  @media (max-width: 640px) { .sec-pillars { grid-template-columns: 1fr; } }
+
+  .sec-pillar {
+    padding: clamp(1.2rem, 2vw, 1.6rem) clamp(1rem, 2vw, 1.5rem);
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+  }
+  .sec-pillar-label {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--color-con-hi);
+    margin-bottom: 0.5rem;
+  }
+  .sec-pillar p {
+    color: var(--color-fg-muted);
+    font-size: 0.92rem;
+    line-height: 1.58;
+    margin-bottom: 0.75rem;
+  }
+  .sec-pillar-list {
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .sec-pillar-list li {
+    color: var(--color-fg-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .sec-pillar-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--color-found);
+    font-size: 0.75rem;
+    top: 0.1em;
+  }
+
+  /* ── Production checklist: numbered editorial rows ── */
+  .sec-checklist {
+    border-top: 1px solid var(--color-line);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .sec-check-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1.5rem;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid var(--color-line);
+    align-items: baseline;
+  }
+  @media (max-width: 600px) {
+    .sec-check-row { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+  .sec-check-num {
+    font-size: 0.75rem;
+    color: var(--color-found-hi);
+    letter-spacing: 0.08em;
+    padding-top: 0.1rem;
+  }
+  .sec-check-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-fg);
+    margin-bottom: 0.4rem;
+  }
+  .sec-check-row p {
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+</style>

@@ -1,0 +1,250 @@
+---
+title: The Command Builder
+description: Define schemas, transforms, guards, events, and the business function with full type inference.
+---
+
+The **command builder** is a fluent API that collects every aspect of a command — schemas, transforms, guards, events, and the business function — into a single typed definition. That definition is attached to a [service builder](/handbook/service/service-builder/) and registered at the event bridge when the service starts.
+
+Every method on the builder returns a new builder instance with updated type parameters. This means TypeScript tracks the shape of your command as you build it, and the final `setCommandFunction` receives a fully typed `context`, `payload`, and `parameter`.
+
+## Schemas are the contract
+
+Schemas drive everything in PURISTA: TypeScript inference, runtime validation, OpenAPI documentation, and cross-service type safety. Define them early and be explicit.
+
+```typescript [signUpCommand.ts]
+import { z } from 'zod'
+
+// Input contract
+export const signUpInputPayloadSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+export const signUpInputParameterSchema = z.object({
+  referralCode: z.string().optional(),
+})
+
+// Output contract
+export const signUpOutputSchema = z.object({
+  userId: z.string(),
+})
+```
+
+| Schema | Method | Validated when |
+|---|---|---|
+| `addPayloadSchema(schema)` | Main input body | After input transform |
+| `addParameterSchema(schema)` | Query/path params, metadata | After input transform |
+| `addOutputSchema(schema)` | Return shape | After command function |
+
+## The command function
+
+```typescript [signUpCommand.ts]
+export const signUpCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('signUp', 'Register a new user')
+  .addPayloadSchema(signUpInputPayloadSchema)
+  .addParameterSchema(signUpInputParameterSchema)
+  .addOutputSchema(signUpOutputSchema)
+  .setCommandFunction(async function (context, payload, parameter) {
+    // payload: { email: string; password: string }
+    // parameter: { referralCode?: string }
+    const user = await context.resources.db.insert('users', payload)
+    return { userId: user.id }
+  })
+```
+
+The function signature is `(context, payload, parameter) => Promise<output>`. The builder validates at compile time that your function's arguments and return type match the declared schemas.
+
+<div class="callout callout--warning">
+  <div class="callout__title">Always use async function</div>
+  <p>The builder calls <code>assertNonArrowFunction(fn, 'setCommandFunction')</code> at runtime and will throw if you pass an arrow function. This is because <code>this</code> must bind to the service instance for access to <code>this.config</code>, <code>this.resources</code>, and <code>this.stores</code>.</p>
+</div>
+
+## Input and output transforms
+
+Transforms are optional hooks that convert data before validation or after the command function runs. They are useful for decryption, field mapping, or format conversion.
+
+```typescript [signUpCommand.ts]
+.setTransformInput(
+  z.object({ rawEmail: z.string(), rawPassword: z.string() }),
+  z.object({}),
+  async function (context, rawPayload, rawParameter) {
+    // Decrypt or remap fields before validation
+    return {
+      payload: { email: rawPayload.rawEmail.toLowerCase(), password: rawPayload.rawPassword },
+      parameter: rawParameter,
+    }
+  },
+)
+```
+
+```typescript [signUpCommand.ts]
+.setTransformOutput(
+  z.object({ id: z.string(), createdAt: z.date() }),
+  async function (context, output) {
+    // Convert internal shape to external shape
+    return { userId: output.id, registeredAt: output.createdAt.toISOString() }
+  },
+)
+```
+
+## Before and after guards
+
+Guards are the right place for auth, authorization, quota checks, and audit logging. They keep your command function focused on business logic.
+
+```typescript [signUpCommand.ts]
+.setBeforeGuardHooks({
+  requireValidEmail: async function (context, payload, parameter) {
+    const domain = payload.email.split('@')[1]
+    if (domain === 'tempmail.com') {
+      throw new HandledError(StatusCode.BadRequest, 'Disposable email addresses are not allowed')
+    }
+  },
+  rateLimit: async function (context, payload, parameter) {
+    const { count } = await context.states.getState(`rate:${payload.email}`)
+    if (count && count > 5) {
+      throw new HandledError(StatusCode.TooManyRequests, 'Rate limit exceeded')
+    }
+  },
+})
+.setAfterGuardHooks({
+  audit: async function (context, result, payload, parameter) {
+    context.logger.info({ userId: result.userId, email: payload.email }, 'User signed up')
+  },
+})
+```
+
+<div class="callout callout--info">
+  <div class="callout__title">Guards run in parallel — and must be regular functions</div>
+  <p>All before guards execute simultaneously with <code>Promise.all</code>. If any guard throws, the command function is skipped and the error is returned to the caller. After guards also run in parallel after the command function succeeds. Guards must be declared as <code>async function</code>, not arrow functions — the builder calls <code>assertNonArrowFunction</code> on each one at registration time and will throw if an arrow function is passed.</p>
+</div>
+
+## Emitting custom events
+
+Commands can emit events that subscriptions react to. This is how you build event-driven flows:
+
+```typescript [signUpCommand.ts]
+.setCommandFunction(async function (context, payload, parameter) {
+  const user = await context.resources.db.insert('users', payload)
+
+  // Emit an event that subscriptions can listen for
+  await context.emit('userSignedUp', { userId: user.id, email: payload.email })
+
+  return { userId: user.id }
+})
+```
+
+To emit events, declare them on the builder so TypeScript knows about them:
+
+```typescript [signUpCommand.ts]
+.canEmit('userSignedUp', z.object({ userId: z.string(), email: z.string() }))
+```
+
+## Cross-service invocation
+
+Commands can invoke other commands across services. The caller does not know where the target service runs — only its name, version, and command name. The event bridge routes the request and returns the response transparently.
+
+```typescript [signUpCommand.ts]
+.canInvoke('ProfileService', '1', 'createProfile', {
+  outputSchema: z.object({ profileId: z.string() }),
+  payloadSchema: z.object({ userId: z.string() }),
+})
+.setCommandFunction(async function (context, payload, parameter) {
+  const user = await context.resources.db.insert('users', payload)
+
+  // Invoke a command in another service
+  const profile = await context.invoke(
+    { serviceName: 'ProfileService', serviceVersion: '1', serviceTarget: 'createProfile' },
+    { userId: user.id },
+  )
+
+  return { userId: user.id, profileId: profile.profileId }
+})
+```
+
+| Method | Purpose |
+|---|---|
+| `canInvoke(service, version, command, config?)` | Declare that this command can call another command |
+| `canConsumeStream(service, version, stream, ...)` | Declare that this command can consume a stream |
+| `canEnqueue(queueName, payloadSchema?, parameterSchema?)` | Declare that this command can enqueue jobs |
+
+## HTTP exposure
+
+Commands are not HTTP endpoints by default. Expose them explicitly using the [Hono-based HTTP server](/handbook/expose/rest-api/):
+
+```typescript [signUpCommand.ts]
+.exposeAsHttpEndpoint('POST', 'api/v1/users', 'application/json', undefined, 'application/json')
+```
+
+You can also control OpenAPI metadata:
+
+```typescript [signUpCommand.ts]
+.setOpenApiSummary('Register a new user')
+.setOpenApiOperationId('signUp')
+.addOpenApiTags('Authentication')
+.addOpenApiErrorStatusCodes(StatusCode.Conflict, StatusCode.TooManyRequests)
+.makeEndpointPublic() // disables auth for this endpoint
+```
+
+For async patterns (return `202 Accepted` while work continues in a queue):
+
+```typescript [signUpCommand.ts]
+.exposeAsHttpEndpoint('POST', 'api/v1/users/async', undefined, undefined, undefined, undefined, { mode: 'async' })
+```
+
+## Building the definition
+
+The builder's `getDefinition()` method is async. It converts schemas to JSON Schema for OpenAPI and returns a `CommandDefinition` that you attach to the service builder:
+
+```typescript [service.ts]
+userServiceV1ServiceBuilder.addCommandDefinition(await signUpCommandBuilder.getDefinition())
+```
+
+## Full example
+
+```typescript [signUpCommand.ts]
+import { z } from 'zod'
+import { StatusCode, HandledError } from '@purista/core'
+import { userServiceV1ServiceBuilder } from '../userService.js'
+
+const signUpInputPayloadSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+const signUpInputParameterSchema = z.object({
+  referralCode: z.string().optional(),
+})
+
+const signUpOutputSchema = z.object({
+  userId: z.string(),
+})
+
+export const signUpCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('signUp', 'Register a new user')
+  .addPayloadSchema(signUpInputPayloadSchema)
+  .addParameterSchema(signUpInputParameterSchema)
+  .addOutputSchema(signUpOutputSchema)
+  .canEmit('userSignedUp', z.object({ userId: z.string(), email: z.string() }))
+  .canInvoke('ProfileService', '1', 'createProfile', {
+    outputSchema: z.object({ profileId: z.string() }),
+    payloadSchema: z.object({ userId: z.string() }),
+  })
+  .setBeforeGuardHooks({
+    blockDisposable: async function (_context, payload, _parameter) {
+      if (payload.email.endsWith('@tempmail.com')) {
+        throw new HandledError(StatusCode.BadRequest, 'Disposable emails not allowed')
+      }
+    },
+  })
+  .setCommandFunction(async function (context, payload, parameter) {
+    const user = await context.resources.db.insert('users', payload)
+    await context.emit('userSignedUp', { userId: user.id, email: payload.email })
+
+    const profile = await context.invoke(
+      { serviceName: 'ProfileService', serviceVersion: '1', serviceTarget: 'createProfile' },
+      { userId: user.id },
+    )
+
+    return { userId: user.id }
+  })
+```

@@ -1,0 +1,98 @@
+---
+import type { HeadlineSegment } from '../ui/Headline.astro'
+
+interface HeroLine extends HeadlineSegment {}
+
+interface HeroStripItem {
+	label: string
+	title: string
+}
+
+interface CTA {
+	label: string
+	href: string
+	variant?: 'primary' | 'ghost'
+}
+
+interface Props {
+	lines: HeroLine[]
+	lede: string
+	ctas?: CTA[]
+	heroStrip?: HeroStripItem[]
+	class?: string
+}
+
+const { lines, lede, ctas = [], heroStrip = [], class: className = '' } = Astro.props
+
+const displayLines = lines.reduce<HeroLine[]>((acc, line) => {
+  const isStandalonePunctuation = /^[.!?,:;]+$/.test(line.text.trim())
+  const previous = acc.at(-1)
+
+  if (isStandalonePunctuation && previous) {
+    previous.text = `${previous.text}${line.text.trim()}`
+    return acc
+  }
+
+  acc.push({ ...line })
+  return acc
+}, [])
+---
+
+<section
+  class:list={['hero soft-gradient relative overflow-hidden min-h-[90vh] w-full', className]}
+  style="padding-block: var(--hero-padding-top) var(--hero-padding-bottom)"
+  id="hero"
+>
+  <div class="wrap relative z-[2] flex flex-col justify-start">
+    <h1 class="display display-tight display-hero reveal in-view">
+      {
+        displayLines.map((line) => (
+          <span class="block">
+            <span
+              class:list={[
+                'inline-block',
+                line.color && line.color !== 'fg' ? `text-[var(--color-${line.color})]` : '',
+              ]}
+            >
+              {line.text}
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+
+    <p class="lede mt-10 max-w-[60ch] reveal in-view">{lede}</p>
+
+    {
+      ctas.length > 0 && (
+        <div class="mt-12 flex gap-4 flex-wrap reveal in-view">
+          {ctas.map((cta) => (
+            <a class:list={['btn', cta.variant === 'primary' ? 'btn-primary' : 'btn-ghost']} href={cta.href}>
+              {cta.label}
+              {cta.variant === 'primary' && (
+                <span class="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              )}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      heroStrip.length > 0 && (
+        <div class="hero-strip mt-20 pt-10 border-t border-[var(--color-line)] grid grid-cols-1 md:grid-cols-3 gap-10 reveal in-view">
+          {heroStrip.map((item) => (
+            <div>
+              <div class="eyebrow mb-2">{item.label}</div>
+              <div class="hero-strip-title">
+                {item.title}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    <slot name="visualization" />
+  </div>
+</section>

@@ -1,0 +1,170 @@
+---
+import CTA from '../../components/landing/CTA.astro'
+import EnterprisePillars from '../../components/landing/EnterprisePillars.astro'
+import Hero from '../../components/landing/Hero.astro'
+import SectionIntro from '../../components/landing/SectionIntro.astro'
+import EnterprisePersonas from '../../components/landing/sections/EnterprisePersonas.astro'
+import EnterpriseShift from '../../components/landing/sections/EnterpriseShift.astro'
+import Stats from '../../components/landing/Stats.astro'
+import ProviderSwap from '../../components/landing/visualizations/ProviderSwap.astro'
+import RequestLifecycle from '../../components/landing/visualizations/RequestLifecycle.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+
+---
+
+<HarnessLayout
+  title="Enterprise — PURISTA"
+  description="PURISTA for enterprise teams. Provider-agnostic by construction. Observable and traceable end to end. Approval-ready by structure."
+  active="enterprise"
+>
+
+  <Hero
+    eyebrow="For decision makers"
+    eyebrowTone="found"
+    lines={[
+      { text: 'Backends your' },
+      { text: 'board', color: 'shimmer' },
+      { text: 'can sign off on.' },
+    ]}
+    lede="PURISTA is the open-source framework for backends that meet enterprise standards by construction. No vendor lock-in. No review archaeology. No PR limbo. The same declared contract serves the CISO, the CTO and the CFO."
+    ctas={[
+      { label: 'Talk to us',            href: 'mailto:hello@purista.dev', variant: 'primary' },
+      { label: 'See how it works',      href: '/#what-is',             variant: 'ghost' },
+    ]}
+    strip={[
+      { label: 'For the CISO', title: 'Reviewable by structure.',  tone: 'found' },
+      { label: 'For the CTO',  title: 'Operable on principle.',    tone: 'pilot' },
+      { label: 'For the CFO',  title: 'Approval-ready by design.', tone: 'con' },
+    ]}
+  />
+
+  {/* ROI stats */}
+  <section class="site-section site-section--tight">
+    <div class="site-wrap">
+      <Stats
+        items={[
+          { num: 14, suffix: '×', label: 'Faster approval cycles', body: 'Reviewers verify declared structure instead of reconstructing it.', tone: 'pilot' },
+          { num: 0,                label: 'Manual trace plumbing',  body: 'OTel spans emitted automatically on every command, subscription and stream.', tone: 'found' },
+          { num: 0,                label: 'Vendor SDKs in code',    body: 'Brokers, secrets and state bound by adapter, never imported.' },
+          { num: 5,                label: 'Reviewers, one artifact', body: 'CISO, CTO, CFO, Compliance, Platform — same contract.',         tone: 'con' },
+        ]}
+      />
+    </div>
+  </section>
+
+  {/* The PURISTA contract — three pillars */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="The PURISTA contract"
+        eyebrowTone="found"
+        headline={[
+          { text: 'Three enterprise guarantees. ' },
+          { text: 'Built into every service', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="These are not features your team has to remember to wire up. They are properties of the shape. Build a service the PURISTA way and you get all three for free — every time."
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <EnterprisePillars />
+      </div>
+    </div>
+  </section>
+
+  {/* The three stakeholders */}
+  <section id="personas" class="site-section">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Stakeholder view"
+        eyebrowTone="con"
+        headline={[
+          { text: 'Same artifact. ' },
+          { text: 'Three signoffs', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="The CISO, CTO and CFO each see the system through a different lens. PURISTA gives every one of them the answers they need from the same source of truth — the declared contract."
+        align="center"
+      />
+
+      <EnterprisePersonas />
+    </div>
+  </section>
+
+  {/* The shift: before vs after */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="The shift"
+        eyebrowTone="pilot"
+        headline={[
+          { text: 'From review ' },
+          { text: 'archaeology', color: 'con' },
+          { text: ' to ' },
+          { text: 'structural verification', color: 'pilot' },
+          { text: '.' },
+        ]}
+        lede="Without structure, reviewers reconstruct intent from code. With PURISTA, they check declared structure. The questions become checks. The checks become checklists. Approval cycle time drops from weeks to hours."
+        align="center"
+      />
+
+      <EnterpriseShift />
+    </div>
+  </section>
+
+  {/* A request, end to end */}
+  <section class="site-section">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="What every request goes through"
+        eyebrowTone="con"
+        headline={[
+          { text: 'Every request, ' },
+          { text: 'eight checkpoints', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="Validation, guard checks, distributed tracing and output schema verification happen around your handler — not inside it, not after it, not by hand. The structure is always there."
+        align="center"
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <RequestLifecycle />
+      </div>
+    </div>
+  </section>
+
+  {/* Provider freedom */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="No vendor lock-in"
+        eyebrowTone="pilot"
+        headline={[
+          { text: 'Multi-cloud is ' },
+          { text: 'a configuration', color: 'pilot' },
+          { text: ' choice.' },
+        ]}
+        lede="Procurement leverage is a feature, not an aspiration. The same service code runs on AWS, on Azure, or fully self-hosted. The adapter is bound at boot — not embedded in your codebase."
+        align="center"
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <ProviderSwap />
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    eyebrow="Ready for approval"
+    headline={[
+      { text: 'Ship AI-built code that ' },
+      { text: 'passes review', color: 'shimmer' },
+      { text: '.' },
+    ]}
+    lede="Start with the framework your reviewers can actually sign off on. We're happy to walk a procurement, security or platform team through an evaluation."
+    ctas={[
+      { label: 'Talk to us',          href: 'mailto:hello@purista.dev', variant: 'primary' },
+      { label: 'Read the Handbook',   href: '/handbook/',               variant: 'ghost' },
+      { label: 'Framework deep-dive', href: '/framework/',           variant: 'ghost' },
+    ]}
+  />
+
+</HarnessLayout>
+

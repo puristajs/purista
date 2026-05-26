@@ -1,0 +1,56 @@
+---
+import HandbookCard from '../../../components/handbook/HandbookCard.astro'
+import { getSidebarItems, handbookSections } from '../../../data/handbook'
+import HandbookLayout from '../../../layouts/HandbookLayout.astro'
+
+export async function getStaticPaths() {
+	return handbookSections.map(section => ({
+		params: { section: section.id },
+		props: { section },
+	}))
+}
+
+const { section } = Astro.props
+const sidebar = getSidebarItems()
+---
+
+<HandbookLayout
+  title={section.title}
+  description={section.subtitle}
+  sidebar={sidebar}
+  currentId={section.id}
+  prose={false}
+>
+  <div class="mb-12">
+    <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-3" style={`color: var(--color-${section.color}-hi)`}>
+      {String(section.num).padStart(2, '0')} — {section.title}
+    </p>
+    <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
+      {section.title}
+    </h1>
+    <p class="lede max-w-[70ch]">
+      {section.subtitle}
+    </p>
+  </div>
+
+  {section.cards.length > 0 ? (
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {section.cards.map((card) => (
+        <HandbookCard
+          title={card.title}
+          description={card.description}
+          icon={card.icon}
+          href={`/handbook/${section.id}/${card.id}/`}
+          color={section.color}
+          featured={card.featured}
+        />
+      ))}
+    </div>
+  ) : (
+    <div class="rounded-xl border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-8 text-center">
+      <p class="text-[var(--color-fg-muted)]">
+        This section contains learning paths. See the <a href="/handbook/" class="text-[var(--color-found)] hover:underline">handbook landing page</a> for details.
+      </p>
+    </div>
+  )}
+</HandbookLayout>

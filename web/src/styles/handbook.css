@@ -1,0 +1,654 @@
+/**
+ * PURISTA Handbook / Docs Styles
+ * Styles for markdown-generated documentation pages.
+ * Optimized for readability of long-form technical content.
+ */
+
+@layer components {
+	/* ── Handbook Sidebar nav items ──────────────────────────────── */
+
+	.hbl-item {
+		display: block;
+		padding: 0.35rem 0.75rem;
+		font-family: var(--font-display);
+		font-size: 0.8125rem;
+		line-height: 1.4;
+		border-radius: 6px;
+		border-left: 2px solid transparent;
+		transition:
+			color 140ms,
+			background 140ms,
+			border-color 140ms;
+		text-decoration: none;
+	}
+
+	.hbl-item--default {
+		color: var(--color-fg-muted);
+	}
+	.hbl-item--default:hover {
+		color: var(--color-fg);
+		background: var(--color-bg-sunk);
+	}
+
+	.hbl-item--parent {
+		color: var(--color-fg);
+		font-weight: 500;
+	}
+	.hbl-item--parent:hover {
+		background: var(--color-bg-sunk);
+	}
+
+	.hbl-item--active {
+		color: var(--color-found);
+		background: color-mix(in srgb, var(--color-found) 8%, transparent);
+		border-left-color: var(--color-found);
+		font-weight: 600;
+	}
+
+	.hbl-item--sub {
+		font-size: 0.775rem;
+		padding-top: 0.25rem;
+		padding-bottom: 0.25rem;
+	}
+
+	.hbl-children {
+		margin-top: 0.125rem;
+		margin-left: 0.875rem;
+		padding-left: 0.75rem;
+		border-left: 1px solid var(--color-line);
+	}
+
+	/* ── Right TOC sidebar ───────────────────────────────────────── */
+	/* Already handled inline but keep TOC link style consistent */
+
+	/* --- Prose Container --- */
+	.prose {
+		font-size: 1rem;
+		line-height: 1.75;
+		color: var(--color-fg);
+	}
+
+	.prose p {
+		margin-bottom: 1.25em;
+		color: var(--color-fg-muted);
+	}
+
+	.prose h1,
+	.prose h2,
+	.prose h3,
+	.prose h4 {
+		font-family: var(--font-display);
+		font-weight: 600;
+		letter-spacing: -0.025em;
+		color: var(--color-fg);
+		margin-top: 2em;
+		margin-bottom: 0.75em;
+		line-height: 1.2;
+	}
+
+	.prose h1 {
+		font-size: clamp(2rem, 4vw, 3rem);
+		letter-spacing: -0.04em;
+		margin-top: 0;
+	}
+
+	.prose h2 {
+		font-size: clamp(1.5rem, 2.5vw, 2rem);
+		padding-bottom: 0.4em;
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	.prose h3 {
+		font-size: clamp(1.25rem, 2vw, 1.5rem);
+	}
+
+	.prose h4 {
+		font-size: 1.125rem;
+	}
+
+	/* ── Link colour contract ──────────────────────────────────
+	   Every inline text link across the handbook uses --color-found.
+	   Navigation, card, and button anchors opt out via explicit class.
+	   ──────────────────────────────────────────────────────────── */
+	.prose a,
+	article a:not([class]) {
+		color: var(--color-found);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		text-decoration-thickness: 1px;
+		transition: color 150ms ease;
+	}
+
+	.prose a:hover,
+	article a:not([class]):hover {
+		color: var(--color-found-hi);
+	}
+
+	.prose a.handbook-card {
+		text-decoration: none;
+	}
+
+	.prose ul,
+	.prose ol {
+		margin-bottom: 1.25em;
+		padding-left: 1.5em;
+	}
+
+	.prose ul {
+		list-style: disc;
+	}
+
+	.prose ol {
+		list-style: decimal;
+	}
+
+	.prose li {
+		margin-bottom: 0.5em;
+		color: var(--color-fg-muted);
+	}
+
+	.prose li::marker {
+		color: var(--color-fg-subtle);
+	}
+
+	.prose strong {
+		color: var(--color-fg);
+		font-weight: 600;
+	}
+
+	.prose code {
+		font-family: var(--font-mono);
+		font-size: 0.875em;
+		background: var(--color-bg-sunk);
+		padding: 0.2em 0.4em;
+		border-radius: 4px;
+		color: var(--color-con);
+	}
+
+	/* --- Code Block (matches site CodeBlock.astro component) --- */
+	.codeblock {
+		position: relative;
+		background: var(--color-bg-elev);
+		border: 1px solid var(--color-line-strong);
+		border-radius: var(--radius-md);
+		overflow: hidden;
+		margin: 0 0 1.5em;
+		min-height: calc(var(--code-lines, 8) * 1.45rem + 3.25rem);
+	}
+
+	.codeblock-header {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		min-height: 2.75rem;
+		padding: 0.7rem 1rem;
+		border-bottom: 1px solid var(--color-line);
+		background: color-mix(in srgb, var(--color-bg-deep) 62%, transparent);
+	}
+
+	.codeblock-dots {
+		display: inline-flex;
+		gap: 0.45rem;
+		flex: 0 0 auto;
+	}
+
+	.codeblock-dots span {
+		width: 0.65rem;
+		height: 0.65rem;
+		border-radius: 9999px;
+	}
+
+	.codeblock-dots span:nth-child(1) {
+		background: #ff5f57;
+	}
+	.codeblock-dots span:nth-child(2) {
+		background: #febc2e;
+	}
+	.codeblock-dots span:nth-child(3) {
+		background: #28c840;
+	}
+
+	.codeblock-title {
+		font-family: var(--font-mono);
+		font-size: 0.78rem;
+		color: var(--color-fg-muted);
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.codeblock-lang {
+		margin-left: auto;
+		font-family: var(--font-mono);
+		font-size: 0.64rem;
+		letter-spacing: 0.16em;
+		color: var(--color-fg-subtle);
+		text-transform: uppercase;
+		flex: 0 0 auto;
+	}
+
+	.codeblock-copy {
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 5px;
+		color: var(--color-fg-subtle);
+		cursor: pointer;
+		border: none;
+		background: none;
+		transition:
+			color 150ms,
+			background 150ms;
+		flex-shrink: 0;
+		margin-left: 0.5rem;
+	}
+
+	.codeblock-copy:hover {
+		color: var(--color-fg);
+		background: var(--color-bg-sunk);
+	}
+
+	.codeblock-copy-icon {
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+
+	.codeblock-body {
+		min-height: calc(var(--code-lines, 8) * 1.45rem);
+		display: flex;
+	}
+
+	/* pre inside a codeblock in prose (handbook only) — override prose-default styles.
+	   Intentionally scoped to .prose so CodeBlock.astro on harness/marketing pages
+	   keeps its own background (transparent → inherits --color-bg-elev from .codeblock). */
+	.prose .codeblock-pre {
+		width: 100%;
+		margin: 0;
+		padding: 1.05rem 1.15rem 1.15rem;
+		font-size: 0.85rem;
+		line-height: 1.45rem;
+		overflow-x: auto;
+		font-family: var(--font-mono);
+		white-space: pre;
+		/* Match the elevated (white in light mode) background used by CodeBlock.astro.
+		   The Shiki !important override is neutralised by the more-specific
+		   .prose .astro-code.codeblock-pre rule outside the layer. */
+		background: var(--color-bg-elev) !important;
+		border: none !important;
+		border-radius: 0 !important;
+	}
+
+	/* Fallback for pre NOT yet wrapped by the script (no-JS / before hydration) */
+	.prose pre:not(.codeblock-pre) {
+		background: var(--color-code-bg);
+		color: var(--color-code-fg);
+		padding: 0.75rem 1.25rem;
+		overflow-x: auto;
+		margin: 0 0 1.5em;
+		border: 1px solid var(--color-line-strong);
+		border-radius: var(--radius-md);
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.prose pre code {
+		background: transparent;
+		padding: 0;
+		color: inherit;
+		font-size: 0.85rem;
+		line-height: 1.45rem;
+		font-family: var(--font-mono);
+		/* Must stay 'normal' — Shiki wraps each source line in a .line span with
+		   display:block, so literal newlines between spans must be collapsed or
+		   they render as extra blank lines. */
+		white-space: normal;
+	}
+
+	/* Line spans from Shiki */
+	.prose pre .line {
+		display: block;
+		line-height: 1.45rem;
+		margin: 0;
+		/* pre-wrap so content wraps when wrap:true is set in Shiki config,
+		   but does NOT cause extra blank lines (unlike white-space:pre on code). */
+		white-space: pre-wrap;
+	}
+
+	.prose pre .line:empty {
+		/* Empty .line spans (blank lines in source) collapse without this */
+		min-height: 1.45rem;
+	}
+
+	/* Mermaid diagram container (rendered from code block) */
+	.prose .mermaid-wrapper {
+		position: relative;
+		background: var(--color-bg-elev);
+		border: 1px solid var(--color-line);
+		border-radius: 12px;
+		margin-bottom: 1.5em;
+		overflow: hidden;
+	}
+
+	.prose .mermaid-controls {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		z-index: 10;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		opacity: 0;
+		transition: opacity 200ms ease;
+	}
+
+	.prose .mermaid-wrapper:hover .mermaid-controls {
+		opacity: 1;
+	}
+
+	.prose .mermaid-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 6px;
+		background: var(--color-bg-elev);
+		border: 1px solid var(--color-line);
+		color: var(--color-fg-muted);
+		cursor: pointer;
+		transition: all 150ms ease;
+	}
+
+	.prose .mermaid-btn:hover {
+		background: var(--color-bg-sunk);
+		color: var(--color-fg);
+		border-color: var(--color-line-strong);
+	}
+
+	.prose .mermaid-viewport {
+		overflow: hidden;
+		cursor: grab;
+		max-height: 70vh;
+		position: relative;
+	}
+
+	.prose .mermaid-viewport.dragging {
+		cursor: grabbing;
+		user-select: none;
+		-webkit-user-select: none;
+	}
+
+	.prose .mermaid-viewport.dragging * {
+		user-select: none;
+		-webkit-user-select: none;
+	}
+
+	.prose .mermaid-content {
+		transform-origin: top left;
+		will-change: transform;
+		min-width: 100%;
+		min-height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1.5rem;
+		box-sizing: border-box;
+		background: var(--color-bg-elev);
+	}
+
+	.prose .mermaid-content svg {
+		max-width: 100%;
+		height: auto;
+	}
+
+	.mermaid-wrapper:fullscreen {
+		display: flex;
+		flex-direction: column;
+		border-radius: 0;
+		width: 100vw;
+		height: 100vh;
+		max-height: none;
+		background: var(--color-bg-elev);
+	}
+
+	.mermaid-wrapper:fullscreen .mermaid-viewport {
+		max-height: none;
+		flex: 1 1 auto;
+		background: var(--color-bg-elev);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.mermaid-wrapper:fullscreen .mermaid-content {
+		width: 100%;
+		height: 100%;
+		padding: 2rem;
+		background: var(--color-bg-elev);
+	}
+
+	/* Mermaid error fallback */
+	.prose .mermaid-error {
+		padding: 1rem 1.25rem;
+		border-radius: 12px;
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		background: rgba(239, 68, 68, 0.1);
+		color: #ef4444;
+		font-family: var(--font-mono);
+		font-size: 0.875rem;
+		margin-bottom: 1.5em;
+	}
+
+	.prose blockquote {
+		border-left: 3px solid var(--color-found);
+		padding-left: 1.25em;
+		margin-bottom: 1.25em;
+		color: var(--color-fg-muted);
+		font-style: italic;
+	}
+
+	.prose hr {
+		border: none;
+		border-top: 1px solid var(--color-line);
+		margin: 2.5em 0;
+	}
+
+	.prose table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 1.5em;
+		font-size: 0.925rem;
+	}
+
+	.prose th {
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		font-weight: 600;
+		text-align: left;
+		padding: 0.75em 1em;
+		border-bottom: 2px solid var(--color-line-strong);
+		color: var(--color-fg-subtle);
+	}
+
+	.prose td {
+		padding: 0.75em 1em;
+		border-bottom: 1px solid var(--color-line);
+		color: var(--color-fg-muted);
+	}
+
+	.prose tr:hover td {
+		background: var(--color-bg-sunk);
+	}
+
+	/* --- Callouts / Admonitions --- */
+	.callout {
+		background: var(--color-bg-elev);
+		border: 1px solid var(--color-line);
+		border-radius: 10px;
+		padding: 1.25rem 1.5rem;
+		margin-bottom: 1.25em;
+	}
+
+	.callout--info {
+		border-left: 3px solid var(--color-found);
+	}
+
+	.callout--warning {
+		border-left: 3px solid var(--color-pilot);
+	}
+
+	.callout--error {
+		border-left: 3px solid #ef4444;
+	}
+
+	.callout__title {
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+	}
+
+	.callout--info .callout__title {
+		color: var(--color-found);
+	}
+
+	.callout--warning .callout__title {
+		color: var(--color-pilot);
+	}
+
+	.callout--error .callout__title {
+		color: #ef4444;
+	}
+
+	/* --- File Tree --- */
+	.file-tree {
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+		line-height: 1.45;
+	}
+	.file-tree-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.file-tree-item {
+		position: relative;
+		list-style: none;
+	}
+	.file-tree-row {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0;
+		position: relative;
+	}
+	.file-tree-icon {
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+	}
+	.file-tree-item[aria-expanded] .file-tree-icon {
+		color: var(--color-pilot);
+		opacity: 0.7;
+	}
+	.file-tree-item:not([aria-expanded]) .file-tree-icon {
+		color: var(--color-fg-subtle);
+		opacity: 0.55;
+	}
+	.file-tree-name {
+		font-weight: 500;
+	}
+	.file-tree-item:not([aria-expanded]) .file-tree-name {
+		color: color-mix(in srgb, var(--color-fg) 80%, var(--color-fg-muted));
+	}
+	.file-tree-highlight {
+		color: var(--color-fg);
+		font-weight: 600;
+	}
+	.file-tree-comment {
+		color: var(--color-fg-subtle);
+		font-size: 0.72rem;
+		margin-left: 0.3rem;
+		opacity: 0.8;
+	}
+	.file-tree-children {
+		list-style: none;
+		margin: 0;
+		padding: 0 0 0 1.15rem;
+		position: relative;
+	}
+	.file-tree-children::before {
+		content: "";
+		position: absolute;
+		left: 0.4rem;
+		top: 0;
+		bottom: 0.5rem;
+		width: 1px;
+		background: color-mix(in srgb, var(--color-line) 70%, transparent);
+	}
+	.file-tree-children > .file-tree-item > .file-tree-row::before {
+		content: "";
+		position: absolute;
+		left: -0.75rem;
+		top: 50%;
+		width: 0.5rem;
+		height: 1px;
+		background: color-mix(in srgb, var(--color-line) 70%, transparent);
+	}
+	.file-tree-children > .file-tree-item:last-child::before {
+		content: "";
+		position: absolute;
+		left: -0.75rem;
+		top: 0;
+		bottom: calc(100% - 0.7rem);
+		width: 1px;
+		background: color-mix(in srgb, var(--color-line) 70%, transparent);
+	}
+
+	/* --- Inline code in headings --- */
+	.prose h1 code,
+	.prose h2 code,
+	.prose h3 code,
+	.prose h4 code {
+		font-size: 0.8em;
+		color: var(--color-con);
+	}
+}
+
+/* ========================================
+   SHIKI CODE BLOCK THEME ADAPTATION
+   Outside @layer to prevent Tailwind
+   from stripping html[data-theme] selectors
+   ======================================== */
+
+/* Unwrapped Shiki pre (no-JS fallback, or non-codeblock prose) gets code-bg */
+.prose .astro-code:not(.codeblock-pre) {
+	background-color: var(--color-code-bg) !important;
+	color: var(--color-code-fg) !important;
+	outline: none;
+}
+
+/* Wrapped codeblock pre uses the same elevated background as CodeBlock.astro */
+.prose .astro-code.codeblock-pre {
+	background-color: var(--color-bg-elev) !important;
+	outline: none;
+}
+
+html[data-theme="dark"] .prose .astro-code:not(.codeblock-pre) {
+	background-color: var(--shiki-dark-bg, var(--color-code-bg)) !important;
+	color: var(--shiki-dark, var(--color-code-fg)) !important;
+}
+
+html[data-theme="dark"] .prose .astro-code.codeblock-pre {
+	background-color: var(--color-bg-elev) !important;
+}
+
+html[data-theme="dark"] .prose .astro-code span {
+	color: var(--shiki-dark, inherit) !important;
+}

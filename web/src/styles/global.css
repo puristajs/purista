@@ -1,0 +1,16 @@
+/**
+ * PURISTA Global Styles Entry Point
+ * Imports all style modules in the correct cascade order.
+ */
+
+/* 1. Tailwind CSS + Design Tokens */
+@import "./tokens.css";
+
+/* 2. Base resets and element styles */
+@import "./base.css";
+
+/* 3. Reusable component classes */
+@import "./components.css";
+
+/* 4. Handbook / docs specific styles */
+@import "./handbook.css";

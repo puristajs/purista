@@ -1,0 +1,320 @@
+---
+/**
+ * Three enterprise pillars — provider-agnostic, traceable, approval-ready.
+ *
+ * Each pillar gets its own bordered panel with a small animated diagram on
+ * one side and an explanatory body on the other. Diagrams build up in
+ * place, no JS required.
+ */
+---
+
+<div class="vep">
+  {/* ─── 1. Provider-agnostic ─── */}
+  <article class="vep-pillar" style="--tone: var(--color-found); --tone-hi: var(--color-found-hi)">
+    <header class="vep-head">
+      <span class="vep-num site-mono">01</span>
+      <span class="vep-tag site-mono">no lock-in</span>
+    </header>
+
+    <h3 class="vep-title">Provider-agnostic, by construction.</h3>
+    <p class="vep-body">
+      Your business code never imports a vendor SDK. Brokers, secret stores,
+      databases and message queues plug in through adapters — swapped by
+      configuration, not by code change.
+    </p>
+
+    <ul class="vep-points">
+      <li>Same code on AWS, Azure, or self-hosted.</li>
+      <li>Multi-cloud and hybrid deployments without rewrites.</li>
+      <li>Adapter SLAs evaluated independently of feature work.</li>
+    </ul>
+
+    {/* Diagram: service ↔ adapter slot rotation */}
+    <div class="vep-diagram vep-diagram--swap" aria-hidden="true">
+      <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet">
+        <rect x="120" y="60" width="120" height="60" rx="10" fill="var(--color-bg-elev)" stroke="var(--tone)" stroke-width="1.4" />
+        <text x="180" y="86" text-anchor="middle" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="13" font-weight="700">your service</text>
+        <text x="180" y="104" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5" letter-spacing="2">UNCHANGED</text>
+
+        {/* Slot positions */}
+        <g class="vep-slot" style="--i:0">
+          <line x1="116" y1="90" x2="60" y2="90" stroke="var(--tone)" stroke-width="1.5" stroke-dasharray="5 5" />
+          <rect x="6" y="68" width="56" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+          <text x="34" y="86" text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="11" font-weight="700">AMQP</text>
+          <text x="34" y="100" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="8">Amazon MQ</text>
+        </g>
+        <g class="vep-slot" style="--i:1">
+          <line x1="244" y1="90" x2="300" y2="90" stroke="var(--tone)" stroke-width="1.5" stroke-dasharray="5 5" />
+          <rect x="298" y="68" width="56" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+          <text x="326" y="86" text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="11" font-weight="700">NATS</text>
+          <text x="326" y="100" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="8">OSS</text>
+        </g>
+        <g class="vep-slot" style="--i:2">
+          <line x1="180" y1="120" x2="180" y2="156" stroke="var(--tone)" stroke-width="1.5" stroke-dasharray="5 5" />
+          <rect x="152" y="148" width="56" height="28" rx="6" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+          <text x="180" y="166" text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="10" font-weight="700">MQTT</text>
+        </g>
+        <g class="vep-slot" style="--i:3">
+          <line x1="180" y1="60" x2="180" y2="24" stroke="var(--tone)" stroke-width="1.5" stroke-dasharray="5 5" />
+          <rect x="152" y="6" width="56" height="28" rx="6" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+          <text x="180" y="24" text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="10" font-weight="700">Dapr</text>
+        </g>
+      </svg>
+    </div>
+  </article>
+
+  {/* ─── 2. Observable & traceable ─── */}
+  <article class="vep-pillar" style="--tone: var(--color-con); --tone-hi: var(--color-con-hi)">
+    <header class="vep-head">
+      <span class="vep-num site-mono">02</span>
+      <span class="vep-tag site-mono">observable by design</span>
+    </header>
+
+    <h3 class="vep-title">Observable & traceable, end to end.</h3>
+    <p class="vep-body">
+      OpenTelemetry spans on every command, subscription and stream — correlated
+      automatically across services. Every message carries <code>principalId</code> and
+      <code>tenantId</code>, giving you the foundation to implement audit logging
+      exactly where your compliance requirements demand it.
+    </p>
+
+    <ul class="vep-points">
+      <li>Trace context propagated automatically across services.</li>
+      <li>principalId and tenantId on every message — ready for your audit logic.</li>
+      <li>Declared contracts make security and compliance review faster.</li>
+    </ul>
+
+    {/* Diagram: stacked spans timeline */}
+    <div class="vep-diagram vep-diagram--trace" aria-hidden="true">
+      <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet">
+        <line x1="40" y1="22" x2="340" y2="22" stroke="var(--color-line)" stroke-dasharray="2 4" />
+        <line x1="40" y1="156" x2="340" y2="156" stroke="var(--color-line)" stroke-dasharray="2 4" />
+        <text x="34" y="14" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8" letter-spacing="1.5">t₀</text>
+        <text x="328" y="14" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8" letter-spacing="1.5">1.6s</text>
+
+        {[
+          { y: 36,  x: 40, w: 280, label: 'order.createOrder',  span: 'root span' },
+          { y: 60,  x: 60, w: 90,  label: 'validate',           span: 'zod' },
+          { y: 84,  x: 80, w: 70,  label: 'guard.check',         span: 'guard' },
+          { y: 108, x: 130, w: 130, label: 'state.put',          span: 'db' },
+          { y: 132, x: 200, w: 100, label: 'emit OrderPlaced',   span: 'bus' },
+        ].map((s, i) => (
+          <g class="vep-span" style={`--i:${i}`}>
+            <rect x={s.x} y={s.y} width={s.w} height="18" rx="4"
+                  fill="color-mix(in srgb, var(--tone) 18%, transparent)"
+                  stroke="color-mix(in srgb, var(--tone) 55%, transparent)" />
+            <text x={s.x + 6} y={s.y + 12} fill="var(--tone-hi)" font-family="JetBrains Mono" font-size="9">{s.label}</text>
+            <text x={s.x + s.w + 6} y={s.y + 12} fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8" letter-spacing="1">{s.span}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  </article>
+
+  {/* ─── 3. Approval-ready by structure ─── */}
+  <article class="vep-pillar" style="--tone: var(--color-pilot); --tone-hi: var(--color-pilot-hi)">
+    <header class="vep-head">
+      <span class="vep-num site-mono">03</span>
+      <span class="vep-tag site-mono">faster signoff</span>
+    </header>
+
+    <h3 class="vep-title">Approval-ready by structure.</h3>
+    <p class="vep-body">
+      Security, ops, compliance and architecture review the same artifact:
+      the declared contract. Questions become checks. PRs ship in hours,
+      not weeks.
+    </p>
+
+    <ul class="vep-points">
+      <li>Every command exposes its data flow at the schema layer.</li>
+      <li>Ownership, IAM and audit policy are inspectable, not implicit.</li>
+      <li>AI-generated code lands in a structure reviewers already trust.</li>
+    </ul>
+
+    {/* Diagram: review gates ticking on */}
+    <div class="vep-diagram vep-diagram--review" aria-hidden="true">
+      <svg viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet">
+        <line x1="50" y1="90" x2="310" y2="90" stroke="var(--color-line)" stroke-dasharray="2 4" />
+        {[
+          { x: 60,  label: 'CISO' },
+          { x: 130, label: 'CTO' },
+          { x: 200, label: 'COMP' },
+          { x: 270, label: 'CFO' },
+        ].map((g, i) => (
+          <g class="vep-gate" style={`--i:${i}`}>
+            <circle cx={g.x} cy="90" r="22" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+            <path d={`M ${g.x - 8} 90 l 6 6 l 12 -12`} fill="none" stroke="var(--tone-hi)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="vep-tick" />
+            <text x={g.x} y="132" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9" letter-spacing="1.5">{g.label}</text>
+          </g>
+        ))}
+        <g transform="translate(112 144)">
+          <rect width="136" height="26" rx="13" fill="color-mix(in srgb, var(--tone) 16%, transparent)" stroke="var(--tone)" />
+          <text x="68" y="17" text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="11" font-weight="700">APPROVED · ready to ship</text>
+        </g>
+      </svg>
+    </div>
+  </article>
+</div>
+
+<style>
+  .vep {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .vep-pillar {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+      "head    diag"
+      "title   diag"
+      "body    diag"
+      "points  diag";
+    gap: 0.7rem 2rem;
+    padding: 1.8rem 1.8rem 1.6rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    overflow: hidden;
+  }
+  @media (max-width: 900px) {
+    .vep-pillar {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "head"
+        "title"
+        "body"
+        "points"
+        "diag";
+      gap: 0.7rem;
+    }
+  }
+
+  .vep-head {
+    grid-area: head;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    color: var(--color-fg-subtle);
+  }
+  .vep-num {
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    color: var(--tone-hi);
+  }
+  .vep-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--tone-hi);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--tone) 34%, transparent);
+    background: color-mix(in srgb, var(--tone) 12%, transparent);
+  }
+
+  .vep-title {
+    grid-area: title;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+    letter-spacing: 0;
+    line-height: 1.08;
+    color: var(--color-fg-strong);
+    max-width: 22ch;
+  }
+  .vep-body {
+    grid-area: body;
+    color: var(--color-fg-muted);
+    font-size: 1rem;
+    line-height: 1.55;
+    max-width: 54ch;
+  }
+  .vep-points {
+    grid-area: points;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .vep-points li {
+    position: relative;
+    padding-left: 1.4rem;
+    font-size: 0.92rem;
+    color: var(--color-fg);
+  }
+  .vep-points li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0.55em;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: var(--tone);
+  }
+
+  /* ─── Diagrams ─── */
+  .vep-diagram {
+    grid-area: diag;
+    align-self: center;
+    width: 100%;
+    max-width: 420px;
+    justify-self: end;
+  }
+  @media (max-width: 900px) {
+    .vep-diagram { justify-self: stretch; margin-top: 0.8rem; }
+  }
+  .vep-diagram svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Swap diagram: adapter slots animate cycle through being highlighted */
+  .vep-diagram--swap .vep-slot {
+    opacity: 0.45;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: vep-swap 5s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 1.25s);
+  }
+  @keyframes vep-swap {
+    0%, 12%, 100% { opacity: 0.45; }
+    4%, 8%        { opacity: 1; }
+  }
+
+  .vep-diagram--trace .vep-span {
+    opacity: 0;
+    transform: translateX(-12px);
+    animation: vep-span-in 0.55s ease-out forwards;
+    animation-delay: calc(0.2s + var(--i) * 0.18s);
+  }
+  @keyframes vep-span-in {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .vep-diagram--review .vep-gate {
+    opacity: 0;
+    animation: vep-span-in 0.5s ease-out forwards;
+    animation-delay: calc(0.3s + var(--i) * 0.28s);
+  }
+  .vep-diagram--review .vep-tick {
+    stroke-dasharray: 28;
+    stroke-dashoffset: 28;
+    animation: vep-tick 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(0.55s + var(--i) * 0.28s);
+  }
+  @keyframes vep-tick { to { stroke-dashoffset: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vep-slot, .vep-span, .vep-gate, .vep-tick {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

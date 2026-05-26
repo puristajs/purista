@@ -1,0 +1,52 @@
+---
+import type { PuristaColor } from '../../data/handbook'
+import HandbookIcon from './HandbookIcon.astro'
+
+interface Props {
+	title: string
+	description: string
+	icon: string
+	href: string
+	color: PuristaColor
+	featured?: boolean
+}
+
+const { title, description, icon, href, color, featured = false } = Astro.props
+---
+
+<a
+  href={href}
+  style={`--card-accent: var(--color-${color}-hi)`}
+  class:list={[
+    'handbook-card group flex items-center gap-4 rounded-xl border transition-all duration-200',
+    featured
+      ? 'border-[var(--color-line-vivid)] bg-[var(--color-bg-elev)] p-5'
+      : 'border-[var(--color-line)] bg-[var(--color-bg-elev)] p-4 hover:border-[var(--color-line-vivid)]',
+  ]}
+>
+  <HandbookIcon name={icon} color="var(--color-found-hi)" />
+
+  <div class="min-w-0 flex-1">
+    <h3 class="font-display font-semibold text-base leading-tight text-[var(--color-fg)]">
+      <span class="handbook-card-title transition-colors duration-200">{title}</span>
+    </h3>
+    <p class="text-[var(--color-fg-muted)] text-sm leading-snug mt-1">
+      {description}
+    </p>
+  </div>
+
+  {featured && (
+    <div class="shrink-0 hidden sm:flex items-center gap-1">
+      <span class="handbook-card-star text-xs">★</span>
+    </div>
+  )}
+</a>
+
+<style is:global>
+  .handbook-card:hover .handbook-card-title {
+    color: var(--card-accent, var(--color-found-hi));
+  }
+  .handbook-card-star {
+    color: var(--card-accent, var(--color-found-hi));
+  }
+</style>

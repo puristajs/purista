@@ -1,0 +1,181 @@
+---
+/**
+ * Open-source signal strip — repos, license, language, runtime, package
+ * registry. Communicates "this is a real OSS project you can read and ship"
+ * without inventing metrics.
+ */
+
+const signals = [
+	{
+		label: 'License',
+		value: 'MIT',
+		tone: 'pilot',
+		icon: '<path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>',
+	},
+	{
+		label: 'Language',
+		value: 'TypeScript',
+		tone: 'found',
+		icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M11 8v8M14 14a2 2 0 1 0 2-2"/>',
+	},
+	{
+		label: 'Runtime',
+		value: 'Node · Bun · Edge',
+		tone: 'con',
+		icon: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/>',
+	},
+	{
+		label: 'Registry',
+		value: '@puristajs',
+		tone: 'found',
+		icon: '<path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/>',
+	},
+]
+
+const repos = [
+	{
+		name: 'puristajs/purista',
+		body: 'The framework. Services, commands, subscriptions, bridges, adapters.',
+		href: 'https://github.com/puristajs/purista',
+	},
+	{
+		name: 'puristajs/harness',
+		body: 'AI Harness — typed, sandboxed LLM agents inside your app boundary.',
+		href: 'https://github.com/puristajs/harness',
+	},
+]
+---
+
+<div class="site-os">
+  <div class="site-os-signals">
+    {signals.map((s, i) => (
+      <article class="site-os-signal" style={`--tone: var(--color-${s.tone}); --tone-hi: var(--color-${s.tone}-hi); --i:${i}`}>
+        <span class="site-os-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" set:html={s.icon} />
+        </span>
+        <div>
+          <span class="site-os-label">{s.label}</span>
+          <span class="site-os-value">{s.value}</span>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <div class="site-os-repos">
+    {repos.map((r, i) => (
+      <a class="site-os-repo" href={r.href} target="_blank" rel="noopener" style={`--i:${i}`}>
+        <header>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M12 .3a12 12 0 0 0-3.79 23.4c.6.1.82-.26.82-.58v-2.17c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.08 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.95 0-1.32.47-2.4 1.24-3.24-.13-.31-.54-1.55.12-3.23 0 0 1-.32 3.3 1.23a11.4 11.4 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.68.25 2.92.12 3.23.78.84 1.24 1.92 1.24 3.24 0 4.62-2.81 5.65-5.49 5.94.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.58A12 12 0 0 0 12 .3z" />
+          </svg>
+          <span class="site-mono">{r.name}</span>
+          <span class="site-os-repo-arrow" aria-hidden="true">↗</span>
+        </header>
+        <p>{r.body}</p>
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .site-os {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .site-os-signals {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.7rem;
+  }
+  @media (max-width: 760px) {
+    .site-os-signals { grid-template-columns: repeat(2, 1fr); }
+  }
+  .site-os-signal {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-elev) 65%, transparent);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: siteos-in 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.06s);
+  }
+  @keyframes siteos-in { to { opacity: 1; transform: translateY(0); } }
+  .site-os-icon {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--tone) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tone) 32%, transparent);
+    color: var(--tone-hi);
+  }
+  .site-os-icon svg { width: 16px; height: 16px; }
+  .site-os-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+  }
+  .site-os-value {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.98rem;
+    letter-spacing: 0;
+    color: var(--color-fg-strong);
+    margin-top: 0.1rem;
+  }
+
+  .site-os-repos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+  @media (max-width: 760px) {
+    .site-os-repos { grid-template-columns: 1fr; }
+  }
+  .site-os-repo {
+    display: block;
+    padding: 1.1rem 1.2rem;
+    border-radius: 14px;
+    border: 1px solid var(--color-line-strong);
+    background: color-mix(in srgb, var(--color-bg-elev) 70%, transparent);
+    transition: border-color 0.3s var(--site-ease-out), transform 0.3s var(--site-ease-out), background 0.3s var(--site-ease-out);
+  }
+  .site-os-repo:hover {
+    border-color: var(--color-line-vivid);
+    transform: translateY(-2px);
+    background: color-mix(in srgb, var(--color-bg-elev) 92%, transparent);
+  }
+  .site-os-repo header {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--color-fg-strong);
+    font-size: 0.95rem;
+  }
+  .site-os-repo-arrow {
+    margin-left: auto;
+    color: var(--color-fg-muted);
+    transition: transform 0.3s var(--site-ease-spring);
+  }
+  .site-os-repo:hover .site-os-repo-arrow {
+    transform: translate(3px, -3px);
+    color: var(--color-fg);
+  }
+  .site-os-repo p {
+    margin-top: 0.45rem;
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-os-signal { animation: none; opacity: 1; transform: none; }
+  }
+</style>

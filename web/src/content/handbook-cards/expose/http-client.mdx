@@ -1,0 +1,162 @@
+---
+title: HTTP Client
+description: Call external APIs from your service with automatic OpenTelemetry tracing, timeout handling, and typed responses.
+---
+
+The `HttpClient` is a wrapper around native `fetch` that provides typed shortcuts, automatic OpenTelemetry tracing, timeout handling, and bearer token management. Use it in command and subscription functions to call external APIs without importing framework-specific HTTP libraries.
+
+## Basic usage
+
+```typescript [client.ts]
+import { HttpClient } from '@purista/core'
+
+const client = new HttpClient({
+  baseUrl: 'https://api.example.com',
+  defaultHeaders: {
+    'content-type': 'application/json; charset=utf-8',
+  },
+})
+
+// GET request
+const user = await client.get('/users/123')
+
+// POST request with typed response
+const created = await client.post<{ id: string }>('/users', { email: 'test@example.com' })
+
+// PUT request
+await client.put('/users/123', { name: 'Updated' })
+
+// DELETE request
+await client.delete('/users/123')
+```
+
+## Available methods
+
+| Method | Purpose |
+|---|---|
+| `.get(path, options?)` | GET request |
+| `.post(path, body, options?)` | POST request |
+| `.put(path, body, options?)` | PUT request |
+| `.patch(path, body, options?)` | PATCH request |
+| `.delete(path, options?)` | DELETE request |
+| `.setBearerToken(token)` | Set bearer token for all subsequent requests |
+
+## Authentication flow
+
+```typescript [auth.ts]
+// Login to get a token
+const loginResponse = await client.post<{ token: string }>('/login', {
+  username: 'user',
+  password: 'secret',
+})
+
+// Set bearer token for all following requests
+client.setBearerToken(loginResponse.token)
+
+// Now all requests include the Authorization header
+const restricted = await client.get('/restricted/path')
+```
+
+## OpenTelemetry integration
+
+HTTP requests are automatically added to the current trace. Pass the span processor:
+
+```typescript [tracing.ts]
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+
+const openTelemetrySpanProcessor = new SimpleSpanProcessor(
+  new OTLPTraceExporter({ url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT }),
+)
+
+const client = new HttpClient({
+  spanProcessor: openTelemetrySpanProcessor,
+  baseUrl: 'https://api.example.com',
+})
+```
+
+The request headers include standard OpenTelemetry propagation headers, so the external server can continue the trace.
+
+## Error handling
+
+Failed requests throw `UnhandledError` with detailed context:
+
+```typescript [error.ts]
+try {
+  await client.get('/might-fail')
+} catch (error) {
+  if (error instanceof UnhandledError) {
+    console.log(error.data.statusCode) // HTTP status
+    console.log(error.data.method)     // HTTP method
+    console.log(error.data.url)        // Full URL
+    console.log(error.data.response)   // Response body
+  }
+}
+```
+
+Error responses are automatically logged and added to the OpenTelemetry trace.
+
+## Timeout configuration
+
+```typescript [timeout.ts]
+const client = new HttpClient({
+  baseUrl: 'https://api.example.com',
+  timeout: 10000, // 10 seconds
+})
+```
+
+## Using in commands
+
+Register the HTTP client as a resource:
+
+```typescript [resource.ts]
+// Step 1: declare the resource type on the builder
+export const userServiceV1ServiceBuilder = new ServiceBuilder(myServiceInfo)
+  .defineResource<'paymentApi', HttpClient>()
+
+// Step 2: inject the instance when starting the service
+const userService = await userServiceV1Service.getInstance(eventBridge, {
+  resources: {
+    paymentApi: new HttpClient({
+      baseUrl: config.paymentApiUrl,
+      defaultHeaders: { 'content-type': 'application/json' },
+    }),
+  },
+})
+```
+
+Use in commands:
+
+```typescript [command.ts]
+.setCommandFunction(async function (context, payload) {
+  const paymentResult = await context.resources.paymentApi.post('/charge', {
+    amount: payload.amount,
+    currency: payload.currency,
+  })
+
+  return { paymentId: paymentResult.id }
+})
+```
+
+## When to use HttpClient
+
+- Calling third-party REST APIs from commands or subscriptions
+- Webhook integrations
+- External authentication providers
+- Any HTTP communication that needs OpenTelemetry tracing
+
+## Common pitfalls
+
+- **Creating a new client per request.** Reuse the client instance; it manages connections and tokens.
+- **Not handling timeouts.** External APIs can be slow. Always configure timeout.
+- **Ignoring error responses.** Check for `UnhandledError` and handle appropriately.
+- **Storing API keys in client config.** Use secret stores and set tokens at runtime.
+
+## Checklist
+
+- [ ] Client is reused across requests (registered as a resource)
+- [ ] Timeout is configured for external API calls
+- [ ] Bearer tokens are set dynamically, not hardcoded
+- [ ] Error handling covers network failures and HTTP errors
+- [ ] OpenTelemetry span processor is passed for tracing
+- [ ] Tests mock the client, not the underlying fetch

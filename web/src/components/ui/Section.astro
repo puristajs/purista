@@ -1,0 +1,25 @@
+---
+interface Props {
+	id?: string
+	theme?: 'default' | 'sunk' | 'gradient' | 'bordered'
+	class?: string
+}
+
+const { id, theme = 'default', class: className = '' } = Astro.props
+
+const themeClasses: Record<string, string> = {
+	default: '',
+	sunk: 'bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]',
+	gradient: 'soft-gradient',
+	bordered: 'border-t border-b border-[var(--color-line)]',
+}
+---
+
+<section
+  id={id}
+  class:list={['section-pad relative overflow-hidden w-full', themeClasses[theme], className]}
+>
+  <div class="wrap">
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,58 @@
+---
+title: Testing a Service
+description: Validate service setup, configuration, and wiring with lightweight unit tests.
+---
+
+A service itself does not contain logic that needs extensive testing. It is a container — a group for commands and subscriptions. What you do test is the **setup**: that the service builder is valid, config schemas are correct, and resources are properly declared.
+
+## Generated test
+
+When you use the CLI to generate a service, a simple unit test is created automatically:
+
+```typescript [userV1Service.test.ts]
+import { userV1Service as service } from './userV1Service.js'
+
+describe('service user version 1', () => {
+  it('has valid setup', () => {
+    service.testServiceSetup()
+  })
+})
+```
+
+`testServiceSetup()` validates that:
+
+- The service info is well-formed.
+- The config schema parses correctly.
+- All required definitions are present.
+- No naming collisions exist.
+
+This test should pass without changes and acts as a safety net against accidental breakage.
+
+## Testing custom service classes
+
+If you implement a custom service class, you may need additional tests for the custom logic. However, a service class **should not** contain business logic — custom classes are for infrastructure concerns like database connections or third-party adapters.
+
+<div class="callout callout--info">
+  <div class="callout__title">Create a separate test file</div>
+  <p>If you need to test custom service class implementation, do not extend the generated test file. Create your own test file to keep the generated test clean and auto-updatable.</p>
+</div>
+
+## Testing with mock resources
+
+Because resources are TypeScript types, you can inject mocks during testing:
+
+```typescript [test.ts]
+import { createSandbox } from 'sinon'
+
+const sandbox = createSandbox()
+const dbMock = {
+  query: sandbox.stub().resolves([{ id: '1', name: 'Alice' }]),
+}
+
+const myService = await serviceBuilder.getInstance(eventBridge, {
+  logger,
+  resources: { resourceNameDB: dbMock },
+})
+```
+
+This keeps service-level tests fast and isolated from real infrastructure.

@@ -1,0 +1,58 @@
+---
+title: Subscription
+description: Fire-and-forget handlers that listen to events and react without blocking the emitter.
+---
+
+A **subscription** is a fire-and-forget handler that listens to events and reacts without blocking the emitter. Use subscriptions for cross-service communication, event-driven workflows, async side effects, or any flow where the caller does not need an immediate response.
+
+Subscriptions live inside services alongside [commands](/handbook/blocks/command-pattern/) and [streams](/handbook/blocks/stream-pattern/). The service builder collects subscription definitions, and the event bridge routes matching events to the right handler.
+
+<div class="callout callout--info">
+  <div class="callout__title">Fire-and-forget event listeners</div>
+  <p>Subscriptions do not return a response to the caller. They either acknowledge the event (<code>ack</code>), schedule a retry, send it to a dead-letter queue, or drop it. If you need request/response, use a <a href="/handbook/blocks/command-pattern/">command</a> instead.</p>
+</div>
+
+## In this section
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+  <a href="/handbook/blocks/subscription-pattern/what-is-subscription/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">What is a Subscription?</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Understand the subscription lifecycle, explicit outcomes, filtering, and bridge advice.</div>
+  </a>
+  <a href="/handbook/blocks/subscription-pattern/subscription-builder/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">The Subscription Builder</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Define typed event subscriptions, filters, before guards, and explicit handler outcomes.</div>
+  </a>
+  <a href="/handbook/blocks/subscription-pattern/subscription-testing/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Testing</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Test handlers in isolation with mocks or validate bridge routing with runtime harnesses.</div>
+  </a>
+</div>
+
+## Quick reference
+
+### Subscription lifecycle
+
+```mermaid
+flowchart LR
+    A[Event Received] --> B[Filter Match?]
+    B -->|No| C[Event Ignored]
+    B -->|Yes| D[Before Guards]
+    D --> E[Subscription Function]
+    E --> F[Return Outcome]
+    F -->|ack| G[Message Acknowledged]
+    F -->|retry| H[Retry Later]
+    F -->|deadLetter| I[Dead Letter Queue]
+    F -->|drop| J[Event Dropped]
+    F -->|stop-consumer| K[Consumer Stopped]
+```
+
+### Key principles
+
+- Subscriptions are **fire-and-forget** — they do not return a response to the caller.
+- Handler functions must return an **explicit outcome**: `{ status: 'ack' | 'retry' | 'deadLetter' | 'drop' | 'stop-consumer' }`.
+- Use **`async function`**, not arrow functions, to preserve `this` context.
+- **Before guards run in parallel** — any guard that throws cancels the handler.
+- **After guards are handled by the Service runtime** — you define them on the builder but the service orchestrates them.
+- Filter which events to process with `subscribeToEvent()`, `filterSentFrom()`, `filterReceivedBy()`, etc.
+- Bridge advice (`adviceDurable`, `adviceAutoacknowledgeMessage`, etc.) hints at infrastructure behavior but the bridge decides.

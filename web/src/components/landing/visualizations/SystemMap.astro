@@ -1,0 +1,170 @@
+---
+/**
+ * System map — orbiting capabilities around a central "PURISTA core" node.
+ * Pure SVG, animated via CSS keyframes (no JS).
+ *
+ * Renders a 1100x720 svg that's responsive via viewBox.
+ */
+const nodes = [
+	{ id: 'svc-a', label: 'Service A', x: 175, y: 150, tone: 'found' },
+	{ id: 'svc-b', label: 'Service B', x: 925, y: 150, tone: 'con' },
+	{ id: 'svc-c', label: 'Service C', x: 100, y: 540, tone: 'pilot' },
+	{ id: 'svc-d', label: 'Service D', x: 1000, y: 540, tone: 'found' },
+	{ id: 'svc-e', label: 'Service E', x: 550, y: 60, tone: 'con' },
+	{ id: 'svc-f', label: 'Service F', x: 550, y: 660, tone: 'pilot' },
+]
+const center = { x: 550, y: 360 }
+---
+
+<div class="site-systemmap-wrap">
+  <svg
+    viewBox="0 0 1100 720"
+    role="img"
+    aria-label="PURISTA system map: services orbit a structural core."
+    class="site-systemmap"
+  >
+    <defs>
+      <radialGradient id="vsm-core" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FAFAFA" stop-opacity="0.95" />
+        <stop offset="55%" stop-color="#60A5FA" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#60A5FA" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="vsm-path-found" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="#60A5FA" stop-opacity="0" />
+        <stop offset="50%" stop-color="#60A5FA" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="#60A5FA" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="vsm-path-con" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="#C084FC" stop-opacity="0" />
+        <stop offset="50%" stop-color="#C084FC" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="#C084FC" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="vsm-path-pilot" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="#34D399" stop-opacity="0" />
+        <stop offset="50%" stop-color="#34D399" stop-opacity="0.9" />
+        <stop offset="100%" stop-color="#34D399" stop-opacity="0" />
+      </linearGradient>
+
+      <filter id="vsm-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="6" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- Outer halo rings -->
+    <g class="vsm-rings" opacity="0.55">
+      <circle cx="550" cy="360" r="220" fill="none" stroke="rgba(255,255,255,0.06)" />
+      <circle cx="550" cy="360" r="290" fill="none" stroke="rgba(255,255,255,0.05)" stroke-dasharray="2 8" />
+      <circle cx="550" cy="360" r="370" fill="none" stroke="rgba(255,255,255,0.04)" />
+    </g>
+
+    <!-- Connector paths -->
+    {
+      nodes.map((n, i) => {
+        const grad = `url(#vsm-path-${n.tone})`;
+        const dx = n.x - center.x;
+        const dy = n.y - center.y;
+        const cx1 = center.x + dx * 0.5 + (i % 2 === 0 ? -40 : 40);
+        const cy1 = center.y + dy * 0.5 + (i % 2 === 0 ? 30 : -30);
+        const d = `M ${center.x} ${center.y} Q ${cx1} ${cy1} ${n.x} ${n.y}`;
+        return (
+          <g class="vsm-edge">
+            <path d={d} stroke="rgba(255,255,255,0.08)" stroke-width="1" fill="none" />
+            <path
+              d={d}
+              stroke={grad}
+              stroke-width="2"
+              fill="none"
+              class="vsm-pulse"
+              style={`animation-delay: ${i * 0.45}s`}
+            />
+          </g>
+        );
+      })
+    }
+
+    <!-- Core -->
+    <g class="vsm-core" transform={`translate(${center.x} ${center.y})`}>
+      <circle r="120" fill="url(#vsm-core)" filter="url(#vsm-glow)" />
+      <circle r="56" fill="rgba(8,8,11,0.92)" stroke="rgba(255,255,255,0.18)" />
+      <text x="0" y="-6" text-anchor="middle" fill="#FAFAFA" font-family="Inter Tight" font-size="20" font-weight="700">PURISTA</text>
+      <text x="0" y="14" text-anchor="middle" fill="#B4B4BC" font-family="JetBrains Mono" font-size="9.5" letter-spacing="2">CORE</text>
+    </g>
+
+    <!-- Outer nodes -->
+    {
+      nodes.map((n, i) => (
+        <g class="vsm-node" transform={`translate(${n.x} ${n.y})`} style={`animation-delay: ${i * 0.3}s`}>
+          <circle r="34" fill="rgba(15,15,18,0.95)" stroke={`var(--color-${n.tone})`} stroke-opacity="0.7" />
+          <circle r="6" fill={`var(--color-${n.tone})`}>
+            <animate attributeName="r" values="6;8;6" dur="2.4s" repeatCount="indefinite" />
+          </circle>
+          <text y="58" text-anchor="middle" fill="#B4B4BC" font-family="JetBrains Mono" font-size="11" letter-spacing="1.5">{n.label.toUpperCase()}</text>
+        </g>
+      ))
+    }
+  </svg>
+</div>
+
+<style>
+  .site-systemmap-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1100 / 720;
+    max-height: 720px;
+  }
+  .site-systemmap {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .vsm-rings circle {
+    transform-origin: 550px 360px;
+    animation: vsm-spin 60s linear infinite;
+  }
+  .vsm-rings circle:nth-child(2) {
+    animation-direction: reverse;
+    animation-duration: 90s;
+  }
+  .vsm-rings circle:nth-child(3) {
+    animation-duration: 120s;
+  }
+  @keyframes vsm-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .vsm-pulse {
+    stroke-dasharray: 22 320;
+    animation: vsm-flow 3.6s ease-in-out infinite;
+  }
+  @keyframes vsm-flow {
+    from { stroke-dashoffset: 0; opacity: 0.2; }
+    50%  { opacity: 1; }
+    to   { stroke-dashoffset: -340; opacity: 0.2; }
+  }
+  .vsm-node {
+    opacity: 0;
+    transform-origin: center;
+    animation: vsm-pop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes vsm-pop {
+    from { opacity: 0; transform: scale(0.5) translate(var(--tx,0), var(--ty,0)); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .vsm-core {
+    transform-origin: 550px 360px;
+    animation: vsm-breathe 4.5s ease-in-out infinite;
+  }
+  @keyframes vsm-breathe {
+    0%, 100% { transform: translate(550px, 360px) scale(1); }
+    50% { transform: translate(550px, 360px) scale(1.04); }
+  }
+  /* the transform attribute above sets the position, but animation overrides it */
+  @media (prefers-reduced-motion: reduce) {
+    .vsm-rings circle, .vsm-pulse, .vsm-node, .vsm-core { animation: none; }
+    .vsm-node { opacity: 1; }
+  }
+</style>

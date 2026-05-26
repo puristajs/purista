@@ -10,6 +10,7 @@
 	"exclude": [
 		"node_modules",
 		"dist",
+		"web",
 		"examples/ai-basic/src/frontend/**/*",
 		"examples/ai-basic/frontend.vite.config.ts",
 		"examples/ai-basic/frontend.vitest.config.ts"

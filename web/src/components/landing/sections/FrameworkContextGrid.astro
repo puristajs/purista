@@ -1,0 +1,80 @@
+---
+const cards = [
+	{ k: 'logger', v: 'Scoped logger with trace correlation.', tone: 'found', call: 'ctx.logger.info(...)' },
+	{ k: 'resources', v: 'Typed dependencies declared on the service.', tone: 'con', call: 'ctx.resources.db' },
+	{ k: 'secrets / configs / states', v: 'Secret · config · state. Provider-agnostic.', tone: 'pilot', call: 'ctx.secrets.getSecret(...)' },
+	{ k: 'emit', v: 'Emit events; downstream subscriptions react.', tone: 'found', call: 'ctx.emit(name, payload)' },
+	{ k: 'service', v: 'Typed cross-service command invocation.', tone: 'con', call: "ctx.service.Profile['1'].create(...)" },
+	{ k: 'queue', v: 'Enqueue background jobs durably.', tone: 'pilot', call: 'ctx.queue.enqueue(...)' },
+	{ k: 'spans', v: 'Wrap any block in an OpenTelemetry span.', tone: 'found', call: 'ctx.wrapInSpan(name, fn)' },
+	{ k: 'message', v: 'Trace ID, tenantId, principalId, headers.', tone: 'con', call: 'ctx.message.principalId' },
+]
+---
+
+<div class="site-fwk-ctx site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+  {cards.map((card, i) => (
+    <article class="site-fwk-ctx-card" style={`--tone:var(--color-${card.tone});--tone-hi:var(--color-${card.tone}-hi);--i:${i}`}>
+      <header>
+        <span class="site-mono site-fwk-ctx-tag">ctx.{card.k}</span>
+        <span class="site-fwk-ctx-dot" aria-hidden="true"></span>
+      </header>
+      <p>{card.v}</p>
+      <code class="site-fwk-ctx-call site-mono">{card.call}</code>
+    </article>
+  ))}
+</div>
+
+<style>
+  .site-fwk-ctx {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+  }
+  @media (max-width: 980px) { .site-fwk-ctx { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .site-fwk-ctx { grid-template-columns: 1fr; } }
+  .site-fwk-ctx-card {
+    position: relative;
+    padding: 1rem 1.05rem 1.05rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: sitefwk-in 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.05s + 0.1s);
+  }
+  @keyframes sitefwk-in { to { opacity: 1; transform: translateY(0); } }
+  .site-fwk-ctx-card header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .site-fwk-ctx-tag {
+    font-size: 0.84rem;
+    color: var(--tone-hi);
+    letter-spacing: 0.01em;
+  }
+  .site-fwk-ctx-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--tone);
+  }
+  .site-fwk-ctx-card p {
+    color: var(--color-fg-muted);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    margin-bottom: 0.65rem;
+  }
+  .site-fwk-ctx-call {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--color-fg);
+    padding: 0.4rem 0.55rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--color-bg-deep) 60%, transparent);
+    border: 1px solid var(--color-line);
+    overflow-x: auto;
+  }
+</style>

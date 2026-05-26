@@ -1,0 +1,53 @@
+<a href="/enterprise/#audit" class="site-fwk-link">
+  <div>
+    <span class="site-mono site-fwk-link-tag">At runtime</span>
+    <h4>Every command call passes through eight checkpoints.</h4>
+    <p>Validation, IAM, tracing and audit all happen around the function you wrote — never inside it. See the full request lifecycle on the Enterprise page.</p>
+  </div>
+  <span class="site-fwk-link-arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+  .site-fwk-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.6rem;
+    padding: 1.4rem 1.6rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    transition: border-color 0.25s ease;
+    color: inherit;
+  }
+  .site-fwk-link:hover {
+    border-color: var(--color-line-vivid);
+  }
+  .site-fwk-link-tag {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-found-hi);
+  }
+  .site-fwk-link h4 {
+    margin-top: 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--color-fg-strong);
+    letter-spacing: 0;
+  }
+  .site-fwk-link p {
+    margin-top: 0.4rem;
+    color: var(--color-fg-muted);
+    font-size: 0.93rem;
+    line-height: 1.55;
+    max-width: 70ch;
+  }
+  .site-fwk-link-arrow {
+    font-size: 1.4rem;
+    color: var(--color-found-hi);
+    transition: transform 0.3s var(--site-ease-spring);
+  }
+  .site-fwk-link:hover .site-fwk-link-arrow { transform: translateX(6px); }
+</style>

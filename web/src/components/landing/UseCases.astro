@@ -1,0 +1,217 @@
+---
+/**
+ * Example service domains drawn from the handbook (Order, User, Payment,
+ * Notification). Each card lists real command and subscription names and
+ * the events the service emits — a concrete glimpse of how PURISTA fits a
+ * real business shape.
+ */
+
+interface Domain {
+	name: string
+	tone: 'found' | 'con' | 'pilot'
+	blurb: string
+	commands: string[]
+	subs: string[]
+	emits: string[]
+}
+
+const domains: Domain[] = [
+	{
+		name: 'UserService',
+		tone: 'found',
+		blurb: 'Registration, sessions, profiles, IAM bindings.',
+		commands: ['registerUser', 'updateProfile', 'changePassword'],
+		subs: ['onOrgInvite'],
+		emits: ['UserCreated', 'ProfileUpdated'],
+	},
+	{
+		name: 'OrderService',
+		tone: 'con',
+		blurb: 'Order lifecycle, cancellation, line-item math.',
+		commands: ['createOrder', 'cancelOrder', 'reprice'],
+		subs: ['onPaymentMade', 'onShipmentReady'],
+		emits: ['OrderPlaced', 'OrderCancelled', 'OrderFulfilled'],
+	},
+	{
+		name: 'PaymentService',
+		tone: 'pilot',
+		blurb: 'Captures, refunds, providers, idempotency.',
+		commands: ['authorize', 'capture', 'refund'],
+		subs: ['onOrderPlaced'],
+		emits: ['PaymentMade', 'PaymentFailed'],
+	},
+	{
+		name: 'NotificationService',
+		tone: 'found',
+		blurb: 'Email, push, in-app — schema-validated templates.',
+		commands: ['send', 'preview'],
+		subs: ['onUserCreated', 'onOrderFulfilled', 'onPaymentFailed'],
+		emits: ['NotificationSent'],
+	},
+]
+---
+
+<div class="site-uc-grid">
+  {domains.map((d, i) => (
+    <article
+      class="site-uc"
+      data-tone={d.tone}
+      style={`--tone: var(--color-${d.tone}); --tone-hi: var(--color-${d.tone}-hi); --i: ${i}`}
+    >
+      <header class="site-uc-head">
+        <span class="site-uc-glyph" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <h3 class="site-uc-name">{d.name}</h3>
+      </header>
+      <p class="site-uc-blurb">{d.blurb}</p>
+
+      <section class="site-uc-row">
+        <span class="site-uc-label">commands</span>
+        <ul>
+          {d.commands.map((c) => <li class="site-uc-pill site-uc-pill--cmd">{c}</li>)}
+        </ul>
+      </section>
+
+      <section class="site-uc-row">
+        <span class="site-uc-label">subscriptions</span>
+        <ul>
+          {d.subs.map((s) => <li class="site-uc-pill site-uc-pill--sub">{s}</li>)}
+        </ul>
+      </section>
+
+      <section class="site-uc-row">
+        <span class="site-uc-label">emits</span>
+        <ul>
+          {d.emits.map((e) => <li class="site-uc-pill site-uc-pill--evt">{e}</li>)}
+        </ul>
+      </section>
+
+      <div class="site-uc-flow" aria-hidden="true">
+        <span class="site-uc-flow-line"></span>
+      </div>
+    </article>
+  ))}
+</div>
+
+<style>
+  .site-uc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.1rem;
+  }
+  @media (max-width: 880px) {
+    .site-uc-grid { grid-template-columns: 1fr; }
+  }
+
+  .site-uc {
+    position: relative;
+    padding: 1.4rem 1.4rem 1.3rem;
+    border-radius: 18px;
+    border: 1px solid var(--color-line-strong);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--tone) 5%, var(--color-bg-elev)),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: siteuc-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.08s + 0.1s);
+  }
+  @keyframes siteuc-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .site-uc-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.55rem;
+  }
+  .site-uc-glyph {
+    display: inline-flex; gap: 4px;
+  }
+  .site-uc-glyph span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--tone);
+    opacity: 0.45;
+  }
+  .site-uc-glyph span:nth-child(2) { opacity: 0.7; }
+  .site-uc-glyph span:nth-child(3) { opacity: 1; }
+
+  .site-uc-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 0;
+    color: var(--color-fg-strong);
+  }
+  .site-uc-blurb {
+    color: var(--color-fg-muted);
+    font-size: 0.93rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .site-uc-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 0.5rem 0.85rem;
+    align-items: start;
+    padding: 0.45rem 0;
+    border-top: 1px dashed var(--color-line);
+  }
+  .site-uc-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-fg-subtle);
+    padding-top: 0.35rem;
+  }
+  .site-uc-row ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .site-uc-pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.28rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-elev) 60%, transparent);
+    color: var(--color-fg);
+  }
+  .site-uc-pill--cmd { color: var(--color-found-hi); border-color: color-mix(in srgb, var(--color-found) 28%, transparent); background: color-mix(in srgb, var(--color-found) 7%, transparent); }
+  .site-uc-pill--sub { color: var(--color-con-hi);   border-color: color-mix(in srgb, var(--color-con) 28%, transparent);   background: color-mix(in srgb, var(--color-con) 7%, transparent); }
+  .site-uc-pill--evt { color: var(--color-pilot-hi); border-color: color-mix(in srgb, var(--color-pilot) 28%, transparent); background: color-mix(in srgb, var(--color-pilot) 7%, transparent); }
+
+  .site-uc-flow {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    overflow: hidden;
+  }
+  .site-uc-flow-line {
+    display: block;
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(to right, transparent, var(--tone-hi), transparent);
+    transform: translateX(-100%);
+    animation: siteuc-flow 4s linear infinite;
+    animation-delay: calc(var(--i) * 0.3s);
+  }
+  @keyframes siteuc-flow {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(220%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-uc, .site-uc-flow-line { animation: none; opacity: 1; transform: none; }
+  }
+</style>

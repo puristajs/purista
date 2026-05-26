@@ -1,0 +1,194 @@
+---
+title: What is an Agent?
+description: Understand agent types, model capabilities, session policies, and runtime requirements.
+---
+
+An agent is an **AI-powered participant** in your PURISTA system. It receives input, uses a language model to reason about it, optionally calls tools (commands, other agents), and returns a structured output.
+
+Agents are not a separate runtime. They are commands and streams that happen to use AI models for their core logic. Agent capabilities require the `@purista/ai-harness` package — after installing it, `getAgentBuilder` becomes available on `ServiceBuilder`.
+
+<div class="callout callout--info">
+  <div class="callout__title">AI as a first-class citizen</div>
+  <p>Agents use the same service, event bridge, and HTTP exposure infrastructure as commands and streams. The only difference is that the handler delegates reasoning to an AI model instead of pure code. Requires <code>@purista/ai-harness</code>.</p>
+</div>
+
+## Agent types
+
+Agents can be defined in three mutually exclusive ways:
+
+| Type | Method | Use case |
+|---|---|---|
+| **Agent function** | `setAgentFunction(fn)` | Custom logic with direct model access |
+| **Harness agent** | `setHarnessAgent(definition)` | Model-driven agent with tool calling |
+| **Harness workflow** | `setHarnessWorkflow(definition)` | Multi-step orchestrated workflow |
+
+You must pick exactly one execution type per agent.
+
+## Model capabilities
+
+Agents declare which model capabilities they need. The runtime gates method availability based on these capabilities:
+
+| Capability | Available methods |
+|---|---|
+| `object` | `context.harness.models.alias.object(prompt)` |
+| `text` | `context.harness.models.alias.text(prompt)` |
+| `embed` | `context.harness.models.alias.embed(texts)` |
+| `rerank` | `context.harness.models.alias.rerank(query, documents)` |
+
+```typescript
+.addModel('gpt4', {
+  model: 'openai/gpt-4',
+  capabilities: ['object', 'text'],
+  defaults: { temperature: 0.7 },
+})
+```
+
+If you declare only `object` capability, `text()` is not available at compile time or runtime.
+
+## Session policies
+
+Agents can maintain conversation state:
+
+| Mode | Behavior |
+|---|---|
+| `ephemeral` (default) | No state persists between calls |
+| `conversation` | State is tracked across calls |
+
+```typescript
+.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'], // which payload field identifies the session
+})
+```
+
+## Sandbox policy
+
+For untrusted inputs or third-party models, enable sandboxing:
+
+```typescript
+.setSandboxPolicy({
+  enabled: true,
+  adapter: 'isolated-vm', // or custom adapter
+})
+```
+
+## Runtime requirements
+
+To run agents, your service needs:
+
+```typescript
+import { ServiceBuilder } from '@purista/core'
+import '@purista/ai-harness' // registers getAgentBuilder on ServiceBuilder
+
+const aiV1ServiceBuilder = new ServiceBuilder({
+  serviceName: 'AiService',
+  serviceVersion: '1',
+})
+
+// add agent definitions, then:
+const aiService = await aiV1ServiceBuilder.getInstance(eventBridge, {
+  queueBridge: /* your queue bridge */,
+  ai: {
+    models: {
+      gpt4: { /* model config */ },
+    },
+  },
+})
+```
+
+<div class="callout callout--warning">
+  <div class="callout__title">Queue bridge required</div>
+  <p>Agents require a <code>queueBridge</code> in service options. Without it, agent execution fails at runtime. This is because agents may queue internal tasks or delegate to other agents.</p>
+</div>
+
+## Agent as queue-based
+
+Agents are internally queue-based. When you invoke an agent, the request goes through the queue system:
+
+```typescript
+// Inside an agent run function
+const result = await context.invoke.agents['SupportAgent.1'].run({
+  query: 'How do I reset my password?',
+})
+```
+
+This queues the agent job and waits for completion (if the response mode requires it).
+
+## Response modes
+
+Control how the agent returns results:
+
+| Mode | Behavior |
+|---|---|
+| `accepted` | Return immediately with job ID |
+| `status` | Return status after completion |
+| `stream` | Stream chunks as they are generated |
+| `event` | Emit an event on completion |
+| `callback` | Call a callback URL on completion |
+
+```typescript
+.setResponseMode('stream', {
+  progressEventName: 'agentResponseChunk',
+})
+```
+
+## Streaming agents
+
+Agents can stream their reasoning:
+
+```typescript
+.setStreamingMode('stream') // or 'aggregate'
+```
+
+In `stream` mode, the agent emits chunks as the model generates them. In `aggregate` mode, the full response is collected before returning.
+
+## Tools and skills
+
+Agents call tools (commands) and other agents:
+
+```typescript
+.canInvoke('UserService', '1', 'getUser')
+.canInvokeAgent('SupportAgent', '1')
+.useSkills(['customer-support', 'billing'])
+.useBuiltInTools(['search', 'calculator'])
+```
+
+Tools are exposed to the model as functions it can call. The model decides which tools to use based on the input.
+
+## Execution policy
+
+Fine-tune agent execution:
+
+```typescript
+.setExecutionPolicy({
+  leaseTtlMs: 60_000,
+  heartbeatIntervalMs: 15_000,
+  maxAttempts: 2,
+  maxParallelHandlers: 1,
+  timeoutMs: 300_000,
+})
+```
+
+## Execution profile
+
+For long-running agents:
+
+```typescript
+.setExecutionProfile('longRunning', {
+  maxRuntimeMs: 600_000,
+  strict: false,
+})
+```
+
+## Signal for cancellation
+
+Agents can check for cancellation:
+
+```typescript
+.setRunFunction(async function (context, payload, parameter) {
+  if (context.signal.aborted) {
+    return { cancelled: true }
+  }
+  // ... model reasoning
+})
+```

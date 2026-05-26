@@ -1,0 +1,966 @@
+header:
+  version: "0.1"
+  name: purista-mental-model
+  assetBaseUrl: /assets/aws-3d
+  assets:
+    - id: application-server
+      path: application-server.svg
+      anchor: [0.5, 1]
+    - id: application
+      path: application.svg
+      anchor: [0.5, 1]
+    - id: workflow-service
+      path: workflow-service.svg
+      anchor: [0.5, 1]
+    - id: file
+      path: file.svg
+      anchor: [0.5, 1]
+    - id: decider
+      path: decider.svg
+      anchor: [0.5, 1]
+    - id: lambda
+      path: lambda.svg
+      anchor: [0.5, 1]
+    - id: sqs
+      path: sqs.svg
+      anchor: [0.5, 1]
+    - id: rds
+      path: rds.svg
+      anchor: [0.5, 1]
+    - id: internet-gateway
+      path: internet-gateway.svg
+      anchor: [0.125, 1]
+    - id: security-token-service
+      path: security-token-service.svg
+      anchor: [0.5, 1]
+  grid:
+    cellSize: 56
+  floor:
+    visible: true
+    layer: ground
+  layers:
+    - name: ground
+    - name: zones
+    - name: structures
+    - name: flows
+    - name: labels
+
+scenes:
+  - id: business-domains
+    elements:
+      - id: order-service-surface
+        asset: rectangle
+        layer: zones
+        at: [8, 18]
+        size: 5
+        primitive:
+          rectangle:
+            fill: "#2563eb"
+            stroke: "#60a5fa"
+            strokeWidth: 2
+            opacity: 0.14
+      - id: payment-service-surface
+        asset: rectangle
+        layer: zones
+        at: [24, 10]
+        size: 5
+        primitive:
+          rectangle:
+            fill: "#059669"
+            stroke: "#34d399"
+            strokeWidth: 2
+            opacity: 0.13
+      - id: fulfillment-service-surface
+        asset: rectangle
+        layer: zones
+        at: [40, 18]
+        size: 5
+        primitive:
+          rectangle:
+            fill: "#7c3aed"
+            stroke: "#c084fc"
+            strokeWidth: 2
+            opacity: 0.13
+      - id: support-service-surface
+        asset: rectangle
+        layer: zones
+        at: [24, 30]
+        size: 5
+        primitive:
+          rectangle:
+            fill: "#f59e0b"
+            stroke: "#fbbf24"
+            strokeWidth: 2
+            opacity: 0.12
+      - id: order-service-domain
+        asset: application-server
+        layer: structures
+        at: [8, 18]
+        size: 5
+        enter: rise-from-ground
+      - id: payment-service-domain
+        asset: application-server
+        layer: structures
+        at: [24, 10]
+        size: 5
+        enter: rise-from-ground
+      - id: fulfillment-service-domain
+        asset: application-server
+        layer: structures
+        at: [40, 18]
+        size: 5
+        enter: rise-from-ground
+      - id: support-service-domain
+        asset: application-server
+        layer: structures
+        at: [24, 30]
+        size: 5
+        enter: rise-from-ground
+      - id: order-domain-label
+        asset: text
+        layer: labels
+        at: [9, 11]
+        text:
+          value: Order
+          align: middle
+          fontSize: 56
+          fontWeight: 800
+      - id: payment-domain-label
+        asset: text
+        layer: labels
+        at: [26, 2]
+        text:
+          value: Payment
+          align: middle
+          fontSize: 56
+          fontWeight: 800
+      - id: fulfillment-domain-label
+        asset: text
+        layer: labels
+        at: [41, 11]
+        text:
+          value: Order
+          align: middle
+          fontSize: 56
+          fontWeight: 800
+      - id: support-domain-label
+        asset: text
+        layer: labels
+        at: [25, 24]
+        text:
+          value: User
+          align: middle
+          fontSize: 56
+          fontWeight: 800
+    camera:
+      target:
+        area:
+          at: [0, 0]
+          size: [52, 42]
+      padding: 72
+      duration: 500
+      easing: ease-out
+
+  - id: isolate-order-service
+    update:
+      elements:
+        - id: payment-service-surface
+          size: 1
+          at: [0, 0]
+          primitive:
+            rectangle:
+              fill: "#059669"
+              stroke: "#34d399"
+              strokeWidth: 0
+              opacity: 0.0
+        - id: payment-service-domain
+          size: 1
+          at: [0, 0]
+        - id: payment-domain-label
+          size: 1
+          at: [0, 0]
+          text:
+            value: _
+        - id: fulfillment-service-surface
+          size: 1
+          primitive:
+            rectangle:
+              fill: "#059669"
+              stroke: "#34d399"
+              strokeWidth: 0
+              opacity: 0.0
+        - id: fulfillment-service-domain
+          size: 1
+        - id: fulfillment-domain-label
+          size: 1
+          text:
+            value: _
+        - id: support-service-surface
+          size: 1
+          primitive:
+            rectangle:
+              fill: "#059669"
+              stroke: "#34d399"
+              strokeWidth: 0
+              opacity: 0.0
+        - id: support-service-domain
+          size: 1
+        - id: support-domain-label
+          text:
+            value: _
+          size: 1
+        - id: order-service-surface
+          at: [24, 20]
+          size: 7
+          primitive:
+            rectangle:
+              fill: "#2563eb"
+              stroke: "#60a5fa"
+              strokeWidth: 3
+              opacity: 0.18
+        - id: order-service-domain
+          at: [24, 20]
+          size: 7
+        - id: order-domain-label
+          at: [26, 11]
+          text:
+            value: Service
+            align: middle
+            fontSize: 56
+            fontWeight: 800
+    camera:
+      target:
+        area:
+          at: [16, 9]
+          size: [20, 23]
+      padding: 52
+      duration: 900
+      easing: ease-in-out
+
+  - id: service-actions
+    remove:
+      elements:
+        - id: order-service-domain
+        - id: payment-service-surface
+        - id: payment-service-domain
+        - id: payment-domain-label
+        - id: fulfillment-service-surface
+        - id: fulfillment-service-domain
+        - id: fulfillment-domain-label
+        - id: support-service-surface
+        - id: support-service-domain
+        - id: support-domain-label
+    update:
+      elements:
+        - id: order-service-surface
+          at: [14, 12]
+          size: 24
+          primitive:
+            rectangle:
+              fill: "#0f172a"
+              stroke: "#60a5fa"
+              strokeWidth: 3
+              opacity: 0.62
+        - id: order-domain-label
+          at: [26, 9]
+          text:
+            value: Order Service v1
+            align: middle
+            fontSize: 22
+            fontWeight: 800
+    add:
+      elements:
+        - id: create-order-command
+          asset: application
+          layer: structures
+          at: [19, 24]
+          size: 3
+          enter: slide-in-left
+        - id: update-order-command
+          asset: application
+          layer: structures
+          at: [26, 24]
+          size: 3
+          enter: slide-in-left
+        - id: cancel-order-command
+          asset: application
+          layer: structures
+          at: [33, 24]
+          size: 3
+          enter: slide-in-left
+        - id: create-order-label
+          asset: text
+          layer: labels
+          at: [19, 18]
+          text:
+            value: |
+              create
+              order
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: update-order-label
+          asset: text
+          layer: labels
+          at: [26, 18]
+          text:
+            value: |
+              update
+              order
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: cancel-order-label
+          asset: text
+          layer: labels
+          at: [33, 18]
+          text:
+            value: |
+              cancel
+              order
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+    camera:
+      target:
+        area:
+          at: [12, 8]
+          size: [29, 32]
+      padding: 48
+      duration: 800
+      easing: ease-in-out
+
+  - id: focus-command
+    remove:
+      elements:
+        - id: update-order-command
+        - id: update-order-label
+        - id: cancel-order-command
+        - id: cancel-order-label
+        - id: order-domain-label
+    update:
+      elements:
+        - id: order-service-surface
+          at: [17, 13]
+          size: 20
+          primitive:
+            rectangle:
+              fill: "#0f172a"
+              stroke: "#60a5fa"
+              strokeWidth: 3
+              opacity: 0.55
+        - id: create-order-command
+          at: [27, 25]
+          size: 5
+        - id: create-order-label
+          at: [27, 16]
+          text:
+            value: |
+              createOrder
+              command
+            align: middle
+            fontSize: 24
+            fontWeight: 800
+    camera:
+      target:
+        area:
+          at: [16, 11]
+          size: [22, 27]
+      padding: 38
+      duration: 900
+      easing: ease-in-out
+
+  - id: command-contracts
+    add:
+      elements:
+        - id: input-schema
+          asset: file
+          layer: structures
+          at: [15, 25]
+          size: 3
+          enter: slide-in-right
+        - id: output-schema
+          asset: file
+          layer: structures
+          at: [39, 25]
+          size: 3
+          enter: slide-in-left
+        - id: input-label
+          asset: text
+          layer: labels
+          at: [15, 19]
+          text:
+            value: |
+              input
+              schema
+            align: middle
+            fontSize: 16
+            fontWeight: 800
+        - id: output-label
+          asset: text
+          layer: labels
+          at: [39, 19]
+          text:
+            value: |
+              output
+              schema
+            align: middle
+            fontSize: 16
+            fontWeight: 800
+        - id: boundary-label
+          asset: text
+          layer: labels
+          at: [27, 35]
+          text:
+            value: validation happens before and after the handler
+            align: middle
+            fontSize: 16
+            fontWeight: 800
+      connections:
+        - id: input-to-command
+          from:
+            element: input-schema
+            side: right
+          to:
+            element: create-order-command
+            side: left
+          style:
+            pattern: dashed
+            stroke: "#60a5fa"
+            strokeWidth: 4
+          end: arrow
+          ambient:
+            - name: flow
+        - id: command-to-output
+          from:
+            element: create-order-command
+            side: right
+          to:
+            element: output-schema
+            side: left
+          style:
+            pattern: dashed
+            stroke: "#34d399"
+            strokeWidth: 4
+          end: arrow
+          ambient:
+            - name: flow
+
+  - id: command-pipeline
+    add:
+      elements:
+        - id: guard-step
+          asset: decider
+          layer: structures
+          at: [18, 36]
+          size: 2
+          enter: rise-from-ground
+        - id: transform-step
+          asset: lambda
+          layer: structures
+          at: [25, 39]
+          size: 2
+          enter: rise-from-ground
+        - id: handler-step
+          asset: workflow-service
+          layer: structures
+          at: [33, 37]
+          size: 3
+          enter: rise-from-ground
+        - id: event-step
+          asset: circle
+          layer: flows
+          at: [41, 35]
+          size: 1
+          enter: fade-in
+          ambient:
+            - name: pulse
+          primitive:
+            circle:
+              fill: "#f59e0b"
+              stroke: "#fde68a"
+              strokeWidth: 2
+              opacity: 0.9
+        - id: guard-label
+          asset: text
+          layer: labels
+          at: [18, 32]
+          text:
+            value: guards
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: transform-label
+          asset: text
+          layer: labels
+          at: [25, 42]
+          text:
+            value: transformers
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: handler-label
+          asset: text
+          layer: labels
+          at: [33, 32]
+          text:
+            value: handler
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: event-label
+          asset: text
+          layer: labels
+          at: [41, 32]
+          text:
+            value: event
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+      connections:
+        - id: command-to-guard
+          from:
+            element: create-order-command
+            side: bottom
+          to:
+            element: guard-step
+            side: top
+          style:
+            pattern: dotted
+            stroke: "#c084fc"
+            strokeWidth: 3
+          end: arrow
+          ambient:
+            - name: flow
+        - id: guard-to-transform
+          from:
+            element: guard-step
+            side: right
+          to:
+            element: transform-step
+            side: left
+          style:
+            pattern: dotted
+            stroke: "#c084fc"
+            strokeWidth: 3
+          end: arrow
+          ambient:
+            - name: flow
+        - id: transform-to-handler
+          from:
+            element: transform-step
+            side: right
+          to:
+            element: handler-step
+            side: left
+          style:
+            pattern: dotted
+            stroke: "#c084fc"
+            strokeWidth: 3
+          end: arrow
+          ambient:
+            - name: flow
+        - id: handler-to-event
+          from:
+            element: handler-step
+            side: right
+          to:
+            element: event-step
+            side: left
+          style:
+            pattern: dotted
+            stroke: "#f59e0b"
+            strokeWidth: 3
+          end: arrow
+          ambient:
+            - name: flow
+    camera:
+      target:
+        area:
+          at: [13, 12]
+          size: [33, 35]
+      padding: 42
+      duration: 800
+      easing: ease-in-out
+
+  - id: service-instance
+    remove:
+      connections:
+        - id: input-to-command
+        - id: command-to-output
+        - id: command-to-guard
+        - id: guard-to-transform
+        - id: transform-to-handler
+        - id: handler-to-event
+      elements:
+        - id: input-schema
+        - id: input-label
+        - id: output-schema
+        - id: output-label
+        - id: boundary-label
+        - id: guard-step
+        - id: guard-label
+        - id: transform-step
+        - id: transform-label
+        - id: handler-step
+        - id: handler-label
+        - id: event-step
+        - id: event-label
+        - id: create-order-command
+        - id: create-order-label
+    update:
+      elements:
+        - id: order-service-surface
+          at: [14, 12]
+          size: 26
+          primitive:
+            rectangle:
+              fill: "#0f172a"
+              stroke: "#60a5fa"
+              strokeWidth: 3
+              opacity: 0.55
+    add:
+      elements:
+        - id: running-service
+          asset: application-server
+          layer: structures
+          at: [27, 27]
+          size: 5
+          enter: rise-from-ground
+        - id: instance-label
+          asset: text
+          layer: labels
+          at: [27, 9]
+          text:
+            value: |
+              Order Service instance
+              definition + runtime contracts
+            align: middle
+            fontSize: 22
+            fontWeight: 800
+        - id: resources-socket
+          asset: circle
+          layer: flows
+          at: [18, 25]
+          size: 1
+          enter: fade-in
+          primitive:
+            circle:
+              fill: "#2563eb"
+              stroke: "#bfdbfe"
+              strokeWidth: 2
+              opacity: 0.9
+        - id: bridge-socket
+          asset: circle
+          layer: flows
+          at: [36, 25]
+          size: 1
+          enter: fade-in
+          primitive:
+            circle:
+              fill: "#f59e0b"
+              stroke: "#fde68a"
+              strokeWidth: 2
+              opacity: 0.9
+        - id: config-socket
+          asset: circle
+          layer: flows
+          at: [27, 16]
+          size: 1
+          enter: fade-in
+          primitive:
+            circle:
+              fill: "#7c3aed"
+              stroke: "#ddd6fe"
+              strokeWidth: 2
+              opacity: 0.9
+        - id: queue-socket
+          asset: circle
+          layer: flows
+          at: [27, 37]
+          size: 1
+          enter: fade-in
+          primitive:
+            circle:
+              fill: "#0ea5e9"
+              stroke: "#bae6fd"
+              strokeWidth: 2
+              opacity: 0.9
+        - id: resources-label
+          asset: text
+          layer: labels
+          at: [18, 22]
+          text:
+            value: resources
+            align: middle
+            fontSize: 15
+            fontWeight: 800
+        - id: bridge-label
+          asset: text
+          layer: labels
+          at: [36, 22]
+          text:
+            value: EventBridge
+            align: middle
+            fontSize: 15
+            fontWeight: 800
+        - id: config-label
+          asset: text
+          layer: labels
+          at: [27, 14]
+          text:
+            value: config/store
+            align: middle
+            fontSize: 15
+            fontWeight: 800
+        - id: queue-label
+          asset: text
+          layer: labels
+          at: [27, 40]
+          text:
+            value: QueueBridge
+            align: middle
+            fontSize: 15
+            fontWeight: 800
+      connections:
+        - id: resources-to-instance
+          from:
+            element: resources-socket
+            side: right
+          to:
+            element: running-service
+            side: left
+          style:
+            stroke: "#60a5fa"
+            strokeWidth: 4
+          start: dot
+          end: dot
+        - id: instance-to-bridge
+          from:
+            element: running-service
+            side: right
+          to:
+            element: bridge-socket
+            side: left
+          style:
+            stroke: "#fbbf24"
+            strokeWidth: 4
+          start: dot
+          end: dot
+        - id: config-to-instance
+          from:
+            element: config-socket
+            side: bottom
+          to:
+            element: running-service
+            side: top
+          style:
+            stroke: "#c084fc"
+            strokeWidth: 4
+          start: dot
+          end: dot
+        - id: instance-to-queue
+          from:
+            element: running-service
+            side: bottom
+          to:
+            element: queue-socket
+            side: top
+          style:
+            stroke: "#38bdf8"
+            strokeWidth: 4
+          start: dot
+          end: dot
+    camera:
+      target:
+        area:
+          at: [12, 8]
+          size: [31, 36]
+      padding: 48
+      duration: 900
+      easing: ease-in-out
+
+  - id: adapter-plug-in
+    add:
+      elements:
+        - id: database-adapter
+          asset: rds
+          layer: structures
+          at: [8, 27]
+          size: 4
+          enter: slide-in-right
+        - id: queue-adapter
+          asset: sqs
+          layer: structures
+          at: [27, 48]
+          size: 4
+          enter: slide-in-left
+        - id: gateway-adapter
+          asset: internet-gateway
+          layer: structures
+          at: [48, 27]
+          size: 4
+          enter: slide-in-left
+        - id: secret-adapter
+          asset: security-token-service
+          layer: structures
+          at: [27, 5]
+          size: 4
+          enter: slide-in-right
+        - id: database-label
+          asset: text
+          layer: labels
+          at: [8, 22]
+          text:
+            value: database adapter
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: queue-adapter-label
+          asset: text
+          layer: labels
+          at: [27, 51]
+          text:
+            value: queue adapter
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: gateway-label
+          asset: text
+          layer: labels
+          at: [48, 22]
+          text:
+            value: event bridge adapter
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+        - id: secret-label
+          asset: text
+          layer: labels
+          at: [27, 2]
+          text:
+            value: secret/config adapter
+            align: middle
+            fontSize: 14
+            fontWeight: 800
+      connections:
+        - id: database-to-resources
+          from:
+            element: database-adapter
+            side: right
+          to:
+            element: resources-socket
+            side: left
+          style:
+            pattern: dotted
+            stroke: "#60a5fa"
+            strokeWidth: 4
+          end: arrow
+          ambient:
+            - name: flow
+        - id: sqs-to-queue
+          from:
+            element: queue-adapter
+            side: top
+          to:
+            element: queue-socket
+            side: bottom
+          style:
+            pattern: dotted
+            stroke: "#38bdf8"
+            strokeWidth: 4
+          end: arrow
+          ambient:
+            - name: flow
+        - id: gateway-to-bridge
+          from:
+            element: gateway-adapter
+            side: left
+          to:
+            element: bridge-socket
+            side: right
+          style:
+            pattern: dotted
+            stroke: "#fbbf24"
+            strokeWidth: 4
+          end: arrow
+          direction: reverse
+          ambient:
+            - name: flow
+        - id: secret-to-config
+          from:
+            element: secret-adapter
+            side: bottom
+          to:
+            element: config-socket
+            side: top
+          style:
+            pattern: dotted
+            stroke: "#c084fc"
+            strokeWidth: 4
+          end: arrow
+          ambient:
+            - name: flow
+    camera:
+      target:
+        area:
+          at: [4, 0]
+          size: [50, 55]
+      padding: 56
+      duration: 900
+      easing: ease-in-out
+
+  - id: observable-business-flow
+    update:
+      elements:
+        - id: running-service
+          ambient:
+            - name: pulse
+    add:
+      elements:
+        - id: trace-label
+          asset: text
+          layer: labels
+          at: [38, 5]
+          text:
+            value: traceId follows the whole business flow
+            align: middle
+            fontSize: 18
+            fontWeight: 800
+      connections:
+        - id: trace-path
+          route: [[48, 27], [36, 27], [36, 25], [27, 25], [27, 37], [27, 48], [18, 48], [18, 25], [8, 25], [8, 27]]
+          style:
+            pattern: dotted
+            stroke: "#ffffff"
+            strokeWidth: 5
+            opacity: 0.9
+          start: dot
+          end: arrow
+          ambient:
+            - name: flow
+
+  - id: audit-overview
+    add:
+      elements:
+        - id: audit-label
+          asset: text
+          layer: labels
+          at: [27, 55]
+          text:
+            value: |
+              Human review surface:
+              service boundary, command contract,
+              runtime wiring, observable flow.
+            align: middle
+            fontSize: 18
+            fontWeight: 800
+            fill: "#bbf7d0"
+    camera:
+      target:
+        area:
+          at: [4, 0]
+          size: [50, 80]
+      padding: 72
+      duration: 900
+      easing: ease-out

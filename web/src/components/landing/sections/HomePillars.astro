@@ -1,0 +1,255 @@
+---
+const pillars = [
+	{
+		num: '01',
+		tone: 'found',
+		viz: 'swap',
+		title: 'Provider-agnostic',
+		body: 'Brokers, secrets, stores and queues plug in through adapters. Swap them by config, never by code.',
+		href: '/enterprise/#pillars',
+		cta: 'See the proof',
+	},
+	{
+		num: '02',
+		tone: 'con',
+		viz: 'trace',
+		title: 'Traceable & auditable',
+		body: 'OpenTelemetry on every command, subscription and stream. Spans emitted by routing — no instrumentation code in your handlers.',
+		href: '/enterprise/#pillars',
+		cta: 'How audit works',
+	},
+	{
+		num: '03',
+		tone: 'pilot',
+		viz: 'approve',
+		title: 'Approval-ready by structure',
+		body: 'Security, ops, compliance and architecture all review the same artifact — the declared contract.',
+		href: '/enterprise/',
+		cta: 'For decision makers',
+	},
+]
+---
+
+<div class="site-home-pillars">
+  {pillars.map((p, i) => (
+    <a
+      class="site-home-pillar"
+      href={p.href}
+      style={`--tone:var(--color-${p.tone});--tone-hi:var(--color-${p.tone}-hi);--i:${i}`}
+    >
+      <header>
+        <span class="site-home-pillar-num site-mono">{p.num}</span>
+        <span class="site-home-pillar-dot" aria-hidden="true"></span>
+      </header>
+
+      <div class="site-home-pillar-viz" aria-hidden="true">
+        {p.viz === 'swap' && (
+          <svg viewBox="0 0 280 120" preserveAspectRatio="xMidYMid meet" class="vhp-swap">
+            <rect x="110" y="38" width="60" height="44" rx="10" fill="var(--color-bg-elev)" stroke="var(--tone)" stroke-width="1.4" />
+            <text x="140" y="60" text-anchor="middle" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="11" font-weight="700">service</text>
+            <text x="140" y="74" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="7" letter-spacing="1.5">UNCHANGED</text>
+            {[
+              { x1: 110, y1: 60, x2: 62, y2: 60, rx: 6, ry: 44, w: 54, h: 32, label: 'Redis', meta: 'oss', tx: 33, ty: 58 },
+              { x1: 170, y1: 60, x2: 218, y2: 60, rx: 220, ry: 44, w: 54, h: 32, label: 'NATS', meta: 'oss', tx: 247, ty: 58 },
+              { x1: 140, y1: 38, x2: 140, y2: 22, rx: 116, ry: 4, w: 48, h: 18, label: 'Dapr', meta: '', tx: 140, ty: 17 },
+              { x1: 140, y1: 82, x2: 140, y2: 98, rx: 116, ry: 98, w: 48, h: 18, label: 'AMQP', meta: '', tx: 140, ty: 111 },
+            ].map((slot, slotIndex) => (
+              <g class="vhp-swap-slot" style={`--i:${slotIndex}`}>
+                <line x1={slot.x1} y1={slot.y1} x2={slot.x2} y2={slot.y2} stroke="var(--tone)" stroke-width="1.4" stroke-dasharray="4 4" />
+                <rect x={slot.rx} y={slot.ry} width={slot.w} height={slot.h} rx="7" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+                <text x={slot.tx} y={slot.ty} text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="10" font-weight="700">{slot.label}</text>
+                {slot.meta && <text x={slot.tx} y={slot.ty + 12} text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="7">{slot.meta}</text>}
+              </g>
+            ))}
+          </svg>
+        )}
+
+        {p.viz === 'trace' && (
+          <svg viewBox="0 0 280 120" preserveAspectRatio="xMidYMid meet" class="vhp-trace">
+            <line x1="32" y1="10" x2="262" y2="10" stroke="var(--color-line)" stroke-dasharray="2 4" />
+            <text x="26" y="9" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="7" letter-spacing="1.5">t0</text>
+            <text x="254" y="9" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="7" letter-spacing="1.5">1.6s</text>
+            {[
+              { y: 22, x: 32, w: 220, label: 'order.create' },
+              { y: 44, x: 48, w: 78, label: 'validate' },
+              { y: 66, x: 60, w: 60, label: 'iam.check' },
+              { y: 88, x: 100, w: 96, label: 'state.put' },
+              { y: 110, x: 158, w: 80, label: 'emit' },
+            ].map((s, i) => (
+              <g class="vhp-trace-span" style={`--i:${i}`}>
+                <rect x={s.x} y={s.y - 6} width={s.w} height="12" rx="3" fill="color-mix(in srgb, var(--tone) 22%, transparent)" stroke="color-mix(in srgb, var(--tone) 55%, transparent)" />
+                <text x={s.x + 4} y={s.y + 3} fill="var(--tone-hi)" font-family="JetBrains Mono" font-size="7">{s.label}</text>
+              </g>
+            ))}
+          </svg>
+        )}
+
+        {p.viz === 'approve' && (
+          <svg viewBox="0 0 280 120" preserveAspectRatio="xMidYMid meet" class="vhp-approve">
+            <line x1="36" y1="50" x2="244" y2="50" stroke="var(--color-line)" stroke-dasharray="2 4" />
+            {[
+              { x: 50, label: 'CISO' },
+              { x: 110, label: 'CTO' },
+              { x: 170, label: 'COMP' },
+              { x: 230, label: 'CFO' },
+            ].map((g, i) => (
+              <g class="vhp-approve-gate" style={`--i:${i}`}>
+                <circle cx={g.x} cy="50" r="14" fill="var(--color-bg-elev)" stroke="var(--tone)" />
+                <path d={`M ${g.x - 5} 50 l 4 4 l 7 -8`} fill="none" stroke="var(--tone-hi)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="vhp-approve-tick" />
+                <text x={g.x} y="76" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="7" letter-spacing="1.2">{g.label}</text>
+              </g>
+            ))}
+            <g class="vhp-approve-seal">
+              <rect x="90" y="92" width="100" height="22" rx="11" fill="color-mix(in srgb, var(--tone) 18%, transparent)" stroke="var(--tone)" />
+              <text x="140" y="106" text-anchor="middle" fill="var(--tone-hi)" font-family="Inter Tight" font-size="9" font-weight="700">APPROVED</text>
+            </g>
+          </svg>
+        )}
+      </div>
+
+      <h3>{p.title}</h3>
+      <p>{p.body}</p>
+      <footer>
+        <span>{p.cta}</span>
+        <span class="site-home-pillar-arrow" aria-hidden="true">→</span>
+      </footer>
+    </a>
+  ))}
+</div>
+
+<style>
+  .site-home-pillars {
+    margin-top: clamp(2rem, 4vw, 3rem);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 900px) { .site-home-pillars { grid-template-columns: 1fr; } }
+
+  .site-home-pillar {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 0.7rem;
+    padding: 1.4rem 1.4rem 1.2rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    color: inherit;
+    overflow: hidden;
+    transition: border-color 0.25s ease;
+    opacity: 0;
+    animation: sitehp-in 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.1s + 0.1s);
+  }
+  @keyframes sitehp-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .site-home-pillar:hover {
+    border-color: var(--color-line-vivid);
+  }
+  .site-home-pillar header,
+  .site-home-pillar footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .site-home-pillar-num {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--tone-hi);
+  }
+  .site-home-pillar-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--tone);
+  }
+  .site-home-pillar-viz {
+    margin: 0.4rem -0.4rem;
+    padding: 0.6rem 0.4rem;
+    aspect-ratio: 280 / 120;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-sunk);
+    border: 1px solid var(--color-line);
+    overflow: hidden;
+  }
+  .site-home-pillar-viz svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .site-home-pillar h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 0;
+    color: var(--color-fg-strong);
+    line-height: 1.1;
+  }
+  .site-home-pillar p {
+    color: var(--color-fg-muted);
+    font-size: 0.93rem;
+    line-height: 1.55;
+  }
+  .site-home-pillar footer {
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--color-line);
+    color: var(--tone-hi);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .site-home-pillar-arrow { transition: transform 0.35s var(--site-ease-spring); }
+  .site-home-pillar:hover .site-home-pillar-arrow { transform: translateX(5px); }
+
+  .vhp-swap-slot {
+    opacity: 0.4;
+    animation: vhp-swap-pulse 5s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 1.25s);
+  }
+  @keyframes vhp-swap-pulse {
+    0%, 18%, 100% { opacity: 0.4; }
+    6%, 14% { opacity: 1; }
+  }
+  .vhp-trace-span {
+    opacity: 0;
+    transform: translateX(-6px);
+    transform-origin: left;
+    animation: vhp-trace-in 4.5s ease-out infinite;
+    animation-delay: calc(var(--i) * 0.45s);
+  }
+  @keyframes vhp-trace-in {
+    0% { opacity: 0; transform: translateX(-6px) scaleX(0.85); }
+    18%, 78% { opacity: 1; transform: translateX(0) scaleX(1); }
+    92%, 100% { opacity: 0; transform: translateX(0) scaleX(1); }
+  }
+  .vhp-approve-tick {
+    stroke-dasharray: 22;
+    stroke-dashoffset: 22;
+    animation: vhp-approve-tick 4.5s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.45s + 0.2s);
+  }
+  @keyframes vhp-approve-tick {
+    0%, 8%, 95%, 100% { stroke-dashoffset: 22; }
+    20%, 80% { stroke-dashoffset: 0; }
+  }
+  .vhp-approve-seal {
+    opacity: 0;
+    transform-origin: 140px 103px;
+    transform: scale(0.85);
+    animation: vhp-approve-seal 4.5s ease-in-out infinite;
+  }
+  @keyframes vhp-approve-seal {
+    0%, 50%, 95%, 100% { opacity: 0; transform: scale(0.85); }
+    62%, 82% { opacity: 1; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vhp-swap-slot,
+    .vhp-trace-span,
+    .vhp-approve-tick,
+    .vhp-approve-seal {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

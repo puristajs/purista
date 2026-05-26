@@ -1,0 +1,141 @@
+---
+title: Testing
+description: Test handlers in isolation with mocks or validate bridge routing with runtime harnesses.
+---
+
+Subscriptions have one testing level: handler isolation with `createSubscriptionContextMock`. Unlike commands and queue workers, there is no full runtime harness for subscriptions — test handler logic directly using the context mock.
+
+| Level | API | Validates |
+|---|---|---|
+| **Handler test** | `createSubscriptionContextMock(...)` | Outcome logic, side effects, guard logic, return outcomes |
+
+## Handler test
+
+Use the context mock to test your subscription handler in isolation:
+
+```typescript [orderNotifications.test.ts]
+import { describe, test, expect, vi } from 'vitest'
+import { createSubscriptionContextMock, safeBind } from '@purista/core'
+import { orderNotificationSubscription } from './orderNotifications.js'
+import { notificationService } from '../notificationService.js'
+
+describe('orderNotification subscription', () => {
+  test('returns ack after sending notification', async () => {
+    const { context } = createSubscriptionContextMock(orderNotificationSubscription, {
+      payload: { orderId: 'ord-1', customerId: 'cust-1', items: [] },
+    })
+
+    const sendPush = vi.fn()
+    const handler = safeBind(orderNotificationSubscription.getSubscriptionFunction(), notificationService)
+    const result = await handler(context, { orderId: 'ord-1', customerId: 'cust-1', items: [] })
+
+    expect(result.status).toBe('ack')
+  })
+
+  test('sends notification with correct customer', async () => {
+    const { context, stubs } = createSubscriptionContextMock(orderNotificationSubscription, {
+      payload: { orderId: 'ord-1', customerId: 'cust-1', items: [{ productId: 'p1', qty: 2 }] },
+    })
+
+    stubs.service.CustomerService['1'].getCustomer.mockResolvedValue({ id: 'cust-1', name: 'Alice' })
+
+    const handler = safeBind(orderNotificationSubscription.getSubscriptionFunction(), notificationService)
+    await handler(context, { orderId: 'ord-1', customerId: 'cust-1', items: [{ productId: 'p1', qty: 2 }] })
+
+    // Verify the stub was called
+    expect(stubs.service.CustomerService['1'].getCustomer).toHaveBeenCalledWith({ customerId: 'cust-1' })
+  })
+
+  test('returns retry on transient failure', async () => {
+    const { context } = createSubscriptionContextMock(orderNotificationSubscription, {
+      payload: { orderId: 'ord-1', customerId: 'cust-1', items: [] },
+    })
+
+    const handler = safeBind(orderNotificationSubscription.getSubscriptionFunction(), notificationService)
+
+    // Simulate a transient failure in the handler
+    // In a real test, you'd mock the notification service to throw
+    const result = await handler(context, { orderId: 'ord-1', customerId: 'cust-1', items: [] })
+
+    // If your handler catches errors and returns retry:
+    // expect(result.status).toBe('retry')
+  })
+})
+```
+
+## Testing explicit outcomes
+
+Test each outcome path your handler supports:
+
+```typescript [orderNotifications.test.ts]
+import { SubscriptionConsumerControlError } from '@purista/core'
+
+describe('outcome handling', () => {
+  test('ack on success', async () => {
+    const { context } = createSubscriptionContextMock(orderNotificationSubscription)
+    const handler = safeBind(orderNotificationSubscription.getSubscriptionFunction(), notificationService)
+    const result = await handler(context, { orderId: 'ord-1', customerId: 'cust-1', items: [] })
+    expect(result.status).toBe('ack')
+  })
+
+  test('retry on temporary failure', async () => {
+    const { context } = createSubscriptionContextMock(orderNotificationSubscription)
+
+    const handler = vi.fn().mockImplementation(async () => {
+      throw new SubscriptionConsumerControlError('DB down', { status: 'retry' })
+    })
+
+    await expect(handler(context, {})).rejects.toThrow('DB down')
+  })
+
+  test('deadLetter on permanent failure', async () => {
+    const { context } = createSubscriptionContextMock(orderNotificationSubscription)
+
+    const handler = vi.fn().mockImplementation(async () => {
+      throw new SubscriptionConsumerControlError('Invalid order', { status: 'deadLetter' })
+    })
+
+    await expect(handler(context, {})).rejects.toThrow('Invalid order')
+  })
+})
+```
+
+## Testing before guards
+
+The subscription builder does not expose a `getBeforeGuardHook` method. Test guard logic either by running the full subscription function (guards execute automatically) or by extracting the guard from the builder's hooks and calling it directly:
+
+```typescript [orderNotifications.test.ts]
+describe('before guards', () => {
+  test('requireAuth rejects unauthenticated events via full handler', async () => {
+    const { context } = createSubscriptionContextMock(orderNotificationSubscription, {
+      payload: { orderId: 'ord-1', customerId: 'cust-1', items: [] },
+    })
+
+    // Remove principalId to simulate unauthenticated event
+    context.message.principalId = undefined
+
+    const handler = safeBind(orderNotificationSubscription.getSubscriptionFunction(), notificationService)
+
+    // Guards execute as part of getSubscriptionFunction() — the handler throws on guard failure
+    await expect(
+      handler(context, { orderId: 'ord-1', customerId: 'cust-1', items: [] }, {})
+    ).rejects.toThrow('Authentication required')
+  })
+})
+```
+
+## What about end-to-end testing?
+
+For integration-level testing where you want to verify that events published to a real broker trigger your subscription handler, use an integration test that starts the full service with its event bridge. There is no standalone subscription runtime harness — `createSubscriptionContextMock` covers the handler contract, and your integration test suite covers broker routing.
+
+## Which level should you use?
+
+| Scenario | Recommended level |
+|---|---|
+| Outcome logic | Handler test |
+| Side effects | Handler test |
+| Guard behavior | Handler test |
+| Filter matching | Runtime test |
+| Bridge advice | Runtime test |
+| Event routing | Runtime test |
+| Full pipeline | Runtime test |

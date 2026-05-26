@@ -1,0 +1,213 @@
+---
+/**
+ * Site Path Selector — the four-audience hub.
+ *
+ * Renders four large signature cards routing each visitor to the surface
+ * built for them. Cards lift on hover with a pointer-tracked spotlight
+ * (see motion.ts `setupCardPointer`) and a tonal accent line at the top.
+ */
+
+interface Path {
+	audience: string
+	title: string
+	body: string
+	href: string
+	cta: string
+	tone: 'found' | 'con' | 'pilot' | 'fg'
+	icon: string
+	topics: string[]
+}
+
+const paths: Path[] = [
+	{
+		audience: 'For decision makers',
+		title: 'Enterprise',
+		body: 'Reviewable by structure. Operable on principle. Approval-ready by design — every data flow, owner, IAM boundary, and audit trail is explicit in code.',
+		href: '/enterprise/',
+		cta: 'Read the enterprise brief',
+		tone: 'found',
+		icon: '<path d="M12 3l8 4v6c0 4.5-3.5 8.2-8 9-4.5-.8-8-4.5-8-9V7l8-4z"/><path d="M9 12l2.2 2.2L15 10"/>',
+		topics: ['CISO · data flow', 'CTO · operability', 'CFO · approval ROI'],
+	},
+	{
+		audience: 'For developers',
+		title: 'Framework',
+		body: 'Services made of commands, subscriptions and streams. Strict separation between business logic, the event bridge, and runtime adapters. TypeScript end-to-end with Zod-validated contracts.',
+		href: '/framework/',
+		cta: 'Explore the framework',
+		tone: 'con',
+		icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+		topics: ['Commands · subscriptions · streams', 'Event bridge · adapters', 'Same code, any runtime'],
+	},
+	{
+		audience: 'For AI-coding teams',
+		title: 'AI Harness',
+		body: 'An independent TypeScript package for typed, sandboxed, observable LLM agents inside your application boundary. Provider-neutral. Self-hosted. Built for production.',
+		href: '/harness/',
+		cta: 'See the AI Harness',
+		tone: 'pilot',
+		icon: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+		topics: ['Models · tools · skills', 'Sandbox · MCP · agents', 'Eval · audit · checkpoints'],
+	},
+	{
+		audience: 'For learners',
+		title: 'Handbook',
+		body: 'Step-by-step path from your first service to enterprise patterns. Mental model, building blocks, stores, bridges, deployment, observability, learning paths.',
+		href: '/handbook/',
+		cta: 'Open the handbook',
+		tone: 'fg',
+		icon: '<path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h8M8 11h8M8 15h5"/>',
+		topics: ['Mental model · philosophy', 'Building blocks · stores', 'Enterprise patterns · ops'],
+	},
+]
+---
+
+<div class="site-paths">
+  {paths.map((p) => (
+    <a
+      class="site-path"
+      href={p.href}
+      data-tone={p.tone}
+      style={`--tone: var(--color-${p.tone === 'fg' ? 'found' : p.tone}); --tone-hi: var(--color-${p.tone === 'fg' ? 'found' : p.tone}-hi)`}
+    >
+      <span class="site-path-spot" aria-hidden="true"></span>
+      <span class="site-path-rail" aria-hidden="true"></span>
+      <header class="site-path-head">
+        <span class="site-path-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={p.icon} />
+        </span>
+        <span class="site-path-audience site-mono">{p.audience}</span>
+      </header>
+      <h3 class="site-path-title">{p.title}</h3>
+      <p class="site-path-body">{p.body}</p>
+      <ul class="site-path-topics">
+        {p.topics.map((t) => <li>{t}</li>)}
+      </ul>
+      <footer class="site-path-foot">
+        <span>{p.cta}</span>
+        <span class="site-path-arrow" aria-hidden="true">→</span>
+      </footer>
+    </a>
+  ))}
+</div>
+
+<style>
+  .site-paths {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+  }
+  @media (max-width: 880px) {
+    .site-paths { grid-template-columns: 1fr; }
+  }
+
+  .site-path {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto auto;
+    gap: 0.85rem;
+    padding: 1.6rem 1.6rem 1.4rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    color: inherit;
+    overflow: hidden;
+    transition: border-color 0.25s ease;
+    min-height: 320px;
+  }
+  .site-path:hover {
+    border-color: var(--color-line-vivid);
+  }
+
+  .site-path-spot { display: none; }
+
+  .site-path-rail { display: none; }
+
+  .site-path-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .site-path-icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    color: var(--tone-hi);
+  }
+  .site-path-icon svg { width: 22px; height: 22px; }
+  .site-path-audience {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+  }
+
+  .site-path-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.65rem, 2.4vw, 2rem);
+    letter-spacing: 0;
+    line-height: 1.05;
+    color: var(--color-fg-strong);
+  }
+  .site-path-body {
+    color: var(--color-fg-muted);
+    font-size: 0.97rem;
+    line-height: 1.55;
+    max-width: 56ch;
+  }
+  .site-path-topics {
+    list-style: none;
+    padding: 0;
+    margin: 0.1rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.55rem;
+  }
+  .site-path-topics li {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    color: var(--color-fg);
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-elev) 60%, transparent);
+  }
+
+  .site-path-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--color-line);
+    color: var(--tone-hi);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .site-path-arrow {
+    transition: transform 0.35s var(--site-ease-spring);
+  }
+  .site-path:hover .site-path-arrow {
+    transform: translateX(6px);
+  }
+</style>
+
+<script>
+  // Mirror motion.ts setupCardPointer onto .site-path for the spotlight effect.
+  // motion.ts only targets .site-card; the path tiles are a different surface.
+  function bind() {
+    function move(e: PointerEvent) {
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.site-path');
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
+      card.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
+    }
+    document.addEventListener('pointermove', move, { passive: true });
+  }
+  bind();
+  document.addEventListener('astro:page-load', bind);
+</script>

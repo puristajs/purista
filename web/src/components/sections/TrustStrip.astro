@@ -1,0 +1,37 @@
+---
+interface StripSegment {
+	text: string
+	color?: 'con' | 'found' | 'pilot' | 'fg-muted'
+}
+
+interface Props {
+	segments?: StripSegment[]
+}
+
+const {
+	segments = [
+		{ text: 'AI implements.', color: 'con' },
+		{ text: '·', color: 'fg-muted' },
+		{ text: 'Enterprise approves.', color: 'pilot' },
+		{ text: '·', color: 'fg-muted' },
+		{ text: 'PURISTA structures.', color: 'found' },
+	],
+} = Astro.props
+---
+
+<section class="trust-strip py-[clamp(2.25rem,4vw,3.5rem)] border-y border-[var(--color-line)] bg-[var(--color-bg-elev)] overflow-hidden relative w-full">
+  <div class="wrap text-center">
+    <div
+      class="reveal font-display font-medium tracking-tight leading-tight inline-flex flex-wrap justify-center gap-x-4 gap-y-1"
+      style="font-size: clamp(1.15rem, 2.4vw, 1.85rem)"
+    >
+      {
+        segments.map((seg) => (
+          <span class={seg.color && seg.color !== 'fg' ? `text-[var(--color-${seg.color})]` : ''}>
+            {seg.text}
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</section>

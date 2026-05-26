@@ -35,12 +35,12 @@
 		"env:down": "docker compose -f docker-compose.yml down"
 	},
 	"devDependencies": {
-		"@types/node": "^25.8.0",
+		"@types/node": "^25.9.1",
 		"@types/sinon": "^21.0.1",
 		"dotenv": "^17.4.2",
 		"sinon": "^22.0.0",
-		"testcontainers": "^11.14.0",
-		"vitest": "^4.1.6"
+		"testcontainers": "^12.0.0",
+		"vitest": "^4.1.7"
 	},
 	"dependencies": {
 		"@azure/identity": "^4.13.1",

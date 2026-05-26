@@ -1,0 +1,608 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import CodeBlock from '../../components/ui/CodeBlock.astro'
+import NumberedBadge from '../../components/ui/NumberedBadge.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout
+  title="Evaluations | AI Harness | PURISTA"
+  description="Compare prompt candidates locally with deterministic scorers. No external platform. No stored datasets. Run in CI, iterate fast."
+>
+
+  <HarnessHero
+    lines={[
+      { text: 'Know your prompts' },
+      { text: 'work', color: 'found' },
+      { text: 'before production.' },
+    ]}
+    lede="The harness ships built-in eval helpers for comparing prompt candidates against a fixed input set. Deterministic, local, cancellable, and CI-friendly — without a hosted eval platform, dataset service, or annotation queue."
+  />
+
+  {/* ── 1. What it is (and isn't) ────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Scope</div>
+        <h2 class="display display-lg">A local comparator, not a full eval platform</h2>
+        <p class="lede">The eval helpers answer one question: given these prompt variants and these example inputs, which candidate performs better? That's it.</p>
+      </div>
+
+      <div class="eval-split">
+        <div>
+          <div class="eyebrow mb-4" style="color: var(--color-found-hi)">Use it for</div>
+          <ul class="eval-list eval-list--yes">
+            <li>Comparing two or more prompt strings against a fixed example set</li>
+            <li>Running deterministic checks in unit or CI tests</li>
+            <li>Validating scorer logic before wiring a product eval layer</li>
+            <li>Smoke-testing output structure after a model upgrade</li>
+          </ul>
+        </div>
+        <div>
+          <div class="eyebrow mb-4" style="color: var(--color-fg-subtle)">Not meant for</div>
+          <ul class="eval-list eval-list--no">
+            <li>Dataset storage and management</li>
+            <li>Prompt version history and experiment runs</li>
+            <li>Human annotation queues</li>
+            <li>Optimisation loops and regression dashboards</li>
+            <li>LLM-as-judge scoring (bring your own scorer callback)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-8 p-5 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+        <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">For a full eval platform:</strong> use <a href="https://cloudgrid.dev/features/ai-evaluation/" target="_blank" rel="noopener" class="eval-link">CloudGrid AI Evaluation</a> to manage datasets, experiment results, comparisons, optimization runs, and per-item score records. The harness helpers are the inner loop — call them from your CloudGrid or product eval workflow and persist whatever they return.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="eval-cloudgrid">
+        <div>
+          <div class="eyebrow mb-4">CloudGrid integration</div>
+          <h2 class="display display-lg">When the eval loop becomes a product workflow.</h2>
+        </div>
+        <div>
+          <p class="lede">CloudGrid is the companion observability and AI evaluation platform for teams that want the harness inner loop connected to production evidence. It keeps datasets, expected outputs, observed results, trace links, aggregate metrics, comparisons, and optimization candidates in one reviewable project.</p>
+          <a href="https://cloudgrid.dev/features/ai-evaluation/" target="_blank" rel="noopener" class="eval-cloudgrid-link">Explore CloudGrid AI Evaluation →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 2. Execution model ───────────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={1} color="found" />
+        <div class="eyebrow">Execution model</div>
+      </div>
+      <h2 class="display display-lg mb-6">Candidates × items → scores</h2>
+      <p class="lede mb-10">The helper evaluates candidates in order. For each candidate it runs every item through your <code class="site-mono">runCandidate</code> callback, then scores the output with your <code class="site-mono">scorer</code> callback. Results are aggregated and returned sorted by mean score.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div>
+          <CodeBlock
+            code={`import {
+  evaluatePromptCandidates,
+  evaluateDeterministicScorer,
+} from '@purista/harness'
+
+const abort = new AbortController()
+
+const scores = await evaluatePromptCandidates({
+  candidates: [
+    { id: 'brief',    prompt: 'Answer in one short paragraph.' },
+    { id: 'detailed', prompt: 'Answer with details and citations.' },
+  ],
+
+  items: [
+    {
+      id: 'item-1',
+      input: { question: 'Can I deploy on Friday?' },
+      expected: 'change freeze',
+    },
+    {
+      id: 'item-2',
+      input: { question: 'What is the rollback procedure?' },
+      expected: 'revert',
+    },
+  ],
+
+  signal: abort.signal,
+
+  runCandidate: async (candidate, item, signal) => {
+    signal.throwIfAborted()
+    return session.agents.answerer.prompt({
+      question: item.input.question,
+    }, { signal })
+  },
+
+  scorer: async (target) =>
+    evaluateDeterministicScorer({
+      type: 'contains',
+      path: '/answer',
+      value: String(target.expected),
+      caseInsensitive: true,
+    }, target),
+})`}
+            label="evaluatePromptCandidates"
+            language="typescript"
+          />
+        </div>
+        <div class="flex flex-col gap-6">
+          <div>
+            <h3 class="h3 mb-3">Return shape</h3>
+            <CodeBlock
+              code={`// scores: CandidateScore[]
+// sorted: mean score desc, pass rate desc, id asc
+
+[
+  {
+    candidateId: 'detailed',
+    meanScore: 1.0,
+    passRate: 1.0,
+    itemCount: 2,
+    scorerCount: 2,
+  },
+  {
+    candidateId: 'brief',
+    meanScore: 0.5,
+    passRate: 0.5,
+    itemCount: 2,
+    scorerCount: 2,
+  },
+]`}
+              language="typescript"
+            />
+          </div>
+          <div class="p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">Sorting is deterministic.</strong> Tie-breaking uses candidateId lexicographic order. Use stable ids so CI output is reproducible across runs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 3. Deterministic scorers ─────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={2} color="con" />
+        <div class="eyebrow">Built-in scorers</div>
+      </div>
+      <h2 class="display display-lg mb-6">Four deterministic scorer types</h2>
+      <p class="lede mb-10"><code class="site-mono">evaluateDeterministicScorer</code> is a pure function. No async, no model calls, no side effects. Pass it a scorer definition and a target, get a score back. Use JSON Pointer paths to select into nested output.</p>
+
+      <div class="eval-scorer-grid">
+
+        <div class="eval-scorer">
+          <div class="eval-scorer-type" style="color: var(--color-found-hi)">contains</div>
+          <p>JSON Pointer selected value contains a substring.</p>
+          <CodeBlock
+            code={`evaluateDeterministicScorer({
+  type: 'contains',
+  path: '/answer',
+  value: 'change freeze',
+  caseInsensitive: true,  // optional
+}, target)`}
+            language="typescript"
+          />
+        </div>
+
+        <div class="eval-scorer">
+          <div class="eval-scorer-type" style="color: var(--color-con-hi)">regex</div>
+          <p>JSON Pointer selected value matches a regular expression.</p>
+          <CodeBlock
+            code={`evaluateDeterministicScorer({
+  type: 'regex',
+  path: '/status',
+  pattern: '^(approved|rejected)$',
+  flags: 'i',  // optional: 'i' | 'm' | 'im'
+}, target)`}
+            language="typescript"
+          />
+        </div>
+
+        <div class="eval-scorer">
+          <div class="eval-scorer-type" style="color: var(--color-pilot-hi)">attribute-equality</div>
+          <p>Two JSON Pointer selected values in the output are deeply equal.</p>
+          <CodeBlock
+            code={`evaluateDeterministicScorer({
+  type: 'attribute-equality',
+  leftPath: '/category',
+  rightPath: '/expectedCategory',
+}, target)`}
+            language="typescript"
+          />
+        </div>
+
+        <div class="eval-scorer">
+          <div class="eval-scorer-type" style="color: var(--color-found-hi)">json-schema</div>
+          <p>Output conforms to a JSON Schema subset. Validates structure when you care about shape, not content.</p>
+          <CodeBlock
+            code={`evaluateDeterministicScorer({
+  type: 'json-schema',
+  schema: {
+    type: 'object',
+    required: ['answer', 'citations'],
+    properties: {
+      answer: { type: 'string' },
+      citations: { type: 'array' },
+    },
+    additionalProperties: false,
+  },
+}, target)`}
+            language="typescript"
+          />
+        </div>
+
+      </div>
+
+      <div class="mt-6 p-5 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+        <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">JSON Pointer paths.</strong> Use RFC 6901 JSON Pointer syntax: <code class="site-mono text-xs">/answer</code> selects <code class="site-mono text-xs">output.answer</code>, <code class="site-mono text-xs">/items/0/title</code> selects the first item's title. When the pointer is missing, the scorer returns <code class="site-mono text-xs">passed: false</code> with <code class="site-mono text-xs">evidence.reason: "missing_pointer"</code> — it does not throw.</p>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 4. Custom scorers ────────────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={3} color="pilot" />
+        <div class="eyebrow">Custom scorers</div>
+      </div>
+      <h2 class="display display-lg mb-6">Bring your own scoring logic</h2>
+      <p class="lede mb-10">The <code class="site-mono">scorer</code> callback is fully application-defined. Compose multiple deterministic checks, call a secondary model for LLM-as-judge, or run a business rule. The harness doesn't care — it just aggregates the scores you return.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h3 class="h3 mb-4">Compose multiple checks</h3>
+          <CodeBlock
+            code={`scorer: async (target) => {
+  // Check 1: answer must be present
+  const hasAnswer = evaluateDeterministicScorer(
+    { type: 'contains', path: '/answer', value: 'policy' },
+    target
+  )
+
+  // Check 2: citations must be an array
+  const hasCitations = evaluateDeterministicScorer(
+    {
+      type: 'json-schema',
+      schema: {
+        type: 'object',
+        required: ['citations'],
+        properties: {
+          citations: { type: 'array' },
+        },
+      },
+    },
+    target
+  )
+
+  // Combine: both must pass
+  const passed = hasAnswer.passed && hasCitations.passed
+  return {
+    score: passed ? 1 : 0,
+    passed,
+    evidence: { hasAnswer: hasAnswer.passed, hasCitations: hasCitations.passed },
+  }
+}`}
+            label="Composite scorer"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">LLM-as-judge scorer</h3>
+          <CodeBlock
+            code={`scorer: async (target, signal) => {
+  signal.throwIfAborted()
+
+  // Call a judge agent for semantic quality
+  const judgment = await session.agents.judge.prompt({
+    response: target.output,
+    question: target.input,
+  }, { signal })
+
+  return {
+    score: judgment.qualityScore,
+    passed: judgment.qualityScore >= 0.7,
+    evidence: { reasoning: judgment.reasoning },
+  }
+}`}
+            label="LLM-as-judge scorer"
+            language="typescript"
+          />
+          <div class="mt-4 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">Cost note.</strong> LLM-as-judge scorers call the model once per candidate × item. For large eval sets, prefer deterministic scorers in CI and reserve model-based scoring for final validation or ambiguous cases.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 5. Cancellation & privacy ────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={4} color="found" />
+        <div class="eyebrow">Cancellation & privacy</div>
+      </div>
+      <h2 class="display display-lg mb-6">Cancellable. Nothing persisted.</h2>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h3 class="h3 mb-4">AbortSignal cancellation</h3>
+          <p class="text-[var(--color-fg-muted)] mb-4"><code class="site-mono">evaluatePromptCandidates</code> requires an <code class="site-mono">AbortSignal</code>. It checks the signal before scheduling each candidate/item pair and passes the same signal to both callbacks. Your callbacks should forward it into model or tool calls.</p>
+          <CodeBlock
+            code={`const abort = new AbortController()
+
+// cancel after 30s in CI
+setTimeout(() => abort.abort(), 30_000)
+
+const scores = await evaluatePromptCandidates({
+  signal: abort.signal,
+  runCandidate: async (candidate, item, signal) => {
+    signal.throwIfAborted()   // check early
+    return session.agents.answerer.prompt(
+      item.input,
+      { signal }              // forward to model call
+    )
+  },
+  // ...
+})`}
+            label="Cancellation"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">Privacy — nothing stored</h3>
+          <p class="text-[var(--color-fg-muted)] mb-4">The eval helpers return aggregate scores only. They do not emit prompt text, model output, expected values, context, or per-item score records to telemetry in any form.</p>
+          <div class="eval-privacy-list">
+            {[
+              ['Not stored', 'Prompt candidate text'],
+              ['Not stored', 'Item inputs and expected values'],
+              ['Not stored', 'Model output content'],
+              ['Not stored', 'Per-item score evidence'],
+              ['Returned only', 'candidateId, meanScore, passRate, itemCount'],
+            ].map(([tag, label]) => (
+              <div class="eval-privacy-row">
+                <span class="eval-privacy-tag" style={tag === 'Returned only' ? 'color: var(--color-found-hi)' : 'color: var(--color-fg-subtle)'}>{tag}</span>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+          <div class="mt-4 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">Persisting results.</strong> If you need per-item scores, experiment history, or annotation records — store the return value in your application layer. The harness helpers are stateless by design.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 6. In CI ─────────────────────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={5} color="con" />
+        <div class="eyebrow">CI integration</div>
+      </div>
+      <h2 class="display display-lg mb-6">Gate your build on prompt quality</h2>
+      <p class="lede mb-8">Use a fake model provider in CI to keep eval tests fast and free. Switch to a live provider for nightly or pre-release runs where you want real model output.</p>
+
+      <CodeBlock
+        code={`import { describe, it, expect } from 'vitest'
+import {
+  evaluatePromptCandidates,
+  evaluateDeterministicScorer,
+} from '@purista/harness'
+
+// Deterministic fake — no real model calls, no cost
+const fakeProvider = {
+  id: 'fake',
+  genAiSystem: 'fake',
+  async object(req) {
+    const q = req.messages.at(-1)?.content ?? ''
+    return {
+      object: {
+        answer: q.includes('freeze') ? 'No deployments during change freeze.' : 'Deployment allowed.',
+        citations: [],
+      },
+      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      finishReason: 'stop',
+    }
+  },
+}
+
+describe('prompt eval — change policy', () => {
+  it('detailed prompt outperforms brief on policy questions', async () => {
+    const harness = createAppHarness(fakeProvider)
+    const session = await harness.getSession('eval-test')
+
+    const scores = await evaluatePromptCandidates({
+      candidates: [
+        { id: 'brief',    prompt: 'Answer briefly.' },
+        { id: 'detailed', prompt: 'Answer with policy context.' },
+      ],
+      items: [
+        { id: 'item-1', input: { question: 'freeze date?' }, expected: 'freeze' },
+      ],
+      signal: new AbortController().signal,
+      runCandidate: async (candidate, item) =>
+        session.agents.answerer.prompt(item.input),
+      scorer: async (target) =>
+        evaluateDeterministicScorer({
+          type: 'contains', path: '/answer',
+          value: String(target.expected), caseInsensitive: true,
+        }, target),
+    })
+
+    expect(scores[0].candidateId).toBe('detailed')
+    expect(scores[0].passRate).toBe(1)
+  })
+})`}
+        label="CI eval test"
+        language="typescript"
+      />
+    </div>
+  </section>
+
+  <CTASection
+    headline={[{ text: 'Test the whole system,' }, { text: ' not just prompts', color: 'found' }, { text: '.' }]}
+    lede="The testing guide covers fake providers, contract tests, streaming assertions, MCP fakes, and review gate tests."
+    ctas={[
+      { label: 'Testing Guide', href: '/harness/testing/', variant: 'primary' },
+      { label: 'Memory Adapters', href: '/harness/memory/', variant: 'ghost' },
+      { label: 'Security & Production', href: '/harness/security/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>
+
+<style>
+  .eval-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 4vw, 5rem);
+    align-items: start;
+  }
+  .eval-split > * { min-width: 0; overflow: hidden; }
+  @media (max-width: 700px) { .eval-split { grid-template-columns: 1fr; } }
+
+  .eval-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .eval-list li {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 0.87rem;
+    color: var(--color-fg-muted);
+    line-height: 1.5;
+    padding-left: 1.1rem;
+    position: relative;
+  }
+
+  .eval-list--yes li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--color-found-hi);
+    font-size: 0.82rem;
+  }
+
+  .eval-list--no li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--color-fg-subtle);
+    font-size: 0.82rem;
+  }
+
+  .eval-link,
+  .eval-cloudgrid-link {
+    color: var(--color-found-hi);
+    font-weight: 700;
+  }
+
+  .eval-link:hover,
+  .eval-cloudgrid-link:hover {
+    text-decoration: underline;
+  }
+
+  .eval-cloudgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    padding-block: clamp(1.5rem, 3vw, 2.5rem);
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .eval-cloudgrid h2 {
+    max-width: 11ch;
+  }
+
+  .eval-cloudgrid-link {
+    display: inline-flex;
+    margin-top: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+  }
+
+  @media (max-width: 820px) {
+    .eval-cloudgrid {
+      grid-template-columns: 1fr;
+    }
+
+    .eval-cloudgrid h2 {
+      max-width: none;
+    }
+  }
+
+  .eval-scorer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+  @media (max-width: 700px) { .eval-scorer-grid { grid-template-columns: 1fr; } }
+
+  .eval-scorer {
+    padding: clamp(1.2rem, 2vw, 1.6rem);
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .eval-scorer-type {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .eval-scorer p {
+    font-size: 0.87rem;
+    color: var(--color-fg-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .eval-privacy-list {
+    border-top: 1px solid var(--color-line);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .eval-privacy-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 0.83rem;
+    align-items: baseline;
+    color: var(--color-fg-muted);
+  }
+
+  .eval-privacy-tag {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+</style>

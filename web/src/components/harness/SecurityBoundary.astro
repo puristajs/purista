@@ -1,0 +1,368 @@
+---
+// SecurityBoundary.astro
+// Isometric architecture diagram — Harness lives outside the sandbox.
+// Inspired by Cloudcraft.co isometric infrastructure diagrams.
+---
+
+<figure class="sb-fig" aria-label="Architecture diagram: PURISTA Harness lives outside the execution sandbox">
+  <svg class="sb-svg" viewBox="0 0 640 370" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="sb-arr-ok" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+        <path d="M0 0.7 L9 3.5 L0 6.3 Z" class="sb-marker-ok" />
+      </marker>
+      <marker id="sb-arr-no" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+        <path d="M0 0.7 L9 3.5 L0 6.3 Z" class="sb-marker-no" />
+      </marker>
+    </defs>
+
+    {/* ══════════════════════════════════════════════
+        APP PROCESS ZONE  (isometric box, green)
+        Front face: rect(20, 92, 256, 188)
+        Depth offset: (+38, -21)
+    ══════════════════════════════════════════════ */}
+
+    {/* Top face (parallelogram) */}
+    <path d="M20,92 L276,92 L314,71 L58,71 Z" class="sb-top sb-top-app" />
+    {/* Front face */}
+    <rect x="20" y="92" width="256" height="188" class="sb-front sb-front-app" />
+    {/* Right face */}
+    <path d="M276,92 L314,71 L314,259 L276,280 Z" class="sb-side sb-side-app" />
+
+    {/* Zone header on top face */}
+    <text x="166" y="84" text-anchor="middle" class="sb-zone-lbl sb-zone-lbl-app">
+      YOUR APPLICATION PROCESS
+    </text>
+
+    {/* ── Harness component block ──────────────── */}
+    <rect x="38" y="114" width="220" height="146" rx="3" class="sb-cmp sb-cmp-found" />
+    {/* Header strip */}
+    <rect x="38" y="114" width="220" height="25" rx="3" class="sb-hdr sb-hdr-found" />
+    <rect x="38" y="127" width="220" height="12" class="sb-hdr sb-hdr-found" />
+
+    {/* Lock icon in header */}
+    <g transform="translate(56,127)">
+      <rect x="-5" y="-5" width="10" height="9" rx="1.5" class="sb-ico-s sb-ico-found" />
+      <path d="M-3,-5 Q-3,-11 0,-11 Q3,-11 3,-5" class="sb-ico-s sb-ico-found" />
+      <circle cx="0" cy="0" r="1.5" class="sb-ico-dot-found" />
+    </g>
+    <text x="148" y="131" text-anchor="middle" class="sb-cmp-title sb-cmp-title-found">
+      PURISTA HARNESS
+    </text>
+
+    {/* API Keys row */}
+    <rect x="54" y="148" width="186" height="22" rx="2" class="sb-row sb-row-found" />
+    {/* Key icon */}
+    <circle cx="66" cy="159" r="5" class="sb-ico-s sb-ico-found" />
+    <path d="M70,159 L81,159 M79,159 L79,164 M75,159 L75,163" class="sb-ico-s sb-ico-found" />
+    <text x="89" y="163" class="sb-row-lbl">API Keys &amp; Credentials</text>
+
+    {/* Review Gates row */}
+    <rect x="54" y="178" width="186" height="22" rx="2" class="sb-row sb-row-found" />
+    {/* Shield icon */}
+    <g transform="translate(66,189)">
+      <path d="M0,-8 L6,-5 L4.5,2 Q0,6 0,6 Q-4.5,4 -4.5,2 L-6,-5 Z" class="sb-ico-s sb-ico-found" />
+      <path d="M-2.5,0.5 L-0.5,2.5 L4,-2.5" class="sb-ico-chk" />
+    </g>
+    <text x="89" y="193" class="sb-row-lbl">Review Gates &amp; Approval</text>
+
+    {/* Audit Logs row */}
+    <rect x="54" y="208" width="186" height="22" rx="2" class="sb-row sb-row-found" />
+    {/* Document icon */}
+    <g transform="translate(66,219)">
+      <path d="M-7,-8 L4,-8 L4,8 L-7,8 Z" class="sb-ico-s sb-ico-found" />
+      <path d="M-5,-3 L2,-3 M-5,1 L0,1 M-5,5 L2,5" class="sb-ico-line" />
+    </g>
+    <text x="89" y="223" class="sb-row-lbl">Audit Logs &amp; Policies</text>
+
+    {/* ══════════════════════════════════════════════
+        TYPED INPUTS ONLY  →  connection arrow
+    ══════════════════════════════════════════════ */}
+    <path d="M278,188 L348,188" class="sb-arrow sb-arrow-ok" marker-end="url(#sb-arr-ok)" />
+    <text x="313" y="181" text-anchor="middle" class="sb-albl sb-albl-ok">typed</text>
+    <text x="313" y="193" text-anchor="middle" class="sb-albl sb-albl-ok">inputs</text>
+    <text x="313" y="205" text-anchor="middle" class="sb-albl sb-albl-ok">only →</text>
+
+    {/* ══════════════════════════════════════════════
+        SANDBOX ZONE  (isometric box, red, dashed)
+        Front face: rect(350, 138, 246, 152)
+        Depth offset: (+36, -20)
+    ══════════════════════════════════════════════ */}
+
+    {/* Top face */}
+    <path d="M350,138 L596,138 L632,118 L386,118 Z" class="sb-top sb-top-sb" />
+    {/* Front face */}
+    <rect x="350" y="138" width="246" height="152" class="sb-front sb-front-sb" />
+    {/* Right face */}
+    <path d="M596,138 L632,118 L632,270 L596,290 Z" class="sb-side sb-side-sb" />
+
+    {/* Zone header on top face */}
+    <text x="490" y="131" text-anchor="middle" class="sb-zone-lbl sb-zone-lbl-sb">
+      SANDBOX — ISOLATED
+    </text>
+
+    {/* ── Execution component block ──────────────── */}
+    <rect x="366" y="158" width="212" height="112" rx="3" class="sb-cmp sb-cmp-con" />
+    {/* Header strip */}
+    <rect x="366" y="158" width="212" height="25" rx="3" class="sb-hdr sb-hdr-con" />
+    <rect x="366" y="171" width="212" height="12" class="sb-hdr sb-hdr-con" />
+
+    {/* Terminal icon */}
+    <g transform="translate(383,171)">
+      <rect x="-5" y="-8" width="20" height="15" rx="2" class="sb-ico-s sb-ico-con" />
+      <path d="M-2,-0.5 L3,4 L-2,7.5" class="sb-ico-s sb-ico-con" />
+      <path d="M5,7.5 L11,7.5" class="sb-ico-s sb-ico-con" />
+    </g>
+    <text x="472" y="175" text-anchor="middle" class="sb-cmp-title sb-cmp-title-con">
+      EXECUTION ONLY
+    </text>
+
+    {/* LLM calls row */}
+    <rect x="382" y="193" width="178" height="20" rx="2" class="sb-row sb-row-con" />
+    <text x="391" y="207" class="sb-row-lbl">LLM calls &amp; tool dispatch</text>
+
+    {/* File ops row */}
+    <rect x="382" y="219" width="178" height="20" rx="2" class="sb-row sb-row-con" />
+    <text x="391" y="233" class="sb-row-lbl">File operations &amp; commands</text>
+
+    {/* No secrets badge */}
+    <rect x="366" y="249" width="212" height="20" rx="2" class="sb-badge" />
+    <text x="472" y="263" text-anchor="middle" class="sb-badge-lbl">NO CREDENTIALS VISIBLE</text>
+
+    {/* ══════════════════════════════════════════════
+        BLOCKED — secrets cannot cross
+        Arrow routes down from harness block, right
+        toward sandbox, hits a wall with ✕
+    ══════════════════════════════════════════════ */}
+    <path d="M148,260 L148,338 L340,338" class="sb-arrow sb-arrow-no" marker-end="url(#sb-arr-no)" />
+
+    {/* Wall / barrier line at sandbox boundary */}
+    <line x1="350" y1="324" x2="350" y2="352" class="sb-wall" />
+
+    {/* ✕ circle */}
+    <circle cx="350" cy="338" r="11" class="sb-blocked-bg" />
+    <path d="M344.5,332.5 L355.5,343.5 M355.5,332.5 L344.5,343.5" class="sb-x" />
+
+    {/* Labels for blocked path */}
+    <text x="236" y="327" text-anchor="middle" class="sb-albl sb-albl-no">credentials are blocked — cannot cross the boundary</text>
+    <text x="149" y="354" text-anchor="middle" class="sb-albl sb-albl-no sb-albl-sub">
+      prompt injection cannot reach keys in a different process
+    </text>
+
+  </svg>
+</figure>
+
+<style>
+  .sb-fig {
+    margin: 0;
+    width: 100%;
+  }
+
+  .sb-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* ── Zone top faces ── */
+  .sb-top-app {
+    fill: color-mix(in srgb, var(--color-found) 16%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-found-hi) 52%, var(--color-line));
+    stroke-width: 1.1;
+  }
+  .sb-top-sb {
+    fill: color-mix(in srgb, var(--color-con) 12%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-con-hi) 45%, var(--color-line));
+    stroke-width: 1.1;
+    stroke-dasharray: 7 4;
+  }
+
+  /* ── Zone front faces ── */
+  .sb-front-app {
+    fill: color-mix(in srgb, var(--color-found) 6%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-found-hi) 52%, var(--color-line));
+    stroke-width: 1.1;
+  }
+  .sb-front-sb {
+    fill: color-mix(in srgb, var(--color-con) 4%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-con-hi) 45%, var(--color-line));
+    stroke-width: 1.1;
+    stroke-dasharray: 7 4;
+  }
+
+  /* ── Zone side faces ── */
+  .sb-side-app {
+    fill: color-mix(in srgb, var(--color-found) 11%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-found-hi) 52%, var(--color-line));
+    stroke-width: 1.1;
+  }
+  .sb-side-sb {
+    fill: color-mix(in srgb, var(--color-con) 8%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-con-hi) 45%, var(--color-line));
+    stroke-width: 1.1;
+    stroke-dasharray: 7 4;
+  }
+
+  /* ── Zone labels ── */
+  .sb-zone-lbl {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.11em;
+  }
+  .sb-zone-lbl-app { fill: var(--color-found-hi); }
+  .sb-zone-lbl-sb  { fill: var(--color-con-hi); }
+
+  /* ── Component blocks ── */
+  .sb-cmp-found {
+    fill: color-mix(in srgb, var(--color-found) 5%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-found) 55%, var(--color-line));
+    stroke-width: 1.1;
+  }
+  .sb-cmp-con {
+    fill: color-mix(in srgb, var(--color-con) 4%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-con) 50%, var(--color-line));
+    stroke-width: 1;
+  }
+
+  /* ── Block headers ── */
+  .sb-hdr-found {
+    fill: color-mix(in srgb, var(--color-found) 22%, var(--color-bg));
+    stroke: none;
+  }
+  .sb-hdr-con {
+    fill: color-mix(in srgb, var(--color-con) 18%, var(--color-bg));
+    stroke: none;
+  }
+
+  /* ── Block titles ── */
+  .sb-cmp-title {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+  }
+  .sb-cmp-title-found { fill: var(--color-found-hi); }
+  .sb-cmp-title-con   { fill: var(--color-con-hi); }
+
+  /* ── Item rows ── */
+  .sb-row-found {
+    fill: color-mix(in srgb, var(--color-found) 7%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-found) 22%, var(--color-line));
+    stroke-width: 0.8;
+  }
+  .sb-row-con {
+    fill: color-mix(in srgb, var(--color-con) 5%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-con) 18%, var(--color-line));
+    stroke-width: 0.8;
+  }
+  .sb-row-lbl {
+    font-family: var(--font-sans, system-ui);
+    font-size: 9.5px;
+    fill: var(--color-fg-muted);
+  }
+
+  /* ── Icons ── */
+  .sb-ico-s {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.4;
+  }
+  .sb-ico-found { stroke: var(--color-found-hi); }
+  .sb-ico-con   { stroke: var(--color-con-hi); }
+  .sb-ico-dot-found { fill: var(--color-found-hi); }
+  .sb-ico-line {
+    fill: none;
+    stroke: var(--color-found-hi);
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+  .sb-ico-chk {
+    fill: none;
+    stroke: color-mix(in srgb, white 35%, var(--color-found-hi));
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ── Arrows ── */
+  .sb-arrow {
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+  .sb-arrow-ok {
+    stroke: var(--color-found-hi);
+    stroke-dasharray: 5 4;
+    animation: sbDash 18s linear infinite;
+  }
+  .sb-arrow-no {
+    stroke: var(--color-con-hi);
+    stroke-dasharray: 4 3;
+    opacity: 0.55;
+  }
+
+  /* ── Arrow markers ── */
+  .sb-marker-ok { fill: var(--color-found-hi); }
+  .sb-marker-no { fill: var(--color-con-hi); opacity: 0.6; }
+
+  /* ── Arrow labels ── */
+  .sb-albl {
+    font-family: var(--font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+  }
+  .sb-albl-ok  { fill: var(--color-found-hi); }
+  .sb-albl-no  { fill: var(--color-con-hi); opacity: 0.7; }
+  .sb-albl-sub { font-size: 7.5px; opacity: 0.5; }
+
+  /* ── Wall / barrier ── */
+  .sb-wall {
+    stroke: color-mix(in srgb, var(--color-con-hi) 60%, var(--color-line));
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    opacity: 0.6;
+  }
+
+  /* ── Blocked ✕ indicator ── */
+  .sb-blocked-bg {
+    fill: var(--color-bg);
+    stroke: var(--color-con-hi);
+    stroke-width: 1.5;
+    opacity: 0.75;
+  }
+  .sb-x {
+    fill: none;
+    stroke: var(--color-con-hi);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.75;
+  }
+
+  /* ── No-credentials badge ── */
+  .sb-badge {
+    fill: color-mix(in srgb, var(--color-con) 9%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--color-con-hi) 35%, transparent);
+    stroke-width: 0.8;
+  }
+  .sb-badge-lbl {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 0.09em;
+    fill: var(--color-con-hi);
+    opacity: 0.8;
+  }
+
+  /* ── Animation ── */
+  @keyframes sbDash {
+    to { stroke-dashoffset: -200; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sb-arrow-ok { animation: none; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .sb-fig { overflow-x: auto; padding-bottom: 0.4rem; }
+    .sb-svg { min-width: 34rem; }
+  }
+</style>

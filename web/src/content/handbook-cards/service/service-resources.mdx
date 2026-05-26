@@ -1,0 +1,113 @@
+---
+title: Resources & Dependencies
+description: Define typed resources — database connections, APIs, external systems — and inject them at service startup.
+---
+
+**Resources** are the dependencies a service needs to do its work: database connection pools, HTTP clients, message producers, or any external system integration.
+
+Defining resources on the service builder makes them available — fully typed — in every command and subscription of that service. This is how PURISTA achieves dependency injection without frameworks, containers, or reflection.
+
+## Define a resource
+
+Resources are declared in the service builder as TypeScript types only:
+
+```typescript [serviceBuilder.ts]
+import type { DbType } from 'my-db'
+
+const serviceBuilder = new ServiceBuilder(serviceOneInfo)
+  .setConfigSchema(serviceOneSchema)
+  .defineResource<'db', DbType>()
+  .defineResource<'emailClient', EmailClient>()
+```
+
+This adds `db` with type `DbType` and `emailClient` with type `EmailClient` to the context of every command and subscription.
+
+<div class="callout callout--warning">
+  <div class="callout__title">Definitions vs instances</div>
+  <p><code>defineResource</code> only declares the type. The actual instance is provided when the service instance is created.</p>
+</div>
+
+## Provide instances at startup
+
+When creating a service instance, pass the resources object:
+
+```typescript [main.ts]
+import { MyDb } from 'my-db'
+
+const myService = await serviceBuilder.getInstance(eventBridge, {
+  logger,
+  resources: {
+    db: new MyDb(process.env.DATABASE_URL),
+    emailClient: new EmailClient({ apiKey: process.env.EMAIL_API_KEY }),
+  },
+})
+```
+
+## Use resources in handlers
+
+Access resources through the handler context:
+
+```typescript [command.ts]
+commandBuilder.setCommandFunction(async function ({ resources }) {
+  const user = await resources.db.query('SELECT * FROM users WHERE id = $1', [userId])
+  await resources.emailClient.send({ to: user.email, subject: 'Welcome!' })
+  return { user }
+})
+```
+
+## Resource lifecycle
+
+Resources follow a simple lifecycle:
+
+1. **Definition** — `defineResource<'db', DbType>()` declares the interface in the builder.
+2. **Instantiation** — The real object is created outside the service and passed to `getInstance()`.
+3. **Access** — Commands and subscriptions receive the instance through their context.
+4. **Cleanup** — If a resource has a `close()` or `disconnect()` method, call it in a shutdown hook or process exit handler.
+
+## Why resources reduce lock-in
+
+Because resources are defined as interfaces, the actual implementation can be swapped without touching business logic:
+
+- Move from PostgreSQL to MySQL? Update the `db` resource adapter. Commands stay identical.
+- Switch email providers from SendGrid to AWS SES? Swap the `emailClient` resource. No command changes.
+- Migrate from one cloud to another? Only resource adapters change.
+
+This is the core of PURISTA's anti-lock-in architecture: business logic depends on interfaces, not products.
+
+## Common resource patterns
+
+| Resource | Typical type | Injected as |
+|---|---|---|
+| Database pool | `PgPool` / `PrismaClient` | Connection pool or ORM client |
+| HTTP client | `AxiosInstance` / `HttpClient` | Pre-configured client with base URL and auth |
+| Cache client | `RedisClient` | Connection to Redis or Valkey |
+| File storage | `S3Client` / `MinioClient` | Object storage client |
+| Email client | `NodemailerTransport` / custom | Pre-configured mailer with provider settings |
+
+## Testing with mock resources
+
+Since resources are TypeScript types, mocking is straightforward:
+
+```typescript [test.ts]
+import { createSandbox } from 'sinon'
+
+const sandbox = createSandbox()
+const dbMock = {
+  query: sandbox.stub().resolves([{ id: '123', name: 'Alice' }]),
+}
+const emailMock = {
+  send: sandbox.stub().resolves({ messageId: 'abc' }),
+}
+
+const myService = await serviceBuilder.getInstance(eventBridge, {
+  logger,
+  resources: { db: dbMock, emailClient: emailMock },
+})
+```
+
+During tests, you replace real infrastructure with stubs. Business logic tests run in milliseconds with no external dependencies.
+
+<div class="callout callout--info">
+  <div class="callout__title">Prefer resources over custom classes</div>
+  <p>Resources offer better decoupling, a higher level of abstraction, and improved scalability compared to custom service classes. Use a <a href="/handbook/service/custom-service-class">custom class</a> only when you need lifecycle hooks like <code>start()</code> and <code>destroy()</code> on the service itself.</p>
+</div>

@@ -1,0 +1,114 @@
+---
+import '../styles/global.css'
+import '../styles/site.css'
+import HarnessNav from '../components/ui/HarnessNav.astro'
+import Footer from '../components/landing/Footer.astro'
+import Nav from '../components/landing/Nav.astro'
+
+interface Props {
+	title?: string
+	description?: string
+	active?: 'home' | 'framework' | 'enterprise' | 'handbook' | 'harness'
+}
+
+const {
+	title = 'PURISTA — Production-grade by structure.',
+	description = 'PURISTA is the open-source TypeScript framework that turns AI-built software into approval-ready enterprise systems.',
+	active = 'home',
+} = Astro.props
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://purista.dev')
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark" class="js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="PURISTA" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..800&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('purista-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored ?? (prefersDark ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body data-site>
+    <Nav active={active} />
+    {active === 'harness' && (
+      <div class="site-harness-subnav">
+        <HarnessNav />
+      </div>
+    )}
+    <main id="site-main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      import '../scripts/site/motion.ts';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .site-harness-subnav {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    right: 0;
+    z-index: 59;
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .site-harness-subnav + #site-main {
+    padding-top: calc(72px + 48px);
+  }
+  [data-site] {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+  [data-site] *,
+  [data-site] *::before,
+  [data-site] *::after {
+    box-sizing: border-box;
+  }
+  [data-site] a {
+    text-decoration: none;
+  }
+  /* Color reset for plain anchors only — buttons own their own colors. */
+  [data-site] a:not(.btn):not(.site-btn):not(.site-btn-primary):not(.site-btn-ghost) {
+    color: inherit;
+  }
+  [data-site] main {
+    position: relative;
+    z-index: 2;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-site] *,
+    [data-site] *::before,
+    [data-site] *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>

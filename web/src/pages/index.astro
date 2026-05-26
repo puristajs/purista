@@ -1,0 +1,267 @@
+---
+import CTA from '../components/landing/CTA.astro'
+import Hero from '../components/landing/Hero.astro'
+import Marquee from '../components/landing/Marquee.astro'
+import OpenSource from '../components/landing/OpenSource.astro'
+import PathSelector from '../components/landing/PathSelector.astro'
+import SectionIntro from '../components/landing/SectionIntro.astro'
+import HomePillars from '../components/landing/sections/HomePillars.astro'
+import EnterpriseAnatomy from '../components/landing/visualizations/EnterpriseAnatomy.astro'
+import HarnessLayout from '../layouts/HarnessLayout.astro'
+
+/**
+ * Home — TRIAGE HUB.
+ *
+ * Home establishes WHAT PURISTA is and routes the visitor to the surface
+ * built for them. It deliberately does NOT carry the full enterprise
+ * pillars, request lifecycle, or provider-swap visualizations — those live
+ * on /enterprise/ (and partially on /framework/) where they belong.
+ *
+ * Each teaser below ends with a "learn more" link to the page that owns
+ * the deeper material.
+ */
+
+---
+
+<HarnessLayout
+  title="PURISTA — Enterprise TypeScript backends. Provider-agnostic. Traceable. Approval-ready."
+  description="Open-source TypeScript framework for enterprise backends. Provider-agnostic by construction. Traceable and auditable end-to-end. Approval-ready by structure."
+  active="home"
+>
+
+  {/* ─── 1. Hero ─── */}
+  <Hero
+    eyebrow="Open source · MIT · TypeScript"
+    eyebrowTone="found"
+    lines={[
+      { text: 'Enterprise' },
+      { text: 'TypeScript', color: 'shimmer' },
+      { text: 'backends.' },
+    ]}
+    lede="An open-source framework for backends regulated teams can actually approve. Provider-agnostic by construction. Traceable and auditable end to end. Reviewable by structure — not by archaeology."
+    ctas={[
+      { label: 'See how it works', href: '#what-is', variant: 'primary' },
+      { label: 'Read the Handbook', href: '/handbook/', variant: 'ghost' },
+    ]}
+    strip={[
+      { label: 'No vendor lock-in', title: 'Provider-agnostic, by config.',  tone: 'found' },
+      { label: 'Compliance-ready',  title: 'Traceable & auditable always.',  tone: 'con' },
+      { label: 'Faster signoff',    title: 'Approval-ready by structure.',   tone: 'pilot' },
+    ]}
+  />
+
+  <Marquee
+    items={[
+      'PROVIDER-AGNOSTIC · NO LOCK-IN',
+      'OPENTELEMETRY ON EVERY MESSAGE',
+      'AUDIT BY ROUTING · NOT BY HANDWORK',
+      'IAM AT THE CONTRACT BOUNDARY',
+      'REVIEWABLE BY STRUCTURE',
+      'TYPESCRIPT END-TO-END · MIT',
+    ]}
+  />
+
+  {/* ─── 2. WHAT IS PURISTA — annotated diagram (UNIQUE to home) ─── */}
+  <section id="what-is" class="site-section">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="What is PURISTA?"
+        eyebrowTone="found"
+        headline={[
+          { text: 'A backend ' },
+          { text: 'with six properties', color: 'shimmer' },
+          { text: ' enterprises actually care about.' },
+        ]}
+        lede="Every service you build with PURISTA has the same anatomy and the same enterprise guarantees. Typed contracts, explicit owner, IAM at the boundary, automatic tracing, provider-agnostic adapters, and runtime portability — baked into the shape, not bolted on after."
+        align="center"
+        size="h1"
+      />
+
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <EnterpriseAnatomy />
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 3. Three guarantees — TEASER, deep dive lives on /enterprise/ ─── */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Three guarantees"
+        eyebrowTone="con"
+        headline={[
+          { text: 'Built into ' },
+          { text: 'every service', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="These are not features your team has to wire up. They are properties of the shape — read the in-depth pillar diagrams on the Enterprise page."
+      />
+      <HomePillars />
+    </div>
+  </section>
+
+  {/* ─── 4. Concept: how PURISTA works ─── */}
+  <section id="concept" class="site-section site-section-divider">
+    <div class="site-wrap">
+      <div class="site-concept-grid">
+
+        {/* Left: prose intro */}
+        <div class="site-concept-lead">
+          <SectionIntro
+            eyebrow="How it works"
+            eyebrowTone="found"
+            headline={[
+              { text: 'One shape.' },
+              { text: ' Every primitive.', color: 'found' },
+            ]}
+            lede="PURISTA organises backend code into services — each one a bounded business context. Inside, you compose primitives: Commands for typed request-reply, Subscriptions for passive event reactions, Streams for long-running flows, Queues for durable work, and AI Agents for orchestrated LLM workflows. The event bridge routes all of them. Your logic never imports the broker."
+          />
+          <a href="/handbook/learn/getting-started/" class="site-concept-link">
+            Read the full concept in the Handbook →
+          </a>
+        </div>
+
+        {/* Right: four principles */}
+        <ul class="site-concept-principles" aria-label="Core principles">
+          <li>
+            <span class="site-concept-prin-label" style="color:var(--color-found-hi)">Business logic first</span>
+            <p>Every service is a single business entity. Its primitives — commands, subscriptions, streams, queues, agents — are its only public surface. Infrastructure plugs in at boot, never imported inside your logic.</p>
+          </li>
+          <li>
+            <span class="site-concept-prin-label" style="color:var(--color-con-hi)">Strict separation</span>
+            <p>The "outside world" is a black box with well-defined interfaces. Every primitive — whether a command, subscription, stream, queue or agent — interacts with other components only through known contracts. No shared state, no tight coupling.</p>
+          </li>
+          <li>
+            <span class="site-concept-prin-label" style="color:var(--color-pilot-hi)">Stateless by design</span>
+            <p>Business logic stays stateless. Config, secret and state stores are injected into the handler context — typed and validated, never fetched directly. Scaling is a matter of routing, not coordination.</p>
+          </li>
+          <li>
+            <span class="site-concept-prin-label" style="color:var(--color-found-hi)">Observable by structure</span>
+            <p>OpenTelemetry spans and error handling happen at the routing layer around your handler. Structured logs carry principalId and tenantId — giving you the foundation for audit logic without writing extra code. Traceability is not an annotation you add — it is a property of the shape.</p>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 5. Path selector — the HUB ─── */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Choose your path"
+        eyebrowTone="found"
+        headline={[
+          { text: 'Four surfaces. ' },
+          { text: 'One framework', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="Each path below leads to the surface built for you — a brief for decision makers, a deep-dive for developers, a standalone package for AI-coding teams, and a step-by-step handbook."
+        align="center"
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <PathSelector />
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 6. Open source ─── */}
+  <section class="site-section">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Open source"
+        eyebrowTone="found"
+        headline={[
+          { text: 'You ' },
+          { text: 'own', color: 'shimmer' },
+          { text: ' the framework. We just maintain it.' },
+        ]}
+        lede="PURISTA and AI Harness are MIT-licensed, published under @puristajs on npm, with public roadmaps on GitHub. Fork the adapters, audit the runtime, contribute upstream."
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2rem,4vw,3rem)">
+        <OpenSource />
+      </div>
+    </div>
+  </section>
+
+  {/* ─── 7. CTA ─── */}
+  <CTA
+    eyebrow="Get started"
+    headline={[
+      { text: 'Build a backend ' },
+      { text: 'reviewers can read', color: 'shimmer' },
+      { text: '.' },
+    ]}
+    lede="Read the handbook, scaffold a service, run it on your laptop, then promote it to wherever it pays — without rewriting business code."
+    ctas={[
+      { label: 'Read the Handbook', href: '/handbook/',     variant: 'primary' },
+      { label: 'For Enterprise',    href: '/enterprise/',   variant: 'ghost' },
+      { label: 'For developers',    href: '/framework/',    variant: 'ghost' },
+    ]}
+  />
+
+</HarnessLayout>
+
+<style>
+  .site-concept-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .site-concept-grid { grid-template-columns: 1fr; }
+  }
+
+  .site-concept-lead {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+  }
+
+  .site-concept-link {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-found-hi);
+    letter-spacing: 0.01em;
+    transition: color 150ms ease;
+  }
+  .site-concept-link:hover {
+    color: var(--color-fg);
+  }
+
+  .site-concept-principles {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-concept-principles li {
+    padding-block: 1.4rem;
+    border-top: 1px solid var(--color-line);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .site-concept-principles li:last-child {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .site-concept-prin-label {
+    font-family: var(--font-display);
+    font-weight: 650;
+    font-size: 1rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .site-concept-principles p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--color-fg-muted);
+  }
+</style>
+

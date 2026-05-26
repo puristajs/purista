@@ -1,0 +1,112 @@
+---
+title: Service Configuration
+description: Add typed custom configuration to your service with Zod schemas.
+---
+
+A **custom service configuration** is service-specific settings made available to all commands and subscriptions via `this.config`. It is not used by PURISTA itself — it is for your business logic.
+
+Custom configs are one way to pass values to handlers. You can also use config stores, secret stores, or state stores. The right choice depends on what the data is, who manages it, and how often it changes.
+
+## When to use what
+
+Use this decision tree to choose the right mechanism:
+
+**Custom config** when:
+- The value is set once during deployment (API URLs, ports, timeouts).
+- The value rarely changes (database connection pool size).
+- The value is infrastructure-related, not business-related.
+
+**Config store** when:
+- The value changes during runtime (feature flags, currency rates).
+- Business users or automation need to update it.
+- The value is not confidential.
+
+**Secret store** when:
+- The value is confidential (passwords, tokens, certificates).
+- It must never appear in code, logs, or environment files.
+
+**State store** when:
+- The value is temporary runtime state (session data, caches).
+- It needs fast read/write access.
+
+## Config vs stores
+
+| | Custom config | Config store | Secret store |
+|---|---|---|---|
+| **Provided by** | Infrastructure & deployment | Database or vendor solution | Vendor solution |
+| **Addresses** | Technical configuration | Business configuration | Secrets & confidential data |
+| **Value lifetime** | Set once at instance creation | Fetched per usage | Fetched per usage |
+| **Changes apply** | On restart / next deployment | On next usage | On next usage |
+| **Value type** | Object (nested) | Key-value (scalar) | Key-value (string) |
+| **Can be updated by handlers** | No | Yes | Yes |
+| **Safe for secrets** | No | No | Yes |
+| **Use cases** | Third-party URLs, ports, timeouts | Feature flags, currency exchange rates | Passwords, auth tokens, certificates |
+
+## Define a config schema
+
+Custom configurations require a [Zod](https://zod.dev) schema:
+
+```typescript [userServiceConfig.ts]
+import { z } from 'zod'
+
+export const userServiceV1ConfigSchema = z.object({
+  apiTimeout: z.number().optional().default(5000),
+  featureFlagNewUI: z.boolean().optional().default(false),
+  externalApiUrl: z.string().url(),
+})
+
+export type UserServiceV1Config = z.input<typeof userServiceV1ConfigSchema>
+```
+
+Attach the schema to the service builder:
+
+```typescript [userServiceV1ServiceBuilder.ts]
+export const userServiceV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
+  .setConfigSchema(userServiceV1ConfigSchema)
+```
+
+Optional fields with defaults are safe: if no value is provided during instance creation, the default is used automatically. Required fields without defaults will cause a type error if missing.
+
+## Provide config at startup
+
+```typescript [main.ts]
+const userService = await userServiceV1Service.getInstance(eventBridge, {
+  logger,
+  resources,
+  serviceConfig: {
+    apiTimeout: 10000,
+    featureFlagNewUI: true,
+    externalApiUrl: 'https://api.example.com',
+  },
+})
+```
+
+## Access config in handlers
+
+Inside any command or subscription function:
+
+```typescript [command.ts]
+commandBuilder.setCommandFunction(async function (context) {
+  const timeout = this.config.apiTimeout
+  const url = this.config.externalApiUrl
+  // ...
+})
+```
+
+<div class="callout callout--warning">
+  <div class="callout__title">Config is immutable after startup</div>
+  <p>Custom config values are fixed when the service instance is created. If you need runtime-updatable values, use a config store instead.</p>
+</div>
+
+## Validation at startup
+
+Because config uses a Zod schema, invalid values fail fast at instance creation — not midway through a request. This is production-grade: bad config never reaches a customer.
+
+```typescript [main.ts]
+// This will throw a ZodError immediately
+const badService = await userServiceV1Service.getInstance(eventBridge, {
+  serviceConfig: {
+    externalApiUrl: 'not-a-url', // ❌ fails here
+  },
+})
+```

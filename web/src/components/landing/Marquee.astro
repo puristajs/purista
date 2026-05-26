@@ -1,0 +1,14 @@
+---
+interface Props {
+	items: string[]
+}
+const { items } = Astro.props
+// Duplicate for seamless loop
+const track = [...items, ...items]
+---
+
+<div class="site-marquee" style="border-block:1px solid var(--color-line);background:color-mix(in srgb, var(--color-bg-sunk) 50%, transparent)">
+  <div class="site-marquee-track">
+    {track.map((it) => <span class="site-marquee-item">{it}</span>)}
+  </div>
+</div>

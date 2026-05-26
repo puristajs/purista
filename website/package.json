@@ -17,15 +17,15 @@
 		"vanilla-cookieconsent": "^3.1.0"
 	},
 	"devDependencies": {
-		"@types/node": "^25.8.0",
-		"date-fns": "^4.1.0",
+		"@types/node": "^25.9.1",
+		"date-fns": "^4.3.0",
 		"feed": "^5.2.1",
 		"gray-matter": "^4.0.3",
 		"mermaid": "^11.15.0",
 		"typescript": "^6.0.3",
 		"vitepress": "^2.0.0-alpha.17",
 		"vitepress-mermaid-renderer": "^1.1.24",
-		"vitepress-sidebar": "^1.33.2",
+		"vitepress-sidebar": "^1.36.1",
 		"vue": "^3.5.34"
 	},
 	"engines": {

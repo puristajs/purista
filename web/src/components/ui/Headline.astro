@@ -1,0 +1,28 @@
+---
+export interface HeadlineSegment {
+	text: string
+	color?: 'con' | 'found' | 'pilot' | 'fg' | 'shimmer'
+}
+
+interface Props {
+	segments: HeadlineSegment[]
+}
+
+const { segments } = Astro.props
+---
+
+{
+  segments.map((seg) => {
+    if (seg.color === 'shimmer') {
+      return (
+        <span class="bg-gradient-to-r from-[var(--color-pilot)] via-[var(--color-con)] via-[var(--color-found)] to-[var(--color-pilot)] bg-[length:200%_auto] bg-clip-text text-transparent animate-[shimmer_4s_linear_infinite]">
+          {seg.text}
+        </span>
+      );
+    }
+    if (seg.color && seg.color !== 'fg') {
+      return <span class={`text-[var(--color-${seg.color})]`}>{seg.text}</span>;
+    }
+    return seg.text;
+  })
+}

@@ -1,0 +1,62 @@
+---
+title: Testing
+description: Unit test handlers in isolation or validate the full runtime path with typed mocks.
+---
+
+PURISTA provides a dedicated test runner for commands. Import it from `@purista/core` and use it to test your command function in isolation with mocked resources.
+
+## Handler test with `getCommandFunctionTestRunner`
+
+Use `getCommandFunctionTestRunner` to run your command function with injected mock resources:
+
+```typescript [signUpCommand.test.ts]
+import { describe, test, expect, vi } from 'vitest'
+import { getCommandFunctionTestRunner } from '@purista/core'
+import { signUpCommandBuilder } from './signUpCommand.js'
+
+describe('signUp command', () => {
+  test('creates a user and returns the userId', async () => {
+    const mockDb = { insert: vi.fn().mockResolvedValue({ id: 'user-123' }) }
+
+    const runner = await getCommandFunctionTestRunner(signUpCommandBuilder, {
+      resources: { db: mockDb },
+    })
+
+    const result = await runner({ email: 'alice@example.com', password: 'secure1234' })
+
+    expect(result.userId).toBeDefined()
+    expect(mockDb.insert).toHaveBeenCalledOnce()
+  })
+
+  test('rejects disposable email addresses', async () => {
+    const mockDb = { insert: vi.fn() }
+
+    const runner = await getCommandFunctionTestRunner(signUpCommandBuilder, {
+      resources: { db: mockDb },
+    })
+
+    await expect(
+      runner({ email: 'bob@tempmail.com', password: 'secure1234' })
+    ).rejects.toThrow()
+  })
+})
+```
+
+The runner:
+- Calls your command function directly with the provided payload
+- Injects the resources, secrets, configs, and states you pass in the options
+- Bypasses the full event bridge pipeline (no validation guards, no transforms)
+- Is fast and deterministic — ideal for unit testing business logic
+
+## Which level should you use?
+
+| Scenario | Recommended approach |
+|---|---|
+| Business logic branching | `getCommandFunctionTestRunner` |
+| Resource interaction patterns | `getCommandFunctionTestRunner` |
+| Schema validation behavior | Integration/runtime test |
+| Guard hook integration | Integration/runtime test |
+| Transform hook integration | Integration/runtime test |
+| Full end-to-end flow | Integration/runtime test |
+
+As a rule of thumb: write handler tests first using `getCommandFunctionTestRunner`. They are fast, deterministic, and cover the majority of your logic. Add integration tests for the pipeline stages (validation, guards, transforms) where multiple components interact.

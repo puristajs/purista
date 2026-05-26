@@ -1,0 +1,625 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessFlow from '../../components/harness/HarnessFlow.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import HarnessStory from '../../components/harness/HarnessStory.astro'
+import CodeBlock from '../../components/ui/CodeBlock.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout title="Observability | AI Harness | PURISTA" description="Evaluate and optimize your AI agents over time with full trace visibility, cost control, and evidence-based iteration.">
+
+  <HarnessHero
+    lines={[
+      { text: 'Evaluate and' },
+      { text: 'optimize', color: 'found' },
+      { text: 'your agents.' },
+    ]}
+    lede="Agents are non-deterministic. A prompt change, a model upgrade, or a new tool can shift behavior in ways unit tests cannot catch. Full trace visibility is the feedback loop that turns guesswork into evidence-based improvement."
+  />
+
+  {/* ── Business Value ───────────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Why Observation Matters</div>
+        <h2 class="display display-lg">Turn traces into business intelligence</h2>
+        <p class="lede">Every model call, tool execution, and agent decision leaves a trace. The Harness makes them actionable — so you can control costs, assure quality, and ship improvements with confidence.</p>
+      </div>
+      <div class="obs-values">
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Understand Failures</span>
+          <p>A workflow returned the wrong answer? Follow the trace from run.started through every model call and tool execution. See exactly where reasoning diverged.</p>
+        </div>
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Measure Token Efficiency</span>
+          <p>Track input and output tokens per model call, per agent, per workflow. Identify which agents are expensive, which prompts are bloated, and where streaming reduces cost.</p>
+        </div>
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Detect Latency Spikes</span>
+          <p>Model call durations, tool execution times, sandbox command latencies — all histogrammed per provider and operation. Spot regressions after provider or prompt changes.</p>
+        </div>
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Compare Providers</span>
+          <p>Running A/B tests between OpenAI and Anthropic? Traces carry provider name, model, token usage, and finish reasons on every span. Compare objectively with data.</p>
+        </div>
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Audit Tool Usage</span>
+          <p>Which tools does each agent call? How often? With what latency? Tool spans carry name, type, MCP transport, and permission decisions — structured observability data you can pipe into your own audit log.</p>
+        </div>
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Validate Improvements</span>
+          <p>Ship a prompt improvement? Compare pre/post trace distributions for accuracy, token count, and latency. Evidence-based iteration beats guesswork.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Trace Tree ───────────────────────────────────────────────── */}
+  <HarnessStory
+    id="trace-tree"
+    layout="viz-left"
+    eyebrow="Trace Structure"
+    headline={[{ text: 'Every operation ' }, { text: 'is visible', color: 'found' }]}
+    lede="The Harness emits OpenTelemetry traces aligned with the official GenAI semantic conventions. Every model call, tool execution, and agent decision is a span — so your observability platform understands AI operations natively."
+    items={[
+      'harness.session.prompt — the entry point',
+      'invoke_agent {name} — agent reasoning loop',
+      'chat gpt-4o-mini — model call with token usage',
+      'execute_tool search_docs — tool invocation',
+      'harness.sandbox.exec — command execution',
+      'harness.state.op — persistence operation',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="trace-tree" />
+    </div>
+  </HarnessStory>
+
+  {/* ── Privacy Gate ─────────────────────────────────────────────── */}
+  <HarnessStory
+    id="privacy"
+    layout="viz-right"
+    eyebrow="Privacy Gate"
+    headline={[{ text: 'Content is ' }, { text: 'opt-in', color: 'con' }]}
+    lede="By default, prompts and responses are not captured in traces or logs. Events are emitted with content fields set to null. Enable captureContent only for deliberate local diagnostics."
+    items={[
+      'captureContent: false — default, privacy-first',
+      'Events emitted but content fields are null',
+      'Structured object content omitted unless enabled',
+      'Enable only for local debugging, never in production',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="privacy" />
+    </div>
+  </HarnessStory>
+
+  {/* ── Debugging Workflow ───────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Debugging</div>
+        <h2 class="display display-lg">Follow the evidence</h2>
+        <p class="lede">When something goes wrong, traces tell the story. Here is the systematic approach to finding and fixing issues.</p>
+      </div>
+      <div class="obs-debug">
+        <div class="obs-debug-row">
+          <span class="obs-debug-num site-mono">01</span>
+          <div>
+            <div class="obs-debug-title">Identify the Run</div>
+            <p>Get the run_id from the UI, API response, or logs. Every trace is rooted at a session prompt or workflow invocation.</p>
+          </div>
+        </div>
+        <div class="obs-debug-row">
+          <span class="obs-debug-num site-mono">02</span>
+          <div>
+            <div class="obs-debug-title">Inspect the Trace</div>
+            <p>Open the trace in CloudGrid, Grafana, or your observability platform. See the full hierarchy: session → workflow → agent → model → tool.</p>
+          </div>
+        </div>
+        <div class="obs-debug-row">
+          <span class="obs-debug-num site-mono">03</span>
+          <div>
+            <div class="obs-debug-title">Find the Divergence</div>
+            <p>Check model finish reasons, tool outputs, token counts, and error.type attributes. The span with ERROR status points to the failure.</p>
+          </div>
+        </div>
+        <div class="obs-debug-row">
+          <span class="obs-debug-num site-mono">04</span>
+          <div>
+            <div class="obs-debug-title">Compare Distributions</div>
+            <p>Look at token usage and operation.duration histograms. Did a prompt change increase token count? Did a provider switch add latency?</p>
+          </div>
+        </div>
+        <div class="obs-debug-row">
+          <span class="obs-debug-num site-mono">05</span>
+          <div>
+            <div class="obs-debug-title">Check Tool Usage</div>
+            <p>Tool spans show which tools were called, with what arguments, and how long they took. MCP spans include transport and auth metadata.</p>
+          </div>
+        </div>
+        <div class="obs-debug-row">
+          <span class="obs-debug-num site-mono">06</span>
+          <div>
+            <div class="obs-debug-title">Validate the Fix</div>
+            <p>Re-run a smoke test and compare the new trace to the old one. Confirm the fix resolved the issue without introducing regressions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Failure Triage ───────────────────────────────────────────── */}
+  <section class="section-pad soft-gradient">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Failure Triage</div>
+        <h2 class="display display-lg">What traces reveal</h2>
+      </div>
+      <div class="obs-failures">
+        <div class="obs-failure-row">
+          <span class="obs-failure-name site-mono">OperationTimeoutError</span>
+          <span class="obs-failure-desc">The run, model, or tool exceeded its budget. The trace shows which span hit the limit and how long sibling spans took. Tune defaults or inspect provider latency.</span>
+        </div>
+        <div class="obs-failure-row">
+          <span class="obs-failure-name site-mono">ValidationError</span>
+          <span class="obs-failure-desc">Input or output schema mismatch. The trace includes the Zod issue path and the offending value. Check the agent output span for the raw model response.</span>
+        </div>
+        <div class="obs-failure-row">
+          <span class="obs-failure-name site-mono">ModelError</span>
+          <span class="obs-failure-desc">Provider HTTP/network/error response. The model span carries normalized metadata: status, provider type, request id, and body summary. No need to dig through raw SDK logs.</span>
+        </div>
+        <div class="obs-failure-row">
+          <span class="obs-failure-name site-mono">Permission Denials</span>
+          <span class="obs-failure-desc">A tool call was gated by a review request or explicit deny. The tool span carries harness.permission.mode and harness.permission.decision. Audit who approved what.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── CloudGrid ────────────────────────────────────────────────── */}
+  <section class="section-pad soft-gradient">
+    <div class="wrap">
+      <div class="section-head mb-12">
+        <div class="eyebrow">Recommended Stack</div>
+        <h2 class="display display-lg">One system for<br><span style="color:var(--color-found)">traces, logs, metrics,<br>and AI evaluation.</span></h2>
+        <p class="lede">The Harness emits standard OTLP telemetry and works with any OpenTelemetry-compatible backend. For teams building with PURISTA, <a href="https://cloudgrid.dev/" target="_blank" rel="noopener" class="obs-link">CloudGrid</a> is the recommended choice — a source-available observability platform that combines traces, logs, metrics, dashboards, alerts, and <a href="https://cloudgrid.dev/features/ai-evaluation/" target="_blank" rel="noopener" class="obs-link">AI evaluation and optimization</a> in a single system.</p>
+      </div>
+
+      <div class="obs-cloudgrid">
+        <div class="obs-cloudgrid-col">
+          <span class="obs-cloudgrid-label site-mono">Why CloudGrid</span>
+          <div class="obs-cloudgrid-points">
+            <div class="obs-cloudgrid-point">
+              <span class="obs-cloudgrid-point-title">Self-hosted, source-available</span>
+              <p>Your telemetry can stay in your network. CloudGrid is built in the open under Apache 2.0 + Commons Clause terms.</p>
+            </div>
+            <div class="obs-cloudgrid-point">
+              <span class="obs-cloudgrid-point-title">OTel-native from the start</span>
+              <p>Speaks GenAI semantic conventions and OpenInference. AgentRuns, LlmCalls, and ToolCalls are first-class entities, not parsed log lines.</p>
+            </div>
+            <div class="obs-cloudgrid-point">
+              <span class="obs-cloudgrid-point-title">AI evaluation built in</span>
+              <p>Build datasets, run evaluations, compare baselines and candidates, explore optimization runs, and keep row-level evidence next to the spans it came from.</p>
+            </div>
+            <div class="obs-cloudgrid-point">
+              <span class="obs-cloudgrid-point-title">PURISTA Harness adapter</span>
+              <p>CloudGrid ships a <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">puristajs/harness</code> eval adapter out of the box. Harness owns all model-provider calls — CloudGrid never holds provider credentials.</p>
+            </div>
+          </div>
+          <a href="https://cloudgrid.dev/" target="_blank" rel="noopener" class="obs-cloudgrid-link">cloudgrid.dev →</a>
+        </div>
+        <div class="obs-cloudgrid-col">
+          <span class="obs-cloudgrid-label site-mono">Getting connected</span>
+          <div class="obs-cloudgrid-setup">
+            <div class="obs-setup-step">
+              <span class="obs-setup-num site-mono">01</span>
+              <div>
+                <div class="obs-setup-title">Start CloudGrid</div>
+                <p>One command: <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">docker compose up</code>. OTLP HTTP on port 4318, gRPC on 4317.</p>
+              </div>
+            </div>
+            <div class="obs-setup-step">
+              <span class="obs-setup-num site-mono">02</span>
+              <div>
+                <div class="obs-setup-title">Point the exporter</div>
+                <p>Set <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318</code>. The Harness reads standard OTel env vars — no Harness config changes needed.</p>
+              </div>
+            </div>
+            <div class="obs-setup-step">
+              <span class="obs-setup-num site-mono">03</span>
+              <div>
+                <div class="obs-setup-title">Watch runs appear</div>
+                <p>Every <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">run.started</code> through <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">run.finished</code> appears as a distributed waterfall with span attributes, events, and token counts.</p>
+              </div>
+            </div>
+            <div class="obs-setup-step">
+              <span class="obs-setup-num site-mono">04</span>
+              <div>
+                <div class="obs-setup-title">Add AI evaluation</div>
+                <p>Configure the eval harness adapter and start building datasets from your production traces. Score with deterministic rules or judge models. Run prompt experiments.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Operations Runbook ───────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Operations</div>
+        <h2 class="display display-lg">Runbook for operators</h2>
+        <p class="lede">Structured logs, traces, and verification gates turn incident response from guesswork into a repeatable process.</p>
+      </div>
+
+      <div class="obs-runbook">
+        <div class="obs-runbook-col">
+          <div class="obs-runbook-label site-mono" style="color:var(--color-found-hi)">Verification Gates</div>
+          <p class="obs-runbook-sub">Run these checks before every deployment or environment promotion.</p>
+          <CodeBlock
+            code={`npm run lint
+npm run typecheck
+npm test
+npm run test:contracts
+npm run test:integration
+npm run test:failure
+npm run build`}
+            language="bash"
+          />
+        </div>
+        <div class="obs-runbook-col">
+          <div class="obs-runbook-label site-mono" style="color:var(--color-con-hi)">Service Readiness</div>
+          <p class="obs-runbook-sub">Before exposing a harness-backed service to traffic:</p>
+          <ul class="obs-runbook-list">
+            <li>Verify session creation and direct agent invocation</li>
+            <li>Verify every workflow entrypoint</li>
+            <li>Verify tool and MCP failures map to harness errors</li>
+            <li>Verify cancellation and timeout behavior</li>
+            <li>Verify harness.shutdown() closes adapters cleanly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="obs-recovery">
+        <div class="obs-recovery-head">Recovery steps</div>
+        <div class="obs-debug">
+          <div class="obs-debug-row">
+            <span class="obs-debug-num site-mono">01</span>
+            <p>Identify <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">run_id</code> from the UI, logs, or API response</p>
+          </div>
+          <div class="obs-debug-row">
+            <span class="obs-debug-num site-mono">02</span>
+            <p>Inspect structured logs for the matching <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">run_id</code></p>
+          </div>
+          <div class="obs-debug-row">
+            <span class="obs-debug-num site-mono">03</span>
+            <p>Inspect trace in your observability platform if <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">traceId</code> is present</p>
+          </div>
+          <div class="obs-debug-row">
+            <span class="obs-debug-num site-mono">04</span>
+            <p>Check final <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">run.finished</code> event for normalized error metadata</p>
+          </div>
+          <div class="obs-debug-row">
+            <span class="obs-debug-num site-mono">05</span>
+            <p>Fix provider, tool, or configuration issue</p>
+          </div>
+          <div class="obs-debug-row">
+            <span class="obs-debug-num site-mono">06</span>
+            <p>Re-run a smoke test, then call <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">harness.shutdown()</code> on process exit</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── Custom Attributes ────────────────────────────────────────── */}
+  <section class="section-pad soft-gradient">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Extending</div>
+        <h2 class="display display-lg">Add your own dimensions</h2>
+        <p class="lede">The Harness emits standard spans. Your application can add custom attributes, events, and baggage to enrich traces with business context.</p>
+      </div>
+      <div class="obs-runbook">
+        <div class="obs-runbook-col">
+          <div class="obs-runbook-label site-mono" style="color:var(--color-found-hi)">Custom Span Attributes</div>
+          <p class="obs-runbook-sub">Add tenant IDs, user segments, experiment flags, or cost centers to every span via OTel baggage and span processors.</p>
+          <CodeBlock
+            code={`import { propagation, context } from '@opentelemetry/api'
+
+const ctx = propagation.setBaggage(
+  context.active(),
+  propagation.createBaggage({
+    'tenant.id': { value: 'acme-corp' },
+    'experiment.variant': { value: 'site' },
+  })
+)`}
+            language="typescript"
+          />
+        </div>
+        <div class="obs-runbook-col">
+          <div class="obs-runbook-label site-mono" style="color:var(--color-con-hi)">Workflow-Level Context</div>
+          <p class="obs-runbook-sub">Pass business context through workflow handlers. The Harness propagates the active OTel context through every agent and tool call.</p>
+          <CodeBlock
+            code={`.workflows(({ workflow }) => ({
+  analyze: workflow({
+    handler: async (ctx) => {
+      // All agent and tool spans inside
+      // this workflow inherit the context
+      const result = await ctx.agents.analyzer(ctx.input)
+      return result
+    },
+  }),
+}))`}
+            language="typescript"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[{ text: 'Observe, ' }, { text: 'understand', color: 'found' }, { text: ', improve.' }]}
+    lede="Traces are the feedback loop that turns guesswork into evidence. Start with defaults, connect CloudGrid or any OTel-compatible backend, and iterate with confidence."
+    ctas={[
+      { label: 'Security & Production Readiness', href: '/harness/security/', variant: 'primary' },
+      { label: 'Testing Guide', href: '/harness/testing/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>
+
+<style is:global>
+  /* ── Business value: 3-col border-grid ── */
+  .obs-values {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+  @media (max-width: 768px) { .obs-values { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .obs-values { grid-template-columns: 1fr; } }
+
+  .obs-value {
+    padding: clamp(1.2rem, 2vw, 1.6rem) clamp(1rem, 2vw, 1.5rem);
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+  }
+  .obs-value-label {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--color-found-hi);
+    margin-bottom: 0.5rem;
+  }
+  .obs-value p {
+    color: var(--color-fg-muted);
+    font-size: 0.92rem;
+    line-height: 1.58;
+  }
+
+  /* ── Debugging steps: numbered editorial rows ── */
+  .obs-debug {
+    border-top: 1px solid var(--color-line);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .obs-debug-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1.5rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--color-line);
+    align-items: baseline;
+  }
+  @media (max-width: 600px) {
+    .obs-debug-row { grid-template-columns: 1fr; gap: 0.2rem; }
+  }
+  .obs-debug-num {
+    font-size: 0.75rem;
+    color: var(--color-con-hi);
+    letter-spacing: 0.08em;
+    padding-top: 0.1rem;
+  }
+  .obs-debug-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-fg);
+    margin-bottom: 0.3rem;
+  }
+  .obs-debug-row p {
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.58;
+    margin: 0;
+  }
+
+  /* ── Failure triage: error-name / description table ── */
+  .obs-failures {
+    border-top: 1px solid var(--color-line);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .obs-failure-row {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    gap: 1.5rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--color-line);
+    align-items: baseline;
+  }
+  @media (max-width: 600px) {
+    .obs-failure-row { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+  .obs-failure-name {
+    font-size: 0.8rem;
+    color: var(--color-con-hi);
+    letter-spacing: 0.04em;
+  }
+  .obs-failure-desc {
+    color: var(--color-fg-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  /* ── Runbook: two-column editorial with code ── */
+  .obs-runbook {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 768px) { .obs-runbook { grid-template-columns: 1fr; } }
+
+  .obs-runbook-col {
+    padding: clamp(1.2rem, 2vw, 1.6rem) clamp(1rem, 2vw, 1.5rem);
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+  }
+  .obs-runbook-label {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+  .obs-runbook-sub {
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-bottom: 0.85rem;
+  }
+  .obs-runbook-list {
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .obs-runbook-list li {
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .obs-runbook-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--color-con);
+    font-size: 0.75rem;
+    top: 0.1em;
+  }
+
+  /* ── Recovery steps heading ── */
+  .obs-recovery {
+    max-width: 860px;
+    margin: 2rem auto 0;
+  }
+  .obs-recovery-head {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  /* obs-debug is reused here, already defined above */
+
+  /* ── CloudGrid recommendation ── */
+  .obs-cloudgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+  @media (max-width: 768px) { .obs-cloudgrid { grid-template-columns: 1fr; } }
+
+  .obs-cloudgrid-col {
+    padding: clamp(1.4rem, 2.5vw, 2rem) clamp(1.2rem, 2vw, 1.6rem);
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .obs-cloudgrid-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--color-found-hi);
+  }
+  .obs-cloudgrid-points {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1rem;
+  }
+  .obs-cloudgrid-point {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .obs-cloudgrid-point-title {
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--color-fg);
+  }
+  .obs-cloudgrid-point p {
+    font-size: 0.87rem;
+    color: var(--color-fg-muted);
+    line-height: 1.58;
+    margin: 0;
+  }
+  .obs-cloudgrid-link {
+    font-size: 0.82rem;
+    color: var(--color-found-hi);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    margin-top: auto;
+  }
+  .obs-cloudgrid-link:hover { text-decoration: underline; }
+
+  .obs-cloudgrid-setup {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1rem;
+  }
+  .obs-setup-step {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--color-line);
+    align-items: baseline;
+  }
+  .obs-setup-num {
+    font-size: 0.72rem;
+    color: var(--color-found-hi);
+    letter-spacing: 0.08em;
+  }
+  .obs-setup-title {
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--color-fg);
+    margin-bottom: 0.25rem;
+  }
+  .obs-setup-step p {
+    font-size: 0.85rem;
+    color: var(--color-fg-muted);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .obs-link {
+    color: var(--color-found-hi);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-found-hi) 40%, transparent);
+  }
+</style>

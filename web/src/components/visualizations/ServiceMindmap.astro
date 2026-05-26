@@ -1,0 +1,236 @@
+---
+interface Props {
+	class?: string
+}
+const { class: className = '' } = Astro.props
+---
+
+<div class:list={['relative w-full mx-auto reveal', className]}>
+  <svg viewBox="0 0 1000 680" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="w-full h-auto block" style="min-width: 600px;">
+    <defs>
+      <radialGradient id="svcGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="var(--color-found-glow)" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+      <pattern id="svcGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="var(--color-line)" stroke-width="0.4"/>
+      </pattern>
+    </defs>
+
+    <rect width="1000" height="680" fill="url(#svcGrid)" opacity="0.3"/>
+    <circle cx="220" cy="340" r="160" fill="url(#svcGlow)" opacity="0.5"/>
+
+    {/* === LEFT — What service contains === */}
+    <text x="40" y="36" text-anchor="start" class="svg-label" fill="var(--color-pilot)" style="font-size: 11px; letter-spacing: 0.12em;">CONTAINS</text>
+
+    <g transform="translate(30 60)">
+      <rect x="0" y="0" width="120" height="38" rx="6" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.2" opacity="0.85"/>
+      <text x="10" y="16" class="svg-label" fill="var(--color-pilot)">COMMANDS</text>
+      <text x="10" y="29" class="svg-label-xs" fill="var(--color-fg-subtle)">sync API calls</text>
+    </g>
+    <g transform="translate(30 115)">
+      <rect x="0" y="0" width="120" height="38" rx="6" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.2" opacity="0.85"/>
+      <text x="10" y="16" class="svg-label" fill="var(--color-pilot)">SUBSCRIPTIONS</text>
+      <text x="10" y="29" class="svg-label-xs" fill="var(--color-fg-subtle)">event reactions</text>
+    </g>
+    <g transform="translate(30 170)">
+      <rect x="0" y="0" width="120" height="38" rx="6" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.2" opacity="0.85"/>
+      <text x="10" y="16" class="svg-label" fill="var(--color-pilot)">STREAMS</text>
+      <text x="10" y="29" class="svg-label-xs" fill="var(--color-fg-subtle)">real-time flows</text>
+    </g>
+    <g transform="translate(30 560)">
+      <rect x="0" y="0" width="120" height="38" rx="6" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.2" opacity="0.85"/>
+      <text x="10" y="16" class="svg-label" fill="var(--color-pilot)">CONFIG</text>
+      <text x="10" y="29" class="svg-label-xs" fill="var(--color-fg-subtle)">Zod schema</text>
+    </g>
+    <g transform="translate(30 615)">
+      <rect x="0" y="0" width="120" height="38" rx="6" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.2" opacity="0.85"/>
+      <text x="10" y="16" class="svg-label" fill="var(--color-pilot)">RESOURCES</text>
+      <text x="10" y="29" class="svg-label-xs" fill="var(--color-fg-subtle)">DB, APIs, clients</text>
+    </g>
+    <g transform="translate(30 660)">
+      <rect x="0" y="0" width="120" height="28" rx="6" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1" opacity="0.7"/>
+      <text x="10" y="18" class="svg-label-xs" fill="var(--color-pilot)">STORES · Secret · Config · State</text>
+    </g>
+
+    {/* Lines from contains to service */}
+    <g stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="3 3" fill="none" opacity="0.5">
+      <line x1="150" y1="79" x2="150" y2="260"/>
+      <line x1="150" y1="134" x2="150" y2="260"/>
+      <line x1="150" y1="189" x2="150" y2="260"/>
+      <line x1="150" y1="579" x2="150" y2="420"/>
+      <line x1="150" y1="634" x2="150" y2="420"/>
+      <line x1="150" y1="674" x2="150" y2="420"/>
+    </g>
+
+    {/* === CENTER — Service === */}
+    <g transform="translate(100 240)">
+      <rect x="0" y="0" width="240" height="200" rx="14" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="2"/>
+      <rect x="0" y="0" width="240" height="200" rx="14" fill="var(--color-found)" fill-opacity="0.05"/>
+      <text x="120" y="46" text-anchor="middle" class="svg-label-lg" fill="var(--color-found)">SERVICE</text>
+      <text x="120" y="74" text-anchor="middle" class="svg-body" fill="var(--color-fg)">UserService · v1</text>
+      <text x="120" y="96" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">Domain Container</text>
+      <rect x="25" y="120" width="190" height="48" rx="8" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="120" y="140" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">Deployable unit</text>
+      <text x="120" y="158" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">monolith · microservice · FaaS</text>
+    </g>
+
+    {/* === RIGHT — Interfaces + stacked adapters === */}
+    <text x="680" y="36" text-anchor="middle" class="svg-label" fill="var(--color-con)" style="font-size: 11px; letter-spacing: 0.12em;">INTERFACES → ADAPTERS</text>
+
+    {/* Event Bridge */}
+    <g transform="translate(420 70)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+      <text x="12" y="18" class="svg-label" fill="var(--color-con)">EVENT BRIDGE</text>
+      <text x="12" y="32" class="svg-label-xs" fill="var(--color-fg-subtle)">pub/sub transport</text>
+    </g>
+    {/* Event Bridge adapters - stacked */}
+    <g transform="translate(600 70)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">AMQP</text>
+    </g>
+    <g transform="translate(600 102)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">NATS</text>
+    </g>
+    <g transform="translate(600 134)">
+      <rect x="0" y="0" width="120" height="22" rx="5" fill="transparent" stroke="none"/>
+      <text x="60" y="14" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">…</text>
+    </g>
+    <line x1="580" y1="92" x2="600" y2="84" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+    <line x1="580" y1="92" x2="600" y2="116" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+
+    {/* Queue Bridge */}
+    <g transform="translate(420 190)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+      <text x="12" y="18" class="svg-label" fill="var(--color-con)">QUEUE BRIDGE</text>
+      <text x="12" y="32" class="svg-label-xs" fill="var(--color-fg-subtle)">background jobs</text>
+    </g>
+    {/* Queue Bridge adapters */}
+    <g transform="translate(600 190)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">Redis Queue</text>
+    </g>
+    <g transform="translate(600 222)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">Temporal</text>
+    </g>
+    <g transform="translate(600 254)">
+      <rect x="0" y="0" width="120" height="22" rx="5" fill="transparent" stroke="none"/>
+      <text x="60" y="14" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">…</text>
+    </g>
+    <line x1="580" y1="212" x2="600" y2="204" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+    <line x1="580" y1="212" x2="600" y2="236" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+
+    {/* Secret Store */}
+    <g transform="translate(420 310)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+      <text x="12" y="18" class="svg-label" fill="var(--color-con)">SECRET STORE</text>
+      <text x="12" y="32" class="svg-label-xs" fill="var(--color-fg-subtle)">confidential data</text>
+    </g>
+    {/* Secret Store adapters */}
+    <g transform="translate(600 310)">
+      <rect x="0" y="0" width="140" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="70" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">HashiCorp Vault</text>
+    </g>
+    <g transform="translate(600 342)">
+      <rect x="0" y="0" width="140" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="70" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">AWS Secrets Mgr</text>
+    </g>
+    <g transform="translate(600 374)">
+      <rect x="0" y="0" width="140" height="22" rx="5" fill="transparent" stroke="none"/>
+      <text x="70" y="14" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">…</text>
+    </g>
+    <line x1="580" y1="332" x2="600" y2="324" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+    <line x1="580" y1="332" x2="600" y2="356" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+
+    {/* Config Store */}
+    <g transform="translate(420 430)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+      <text x="12" y="18" class="svg-label" fill="var(--color-con)">CONFIG STORE</text>
+      <text x="12" y="32" class="svg-label-xs" fill="var(--color-fg-subtle)">runtime values</text>
+    </g>
+    {/* Config Store adapters */}
+    <g transform="translate(600 430)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">etcd</text>
+    </g>
+    <g transform="translate(600 462)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">Consul</text>
+    </g>
+    <g transform="translate(600 494)">
+      <rect x="0" y="0" width="120" height="22" rx="5" fill="transparent" stroke="none"/>
+      <text x="60" y="14" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">…</text>
+    </g>
+    <line x1="580" y1="452" x2="600" y2="444" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+    <line x1="580" y1="452" x2="600" y2="476" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+
+    {/* State Store */}
+    <g transform="translate(420 550)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+      <text x="12" y="18" class="svg-label" fill="var(--color-con)">STATE STORE</text>
+      <text x="12" y="32" class="svg-label-xs" fill="var(--color-fg-subtle)">KV / blob / cache</text>
+    </g>
+    {/* State Store adapters */}
+    <g transform="translate(600 550)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">Redis</text>
+    </g>
+    <g transform="translate(600 582)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">PostgreSQL</text>
+    </g>
+    <g transform="translate(600 614)">
+      <rect x="0" y="0" width="120" height="22" rx="5" fill="transparent" stroke="none"/>
+      <text x="60" y="14" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">…</text>
+    </g>
+    <line x1="580" y1="572" x2="600" y2="564" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+    <line x1="580" y1="572" x2="600" y2="596" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+
+    {/* OpenTelemetry */}
+    <g transform="translate(420 620)">
+      <rect x="0" y="0" width="160" height="44" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+      <text x="12" y="18" class="svg-label" fill="var(--color-con)">OPENTELEMETRY</text>
+      <text x="12" y="32" class="svg-label-xs" fill="var(--color-fg-subtle)">traces & metrics</text>
+    </g>
+    {/* OpenTelemetry adapters */}
+    <g transform="translate(600 620)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">Jaeger</text>
+    </g>
+    <g transform="translate(600 652)">
+      <rect x="0" y="0" width="120" height="28" rx="5" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+      <text x="60" y="18" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-muted)">Datadog</text>
+    </g>
+    <line x1="580" y1="642" x2="600" y2="634" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+    <line x1="580" y1="642" x2="600" y2="666" stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.5"/>
+
+    {/* Lines from service to interfaces */}
+    <g stroke="var(--color-con)" stroke-width="1.2" fill="none" opacity="0.55">
+      <line x1="340" y1="280" x2="420" y2="92"/>
+      <line x1="340" y1="310" x2="420" y2="212"/>
+      <line x1="340" y1="340" x2="420" y2="332"/>
+      <line x1="340" y1="360" x2="420" y2="452"/>
+      <line x1="340" y1="390" x2="420" y2="572"/>
+      <line x1="340" y1="410" x2="420" y2="642"/>
+    </g>
+
+    {/* Animated dots service→interfaces */}
+    <circle r="2.5" fill="var(--color-con)" filter="drop-shadow(0 0 3px var(--color-con-glow))">
+      <animateMotion dur="2.5s" repeatCount="indefinite" path="M 340 280 L 420 92"/>
+    </circle>
+    <circle r="2.5" fill="var(--color-con)" filter="drop-shadow(0 0 3px var(--color-con-glow))" opacity="0.7">
+      <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.4s" path="M 340 310 L 420 212"/>
+    </circle>
+    <circle r="2.5" fill="var(--color-con)" filter="drop-shadow(0 0 3px var(--color-con-glow))" opacity="0.5">
+      <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.8s" path="M 340 340 L 420 332"/>
+    </circle>
+    <circle r="2.5" fill="var(--color-con)" filter="drop-shadow(0 0 3px var(--color-con-glow))" opacity="0.7">
+      <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.2s" path="M 340 390 L 420 572"/>
+    </circle>
+    <circle r="2.5" fill="var(--color-con)" filter="drop-shadow(0 0 3px var(--color-con-glow))" opacity="0.5">
+      <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.6s" path="M 340 410 L 420 642"/>
+    </circle>
+  </svg>
+</div>

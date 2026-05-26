@@ -1,0 +1,145 @@
+---
+title: Security
+description: Secrets, authentication, encryption, and access control — security by design in PURISTA services.
+---
+
+Security in PURISTA is layered: secrets are never in code, authentication happens at the HTTP boundary, authorization is declarative via guards, and every message carries security metadata. This guide covers the security patterns for production PURISTA systems.
+
+## Secrets management
+
+Secrets never belong in code, environment variables, or config files:
+
+```typescript [secrets.ts]
+import { ServiceBuilder } from '@purista/core'
+import { AWSSecretStore } from '@purista/aws-secret-store'
+
+export const userServiceV1ServiceBuilder = new ServiceBuilder(myServiceInfo)
+  .addSecretStore(AWSSecretStore, { region: 'us-east-1' })
+```
+
+Access in commands:
+
+```typescript [command.ts]
+.setCommandFunction(async function (context, payload) {
+  const apiKey = await context.secrets.getSecret('paymentProvider:apiKey')
+  // Use apiKey — never log it
+})
+```
+
+## Authentication
+
+Implement authentication in the HTTP server protect handler:
+
+```typescript [auth.ts]
+import { HandledError, StatusCode } from '@purista/core'
+
+honoService.setProtectHandler(async function (c, next) {
+  const header = c.req.header('authorization')
+  if (!header) {
+    const err = new HandledError(StatusCode.Unauthorized, 'Not logged in')
+    return c.json(err.getErrorResponse(), 401)
+  }
+
+  const token = header.split(' ')[1]
+  const { payload, error } = await tokenValidator(token)
+
+  if (error) {
+    const err = new HandledError(StatusCode.InvalidToken, 'Invalid token')
+    return c.json(err.getErrorResponse(), 401)
+  }
+
+  c.set('principalId', payload.id)
+  return next()
+})
+```
+
+## Authorization via guards
+
+Guards are the primary enforcement point for authorization in PURISTA. They run after input validation and before the command function executes, so the handler can assume authorization has already been checked.
+
+Guards **must** be declared as `async function`, not arrow functions. PURISTA binds the service instance to `this` inside guards, and arrow functions do not have their own `this`.
+
+A before guard receives three arguments — `(context, payload, parameter)` — and must return `Promise<void>` or throw a `HandledError`:
+
+```typescript [guards.ts]
+.setBeforeGuardHooks({
+  requireAdmin: async function (context, payload, parameter) {
+    const user = await context.resources.db.getUser(context.message.principalId)
+    if (user.role !== 'admin') {
+      throw new HandledError(StatusCode.Forbidden, 'Admin required')
+    }
+  },
+})
+```
+
+An after guard — for post-response auditing — receives four arguments: `(context, result, originalPayload, originalParameter)`.
+
+Guards can access `context.secrets`, `context.configs`, and `context.states` directly — there is no `context.stores` accessor.
+
+## Tenant isolation
+
+Every message carries `tenantId`. The check belongs in a **before guard** so the handler can assume it is present:
+
+```typescript [tenant.ts]
+.setBeforeGuardHooks({
+  requireTenant: async function (context, payload, parameter) {
+    if (!context.message.tenantId) {
+      throw new HandledError(StatusCode.Unauthorized, 'tenantId is required')
+    }
+  },
+})
+.setCommandFunction(async function (context, payload, parameter) {
+  const { tenantId } = context.message
+
+  return context.resources.db.query({
+    table: 'users',
+    where: { tenantId, id: payload.userId },
+  })
+})
+```
+
+## Data privacy
+
+- **Never log secrets** — redact sensitive fields from logs
+- **Validate output schemas** — prevents accidental data leakage
+- **Use encryption at rest** — for state stores where required
+- **Build audit logic on message metadata** — every message carries `principalId`, `tenantId`, and `traceId`; PURISTA does not store audit logs by default — implement a dedicated audit subscription that persists events to your audit store
+
+## Input validation
+
+All inputs are schema-validated:
+
+```typescript [validation.ts]
+.addPayloadSchema(z.object({
+  email: z.string().email(),
+  password: z.string().min(12),
+}))
+```
+
+Unknown fields are automatically stripped. This prevents injection of unexpected data.
+
+## Cross-service invocation security
+
+Declare explicit cross-service permissions:
+
+```typescript [invoke.ts]
+export const userService = userServiceBuilder
+  .addCommandDefinition(...commandDefinitions)
+  .canInvoke('EmailService', '1', 'sendWelcomeEmail')
+  .canInvoke('PaymentService', '1', 'processPayment')
+```
+
+Only declared invocations are allowed. Attempts to invoke undeclared services fail at startup.
+
+## Security checklist
+
+- [ ] No secrets in code, config files, or environment variables
+- [ ] Authentication is implemented in the HTTP server layer
+- [ ] Authorization uses before guards, not inline in commands
+- [ ] Tenant isolation is enforced on all data access
+- [ ] Input validation strips unknown fields
+- [ ] Output validation prevents data leakage
+- [ ] Cross-service invocations are explicitly declared
+- [ ] Logs redact sensitive data
+- [ ] Encryption at rest is configured where required
+- [ ] Security headers (CORS, CSP, HSTS) are set

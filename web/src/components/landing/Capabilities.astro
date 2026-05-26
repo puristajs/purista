@@ -1,0 +1,126 @@
+---
+const capabilities = [
+	{
+		title: 'AI Harness',
+		body: 'Sandbox and LLM adapters for safe AI integration with audit trails.',
+		tone: 'con',
+		href: '/harness/',
+		icon: '<circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+	},
+	{
+		title: 'HTTP Server',
+		body: 'Routes, middleware, CORS, and OpenAPI auto-generated from definitions.',
+		tone: 'found',
+		href: '/handbook/3_eco_system/http_server',
+		icon: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+	},
+	{
+		title: 'Event Bridge',
+		body: 'Pub/sub, message queues, and retry logic wired at runtime.',
+		tone: 'con',
+		href: '/handbook/bridges/event-bridges/',
+		icon: '<circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10"/>',
+	},
+	{
+		title: 'Secret Store',
+		body: 'Vault, env vars, and rotation injected at bootstrap.',
+		tone: 'found',
+		href: '/handbook/stores/secret-store/',
+		icon: '<rect x="4" y="11" width="16" height="11" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+	},
+	{
+		title: 'State Store',
+		body: 'KV, blob storage, and caches bound by name, swappable by config.',
+		tone: 'pilot',
+		href: '/handbook/stores/state-store/',
+		icon: '<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.6 3.6 3 8 3s8-1.4 8-3V6M4 12v6c0 1.6 3.6 3 8 3s8-1.4 8-3v-6"/>',
+	},
+	{
+		title: 'Config Store',
+		body: 'Runtime config with validation and environment-aware values.',
+		tone: 'found',
+		href: '/handbook/stores/config-store/',
+		icon: '<path d="M4 7h16M4 12h10M4 17h16M18 12h2"/><circle cx="14" cy="7" r="2"/><circle cx="16" cy="17" r="2"/><circle cx="8" cy="12" r="2"/>',
+	},
+	{
+		title: 'Queue Bridge',
+		body: 'Durable delivery with dead-letter support.',
+		tone: 'con',
+		href: '/handbook/bridges/queue-bridges/',
+		icon: '<path d="M4 7h12M4 12h16M4 17h10"/><path d="M18 5l3 2-3 2M16 15l3 2-3 2"/>',
+	},
+	{
+		title: 'Temporal',
+		body: 'Durable workflows for long-running business processes.',
+		tone: 'found',
+		href: '/handbook/patterns/temporal/',
+		icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+	},
+	{
+		title: 'Dapr SDK',
+		body: 'Native sidecar integration via Distributed Application Runtime.',
+		tone: 'pilot',
+		href: '/handbook/3_eco_system/eventbridges/dapr',
+		icon: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12v10M12 12L3 7"/>',
+	},
+	{
+		title: 'Kubernetes SDK',
+		body: 'K8s-native deployment with health probes and graceful shutdown.',
+		tone: 'con',
+		href: '/handbook/ops/deployment/',
+		icon: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+	},
+]
+---
+
+<div class="site-cap-grid">
+  {
+    capabilities.map((c, i) => (
+      <a
+        href={c.href}
+        class="site-card site-cap-card site-reveal"
+        data-tone={c.tone}
+        style={`--icon-color: var(--color-${c.tone}); --site-reveal-delay: ${i * 60}ms`}
+      >
+        <div class="site-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" set:html={c.icon} />
+        </div>
+        <h4 class="site-card-title">{c.title}</h4>
+        <p class="site-card-body">{c.body}</p>
+        <div class="site-cap-corner" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M3 13 L13 3 M13 3 H6 M13 3 V10" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </a>
+    ))
+  }
+</div>
+
+<style>
+  .site-cap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.1rem;
+  }
+  .site-cap-card {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+  }
+  .site-cap-corner {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.1rem;
+    color: var(--color-fg-subtle);
+    transition: color 0.3s var(--site-ease-out), transform 0.3s var(--site-ease-spring);
+  }
+  .site-cap-corner svg { width: 14px; height: 14px; }
+  .site-card:hover .site-cap-corner {
+    color: var(--icon-color, var(--color-fg));
+    transform: translate(2px, -2px);
+  }
+</style>
