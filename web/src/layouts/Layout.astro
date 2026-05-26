@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import SeoHead from '../components/meta/SeoHead.astro'
 
 interface Props {
 	title?: string
@@ -11,13 +12,6 @@ const {
 	description = 'PURISTA 3. The open-source TypeScript framework for production-grade systems built with AI-assisted development. Declared. Reviewable. Observable. Approval-ready.',
 } = Astro.props
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site)
-const ogRoute =
-	Astro.url.pathname
-		.replace(/^\//, '')
-		.replace(/\/$/, '')
-		.replace(/\/index$/, '') || 'index'
-const ogImage = new URL(`/open-graph/${ogRoute}.png`, Astro.site).toString()
 ---
 
 <!doctype html>
@@ -54,27 +48,7 @@ const ogImage = new URL(`/open-graph/${ogRoute}.png`, Astro.site).toString()
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
-
-    {/* Open Graph */}
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={title} />
-    <meta property="og:site_name" content="PURISTA" />
-
-    {/* Twitter */}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={canonicalURL} />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <SeoHead title={title} description={description} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -82,7 +56,6 @@ const ogImage = new URL(`/open-graph/${ogRoute}.png`, Astro.site).toString()
       href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..800&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
   </head>
   <body>

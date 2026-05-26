@@ -1,0 +1,59 @@
+---
+interface Props {
+	title: string
+	description: string
+	type?: 'website' | 'article'
+	imageRoute?: string
+}
+
+const { title, description, type = 'website', imageRoute } = Astro.props
+
+const site = Astro.site ?? new URL('https://purista.dev')
+const canonicalURL = new URL(Astro.url.pathname, site)
+const route =
+	imageRoute ??
+	(Astro.url.pathname
+		.replace(/^\//, '')
+		.replace(/\/$/, '')
+		.replace(/\/index$/, '') || 'index')
+const ogImage = new URL(`/open-graph/${route}.png`, site).toString()
+const themeLight = '#f7f7f2'
+const themeDark = '#08080b'
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalURL} />
+<meta name="application-name" content="PURISTA" />
+<meta name="apple-mobile-web-app-title" content="PURISTA" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content={themeLight} />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content={themeDark} />
+
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:secure_url" content={ogImage} />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${title} — PURISTA`} />
+<meta property="og:site_name" content="PURISTA" />
+<meta property="og:locale" content="en_US" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={`${title} — PURISTA`} />
+
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#f4d35e" />
