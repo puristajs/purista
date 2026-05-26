@@ -88,4 +88,4 @@ Contributors are welcome!
 
 [![Sebastian Wessel](https://contrib.rocks/image?repo=sebastianwessel/purista)](https://github.com/puristajs/purista)
 
-[PURISTA handbook](website/doc/handbook/)
+[PURISTA handbook](web/src/content/handbook/)

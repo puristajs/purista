@@ -24,7 +24,7 @@
 		"./packages/redis-state-store",
 		"./packages/vault-secret-store"
 	],
-	"plugin": ["typedoc-plugin-markdown"],
+	"plugin": [],
 	"externalSymbolLinkMappings": {
 		"ai": {
 			"LanguageModel": "https://ai-sdk.dev/docs/reference/ai-sdk-core/stream-text"
@@ -44,7 +44,7 @@
 		]
 	},
 	"tsconfig": "tsconfig.typedoc.json",
-	"out": "website/doc/api",
+	"out": "web/public/api",
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,
 	"includeVersion": true,

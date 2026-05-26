@@ -64,3 +64,7 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 - For sandbox implementation work, also load `website/doc/public/llms/sandbox.txt`.
 - Canonical framework skills are available under `skills/` and should be loaded selectively.
 - Prefer the shared layered catalog there over app-local copies.
+
+## Website Design Guidance
+- For the Astro website in `web/`, load `web/AGENTS.md` and `web/DESIGN.md` before changing layout, visuals, UI components, copy structure, or page storytelling.
+- The website direction is flat, focused, dark-first technical editorial with fewer boxes, reusable layout primitives, and semantic visuals. AI Harness pages should be especially card-light and visual-led.

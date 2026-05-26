@@ -11,7 +11,7 @@
 		"test:integration": "node ./scripts/runWithDockerHost.mjs node --env-file=.env ./node_modules/vitest/vitest.mjs",
 		"test:unit": "tsc --noEmit -p ./tsconfig.unit.json && vitest -c ./vitest.config.unit.ts",
 		"test:coverage:streaming": "tsc --noEmit && vitest -c ./vitest.config.streaming.ts --run",
-		"update:doc": "npm run gitclean && git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && typedoc --options typedoc.json && git add --all && git commit -S -am \"doc: update api documentation\" && git commit -am \"doc: update CHANGELOG\" && npm run build:doc -w website",
+		"update:doc": "npm run gitclean && git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && typedoc --options typedoc.json && npm run build -w @purista/web && git add --all && git commit -S -am \"doc: update api documentation\" && git commit -am \"doc: update CHANGELOG\"",
 		"release:major": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
 		"release:minor": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",
 		"release:patch": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version patch --no-git-tag-version --workspaces && npm run commit:patch && npm publish --workspaces",
@@ -24,9 +24,9 @@
 		"commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh && npm run build",
 		"commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh && npm run build",
 		"commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh && npm run build",
-		"dev:doc": "npm run dev -w website",
-		"build:doc": "git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && typedoc --options typedoc.json && npm run build:doc -w website",
-		"vitepress": "npm run preview -w website",
+		"dev:doc": "npm run dev -w @purista/web",
+		"build:doc": "git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && typedoc --options typedoc.json && npm run build -w @purista/web",
+		"preview:doc": "npm run preview -w @purista/web",
 		"check:cycling": "npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages",
 		"sign": "git rebase --exec \"git commit --amend --no-edit -n -S\" -i",
 		"deps:check": "check-dependency-version-consistency && ncu -ws --root",
@@ -36,7 +36,7 @@
 	"workspaces": [
 		"./packages/*",
 		"./examples/*",
-		"website"
+		"web"
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
@@ -52,13 +52,13 @@
 		"ts-node": "^10.9.2",
 		"tsx": "^4.22.3",
 		"typedoc": "^0.28.19",
-		"typedoc-plugin-markdown": "^4.11.0",
 		"typescript": "^6.0.3",
 		"vitest": "^4.1.7"
 	},
 	"packageManager": "npm@11.15.0",
 	"overrides": {
-		"protobufjs": "7.5.8"
+		"protobufjs": "7.5.8",
+		"vite": "7.3.3"
 	},
 	"engines": {
 		"node": ">=24.15.0"
