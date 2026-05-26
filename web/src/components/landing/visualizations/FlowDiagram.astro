@@ -1,0 +1,381 @@
+---
+/**
+ * Site Flow Diagram — n8n-style animated workflow visualization.
+ *
+ * Nodes are rounded panels with an icon, title, and sublabel. Edges are
+ * curved cubic-bezier paths drawn between port points on each node, with
+ * an optional dashed style and animated flowing particles. Edges may carry
+ * a label rendered at the midpoint.
+ *
+ * The visualization is responsive via SVG viewBox; place inside a flex/grid
+ * container with a known aspect ratio for best results.
+ */
+
+type Tone = 'found' | 'con' | 'pilot' | 'fg'
+type EdgeStyle = 'solid' | 'dashed'
+type PortSide = 'left' | 'right' | 'top' | 'bottom'
+
+export interface FlowNode {
+	id: string
+	x: number // viewBox coords, top-left of node
+	y: number
+	w?: number
+	h?: number
+	title: string
+	sub?: string
+	icon?: string // raw inner SVG markup (no <svg> wrapper)
+	tone?: Tone
+	shape?: 'rect' | 'circle' | 'pill' | 'plus' | 'condition'
+}
+
+export interface FlowEdge {
+	from: string
+	to: string
+	fromSide?: PortSide
+	toSide?: PortSide
+	style?: EdgeStyle
+	tone?: Tone
+	label?: string
+	/** Bezier curvature multiplier, defaults to 0.5 of distance */
+	curve?: number
+	/** Delay (s) for the flowing pulse animation along this edge */
+	delay?: number
+}
+
+interface Props {
+	width?: number
+	height?: number
+	nodes: FlowNode[]
+	edges: FlowEdge[]
+	/** Optional ambient label rendered top-left */
+	caption?: string
+	/** Aspect ratio for the wrapper (defaults to width/height) */
+	ariaLabel?: string
+}
+
+const { width = 1100, height = 620, nodes, edges, caption, ariaLabel = 'Workflow diagram' } = Astro.props
+
+// Default node sizes
+function nodeSize(n: FlowNode) {
+	const w = n.w ?? (n.shape === 'circle' ? 90 : n.shape === 'plus' ? 56 : 230)
+	const h = n.h ?? (n.shape === 'circle' ? 90 : n.shape === 'plus' ? 56 : 86)
+	return { w, h }
+}
+
+function nodeById(id: string) {
+	return nodes.find(n => n.id === id)
+}
+
+function portPoint(n: FlowNode, side: PortSide) {
+	const { w, h } = nodeSize(n)
+	switch (side) {
+		case 'left':
+			return { x: n.x, y: n.y + h / 2 }
+		case 'right':
+			return { x: n.x + w, y: n.y + h / 2 }
+		case 'top':
+			return { x: n.x + w / 2, y: n.y }
+		case 'bottom':
+			return { x: n.x + w / 2, y: n.y + h }
+	}
+}
+
+function edgePath(e: FlowEdge): { d: string; mid: { x: number; y: number } } {
+	const from = nodeById(e.from)
+	const to = nodeById(e.to)
+	if (!from || !to) return { d: '', mid: { x: 0, y: 0 } }
+
+	// Auto-pick sides if not provided
+	const fromSide: PortSide = e.fromSide ?? (to.x >= from.x + (from.w ?? 230) ? 'right' : 'bottom')
+	const toSide: PortSide = e.toSide ?? (to.x >= from.x ? 'left' : 'right')
+
+	const a = portPoint(from, fromSide)
+	const b = portPoint(to, toSide)
+
+	const dx = b.x - a.x
+	const dy = b.y - a.y
+	const curve = e.curve ?? 0.45
+
+	// Compute control points based on port direction
+	function dir(side: PortSide): { dx: number; dy: number } {
+		switch (side) {
+			case 'left':
+				return { dx: -1, dy: 0 }
+			case 'right':
+				return { dx: 1, dy: 0 }
+			case 'top':
+				return { dx: 0, dy: -1 }
+			case 'bottom':
+				return { dx: 0, dy: 1 }
+		}
+	}
+	const da = dir(fromSide)
+	const db = dir(toSide)
+	const dist = Math.max(80, Math.hypot(dx, dy) * curve)
+	const c1 = { x: a.x + da.dx * dist, y: a.y + da.dy * dist }
+	const c2 = { x: b.x + db.dx * dist, y: b.y + db.dy * dist }
+
+	const d = `M ${a.x} ${a.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${b.x} ${b.y}`
+	// Approx midpoint at t=0.5 on the cubic bezier
+	const mt = 0.5
+	const mx = (1 - mt) ** 3 * a.x + 3 * (1 - mt) ** 2 * mt * c1.x + 3 * (1 - mt) * mt ** 2 * c2.x + mt ** 3 * b.x
+	const my = (1 - mt) ** 3 * a.y + 3 * (1 - mt) ** 2 * mt * c1.y + 3 * (1 - mt) * mt ** 2 * c2.y + mt ** 3 * b.y
+
+	return { d, mid: { x: mx, y: my } }
+}
+
+function toneColor(t?: Tone) {
+	switch (t) {
+		case 'pilot':
+			return 'var(--color-pilot)'
+		case 'con':
+			return 'var(--color-con)'
+		case 'found':
+			return 'var(--color-found)'
+		default:
+			return 'var(--color-fg-muted)'
+	}
+}
+function toneColorHi(t?: Tone) {
+	switch (t) {
+		case 'pilot':
+			return 'var(--color-pilot-hi)'
+		case 'con':
+			return 'var(--color-con-hi)'
+		case 'found':
+			return 'var(--color-found-hi)'
+		default:
+			return 'var(--color-fg)'
+	}
+}
+
+const uid = Math.random().toString(36).slice(2, 8)
+---
+
+<div class="site-flow-wrap" style={`aspect-ratio: ${width} / ${height}`}>
+  {caption && <div class="site-flow-caption site-mono">{caption}</div>}
+  <svg
+    viewBox={`0 0 ${width} ${height}`}
+    role="img"
+    aria-label={ariaLabel}
+    xmlns="http://www.w3.org/2000/svg"
+    class="site-flow"
+  >
+    <defs>
+      <filter id={`vf-${uid}-glow`} x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="b" />
+        <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+      </filter>
+      {(['found', 'con', 'pilot'] as const).map((t) => (
+        <linearGradient id={`vf-${uid}-grad-${t}`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%"  stop-color={toneColor(t)} stop-opacity="0" />
+          <stop offset="50%" stop-color={toneColor(t)} stop-opacity="1" />
+          <stop offset="100%" stop-color={toneColor(t)} stop-opacity="0" />
+        </linearGradient>
+      ))}
+    </defs>
+
+    {/* Edges: base path under animated pulse */}
+    {edges.map((e, i) => {
+      const { d, mid } = edgePath(e);
+      const tone = e.tone ?? 'found';
+      const isDashed = e.style === 'dashed';
+      return (
+        <g class="site-flow-edge" style={`--delay: ${e.delay ?? i * 0.4}s`}>
+          <path
+            d={d}
+            stroke="rgba(255,255,255,0.08)"
+            stroke-width="1.2"
+            fill="none"
+            stroke-dasharray={isDashed ? '4 6' : undefined}
+          />
+          <path
+            d={d}
+            stroke={`url(#vf-${uid}-grad-${tone})`}
+            stroke-width="2"
+            fill="none"
+            class="site-flow-edge-pulse"
+            stroke-linecap="round"
+          />
+          {e.label && (
+            <g transform={`translate(${mid.x} ${mid.y})`}>
+              <rect
+                x="-32" y="-11" width="64" height="22" rx="11"
+                fill="var(--color-bg-elev)"
+                stroke="var(--color-line-strong)"
+                stroke-width="1"
+              />
+              <text
+                x="0" y="4"
+                text-anchor="middle"
+                fill={toneColorHi(tone)}
+                font-family="JetBrains Mono"
+                font-size="10"
+                letter-spacing="1"
+              >{e.label}</text>
+            </g>
+          )}
+        </g>
+      );
+    })}
+
+    {/* Nodes */}
+    {nodes.map((n, idx) => {
+      const { w, h } = nodeSize(n);
+      const tone = n.tone ?? 'fg';
+      const c  = toneColor(tone);
+      const ch = toneColorHi(tone);
+
+      if (n.shape === 'plus') {
+        return (
+          <g class="site-flow-node site-flow-node--plus" transform={`translate(${n.x} ${n.y})`} style={`--delay:${0.6 + idx * 0.08}s`}>
+            <rect x="0" y="0" width={w} height={h} rx="10"
+                  fill="transparent"
+                  stroke="var(--color-line-vivid)"
+                  stroke-width="1.2"
+                  stroke-dasharray="4 4" />
+            <path d={`M ${w/2 - 8} ${h/2} h 16 M ${w/2} ${h/2 - 8} v 16`}
+                  stroke="var(--color-fg-muted)" stroke-width="1.6" stroke-linecap="round" />
+          </g>
+        );
+      }
+
+      if (n.shape === 'condition') {
+        // Diamond-like router node
+        return (
+          <g class="site-flow-node site-flow-node--condition" transform={`translate(${n.x} ${n.y})`} style={`--delay:${0.6 + idx * 0.08}s`}>
+            <rect x="0" y="0" width={w} height={h} rx="14"
+                  fill="var(--color-bg-elev)" stroke={c} stroke-width="1.2" />
+            <g transform={`translate(${w/2} ${h/2})`} fill="none" stroke={ch} stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M -10 -8 L 10 -8 M -10 8 L 4 8 M 4 -12 L 10 -8 L 4 -4 M -4 4 L -10 8 L -4 12" />
+            </g>
+            <text x={w/2} y={h + 16} text-anchor="middle" fill="var(--color-fg)" font-family="Inter" font-size="13" font-weight="600">{n.title}</text>
+          </g>
+        );
+      }
+
+      if (n.shape === 'circle') {
+        return (
+          <g class="site-flow-node site-flow-node--circle" transform={`translate(${n.x + w/2} ${n.y + h/2})`} style={`--delay:${0.6 + idx * 0.08}s`}>
+            <circle r={w/2} fill="var(--color-bg-elev)" stroke={c} stroke-width="1.4" />
+            <g transform="translate(-12 -12)" fill="none" stroke={ch} stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" set:html={n.icon ?? ''} />
+            <text y={w/2 + 18} text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="10" letter-spacing="1.5">{n.title.toUpperCase()}</text>
+          </g>
+        );
+      }
+
+      // Default: rounded rect with icon + title + sub
+      return (
+        <g class="site-flow-node" transform={`translate(${n.x} ${n.y})`} style={`--delay:${0.6 + idx * 0.08}s`}>
+          {/* Card shadow */}
+          <rect x="-1" y="2" width={w + 2} height={h} rx="14" fill="rgba(0,0,0,0.4)" filter={`url(#vf-${uid}-glow)`} opacity="0.4" />
+          <rect x="0" y="0" width={w} height={h} rx="14"
+                fill="var(--color-bg-elev)"
+                stroke={tone === 'fg' ? 'var(--color-line-strong)' : c}
+                stroke-width="1.2" />
+          {/* Tone gradient overlay */}
+          <rect x="0" y="0" width={w} height={h} rx="14" fill={`url(#vf-${uid}-grad-${tone === 'fg' ? 'found' : tone})`} opacity="0.06" />
+
+          {/* Left port indicator */}
+          <g transform={`translate(0 ${h/2})`}>
+            <rect x="-5" y="-4" width="8" height="8" rx="1.5"
+                  fill="var(--color-bg-elev)" stroke="var(--color-line-vivid)" transform="rotate(45)" />
+          </g>
+          {/* Right port indicator */}
+          <g transform={`translate(${w} ${h/2})`}>
+            <rect x="-3" y="-4" width="8" height="8" rx="1.5"
+                  fill="var(--color-bg-elev)" stroke="var(--color-line-vivid)" transform="rotate(45)" />
+          </g>
+
+          {/* Icon container */}
+          <g transform="translate(18 22)">
+            <rect x="-2" y="-2" width="44" height="44" rx="10"
+                  fill={tone === 'fg' ? 'var(--color-bg-sunk)' : `color-mix(in srgb, ${c} 18%, transparent)`}
+                  stroke={tone === 'fg' ? 'var(--color-line)' : `color-mix(in srgb, ${c} 35%, transparent)`}
+                  stroke-width="1" />
+            {n.icon && (
+              <g transform="translate(10 10)" fill="none" stroke={ch} stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" set:html={n.icon} />
+            )}
+          </g>
+
+          {/* Text */}
+          <text x="74" y="36"
+                fill="var(--color-fg-strong)"
+                font-family="Inter Tight"
+                font-size="15"
+                font-weight="600"
+                letter-spacing="0">{n.title}</text>
+          {n.sub && (
+            <text x="74" y="56"
+                  fill="var(--color-fg-muted)"
+                  font-family="JetBrains Mono"
+                  font-size="10.5"
+                  letter-spacing="1">{n.sub}</text>
+          )}
+        </g>
+      );
+    })}
+  </svg>
+</div>
+
+<style>
+  .site-flow-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+  }
+  .site-flow {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .site-flow-caption {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-fg-subtle);
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-bg-elev) 55%, transparent);
+    z-index: 2;
+  }
+  .site-flow-edge {
+    opacity: 0;
+    animation: vfe-fade 0.7s var(--delay, 0s) ease-out forwards;
+  }
+  @keyframes vfe-fade {
+    to { opacity: 1; }
+  }
+  .site-flow-edge-pulse {
+    stroke-dasharray: 14 240;
+    animation: vfe-flow 3.4s linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes vfe-flow {
+    from { stroke-dashoffset: 254; opacity: 0.25; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    to   { stroke-dashoffset: 0; opacity: 0.25; }
+  }
+  .site-flow-node {
+    opacity: 0;
+    transform-origin: center;
+    animation: vfn-pop 0.8s var(--delay, 0s) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes vfn-pop {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* SVG transform: translate on groups already used via attribute; CSS keyframe doesn't
+     override the attribute when only animation property is used. Good. */
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-flow-edge,
+    .site-flow-edge-pulse,
+    .site-flow-node { animation: none; opacity: 1; }
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+import type { HeadlineSegment } from '../ui/Headline.astro'
+import Headline from '../ui/Headline.astro'
+
+interface CTA {
+	label: string
+	href: string
+	variant?: 'primary' | 'ghost'
+}
+
+interface Props {
+	id?: string
+	headline: HeadlineSegment[]
+	lede?: string
+	ctas?: CTA[]
+	size?: 'xl' | 'lg'
+}
+
+const { id = 'cta', headline, lede, ctas = [], size = 'xl' } = Astro.props
+
+const sizeClass = {
+	xl: 'display-xl',
+	lg: 'display-lg',
+}[size]
+---
+
+<section
+  id={id}
+  class="section-pad text-center relative overflow-hidden w-full"
+>
+  <div class="cta-glow absolute inset-0 pointer-events-none" />
+  <div class="wrap relative z-[2]">
+    <div class="reveal">
+      <h2 class:list={['display mx-auto max-w-[22ch]', sizeClass]}>
+        <Headline segments={headline} />
+      </h2>
+      {lede && (
+        <p class="mt-5 text-[var(--color-fg-muted)] max-w-[52ch] mx-auto text-[1.1rem]">
+          {lede}
+        </p>
+      )}
+    </div>
+    {
+      ctas.length > 0 && (
+        <div class="reveal mt-9 flex justify-center gap-3 flex-wrap">
+          {ctas.map((cta) => (
+            <a class:list={['btn', cta.variant === 'primary' ? 'btn-primary' : 'btn-ghost']} href={cta.href}>
+              {cta.label}
+              {cta.variant === 'primary' && <span>→</span>}
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</section>

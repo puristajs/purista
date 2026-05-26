@@ -1,0 +1,152 @@
+---
+import Navigation from '../components/ui/Navigation'
+import type { SidebarItem } from '../lib/sidebar'
+import Layout from './Layout.astro'
+
+interface Props {
+	title: string
+	description?: string
+	sidebar?: SidebarItem[]
+	currentId?: string
+	headings?: { depth: number; slug: string; text: string }[]
+	prose?: boolean
+}
+
+const { title, description, sidebar = [], currentId = '', headings = [], prose = true } = Astro.props
+
+function isActive(item: SidebarItem, id: string): boolean {
+	const itemBase = item.id.replace(/\/index$/, '')
+	const currentBase = id.replace(/\/index$/, '')
+	return itemBase === currentBase
+}
+
+function isParentActive(item: SidebarItem, id: string): boolean {
+	if (!item.items) return false
+	const itemBase = item.id.replace(/\/index$/, '')
+	const currentBase = id.replace(/\/index$/, '')
+	// Direct path prefix match
+	if (currentBase.startsWith(itemBase + '/') || itemBase === currentBase) return true
+	// Also match if current page is one of the nested items
+	return item.items.some(sub => {
+		const subBase = sub.id.replace(/\/index$/, '')
+		if (subBase === currentBase) return true
+		if (sub.items) return isParentActive(sub, id)
+		return false
+	})
+}
+
+function getItemHref(item: SidebarItem): string {
+	const base = item.id.replace(/\/index$/, '')
+	if (base === '') return '/handbook/'
+	return `/handbook/${base}`
+}
+---
+
+<Layout title={`${title} | PURISTA Handbook`} description={description}>
+  <div class="h-screen flex flex-col overflow-hidden">
+    <Navigation client:load />
+
+    <div class="flex flex-1 overflow-hidden">
+      {/* Sidebar */}
+      <aside class="hidden lg:block w-64 shrink-0 border-r border-[var(--color-line)] overflow-y-auto" style="background: var(--color-bg)">
+        <div class="px-4 py-6">
+          <a href="/handbook" class="flex items-center gap-2.5 mb-7 px-2">
+            <div class="w-6 h-6 grid place-items-center bg-[var(--color-fg)] text-[var(--color-bg)] rounded text-xs font-extrabold font-display shrink-0">P</div>
+            <span class="font-display font-semibold text-sm tracking-tight" style="color: var(--color-fg-strong)">Handbook</span>
+          </a>
+          <nav class="space-y-0.5">
+            {sidebar.map((item) => (
+              <div class="hbl-group">
+                <a
+                  href={getItemHref(item)}
+                  class={`hbl-item ${
+                    isActive(item, currentId)
+                      ? 'hbl-item--active'
+                      : isParentActive(item, currentId)
+                      ? 'hbl-item--parent'
+                      : 'hbl-item--default'
+                  }`}
+                >
+                  {item.title}
+                </a>
+                {item.items && item.items.length > 0 && isParentActive(item, currentId) && (
+                  <div class="hbl-children">
+                    {item.items.map((sub) => (
+                      <div>
+                        <a
+                          href={getItemHref(sub)}
+                          class={`hbl-item hbl-item--sub ${
+                            isActive(sub, currentId)
+                              ? 'hbl-item--active'
+                              : isParentActive(sub, currentId)
+                              ? 'hbl-item--parent'
+                              : 'hbl-item--default'
+                          }`}
+                        >
+                          {sub.title}
+                        </a>
+                        {sub.items && sub.items.length > 0 && isParentActive(sub, currentId) && (
+                          <div class="hbl-children">
+                            {sub.items.map((subsub) => (
+                              <a
+                                href={getItemHref(subsub)}
+                                class={`hbl-item hbl-item--sub ${
+                                  isActive(subsub, currentId)
+                                    ? 'hbl-item--active'
+                                    : 'hbl-item--default'
+                                }`}
+                              >
+                                {subsub.title}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main class="flex-1 min-w-0 overflow-y-auto">
+        <div class="max-w-5xl mx-auto px-6 py-12 lg:py-16">
+          <article class:list={[{ prose }]}>
+            <slot />
+          </article>
+        </div>
+      </main>
+
+      {/* TOC - Right sidebar */}
+      {headings.length > 0 && (
+        <aside class="hidden xl:block w-56 shrink-0 border-l border-[var(--color-line)] overflow-y-auto" style="background: var(--color-bg)">
+          <div class="px-4 py-6 sticky top-0">
+            <div class="font-mono text-[0.65rem] tracking-[0.14em] uppercase font-semibold mb-3" style="color: var(--color-fg-subtle)">On this page</div>
+            <nav class="space-y-0.5">
+              {headings.filter((h) => h.depth <= 3).map((heading) => (
+                <a
+                  href={`#${heading.slug}`}
+                  class={`block py-1 text-[0.78rem] leading-snug transition-colors hover:text-[var(--color-found)] ${
+                    heading.depth === 2
+                      ? 'text-[var(--color-fg-muted)]'
+                      : 'text-[var(--color-fg-subtle)] pl-3 border-l border-[var(--color-line)]'
+                  }`}
+                  style="font-family: var(--font-display); text-decoration: none;"
+                >
+                  {heading.text}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </aside>
+      )}
+    </div>
+  </div>
+
+  <script>
+    import '../scripts/handbook-client.ts';
+  </script>
+</Layout>

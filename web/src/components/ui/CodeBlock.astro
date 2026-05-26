@@ -1,0 +1,233 @@
+---
+interface Props {
+	code: string
+	language?: string
+	label?: string
+	filename?: string
+	showLineNumbers?: boolean
+}
+
+const { code, language, label, filename, showLineNumbers = false } = Astro.props
+
+// Simple syntax highlighter — tokenizes common TS/JS patterns
+function highlight(src: string): string {
+	const colors = {
+		keyword: 'var(--color-con)',
+		string: 'var(--color-pilot)',
+		comment: 'var(--color-fg-subtle)',
+		number: 'var(--color-found)',
+		function: 'var(--color-found)',
+		type: 'var(--color-con)',
+		punctuation: 'var(--color-fg-muted)',
+	}
+
+	const keywordPattern =
+		/\b(import|export|from|const|let|var|function|async|await|return|if|else|for|of|new|typeof|instanceof|interface|type|extends|implements|class|public|private|protected|static|get|set|throw|try|catch|finally|default|as|in|with|yield|void|delete|debugger)\b/g
+	const typePattern =
+		/\b(string|number|boolean|undefined|null|any|unknown|never|void|Promise|Array|Record|Map|Set|Date|Error|JSON|console)\b/g
+	const functionPattern = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g
+	const stringPattern = /(['"`])(?:\\.|(?!\1)[^\\])*\1|`[^`]*`/g
+	const commentPattern = /\/\/.*|\/\*[\s\S]*?\*\//g
+	const numberPattern = /\b\d+(?:_?\d+)*(?:\.\d+(?:_?\d+)*)?(?:[eE][+-]?\d+)?\b/g
+	const booleanPattern = /\b(true|false)\b/g
+
+	// Escape HTML first
+	let html = src
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;')
+
+	// Apply highlighting in order: comments first (so they don't get re-highlighted)
+	// We use placeholders to avoid double-processing
+	const placeholders: { placeholder: string; html: string }[] = []
+	let pidx = 0
+
+	const store = (replacement: string) => {
+		const key = `___PH${pidx++}___`
+		placeholders.push({ placeholder: key, html: replacement })
+		return key
+	}
+
+	html = html
+		// Comments
+		.replace(commentPattern, m => store(`<span style="color: ${colors.comment}">${m}</span>`))
+		// Strings (including template literals)
+		.replace(/&quot;(?:[^&]|&(?!quot;))*&quot;|&#39;(?:[^&]|&(?!#39;))*&#39;/g, m =>
+			store(`<span style="color: ${colors.string}">${m}</span>`),
+		)
+		// Keywords
+		.replace(keywordPattern, m => store(`<span style="color: ${colors.keyword}">${m}</span>`))
+		// Types
+		.replace(typePattern, m => store(`<span style="color: ${colors.type}">${m}</span>`))
+		// Booleans
+		.replace(booleanPattern, m => store(`<span style="color: ${colors.keyword}">${m}</span>`))
+		// Numbers
+		.replace(numberPattern, m => store(`<span style="color: ${colors.number}">${m}</span>`))
+
+	// Restore placeholders
+	for (const { placeholder, html: h } of placeholders) {
+		html = html.replace(placeholder, h)
+	}
+
+	return html
+}
+
+const highlightedCode = highlight(code)
+
+// Build line-numbered version if requested
+const codeLines = highlightedCode.split('\n')
+const lines = showLineNumbers
+	? codeLines
+			.map((line, i) => `<span class="line-number">${String(i + 1).padStart(2, ' ')}</span>${line || ' '}`)
+			.join('\n')
+	: highlightedCode
+
+const displayTitle = filename ?? label ?? 'snippet.ts'
+const displayLanguage = language ?? 'typescript'
+---
+
+<figure class="codeblock" style={`--code-lines: ${Math.min(Math.max(codeLines.length, 6), 28)}`}>
+  <header class="codeblock-header">
+    <div class="codeblock-dots" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+    <span class="codeblock-title">{displayTitle}</span>
+    <span class="codeblock-lang">{displayLanguage}</span>
+    <button class="codeblock-copy" aria-label="Copy code" title="Copy to clipboard">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="codeblock-copy-icon">
+        <rect x="5.5" y="5.5" width="8" height="8" rx="1.25" stroke="currentColor" stroke-width="1.25"/>
+        <path d="M10.5 5.5V3.75A1.75 1.75 0 0 0 8.75 2H3.75A1.75 1.75 0 0 0 2 3.75v5A1.75 1.75 0 0 0 3.75 10.5H5.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </header>
+  <div class="codeblock-body">
+    <pre class:list={['codeblock-pre', showLineNumbers && 'codeblock-pre--numbered']}><code set:html={lines} /></pre>
+  </div>
+</figure>
+
+<style>
+  .codeblock {
+    position: relative;
+    background: var(--color-bg-elev);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin: 0;
+    min-height: calc(var(--code-lines, 8) * 1.45rem + 3.25rem);
+  }
+  .codeblock-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 2.75rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-deep) 62%, transparent);
+  }
+  .codeblock-dots {
+    display: inline-flex;
+    gap: 0.45rem;
+    flex: 0 0 auto;
+  }
+  .codeblock-dots span {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    background: var(--color-line-vivid);
+  }
+  .codeblock-dots span:nth-child(1) { background: #ff5f57; }
+  .codeblock-dots span:nth-child(2) { background: #febc2e; }
+  .codeblock-dots span:nth-child(3) { background: #28c840; }
+  .codeblock-title {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-fg-muted);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .codeblock-lang {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    color: var(--color-fg-subtle);
+    text-transform: uppercase;
+    flex: 0 0 auto;
+  }
+  .codeblock-copy {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 5px;
+    color: var(--color-fg-subtle);
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: color 150ms, background 150ms;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+  }
+  .codeblock-copy:hover {
+    color: var(--color-fg);
+    background: var(--color-bg-sunk);
+  }
+  .codeblock-copy-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  .codeblock-body {
+    min-height: calc(var(--code-lines, 8) * 1.45rem);
+    display: flex;
+  }
+  .codeblock-pre {
+    width: 100%;
+    margin: 0;
+    padding: 1.05rem 1.15rem 1.15rem;
+    font-size: 0.85rem;
+    line-height: 1.45rem;
+    overflow-x: auto;
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    white-space: pre;
+  }
+  .codeblock-pre--numbered {
+    padding-left: 0.75rem;
+  }
+  .codeblock-pre--numbered .line-number {
+    display: inline-block;
+    width: 2rem;
+    text-align: right;
+    margin-right: 1rem;
+    color: var(--color-fg-subtle);
+    user-select: none;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.codeblock-copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const codeEl = btn.closest('.codeblock')?.querySelector('code')
+      if (!codeEl) return
+      try {
+        await navigator.clipboard.writeText(codeEl.textContent ?? '')
+        const icon = btn.querySelector<SVGElement>('.codeblock-copy-icon')
+        if (icon) {
+          const prev = icon.innerHTML
+          icon.innerHTML = '<path d="M2.5 8.5l3.5 3.5 7-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+          btn.style.color = 'var(--color-pilot)'
+          setTimeout(() => {
+            icon.innerHTML = prev
+            btn.style.color = ''
+          }, 2000)
+        }
+      } catch {
+        // clipboard not available — silently ignore
+      }
+    })
+  })
+</script>

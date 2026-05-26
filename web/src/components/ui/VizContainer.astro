@@ -1,0 +1,209 @@
+---
+interface Props {
+	class?: string
+	caption?: string
+}
+const { class: className = '', caption } = Astro.props
+---
+
+<div class:list={['viz-container relative rounded-xl border border-[var(--color-line)] bg-[var(--color-bg-elev)] overflow-hidden', className]} data-viz-container>
+  {/* Controls */}
+  <div class="viz-controls absolute top-3 right-3 z-10 flex items-center gap-1.5">
+    <button class="viz-btn" data-viz-zoom="out" aria-label="Zoom out" title="Zoom out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button class="viz-btn" data-viz-zoom="in" aria-label="Zoom in" title="Zoom in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+    <button class="viz-btn" data-viz-reset aria-label="Reset view" title="Reset view">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+    <button class="viz-btn" data-viz-fullscreen aria-label="Fullscreen" title="Fullscreen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </div>
+
+  {/* Pan/zoom viewport */}
+  <div class="viz-viewport overflow-hidden cursor-grab active:cursor-grabbing" data-viz-viewport>
+    <div class="viz-content min-w-full min-h-full flex items-center justify-center p-6" data-viz-content>
+      <slot />
+    </div>
+  </div>
+
+  {caption && (
+    <div class="px-5 py-3 border-t border-[var(--color-line)] text-[0.82rem] text-[var(--color-fg-muted)] text-center">
+      {caption}
+    </div>
+  )}
+</div>
+
+<style>
+  .viz-controls {
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  .viz-container:hover .viz-controls {
+    opacity: 1;
+  }
+  .viz-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--color-bg-elev);
+    border: 1px solid var(--color-line);
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+  .viz-btn:hover {
+    background: var(--color-bg-sunk);
+    color: var(--color-fg);
+    border-color: var(--color-line-strong);
+  }
+  .viz-viewport {
+    max-height: 70vh;
+    position: relative;
+  }
+  .viz-content {
+    transform-origin: top left;
+    will-change: transform;
+  }
+  .viz-container:fullscreen {
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+    width: 100vw;
+    height: 100vh;
+    max-height: none;
+  }
+  .viz-container:fullscreen .viz-viewport {
+    max-height: none;
+    flex: 1 1 auto;
+  }
+  .viz-viewport.dragging {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .viz-viewport.dragging * {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+</style>
+
+<script>
+  (function() {
+    document.querySelectorAll('[data-viz-container]').forEach(container => {
+      const viewport = container.querySelector('[data-viz-viewport]') as HTMLElement;
+      const content = container.querySelector('[data-viz-content]') as HTMLElement;
+      if (!viewport || !content) return;
+
+      let scale = 1;
+      let tx = 0;
+      let ty = 0;
+      let isDragging = false;
+      let lastX = 0, lastY = 0;
+
+      function applyTransform() {
+        content.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      }
+
+      // Zoom buttons
+      container.querySelector('[data-viz-zoom="in"]')?.addEventListener('click', () => {
+        scale = Math.min(scale + 0.25, 3);
+        applyTransform();
+      });
+      container.querySelector('[data-viz-zoom="out"]')?.addEventListener('click', () => {
+        scale = Math.max(scale - 0.25, 0.5);
+        applyTransform();
+      });
+      container.querySelector('[data-viz-reset]')?.addEventListener('click', () => {
+        scale = 1;
+        tx = 0;
+        ty = 0;
+        applyTransform();
+      });
+
+      // Fullscreen
+      container.querySelector('[data-viz-fullscreen]')?.addEventListener('click', () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          container.requestFullscreen();
+        }
+      });
+
+      // Mouse pan
+      viewport.addEventListener('mousedown', startDrag);
+      window.addEventListener('mouseup', endDrag);
+      window.addEventListener('mousemove', onDrag);
+
+      // Touch pan
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          startDragTouch(touch.clientX, touch.clientY);
+          e.preventDefault();
+        }
+      }, { passive: false });
+      window.addEventListener('touchend', endDrag);
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isDragging) {
+          const touch = e.touches[0];
+          onDragTouch(touch.clientX, touch.clientY);
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      function startDrag(e: MouseEvent) {
+        if ((e.target as HTMLElement).closest('.viz-controls')) return;
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        viewport.classList.add('dragging', 'cursor-grabbing');
+        viewport.classList.remove('cursor-grab');
+        e.preventDefault();
+      }
+
+      function startDragTouch(clientX: number, clientY: number) {
+        isDragging = true;
+        lastX = clientX;
+        lastY = clientY;
+        viewport.classList.add('dragging', 'cursor-grabbing');
+        viewport.classList.remove('cursor-grab');
+      }
+
+      function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        viewport.classList.remove('dragging', 'cursor-grabbing');
+        viewport.classList.add('cursor-grab');
+      }
+
+      function onDrag(e: MouseEvent) {
+        if (!isDragging) return;
+        e.preventDefault();
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        tx += dx;
+        ty += dy;
+        applyTransform();
+      }
+
+      function onDragTouch(clientX: number, clientY: number) {
+        if (!isDragging) return;
+        const dx = clientX - lastX;
+        const dy = clientY - lastY;
+        lastX = clientX;
+        lastY = clientY;
+        tx += dx;
+        ty += dy;
+        applyTransform();
+      }
+    });
+  })();
+</script>

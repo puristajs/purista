@@ -1,0 +1,126 @@
+---
+interface Segment {
+	text: string
+	color?: 'fg' | 'found' | 'con' | 'pilot' | 'shimmer'
+}
+interface CTA {
+	label: string
+	href: string
+	variant?: 'primary' | 'ghost'
+}
+
+interface Props {
+	eyebrow?: string
+	headline: Segment[]
+	lede?: string
+	ctas?: CTA[]
+}
+
+const { eyebrow = 'Build with PURISTA', headline, lede, ctas = [] } = Astro.props
+
+function tone(c?: string) {
+	if (!c || c === 'fg' || c === 'shimmer') return ''
+	return `color: var(--color-${c}-hi);`
+}
+function clz(c?: string) {
+	return c === 'shimmer' ? 'site-shimmer' : ''
+}
+---
+
+<section class="site-cta-section">
+  <div class="site-cta-orb site-cta-orb-a" aria-hidden="true"></div>
+  <div class="site-cta-orb site-cta-orb-b" aria-hidden="true"></div>
+  <div class="site-cta-orb site-cta-orb-c" aria-hidden="true"></div>
+
+  <div class="site-wrap" style="position:relative;z-index:2;text-align:center">
+    <span class="site-eyebrow site-reveal" style="margin-bottom:1.4rem">
+      <span class="site-eyebrow-dot"></span>
+      <span>{eyebrow}</span>
+    </span>
+
+    <h2 class="site-h1 site-reveal" style="--site-reveal-delay:120ms;max-width:22ch;margin:1.2rem auto 0">
+      {
+        headline.map((seg) => (
+          <span class={clz(seg.color)} style={tone(seg.color)}>
+            {seg.text}
+          </span>
+        ))
+      }
+    </h2>
+
+    {
+      lede && (
+        <p class="site-lede site-reveal" style="--site-reveal-delay:240ms;margin:1.8rem auto 0;text-align:center">
+          {lede}
+        </p>
+      )
+    }
+
+    {
+      ctas.length > 0 && (
+        <div class="site-reveal" style="--site-reveal-delay:360ms;margin-top:2.6rem;display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap">
+          {ctas.map((cta) => (
+            <a
+              href={cta.href}
+              class={`site-btn ${cta.variant === 'ghost' ? 'site-btn-ghost' : 'site-btn-primary'}`}
+              data-magnetic={cta.variant === 'primary' ? '0.18' : undefined}
+            >
+              <span>{cta.label}</span>
+              <span class="site-btn-arrow">→</span>
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .site-cta-section {
+    position: relative;
+    padding-block: clamp(6rem, 12vw, 11rem);
+    overflow: hidden;
+    isolation: isolate;
+    border-top: 1px solid var(--color-line);
+    background: var(--color-bg-sunk);
+  }
+  .site-cta-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.55;
+  }
+  .site-cta-orb-a {
+    top: -10%;
+    left: -5%;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(closest-side, var(--color-found-glow), transparent 70%);
+    animation: site-cta-drift 18s ease-in-out infinite alternate;
+  }
+  .site-cta-orb-b {
+    top: 30%;
+    right: -10%;
+    width: 45vw;
+    height: 45vw;
+    background: radial-gradient(closest-side, var(--color-con-glow), transparent 70%);
+    animation: site-cta-drift 22s ease-in-out infinite alternate-reverse;
+  }
+  .site-cta-orb-c {
+    bottom: -20%;
+    left: 30%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(closest-side, var(--color-pilot-glow), transparent 70%);
+    animation: site-cta-drift 26s ease-in-out infinite alternate;
+  }
+  @keyframes site-cta-drift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(4vw, -3vh, 0) scale(1.1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-cta-orb { animation: none; }
+  }
+</style>

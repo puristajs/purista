@@ -1,0 +1,31 @@
+---
+interface Props {
+	label: string
+	color?: 'found' | 'con' | 'pilot' | 'muted'
+	size?: 'sm' | 'xs'
+}
+
+const { label, color = 'muted', size = 'xs' } = Astro.props
+
+const colorClasses: Record<string, string> = {
+	found: 'text-[var(--color-found)]',
+	con: 'text-[var(--color-con)]',
+	pilot: 'text-[var(--color-pilot)]',
+	muted: 'text-[var(--color-fg-muted)]',
+}
+
+const sizeClasses: Record<string, string> = {
+	xs: 'text-[10px]',
+	sm: 'text-xs',
+}
+---
+
+<span
+  class:list={[
+    'inline-block px-2 py-0.5 rounded font-mono bg-[var(--color-bg-sunk)] border border-[var(--color-line)]',
+    colorClasses[color],
+    sizeClasses[size],
+  ]}
+>
+  {label}
+</span>

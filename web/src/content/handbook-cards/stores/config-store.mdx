@@ -1,0 +1,183 @@
+---
+title: Config Store
+description: Non-sensitive configuration that varies by environment — externalized, testable, and swappable without touching business logic.
+---
+
+The **config store** holds non-sensitive configuration that may change during runtime. API URLs, feature flags, timeout settings, and third-party provider endpoints all belong here — not in code, not in environment variables, and never alongside secrets.
+
+## Config store vs. secret store vs. state store
+
+PURISTA ships three distinct store abstractions. Choose based on what the data _is_:
+
+| | Config store | Secret store | State store |
+|---|---|---|---|
+| **Purpose** | Non-sensitive configuration | Sensitive credentials | Runtime business state |
+| **Examples** | Feature flags, API URLs | Passwords, tokens, certificates | Sessions, counters, job status |
+| **Confidential** | No | Yes | Sometimes |
+| **Changed by handlers** | Yes | Rarely | Yes |
+| **Validated automatically** | No (validate yourself) | No | No |
+
+If the data is a credential → use a [secret store](/handbook/stores/secret-store/).  
+If the data is business state your handlers read and write → use a [state store](/handbook/stores/state-store/).  
+If the data is non-sensitive configuration that operators tune → use a config store.
+
+## Config store vs. service config
+
+PURISTA offers two ways to provide configuration. Choose based on mutability and type safety needs:
+
+| | Config store | Service config |
+|---|---|---|
+| Typed out of the box | No | Yes (Zod schema) |
+| Validated out of the box | No | Yes |
+| Changes during runtime | Yes | No |
+| Distributed / shared | Yes | No |
+
+**Use service config** for values needed at startup that never change: database connection strings, service name, port numbers.
+
+**Use config store** for values that might change without a restart: third-party API URLs, feature flags, rate limits.
+
+## Usage
+
+Pass a config store when creating the service instance:
+
+```typescript [main.ts]
+import { DaprConfigStore } from '@purista/dapr-sdk'
+
+const configStore = new DaprConfigStore({ configStoreName: 'app-config' })
+
+const userService = await userServiceV1Service.getInstance(eventBridge, {
+  configStore,
+})
+await userService.start()
+```
+
+Access from commands and subscriptions:
+
+```typescript [command.ts]
+.setCommandFunction(async function (context, payload) {
+  // Get one or more config values
+  const config = await context.configs.getConfig('thirdPartyApiUrl', 'requestTimeout')
+
+  // config.thirdPartyApiUrl — string
+  // config.requestTimeout — number
+
+  // Set a config value at runtime
+  await context.configs.setConfig('featureFlag:newDashboard', true)
+
+  // Remove a config value
+  await context.configs.removeConfig('deprecated:oldEndpoint')
+})
+```
+
+## Validate config reads
+
+Config stores return `unknown` values. Validate them in production:
+
+```typescript [validated.ts]
+import { z } from 'zod'
+
+const apiConfigSchema = z.object({
+  hostUrl: z.string().url(),
+  port: z.number().int().min(1).max(65535),
+})
+
+.setCommandFunction(async function (context, payload) {
+  const raw = await context.configs.getConfig('hostUrl', 'port')
+  const config = apiConfigSchema.parse(raw)
+
+  // config is now fully typed and validated
+  const response = await fetch(`${config.hostUrl}:${config.port}/api/v1/data`)
+})
+```
+
+## Default config store
+
+For local development, use the in-memory default:
+
+```typescript [default.ts]
+import { DefaultConfigStore } from '@purista/core'
+
+const configStore = new DefaultConfigStore({
+  enableGet: true,
+  enableSet: true,
+  enableRemove: true,
+  config: {
+    thirdPartyApiUrl: 'https://api.example.com',
+    requestTimeout: 5000,
+  },
+})
+```
+
+## Official adapters
+
+| Package | Backend | Best for |
+|---|---|---|
+| `@purista/core` | In-memory | Development, testing |
+| `@purista/aws-config-store` | AWS Systems Manager Parameter Store | AWS deployments |
+| `@purista/nats-config-store` | NATS KV | NATS-first platforms |
+| `@purista/redis-config-store` | Redis | Redis-first platforms |
+| `@purista/dapr-sdk` | Dapr configuration | Polyglot, service-mesh |
+
+## Custom config store
+
+Extend `ConfigStoreBaseClass` to build your own:
+
+```typescript [custom.ts]
+import { ConfigStoreBaseClass, StoreBaseConfig } from '@purista/core'
+
+type MyConfigConfig = { url: string }
+
+export class MyConfigStore extends ConfigStoreBaseClass<MyConfigConfig> {
+  private client
+
+  constructor(config?: StoreBaseConfig<MyConfigConfig>) {
+    super('MyConfigStore', config)
+    this.client = customClient.connect(this.config.config.url)
+  }
+
+  protected async getConfigImpl<Names extends string[]>(...names: Names) {
+    const result: Record<string, unknown> = {}
+    for (const name of names) {
+      const value = await this.client.get(name)
+      result[name] = value ? JSON.parse(value) : undefined
+    }
+    return result as any
+  }
+
+  protected async setConfigImpl(name: string, value: unknown) {
+    await this.client.set(name, JSON.stringify(value))
+  }
+
+  protected async removeConfigImpl(name: string) {
+    await this.client.del(name)
+  }
+
+  async destroy() {
+    await this.client.disconnect()
+    super.destroy()
+  }
+}
+```
+
+## When to use config stores
+
+- Feature flags that change without deployment
+- Third-party API URLs that vary by environment
+- Rate limits and timeout settings
+- A/B test configuration
+- Any value that operators might tune in production
+
+## Common pitfalls
+
+- **Storing secrets in config stores.** Configs may be logged or exposed in dashboards. Use secret stores for credentials.
+- **Not validating reads.** Config stores return `unknown`. Always parse and validate.
+- **Assuming set/remove are enabled.** By default, only `get` is enabled. Enable `set` and `remove` explicitly if needed.
+- **Using config for startup-critical values.** If a missing config prevents the service from starting, use service config instead.
+
+## Checklist
+
+- [ ] Config store is used for non-sensitive, runtime-mutable values
+- [ ] Config reads are validated with Zod schemas in production
+- [ ] Set/remove capabilities are enabled only when needed
+- [ ] Secrets are in secret stores, never in config stores
+- [ ] Integration tests cover the concrete provider behavior

@@ -1,0 +1,326 @@
+---
+import HandbookCard from '../../components/handbook/HandbookCard.astro'
+import { getSidebarItems, handbookSections } from '../../data/handbook'
+import HandbookLayout from '../../layouts/HandbookLayout.astro'
+
+/**
+ * Handbook overview — uses the same shell as every other handbook page:
+ * left sidebar for navigation, right sidebar as a chapter TOC.
+ * Content is a short intro (split layout with code preview) followed
+ * by all sections and their cards.
+ */
+
+const sidebar = getSidebarItems()
+
+// Generate heading entries for the right-side TOC from the section list
+const headings = handbookSections.map(s => ({
+	depth: 2,
+	slug: s.id,
+	text: `${String(s.num).padStart(2, '0')} — ${s.title}`,
+}))
+---
+
+<HandbookLayout
+  title="PURISTA Handbook"
+  description="Nine chapters from hands-on tutorials to mental model, building blocks, enterprise patterns and operations — real TypeScript throughout."
+  sidebar={sidebar}
+  currentId=""
+  headings={headings}
+  prose={false}
+>
+
+  {/* Intro — split layout */}
+  <div class="hb-intro-grid mb-14 pb-10 border-b border-[var(--color-line)]">
+
+    {/* Left — text + CTAs */}
+    <div class="hb-intro-text">
+      <p class="font-mono text-[0.72rem] tracking-[0.16em] uppercase mb-4" style="color: var(--color-found)">
+        Handbook
+      </p>
+      <h1 class="font-display font-semibold text-3xl tracking-tight mb-4" style="color: var(--color-fg-strong); line-height: 1.1;">
+        The PURISTA<br/>
+        <span class="hb-accent">handbook.</span>
+      </h1>
+      <p class="text-[var(--color-fg-muted)] text-base leading-relaxed mb-8" style="max-width: 48ch">
+        Start with the 15-minute tutorial, then go as deep as you need — from
+        core mental models to enterprise patterns and live operations. Every
+        chapter has builder-pattern examples in real TypeScript.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a
+          href="/handbook/learn/getting-started/"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold
+                 bg-[var(--color-fg)] text-[var(--color-bg)]
+                 hover:bg-[var(--color-fg-strong)] transition-colors"
+        >
+          Start: 15-minute tour
+        </a>
+        <a
+          href="/handbook/learn/from-zero-to-production/"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+                 border border-[var(--color-line-strong)] text-[var(--color-fg-muted)]
+                 hover:border-[var(--color-line-vivid)] hover:text-[var(--color-fg)]
+                 transition-colors"
+        >
+          Zero to production
+        </a>
+      </div>
+    </div>
+
+    {/* Right — code showcase */}
+    <div class="hb-intro-preview">
+      {/* Tab bar */}
+      <div class="hb-preview-tabs" role="tablist">
+        <button class="hb-preview-tab hb-preview-tab--active" data-tab="cli" role="tab" aria-selected="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+          CLI
+        </button>
+        <button class="hb-preview-tab" data-tab="code" role="tab" aria-selected="false">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+          </svg>
+          TypeScript
+        </button>
+      </div>
+
+      {/* CLI panel */}
+      <div class="hb-preview-panel" data-panel="cli">
+        <pre class="hb-preview-code"><code><span class="hb-tok-comment"># install the PURISTA AI skill</span>
+<span class="hb-tok-cmd">npx</span> skills add puristajs/purista --skill purista
+
+<span class="hb-tok-comment"># scaffold a new project</span>
+<span class="hb-tok-cmd">npm</span> create purista@latest my-app
+
+<span class="hb-tok-comment"># add a service and its first command</span>
+<span class="hb-tok-cmd">purista</span> add service user
+<span class="hb-tok-cmd">purista</span> add command signup
+
+<span class="hb-tok-comment"># run in development</span>
+<span class="hb-tok-cmd">npm</span> run dev</code></pre>
+      </div>
+
+      {/* TypeScript panel */}
+      <div class="hb-preview-panel hb-preview-panel--hidden" data-panel="code">
+        <pre class="hb-preview-code"><code><span class="hb-tok-comment">// user/v1/command/signup</span>
+<span class="hb-tok-kw">export const</span> signUpCommand = userV1ServiceBuilder
+  .<span class="hb-tok-method">getCommandBuilder</span>(<span class="hb-tok-str">'signUp'</span>, <span class="hb-tok-str">'Register a user'</span>)
+  .<span class="hb-tok-method">addPayloadSchema</span>(z.<span class="hb-tok-method">object</span>(&#123;
+    email: z.<span class="hb-tok-method">string</span>().<span class="hb-tok-method">email</span>(),
+    name:  z.<span class="hb-tok-method">string</span>(),
+  &#125;))
+  .<span class="hb-tok-method">setCommandFunction</span>(<span class="hb-tok-kw">async function</span> (context, payload) &#123;
+    <span class="hb-tok-kw">const</span> userId = <span class="hb-tok-kw">await</span> context.resources.db
+      .<span class="hb-tok-method">createUser</span>(payload)
+
+    <span class="hb-tok-kw">await</span> context.<span class="hb-tok-method">emit</span>(<span class="hb-tok-str">'user.registered'</span>, &#123; userId &#125;)
+
+    <span class="hb-tok-kw">return</span> &#123; userId &#125;
+  &#125;)</code></pre>
+      </div>
+    </div>
+
+  </div>
+
+  {/* ── All chapters ── */}
+  <div class="hb-overview-chapters">
+    {handbookSections.map((section) => (
+      <section id={section.id} class="hb-overview-section">
+        <header class="hb-overview-section-head">
+          <span
+            class="font-mono text-[0.68rem] tracking-[0.14em] uppercase"
+            style={`color: var(--color-${section.color}-hi)`}
+          >
+            {String(section.num).padStart(2, '0')}
+          </span>
+          <div>
+            <a
+              href={`/handbook/${section.id}/`}
+              class="hb-overview-section-title"
+              style={`--sec-color: var(--color-${section.color}-hi)`}
+            >
+              {section.title}
+            </a>
+            <p class="text-[var(--color-fg-muted)] text-sm leading-snug mt-1">
+              {section.subtitle}
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-5">
+          {section.cards.map((card) => (
+            <HandbookCard
+              title={card.title}
+              description={card.description}
+              icon={card.icon}
+              href={`/handbook/${section.id}/${card.id}/`}
+              color={section.color}
+              featured={card.featured}
+            />
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+
+</HandbookLayout>
+
+<style is:global>
+  /* ── Intro split grid ─────────────────────────────────────────── */
+  .hb-intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+  @media (max-width: 720px) {
+    .hb-intro-grid { grid-template-columns: 1fr; }
+    .hb-intro-preview { display: none; }
+  }
+
+  /* Accent gradient on "handbook." — static, no animation */
+  .hb-accent {
+    background: linear-gradient(
+      120deg,
+      var(--color-found-hi) 0%,
+      var(--color-con-hi) 55%,
+      var(--color-pilot-hi) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+  }
+
+  /* ── Code preview card ────────────────────────────────────────── */
+  .hb-intro-preview {
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elev);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .hb-preview-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-bg-deep) 50%, transparent);
+    padding: 0 0.75rem;
+  }
+
+  .hb-preview-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--color-fg-subtle);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 150ms, border-color 150ms;
+    margin-bottom: -1px;
+  }
+  .hb-preview-tab:hover {
+    color: var(--color-fg-muted);
+  }
+  .hb-preview-tab--active {
+    color: var(--color-found);
+    border-bottom-color: var(--color-found);
+  }
+
+  .hb-preview-panel {
+    padding: 1.1rem 1.25rem;
+  }
+  .hb-preview-panel--hidden {
+    display: none;
+  }
+
+  .hb-preview-code {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--color-fg-muted);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  /* Syntax token colours */
+  .hb-tok-comment { color: var(--color-fg-subtle); font-style: italic; }
+  .hb-tok-cmd     { color: var(--color-pilot-hi); font-weight: 600; }
+  .hb-tok-kw      { color: var(--color-con-hi); }
+  .hb-tok-str     { color: var(--color-pilot-hi); }
+  .hb-tok-method  { color: var(--color-found-hi); }
+
+  /* Dark mode token adjustments */
+  html[data-theme="dark"] .hb-tok-cmd    { color: var(--color-pilot-hi); }
+  html[data-theme="dark"] .hb-tok-str    { color: var(--color-pilot-hi); }
+  html[data-theme="dark"] .hb-tok-method { color: var(--color-found-hi); }
+
+  /* ── Chapter grid ─────────────────────────────────────────────── */
+  .hb-overview-chapters {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .hb-overview-section {
+    padding-block: 2rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .hb-overview-section:last-child {
+    border-bottom: none;
+  }
+
+  .hb-overview-section-head {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  .hb-overview-section-title {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 650;
+    font-size: 1.05rem;
+    color: var(--color-fg-strong);
+    line-height: 1.15;
+    transition: color 0.18s;
+  }
+  .hb-overview-section-title:hover {
+    color: var(--sec-color);
+  }
+</style>
+
+<script>
+  // Tab switcher for the intro code preview
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.hb-preview-tab')
+    const panels = document.querySelectorAll<HTMLElement>('.hb-preview-panel')
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab
+        tabs.forEach(t => {
+          t.classList.toggle('hb-preview-tab--active', t.dataset.tab === target)
+          t.setAttribute('aria-selected', String(t.dataset.tab === target))
+        })
+        panels.forEach(p => {
+          p.classList.toggle('hb-preview-panel--hidden', p.dataset.panel !== target)
+        })
+      })
+    })
+  })
+</script>

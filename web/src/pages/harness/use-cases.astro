@@ -1,0 +1,128 @@
+---
+import HarnessFlow from '../../components/harness/HarnessFlow.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import HarnessStory from '../../components/harness/HarnessStory.astro'
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout title="AI Harness Use Cases | PURISTA" description="Production AI patterns — from RAG and triage to human review gates, parallel agents, and living wikis.">
+  <HarnessHero
+    lines={[
+      { text: 'AI patterns' },
+      { text: 'that ship.', color: 'found' },
+    ]}
+    lede="Start with the smallest useful shape: a direct agent, a grounded answer, a workflow, or a review gate. Add orchestration only when the product risk asks for it."
+  />
+
+  <HarnessStory
+    id="rag"
+    layout="viz-left"
+    eyebrow="Use Case 01"
+    headline={[{ text: 'RAG & ' }, { text: 'Source-Grounded Q&A', color: 'found' }]}
+    lede="Build retrieval-augmented generation systems where the agent searches, reads, cites, and validates sources — all with typed output schemas."
+    items={[
+      'Search and read are explicit tool calls.',
+      'The answer carries citations and confidence.',
+      'Unsupported claims are rejected before publish.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="rag" />
+    </div>
+  </HarnessStory>
+
+  <HarnessStory
+    id="hitl"
+    layout="viz-right"
+    eyebrow="Use Case 02"
+    headline={[{ text: 'Human-in-the-' }, { text: 'Loop Review', color: 'con' }]}
+    lede="When proposed changes should not be applied until a human approves them. The proposal agent drafts; the workflow owns the gate."
+    items={[
+      'No mutation before approval.',
+      'Approve, revise, and reject are separate paths.',
+      'Every decision leaves an OTel trace and log entry.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="review" />
+    </div>
+  </HarnessStory>
+
+  <HarnessStory
+    id="triage"
+    layout="viz-left"
+    eyebrow="Use Case 03"
+    headline={[{ text: 'Triage & ' }, { text: 'Routing', color: 'pilot' }]}
+    lede="Classify incoming requests, assign priority and ownership, and route to the right downstream handler — all with narrow, typed outputs."
+    items={[
+      'Classification produces narrow JSON fields.',
+      'Routing policy consumes fields, not prose.',
+      'Escalation is just another typed route.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="triage" />
+    </div>
+  </HarnessStory>
+
+  <HarnessStory
+    id="parallel"
+    layout="viz-right"
+    eyebrow="Use Case 04"
+    headline={[{ text: 'Parallel ' }, { text: 'Agents', color: 'found' }]}
+    lede="Fan-out to multiple specialized agents for code review, risk analysis, test generation, and documentation — then synthesize results into a single coherent output."
+    items={[
+      'Each branch has its own instructions and tools.',
+      'The workflow owns fan-out and fan-in.',
+      'Synthesis returns one typed result.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="parallel" />
+    </div>
+  </HarnessStory>
+
+  <HarnessStory
+    id="reason"
+    layout="viz-left"
+    eyebrow="Use Case 05"
+    headline={[{ text: 'Plan, Reason,' }, { text: 'Reflect, Judge', color: 'con' }]}
+    lede="When correctness matters more than raw speed, use a structured workflow to plan, retrieve, reason, reflect, judge, and publish."
+    items={[
+      'Each phase is named and traceable.',
+      'Reflection and judging are explicit steps.',
+      'Publishing happens only after readiness checks.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="reasoning" />
+    </div>
+  </HarnessStory>
+
+  <HarnessStory
+    id="living-wiki"
+    layout="viz-right"
+    eyebrow="Use Case 06"
+    headline={[{ text: 'Living ' }, { text: 'Wiki', color: 'found' }]}
+    lede="A self-updating knowledge base that combines direct Q&A, ingest workflows, decision memos, architecture reviews, and continuous audit — all with human review gates."
+    items={[
+      'Ingest turns sources into grounded references.',
+      'Q&A uses citations instead of memory guesses.',
+      'Audit work feeds reviewed maintenance.',
+    ]}
+  >
+    <div slot="visualization" class="w-full">
+      <HarnessFlow variant="wiki" />
+    </div>
+  </HarnessStory>
+
+  <CTASection
+    headline={[{ text: 'Add ' }, { text: 'memory and context', color: 'found' }, { text: '.' }]}
+    lede="Learn how agents remember across sessions, runs, and users without turning memory into hidden business truth."
+    ctas={[
+      { label: 'Memory & Context', href: '/harness/memory/', variant: 'primary' },
+      { label: 'Architecture Reference', href: '/harness/architecture/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>

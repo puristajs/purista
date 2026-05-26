@@ -1,0 +1,275 @@
+---
+title: Agent Workflows
+description: Chain agents, orchestrate multi-step reasoning, and manage state across agent boundaries.
+---
+
+Agent workflows let you compose multiple agents into multi-step processes. Each step can be a model call, a tool invocation, or a sub-agent. PURISTA tracks state across steps and handles failure recovery.
+
+## Workflow types
+
+| Type | Description | Use case |
+|---|---|---|
+| **Sequential** | Steps execute one after another | Linear processing pipelines |
+| **Conditional** | Steps branch based on intermediate results | Decision trees, routing |
+| **Parallel** | Multiple steps execute concurrently | Batch processing, fan-out |
+| **Looping** | Steps repeat until a condition is met | Iterative refinement |
+
+## Defining a workflow
+
+Use `setHarnessWorkflow` on the agent builder:
+
+```typescript [supportWorkflow.ts]
+import { ServiceBuilder } from '@purista/core'
+import '@purista/ai-harness'
+import { aiV1ServiceBuilder } from './aiV1ServiceBuilder.js'
+
+const supportWorkflow = aiV1ServiceBuilder
+  .getAgentBuilder('SupportWorkflow', 'Multi-step support process')
+  .addPayloadSchema(z.object({ query: z.string() }))
+  .addOutputSchema(z.object({ answer: z.string(), escalated: z.boolean() }))
+  .addModel('gpt4', { model: 'openai/gpt-4', capabilities: ['object'] })
+  .setHarnessWorkflow({
+    steps: [
+      {
+        id: 'classify',
+        type: 'model',
+        prompt: 'Classify this customer query into: billing, technical, or general',
+        outputSchema: z.object({ category: z.enum(['billing', 'technical', 'general']) }),
+      },
+      {
+        id: 'route',
+        type: 'condition',
+        condition: (state) => state.classify.category === 'billing',
+        then: 'billingStep',
+        else: 'technicalOrGeneralStep',
+      },
+      {
+        id: 'billingStep',
+        type: 'tool',
+        tool: 'checkBillingStatus',
+        input: (state, payload) => ({ userId: payload.userId }),
+      },
+      {
+        id: 'technicalOrGeneralStep',
+        type: 'model',
+        prompt: (state, payload) => `Answer this ${state.classify.category} query: ${payload.query}`,
+        outputSchema: z.object({ answer: z.string() }),
+      },
+      {
+        id: 'finalize',
+        type: 'model',
+        prompt: (state) => `Summarize the response for the customer`,
+        outputSchema: z.object({ answer: z.string(), escalated: z.boolean() }),
+      },
+    ],
+  })
+```
+
+## Step types
+
+### Model step
+
+Calls a language model with a prompt and optional schema:
+
+```typescript
+{
+  id: 'classify',
+  type: 'model',
+  prompt: 'Classify this query',
+  outputSchema: z.object({ category: z.string() }),
+  model: 'gpt4', // optional, defaults to first model
+}
+```
+
+### Tool step
+
+Calls a tool (command or agent):
+
+```typescript
+{
+  id: 'getUser',
+  type: 'tool',
+  tool: 'UserService.1.getUser',
+  input: (state, payload) => ({ userId: payload.userId }),
+}
+```
+
+### Condition step
+
+Branches based on workflow state:
+
+```typescript
+{
+  id: 'route',
+  type: 'condition',
+  condition: (state) => state.classify.category === 'billing',
+  then: 'billingStep',
+  else: 'generalStep',
+}
+```
+
+### Parallel step
+
+Executes multiple steps concurrently:
+
+```typescript
+{
+  id: 'gatherData',
+  type: 'parallel',
+  steps: ['getUser', 'getOrders', 'getPreferences'],
+}
+```
+
+### Loop step
+
+Repeats a step until a condition is met:
+
+```typescript
+{
+  id: 'refine',
+  type: 'loop',
+  step: 'improveAnswer',
+  until: (state) => state.improveAnswer.confidence > 0.9,
+  maxIterations: 5,
+}
+```
+
+## Workflow state
+
+Each step can read and write to a shared state object:
+
+```typescript
+{
+  id: 'classify',
+  type: 'model',
+  prompt: 'Classify this query',
+  outputSchema: z.object({ category: z.string() }),
+  // Result is stored in state.classify
+}
+```
+
+Later steps access results via `state.stepId`:
+
+```typescript
+{
+  id: 'route',
+  type: 'condition',
+  condition: (state) => state.classify.category === 'billing',
+}
+```
+
+## Error handling
+
+Workflows handle errors at the step level:
+
+```typescript
+{
+  id: 'getUser',
+  type: 'tool',
+  tool: 'UserService.1.getUser',
+  onError: 'retry', // 'retry' | 'continue' | 'fail'
+  maxRetries: 3,
+}
+```
+
+Or at the workflow level:
+
+```typescript
+.setHarnessWorkflow({
+  steps: [...],
+  onError: 'rollback', // 'rollback' | 'partial' | 'fail'
+})
+```
+
+## Sub-agent invocation
+
+Workflows can invoke other agents as steps:
+
+```typescript
+{
+  id: 'escalate',
+  type: 'agent',
+  agent: 'EscalationAgent.1',
+  input: (state, payload) => ({
+    query: payload.query,
+    context: state.classify,
+  }),
+}
+```
+
+## Session across agents
+
+When using `conversation` mode, state persists across agent invocations:
+
+```typescript
+.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: 'conversationId',
+})
+```
+
+All agents in a workflow sharing the same `conversationId` access the same session state.
+
+## Streaming workflows
+
+Workflows can stream intermediate results:
+
+```typescript
+.setStreamingMode('stream')
+.setResponseMode('stream', { eventName: 'workflowStep' })
+```
+
+Each completed step emits a chunk with its result.
+
+## Full workflow example
+
+```typescript [onboardingWorkflow.ts]
+import { aiV1ServiceBuilder } from './aiV1ServiceBuilder.js'
+
+const onboardingWorkflow = aiV1ServiceBuilder
+  .getAgentBuilder('OnboardingWorkflow', 'Guide new users through setup')
+  .addPayloadSchema(z.object({ userId: z.string() }))
+  .addOutputSchema(z.object({ completed: z.boolean(), steps: z.array(z.string()) }))
+  .addModel('gpt4', { model: 'openai/gpt-4', capabilities: ['object', 'text'] })
+  .setHarnessWorkflow({
+    steps: [
+      {
+        id: 'getUser',
+        type: 'tool',
+        tool: 'UserService.1.getUser',
+        input: (state, payload) => ({ userId: payload.userId }),
+      },
+      {
+        id: 'checkProfile',
+        type: 'model',
+        prompt: (state) => `Is this profile complete? ${JSON.stringify(state.getUser)}`,
+        outputSchema: z.object({ complete: z.boolean(), missing: z.array(z.string()) }),
+      },
+      {
+        id: 'route',
+        type: 'condition',
+        condition: (state) => state.checkProfile.complete,
+        then: 'welcome',
+        else: 'guideSetup',
+      },
+      {
+        id: 'guideSetup',
+        type: 'model',
+        prompt: (state) => `Guide the user to complete: ${state.checkProfile.missing.join(', ')}`,
+        outputSchema: z.object({ steps: z.array(z.string()) }),
+      },
+      {
+        id: 'welcome',
+        type: 'model',
+        prompt: 'Generate a welcome message for a fully set-up user',
+        outputSchema: z.object({ message: z.string() }),
+      },
+      {
+        id: 'finalize',
+        type: 'model',
+        prompt: (state) => 'Summarize the onboarding result',
+        outputSchema: z.object({ completed: z.boolean(), steps: z.array(z.string()) }),
+      },
+    ],
+  })
+```

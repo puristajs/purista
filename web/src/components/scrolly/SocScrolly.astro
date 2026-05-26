@@ -1,0 +1,491 @@
+---
+import { socSteps } from './soc-content'
+---
+
+<div class="soc-scrolly-wrap">
+  {/* Intro */}
+  <div class="mb-16">
+    <div class="font-mono text-[0.7rem] tracking-[0.15em] uppercase text-[var(--color-pilot)] font-semibold mb-3">
+      Mental Model
+    </div>
+    <h1 class="font-display font-semibold text-[2.2rem] tracking-tight text-[var(--color-fg)] mb-4 leading-tight">
+      Separation of Concerns
+    </h1>
+    <p class="lede max-w-[55ch]">
+      Why every real-world business step deserves its own isolated, reviewable,
+      replaceable implementation — and how PURISTA makes it the default.
+    </p>
+  </div>
+
+  <div class="scrolly-grid relative items-start">
+    {/* Text column */}
+    <div class="scrolly-text relative">
+      <div class="absolute left-[-2.25rem] top-0 bottom-0 w-[2px] bg-[var(--color-line)] rounded hidden xl:block" aria-hidden="true">
+        <div class="scrolly-knob absolute left-1/2 w-[10px] h-[10px] rounded-full -translate-x-1/2 bg-[var(--color-bg-elev)] border-2 border-[var(--color-line-strong)] transition-all duration-300" style="top: 8%"></div>
+      </div>
+
+      {socSteps.map((step) => (
+        <article
+          class="scrolly-stage min-h-[85vh] grid content-center py-8 opacity-35 transition-opacity duration-500"
+          data-stage={step.id}
+          id={`soc-stage-${step.id}`}
+        >
+          <div class="inline-flex items-center gap-[0.65rem] font-mono text-[0.74rem] tracking-[0.14em] uppercase font-semibold mb-5" style={`color: var(--color-${step.color})`}>
+            <span class="px-[0.55rem] py-1 rounded-[5px] font-semibold" style={`background: color-mix(in srgb, var(--color-${step.color}) 14%, transparent); border: 1px solid color-mix(in srgb, var(--color-${step.color}) 35%, transparent)`}>
+              {step.num}
+            </span>
+            {step.tag}
+          </div>
+          <h3 class="font-display font-semibold text-[1.45rem] tracking-tight text-[var(--color-fg)] mb-4 leading-tight">
+            {step.title} <em class="not-italic" style={`color: var(--color-${step.color})`}>{step.highlight}</em>.
+          </h3>
+          <p class="text-[var(--color-fg-muted)] text-[1.02rem] leading-relaxed mb-6 max-w-[48ch]">{step.lede}</p>
+          <ul class="bullet-list--muted" style={`--bullet-c: var(--color-${step.color})`}>
+            {step.bullets.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
+
+
+    </div>
+
+    {/* Visualization column */}
+    <div class="hidden lg:grid sticky top-24 h-[calc(100vh-7rem)] items-center">
+      <div class="relative w-full aspect-square max-w-[560px] mx-auto" id="soc-viz-stack" data-stage="problem">
+
+        {/* Stage 1: The Problem — tangled mess */}
+        <div class="viz-stage absolute inset-0 transition-all duration-700" data-id="problem">
+          <svg viewBox="60 60 440 440" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="socGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+                <path d="M 28 0 L 0 0 0 28" fill="none" stroke="var(--color-line)" stroke-width="0.5"/>
+              </pattern>
+              <radialGradient id="glowCon" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--color-con-glow)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+            </defs>
+            <rect width="560" height="560" fill="url(#socGrid)" opacity="0.5"/>
+            <circle cx="280" cy="280" r="220" fill="url(#glowCon)" opacity="0.4"/>
+
+            {/* Central messy box */}
+            <rect x="160" y="160" width="240" height="240" rx="16" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="2" opacity="0.9"/>
+            <text x="280" y="195" text-anchor="middle" class="svg-label" fill="var(--color-con)">USER SIGNUP</text>
+
+            {/* Mixed concerns inside */}
+            <rect x="185" y="215" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-pilot) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-pilot) 30%, transparent)" stroke-width="1"/>
+            <text x="230" y="233" text-anchor="middle" class="svg-label-sm" fill="var(--color-pilot)">HTTP handler</text>
+
+            <rect x="285" y="215" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-found) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-found) 30%, transparent)" stroke-width="1"/>
+            <text x="330" y="233" text-anchor="middle" class="svg-label-sm" fill="var(--color-found)">Validation</text>
+
+            <rect x="185" y="255" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-con) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-con) 30%, transparent)" stroke-width="1"/>
+            <text x="230" y="273" text-anchor="middle" class="svg-label-sm" fill="var(--color-con)">DB query</text>
+
+            <rect x="285" y="255" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-pilot) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-pilot) 30%, transparent)" stroke-width="1"/>
+            <text x="330" y="273" text-anchor="middle" class="svg-label-sm" fill="var(--color-pilot)">Email send</text>
+
+            <rect x="185" y="295" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-found) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-found) 30%, transparent)" stroke-width="1"/>
+            <text x="230" y="313" text-anchor="middle" class="svg-label-sm" fill="var(--color-found)">Logging</text>
+
+            <rect x="285" y="295" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-con) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-con) 30%, transparent)" stroke-width="1"/>
+            <text x="330" y="313" text-anchor="middle" class="svg-label-sm" fill="var(--color-con)">Analytics</text>
+
+            <rect x="235" y="335" width="90" height="28" rx="5" fill="color-mix(in srgb, var(--color-pilot) 10%, var(--color-bg-sunk))" stroke="color-mix(in srgb, var(--color-pilot) 30%, transparent)" stroke-width="1"/>
+            <text x="280" y="353" text-anchor="middle" class="svg-label-sm" fill="var(--color-pilot)">Auth check</text>
+
+            {/* Chaotic connecting lines */}
+            <g stroke="var(--color-line-strong)" stroke-width="0.8" stroke-dasharray="3 3" fill="none" opacity="0.6">
+              <line x1="230" y1="229" x2="330" y2="269"/><line x1="330" y1="229" x2="230" y2="269"/>
+              <line x1="230" y1="269" x2="330" y2="309"/><line x1="330" y1="269" x2="230" y2="309"/>
+              <line x1="230" y1="309" x2="280" y2="349"/><line x1="330" y1="309" x2="280" y2="349"/>
+              <line x1="230" y1="229" x2="280" y2="349"/><line x1="330" y1="229" x2="280" y2="349"/>
+            </g>
+
+            {/* Warning labels */}
+            <text x="280" y="420" text-anchor="middle" class="svg-caption" fill="var(--color-con)">— EVERYTHING TOUCHES EVERYTHING —</text>
+            <text x="280" y="440" text-anchor="middle" class="svg-caption" fill="var(--color-fg-subtle)">change email provider → refactor signup</text>
+          </svg>
+        </div>
+
+        {/* Stage 2: One Step, One Piece — clean separation */}
+        <div class="viz-stage absolute inset-0 opacity-0 scale-[0.94] transition-all duration-700" data-id="onestep">
+          <svg viewBox="60 60 440 440" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="glowPilot" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--color-pilot-glow)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+            </defs>
+            <rect width="560" height="560" fill="url(#socGrid)" opacity="0.5"/>
+            <circle cx="280" cy="280" r="220" fill="url(#glowPilot)" opacity="0.35"/>
+
+            {/* Flow: Validate → Create → Email → Log */}
+            <g transform="translate(80 100)">
+              <rect x="0" y="0" width="160" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="80" y="28" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">COMMAND</text>
+              <text x="80" y="48" text-anchor="middle" class="svg-body-md" fill="var(--color-fg)">Validate Input</text>
+              <circle cx="80" cy="62" r="3" fill="var(--color-pilot)"/>
+            </g>
+
+            <g transform="translate(320 100)">
+              <rect x="0" y="0" width="160" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="80" y="28" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">COMMAND</text>
+              <text x="80" y="48" text-anchor="middle" class="svg-body-md" fill="var(--color-fg)">Create User</text>
+              <circle cx="80" cy="62" r="3" fill="var(--color-pilot)"/>
+            </g>
+
+            <g transform="translate(80 260)">
+              <rect x="0" y="0" width="160" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.5"/>
+              <text x="80" y="28" text-anchor="middle" class="svg-label" fill="var(--color-found)">SUBSCRIPTION</text>
+              <text x="80" y="48" text-anchor="middle" class="svg-body-md" fill="var(--color-fg)">Send Welcome Email</text>
+              <circle cx="80" cy="62" r="3" fill="var(--color-found)"/>
+            </g>
+
+            <g transform="translate(320 260)">
+              <rect x="0" y="0" width="160" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.5"/>
+              <text x="80" y="28" text-anchor="middle" class="svg-label" fill="var(--color-found)">SUBSCRIPTION</text>
+              <text x="80" y="48" text-anchor="middle" class="svg-body-md" fill="var(--color-fg)">Log Analytics</text>
+              <circle cx="80" cy="62" r="3" fill="var(--color-found)"/>
+            </g>
+
+            {/* Clean arrows between boxes */}
+            <g stroke="var(--color-line-strong)" stroke-width="1.2" fill="none" opacity="0.7">
+              <line x1="240" y1="135" x2="320" y2="135" stroke-dasharray="4 3"/>
+              <line x1="160" y1="170" x2="160" y2="260" stroke-dasharray="4 3"/>
+              <line x1="400" y1="170" x2="400" y2="260" stroke-dasharray="4 3"/>
+              <line x1="240" y1="295" x2="320" y2="295" stroke-dasharray="4 3"/>
+            </g>
+
+            {/* Animated dots flowing */}
+            <circle r="3" fill="var(--color-pilot)" filter="drop-shadow(0 0 4px var(--color-pilot-glow))">
+              <animateMotion dur="2.5s" repeatCount="indefinite" path="M 240 135 L 320 135"/>
+            </circle>
+            <circle r="3" fill="var(--color-pilot)" filter="drop-shadow(0 0 4px var(--color-pilot-glow))">
+              <animateMotion dur="2.5s" begin="0.6s" repeatCount="indefinite" path="M 160 170 L 160 260"/>
+            </circle>
+            <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 4px var(--color-found-glow))">
+              <animateMotion dur="2.5s" begin="1.2s" repeatCount="indefinite" path="M 240 295 L 320 295"/>
+            </circle>
+
+            <text x="280" y="420" text-anchor="middle" class="svg-caption" fill="var(--color-pilot)">— EACH HAS ONE REASON TO EXIST —</text>
+          </svg>
+        </div>
+
+        {/* Stage 3: Data Control — boundaries */}
+        <div class="viz-stage absolute inset-0 opacity-0 scale-[0.94] transition-all duration-700" data-id="data">
+          <svg viewBox="60 60 440 440" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="glowFound" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--color-found-glow)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+            </defs>
+            <rect width="560" height="560" fill="url(#socGrid)" opacity="0.5"/>
+            <circle cx="280" cy="280" r="200" fill="url(#glowFound)" opacity="0.3"/>
+
+            {/* User Service — PII inside */}
+            <g transform="translate(120 140)">
+              <rect x="0" y="0" width="200" height="120" rx="12" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="2"/>
+              <rect x="0" y="0" width="200" height="120" rx="12" fill="var(--color-found)" fill-opacity="0.05"/>
+              <text x="100" y="28" text-anchor="middle" class="svg-label" fill="var(--color-found)">USER SERVICE</text>
+              <text x="100" y="50" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">PII lives here</text>
+              <rect x="20" y="65" width="160" height="30" rx="6" fill="var(--color-bg-sunk)" stroke="color-mix(in srgb, var(--color-found) 25%, var(--color-line))" stroke-width="1"/>
+              <text x="100" y="84" text-anchor="middle" class="svg-label-sm" fill="var(--color-fg)">email · name · address</text>
+              {/* Lock icon */}
+              <circle cx="100" cy="108" r="4" fill="var(--color-found)"/>
+            </g>
+
+            {/* Email Service — no PII */}
+            <g transform="translate(340 320)">
+              <rect x="0" y="0" width="120" height="80" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="60" y="28" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">EMAIL</text>
+              <text x="60" y="48" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">events only</text>
+              <text x="60" y="66" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">no PII access</text>
+            </g>
+
+            {/* Analytics Service — no PII */}
+            <g transform="translate(80 320)">
+              <rect x="0" y="0" width="120" height="80" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="60" y="28" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">ANALYTICS</text>
+              <text x="60" y="48" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">events only</text>
+              <text x="60" y="66" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">no PII access</text>
+            </g>
+
+            {/* Boundary arrows — events only */}
+            <g stroke="var(--color-line-strong)" stroke-width="1" stroke-dasharray="4 3" fill="none" opacity="0.6">
+              <line x1="220" y1="200" x2="340" y2="340"/>
+              <line x1="180" y1="260" x2="140" y2="320"/>
+            </g>
+
+            {/* Event dots crossing boundary */}
+            <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 4px var(--color-found-glow))">
+              <animateMotion dur="2.5s" repeatCount="indefinite" path="M 220 200 L 340 340"/>
+            </circle>
+            <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 4px var(--color-found-glow))">
+              <animateMotion dur="2.5s" begin="1s" repeatCount="indefinite" path="M 180 260 L 140 320"/>
+            </circle>
+
+            <text x="280" y="460" text-anchor="middle" class="svg-caption" fill="var(--color-found)">— PII NEVER CROSSES SERVICE BOUNDARIES —</text>
+          </svg>
+        </div>
+
+        {/* Stage 4: Scale — teams & AI */}
+        <div class="viz-stage absolute inset-0 opacity-0 scale-[0.94] transition-all duration-700" data-id="scale">
+          <svg viewBox="60 60 440 440" xmlns="http://www.w3.org/2000/svg">
+            <rect width="560" height="560" fill="url(#socGrid)" opacity="0.5"/>
+            <circle cx="280" cy="280" r="220" fill="url(#glowPilot)" opacity="0.3"/>
+
+            {/* Team A */}
+            <g transform="translate(60 80)">
+              <rect x="0" y="0" width="200" height="160" rx="12" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="100" y="26" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">TEAM A</text>
+              <rect x="20" y="45" width="160" height="32" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+              <text x="100" y="65" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg)">User Service</text>
+              <rect x="20" y="85" width="160" height="32" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+              <text x="100" y="105" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg)">Auth Service</text>
+              <text x="100" y="140" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">2 developers + AI agent</text>
+            </g>
+
+            {/* Team B */}
+            <g transform="translate(300 80)">
+              <rect x="0" y="0" width="200" height="160" rx="12" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+              <text x="100" y="26" text-anchor="middle" class="svg-label" fill="var(--color-con)">TEAM B</text>
+              <rect x="20" y="45" width="160" height="32" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+              <text x="100" y="65" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg)">Email Service</text>
+              <rect x="20" y="85" width="160" height="32" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" stroke-width="1"/>
+              <text x="100" y="105" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg)">Notification Service</text>
+              <text x="100" y="140" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">1 developer + AI agent</text>
+            </g>
+
+            {/* Scaled service — multiple instances */}
+            <g transform="translate(80 300)">
+              <rect x="0" y="0" width="180" height="100" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.5"/>
+              <text x="90" y="24" text-anchor="middle" class="svg-label" fill="var(--color-found)">USER SERVICE</text>
+              <text x="90" y="44" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">scaled 5x</text>
+              <g transform="translate(90 70)">
+                {[0,1,2,3,4].map(i => (
+                  <rect x={-60 + i*28} y="-10" width="22" height="20" rx="4" fill="var(--color-found)" opacity="0.25" stroke="var(--color-found)" stroke-width="1"/>
+                ))}
+              </g>
+            </g>
+
+            {/* AI agent */}
+            <g transform="translate(320 320)">
+              <rect x="0" y="0" width="140" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <text x="70" y="28" text-anchor="middle" class="svg-label" fill="var(--color-con)">AI AGENT</text>
+              <text x="70" y="48" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">generates command</text>
+              <circle cx="70" cy="62" r="3" fill="var(--color-con)">
+                <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
+            </g>
+
+            <text x="280" y="460" text-anchor="middle" class="svg-caption" fill="var(--color-pilot)">— WORK IN PARALLEL, DEPLOY INDEPENDENTLY —</text>
+          </svg>
+        </div>
+
+        {/* Stage 5: Audit & Approval */}
+        <div class="viz-stage absolute inset-0 opacity-0 scale-[0.94] transition-all duration-700" data-id="audit">
+          <svg viewBox="60 60 440 440" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="glowFound" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--color-found-glow)"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+            </defs>
+            <rect width="560" height="560" fill="url(#socGrid)" opacity="0.5"/>
+            <circle cx="280" cy="280" r="220" fill="url(#glowFound)" opacity="0.3"/>
+
+            {/* Large PR — blocked */}
+            <g transform="translate(60 100)">
+              <rect x="0" y="0" width="200" height="140" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="1.5"/>
+              <text x="100" y="26" text-anchor="middle" class="svg-label" fill="var(--color-con)">MONOLITH PR</text>
+              <text x="100" y="48" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">+500 lines</text>
+              <text x="100" y="66" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">touches HTTP · DB · email · auth</text>
+              <rect x="40" y="85" width="120" height="28" rx="14" fill="color-mix(in srgb, var(--color-con) 10%, transparent)" stroke="var(--color-con)" stroke-width="1"/>
+              <text x="100" y="103" text-anchor="middle" class="svg-label-sm" fill="var(--color-con)">⏳ 3 days review</text>
+            </g>
+
+            {/* Small PR — approved */}
+            <g transform="translate(300 100)">
+              <rect x="0" y="0" width="200" height="140" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.5"/>
+              <text x="100" y="26" text-anchor="middle" class="svg-label" fill="var(--color-found)">PURISTA PR</text>
+              <text x="100" y="48" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">+40 lines</text>
+              <text x="100" y="66" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">one command, one purpose</text>
+              <rect x="40" y="85" width="120" height="28" rx="14" fill="color-mix(in srgb, var(--color-found) 10%, transparent)" stroke="var(--color-found)" stroke-width="1"/>
+              <text x="100" y="103" text-anchor="middle" class="svg-label-sm" fill="var(--color-found)">✓ 15 min review</text>
+            </g>
+
+            {/* Reviewers */}
+            <g transform="translate(100 320)">
+              <rect x="0" y="0" width="140" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1"/>
+              <text x="70" y="26" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">SECURITY</text>
+              <text x="70" y="46" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">reviews data flow</text>
+              <text x="70" y="62" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">at service boundary</text>
+            </g>
+
+            <g transform="translate(320 320)">
+              <rect x="0" y="0" width="140" height="70" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1"/>
+              <text x="70" y="26" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">COMPLIANCE</text>
+              <text x="70" y="46" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">verifies audit trail</text>
+              <text x="70" y="62" text-anchor="middle" class="svg-label-xs" fill="var(--color-fg-subtle)">per service</text>
+            </g>
+
+            <text x="280" y="460" text-anchor="middle" class="svg-caption" fill="var(--color-found)">— SMALL CHANGES · FAST REVIEW · QUICK TO PROD —</text>
+          </svg>
+        </div>
+
+        {/* Stage 6: Swap Any Part */}
+        <div class="viz-stage absolute inset-0 opacity-0 scale-[0.94] transition-all duration-700" data-id="swap">
+          <svg viewBox="60 60 440 440" xmlns="http://www.w3.org/2000/svg">
+            <rect width="560" height="560" fill="url(#socGrid)" opacity="0.5"/>
+            <circle cx="280" cy="280" r="220" fill="url(#glowPilot)" opacity="0.3"/>
+
+            {/* Stable services */}
+            <g transform="translate(80 120)">
+              <rect x="0" y="0" width="140" height="60" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="70" y="24" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">USER</text>
+              <text x="70" y="42" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">unchanged</text>
+            </g>
+
+            <g transform="translate(340 120)">
+              <rect x="0" y="0" width="140" height="60" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="70" y="24" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">AUTH</text>
+              <text x="70" y="42" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">unchanged</text>
+            </g>
+
+            <g transform="translate(80 260)">
+              <rect x="0" y="0" width="140" height="60" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" stroke-width="1.5"/>
+              <text x="70" y="24" text-anchor="middle" class="svg-label" fill="var(--color-pilot)">ANALYTICS</text>
+              <text x="70" y="42" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">unchanged</text>
+            </g>
+
+            {/* Service being replaced */}
+            <g transform="translate(300 240)">
+              <rect x="0" y="0" width="200" height="100" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-con)" stroke-width="2" stroke-dasharray="5 3"/>
+              <rect x="0" y="0" width="200" height="100" rx="10" fill="var(--color-con)" fill-opacity="0.06"/>
+              <text x="100" y="28" text-anchor="middle" class="svg-label" fill="var(--color-con)">EMAIL SERVICE</text>
+              <text x="100" y="48" text-anchor="middle" class="svg-body-sm" fill="var(--color-fg-muted)">being replaced</text>
+              <rect x="30" y="62" width="140" height="24" rx="12" fill="var(--color-bg-sunk)" stroke="var(--color-con)" stroke-width="1"/>
+              <text x="100" y="78" text-anchor="middle" class="svg-label-xs" fill="var(--color-con)">SendGrid → AWS SES</text>
+            </g>
+
+            {/* Arrows showing connections remain */}
+            <g stroke="var(--color-line-strong)" stroke-width="1" stroke-dasharray="4 3" fill="none" opacity="0.5">
+              <line x1="220" y1="150" x2="300" y2="260"/>
+              <line x1="220" y1="290" x2="300" y2="290"/>
+              <line x1="420" y1="180" x2="400" y2="240"/>
+            </g>
+
+            {/* New adapter */}
+            <g transform="translate(300 380)">
+              <rect x="0" y="0" width="200" height="40" rx="8" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.5"/>
+              <text x="100" y="24" text-anchor="middle" class="svg-label-sm" fill="var(--color-found)">NEW ADAPTER ONLY</text>
+            </g>
+
+            <text x="280" y="460" text-anchor="middle" class="svg-caption" fill="var(--color-pilot)">— BUSINESS LOGIC STAYS IDENTICAL —</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const stages = document.querySelectorAll('.scrolly-stage');
+    const vizStack = document.getElementById('soc-viz-stack');
+    const knob = document.querySelector('.scrolly-knob');
+    let currentStage = 'problem';
+
+    if (!vizStack || stages.length === 0) return;
+
+    const colors: Record<string, string> = {
+      problem: 'con',
+      onestep: 'pilot',
+      data: 'found',
+      scale: 'pilot',
+      audit: 'found',
+      swap: 'pilot',
+    };
+
+    const knobPositions: Record<string, string> = {
+      problem: '8%',
+      onestep: '23%',
+      data: '38%',
+      scale: '53%',
+      audit: '68%',
+      swap: '83%',
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      let best: IntersectionObserverEntry | null = null;
+      entries.forEach(e => {
+        if (e.isIntersecting && (!best || e.intersectionRatio > best.intersectionRatio)) {
+          best = e;
+        }
+      });
+      if (best) {
+        const id = (best.target as HTMLElement).dataset.stage || 'problem';
+        if (id !== currentStage) {
+          currentStage = id;
+          vizStack.dataset.stage = id;
+          stages.forEach(s => {
+            const active = (s as HTMLElement).dataset.stage === id;
+            (s as HTMLElement).style.opacity = active ? '1' : '0.35';
+          });
+          if (knob) {
+            const color = colors[id] || 'pilot';
+            knob.style.top = knobPositions[id] || '8%';
+            knob.style.background = `var(--color-${color})`;
+            knob.style.borderColor = `var(--color-${color})`;
+            knob.style.boxShadow = `0 0 0 6px color-mix(in srgb, var(--color-${color}) 20%, transparent)`;
+          }
+        }
+      }
+    }, { threshold: [0.3, 0.5, 0.7], rootMargin: '-30% 0px -30% 0px' });
+
+    stages.forEach(s => observer.observe(s));
+
+    // Initialize first stage as active on load
+    const firstStage = stages[0];
+    if (firstStage) {
+      firstStage.style.opacity = '1';
+      const firstId = firstStage.dataset.stage || 'problem';
+      currentStage = firstId;
+      vizStack.dataset.stage = firstId;
+      if (knob) {
+        const color = colors[firstId] || 'pilot';
+        knob.style.top = knobPositions[firstId] || '8%';
+        knob.style.background = `var(--color-${color})`;
+        knob.style.borderColor = `var(--color-${color})`;
+        knob.style.boxShadow = `0 0 0 6px color-mix(in srgb, var(--color-${color}) 20%, transparent)`;
+      }
+    }
+  })();
+</script>
+
+<style>
+  .viz-stage { will-change: opacity, transform; }
+  #soc-viz-stack[data-stage="problem"] .viz-stage[data-id="problem"],
+  #soc-viz-stack[data-stage="onestep"] .viz-stage[data-id="onestep"],
+  #soc-viz-stack[data-stage="data"] .viz-stage[data-id="data"],
+  #soc-viz-stack[data-stage="scale"] .viz-stage[data-id="scale"],
+  #soc-viz-stack[data-stage="audit"] .viz-stage[data-id="audit"],
+  #soc-viz-stack[data-stage="swap"] .viz-stage[data-id="swap"] {
+    opacity: 1;
+    transform: scale(1);
+  }
+  #soc-viz-stack[data-stage="problem"] .viz-stage:not([data-id="problem"]),
+  #soc-viz-stack[data-stage="onestep"] .viz-stage:not([data-id="onestep"]),
+  #soc-viz-stack[data-stage="data"] .viz-stage:not([data-id="data"]),
+  #soc-viz-stack[data-stage="scale"] .viz-stage:not([data-id="scale"]),
+  #soc-viz-stack[data-stage="audit"] .viz-stage:not([data-id="audit"]),
+  #soc-viz-stack[data-stage="swap"] .viz-stage:not([data-id="swap"]) {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+</style>

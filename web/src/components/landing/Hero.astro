@@ -1,0 +1,145 @@
+---
+interface HeroLine {
+	text: string
+	color?: 'fg' | 'found' | 'con' | 'pilot' | 'shimmer'
+}
+
+interface HeroStripItem {
+	label: string
+	title: string
+	tone?: 'found' | 'con' | 'pilot'
+}
+
+interface CTA {
+	label: string
+	href: string
+	variant?: 'primary' | 'ghost'
+}
+
+interface Props {
+	eyebrow?: string
+	eyebrowTone?: 'found' | 'con' | 'pilot'
+	lines: HeroLine[]
+	lede: string
+	ctas?: CTA[]
+	strip?: HeroStripItem[]
+	showCanvas?: boolean
+}
+
+const {
+	eyebrow = 'PURISTA · v3 · production-grade',
+	eyebrowTone = 'found',
+	lines,
+	lede,
+	ctas = [],
+	strip = [],
+	showCanvas = false,
+} = Astro.props
+
+function colorClass(c?: string) {
+	if (!c || c === 'fg') return ''
+	if (c === 'shimmer') return 'site-shimmer'
+	return ''
+}
+function colorStyle(c?: string) {
+	if (!c || c === 'fg' || c === 'shimmer') return ''
+	return `color: var(--color-${c}-hi);`
+}
+
+const displayLines = lines.reduce<HeroLine[]>((acc, line) => {
+	const isStandalonePunctuation = /^[.!?,:;]+$/.test(line.text.trim())
+	const previous = acc.at(-1)
+
+	if (isStandalonePunctuation && previous) {
+		previous.text = `${previous.text}${line.text.trim()}`
+		return acc
+	}
+
+	acc.push({ ...line })
+	return acc
+}, [])
+---
+
+<section class="site-hero" id="hero">
+  {showCanvas && <div class="site-hero-canvas" data-hero-canvas aria-hidden="true" />}
+  <div class="site-aurora" aria-hidden="true"></div>
+  <div class="site-hero-grid" aria-hidden="true"></div>
+  <div class="site-hero-vignette" aria-hidden="true"></div>
+
+  <div class="site-wrap site-hero-inner">
+    <div class="site-reveal" style="margin-bottom:2rem">
+      <span class="site-eyebrow" data-tone={eyebrowTone}>
+        <span class="site-eyebrow-dot"></span>
+        <span>{eyebrow}</span>
+      </span>
+    </div>
+
+    <h1 class="site-display" style="max-width:18ch">
+      {
+        displayLines.map((line) => (
+          <span class="site-display-line" style="display:block">
+            <span
+              class={colorClass(line.color)}
+              style={colorStyle(line.color)}
+              data-site-split
+            >
+              {line.text}
+            </span>
+          </span>
+        ))
+      }
+    </h1>
+
+    <p class="site-lede site-reveal" style="margin-top:2rem;max-width:54ch;--site-reveal-delay:280ms">
+      {lede}
+    </p>
+
+    {
+      ctas.length > 0 && (
+        <div class="site-hero-actions site-reveal" style="--site-reveal-delay:440ms">
+          {ctas.map((cta) => (
+            <a
+              href={cta.href}
+              class={`site-btn ${cta.variant === 'ghost' ? 'site-btn-ghost' : 'site-btn-primary'}`}
+              data-magnetic={cta.variant === 'primary' ? '0.18' : undefined}
+            >
+              <span>{cta.label}</span>
+              <span class="site-btn-arrow">→</span>
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      strip.length > 0 && (
+        <div class="site-hero-strip site-reveal" style="--site-reveal-delay:680ms">
+          {strip.map((item) => (
+            <div class="site-hero-strip-item">
+              <span
+                class="site-hero-strip-label"
+                style={item.tone ? `color: var(--color-${item.tone}-hi)` : ''}
+              >
+                {item.label}
+              </span>
+              <span class="site-hero-strip-title">{item.title}</span>
+            </div>
+          ))}
+        </div>
+      )
+    }
+  </div>
+
+  <div class="site-scroll-indicator">
+    <span>Scroll</span>
+    <span class="site-scroll-indicator-bar"></span>
+  </div>
+
+  {
+    showCanvas && (
+      <script>
+        import '../../scripts/site/heroCanvas.ts';
+      </script>
+    )
+  }
+</section>

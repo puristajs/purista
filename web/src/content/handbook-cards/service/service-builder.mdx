@@ -1,0 +1,172 @@
+---
+title: The Service Builder
+description: Define service metadata, configuration, resources, and attach command, subscription, and stream definitions.
+---
+
+import FileTree from '../../../components/ui/FileTree.astro';
+import FileTreeFolder from '../../../components/ui/FileTreeFolder.astro';
+import FileTreeFile from '../../../components/ui/FileTreeFile.astro';
+
+The **service builder** is the factory that defines everything a service needs: its identity, configuration schema, resources, and all attached handlers.
+
+Think of it as the blueprint. The builder collects declarations. The service file wires them together. The instance connects them to runtime infrastructure.
+
+## Service definition
+
+Every service starts with stable metadata. This metadata never changes for the lifetime of the service version:
+
+```typescript [userServiceV1ServiceBuilder.ts]
+import { ServiceBuilder, ServiceInfoType } from '@purista/core'
+
+export const userServiceInfo = {
+  serviceName: 'UserService',
+  serviceVersion: '1',
+  serviceDescription: 'Handles user registration, authentication, and profiles',
+} as const satisfies ServiceInfoType
+
+export const userServiceV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
+```
+
+The `serviceName` becomes the domain boundary. The `serviceVersion` is a contract: version `1` promises a specific set of commands and subscriptions. When you break that contract, you increment the version.
+
+## The three naming levels
+
+PURISTA uses a consistent three-level naming convention for every service:
+
+| Level | Name pattern | What it is |
+|---|---|---|
+| **Builder** | `userServiceV1ServiceBuilder` | The `ServiceBuilder` instance with info, config schema, and resource declarations. Imported by command and subscription builders. |
+| **Service** | `userServiceV1Service` | The builder after all command, subscription, and stream definitions have been attached via `.addCommandDefinition()`. This is what you export from the service directory. |
+| **Instance** | `userService` | The live runtime object returned by `await userServiceV1Service.getInstance(eventBridge, opts)`. One instance per process or container. |
+
+This naming makes the lifecycle unambiguous: you build once, you wire once, and you instantiate at runtime.
+
+## Typical file structure
+
+A well-organized service follows a predictable layout. This makes navigation automatic for developers and AI agents:
+
+<FileTree>
+  <FileTreeFolder name="src" comment="source root">
+    <FileTreeFolder name="services" comment="all services">
+      <FileTreeFolder name="userService" comment="domain: users">
+        <FileTreeFile name="userServiceV1ServiceBuilder.ts" comment="metadata + config + resources" />
+        <FileTreeFile name="userServiceV1Service.ts" comment="wiring: attach handlers" highlight />
+        <FileTreeFile name="userServiceConfig.ts" comment="Zod schema + types" />
+        <FileTreeFolder name="commands" comment="sync operations">
+          <FileTreeFolder name="signUp" comment="register a user">
+            <FileTreeFile name="signUpCommandBuilder.ts" />
+            <FileTreeFile name="schema.ts" />
+            <FileTreeFile name="types.ts" />
+            <FileTreeFile name="signUpCommandBuilder.test.ts" />
+          </FileTreeFolder>
+          <FileTreeFolder name="getUser" comment="fetch a user">
+            <FileTreeFile name="getUserCommandBuilder.ts" />
+            <FileTreeFile name="schema.ts" />
+            <FileTreeFile name="types.ts" />
+            <FileTreeFile name="getUserCommandBuilder.test.ts" />
+          </FileTreeFolder>
+        </FileTreeFolder>
+        <FileTreeFolder name="subscriptions" comment="event reactions">
+          <FileTreeFolder name="sendWelcomeEmail" comment="on user created">
+            <FileTreeFile name="sendWelcomeEmailSubscriptionBuilder.ts" />
+            <FileTreeFile name="schema.ts" />
+            <FileTreeFile name="types.ts" />
+            <FileTreeFile name="sendWelcomeEmailSubscriptionBuilder.test.ts" />
+          </FileTreeFolder>
+        </FileTreeFolder>
+        <FileTreeFolder name="streams" comment="real-time flows">
+          <FileTreeFolder name="userSearch" comment="search stream">
+            <FileTreeFile name="userSearchStreamBuilder.ts" />
+            <FileTreeFile name="schema.ts" />
+            <FileTreeFile name="types.ts" />
+            <FileTreeFile name="userSearchStreamBuilder.test.ts" />
+          </FileTreeFolder>
+        </FileTreeFolder>
+      </FileTreeFolder>
+    </FileTreeFolder>
+  </FileTreeFolder>
+</FileTree>
+
+## Attach handlers
+
+Keep definition lists in the service file and spread them into the builder. This pattern preserves type inference end-to-end:
+
+```typescript [userServiceV1Service.ts]
+import { signUpCommandBuilder } from './commands/signUp/signUpCommandBuilder.js'
+import { getUserCommandBuilder } from './commands/getUser/getUserCommandBuilder.js'
+import { sendWelcomeEmailSubscriptionBuilder } from './subscriptions/sendWelcomeEmail/sendWelcomeEmailSubscriptionBuilder.js'
+import { userSearchStreamBuilder } from './streams/userSearch/userSearchStreamBuilder.js'
+import { userServiceV1ServiceBuilder } from './userServiceV1ServiceBuilder'
+
+const commandDefinitions = [
+  signUpCommandBuilder.getDefinition(),
+  getUserCommandBuilder.getDefinition(),
+] as Parameters<typeof userServiceV1ServiceBuilder['addCommandDefinition']>[0][]
+
+const subscriptionDefinitions = [
+  sendWelcomeEmailSubscriptionBuilder.getDefinition(),
+] as Parameters<typeof userServiceV1ServiceBuilder['addSubscriptionDefinition']>[0][]
+
+const streamDefinitions = [
+  userSearchStreamBuilder.getDefinition(),
+] as Parameters<typeof userServiceV1ServiceBuilder['addStreamDefinition']>[0][]
+
+export const userServiceV1Service = userServiceV1ServiceBuilder
+  .addCommandDefinition(...commandDefinitions)
+  .addSubscriptionDefinition(...subscriptionDefinitions)
+  .addStreamDefinition(...streamDefinitions)
+```
+
+<div class="callout callout--info">
+  <div class="callout__title">Preserve typed declarations</div>
+  <p>Keep the constant names <code>commandDefinitions</code>, <code>subscriptionDefinitions</code>, and <code>streamDefinitions</code>. Use the typed declaration <code>Parameters&lt;typeof builder['add...Definition']&gt;[0][]</code> — do not replace with untyped arrays.</p>
+</div>
+
+## Why split builder and service files
+
+Keep the basic service builder (`...ServiceBuilder.ts`) separate from service wiring (`...Service.ts`) to avoid cyclic dependencies. Command, subscription, and stream builders import from the service builder to inherit typed context. The service file imports the builders to attach them. Splitting the files breaks the cycle:
+
+```
+ServiceBuilder.ts  →  CommandBuilder.ts
+       ↑                    ↓
+   Service.ts  ←——  command.getDefinition()
+```
+
+## Add config and resources
+
+Most real services need configuration and resources. Chain them on the builder before attaching handlers:
+
+```typescript [userServiceV1ServiceBuilder.ts]
+export const userServiceV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
+  .setConfigSchema(userServiceV1ConfigSchema)
+  .defineResource<'db', DatabaseClient>()
+  .defineResource<'emailClient', EmailClient>()
+```
+
+These declarations become available — fully typed — in every command and subscription context.
+
+## Create and start an instance
+
+```typescript [main.ts]
+const userService = await userServiceV1Service.getInstance(eventBridge, {
+  logger,
+  resources: {
+    db: new DatabaseClient(process.env.DATABASE_URL),
+    emailClient: new EmailClient(),
+  },
+})
+await userService.start()
+```
+
+Always call `start()` so definitions are registered at the event bridge and startup hooks can run.
+
+## Builder method reference
+
+| Method | Purpose |
+|---|---|
+| `setConfigSchema(schema)` | Attach a Zod schema for service-level configuration |
+| `defineResource<Name, Type>()` | Declare a typed resource dependency |
+| `addCommandDefinition(...defs)` | Attach command definitions |
+| `addSubscriptionDefinition(...defs)` | Attach subscription definitions |
+| `addStreamDefinition(...defs)` | Attach stream definitions |
+| `setCustomClass(Class)` | Use a custom service class (rarely needed) |

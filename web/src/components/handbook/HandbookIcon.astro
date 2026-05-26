@@ -1,0 +1,791 @@
+---
+interface Props {
+	name: string
+	color?: string
+}
+
+const { name, color = 'currentColor' } = Astro.props
+---
+
+<div class="handbook-icon-wrap" style={`color: ${color}`}>
+  <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="handbook-icon-svg">
+
+    {name === 'layers' && (
+      <g class="icon-inner">
+        <rect x="10" y="28" width="28" height="6" rx="2" stroke="currentColor" stroke-width="2" opacity="0.5" class="icon-layer-lag" />
+        <rect x="10" y="20" width="28" height="6" rx="2" stroke="currentColor" stroke-width="2" opacity="0.7" class="icon-layer-mid" />
+        <rect x="10" y="12" width="28" height="6" rx="2" stroke="currentColor" stroke-width="2" class="icon-layer-top" />
+        <circle cx="36" cy="10" r="3" fill="currentColor" class="icon-accent" opacity="0.6" />
+      </g>
+    )}
+
+    {name === 'certificate' && (
+      <g class="icon-inner">
+        <rect x="12" y="8" width="24" height="28" rx="3" stroke="currentColor" stroke-width="2" />
+        <path d="M18 18h12M18 22h8" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" />
+        <circle cx="24" cy="32" r="4" stroke="currentColor" stroke-width="1.5" class="icon-seal" />
+        <path d="M24 30v4M22 32h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="icon-seal-cross" />
+        <circle cx="38" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'network' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="14" r="5" stroke="currentColor" stroke-width="2" class="icon-node-top" />
+        <circle cx="14" cy="32" r="5" stroke="currentColor" stroke-width="2" class="icon-node-left" />
+        <circle cx="34" cy="32" r="5" stroke="currentColor" stroke-width="2" class="icon-node-right" />
+        <path d="M21 18l-4 11M27 18l4 11M19 32h10" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" />
+        <circle cx="24" cy="14" r="2" fill="currentColor" class="icon-accent" opacity="0.5" />
+      </g>
+    )}
+
+    {name === 'dots' && (
+      <g class="icon-inner">
+        <circle cx="16" cy="16" r="4" stroke="currentColor" stroke-width="2" opacity="0.5" class="icon-dot-1" />
+        <circle cx="32" cy="16" r="4" stroke="currentColor" stroke-width="2" opacity="0.7" class="icon-dot-2" />
+        <circle cx="16" cy="32" r="4" stroke="currentColor" stroke-width="2" opacity="0.7" class="icon-dot-3" />
+        <circle cx="32" cy="32" r="4" stroke="currentColor" stroke-width="2" class="icon-dot-4" />
+        <circle cx="32" cy="32" r="1.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'shield' && (
+      <g class="icon-inner">
+        <path d="M24 6L8 14v10c0 8 6.8 15.4 16 18 9.2-2.6 16-10 16-18V14L24 6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <path d="M18 24l4 4 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-check" />
+        <circle cx="34" cy="12" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'cloud' && (
+      <g class="icon-inner">
+        <path d="M36 30c4.4 0 8-3.6 8-8s-3.6-8-8-8c-.4 0-.8 0-1.2.1C33.4 8.8 29.2 6 24.5 6c-6.2 0-11.4 4.5-12.4 10.5C7.5 17.5 4 21.4 4 26c0 5.5 4.5 10 10 10h22z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <circle cx="16" cy="26" r="2" fill="currentColor" opacity="0.3" class="icon-cloud-puff-1" />
+        <circle cx="22" cy="24" r="1.5" fill="currentColor" opacity="0.2" class="icon-cloud-puff-2" />
+        <circle cx="38" cy="14" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'box' && (
+      <g class="icon-inner">
+        <path d="M24 6L8 14v20l16 8 16-8V14L24 6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <path d="M24 6v20M8 14l16 8 16-8" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="36" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'settings' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2" />
+        <circle cx="24" cy="24" r="3" fill="currentColor" opacity="0.4" class="icon-gear-hub" />
+        <path d="M24 8v4M24 36v4M8 24h4M36 24h4M13.2 13.2l2.8 2.8M32 32l2.8 2.8M13.2 34.8l2.8-2.8M32 16l2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="icon-gear-spokes" />
+      </g>
+    )}
+
+    {name === 'database' && (
+      <g class="icon-inner">
+        <ellipse cx="24" cy="14" rx="12" ry="5" stroke="currentColor" stroke-width="2" />
+        <path d="M12 14v10c0 2.8 5.4 5 12 5s12-2.2 12-5V14" stroke="currentColor" stroke-width="2" />
+        <path d="M12 24v10c0 2.8 5.4 5 12 5s12-2.2 12-5V24" stroke="currentColor" stroke-width="2" />
+        <path d="M12 14c0 2.8 5.4 5 12 5s12-2.2 12-5" stroke="currentColor" stroke-width="1.5" opacity="0.3" class="icon-db-mid" />
+        <circle cx="36" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'bolt' && (
+      <g class="icon-inner">
+        <path d="M26 6L14 26h10l-2 16 14-20h-10l4-16z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" class="icon-bolt-body" />
+        <path d="M22 30l-2 8" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" class="icon-bolt-spark-1" />
+        <path d="M28 24l3-3" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" class="icon-bolt-spark-2" />
+        <circle cx="36" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'wave' && (
+      <g class="icon-inner">
+        <path d="M6 24c4-6 8-6 12 0s8 6 12 0 8-6 12 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" class="icon-wave-main" />
+        <path d="M6 30c4-4 8-4 12 0s8 4 12 0 8-4 12 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.3" class="icon-wave-sub" />
+        <circle cx="38" cy="12" r="2" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'bell' && (
+      <g class="icon-inner">
+        <path d="M24 8c-5.5 0-10 4.5-10 10v8l-4 6h28l-4-6v-8c0-5.5-4.5-10-10-10z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <path d="M21 36a3 3 0 0 0 6 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="icon-bell-clapper" />
+        <circle cx="24" cy="12" r="2" fill="currentColor" opacity="0.5" class="icon-bell-dot" />
+        <circle cx="38" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'list-check' && (
+      <g class="icon-inner">
+        <rect x="8" y="10" width="32" height="28" rx="3" stroke="currentColor" stroke-width="2" />
+        <path d="M14 20h6M14 28h6M14 36h6" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" />
+        <path d="M26 20l3 3 7-7M26 28l3 3 7-7M26 36l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-check-group" />
+      </g>
+    )}
+
+    {name === 'robot' && (
+      <g class="icon-inner">
+        <rect x="14" y="10" width="20" height="16" rx="3" stroke="currentColor" stroke-width="2" />
+        <rect x="20" y="26" width="8" height="6" rx="1" stroke="currentColor" stroke-width="2" />
+        <circle cx="19" cy="18" r="2" fill="currentColor" opacity="0.5" class="icon-eye-left" />
+        <circle cx="29" cy="18" r="2" fill="currentColor" opacity="0.5" class="icon-eye-right" />
+        <path d="M22 22h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+        <circle cx="36" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'help' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2" />
+        <path d="M19 20a5 5 0 0 1 9.5-2 5 5 0 0 1-2 5.5l-2.5 2v2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="icon-q-curve" />
+        <circle cx="24" cy="34" r="2" fill="currentColor" opacity="0.5" class="icon-q-dot" />
+      </g>
+    )}
+
+    {name === 'ear' && (
+      <g class="icon-inner">
+        <path d="M16 14c0-4.4 3.6-8 8-8s8 3.6 8 8v12c0 4.4-3.6 8-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M20 20c2-2 6-2 8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.5" class="icon-ear-inner" />
+        <circle cx="24" cy="28" r="3" stroke="currentColor" stroke-width="2" class="icon-ear-lobe" />
+        <circle cx="36" cy="10" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'inbox' && (
+      <g class="icon-inner">
+        <path d="M8 12l4-6h24l4 6v24a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V12z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <path d="M8 12h12l4 6h8l4-6h4" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linejoin="round" class="icon-inbox-flap" />
+        <circle cx="24" cy="22" r="3" stroke="currentColor" stroke-width="1.5" opacity="0.5" class="icon-inbox-item" />
+      </g>
+    )}
+
+    {name === 'flow' && (
+      <g class="icon-inner">
+        <rect x="10" y="10" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2" opacity="0.4" />
+        <rect x="28" y="10" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2" opacity="0.4" />
+        <rect x="10" y="28" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2" opacity="0.4" />
+        <rect x="28" y="28" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2" class="icon-flow-target" />
+        <path d="M20 15h8M15 20v8M33 20v8M20 33h8" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" />
+        <circle cx="38" cy="38" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'brain' && (
+      <g class="icon-inner">
+        <path d="M18 12c-4 0-8 3-8 8 0 3 1.5 5.5 4 7-1 1.5-1 3.5 0 5 1.5 2 4.5 2.5 7 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" class="icon-brain-left" />
+        <path d="M30 12c4 0 8 3 8 8 0 3-1.5 5.5-4 7 1 1.5 1 3.5 0 5-1.5 2-4.5 2.5-7 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" class="icon-brain-right" />
+        <path d="M20 18h8M20 22h8M20 26h6" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" />
+        <circle cx="24" cy="16" r="2" fill="currentColor" opacity="0.5" class="icon-brain-pulse" />
+      </g>
+    )}
+
+    {name === 'check-circle' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="2" />
+        <path d="M17 24l5 5 9-10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-check-path" />
+        <circle cx="36" cy="12" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'check' && (
+      <g class="icon-inner">
+        <rect x="8" y="8" width="32" height="32" rx="4" stroke="currentColor" stroke-width="2" opacity="0.15" />
+        <path d="M14 24l6 6 14-14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="icon-check-bold" />
+      </g>
+    )}
+
+    {name === 'zap' && (
+      <g class="icon-inner">
+        <path d="M28 8L16 24h10l-3 16 14-18h-10l5-14z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" class="icon-zap-body" />
+        <circle cx="14" cy="14" r="2" fill="currentColor" opacity="0.3" class="icon-zap-spark-1" />
+        <circle cx="36" cy="36" r="2" fill="currentColor" opacity="0.3" class="icon-zap-spark-2" />
+      </g>
+    )}
+
+    {name === 'settings-auto' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="24" r="8" stroke="currentColor" stroke-width="2" />
+        <path d="M24 12v4M24 32v4M12 24h4M32 24h4M16.7 16.7l2.8 2.8M28.5 28.5l2.8 2.8M16.7 31.3l2.8-2.8M28.5 19.5l2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="icon-gear-spokes" />
+        <path d="M22 36l2 4 2-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-auto-arrow" />
+      </g>
+    )}
+
+    {name === 'lock' && (
+      <g class="icon-inner">
+        <rect x="12" y="20" width="24" height="20" rx="3" stroke="currentColor" stroke-width="2" />
+        <path d="M18 20v-6a6 6 0 0 1 12 0v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <circle cx="24" cy="30" r="2.5" fill="currentColor" opacity="0.4" class="icon-lock-keyhole" />
+        <path d="M24 32.5v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+      </g>
+    )}
+
+    {name === 'database-search' && (
+      <g class="icon-inner">
+        <ellipse cx="24" cy="14" rx="10" ry="4" stroke="currentColor" stroke-width="2" />
+        <path d="M14 14v10c0 2.2 4.5 4 10 4s10-1.8 10-4V14" stroke="currentColor" stroke-width="2" />
+        <path d="M14 24v10c0 2.2 4.5 4 10 4" stroke="currentColor" stroke-width="2" />
+        <circle cx="32" cy="32" r="5" stroke="currentColor" stroke-width="2" class="icon-search-ring" />
+        <path d="M36 36l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="icon-search-handle" />
+      </g>
+    )}
+
+    {name === 'api' && (
+      <g class="icon-inner">
+        <rect x="10" y="12" width="28" height="24" rx="3" stroke="currentColor" stroke-width="2" />
+        <path d="M10 18h28M16 12v-3M32 12v-3" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" />
+        <path d="M16 28l4-4 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" class="icon-api-chart" />
+      </g>
+    )}
+
+    {name === 'star' && (
+      <g class="icon-inner">
+        <path d="M24 8l3.5 10.5H38l-9 6.5 3.5 10.5-9-6.5-9 6.5 3.5-10.5-9-6.5h10.5L24 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" class="icon-star-body" />
+        <circle cx="24" cy="24" r="3" fill="currentColor" opacity="0.3" class="icon-star-center" />
+      </g>
+    )}
+
+    {name === 'world' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="24" r="15" stroke="currentColor" stroke-width="2" />
+        <ellipse cx="24" cy="24" rx="6" ry="15" stroke="currentColor" stroke-width="1.5" opacity="0.3" />
+        <path d="M9 24h30M24 9c-3 4-3 10 0 14 3 4 3 10 0 14" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" />
+        <circle cx="36" cy="12" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'link-check' && (
+      <g class="icon-inner">
+        <path d="M18 26a6 6 0 0 1 0-8l6-6a6 6 0 0 1 8.5 0l.5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4" />
+        <path d="M30 22a6 6 0 0 1 0 8l-6 6a6 6 0 0 1-8.5 0l-.5-.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+        <path d="M20 28l4 4 8-8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-check-small" />
+      </g>
+    )}
+
+    {name === 'list-search' && (
+      <g class="icon-inner">
+        <path d="M10 14h12M10 22h12M10 30h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+        <circle cx="34" cy="30" r="5" stroke="currentColor" stroke-width="2" class="icon-search-ring" />
+        <path d="M38 34l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="icon-search-handle" />
+        <rect x="10" y="10" width="28" height="28" rx="3" stroke="currentColor" stroke-width="1.5" opacity="0.15" />
+      </g>
+    )}
+
+    {name === 'link' && (
+      <g class="icon-inner">
+        <path d="M18 28a6 6 0 0 1 0-8l6-6a6 6 0 0 1 8.5 0l.5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4" />
+        <path d="M30 20a6 6 0 0 1 0 8l-6 6a6 6 0 0 1-8.5 0l-.5-.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+        <circle cx="36" cy="12" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'stairs' && (
+      <g class="icon-inner">
+        <rect x="8" y="30" width="12" height="10" rx="2" stroke="currentColor" stroke-width="2" class="icon-step-1" />
+        <rect x="20" y="20" width="12" height="10" rx="2" stroke="currentColor" stroke-width="2" class="icon-step-2" />
+        <rect x="32" y="10" width="8" height="10" rx="2" stroke="currentColor" stroke-width="2" class="icon-step-3" />
+        <path d="M14 30v-4c0-2.2 1.8-4 4-4h6c2.2 0 4-1.8 4-4v-4c0-2.2 1.8-4 4-4h4" stroke="currentColor" stroke-width="1.5" opacity="0.2" stroke-linecap="round" fill="none" />
+        <circle cx="38" cy="8" r="2" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'clock' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="2" />
+        <path d="M24 14v10l6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="icon-clock-hand" />
+        <circle cx="24" cy="24" r="2" fill="currentColor" opacity="0.3" />
+        <path d="M24 6v2M24 40v2M6 24h2M40 24h2" stroke="currentColor" stroke-width="1.5" opacity="0.2" stroke-linecap="round" />
+      </g>
+    )}
+
+    {name === 'branch' && (
+      <g class="icon-inner">
+        <circle cx="14" cy="14" r="4" stroke="currentColor" stroke-width="2" class="icon-node-top" />
+        <circle cx="14" cy="34" r="4" stroke="currentColor" stroke-width="2" class="icon-node-left" />
+        <circle cx="34" cy="34" r="4" stroke="currentColor" stroke-width="2" class="icon-node-right" />
+        <path d="M14 18v8c0 2.2 1.8 4 4 4h8c2.2 0 4 1.8 4 4v4" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" fill="none" />
+        <circle cx="14" cy="14" r="1.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'history' && (
+      <g class="icon-inner">
+        <path d="M24 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <circle cx="24" cy="24" r="12" stroke="currentColor" stroke-width="2" />
+        <path d="M24 16v8l5 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="icon-history-hand" />
+        <path d="M24 4c-11 0-20 9-20 20s9 20 20 20" stroke="currentColor" stroke-width="1.5" opacity="0.15" stroke-linecap="round" fill="none" class="icon-history-arc" />
+      </g>
+    )}
+
+    {name === 'git-compare' && (
+      <g class="icon-inner">
+        <circle cx="16" cy="14" r="4" stroke="currentColor" stroke-width="2" class="icon-node-top" />
+        <circle cx="16" cy="34" r="4" stroke="currentColor" stroke-width="2" class="icon-node-left" />
+        <circle cx="32" cy="34" r="4" stroke="currentColor" stroke-width="2" class="icon-node-right" />
+        <path d="M16 18v8c0 2.2 1.8 4 4 4h8c2.2 0 4 1.8 4 4v4" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" fill="none" />
+        <path d="M32 14h4M32 18h4M16 8v-2M16 42v-2" stroke="currentColor" stroke-width="1.5" opacity="0.3" stroke-linecap="round" />
+      </g>
+    )}
+
+    {name === 'flow-branch' && (
+      <g class="icon-inner">
+        <circle cx="24" cy="12" r="4" stroke="currentColor" stroke-width="2" class="icon-node-top" />
+        <circle cx="14" cy="36" r="4" stroke="currentColor" stroke-width="2" class="icon-node-left" />
+        <circle cx="34" cy="36" r="4" stroke="currentColor" stroke-width="2" class="icon-node-right" />
+        <path d="M24 16v8c0 2.2-1.8 4-4 4h-2c-2.2 0-4 1.8-4 4v4M24 24c0 2.2 1.8 4 4 4h2c2.2 0 4 1.8 4 4v4" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" fill="none" />
+        <circle cx="24" cy="12" r="1.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'telescope' && (
+      <g class="icon-inner">
+        <path d="M14 36l6-18 10 4-6 18z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" class="icon-scope-body" />
+        <path d="M20 18l12-8 4 6-12 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" class="icon-scope-lens" />
+        <circle cx="16" cy="38" r="3" stroke="currentColor" stroke-width="1.5" opacity="0.4" class="icon-scope-tripod" />
+        <path d="M13 38h6M16 38v4" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" />
+      </g>
+    )}
+
+    {name === 'cloud-upload' && (
+      <g class="icon-inner">
+        <path d="M36 26c4.4 0 8-3.6 8-8s-3.6-8-8-8c-.4 0-.8 0-1.2.1C33.4 10.8 29.2 8 24.5 8c-6.2 0-11.4 4.5-12.4 10.5C7.5 19.5 4 23.4 4 28c0 5.5 4.5 10 10 10h22z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <path d="M24 20v14M18 26l6-6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-upload-arrow" />
+      </g>
+    )}
+
+    {name === 'shield-check' && (
+      <g class="icon-inner">
+        <path d="M24 8L10 15v10c0 7 6 13.5 14 16 8-2.5 14-9 14-16V15L24 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        <path d="M18 22l5 5 9-9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-check-path" />
+        <circle cx="34" cy="14" r="2.5" fill="currentColor" class="icon-accent" />
+      </g>
+    )}
+
+    {name === 'rocket' && (
+      <g class="icon-inner">
+        <path d="M24 8c-4 8-6 14-6 20 0 3 1 6 3 8h6c2-2 3-5 3-8 0-6-2-12-6-20z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" class="icon-rocket-body" />
+        <path d="M18 28c-3 2-5 6-5 10h4M30 28c3 2 5 6 5 10h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-rocket-fins" />
+        <path d="M22 38v4M26 38v4" stroke="currentColor" stroke-width="1.5" opacity="0.4" stroke-linecap="round" class="icon-rocket-flame" />
+        <circle cx="24" cy="18" r="2" fill="currentColor" opacity="0.4" />
+      </g>
+    )}
+  </svg>
+</div>
+
+<style is:global>
+  .handbook-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .handbook-icon-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ========================================
+     HOVER MICRO-ANIMATIONS (triggered by parent .group)
+     ======================================== */
+
+  /* layers: top layer slides up, accent dot pulses */
+  .group:hover .icon-layer-top {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+  }
+  .group:hover .icon-layer-mid {
+    transform: translateY(-1px);
+    transition: transform 0.3s ease 0.05s;
+  }
+  .group:hover .icon-accent {
+    animation: pulse-scale 0.6s ease-in-out;
+  }
+
+  /* certificate: seal rotates slightly */
+  .group:hover .icon-seal {
+    transform: rotate(15deg);
+    transform-origin: center;
+    transition: transform 0.4s ease;
+  }
+  .group:hover .icon-seal-cross {
+    transform: rotate(15deg);
+    transform-origin: center;
+    transition: transform 0.4s ease;
+  }
+
+  /* network: nodes pulse in sequence */
+  .group:hover .icon-node-top {
+    animation: pulse-dot 0.5s ease-in-out;
+  }
+  .group:hover .icon-node-left {
+    animation: pulse-dot 0.5s ease-in-out 0.1s;
+  }
+  .group:hover .icon-node-right {
+    animation: pulse-dot 0.5s ease-in-out 0.2s;
+  }
+
+  /* dots: dots scale in ripple */
+  .group:hover .icon-dot-1 { animation: pop-in 0.4s ease 0s; }
+  .group:hover .icon-dot-2 { animation: pop-in 0.4s ease 0.08s; }
+  .group:hover .icon-dot-3 { animation: pop-in 0.4s ease 0.16s; }
+  .group:hover .icon-dot-4 { animation: pop-in 0.4s ease 0.24s; }
+
+  /* shield: check draws in */
+  .group:hover .icon-check {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: draw-stroke 0.5s ease forwards;
+  }
+
+  /* cloud: puffs drift */
+  .group:hover .icon-cloud-puff-1 { animation: drift-right 0.8s ease-in-out; }
+  .group:hover .icon-cloud-puff-2 { animation: drift-right 0.8s ease-in-out 0.1s; }
+
+  /* box: top opens (lines shift) */
+  .group:hover .icon-inner > path:nth-of-type(2) {
+    transform: translateY(-1px);
+    transition: transform 0.3s ease;
+  }
+
+  /* settings: gear rotates */
+  .group:hover .icon-gear-spokes {
+    transform: rotate(30deg);
+    transform-origin: center;
+    transition: transform 0.6s ease;
+  }
+  .group:hover .icon-gear-hub {
+    transform: rotate(30deg);
+    transform-origin: center;
+    transition: transform 0.6s ease;
+  }
+
+  /* database: middle ring bounces */
+  .group:hover .icon-db-mid {
+    animation: bounce-soft 0.5s ease;
+  }
+
+  /* bolt: sparks flash */
+  .group:hover .icon-bolt-spark-1 { animation: flash-in 0.4s ease; }
+  .group:hover .icon-bolt-spark-2 { animation: flash-in 0.4s ease 0.1s; }
+  .group:hover .icon-bolt-body {
+    animation: shake-tiny 0.3s ease;
+  }
+
+  /* wave: wave shifts */
+  .group:hover .icon-wave-main {
+    animation: wave-shift 0.8s ease-in-out;
+  }
+  .group:hover .icon-wave-sub {
+    animation: wave-shift 0.8s ease-in-out 0.1s reverse;
+  }
+
+  /* bell: clapper swings */
+  .group:hover .icon-bell-clapper {
+    transform-origin: 24px 33px;
+    animation: swing 0.5s ease-in-out;
+  }
+  .group:hover .icon-bell-dot {
+    animation: pulse-dot 0.5s ease;
+  }
+
+  /* list-check: checks appear sequentially */
+  .group:hover .icon-check-group {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: draw-stroke 0.6s ease forwards;
+  }
+
+  /* robot: eyes blink */
+  .group:hover .icon-eye-left { animation: blink 0.3s ease; }
+  .group:hover .icon-eye-right { animation: blink 0.3s ease 0.1s; }
+
+  /* help: question mark bobs */
+  .group:hover .icon-q-curve {
+    animation: bob-up 0.5s ease-in-out;
+  }
+  .group:hover .icon-q-dot {
+    animation: pop-in 0.3s ease 0.2s;
+  }
+
+  /* ear: inner vibrates */
+  .group:hover .icon-ear-inner {
+    animation: vibrate-tiny 0.4s ease;
+  }
+  .group:hover .icon-ear-lobe {
+    animation: pulse-dot 0.5s ease;
+  }
+
+  /* inbox: item drops in */
+  .group:hover .icon-inbox-item {
+    transform: translateY(-4px);
+    transition: transform 0.3s ease;
+    opacity: 1;
+  }
+  .group:hover .icon-inbox-flap {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+  }
+
+  /* flow: target pulses */
+  .group:hover .icon-flow-target {
+    animation: pulse-scale 0.5s ease;
+  }
+
+  /* brain: pulse glow */
+  .group:hover .icon-brain-pulse {
+    animation: pulse-scale 0.6s ease-in-out;
+  }
+  .group:hover .icon-brain-left {
+    transform: translateX(-1px);
+    transition: transform 0.3s ease;
+  }
+  .group:hover .icon-brain-right {
+    transform: translateX(1px);
+    transition: transform 0.3s ease;
+  }
+
+  /* check-circle: check draws */
+  .group:hover .icon-check-path {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: draw-stroke 0.5s ease forwards;
+  }
+
+  /* check: bold check scales */
+  .group:hover .icon-check-bold {
+    animation: pulse-scale 0.4s ease;
+  }
+
+  /* zap: sparks fly */
+  .group:hover .icon-zap-spark-1 { animation: pop-in 0.3s ease; }
+  .group:hover .icon-zap-spark-2 { animation: pop-in 0.3s ease 0.1s; }
+  .group:hover .icon-zap-body {
+    animation: shake-tiny 0.3s ease;
+  }
+
+  /* settings-auto: arrow bounces */
+  .group:hover .icon-auto-arrow {
+    animation: bounce-soft 0.5s ease;
+  }
+
+  /* lock: keyhole glows */
+  .group:hover .icon-lock-keyhole {
+    animation: pulse-scale 0.5s ease;
+  }
+
+  /* database-search: search ring expands */
+  .group:hover .icon-search-ring {
+    animation: pulse-scale 0.5s ease;
+  }
+  .group:hover .icon-search-handle {
+    animation: wiggle 0.4s ease;
+  }
+
+  /* api: chart draws */
+  .group:hover .icon-api-chart {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: draw-stroke 0.6s ease forwards;
+  }
+
+  /* star: center pulses, star rotates slightly */
+  .group:hover .icon-star-body {
+    transform: rotate(5deg);
+    transform-origin: center;
+    transition: transform 0.5s ease;
+  }
+  .group:hover .icon-star-center {
+    animation: pulse-scale 0.5s ease;
+  }
+
+  /* world: arcs spin */
+  .group:hover .icon-accent {
+    animation: pulse-scale 0.5s ease;
+  }
+
+  /* link-check: check draws */
+  .group:hover .icon-check-small {
+    stroke-dasharray: 20;
+    stroke-dashoffset: 20;
+    animation: draw-stroke 0.4s ease forwards;
+  }
+
+  /* list-search: search ring pulses */
+  .group:hover .icon-search-ring { animation: pulse-scale 0.5s ease; }
+  .group:hover .icon-search-handle { animation: wiggle 0.4s ease; }
+
+  /* link: accent dot pulses */
+  .group:hover .icon-accent { animation: pulse-scale 0.5s ease; }
+
+  /* stairs: steps light up */
+  .group:hover .icon-step-1 { animation: pop-in 0.2s ease; }
+  .group:hover .icon-step-2 { animation: pop-in 0.2s ease 0.1s; }
+  .group:hover .icon-step-3 { animation: pop-in 0.2s ease 0.2s; }
+
+  /* clock: hand spins */
+  .group:hover .icon-clock-hand {
+    transform: rotate(30deg);
+    transform-origin: 24px 24px;
+    transition: transform 0.5s ease;
+  }
+
+  /* branch: nodes pulse */
+  .group:hover .icon-node-top { animation: pulse-dot 0.4s ease; }
+  .group:hover .icon-node-left { animation: pulse-dot 0.4s ease 0.1s; }
+  .group:hover .icon-node-right { animation: pulse-dot 0.4s ease 0.2s; }
+
+  /* history: hand spins back */
+  .group:hover .icon-history-hand {
+    transform: rotate(-30deg);
+    transform-origin: 24px 24px;
+    transition: transform 0.5s ease;
+  }
+  .group:hover .icon-history-arc {
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: draw-stroke 0.8s ease forwards;
+  }
+
+  /* git-compare: nodes pulse */
+  .group:hover .icon-node-top { animation: pulse-dot 0.4s ease; }
+  .group:hover .icon-node-left { animation: pulse-dot 0.4s ease 0.1s; }
+  .group:hover .icon-node-right { animation: pulse-dot 0.4s ease 0.2s; }
+
+  /* flow-branch: nodes pulse */
+  .group:hover .icon-node-top { animation: pulse-dot 0.4s ease; }
+  .group:hover .icon-node-left { animation: pulse-dot 0.4s ease 0.1s; }
+  .group:hover .icon-node-right { animation: pulse-dot 0.4s ease 0.2s; }
+
+  /* telescope: body tilts */
+  .group:hover .icon-scope-body {
+    transform: rotate(-3deg);
+    transform-origin: 20px 30px;
+    transition: transform 0.4s ease;
+  }
+  .group:hover .icon-scope-lens {
+    transform: rotate(-3deg) translateX(1px);
+    transform-origin: 20px 30px;
+    transition: transform 0.4s ease;
+  }
+
+  /* cloud-upload: arrow bounces up */
+  .group:hover .icon-upload-arrow {
+    animation: bounce-up 0.5s ease;
+  }
+
+  /* shield-check: check draws */
+  .group:hover .icon-check-path {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: draw-stroke 0.5s ease forwards;
+  }
+
+  /* rocket: flames flicker, body shakes */
+  .group:hover .icon-rocket-flame {
+    animation: flicker 0.3s ease infinite;
+  }
+  .group:hover .icon-rocket-body {
+    animation: shake-tiny 0.3s ease;
+  }
+
+  /* ========================================
+     KEYFRAME ANIMATIONS
+     ======================================== */
+
+  @keyframes pulse-scale {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulse-dot {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes draw-stroke {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes pop-in {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes drift-right {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  @keyframes bounce-up {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-4px); }
+    60% { transform: translateY(-2px); }
+  }
+
+  @keyframes shake-tiny {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+  }
+
+  @keyframes flash-in {
+    0% { opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.3; }
+  }
+
+  @keyframes wave-shift {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes swing {
+    0% { transform: rotate(0); }
+    25% { transform: rotate(8deg); }
+    75% { transform: rotate(-4deg); }
+    100% { transform: rotate(0); }
+  }
+
+  @keyframes blink {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.2); }
+  }
+
+  @keyframes bob-up {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  @keyframes vibrate-tiny {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-0.5px); }
+    75% { transform: translateX(0.5px); }
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(3deg); }
+    75% { transform: rotate(-3deg); }
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+</style>

@@ -1,0 +1,197 @@
+---
+title: Config Stores
+description: Config stores in PURISTA typescript framework
+order: 206010
+---
+
+# Config Stores
+
+In PURISTA applications, there are two general ways to make configuration data accessible for your commands and subscriptions.
+
+You can provide configurations via the [service configuration](../service/add-a-service-config.md) or via config stores.  
+Both are valid and you might ask why and when to use which option.
+
+Configurations that are necessary to start a service and are not changeable during runtime must be provided via the service configuration. As an example: database configurations, timeout settings, and similar values.
+
+Configurations like URLs of third-party providers, credential user names (not passwords!), and similar values that may change during runtime should be stored in config stores.
+
+|   | config store  | service config  |
+|---|---|---|
+| typed*                  | no  | yes  |
+| validated*              |  no | yes  |
+| changes during runtime  | possible  | no  |
+| distributed/shared      | possible  | no  |
+
+_(*) out of the box_
+
+::: tip Feature flags
+If you need feature flags in your application, you might have a look at [OpenFeature](https://openfeature.dev).
+:::
+
+Using config stores, allows to manage configuration, without the need to restart instances, and to use solutions like AWS Parameter Store, without directly coupling vendor specific solutions to business code.
+
+Also, if a command or subscription needs further configurations like URLs of external services, then the config store is a good place to persist this information.
+
+The config store is a simple interface to a key-value-store. The key must be a string and the value can be any type which can be serialized via JSON stringify/parse.
+
+## Usage
+
+Config stores are provided to the services during instance creation.
+
+```typescript
+const configStore = new DaprConfigStore({ configStoreName: 'local-config-store' })
+
+const myService = await myV1Service.getInstance(eventBridge, {
+    configStore,
+  })
+```
+
+The config store is provided inside the `context` of command functions and subscription functions.
+It can be used like this:
+
+```typescript
+.setCommandFunction(async function (context, payload) {
+
+  // set a config
+  await context.configs.setConfig('port', 8080)
+
+  // get a config
+  const myConfig = await context.configs.getConfig('hostUrl', 'port')
+  console.log(myConfig) // outputs: { hostUrl: "http://example.com", port: 8080 }
+
+  // remove a config
+  await context.configs.removeConfig('port')
+})
+```
+
+::: tip Use schemas to validate
+A production ready approach is, to validate the result of store getters and setters against a schema.
+It validates the input or return values and gives you proper types for further usage in one step.
+As an example:
+:::
+
+```typescript
+setCommandFunction(async function (context, payload) {
+
+  const configSchema = z.object({
+    hostUrl: z.string().url(),
+    port: z.number().int().min(1).max(99999),
+  })
+
+  const result = await context.configs.getConfig('hostUrl', 'port')
+
+  // myConfig now has proper types and is technical valid
+  const myConfig = configSchema.parse(result)
+
+  console.log(myConfig) // outputs: { hostUrl: "http://example.com", port: 8080 }
+
+})
+```
+
+::: info
+Config stores per default have:
+
+- enabled getter
+- disabled setter
+- disabled removal
+
+You need to explicitly enable them via config if needed.
+:::
+
+## Default config store
+
+PURISTA comes with a default config store, which can be used as placeholder or connector to config files and environment variables.
+In the constructor config, you can add a `config` property. The property must be from type object.
+
+Example:
+
+```typescript
+const store = new DefaultConfigStore({
+  enableGet: true,
+  enableRemove: true,
+  enableSet: true,
+  config: {
+    initialValue: 'initial',
+    fromEnvVar: process.env.MY_VALUE,
+  },
+})
+
+console.log(await store.getConfig('initialValue')) // outputs: { initialValue: "initial" }
+```
+
+## Custom config store
+
+It is quite simple to build a custom config store.
+You can simply extend the `ConfigStoreBaseClass` with type parameter of your custom store config.
+
+```typescript
+import { 
+    ConfigStore,
+    ConfigStoreBaseClass,
+    UnhandledError, 
+    StatusCode,
+    StoreBaseConfig,
+    type ObjectWithKeysFromStringArray 
+  } from '@purista/core'
+
+type CustomStoreConfig = {
+  url: string
+}
+
+export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> implements ConfigStore {
+
+  private client
+
+  constructor(config?: StoreBaseConfig<CustomStoreConfig>) {
+    super('CustomStoreName', config)
+
+    this.client = customClient.connect(this.config.config.url)
+  }
+
+  protected async getConfigImpl<ConfigNames extends string[]>(
+    ...configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+    const result: Record<string, unknown> = {}
+    for await (const name of configNames) {
+      try {
+        // your custom logic goes here:
+        const value = await this.client.get(name)
+        result[name] = value ? JSON.parse(value) : undefined
+      } catch (err) {
+        const msg = `error in config store getting value ${name}`
+        this.logger.error({ err }, msg)
+        throw new UnhandledError(StatusCode.InternalServerError, msg)
+      }
+    }
+    return result as ObjectWithKeysFromStringArray<ConfigNames>
+
+  }
+
+  protected async removeConfigImpl(configName: string): Promise<void> {
+    try {
+      // your custom logic goes here:
+      await this.client.del(configName)
+    } catch (err) {
+      const msg = `error in config store removing value ${configName}`
+      this.logger.error({ err }, msg)
+      throw new UnhandledError(StatusCode.InternalServerError, msg)
+    }
+  }
+
+  protected async setConfigImpl(configName: string, configValue: unknown) {
+    try {
+      // your custom logic goes here:
+      await this.client.set(configName, JSON.stringify(configValue))
+    } catch (err) {
+      const msg = `error in config store setting value ${configName}`
+      this.logger.error({ err }, msg)
+      throw new UnhandledError(StatusCode.InternalServerError, msg)
+    }
+  }
+
+  async destroy() {
+    await this.client.disconnect()
+    super.destroy()
+  }
+}
+```

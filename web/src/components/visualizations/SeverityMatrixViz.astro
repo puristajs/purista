@@ -1,0 +1,25 @@
+---
+interface Props {
+	class?: string
+}
+const { class: className = '' } = Astro.props
+---
+
+<svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" class:list={['w-full', className]}>
+  <defs>
+    <marker id="sevArrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M 0 0.5 L 8 3 L 0 5.5 Z" fill="var(--color-con)" opacity="0.5"/>
+    </marker>
+  </defs>
+  <rect x="30" y="20" width="460" height="240" rx="12" fill="var(--color-bg-elev)" stroke="var(--color-line)" stroke-width="1"/>
+  <text x="260" y="46" text-anchor="middle" class="svg-caption" fill="var(--color-fg-subtle)">SEVERITY LEVELS</text>
+  <rect x="60" y="70" width="390" height="44" rx="6" fill="color-mix(in srgb, var(--color-con) 10%, var(--color-bg-elev))" stroke="color-mix(in srgb, var(--color-con) 30%, transparent)" stroke-width="1"/>
+  <text x="85" y="97" text-anchor="start" class="svg-label" fill="var(--color-con)">CRITICAL</text>
+  <text x="170" y="97" text-anchor="start" class="svg-body-sm" fill="var(--color-fg)">Durable state · Tenant isolation · Content capture off</text>
+  <rect x="60" y="126" width="390" height="44" rx="6" fill="color-mix(in srgb, var(--color-found) 8%, var(--color-bg-elev))" stroke="color-mix(in srgb, var(--color-found) 25%, transparent)" stroke-width="1"/>
+  <text x="85" y="153" text-anchor="start" class="svg-label" fill="var(--color-found)">HIGH</text>
+  <text x="170" y="153" text-anchor="start" class="svg-body-sm" fill="var(--color-fg)">Timeout budgets · Permission gates · Sandbox minimalism</text>
+  <rect x="60" y="182" width="390" height="44" rx="6" fill="color-mix(in srgb, var(--color-pilot) 6%, var(--color-bg-elev))" stroke="color-mix(in srgb, var(--color-pilot) 20%, transparent)" stroke-width="0.8"/>
+  <text x="85" y="209" text-anchor="start" class="svg-label" fill="var(--color-pilot)">MEDIUM</text>
+  <text x="170" y="209" text-anchor="start" class="svg-body-sm" fill="var(--color-fg)">Failure mode testing · Tool output validation</text>
+</svg>

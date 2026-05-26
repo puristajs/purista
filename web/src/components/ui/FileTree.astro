@@ -1,0 +1,12 @@
+---
+interface Props {
+	class?: string
+}
+const { class: className = '' } = Astro.props
+---
+
+<div class:list={['file-tree rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-4 overflow-x-auto', className]}>
+  <ul class="file-tree-list" role="tree">
+    <slot />
+  </ul>
+</div>

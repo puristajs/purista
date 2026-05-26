@@ -1,0 +1,158 @@
+---
+title: HTTP Exposure
+description: Expose commands as REST endpoints with path parameters, query strings, and OpenAPI documentation.
+---
+
+Commands are not HTTP endpoints by default. You expose them explicitly using `exposeAsHttpEndpoint`. The command builder defines the contract; the HTTP server builds the router and OpenAPI definition from it.
+
+PURISTA uses [Hono](https://hono.dev/) under the hood for HTTP handling, but you do not write Hono routes directly. Instead, you declare the HTTP contract on the command builder, and the HTTP server adapter auto-generates the route.
+
+## Basic exposure
+
+```typescript [signUpCommand.ts]
+import { z } from 'zod'
+
+const signUpCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('signUp', 'Register a new user')
+  .addPayloadSchema(z.object({ email: z.string().email(), password: z.string().min(8) }))
+  .addParameterSchema(z.object({ referralCode: z.string().optional() }))
+  .addOutputSchema(z.object({ userId: z.string() }))
+  .exposeAsHttpEndpoint('POST', 'api/v1/users')
+  .setCommandFunction(async function (context, payload, parameter) {
+    const user = await context.resources.db.insert('users', payload)
+    return { userId: user.id }
+  })
+```
+
+The `exposeAsHttpEndpoint` method takes:
+
+| Argument | Purpose |
+|---|---|
+| `method` | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE` |
+| `path` | URL path without leading slash, can include parameters like `:id` |
+| `contentTypeRequest` | (optional) Request content type |
+| `contentEncodingRequest` | (optional) Request encoding |
+| `contentTypeResponse` | (optional) Response content type |
+| `contentEncodingResponse` | (optional) Response encoding |
+| `options` | (optional) `{ mode?: 'sync' \| 'async' }` |
+
+## Path and query parameters
+
+Path parameters in the URL are extracted and passed to the command's parameter schema:
+
+```typescript [getUserCommand.ts]
+const getUserCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('getUser', 'Get a user by ID')
+  .addParameterSchema(z.object({ id: z.string().uuid() }))
+  .addOutputSchema(z.object({ id: z.string(), email: z.string() }))
+  .exposeAsHttpEndpoint('GET', 'api/v1/users/:id')
+  .setCommandFunction(async function (context, payload, parameter) {
+    // parameter.id is extracted from the URL path
+    const user = await context.resources.db.findById('users', parameter.id)
+    if (!user) {
+      throw new HandledError(StatusCode.NotFound, 'User not found')
+    }
+    return user
+  })
+```
+
+Query parameters are also passed through the parameter schema:
+
+```typescript [listUsersCommand.ts]
+const listUsersCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('listUsers', 'List users with pagination')
+  .addParameterSchema(z.object({
+    page: z.string().transform(Number).default('1'),
+    limit: z.string().transform(Number).default('20'),
+    search: z.string().optional(),
+  }))
+  .addOutputSchema(z.object({
+    items: z.array(z.object({ id: z.string(), email: z.string() })),
+    total: z.number(),
+  }))
+  .exposeAsHttpEndpoint('GET', 'api/v1/users')
+  .setCommandFunction(async function (context, payload, parameter) {
+    const users = await context.resources.db.find('users', {
+      limit: parameter.limit,
+      offset: (parameter.page - 1) * parameter.limit,
+      search: parameter.search,
+    })
+    return { items: users, total: users.length }
+  })
+```
+
+## Async HTTP exposure
+
+For long-running operations, use `{ mode: 'async' }`. The HTTP adapter returns `202 Accepted` immediately and enqueues the work:
+
+```typescript [generateReportCommand.ts]
+const generateReportCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('generateReport', 'Generate a usage report')
+  .addPayloadSchema(z.object({ startDate: z.string(), endDate: z.string() }))
+  .addOutputSchema(z.object({ jobId: z.string(), statusUrl: z.string() }))
+  .canEnqueue('reportJob', z.object({ startDate: z.string(), endDate: z.string() }), z.object({}))
+  .exposeAsHttpEndpoint('POST', 'api/v1/reports', undefined, undefined, undefined, undefined, { mode: 'async' })
+  .setCommandFunction(async function (context, payload, parameter) {
+    const job = await context.queue.enqueue.reportJob(payload, {})
+    return {
+      jobId: job.jobId,
+      statusUrl: `/api/v1/reports/status/${job.jobId}`,
+    }
+  })
+```
+
+When `mode: 'async'` is set, the builder automatically adds `StatusCode.Accepted` to the OpenAPI error status codes so the documentation correctly reflects the `202` response.
+
+## OpenAPI metadata
+
+Control the generated OpenAPI documentation with fluent methods:
+
+```typescript [signUpCommand.ts]
+signUpCommandBuilder
+  .setOpenApiSummary('Register a new user account')
+  .setOpenApiOperationId('signUp')
+  .addOpenApiTags('Authentication', 'Users')
+  .addOpenApiErrorStatusCodes(StatusCode.Conflict, StatusCode.TooManyRequests)
+  .makeEndpointPublic() // disables default auth requirement
+```
+
+| Method | Purpose |
+|---|---|
+| `setOpenApiSummary(text)` | Short description in OpenAPI |
+| `setOpenApiOperationId(id)` | Unique operation identifier |
+| `addOpenApiTags(...tags)` | Grouping tags |
+| `addOpenApiErrorStatusCodes(...codes)` | Document possible error responses |
+| `makeEndpointPublic()` | Disables auth for this endpoint |
+| `enableHttpSecurity(enabled)` | Toggle security (default: true) |
+| `addQueryParameters(...params)` | Declare query parameter metadata |
+
+## Security
+
+By default, exposed endpoints require authentication. Use `makeEndpointPublic()` for public endpoints like health checks or sign-up:
+
+```typescript [healthCommand.ts]
+const healthCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('health', 'Health check endpoint')
+  .addOutputSchema(z.object({ status: z.string() }))
+  .exposeAsHttpEndpoint('GET', 'health')
+  .makeEndpointPublic()
+  .setCommandFunction(async function () {
+    return { status: 'ok' }
+  })
+```
+
+## Content types
+
+Override content types for non-JSON payloads:
+
+```typescript [uploadCommand.ts]
+const uploadCommandBuilder = userServiceV1ServiceBuilder
+  .getCommandBuilder('upload', 'Upload a file')
+  .addPayloadSchema(z.instanceof(Buffer))
+  .addParameterSchema(z.object({ filename: z.string() }))
+  .exposeAsHttpEndpoint('POST', 'api/v1/uploads', 'application/octet-stream')
+  .setCommandFunction(async function (context, payload, parameter) {
+    await context.resources.storage.put(parameter.filename, payload)
+    return { uploaded: true }
+  })
+```

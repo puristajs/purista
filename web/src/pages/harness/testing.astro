@@ -1,0 +1,714 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import CodeBlock from '../../components/ui/CodeBlock.astro'
+import NumberedBadge from '../../components/ui/NumberedBadge.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout
+  title="Testing | AI Harness | PURISTA"
+  description="Test PURISTA AI Harness applications without calling external model providers. Fake providers, contract tests, streaming assertions, MCP fakes, and review gate tests."
+>
+
+  <HarnessHero
+    lines={[
+      { text: 'Test agents' },
+      { text: 'without calling', color: 'found' },
+      { text: 'external APIs.' },
+    ]}
+    lede="Every layer of a harness application is testable in isolation. Inject a fake model provider. Contract-test your state store. Assert streaming event sequences. Run fake MCP servers in CI. No real API keys needed."
+  />
+
+  {/* ── 1. Test pyramid ──────────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Test pyramid</div>
+        <h2 class="display display-lg">Four levels, clear boundaries</h2>
+        <p class="lede">Start at the bottom. Each level is independently testable. Climb the pyramid only when the previous level passes.</p>
+      </div>
+
+      <div class="tst-pyramid">
+        {[
+          {
+            level: '1',
+            label: 'Unit tests',
+            color: 'found',
+            items: ['Zod schemas', 'TypeScript tool handlers', 'Skill frontmatter', 'Eval scorer definitions', 'Custom adapter logic'],
+            note: 'Pure functions. No harness, no session, no model calls.',
+          },
+          {
+            level: '2',
+            label: 'Contract tests',
+            color: 'con',
+            items: ['StateStore adapter', 'MemoryAdapter', 'SandboxSession', 'Model provider adapter'],
+            note: 'Use the shared contract test helpers from @purista/harness/testing.',
+          },
+          {
+            level: '3',
+            label: 'Integration tests',
+            color: 'pilot',
+            items: ['Full session agent runs', 'Workflow sequences', 'Streaming event assertions', 'MCP runner', 'Review gate flows'],
+            note: 'Use a fake model provider. Real sessions, real sandboxes, fake model responses.',
+          },
+          {
+            level: '4',
+            label: 'Live smoke tests',
+            color: 'found',
+            items: ['Real provider end-to-end', 'Production config validation'],
+            note: 'Gate-kept by API key presence. Run nightly or pre-release only.',
+          },
+        ].map((row) => (
+          <div class="tst-pyramid-row">
+            <div class="tst-pyramid-meta">
+              <div class="tst-pyramid-level" style={`color: var(--color-${row.color}-hi)`}>{row.level}</div>
+              <div class="tst-pyramid-label">{row.label}</div>
+            </div>
+            <div class="tst-pyramid-items">
+              {row.items.map((item) => (
+                <span class="tst-pyramid-item">{item}</span>
+              ))}
+            </div>
+            <div class="tst-pyramid-note">{row.note}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ── 2. Fake model provider ───────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={1} color="found" />
+        <div class="eyebrow">Level 3 — integration tests</div>
+      </div>
+      <h2 class="display display-lg mb-6">Replace the model with a fake provider</h2>
+      <p class="lede mb-10">A fake model provider is a plain object that implements the <code class="site-mono">ModelProvider</code> interface. It returns deterministic responses. Real sessions, real sandboxes, real tool calls — only the model output is controlled.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div>
+          <h3 class="h3 mb-4">Minimal fake provider</h3>
+          <CodeBlock
+            code={`const fakeProvider = {
+  id: 'fake',
+  genAiSystem: 'fake',
+  async object(req) {
+    return {
+      object: {
+        answer: 'Fake answer from test fixture.',
+        citations: [],
+      },
+      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      finishReason: 'stop',
+    }
+  },
+}
+
+const harness = defineHarness({ name: 'test' })
+  .models({
+    fast: {
+      provider: fakeProvider,
+      model: 'fake-model',
+      capabilities: ['object'],
+    },
+  })
+  .agents(({ agent }) => ({
+    answerer: agent({
+      model: 'fast',
+      input: z.object({ question: z.string() }),
+      output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
+      instructions: 'Answer concisely.',
+    }),
+  }))
+  .build()
+
+const session = await harness.getSession('test-user')
+
+await expect(
+  session.agents.answerer.prompt({ question: 'hello?' })
+).resolves.toMatchObject({ answer: 'Fake answer from test fixture.' })`}
+            label="Fake provider test"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">Input-aware fake</h3>
+          <p class="text-[var(--color-fg-muted)] mb-4">Inspect the request messages to return different responses for different inputs — useful for testing branching workflows.</p>
+          <CodeBlock
+            code={`const inputAwareFake = {
+  id: 'fake',
+  genAiSystem: 'fake',
+  async object(req) {
+    const last = req.messages.at(-1)?.content ?? ''
+    const isCritical = last.toString().toLowerCase()
+      .includes('critical')
+
+    return {
+      object: {
+        priority: isCritical ? 'P1' : 'P3',
+        owner: isCritical ? 'on-call' : 'team-backlog',
+        nextAction: isCritical
+          ? 'page on-call immediately'
+          : 'add to backlog',
+      },
+      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+      finishReason: 'stop',
+    }
+  },
+}`}
+            label="Input-aware fake"
+            language="typescript"
+          />
+          <div class="mt-4 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <p class="text-sm text-[var(--color-fg-muted)] m-0">The harness also ships <code class="site-mono text-xs">fakeModelProvider()</code> and <code class="site-mono text-xs">fakeMemoryAdapter()</code> helpers from <code class="site-mono text-xs">@purista/harness/testing</code> for common fixture patterns.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 3. Streaming events ──────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={2} color="con" />
+        <div class="eyebrow">Streaming assertions</div>
+      </div>
+      <h2 class="display display-lg mb-6">Assert event sequences from .stream()</h2>
+      <p class="lede mb-10">The streaming API emits typed <code class="site-mono">RunEvent</code> values. Collect them in an array and assert the sequence, tool calls, and final output.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h3 class="h3 mb-4">Collect and assert events</h3>
+          <CodeBlock
+            code={`const events: RunEvent[] = []
+
+for await (const event of session.agents.answerer.stream({
+  question: 'What is the policy?',
+})) {
+  events.push(event)
+}
+
+// lifecycle
+expect(events.at(0)?.type).toBe('run.started')
+expect(events.at(-1)?.type).toBe('run.finished')
+
+// tool calls
+const toolEvents = events.filter(e => e.type === 'tool.started')
+expect(toolEvents).toHaveLength(1)
+expect(toolEvents[0].toolId).toBe('search_docs')
+
+// final output
+const finished = events.find(e => e.type === 'run.finished')
+expect(finished?.output).toMatchObject({
+  answer: expect.any(String),
+  citations: expect.any(Array),
+})`}
+            label="Streaming event assertions"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">Event sequence for tool use</h3>
+          <div class="tst-event-list">
+            {[
+              { type: 'run.started', color: 'found', note: 'First event. Always emitted.' },
+              { type: 'agent.started', color: 'found', note: 'Agent loop begins.' },
+              { type: 'tool.started', color: 'con', note: 'One per tool call. Has toolId, toolName, input.' },
+              { type: 'tool.finished', color: 'con', note: 'Tool output returned. Has output and durationMs.' },
+              { type: 'agent.finished', color: 'found', note: 'Model returned final validated output.' },
+              { type: 'run.finished', color: 'found', note: 'Last event. Has output, usage, durationMs.' },
+            ].map((row) => (
+              <div class="tst-event-row">
+                <code class="tst-event-type" style={`color: var(--color-${row.color}-hi)`}>{row.type}</code>
+                <span>{row.note}</span>
+              </div>
+            ))}
+          </div>
+          <div class="mt-4 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <p class="text-sm text-[var(--color-fg-muted)] m-0">Workflows emit the same outer <code class="site-mono text-xs">run.started</code> / <code class="site-mono text-xs">run.finished</code> envelope plus <code class="site-mono text-xs">agent.started</code> / <code class="site-mono text-xs">agent.finished</code> for each agent invocation inside.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 4. Tool tests ────────────────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={3} color="pilot" />
+        <div class="eyebrow">Unit tests — tools</div>
+      </div>
+      <h2 class="display display-lg mb-6">Test tool handlers in isolation</h2>
+      <p class="lede mb-10">TypeScript tool handlers are plain async functions. Pass a minimal context object and assert both successful output and validation failure behaviour — no harness or session needed.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h3 class="h3 mb-4">Happy path</h3>
+          <CodeBlock
+            code={`import { policyLookupHandler } from './tools/policyLookup'
+
+it('returns policy text for known topic', async () => {
+  const ctx = {
+    logger: console,
+    signal: new AbortController().signal,
+    toolId: 'policy_lookup',
+    sandbox: undefined,
+  }
+
+  const result = await policyLookupHandler(
+    ctx,
+    { topic: 'deployment' }
+  )
+
+  expect(result).toMatchObject({
+    text: expect.stringContaining('change freeze'),
+  })
+})`}
+            label="Tool happy path"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">Validation and error paths</h3>
+          <CodeBlock
+            code={`it('rejects unknown topic', async () => {
+  const ctx = {
+    logger: console,
+    signal: new AbortController().signal,
+    toolId: 'policy_lookup',
+    sandbox: undefined,
+  }
+
+  await expect(
+    policyLookupHandler(ctx, { topic: 'does-not-exist' })
+  ).rejects.toThrow('Policy not found')
+})
+
+it('respects cancellation', async () => {
+  const abort = new AbortController()
+  abort.abort()
+
+  await expect(
+    policyLookupHandler(
+      { ...ctx, signal: abort.signal },
+      { topic: 'deployment' }
+    )
+  ).rejects.toThrow()
+})`}
+            label="Tool error paths"
+            language="typescript"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 5. Eval scorer tests ─────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={4} color="found" />
+        <div class="eyebrow">Unit tests — eval scorers</div>
+      </div>
+      <h2 class="display display-lg mb-6">Validate scorer definitions before running evals</h2>
+      <p class="lede mb-10">Import <code class="site-mono">evaluateDeterministicScorer</code> directly to unit-test scorer definitions without a harness, session, or candidate loop.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <CodeBlock
+            code={`import { evaluateDeterministicScorer } from '@purista/harness'
+
+it('contains scorer passes when value is present', async () => {
+  const result = evaluateDeterministicScorer(
+    {
+      type: 'contains',
+      path: '/answer',
+      value: 'change freeze',
+      caseInsensitive: true,
+    },
+    {
+      input: { question: 'Can I deploy on Friday?' },
+      output: { answer: 'No — there is a change freeze.' },
+    }
+  )
+
+  expect(result).toMatchObject({ score: 1, passed: true })
+})
+
+it('contains scorer fails gracefully on missing pointer', async () => {
+  const result = evaluateDeterministicScorer(
+    { type: 'contains', path: '/missing', value: 'foo' },
+    { input: {}, output: { answer: 'something' } }
+  )
+
+  expect(result.passed).toBe(false)
+  expect(result.evidence?.reason).toBe('missing_pointer')
+})`}
+            label="Scorer unit tests"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">Test all four types</h3>
+          <div class="tst-event-list">
+            {[
+              ['contains', 'value present / absent / case handling'],
+              ['regex', 'pattern match / no match / flags'],
+              ['attribute-equality', 'equal values / unequal / missing pointers'],
+              ['json-schema', 'valid shape / missing required / additional properties'],
+            ].map(([type, cases]) => (
+              <div class="tst-event-row">
+                <code class="tst-event-type" style="color: var(--color-found-hi)">{type}</code>
+                <span class="text-[var(--color-fg-muted)]">{cases}</span>
+              </div>
+            ))}
+          </div>
+          <div class="mt-6 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <p class="text-sm text-[var(--color-fg-muted)] m-0"><strong class="text-[var(--color-fg)]">Test scorers before candidate runs.</strong> A wrong pointer path or invalid schema returns <code class="site-mono text-xs">passed: false</code> silently — catching it in a unit test is faster than debugging it mid-eval.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 6. MCP testing ───────────────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={5} color="con" />
+        <div class="eyebrow">Contract tests — MCP</div>
+      </div>
+      <h2 class="display display-lg mb-6">Test MCP tools with local fake servers</h2>
+      <p class="lede mb-10">Use fixture servers for contract tests. Prove the harness correctly executes commands through the sandbox, validates schemas, and handles errors — without a real MCP server.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div>
+          <h3 class="h3 mb-4">Stdio MCP contract tests</h3>
+          <CodeBlock
+            code={`// things to assert for mcp_stdio tools:
+
+// 1. command runs through sandbox executor
+it('runs command through sandbox exec', async () => {
+  const result = await session.agents.diagrammer.prompt(input)
+  expect(result.diagramXml).toBeDefined()
+})
+
+// 2. fails cleanly when sandbox has no executor
+it('throws SandboxNoExecutorError without executor', async () => {
+  const noExecHarness = defineHarness({ name: 'test' })
+    .sandbox(inMemorySandbox()) // file-only, no exec
+    .tools({ drawio: { kind: 'mcp_stdio', ... } })
+    .build()
+
+  const s = await noExecHarness.getSession('t')
+  await expect(s.agents.diagrammer.prompt(input))
+    .rejects.toThrow('SandboxNoExecutorError')
+})
+
+// 3. validates input schema before calling server
+it('rejects invalid tool input', async () => {
+  await expect(
+    session.agents.diagrammer.prompt({ badInput: true })
+  ).rejects.toThrow('ValidationError')
+})`}
+            label="Stdio MCP contract tests"
+            language="typescript"
+          />
+        </div>
+        <div>
+          <h3 class="h3 mb-4">HTTP MCP contract tests</h3>
+          <CodeBlock
+            code={`// things to assert for mcp_http tools:
+
+// 1. auth failure surfaces as McpAuthError
+it('throws McpAuthError on 401', async () => {
+  const harness = buildHarnessWithHttpMcp({
+    url: 'http://fake-mcp/bad-auth',
+  })
+  await expect(session.agents.search.prompt(input))
+    .rejects.toThrow('McpAuthError')
+})
+
+// 2. protocol failures map to McpProtocolError
+it('throws McpProtocolError on bad response', async () => {
+  await expect(session.agents.search.prompt(input))
+    .rejects.toThrow('McpProtocolError')
+})
+
+// 3. output schema validation
+it('rejects invalid MCP server output', async () => {
+  // fake server returns wrong shape
+  await expect(session.agents.search.prompt(input))
+    .rejects.toThrow('ValidationError')
+})
+
+// 4. tool returns isError: true
+it('throws ToolError when MCP signals isError', async () => {
+  await expect(session.agents.search.prompt(input))
+    .rejects.toThrow('ToolError')
+})`}
+            label="HTTP MCP contract tests"
+            language="typescript"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* ── 7. Review gates ──────────────────────────────────────────── */}
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={6} color="pilot" />
+        <div class="eyebrow">Integration tests — review gates</div>
+      </div>
+      <h2 class="display display-lg mb-6">Prove human-in-the-loop flows work correctly</h2>
+      <p class="lede mb-10">Review gates are stateful flows. Four invariants must hold. Test each one explicitly.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        {[
+          {
+            invariant: 'No mutation before approval',
+            test: 'Run the workflow, assert write tools were not called before the review decision resolves.',
+            tone: 'found',
+          },
+          {
+            invariant: 'Review questions visible and submittable',
+            test: 'Assert answer choices are returned and that each can be submitted independently.',
+            tone: 'con',
+          },
+          {
+            invariant: 'Decisions are idempotent',
+            test: 'Submit the same decision twice. Assert the second submission succeeds or returns a clear idempotency signal.',
+            tone: 'pilot',
+          },
+          {
+            invariant: 'Stale ids fail cleanly',
+            test: 'Submit a decision with a stale review id or run id. Assert a meaningful error, not a silent no-op.',
+            tone: 'found',
+          },
+        ].map((row) => (
+          <div class="p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+            <div class="text-xs font-mono mb-2" style={`color: var(--color-${row.tone}-hi)`}>INVARIANT</div>
+            <p class="text-sm font-medium text-[var(--color-fg)] mb-2">{row.invariant}</p>
+            <p class="text-sm text-[var(--color-fg-muted)] m-0">{row.test}</p>
+          </div>
+        ))}
+      </div>
+
+      <CodeBlock
+        code={`it('does not write before review approval', async () => {
+  const writesSpy = vi.fn()
+
+  const harness = defineHarness({ name: 'test' })
+    .tools({
+      write_wiki: {
+        description: 'Write to wiki.',
+        input: z.object({ content: z.string() }),
+        output: z.object({ ok: z.boolean() }),
+        handler: async (_ctx, input) => {
+          writesSpy(input)
+          return { ok: true }
+        },
+      },
+    })
+    .workflows(({ workflow }) => ({
+      propose_and_review: workflow({
+        input: z.object({ topic: z.string() }),
+        output: z.object({ approved: z.boolean() }),
+        handler: async (ctx) => {
+          const proposal = await ctx.agents.writer(ctx.input)
+          const decision = await ctx.reviewGate(proposal)
+          if (decision.approved) {
+            await ctx.tools.write_wiki({ content: proposal.content })
+          }
+          return { approved: decision.approved }
+        },
+      }),
+    }))
+    .build()
+
+  const session = await harness.getSession('test')
+
+  // pause at review gate — do not approve
+  const run = session.workflows.propose_and_review.stream({ topic: 'AI policy' })
+  for await (const event of run) {
+    if (event.type === 'review.requested') break
+  }
+
+  expect(writesSpy).not.toHaveBeenCalled()
+})`}
+        label="No mutation before approval"
+        language="typescript"
+      />
+    </div>
+  </section>
+
+  {/* ── 8. Contract tests ────────────────────────────────────────── */}
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={7} color="found" />
+        <div class="eyebrow">Contract tests — adapters</div>
+      </div>
+      <h2 class="display display-lg mb-6">Validate custom adapters with shared contracts</h2>
+      <p class="lede mb-10">The harness ships shared contract test suites from <code class="site-mono">@purista/harness/testing</code>. Run them against your custom adapters before publishing to verify they behave exactly as the core expects.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div>
+          <h3 class="h3 mb-3">State store</h3>
+          <CodeBlock
+            code={`import { stateStoreContract } from '@purista/harness/testing'
+import { myStateStore } from './myStateStore'
+
+describe('myStateStore', () => {
+  stateStoreContract(() => myStateStore({
+    url: process.env.TEST_DB_URL,
+  }))
+})`}
+            label="stateStoreContract"
+            language="typescript"
+          />
+          <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates session CRUD, run write/read, message append, event persistence, and concurrent-write behaviour.</p>
+        </div>
+        <div>
+          <h3 class="h3 mb-3">Memory adapter</h3>
+          <CodeBlock
+            code={`import { memoryAdapterContract } from '@purista/harness/testing'
+import { myMemoryAdapter } from './myMemoryAdapter'
+
+describe('myMemoryAdapter', () => {
+  memoryAdapterContract(() => myMemoryAdapter({
+    url: process.env.TEST_REDIS_URL,
+  }))
+})`}
+            label="memoryAdapterContract"
+            language="typescript"
+          />
+          <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates scope isolation, read/write round-trips, list with prefix, delete, TTL expiry, and search when declared.</p>
+        </div>
+        <div>
+          <h3 class="h3 mb-3">Sandbox</h3>
+          <CodeBlock
+            code={`import { sandboxContract } from '@purista/harness/testing'
+import { myCustomSandbox } from './myCustomSandbox'
+
+describe('myCustomSandbox', () => {
+  sandboxContract(() => myCustomSandbox())
+})`}
+            label="sandboxContract"
+            language="typescript"
+          />
+          <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates file read/write, executor availability declaration, cancellation, and snapshot/resume when declared.</p>
+        </div>
+      </div>
+
+      <div class="mt-8 p-5 border border-[var(--color-line)] rounded-[var(--radius-md)]">
+        <h4 class="font-semibold text-sm mb-2">Coverage gate</h4>
+        <p class="text-sm text-[var(--color-fg-muted)] m-0">The harness core enforces a coverage gate on its own test suite: statements 80%, branches 75%, functions 80%, lines 80%. Adapter packages should enforce their own gates before publishing.</p>
+      </div>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[{ text: 'Production-ready.' }, { text: ' Check the list', color: 'found' }, { text: '.' }]}
+    lede="Review the security model and production checklist before deploying to make sure nothing slips through."
+    ctas={[
+      { label: 'Security & Production', href: '/harness/security/', variant: 'primary' },
+      { label: 'Observability',          href: '/harness/observability/', variant: 'ghost' },
+      { label: 'Prompt Evaluations',     href: '/harness/evaluations/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>
+
+<style>
+  .tst-pyramid {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .tst-pyramid-row {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-line);
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .tst-pyramid-row { grid-template-columns: 1fr; gap: 0.5rem; }
+  }
+
+  .tst-pyramid-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .tst-pyramid-level {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .tst-pyramid-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-fg);
+  }
+
+  .tst-pyramid-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-content: start;
+  }
+
+  .tst-pyramid-item {
+    font-family: var(--font-mono);
+    font-size: 0.73rem;
+    color: var(--color-fg-muted);
+    background: var(--color-bg-sunk);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .tst-pyramid-note {
+    font-size: 0.82rem;
+    color: var(--color-fg-subtle);
+    line-height: 1.5;
+    max-width: 280px;
+    font-style: italic;
+  }
+  @media (max-width: 800px) { .tst-pyramid-note { max-width: none; } }
+
+  .tst-event-list {
+    border-top: 1px solid var(--color-line);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tst-event-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 0.83rem;
+    align-items: baseline;
+  }
+
+  .tst-event-type {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+</style>

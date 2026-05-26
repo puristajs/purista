@@ -1,0 +1,510 @@
+---
+import SiteLayout from '../../../layouts/SiteLayout.astro'
+
+const storySteps = [
+	{
+		kicker: '01 / Business language',
+		title: 'Domains are the first architecture decision.',
+		body: 'At business level, you already know the meaningful ownership areas: orders, payments, fulfillment, support. PURISTA starts there, before routes, brokers, packages, or deployment topology.',
+		map: 'Domain -> capability boundary',
+	},
+	{
+		kicker: '02 / Service ownership',
+		title: 'A service is the container for one domain.',
+		body: 'The domain becomes a versioned service. It owns its rules, contracts, resources, and runtime requirements. The service is not a folder convention; it is the explicit boundary your team can review.',
+		map: 'Domain -> Service',
+	},
+	{
+		kicker: '03 / Deliberate actions',
+		title: 'Actions become commands.',
+		body: 'Creating, updating, cancelling, approving, or reconciling are deliberate operations. In PURISTA, each one becomes a typed command with input, output, errors, and handler logic in one predictable place.',
+		map: 'Action -> Command',
+	},
+	{
+		kicker: '04 / Business facts',
+		title: 'Successful commands publish facts.',
+		body: 'When a command succeeds, it can emit a business fact such as orderCreated. Other capabilities react to that fact without importing the original service or knowing its implementation.',
+		map: 'Fact -> Event + Subscription',
+	},
+	{
+		kicker: '05 / Command contracts',
+		title: 'A command has typed contract edges.',
+		body: 'A command is not just a function. It has input validation before the handler and output validation after the handler, so the business operation has a reviewable contract on both sides.',
+		map: 'Input + output -> validated command',
+	},
+	{
+		kicker: '06 / Command anatomy',
+		title: 'Inside the command, each concern has a place.',
+		body: 'Guards decide whether work may proceed. Transformers shape data. The handler owns the business operation. Successful work can emit a fact for the rest of the system.',
+		map: 'Guards + transformers + handler -> event',
+	},
+	{
+		kicker: '07 / Running instance',
+		title: 'Definitions are not infrastructure.',
+		body: 'A service definition describes the business capability. A running service instance receives resources, config, stores, bridges, logger, and policies through explicit runtime contracts.',
+		map: 'Definition -> Service instance',
+	},
+	{
+		kicker: '08 / Swappable infrastructure',
+		title: 'Adapters plug into those contracts.',
+		body: 'Databases, queues, event transports, secret stores, and local in-memory tools sit behind runtime interfaces. Business logic talks to contracts, not vendor SDKs.',
+		map: 'Infrastructure -> Adapter',
+	},
+	{
+		kicker: '09 / Inspection',
+		title: 'Every flow is traceable.',
+		body: 'Messages carry identity and trace context through commands, events, queues, subscriptions, and adapters. You can inspect the business flow instead of reverse-engineering side effects from code.',
+		map: 'Trust -> schemas + traces',
+	},
+	{
+		kicker: '10 / Human audit',
+		title: 'AI can build the stack. Humans audit the model.',
+		body: 'The value is not just faster code. The value is an explicit architecture where service boundaries, contracts, dependencies, and business flows can be reviewed by people with different technical depth.',
+		map: 'Intent -> implementation -> audit',
+	},
+]
+---
+
+<SiteLayout
+	title="PURISTA Mental Model — From Business Flow to Trusted System"
+	description="A visual explanation of how PURISTA maps business domains to services, commands, events, queues, runtime contracts, adapters, and observable business flows."
+	active="framework"
+>
+	<section class="mental-hero">
+		<div class="site-wrap site-wrap--wide mental-hero-grid">
+			<div class="mental-hero-copy">
+				<span class="site-eyebrow" data-tone="found">
+					<span class="site-eyebrow-dot"></span>
+					Mental model
+				</span>
+				<h1 class="site-h1">
+					From business flow to <span class="site-shimmer">trusted system</span>.
+				</h1>
+				<p class="site-lede">
+					PURISTA maps the language of a business into explicit, typed, observable architecture. This page shows the transformation step by step: domains become services, actions become commands, facts become events, and infrastructure becomes runtime wiring.
+				</p>
+				<div class="mental-hero-actions">
+					<a class="site-btn site-btn-primary" href="#story">
+						<span>Walk the model</span>
+						<span class="site-btn-arrow">-></span>
+					</a>
+					<a class="site-btn site-btn-ghost" href="/handbook/concept/">
+						<span>Read the handbook</span>
+					</a>
+				</div>
+			</div>
+			<div class="mental-hero-panel" aria-hidden="true">
+				<div class="mental-stack-line">Business domain</div>
+				<div class="mental-stack-line">Service boundary</div>
+				<div class="mental-stack-line">Typed contracts</div>
+				<div class="mental-stack-line">Runtime adapters</div>
+				<div class="mental-stack-line">Observable flow</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="story" class="mental-story" data-mental-model>
+		<div class="mental-story-rail">
+			<div class="mental-visual-shell">
+				<div class="mental-visual-topline">
+					<span>Live architecture scene</span>
+					<span data-progress-label>01 / 10</span>
+				</div>
+				<div id="purista-mental-model-scene" class="mental-scene" aria-label="Animated isometric PURISTA mental model"></div>
+				<div class="mental-progress" aria-hidden="true">
+					<div class="mental-progress-bar" data-progress-bar></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="mental-copy-rail">
+			{
+				storySteps.map((step, index) => (
+					<article class="mental-step" data-step-card data-step-index={index}>
+						<p class="mental-step-kicker">{step.kicker}</p>
+						<h2>{step.title}</h2>
+						<p>{step.body}</p>
+						<div class="mental-step-map">{step.map}</div>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="site-section site-section-divider">
+		<div class="site-wrap site-wrap--page mental-close">
+			<span class="site-eyebrow" data-tone="pilot">
+				<span class="site-eyebrow-dot"></span>
+				What to audit
+			</span>
+			<h2 class="site-h2">The model gives every audience a useful review surface.</h2>
+			<div class="mental-audit-grid">
+				<div>
+					<h3>Business reviewers</h3>
+					<p>Validate that every capability has a clear owner, that the business facts are named correctly, and that the visible flow matches the intended process.</p>
+				</div>
+				<div>
+					<h3>Architects</h3>
+					<p>Inspect service boundaries, durability decisions, runtime contracts, adapter choices, and trace propagation without reading every handler first.</p>
+				</div>
+				<div>
+					<h3>Developers and AI agents</h3>
+					<p>Implement inside narrow builder-defined surfaces: commands, subscriptions, queues, resources, and tests that match the declared contracts.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+</SiteLayout>
+
+<script>
+	import { mountScene } from '@sebastianwessel/isostate'
+	import sceneBundle from '../../../content/isostate/purista-mental-model.isostate.js'
+
+	const root = document.querySelector('[data-mental-model]')
+	const target = document.querySelector('#purista-mental-model-scene')
+
+	if (root instanceof HTMLElement && target instanceof HTMLElement) {
+		const mounted = mountScene(target, sceneBundle, {
+			label: 'PURISTA mental model',
+			controller: {
+				transitionDuration: 700,
+				transitionEasing: 'ease-in-out',
+			},
+		})
+		const cards = Array.from(root.querySelectorAll('[data-step-card]'))
+		const progressBar = root.querySelector('[data-progress-bar]')
+		const progressLabel = root.querySelector('[data-progress-label]')
+		let frame = 0
+
+		const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
+		const render = () => {
+			frame = 0
+			const rect = root.getBoundingClientRect()
+			const travel = Math.max(1, rect.height - window.innerHeight)
+			const progress = clamp((0 - rect.top) / travel, 0, 1)
+			const active = clamp(Math.round(progress * (cards.length - 1)), 0, cards.length - 1)
+
+			mounted.controller?.setProgress(progress)
+			root.style.setProperty('--mental-progress', progress.toFixed(4))
+			if (progressBar instanceof HTMLElement) {
+				progressBar.style.transform = `scaleX(${progress})`
+			}
+			if (progressLabel) {
+				progressLabel.textContent = `${String(active + 1).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`
+			}
+			for (const [index, card] of cards.entries()) {
+				card.classList.toggle('is-active', index === active)
+			}
+		}
+
+		const requestRender = () => {
+			if (frame) return
+			frame = window.requestAnimationFrame(render)
+		}
+
+		render()
+		window.addEventListener('scroll', requestRender, { passive: true })
+		window.addEventListener('resize', requestRender)
+	}
+</script>
+
+<style>
+	.mental-hero {
+		position: relative;
+		min-height: 100svh;
+		display: grid;
+		align-items: center;
+		padding-block: calc(72px + clamp(3rem, 8vw, 6rem)) clamp(4rem, 8vw, 7rem);
+		overflow: hidden;
+	}
+	.mental-hero::before {
+		content: "";
+		position: absolute;
+		inset: 72px 0 auto;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--color-line-strong), transparent);
+	}
+	.mental-hero::after {
+		content: "";
+		position: absolute;
+		inset: 10% -20% auto;
+		height: 70%;
+		background:
+			linear-gradient(120deg, color-mix(in srgb, var(--color-found) 10%, transparent), transparent 42%),
+			linear-gradient(240deg, color-mix(in srgb, var(--color-pilot) 10%, transparent), transparent 45%),
+			url("/images/bg/grid-lines.svg");
+		opacity: 0.8;
+		pointer-events: none;
+		transform: skewY(-6deg);
+	}
+	.mental-hero-grid {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(320px, 0.58fr);
+		gap: clamp(2rem, 6vw, 6rem);
+		align-items: center;
+	}
+	.mental-hero-copy {
+		max-width: 860px;
+	}
+	.mental-hero-copy h1 {
+		margin: 1.5rem 0 1.25rem;
+		max-width: 12ch;
+	}
+	.mental-hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.8rem;
+		margin-top: 2rem;
+	}
+	.mental-hero-panel {
+		position: relative;
+		display: grid;
+		gap: 0.75rem;
+		padding: 1rem;
+		border: 1px solid var(--color-line-strong);
+		background: color-mix(in srgb, var(--color-bg-elev) 70%, transparent);
+		box-shadow: var(--shadow-lg);
+		backdrop-filter: blur(18px);
+	}
+	.mental-stack-line {
+		padding: 1rem 1.1rem;
+		border: 1px solid var(--color-line);
+		background: color-mix(in srgb, var(--color-bg-sunk) 72%, transparent);
+		font-family: var(--font-mono);
+		font-size: 0.82rem;
+		color: var(--color-fg-muted);
+	}
+	.mental-stack-line:nth-child(2) {
+		border-color: color-mix(in srgb, var(--color-found) 42%, var(--color-line));
+		color: var(--color-found-hi);
+	}
+	.mental-stack-line:nth-child(4) {
+		border-color: color-mix(in srgb, var(--color-pilot) 42%, var(--color-line));
+		color: var(--color-pilot-hi);
+	}
+
+	.mental-story {
+		--mental-progress: 0;
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.7fr);
+		gap: clamp(1.5rem, 4vw, 4rem);
+		max-width: var(--layout-max-fluid);
+		margin: 0 auto;
+		padding: 0 var(--gutter) clamp(5rem, 10vw, 9rem);
+	}
+	.mental-story-rail {
+		position: sticky;
+		top: 92px;
+		height: calc(100svh - 112px);
+		display: grid;
+		align-items: center;
+	}
+	.mental-visual-shell {
+		position: relative;
+		height: min(760px, calc(100svh - 132px));
+		min-height: 430px;
+		border: 1px solid var(--color-line-strong);
+		background:
+			linear-gradient(180deg, color-mix(in srgb, var(--color-bg-elev) 88%, transparent), color-mix(in srgb, var(--color-bg-sunk) 92%, transparent)),
+			url("/images/bg/dot-grid.svg");
+		box-shadow: var(--shadow-lg);
+		overflow: hidden;
+	}
+	.mental-visual-shell::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background:
+			linear-gradient(135deg, color-mix(in srgb, var(--color-found) 14%, transparent), transparent 38%),
+			linear-gradient(315deg, color-mix(in srgb, var(--color-pilot) 12%, transparent), transparent 42%);
+		pointer-events: none;
+	}
+	.mental-visual-topline {
+		position: relative;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1rem 1.1rem;
+		border-bottom: 1px solid var(--color-line);
+		font-family: var(--font-mono);
+		font-size: 0.76rem;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: var(--color-fg-muted);
+		background: color-mix(in srgb, var(--color-bg-elev) 58%, transparent);
+		backdrop-filter: blur(16px);
+	}
+	.mental-scene {
+		position: relative;
+		z-index: 1;
+		height: calc(100% - 54px);
+		min-height: 0;
+	}
+	.mental-scene :global(svg) {
+		width: 100%;
+		height: 100%;
+		display: block;
+		color: var(--color-fg);
+	}
+	.mental-progress {
+		position: absolute;
+		left: 1rem;
+		right: 1rem;
+		bottom: 1rem;
+		height: 3px;
+		background: var(--color-line);
+		overflow: hidden;
+	}
+	.mental-progress-bar {
+		width: 100%;
+		height: 100%;
+		transform-origin: left center;
+		transform: scaleX(0);
+		background: linear-gradient(90deg, var(--color-found), var(--color-con), var(--color-pilot));
+	}
+	.mental-copy-rail {
+		display: grid;
+		gap: 55svh;
+		padding-block: 16svh 24svh;
+	}
+	.mental-step {
+		position: relative;
+		padding: clamp(1.35rem, 3vw, 2rem);
+		border: 1px solid var(--color-line);
+		background: color-mix(in srgb, var(--color-bg-elev) 62%, transparent);
+		backdrop-filter: blur(16px);
+		opacity: 0.48;
+		transform: translateY(12px);
+		transition:
+			opacity 0.35s var(--site-ease-out),
+			transform 0.35s var(--site-ease-out),
+			border-color 0.35s var(--site-ease-out),
+			background 0.35s var(--site-ease-out);
+	}
+	.mental-step.is-active {
+		opacity: 1;
+		transform: translateY(0);
+		border-color: color-mix(in srgb, var(--color-found) 48%, var(--color-line-vivid));
+		background: color-mix(in srgb, var(--color-bg-elev) 88%, transparent);
+	}
+	.mental-step-kicker {
+		margin: 0 0 0.75rem;
+		font-family: var(--font-mono);
+		font-size: 0.74rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--color-found-hi);
+	}
+	.mental-step h2 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(1.75rem, 3vw, 2.65rem);
+		line-height: 1.02;
+		letter-spacing: 0;
+		text-wrap: balance;
+	}
+	.mental-step p:not(.mental-step-kicker) {
+		margin: 1rem 0 0;
+		color: var(--color-fg-muted);
+		line-height: 1.62;
+		font-size: clamp(1rem, 1.2vw, 1.12rem);
+	}
+	.mental-step-map {
+		display: inline-flex;
+		margin-top: 1.25rem;
+		padding: 0.48rem 0.7rem;
+		border: 1px solid color-mix(in srgb, var(--color-pilot) 45%, var(--color-line));
+		background: color-mix(in srgb, var(--color-pilot) 10%, transparent);
+		color: var(--color-pilot-hi);
+		font-family: var(--font-mono);
+		font-size: 0.78rem;
+	}
+	.mental-close {
+		display: grid;
+		gap: 2rem;
+	}
+	.mental-close h2 {
+		max-width: 12ch;
+	}
+	.mental-audit-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.mental-audit-grid > div {
+		padding: 1.25rem;
+		border: 1px solid var(--color-line);
+		background: var(--color-bg-elev);
+	}
+	.mental-audit-grid h3 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.25rem;
+	}
+	.mental-audit-grid p {
+		margin: 0.75rem 0 0;
+		color: var(--color-fg-muted);
+		line-height: 1.6;
+	}
+	@media (max-width: 1120px) {
+		.mental-hero-grid {
+			grid-template-columns: 1fr;
+		}
+		.mental-hero-panel {
+			max-width: 720px;
+		}
+		.mental-story {
+			grid-template-columns: 1fr;
+			padding-top: 0;
+		}
+		.mental-story-rail {
+			position: sticky;
+			top: 76px;
+			height: 58svh;
+			z-index: 5;
+		}
+		.mental-visual-shell {
+			height: 54svh;
+			min-height: 360px;
+		}
+		.mental-scene {
+			min-height: 0;
+		}
+		.mental-copy-rail {
+			gap: 35svh;
+			padding-block: 8svh 18svh;
+		}
+		.mental-audit-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 720px) {
+		.mental-hero {
+			min-height: auto;
+		}
+		.mental-hero-panel {
+			display: none;
+		}
+		.mental-story {
+			padding-inline: 1rem;
+		}
+		.mental-story-rail {
+			height: 48svh;
+		}
+		.mental-visual-shell {
+			height: 44svh;
+			min-height: 300px;
+		}
+		.mental-scene {
+			min-height: 0;
+		}
+		.mental-copy-rail {
+			gap: 28svh;
+		}
+	}
+</style>

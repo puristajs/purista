@@ -1,0 +1,47 @@
+---
+interface StatItem {
+	num: number
+	suffix?: string
+	decimals?: number
+	label: string
+	body: string
+	tone?: 'found' | 'con' | 'pilot'
+}
+
+interface Props {
+	items: StatItem[]
+}
+
+const { items } = Astro.props
+---
+
+<div class="site-stats-grid">
+  {
+    items.map((s, i) => (
+      <article
+        class="site-stat site-reveal"
+        style={`--site-reveal-delay: ${i * 90}ms; ${s.tone ? `--accent: var(--color-${s.tone}-hi);` : ''}`}
+      >
+        <span class="site-stat-label">{s.label}</span>
+        <span
+          class="site-stat-num"
+          data-count={s.num}
+          data-count-suffix={s.suffix ?? ''}
+          data-count-decimals={s.decimals ?? 0}
+          style={s.tone ? `color: var(--color-${s.tone}-hi);` : ''}
+        >
+          0{s.suffix ?? ''}
+        </span>
+        <span class="site-stat-body">{s.body}</span>
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .site-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+title: Direct Service Calls
+description: In-process communication between services — the fastest path when all services share the same process and event bridge.
+---
+
+When all services run in the same process — whether in a monolith or during testing — **direct calls** are the fastest way for services to communicate. The event bridge routes messages in-memory without serialization, network overhead, or broker latency.
+
+## How direct calls work
+
+In a monolith setup, all services share a `DefaultEventBridge`:
+
+```typescript [monolith.ts]
+import { DefaultEventBridge } from '@purista/core'
+import { userV1Service } from './services/user.js'
+import { emailV1Service } from './services/email.js'
+
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+
+const userService = await userV1Service.getInstance(eventBridge)
+const emailService = await emailV1Service.getInstance(eventBridge)
+
+await userService.start()
+await emailService.start()
+```
+
+When the User service invokes an Email service command:
+
+```typescript [invoke.ts]
+.setCommandFunction(async function (context, payload) {
+  await context.service.EmailService['1'].sendWelcomeEmail(
+    { email: payload.email },
+    {},
+  )
+})
+```
+
+The event bridge routes the message directly to the Email service's handler — no network, no serialization, no broker.
+
+## Direct call performance
+
+| Path | Latency | Overhead |
+|---|---|---|
+| Direct call (same process) | ~1-5μs | Function call + validation |
+| Same-machine broker | ~1-5ms | Serialization + TCP |
+| Remote broker | ~5-50ms | Serialization + network roundtrip |
+
+Direct calls are 1000x faster than remote broker calls. Use them when services share a process.
+
+## When to use direct calls
+
+- **Monolith deployments** — all services in one process
+- **Integration tests** — fast, no broker setup
+- **Local development** — instant feedback, no Docker
+- **Performance-critical paths** — within a monolith, use direct calls for hot paths
+
+## When NOT to use direct calls
+
+- **Microservice deployments** — services run in separate containers
+- **Serverless** — functions may not share a process
+- **Cross-region** — services are geographically distributed
+- **Independent scaling** — services need to scale separately
+
+## Testing with direct calls
+
+The fastest way to test service interactions:
+
+```typescript [test.ts]
+import { DefaultEventBridge } from '@purista/core'
+import { userV1Service } from './services/user.js'
+import { emailV1Service } from './services/email.js'
+
+test('user sign-up sends welcome email', async () => {
+  const eventBridge = new DefaultEventBridge()
+  await eventBridge.start()
+
+  const userService = await userV1Service.getInstance(eventBridge, {
+    resources: { db: mockDb },
+  })
+  const emailService = await emailV1Service.getInstance(eventBridge, {
+    resources: { mailer: mockMailer },
+  })
+
+  await userService.start()
+  await emailService.start()
+
+  const result = await userService.invoke('userSignUp', {
+    email: 'test@example.com',
+    password: 'secure-password',
+  })
+
+  expect(mockMailer.send).toHaveBeenCalledWith({
+    to: 'test@example.com',
+    subject: 'Welcome to PURISTA',
+  })
+})
+```
+
+No network, no broker, no Docker. Just your logic and mocks.
+
+## Direct calls vs. message broker
+
+The same code works with both:
+
+```typescript [same-code.ts]
+// Local: direct calls through DefaultEventBridge
+const localBridge = new DefaultEventBridge()
+
+// Production: messages through NATS
+const prodBridge = new NatsBridge({ url: process.env.NATS_URL })
+
+// Same service code, same invocation pattern
+const userService = await userV1Service.getInstance(localBridge) // or prodBridge
+```
+
+This is the core benefit of PURISTA's architecture: **the same business logic runs everywhere; only the bridge changes.**
+
+## Common pitfalls
+
+- **Assuming direct calls work across processes.** They only work within the same process. Use a broker for distributed deployments.
+- **Relying on shared memory.** Even in a monolith, services should not share state. Use stores for shared data.
+- **Not testing with the production bridge.** Test with `DefaultEventBridge` for speed, but also test with your production bridge in CI.
+
+## Checklist
+
+- [ ] Direct calls are only used within the same process
+- [ ] Services do not share memory even in monolith mode
+- [ ] Tests use `DefaultEventBridge` for speed
+- [ ] CI also tests with the production bridge
+- [ ] Migration to microservices does not require code changes

@@ -1,0 +1,196 @@
+---
+import SiteLayout from './SiteLayout.astro'
+
+/**
+ * HarnessLayout keeps legacy harness subpages on the current site shell.
+ *
+ * The /harness/ landing page already uses SiteLayout; subpages should share the
+ * same primary nav, harness subnav, theme scope, and footer instead of carrying
+ * a parallel top-level layout.
+ */
+
+interface Props {
+	title?: string
+	description?: string
+	active?: 'home' | 'framework' | 'enterprise' | 'handbook' | 'harness'
+}
+
+const { title, description, active = 'harness' } = Astro.props
+---
+
+<SiteLayout title={title} description={description} active={active}>
+  <div class="harness-shell site-layout-story">
+    <slot />
+  </div>
+</SiteLayout>
+
+<style is:global>
+  .harness-shell {
+    overflow-x: clip;
+  }
+
+  .harness-shell .hero {
+    min-height: 0 !important;
+    background: transparent !important;
+    --hero-padding-top: clamp(3rem, 5vw, 5rem);
+    --hero-padding-bottom: clamp(3rem, 5vw, 5rem);
+  }
+
+  .harness-shell .hero-strip {
+    margin-top: clamp(2.4rem, 4vw, 4rem);
+    padding-top: clamp(1.4rem, 2.5vw, 2rem);
+  }
+
+  .harness-shell .section-pad {
+    padding-block: clamp(3rem, 6vw, 5.5rem);
+  }
+
+  .harness-shell section.section-pad {
+    background: transparent !important;
+    border-color: var(--color-line) !important;
+  }
+
+  .harness-shell .section-pad-lg {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .harness-shell .display-hero {
+    font-size: clamp(3rem, 6.2vw, 5.6rem);
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .harness-shell .display-lg {
+    font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+    letter-spacing: 0;
+  }
+
+  .harness-shell .display-md,
+  .harness-shell .h3 {
+    font-size: clamp(1.6rem, 2.6vw, 2.25rem);
+    letter-spacing: 0;
+  }
+
+  .harness-shell .lede {
+    font-size: clamp(1rem, 1.3vw, 1.12rem);
+  }
+
+  .harness-shell .section-head--center {
+    margin-inline: 0;
+    max-width: 760px;
+    text-align: left;
+  }
+
+  .harness-shell .section-head--center .lede {
+    margin-inline: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .harness-shell .story-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .harness-shell .grid:has(> .card),
+  .harness-shell .grid:has(> .group.card) {
+    gap: clamp(1rem, 2vw, 1.6rem) !important;
+  }
+
+  .harness-shell .card {
+    background: transparent !important;
+    border: 0 !important;
+    border-top: 1px solid var(--color-line) !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+    padding: clamp(1rem, 1.8vw, 1.35rem) 0 0 !important;
+  }
+
+  .harness-shell .card:hover {
+    border-color: var(--color-line-strong) !important;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .harness-shell .card:has(.codeblock),
+  .harness-shell .story-grid .card {
+    border-top: 0 !important;
+    padding: 0 !important;
+  }
+
+  .harness-shell .grid:has(> .card .codeblock) {
+    align-items: stretch;
+  }
+
+  .harness-shell .grid:has(> .card .codeblock) > .card,
+  .harness-shell .grid:has(> .card .codeblock) > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .harness-shell .grid:has(> .card .codeblock) .codeblock {
+    flex: 1;
+  }
+
+  .harness-shell .card-icon {
+    width: 2.15rem;
+    height: 2.15rem;
+    margin-bottom: 0.65rem;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+  }
+
+  .harness-shell .group:hover .card-icon {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .harness-shell .card-title {
+    letter-spacing: 0;
+  }
+
+  .harness-shell .soft-gradient {
+    background: transparent !important;
+  }
+
+  .harness-story-visual {
+    width: 100%;
+  }
+
+  .harness-story-visual > :where(.hflow, svg, figure, .codeblock) {
+    width: 100%;
+  }
+
+  .harness-next {
+    padding-block: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--color-line);
+  }
+
+  .harness-next .wrap {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .harness-next p {
+    margin: 0;
+    color: var(--color-fg-muted);
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+  }
+
+  .harness-next a {
+    color: var(--color-found-hi);
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 720px) {
+    .harness-next .wrap {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

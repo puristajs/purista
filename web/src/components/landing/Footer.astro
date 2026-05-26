@@ -1,0 +1,68 @@
+---
+const year = new Date().getFullYear()
+
+const cols = [
+	{
+		title: 'Framework',
+		links: [
+			{ label: 'Overview', href: '/framework/' },
+			{ label: 'Handbook', href: '/handbook/' },
+			{ label: 'AI Harness', href: '/harness/' },
+			{ label: 'GitHub', href: 'https://github.com/puristajs/purista' },
+		],
+	},
+	{
+		title: 'Enterprise',
+		links: [
+			{ label: 'For CISO', href: '/enterprise/#ciso' },
+			{ label: 'For CTO', href: '/enterprise/#cto' },
+			{ label: 'For CFO', href: '/enterprise/#cfo' },
+			{ label: 'Talk to us', href: 'mailto:hello@purista.dev' },
+		],
+	},
+	{
+		title: 'Project',
+		links: [
+			{ label: 'Discussions', href: 'https://github.com/puristajs/purista/discussions' },
+			{ label: 'License', href: 'https://github.com/puristajs/purista/blob/main/LICENSE' },
+			{ label: 'Changelog', href: 'https://github.com/puristajs/purista/releases' },
+			{ label: 'Brand', href: '#' },
+		],
+	},
+]
+---
+
+<footer class="site-footer">
+  <div class="site-wrap">
+    <div class="site-footer-grid">
+      <div>
+        <a href="/" class="site-brand">
+          <span class="site-brand-mark">P</span>
+          <span>PURISTA</span>
+        </a>
+        <p class="site-lede" style="margin-top:1.2rem;max-width:36ch;font-size:.95rem;">
+          The open-source TypeScript framework for production-grade enterprise
+          systems. Declared. Reviewable. Observable. Approval-ready.
+        </p>
+        <div style="display:flex;gap:.6rem;margin-top:1.4rem;flex-wrap:wrap">
+          <a href="/enterprise/" class="site-btn site-btn-primary" style="padding:.7rem 1.1rem;font-size:.85rem">
+            Start with PURISTA <span class="site-btn-arrow">→</span>
+          </a>
+        </div>
+      </div>
+      {
+        cols.map((col) => (
+          <div class="site-footer-col">
+            <h4>{col.title}</h4>
+            {col.links.map((l) => <a href={l.href}>{l.label}</a>)}
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="site-footer-bottom">
+      <span>© {year} PURISTA — Production-grade by structure.</span>
+      <span>site · Built with Astro, GSAP, Lenis & three.js</span>
+    </div>
+  </div>
+</footer>

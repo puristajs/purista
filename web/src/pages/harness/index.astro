@@ -1,0 +1,712 @@
+---
+import CodePreview from '../../components/landing/CodePreview.astro'
+import CTA from '../../components/landing/CTA.astro'
+import Hero from '../../components/landing/Hero.astro'
+import SectionIntro from '../../components/landing/SectionIntro.astro'
+import Stats from '../../components/landing/Stats.astro'
+import SiteLayout from '../../layouts/SiteLayout.astro'
+
+/* ─── Real harness code: defineHarness().models().tools().agents() ─── */
+const harnessCode = [
+	{
+		tokens: [
+			{ t: 'kw', v: 'import' },
+			{ t: 'plain', v: ' { defineHarness, openai } ' },
+			{ t: 'kw', v: 'from' },
+			{ t: 'plain', v: ' ' },
+			{ t: 'str', v: "'@purista/harness'" },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '' }] },
+	{
+		tokens: [
+			{ t: 'kw', v: 'const' },
+			{ t: 'plain', v: ' harness = ' },
+			{ t: 'fn', v: 'defineHarness' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: '{ name: ' },
+			{ t: 'str', v: "'support'" },
+			{ t: 'plain', v: ' })' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'models' },
+			{ t: 'op', v: '({' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    fast: { provider: ' },
+			{ t: 'fn', v: 'openai' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: '{ apiKey }' },
+			{ t: 'op', v: ')' },
+			{ t: 'plain', v: ', model: ' },
+			{ t: 'str', v: "'gpt-4o-mini'" },
+			{ t: 'plain', v: ', capabilities: [' },
+			{ t: 'str', v: "'object'" },
+			{ t: 'plain', v: '] }' },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '  })' }] },
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'tools' },
+			{ t: 'op', v: '({' },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '    searchDocs: {' }] },
+	{
+		tokens: [
+			{ t: 'plain', v: '      description: ' },
+			{ t: 'str', v: "'Search internal docs.'" },
+			{ t: 'plain', v: ',' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '      input: z.' },
+			{ t: 'fn', v: 'object' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: '{ query: z.' },
+			{ t: 'fn', v: 'string' },
+			{ t: 'op', v: '()' },
+			{ t: 'plain', v: ' })' },
+			{ t: 'plain', v: ',' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '      handler: ' },
+			{ t: 'kw', v: 'async' },
+			{ t: 'plain', v: ' (_ctx, { query }) => searchIndex(query),' },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '    },' }] },
+	{ tokens: [{ t: 'plain', v: '  })' }] },
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'agents' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: '({ agent }) => ({' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    answerer: ' },
+			{ t: 'fn', v: 'agent' },
+			{ t: 'op', v: '({' },
+			{ t: 'plain', v: ' model: ' },
+			{ t: 'str', v: "'fast'" },
+			{ t: 'plain', v: ', instructions: ' },
+			{ t: 'str', v: "'Answer briefly.'" },
+			{ t: 'plain', v: ' }),' },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '  }))' }] },
+]
+
+/* ─── Enterprise outcomes (replace technical primitives as lead content) ─── */
+const outcomes = [
+	{
+		k: 'data',
+		title: 'Data stays in your perimeter',
+		body: 'The Harness runs inside your application process. No third-party SaaS platform receives your prompts, context, or tool outputs. You own data residency.',
+		tone: 'found',
+	},
+	{
+		k: 'audit',
+		title: 'Every decision is traceable',
+		body: 'OpenTelemetry GenAI spans on every model call, tool execution, and agent decision. Full observability trail your team can actually inspect.',
+		tone: 'con',
+	},
+	{
+		k: 'hitl',
+		title: 'No mutation without approval',
+		body: 'Workflows pause at human review gates. Write tools execute only after an explicit human decision. Approve, revise, or reject — each path is logged.',
+		tone: 'pilot',
+	},
+	{
+		k: 'vendor',
+		title: 'No provider lock-in',
+		body: 'Swap OpenAI for Anthropic, Bedrock for Azure in one config line. Agents, tools, and workflows stay unchanged. Your code is never tied to one model API.',
+		tone: 'found',
+	},
+]
+
+/* ─── Technical primitives (for architects and developers, shown later) ─── */
+const primitives = [
+	{ k: 'models', label: 'Models', body: 'OpenAI · Anthropic · Bedrock · Azure. Capability-gated.', tone: 'found' },
+	{ k: 'tools', label: 'Tools', body: 'Typed TS functions or MCP servers. Bash · file · grep · MCP.', tone: 'con' },
+	{ k: 'skills', label: 'Skills', body: 'SKILL.md directories mounted as reusable instruction packs.', tone: 'pilot' },
+	{
+		k: 'agents',
+		label: 'Agents',
+		body: 'Typed conversation loops. Input → model → tools → typed output.',
+		tone: 'found',
+	},
+	{
+		k: 'workflows',
+		label: 'Workflows',
+		body: 'Sequence · branch · parallel · durable. Multi-agent orchestration.',
+		tone: 'con',
+	},
+	{ k: 'sessions', label: 'Sessions', body: 'Isolated memory, history, sandbox per user or run.', tone: 'pilot' },
+]
+
+const providers = [
+	{ name: 'OpenAI', sub: 'GPT-4o · embeddings', tone: 'found' },
+	{ name: 'Anthropic', sub: 'Claude · tool use', tone: 'con' },
+	{ name: 'AWS Bedrock', sub: 'enterprise', tone: 'pilot' },
+	{ name: 'Azure', sub: 'AI Foundry', tone: 'found' },
+]
+---
+
+<SiteLayout
+  title="AI Harness — PURISTA"
+  description="The PURISTA AI Harness: production-grade LLM agents inside your own application boundary. Self-hosted, audit-ready, provider-neutral. No SaaS dependencies."
+  active="harness"
+>
+
+  <div class="site-layout-page">
+
+    {/* ─── Hero ─── */}
+    <Hero
+      eyebrow="Open Source · MIT · Standalone Package"
+      eyebrowTone="con"
+      lines={[
+        { text: 'AI inside' },
+        { text: 'your boundary', color: 'shimmer' },
+        { text: '.' },
+      ]}
+      lede="The PURISTA AI Harness runs inside your application — not in a SaaS platform. Your data stays within your perimeter. Every decision leaves an OpenTelemetry trace. Human review gates block mutations until approved. Provider-neutral. Self-hosted. Built for production."
+      ctas={[
+        { label: 'See how it works', href: '#challenge', variant: 'primary' },
+        { label: 'Get started',      href: '/harness/get-started/', variant: 'ghost' },
+      ]}
+      strip={[
+        { label: 'Self-hosted',      title: 'Your process. Your data. No SaaS in the path.',    tone: 'found' },
+        { label: 'Observable',       title: 'OTel GenAI on every span, decision, and tool call.',  tone: 'con' },
+        { label: 'Provider-neutral', title: 'OpenAI · Anthropic · Bedrock · Azure.',              tone: 'pilot' },
+      ]}
+    />
+
+    {/* ─── Enterprise problem ─── */}
+    <section id="challenge" class="site-section site-section-divider">
+      <div class="site-wrap">
+        <SectionIntro
+          eyebrow="The challenge"
+          eyebrowTone="con"
+          headline={[
+            { text: 'AI without control ' },
+            { text: 'is a production blocker', color: 'shimmer' },
+            { text: '.' },
+          ]}
+          lede="Most enterprises cannot ship AI to production because they cannot answer the three questions their auditors, security teams, and regulators will ask."
+        />
+
+        <div class="site-hrn-problems">
+          <div class="site-hrn-problem">
+            <span class="site-hrn-problem-num site-mono">01</span>
+            <div>
+              <h4>Where does your data go?</h4>
+              <p>SaaS AI platforms receive your prompts, internal context, and business data. In regulated industries — finance, healthcare, legal, government — sending sensitive data to external inference endpoints is often impermissible without explicit contracts, audit trails, and data residency guarantees.</p>
+            </div>
+          </div>
+          <div class="site-hrn-problem">
+            <span class="site-hrn-problem-num site-mono">02</span>
+            <div>
+              <h4>What did the AI decide — and why?</h4>
+              <p>Without a structured audit trail, you cannot explain or defend automated AI decisions to regulators, customers, or your own security team. Traces that say "the model responded" are not audit evidence. You need every tool call, every model decision, and every agent step on record.</p>
+            </div>
+          </div>
+          <div class="site-hrn-problem">
+            <span class="site-hrn-problem-num site-mono">03</span>
+            <div>
+              <h4>Who approved the action?</h4>
+              <p>AI agents that write records, send messages, or trigger workflows without human review create liability. "The model did it" is not a defensible position. Every mutation needs an owner — a named human who reviewed and approved it before execution.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Stats ─── */}
+    <section class="site-section site-section--tight">
+      <div class="site-wrap">
+        <Stats
+          items={[
+            { num: 0,   label: 'SaaS dependencies', body: 'Runs inside your process. Your data never leaves your boundary.',                       tone: 'found' },
+            { num: 100, suffix: '%', label: 'Trace coverage', body: 'OTel GenAI conventions on every prompt, tool call, and agent decision.',     tone: 'con' },
+            { num: 4,   label: 'LLM providers',     body: 'OpenAI · Anthropic · AWS Bedrock · Azure AI Foundry. Swap without rewriting.',         tone: 'pilot' },
+            { num: 6,   label: 'Core primitives',   body: 'Models · tools · skills · agents · workflows · sessions — one typed API.' },
+          ]}
+        />
+      </div>
+    </section>
+
+    {/* ─── Enterprise outcomes ─── */}
+    <section id="control" class="site-section site-section-divider">
+      <div class="site-wrap">
+        <SectionIntro
+          eyebrow="What changes"
+          eyebrowTone="found"
+          headline={[
+            { text: 'Control the boundary. ' },
+            { text: 'Own the observability', color: 'shimmer' },
+            { text: '.' },
+          ]}
+          lede="The Harness is not a wrapper or a SaaS integration. It is the runtime that owns the boundary between your TypeScript code and external models — with four guarantees that matter at enterprise scale."
+        />
+
+        <div class="site-hrn-outcomes">
+          {outcomes.map((o, i) => (
+            <div class="site-hrn-outcome" style={`--tone:var(--color-${o.tone});--tone-hi:var(--color-${o.tone}-hi);--i:${i}`}>
+              <span class="site-hrn-outcome-bar" aria-hidden="true"></span>
+              <div>
+                <h4>{o.title}</h4>
+                <p>{o.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Code preview ─── */}
+    <section class="site-section" style="background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-bg-sunk) 60%, transparent))">
+      <div class="site-wrap">
+        <SectionIntro
+          eyebrow="In your code"
+          eyebrowTone="con"
+          headline={[
+            { text: 'A harness in ' },
+            { text: 'one file', color: 'shimmer' },
+            { text: '.' },
+          ]}
+          lede="Define models, register tools, declare agents. The chain is typed end-to-end — payload schemas propagate into tool handlers, agent outputs, and session calls. Provider-neutral by construction."
+          align="center"
+        />
+
+        <div class="site-reveal" style="--site-reveal-delay:160ms;max-width:880px;margin:clamp(2rem,4vw,3rem) auto 0">
+          <CodePreview filename="harness.ts" lines={harnessCode} caption="defineHarness().models().tools().agents() — fluent, typed, provider-neutral." />
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Provider neutrality ─── */}
+    <section class="site-section">
+      <div class="site-wrap">
+        <SectionIntro
+          eyebrow="Provider-neutral"
+          eyebrowTone="pilot"
+          headline={[
+            { text: 'Swap the model. ' },
+            { text: 'Keep the code', color: 'pilot' },
+            { text: '.' },
+          ]}
+          lede="Models, tools, sandboxes, state stores and MCP — each is a pluggable adapter. Capability-based gating means an agent that requires a feature will fail fast at startup if the bound model can't provide it, not silently at runtime."
+          align="center"
+        />
+
+        <div class="site-hrn-providers">
+          {providers.map((p, i) => (
+            <article class="site-hrn-provider" style={`--tone:var(--color-${p.tone});--tone-hi:var(--color-${p.tone}-hi);--i:${i}`}>
+              <span class="site-hrn-provider-dot" aria-hidden="true"></span>
+              <div>
+                <h4>{p.name}</h4>
+                <span class="site-mono">{p.sub}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Six building blocks (technical, for architects) ─── */}
+    <section id="anatomy" class="site-section site-section-divider" style="background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--color-bg-sunk) 60%, transparent))">
+      <div class="site-wrap">
+        <SectionIntro
+          eyebrow="Six building blocks"
+          eyebrowTone="con"
+          headline={[
+            { text: 'One typed boundary. ' },
+            { text: 'Every primitive you need', color: 'shimmer' },
+            { text: '.' },
+          ]}
+          lede="The Harness provides six primitives that cover the entire agent lifecycle — from model calls and tool execution to multi-agent orchestration, durable workflows, and scoped session memory."
+        />
+
+        <div class="site-hrn-prim">
+          {primitives.map((p, i) => (
+            <article class="site-hrn-prim-card" style={`--tone:var(--color-${p.tone});--tone-hi:var(--color-${p.tone}-hi);--i:${i}`}>
+              <header>
+                <span class="site-hrn-prim-tag site-mono">.{p.k}()</span>
+                <span class="site-hrn-prim-dot" aria-hidden="true"></span>
+              </header>
+              <h4>{p.label}</h4>
+              <p>{p.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Integration with PURISTA ─── */}
+    <section class="site-section">
+      <div class="site-wrap">
+        <SectionIntro
+          eyebrow="Inside PURISTA"
+          eyebrowTone="found"
+          headline={[
+            { text: 'A harness agent becomes ' },
+            { text: 'a service primitive', color: 'shimmer' },
+            { text: '.' },
+          ]}
+          lede="The Harness stands alone — but PURISTA services can attach a harness agent or workflow as a typed primitive. The result inherits everything: contracts, IAM, OTel tracing, retries. The agent is reviewed like any other service command."
+          align="center"
+        />
+
+        <div class="site-hrn-bridge site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+          <article class="site-hrn-bridge-card site-hrn-bridge-card--harness">
+            <header>
+              <span class="site-mono">@purista/harness</span>
+              <span class="site-hrn-bridge-pill" data-tone="con">STANDALONE</span>
+            </header>
+            <h4>The Harness</h4>
+            <p>Models, tools, agents, workflows, sandboxed sessions. Use it without ever installing the framework.</p>
+          </article>
+
+          <div class="site-hrn-bridge-arrow" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+
+          <article class="site-hrn-bridge-card site-hrn-bridge-card--purista">
+            <header>
+              <span class="site-mono">@purista/core</span>
+              <span class="site-hrn-bridge-pill" data-tone="found">+ INTEGRATED</span>
+            </header>
+            <h4>A PURISTA service</h4>
+            <p>Attach via <code class="site-mono">AgentQueueBuilder.setHarnessAgent(...)</code> or <code class="site-mono">AgentQueueBuilder.setHarnessWorkflow(...)</code>. The agent ships with contracts, IAM, OTel and observability — the framework adds the enterprise envelope.</p>
+          </article>
+        </div>
+
+        <div class="site-hrn-bridge-note site-reveal" style="--site-reveal-delay:280ms">
+          <span class="site-mono">↳</span>
+          <span>Same agent definition — used standalone in a script, or wrapped as a PURISTA primitive inside your enterprise system.</span>
+        </div>
+      </div>
+    </section>
+
+    <CTA
+      eyebrow="Try it"
+      headline={[
+        { text: 'Build AI ' },
+        { text: 'your reviewers can trust', color: 'shimmer' },
+        { text: '.' },
+      ]}
+      lede="The Harness ships independently as @purista/harness. Use it standalone, or wire it into a PURISTA service for the full enterprise envelope."
+      ctas={[
+        { label: 'Get started',              href: '/harness/get-started/',  variant: 'primary' },
+        { label: 'Explore use cases',        href: '/harness/use-cases/',    variant: 'ghost' },
+        { label: 'Security & compliance',    href: '/harness/security/',     variant: 'ghost' },
+      ]}
+    />
+  </div>
+
+</SiteLayout>
+
+<style is:global>
+  /* ─── Enterprise problems — editorial rows ─── */
+  .site-hrn-problems {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    border-top: 1px solid var(--color-line);
+  }
+  .site-hrn-problem {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    padding: clamp(1.4rem, 3vw, 2rem) 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .site-hrn-problem-num {
+    font-size: 0.75rem;
+    color: var(--color-con-hi);
+    padding-top: 0.3rem;
+    letter-spacing: 0.06em;
+  }
+  .site-hrn-problem h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1rem, 1.4vw, 1.18rem);
+    letter-spacing: -0.02em;
+    color: var(--color-fg-strong);
+    margin-bottom: 0.5rem;
+  }
+  .site-hrn-problem p {
+    color: var(--color-fg-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 72ch;
+  }
+  @media (max-width: 560px) {
+    .site-hrn-problem { grid-template-columns: 1fr; gap: 0.5rem; }
+    .site-hrn-problem-num { padding-top: 0; }
+  }
+
+  /* ─── Enterprise outcomes — 2×2 editorial grid ─── */
+  .site-hrn-outcomes {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--color-line);
+    border-left: 1px solid var(--color-line);
+  }
+  @media (max-width: 640px) { .site-hrn-outcomes { grid-template-columns: 1fr; } }
+
+  .site-hrn-outcome {
+    padding: clamp(1.4rem, 2.5vw, 2rem) clamp(1.2rem, 2vw, 1.8rem);
+    border-bottom: 1px solid var(--color-line);
+    border-right: 1px solid var(--color-line);
+    position: relative;
+    opacity: 0;
+    transform: translateY(6px);
+    animation: sitehrn-in 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.08s + 0.1s);
+  }
+  .site-hrn-outcome-bar {
+    display: block;
+    width: 2.5rem;
+    height: 2px;
+    background: var(--tone);
+    margin-bottom: 0.9rem;
+    border-radius: 2px;
+  }
+  .site-hrn-outcome h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1rem, 1.3vw, 1.12rem);
+    letter-spacing: -0.02em;
+    color: var(--color-fg-strong);
+    margin-bottom: 0.5rem;
+  }
+  .site-hrn-outcome p {
+    color: var(--color-fg-muted);
+    font-size: 0.92rem;
+    line-height: 1.58;
+  }
+
+  /* ─── Primitives grid ─── */
+  .site-hrn-prim {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+  }
+  @media (max-width: 880px) { .site-hrn-prim { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .site-hrn-prim { grid-template-columns: 1fr; } }
+
+  .site-hrn-prim-card {
+    position: relative;
+    padding: 1.3rem 1.3rem 1.2rem;
+    border-radius: 16px;
+    border: 1px solid var(--color-line-strong);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--tone) 7%, var(--color-bg-elev)),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+    opacity: 0;
+    transform: translateY(8px);
+    animation: sitehrn-in 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.06s + 0.1s);
+  }
+  @keyframes sitehrn-in { to { opacity: 1; transform: translateY(0); } }
+
+  .site-hrn-prim-card header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+  }
+  .site-hrn-prim-tag {
+    font-size: 0.78rem;
+    color: var(--tone-hi);
+  }
+  .site-hrn-prim-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 10px var(--tone);
+  }
+  .site-hrn-prim-card h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+    color: var(--color-fg-strong);
+    margin-bottom: 0.4rem;
+  }
+  .site-hrn-prim-card p {
+    color: var(--color-fg-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  /* ─── Providers row ─── */
+  .site-hrn-providers {
+    margin-top: clamp(2rem, 4vw, 3rem);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.85rem;
+  }
+  @media (max-width: 760px) { .site-hrn-providers { grid-template-columns: repeat(2, 1fr); } }
+  .site-hrn-provider {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid var(--color-line-strong);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--tone) 8%, var(--color-bg-elev)),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+    opacity: 0;
+    animation: sitehrn-in 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.07s + 0.1s);
+  }
+  .site-hrn-provider-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--tone);
+    box-shadow: 0 0 14px var(--tone);
+    flex: 0 0 12px;
+  }
+  .site-hrn-provider h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-fg-strong);
+    letter-spacing: -0.015em;
+  }
+  .site-hrn-provider .site-mono {
+    font-size: 0.74rem;
+    color: var(--color-fg-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── Standalone + integration bridge ─── */
+  .site-hrn-bridge {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  @media (max-width: 880px) {
+    .site-hrn-bridge { grid-template-columns: 1fr; }
+    .site-hrn-bridge-arrow { display: none; }
+  }
+  .site-hrn-bridge-card {
+    padding: 1.5rem 1.5rem 1.4rem;
+    border-radius: 18px;
+    border: 1px solid var(--color-line-strong);
+    background: color-mix(in srgb, var(--color-bg-elev) 80%, transparent);
+  }
+  .site-hrn-bridge-card--harness {
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-con) 8%, var(--color-bg-elev)),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+  }
+  .site-hrn-bridge-card--purista {
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--color-found) 8%, var(--color-bg-elev)),
+      color-mix(in srgb, var(--color-bg-sunk) 95%, transparent));
+  }
+  .site-hrn-bridge-card header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+  .site-hrn-bridge-card .site-mono {
+    font-size: 0.78rem;
+    color: var(--color-fg-muted);
+  }
+  .site-hrn-bridge-pill {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    padding: 0.22rem 0.55rem;
+    border-radius: 999px;
+  }
+  .site-hrn-bridge-pill[data-tone="con"] {
+    color: var(--color-con-hi);
+    background: color-mix(in srgb, var(--color-con) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-con) 38%, transparent);
+  }
+  .site-hrn-bridge-pill[data-tone="found"] {
+    color: var(--color-found-hi);
+    background: color-mix(in srgb, var(--color-found) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-found) 38%, transparent);
+  }
+  .site-hrn-bridge-card h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: -0.025em;
+    color: var(--color-fg-strong);
+  }
+  .site-hrn-bridge-card p {
+    margin-top: 0.7rem;
+    color: var(--color-fg-muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .site-hrn-bridge-card code {
+    font-size: 0.85em;
+    background: color-mix(in srgb, var(--color-bg-deep) 60%, transparent);
+    border: 1px solid var(--color-line);
+    color: var(--color-fg);
+    padding: 0.05rem 0.35rem;
+    border-radius: 4px;
+  }
+  .site-hrn-bridge-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .site-hrn-bridge-arrow span {
+    width: 22px; height: 22px;
+    border-right: 2px solid var(--color-fg-muted);
+    border-bottom: 2px solid var(--color-fg-muted);
+    transform: rotate(-45deg);
+    opacity: 0.35;
+    animation: sitehrn-arrow 1.6s ease-in-out infinite;
+  }
+  .site-hrn-bridge-arrow span:nth-child(2) { animation-delay: 0.2s; }
+  .site-hrn-bridge-arrow span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes sitehrn-arrow {
+    0%, 100% { transform: rotate(-45deg) translate(-2px,-2px); opacity: 0.2; }
+    50%      { transform: rotate(-45deg) translate(2px, 2px);   opacity: 0.9; }
+  }
+  .site-hrn-bridge-note {
+    margin-top: 1.4rem;
+    text-align: center;
+    color: var(--color-fg-muted);
+    font-size: 0.92rem;
+  }
+  .site-hrn-bridge-note .site-mono {
+    color: var(--color-fg-subtle);
+    margin-right: 0.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-hrn-prim-card, .site-hrn-provider, .site-hrn-outcome, .site-hrn-bridge-arrow span {
+      animation: none; opacity: 1; transform: none;
+    }
+  }
+</style>

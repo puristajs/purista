@@ -1,0 +1,61 @@
+---
+interface Segment {
+	text: string
+	color?: 'fg' | 'found' | 'con' | 'pilot' | 'shimmer'
+}
+
+interface Props {
+	eyebrow?: string
+	eyebrowTone?: 'found' | 'con' | 'pilot'
+	headline: Segment[]
+	lede?: string
+	align?: 'left' | 'center'
+	size?: 'h1' | 'h2'
+	class?: string
+}
+
+const { eyebrow, eyebrowTone = 'found', headline, lede, align = 'left', size = 'h2', class: cls = '' } = Astro.props
+
+function tone(c?: string) {
+	if (!c || c === 'fg') return ''
+	if (c === 'shimmer') return ''
+	return `color: var(--color-${c}-hi);`
+}
+function cls2(c?: string) {
+	return c === 'shimmer' ? 'site-shimmer' : ''
+}
+---
+
+<header
+  class:list={['site-section-intro', cls]}
+  style={`text-align:${align};${align === 'center' ? 'margin-inline:auto;' : ''}max-width:${align === 'center' ? '780px' : '900px'}`}
+>
+  {
+    eyebrow && (
+      <div class="site-reveal" style="margin-bottom:1.3rem">
+        <span class="site-eyebrow" data-tone={eyebrowTone}>
+          <span class="site-eyebrow-dot"></span>
+          <span>{eyebrow}</span>
+        </span>
+      </div>
+    )
+  }
+
+  <h2 class:list={[size === 'h1' ? 'site-h1' : 'site-h2', 'site-reveal']} style="--site-reveal-delay:120ms">
+    {
+      headline.map((seg) => (
+        <span class={cls2(seg.color)} style={tone(seg.color)}>
+          {seg.text}
+        </span>
+      ))
+    }
+  </h2>
+
+  {
+    lede && (
+      <p class="site-lede site-reveal" style="margin-top:1.4rem;--site-reveal-delay:240ms">
+        {lede}
+      </p>
+    )
+  }
+</header>

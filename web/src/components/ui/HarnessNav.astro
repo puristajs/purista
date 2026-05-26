@@ -1,0 +1,37 @@
+---
+const links = [
+	{ href: '/harness/', label: 'Overview' },
+	{ href: '/harness/get-started/', label: 'Get Started' },
+	{ href: '/harness/architecture/', label: 'Architecture' },
+	{ href: '/harness/use-cases/', label: 'Use Cases' },
+	{ href: '/harness/memory/', label: 'Memory' },
+	{ href: '/harness/evaluations/', label: 'Evaluations' },
+	{ href: '/harness/testing/', label: 'Testing' },
+	{ href: '/harness/observability/', label: 'Observability' },
+	{ href: '/harness/security/', label: 'Security' },
+]
+
+const currentPath = Astro.url.pathname
+---
+
+<div class="w-full border-b border-[var(--color-line)] bg-[var(--color-bg)]">
+  <div class="wrap">
+    <nav class="flex gap-1 overflow-x-auto py-2">
+      {links.map((link) => {
+        const isActive = currentPath === link.href || (currentPath.startsWith(link.href) && link.href !== '/harness/');
+        return (
+          <a
+            href={link.href}
+            class={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-180 ${
+              isActive
+                ? 'text-[var(--color-found)] bg-[var(--color-bg-sunk)]'
+                : 'text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-bg-sunk)]'
+            }`}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+    </nav>
+  </div>
+</div>

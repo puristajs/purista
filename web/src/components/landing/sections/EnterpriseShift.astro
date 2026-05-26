@@ -1,0 +1,135 @@
+<div class="site-ent-shift site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+  <div class="site-ent-shift-col site-ent-shift-col--before">
+    <header>
+      <span class="site-mono site-ent-shift-label">BEFORE · without structure</span>
+      <h4>Reviewers reconstruct intent.</h4>
+    </header>
+    <ul>
+      <li>"Where does this data go?"</li>
+      <li>"Who owns this endpoint?"</li>
+      <li>"How is rotation handled?"</li>
+      <li>"What's the retry policy?"</li>
+      <li>"Where is this logged?"</li>
+    </ul>
+  </div>
+
+  <div class="site-ent-shift-bridge" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="site-ent-shift-col site-ent-shift-col--after">
+    <header>
+      <span class="site-mono site-ent-shift-label">AFTER · PURISTA structure</span>
+      <h4>Reviewers verify declared structure.</h4>
+    </header>
+    <ul>
+      <li><span class="site-mono">data-flow</span> → output schema declares it</li>
+      <li><span class="site-mono">owner</span> → required field on every service</li>
+      <li><span class="site-mono">secrets</span> → adapter-injected, never embedded</li>
+      <li><span class="site-mono">retry</span> → policy declared on the bridge</li>
+      <li><span class="site-mono">trace</span> → emitted by routing, not handwork</li>
+    </ul>
+  </div>
+</div>
+
+<style>
+  .site-ent-shift {
+    display: grid;
+    grid-template-columns: 1fr 70px 1fr;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  @media (max-width: 880px) {
+    .site-ent-shift { grid-template-columns: 1fr; }
+    .site-ent-shift-bridge { display: none; }
+  }
+  .site-ent-shift-col {
+    padding: 1.6rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+  }
+  .site-ent-shift-col--before {
+    border-color: color-mix(in srgb, var(--color-con) 35%, var(--color-line-strong));
+  }
+  .site-ent-shift-col--after {
+    border-color: color-mix(in srgb, var(--color-pilot) 35%, var(--color-line-strong));
+  }
+  .site-ent-shift-col header { margin-bottom: 1.1rem; }
+  .site-ent-shift-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+  }
+  .site-ent-shift-col--before .site-ent-shift-label { color: var(--color-con-hi); }
+  .site-ent-shift-col--after .site-ent-shift-label { color: var(--color-pilot-hi); }
+  .site-ent-shift-col h4 {
+    margin-top: 0.5rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--color-fg-strong);
+    letter-spacing: 0;
+  }
+  .site-ent-shift-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .site-ent-shift-col li {
+    color: var(--color-fg-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    padding-left: 1.1rem;
+    position: relative;
+  }
+  .site-ent-shift-col--before li::before {
+    content: "?";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    color: var(--color-con-hi);
+  }
+  .site-ent-shift-col--after li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--color-pilot-hi);
+  }
+  .site-ent-shift-col--after .site-mono {
+    color: var(--color-fg-strong);
+    background: color-mix(in srgb, var(--color-pilot) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-pilot) 25%, transparent);
+    padding: 0.05rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.82em;
+  }
+  .site-ent-shift-bridge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .site-ent-shift-bridge span {
+    width: 20px;
+    height: 20px;
+    border-right: 2px solid var(--color-fg-muted);
+    border-bottom: 2px solid var(--color-fg-muted);
+    transform: rotate(-45deg);
+    opacity: 0.4;
+    animation: siteent-arrow 1.6s ease-in-out infinite;
+  }
+  .site-ent-shift-bridge span:nth-child(2) { animation-delay: 0.2s; }
+  .site-ent-shift-bridge span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes siteent-arrow {
+    0%, 100% { transform: rotate(-45deg) translate(-3px, -3px); opacity: 0.2; }
+    50% { transform: rotate(-45deg) translate(3px, 3px); opacity: 0.9; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-ent-shift-bridge span { animation: none; }
+  }
+</style>

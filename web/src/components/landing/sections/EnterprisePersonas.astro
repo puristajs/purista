@@ -1,0 +1,149 @@
+---
+const personas = [
+	{
+		key: 'ciso',
+		role: 'CISO',
+		tone: 'found',
+		headline: 'Security reviews the wire, not the code.',
+		body: 'Every data flow, access boundary and secret injection is explicit in the contract. Threat models reference real artifacts — schemas, IAM bindings, adapter declarations — not screenshots of architecture diagrams.',
+		points: [
+			'Typed access boundaries on every command.',
+			'Secrets injected by adapter — never embedded.',
+			'IAM expressed at the contract layer.',
+			'Audit trail emitted as a side-effect of routing.',
+		],
+	},
+	{
+		key: 'cto',
+		role: 'CTO',
+		tone: 'pilot',
+		headline: 'Operable on principle.',
+		body: 'Services declare their contracts. Infrastructure binds at boot. No hidden coupling. The same code runs on a laptop, a Kubernetes cluster, or a serverless edge — and you keep the option open.',
+		points: [
+			'Same service across runtimes — no rewrite.',
+			'Observable by default. OpenTelemetry built in.',
+			'Failure modes inspectable, not inferred.',
+			'Onboarding becomes reading, not archaeology.',
+		],
+	},
+	{
+		key: 'cfo',
+		role: 'CFO',
+		tone: 'con',
+		headline: 'Approval-ready by design.',
+		body: 'Reduce review cycle time. Cut audit preparation cost. Eliminate vendor lock-in clauses from the renewal table. Turn AI-built velocity into approved deployments — not stalled PR backlogs.',
+		points: [
+			'Approval cycle time — from weeks to hours.',
+			'Audit-prep effort — a measurable line item.',
+			'AI investment — translated into shipped code.',
+			'Provider exit cost — close to zero.',
+		],
+	},
+]
+---
+
+<div class="site-ent-personas">
+  {personas.map((p, i) => (
+    <article id={p.key} class="site-ent-persona" style={`--tone: var(--color-${p.tone}); --tone-hi: var(--color-${p.tone}-hi); --i:${i}`}>
+      <header class="site-ent-persona-head">
+        <span class="site-ent-persona-role site-mono">{p.role}</span>
+        <span class="site-ent-persona-num site-mono">0{i + 1}</span>
+      </header>
+      <h3 class="site-ent-persona-title">{p.headline}</h3>
+      <p class="site-ent-persona-body">{p.body}</p>
+      <ul class="site-ent-persona-points">
+        {p.points.map((pt) => (
+          <li>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>{pt}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  ))}
+</div>
+
+<style>
+  .site-ent-personas {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 980px) {
+    .site-ent-personas { grid-template-columns: 1fr; }
+  }
+  .site-ent-persona {
+    position: relative;
+    padding: 1.5rem 1.5rem 1.4rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-bg-elev);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: siteent-in 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation-delay: calc(var(--i) * 0.12s + 0.1s);
+  }
+  @keyframes siteent-in { to { opacity: 1; transform: translateY(0); } }
+  .site-ent-persona-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .site-ent-persona-role {
+    font-size: 0.74rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--tone-hi);
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent);
+    background: color-mix(in srgb, var(--tone) 12%, transparent);
+  }
+  .site-ent-persona-num {
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    color: var(--color-fg-subtle);
+  }
+  .site-ent-persona-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.45rem;
+    letter-spacing: 0;
+    line-height: 1.1;
+    color: var(--color-fg-strong);
+    max-width: 18ch;
+  }
+  .site-ent-persona-body {
+    margin-top: 0.85rem;
+    color: var(--color-fg-muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+  }
+  .site-ent-persona-points {
+    list-style: none;
+    padding: 0;
+    margin: 1.3rem 0 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .site-ent-persona-points li {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    font-size: 0.9rem;
+    color: var(--color-fg);
+  }
+  .site-ent-persona-points svg {
+    flex: 0 0 14px;
+    margin-top: 0.3em;
+    color: var(--tone-hi);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-ent-persona { animation: none; opacity: 1; transform: none; }
+  }
+</style>

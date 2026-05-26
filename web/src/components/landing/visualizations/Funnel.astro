@@ -1,0 +1,126 @@
+---
+/**
+ * Comparative review funnel — with vs without PURISTA.
+ * Pure SVG with CSS animation. Variant controls color + flow speed.
+ */
+interface Props {
+	variant: 'bad' | 'good'
+}
+const { variant } = Astro.props
+const isGood = variant === 'good'
+const stroke = isGood ? 'var(--color-pilot-hi)' : 'var(--color-con-hi)'
+const fill = isGood ? 'var(--color-pilot)' : 'var(--color-con)'
+const gates = isGood
+	? ['Contract review', 'Verification', 'Auditable trail', 'Ship']
+	: ['Code review', 'Security ask', 'Compliance ask', 'Stuck']
+---
+
+<div class={`site-funnel ${isGood ? 'is-good' : 'is-bad'}`}>
+  <svg viewBox="0 0 480 580" role="img" aria-label={`Review funnel ${variant}`}>
+    <defs>
+      <linearGradient id={`vf-${variant}-grad`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color={fill} stop-opacity="0.18" />
+        <stop offset="100%" stop-color={fill} stop-opacity="0" />
+      </linearGradient>
+    </defs>
+
+    <!-- Funnel walls -->
+    <path
+      d={isGood
+        ? "M 40 40 L 440 40 L 360 540 L 120 540 Z"
+        : "M 40 40 L 440 40 L 280 540 L 200 540 Z"}
+      fill={`url(#vf-${variant}-grad)`}
+      stroke={stroke}
+      stroke-opacity="0.4"
+      stroke-width="1.5"
+    />
+
+    {/* Gate rows */}
+    {gates.map((g, i) => {
+      const y = 80 + i * 130;
+      return (
+        <g class="vf-row" style={`--delay:${i * 0.18}s`}>
+          <line x1="60" y1={y} x2="420" y2={y} stroke="rgba(255,255,255,0.08)" stroke-dasharray="3 6" />
+          <text x="240" y={y - 8} text-anchor="middle" fill="#B4B4BC" font-family="JetBrains Mono" font-size="11" letter-spacing="2" text-transform="uppercase">
+            {g.toUpperCase()}
+          </text>
+        </g>
+      );
+    })}
+
+    {/* PR blocks flowing — staggered */}
+    {Array.from({ length: isGood ? 5 : 5 }).map((_, i) => (
+      <g class="vf-pr" style={`--i:${i};--delay:${i * 0.8}s`}>
+        <rect
+          x="-30"
+          y="0"
+          width="60"
+          height="28"
+          rx="6"
+          fill={fill}
+          fill-opacity={isGood ? 0.9 : 0.85}
+        />
+        <text
+          x="0"
+          y="18"
+          text-anchor="middle"
+          fill="#08080B"
+          font-family="JetBrains Mono"
+          font-size="11"
+          font-weight="600"
+        >PR-{(i + 1).toString().padStart(2, '0')}</text>
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .site-funnel {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 480 / 580;
+    border-radius: 18px;
+    border: 1px solid var(--color-line);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-bg-elev) 80%, transparent), transparent);
+    padding: 1rem;
+    overflow: hidden;
+  }
+  .site-funnel svg {
+    width: 100%;
+    height: 100%;
+  }
+  .vf-row text {
+    opacity: 0;
+    animation: vf-fade 0.8s var(--delay, 0s) ease-out forwards;
+  }
+  @keyframes vf-fade {
+    to { opacity: 1; }
+  }
+  .vf-pr {
+    transform: translate(240px, 80px);
+    animation: vf-flow-bad 9s var(--delay, 0s) ease-in infinite;
+  }
+  .site-funnel.is-good .vf-pr {
+    animation: vf-flow-good 4.2s var(--delay, 0s) ease-in-out infinite;
+  }
+  @keyframes vf-flow-bad {
+    0%   { transform: translate(240px, 60px); opacity: 0; }
+    8%   { opacity: 1; }
+    35%  { transform: translate(240px, 200px); }
+    55%  { transform: translate(240px, 320px); opacity: 1; }
+    80%  { transform: translate(240px, 430px); opacity: 0.4; }
+    95%  { transform: translate(240px, 480px); opacity: 0; }
+    100% { transform: translate(240px, 480px); opacity: 0; }
+  }
+  @keyframes vf-flow-good {
+    0%   { transform: translate(240px, 60px); opacity: 0; }
+    10%  { opacity: 1; }
+    40%  { transform: translate(240px, 220px); }
+    70%  { transform: translate(240px, 380px); }
+    95%  { transform: translate(240px, 540px); opacity: 1; }
+    100% { transform: translate(240px, 560px); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vf-pr { animation: none; }
+  }
+</style>

@@ -1,0 +1,110 @@
+---
+import type { HeadlineSegment } from '../ui/Headline.astro'
+import Headline from '../ui/Headline.astro'
+
+type StoryTheme = 'default' | 'sunk' | 'gradient'
+type StoryLayout = 'center' | 'viz-left' | 'viz-right'
+type StorySplit = 'default' | 'balanced'
+
+interface Props {
+	id: string
+	layout: StoryLayout
+	theme?: StoryTheme
+	eyebrow?: string
+	headline: HeadlineSegment[]
+	lede?: string
+	items?: string[]
+	itemColor?: 'con' | 'found' | 'pilot'
+	size?: 'xl' | 'lg' | 'md'
+	split?: StorySplit
+	class?: string
+}
+
+const {
+	id,
+	layout,
+	theme = 'default',
+	eyebrow,
+	headline,
+	lede,
+	items = [],
+	itemColor = 'found',
+	size = 'lg',
+	split = 'default',
+	class: className = '',
+} = Astro.props
+
+const themeClasses: Record<StoryTheme, string> = {
+	default: '',
+	sunk: 'bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]',
+	gradient: 'soft-gradient',
+}
+
+const isCenter = layout === 'center'
+const isVizLeft = layout === 'viz-left'
+const isVizRight = layout === 'viz-right'
+
+const vizOrder = isVizLeft ? '' : isVizRight ? 'lg:order-2' : ''
+const contentOrder = isVizRight ? 'lg:order-1' : ''
+const contentAlign = isCenter ? 'text-center max-w-[80ch] mx-auto' : ''
+
+const sizeClass = {
+	xl: 'display-xl',
+	lg: 'display-lg',
+	md: 'display-md',
+}[size]
+
+const splitClass = split === 'balanced' ? 'story-grid--balanced' : ''
+---
+
+<section
+  id={id}
+  class:list={[
+    'section-pad relative overflow-hidden w-full',
+    themeClasses[theme],
+    className,
+  ]}
+>
+  <div class="wrap">
+    {
+      isCenter ? (
+        <div class:list={['reveal', contentAlign]}>
+          {eyebrow && <div class="eyebrow mb-4">{eyebrow}</div>}
+          <h2 class:list={['display mb-7', sizeClass]}>
+            <Headline segments={headline} />
+          </h2>
+          {lede && <p class="lede mx-auto">{lede}</p>}
+          {items.length > 0 && (
+            <ul class="bullet-list mt-10" style={`--bullet-c: var(--color-${itemColor})`}>
+              {items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div class:list={['story-grid', splitClass]}>
+          <div class:list={['reveal', vizOrder]}>
+            <slot name="visualization">
+              <p class="text-center text-[var(--color-fg-muted)]">Visualization slot</p>
+            </slot>
+          </div>
+          <div class:list={['reveal reveal-delay-1', contentOrder]}>
+            {eyebrow && <div class="eyebrow mb-4">{eyebrow}</div>}
+            <h2 class:list={['display mb-8', sizeClass]}>
+              <Headline segments={headline} />
+            </h2>
+            {lede && <p class="lede max-w-[50ch] mb-10">{lede}</p>}
+            {items.length > 0 && (
+              <ul class="bullet-list" style={`--bullet-c: var(--color-${itemColor})`}>
+                {items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )
+    }
+  </div>
+</section>

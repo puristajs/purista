@@ -1,0 +1,45 @@
+---
+interface Props {
+	class?: string
+}
+
+const { class: className = '' } = Astro.props
+---
+
+<div class:list={['mt-[clamp(3.5rem,7vw,6rem)] relative w-full mx-auto reveal', className]}>
+  <svg viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" class="w-full h-auto block">
+    <defs>
+      <radialGradient id="hsmGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--color-found-glow)" stop-opacity="0.7"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      <radialGradient id="hsmCore" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--color-found-glow)" stop-opacity="0.5"/><stop offset="60%" stop-color="var(--color-found-glow)" stop-opacity="0.1"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    </defs>
+    <ellipse cx="600" cy="250" rx="280" ry="180" fill="url(#hsmGlow)"/>
+    <ellipse cx="600" cy="250" rx="160" ry="160" fill="url(#hsmCore)"/>
+    <g class="hsm-edges" stroke="var(--color-line-strong)" stroke-width="1" stroke-dasharray="3 4" fill="none">
+      <line x1="200" y1="120" x2="540" y2="240"/><line x1="160" y1="250" x2="540" y2="250"/><line x1="200" y1="380" x2="540" y2="260"/>
+      <line x1="1000" y1="120" x2="660" y2="240"/><line x1="1040" y1="250" x2="660" y2="250"/><line x1="1000" y1="380" x2="660" y2="260"/>
+      <line x1="600" y1="60" x2="600" y2="190"/><line x1="600" y1="310" x2="600" y2="440"/>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))"><animateMotion dur="3.5s" repeatCount="indefinite" path="M 200 120 L 540 240"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))" opacity="0.7"><animateMotion dur="3.5s" repeatCount="indefinite" begin="0.5s" path="M 160 250 L 540 250"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))"><animateMotion dur="3.5s" repeatCount="indefinite" begin="1s" path="M 200 380 L 540 260"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))" opacity="0.7"><animateMotion dur="3.5s" repeatCount="indefinite" begin="1.5s" path="M 660 240 L 1000 120"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))"><animateMotion dur="3.5s" repeatCount="indefinite" begin="2s" path="M 660 250 L 1040 250"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))" opacity="0.7"><animateMotion dur="3.5s" repeatCount="indefinite" begin="2.5s" path="M 660 260 L 1000 380"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))"><animateMotion dur="3.5s" repeatCount="indefinite" begin="0.7s" path="M 600 60 L 600 190"/></circle>
+      <circle r="3" fill="var(--color-found)" filter="drop-shadow(0 0 5px var(--color-found-glow))" opacity="0.7"><animateMotion dur="3.5s" repeatCount="indefinite" begin="1.7s" path="M 600 310 L 600 440"/></circle>
+    </g>
+    <g transform="translate(140 90)"><rect x="0" y="0" width="120" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-con) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-con)">AI · CODER</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">code generation</text></g>
+    <g transform="translate(100 220)"><rect x="0" y="0" width="120" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-con) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-con)">AI · AGENT</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">runtime tasks</text></g>
+    <g transform="translate(140 350)"><rect x="0" y="0" width="120" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-con) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-con)">AI · COPILOT</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">implementation</text></g>
+    <g transform="translate(530 30)"><rect x="0" y="0" width="140" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-pilot) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-pilot)">ENTERPRISE</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">review · approval</text></g>
+    <g transform="translate(940 90)"><rect x="0" y="0" width="130" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-found) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-found)">CLOUD · K8S</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">infrastructure</text></g>
+    <g transform="translate(980 220)"><rect x="0" y="0" width="130" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-found) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-found)">OBSERVABILITY</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">otel · traces</text></g>
+    <g transform="translate(940 350)"><rect x="0" y="0" width="130" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-found) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-found)">DATA · SECRETS</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">vault · stores</text></g>
+    <g transform="translate(525 410)"><rect x="0" y="0" width="150" height="60" rx="9" fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-pilot) 40%, var(--color-line-strong))" stroke-width="1.2"/><text x="14" y="22" class="svg-label" fill="var(--color-pilot)">AUDIT · COMPLIANCE</text><text x="14" y="42" class="svg-body" fill="var(--color-fg)">traces · contracts</text></g>
+    <g transform="translate(520 195)"><rect x="0" y="0" width="160" height="110" rx="14" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="2"/><rect x="0" y="0" width="160" height="110" rx="14" fill="var(--color-found)" fill-opacity="0.06"/><text x="80" y="32" text-anchor="middle" class="svg-label" fill="var(--color-found)">STRUCTURAL CORE</text><text x="80" y="64" text-anchor="middle" class="svg-title" fill="var(--color-fg)">PURISTA</text><text x="80" y="86" text-anchor="middle" class="svg-caption" fill="var(--color-fg-muted)">v3</text><circle cx="80" cy="100" r="3" fill="var(--color-found)"><animate attributeName="r" values="3;6;3" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/></circle></g>
+  </svg>
+  <div class="mt-6 flex items-center justify-center gap-[0.85rem] flex-wrap">
+    <span class="font-mono text-[0.7rem] tracking-[0.16em] font-semibold px-[0.7rem] py-[0.3rem] rounded bg-[var(--color-bg-elev)] border border-[var(--color-line)] text-[var(--color-con)]" style="border-color: color-mix(in srgb, var(--color-con) 30%, var(--color-line))">AI · COPILOT</span>
+    <span class="font-mono text-[0.7rem] tracking-[0.16em] font-semibold px-[0.7rem] py-[0.3rem] rounded bg-[var(--color-bg-elev)] border border-[var(--color-line)] text-[var(--color-found)]" style="border-color: color-mix(in srgb, var(--color-found) 30%, var(--color-line))">ENTERPRISE · READY</span>
+    <span class="text-[0.92rem] text-[var(--color-fg-muted)] max-w-[56ch] text-center">The structural core that connects AI implementation with enterprise approval.</span>
+  </div>
+</div>

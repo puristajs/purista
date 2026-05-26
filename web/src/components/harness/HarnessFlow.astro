@@ -1,0 +1,755 @@
+---
+type Tone = 'found' | 'con' | 'pilot'
+type Variant =
+	| 'command-center'
+	| 'rag'
+	| 'review'
+	| 'triage'
+	| 'parallel'
+	| 'reasoning'
+	| 'wiki'
+	| 'capabilities'
+	| 'sandbox'
+	| 'mcp'
+	| 'adapter-architecture'
+	| 'agent-workflow'
+	| 'agent-lifecycle'
+	| 'durable-run'
+	| 'trace-tree'
+	| 'privacy'
+	| 'jaeger'
+	| 'severity'
+	| 'in-process'
+
+interface Step {
+	label: string
+	detail: string
+	tone: Tone
+}
+
+interface Scene {
+	eyebrow: string
+	title: string
+	steps: Step[]
+	branches?: Step[]
+	note?: string
+}
+
+interface Props {
+	variant: Variant
+}
+
+const { variant } = Astro.props
+
+const scenes: Record<Variant, Scene> = {
+	'command-center': {
+		eyebrow: 'Runtime path',
+		title: 'One boundary coordinates the full run.',
+		steps: [
+			{ label: 'Request', detail: 'schema + context', tone: 'pilot' },
+			{ label: 'Harness', detail: 'policy, state, tools', tone: 'con' },
+			{ label: 'Agent / workflow', detail: 'reasoning or durable steps', tone: 'found' },
+			{ label: 'Review', detail: 'optional approval gate', tone: 'pilot' },
+			{ label: 'Artifact', detail: 'typed result + trace', tone: 'found' },
+		],
+	},
+	rag: {
+		eyebrow: 'Source-grounded answer',
+		title: 'RAG becomes a visible pipeline, not a hidden prompt.',
+		steps: [
+			{ label: 'Question', detail: 'intent + output schema', tone: 'pilot' },
+			{ label: 'Search', detail: 'owned index, ranked hits', tone: 'found' },
+			{ label: 'Read', detail: 'source chunks + metadata', tone: 'found' },
+			{ label: 'Answer', detail: 'citations + confidence', tone: 'con' },
+			{ label: 'Validate', detail: 'unsupported claims fail', tone: 'pilot' },
+		],
+	},
+	review: {
+		eyebrow: 'Human-in-the-loop',
+		title: 'The write path only opens after approval.',
+		steps: [
+			{ label: 'Proposal', detail: 'agent drafts change', tone: 'con' },
+			{ label: 'Review gate', detail: 'human decides', tone: 'pilot' },
+		],
+		branches: [
+			{ label: 'Approve', detail: 'apply mutation', tone: 'found' },
+			{ label: 'Revise', detail: 'loop back with feedback', tone: 'con' },
+			{ label: 'Reject', detail: 'record audit decision', tone: 'pilot' },
+		],
+	},
+	triage: {
+		eyebrow: 'Typed routing',
+		title: 'Route on structured fields, not prose.',
+		steps: [
+			{ label: 'Inbox', detail: 'ticket, mail or event', tone: 'pilot' },
+			{ label: 'Classifier', detail: 'priority, category, owner', tone: 'con' },
+		],
+		branches: [
+			{ label: 'Billing', detail: 'payment route', tone: 'found' },
+			{ label: 'Support', detail: 'knowledge route', tone: 'found' },
+			{ label: 'Escalate', detail: 'risk or SLA route', tone: 'pilot' },
+		],
+	},
+	parallel: {
+		eyebrow: 'Fan-out / fan-in',
+		title: 'Specialists run independently, then merge.',
+		steps: [
+			{ label: 'Planner', detail: 'split independent work', tone: 'con' },
+		],
+		branches: [
+			{ label: 'Facts', detail: 'collect evidence', tone: 'found' },
+			{ label: 'Risk', detail: 'failure modes', tone: 'pilot' },
+			{ label: 'Tests', detail: 'coverage gaps', tone: 'found' },
+			{ label: 'Docs', detail: 'explanation quality', tone: 'pilot' },
+			{ label: 'Synthesis', detail: 'one typed decision', tone: 'con' },
+		],
+	},
+	reasoning: {
+		eyebrow: 'Inspectable reasoning',
+		title: 'Correctness work is split into named steps.',
+		steps: [
+			{ label: 'Plan', detail: 'scope + output', tone: 'pilot' },
+			{ label: 'Retrieve', detail: 'evidence through tools', tone: 'found' },
+			{ label: 'Reason', detail: 'draft answer', tone: 'con' },
+			{ label: 'Reflect', detail: 'find gaps', tone: 'found' },
+			{ label: 'Judge', detail: 'score readiness', tone: 'pilot' },
+			{ label: 'Publish', detail: 'approved artifact', tone: 'con' },
+		],
+	},
+	wiki: {
+		eyebrow: 'Living knowledge loop',
+		title: 'Sources feed answers; audits feed maintenance.',
+		steps: [
+			{ label: 'Sources', detail: 'docs, repos, decisions', tone: 'pilot' },
+			{ label: 'Ingest', detail: 'chunk, embed, index', tone: 'con' },
+			{ label: 'Wiki core', detail: 'grounded references', tone: 'found' },
+			{ label: 'Q&A', detail: 'cited answers', tone: 'con' },
+			{ label: 'Audit', detail: 'stale or conflicting pages', tone: 'pilot' },
+			{ label: 'Maintain', detail: 'reviewed updates', tone: 'found' },
+		],
+		note: 'The loop is intentional: every generated answer can become evidence for what should be updated next.',
+	},
+	capabilities: {
+		eyebrow: 'Capability gating',
+		title: 'Model promises are checked before a run starts.',
+		steps: [
+			{ label: 'Agent', detail: 'declares required features', tone: 'con' },
+			{ label: 'Model', detail: 'advertises capabilities', tone: 'found' },
+			{ label: 'Gate', detail: 'compare before execute', tone: 'pilot' },
+			{ label: 'Run', detail: 'only valid paths open', tone: 'found' },
+			{ label: 'Fail fast', detail: 'missing support is explicit', tone: 'pilot' },
+		],
+	},
+	sandbox: {
+		eyebrow: 'Sandbox boundary',
+		title: 'Tools run through the selected isolation layer.',
+		steps: [
+			{ label: 'Agent', detail: 'requests file or command', tone: 'con' },
+			{ label: 'Policy', detail: 'allowed operation', tone: 'pilot' },
+			{ label: 'Sandbox', detail: 'memory, bash or remote', tone: 'found' },
+			{ label: 'Tool', detail: 'executes with limits', tone: 'con' },
+			{ label: 'Trace', detail: 'stdout, stderr, exit', tone: 'pilot' },
+		],
+	},
+	mcp: {
+		eyebrow: 'MCP transport',
+		title: 'One tool contract can run local or remote.',
+		steps: [
+			{ label: 'Agent', detail: 'calls typed tool', tone: 'con' },
+			{ label: 'Router', detail: 'stdio or HTTP', tone: 'found' },
+		],
+		branches: [
+			{ label: 'Sandbox', detail: 'stdio server', tone: 'pilot' },
+			{ label: 'HTTP', detail: 'remote endpoint', tone: 'found' },
+			{ label: 'Validate', detail: 'schema checked result', tone: 'pilot' },
+		],
+	},
+	'adapter-architecture': {
+		eyebrow: 'Adapter architecture',
+		title: 'Your code talks to one normalized provider contract.',
+		steps: [
+			{ label: 'Your code', detail: 'session agent call', tone: 'pilot' },
+			{ label: 'Base provider', detail: 'timeout, cancel, trace', tone: 'con' },
+			{ label: 'Adapter', detail: 'translate, normalize', tone: 'found' },
+		],
+		branches: [
+			{ label: 'OpenAI SDK', detail: 'provider call', tone: 'con' },
+			{ label: 'Anthropic SDK', detail: 'provider call', tone: 'con' },
+			{ label: 'Bedrock SDK', detail: 'provider call', tone: 'con' },
+		],
+	},
+	'agent-workflow': {
+		eyebrow: 'Agent vs workflow',
+		title: 'The workflow owns orchestration; agents own reasoning.',
+		steps: [
+			{ label: 'Input', detail: 'typed request', tone: 'pilot' },
+			{ label: 'Workflow', detail: 'branch, sequence, fan out', tone: 'found' },
+			{ label: 'Agent', detail: 'model + tools loop', tone: 'con' },
+			{ label: 'Gate', detail: 'deterministic decision', tone: 'pilot' },
+			{ label: 'Output', detail: 'typed artifact', tone: 'found' },
+		],
+	},
+	'agent-lifecycle': {
+		eyebrow: 'Agent lifecycle',
+		title: 'Every model call, tool call and result is observable.',
+		steps: [
+			{ label: 'Run start', detail: 'metadata + trace id', tone: 'pilot' },
+			{ label: 'Prompt', detail: 'messages prepared', tone: 'con' },
+			{ label: 'Model', detail: 'tokens + latency', tone: 'found' },
+			{ label: 'Tool', detail: 'validated execution', tone: 'con' },
+			{ label: 'Result', detail: 'schema checked output', tone: 'pilot' },
+		],
+	},
+	'durable-run': {
+		eyebrow: 'Durable execution',
+		title: 'State snapshots keep long runs inspectable.',
+		steps: [
+			{ label: 'Session', detail: 'tenant and user scope', tone: 'pilot' },
+			{ label: 'State', detail: 'persist history', tone: 'found' },
+			{ label: 'Run', detail: 'resume after restart', tone: 'con' },
+			{ label: 'Audit', detail: 'decision trail remains', tone: 'pilot' },
+		],
+	},
+	'trace-tree': {
+		eyebrow: 'Trace tree',
+		title: 'The run becomes a navigable operations graph.',
+		steps: [
+			{ label: 'Run', detail: 'root span', tone: 'pilot' },
+			{ label: 'Agent', detail: 'conversation span', tone: 'con' },
+			{ label: 'Model', detail: 'token and latency span', tone: 'found' },
+			{ label: 'Tool', detail: 'input, output, error', tone: 'con' },
+			{ label: 'Finish', detail: 'status + cost signal', tone: 'pilot' },
+		],
+	},
+	privacy: {
+		eyebrow: 'Content capture',
+		title: 'Operational metadata stays on; sensitive content is opt-in.',
+		steps: [
+			{ label: 'Default', detail: 'metadata only', tone: 'pilot' },
+			{ label: 'Config', detail: 'capture flag explicit', tone: 'found' },
+		],
+		branches: [
+			{ label: 'Prompt text', detail: 'only when enabled', tone: 'con' },
+			{ label: 'Tool payload', detail: 'redacted by policy', tone: 'pilot' },
+			{ label: 'Trace', detail: 'safe to share', tone: 'found' },
+		],
+	},
+	jaeger: {
+		eyebrow: 'Trace inspection',
+		title: 'Jaeger links connect logs to the full run timeline.',
+		steps: [
+			{ label: 'Log', detail: 'run id + trace id', tone: 'pilot' },
+			{ label: 'Jaeger', detail: 'open trace', tone: 'found' },
+			{ label: 'Span tree', detail: 'model and tools', tone: 'con' },
+			{ label: 'Fix', detail: 'compare new run', tone: 'pilot' },
+		],
+	},
+	severity: {
+		eyebrow: 'Ship readiness',
+		title: 'Release risk is sorted by severity, not checklist order.',
+		steps: [
+			{ label: 'Critical', detail: 'state, tenant, privacy', tone: 'con' },
+			{ label: 'High', detail: 'timeouts, gates, sandbox', tone: 'found' },
+			{ label: 'Medium', detail: 'failure modes and tests', tone: 'pilot' },
+			{ label: 'Ship', detail: 'known residual risk', tone: 'found' },
+		],
+	},
+	'in-process': {
+		eyebrow: 'Process boundary',
+		title: 'Credentials never cross into the sandbox.',
+		steps: [
+			{ label: 'Harness', detail: 'credentials, keys, policies', tone: 'found' },
+			{ label: 'Tool call', detail: 'typed input only, no secrets', tone: 'pilot' },
+			{ label: 'Sandbox', detail: 'execution only, nothing sensitive', tone: 'con' },
+		],
+		note: 'Even under successful prompt injection, the model cannot reach keys it was never given — they live in a different process boundary.',
+	},
+}
+
+const scene = scenes[variant]
+
+const stepGap = scene.steps.length > 1 ? 500 / (scene.steps.length - 1) : 0
+const stepNodes = scene.steps.map((step, index) => ({
+	step,
+	x: scene.branches ? (scene.steps.length === 1 ? 320 : 150 + index * 340) : 70 + index * stepGap,
+	y: scene.branches ? (scene.steps.length === 1 ? 82 : 92) : index % 2 === 0 ? 122 : 156,
+}))
+
+const branchGap = scene.branches && scene.branches.length > 1 ? 500 / (scene.branches.length - 1) : 0
+const branchNodes = (scene.branches ?? []).map((step, index) => ({
+	step,
+	x: 70 + index * branchGap,
+	y: 238,
+}))
+
+const objectFor = (label: string) => {
+	const key = label.toLowerCase()
+	if (key.includes('model') || key.includes('sdk') || key.includes('openai') || key.includes('anthropic') || key.includes('bedrock')) return 'network'
+	if (key.includes('search') || key.includes('retrieve')) return 'search'
+	if (key.includes('read') || key.includes('source') || key.includes('docs') || key.includes('wiki') || key.includes('state') || key.includes('log')) return 'docs'
+	if (key.includes('answer') || key.includes('q&a') || key.includes('publish') || key.includes('artifact') || key.includes('finish')) return 'answer'
+	if (key.includes('validate') || key.includes('approve') || key.includes('judge') || key.includes('review gate') || key.includes('gate') || key.includes('policy')) return 'shield'
+	if (key.includes('classifier') || key.includes('route') || key.includes('triage') || key.includes('router') || key.includes('http')) return 'router'
+	if (key.includes('planner') || key === 'plan') return 'board'
+	if (key.includes('risk') || key.includes('reject') || key.includes('escalate') || key.includes('audit') || key.includes('critical') || key.includes('fail')) return 'warning'
+	if (key.includes('test') || key.includes('high') || key.includes('medium') || key.includes('ship')) return 'checklist'
+	if (key.includes('maintain') || key.includes('revise') || key.includes('tool') || key.includes('sandbox')) return 'tool'
+	if (key.includes('agent') || key.includes('workflow') || key.includes('reason') || key.includes('reflect') || key.includes('jaeger') || key.includes('span') || key.includes('trace')) return 'network'
+	if (key.includes('billing')) return 'coins'
+	if (key.includes('support')) return 'person'
+	if (key.includes('proposal') || key.includes('request') || key.includes('question') || key.includes('inbox')) return 'inbox'
+	return 'cube'
+}
+
+const splitDetail = (detail: string) => {
+	if (detail.length <= 20) return [detail]
+
+	const splitters = [' + ', ', ', ' or ', ' and ']
+	for (const splitter of splitters) {
+		const index = detail.indexOf(splitter)
+		if (index > 6 && index < detail.length - 6) {
+			const first = detail.slice(0, index + (splitter === ', ' ? 0 : splitter.trim().length)).trim()
+			const second = detail.slice(index + splitter.length).trim()
+			return [first, second]
+		}
+	}
+
+	const words = detail.split(' ')
+	const mid = Math.ceil(words.length / 2)
+	return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')]
+}
+---
+
+<figure class="hflow" data-variant={variant} aria-label={`${scene.eyebrow}: ${scene.title}`}>
+  <header class="hflow-head">
+    <span>{scene.eyebrow}</span>
+    <strong>{scene.title}</strong>
+  </header>
+
+  <svg class="hflow-svg" viewBox="0 0 640 340" role="img" aria-hidden="true">
+    <defs>
+      <linearGradient id="hflowObjectGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="rgba(255,255,255,0.82)" />
+        <stop offset="42%" stop-color="rgba(255,255,255,0.26)" />
+        <stop offset="100%" stop-color="rgba(255,255,255,0.04)" />
+      </linearGradient>
+      <linearGradient id="hflowSideGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="rgba(255,255,255,0.18)" />
+        <stop offset="100%" stop-color="rgba(0,0,0,0.22)" />
+      </linearGradient>
+      <radialGradient id="hflowPlateGlow" cx="42%" cy="28%" r="74%">
+        <stop offset="0%" stop-color="rgba(255,255,255,0.34)" />
+        <stop offset="48%" stop-color="rgba(255,255,255,0.08)" />
+        <stop offset="100%" stop-color="rgba(0,0,0,0.18)" />
+      </radialGradient>
+      <filter id="hflowSoftShadow" x="-35%" y="-45%" width="170%" height="190%">
+        <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#000" flood-opacity="0.28" />
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#fff" flood-opacity="0.08" />
+      </filter>
+      <filter id="hflowGlow" x="-45%" y="-45%" width="190%" height="190%">
+        <feGaussianBlur stdDeviation="3.5" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+      <marker id={`hflow-arrow-${variant}`} markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+        <path d="M0 0.7 L9 3.5 L0 6.3 Z" class="hflow-arrow" />
+      </marker>
+    </defs>
+
+    <g class="hflow-paths" marker-end={`url(#hflow-arrow-${variant})`}>
+      {
+        stepNodes.slice(0, -1).map((node, index) => {
+          const next = stepNodes[index + 1]
+          return (
+            <path
+              class="hflow-path hflow-path--main"
+              d={`M ${node.x + 46} ${node.y + 16} C ${node.x + 82} ${node.y + 12}, ${next.x - 82} ${next.y + 12}, ${next.x - 46} ${next.y + 16}`}
+            />
+          )
+        })
+      }
+      {
+        scene.branches &&
+          branchNodes.map((node) => {
+            const source = stepNodes[stepNodes.length - 1]
+            return (
+              <path
+                class="hflow-path hflow-path--branch"
+                d={`M ${source.x} ${source.y + 60} C ${source.x} ${source.y + 105}, ${node.x} ${node.y - 88}, ${node.x} ${node.y - 42}`}
+              />
+            )
+          })
+      }
+    </g>
+
+    <g class="hflow-nodes">
+      {
+        stepNodes.map(({ step, x, y }, index) => {
+          const object = objectFor(step.label)
+          const detailLines = splitDetail(step.detail)
+          return (
+            <g class="hflow-node" data-tone={step.tone} data-object={object} transform={`translate(${x} ${y})`}>
+              <ellipse class="hflow-ground-shadow" cx="0" cy="56" rx="58" ry="18" />
+              <path class="hflow-platform-top" d="M0 6 L54 33 L0 60 L-54 33 Z" />
+              <path class="hflow-platform-front" d="M-54 33 L0 60 L54 33 L54 47 L0 74 L-54 47 Z" />
+              <g class="hflow-object">
+                {object === 'search' && (
+                  <>
+                    <circle class="hflow-object-stroke" cx="-8" cy="-8" r="23" />
+                    <path class="hflow-object-stroke" d="M9 9 L34 31" />
+                    <path class="hflow-object-fill" d="M-18 -8 L-8 -18 L2 -8 L-8 2 Z" />
+                  </>
+                )}
+                {object === 'docs' && (
+                  <>
+                    <path class="hflow-object-fill hflow-paper" d="M-30 -30 L8 -46 L36 -31 L-2 -14 Z" />
+                    <path class="hflow-object-fill hflow-paper hflow-paper-mid" d="M-34 -14 L4 -30 L32 -15 L-6 2 Z" />
+                    <path class="hflow-object-fill hflow-paper hflow-paper-top" d="M-38 2 L0 -14 L28 1 L-10 18 Z" />
+                    <path class="hflow-object-line" d="M-16 1 L6 -9 M-6 7 L15 -2" />
+                  </>
+                )}
+                {object === 'answer' && (
+                  <>
+                    <path class="hflow-object-fill" d="M-36 -28 L26 -28 L38 -16 L38 18 L-6 18 L-24 34 L-20 18 L-36 18 Z" />
+                    <path class="hflow-object-line" d="M-20 -10 L20 -10 M-20 2 L8 2" />
+                  </>
+                )}
+                {object === 'shield' && (
+                  <>
+                    <path class="hflow-object-fill" d="M0 -42 L36 -28 L30 8 Q24 30 0 43 Q-24 30 -30 8 L-36 -28 Z" />
+                    <path class="hflow-object-line hflow-check" d="M-17 1 L-4 14 L21 -15" />
+                  </>
+                )}
+                {object === 'router' && (
+                  <>
+                    <path class="hflow-object-stroke" d="M0 -36 L0 0 M0 0 L-34 30 M0 0 L34 30" />
+                    <circle class="hflow-object-fill" cx="0" cy="-36" r="12" />
+                    <circle class="hflow-object-fill" cx="-34" cy="30" r="12" />
+                    <circle class="hflow-object-fill" cx="34" cy="30" r="12" />
+                  </>
+                )}
+                {object === 'board' && (
+                  <>
+                    <path class="hflow-object-fill" d="M-38 -34 L34 -34 L34 26 L-38 26 Z" />
+                    <path class="hflow-object-line" d="M-24 -16 L20 -16 M-24 0 L4 0 M-24 16 L14 16" />
+                    <circle class="hflow-object-dot" cx="24" cy="0" r="4" />
+                  </>
+                )}
+                {object === 'warning' && (
+                  <>
+                    <path class="hflow-object-fill" d="M0 -42 L40 30 L-40 30 Z" />
+                    <path class="hflow-object-line" d="M0 -17 L0 8" />
+                    <circle class="hflow-object-dot" cx="0" cy="20" r="4" />
+                  </>
+                )}
+                {object === 'checklist' && (
+                  <>
+                    <path class="hflow-object-fill" d="M-32 -36 L30 -36 L30 34 L-32 34 Z" />
+                    <path class="hflow-object-line" d="M-18 -18 L-10 -10 L2 -24 M10 -17 L22 -17 M-18 5 L-10 13 L2 -1 M10 6 L22 6" />
+                  </>
+                )}
+                {object === 'tool' && (
+                  <>
+                    <path class="hflow-object-stroke" d="M-28 28 L18 -18" />
+                    <path class="hflow-object-fill" d="M14 -38 Q29 -42 38 -31 L22 -15 L7 -30 Z" />
+                    <circle class="hflow-object-fill" cx="-30" cy="30" r="10" />
+                  </>
+                )}
+                {object === 'network' && (
+                  <>
+                    <path class="hflow-object-stroke" d="M-28 -8 L0 -30 L30 -8 L20 28 L-20 28 Z M-28 -8 L20 28 M30 -8 L-20 28" />
+                    <circle class="hflow-object-fill" cx="-28" cy="-8" r="9" />
+                    <circle class="hflow-object-fill" cx="0" cy="-30" r="9" />
+                    <circle class="hflow-object-fill" cx="30" cy="-8" r="9" />
+                    <circle class="hflow-object-fill" cx="20" cy="28" r="9" />
+                    <circle class="hflow-object-fill" cx="-20" cy="28" r="9" />
+                  </>
+                )}
+                {object === 'coins' && (
+                  <>
+                    <ellipse class="hflow-object-fill" cx="0" cy="-20" rx="30" ry="12" />
+                    <path class="hflow-object-fill" d="M-30 -20 Q0 -8 30 -20 L30 18 Q0 31 -30 18 Z" />
+                    <ellipse class="hflow-object-line" cx="0" cy="18" rx="30" ry="12" />
+                    <text class="hflow-object-symbol" x="0" y="-14" text-anchor="middle">$</text>
+                  </>
+                )}
+                {object === 'person' && (
+                  <>
+                    <circle class="hflow-object-fill" cx="0" cy="-25" r="17" />
+                    <path class="hflow-object-fill" d="M-30 28 Q-22 -2 0 -2 Q22 -2 30 28 Z" />
+                    <path class="hflow-object-line" d="M15 -24 Q34 -19 28 -1 L16 -1" />
+                  </>
+                )}
+                {object === 'inbox' && (
+                  <>
+                    <path class="hflow-object-fill" d="M-38 -22 L38 -22 L30 30 L-30 30 Z" />
+                    <path class="hflow-object-line" d="M-30 -22 L-10 3 L10 3 L30 -22 M-14 -42 L16 -42 L16 -22 L-14 -22 Z" />
+                    <text class="hflow-object-symbol" x="1" y="-28" text-anchor="middle">?</text>
+                  </>
+                )}
+                {object === 'cube' && (
+                  <>
+                    <path class="hflow-object-fill" d="M0 -38 L42 -17 L0 4 L-42 -17 Z" />
+                    <path class="hflow-object-fill hflow-object-side" d="M-42 -17 L0 4 L0 42 L-42 20 Z" />
+                    <path class="hflow-object-fill hflow-object-side-strong" d="M42 -17 L0 4 L0 42 L42 20 Z" />
+                  </>
+                )}
+              </g>
+              <text class="hflow-index" x="0" y="-55" text-anchor="middle">{String(index + 1).padStart(2, '0')}</text>
+              <text class="hflow-label" x="0" y="104" text-anchor="middle">{step.label}</text>
+              <text class="hflow-detail" x="0" y="123" text-anchor="middle">
+                {detailLines.map((line, lineIndex) => (
+                  <tspan x="0" dy={lineIndex === 0 ? 0 : 14}>{line}</tspan>
+                ))}
+              </text>
+            </g>
+          )
+        })
+      }
+      {
+        branchNodes.map(({ step, x, y }) => {
+          const object = objectFor(step.label)
+          const detailLines = splitDetail(step.detail)
+          return (
+            <g class="hflow-node hflow-node--branch" data-tone={step.tone} data-object={object} transform={`translate(${x} ${y}) scale(0.86)`}>
+              <ellipse class="hflow-ground-shadow" cx="0" cy="56" rx="58" ry="18" />
+              <path class="hflow-platform-top" d="M0 6 L54 33 L0 60 L-54 33 Z" />
+              <path class="hflow-platform-front" d="M-54 33 L0 60 L54 33 L54 47 L0 74 L-54 47 Z" />
+              <g class="hflow-object">
+                <path class="hflow-object-fill" d="M0 -38 L42 -17 L0 4 L-42 -17 Z" />
+                <path class="hflow-object-fill hflow-object-side" d="M-42 -17 L0 4 L0 42 L-42 20 Z" />
+                <path class="hflow-object-fill hflow-object-side-strong" d="M42 -17 L0 4 L0 42 L42 20 Z" />
+                {object === 'shield' && <path class="hflow-object-line hflow-check" d="M-16 -5 L-4 8 L20 -20" />}
+                {object === 'warning' && <path class="hflow-object-line" d="M0 -26 L0 -4 M0 8 L0 9" />}
+                {object === 'tool' && <path class="hflow-object-line" d="M-20 20 L20 -20 M10 -30 L28 -12" />}
+                {object === 'coins' && <text class="hflow-object-symbol" x="0" y="-9" text-anchor="middle">$</text>}
+                {object === 'person' && <circle class="hflow-object-line" cx="0" cy="-12" r="14" />}
+                {object === 'checklist' && <path class="hflow-object-line" d="M-18 -10 L-8 0 L12 -22 M-18 14 L18 14" />}
+                {object === 'docs' && <path class="hflow-object-line" d="M-18 -14 L18 -14 M-18 2 L10 2" />}
+                {object === 'answer' && <path class="hflow-object-line" d="M-18 -12 L20 -12 M-18 4 L8 4" />}
+              </g>
+              <text class="hflow-label" x="0" y="104" text-anchor="middle">{step.label}</text>
+              <text class="hflow-detail" x="0" y="123" text-anchor="middle">
+                {detailLines.map((line, lineIndex) => (
+                  <tspan x="0" dy={lineIndex === 0 ? 0 : 14}>{line}</tspan>
+                ))}
+              </text>
+            </g>
+          )
+        })
+      }
+    </g>
+  </svg>
+
+  {scene.note && <p class="hflow-note">{scene.note}</p>}
+</figure>
+
+<style>
+  .hflow {
+    margin: 0;
+    display: grid;
+    gap: 0.9rem;
+    color: var(--color-fg);
+    max-width: 100%;
+  }
+
+  .hflow-head {
+    display: grid;
+    gap: 0.35rem;
+    max-width: 54ch;
+  }
+
+  .hflow-head span {
+    color: var(--color-fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .hflow-head strong {
+    color: var(--color-fg-strong);
+    font-family: var(--font-display);
+    font-size: clamp(1.08rem, 1.8vw, 1.42rem);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  .hflow-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .hflow-path {
+    fill: none;
+    stroke: var(--color-fg-subtle);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-dasharray: 7 8;
+    opacity: 0.72;
+    animation: hflowDash 24s linear infinite;
+  }
+
+  .hflow-path--main {
+    stroke: color-mix(in srgb, var(--color-found-hi) 70%, var(--color-fg-subtle));
+  }
+
+  .hflow-path--branch {
+    stroke: color-mix(in srgb, var(--color-con-hi) 65%, var(--color-fg-subtle));
+    animation-duration: 18s;
+  }
+
+  .hflow-arrow {
+    fill: color-mix(in srgb, var(--color-found-hi) 70%, var(--color-fg-subtle));
+  }
+
+  .hflow-node {
+    --tone: var(--color-found);
+    --tone-hi: var(--color-found-hi);
+  }
+
+  .hflow-node[data-tone="con"] {
+    --tone: var(--color-con);
+    --tone-hi: var(--color-con-hi);
+  }
+
+  .hflow-node[data-tone="pilot"] {
+    --tone: var(--color-pilot);
+    --tone-hi: var(--color-pilot-hi);
+  }
+
+  .hflow-ground-shadow {
+    fill: color-mix(in srgb, var(--tone) 18%, transparent);
+    filter: blur(7px);
+    opacity: 0.58;
+  }
+
+  .hflow-platform-top {
+    fill: color-mix(in srgb, var(--tone-hi) 24%, var(--color-bg));
+    stroke: color-mix(in srgb, white 22%, var(--tone-hi));
+    stroke-width: 0.85;
+    filter: url(#hflowGlow);
+  }
+
+  .hflow-platform-front {
+    fill: color-mix(in srgb, var(--tone) 18%, var(--color-bg));
+    stroke: color-mix(in srgb, var(--tone-hi) 44%, var(--color-line));
+    stroke-width: 0.8;
+  }
+
+  .hflow-object {
+    filter: url(#hflowSoftShadow);
+  }
+
+  .hflow-object-fill {
+    fill: color-mix(in srgb, var(--tone-hi) 34%, var(--color-bg));
+    stroke: color-mix(in srgb, white 24%, var(--tone-hi));
+    stroke-width: 0.9;
+    stroke-linejoin: round;
+  }
+
+  .hflow-object-side {
+    fill: color-mix(in srgb, var(--tone) 18%, var(--color-bg));
+  }
+
+  .hflow-object-side-strong {
+    fill: color-mix(in srgb, var(--tone) 40%, var(--color-bg));
+  }
+
+  .hflow-paper {
+    opacity: 0.82;
+  }
+
+  .hflow-paper-mid {
+    opacity: 0.9;
+  }
+
+  .hflow-paper-top {
+    opacity: 1;
+  }
+
+  .hflow-object-stroke,
+  .hflow-object-line {
+    fill: none;
+    stroke: color-mix(in srgb, white 36%, var(--tone-hi));
+    stroke-width: 2.35;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hflow-object-stroke {
+    stroke-width: 3.4;
+    filter: url(#hflowSoftShadow);
+  }
+
+  .hflow-check {
+    stroke: color-mix(in srgb, white 35%, var(--color-found-hi));
+    stroke-width: 4.2;
+  }
+
+  .hflow-object-dot {
+    fill: var(--tone-hi);
+  }
+
+  .hflow-object-symbol {
+    fill: var(--tone-hi);
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 800;
+  }
+
+  .hflow-index {
+    fill: var(--tone-hi);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .hflow-label {
+    fill: var(--color-fg-strong);
+    font-family: var(--font-display);
+    font-size: 0.96rem;
+    font-weight: 650;
+    letter-spacing: 0;
+  }
+
+  .hflow-detail,
+  .hflow-note {
+    color: var(--color-fg-muted);
+    fill: var(--color-fg-muted);
+    font-size: 0.74rem;
+    line-height: 1.42;
+  }
+
+  .hflow-note {
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  @keyframes hflowDash {
+    to {
+      stroke-dashoffset: -240;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hflow-path {
+      animation: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hflow-svg {
+      min-width: 34rem;
+    }
+
+    .hflow {
+      overflow-x: auto;
+      padding-bottom: 0.4rem;
+    }
+  }
+</style>

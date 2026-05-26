@@ -1,0 +1,309 @@
+---
+/**
+ * The anatomy of a PURISTA service.
+ *
+ * Visual model of how a service is constructed: an outer container holds three
+ * primitive kinds (commands, subscriptions, streams), the event bridge wires
+ * messages between services, and adapters bind concrete infrastructure at
+ * runtime. Pure SVG with CSS animation — no JS required.
+ */
+---
+
+<div class="vsa-wrap" role="img" aria-label="Anatomy of a PURISTA service: a service container with commands, subscriptions and streams, connected through the event bridge to runtime adapters.">
+  <svg viewBox="0 0 980 556" class="vsa-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="vsa-bridge-grad" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="var(--color-found)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--color-found-hi)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--color-found)" stop-opacity="0" />
+      </linearGradient>
+
+      <marker id="vsa-arrowhead" viewBox="0 0 10 10" refX="9" refY="5"
+              markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M 0 1.5 L 8.5 5 L 0 8.5 z" fill="var(--color-found-hi)" />
+      </marker>
+      <marker id="vsa-arrowhead-down" viewBox="0 0 10 10" refX="5" refY="9"
+              markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M 1.5 0 L 5 8.5 L 8.5 0 z" fill="var(--color-found-hi)" />
+      </marker>
+    </defs>
+
+    {/* ============================ Service container ============================ */}
+    <g class="vsa-service">
+      {/* outer card — flat, no halo */}
+      <rect x="20" y="30" width="490" height="360" rx="10"
+            fill="var(--color-bg-elev)" stroke="var(--color-line-strong)" stroke-width="1.2" />
+
+      {/* header */}
+      <text x="44" y="62" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="10" letter-spacing="2.4">SERVICE · CONTAINER</text>
+      <text x="44" y="92" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="24" font-weight="700" letter-spacing="-0.5">OrderService</text>
+      <text x="44" y="116" fill="var(--color-fg-muted)" font-family="Inter" font-size="12.5">A business capability. One bounded context. One deployable unit.</text>
+
+      {/* divider */}
+      <line x1="44" y1="134" x2="490" y2="134" stroke="var(--color-line)" />
+
+      {/* meta strip */}
+      <g transform="translate(44 148)">
+        <text fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8.5" letter-spacing="2">OWNER</text>
+        <text y="15" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">team-commerce</text>
+      </g>
+      <g transform="translate(200 148)">
+        <text fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8.5" letter-spacing="2">VERSION</text>
+        <text y="15" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">2.4.1</text>
+      </g>
+      <g transform="translate(306 148)">
+        <text fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8.5" letter-spacing="2">IAM</text>
+        <text y="15" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">order.*</text>
+      </g>
+      <g transform="translate(408 148)">
+        <text fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8.5" letter-spacing="2">TRACED</text>
+        <text y="15" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="10.5">100%</text>
+      </g>
+
+      {/* Three primitives — each 146 × 170, gap 8, starts at x=44, y=192 */}
+
+      {/* Commands */}
+      <g class="vsa-prim" style="--i:0">
+        <rect x="44" y="192" width="146" height="170" rx="8"
+              fill="color-mix(in srgb, var(--color-found) 6%, var(--color-bg-elev))"
+              stroke="color-mix(in srgb, var(--color-found) 34%, transparent)" stroke-width="1.2" />
+        <rect x="56" y="206" width="22" height="22" rx="6"
+              fill="color-mix(in srgb, var(--color-found) 14%, transparent)"
+              stroke="color-mix(in srgb, var(--color-found) 30%, transparent)" />
+        <g transform="translate(61 211)" fill="none" stroke="var(--color-found-hi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 0 6 L 4.5 11 L 11 1" />
+        </g>
+        <text x="86" y="222" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="13" font-weight="600">Commands</text>
+        <text x="56" y="246" fill="var(--color-fg-muted)" font-family="Inter" font-size="10.5">Request → reply.</text>
+        <text x="56" y="261" fill="var(--color-fg-muted)" font-family="Inter" font-size="10.5">Typed input + output.</text>
+        <rect x="56" y="274" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="64" y="286" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9.5">createOrder</text>
+        <rect x="56" y="294" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="64" y="306" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9.5">cancelOrder</text>
+        <rect x="56" y="314" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="64" y="326" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9.5">getStatus</text>
+        <rect x="56" y="334" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="64" y="346" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9.5">updateAddress</text>
+      </g>
+
+      {/* Subscriptions */}
+      <g class="vsa-prim" style="--i:1">
+        <rect x="198" y="192" width="146" height="170" rx="8"
+              fill="color-mix(in srgb, var(--color-con) 6%, var(--color-bg-elev))"
+              stroke="color-mix(in srgb, var(--color-con) 34%, transparent)" stroke-width="1.2" />
+        <rect x="210" y="206" width="22" height="22" rx="6"
+              fill="color-mix(in srgb, var(--color-con) 14%, transparent)"
+              stroke="color-mix(in srgb, var(--color-con) 30%, transparent)" />
+        <g transform="translate(215 211)" fill="none" stroke="var(--color-con-hi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 0 3 a 6 6 0 0 1 12 0 v 4 a 2 2 0 0 0 2 2 H 0 a 2 2 0 0 0 2 -2 V 3" />
+          <path d="M 5 11 a 2 2 0 0 0 4 0" />
+        </g>
+        <text x="240" y="222" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="13" font-weight="600">Subscriptions</text>
+        <text x="210" y="246" fill="var(--color-fg-muted)" font-family="Inter" font-size="10.5">Listen → react.</text>
+        <text x="210" y="261" fill="var(--color-fg-muted)" font-family="Inter" font-size="10.5">Filtered. Fire-and-forget.</text>
+        <rect x="210" y="274" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="218" y="286" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="9.5">onPaymentMade</text>
+        <rect x="210" y="294" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="218" y="306" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="9.5">onShipped</text>
+        <rect x="210" y="314" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="218" y="326" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="9.5">onInventory</text>
+        <rect x="210" y="334" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="218" y="346" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="9.5">onRefundIssued</text>
+      </g>
+
+      {/* Streams */}
+      <g class="vsa-prim" style="--i:2">
+        <rect x="352" y="192" width="146" height="170" rx="8"
+              fill="color-mix(in srgb, var(--color-pilot) 6%, var(--color-bg-elev))"
+              stroke="color-mix(in srgb, var(--color-pilot) 34%, transparent)" stroke-width="1.2" />
+        <rect x="364" y="206" width="22" height="22" rx="6"
+              fill="color-mix(in srgb, var(--color-pilot) 14%, transparent)"
+              stroke="color-mix(in srgb, var(--color-pilot) 30%, transparent)" />
+        <g transform="translate(369 211)" fill="none" stroke="var(--color-pilot-hi)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M 0 5 h 14" />
+          <path d="M 0 9 h 14" />
+          <path d="M 0 13 h 10" />
+        </g>
+        <text x="394" y="222" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="13" font-weight="600">Streams</text>
+        <text x="364" y="246" fill="var(--color-fg-muted)" font-family="Inter" font-size="10.5">Long-running flows.</text>
+        <text x="364" y="261" fill="var(--color-fg-muted)" font-family="Inter" font-size="10.5">Tokens · NDJSON · SSE.</text>
+        <rect x="364" y="274" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="372" y="286" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9.5">orderTimeline</text>
+        <rect x="364" y="294" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="372" y="306" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9.5">aiSummary</text>
+        <rect x="364" y="314" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="372" y="326" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9.5">liveTracking</text>
+        <rect x="364" y="334" width="122" height="17" rx="4" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="372" y="346" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9.5">exportStream</text>
+      </g>
+    </g>
+
+    {/* Connector: service right edge → bridge left edge at y=277 (primitive mid) */}
+    <line x1="510" y1="277" x2="542" y2="277" fill="none" stroke="var(--color-line)" stroke-width="1.5" />
+    <path d="M 510 277 L 542 277" fill="none" stroke="url(#vsa-bridge-grad)" stroke-width="2.5"
+          class="vsa-pulse" marker-end="url(#vsa-arrowhead)" />
+    <text x="526" y="268" text-anchor="middle" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8" letter-spacing="0.5">msg</text>
+
+    {/* ============================ Event Bridge ============================ */}
+    <g class="vsa-bridge">
+      <rect x="542" y="130" width="418" height="260" rx="10"
+            fill="var(--color-bg-elev)"
+            stroke="var(--color-found)" stroke-width="1.4" stroke-dasharray="6 5" />
+
+      <text x="566" y="158" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="10" letter-spacing="2.4">EVENT BRIDGE</text>
+      <text x="566" y="186" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="19" font-weight="700">Routes. Retries. Filters.</text>
+      <text x="566" y="208" fill="var(--color-fg-muted)" font-family="Inter" font-size="12">Resolves messages by name, sender,</text>
+      <text x="566" y="224" fill="var(--color-fg-muted)" font-family="Inter" font-size="12">principal and tenant. Provider-agnostic.</text>
+
+      {/* Feature bullets */}
+      <g transform="translate(566 244)">
+        <circle cx="5" cy="5.5" r="3" fill="var(--color-found-hi)" />
+        <text x="16" y="10" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Type-safe message routing</text>
+      </g>
+      <g transform="translate(566 262)">
+        <circle cx="5" cy="5.5" r="3" fill="var(--color-con-hi)" />
+        <text x="16" y="10" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Automatic retry + dead letter</text>
+      </g>
+      <g transform="translate(566 280)">
+        <circle cx="5" cy="5.5" r="3" fill="var(--color-pilot-hi)" />
+        <text x="16" y="10" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">OpenTelemetry on every message</text>
+      </g>
+      <g transform="translate(566 298)">
+        <circle cx="5" cy="5.5" r="3" fill="var(--color-found-hi)" />
+        <text x="16" y="10" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">IAM + tenant filtering built-in</text>
+      </g>
+
+      {/* Token pills */}
+      <g transform="translate(566 328)">
+        <rect width="60" height="20" rx="10"
+              fill="color-mix(in srgb, var(--color-found) 14%, transparent)"
+              stroke="color-mix(in srgb, var(--color-found) 32%, transparent)" />
+        <text x="30" y="14" text-anchor="middle" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="0.5">ack</text>
+
+        <rect x="68" width="60" height="20" rx="10"
+              fill="color-mix(in srgb, var(--color-con) 14%, transparent)"
+              stroke="color-mix(in srgb, var(--color-con) 32%, transparent)" />
+        <text x="98" y="14" text-anchor="middle" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="0.5">retry</text>
+
+        <rect x="136" width="86" height="20" rx="10"
+              fill="color-mix(in srgb, var(--color-pilot) 14%, transparent)"
+              stroke="color-mix(in srgb, var(--color-pilot) 32%, transparent)" />
+        <text x="179" y="14" text-anchor="middle" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="0.5">deadletter</text>
+
+        <rect x="230" width="52" height="20" rx="10"
+              fill="color-mix(in srgb, var(--color-fg-muted) 18%, transparent)"
+              stroke="var(--color-line-vivid)" />
+        <text x="256" y="14" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9" letter-spacing="0.5">drop</text>
+      </g>
+    </g>
+
+    {/* Connector: bridge bottom → adapters (vertical at x=752, bridge center) */}
+    <line x1="752" y1="390" x2="752" y2="430" stroke="var(--color-line)" stroke-width="1.5" />
+    <path d="M 752 390 V 430" fill="none" stroke="var(--color-found-hi)" stroke-width="2"
+          class="vsa-pulse-v" marker-end="url(#vsa-arrowhead-down)" />
+    <text x="762" y="413" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="8" letter-spacing="0.5">bind</text>
+
+    {/* ============================ Adapters row ============================ */}
+    <g class="vsa-adapters" transform="translate(20 436)">
+      <text fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5" letter-spacing="2.2">ADAPTERS · BOUND AT RUNTIME · NEVER IMPORTED IN BUSINESS CODE</text>
+      {[
+        { x: 0,   label: 'HTTP',   sub: 'OpenAPI',   tone: 'found' },
+        { x: 135, label: 'AMQP',  sub: 'RabbitMQ',  tone: 'pilot' },
+        { x: 270, label: 'NATS',  sub: 'JetStream',  tone: 'pilot' },
+        { x: 405, label: 'Redis', sub: 'Pub/Sub',    tone: 'con' },
+        { x: 540, label: 'MQTT',  sub: 'MqttBridge',  tone: 'pilot' },
+        { x: 675, label: 'Vault', sub: 'secrets',    tone: 'found' },
+        { x: 808, label: '+',     sub: 'custom',     tone: 'fg' },
+      ].map((a, i) => (
+        <g class="vsa-chip" style={`--i:${i}`} transform={`translate(${a.x} 18)`}>
+          <rect width={a.label === '+' ? 132 : 128} height="78" rx="8"
+                fill="var(--color-bg-elev)"
+                stroke={a.tone === 'fg' ? 'var(--color-line-vivid)' : `color-mix(in srgb, var(--color-${a.tone}) 42%, transparent)`}
+                stroke-width="1.2"
+                stroke-dasharray={a.label === '+' ? '5 5' : undefined} />
+          <text x="16" y="34"
+                fill={a.tone === 'fg' ? 'var(--color-fg-strong)' : `var(--color-${a.tone}-hi)`}
+                font-family="Inter Tight" font-size="16" font-weight="700">{a.label}</text>
+          <text x="16" y="54"
+                fill="var(--color-fg-muted)"
+                font-family="JetBrains Mono" font-size="9.5" letter-spacing="1">{a.sub}</text>
+          <line x1="16" y1="66" x2="76" y2="66"
+                stroke={a.tone === 'fg' ? 'var(--color-line)' : `color-mix(in srgb, var(--color-${a.tone}) 35%, transparent)`} />
+          <circle cx="108" cy="66" r="3"
+                  fill={a.tone === 'fg' ? 'var(--color-fg-subtle)' : `var(--color-${a.tone}-hi)`} />
+        </g>
+      ))}
+    </g>
+  </svg>
+</div>
+
+<style>
+  .vsa-wrap {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    aspect-ratio: 980 / 556;
+  }
+  .vsa-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /*
+   * IMPORTANT: animate `opacity` only — never `transform`. The SVG `<g>`
+   * elements here use the `transform="translate(...)"` attribute for layout,
+   * and a CSS `transform` would override that attribute and stack everything
+   * at the origin.
+   */
+  .vsa-service,
+  .vsa-bridge,
+  .vsa-adapters {
+    opacity: 0;
+    animation: vsa-fade-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .vsa-service  { animation-delay: 0.0s; }
+  .vsa-bridge   { animation-delay: 0.5s; }
+  .vsa-adapters { animation-delay: 0.9s; }
+  @keyframes vsa-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .vsa-prim {
+    opacity: 0;
+    animation: vsa-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(0.2s + var(--i) * 0.12s);
+  }
+  .vsa-chip {
+    opacity: 0;
+    animation: vsa-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(1.1s + var(--i) * 0.08s);
+  }
+
+  .vsa-pulse {
+    stroke-dasharray: 14 200;
+    animation: vsa-flow 2.4s linear infinite;
+    animation-delay: 0.9s;
+  }
+  .vsa-pulse-v {
+    stroke-dasharray: 8 60;
+    animation: vsa-flow-v 1.6s linear infinite;
+    animation-delay: 1.3s;
+  }
+  @keyframes vsa-flow {
+    from { stroke-dashoffset: 214; }
+    to   { stroke-dashoffset: 0; }
+  }
+  @keyframes vsa-flow-v {
+    from { stroke-dashoffset: 68; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vsa-service, .vsa-bridge, .vsa-adapters, .vsa-prim, .vsa-chip {
+      animation: none; opacity: 1;
+    }
+    .vsa-pulse, .vsa-pulse-v { animation: none; }
+  }
+</style>

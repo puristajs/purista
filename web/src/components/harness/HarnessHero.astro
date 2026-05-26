@@ -1,0 +1,37 @@
+---
+import HeroSection from '../sections/HeroSection.astro'
+import type { HeadlineSegment } from '../ui/Headline.astro'
+
+interface CTA {
+	label: string
+	href: string
+	variant?: 'primary' | 'ghost'
+}
+
+interface HeroStripItem {
+	label: string
+	title: string
+}
+
+interface Props {
+	lines: HeadlineSegment[]
+	lede: string
+	ctas?: CTA[]
+	heroStrip?: HeroStripItem[]
+	class?: string
+}
+
+const { lines, lede, ctas = [], heroStrip = [], class: className = '' } = Astro.props
+---
+
+<HeroSection
+  class={`bg-hero-glow harness-hero ${className}`}
+  lines={lines}
+  lede={lede}
+  ctas={ctas}
+  heroStrip={heroStrip}
+>
+  <Fragment slot="visualization">
+    <slot name="visualization" />
+  </Fragment>
+</HeroSection>

@@ -1,0 +1,129 @@
+---
+title: Export service definitions
+description: Export the service definitions to share them and to use them for building connectors or visualizations
+order: 210010
+---
+
+# Exporting Service Definitions
+
+The concept of builders arises from the need to efficiently access and process information about services, commands, subscriptions, events, endpoints, and more, in a way that facilitates sharing and automation. Therefore, PURISTA offers the capability to export information from service builders as easily serializable JSON objects. These objects can be saved, shared, and processed as needed.
+
+Exporting this information is straightforward.
+
+```typescript
+import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+
+import { exportServiceDefinitions } from '@purista/core'
+
+import { pingV1Service } from './service/ping/v1/index.js'
+import { fooV1Service } from './service/foo/v1/index.js'
+import { barV1Service } from './service/bar/v1/index.js'
+
+const exportDefinitions = async () => {
+
+  const serviceBuilders = [pingV1Service, fooV1Service, barV1Service]
+
+  const definitions = await exportServiceDefinitions(serviceBuilders)
+
+  await writeFile(join(process.cwd(), 'definitions.json'), JSON.stringify(definitions, null ,2))
+}
+
+exportDefinitions()
+```
+
+This small script exports the complete service definitions of the provided service builders.
+It includes information about each command and subscription, including the structure of inputs, outputs, and custom events.
+
+The data structure looks like this:
+
+```typescript
+const definitions = {
+  version: 'X.Y.Z', // the PURISTA version used to generate the definition
+  services: {
+    [serviceName]: {
+      [serviceVersion]: {
+        description: 'The description of the service version',
+        deprecated: false, // indicates if the whole service is deprecated
+        commands: {
+          [commandName]: {
+            commandName: 'foo',
+            commandDescription: 'The description for foo',
+            eventBridgeConfig: {
+              durable: false,
+              autoacknowledge: true,
+              shared: true
+            },
+            metadata: {
+              expose: {
+                contentTypeRequest: 'application/json',
+                contentEncodingRequest: 'utf-8',
+                contentTypeResponse: 'application/json',
+                contentEncodingResponse: 'utf-8',
+                inputPayload: {
+                  type: 'object',
+                  properties: {
+                    ping: {
+                      type: 'string',
+                      title: 'Ping input'
+                    }
+                  },
+                  required: [
+                    ping
+                  ],
+                  title: 'ping input payload schema'
+                },
+                parameter: {
+                  // ...Schema
+                },
+                outputPayload: {
+                  // ...schema
+                },
+                deprecated: false, // indicates if command is deprecated
+                http: {
+                  method: 'POST',
+                  path: 'ping',
+                  openApi: {
+                    description: 'the ping command exposed as http endpoint',
+                    summary: 'ping',
+                    isSecure: false,
+                    query: [
+                      {
+                        name: 'query',
+                        required: false
+                      }
+                    ],
+                    tags: ['OpenAPI_TAG'],
+                    additionalStatusCodes: [],
+                    operationId: 'ping'
+                  }
+                }
+              }
+            },
+            eventName: 'fooed', // The event name
+            hooks: {
+              beforeGuard: {},
+              afterGuard: {}
+            },
+            invokes: {
+              [serviceName]: {
+                [serviceVersion]: {
+
+                }
+              }
+            },
+            emitList: {
+              [customEventName]: {
+                // ...payload schema
+              }
+            }
+          }
+        }
+        subscriptions: {
+          [subscriptionName]
+        }
+      }
+    }
+  }
+}
+```

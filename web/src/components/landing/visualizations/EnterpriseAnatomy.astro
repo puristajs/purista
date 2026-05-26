@@ -1,0 +1,255 @@
+---
+/**
+ * "What is PURISTA?" — annotated service diagram with PowerPoint-style
+ * callouts that reveal one at a time on scroll.
+ *
+ * The center is a single service. Six callouts radiate out, each labeling
+ * an enterprise property (typed contracts, owner, IAM, tracing, adapter
+ * sovereignty, runtime portability). Callouts animate in sequence.
+ */
+---
+
+<div class="vea-wrap" role="img" aria-label="A PURISTA service annotated with its six enterprise properties.">
+  <svg viewBox="0 0 1100 720" xmlns="http://www.w3.org/2000/svg" class="vea-svg">
+    <defs>
+      <radialGradient id="vea-core" cx="50%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="var(--color-found)" stop-opacity="0.32" />
+        <stop offset="100%" stop-color="var(--color-found)" stop-opacity="0" />
+      </radialGradient>
+      <linearGradient id="vea-bracket" x1="0" x2="1" y1="0" y2="0">
+        <stop offset="0%" stop-color="var(--color-found-hi)" stop-opacity="0" />
+        <stop offset="50%" stop-color="var(--color-found-hi)" stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--color-found-hi)" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+
+    {/* Faint structural grid */}
+    <g opacity="0.4">
+      <line x1="0" y1="360" x2="1100" y2="360" stroke="var(--color-line)" stroke-dasharray="2 6" />
+      <line x1="550" y1="0" x2="550" y2="720" stroke="var(--color-line)" stroke-dasharray="2 6" />
+    </g>
+
+    {/* ──────────────── Central service ──────────────── */}
+    <g class="vea-core">
+      <rect x="370" y="220" width="360" height="280" rx="22" fill="url(#vea-core)" />
+      <rect x="390" y="248" width="320" height="224" rx="18"
+            fill="var(--color-bg-elev)" stroke="var(--color-line-strong)" stroke-width="1.4" />
+
+      {/* Header */}
+      <text x="412" y="282" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="10" letter-spacing="2.4">A PURISTA SERVICE</text>
+      <text x="412" y="316" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="28" font-weight="700" letter-spacing="0">OrderService</text>
+      <text x="412" y="340" fill="var(--color-fg-muted)" font-family="Inter" font-size="13">One bounded context. One deployable unit.</text>
+
+      <line x1="412" y1="360" x2="688" y2="360" stroke="var(--color-line)" />
+
+      {/* Inner primitives */}
+      <g transform="translate(412 374)">
+        <rect width="84" height="74" rx="10" fill="color-mix(in srgb, var(--color-found) 9%, var(--color-bg-elev))" stroke="color-mix(in srgb, var(--color-found) 42%, transparent)" />
+        <text x="12" y="22" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="1.8">COMMANDS</text>
+        <text x="12" y="44" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">createOrder</text>
+        <text x="12" y="60" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">cancelOrder</text>
+      </g>
+      <g transform="translate(508 374)">
+        <rect width="84" height="74" rx="10" fill="color-mix(in srgb, var(--color-con) 9%, var(--color-bg-elev))" stroke="color-mix(in srgb, var(--color-con) 42%, transparent)" />
+        <text x="12" y="22" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="1.8">SUBSCRIPTIONS</text>
+        <text x="12" y="44" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">onPaid</text>
+        <text x="12" y="60" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">onShipped</text>
+      </g>
+      <g transform="translate(604 374)">
+        <rect width="84" height="74" rx="10" fill="color-mix(in srgb, var(--color-pilot) 9%, var(--color-bg-elev))" stroke="color-mix(in srgb, var(--color-pilot) 42%, transparent)" />
+        <text x="12" y="22" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="1.8">STREAMS</text>
+        <text x="12" y="44" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">timeline</text>
+        <text x="12" y="60" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">summary</text>
+      </g>
+    </g>
+
+    {/* ──────────────── Callouts ──────────────── */}
+    {/*
+       Six callouts. Each has:
+       - a number badge with the tone color
+       - a connector line from the service edge to the callout box
+       - a card with title + 1-line explanation
+       Animation order is bound to --i (1..6)
+    */}
+
+    {/* 1 — TOP LEFT — Typed contracts */}
+    <g class="vea-callout" style="--i:1">
+      <path class="vea-line" d="M 388 260 C 320 230 240 210 168 174" fill="none"
+            stroke="var(--color-found)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="388" cy="260" r="5" fill="var(--color-found)" />
+      <g transform="translate(28 88)">
+        <rect width="240" height="86" rx="12"
+              fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-found) 45%, transparent)" />
+        <g transform="translate(16 16)">
+          <circle r="11" fill="color-mix(in srgb, var(--color-found) 18%, transparent)" stroke="var(--color-found)" />
+          <text y="4" text-anchor="middle" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="11" font-weight="700">01</text>
+        </g>
+        <text x="40" y="32" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">Typed contracts</text>
+        <text x="16" y="58" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Inputs, outputs and</text>
+        <text x="16" y="73" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">events — schema-validated.</text>
+      </g>
+    </g>
+
+    {/* 2 — TOP RIGHT — Explicit owner */}
+    <g class="vea-callout" style="--i:2">
+      <path class="vea-line" d="M 712 260 C 800 230 880 210 950 174" fill="none"
+            stroke="var(--color-found)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="712" cy="260" r="5" fill="var(--color-found)" />
+      <g transform="translate(832 88)">
+        <rect width="240" height="86" rx="12"
+              fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-found) 45%, transparent)" />
+        <g transform="translate(16 16)">
+          <circle r="11" fill="color-mix(in srgb, var(--color-found) 18%, transparent)" stroke="var(--color-found)" />
+          <text y="4" text-anchor="middle" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="11" font-weight="700">02</text>
+        </g>
+        <text x="40" y="32" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">Explicit ownership</text>
+        <text x="16" y="58" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Every service declares</text>
+        <text x="16" y="73" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">team, version, on-call.</text>
+      </g>
+    </g>
+
+    {/* 3 — MIDDLE LEFT — IAM at the boundary */}
+    <g class="vea-callout" style="--i:3">
+      <path class="vea-line" d="M 388 360 C 320 360 240 360 180 360" fill="none"
+            stroke="var(--color-con)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="388" cy="360" r="5" fill="var(--color-con)" />
+      <g transform="translate(28 316)">
+        <rect width="240" height="86" rx="12"
+              fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-con) 45%, transparent)" />
+        <g transform="translate(16 16)">
+          <circle r="11" fill="color-mix(in srgb, var(--color-con) 18%, transparent)" stroke="var(--color-con)" />
+          <text y="4" text-anchor="middle" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="11" font-weight="700">03</text>
+        </g>
+        <text x="40" y="32" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">IAM at the boundary</text>
+        <text x="16" y="58" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Permissions live with the</text>
+        <text x="16" y="73" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">contract. Reviewable by role.</text>
+      </g>
+    </g>
+
+    {/* 4 — MIDDLE RIGHT — Tracing & audit */}
+    <g class="vea-callout" style="--i:4">
+      <path class="vea-line" d="M 712 360 C 800 360 880 360 920 360" fill="none"
+            stroke="var(--color-con)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="712" cy="360" r="5" fill="var(--color-con)" />
+      <g transform="translate(832 316)">
+        <rect width="240" height="86" rx="12"
+              fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-con) 45%, transparent)" />
+        <g transform="translate(16 16)">
+          <circle r="11" fill="color-mix(in srgb, var(--color-con) 18%, transparent)" stroke="var(--color-con)" />
+          <text y="4" text-anchor="middle" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="11" font-weight="700">04</text>
+        </g>
+        <text x="40" y="32" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">Tracing & audit</text>
+        <text x="16" y="58" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">OpenTelemetry on every</text>
+        <text x="16" y="73" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">message. Audit by routing.</text>
+      </g>
+    </g>
+
+    {/* 5 — BOTTOM LEFT — Provider-agnostic */}
+    <g class="vea-callout" style="--i:5">
+      <path class="vea-line" d="M 388 460 C 320 490 240 510 180 546" fill="none"
+            stroke="var(--color-pilot)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="388" cy="460" r="5" fill="var(--color-pilot)" />
+      <g transform="translate(28 546)">
+        <rect width="240" height="86" rx="12"
+              fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-pilot) 45%, transparent)" />
+        <g transform="translate(16 16)">
+          <circle r="11" fill="color-mix(in srgb, var(--color-pilot) 18%, transparent)" stroke="var(--color-pilot)" />
+          <text y="4" text-anchor="middle" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="11" font-weight="700">05</text>
+        </g>
+        <text x="40" y="32" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">Provider-agnostic</text>
+        <text x="16" y="58" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Brokers, secrets, stores —</text>
+        <text x="16" y="73" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">swap by config, not by code.</text>
+      </g>
+    </g>
+
+    {/* 6 — BOTTOM RIGHT — Runtime portable */}
+    <g class="vea-callout" style="--i:6">
+      <path class="vea-line" d="M 712 460 C 800 490 880 510 920 546" fill="none"
+            stroke="var(--color-pilot)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="712" cy="460" r="5" fill="var(--color-pilot)" />
+      <g transform="translate(832 546)">
+        <rect width="240" height="86" rx="12"
+              fill="var(--color-bg-elev)" stroke="color-mix(in srgb, var(--color-pilot) 45%, transparent)" />
+        <g transform="translate(16 16)">
+          <circle r="11" fill="color-mix(in srgb, var(--color-pilot) 18%, transparent)" stroke="var(--color-pilot)" />
+          <text y="4" text-anchor="middle" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="11" font-weight="700">06</text>
+        </g>
+        <text x="40" y="32" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">Runtime-portable</text>
+        <text x="16" y="58" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">Same service on a laptop,</text>
+        <text x="16" y="73" fill="var(--color-fg-muted)" font-family="Inter" font-size="11.5">a cluster, or the edge.</text>
+      </g>
+    </g>
+
+    {/* Bracket caption under the service */}
+    <line x1="370" y1="516" x2="730" y2="516" stroke="url(#vea-bracket)" stroke-width="1.4" class="vea-bracket" />
+    <text x="550" y="538" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="10.5" letter-spacing="2" class="vea-bracket-text">SIX PROPERTIES · ONE STRUCTURE</text>
+  </svg>
+</div>
+
+<style>
+  .vea-wrap {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    aspect-ratio: 1100 / 720;
+  }
+  .vea-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Core appears first */
+  .vea-core {
+    opacity: 0;
+    transform-origin: 550px 380px;
+    animation: vea-core-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes vea-core-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Callouts cascade in */
+  .vea-callout {
+    opacity: 0;
+    animation: vea-callout-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(0.6s + (var(--i) - 1) * 0.32s);
+  }
+  @keyframes vea-callout-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Connector lines draw on first */
+  .vea-line {
+    stroke-dasharray: 240;
+    stroke-dashoffset: 240;
+    animation: vea-line-draw 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(0.5s + (var(--i) - 1) * 0.32s);
+  }
+  @keyframes vea-line-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  .vea-bracket {
+    stroke-dasharray: 360;
+    stroke-dashoffset: 360;
+    animation: vea-line-draw 1s ease-out forwards;
+    animation-delay: 2.6s;
+  }
+  .vea-bracket-text {
+    opacity: 0;
+    animation: vea-callout-in 0.5s ease-out forwards;
+    animation-delay: 2.9s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vea-core, .vea-callout, .vea-line, .vea-bracket, .vea-bracket-text {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

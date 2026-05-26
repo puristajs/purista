@@ -1,0 +1,279 @@
+---
+title: Error Handling
+description: Error handling in typescript backend framework PURISTA
+order: 204020
+---
+
+# Error handling
+
+Error handling is one of the essentials of software development.
+But it's not easy - especially when your complexity is growing.
+
+By implementing only happy path, without proper error handling, maintenance will quickly become a nightmare.
+
+PURISTA is build with error handling in mind and helps developers to build understandable, predictable and secure applications.
+
+Error handling is done in different layers of your application, and errors are also unified for better error handling.
+
+PURISTA has deeply integrated support for [OpenTelemetry](https://opentelemetry.io/).
+This provides an industrial standard way to keep track of errors and issues.
+See [Logging](./logging.md) and [Tracing](../4_open_telemetry/) section.
+
+Errors are automatically added to the OpenTelemetry trace.
+
+There are two error types provided by PURISTA — `HandledError` and `UnhandledError`.
+Both types are logged automatically as soon as they get thrown.
+
+Using these two error types ensures that we have a defined error structure.
+
+## The core distinction
+
+| | `HandledError` | `UnhandledError` |
+|---|---|---|
+| **Meaning** | "I know exactly what went wrong and I'm telling the caller" | "Something unexpected broke — the caller gets a 500" |
+| **Examples** | Entity not found (404), permission denied (403), duplicate ID (409), bad input (400) | Database connection lost, unexpected null, third-party API returned garbage |
+| **Logged at** | `debug` level — expected business flow, not alerting | `error` level — triggers alerts and investigation |
+| **Information returned to caller** | Status code + message + optional data | Status code 500, generic message — no internals leaked |
+
+The practical rule: throw `HandledError` when the caller made a mistake or a predictable condition occurred. Throw (or let PURISTA wrap as) `UnhandledError` when your system encountered something it did not expect and cannot recover from gracefully.
+
+## HandledError
+
+Handled errors are thrown by intention.
+These errors are kind of "Ok, I know there is something wrong, and I give back a proper response".
+
+Use cases are something like an API call requests an entity by ID, but no entity for a given ID exist, or the requester does not have proper permissions to access the entity.
+Also, every failing input validation in PURISTA is a `HandledError`, as we know what happens and how to react.
+
+```typescript
+import { HandledError, UnhandledError, StatusCode } from '@purista/core'
+```
+
+Example:
+
+An API call is invoking a service function like this:
+
+```typescript
+const result = dbRepository.findOne(id)
+
+if (!result) {
+  throw new HandledError(StatusCode.NotFound, 'entity not found')
+}
+
+```
+
+This will give the client who has called the API endpoint a response with HTTP status code **404 NOT FOUND** and with a payload like this:
+
+```json
+{
+  "status": 404,
+  "message": "entity not found"
+}
+```
+
+When you expose commands through the Hono HTTP server, PURISTA does not return this internal framework payload directly.  
+`@purista/hono-http-server` maps framework errors to [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html) at the HTTP boundary.
+
+Example HTTP response from the Hono server:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "entity not found"
+}
+```
+
+By default, the Hono adapter uses `about:blank` for the problem `type` to avoid emitting dead framework-owned URLs.
+If your application publishes problem type documentation, configure `problemDetails.typeBaseUri` in the Hono service to emit stable application-specific URIs instead.
+
+You can provide additional data to that error response:
+
+```typescript
+const result = db.findOne(id)
+
+if (!result) {
+  throw new HandledError(StatusCode.NotFound, 'entity not found', { id })
+}
+
+```
+
+which results in:
+
+```json
+{
+  "status": 404,
+  "message": "entity not found",
+  "data": {
+    "id": 1
+  }
+}
+```
+
+::: warning Be aware:
+A `HandledError` is only logged in `debug` log level, as it is expected, that this kind of error, is part of the regular business logic, which does not need to get persisted in logs or is used for alerting.
+:::
+
+## UnhandledError
+
+Unhandled Errors are more generic errors, where it is not clear, what exactly happened, or how we should handle it.
+
+Let's take an example of a POST endpoint for creating a new Entity.
+
+```typescript
+try{
+  const result = dbRepository.create(payload)
+} catch(err) {
+  if (isConstraintViolation(err)) {
+    // give the client a proper answer: they tried to insert a record but one with the same id already exists
+    throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
+  }
+  throw UnhandledError.from(err, StatusCode.InternalServerError)
+}
+
+```
+
+As you can see, the error is handled in the sense of _"Ok there is something wrong, and I log this error, and I prevent the system to crash"_, but from the client side it is more like _"Oops, something went wrong — this should not happen — try again later"_
+
+## General error handling
+
+It is totally fine, if you reduce your error handling in service functions and subscriptions to HandledErrors only.
+It is JavaScript/typescript - so just let it throw!
+
+Each service function, and each subscription itself, is wrapped by a try-catch, which will convert any error other than a instance of HandledError, into a UnhandledError with error code 500. The error will be logged. And an error message is send. So no worries, that your whole system can break.
+
+You can create subscriptions to track errors, you have the logs, the user gets a proper response, no information will be leaked.
+
+Because of this, the example from `HandledError` is totally fine, and we do not need to write more code here.
+We know that any database issue is handled and returned as **500 INTERNAL SERVER ERROR**.
+
+### Example
+
+**👎 BAD PRACTICE**
+
+Do not catch and handle only *some* errors.
+
+```typescript
+try{
+  const result = db.create(payload)
+} catch(err) {
+  if (isConstraintViolation(err)) {
+    // give the client a proper answer: they tried to insert a record with a duplicate id
+    throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
+  }
+  // ANY NON-CONSTRAINT-ERROR is swallowed, because it is caught but not handled
+  // if it is some other error you never get informed about it
+  // it will not throw and will not be logged
+}
+```
+
+**👍 GOOD PRACTICE**
+
+Handle the things you can, and throw the rest.
+
+```typescript
+try{
+  const result = db.create(payload)
+} catch(error) {
+  if (isConstraintViolation(error)) {
+    // give the client a proper answer, that they tried to insert a record,
+    // but a record with the same id already exists
+    throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
+  }
+  // use static class method .from() to keep the stack trace!
+  throw UnhandledError.from(error, StatusCode.InternalServerError)
+}
+```
+
+
+## Validation errors
+
+Each service function has input and output validation enforced by design.
+
+Data which is not included in the schema is automatically stripped out and not available inside the service function.
+Same for function outputs - unknown is stripped out to prevent exposing sensitive data to the outside in result payload.
+
+### Input validation
+
+If an input validation fails (parameter or payload validation), the validation error is transformed into a HandledError with status **400 BAD REQUEST** and a more specific error detail is available in error response data object.
+This is ok, because the one who invoked the function, does already know the input data, and we are safe to give some hints, what data is violating the schema.
+
+PURISTA is passing the `issues` property if Zod error instances into the `data` field. See [Zod - Error handling](https://zod.dev/?id=error-handling).
+
+```json
+{
+  "status": 400,
+  "message": "Bad request",
+  "data": [
+    {
+      "code": "invalid_type",
+      "expected": "string",
+      "received": "number",
+      "path": [ "name" ],
+      "message": "Expected string, received number"
+    }
+  ]
+}
+```
+
+If the same validation error is returned through the Hono HTTP adapter, it is exposed as RFC 9457 Problem Details with the validation entries in `errors`:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Bad Request",
+  "errors": [
+    {
+      "code": "invalid_type",
+      "expected": "string",
+      "received": "number",
+      "path": ["name"],
+      "message": "Expected string, received number"
+    }
+  ]
+}
+```
+
+With explicit problem type configuration, the same response can expose application-owned URIs such as `https://api.example.com/problems/validation-error`.
+
+## HTTP representation in `@purista/hono-http-server`
+
+The Hono adapter exposes framework-generated HTTP errors as:
+
+- `application/problem+json` as the canonical machine-readable format
+- `text/markdown` when the client explicitly sends `Accept: text/markdown`
+
+The Markdown representation is rendered from the same normalized problem object. It is useful for agents and debugging tools, but JSON remains the source HTTP contract.
+
+### Output validation
+
+On the other hand, output validation errors are transformed into UnhandledError with status **500 INTERNAL SERVER ERROR** and no additional data is provided within the error response.
+This way, we can be sure, that we do not accidentally expose data or further information which allows attackers to get more insights of our system.
+
+### Errors in subscriptions
+
+Subscriptions should implement their own input validation.
+Because a subscription can receive different message types, depending on the subscription settings, there is currently no way to automate it.
+
+If a subscription throws some error - other than a `HandledError`, it is automatically transformed into an UnhandledError and the original error gets logged.
+
+
+
+## Error tracking
+
+In general, there are two supported options available to track errors in PURISTA.
+
+### OpenTelemetry and logging
+
+The default and recommended way to track errors in a PURISTA based application is to use OpenTelemetry together with structured logging.
+
+This is the right integration point for tooling such as [Sentry](https://sentry.io/), alerting pipelines, or custom operational automation.
+Wire these systems at the host/runtime layer instead of adding side-channel logic to service handlers.
+
+### Tracking of error messages
+
+If your application needs downstream business reactions to failures, emit explicit PURISTA custom events with `.canEmit(...)` and `context.emit(...)`.
+This keeps the event contract schema-first and aligned with subscriptions and transport delivery instead of relying on in-process runtime hooks.

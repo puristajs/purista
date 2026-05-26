@@ -1,0 +1,155 @@
+---
+title: The Queue Builder
+description: Define typed queue contracts with lifecycle config, execution profiles, and result policies.
+---
+
+`getQueueBuilder` (called on a service builder) declares what work a queue can perform, how it is typed, and how jobs behave during their lifecycle. It does not define how the work is executed — that is the worker's job.
+
+## Builder workflow
+
+```mermaid
+flowchart LR
+    A[Call getQueueBuilder] --> B[Define Payload Schema]
+    B --> C[Set Lifecycle Config]
+    C --> D[Set Execution Profile]
+    D --> E[Set Result Policy]
+    E --> F[Add to Service]
+```
+
+## Step 1 — Create the builder
+
+```typescript [imageQueue.ts]
+import { imageV1ServiceBuilder } from '../imageV1ServiceBuilder.js'
+
+const imageQueue = imageV1ServiceBuilder.getQueueBuilder(
+  'processImage',
+  'Process uploaded images in the background',
+)
+```
+
+## Step 2 — Define the payload schema
+
+```typescript [imageQueue.ts]
+import { z } from 'zod'
+
+const imagePayloadSchema = z.object({
+  imageUrl: z.string().url(),
+  maxWidth: z.number().optional(),
+  maxHeight: z.number().optional(),
+  format: z.enum(['jpeg', 'png', 'webp']).default('jpeg'),
+})
+
+imageQueue.addPayloadSchema(imagePayloadSchema)
+```
+
+## Step 3 — Set lifecycle configuration
+
+```typescript [imageQueue.ts]
+imageQueue.setLifecycleConfig({
+  maxAttempts: 4,                  // 1 initial + 3 retries
+  visibilityTimeoutMs: 30_000,     // lock expires after 30s if worker goes silent
+  retryWindowMs: 3_600_000,        // retry window: 1 hour
+  poisonMessageFailureThreshold: 10,
+  poisonMessageAction: 'pause-worker',
+})
+```
+
+| Option | Description |
+|---|---|
+| `maxAttempts` | Total attempts before the job is dead-lettered (1 initial + retries) |
+| `visibilityTimeoutMs` | How long a job is locked to a worker before it becomes visible again |
+| `heartbeatIntervalMs` | How often workers should heartbeat to hold the lock |
+| `retryWindowMs` | Total window within which retries are allowed |
+| `retryStrategy` | Retry strategy object controlling backoff behavior |
+| `poisonMessageFailureThreshold` | Failure count before treating as poison |
+| `poisonMessageAction` | `'none'` or `'pause-worker'` |
+
+## Step 4 — Set execution profile
+
+```typescript [imageQueue.ts]
+imageQueue.setExecutionProfile('longRunning', {
+  maxRuntimeMs: 300_000, // 5 minutes
+  strict: false, // allow slight overrun
+})
+```
+
+Use `longRunning` for jobs that may take minutes or hours. Use the default profile for quick tasks.
+
+## Step 5 — Set result policy
+
+```typescript [imageQueue.ts]
+imageQueue.setResultPolicy({
+  mode: 'event',
+  successEventName: 'imageProcessed',
+})
+// Or use the convenience helper:
+// imageQueue.emitResultAsEvent('imageProcessed')
+```
+
+| Mode | Behavior |
+|---|---|
+| `none` | Job completes silently |
+| `event` | Emit a custom event on success |
+| `state` | Store result for later retrieval |
+| `state-and-event` | Both emit and store |
+
+## Step 6 — Add to the service
+
+```typescript [imageV1Service.ts]
+import { imageV1ServiceBuilder } from './imageV1ServiceBuilder.js'
+import { imageQueue } from './queues/imageQueue.js'
+import { imageWorker } from './workers/imageWorker.js'
+
+export const imageV1Service = imageV1ServiceBuilder
+  .addQueueDefinition(imageQueue)
+  .addQueueWorkerDefinition(imageWorker)
+```
+
+```typescript [index.ts]
+const imageService = await imageV1ServiceBuilder.getInstance(eventBridge, { queueBridge })
+await imageService.start()
+```
+
+## Full example
+
+```typescript [imageQueue.ts]
+import { z } from 'zod'
+import { imageV1ServiceBuilder } from '../imageV1ServiceBuilder.js'
+
+export const imageQueue = imageV1ServiceBuilder
+  .getQueueBuilder(
+    'processImage',
+    'Process uploaded images in the background',
+  )
+  .addPayloadSchema(z.object({
+    imageUrl: z.string().url(),
+    maxWidth: z.number().optional(),
+    maxHeight: z.number().optional(),
+    format: z.enum(['jpeg', 'png', 'webp']).default('jpeg'),
+  }))
+  .setLifecycleConfig({
+    maxAttempts: 4,
+    visibilityTimeoutMs: 30_000,
+    retryWindowMs: 3_600_000,
+    poisonMessageFailureThreshold: 5,
+    poisonMessageAction: 'pause-worker',
+  })
+  .setExecutionProfile('longRunning', {
+    maxRuntimeMs: 300_000,
+    strict: false,
+  })
+  .setResultPolicy({
+    mode: 'event',
+    successEventName: 'imageProcessed',
+  })
+```
+
+## Registering with the service
+
+Pass the queue builder directly to `.addQueueDefinition()` on the service:
+
+```typescript [imageV1Service.ts]
+export const imageV1Service = imageV1ServiceBuilder
+  .addQueueDefinition(imageQueue)
+  .addQueueWorkerDefinition(imageWorker)
+```

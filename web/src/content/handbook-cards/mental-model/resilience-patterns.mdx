@@ -1,0 +1,197 @@
+---
+title: Resilience Through Patterns
+description: Fault tolerance, retry logic, graceful failure, and delivery semantics — built into the framework, not bolted on afterwards.
+---
+
+Resilience in PURISTA is not an afterthought. Every message has delivery semantics, every handler has retry boundaries, and every bridge exposes health diagnostics. The framework defaults to safe behavior and fails fast when guarantees cannot be met.
+
+## Delivery semantics
+
+End-to-end message delivery is a combination of three factors:
+
+1. The selected event bridge
+2. Broker and component configuration
+3. Your handler design (idempotency, retries, side effects)
+
+### Common guarantee modes
+
+| Mode | Meaning | When to use |
+|---|---|---|
+| **At-most-once** | Lower overhead, messages can be lost | Telemetry, metrics, non-critical events |
+| **At-least-once** | Safer delivery, duplicates expected | Business events, payment processing |
+| **Exactly-once** | Rarely guaranteed end-to-end | Requires idempotent handlers + deduplication |
+
+<div class="callout callout--info">
+  <div class="callout__title">Exactly-once is a handler property</div>
+  <p>No broker can guarantee exactly-once delivery across distributed side effects. PURISTA provides the tools (idempotency keys, deduplication, idempotent handlers); you provide the design.</p>
+</div>
+
+## Safe defaults
+
+PURISTA defaults to strict startup validation for reliability-sensitive semantics:
+
+- If a handler requests delivery behavior a bridge cannot honor, **startup fails** in strict mode
+- Late command responses after timeout are **ignored with a warning**
+- Stream sessions use **bounded timeout handling** and terminal-frame enforcement
+- Queue workers apply **bounded retries** and dead-letter routing using lifecycle defaults
+
+### Canonical defaults
+
+| Area | Default | Behavior |
+|---|---|---|
+| Command invocation timeout | Bridge `defaultCommandTimeout` (30s) | Caller timeout is terminal; late responses ignored |
+| Stream invocation timeout | Bridge `defaultCommandTimeout` | Late frames after timeout/terminal are ignored |
+| Subscription failure handling | `mode: 'strict'`, `maxAttempts: 1` | Startup rejects unsupported semantics |
+| Queue lifecycle retry | `maxAttempts: 10`, exponential backoff, `retryWindowMs: 24h` | Retries stay bounded; route to DLQ after exhaustion |
+
+## Subscription control outcomes
+
+Subscription handlers can return explicit control outcomes:
+
+| Outcome | Meaning |
+|---|---|
+| `ack` | Settle as successful |
+| `retry` | Request retry, optionally with `delayMs` |
+| `deadLetter` | Route directly to dead-letter handling |
+| `drop` | Settle and discard with a warning |
+| `stop-consumer` | Pause the subscription consumer; requires explicit resume |
+
+```typescript [subscription.ts]
+.setSubscriptionFunction(async function (context, payload) {
+  try {
+    await context.resources.db.processEvent(payload)
+    return { status: 'ack' }
+  } catch (err) {
+    if (err.code === 'CONFLICT') {
+      return { status: 'deadLetter' }
+    }
+    return { status: 'retry', delayMs: 5000 }
+  }
+})
+```
+
+## Health and paused-state semantics
+
+Service health includes paused operational state as first-class observability:
+
+- Paused queue workers are in `ServiceHealthState.pausedQueueWorkers`
+- Paused subscription consumers are in `ServiceHealthState.pausedSubscriptionConsumers`
+- If either list is non-empty, service health is `warn`
+
+```typescript [health-check.ts]
+const health = await service.getHealth()
+console.log(health.state) // 'healthy' | 'warn' | 'unhealthy'
+console.log(health.pausedQueueWorkers)
+console.log(health.pausedSubscriptionConsumers)
+```
+
+## In-flight diagnostics
+
+Event bridges expose in-flight diagnostics by work kind:
+
+```typescript [diagnostics.ts]
+const diagnostics = service.getInFlightDiagnostics()
+console.log(diagnostics.total) // all in-flight handlers
+console.log(diagnostics.byKind) // { command: 3, subscription: 1, stream: 0, generic: 0 }
+```
+
+Use this during graceful shutdown to verify drain reached zero before teardown.
+
+## Stream reliability
+
+Stream consumers should handle terminal frames explicitly:
+
+- `complete` — normal end of stream
+- `error` — terminal failure
+- `cancel` — consumer cancelled (normal control path)
+
+Expect exactly one terminal state per session.
+
+```typescript [stream-consumer.ts]
+for await (const frame of stream) {
+  if (frame.type === 'chunk') {
+    processChunk(frame.payload)
+  } else if (frame.type === 'complete') {
+    console.log('stream completed')
+    break
+  } else if (frame.type === 'error') {
+    console.error('stream error:', frame.error)
+    break
+  } else if (frame.type === 'cancel') {
+    console.log('stream cancelled by consumer')
+    break
+  }
+}
+```
+
+## Designing for resilience
+
+### Idempotency
+
+Make command and subscription side effects idempotent:
+
+```typescript [idempotent.ts]
+// ✅ Idempotent: same input produces same result
+.setCommandFunction(async function (context, payload) {
+  const key = `user:${payload.email}`
+  const existing = await context.resources.db.getByKey(key)
+  if (existing) {
+    return { userId: existing.id } // already created
+  }
+  const userId = await context.resources.db.create(payload)
+  return { userId }
+})
+```
+
+### Timeout budgets
+
+Set explicit timeout and retry budgets:
+
+```typescript [timeout.ts]
+userServiceV1ServiceBuilder
+  .getCommandBuilder('processPayment', 'process a payment')
+  .setCommandFunction(async function (context, payload) {
+    // Business logic
+  })
+  // Override default timeout for this specific command
+  // Timeout is configured on the bridge or via command metadata
+```
+
+### Graceful shutdown
+
+```typescript [shutdown.ts]
+import { gracefulShutdown } from '@purista/core'
+
+gracefulShutdown(logger, [
+  eventBridge,
+  userService,
+  emailService,
+])
+```
+
+`gracefulShutdown` takes a logger, an ordered array of destroyables, and an optional timeout in ms (default 30 000). Each entry is destroyed in sequence.
+
+## When to focus on resilience
+
+- Production systems where downtime is costly
+- Financial transactions (payments, billing, inventory)
+- Multi-step workflows where partial failure is expensive
+- Systems with external dependencies (third-party APIs, databases)
+
+## Common pitfalls
+
+- **Non-idempotent side effects.** Without idempotency, retries create duplicate data.
+- **Ignoring timeout boundaries.** Default timeouts may not match your SLA.
+- **Assuming exactly-once delivery.** Design for at-least-once with idempotency.
+- **Not testing failure paths.** Test retries, timeouts, and dead-letter routing in CI.
+- **Missing drain verification.** Always check in-flight diagnostics before shutdown.
+
+## Checklist
+
+- [ ] All command and subscription side effects are idempotent
+- [ ] Timeout and retry budgets are defined per handler
+- [ ] Dead-letter routing is configured for queue workers
+- [ ] Graceful shutdown waits for in-flight messages
+- [ ] Health checks include paused state
+- [ ] Failure paths are tested in CI (not just happy path)
+- [ ] Operational runbook documents outage and reconnect behavior

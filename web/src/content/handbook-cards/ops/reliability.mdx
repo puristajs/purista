@@ -1,0 +1,174 @@
+---
+title: Reliability
+description: Error handling, retries, circuit breakers, and graceful failure — built into PURISTA's message model.
+---
+
+Reliability in PURISTA is built on typed errors, automatic retries, bounded failure handling, and graceful shutdown. The framework separates expected errors (HandledError) from unexpected failures (UnhandledError) and provides clear semantics for each.
+
+## Error types
+
+PURISTA provides two error types:
+
+| Type | Meaning | HTTP Status | Log Level | Retries |
+|---|---|---|---|---|
+| **HandledError** | Expected business error | Configurable (404, 409, etc.) | Debug | No — not retried |
+| **UnhandledError** | Unexpected failure | 500 | Error | Yes — retried up to `maxAttempts` |
+
+`HandledError` signals an expected business condition (user not found, conflict, forbidden). These are not retried — retrying would produce the same result. `UnhandledError` signals an unexpected infrastructure or code failure where a retry may succeed.
+
+### HandledError
+
+Use for expected business conditions:
+
+```typescript [handled.ts]
+import { HandledError, StatusCode } from '@purista/core'
+
+.setCommandFunction(async function (context, payload) {
+  const user = await context.resources.db.findById(payload.userId)
+  if (!user) {
+    throw new HandledError(StatusCode.NotFound, 'User not found')
+  }
+  return user
+})
+```
+
+The HTTP adapter returns RFC 9457 Problem Details:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "User not found"
+}
+```
+
+### UnhandledError
+
+Use for unexpected failures:
+
+```typescript [unhandled.ts]
+try {
+  const result = await context.resources.db.create(payload)
+  return result
+} catch (err) {
+  if (isConstraintViolation(err)) {
+    throw new HandledError(StatusCode.Conflict, 'User already exists')
+  }
+  throw UnhandledError.from(err, StatusCode.InternalServerError)
+}
+```
+
+## Validation errors
+
+Input validation failures are automatically converted to HandledError with status **400 Bad Request**:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Bad Request",
+  "errors": [
+    {
+      "code": "invalid_type",
+      "expected": "string",
+      "received": "number",
+      "path": ["name"],
+      "message": "Expected string, received number"
+    }
+  ]
+}
+```
+
+Output validation failures are **500 Internal Server Error** — never expose internal schema details.
+
+## Retry and circuit breaker
+
+Configure retries per command or subscription:
+
+```typescript [retry.ts]
+.adviceConsumerFailureHandling({
+  mode: 'strict',
+  maxAttempts: 5,
+  retryDelayMs: 1000,
+  deadLetterTarget: 'my-command.dead-letter',
+})
+```
+
+For queue workers:
+
+```typescript [queue-retry.ts]
+.setLifecycleConfig({
+  visibilityTimeoutMs: 60_000,
+  maxAttempts: 10,
+  retryDelayMs: 5000,
+})
+```
+
+## Graceful shutdown
+
+`gracefulShutdown(logger, destroyables, timeoutMs?)` registers `SIGTERM` and `SIGINT` handlers and sequentially destroys each entry. The optional third argument sets the maximum wait time in milliseconds before a forced exit (default: `30000`).
+
+```typescript [shutdown.ts]
+import { gracefulShutdown } from '@purista/core'
+
+const services = [userService, emailService]
+gracefulShutdown(logger, [
+  honoService.prepareDestroy(),
+  eventBridge,
+  ...services,
+  {
+    name: 'close-http-socket',
+    destroy: async () => await serverInstance.stop(),
+  },
+], 30_000) // optional: default is 30 000 ms
+```
+
+Steps:
+1. Stop accepting new HTTP requests
+2. Drain the event bridge
+3. Shut down services
+4. Close sockets
+5. Release resources
+
+## Health checks
+
+```typescript [health.ts]
+honoService.setHealthFunction(async function () {
+  if (!isDatabaseHealthy()) {
+    throw new Error('Database unreachable')
+  }
+})
+```
+
+Service health includes:
+- Event bridge connectivity
+- Store connectivity
+- Paused subscription consumers
+- Paused queue workers
+
+## When to focus on reliability
+
+- Production systems where downtime is costly
+- Financial transactions (payments, billing, inventory)
+- Multi-step workflows where partial failure is expensive
+- Systems with external dependencies (third-party APIs, databases)
+
+## Common pitfalls
+
+- **Swallowing errors.** Catch only what you can handle. Let the rest throw.
+- **Non-idempotent side effects.** Without idempotency, retries create duplicates.
+- **Ignoring timeout boundaries.** Default timeouts may not match your SLA.
+- **Missing graceful shutdown.** In-flight requests are dropped without proper shutdown.
+
+## Checklist
+
+- [ ] HandledError is used for expected business errors
+- [ ] UnhandledError is used for unexpected failures
+- [ ] Input validation errors return 400 with helpful details
+- [ ] Output validation errors return 500 without internal details
+- [ ] Retry policies are configured per handler
+- [ ] Graceful shutdown waits for in-flight messages
+- [ ] Health checks verify all critical dependencies
+- [ ] Error tracking is wired to OpenTelemetry or Sentry

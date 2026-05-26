@@ -1,0 +1,452 @@
+---
+/**
+ * Site Stage Visualization — per-stage animated SVG scenes for Scrolly.
+ *
+ * Five focused mini-visualizations that illustrate the Definition→Implementation
+ * journey. Each is rendered as a self-contained inline SVG with CSS-driven
+ * animations so all five can mount at once without WebGL/React overhead.
+ *
+ * Usage: <StageViz stage="declare" />
+ */
+interface Props {
+	stage: 'declare' | 'verify' | 'observe' | 'operate' | 'approve'
+}
+const { stage } = Astro.props
+---
+
+{stage === 'declare' && (
+  <div class="vsv vsv-declare">
+    <svg viewBox="0 0 460 360" role="img" aria-label="A form submission is transformed into a typed, owned contract.">
+      <defs>
+        <linearGradient id="vsv-d-arrow" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stop-color="var(--color-found)" stop-opacity="0" />
+          <stop offset="50%" stop-color="var(--color-found-hi)" stop-opacity="1" />
+          <stop offset="100%" stop-color="var(--color-found)" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Source: form */}
+      <g class="vsv-card vsv-d-form">
+        <rect x="14" y="40" width="170" height="220" rx="14" fill="var(--color-bg-elev)" stroke="var(--color-line-strong)" />
+        <text x="32" y="64" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">INPUT · FORM</text>
+        <rect x="32" y="82" width="134" height="34" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="42" y="103" fill="var(--color-fg)" font-family="Inter" font-size="11">email</text>
+        <rect x="32" y="124" width="134" height="34" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="42" y="145" fill="var(--color-fg)" font-family="Inter" font-size="11">role</text>
+        <rect x="32" y="166" width="134" height="34" rx="6" fill="var(--color-bg-sunk)" stroke="var(--color-line)" />
+        <text x="42" y="187" fill="var(--color-fg)" font-family="Inter" font-size="11">manager</text>
+        <rect x="32" y="216" width="64" height="30" rx="6" fill="var(--color-fg)" />
+        <text x="64" y="236" text-anchor="middle" fill="var(--color-bg)" font-family="Inter" font-size="11" font-weight="600">Submit</text>
+      </g>
+
+      {/* Animated arrow with caption */}
+      <g>
+        <line x1="190" y1="150" x2="270" y2="150" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+        <line x1="190" y1="150" x2="270" y2="150" stroke="url(#vsv-d-arrow)" stroke-width="2" class="vsv-d-pulse" />
+        <text x="230" y="138" text-anchor="middle" fill="var(--color-fg-subtle)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">DECLARE</text>
+      </g>
+
+      {/* Target: typed contract */}
+      <g class="vsv-card vsv-d-contract">
+        <rect x="278" y="20" width="168" height="260" rx="14" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.4" />
+        <text x="296" y="44" fill="var(--color-found-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">CONTRACT · TYPED</text>
+
+        <g class="vsv-d-line" style="--i:0">
+          <text x="296" y="72" fill="var(--color-con-hi)" font-family="JetBrains Mono" font-size="10.5">type </text>
+          <text x="328" y="72" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">CreateUser = {`{`}</text>
+        </g>
+        <g class="vsv-d-line" style="--i:1">
+          <text x="308" y="92" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">email: </text>
+          <text x="346" y="92" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="10.5">Email</text>
+        </g>
+        <g class="vsv-d-line" style="--i:2">
+          <text x="308" y="110" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">role: </text>
+          <text x="340" y="110" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="10.5">Role</text>
+        </g>
+        <g class="vsv-d-line" style="--i:3">
+          <text x="308" y="128" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">manager: </text>
+          <text x="358" y="128" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="10.5">UserId</text>
+        </g>
+        <g class="vsv-d-line" style="--i:4">
+          <text x="296" y="148" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="10.5">{`}`}</text>
+        </g>
+
+        <line x1="296" y1="170" x2="428" y2="170" stroke="var(--color-line)" />
+
+        <g class="vsv-d-line" style="--i:5">
+          <text x="296" y="190" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5">owner:</text>
+          <text x="332" y="190" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="9.5">team-iam</text>
+        </g>
+        <g class="vsv-d-line" style="--i:6">
+          <text x="296" y="208" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5">iam:</text>
+          <text x="320" y="208" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="9.5">user.create</text>
+        </g>
+        <g class="vsv-d-line" style="--i:7">
+          <text x="296" y="226" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5">trace:</text>
+          <text x="328" y="226" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="9.5">auto-emit</text>
+        </g>
+        <g class="vsv-d-line" style="--i:8">
+          <text x="296" y="244" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5">audit:</text>
+          <text x="328" y="244" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9.5">on</text>
+        </g>
+        <g class="vsv-d-line" style="--i:9">
+          <text x="296" y="262" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5">retries:</text>
+          <text x="332" y="262" fill="var(--color-fg)" font-family="JetBrains Mono" font-size="9.5">3 · exp</text>
+        </g>
+      </g>
+
+      <text x="230" y="320" text-anchor="middle" fill="var(--color-fg-muted)" font-family="Inter" font-size="12">Shape · Owner · IAM · Audit — declared once.</text>
+    </svg>
+  </div>
+)}
+
+{stage === 'verify' && (
+  <div class="vsv vsv-verify">
+    <svg viewBox="0 0 460 360" role="img" aria-label="Five reviewer gates light up in sequence.">
+      <defs>
+        <linearGradient id="vsv-v-rail" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="var(--color-found)" stop-opacity="0" />
+          <stop offset="50%" stop-color="var(--color-found-hi)" stop-opacity="1" />
+          <stop offset="100%" stop-color="var(--color-pilot-hi)" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Vertical rail */}
+      <rect x="64" y="20" width="2" height="320" fill="rgba(255,255,255,0.08)" />
+      <rect x="64" y="20" width="2" height="320" fill="url(#vsv-v-rail)" class="vsv-v-rail" />
+
+      {[
+        { y: 38,  label: 'Security · data flow',         tag: 'CISO',         tone: 'found' },
+        { y: 100, label: 'Operations · runtime behavior', tag: 'CTO',         tone: 'pilot' },
+        { y: 162, label: 'Compliance · audit trail',     tag: 'COMPLIANCE',   tone: 'con' },
+        { y: 224, label: 'Architecture · boundaries',    tag: 'ARCH',         tone: 'found' },
+        { y: 286, label: 'Platform · IAM',               tag: 'PLATFORM',     tone: 'pilot' },
+      ].map((g, i) => (
+        <g class="vsv-v-gate" style={`--i:${i}`}>
+          {/* Connector */}
+          <line x1="66" y1={g.y + 18} x2="106" y2={g.y + 18} stroke="rgba(255,255,255,0.1)" />
+          {/* Check ring */}
+          <circle cx="65" cy={g.y + 18} r="11" fill="var(--color-bg)" stroke="var(--color-line-vivid)" />
+          <g class="vsv-v-tick" style={`--tone: var(--color-${g.tone}); --tone-hi: var(--color-${g.tone}-hi);`}>
+            <circle cx="65" cy={g.y + 18} r="11" fill="none" stroke="var(--tone-hi)" stroke-width="1.8" />
+            <path d={`M ${60} ${g.y + 18} l 4 4 l 7 -8`} fill="none" stroke="var(--tone-hi)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+          {/* Gate card */}
+          <rect x="116" y={g.y} width="320" height="36" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-line)" />
+          <text x="132" y={g.y + 21} fill="var(--color-fg)" font-family="Inter" font-size="12" font-weight="500">{g.label}</text>
+          <rect x={420 - 76} y={g.y + 10} width="76" height="16" rx="3" fill={`color-mix(in srgb, var(--color-${g.tone}) 18%, transparent)`} />
+          <text x={420 - 38} y={g.y + 22} text-anchor="middle" fill={`var(--color-${g.tone}-hi)`} font-family="JetBrains Mono" font-size="9" letter-spacing="1.5">{g.tag}</text>
+        </g>
+      ))}
+    </svg>
+  </div>
+)}
+
+{stage === 'observe' && (
+  <div class="vsv vsv-observe">
+    <svg viewBox="0 0 460 360" role="img" aria-label="Live traces, metrics, and logs streaming from a service.">
+      <defs>
+        <linearGradient id="vsv-o-line" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stop-color="var(--color-pilot)" stop-opacity="0" />
+          <stop offset="50%" stop-color="var(--color-pilot-hi)" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="var(--color-pilot)" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Service node */}
+      <g>
+        <rect x="22" y="142" width="120" height="76" rx="12" fill="var(--color-bg-elev)" stroke="var(--color-pilot)" />
+        <text x="82" y="170" text-anchor="middle" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">SERVICE</text>
+        <text x="82" y="190" text-anchor="middle" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="15" font-weight="600">order</text>
+        <circle cx="138" cy="158" r="4" fill="var(--color-pilot)" class="vsv-o-pulse-dot" />
+      </g>
+
+      {/* Output channels */}
+      {[
+        { y: 50,  label: 'OTel traces', tag: 'trace', tone: 'pilot' },
+        { y: 130, label: 'Metrics',     tag: 'metric', tone: 'found' },
+        { y: 210, label: 'Logs',        tag: 'log',    tone: 'con' },
+        { y: 290, label: 'Audit',       tag: 'audit',  tone: 'pilot' },
+      ].map((c, i) => (
+        <g class="vsv-o-row" style={`--i:${i}`}>
+          {/* Path */}
+          <path
+            d={`M 142 180 C 200 180 220 ${c.y + 26} 290 ${c.y + 26}`}
+            fill="none"
+            stroke="rgba(255,255,255,0.06)"
+          />
+          <path
+            d={`M 142 180 C 200 180 220 ${c.y + 26} 290 ${c.y + 26}`}
+            fill="none"
+            stroke={`var(--color-${c.tone}-hi)`}
+            stroke-width="1.6"
+            stroke-linecap="round"
+            class="vsv-o-flow"
+            style={`--delay:${i * 0.5}s`}
+          />
+          {/* Sink card */}
+          <rect x="290" y={c.y + 6} width="156" height="40" rx="10" fill="var(--color-bg-elev)" stroke="var(--color-line)" />
+          <rect x="300" y={c.y + 18} width="14" height="14" rx="3" fill={`color-mix(in srgb, var(--color-${c.tone}) 18%, transparent)`} stroke={`var(--color-${c.tone})`} />
+          <text x="324" y={c.y + 30} fill="var(--color-fg)" font-family="Inter" font-size="12" font-weight="500">{c.label}</text>
+          <text x="324" y={c.y + 42} fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9.5" letter-spacing="1.5">{c.tag}.live</text>
+          {/* Tick particle */}
+          <circle r="4" fill={`var(--color-${c.tone}-hi)`} class="vsv-o-bead" style={`--delay:${i * 0.4 + 0.2}s`}>
+            <animateMotion
+              dur="2.2s"
+              repeatCount="indefinite"
+              begin={`${i * 0.4}s`}
+              path={`M 142 180 C 200 180 220 ${c.y + 26} 290 ${c.y + 26}`}
+            />
+          </circle>
+        </g>
+      ))}
+    </svg>
+  </div>
+)}
+
+{stage === 'operate' && (
+  <div class="vsv vsv-operate">
+    <svg viewBox="0 0 460 360" role="img" aria-label="Infrastructure adapters swap at runtime around an unchanged service core.">
+      <defs>
+        <radialGradient id="vsv-op-core" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="var(--color-found-hi)" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="var(--color-found)" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Center service core */}
+      <g>
+        <circle cx="230" cy="180" r="80" fill="url(#vsv-op-core)" />
+        <circle cx="230" cy="180" r="48" fill="var(--color-bg-elev)" stroke="var(--color-found)" stroke-width="1.4" />
+        <text x="230" y="172" text-anchor="middle" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">Service</text>
+        <text x="230" y="190" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="8.5" letter-spacing="2">UNCHANGED</text>
+      </g>
+
+      {/* Four adapter "slots" rotating around */}
+      {[
+        { x: 230, y: 50,  label: 'HTTP',    sub: 'OpenAPI · routes',    tone: 'found' },
+        { x: 410, y: 180, label: 'Queue',   sub: 'AMQP · NATS · MQTT',   tone: 'pilot' },
+        { x: 230, y: 310, label: 'State',   sub: 'KV · blob · cache',   tone: 'con' },
+        { x: 50,  y: 180, label: 'Secrets', sub: 'Vault · env · KMS',   tone: 'found' },
+      ].map((a, i) => (
+        <g class="vsv-op-slot" style={`--i:${i}`}>
+          {/* Connector line */}
+          <line x1="230" y1="180" x2={a.x} y2={a.y} stroke="rgba(255,255,255,0.08)" />
+          <line x1="230" y1="180" x2={a.x} y2={a.y} stroke={`var(--color-${a.tone})`} stroke-width="1.5" class="vsv-op-line" style={`--delay:${i * 0.4}s`} />
+
+          {/* Adapter chip */}
+          <rect
+            x={a.x - 64}
+            y={a.y - 22}
+            width="128"
+            height="44"
+            rx="11"
+            fill="var(--color-bg-elev)"
+            stroke={`var(--color-${a.tone})`}
+            stroke-width="1.2"
+            class="vsv-op-chip"
+            style={`--delay:${i * 0.25}s`}
+          />
+          <circle cx={a.x - 50} cy={a.y} r="6" fill={`color-mix(in srgb, var(--color-${a.tone}) 25%, transparent)`} stroke={`var(--color-${a.tone}-hi)`} />
+          <text x={a.x - 32} y={a.y - 2} fill={`var(--color-${a.tone}-hi)`} font-family="Inter Tight" font-size="12" font-weight="600">{a.label}</text>
+          <text x={a.x - 32} y={a.y + 12} fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="9">{a.sub}</text>
+        </g>
+      ))}
+    </svg>
+  </div>
+)}
+
+{stage === 'approve' && (
+  <div class="vsv vsv-approve">
+    <svg viewBox="0 0 460 360" role="img" aria-label="A sign-off chain across CISO, CTO and CFO produces an approval-ready release.">
+      {/* Chain rail */}
+      <line x1="60" y1="180" x2="400" y2="180" stroke="rgba(255,255,255,0.08)" stroke-width="2" />
+      <line x1="60" y1="180" x2="400" y2="180" stroke="var(--color-con)" stroke-width="2" class="vsv-ap-rail" />
+
+      {/* Three signers */}
+      {[
+        { x: 84,  label: 'CISO',      tone: 'found',  body: 'Reviewable.' },
+        { x: 230, label: 'CTO',       tone: 'pilot',  body: 'Operable.' },
+        { x: 376, label: 'CFO',       tone: 'con',    body: 'Approvable.' },
+      ].map((p, i) => (
+        <g class="vsv-ap-signer" style={`--i:${i}`}>
+          <circle cx={p.x} cy="180" r="26" fill="var(--color-bg-elev)" stroke={`var(--color-${p.tone})`} stroke-width="1.5" />
+          <g class="vsv-ap-check" style={`--delay:${0.4 + i * 0.5}s; --tone-hi: var(--color-${p.tone}-hi)`}>
+            <path d={`M ${p.x - 8} 180 l 6 6 l 11 -12`} fill="none" stroke={`var(--color-${p.tone}-hi)`} stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+          <text x={p.x} y="232" text-anchor="middle" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="14" font-weight="700">{p.label}</text>
+          <text x={p.x} y="250" text-anchor="middle" fill={`var(--color-${p.tone}-hi)`} font-family="JetBrains Mono" font-size="9.5" letter-spacing="1.5">{p.body}</text>
+          <text x={p.x} y="142" text-anchor="middle" fill="var(--color-fg-muted)" font-family="JetBrains Mono" font-size="8.5" letter-spacing="2">SIGN-OFF</text>
+        </g>
+      ))}
+
+      {/* Final approved seal */}
+      <g class="vsv-ap-seal">
+        <rect x="160" y="290" width="140" height="42" rx="21" fill={`color-mix(in srgb, var(--color-pilot) 16%, transparent)`} stroke="var(--color-pilot)" stroke-width="1.4" />
+        <circle cx="184" cy="311" r="9" fill="var(--color-pilot)" />
+        <path d="M 178 311 l 4 4 l 7 -7" fill="none" stroke="var(--color-bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <text x="248" y="306" text-anchor="middle" fill="var(--color-fg-strong)" font-family="Inter Tight" font-size="12" font-weight="700">APPROVAL-READY</text>
+        <text x="248" y="322" text-anchor="middle" fill="var(--color-pilot-hi)" font-family="JetBrains Mono" font-size="9" letter-spacing="2">release/2026.05</text>
+      </g>
+    </svg>
+  </div>
+)}
+
+<style>
+  .vsv {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  .vsv svg {
+    width: 100%;
+    height: auto;
+    max-width: 460px;
+    display: block;
+  }
+
+  /* ============ DECLARE ============ */
+  .vsv-d-pulse {
+    stroke-dasharray: 14 60;
+    animation: vsv-d-flow 2.4s linear infinite;
+  }
+  @keyframes vsv-d-flow {
+    from { stroke-dashoffset: 74; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .vsv-d-line {
+    opacity: 0;
+    transform: translateX(-6px);
+    animation: vsv-d-line-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--i) * 0.12s + 0.3s);
+  }
+  @keyframes vsv-d-line-in {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ============ VERIFY ============ */
+  .vsv-v-rail {
+    transform-origin: top center;
+    transform: scaleY(0);
+    animation: vsv-v-rail 1.6s ease-out forwards;
+    animation-delay: 0.2s;
+  }
+  @keyframes vsv-v-rail {
+    to { transform: scaleY(1); }
+  }
+  .vsv-v-gate {
+    opacity: 0;
+    animation: vsv-v-fade 0.5s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.28s + 0.3s);
+  }
+  @keyframes vsv-v-fade {
+    to { opacity: 1; }
+  }
+  .vsv-v-tick {
+    transform-origin: center;
+    transform: scale(0);
+    animation: vsv-v-tick 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: calc(var(--i) * 0.28s + 0.7s);
+  }
+  @keyframes vsv-v-tick {
+    to { transform: scale(1); }
+  }
+
+  /* ============ OBSERVE ============ */
+  .vsv-o-pulse-dot {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: vsv-o-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes vsv-o-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.6); opacity: 0.5; }
+  }
+  .vsv-o-flow {
+    stroke-dasharray: 18 220;
+    animation: vsv-o-stream 2.8s linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes vsv-o-stream {
+    from { stroke-dashoffset: 238; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .vsv-o-row {
+    opacity: 0;
+    animation: vsv-d-line-in 0.5s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.18s + 0.3s);
+  }
+
+  /* ============ OPERATE ============ */
+  .vsv-op-slot {
+    opacity: 0;
+    animation: vsv-op-fade 0.6s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.25s + 0.4s);
+  }
+  @keyframes vsv-op-fade { to { opacity: 1; } }
+  .vsv-op-chip {
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: vsv-op-swap 6s ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes vsv-op-swap {
+    0%, 35%, 100% { transform: scale(1); filter: brightness(1); }
+    18%, 22% { transform: scale(1.06); filter: brightness(1.4); }
+  }
+  .vsv-op-line {
+    stroke-dasharray: 6 6;
+    animation: vsv-op-dash 1.8s linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes vsv-op-dash {
+    from { stroke-dashoffset: 12; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  /* ============ APPROVE ============ */
+  .vsv-ap-rail {
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    animation: vsv-ap-rail 1.8s ease-out forwards;
+    animation-delay: 0.3s;
+  }
+  @keyframes vsv-ap-rail { to { stroke-dashoffset: 0; } }
+  .vsv-ap-signer {
+    opacity: 0;
+    animation: vsv-op-fade 0.55s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.45s + 0.4s);
+  }
+  .vsv-ap-check {
+    opacity: 0;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: vsv-ap-check 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes vsv-ap-check {
+    from { opacity: 0; transform: scale(0); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .vsv-ap-seal {
+    opacity: 0;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: vsv-ap-seal 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation-delay: 2.2s;
+  }
+  @keyframes vsv-ap-seal {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vsv *, .vsv *::before, .vsv *::after {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+      stroke-dashoffset: 0 !important;
+    }
+  }
+</style>

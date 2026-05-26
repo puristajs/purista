@@ -1,0 +1,29 @@
+---
+interface Props {
+	name: string
+	open?: boolean
+	comment?: string
+}
+const { name, open = true, comment } = Astro.props
+---
+
+<li class="file-tree-item" role="treeitem" aria-expanded={open}>
+  <div class="file-tree-row">
+    <svg class="file-tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      {open ? (
+        <>
+          <path d="M6 14l1.5-7h9L18 14H6z"/>
+          <path d="M6 14h12v5H6z"/>
+          <path d="M2 10h6l1.5-3h5"/>
+        </>
+      ) : (
+        <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>
+      )}
+    </svg>
+    <span class="file-tree-name" style="color: var(--color-pilot)">{name}</span>
+    {comment && <span class="file-tree-comment">{comment}</span>}
+  </div>
+  <ul class="file-tree-children" role="group">
+    <slot />
+  </ul>
+</li>

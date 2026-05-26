@@ -1,0 +1,31 @@
+---
+import type { HeadlineSegment } from './Headline.astro'
+import Headline from './Headline.astro'
+
+interface Props {
+	eyebrow?: string
+	headline: HeadlineSegment[]
+	lede?: string
+	size?: 'xl' | 'lg' | 'md'
+	align?: 'center' | 'left'
+	class?: string
+}
+
+const { eyebrow, headline, lede, size = 'lg', align = 'center', class: className = '' } = Astro.props
+
+const sizeClass = {
+	xl: 'display-xl',
+	lg: 'display-lg',
+	md: 'display-md',
+}[size]
+
+const alignClass = align === 'center' ? 'text-center max-w-[80ch] mx-auto' : 'max-w-[80ch]'
+---
+
+<div class:list={['reveal', alignClass, className]}>
+  {eyebrow && <div class="eyebrow mb-4">{eyebrow}</div>}
+  <h2 class:list={['display mb-5', sizeClass]}>
+    <Headline segments={headline} />
+  </h2>
+  {lede && <p class:list={['lede', align === 'center' && 'mx-auto']}>{lede}</p>}
+</div>

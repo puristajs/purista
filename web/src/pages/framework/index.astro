@@ -1,0 +1,348 @@
+---
+import Capabilities from '../../components/landing/Capabilities.astro'
+import CodePreview from '../../components/landing/CodePreview.astro'
+import CTA from '../../components/landing/CTA.astro'
+import Hero from '../../components/landing/Hero.astro'
+import SectionIntro from '../../components/landing/SectionIntro.astro'
+import FrameworkBuilderSteps from '../../components/landing/sections/FrameworkBuilderSteps.astro'
+import FrameworkContextGrid from '../../components/landing/sections/FrameworkContextGrid.astro'
+import FrameworkRuntimeLink from '../../components/landing/sections/FrameworkRuntimeLink.astro'
+import Stats from '../../components/landing/Stats.astro'
+import ServiceAnatomy from '../../components/landing/visualizations/ServiceAnatomy.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+
+/* ─── Real builder code: a Command from start to finish ─── */
+const commandCode = [
+	{ tokens: [{ t: 'cmt', v: '// 1. Build the command' }] },
+	{
+		tokens: [
+			{ t: 'kw', v: 'export const' },
+			{ t: 'plain', v: ' createOrderBuilder = orderService' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'getCommandBuilder' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'createOrder'" },
+			{ t: 'op', v: ', ' },
+			{ t: 'str', v: "'Place a new order'" },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'addPayloadSchema' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: 'createOrderInput' },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'addOutputSchema' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: 'orderConfirmed' },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'exposeAsHttpEndpoint' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'POST'" },
+			{ t: 'op', v: ', ' },
+			{ t: 'str', v: "'orders'" },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'canEmit' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'OrderPlaced'" },
+			{ t: 'op', v: ', orderPlacedEvent)' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'setCommandFunction' },
+			{ t: 'op', v: '(' },
+			{ t: 'kw', v: 'async function' },
+			{ t: 'plain', v: ' (ctx, payload) {' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    ' },
+			{ t: 'kw', v: 'const' },
+			{ t: 'plain', v: ' id = ' },
+			{ t: 'kw', v: 'await' },
+			{ t: 'plain', v: ' ctx.resources.db.' },
+			{ t: 'fn', v: 'insert' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'orders'" },
+			{ t: 'op', v: ', payload)' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    ' },
+			{ t: 'kw', v: 'await' },
+			{ t: 'plain', v: ' ctx.' },
+			{ t: 'fn', v: 'emit' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'OrderPlaced'" },
+			{ t: 'op', v: ', { id })' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    ' },
+			{ t: 'kw', v: 'return' },
+			{ t: 'plain', v: ' { id, status: ' },
+			{ t: 'str', v: "'confirmed'" },
+			{ t: 'plain', v: ' }' },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '  })' }] },
+]
+
+/* ─── Real subscription code ─── */
+const subscriptionCode = [
+	{ tokens: [{ t: 'cmt', v: '// React to events emitted by other services' }] },
+	{
+		tokens: [
+			{ t: 'kw', v: 'export const' },
+			{ t: 'plain', v: ' onPaid = orderService' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'getSubscriptionBuilder' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'onPaid'" },
+			{ t: 'op', v: ', ' },
+			{ t: 'str', v: "'mark order paid'" },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'subscribeToEvent' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'Payment'" },
+			{ t: 'op', v: ', ' },
+			{ t: 'str', v: "'1'" },
+			{ t: 'op', v: ', ' },
+			{ t: 'str', v: "'PaymentMade'" },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'addPayloadSchema' },
+			{ t: 'op', v: '(' },
+			{ t: 'plain', v: 'paymentMadeEvent' },
+			{ t: 'op', v: ')' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '  .' },
+			{ t: 'fn', v: 'setSubscriptionFunction' },
+			{ t: 'op', v: '(' },
+			{ t: 'kw', v: 'async function' },
+			{ t: 'plain', v: ' (ctx, payload) {' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    ' },
+			{ t: 'kw', v: 'await' },
+			{ t: 'plain', v: ' ctx.resources.db.' },
+			{ t: 'fn', v: 'markPaid' },
+			{ t: 'op', v: '(payload.orderId)' },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'plain', v: '    ctx.logger.' },
+			{ t: 'fn', v: 'info' },
+			{ t: 'op', v: '(' },
+			{ t: 'str', v: "'order paid'" },
+			{ t: 'op', v: ', payload)' },
+		],
+	},
+	{ tokens: [{ t: 'plain', v: '  })' }] },
+]
+---
+
+<HarnessLayout
+  title="Framework — PURISTA"
+  description="Build TypeScript backends with explicit shape: services from a ServiceBuilder, commands and subscriptions chained as typed builders. Zod everywhere. Adapters at the edge."
+  active="framework"
+>
+
+  <Hero
+    eyebrow="For developers"
+    eyebrowTone="con"
+    lines={[
+      { text: 'TypeScript' },
+      { text: 'builders', color: 'shimmer' },
+      { text: 'for real backends.' },
+    ]}
+    lede="Services from a ServiceBuilder. Commands and subscriptions chained as typed builders. Schemas with Zod. Handler context with logger, resources, stores, emit and cross-service invocation — fully inferred end to end."
+    ctas={[
+      { label: 'Read the Handbook', href: '/handbook/', variant: 'primary' },
+      { label: 'View on GitHub', href: 'https://github.com/puristajs/purista', variant: 'ghost' },
+    ]}
+    strip={[
+      { label: 'Paradigm',  title: 'Message-driven · type-safe',           tone: 'found' },
+      { label: 'Runtime',   title: 'Node · Bun · Edge · Serverless',       tone: 'pilot' },
+      { label: 'Bridges',   title: 'AMQP · NATS · MQTT · Dapr · in-memory', tone: 'con' },
+    ]}
+  />
+
+  {/* Stats */}
+  <section class="site-section site-section--tight">
+    <div class="site-wrap">
+      <Stats
+        items={[
+          { num: 3,   label: 'Builders',                body: 'ServiceBuilder · getCommandBuilder · getSubscriptionBuilder.', tone: 'con' },
+          { num: 5,   label: 'Event bridges',           body: 'AMQP · NATS · MQTT · Dapr · in-memory. Bring your own.',     tone: 'pilot' },
+          { num: 4,   label: 'Runtimes',                body: 'Node · Bun · Kubernetes · serverless / edge — same code.',      tone: 'found' },
+          { num: 100, suffix: '%', label: 'Inferred',   body: 'Zod schemas propagate through every handler signature.' },
+        ]}
+      />
+    </div>
+  </section>
+
+  {/* The shape of a service */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="The shape"
+        eyebrowTone="found"
+        headline={[
+          { text: 'Every service has ' },
+          { text: 'the same anatomy', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="A service is a typed container of primitives: commands, subscriptions, streams, queues and AI agents. It declares owner, version and IAM. The event bridge handles routing. Adapters bind concrete infrastructure at boot — never imported in your code."
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <ServiceAnatomy />
+      </div>
+    </div>
+  </section>
+
+  {/* The Command builder, end to end */}
+  <section class="site-section">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Builder pattern"
+        eyebrowTone="con"
+        headline={[
+          { text: 'A command, ' },
+          { text: 'built step by step', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="Every command is a chain of typed calls — schemas, exposure, events it can emit, then the handler. Inference flows through the chain so payload and ctx are fully typed inside your function body."
+        align="center"
+      />
+
+      <FrameworkBuilderSteps commandCode={commandCode} />
+    </div>
+  </section>
+
+  {/* The Handler context */}
+  <section class="site-section">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Handler context"
+        eyebrowTone="pilot"
+        headline={[
+          { text: 'Inside the handler: ' },
+          { text: 'everything typed', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="The first argument to every handler is the context. It exposes logger, resources, secrets, configs, and states, emit, cross-service invocation, queue helpers, and OpenTelemetry spans — all inferred from your service definition."
+        align="center"
+      />
+
+      <FrameworkContextGrid />
+    </div>
+  </section>
+
+  {/* Subscription builder */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Subscriptions"
+        eyebrowTone="found"
+        headline={[
+          { text: 'Listen, ' },
+          { text: 'react, move on', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="A subscription is a typed reaction to an event from another service. Same builder discipline as commands — but fire-and-forget. Filter by sender, principal or tenant; advise durability and acknowledgement."
+      />
+      <div class="site-reveal" style="--site-reveal-delay:160ms;margin-top:clamp(2.5rem,5vw,4rem);max-width:880px;margin-left:auto;margin-right:auto">
+        <CodePreview filename="onPaid.subscription.ts" lines={subscriptionCode} caption="Subscribe to Payment.PaymentMade — the framework routes, retries and traces automatically." />
+      </div>
+    </div>
+  </section>
+
+  {/* Pointer to enterprise lifecycle (avoids duplication) */}
+  <section class="site-section site-section--tight">
+    <div class="site-wrap">
+      <FrameworkRuntimeLink />
+    </div>
+  </section>
+
+  {/* Capabilities / Adapters */}
+  <section class="site-section site-section-divider">
+    <div class="site-wrap">
+      <SectionIntro
+        eyebrow="Runtime adapters"
+        eyebrowTone="pilot"
+        headline={[
+          { text: 'Adapters at the edge. ' },
+          { text: 'Never in your code', color: 'shimmer' },
+          { text: '.' },
+        ]}
+        lede="First-party adapters for the infrastructure you already run. Implement the interface to add your own — the rest of your services never know the difference."
+        align="center"
+      />
+      <div class="site-reveal" style="--site-reveal-delay:200ms;margin-top:clamp(2.5rem,5vw,4rem)">
+        <Capabilities />
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    eyebrow="Start building"
+    headline={[
+      { text: 'Scaffold a service. ' },
+      { text: 'Ship a system', color: 'shimmer' },
+      { text: '.' },
+    ]}
+    lede="The Handbook walks you from a single command on an in-memory bridge to a multi-service deployment on the broker of your choice."
+    ctas={[
+      { label: 'Read the Handbook', href: '/handbook/',       variant: 'primary' },
+      { label: 'For Enterprise',    href: '/enterprise/',  variant: 'ghost' },
+      { label: 'AI Harness',        href: '/harness/',     variant: 'ghost' },
+    ]}
+  />
+
+</HarnessLayout>

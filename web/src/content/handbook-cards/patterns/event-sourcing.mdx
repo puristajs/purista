@@ -1,0 +1,114 @@
+---
+title: Event Sourcing
+description: Using events as the source of truth — rebuild state from history, audit every change, and enable temporal queries.
+---
+
+Event sourcing is the pattern of storing state changes as a sequence of events rather than updating a single record. In PURISTA, every command can emit events, and subscriptions can project those events into read models. This makes event sourcing a natural fit.
+
+## Core idea
+
+Instead of:
+
+```
+UPDATE users SET name = 'John' WHERE id = 123
+```
+
+Store:
+
+```
+Event: userNameChanged { userId: 123, oldName: 'Jane', newName: 'John', timestamp: ... }
+```
+
+The current state is derived by replaying all events for an entity.
+
+## PURISTA and event sourcing
+
+PURISTA's message model maps naturally to event sourcing:
+
+| Event Sourcing Concept | PURISTA Equivalent |
+|---|---|
+| Command | PURISTA command |
+| Event | Command success event |
+| Event store | **Not included** — add your own (e.g., EventStoreDB, Kafka with compaction, or a Postgres events table) |
+| Projection | Subscription that builds read models |
+| Snapshot | State store cache of current state |
+
+PURISTA routes events through the event bridge, but the bridge is not an event store — events are not persisted or replayable by default. To implement true event sourcing, you need to add a durable event store that your commands write to and your projections replay from.
+
+## Example: user profile
+
+### The command emits events
+
+```typescript [command.ts]
+const updateProfileCommand = userServiceBuilder
+  .getCommandBuilder('updateProfile', 'Update user profile', 'profileUpdated')
+  .addPayloadSchema(z.object({ userId: z.string(), name: z.string() }))
+  .addOutputSchema(z.object({ userId: z.string(), name: z.string() }))
+  .setCommandFunction(async function (context, payload) {
+    const current = await context.states.getState(`profile:${payload.userId}`)
+    const oldName = current[`profile:${payload.userId}`]?.name
+
+    await context.states.setState(`profile:${payload.userId}`, {
+      userId: payload.userId,
+      name: payload.name,
+    })
+
+    // Emit the event
+    await context.emit('profileUpdated', {
+      userId: payload.userId,
+      oldName,
+      newName: payload.name,
+      timestamp: Date.now(),
+    })
+
+    return { userId: payload.userId, name: payload.name }
+  })
+```
+
+### Subscriptions project read models
+
+```typescript [projection.ts]
+const profileProjection = analyticsServiceBuilder
+  .getSubscriptionBuilder('profileProjection', 'Build profile search index')
+  .subscribeToEvent('profileUpdated')
+  .setSubscriptionFunction(async function (context, payload) {
+    await context.resources.searchIndex.update({
+      userId: payload.userId,
+      name: payload.newName,
+    })
+    return { status: 'ack' }
+  })
+```
+
+## When to use event sourcing
+
+All of these use cases require a durable event store (not included in PURISTA — you must add one):
+
+- Audit trails are required (finance, healthcare, compliance)
+- You need to replay history to rebuild state
+- Temporal queries are needed ("What was the state on March 1st?")
+- Multiple read models from the same events
+- Event-driven architectures with complex business rules
+
+## When NOT to use event sourcing
+
+- Simple CRUD with no audit requirements
+- Small domains where replay overhead exceeds value
+- Teams unfamiliar with eventual consistency
+- When strict ACID transactions are required per operation
+
+## Common pitfalls
+
+- **Not versioning events.** Event schemas evolve. Version them from the start.
+- **Missing snapshots.** Replaying thousands of events is slow. Snapshots cache current state.
+- **Tight coupling to projections.** Projections should be independent; they can be rebuilt.
+- **Ignoring eventual consistency.** Projections are async; they may lag behind the event stream.
+
+## Checklist
+
+- [ ] Events are versioned and schema-evolvable
+- [ ] Snapshots prevent unbounded replay
+- [ ] Projections are independent and rebuildable
+- [ ] A durable event store is in place (EventStoreDB, Kafka with compaction, or a custom events table)
+- [ ] Temporal queries are tested
+- [ ] Projection lag is monitored

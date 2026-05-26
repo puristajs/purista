@@ -1,0 +1,113 @@
+---
+title: What is a Service?
+description: A service is a domain container and a deployable unit. It groups related business logic, declares its dependencies, and connects to infrastructure through swappable interfaces.
+---
+
+import ServiceMindmap from '../../../components/visualizations/ServiceMindmap.astro';
+import VizContainer from '../../../components/ui/VizContainer.astro';
+
+A **service** is two things at once: a **domain container** and a **deployable unit**.
+
+As a domain container, it groups related business logic — commands, subscriptions, and streams — around a single bounded context like "User Management" or "Billing." As a deployable unit, it is the artifact you ship: one service per container in Kubernetes, one service per function in serverless, or multiple services bundled together in a monolith. The same code runs everywhere; only the runtime wiring changes.
+
+## What lives inside a service
+
+Every service is a self-contained boundary that holds:
+
+- **Commands** — synchronous operations callable from the outside world, like HTTP endpoints or RPC calls.
+- **Subscriptions** — asynchronous reactions to events. The event producer does not know subscribers exist.
+- **Streams** — multi-frame request/response workloads for real-time or chunked data.
+- **Configuration** — a typed Zod schema defining service-specific settings, available to all handlers via `this.config`.
+- **Resources** — typed dependencies injected at startup: database pools, HTTP clients, message producers, or any external connection.
+- **Stores** — unified interfaces for secrets, runtime configuration, and state data.
+
+<div class="callout callout--warning">
+  <div class="callout__title">Keep the service class thin</div>
+  <p>A service itself should not contain business logic. It acts as a logical container and wiring layer. Put all implementation inside commands, subscriptions, and streams.</p>
+</div>
+
+## Service architecture at a glance
+
+<VizContainer class="my-10">
+  <ServiceMindmap />
+</VizContainer>
+
+## The domain-driven perspective
+
+In domain-driven design, a service represents a **bounded context** — a cohesive area of business capability with clear boundaries.
+
+- **User Service** handles registration, authentication, and profile management.
+- **Billing Service** handles invoicing, payments, and subscription state.
+- **Notification Service** handles emails, push notifications, and in-app alerts.
+
+Each service owns its data, its contracts, and its deployment lifecycle. Services communicate through messages, not direct database access. This means the User Service owns user data; the Billing Service requests what it needs through a command or listens to events through a subscription.
+
+## The deployable perspective
+
+A service is also the unit of deployment. Because PURISTA separates business logic from runtime wiring, the same service code can be deployed in multiple shapes without modification:
+
+| Deployment model | How it works |
+|---|---|
+| **Monolith** | Multiple services run in a single process, sharing an in-memory event bridge. Fastest local development. |
+| **Microservices** | Each service runs in its own container, connected via AMQP, NATS, MQTT, or Dapr. Independent scaling and failure domains. |
+| **Kubernetes** | Services deploy as pods with health probes, graceful shutdown, and horizontal pod autoscaling via the K8s SDK. |
+| **Serverless / FaaS** | Individual commands deploy as functions. The service definition becomes the function signature. |
+| **Edge** | Lightweight services run at the edge with minimal infrastructure dependencies. |
+
+<div class="callout callout--info">
+  <div class="callout__title">Deployment is a runtime decision</div>
+  <p>Your business logic does not change when you move from monolith to microservices. Only the event bridge adapter and resource providers change. This is the core benefit of interface-based architecture.</p>
+</div>
+
+## Event bridge and queue bridge
+
+Services always need an **event bridge** for command, subscription, and stream traffic. Queues are supplied through a separate `queueBridge` option, letting you mix transports per use case:
+
+```typescript [main.ts]
+import { AmqpBridge } from '@purista/amqpbridge'
+import { RedisQueueBridge } from '@purista/redis-queue-bridge'
+import { myV1Service } from './my-service'
+
+const eventBridge = new AmqpBridge({ /* ... */ })
+const queueBridge = new RedisQueueBridge({ /* ... */ })
+
+const myService = await myV1Service.getInstance(eventBridge, {
+  logger,
+  resources,
+  queueBridge,
+})
+await myService.start()
+```
+
+If you skip `queueBridge`, PURISTA injects the in-memory default bridge automatically — convenient for tests and local development. Production deployments should always supply an explicit queue bridge.
+
+## Typical implementation order
+
+1. Define service info and create a service builder.
+2. Add a config schema if the service needs custom configuration.
+3. Define resources used by commands and subscriptions.
+4. Add command, subscription, and stream definitions.
+5. Create a service instance, provide required resources, and call `start()`.
+
+## When to create a new service
+
+- You can describe the boundary in one sentence: "This service handles user authentication."
+- The handlers inside share resources and configuration.
+- A single team can own the entire service.
+- The service maps to a deployable unit that makes operational sense.
+
+## Common pitfalls
+
+- **Putting business logic into the service class.** The service class is for wiring, not implementation.
+- **Mixing unrelated domains.** A service called `UserAndBillingAndAnalyticsService` is a signal to split.
+- **Storing mutable runtime state on the service instance.** Use state stores or pass data through messages.
+- **Treating deployment as an afterthought.** Design services as deployable units from day one.
+
+## Checklist
+
+- [ ] Service info is stable and meaningful (`serviceName`, `serviceVersion`).
+- [ ] The service name describes a single domain boundary.
+- [ ] Config schema is defined where needed.
+- [ ] Resources are typed and passed at instance creation.
+- [ ] `testServiceSetup()` is present and passing.
+- [ ] The service can be deployed in at least two shapes without code changes.

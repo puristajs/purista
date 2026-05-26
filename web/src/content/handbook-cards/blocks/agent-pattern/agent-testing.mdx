@@ -1,0 +1,276 @@
+---
+title: Testing
+description: Test agents with harnesses, scripted models, and deterministic tool responses.
+---
+
+Agents have two testing levels:
+
+| Level | API | Validates |
+|---|---|---|
+| **Handler test** | `createAgentContextMock(...)` | Agent logic, model interaction, tool selection |
+| **Runtime test** | `createAgentTestHarness(...)` | Full pipeline with real models or scripted responses |
+
+## Handler test
+
+Use the context mock to test your agent in isolation:
+
+```typescript [supportAgent.test.ts]
+import { describe, test, expect, vi } from 'vitest'
+import { safeBind } from '@purista/core'
+import { createAgentContextMock } from '@purista/ai-harness'
+import { supportAgent } from './supportAgent.js'
+import { aiService } from '../aiService.js'
+
+describe('supportAgent', () => {
+  test('returns structured output', async () => {
+    const { context } = createAgentContextMock(supportAgent, {
+      payload: { query: 'How do I reset my password?' },
+    })
+
+    // Mock the model response
+    context.harness.models.gpt4.object = vi.fn().mockResolvedValue({
+      answer: 'Go to Settings > Security > Reset Password',
+      confidence: 0.95,
+      sources: ['knowledge-base-1'],
+    })
+
+    const handler = safeBind(supportAgent.getAgentFunction(), aiService)
+    const result = await handler(context, { query: 'How do I reset my password?' }, {})
+
+    expect(result.answer).toBe('Go to Settings > Security > Reset Password')
+    expect(result.confidence).toBe(0.95)
+  })
+
+  test('calls tools when needed', async () => {
+    const { context, stubs } = createAgentContextMock(supportAgent, {
+      payload: { query: 'What is my order status?' },
+    })
+
+    // Mock model deciding to call a tool
+    context.harness.models.gpt4.object = vi.fn()
+      .mockResolvedValueOnce({ toolCall: 'getOrderHistory', parameters: { userId: 'user-1' } })
+      .mockResolvedValueOnce({ answer: 'Your last order was delivered yesterday', confidence: 0.9 })
+
+    stubs.service.OrderService['1'].getOrderHistory.mockResolvedValue({
+      orders: [{ id: 'ord-1', status: 'delivered' }],
+    })
+
+    const handler = safeBind(supportAgent.getAgentFunction(), aiService)
+    const result = await handler(context, { query: 'What is my order status?' }, {})
+
+    expect(stubs.service.OrderService['1'].getOrderHistory).toHaveBeenCalledWith({ userId: 'user-1' })
+    expect(result.answer).toContain('delivered')
+  })
+})
+```
+
+## Scripted model harness
+
+For deterministic tests, use a scripted model instead of a real AI:
+
+```typescript [supportAgent.test.ts]
+import { createScriptedHarnessModel, createAgentContextMock } from '@purista/ai-harness'
+import { safeBind } from '@purista/core'
+
+test('deterministic agent behavior', async () => {
+  const scriptedModel = createScriptedHarnessModel({
+    responses: [
+      {
+        match: (prompt) => prompt.includes('reset password'),
+        response: { answer: 'Click forgot password', confidence: 0.9 },
+      },
+      {
+        match: (prompt) => prompt.includes('order status'),
+        response: { toolCall: 'getOrderHistory', parameters: { userId: 'user-1' } },
+      },
+    ],
+  })
+
+  const { context } = createAgentContextMock(supportAgent, {
+    payload: { query: 'How do I reset my password?' },
+  })
+
+  context.harness.models.gpt4 = scriptedModel
+
+  const handler = safeBind(supportAgent.getAgentFunction(), aiService)
+  const result = await handler(context, { query: 'How do I reset my password?' }, {})
+
+  expect(result.answer).toBe('Click forgot password')
+})
+```
+
+## Testing tool selection
+
+```typescript [supportAgent.test.ts]
+describe('tool selection', () => {
+  test('selects correct tool for billing query', async () => {
+    const { context } = createAgentContextMock(supportAgent, {
+      payload: { query: 'Why was I charged $50?' },
+    })
+
+    const toolCalls: string[] = []
+    context.harness.models.gpt4.object = vi.fn().mockImplementation((prompt) => {
+      if (prompt.includes('billing')) {
+        toolCalls.push('checkBillingStatus')
+        return { toolCall: 'checkBillingStatus', parameters: { userId: 'user-1' } }
+      }
+      return { answer: 'Here is your billing info', confidence: 0.9 }
+    })
+
+    const handler = safeBind(supportAgent.getAgentFunction(), aiService)
+    await handler(context, { query: 'Why was I charged $50?' }, {})
+
+    expect(toolCalls).toContain('checkBillingStatus')
+  })
+})
+```
+
+## Testing session state
+
+```typescript [supportAgent.test.ts]
+describe('conversation mode', () => {
+  test('remembers previous context', async () => {
+    const { context } = createAgentContextMock(supportAgent, {
+      payload: { query: 'What about premium?', conversationId: 'conv-1' },
+    })
+
+    // Simulate previous state in session
+    context.session = {
+      conversationId: 'conv-1',
+      history: [
+        { role: 'user', content: 'Tell me about plans' },
+        { role: 'assistant', content: 'We have Basic and Premium' },
+      ],
+    }
+
+    context.harness.models.gpt4.object = vi.fn().mockImplementation((prompt) => {
+      // The prompt should include conversation history
+      expect(prompt).toContain('Basic and Premium')
+      return { answer: 'Premium includes all features', confidence: 0.95 }
+    })
+
+    const handler = safeBind(supportAgent.getAgentFunction(), aiService)
+    const result = await handler(context, { query: 'What about premium?' }, {})
+
+    expect(result.answer).toBe('Premium includes all features')
+  })
+})
+```
+
+## Testing streaming
+
+```typescript [supportAgent.test.ts]
+describe('streaming mode', () => {
+  test('emits chunks during reasoning', async () => {
+    const { context, writer } = createAgentContextMock(supportAgent, {
+      payload: { query: 'Explain quantum computing' },
+      streaming: true,
+    })
+
+    context.harness.models.gpt4.text = vi.fn().mockImplementation(async function* () {
+      yield 'Quantum computing '
+      yield 'uses qubits '
+      yield 'instead of bits.'
+    })
+
+    const handler = safeBind(supportAgent.getAgentFunction(), aiService)
+    await handler(context, { query: 'Explain quantum computing' }, {}, writer)
+
+    expect(writer.write).toHaveBeenCalledTimes(3)
+    expect(writer.close).toHaveBeenCalled()
+  })
+})
+```
+
+## Runtime test
+
+Use the harness when you need to verify the full agent pipeline:
+
+```typescript [supportAgent.test.ts]
+import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai-harness'
+
+test('full runtime: processes agent request', async () => {
+  const harness = await createAgentTestHarness(aiService, supportAgent, {
+    models: {
+      gpt4: createScriptedHarnessModel({
+        responses: [
+          {
+            match: () => true,
+            response: { answer: 'Test response', confidence: 0.9 },
+          },
+        ],
+      }),
+    },
+  })
+
+  try {
+    const result = await harness.run({
+      payload: { query: 'Test query' },
+    })
+
+    expect(result.answer).toBe('Test response')
+    expect(result.confidence).toBe(0.9)
+  } finally {
+    await harness.destroy()
+  }
+})
+```
+
+The runtime harness:
+- Starts a real service with the agent registered
+- Can use real models or scripted responses
+- Runs the full pipeline including guards and tool routing
+- Requires `await harness.destroy()` to clean up
+
+## Testing workflows
+
+```typescript [supportWorkflow.test.ts]
+import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai-harness'
+
+test('workflow: routes billing queries correctly', async () => {
+  const harness = await createAgentTestHarness(aiService, supportWorkflow, {
+    models: {
+      gpt4: createScriptedHarnessModel({
+        responses: [
+          {
+            match: (prompt) => prompt.includes('Classify'),
+            response: { category: 'billing' },
+          },
+          {
+            match: (prompt) => prompt.includes('billing status'),
+            response: { status: 'paid', amount: 50 },
+          },
+          {
+            match: (prompt) => prompt.includes('Summarize'),
+            response: { answer: 'You paid $50', escalated: false },
+          },
+        ],
+      }),
+    },
+  })
+
+  try {
+    const result = await harness.run({
+      payload: { query: 'Why was I charged $50?' },
+    })
+
+    expect(result.escalated).toBe(false)
+    expect(result.answer).toContain('$50')
+  } finally {
+    await harness.destroy()
+  }
+})
+```
+
+## Which level should you use?
+
+| Scenario | Recommended level |
+|---|---|
+| Model prompt logic | Handler test |
+| Tool selection | Handler test |
+| Output schema validation | Handler test |
+| Session state | Handler test |
+| Streaming behavior | Handler test |
+| Guard integration | Runtime test |
+| Workflow routing | Runtime test |
+| Full pipeline with models | Runtime test |
