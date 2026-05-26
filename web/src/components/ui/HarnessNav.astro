@@ -1,15 +1,5 @@
 ---
-const links = [
-	{ href: '/harness/', label: 'Overview' },
-	{ href: '/harness/get-started/', label: 'Get Started' },
-	{ href: '/harness/architecture/', label: 'Architecture' },
-	{ href: '/harness/use-cases/', label: 'Use Cases' },
-	{ href: '/harness/memory/', label: 'Memory' },
-	{ href: '/harness/evaluations/', label: 'Evaluations' },
-	{ href: '/harness/testing/', label: 'Testing' },
-	{ href: '/harness/observability/', label: 'Observability' },
-	{ href: '/harness/security/', label: 'Security' },
-]
+import { harnessNavLinks } from '../../data/navigation'
 
 const currentPath = Astro.url.pathname
 ---
@@ -17,7 +7,7 @@ const currentPath = Astro.url.pathname
 <div class="w-full border-b border-[var(--color-line)] bg-[var(--color-bg)]">
   <div class="wrap">
     <nav class="flex gap-1 overflow-x-auto py-2">
-      {links.map((link) => {
+      {harnessNavLinks.map((link) => {
         const isActive = currentPath === link.href || (currentPath.startsWith(link.href) && link.href !== '/harness/');
         return (
           <a

@@ -1,19 +1,12 @@
 ---
 import ThemeToggle from '../ui/ThemeToggle.tsx'
+import { primaryNavLinks, type PrimaryNavKey } from '../../data/navigation'
 
 interface Props {
-	active?: 'home' | 'framework' | 'enterprise' | 'harness' | 'handbook'
+	active?: PrimaryNavKey
 }
 
 const { active = 'home' } = Astro.props
-
-const links = [
-	{ href: '/', label: 'Explore', key: 'home' },
-	{ href: '/enterprise/', label: 'Enterprise', key: 'enterprise' },
-	{ href: '/framework/', label: 'Framework', key: 'framework' },
-	{ href: '/harness/', label: 'AI Harness', key: 'harness' },
-	{ href: '/handbook/', label: 'Handbook', key: 'handbook' },
-]
 ---
 
 <nav class="site-nav" aria-label="Primary">
@@ -25,7 +18,7 @@ const links = [
 
     <div class="site-nav-links">
       {
-        links.map((l) => (
+        primaryNavLinks.map((l) => (
           <a
             href={l.href}
             class={`site-nav-link${active === l.key ? ' is-active' : ''}`}
@@ -46,7 +39,7 @@ const links = [
         </summary>
         <div class="site-nav-mobile-panel">
           {
-            links.map((l) => (
+            primaryNavLinks.map((l) => (
               <a
                 href={l.href}
                 class={active === l.key ? 'is-active' : undefined}

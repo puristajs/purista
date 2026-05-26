@@ -1,7 +1,8 @@
 ---
-import Navigation from '../components/ui/Navigation'
+import '../styles/site.css'
+import Nav from '../components/landing/Nav.astro'
 import type { SidebarItem } from '../lib/sidebar'
-import Layout from './Layout.astro'
+import BaseLayout from './BaseLayout.astro'
 
 interface Props {
 	title: string
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const { title, description, sidebar = [], currentId = '', headings = [], prose = true } = Astro.props
+const pageTitle = title === 'PURISTA Handbook' ? title : `${title} | PURISTA Handbook`
 
 function isActive(item: SidebarItem, id: string): boolean {
 	const itemBase = item.id.replace(/\/index$/, '')
@@ -42,11 +44,11 @@ function getItemHref(item: SidebarItem): string {
 }
 ---
 
-<Layout title={`${title} | PURISTA Handbook`} description={description}>
-  <div class="h-screen flex flex-col overflow-hidden">
-    <Navigation client:load />
+<BaseLayout title={pageTitle} description={description} siteShell>
+  <Nav active="handbook" />
 
-    <div class="flex flex-1 overflow-hidden">
+  <div class="h-screen flex flex-col overflow-hidden pt-[72px]">
+    <div class="flex flex-1 min-h-0 overflow-hidden">
       {/* Sidebar */}
       <aside class="hidden lg:block w-64 shrink-0 border-r border-[var(--color-line)] overflow-y-auto" style="background: var(--color-bg)">
         <div class="px-4 py-6">
@@ -149,4 +151,4 @@ function getItemHref(item: SidebarItem): string {
   <script>
     import '../scripts/handbook-client.ts';
   </script>
-</Layout>
+</BaseLayout>

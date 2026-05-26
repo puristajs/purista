@@ -1,15 +1,15 @@
 ---
-import '../styles/global.css'
 import '../styles/site.css'
 import HarnessNav from '../components/ui/HarnessNav.astro'
 import Footer from '../components/landing/Footer.astro'
 import Nav from '../components/landing/Nav.astro'
-import SeoHead from '../components/meta/SeoHead.astro'
+import type { PrimaryNavKey } from '../data/navigation'
+import BaseLayout from './BaseLayout.astro'
 
 interface Props {
 	title?: string
 	description?: string
-	active?: 'home' | 'framework' | 'enterprise' | 'handbook' | 'harness'
+	active?: PrimaryNavKey
 }
 
 const {
@@ -20,44 +20,22 @@ const {
 
 ---
 
-<!doctype html>
-<html lang="en" data-theme="dark" class="js">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <SeoHead title={title} description={description} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..800&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <script is:inline>
-      (function () {
-        const stored = localStorage.getItem('purista-theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = stored ?? (prefersDark ? 'dark' : 'light');
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
-  </head>
-  <body data-site>
-    <Nav active={active} />
-    {active === 'harness' && (
-      <div class="site-harness-subnav">
-        <HarnessNav />
-      </div>
-    )}
-    <main id="site-main">
-      <slot />
-    </main>
-    <Footer />
+<BaseLayout title={title} description={description} siteShell>
+  <Nav active={active} />
+  {active === 'harness' && (
+    <div class="site-harness-subnav">
+      <HarnessNav />
+    </div>
+  )}
+  <main id="site-main">
+    <slot />
+  </main>
+  <Footer />
 
-    <script>
-      import '../scripts/site/motion.ts';
-    </script>
-  </body>
-</html>
+  <script>
+    import '../scripts/site/motion.ts';
+  </script>
+</BaseLayout>
 
 <style is:global>
   .site-harness-subnav {
@@ -95,13 +73,5 @@ const {
   [data-site] main {
     position: relative;
     z-index: 2;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    [data-site] *,
-    [data-site] *::before,
-    [data-site] *::after {
-      animation-duration: 0.001ms !important;
-      transition-duration: 0.001ms !important;
-    }
   }
 </style>
