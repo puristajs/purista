@@ -1,6 +1,6 @@
 {
 	"name": "@purista/redis-queue-bridge",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "Queue bridge implementation backed by Redis lists",
 	"homepage": "https://purista.dev",
 	"repository": {
