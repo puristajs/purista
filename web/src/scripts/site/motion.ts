@@ -72,8 +72,8 @@ function setupNavScroll() {
 	const nav = document.querySelector<HTMLElement>('.site-nav')
 	if (!nav) return () => {}
 	function update() {
-		if (window.scrollY > 12) nav!.classList.add('is-scrolled')
-		else nav!.classList.remove('is-scrolled')
+		if (window.scrollY > 12) nav.classList.add('is-scrolled')
+		else nav.classList.remove('is-scrolled')
 	}
 	window.addEventListener('scroll', update, { passive: true })
 	update()
@@ -157,13 +157,17 @@ function setupWordReveal() {
 		},
 		{ threshold: 0.15 },
 	)
-	document.querySelectorAll('.site-words').forEach(el => io.observe(el))
+	document.querySelectorAll('.site-words').forEach(el => {
+		io.observe(el)
+	})
 	return () => io.disconnect()
 }
 
 function setupReveal() {
 	if (prefersReducedMotion) {
-		document.querySelectorAll('.site-reveal').forEach(el => el.classList.add('is-in'))
+		document.querySelectorAll('.site-reveal').forEach(el => {
+			el.classList.add('is-in')
+		})
 		return () => {}
 	}
 	const io = new IntersectionObserver(
@@ -177,7 +181,9 @@ function setupReveal() {
 		},
 		{ threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
 	)
-	document.querySelectorAll('.site-reveal').forEach(el => io.observe(el))
+	document.querySelectorAll('.site-reveal').forEach(el => {
+		io.observe(el)
+	})
 	return () => io.disconnect()
 }
 
@@ -217,7 +223,11 @@ function setupMagnetic() {
 			el.removeEventListener('pointerleave', reset)
 		})
 	})
-	return () => cleanups.forEach(c => c())
+	return () => {
+		cleanups.forEach(c => {
+			c()
+		})
+	}
 }
 
 function setupHeroParallax(lenis: Lenis) {
@@ -284,7 +294,11 @@ function setupScrollyPin() {
 		})
 		cleanups.push(() => trigger.kill())
 	})
-	return () => cleanups.forEach(c => c())
+	return () => {
+		cleanups.forEach(c => {
+			c()
+		})
+	}
 }
 
 function setupVizScroll() {
@@ -311,7 +325,11 @@ function setupVizScroll() {
 		cleanups.push(() => trigger.kill())
 	})
 
-	return () => cleanups.forEach(c => c())
+	return () => {
+		cleanups.forEach(c => {
+			c()
+		})
+	}
 }
 
 function setupCounters() {
@@ -367,8 +385,12 @@ function init() {
 	window.__siteMotion = {
 		lenis,
 		destroy() {
-			teardowns.forEach(t => t())
-			ScrollTrigger.getAll().forEach(t => t.kill())
+			teardowns.forEach(t => {
+				t()
+			})
+			ScrollTrigger.getAll().forEach(t => {
+				t.kill()
+			})
 			lenis.destroy()
 		},
 	}

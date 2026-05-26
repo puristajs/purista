@@ -15,7 +15,10 @@
 		line-height: 1.4;
 		border-radius: 6px;
 		border-left: 2px solid transparent;
-		transition: color 140ms, background 140ms, border-color 140ms;
+		transition:
+			color 140ms,
+			background 140ms,
+			border-color 140ms;
 		text-decoration: none;
 	}
 
@@ -53,7 +56,6 @@
 		margin-left: 0.875rem;
 		padding-left: 0.75rem;
 		border-left: 1px solid var(--color-line);
-		space-y: 0.125rem;
 	}
 
 	/* ── Right TOC sidebar ───────────────────────────────────────── */
@@ -196,9 +198,15 @@
 		border-radius: 9999px;
 	}
 
-	.codeblock-dots span:nth-child(1) { background: #ff5f57; }
-	.codeblock-dots span:nth-child(2) { background: #febc2e; }
-	.codeblock-dots span:nth-child(3) { background: #28c840; }
+	.codeblock-dots span:nth-child(1) {
+		background: #ff5f57;
+	}
+	.codeblock-dots span:nth-child(2) {
+		background: #febc2e;
+	}
+	.codeblock-dots span:nth-child(3) {
+		background: #28c840;
+	}
 
 	.codeblock-title {
 		font-family: var(--font-mono);
@@ -230,7 +238,9 @@
 		cursor: pointer;
 		border: none;
 		background: none;
-		transition: color 150ms, background 150ms;
+		transition:
+			color 150ms,
+			background 150ms;
 		flex-shrink: 0;
 		margin-left: 0.5rem;
 	}

@@ -33,11 +33,11 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@types/node": "^25.8.0",
+		"@types/node": "^25.9.1",
 		"@types/sinon": "^21.0.1",
 		"@types/ws": "^8.18.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.6"
+		"vitest": "^4.1.7"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",

@@ -13,6 +13,7 @@
 			"!**/*.d.ts",
 			"!**/coverage/**/*",
 			"!**/docs/**/*",
+			"!**/web/**/*",
 			"!**/website_new/**/*",
 			"!**/.vitepress/cache",
 			"!**/doc/public/**/*",
