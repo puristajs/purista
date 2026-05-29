@@ -1,6 +1,6 @@
 # Bridge Reliability Hardening
 
-Source of truth: [`specs/35-bridge-reliability/00-requirements.md`](/Users/sebastianwessel/projekte/@purista/specs/35-bridge-reliability/00-requirements.md)
+Status: implemented tracker.
 
 This document tracks the `purista` monorepo implementation status for the bridge reliability hardening slice.
 

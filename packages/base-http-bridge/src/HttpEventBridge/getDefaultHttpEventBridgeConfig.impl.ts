@@ -2,6 +2,14 @@ import type { Complete, EventBridgeConfig } from '@purista/core'
 
 import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
 
+/**
+ * Runs the getDefaultHttpEventBridgeConfig helper exported by @purista/base-http-bridge.
+ * Start the bridge before registering services and stop it during graceful shutdown.
+ * Expose only schemas and metadata that are safe for clients to inspect.
+ */
+/**
+ * Returns default HTTP event bridge settings shared by sidecar-based bridges.
+ */
 export const getDefaultHttpEventBridgeConfig = (): EventBridgeConfig<Omit<HttpEventBridgeConfig, 'serve'>> => {
 	const config: Complete<Omit<HttpEventBridgeConfig, 'serve'>> = {
 		name: 'HttpEventBridge',

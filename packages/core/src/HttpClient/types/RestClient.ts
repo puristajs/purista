@@ -1,8 +1,10 @@
 import type { HttpClientRequestOptions } from './HttpClientRequestOptions.js'
 
 /**
- * A REST API client which will provide GET, POST, PUT, PATCH, DELETE methods
- * The client provides error and timeout handling and tries to decode the responses
+ * REST API client abstraction for JSON-oriented HTTP calls.
+ *
+ * Implementations should normalize timeout/provider failures to PURISTA errors
+ * and avoid logging request/response payloads by default.
  */
 export interface RestClient {
 	/**

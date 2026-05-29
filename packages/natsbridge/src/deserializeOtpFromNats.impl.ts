@@ -3,8 +3,11 @@ import type { EBMessage, Logger } from '@purista/core'
 import { deserializeOtp } from '@purista/core'
 import type { MsgHdrs } from 'nats'
 
+/**
+ * Restores OpenTelemetry context from NATS headers or the message OTP.
+ */
 export const deserializeOtpFromNats = (logger: Logger, message: EBMessage, headers?: MsgHdrs) => {
-	// try to use mqtt user property first
+	// try to use NATS headers first
 	if (headers?.has('traceparent')) {
 		return propagation.extract(context.active(), headers)
 	}

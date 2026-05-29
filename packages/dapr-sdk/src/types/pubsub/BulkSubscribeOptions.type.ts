@@ -19,14 +19,30 @@ import type { KeyValueType } from './KeyValue.type.js'
  **/
 export type BulkSubscribeOptions = {
 	// The route creation for a single route or DaprPubSubRouteType
+	/**
+	 * Stores the route value exposed by BulkSubscribeOptions.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	route?: string | DaprPubSubRouteType
 
 	// Metadata for the subscription
+	/**
+	 * Stores the metadata value exposed by BulkSubscribeOptions.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	metadata?: KeyValueType
 
 	// Max number of messages to be sent in a single bulk request
+	/**
+	 * Stores the maxMessagesCount value exposed by BulkSubscribeOptions.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	maxMessagesCount?: number
 
 	// Max duration to wait for messages to be sent in a single bulk request
+	/**
+	 * Stores the maxAwaitDurationMs value exposed by BulkSubscribeOptions.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	maxAwaitDurationMs?: number
 }

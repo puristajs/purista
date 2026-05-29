@@ -4,6 +4,7 @@ import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate a command unit test using the current command context mock shape. */
 export const getCommandTestFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

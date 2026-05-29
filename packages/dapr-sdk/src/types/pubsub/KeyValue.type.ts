@@ -11,6 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * Dapr metadata key-value map.
+ */
 export type KeyValueType = {
 	[key: string]: unknown
 }

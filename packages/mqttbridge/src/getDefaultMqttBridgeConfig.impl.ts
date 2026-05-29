@@ -2,6 +2,12 @@ import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
 
 const SECONDS_PER_DAY = 86_400
 
+/**
+ * Returns default MQTT bridge configuration.
+ *
+ * Defaults target a local MQTT 5 broker on `localhost:1883`, use QoS 1 for
+ * commands and subscriptions, and keep MQTT session/message expiry explicit.
+ */
 export const getDefaultMqttBridgeConfig = (): MqttBridgeConfig => {
 	return {
 		topicPrefix: 'purista',

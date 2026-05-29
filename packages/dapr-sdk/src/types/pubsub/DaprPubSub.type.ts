@@ -21,23 +21,51 @@ import type { KeyValueType } from './KeyValue.type.js'
  */
 export type DaprPubSubType = {
 	// The pubsub component name
+	/**
+	 * Stores the pubsubname value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	pubsubname: string
 
 	// The topic name
+	/**
+	 * Stores the topic value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	topic: string
 
 	// Metadata
+	/**
+	 * Stores the metadata value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	metadata?: KeyValueType
 
 	// A singular route to send the event to
+	/**
+	 * Stores the route value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	route?: string
 
 	// A rule based route to send the event to
+	/**
+	 * Stores the routes value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	routes?: DaprPubSubRouteType
 
 	// The path to send unprocessable events to
+	/**
+	 * Stores the deadLetterTopic value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	deadLetterTopic?: string
 
 	// The settings for bulk subscribe
+	/**
+	 * Stores the bulkSubscribe value exposed by DaprPubSubType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	bulkSubscribe?: BulkSubscribeConfig
 }

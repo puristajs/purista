@@ -4,6 +4,7 @@ import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate a queue worker test using `createQueueWorkerTestHarness`. */
 export const getQueueWorkerTestFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

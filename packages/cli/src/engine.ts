@@ -14,15 +14,33 @@ import type {
 } from './core/types.js'
 import { createProjectSnapshot } from './project/createProjectSnapshot.js'
 
+/** Options for creating a reusable programmatic PURISTA CLI engine. */
 export type PuristaCliEngineOptions = {
+	/** Project root used for config loading, project scanning, and generated file writes. */
 	cwd?: string
+	/** Input resolution mode. Defaults to `programmatic`. */
 	mode?: PuristaCommandMode
+	/** Prompt adapter used when commands need missing values. */
 	prompt?: PromptAdapter
 }
 
 const shouldLoadProjectMetadata = (commandId: PuristaCommandId) =>
 	commandId !== 'init-project' && !commandId.startsWith('export-')
 
+/**
+ * Create a programmatic CLI engine bound to a working directory and prompt adapter.
+ *
+ * @example
+ * ```ts
+ * const cli = createPuristaCliEngine({ cwd: '/workspace/my-app' })
+ * await cli.runPuristaCommand('add-command', {
+ *   serviceName: 'user',
+ *   serviceVersion: '1',
+ *   commandName: 'create user',
+ *   commandDescription: 'Create a user account',
+ * })
+ * ```
+ */
 export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) => {
 	const cwd = options.cwd ?? process.cwd()
 	const mode = options.mode ?? 'programmatic'
@@ -98,12 +116,28 @@ export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) =>
 	}
 }
 
+/**
+ * Resolve a CLI command without writing files.
+ *
+ * Use this to preview missing prompts, validation issues, and resolved defaults.
+ */
 export const resolvePuristaCommand = async <TInput>(
 	commandId: PuristaCommandId,
 	input: TInput,
 	options?: PuristaCliEngineOptions,
 ) => createPuristaCliEngine(options).resolvePuristaCommand(commandId, input)
 
+/**
+ * Resolve and execute a CLI command in one call.
+ *
+ * @example
+ * ```ts
+ * await runPuristaCommand('add-service', {
+ *   serviceName: 'billing',
+ *   serviceDescription: 'Owns billing workflows',
+ * })
+ * ```
+ */
 export const runPuristaCommand = async <TInput>(
 	commandId: PuristaCommandId,
 	input: TInput,

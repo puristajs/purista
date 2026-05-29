@@ -10,7 +10,9 @@ import {
 import { EventBridgeLateResponseHandling } from '../core/EventBridge/types/EventBridgeLateResponseHandling.js'
 import { EventBridgeStreamLateFrameHandling } from '../core/EventBridge/types/EventBridgeStreamLateFrameHandling.js'
 
-type EventBridgeCapabilityOverrides = Partial<Omit<EventBridgeCapabilities, 'consumerFailureHandling'>> & {
+/** Capability overrides accepted by `getEventBridgeMock` for strict reliability tests. */
+export type EventBridgeCapabilityOverrides = Partial<Omit<EventBridgeCapabilities, 'consumerFailureHandling'>> & {
+	/** Partial consumer failure capability overrides. */
 	consumerFailureHandling?: Partial<EventBridgeCapabilities['consumerFailureHandling']>
 }
 

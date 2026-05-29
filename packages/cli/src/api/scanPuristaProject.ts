@@ -5,17 +5,28 @@ import {
 } from '../project/createProjectSnapshot.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
+/** Public service scan result used by legacy generator helpers. */
 export type PuristaProjectServices = Record<
 	string,
 	Record<string, Omit<ServiceVersionSnapshot, 'queues' | 'queueWorkers'>>
 >
 
+/** Public project information required by scaffolding helpers. */
 export type PuristaProjectInfo = {
+	/** Services keyed by generated service directory and version. */
 	services: PuristaProjectServices
+	/** Known ServiceEvent entries sorted by event value. */
 	eventNames: { name: string; value: string }[]
+	/** ServiceEvent enum/object file name relative to `puristaConfig.servicePath`. */
 	eventEnumFileName: string
 }
 
+/**
+ * Scan a PURISTA project for service, command, subscription, stream, and event metadata.
+ *
+ * Queue and agent metadata is available through `createProjectSnapshot`; this helper
+ * keeps the historical public shape used by service artifact generators.
+ */
 export const scanPuristaProject = async (
 	puristaConfig: PuristaConfig,
 	projectRootPath?: string,

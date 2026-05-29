@@ -12,14 +12,21 @@ import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
 /**
- * Add all folders and files for a new subscription to an existing PURISTA service.
+ * Add a subscription to an existing PURISTA service version.
+ *
+ * Generates `types.ts`, `schema.ts`, a subscription builder, a subscription
+ * test, and appends the subscription definition to the service composition file.
  */
 export const addPuristaSubscription = async (input: {
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
+	/** Human-readable subscription description used by `getSubscriptionBuilder`. */
 	subscriptionDescription: string
+	/** Logical subscription name, for example `send welcome email`. */
 	subscriptionName: string
+	/** Event consumed by the generated subscription. */
 	eventToSubscribe?: string
+	/** Optional event emitted by the subscription output. */
 	responseEventName?: string
 	serviceName: string
 	serviceVersion: string

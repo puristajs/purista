@@ -8,19 +8,37 @@ import { getParameterDefinition } from './getParameterDefinition.js'
 import { getQueryDefinition } from './getQueryDefinition.js'
 import { resolveHttpStreamingMode } from './streamTransport.js'
 
+/**
+ * OpenAPI generation settings needed by HTTP helper functions.
+ */
 export type Config = {
+	/** Header name used to propagate an application trace id. */
 	traceHeaderField?: string
+	/** Problem details configuration used for generated error schemas. */
 	problemDetails?: {
 		typeBaseUri?: string
 	}
 }
 
+/**
+ * PURISTA owner metadata attached to generated OpenAPI operations.
+ */
 export type PuristaOpenApiOperationOwner = {
+	/** Owning service name. */
 	serviceName: string
+	/** Owning service version. */
 	serviceVersion: string
+	/** Command or stream name exposed by the operation. */
 	serviceTarget: string
 }
 
+/**
+ * Adds one HTTP-exposed PURISTA command or stream operation to an OpenAPI document.
+ *
+ * The generated operation documents synchronous commands, async queue-backed
+ * command responses, streamed SSE responses and aggregate stream responses
+ * according to the command/stream HTTP metadata.
+ */
 export const addPathToOpenApi = (
 	openApiBuilder: OpenApiBuilder,
 	metadata: HttpExposedServiceMeta,

@@ -12,15 +12,16 @@ import type {
 	Session,
 	TelemetryOptions,
 } from '@purista/harness'
+import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../core/types/PuristaMetrics.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 
+/** Model capability names supported by `@purista/harness` model bindings. */
 export type AgentModelCapability = ModelCapability
 
-export type SupportedHttpMethod = 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT'
-
+/** Execution implementation kind used by an attached agent definition. */
 export type AgentExecutionKind = 'harnessAgent' | 'harnessWorkflow' | 'runFunction'
 
 /**
@@ -48,101 +49,162 @@ export type AgentModelBinding<
 }
 
 export type AgentRuntimeModelBinding<Binding extends AgentModelBinding = AgentModelBinding> = {
+	/** Provider instance used by the attached agent runtime for this model alias. */
 	provider: ModelProvider
+	/** Optional runtime model override for the statically declared model id. */
 	model?: string
+	/** Optional runtime capability override for the statically declared capabilities. */
 	capabilities?: readonly AgentModelCapability[]
+	/** Default model options applied by the harness provider. */
 	defaults?: ModelDefaults
+	/** Provider-specific runtime options. */
 	providerOptions?: Record<string, unknown>
 } & Partial<Pick<Binding, 'model'>>
 
+/** Runtime model bindings keyed by every model alias declared on an agent builder. */
 export type AgentRuntimeModelBindings<Models extends Record<string, AgentModelBinding>> = {
 	[K in keyof Models]: AgentRuntimeModelBinding<Models[K]>
 }
 
+/** Typed model handles exposed to an agent run function. */
 export type AgentHandlerModelBindings<Models extends Record<string, AgentModelBinding>> = {
 	readonly [K in keyof Models]: ModelHandle<Models[K]>
 }
 
+/** Declares one service command that an attached agent may call as a typed tool. */
 export type AllowedCommandToolDefinition<
 	Output extends Schema = Schema,
 	Payload extends Schema = Schema,
 	Parameter extends Schema = Schema,
 > = {
+	/** Target service name. */
 	serviceName: string
+	/** Target service version. */
 	serviceVersion: string
+	/** Target command name. */
 	commandName: string
+	/** Optional schema for the command result. */
 	outputSchema?: Output
+	/** Optional schema for the command payload. */
 	payloadSchema?: Payload
+	/** Optional schema for the command parameter. */
 	parameterSchema?: Parameter
 }
 
+/** Declares one attached agent that this attached agent may call. */
 export type AllowedAgentDefinition<
 	Output extends Schema = Schema,
 	Payload extends Schema = Schema,
 	Parameter extends Schema = Schema,
 > = {
+	/** Target agent command name. */
 	agentName: string
+	/** Target service version. */
 	serviceVersion: string
+	/** Optional schema for the child agent result. */
 	outputSchema?: Output
+	/** Optional schema for the child agent payload. */
 	payloadSchema?: Payload
+	/** Optional schema for the child agent parameter. */
 	parameterSchema?: Parameter
 }
 
+/** Queue execution policy applied to the generated agent worker and queue. */
 export type AgentExecutionPolicy = {
+	/** Queue visibility timeout used as the agent lease TTL. */
 	leaseTtlMs?: number
+	/** Queue heartbeat interval used while an agent run is active. */
 	heartbeatIntervalMs?: number
+	/** Maximum delivery attempts for a queued agent run. */
 	maxAttempts?: number
+	/** Maximum number of agent runs handled concurrently by the generated worker. */
 	maxParallelHandlers?: number
+	/** Optional execution timeout in milliseconds for runtimes that honor it. */
 	timeoutMs?: number
 }
 
+/** Storage or event side effect used for queued agent run results. */
 export type AgentQueueResultPolicyMode = 'none' | 'event' | 'state' | 'state-and-event'
 
+/** Controls how generated queues persist and/or emit agent worker completion metadata. */
 export type AgentQueueResultPolicy = {
+	/** Result handling mode for the generated queue. */
 	mode: AgentQueueResultPolicyMode
+	/** Event emitted when an agent run succeeds. */
 	successEventName?: string
+	/** Event emitted when an agent run fails. */
 	failureEventName?: string
+	/** Event emitted when an agent run is cancelled. */
 	cancelledEventName?: string
+	/** Event emitted when an agent run is dead-lettered. */
 	deadLetterEventName?: string
+	/** Event emitted for progress updates when enabled. */
 	progressEventName?: string
+	/** Optional result metadata TTL in milliseconds. */
 	ttlMs?: number
+	/** Emit progress events from queue result metadata when supported. */
 	emitProgressEvents?: boolean
+	/** Event id strategy used for generated queue result events. */
 	eventId?:
 		| 'jobIdAndStatus'
 		| ((input: { jobId: string; queueName: string; status: string; attempt: number }) => string)
+	/** Whether result side effects are required or best effort. */
 	delivery?: 'required' | 'best-effort'
 }
 
+/** Public response contract exposed by the generated agent command or stream. */
 export type AgentResponseMode = 'accepted' | 'status' | 'stream' | 'event' | 'callback'
 
+/** Options for long-running agent response contracts. */
 export type AgentResponseModeOptions = {
+	/** Queue result handling policy for this response mode. */
 	resultPolicy?: AgentQueueResultPolicyMode | AgentQueueResultPolicy
+	/** Optional success event override. */
 	successEventName?: string
+	/** Optional failure event override. */
 	failureEventName?: string
+	/** Optional progress event override. */
 	progressEventName?: string
+	/** Optional result metadata TTL in milliseconds. */
 	ttlMs?: number
+	/** Whether result side effects are required or best effort. */
 	delivery?: AgentQueueResultPolicy['delivery']
+	/** Status URL returned by accepted/status response modes. */
 	statusUrl?: string
+	/** Stream URL returned by stream response mode metadata. */
 	streamUrl?: string
+	/** Resource name used by callback integrations. */
 	callbackResourceName?: string
 }
 
+/** Session behavior used by the harness runtime for each agent run. */
 export type AgentSessionPolicy = { mode: 'ephemeral' } | { mode: 'conversation'; payloadPath: readonly string[] }
 
+/** Optional sandbox adapter configuration passed through to the agent runtime. */
 export type AgentSandboxPolicy = {
+	/** Enables sandbox usage when a compatible runtime is configured. */
 	enabled?: boolean
+	/** Runtime-specific sandbox adapter. */
 	adapter?: unknown
 }
 
+/** HTTP projection metadata for the generated agent command or stream. */
 export type AgentHttpExposure = {
+	/** HTTP method exposed by the generated definition. */
 	method: SupportedHttpMethod
+	/** HTTP path exposed by the generated definition. */
 	path: string
+	/** Expose streaming SSE-like chunks or one aggregate JSON response. */
 	streamingMode?: 'stream' | 'aggregate'
+	/** Marks the HTTP endpoint public by disabling generated security metadata. */
 	public?: boolean
+	/** Request content type for generated HTTP metadata. */
 	requestContentType?: string
+	/** Response content type for aggregate HTTP metadata. */
 	responseContentType?: string
 }
 
+/** Stable run identity propagated through attached agent execution events and results. */
 export type AgentRunIdentity = {
 	transportMessageId: string
 	correlationId?: string
@@ -158,28 +220,34 @@ export type AgentRunIdentity = {
 	harnessSessionId: string
 }
 
+/** Harness run event decorated with PURISTA agent identity metadata. */
 export type AgentRunEvent = {
 	identity: AgentRunIdentity
 	event: RunEvent
 }
 
+/** Aggregate result returned by an attached agent runtime. */
 export type AgentRunResult<Output = unknown> = {
 	identity: AgentRunIdentity
 	output: Output
 	events: AgentRunEvent[]
 }
 
-type InferOptionalInput<T> = [NonNullable<T>] extends [never]
+/** Infers an agent tool input schema when one is declared, otherwise falls back to `unknown`. */
+export type InferOptionalInput<T> = [NonNullable<T>] extends [never]
 	? unknown
 	: NonNullable<T> extends Schema
 		? InferIn<NonNullable<T>>
 		: unknown
-type InferOptionalOutput<T> = [NonNullable<T>] extends [never]
+
+/** Infers an agent tool output schema when one is declared, otherwise falls back to `unknown`. */
+export type InferOptionalOutput<T> = [NonNullable<T>] extends [never]
 	? unknown
 	: NonNullable<T> extends Schema
 		? Infer<NonNullable<T>>
 		: unknown
 
+/** Typed command tool call map exposed at `context.invoke.tools`. */
 export type CommandToolInvokeMap<Tools extends Record<string, AllowedCommandToolDefinition>> = {
 	readonly [K in keyof Tools]: {
 		call(
@@ -189,6 +257,7 @@ export type CommandToolInvokeMap<Tools extends Record<string, AllowedCommandTool
 	}
 }
 
+/** Typed child-agent invocation map exposed at `context.invoke.agents`. */
 export type AgentInvokeMap<Agents extends Record<string, AllowedAgentDefinition>> = {
 	readonly [K in keyof Agents]: {
 		run(
@@ -198,6 +267,7 @@ export type AgentInvokeMap<Agents extends Record<string, AllowedAgentDefinition>
 	}
 }
 
+/** Context passed to an attached agent run function. */
 export type AgentHandlerContext<
 	Payload = unknown,
 	Parameter = unknown,
@@ -207,8 +277,11 @@ export type AgentHandlerContext<
 	AgentTools extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = {
+	/** Validated payload for the agent run. */
 	payload: Payload
+	/** Validated parameter object for the agent run. */
 	parameter: Parameter
+	/** Stable agent run identity and trace/correlation metadata. */
 	identity: AgentRunIdentity
 	/** the original PURISTA message context */
 	message: unknown
@@ -232,6 +305,7 @@ export type AgentHandlerContext<
 	resources: Resources
 	/** typed custom metrics declared on the service and this agent builder */
 	metrics: PuristaMetricContext<Metrics>
+	/** Provider-neutral harness session, model handles, and event bridge. */
 	harness: {
 		session: Session<any>
 		models: AgentHandlerModelBindings<Models>
@@ -239,14 +313,18 @@ export type AgentHandlerContext<
 			emit(event: RunEvent): Promise<void>
 		}
 	}
+	/** Typed command tools and child-agent calls declared on the builder. */
 	invoke: {
 		tools: CommandToolInvokeMap<CommandTools>
 		agents: AgentInvokeMap<AgentTools>
 	}
+	/** Logger scoped to the owning PURISTA service and agent runtime. */
 	logger: PuristaLogger
+	/** Abort signal for cooperative cancellation. */
 	signal: AbortSignal
 }
 
+/** Run function shape accepted by `AgentQueueBuilder.setRunFunction(...)`. */
 export type AgentHandler<
 	Payload = unknown,
 	Parameter = unknown,
@@ -260,6 +338,7 @@ export type AgentHandler<
 	context: AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Metrics>,
 ) => Promise<Output>
 
+/** Internal execution definition selected by exactly one agent execution setter. */
 export type AgentExecutionDefinition<
 	Payload = unknown,
 	Parameter = unknown,
@@ -277,6 +356,7 @@ export type AgentExecutionDefinition<
 			handler: AgentHandler<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output, Metrics>
 	  }
 
+/** Provider-neutral manifest describing an attached PURISTA agent. */
 export type AgentManifest<Models extends Record<string, AgentModelBinding> = Record<string, AgentModelBinding>> = {
 	serviceName: string
 	serviceVersion: string
@@ -303,6 +383,7 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 	builtInTools: readonly BuiltinToolName[] | false | true
 }
 
+/** Mutable runtime reference bound when the owning service instance is created. */
 export type AgentRuntimeRef<Output = unknown> = {
 	current?: {
 		executeAggregate(input: AgentRuntimeInvocationInput): Promise<Output>
@@ -311,6 +392,7 @@ export type AgentRuntimeRef<Output = unknown> = {
 	}
 }
 
+/** Aggregate invocation input passed from generated PURISTA definitions into the agent runtime. */
 export type AgentRuntimeInvocationInput = {
 	appContext: Record<string, unknown>
 	message: Record<string, unknown>
@@ -319,6 +401,7 @@ export type AgentRuntimeInvocationInput = {
 	signal?: AbortSignal
 }
 
+/** Streaming invocation input passed from generated PURISTA stream definitions into the agent runtime. */
 export type AgentRuntimeStreamInvocationInput = AgentRuntimeInvocationInput & {
 	writer: {
 		write(chunk: unknown): Promise<void>
@@ -328,6 +411,7 @@ export type AgentRuntimeStreamInvocationInput = AgentRuntimeInvocationInput & {
 	}
 }
 
+/** Attached agent definition before expansion into service definitions. */
 export type AgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes> = {
 	manifest: AgentManifest<S['Models']>
 	payloadSchema?: S['PayloadSchema']
@@ -346,10 +430,12 @@ export type AgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQueueBuil
 	runtime: AgentRuntimeRef<Infer<S['OutputSchema']>>
 }
 
+/** Core definition metadata attached to generated queue, worker, command, and stream artifacts. */
 export type AttachedCoreDefinition = {
 	[key: string]: unknown
 }
 
+/** Agent plus the generated queue, worker, command, and stream definitions added to a service. */
 export type AttachedAgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes> =
 	AgentDefinition<S> & {
 		queue: AttachedCoreDefinition & { queueName: string }
@@ -358,6 +444,7 @@ export type AttachedAgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQ
 		stream: AttachedCoreDefinition & { streamName: string }
 	}
 
+/** Type accumulator used by `AgentQueueBuilder` to preserve typed schemas, tools, models, and metrics. */
 export type AgentQueueBuilderTypes<
 	PayloadSchema extends Schema = Schema,
 	ParameterSchema extends Schema = Schema,
@@ -380,6 +467,7 @@ export type AgentQueueBuilderTypes<
 	Metrics: Metrics
 }
 
+/** Broad agent builder type used where any attached agent definition is accepted. */
 export type AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes<
 	Schema,
 	Schema,
@@ -392,8 +480,10 @@ export type AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes<
 	PuristaMetricDefinitions
 >
 
+/** Extracts the statically declared model alias map from an attached agent definition. */
 export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ? S['Models'] : Record<never, never>
 
+/** Runtime options required to initialize attached agents for a service instance. */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
 	stateStore?: unknown
@@ -402,8 +492,10 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	telemetry?: TelemetryOptions
 }
 
+/** Resolved harness model aliases keyed by the statically declared model map. */
 export type ResolvedAgentRuntimeModelBindings<Models extends Record<string, AgentModelBinding>> = {
 	[K in keyof Models]: ModelAlias
 }
 
+/** Opaque `@purista/harness` handle used by attached agent runtimes. */
 export type AgentHarnessHandle = Harness<any>

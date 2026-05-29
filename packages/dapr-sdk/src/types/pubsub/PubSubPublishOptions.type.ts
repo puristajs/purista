@@ -13,6 +13,9 @@ limitations under the License.
 
 import type { KeyValueType } from './KeyValue.type.js'
 
+/**
+ * Options forwarded to Dapr Pub/Sub publish operations.
+ */
 export type PubSubPublishOptions = {
 	/**
 	 * The content type of the message.

@@ -3,13 +3,28 @@ import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StreamFrame } from '../types/stream/StreamFrame.js'
 import type { StreamHandle } from '../types/stream/StreamHandle.js'
 
-type PushResult = 'accepted' | 'late' | 'missing'
+/**
+ * Result of routing a stream frame or error to a pending stream session.
+ *
+ * @group Event bridge
+ */
+export type PushResult = 'accepted' | 'late' | 'missing'
 
-type PendingStreamSession<Chunk = unknown, Final = unknown> = {
+/**
+ * Mutable stream session stored for one pending stream invocation.
+ *
+ * @group Event bridge
+ */
+export type PendingStreamSession<Chunk = unknown, Final = unknown> = {
+	/** Async-iterable handle returned to the stream caller. */
 	handle: StreamHandle<Chunk, Final>
+	/** Push one correlated stream frame into the session. */
 	push: (frame: StreamFrame<Chunk, Final>) => PushResult
+	/** Reject the stream handle and any waiting iterator calls. */
 	reject: (error: unknown) => void
+	/** Record the producer instance and return a queued cancel reason, if any. */
 	markOwner: (instanceId: string) => string | undefined
+	/** Request caller cancellation and report whether a cancel frame should be sent. */
 	requestCancel: (reason?: string) => {
 		ownerInstanceId?: string
 		reason?: string
@@ -17,6 +32,15 @@ type PendingStreamSession<Chunk = unknown, Final = unknown> = {
 	}
 }
 
+/**
+ * Registry for stream invocations awaiting correlated frames.
+ *
+ * Streams time out when frames stop arriving. Timed-out stream ids are retained
+ * briefly so late frames can be classified and logged without reaching a closed
+ * async iterator.
+ *
+ * @group Event bridge
+ */
 export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 	private readonly pending = new Map<string, PendingStreamSession<Chunk, Final>>()
 	private readonly timedOut = new Map<string, number>()
@@ -28,10 +52,12 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 		} = {},
 	) {}
 
+	/** Number of streams currently awaiting frames. */
 	get size() {
 		return this.pending.size
 	}
 
+	/** Register one stream session and create its async-iterable handle. */
 	register(correlationId: string, timeoutMs: number, traceId: string | undefined): PendingStreamSession<Chunk, Final> {
 		const queue: StreamFrame<Chunk, Final>[] = []
 		const waiters: Array<{
@@ -209,10 +235,12 @@ export class PendingStreamRegistry<Chunk = unknown, Final = unknown> {
 		return session
 	}
 
+	/** Return a pending stream session by correlation id. */
 	get(correlationId: string) {
 		return this.pending.get(correlationId)
 	}
 
+	/** Reject one pending stream or classify it as late/missing. */
 	reject(correlationId: string, error: unknown) {
 		const pending = this.pending.get(correlationId)
 		if (!pending) {

@@ -1,6 +1,4 @@
-/**
- * HTTP authentication information
- */
+/** HTTP authentication information kept in memory by {@link HttpClient}. */
 export type AuthCredentials = {
 	/** Basic-Auth information */
 	basicAuth?: {
@@ -9,6 +7,6 @@ export type AuthCredentials = {
 		/** Basic-Auth password */
 		password: string
 	}
-	/** Bearer token header */
+	/** Bearer token header value. Do not log or expose in telemetry. */
 	bearerToken?: string
 }

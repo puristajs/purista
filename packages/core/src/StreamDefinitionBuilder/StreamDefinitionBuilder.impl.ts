@@ -26,6 +26,22 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
 
+/**
+ * Builds a stream definition for incremental output or aggregate stream results.
+ *
+ * Streams can emit typed chunks, optionally aggregate chunks into a final
+ * payload, expose server-sent HTTP streams, invoke commands, consume other
+ * streams, enqueue queues, and emit custom events.
+ *
+ * @example
+ * ```ts
+ * const stream = service
+ *   .getStreamBuilder('generateReport', 'Generate report progress')
+ *   .addChunkSchema(progressSchema)
+ *   .addFinalSchema(reportSchema)
+ *   .exposeAsHttpStreamEndpoint('POST', 'reports/generate')
+ * ```
+ */
 export class StreamDefinitionBuilder<
 	S extends Service,
 	C extends StreamDefinitionBuilderTypes = StreamDefinitionBuilderTypes,
@@ -112,6 +128,9 @@ export class StreamDefinitionBuilder<
 		this.deprecated = deprecated
 	}
 
+	/**
+	 * Declare a queue this stream handler may enqueue through its typed queue proxy.
+	 */
 	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
 		queueName: QueueName,
 		payloadSchema?: Payload,
@@ -142,6 +161,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Declare a command this stream handler may invoke through its typed service proxy. */
 	canInvoke<
 		Output extends Schema,
 		Payload extends Schema,
@@ -191,6 +211,22 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/**
+	 * Declare a stream this stream handler may consume through its typed stream proxy.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.canConsumeStream(
+	 *   'reports',
+	 *   '1',
+	 *   'extractPages',
+	 *   pageChunkSchema,
+	 *   requestSchema,
+	 *   undefined,
+	 *   summarySchema,
+	 * )
+	 * ```
+	 */
 	canConsumeStream<
 		Chunk extends Schema,
 		Final extends Schema,
@@ -272,6 +308,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Declare a custom event this stream handler may emit. */
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
 		this.emitList = registerEmitSchema(this.emitList, eventName, schema) as C['EmitList']
 		return this as unknown as StreamDefinitionBuilder<
@@ -415,6 +452,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Add the payload schema used by stream invocation and handler input. */
 	addPayloadSchema<PayloadSchema extends Schema>(
 		inputSchema: PayloadSchema,
 		inputContentType?: ContentType,
@@ -440,6 +478,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Add the parameter schema used by stream invocation and handler input. */
 	addParameterSchema<ParamsSchema extends Schema>(parameterSchema: ParamsSchema) {
 		this.parameterSchema = parameterSchema
 		return this as unknown as StreamDefinitionBuilder<
@@ -458,6 +497,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Add the schema used to validate each stream chunk written by the handler. */
 	addChunkSchema<ChunkSchema extends Schema>(chunkSchema: ChunkSchema, validateChunks = true) {
 		this.chunkSchema = chunkSchema
 		this.validateChunk = validateChunks
@@ -477,6 +517,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Add the schema used to validate the final stream payload. */
 	addFinalSchema<FinalSchema extends Schema>(finalSchema: FinalSchema, validateFinal = true) {
 		this.finalSchema = finalSchema
 		this.validateFinal = validateFinal
@@ -496,21 +537,42 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Mark this stream definition as deprecated in generated metadata. */
 	markAsDeprecated() {
 		this.deprecated = true
 		return this
 	}
 
+	/**
+	 * Enable or disable default aggregation of chunks into the final payload.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.enableChunkAggregation(false)
+	 * ```
+	 */
 	enableChunkAggregation(enabled = true) {
 		this.aggregateChunks = enabled
 		return this
 	}
 
+	/** Set a custom event name emitted for successful final stream output. */
 	setFinalEventName<N extends string>(eventName: NonEmptyString<N>) {
 		this.finalEventName = eventName
 		return this
 	}
 
+	/**
+	 * Expose this stream as an HTTP stream endpoint.
+	 *
+	 * @example
+	 * ```ts
+	 * stream
+	 *   .exposeAsHttpStreamEndpoint('POST', 'reports/generate')
+	 *   .setHttpStreamingMode('stream')
+	 *   .makeEndpointPublic()
+	 * ```
+	 */
 	exposeAsHttpStreamEndpoint(
 		method: SupportedHttpMethod,
 		path: string,
@@ -532,6 +594,7 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	/** Set stream protocol metadata for generated OpenAPI/HTTP exposure. */
 	setHttpStreamProtocol(protocol: string, documentationUrl?: string) {
 		this.httpStreamProtocol = {
 			protocol,
@@ -540,46 +603,60 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	/** Choose whether HTTP exposure returns chunks or an aggregate JSON response. */
 	setHttpStreamingMode(mode: 'stream' | 'aggregate') {
 		this.httpStreamingMode = mode
 		return this
 	}
 
+	/** Mark the HTTP stream endpoint public in generated security metadata. */
 	makeEndpointPublic() {
 		this.isSecure = false
 		return this
 	}
 
+	/** Enable or disable generated HTTP security metadata. */
 	enableHttpSecurity(enabled = true) {
 		this.isSecure = enabled
 		return this
 	}
 
+	/** Set the OpenAPI summary for HTTP stream exposure. */
 	setOpenApiSummary(summary: string) {
 		this.summary = summary
 		return this
 	}
 
+	/** Add OpenAPI tags for HTTP stream exposure. */
 	addOpenApiTags(...tags: string[]) {
 		this.tags.push(...tags)
 		return this
 	}
 
+	/** Set the OpenAPI operation id for HTTP stream exposure. */
 	setOpenApiOperationId(operationId: string) {
 		this.operationId = operationId
 		return this
 	}
 
+	/** Add non-default OpenAPI error status codes for HTTP stream exposure. */
 	addOpenApiErrorStatusCodes(...codes: StatusCode[]) {
 		this.errorStatusCodes.push(...codes)
 		return this
 	}
 
+	/** Add query parameter metadata for HTTP stream exposure. */
 	addQueryParameters(...queryParams: QueryParameter<Infer<C['ParamsSchema']>>[]) {
 		this.queryParameter.push(...queryParams)
 		return this
 	}
 
+	/**
+	 * Set the stream handler implementation.
+	 *
+	 * Use a function declaration so PURISTA can bind the service instance as
+	 * `this` when executing the handler.
+	 */
 	setStreamFunction(
 		fn: StreamFunction<
 			S,
@@ -601,6 +678,7 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	/** Return the configured stream handler implementation. */
 	getStreamFunction() {
 		if (!this.fn) {
 			throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.streamName}`, {
@@ -624,6 +702,7 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/** Resolve this builder into the stream definition consumed by a service. */
 	async getDefinition() {
 		if (!this.fn) {
 			throw new Error(`StreamDefinitionBuilder: missing function implementation for ${this.streamName}`)

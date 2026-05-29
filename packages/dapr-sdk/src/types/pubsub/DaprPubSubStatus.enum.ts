@@ -11,10 +11,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * Status values returned to Dapr Pub/Sub callbacks.
+ */
 export enum DaprPubSubStatusEnum {
-	SUCCESS = 'SUCCESS', // Message is processed successfully
-	RETRY = 'RETRY', // Message to be retried by Dapr
-	DROP = 'DROP', // Warning is logged and message is dropped
+	/**
+	 * Message was processed successfully.
+	 */
+	SUCCESS = 'SUCCESS',
+	/**
+	 * Message should be retried by Dapr according to component policy.
+	 */
+	RETRY = 'RETRY',
+	/**
+	 * Message should be dropped after Dapr logs a warning.
+	 */
+	DROP = 'DROP',
 }
 
 export default DaprPubSubStatusEnum

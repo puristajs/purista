@@ -12,6 +12,12 @@ import {
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
 import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
+/**
+ * Handles MQTT command responses for pending invocations.
+ *
+ * The handler resolves or rejects the pending invocation by correlation data or
+ * message correlation id. Late responses are ignored with a warning.
+ */
 export const handleCommandResponse: IncomingMessageFunction = async function (message, packet) {
 	const context = deserializeOtpFromMqtt(this.logger, message, packet.properties?.userProperties)
 	return this.startActiveSpan(

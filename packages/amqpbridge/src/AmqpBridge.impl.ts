@@ -55,23 +55,46 @@ import type { Encrypter } from './types/Encrypter.js'
 const RETRY_ATTEMPT_HEADER = 'x-purista-retry-attempt'
 const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
 
-type PausedSubscriptionState = {
+/** Runtime pause metadata for a subscription consumer managed by the AMQP bridge. */
+export type PausedSubscriptionState = {
+	/** Unix timestamp in milliseconds when the consumer was paused. */
 	pausedAt: number
+	/** Operational reason for the pause. */
 	reason: string
 }
 
-type RegisteredSubscription = {
+/** Consumer registration tracked by the AMQP bridge for cleanup and retry handling. */
+export type RegisteredSubscription = {
+	/** PURISTA subscription callback registered for the queue. */
 	cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
+	/** AMQP channel used by this consumer. */
 	channel: ConfirmChannel
+	/** Queue name consumed by this registration. */
 	queueName: string
+	/** PURISTA subscription definition associated with the consumer. */
 	subscription: Subscription
+	/** Whether AMQP acknowledgement is disabled for this consumer. */
 	noAck: boolean
+	/** AMQP message handler installed for the consumer. */
 	consumeHandler: (msg: amqplib.ConsumeMessage | null) => Promise<unknown>
+	/** Broker-assigned consumer tag, if registered. */
 	consumerTag?: string
 }
 
 /**
- * The AMQP event bridge connects to a AMQP broker.
+ * EventBridge implementation for AMQP brokers such as RabbitMQ.
+ *
+ * The bridge uses a headers exchange, confirm channels, durable queues when
+ * requested by command/subscription definitions, and a private reply queue for
+ * command responses. In strict capability terms it supports durable command
+ * and subscription consumers, broker-confirmed command publishing, bounded
+ * subscription retry, and dead-letter routing when configured. It does not
+ * support event streams.
+ *
+ * Payloads are encoded and encrypted through configured content-type and
+ * content-encoding handlers. The default `plainEncrypter` is a no-op; avoid
+ * publishing secrets or unnecessary personal data unless a real encryption
+ * handler and broker controls are in place.
  *
  * @example
  * ```typescript
@@ -90,15 +113,22 @@ type RegisteredSubscription = {
  * @group Event bridge
  */
 export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implements EventBridge {
+	/** Active AMQP connection, available after {@link start}. */
 	protected connection?: ChannelModel
+	/** Shared publishing channel used for event and command publication. */
 	protected channel?: ConfirmChannel
 
+	/** Last known broker/channel health state. */
 	protected healthy = false
+	/** Indicates whether startup completed and the bridge can handle traffic. */
 	protected ready = false
 
+	/** Consumer tags grouped with their channels for shutdown cleanup. */
 	protected consumerRegistrations: { channel: ConfirmChannel; tag: string }[] = []
 
+	/** Broker-created exclusive queue that receives command responses. */
 	protected replyQueueName?: string
+	/** Registered command handlers keyed by generated AMQP queue name. */
 	protected serviceFunctions = new Map<
 		string,
 		{
@@ -107,37 +137,46 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 	>()
 
+	/** Pending command invocations waiting for a correlated response. */
 	protected pendingInvocations = new PendingInvocationRegistry<unknown>({
 		onLateResponse: correlationId => {
 			this.logger.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
 		},
 	})
 
+	/** Registered subscription consumers keyed by generated subscription queue name. */
 	protected subscriptions = new Map<string, RegisteredSubscription>()
+	/** Subscription consumers paused by control signals. */
 	protected pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
+	/** Content-type codecs used before encryption. */
 	protected encoder: Encoder = {
 		...jsonEncoder,
 	}
 
+	/** Content-encoding encryption handlers used after encoding. */
 	protected encrypter: Encrypter = {
 		...plainEncrypter,
 	}
 
+	/** Tracks a broker consumer tag so shutdown can cancel it. */
 	protected addConsumerRegistration(channel: ConfirmChannel, tag: string) {
 		this.consumerRegistrations.push({ channel, tag })
 	}
 
+	/** Removes all tracked consumer tags for a closed channel. */
 	protected removeConsumerRegistrationsForChannel(channel: ConfirmChannel) {
 		this.consumerRegistrations = this.consumerRegistrations.filter(entry => entry.channel !== channel)
 	}
 
+	/** Removes one tracked consumer tag. */
 	protected removeConsumerRegistration(channel: ConfirmChannel, tag: string) {
 		this.consumerRegistrations = this.consumerRegistrations.filter(
 			entry => !(entry.channel === channel && entry.tag === tag),
 		)
 	}
 
+	/** Sends a message to a queue and waits for broker confirms when available. */
 	protected async sendToQueueAndConfirm(
 		channel: ConfirmChannel,
 		queueName: string,
@@ -150,6 +189,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 	}
 
+	/** Creates a publishing channel, preferring confirm channels when supported. */
 	protected async createPublishingChannel() {
 		if (!this.connection) {
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'No connection - not connected')
@@ -160,6 +200,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return this.connection.createChannel() as Promise<ConfirmChannel>
 	}
 
+	/** Reads the PURISTA retry attempt header from an AMQP message. */
 	protected getConsumerAttempt(headers: unknown) {
 		if (!headers || typeof headers !== 'object') {
 			return 1
@@ -179,10 +220,12 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return 1
 	}
 
+	/** Resolves the dead-letter routing key for a subscription failure. */
 	protected getSubscriptionDeadLetterTarget(subscription: Subscription) {
 		return subscription.eventBridgeConfig.consumerFailureHandling?.deadLetterTarget ?? this.config.deadLetterRoutingKey
 	}
 
+	/** Converts subscription handler failures to a concise dead-letter reason. */
 	protected getSubscriptionFailureReason(error: unknown) {
 		if (error instanceof UnhandledError && error.data && typeof error.data === 'object' && 'error' in error.data) {
 			const cause = (error.data as { error?: unknown }).error
@@ -201,6 +244,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return String(error)
 	}
 
+	/** Republishes a failed subscription message for immediate or delayed retry. */
 	protected async retrySubscriptionMessage(
 		channel: ConfirmChannel,
 		queueName: string,
@@ -233,10 +277,12 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		channel.ack(msg)
 	}
 
+	/** Builds the queue name used for delayed subscription retry. */
 	protected getSubscriptionRetryQueueName(queueName: string, retryDelayMs: number) {
 		return `${queueName}.retry.${retryDelayMs}`
 	}
 
+	/** Declares the TTL retry queue that routes expired messages back to the source queue. */
 	protected async ensureSubscriptionRetryQueue(
 		channel: ConfirmChannel,
 		sourceQueueName: string,
@@ -253,6 +299,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		})
 	}
 
+	/** Hands a failed subscription message to the configured dead-letter target. */
 	protected async deadLetterSubscriptionMessage(
 		channel: ConfirmChannel,
 		subscription: Subscription,
@@ -284,6 +331,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		channel.ack(msg)
 	}
 
+	/**
+	 * Creates an AMQP bridge with defaults merged into the provided config.
+	 */
 	constructor(config?: EventBridgeConfig<AmqpBridgeConfig>) {
 		//= getDefaultConfig()
 		const conf = {
@@ -352,7 +402,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 	}
 
 	/**
-	 * Connect to RabbitMQ broker, ensure exchange, call back queue
+	 * Connects to the AMQP broker and declares the exchange and reply queue.
+	 *
+	 * Startup establishes confirm-capable publishing where the broker supports
+	 * it. Registration methods declare command and subscription queues after
+	 * this method has completed.
 	 */
 	async start() {
 		await super.start()
@@ -493,7 +547,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	/**
 	 * Emits a message via AMQP headers exchange.
-	 * The message is encoded and encrypted according to configured codecs.
+	 *
+	 * The message is encoded and encrypted according to configured codecs and
+	 * published as persistent. Broker confirms are used where supported by the
+	 * active channel, but consumers can still process events more than once
+	 * after redelivery.
 	 */
 	async emitMessage<T extends EBMessage>(
 		message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
@@ -572,7 +630,10 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	/**
 	 * Invokes a remote command and waits for a matching command response.
-	 * The call is rejected with timeout if no response is received in time.
+	 *
+	 * The call is rejected on timeout if no response is received in time. Late
+	 * responses are ignored with a warning and should not be relied on for side
+	 * effects.
 	 */
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
@@ -671,6 +732,12 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	/**
 	 * Register a service function and ensure that there is a queue for all incoming command requests.
+	 *
+	 * Durable definitions create durable AMQP queues and use manual
+	 * acknowledgement. Non-durable definitions create auto-delete queues by
+	 * default. Optional configured broker dead-letter exchange/routing key is
+	 * applied to durable command queues.
+	 *
 	 * @param address The service function address
 	 * @param cb the function to call if a matching command message arrives
 	 * @returns the id of command function queue
@@ -928,6 +995,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	/**
 	 * Registers a subscription consumer and returns its stable subscription key.
+	 *
+	 * Shared subscriptions use a generated queue name; non-shared subscriptions
+	 * use an exclusive auto-delete queue. Manual-ack consumers can retry, drop,
+	 * stop, or dead-letter through PURISTA subscription control signals. Delayed
+	 * retry uses an AMQP TTL retry queue only for durable consumers.
 	 */
 	async registerSubscription(
 		subscription: Subscription,
@@ -1212,6 +1284,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
 	}
 
+	/**
+	 * Resumes a subscription consumer paused by a `stop-consumer` control signal.
+	 */
 	async resumeSubscriptionConsumer(registrationKey: string) {
 		const entry = this.subscriptions.get(registrationKey)
 		if (!entry) {
@@ -1235,6 +1310,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	/**
 	 * Encode given payload to buffer
+	 *
+	 * Encoding is selected by `contentType`; encryption is selected by
+	 * `contentEncoding`. The default encryption handler is a no-op and should be
+	 * replaced when payload confidentiality is required.
+	 *
 	 * @param input
 	 * @param contentType
 	 * @param contentEncoding
@@ -1256,6 +1336,10 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 	/**
 	 * Decode buffer into given type
+	 *
+	 * Decryption is applied before content decoding using the configured
+	 * content-encoding and content-type handlers.
+	 *
 	 * @param input the input buffer
 	 * @param contentType the content type of buffer content
 	 * @param contentEncoding the encoding type of buffer content

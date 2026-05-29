@@ -18,8 +18,16 @@ limitations under the License.
  */
 export type DaprPubSubRuleType = {
 	// Match rule (e.g. event.type == "hello")
+	/**
+	 * Stores the match value exposed by DaprPubSubRuleType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	match: string
 
 	// The path to send the event towards if it matches
+	/**
+	 * Stores the path value exposed by DaprPubSubRuleType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	path: string
 }

@@ -1,12 +1,15 @@
+/**
+ * Configuration for clients that call the local Dapr sidecar.
+ */
 export type DaprClientConfig = {
 	/**
-	 * The Dapr api version
+	 * Dapr HTTP API version.
 	 * @default v1.0
 	 */
 	daprApiVersion: string
 	/**
 	 * Host location of the Dapr sidecar.
-	 * @default 127.0.0.1
+	 * @default http://127.0.0.1
 	 */
 	daprHost?: string
 	/**
@@ -22,7 +25,9 @@ export type DaprClientConfig = {
 	appPrefix?: string
 
 	/**
-	 * API token to authenticate with Dapr.
+	 * API token used to authenticate with the Dapr sidecar.
+	 *
+	 * Do not log or expose this value.
 	 * See https://docs.dapr.io/operations/security/api-token/.
 	 */
 	daprApiToken?: string
@@ -34,7 +39,7 @@ export type DaprClientConfig = {
 	isKeepAlive?: boolean
 
 	/**
-	 * The PubSub to be used for event messages
+	 * Dapr Pub/Sub component name used for PURISTA event messages.
 	 * @default pubsub
 	 */
 	pubSubName?: string

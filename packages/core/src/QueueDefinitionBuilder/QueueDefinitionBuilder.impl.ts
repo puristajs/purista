@@ -9,6 +9,22 @@ import type { QueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefin
 import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
 import type { Schema } from '../schema/index.js'
 
+/**
+ * Builds a durable queue contract for background work.
+ *
+ * Queue definitions describe schemas, retry/lease behavior, result side
+ * effects, worker bindings, and optional schedules. Runtime queue semantics are
+ * provided by the configured queue bridge.
+ *
+ * @example
+ * ```ts
+ * const queue = service
+ *   .getQueueBuilder('billing.monthlyClosing', 'Close monthly billing')
+ *   .addPayloadSchema(monthlyClosingSchema)
+ *   .setLifecycleConfig({ maxAttempts: 5 })
+ *   .emitResultAsEvent('billing.monthlyClosing.completed')
+ * ```
+ */
 export class QueueDefinitionBuilder {
 	private payloadSchema?: Schema
 	private parameterSchema?: Schema
@@ -32,16 +48,19 @@ export class QueueDefinitionBuilder {
 		private readonly queueDescription: string,
 	) {}
 
+	/** Add the queue job payload schema used during enqueue and worker execution. */
 	addPayloadSchema(schema: Schema) {
 		this.payloadSchema = schema
 		return this
 	}
 
+	/** Add the queue job parameter schema used during enqueue and worker execution. */
 	addParameterSchema(schema: Schema) {
 		this.parameterSchema = schema
 		return this
 	}
 
+	/** Override queue retry, lease, heartbeat, delay, and retention lifecycle defaults. */
 	setLifecycleConfig(config: Partial<QueueLifecycleConfig>) {
 		this.lifecycleConfig = {
 			...defaultQueueLifecycleConfig,
@@ -142,31 +161,47 @@ export class QueueDefinitionBuilder {
 		return this
 	}
 
+	/**
+	 * Transform or normalize a job before it is sent to the queue bridge.
+	 *
+	 * @example
+	 * ```ts
+	 * queue.setBeforeEnqueueTransform(async job => ({
+	 *   ...job,
+	 *   parameter: { ...job.parameter, requestedAt: Date.now() },
+	 * }))
+	 * ```
+	 */
 	setBeforeEnqueueTransform(transform: QueueTransformHook) {
 		this.beforeEnqueueTransform = transform
 		return this
 	}
 
+	/** Transform or enrich a stored job immediately before worker execution. */
 	setBeforeExecuteTransform(transform: QueueTransformHook) {
 		this.beforeExecuteTransform = transform
 		return this
 	}
 
+	/** Configure where failed jobs are dead-lettered when the queue bridge supports it. */
 	setDeadLetterOptions(options: { queueName?: string }) {
 		this.deadLetter = options
 		return this
 	}
 
+	/** Set tags used by tooling and generated queue metadata. */
 	setTags(tags: string[]) {
 		this.tags = tags
 		return this
 	}
 
+	/** Mark this queue definition as deprecated in generated metadata. */
 	markAsDeprecated() {
 		this.deprecated = true
 		return this
 	}
 
+	/** Configure queue bridge delivery hints such as prefetch and ordering guarantee. */
 	setQueueBridgeConfig(config: Partial<DefinitionQueueBridgeConfig>) {
 		this.queueBridgeConfig = {
 			...this.queueBridgeConfig,
@@ -175,11 +210,13 @@ export class QueueDefinitionBuilder {
 		return this
 	}
 
+	/** Attach one or more worker definitions that can process jobs from this queue. */
 	addWorkerDefinition(...workers: QueueWorkerDefinition[]) {
 		this.workers.push(...workers)
 		return this
 	}
 
+	/** Resolve this builder into the queue definition consumed by a service. */
 	async getDefinition(): Promise<QueueDefinition> {
 		const lifecycle = this.lifecycleConfig ?? defaultQueueLifecycleConfig
 

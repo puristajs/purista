@@ -2,6 +2,11 @@ import { StatusCode } from '@purista/core'
 
 import type { RouterFunction } from './types/RouterFunction.js'
 
+/**
+ * Health endpoint used by HTTP event bridges.
+ *
+ * Returns `200` when the bridge reports healthy and `500` otherwise.
+ */
 export const healthzRoute: RouterFunction = async function (c) {
 	const isHealthy = await this.isHealthy()
 	if (isHealthy) {

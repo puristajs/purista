@@ -19,7 +19,7 @@ The old fragmented framework skill set is folded into `purista`:
 - observability and deployment
 - OTel Metrics API guidance, custom metric builders, typed `context.metrics`, and ai-harness telemetry ownership
 - scaffolding and implementation planning
-- spec-to-architecture guidance
+- requirements-to-architecture guidance
 
 ## Umbrella-skill quality requirements
 - `SKILL.md` stays compact and navigation-oriented
@@ -30,5 +30,5 @@ The old fragmented framework skill set is folded into `purista`:
 
 ## Downstream review notes
 - `voyage` should consume only `purista` plus its local overlay
-- `specs/00-context.md` and public website context outputs must point at the single canonical path under `web/src/content/`
+- public website context outputs must point at the single canonical path under `web/src/content/`
 - framework tests must stop asserting the old multi-skill catalog shape

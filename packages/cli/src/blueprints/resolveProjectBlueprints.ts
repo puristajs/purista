@@ -31,6 +31,12 @@ const addBlueprint = (
 	target.push(blueprintId)
 }
 
+/**
+ * Select the built-in blueprints required for a project input.
+ *
+ * The resolver always includes `base`, runtime, and event bridge blueprints, then
+ * adds HTTP and linter blueprints when requested.
+ */
 export const resolveProjectBlueprints = (
 	input: CreateProjectInput,
 	options: { cwd?: string } = {},

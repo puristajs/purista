@@ -1,37 +1,23 @@
 /**
-The config store adapter for AWS System Manager.
-It will store, retrive, update or remove configs in AWS System Manager.
-
-For performance reasons, and to reduce costs, the config values are cached in memory after first fetch.
-
-You can disable the whole caching via config by setting enableCache to false.
-If the cache is enabled, you can set the ttl for cached config values via config cacheTtl (in ms).
-
-This will return the cached config if available and if ttl is not exceeded.
-If a config value exceeds the ttl, it does not automatically get removed from cache.
-It will be removed/overwritten on next get request.
-
-@example 
-```typescript
-const config = {
-  region: 'us-east-1'
-}
-
-const store = new AWSConfigStore({ config })
-
-await store.setConfig('myConfig', 'value')
-
-let value = await store.getConfig('myConfig')
-console.log(value) // outputs: { myConfig: 'value' }
-
-await store.removeConfig('myConfig')
-
-value = await store.getConfig('myConfig')
-console.log(value) // outputs: undefined
-
-```
-@module
-*/
+ * AWS Systems Manager Parameter Store adapter for PURISTA config values.
+ *
+ * The store caches reads in memory by default. Configure AWS credentials through
+ * the AWS SDK provider chain or `client` options, and use tenant-aware parameter
+ * names such as `/tenants/acme/prod/app/theme`.
+ *
+ * @example
+ * ```typescript
+ * const store = new AWSConfigStore({
+ *   client: { region: 'eu-central-1' },
+ *   cacheTtl: 60_000,
+ * })
+ *
+ * await store.setConfig('/tenants/acme/prod/app/theme', 'dark')
+ * const config = await store.getConfig('/tenants/acme/prod/app/theme')
+ * ```
+ *
+ * @module
+ */
 export * from './AWSConfigStore.impl.js'
 export * from './types.js'
 export * from './version.js'

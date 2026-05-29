@@ -1,16 +1,24 @@
 import type { ClientOptions } from 'google-gax'
 
 /**
- * Google Secret Manager store config
+ * Google Secret Manager store configuration.
  */
 export type GoogleSecretStoreConfig = {
 	/**
-	 * The google project id in format of projects/* without ending /secrets
-	 * @example projects/428371962963
+	 * Google Cloud project resource name in `projects/*` format, without a
+	 * trailing `/secrets` segment.
+	 *
+	 * @example
+	 * ```typescript
+	 * 'projects/example-project'
+	 * ```
 	 */
 	project: string
 	/**
-	 * Google client options
+	 * Options passed to `SecretManagerServiceClient`.
+	 *
+	 * Prefer Application Default Credentials or workload identity over static
+	 * service account keys.
 	 */
 	client?: ClientOptions
 }

@@ -16,5 +16,9 @@ limitations under the License.
  */
 export type PubSubPublishResponseType = {
 	// error contains the error if the publish failed.
+	/**
+	 * Stores the error value exposed by PubSubPublishResponseType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	error?: Error
 }

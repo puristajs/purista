@@ -7,6 +7,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - `skills/purista-skill-maintainer/` is the meta skill for maintaining that catalog.
 - Applications may add overlay skills, but core framework knowledge should stay in the shared `purista` skill references.
 - Repo-local `skills/` is the source of truth. Installed copies in `$CODEX_HOME/skills` are mirrors and should be refreshed from here when drift appears.
+- The user-facing `purista` skill must not require internal spec access. The maintainer skill may use specs because it is for developing and aligning PURISTA itself.
 
 ## Filesystem Layout
 - Each skill uses `skills/<skill-name>/SKILL.md`.
@@ -18,6 +19,10 @@ This repository ships one shared framework skill catalog in `skills/`.
 - Split architecture guidance from implementation guidance.
 - Split package guidance from component/builder guidance.
 - Prefer CLI-generated skeletons whenever possible; document lower-level builder usage as the refinement path.
+- Keep `SKILL.md` files compact and route detailed material into directly linked references.
+- Add `## Contents` to reference files over 100 lines.
+- Keep concrete evaluation scenarios for the canonical `purista` skill so drift repairs can be tested against realistic tasks.
+- Keep active specs, implementation, public docs, and skills aligned in that order: specs define intended behavior, implementation realizes it, public docs explain it, and user-facing skills teach the implemented behavior.
 - Keep current platform decisions visible: Hono as active HTTP runtime, EventBridge/QueueBridge separation, core-owned harness-backed agents, and provider packages as app-level dependencies.
 - Keep current enterprise decisions visible: schedules are contracts, Kubernetes CronJob export is manifest generation, Redis/NATS strict idempotency returns the original job id, and no `@purista/contracts` package is used.
 - Contract guidance should prefer boundary-local consumer schemas over one oversized shared schema reused across many services.
@@ -28,3 +33,6 @@ This repository ships one shared framework skill catalog in `skills/`.
 Shared roots load first. App-local overlay roots load second. Overlays may override a shared skill of the same name, but the preferred shape is one shared `purista` skill plus app-specific overlays.
 
 Overlays should document product-local decisions only. They should not fork core framework behavior unless the framework itself changed and the shared catalog is updated first.
+
+## Validation
+Run `npm run audit:skills` from the `purista` repo after changing this catalog.

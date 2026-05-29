@@ -17,33 +17,60 @@ import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
+/** Optional command generated together with a queue to enqueue work. */
 export type QueueProducerOptions = {
+	/** Command name used for the producer command builder. */
 	commandName: string
+	/** Human-readable description written into the generated producer command. */
 	commandDescription: string
+	/** Optional success event emitted after the producer enqueues work. */
 	responseEventName?: string
 }
 
+/** Queue worker generated together with a queue. */
 export type QueueWorkerOptions = {
+	/** Logical worker name. */
 	name: string
+	/** Human-readable description written into the generated queue worker. */
 	description: string
+	/** Queue worker scheduling mode. */
 	mode: 'continuous' | 'interval' | 'sequential'
+	/** Interval in milliseconds when `mode` is `interval`. */
 	intervalMs?: number
+	/** Maximum number of jobs handled concurrently. */
 	maxParallelHandlers: number
 }
 
+/** Input for generating a queue, its primary worker, and optional producer command. */
 export type AddPuristaQueueInput = {
+	/** Project root path; defaults to `process.cwd()`. */
 	projectRootPath?: string
+	/** PURISTA project configuration controlling generated paths and casing. */
 	puristaConfig: PuristaConfig
+	/** Discovered project metadata used to update the service composition. */
 	puristaProject: PuristaProjectInfo
+	/** Service name that owns the generated queue. */
 	serviceName: string
+	/** Service version that owns the generated queue. */
 	serviceVersion: string
+	/** Logical queue name used by `getQueueBuilder`. */
 	queueName: string
+	/** Human-readable queue description written into generated docs and tests. */
 	queueDescription: string
+	/** Primary worker generated for the queue. */
 	worker: QueueWorkerOptions
+	/** Optional producer command generated with queue enqueue permissions. */
 	producer?: QueueProducerOptions
+	/** Optional formatting options passed to `code-block-writer`. */
 	codeWriterOptions?: Partial<Options>
 }
 
+/**
+ * Add a queue contract, queue worker, and optional producer command to a service.
+ *
+ * The producer command is generated with `.canEnqueue(...)` and a starter
+ * `context.queue.enqueue.<queueName>(payload, parameter)` call.
+ */
 export const addPuristaQueue = async (input: AddPuristaQueueInput) => {
 	const projectPath = input.projectRootPath ?? process.cwd()
 	const serviceDirName = convertToProjectFileCasing(input.serviceName, input.puristaConfig)

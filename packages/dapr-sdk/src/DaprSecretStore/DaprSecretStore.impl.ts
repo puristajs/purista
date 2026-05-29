@@ -10,13 +10,19 @@ import { puristaVersion } from '../version.js'
 import type { DaprSecretStoreConfig } from './types/DaprSecretStoreConfig.js'
 
 /**
- * DaprSecretStore is an adapter which connects to the secret store provided by the underlaying Dapr infrastructure.
+ * Secret store adapter backed by a Dapr secret component.
  *
- * Dapr currently provides only the possibility to fetch a secret. Creating a new secret, changing an existing secret or removal of secrets is not supported.
+ * The adapter fetches secrets through the local sidecar. Creating, changing and
+ * removing secrets is not supported by this implementation.
  */
 export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig> {
 	private client: HttpClient<DaprClientConfig>
 
+	/**
+	 * Creates a Dapr-backed secret store.
+	 *
+	 * @param config - Store name, namespace metadata and Dapr sidecar client settings.
+	 */
 	constructor(config?: StoreBaseConfig<DaprSecretStoreConfig>) {
 		super(config?.secretStoreName ?? 'DaprSecretStore', { ...config })
 		const logger = this.logger
@@ -52,6 +58,11 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 		})
 	}
 
+	/**
+	 * Reads one or more secrets from the configured Dapr component.
+	 *
+	 * Never log secret values or include them in traces, metrics, examples or error messages.
+	 */
 	protected async getSecretImpl<SecretNames extends string[]>(
 		...secretNames: SecretNames
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
@@ -81,11 +92,17 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 		return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
 
+	/**
+	 * Dapr secret mutation is not implemented by this adapter.
+	 */
 	protected async setSecretImpl(secretName: string) {
 		void secretName
 		throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of secrets is not available')
 	}
 
+	/**
+	 * Dapr secret removal is not implemented by this adapter.
+	 */
 	protected async removeSecretImpl(secretName: string) {
 		void secretName
 		throw new UnhandledError(StatusCode.NotImplemented, 'removing of secrets is not available')

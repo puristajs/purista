@@ -4,6 +4,12 @@ import { camelCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/**
+ * Generate a queue worker builder file.
+ *
+ * The generated worker uses `.getQueueWorkerBuilder(...)`, configures mode,
+ * parallelism, and a starter handler that completes the current job.
+ */
 export const getQueueWorkerBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

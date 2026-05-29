@@ -1,6 +1,6 @@
 ---
 name: purista-skill-maintainer
-description: Create, review, refactor, and keep the canonical PURISTA skill and its maintenance guidance up to date using the shared purista/skills catalog, spec-first sourcing, and cross-repo drift checks.
+description: Maintains the canonical PURISTA skill catalog with spec-grounded drift checks, implementation verification, progressive disclosure, and evaluation scenarios.
 topics: [skills, documentation, maintenance]
 phases: [spec, architecture, implementation, review]
 ---
@@ -13,20 +13,26 @@ Use this skill when creating, refactoring, consolidating, or reviewing the share
 ## What this skill is for
 This skill defines the maintenance workflow for the shared PURISTA skill catalog in `purista/skills`.
 The catalog now has one canonical framework skill, `purista`, plus one separate meta skill, `purista-skill-maintainer`.
-The maintainer skill keeps that model coherent, readable, implementation-grounded, and aligned across `purista`, `starter`, `create-purista`, `specs`, and `voyage`.
+The maintainer skill keeps that model coherent, readable, spec-grounded, implementation-verified, and aligned across `purista`, `starter`, `create-purista`, public docs, and `voyage`.
 
 ## Source-of-truth order
 Read sources in this order before changing a skill:
-1. Relevant docs in `specs/`
+1. Current relevant specs in `specs/`
 2. Current implementation in `purista/`
-3. The current `purista` skill and its `references/`
-4. Downstream overlays and consumers in `voyage`, `starter`, and `create-purista`
+3. Public handbook/API docs in `purista/web`
+4. The current `purista` skill and its `references/`
+5. Downstream overlays and consumers in `voyage`, `starter`, and `create-purista`
+
+Specs are the source of truth for framework development. If implementation and specs conflict, first decide whether the implementation drifted or the spec is stale. Fix the drift in the implementation or update/supersede the spec, then align skills to the implemented behavior that now follows the current spec.
 
 ## Hard rules
 - Treat `purista` as the canonical shared framework skill path unless the change is explicitly about the maintainer skill itself.
+- Keep user-facing framework skills independent from internal spec access. The `purista-skill-maintainer` skill may reference specs because it is for maintaining PURISTA itself.
 - Keep `SKILL.md` compact and navigational; move depth into `references/`.
+- Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
 - Use the filesystem as part of the reasoning surface: good reference taxonomy matters.
 - Verify every file path, package path, and code snippet in the repo.
+- Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Keep `purista/skills` as the source of truth; installed copies under `$CODEX_HOME/skills` are mirrors that may need syncing after repo changes.
 - Do not split the framework back into many sibling skills unless there is a genuinely separate non-runtime concern.
@@ -44,20 +50,25 @@ Read sources in this order before changing a skill:
 - If a producer emits a broad payload, document that consumers should redefine a narrower schema locally and keep only the fields they actually use.
 
 ## Required read order
-- `specs/00-context.md`
+- `specs/README.md`
+- relevant active specs for the framework capability being changed
 - `purista/skills/README.md`
 - `purista/skills/purista/SKILL.md`
 - this `SKILL.md`
 - `references/maintenance-checklist.md`
 - `references/catalog-audit-wave1.md`
+- `purista/skills/purista/references/11-evaluation-scenarios.md`
 
 ## What to review for every change
 - One-skill routing quality
 - Accuracy of file references and package paths
 - Definition / implementation / configuration / instantiation coverage
 - Reference taxonomy quality
+- Progressive disclosure quality: `SKILL.md` routes, references teach depth, and no reference requires loading unrelated files
 - Snippet relevance and duplicate-content risk
-- Drift in `starter`, `create-purista`, `voyage`, `specs`, and published docs
+- Evaluation scenarios still cover setup, CLI scaffolding, streams, queues, agents, enterprise review, and drift repair
+- Drift between active specs and implementation
+- Drift in `starter`, `create-purista`, `voyage`, and published docs
 - Drift between repo-local skills and installed mirror copies under `$CODEX_HOME/skills`
 - Drift between metric catalog, observability docs, examples, and skill snippets
 - Drift between security/privacy handbook pages, AI docs, generated examples, and skill guidance about PII, prompts, secrets, telemetry, and tenant isolation

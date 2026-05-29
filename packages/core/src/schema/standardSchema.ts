@@ -4,7 +4,10 @@ import type { AnySchema } from 'yup'
 import type { ZodType } from 'zod'
 
 /**
- * Common schema abstraction used across PURISTA.
+ * Common Standard Schema abstraction used across PURISTA boundaries.
+ *
+ * Commands, subscriptions, streams, queues, configuration, and custom metrics
+ * use schemas for runtime validation and documentation generation.
  */
 export type Schema = StandardSchemaV1
 /** Infers output type from a schema. */
@@ -14,6 +17,9 @@ export type InferIn<TSchema extends Schema> = StandardSchemaV1.InferInput<TSchem
 
 /**
  * Unified validation result shape for all supported schema vendors.
+ *
+ * Validation issues can be safely surfaced as contract errors, but raw input
+ * values should not be logged alongside them unless explicitly safe.
  */
 export type ValidationResult<TOutput> =
 	| { success: true; data: TOutput }
@@ -61,6 +67,14 @@ const getZodToJSONSchema = (zodModule: ZodModuleShape) => zodModule.z?.toJSONSch
 
 /**
  * Validates input data with a Standard Schema compatible validator.
+ *
+ * @example
+ * ```ts
+ * const result = await validate(schema, input)
+ * if (!result.success) {
+ *   throw new HandledError(StatusCode.BadRequest, 'invalid input', result.issues)
+ * }
+ * ```
  */
 export const validate = async <TSchema extends Schema>(
 	schema: TSchema,
@@ -77,6 +91,8 @@ export const validate = async <TSchema extends Schema>(
 
 /**
  * Converts supported schema formats into OpenAPI-compatible JSON Schema.
+ *
+ * Used by API documentation and service definition export helpers.
  */
 export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions): Promise<SchemaObject> => {
 	const standardProps = schema['~standard']

@@ -18,8 +18,16 @@ import type { TypeDaprPubSubCallback } from './DaprPubSubCallback.type.js'
  */
 export type PubSubSubscriptionTopicRouteType = {
 	// Our event handlers
+	/**
+	 * Stores the eventHandlers value exposed by PubSubSubscriptionTopicRouteType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	eventHandlers: TypeDaprPubSubCallback[]
 
 	// The path on the server (e.g. POST /my-path)
+	/**
+	 * Stores the path value exposed by PubSubSubscriptionTopicRouteType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	path: string
 }

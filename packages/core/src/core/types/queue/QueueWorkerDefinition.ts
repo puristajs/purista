@@ -11,8 +11,21 @@ import type { QueueMessage } from './QueueMessage.js'
 import type { QueueWorkerAfterGuardHook } from './QueueWorkerAfterGuardHook.js'
 import type { QueueWorkerBeforeGuardHook } from './QueueWorkerBeforeGuardHook.js'
 
+/**
+ * Queue worker polling mode.
+ *
+ * @group Queue
+ */
 export type QueueWorkerMode = 'continuous' | 'interval' | 'sequential'
 
+/**
+ * Function that processes one leased queue message.
+ *
+ * Handlers should be idempotent because retries, lease expiry, and redrive can
+ * execute the same business work more than once.
+ *
+ * @group Queue
+ */
 export type QueueWorkerHandler<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
@@ -36,6 +49,11 @@ export type QueueWorkerHandler<
 	message: QueueMessage<MessagePayloadType, MessageParamsType>,
 ) => Promise<QueueHandlerResult | undefined>
 
+/**
+ * Public definition of a worker attached to a queue.
+ *
+ * @group Queue
+ */
 export type QueueWorkerDefinition<
 	PayloadSchema extends Schema = Schema,
 	ParamsSchema extends Schema = Schema,
@@ -46,11 +64,17 @@ export type QueueWorkerDefinition<
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > = {
+	/** Worker name used in diagnostics and metrics. */
 	name: string
+	/** Queue name this worker leases from. */
 	queueName: string
+	/** Polling/execution mode. */
 	mode: QueueWorkerMode
+	/** Poll interval for interval-based workers. */
 	intervalMs?: number
+	/** Maximum concurrently leased messages for this worker. */
 	maxParallelHandlers: number
+	/** Business handler for leased messages. */
 	handler: QueueWorkerHandler<
 		PayloadSchema,
 		ParamsSchema,
@@ -61,6 +85,7 @@ export type QueueWorkerDefinition<
 		QueueInvokes,
 		Metrics
 	>
+	/** Guards that run before the worker handler. */
 	beforeGuards?: Record<
 		string,
 		QueueWorkerBeforeGuardHook<
@@ -72,6 +97,7 @@ export type QueueWorkerDefinition<
 			StreamInvokes
 		>
 	>
+	/** Guards that run after the worker handler. */
 	afterGuards?: Record<
 		string,
 		QueueWorkerAfterGuardHook<

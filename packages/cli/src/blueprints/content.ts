@@ -4,12 +4,14 @@ import { convertToProjectFileCasing } from '../api/convertToProjectFileCasing.js
 import type { PuristaConfig } from '../api/loadPuristaConfig.js'
 import type { CreateProjectInput } from '../create/types.js'
 
+/** Create the default `.gitignore` content for generated projects. */
 export const createGitIgnoreFile = () => `node_modules
 dist
 .DS_Store
 coverage
 `
 
+/** Create the generated project README content. */
 export const createReadmeFile = (input: CreateProjectInput) => `# ${input.projectName}
 
 Generated with \`@purista/cli\`.
@@ -32,6 +34,7 @@ Generated with \`@purista/cli\`.
 Contract exporters refresh \`purista.definitions.json\` before writing provider-neutral outputs. Update \`src/definitions.ts\` when you add service builders that should be exported.
 `
 
+/** Create the starter `ServiceEvent` enum with the example ping event. */
 export const createServiceEventEnumFile = (input: CreateProjectInput) => {
 	const eventName = convertToProjectEventCasing('ping executed', {
 		$schema: 'https://purista.dev/schemas/1.12.0/schema.json',
@@ -51,6 +54,7 @@ export const createServiceEventEnumFile = (input: CreateProjectInput) => {
 `
 }
 
+/** Create `src/definitions.ts` for exporting generated service definitions. */
 export const createDefinitionsFile = (input: CreateProjectInput) => {
 	const puristaConfig: PuristaConfig = {
 		$schema: 'https://purista.dev/schemas/1.12.0/schema.json',
@@ -76,6 +80,7 @@ export const exportPuristaDefinitions = () => exportServiceDefinitions([...servi
 `
 }
 
+/** Create the script that writes `purista.definitions.json`. */
 export const createExportDefinitionsFile = () => `import { writeFile } from 'node:fs/promises'
 import { exportPuristaDefinitions } from './definitions.js'
 
@@ -137,6 +142,7 @@ export const getEventBridge = async (logger: Logger) => {
 }
 `
 
+/** Create event bridge runtime wiring for the selected bridge blueprint. */
 export const createEventBridgeFile = (input: CreateProjectInput) => {
 	switch (input.eventBridge) {
 		case 'amqp':
@@ -152,6 +158,7 @@ export const createEventBridgeFile = (input: CreateProjectInput) => {
 	}
 }
 
+/** Create the default AMQP bridge config module. */
 export const createAmqpConfigFile = () => `import type { AmqpBridgeConfig } from '@purista/amqpbridge'
 
 const amqpBridgeConfig: Partial<AmqpBridgeConfig> = {
@@ -162,6 +169,7 @@ const amqpBridgeConfig: Partial<AmqpBridgeConfig> = {
 export default amqpBridgeConfig
 `
 
+/** Create the default MQTT bridge config module. */
 export const createMqttConfigFile = () => `import type { MqttBridgeConfig } from '@purista/mqttbridge'
 
 const mqttBridgeConfig: Partial<MqttBridgeConfig> = {
@@ -171,6 +179,7 @@ const mqttBridgeConfig: Partial<MqttBridgeConfig> = {
 export default mqttBridgeConfig
 `
 
+/** Create the default NATS bridge config module. */
 export const createNatsConfigFile = () => `import type { NatsBridgeConfig } from '@purista/natsbridge'
 
 const natsBridgeConfig: Partial<NatsBridgeConfig> = {}
@@ -178,6 +187,7 @@ const natsBridgeConfig: Partial<NatsBridgeConfig> = {}
 export default natsBridgeConfig
 `
 
+/** Create the default Dapr event bridge config module. */
 export const createDaprConfigFile = () => `import type { DaprEventBridgeConfig } from '@purista/dapr-sdk'
 
 const daprBridgeConfig: Partial<DaprEventBridgeConfig> = {
@@ -190,6 +200,7 @@ const daprBridgeConfig: Partial<DaprEventBridgeConfig> = {
 export default daprBridgeConfig
 `
 
+/** Create Hono HTTP server config for generated projects. */
 export const createHttpConfigFile = () => `import type { HonoServiceV1ConfigPartial } from '@purista/hono-http-server'
 
 const serviceConfig = {
@@ -213,6 +224,7 @@ const httpConfig = {
 export default httpConfig
 `
 
+/** Create runtime-specific Hono HTTP server bootstrap code. */
 export const createHttpFile = (runtime: CreateProjectInput['runtime']) => {
 	if (runtime === 'bun') {
 		return `import type { EventBridge, Logger, Service } from '@purista/core'
@@ -293,6 +305,7 @@ export const getHttpServer = async (input: { eventBridge: EventBridge; logger: L
 `
 }
 
+/** Create the static landing page served by the generated Hono setup. */
 export const createPublicIndexHtml = (input: CreateProjectInput) => `<!doctype html>
 <html lang="en">
 	<head>
@@ -335,6 +348,7 @@ export const createPublicIndexHtml = (input: CreateProjectInput) => `<!doctype h
 </html>
 `
 
+/** Create the generated Biome config. */
 export const createBiomeConfigFile = () => `{
 	"$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
 	"assist": { "actions": { "source": { "organizeImports": "off" } } },
@@ -381,6 +395,7 @@ export const createBiomeConfigFile = () => `{
 }
 `
 
+/** Create an ESLint flat config for ESM projects. */
 export const createEslintModuleConfigFile = () => `import pluginJs from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -409,6 +424,7 @@ export default [
 ]
 `
 
+/** Create an ESLint flat config for CommonJS projects. */
 export const createEslintCommonJsConfigFile = () => `import pluginJs from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -438,6 +454,7 @@ export default [
 ]
 `
 
+/** Create `src/index.ts` with event bridge, service startup, optional HTTP, and shutdown wiring. */
 export const createEntrypointFile = (input: CreateProjectInput, puristaConfig: PuristaConfig) => {
 	const serviceDirectory = convertToProjectFileCasing('ping', puristaConfig)
 	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)

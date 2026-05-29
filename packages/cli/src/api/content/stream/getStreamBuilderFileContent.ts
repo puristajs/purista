@@ -6,6 +6,13 @@ import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
+/**
+ * Generate a stream builder file.
+ *
+ * The generated builder uses `.getStreamBuilder(...)`, attaches input, chunk,
+ * and final schemas, optionally sets a final event, and closes the writer in the
+ * starter implementation.
+ */
 export const getStreamBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

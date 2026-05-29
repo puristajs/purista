@@ -1,13 +1,18 @@
 /**
- * Options for a single request
+ * Options for a single HTTP request.
  */
 export type HttpClientRequestOptions = {
 	/**
-	 * additional headers
+	 * Additional headers for this request.
+	 *
+	 * These are sent over the wire and may be visible to telemetry processors.
+	 * Avoid secrets unless explicitly required and governed by policy.
 	 */
 	headers?: Record<string, string>
 	/**
-	 * query/search string parameter
+	 * Query/search string parameters.
+	 *
+	 * Avoid secrets and PII in query strings.
 	 */
 	query?: Record<string, string>
 	/**

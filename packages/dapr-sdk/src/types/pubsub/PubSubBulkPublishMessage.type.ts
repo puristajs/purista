@@ -13,10 +13,17 @@ limitations under the License.
 
 import type { KeyValueType } from './KeyValue.type.js'
 
+/**
+ * Explicit Dapr bulk publish message with per-entry metadata.
+ */
 export type PubSubBulkPublishMessageExplicit = {
+	/** Optional caller-provided entry id. */
 	entryID?: string
+	/** Event payload published for this entry. */
 	event: object | string
+	/** Dapr metadata sent with this entry. */
 	metadata?: KeyValueType
+	/** Content type for the event payload. */
 	contentType?: string
 }
 

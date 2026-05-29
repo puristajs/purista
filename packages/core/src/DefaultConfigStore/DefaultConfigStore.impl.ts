@@ -7,8 +7,13 @@ import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKe
 import type { DefaultConfigStoreConfig } from './types/DefaultConfigStoreConfig.js'
 
 /**
+ * Process-local in-memory config store for development and tests.
+ *
  * The DefaultConfigStore is a placeholder which offers all needed methods.
  * Getters and setters will throw a UnhandledError with status `Unauthorized`, when a disabled operation is called.
+ *
+ * Values are stored in memory and are lost on shutdown. Do not use it for
+ * production configuration or secrets.
  *
  * For development and testing purpose, you can initiate the store with values.
  *

@@ -5,8 +5,11 @@ import type { LogLevelName } from '../../core/types/LogLevelName.js'
 import type { Prettify } from '../../core/types/Prettify.js'
 
 /**
- * Tha basic configuration for a HTTPClient
- * Requires as least a `baseUrl`
+ * Basic configuration for {@link HttpClient}.
+ *
+ * The client emits OpenTelemetry spans and framework HTTP metrics when a
+ * recorder/processor is supplied. Keep `baseUrl`, headers, and trace ids free
+ * of secrets because external telemetry/log processors may observe them.
  */
 export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Prettify<
 	{
@@ -40,9 +43,12 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
 		 */
 		name?: string
 		/**
-		 * Add your default headers here
+		 * Add your default headers here.
+		 *
 		 * These headers will be part of every request.
 		 * They can be overwritten per request option
+		 * Do not put secrets here unless the application's logging and telemetry
+		 * policy explicitly permits those header names.
 		 * */
 		defaultHeaders?: Record<string, string>
 		/**
@@ -59,7 +65,7 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
 			/** Basic-Auth password */
 			password: string
 		}
-		/** Auth-Bearer token */
+		/** Auth-Bearer token. Prefer `setBearerToken` when rotating at runtime. */
 		bearerToken?: string
 
 		/**

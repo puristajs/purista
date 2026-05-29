@@ -11,8 +11,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * Failed entry reported by Dapr's bulk publish API response.
+ */
 export type PubSubBulkPublishApiResponseStatus = {
+	/** Entry id from the bulk publish request. */
 	entryID: string
+	/** Error message returned by Dapr for this entry. */
 	error: string
 }
 
@@ -20,5 +25,6 @@ export type PubSubBulkPublishApiResponseStatus = {
  * Response from a bulk publish API request.
  */
 export type PubSubBulkPublishApiResponse = {
+	/** Entries that Dapr rejected while processing the bulk publish request. */
 	failedEntries: PubSubBulkPublishApiResponseStatus[]
 }

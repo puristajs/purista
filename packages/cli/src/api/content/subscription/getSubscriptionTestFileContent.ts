@@ -4,6 +4,7 @@ import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate a subscription unit test using the current subscription context mock shape. */
 export const getSubscriptionTestFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

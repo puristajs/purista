@@ -1,55 +1,66 @@
 import type { Command, CommandResponse, EBMessage, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
 
 /**
- * The HttpEventBridgeClient connects the HTTPEventBridge with the sidecar service.
- * This client is responsible for the communication to the sidecar service.
+ * Adapter contract between {@link HttpEventBridge} and a sidecar or platform HTTP API.
+ *
+ * Implementations encode runtime-specific URL conventions, for example Dapr's
+ * `/v1.0/invoke/{app-id}/method/...` command path and Pub/Sub publish endpoint.
  */
 export interface HttpEventBridgeClient {
 	/**
-	 * Generate the url path of the command.
-	 * This url is a POST endpoint and expects a command message as payload
-	 * @param address
-	 * @returns url path of endpoint
+	 * Generates the internal POST path for a full PURISTA command message.
+	 *
+	 * @param address - Receiver service and command address.
+	 * @returns Relative URL path hosted by the receiving service.
 	 */
 	getInternalPathForCommand: (address: EBMessageAddress) => string
 
 	/**
-	 * Generate the url path of the command based on the command builder `exposeAsHttpEndpoint` settings.
-	 * This url is a POST endpoint and expects the payload and parameter as defined for exposing.
-	 * @param address
-	 * @returns url path of endpoint
+	 * Generates the public HTTP projection path declared by command metadata.
+	 *
+	 * This route accepts the command's exposed payload and parameters, not the
+	 * full PURISTA command envelope.
+	 *
+	 * @param address - Receiver service and command address.
+	 * @param metadata - HTTP exposure metadata from the command definition.
+	 * @returns Relative URL path for the public command endpoint.
 	 */
 	getApiPathForCommand: (address: EBMessageAddress, metadata: HttpExposedServiceMeta) => string
 
 	/**
-	 * Generate the url path of the subscription.
-	 * This url is a POST endpoint.
-	 * The expected payload is a EBMessage or an CloudEvent with an EBMessage as data depending on config settings
-	 * @param address
-	 * @returns url path of endpoint
+	 * Generates the internal POST path for subscription delivery.
+	 *
+	 * Depending on bridge configuration, the route receives either an `EBMessage`
+	 * payload or a CloudEvent whose `data` contains the message.
+	 *
+	 * @param address - Subscriber service and subscription address.
+	 * @returns Relative URL path hosted by the subscriber service.
 	 */
 	getInternalPathForSubscription: (address: EBMessageAddress) => string
 
 	/**
-	 * Invoke a command
-	 * @param command Command
-	 * @param headers optional HTTP header
-	 * @param timeout the command timeout
-	 * @returns
+	 * Invokes a command through the sidecar/platform HTTP API.
+	 *
+	 * @param command - Full PURISTA command envelope.
+	 * @param headers - Optional HTTP headers, including propagated tracing headers.
+	 * @param timeout - Optional timeout in milliseconds.
+	 * @returns Full PURISTA command response envelope.
 	 */
 	invoke: (command: Command, headers?: Record<string, string>, timeout?: number) => Promise<CommandResponse>
 
 	/**
-	 * Send a EBMessage as event to the underlaying message infrastructure.
-	 * @param message
-	 * @param headers
-	 * @returns
+	 * Publishes an event message to the underlying event transport.
+	 *
+	 * Event publication is distinct from queue enqueueing and does not imply
+	 * durable background job semantics.
+	 *
+	 * @param message - Event message with `eventName` set.
+	 * @param headers - Optional HTTP headers, including propagated tracing headers.
 	 */
 	sendEvent: (message: EBMessage, headers?: Record<string, string>) => Promise<void>
 
 	/**
-	 * Checks if the sidecar container is available to be able to send events and invoke commands
-	 * @returns boolean
+	 * Checks whether the sidecar or platform API is available for outgoing traffic.
 	 */
 	isSidecarAvailable: () => Promise<boolean>
 }

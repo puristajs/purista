@@ -1,9 +1,13 @@
 import type { DefinitionEventBridgeConsumerFailureHandling } from './DefinitionEventBridgeConsumerFailureHandling.js'
 
 /**
- * Settings and advices for the event bridge, which are set in the command or subscription builder.
- * The properties are advices and hints.
- * It depends on the used event bridge implementation and underlaying message broker, if a specific property can be respected.
+ * Event bridge delivery requirements requested by command, stream, or subscription definitions.
+ *
+ * These settings are validated against the selected bridge capabilities. In
+ * strict reliability modes, startup should fail when the bridge cannot satisfy
+ * the requested semantics instead of silently degrading behavior.
+ *
+ * @group Event bridge
  */
 export type DefinitionEventBridgeConfig = {
 	/**

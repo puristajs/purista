@@ -10,11 +10,18 @@ import { puristaVersion } from '../version.js'
 import type { DaprStateStoreConfig } from './types/DaprStateStoreConfig.js'
 
 /**
- * DaprStateStore is an adapter which connects to the state store provided by the underlaying Dapr infrastructure
+ * State store adapter backed by a Dapr state component.
+ *
+ * Reads, writes and removes JSON state values through the local Dapr sidecar.
  */
 export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	private client: HttpClient<DaprClientConfig>
 
+	/**
+	 * Creates a Dapr-backed state store.
+	 *
+	 * @param config - Store name, logger and Dapr sidecar client settings.
+	 */
 	constructor(config?: StoreBaseConfig<DaprStateStoreConfig>) {
 		super(config?.stateStoreName ?? 'DaprStateStore', { ...config })
 		const logger = this.logger
@@ -50,6 +57,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 		})
 	}
 
+	/**
+	 * Reads one or more state values from the configured Dapr component.
+	 */
 	protected async getStateImpl<StateNames extends string[]>(
 		...stateNames: StateNames
 	): Promise<ObjectWithKeysFromStringArray<StateNames>> {
@@ -79,6 +89,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 		return returnValue as ObjectWithKeysFromStringArray<StateNames>
 	}
 
+	/**
+	 * Writes a state value to the configured Dapr component.
+	 */
 	protected async setStateImpl(stateName: string, stateValue: unknown) {
 		const path = join(
 			this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
@@ -96,6 +109,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 		await this.client.post(path, payload)
 	}
 
+	/**
+	 * Removes a state value from the configured Dapr component.
+	 */
 	protected async removeStateImpl(stateName: string) {
 		const path = join(
 			this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,

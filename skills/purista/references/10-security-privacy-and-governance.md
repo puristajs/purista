@@ -2,13 +2,22 @@
 
 Use this reference when designing or reviewing PURISTA systems that handle tenant data, regulated data, confidential business data, secrets, or AI/model processing.
 
-Source material:
+Related public handbook material:
 - `purista/web/src/content/handbook-cards/mental-model/data-control.mdx`
 - `purista/web/src/content/handbook-cards/mental-model/resilience-patterns.mdx`
 - `purista/web/src/content/handbook-cards/mental-model/deployment-flexibility.mdx`
-- `specs/agent_protocol_concept/section_4_security_access.md`
-- `specs/20-agents/50-observability-governance.md`
-- `specs/45-observability-metrics/60-docs-examples-skills.md`
+
+## Contents
+- [Core Rule](#core-rule)
+- [Identity And Tenant Flow](#identity-and-tenant-flow)
+- [Authorization Placement](#authorization-placement)
+- [Data Minimization](#data-minimization)
+- [Secret Handling](#secret-handling)
+- [Observability Safety](#observability-safety)
+- [AI And Model Safety](#ai-and-model-safety)
+- [Multi-Tenant Data Patterns](#multi-tenant-data-patterns)
+- [Audit Records](#audit-records)
+- [Production Readiness Checklist](#production-readiness-checklist)
 
 ## Core Rule
 Security and privacy are architecture boundaries. Do not treat them as code comments or late handler checks.

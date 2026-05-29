@@ -7,6 +7,21 @@ import type {
 	QueueWorkerMode,
 } from '../core/types/queue/QueueWorkerDefinition.js'
 
+/**
+ * Builds a queue worker definition for one queue.
+ *
+ * A worker owns execution behavior for queued jobs. The queue definition owns
+ * durability and lifecycle policy; this builder owns handler concurrency,
+ * worker mode, and guard hooks.
+ *
+ * @example
+ * ```ts
+ * const worker = service
+ *   .getQueueWorkerBuilder('billing.monthlyClosing', 'close-month')
+ *   .setMaxParallelHandlers(2)
+ *   .setHandler(async (context, job) => ({ status: 'success', output: job.payload }))
+ * ```
+ */
 export class QueueWorkerBuilder {
 	private mode: QueueWorkerMode = 'continuous'
 	private intervalMs?: number
@@ -20,26 +35,31 @@ export class QueueWorkerBuilder {
 		private readonly workerName: string,
 	) {}
 
+	/** Set whether the worker runs continuously or in a bridge-supported polling mode. */
 	setMode(mode: QueueWorkerMode) {
 		this.mode = mode
 		return this
 	}
 
+	/** Set the polling interval for worker modes that use intervals. */
 	setIntervalMs(intervalMs: number) {
 		this.intervalMs = intervalMs
 		return this
 	}
 
+	/** Set how many jobs this worker may process concurrently. */
 	setMaxParallelHandlers(count: number) {
 		this.maxParallelHandlers = count
 		return this
 	}
 
+	/** Set the job handler implementation for this worker. */
 	setHandler(handler: QueueWorkerHandler) {
 		this.handler = handler
 		return this
 	}
 
+	/** Register named guard hooks that run before the worker handler. */
 	setBeforeGuardHooks(hooks: Record<string, QueueWorkerBeforeGuardHook>) {
 		this.beforeGuards = mergeNamedHooks(this.beforeGuards, hooks, 'setBeforeGuardHooks')
 		return this
@@ -52,6 +72,7 @@ export class QueueWorkerBuilder {
 		return getNamedHook(this.beforeGuards, name)
 	}
 
+	/** Register named guard hooks that run after the worker handler. */
 	setAfterGuardHooks(hooks: Record<string, QueueWorkerAfterGuardHook>) {
 		this.afterGuards = mergeNamedHooks(this.afterGuards, hooks, 'setAfterGuardHooks')
 		return this
@@ -64,6 +85,7 @@ export class QueueWorkerBuilder {
 		return getNamedHook(this.afterGuards, name)
 	}
 
+	/** Resolve this builder into the queue worker definition consumed by a service. */
 	async getDefinition(): Promise<QueueWorkerDefinition> {
 		if (!this.handler) {
 			throw new Error('QueueWorkerBuilder: missing handler implementation')

@@ -12,21 +12,40 @@ import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
+/** Input for generating an additional worker for an existing queue. */
 export type AddPuristaQueueWorkerInput = {
+	/** Project root path; defaults to `process.cwd()`. */
 	projectRootPath?: string
+	/** PURISTA project configuration controlling generated paths and casing. */
 	puristaConfig: PuristaConfig
+	/** Discovered project metadata used to update the service composition. */
 	puristaProject: PuristaProjectInfo
+	/** Service name that owns the target queue. */
 	serviceName: string
+	/** Service version that owns the target queue. */
 	serviceVersion: string
+	/** Existing queue name the worker handles. */
 	queueName: string
+	/** Logical worker name. */
 	workerName: string
+	/** Human-readable worker description written into generated docs and tests. */
 	workerDescription: string
+	/** Queue worker scheduling mode. */
 	mode: 'continuous' | 'interval' | 'sequential'
+	/** Interval in milliseconds when `mode` is `interval`. */
 	intervalMs?: number
+	/** Maximum number of jobs handled concurrently. */
 	maxParallelHandlers: number
+	/** Optional formatting options passed to `code-block-writer`. */
 	codeWriterOptions?: Partial<Options>
 }
 
+/**
+ * Add a queue worker for an existing service queue.
+ *
+ * Generates a queue worker builder/test pair and appends the worker definition
+ * to the service composition file.
+ */
 export const addPuristaQueueWorker = async (input: AddPuristaQueueWorkerInput) => {
 	const projectPath = input.projectRootPath ?? process.cwd()
 	const serviceDirName = convertToProjectFileCasing(input.serviceName, input.puristaConfig)

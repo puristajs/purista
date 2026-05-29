@@ -9,7 +9,12 @@ import type { StoreBaseConfig } from '../types/StoreBaseConfig.js'
 import type { SecretStoreCacheMap } from './types/SecretStoreCacheMap.js'
 
 /**
- * Base class for secret store adapters
+ * Base class for secret store adapters.
+ *
+ * The base class enforces operation toggles and optional cache behavior before
+ * delegating to adapter implementations. Adapter logs, traces, metrics, and
+ * errors must never include secret values.
+ *
  * The actual store implementation must overwrite the protected methods:
  *
  * - `getSecretImpl`
@@ -21,11 +26,15 @@ import type { SecretStoreCacheMap } from './types/SecretStoreCacheMap.js'
  * @group Store
  */
 export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, unknown> = EmptyObject> {
+	/** Child logger scoped to the store name. */
 	logger: Logger
+	/** Store configuration including operation toggles and cache settings. */
 	config: Prettify<StoreBaseConfig<SecretStoreConfigType>>
 
+	/** Store name used in logs and diagnostics. */
 	name: string
 
+	/** Optional in-memory cache of secret values. */
 	cache: SecretStoreCacheMap = new Map()
 
 	constructor(name: string, config: StoreBaseConfig<SecretStoreConfigType>) {
@@ -43,11 +52,22 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 		}
 	}
 
+	/**
+	 * Adapter-specific secret lookup implementation.
+	 *
+	 * Implementations must not log returned secret values.
+	 */
 	protected abstract getSecretImpl<SecretNames extends string[]>(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		...secretNames: SecretNames
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>>
 
+	/**
+	 * Get one or more secrets by name.
+	 *
+	 * Returned values are sensitive. Keep them out of logs, metrics, traces,
+	 * events, queue headers, and error payloads.
+	 */
 	async getSecret<SecretNames extends string[]>(
 		...secretNames: SecretNames
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
@@ -100,8 +120,10 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 		return { ...result, ...freshSecrets } as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
 
+	/** Adapter-specific secret removal implementation. */
 	protected abstract removeSecretImpl(_secretName: string): Promise<void>
 
+	/** Remove one secret by name. */
 	async removeSecret(secretName: string): Promise<void> {
 		if (!this.config.enableRemove) {
 			const err = new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
@@ -116,8 +138,14 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 		return this.removeSecretImpl(secretName)
 	}
 
+	/**
+	 * Adapter-specific secret write implementation.
+	 *
+	 * Implementations must not log `secretValue`.
+	 */
 	protected abstract setSecretImpl(_secretName: string, _secretValue: string): Promise<void>
 
+	/** Store or replace one secret value. */
 	async setSecret(secretName: string, secretValue: string) {
 		if (!this.config.enableSet) {
 			const err = new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
@@ -134,6 +162,7 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 		return result
 	}
 
+	/** Shutdown hook for store adapters. */
 	async destroy() {
 		this.logger.info('stopped')
 	}

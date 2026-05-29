@@ -18,8 +18,16 @@ import type DaprPubSubStatusEnum from './DaprPubSubStatus.enum.js'
  **/
 export type BulkSubscribeResponseEntry = {
 	// The id of the bulk subscribe entry
+	/**
+	 * Stores the entryId value exposed by BulkSubscribeResponseEntry.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	entryId: string
 
 	// The response status of the bulk subscribe entry
+	/**
+	 * Stores the status value exposed by BulkSubscribeResponseEntry.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	status: DaprPubSubStatusEnum
 }

@@ -52,8 +52,13 @@ import type { HttpEventBridgeClient } from './types/HttpEventBridgeClient.js'
 import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
 
 /**
- * The HTTP event bridge is a generic event bridge.
- * In environments like Dapr or Knative, the communication is done via sidecar containers and via HTTP.
+ * Generic HTTP-based event bridge for runtimes that deliver PURISTA messages over HTTP.
+ *
+ * In environments like Dapr or Knative, communication is commonly handled by
+ * sidecar containers or platform routers. This bridge exposes internal POST
+ * endpoints for commands and subscriptions, optionally exposes command REST
+ * projections, and uses the configured {@link HttpEventBridgeClient} for calls
+ * back to the sidecar or platform HTTP API.
  *
  * In these cases, it is expected, that the current instance is a HTTP server, which provides REST endpoints for commands and subscriptions.
  * The communication from the current instance to the sidecar is also done via REST endpoints.
@@ -66,17 +71,64 @@ import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
  * - hono
  * - trouter
  */
+/**
+ * Stores the app value exposed by HttpEventBridge.
+ * Start the bridge before registering services and stop it during graceful shutdown.
+ * Expose only schemas and metadata that are safe for clients to inspect.
+ * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+ */
 export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
+	/**
+	 * Stores the isShuttingDown value exposed by HttpEventBridge.
+	 * Start the bridge before registering services and stop it during graceful shutdown.
+	 * Expose only schemas and metadata that are safe for clients to inspect.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	extends EventBridgeBaseClass<CustomConfig>
+	/**
+	 * Stores the isStarted value exposed by HttpEventBridge.
+	 * Start the bridge before registering services and stop it during graceful shutdown.
+	 * Expose only schemas and metadata that are safe for clients to inspect.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	implements EventBridge
 {
+	/**
+	 * Stores the client value exposed by HttpEventBridge.
+	 * Start the bridge before registering services and stop it during graceful shutdown.
+	 * Expose only schemas and metadata that are safe for clients to inspect.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
+	/**
+	 * Runtime server returned by the configured Hono `serve` adapter.
+	 *
+	 * It is set during {@link start} and closed during {@link destroy}.
+	 */
 	public server: Server | Http2Server | Http2SecureServer | undefined
+	/**
+	 * Hono application that hosts health, command, subscription and REST projection routes.
+	 */
 	public app: Hono
+	/**
+	 * Indicates that shutdown has started and new HTTP requests should be rejected.
+	 */
 	public isShuttingDown = false
+	/**
+	 * Indicates that the bridge has registered routes and started its HTTP server.
+	 */
 	public isStarted = false
 
+	/**
+	 * HTTP client adapter used for outgoing command invocations, event publication and health checks.
+	 */
 	public client: HttpEventBridgeClient
 
+	/**
+	 * Creates an HTTP event bridge around a sidecar/platform client.
+	 *
+	 * @param config - Event bridge and HTTP server configuration.
+	 * @param client - Client that knows the platform-specific URL layout.
+	 */
 	constructor(config: EventBridgeConfig<CustomConfig>, client: HttpEventBridgeClient) {
 		const defaults = getDefaultHttpEventBridgeConfig()
 		const conf = {
@@ -125,6 +177,12 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		this.app = new Hono({ router: new PatternRouter() })
 	}
 
+	/**
+	 * Starts the Hono server and registers common middleware and the `/healthz` route.
+	 *
+	 * The bridge rejects new requests with `503` while {@link destroy} is draining
+	 * in-flight work.
+	 */
 	async start() {
 		this.app.notFound(c => {
 			const err = new HandledError(StatusCode.NotFound, getErrorMessageForCode(StatusCode.NotFound), {
@@ -185,6 +243,15 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		})
 	}
 
+	/**
+	 * Publishes an event message through the configured HTTP client.
+	 *
+	 * Info messages are ignored locally. Other messages must carry an `eventName`
+	 * because this bridge maps events to the underlying transport's event topic.
+	 *
+	 * @param message - Event bridge message without generated id, timestamp and correlation id.
+	 * @returns The immutable message with generated transport metadata.
+	 */
 	async emitMessage<T extends EBMessage>(
 		message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
 	): Promise<Readonly<EBMessage>> {
@@ -240,6 +307,17 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		)
 	}
 
+	/**
+	 * Invokes a PURISTA command over HTTP and returns the command payload.
+	 *
+	 * This is direct request/response command transport. It does not turn the
+	 * command into durable queued work; queue behavior must be modelled with a
+	 * queue definition and exposed as an async endpoint by the owning service.
+	 *
+	 * @param input - Command envelope without generated id, message type, timestamp and correlation id.
+	 * @param ttl - Optional request timeout forwarded to the HTTP client.
+	 * @throws `HandledError` or `UnhandledError` when the remote command returns an error response.
+	 */
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
 		ttl?: number,
@@ -296,6 +374,15 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		})
 	}
 
+	/**
+	 * Registers the internal command endpoint, plus an optional REST projection.
+	 *
+	 * Internal command endpoints accept full PURISTA command messages. REST
+	 * projections are generated only when command metadata declares HTTP exposure
+	 * and `enableRestApiExpose` is enabled.
+	 *
+	 * @returns The internal command route path.
+	 */
 	async registerCommand(
 		address: EBMessageAddress,
 		cb: (
@@ -355,10 +442,23 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		return path
 	}
 
+	/**
+	 * Placeholder for transport-specific command unregistration.
+	 *
+	 * Hono route removal is not supported by this bridge after registration.
+	 */
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
 		this.logger.debug({ address }, 'unregister command')
 	}
 
+	/**
+	 * Registers a subscription endpoint before the HTTP server starts.
+	 *
+	 * Subscriptions react to emitted events/facts. They are not queue workers and
+	 * should remain idempotent because HTTP/event transports may redeliver.
+	 *
+	 * @returns The internal subscription route path.
+	 */
 	async registerSubscription(
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
@@ -381,14 +481,25 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		return path
 	}
 
+	/**
+	 * Placeholder for transport-specific subscription unregistration.
+	 *
+	 * Hono route removal is not supported by this bridge after registration.
+	 */
 	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
 		this.logger.debug({ address }, 'unregister subscription')
 	}
 
+	/**
+	 * Reports whether the bridge can accept new HTTP requests.
+	 */
 	async isReady(): Promise<boolean> {
 		return this.isStarted && !this.isShuttingDown
 	}
 
+	/**
+	 * Reports whether the bridge is started and its sidecar/platform client is reachable.
+	 */
 	async isHealthy(): Promise<boolean> {
 		if (!this.isStarted) {
 			return false

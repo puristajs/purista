@@ -38,6 +38,7 @@ import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTy
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
 export type HttpExposureOptions = {
+	/** Execute HTTP requests synchronously or enqueue asynchronously when queue access is declared. */
 	mode?: 'sync' | 'async'
 }
 
@@ -133,6 +134,14 @@ export class CommandDefinitionBuilder<
 		transformOutput: undefined,
 	}
 
+	/**
+	 * Declare a queue this command handler may enqueue through its typed queue proxy.
+	 *
+	 * @example
+	 * ```ts
+	 * command.canEnqueue('billing.monthlyClosing', monthlyPayloadSchema)
+	 * ```
+	 */
 	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
 		queueName: QueueName,
 		payloadSchema?: Payload,
@@ -266,6 +275,20 @@ export class CommandDefinitionBuilder<
 		>
 	}
 
+	/**
+	 * Declare a stream this command handler may consume through its typed stream proxy.
+	 *
+	 * @example
+	 * ```ts
+	 * command.canConsumeStream(
+	 *   'reports',
+	 *   '1',
+	 *   'generateReport',
+	 *   reportChunkSchema,
+	 *   reportRequestSchema,
+	 * )
+	 * ```
+	 */
 	canConsumeStream<
 		Chunk extends Schema,
 		Final extends Schema,
@@ -812,6 +835,13 @@ export class CommandDefinitionBuilder<
 	 * @param contentTypeResponse input content type defaults to application/json
 	 * @param contentEncodingResponse input content encoding defaults to utf-8
 	 * @returns CommandDefinitionBuilder
+	 *
+	 * @example
+	 * ```ts
+	 * command
+	 *   .exposeAsHttpEndpoint('POST', 'orders')
+	 *   .setOpenApiSummary('Create an order')
+	 * ```
 	 */
 	exposeAsHttpEndpoint(
 		method: SupportedHttpMethod,

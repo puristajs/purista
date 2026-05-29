@@ -30,7 +30,7 @@ Implementation tickets should specify:
 - forbidden imports or stale terms
 - acceptance checks
 
-For framework metrics work, update the metric catalog/spec before adding or renaming framework metrics. Custom application metrics belong in builder declarations and examples under `app.*`; do not add backend-specific exporters or Prometheus client dependencies to core packages.
+For framework metrics work, update the metric catalog before adding or renaming framework metrics. Custom application metrics belong in builder declarations and examples under `app.*`; do not add backend-specific exporters or Prometheus client dependencies to core packages.
 
 ## Parallel Work
 Parallelize only when write scopes are disjoint:

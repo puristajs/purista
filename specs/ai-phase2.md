@@ -1,93 +1,21 @@
-# PURISTA AI Realignment Wave (Superseded Status Mirror)
+# PURISTA AI Phase 2 Notes
 
-Status: superseded by `specs/20-agents/80-core-ai-migration-plan.md`.
+Status: superseded.
 
-This file is historical context only. Do not implement the `@purista/ai`
-runtime contract, `invokeAgent`, `context.invoke.agents.*`, sandbox drivers,
-protocol artifacts, or standalone compatibility wrappers described below.
+This file previously mirrored an unreleased `@purista/ai` runtime contract. That
+contract is obsolete and must not be used for implementation, documentation, or
+skill guidance.
 
-This file mirrors the current AI runtime contract after the stream-first realignment in `@purista/ai`.
-Canonical long-form architecture remains in `/Users/sebastianwessel/projekte/@purista/specs/20-agents/`.
+The implemented direction is:
 
-## Scope of this wave
+- PURISTA agent integration lives in `@purista/core`.
+- `@purista/ai` has been removed and has no compatibility wrapper.
+- `@purista/harness` is the provider-neutral runtime dependency used by core
+  agent support.
+- Provider packages remain application-level dependencies.
+- Old protocol concepts such as `AgentProtocolEnvelope`, `purista-ai:*`,
+  `AiSdkProvider`, `streamProtocolAdapter`, `ui-message`, `context.ai`,
+  `invokeAgent`, and `context.invoke.agents.*` are removed historical terms.
 
-- keep agents as PURISTA-context-native runtimes (no standalone executor DX)
-- unify invocation behavior across `invokeAgent`, `AgentInstance.invoke`, and `context.invoke.agents.*`
-- keep canonical target fixed to `run`
-- keep stream-first defaults while allowing final-result usage on top of the same contract
-- clean top-level exports so internal runtime/platform internals are no longer public API
-
-## Implemented runtime contract
-
-1. Canonical invocation path
-- shared internal transport module now drives:
-  - `runtime/invokeAgent.ts`
-  - `runtime/AgentInstance.ts`
-  - `runtime/context.ts` (`context.invoke.agents.*`)
-- default delivery mode: `prefer-stream`
-- strict streaming mode: `require-stream`
-
-2. Delivery semantics
-- stream session opens first by default
-- fallback to command invoke is allowed only in `prefer-stream`
-- forwarding/live relay helpers use `require-stream` and fail fast if stream support is missing
-
-3. Canonical target
-- agent receiver target is centrally defined and fixed to `run`
-- scattered hardcoded `'run'` literals were replaced in builder/runtime internals
-
-4. `runObject` hardening
-- `context.invoke.agents.runObject(...)` now:
-  - parses final assistant text as JSON
-  - validates against declared `outputSchema` from `.canInvokeAgent(...)` when available
-  - allows per-call override schema via invocation options
-  - throws `HandledError` with actionable diagnostics on parse/validation failure
-
-5. Public API cleanup
-- removed top-level exports from `@purista/ai` root:
-  - `runtime/AgentExecutor`
-  - `platform/index`
-- implementation remains package-internal where still needed
-
-## Validation coverage
-
-- invocation transport tests:
-  - stream-first success
-  - fallback behavior
-  - `require-stream` fail-fast behavior
-- context invocation tests:
-  - forwarding requires stream support
-  - `runObject` schema validation (success + failure)
-- agent instance tests:
-  - parity with shared invocation transport behavior
-- export surface test:
-  - confirms internal runtime/platform exports are not exposed from package root
-
-## Remaining intentional backlog
-
-- no additional queue/provider expansion in this wave
-- no CLI command surface for AI runtime operator controls in this wave
-- no standalone execution architecture will be introduced unless a new canonical spec approves it
-
-## AI DX hardening wave (sandbox + runtime convergence)
-
-This wave extends the phase-2 runtime with production-focused sandbox hardening and closes remaining execution-path drift.
-
-Implemented:
-
-1. Sandbox security and timeout handling
-- `executeBash` request supports `timeoutMs` and timeout propagation to drivers.
-- timeout result mapping is deterministic (`HandledError` timeout on command surface).
-- Podman file-write path no longer uses shell-string target interpolation; file transfer uses safe copy semantics.
-
-2. Concurrency-safe sandbox lifecycle
-- `SandboxRegistry` now provides owner-tuple provisioning lock semantics (`withOwnerProvisionLock`).
-- `ensureSandbox` runs owner-scoped create/recreate flow under lock and uses deterministic sandbox ids by owner scope.
-
-3. Binary-safe file transport
-- sandbox write payload changed from text-only strings to encoded content objects (`utf-8` / `base64`).
-- adapter layer keeps text convenience while preserving binary payloads losslessly.
-
-4. Canonical runtime convergence
-- worker and inline execution paths share one internal workload engine (`executeAgentWorkload`).
-- `AgentExecutor` remains compatibility wrapper, no standalone execution architecture reintroduced.
+Use `specs/20-agents/80-core-ai-migration-plan.md` for migration history and
+current agent ownership details.

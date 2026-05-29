@@ -17,21 +17,45 @@ import {
 import type { AWSSecretStoreConfig } from './types.js'
 
 /**
- * The secret store adapter for AWS Secrets Manager.
- * It will store, retrive, update or remove secrets in AWS Secrets Manager.
+ * Secret store backed by AWS Secrets Manager.
  *
- * For performance reasons, and to reduce costs, the secret values are cached in memory after first fetch.
+ * Secret values are cached in memory after the first read to reduce network
+ * calls and AWS charges. Set `enableCache` to `false` for every read to hit AWS,
+ * or set `cacheTtl` in milliseconds to bound cache reuse. Expired cache entries
+ * are refreshed on the next read.
  *
- * You can disable the whole caching via config by setting enableCache to false.
- * If the cache is enabled, you can set the ttl for cached secret values via config cacheTtl (in ms).
+ * Use stable, tenant-aware names such as
+ * `tenants/acme/prod/payments/stripe-api-key`. Never log values returned by this
+ * store and avoid putting real secrets in examples, tests, or traces.
  *
- * This will return the cached secret if available and if ttl is not exceeded.
- * If a secret value exceeds the ttl, it does not automatically get removed from cache.
- * It will be removed/overwritten on next get request.
+ * AWS credentials and region are resolved by the AWS SDK from `client` options,
+ * environment variables, shared config files, or the runtime role.
+ *
+ * @example
+ * ```typescript
+ * const store = new AWSSecretStore({
+ *   client: { region: 'eu-central-1' },
+ *   cacheTtl: 30_000,
+ * })
+ *
+ * await store.setSecret('tenants/acme/prod/payments/api-token', 'placeholder-secret')
+ * const secret = await store.getSecret('tenants/acme/prod/payments/api-token')
+ * ```
  */
 export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
+	/**
+	 * AWS SDK client used for Secrets Manager requests.
+	 *
+	 * Applications normally configure this through the constructor. Tests may
+	 * replace it with a compatible client.
+	 */
 	client: SecretsManagerClient
 
+	/**
+	 * Creates an AWS Secrets Manager-backed secret store.
+	 *
+	 * @param config Store options plus AWS SDK client configuration.
+	 */
 	constructor(config: StoreBaseConfig<AWSSecretStoreConfig>) {
 		super('AWSSecretStore', { enableCache: true, ...config })
 		this.client = new SecretsManagerClient(this.config.client)

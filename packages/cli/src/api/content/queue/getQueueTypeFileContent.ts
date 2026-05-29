@@ -3,6 +3,7 @@ import CodeBlockWriter from 'code-block-writer'
 import { camelCase, pascalCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate TypeScript aliases inferred from a queue schema module. */
 export const getQueueTypeFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

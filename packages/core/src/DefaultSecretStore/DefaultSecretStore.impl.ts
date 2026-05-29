@@ -5,8 +5,12 @@ import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKe
 import type { DefaultSecretStoreConfig } from './types/DefaultSecretStoreConfig.js'
 
 /**
+ * Process-local in-memory secret store for development and tests.
+ *
  * The DefaultSecretStore is a placeholder which offers all needed methods.
  * Getters and setters will throw a UnhandledError with status `Unauthorized`, when a disabled operation is called.
+ * Values are stored as plain strings in memory and must not be used for
+ * production secrets.
  *
  * For development and testing purpose, you can initiate the store with values.
  *

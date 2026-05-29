@@ -3,7 +3,11 @@ import path from 'node:path'
 import type { PackageJson } from 'type-fest'
 import type { CreateProjectInput } from './types.js'
 
-export type PKG = PackageJson & { trustedDependencies?: string[] }
+/** Package.json shape used by the CLI project blueprint merger. */
+export type PKG = PackageJson & {
+	/** Bun trusted dependency allowlist emitted by generated projects when needed. */
+	trustedDependencies?: string[]
+}
 
 const bunPackage: PKG = {
 	scripts: {

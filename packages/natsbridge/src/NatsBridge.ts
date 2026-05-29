@@ -82,49 +82,72 @@ type ResolvedConsumerFailureHandling = {
 	deadLetterTarget: string
 }
 
-type PausedSubscriptionState = {
+/** Runtime pause metadata for a subscription consumer managed by the NATS bridge. */
+export type PausedSubscriptionState = {
+	/** Unix timestamp in milliseconds when the consumer was paused. */
 	pausedAt: number
+	/** Operational reason for the pause. */
 	reason: string
 }
 
-type RegisteredSubscription = {
+/** NATS or JetStream subscription tracked by the bridge for cleanup. */
+export type RegisteredSubscription = {
+	/** Broker subscription handle used by the bridge. */
 	subscription: JetStreamSubscription | NatsSubscription
 }
 
 /**
-The event bridge supports low-latency core NATS messaging.
-
-When JetStream is available, durable command and subscription registrations use
-JetStream consumers. Without JetStream, durable requests fail fast by default
-(`durableSubscriptionMode: 'strict'`) instead of silently degrading to
-non-durable core NATS semantics.
-
-Example usage:
-
-@example
-* ```typescript
-import { NatsBridge } from '@purista/natsbridge'
-
-// create and init our eventbridge
-  const eventBridge = new NatsBridge()
-  await eventBridge.start()
-
-```
+ * EventBridge implementation for NATS core messaging with optional JetStream.
+ *
+ * Core NATS is used for low-latency request/reply and event publication.
+ * JetStream is required for durable command/subscription registrations,
+ * manual acknowledgements, bounded subscription retry, delayed retry,
+ * pause/resume, and bridge-managed dead-letter publishing. In strict mode,
+ * registrations that require those guarantees fail fast when JetStream is not
+ * available. In best-effort mode, the bridge warns and falls back to core NATS
+ * semantics.
+ *
+ * Payloads are serialized with NATS `JSONCodec`; headers carry metadata and
+ * OpenTelemetry context where supported. Avoid publishing secrets or
+ * unnecessary personal data unless broker storage, transport, and backups are
+ * protected for that data.
+ *
+ * @example
+ * ```typescript
+ * import { NatsBridge } from '@purista/natsbridge'
+ *
+ * const eventBridge = new NatsBridge({
+ *   servers: 'nats://localhost:4222',
+ *   durableSubscriptionMode: 'strict',
+ * })
+ *
+ * await eventBridge.start()
+ * ```
  */
 export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implements EventBridge {
+	/** Active NATS connection, available after {@link start}. */
 	public connection: NatsConnection | undefined
 
+	/** Indicates whether the connected broker reports JetStream support. */
 	public isJetStreamEnabled = false
 
+	/** JetStream manager used for stream and consumer provisioning. */
 	public jsm: JetStreamManager | undefined
+	/** JetStream client used for durable publications and subscriptions. */
 	public js: JetStreamClient | undefined
 
+	/** Registered command subscriptions keyed by PURISTA service address. */
 	commands = new Map<string, JetStreamSubscription | NatsSubscription>()
+	/** Registered event subscriptions keyed by PURISTA subscriber address. */
 	subscriptions = new Map<string, RegisteredSubscription>()
 	private pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
+	/** JSON codec used for NATS message payload serialization. */
 	sc = JSONCodec()
 
+	/**
+	 * Creates a NATS bridge with defaults merged into NATS connection options.
+	 */
 	constructor(config?: EventBridgeConfig<Partial<NatsBridgeConfig>>) {
 		const conf = {
 			...getDefaultNatsBridgeConfig(),
@@ -497,6 +520,9 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		return this.js.subscribe(subject, opts)
 	}
 
+	/**
+	 * Connects to NATS and initializes JetStream clients when available.
+	 */
 	async start() {
 		const conf = { ...this.config, name: this.instanceId }
 		this.connection = await connect(conf)
@@ -515,14 +541,22 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		this.capabilities.consumerFailureHandling.consumerPauseResume = this.isJetStreamEnabled
 	}
 
+	/** Indicates whether the NATS connection is open and not draining. */
 	async isReady() {
 		return !this.connection?.isClosed() && !this.connection?.isDraining()
 	}
 
+	/** Indicates whether the NATS connection is open and not draining. */
 	async isHealthy() {
 		return !this.connection?.isClosed() && !this.connection?.isDraining()
 	}
 
+	/**
+	 * Publishes a PURISTA message as a NATS JSON payload.
+	 *
+	 * Core NATS publish is fire-and-forget; durable subscription guarantees are
+	 * applied when consumers are JetStream-backed, not by this publish call.
+	 */
 	async emitMessage<T extends EBMessage>(
 		message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
 		contentType = 'application/json',
@@ -596,6 +630,9 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		})
 	}
 
+	/**
+	 * Invokes a command with NATS request/reply and waits for the response.
+	 */
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
 		commandTimeout: number = this.defaultCommandTimeout,
@@ -738,6 +775,12 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		)
 	}
 
+	/**
+	 * Registers a command handler.
+	 *
+	 * Durable command definitions require JetStream in strict mode. Core NATS
+	 * command handlers are queue-group subscriptions without broker durability.
+	 */
 	async registerCommand(
 		address: EBMessageAddress,
 		cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
@@ -776,6 +819,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		return topic
 	}
 
+	/** Unregisters and drains/destroys a command handler subscription. */
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
 		if (!this.connection) {
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
@@ -794,6 +838,13 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		this.commands.delete(registrationKey)
 	}
 
+	/**
+	 * Registers a subscription handler.
+	 *
+	 * Durable, manual-ack, and consumer-failure-handling subscriptions require
+	 * JetStream in strict mode. JetStream-backed subscriptions support bounded
+	 * retry, delayed retry, dead-letter publishing, drop, and pause/resume.
+	 */
 	async registerSubscription(
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
@@ -825,6 +876,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		return topic
 	}
 
+	/** Unregisters and drains/destroys a subscription handler. */
 	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
 		if (!this.connection) {
 			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
@@ -844,10 +896,12 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		this.pausedSubscriptionConsumers.delete(registrationKey)
 	}
 
+	/** Returns currently paused subscription consumers keyed by registration key. */
 	getPausedSubscriptionConsumers() {
 		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
 	}
 
+	/** Resumes a subscription consumer paused by a `stop-consumer` control signal. */
 	async resumeSubscriptionConsumer(registrationKey: string) {
 		if (!this.pausedSubscriptionConsumers.has(registrationKey)) {
 			return
@@ -856,6 +910,10 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		this.logger.info({ registrationKey }, 'Resumed paused NATS subscription consumer')
 	}
 
+	/**
+	 * Waits for in-flight handlers, drains subscriptions, and closes the NATS
+	 * connection.
+	 */
 	async destroy() {
 		const drained = await this.waitForInFlightDrain()
 		if (!drained) {

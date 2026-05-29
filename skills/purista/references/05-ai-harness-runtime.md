@@ -2,6 +2,16 @@
 
 Use this reference when implementing PURISTA agents.
 
+## Contents
+- [Current Model](#current-model)
+- [Builder Pattern](#builder-pattern)
+- [Runtime Wiring](#runtime-wiring)
+- [Handler Context](#handler-context)
+- [AI Security And Privacy](#ai-security-and-privacy)
+- [Streaming](#streaming)
+- [Multimodal](#multimodal)
+- [Testing](#testing)
+
 ## Current Model
 `@purista/core` uses published `@purista/harness` to integrate agents into PURISTA services. Core does not expose the removed PURISTA AI protocol and does not adapt to Vercel AI SDK UI messages.
 

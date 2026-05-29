@@ -13,8 +13,13 @@ limitations under the License.
 
 import type { PubSubBulkPublishEntry } from './PubSubBulkPublishEntry.type.js'
 
+/**
+ * Failed entry collected while preparing or sending a bulk publish request.
+ */
 export type PubSubBulkPublishResponseFailedEntry = {
+	/** Message entry that failed. */
 	message: PubSubBulkPublishEntry
+	/** Error associated with the failed entry. */
 	error: Error
 }
 
@@ -22,5 +27,6 @@ export type PubSubBulkPublishResponseFailedEntry = {
  * PubSubBulkPublishResponse defines the response from a bulk publish request.
  */
 export type PubSubBulkPublishResponse = {
+	/** Messages that failed before or during the bulk publish call. */
 	failedMessages: PubSubBulkPublishResponseFailedEntry[]
 }

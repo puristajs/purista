@@ -1,8 +1,10 @@
 import type { Encoder } from '../types/Encoder.js'
 
 /**
- * The JSON encoder.
- * Encodes JSON/JavaScript object to the AMQP message payload format and Decodes the AMQP message payload to JSON/JavaScript object
+ * Default JSON payload encoder for AMQP messages.
+ *
+ * Values are serialized with `JSON.stringify` and parsed with `JSON.parse`.
+ * This does not encrypt or redact payloads.
  */
 export const jsonEncoder: Encoder = {
 	'application/json': {

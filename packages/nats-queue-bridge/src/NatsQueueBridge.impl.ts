@@ -42,9 +42,59 @@ type IdempotencyRecord = {
 	updatedAt: number
 }
 
+/**
+ * Strict QueueBridge implementation backed by NATS JetStream streams and KV.
+ *
+ * The bridge requires JetStream at startup and exposes strict queue
+ * capabilities: delayed delivery, FIFO delivery per queue subject,
+ * inspectable dead-letter streams, lease inspection, and idempotent enqueue.
+ * It does not claim exactly-once execution; workers must keep side effects
+ * idempotent because leased jobs can be retried after failures or lease expiry.
+ *
+ * Payloads are persisted through NATS `JSONCodec`. Do not enqueue secrets,
+ * tokens, or unnecessary personal data unless your broker storage and backups
+ * are protected appropriately.
+ *
+ * @example
+ * ```typescript
+ * import { NatsQueueBridge } from '@purista/nats-queue-bridge'
+ *
+ * const queueBridge = new NatsQueueBridge({
+ *   connectionOptions: { servers: 'nats://localhost:4222' },
+ *   defaultMaxAttempts: 5,
+ * })
+ *
+ * await queueBridge.start()
+ * ```
+ *
+ * @example
+ * ```typescript
+ * const first = await queueBridge.enqueue({
+ *   queueName: 'billing.invoice-email',
+ *   payload: { invoiceId: 'inv_123' },
+ *   idempotencyKey: 'invoice-email:inv_123',
+ * })
+ *
+ * const duplicate = await queueBridge.enqueue({
+ *   queueName: 'billing.invoice-email',
+ *   payload: { invoiceId: 'inv_123' },
+ *   idempotencyKey: 'invoice-email:inv_123',
+ * })
+ *
+ * first.jobId === duplicate.jobId
+ * ```
+ */
 export class NatsQueueBridge implements QueueBridge {
+	/** Stable bridge name reported to PURISTA runtime diagnostics. */
 	public readonly name = 'NatsQueueBridge'
 
+	/**
+	 * Queue capabilities supported by this JetStream bridge.
+	 *
+	 * `idempotencyEnforcement` and `strictStartupValidation` are true. The
+	 * bridge still reports `exactlyOnce: false` because handler side effects can
+	 * be executed more than once after redelivery or process failure.
+	 */
 	public readonly capabilities: QueueBridgeCapabilities = {
 		delayedDelivery: true,
 		fifoOrdering: true,
@@ -66,6 +116,7 @@ export class NatsQueueBridge implements QueueBridge {
 		strictStartupValidation: true,
 	}
 
+	/** Unique bridge instance identifier for diagnostics and lease ownership. */
 	public readonly instanceId = randomUUID()
 
 	private connection?: NatsConnection
@@ -86,6 +137,7 @@ export class NatsQueueBridge implements QueueBridge {
 	private readonly releaseBatchSize: number
 	private readonly idempotencyPendingTimeoutMs: number
 
+	/** Creates a NATS JetStream queue bridge with the provided options. */
 	constructor(private readonly options: NatsQueueBridgeOptions = {}) {
 		this.subjectPrefix = options.subjectPrefix ?? DEFAULT_SUBJECT_PREFIX
 		this.defaultLeaseTtlMs = options.defaultLeaseTtlMs ?? DEFAULT_LEASE_TTL_MS
@@ -95,6 +147,11 @@ export class NatsQueueBridge implements QueueBridge {
 		this.idempotencyPendingTimeoutMs = options.idempotencyPendingTimeoutMs ?? DEFAULT_IDEMPOTENCY_PENDING_TIMEOUT_MS
 	}
 
+	/**
+	 * Connects to NATS and initializes JetStream clients.
+	 *
+	 * Startup fails if the configured NATS server does not provide JetStream.
+	 */
 	async start() {
 		if (!this.connection) {
 			this.connection = await connect(this.options.connectionOptions)
@@ -103,6 +160,9 @@ export class NatsQueueBridge implements QueueBridge {
 		}
 	}
 
+	/**
+	 * Drains and closes the NATS connection and clears local lease/consumer caches.
+	 */
 	async destroy() {
 		this.pendingConsumers.clear()
 		this.scheduledConsumers.clear()
@@ -117,10 +177,16 @@ export class NatsQueueBridge implements QueueBridge {
 		}
 	}
 
+	/**
+	 * Indicates whether the bridge has an open NATS connection.
+	 */
 	async isReady() {
 		return !!this.connection && !this.connection.isClosed()
 	}
 
+	/**
+	 * Performs a lightweight connection flush to verify broker health.
+	 */
 	async isHealthy() {
 		if (!this.connection) {
 			return false
@@ -133,6 +199,13 @@ export class NatsQueueBridge implements QueueBridge {
 		}
 	}
 
+	/**
+	 * Enqueues a job, optionally scheduled for later delivery.
+	 *
+	 * When `idempotencyKey` is provided, duplicate enqueue calls for the same
+	 * queue and key return the original `jobId`. The job is stored as JSON in
+	 * JetStream; keep payloads minimal and avoid secrets.
+	 */
 	async enqueue(options: QueueEnqueueOptions<unknown, unknown>): Promise<QueueEnqueueResult> {
 		await this.ensureQueueTopology(options.queueName, options.leaseTtlMs)
 		const now = Date.now()
@@ -166,6 +239,14 @@ export class NatsQueueBridge implements QueueBridge {
 		return this.publishIdempotentQueueMessage(options.queueName, options.idempotencyKey, message, result)
 	}
 
+	/**
+	 * Leases the next available job from a queue.
+	 *
+	 * Scheduled jobs that are due are released before leasing. A leased job must
+	 * be completed with {@link ack}, retried with {@link nack}, or extended with
+	 * {@link extendLease}; otherwise JetStream redelivery can make it available
+	 * again.
+	 */
 	async leaseNext(queueName: string, options?: QueueLeaseOptions): Promise<QueueLease | undefined> {
 		await this.ensureQueueTopology(queueName)
 		await this.releaseDueJobs(queueName, options?.waitTimeMs)
@@ -200,6 +281,12 @@ export class NatsQueueBridge implements QueueBridge {
 		}
 	}
 
+	/**
+	 * Extends a currently tracked lease.
+	 *
+	 * Unknown or already completed leases are ignored to keep worker shutdown
+	 * and duplicate acknowledgements safe.
+	 */
 	async extendLease(queueName: string, leaseId: string, extensionMs: number): Promise<void> {
 		const lease = this.leases.get(leaseId)
 		if (!lease || lease.queueName !== queueName) {
@@ -211,6 +298,9 @@ export class NatsQueueBridge implements QueueBridge {
 		lease.message.leaseExpiresAt = lease.leaseExpiresAt
 	}
 
+	/**
+	 * Acknowledges successful processing and removes the local lease tracking.
+	 */
 	async ack(queueName: string, leaseId: string): Promise<void> {
 		const lease = this.leases.get(leaseId)
 		if (!lease || lease.queueName !== queueName) {
@@ -220,6 +310,13 @@ export class NatsQueueBridge implements QueueBridge {
 		this.leases.delete(leaseId)
 	}
 
+	/**
+	 * Retries or dead-letters a leased job.
+	 *
+	 * The job is republished with an optional delay until `maxAttempts` is
+	 * reached, then moved to the dead-letter stream with the retry reason in
+	 * message headers.
+	 */
 	async nack(queueName: string, leaseId: string, request: QueueRetryRequest): Promise<void> {
 		const lease = this.leases.get(leaseId)
 		if (!lease || lease.queueName !== queueName) {
@@ -248,6 +345,9 @@ export class NatsQueueBridge implements QueueBridge {
 		lease.msg.ack()
 	}
 
+	/**
+	 * Moves a message directly to the queue dead-letter stream.
+	 */
 	async moveToDeadLetter(queueName: string, message: QueueMessage, reason?: string): Promise<void> {
 		await this.ensureDeadLetterTopology(queueName)
 		const js = this.getJetStreamClient()
@@ -262,6 +362,9 @@ export class NatsQueueBridge implements QueueBridge {
 		await js.publish(this.deadLetterSubject(queueName), this.codec.encode(enrichedMessage))
 	}
 
+	/**
+	 * Reads dead-lettered jobs without redriving or deleting them.
+	 */
 	async peekDeadLetter(queueName: string, options?: QueueDeadLetterListOptions): Promise<QueueMessage[]> {
 		await this.ensureDeadLetterTopology(queueName)
 		const stream = await this.getStream(this.deadLetterStreamName(queueName))
@@ -269,6 +372,10 @@ export class NatsQueueBridge implements QueueBridge {
 		return storedMessages.map(message => this.decodeStoredMessage(message))
 	}
 
+	/**
+	 * Redrives dead-lettered jobs back to the pending queue and removes them
+	 * from the dead-letter stream.
+	 */
 	async redriveDeadLetter(queueName: string, options?: QueueDeadLetterRedriveOptions): Promise<number> {
 		await this.ensureDeadLetterTopology(queueName)
 		await this.ensureQueueTopology(queueName)
@@ -288,6 +395,9 @@ export class NatsQueueBridge implements QueueBridge {
 		return moved
 	}
 
+	/**
+	 * Deletes all jobs in the queue dead-letter stream and returns the deleted count.
+	 */
 	async purgeDeadLetter(queueName: string): Promise<number> {
 		await this.ensureDeadLetterTopology(queueName)
 		const jsm = this.getJetStreamManager()
@@ -297,6 +407,9 @@ export class NatsQueueBridge implements QueueBridge {
 		return streamInfo.state.messages
 	}
 
+	/**
+	 * Returns leases currently tracked by this bridge instance.
+	 */
 	async inspectLeases(queueName: string, options?: QueueDeadLetterListOptions): Promise<QueueLeaseInspectionRecord[]> {
 		const offset = options?.offset ?? 0
 		const limit = options?.limit ?? Number.MAX_SAFE_INTEGER
@@ -311,6 +424,10 @@ export class NatsQueueBridge implements QueueBridge {
 			}))
 	}
 
+	/**
+	 * Returns broker-derived queue metrics for pending, in-flight, and
+	 * dead-lettered jobs.
+	 */
 	async metrics(queueName: string): Promise<QueueMetrics> {
 		await this.ensureQueueTopology(queueName)
 		await this.ensureDeadLetterTopology(queueName)

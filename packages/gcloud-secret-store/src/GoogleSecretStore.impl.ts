@@ -12,21 +12,46 @@ import {
 import type { GoogleSecretStoreConfig } from './types.js'
 
 /**
- * The secret store adapter for Google Secret Manager.
- * It will store, retrive, update or remove secrets in Google Secret Manager.
+ * Secret store backed by Google Secret Manager.
  *
- * For performance reasons, and to reduce costs, the secret values are cached in memory after first fetch.
+ * Secret values are cached in memory after the first read to reduce Google Cloud
+ * API calls. Set `enableCache` to `false` to always read from Google Secret
+ * Manager, or set `cacheTtl` in milliseconds to bound cache reuse. Expired
+ * entries are refreshed on the next read.
  *
- * You can disable the whole caching via config by setting enableCache to false.
- * If the cache is enabled, you can set the ttl for cached secret values via config cacheTtl (in ms).
+ * Credentials are resolved by the Google Cloud client from `client` options,
+ * Application Default Credentials, workload identity, or the runtime service
+ * account. Do not embed service account keys in source code.
  *
- * This will return the cached secret if available and if ttl is not exceeded.
- * If a secret value exceeds the ttl, it does not automatically get removed from cache.
- * It will be removed/overwritten on next get request.
+ * Use Google Secret Manager-compatible secret ids that encode tenant and
+ * environment, for example `acme-prod-payments-api-token`. Never log returned
+ * secret values.
+ *
+ * @example
+ * ```typescript
+ * const store = new GoogleSecretStore({
+ *   project: 'projects/example-project',
+ *   cacheTtl: 30_000,
+ * })
+ *
+ * await store.setSecret('acme-prod-payments-api-token', 'placeholder-secret')
+ * const secret = await store.getSecret('acme-prod-payments-api-token')
+ * ```
  */
 export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreConfig> {
+	/**
+	 * Google Secret Manager client used for secret operations.
+	 *
+	 * Applications normally configure this through the constructor. Tests may
+	 * replace it with a compatible client.
+	 */
 	client: SecretManagerServiceClient
 
+	/**
+	 * Creates a Google Secret Manager-backed secret store.
+	 *
+	 * @param config Store options and Google Cloud client configuration.
+	 */
 	constructor(config: StoreBaseConfig<GoogleSecretStoreConfig>) {
 		super('GoogleSecretStore', { enableCache: true, ...config })
 		this.client = new SecretManagerServiceClient(this.config.client)
@@ -66,10 +91,22 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
 		return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
 
+	/**
+	 * Removes a secret resource from Google Secret Manager.
+	 *
+	 * Prefer calling `removeSecret` so inherited store guards and cache handling
+	 * are applied.
+	 */
 	async removeSecretImpl(secretName: string) {
 		await this.client.deleteSecret({ name: join(this.config.project, 'secrets', secretName) })
 	}
 
+	/**
+	 * Adds a new secret version, creating the secret resource first when needed.
+	 *
+	 * Prefer calling `setSecret` so inherited store guards and cache handling are
+	 * applied.
+	 */
 	async setSecretImpl(secretName: string, secretValue: string) {
 		const existingValue = await this.getSecret(secretName)
 

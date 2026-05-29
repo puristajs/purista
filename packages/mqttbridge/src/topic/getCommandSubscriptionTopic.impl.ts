@@ -4,8 +4,15 @@ import type { EBMessageAddress } from '@purista/core'
 import { convertToSnakeCase, EBMessageType } from '@purista/core'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
+/**
+ * Function signature for building an MQTT command subscription topic filter.
+ */
 export type GetCommandTopicFn = (this: IMqttBridge, address: EBMessageAddress) => string
 
+/**
+ * Builds the MQTT topic filter used by command handlers for one service
+ * address.
+ */
 export const getCommandSubscriptionTopic: GetCommandTopicFn = function (address) {
 	return join(
 		this.config.topicPrefix,

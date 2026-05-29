@@ -32,6 +32,15 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
+/**
+ * Creates a REST projection handler for an HTTP-exposed command.
+ *
+ * The generated route accepts the command's declared HTTP payload and
+ * parameters, translates them into a PURISTA command envelope, then returns the
+ * command payload or a typed error response. It is still command transport, not
+ * a durable queue unless the command itself enqueues work and declares async
+ * HTTP mode.
+ */
 export const getCommandHandlerRestApi = function (
 	this: IHttpEventBridge,
 	address: EBMessageAddress,
