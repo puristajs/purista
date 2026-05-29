@@ -108,13 +108,12 @@ Validation:
 Prompt:
 
 ```text
-The specs mention @purista/ai and AgentProtocolEnvelope, but the implementation exposes core-native agents. Update the skills.
+Old planning notes mention @purista/ai and AgentProtocolEnvelope, but the implementation exposes core-native agents. Update the skills.
 ```
 
 Expected behavior:
-- reads `specs/00-context.md` first and treats `purista/skills` as canonical framework knowledge
-- checks current implementation before copying stale spec assumptions
-- documents the implemented API and records spec drift instead of reviving removed APIs
+- checks current implementation before copying stale planning assumptions
+- documents the implemented API and records planning drift instead of reviving removed APIs
 - updates repo-local `purista/skills` before installed mirror copies
 
 Validation:

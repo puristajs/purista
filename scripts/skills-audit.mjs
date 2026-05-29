@@ -73,6 +73,10 @@ for (const skillDir of skillDirs) {
 		addIssue(skillFile, 'SKILL.md should stay under 500 lines and move depth into references')
 	}
 
+	if (/\bspecs?\b|specs\//i.test(skillText)) {
+		addIssue(skillFile, 'skills must not reference internal specs; use implementation and public docs instead')
+	}
+
 	const referencesDir = join(skillDir, 'references')
 	if (!existsSync(referencesDir)) {
 		continue
@@ -90,6 +94,13 @@ for (const skillDir of skillDirs) {
 		}
 
 		const referenceText = readText(reference)
+		if (/\bspecs?\b|specs\//i.test(referenceText)) {
+			addIssue(
+				reference,
+				'skill references must not reference internal specs; use implementation and public docs instead',
+			)
+		}
+
 		const lines = lineCount(referenceText)
 		const firstSection = referenceText.split(/\r?\n/).slice(0, 35).join('\n')
 		if (lines > 100 && !firstSection.includes('## Contents')) {

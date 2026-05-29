@@ -3,12 +3,12 @@
 Use this checklist when creating or updating a skill.
 
 ## 1. Source check
-- `specs/00-context.md` and relevant `specs/` documents read
 - Current implementation paths verified in `purista/`
+- Public handbook/API docs checked when behavior is documented for users
 - Neighboring skills reviewed for overlap
 - Downstream repos checked when capability changes affect generated or default behavior
 - The framework knowledge required by an otherwise untrained model has been identified explicitly
-- Older planning specs checked for stale assumptions before copying package names, protocols, or API shapes into skills
+- Older planning notes checked for stale assumptions before copying package names, protocols, or API shapes into skills
 
 ## 2. Routing check
 - `name` is stable and specific
@@ -62,8 +62,8 @@ Use this checklist when creating or updating a skill.
 - `starter` aligned when defaults or generated app shape changed
 - `create-purista` aligned when scaffolding or templates changed
 - `voyage` aligned when framework capability assumptions changed
-- `specs` updated when guidance or migration expectations changed
-- Known spec drift is documented when an old planning draft disagrees with implemented public APIs
+- Public docs updated when guidance or migration expectations changed
+- Known planning-doc drift is documented outside the skill when an old draft disagrees with implemented public APIs
 - Observability handbook, metric catalog, examples, and skills agree on metric names, attributes, and ownership boundaries
 - Security/privacy handbook pages, AI docs, examples, generated templates, and skills agree on tenant/principal propagation, guard placement, secret-store usage, redaction, sandboxing, and sensitive telemetry rules
 - Public handbook and published LLM knowledge files point to the canonical single skill path

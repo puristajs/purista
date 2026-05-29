@@ -2,7 +2,7 @@
 name: purista
 description: Canonical PURISTA framework skill for architecture, builder-based implementation, package selection, CLI scaffolding, runtime wiring, testing, and optional AI agents.
 topics: [architecture, implementation, builders, packages, cli, agents, runtime]
-phases: [spec, architecture, implementation, review]
+phases: [architecture, implementation, review]
 ---
 
 # PURISTA

@@ -3,7 +3,7 @@
 Use this reference when turning architecture into code.
 
 ## Default Workflow
-1. Read current specs and implementation.
+1. Read current implementation and public handbook/API docs.
 2. Identify the owning service/package/component.
 3. Use the PURISTA CLI to create supported artifacts.
 4. Refine generated builders, schemas, handlers, and tests.
