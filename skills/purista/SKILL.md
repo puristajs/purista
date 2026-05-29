@@ -22,6 +22,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 ## Hard Rules
 - Start from business capabilities and ownership boundaries, not package names or routes.
 - Use the PURISTA CLI whenever it can generate the target artifact; refine generated code instead of hand-writing the skeleton.
+- For a new app, start with `npm create purista@latest` or `purista init <target>` and use deterministic `purista init ... --non-interactive --defaults` flags for agentic setup.
 - Keep schemas explicit on every boundary. Prefer consumer-local schemas over one oversized shared schema.
 - Keep external systems behind resources or runtime bindings.
 - Treat tenant isolation, authorization, auditability, and data minimization as architecture requirements, not handler details.
@@ -85,6 +86,7 @@ PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semant
 - Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
 - Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.
 - Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
+- Project setup and scaffolding follow the handbook quickstart shape: `src/service` and `src/agents` are CLI-managed roots, and services, commands, streams, queues, workers, and agents are added through `purista add ...`.
 - Package dependencies do not introduce optional AI or transport coupling into core packages.
 
 ## Read If Needed

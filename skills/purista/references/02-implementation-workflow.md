@@ -15,6 +15,18 @@ Use this reference when turning architecture into code.
 Prefer CLI scaffolding for supported app artifacts:
 
 ```bash
+npm create purista@latest
+purista init my-app \
+  --runtime node \
+  --event-bridge default \
+  --webserver \
+  --linter biome \
+  --formatter biome \
+  --type module \
+  --package-manager npm \
+  --non-interactive \
+  --defaults \
+  --no-install
 purista init
 purista add service <name> --description "<description>"
 purista add command <name> --service <serviceName> --service-version <version>
@@ -24,6 +36,8 @@ purista add queue <name> --service <serviceName> --service-version <version>
 purista add queue-worker <name> --service <serviceName> --service-version <version> --queue <queueName>
 purista add agent <name> --service <serviceName> --service-version <version>
 ```
+
+Use `npm create purista@latest` for the normal quickstart path. Use `purista init <target>` when an agent, CI job, or script needs the same blueprint engine directly. For automated setup, pass every relevant choice explicitly and combine `--non-interactive`, `--defaults`, and `--no-install` when dependency installation is handled by the caller.
 
 Use builder APIs directly when:
 - the CLI does not expose the needed advanced option
