@@ -7,7 +7,7 @@ import PathSelector from '../components/landing/PathSelector.astro'
 import SectionIntro from '../components/landing/SectionIntro.astro'
 import HomePillars from '../components/landing/sections/HomePillars.astro'
 import EnterpriseAnatomy from '../components/landing/visualizations/EnterpriseAnatomy.astro'
-import HarnessLayout from '../layouts/HarnessLayout.astro'
+import SiteLayout from '../layouts/SiteLayout.astro'
 
 /**
  * Home — TRIAGE HUB.
@@ -23,7 +23,7 @@ import HarnessLayout from '../layouts/HarnessLayout.astro'
 
 ---
 
-<HarnessLayout
+<SiteLayout
   title="PURISTA — Enterprise TypeScript backends. Provider-agnostic. Traceable. Approval-ready."
   description="Open-source TypeScript framework for enterprise backends. Provider-agnostic by construction. Traceable and auditable end-to-end. Approval-ready by structure."
   active="home"
@@ -200,7 +200,7 @@ import HarnessLayout from '../layouts/HarnessLayout.astro'
     ]}
   />
 
-</HarnessLayout>
+</SiteLayout>
 
 <style>
   .site-concept-grid {
@@ -264,4 +264,3 @@ import HarnessLayout from '../layouts/HarnessLayout.astro'
     color: var(--color-fg-muted);
   }
 </style>
-
