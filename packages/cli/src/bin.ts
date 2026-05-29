@@ -177,7 +177,6 @@ const main = async () => {
 			.argument('[target]', 'target directory')
 			.option('--runtime <runtime>', 'runtime to use')
 			.option('--package-manager <packageManager>', 'package manager to use')
-			.option('--type <type>', 'module type')
 			.option('--event-bridge <eventBridge>', 'event bridge')
 			.option('--file-convention <fileConvention>', 'file naming convention')
 			.option('--event-convention <eventConvention>', 'event naming convention')
@@ -193,7 +192,6 @@ const main = async () => {
 					target,
 					runtime: options.runtime,
 					packageManager: options.packageManager,
-					type: options.type,
 					eventBridge: options.eventBridge,
 					fileConvention: options.fileConvention,
 					eventConvention: options.eventConvention,

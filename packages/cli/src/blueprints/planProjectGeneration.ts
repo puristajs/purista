@@ -97,7 +97,6 @@ const createPredictedExampleArtifacts = (step: ProjectGeneratorStep, puristaConf
  *   eventConvention: 'camel',
  *   linter: 'biome',
  *   formatter: 'biome',
- *   type: 'module',
  *   packageManager: 'npm',
  *   installDependencies: false,
  * })
@@ -127,7 +126,7 @@ export const planProjectGeneration = (
 	let packageJson: PKG = {
 		name: input.projectName,
 		private: true,
-		type: input.type,
+		type: 'module',
 		dependencies: {},
 		devDependencies: {},
 		trustedDependencies: [],

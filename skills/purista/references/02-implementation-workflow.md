@@ -22,7 +22,6 @@ purista init my-app \
   --webserver \
   --linter biome \
   --formatter biome \
-  --type module \
   --package-manager npm \
   --non-interactive \
   --defaults \

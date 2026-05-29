@@ -424,36 +424,6 @@ export default [
 ]
 `
 
-/** Create an ESLint flat config for CommonJS projects. */
-export const createEslintCommonJsConfigFile = () => `import pluginJs from '@eslint/js'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
-
-export default [
-	{ files: ['**/*.{js,mjs,cjs,ts}'] },
-	{ files: ['**/*.js'], languageOptions: { sourceType: 'commonjs' } },
-	{ languageOptions: { globals: globals.node } },
-	pluginJs.configs.recommended,
-	...tseslint.configs.recommended,
-	{
-		rules: {
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{
-					args: 'all',
-					argsIgnorePattern: '^_',
-					caughtErrors: 'all',
-					caughtErrorsIgnorePattern: '^_',
-					destructuredArrayIgnorePattern: '^_',
-					varsIgnorePattern: '^_',
-					ignoreRestSiblings: true,
-				},
-			],
-		},
-	},
-]
-`
-
 /** Create `src/index.ts` with event bridge, service startup, optional HTTP, and shutdown wiring. */
 export const createEntrypointFile = (input: CreateProjectInput, puristaConfig: PuristaConfig) => {
 	const serviceDirectory = convertToProjectFileCasing('ping', puristaConfig)

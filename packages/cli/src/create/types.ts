@@ -30,8 +30,6 @@ export type CreateProjectInput = {
 	linter: 'biome' | 'eslint' | 'none'
 	/** Formatter setup recorded in `purista.json`. */
 	formatter: 'biome' | 'prettier' | 'none'
-	/** Node package module type. */
-	type: 'module' | 'commonjs'
 	/** Package manager used in generated documentation and install commands. */
 	packageManager: PackageManager
 	/** Whether init commands should install dependencies after writing files. */

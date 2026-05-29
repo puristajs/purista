@@ -17,7 +17,6 @@ export const blueprintIds = [
 	'http-bun',
 	'linter-biome',
 	'linter-eslint-module',
-	'linter-eslint-commonjs',
 ] as const
 
 /** Built-in project blueprint identifiers understood by the generator. */

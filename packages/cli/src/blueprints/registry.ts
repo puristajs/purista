@@ -6,7 +6,6 @@ import {
 	createBiomeConfigFile,
 	createDaprConfigFile,
 	createDefinitionsFile,
-	createEslintCommonJsConfigFile,
 	createEslintModuleConfigFile,
 	createExportDefinitionsFile,
 	createGitIgnoreFile,
@@ -320,15 +319,6 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 		tags: ['linter', 'eslint', 'module'],
 		create: () => ({
 			files: [{ path: 'eslint.config.mjs', content: createEslintModuleConfigFile() }],
-			packageJson: eslintPackage,
-		}),
-	},
-	'linter-eslint-commonjs': {
-		id: 'linter-eslint-commonjs',
-		description: 'ESLint config for CommonJS projects.',
-		tags: ['linter', 'eslint', 'commonjs'],
-		create: () => ({
-			files: [{ path: 'eslint.config.js', content: createEslintCommonJsConfigFile() }],
 			packageJson: eslintPackage,
 		}),
 	},

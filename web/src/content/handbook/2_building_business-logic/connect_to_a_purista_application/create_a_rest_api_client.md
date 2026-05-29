@@ -57,8 +57,8 @@ const config = {
   version: '2.1.5', // PURISTA version
   definitionPath: './definitions', // path of *.json files with definitions
   outputPath: './dist', // output folder
+  buildAs: 'esm',
   httpClient: {
-    buildAs: 'both', // 'esm' | 'commonjs' | 'both'
     clientName: 'HttpClient' // class name of client
   },
 }
@@ -80,8 +80,8 @@ The client builder emits some information, which can be used for logging or for 
 const config = {
   definitionPath: './definitions',
   outputPath: './dist',
+  buildAs: 'esm',
   httpClient: {
-    buildAs: 'both',
     clientName: 'HttpClient',
   },
 }
@@ -111,13 +111,13 @@ The config file is a simple json file.
   "version": "2.1.5",
   "definitionPath": "./definitions",
   "outputPath": "./dist",
+  "buildAs": "esm",
   "package": {
     "name": "@company/http-client",
     "description": "my custom client",
     "private": true
   },
   "httpClient": {
-    "buildAs": "both",
     "clientName": "HttpClient"
   }
 }
@@ -131,8 +131,8 @@ You can simply export the current configuration.
 const config = {
   definitionPath: './definitions',
   outputPath: './dist',
+  buildAs: 'esm',
   httpClient: {
-    buildAs: 'both',
     clientName: 'HttpClient',
   },
 }
@@ -161,8 +161,8 @@ const config = {
   version: '2.1.5', // PURISTA version
   definitionPath: './definitions', // path of definitions
   outputPath: './dist', // output folder
+  buildAs: 'esm',
   httpClient: {
-    buildAs: 'both', // 'esm' | 'commonjs' | 'both'
     clientName: 'HttpClient' // class name of client
   },
 }
@@ -224,13 +224,13 @@ generate()
   "version": "2.1.5",
   "definitionPath": "./definitions",
   "outputPath": "./dist",
+  "buildAs": "esm",
   "package": {
     "name": "@company/http-client",
     "description": "my custom client",
     "private": true
   },
   "httpClient": {
-    "buildAs": "both",
     "clientName": "HttpClient"
   }
 }

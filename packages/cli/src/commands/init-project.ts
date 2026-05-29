@@ -11,7 +11,7 @@ import { installDependencies } from '../create/installDependencies.js'
 import type { CreateProjectInput } from '../create/types.js'
 import { captureMutationSnapshot, createPendingResolution, createResult } from './shared.js'
 
-const schema = z.object({
+const schema = z.strictObject({
 	target: z.string().trim().min(1).default('my-app'),
 	projectName: z.string().trim().optional(),
 	runtime: z.enum(['node', 'bun']).default('node'),
@@ -23,7 +23,6 @@ const schema = z.object({
 		.default('camel'),
 	linter: z.enum(['biome', 'eslint', 'none']).default('biome'),
 	formatter: z.enum(['biome', 'prettier', 'none']).default('biome'),
-	type: z.enum(['module', 'commonjs']).default('module'),
 	packageManager: z.enum(['npm', 'bun', 'pnpm', 'yarn']).default('npm'),
 	installDependencies: z.coerce.boolean().default(true),
 })
@@ -62,18 +61,6 @@ export const initProjectCommand: PuristaExecutableCommand<InitProjectInput, Crea
 				choices: packageManagerChoices,
 				defaultValue: 'npm',
 			} as const)
-		if (!input.type?.trim())
-			missing.push({
-				type: 'select',
-				key: 'type',
-				message: 'Do you want to create an ESM or CommonJS project?',
-				choices: [
-					{ name: 'ESM', value: 'module' },
-					{ name: 'CommonJS', value: 'commonjs' },
-				],
-				defaultValue: 'module',
-			} as const)
-
 		const parsed = schema.safeParse(input)
 		if (!parsed.success) {
 			return createPendingResolution(

@@ -65,7 +65,7 @@ export const getPackageJson = (settings: CreateProjectInput): PKG => {
 	return {
 		name: settings.projectName,
 		...runtimePkg,
-		type: settings.type,
+		type: 'module',
 	} as PKG
 }
 
