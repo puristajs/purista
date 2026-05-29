@@ -1,8 +1,8 @@
 ---
 name: purista-skill-maintainer
-description: Maintains the canonical PURISTA skill catalog with implementation-grounded drift checks, progressive disclosure, and evaluation scenarios.
+description: Maintains the canonical PURISTA skill catalog with spec-grounded drift checks, implementation verification, progressive disclosure, and evaluation scenarios.
 topics: [skills, documentation, maintenance]
-phases: [architecture, implementation, review]
+phases: [spec, architecture, implementation, review]
 ---
 
 # PURISTA Skill Maintainer
@@ -13,19 +13,21 @@ Use this skill when creating, refactoring, consolidating, or reviewing the share
 ## What this skill is for
 This skill defines the maintenance workflow for the shared PURISTA skill catalog in `purista/skills`.
 The catalog now has one canonical framework skill, `purista`, plus one separate meta skill, `purista-skill-maintainer`.
-The maintainer skill keeps that model coherent, readable, implementation-grounded, and aligned across `purista`, `starter`, `create-purista`, public docs, and `voyage`.
+The maintainer skill keeps that model coherent, readable, spec-grounded, implementation-verified, and aligned across `purista`, `starter`, `create-purista`, public docs, and `voyage`.
 
 ## Source-of-truth order
 Read sources in this order before changing a skill:
-1. Current implementation in `purista/`
-2. Public handbook/API docs in `purista/web`
-3. The current `purista` skill and its `references/`
-4. Downstream overlays and consumers in `voyage`, `starter`, and `create-purista`
+1. Current relevant specs in `specs/`
+2. Current implementation in `purista/`
+3. Public handbook/API docs in `purista/web`
+4. The current `purista` skill and its `references/`
+5. Downstream overlays and consumers in `voyage`, `starter`, and `create-purista`
 
-If older planning notes conflict with implemented public APIs, document the drift outside the skill and align skills to the implemented, reviewed behavior. Do not revive stale package names, protocols, or APIs just because an old planning draft mentions them.
+Specs are the source of truth for framework development. If implementation and specs conflict, first decide whether the implementation drifted or the spec is stale. Fix the drift in the implementation or update/supersede the spec, then align skills to the implemented behavior that now follows the current spec.
 
 ## Hard rules
 - Treat `purista` as the canonical shared framework skill path unless the change is explicitly about the maintainer skill itself.
+- Keep user-facing framework skills independent from internal spec access. The `purista-skill-maintainer` skill may reference specs because it is for maintaining PURISTA itself.
 - Keep `SKILL.md` compact and navigational; move depth into `references/`.
 - Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
 - Use the filesystem as part of the reasoning surface: good reference taxonomy matters.
@@ -48,6 +50,8 @@ If older planning notes conflict with implemented public APIs, document the drif
 - If a producer emits a broad payload, document that consumers should redefine a narrower schema locally and keep only the fields they actually use.
 
 ## Required read order
+- `specs/README.md`
+- relevant active specs for the framework capability being changed
 - `purista/skills/README.md`
 - `purista/skills/purista/SKILL.md`
 - this `SKILL.md`
@@ -63,6 +67,7 @@ If older planning notes conflict with implemented public APIs, document the drif
 - Progressive disclosure quality: `SKILL.md` routes, references teach depth, and no reference requires loading unrelated files
 - Snippet relevance and duplicate-content risk
 - Evaluation scenarios still cover setup, CLI scaffolding, streams, queues, agents, enterprise review, and drift repair
+- Drift between active specs and implementation
 - Drift in `starter`, `create-purista`, `voyage`, and published docs
 - Drift between repo-local skills and installed mirror copies under `$CODEX_HOME/skills`
 - Drift between metric catalog, observability docs, examples, and skill snippets

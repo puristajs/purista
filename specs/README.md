@@ -1,7 +1,13 @@
 # PURISTA Specs
 
-Specs in this directory are internal planning and migration records. Public
-documentation and skills must not reference these files as source material.
+Specs in this directory are the source of truth for framework development.
+Implementation should follow active specs. When implementation and specs drift,
+fix the implementation or update/supersede the spec before changing public docs
+or user-facing skills.
+
+User-facing skills and public documentation must not require access to internal
+specs. The maintainer/development guidance may use specs to keep PURISTA itself
+aligned.
 
 ## Concise Specs
 - Keep each spec focused on one decision, migration, or implementation slice.
@@ -14,10 +20,13 @@ documentation and skills must not reference these files as source material.
   current implementation or migration record.
 
 ## Knowledge Alignment
-- Skills are grounded in current implementation and public handbook/API docs,
-  not internal specs.
-- When implementation, public docs, and a spec disagree, update the spec or mark
-  it superseded before changing skills.
+- Specs define intended framework behavior.
+- Implementation realizes the specs.
+- Public handbook/API docs explain implemented behavior.
+- User-facing skills teach implemented behavior without requiring spec access.
+- The skill maintainer workflow may reference specs to reconcile drift.
+- When implementation, public docs, and a spec disagree, fix implementation or
+  update/supersede the spec before changing user-facing skills.
 - Obsolete AI package, protocol, and handler-context terms may appear only in
   migration or superseded AI records. `npm run audit:knowledge` enforces the
   concrete forbidden-term list.

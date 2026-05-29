@@ -46,9 +46,14 @@ const requireContains = (file, patterns) => {
 
 const skillMarkdown = listMarkdown(resolve(root, 'skills'))
 for (const file of skillMarkdown) {
+	const rel = relative(root, file)
 	const text = readText(file)
-	if (/\bspecs?\b|specs\//i.test(text)) {
-		addIssue(file, 'skills must not reference internal specs; use implementation and public docs')
+	if (
+		rel !== 'skills/README.md' &&
+		!rel.startsWith('skills/purista-skill-maintainer/') &&
+		/\bspecs?\b|specs\//i.test(text)
+	) {
+		addIssue(file, 'user-facing skills must not reference internal specs')
 	}
 }
 
@@ -77,20 +82,32 @@ for (const file of listMarkdown(resolve(root, 'specs'))) {
 requireContains(resolve(root, 'AGENTS.md'), [
 	[/npm run audit:skills/, 'must tell agents to run the skill audit after skill changes'],
 	[/npm run audit:knowledge/, 'must tell agents to run the knowledge audit after skills/spec/agent-doc changes'],
-	[/skills must not reference internal specs/i, 'must state that skills cannot reference internal specs'],
+	[/Specs are the source of truth/i, 'must state that specs are the source of truth for framework development'],
+	[
+		/User-facing framework skills must not require access to internal specs/i,
+		'must state the user-facing skill/spec boundary',
+	],
 ])
 
 requireContains(resolve(root, 'web', 'AGENTS.md'), [
 	[/public handbook/i, 'must route website agents to public handbook/source docs rather than internal specs'],
+	[/Specs are the source\s+of\s+truth/i, 'must preserve the spec/source boundary for website agents'],
+	[/user-facing skill/i, 'must state the user-facing skill boundary for website agents'],
 ])
 
 requireContains(resolve(root, 'web', 'CLAUDE.md'), [
 	[/AGENTS\.md/, 'must keep Claude website guidance chained to AGENTS.md'],
+	[/Specs are the source of truth/i, 'must preserve the spec/source boundary for Claude website guidance'],
+	[/user-facing skill/i, 'must state the user-facing skill boundary for Claude website guidance'],
 ])
 
 requireContains(resolve(root, 'specs', 'README.md'), [
 	[/Concise Specs/i, 'must define concise spec rules'],
 	[/Knowledge Alignment/i, 'must define knowledge alignment rules'],
+	[
+		/Specs in this directory are the source of truth/i,
+		'must state that specs are authoritative for framework development',
+	],
 ])
 
 if (issues.length) {

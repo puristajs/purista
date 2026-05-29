@@ -8,10 +8,11 @@ Before changing website layout, copy, UI components, visualizations, or page
 structure, read `DESIGN.md` in this directory.
 
 For handbook or API content, use the public handbook source in `web/src/content`
-and the implemented TypeScript APIs as source material. Do not make website or
-skill content depend on internal specs. If implementation and an old planning
-document disagree, update or supersede the planning document instead of copying
-stale guidance forward.
+and the implemented TypeScript APIs as source material. Specs are the source of
+truth for framework development, but public website and user-facing skill
+content must be self-contained and must not require access to internal specs. If
+implementation and a spec or old planning document disagree, resolve that drift
+in the spec or implementation before copying guidance forward.
 
 The design direction is:
 - dark-first, flat, precise, technical editorial;

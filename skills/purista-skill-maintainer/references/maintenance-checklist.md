@@ -3,12 +3,14 @@
 Use this checklist when creating or updating a skill.
 
 ## 1. Source check
+- Relevant active specs read first
 - Current implementation paths verified in `purista/`
 - Public handbook/API docs checked when behavior is documented for users
 - Neighboring skills reviewed for overlap
 - Downstream repos checked when capability changes affect generated or default behavior
 - The framework knowledge required by an otherwise untrained model has been identified explicitly
 - Older planning notes checked for stale assumptions before copying package names, protocols, or API shapes into skills
+- Any spec/implementation drift is resolved before the user-facing `purista` skill is changed
 
 ## 2. Routing check
 - `name` is stable and specific
@@ -59,6 +61,7 @@ Use this checklist when creating or updating a skill.
 - `npm run audit:skills` passes
 
 ## 6. Drift check
+- Active specs aligned with implementation
 - `starter` aligned when defaults or generated app shape changed
 - `create-purista` aligned when scaffolding or templates changed
 - `voyage` aligned when framework capability assumptions changed

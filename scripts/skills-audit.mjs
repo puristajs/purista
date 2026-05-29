@@ -44,6 +44,7 @@ const skillDirs = readdirSync(skillsRoot, { withFileTypes: true })
 	.sort()
 
 for (const skillDir of skillDirs) {
+	const skillName = relative(skillsRoot, skillDir)
 	const skillFile = join(skillDir, 'SKILL.md')
 	if (!existsSync(skillFile)) {
 		addIssue(skillDir, 'missing SKILL.md')
@@ -73,8 +74,8 @@ for (const skillDir of skillDirs) {
 		addIssue(skillFile, 'SKILL.md should stay under 500 lines and move depth into references')
 	}
 
-	if (/\bspecs?\b|specs\//i.test(skillText)) {
-		addIssue(skillFile, 'skills must not reference internal specs; use implementation and public docs instead')
+	if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(skillText)) {
+		addIssue(skillFile, 'user-facing skills must not reference internal specs')
 	}
 
 	const referencesDir = join(skillDir, 'references')
@@ -94,11 +95,8 @@ for (const skillDir of skillDirs) {
 		}
 
 		const referenceText = readText(reference)
-		if (/\bspecs?\b|specs\//i.test(referenceText)) {
-			addIssue(
-				reference,
-				'skill references must not reference internal specs; use implementation and public docs instead',
-			)
+		if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(referenceText)) {
+			addIssue(reference, 'user-facing skill references must not reference internal specs')
 		}
 
 		const lines = lineCount(referenceText)

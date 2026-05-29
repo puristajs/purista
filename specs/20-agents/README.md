@@ -47,9 +47,12 @@ history. Their old package-boundary recommendations have been replaced by
 - Framework implementation, architecture, CLI, docs, and examples should use
   [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) for migration
   history and current ownership decisions.
-- Skill updates must not reference internal specs. They should use current
-  implementation and public handbook/API docs, then run `npm run audit:skills`
-  and `npm run audit:knowledge`.
+- User-facing skill updates must not reference internal specs. They should use
+  current implementation and public handbook/API docs, then run
+  `npm run audit:skills` and `npm run audit:knowledge`.
+- The `purista-skill-maintainer` workflow is the exception: it may use active
+  specs to keep implementation, public docs, examples, and user-facing skills
+  aligned.
 - Historical documents may be read for rationale only. If they mention
   `@purista/ai`, `context.ai`, `purista-ai:*`, `AiSdkProvider`, or
   `streamProtocolAdapter`, treat those references as superseded unless the

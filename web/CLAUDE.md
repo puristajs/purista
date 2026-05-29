@@ -3,10 +3,11 @@
 Follow `AGENTS.md` first. For any PURISTA website UI, layout, visual, content,
 or Astro component work, also read `DESIGN.md` before editing.
 
-For handbook, API, and agent-facing content, follow the implemented API and
-public docs source. Do not reference internal specs from skills or public
-assistant guidance; stale planning docs should be corrected or marked
-superseded.
+For handbook, API, and public agent-facing content, follow the implemented API
+and public docs source. Specs are the source of truth for framework development,
+but public website and user-facing skill content must not require internal spec
+access. When specs and implementation drift, correct the stale side first, then
+update public guidance from the aligned behavior.
 
 Use the design guide as the contract for taste and implementation:
 - flat technical editorial, not card-heavy SaaS;
