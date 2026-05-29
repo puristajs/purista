@@ -310,11 +310,16 @@ Required changes:
 - Update package map, implementation workflow, and scaffolding references if
   they mention `@purista/ai`.
 - Remove guidance that AI must remain outside core.
+- Do not make skills reference internal specs. Skills must be grounded in
+  current implementation and public handbook/API docs.
+- Run `npm run audit:skills` and `npm run audit:knowledge`.
 
 Acceptance:
 
 - Future agents using `purista` skill generate core-based AI code.
-- Skill docs mention `@purista/ai` only as removed historical context.
+- Skill docs do not mention internal specs or `@purista/ai`.
+- Agent/Claude guidance tells maintainers to keep skills, public docs, and
+  specs aligned through the knowledge audits.
 
 ## 5. Final Integration Gate
 

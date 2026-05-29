@@ -3,7 +3,9 @@
 Status: active routing document.
 
 Use [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) as the
-active source of truth for PURISTA agent work.
+active migration record for PURISTA agent work. Current implementation and
+public handbook/API docs remain the source material for skills and user-facing
+documentation.
 
 ## Active Decision
 
@@ -42,8 +44,12 @@ history. Their old package-boundary recommendations have been replaced by
 
 ## Routing
 
-- Framework implementation, architecture, CLI, docs, examples, and skill updates
-  must start from [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md).
+- Framework implementation, architecture, CLI, docs, and examples should use
+  [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) for migration
+  history and current ownership decisions.
+- Skill updates must not reference internal specs. They should use current
+  implementation and public handbook/API docs, then run `npm run audit:skills`
+  and `npm run audit:knowledge`.
 - Historical documents may be read for rationale only. If they mention
   `@purista/ai`, `context.ai`, `purista-ai:*`, `AiSdkProvider`, or
   `streamProtocolAdapter`, treat those references as superseded unless the

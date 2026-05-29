@@ -7,6 +7,12 @@ This directory contains the new Astro-based PURISTA website.
 Before changing website layout, copy, UI components, visualizations, or page
 structure, read `DESIGN.md` in this directory.
 
+For handbook or API content, use the public handbook source in `web/src/content`
+and the implemented TypeScript APIs as source material. Do not make website or
+skill content depend on internal specs. If implementation and an old planning
+document disagree, update or supersede the planning document instead of copying
+stale guidance forward.
+
 The design direction is:
 - dark-first, flat, precise, technical editorial;
 - fewer boxes and cards;
@@ -33,3 +39,6 @@ After visual or layout changes:
 
 Existing Vite large chunk warnings are known and should not block scoped design
 work unless the task is performance-focused.
+
+After handbook, API, skill-install, or agent-facing docs changes, also run:
+- `npm run audit:knowledge`

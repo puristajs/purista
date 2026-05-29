@@ -63,6 +63,15 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 - Website and handbook source content lives under `web/src/content/`.
 - Canonical framework skills are available under `skills/` and should be loaded selectively.
 - Prefer the shared layered catalog there over app-local copies.
+- Skills must not reference internal specs. They should be grounded in current implementation and public handbook/API docs.
+- When changing skills, specs, AGENTS/CLAUDE guidance, or public knowledge files, run `npm run audit:skills` and `npm run audit:knowledge`.
+- If a planning/spec file is obsolete, replace it with a concise superseded note or update it to match implementation. Do not leave conflicting active guidance behind.
+
+## Skill And Spec Alignment
+- `skills/purista/SKILL.md` stays compact and routes deeper guidance into directly linked references.
+- Long skill references should include `## Contents` and realistic evaluation scenarios should stay current.
+- Specs should be concise, current, and implementation-aligned. Historical notes must be clearly marked as superseded.
+- Public docs and generated examples must not rely on internal spec paths as source material.
 
 ## Website Design Guidance
 - For the Astro website in `web/`, load `web/AGENTS.md` and `web/DESIGN.md` before changing layout, visuals, UI components, copy structure, or page storytelling.
