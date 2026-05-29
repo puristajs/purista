@@ -6,12 +6,14 @@ interface Props {
 	title?: string
 	description?: string
 	siteShell?: boolean
+	markdownUrl?: string
 }
 
 const {
 	title = 'PURISTA — Production-grade by structure.',
 	description = 'PURISTA is the open-source TypeScript framework that turns AI-built software into approval-ready enterprise systems.',
 	siteShell = false,
+	markdownUrl,
 } = Astro.props
 const bodyAttrs = siteShell ? { 'data-site': '' } : {}
 ---
@@ -37,6 +39,7 @@ const bodyAttrs = siteShell ? { 'data-site': '' } : {}
       rel="stylesheet"
     />
     <meta name="generator" content={Astro.generator} />
+    {markdownUrl && <link rel="alternate" type="text/markdown" href={markdownUrl} />}
     <slot name="head" />
   </head>
   <body {...bodyAttrs}>

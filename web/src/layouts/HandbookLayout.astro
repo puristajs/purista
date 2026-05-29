@@ -15,6 +15,8 @@ interface Props {
 
 const { title, description, sidebar = [], currentId = '', headings = [], prose = true } = Astro.props
 const pageTitle = title === 'PURISTA Handbook' ? title : `${title} | PURISTA Handbook`
+const handbookPath = Astro.url.pathname.replace(/\/$/, '')
+const markdownUrl = handbookPath === '/handbook' ? '/handbook.md' : `${handbookPath}.md`
 
 function isActive(item: SidebarItem, id: string): boolean {
 	const itemBase = item.id.replace(/\/index$/, '')
@@ -45,7 +47,7 @@ function getItemHref(item: SidebarItem): string {
 }
 ---
 
-<BaseLayout title={pageTitle} description={description} siteShell>
+<BaseLayout title={pageTitle} description={description} siteShell markdownUrl={markdownUrl}>
   <Nav active="handbook" />
 
   <div class="h-screen flex flex-col overflow-hidden pt-[72px]">

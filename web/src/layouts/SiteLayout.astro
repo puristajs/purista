@@ -17,10 +17,12 @@ const {
 	description = 'PURISTA is the open-source TypeScript framework that turns AI-built software into approval-ready enterprise systems.',
 	active = 'home',
 } = Astro.props
+const sitePath = Astro.url.pathname.replace(/\/$/, '')
+const markdownUrl = active === 'harness' ? (sitePath === '/harness' ? '/harness.md' : `${sitePath}.md`) : undefined
 
 ---
 
-<BaseLayout title={title} description={description} siteShell>
+<BaseLayout title={title} description={description} siteShell markdownUrl={markdownUrl}>
   <Nav active={active} />
   {active === 'harness' && (
     <div class="site-harness-subnav">
