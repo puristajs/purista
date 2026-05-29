@@ -4,7 +4,7 @@
 PURISTA is a TypeScript monorepo using npm workspaces and is a framework for building distributed systems.
 - `packages/`: Core framework modules and bridges (each package has its own `src/` and tests).
 - `examples/`: End-to-end sample services and integrations (e.g., `examples/fullexample/`).
-- `website/`: Documentation site and handbook sources.
+- `web/`: Astro documentation website, handbook sources, and migrated article/resource/legal content.
 - `docs/`: Generated or supporting documentation artifacts.
 - `test/`: Root-level tests and fixtures.
 - `dist/`: Build output (generated).
@@ -14,7 +14,7 @@ Run these from the repo root:
 - `npm install`: Install workspace dependencies.
 - `npm start`: Run the full example app (`examples/fullexample`).
 - `npm run build`: Build all workspaces and run formatting/lint fixes.
-- `npm run dev -w website`: Start the docs site locally.
+- `npm run dev -w @purista/web`: Start the docs site locally.
 - `npm test`: Run the default Vitest test suite.
 - `npm run test:unit`: Type-check (`tsc --noEmit`) and run unit tests via `vitest.config.unit.ts`.
 - `npm run lint`: Run Biome checks.
@@ -60,8 +60,7 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 
 ## AI Context Files
 - Start with repository-level context in `llms.txt`.
-- Public published files are under `website/doc/public/llms/`.
-- For sandbox implementation work, also load `website/doc/public/llms/sandbox.txt`.
+- Website and handbook source content lives under `web/src/content/`.
 - Canonical framework skills are available under `skills/` and should be loaded selectively.
 - Prefer the shared layered catalog there over app-local copies.
 

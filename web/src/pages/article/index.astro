@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content'
+import HandbookCard from '../../components/handbook/HandbookCard.astro'
+import DocPageLayout from '../../layouts/DocPageLayout.astro'
+
+const articles = (await getCollection('articles'))
+	.filter(entry => entry.id !== 'index')
+	.sort((a, b) => (b.data.order ?? 0) - (a.data.order ?? 0))
+---
+
+<DocPageLayout title="Articles" description="PURISTA release notes and articles migrated from the previous website.">
+  <h1>Articles</h1>
+  <p>Release notes and long-form articles from the PURISTA archive.</p>
+  <div class="grid grid-cols-1 gap-3 not-prose">
+    {articles.map(article => (
+      <HandbookCard
+        title={article.data.title}
+        description={article.data.description ?? 'PURISTA article'}
+        icon="book"
+        href={`/article/${article.id}/`}
+        color="found"
+      />
+    ))}
+  </div>
+</DocPageLayout>

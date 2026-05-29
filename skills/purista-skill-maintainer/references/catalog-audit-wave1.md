@@ -30,5 +30,5 @@ The old fragmented framework skill set is folded into `purista`:
 
 ## Downstream review notes
 - `voyage` should consume only `purista` plus its local overlay
-- `specs/00-context.md` and public `website/doc/public/llms/*.txt` outputs must point at the single canonical path
+- `specs/00-context.md` and public website context outputs must point at the single canonical path under `web/src/content/`
 - framework tests must stop asserting the old multi-skill catalog shape

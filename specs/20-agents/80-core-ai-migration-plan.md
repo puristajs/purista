@@ -271,7 +271,7 @@ Write scope:
 
 - `packages/core/README.md`
 - `packages/cli/README.md`
-- `website/doc/**`
+- `web/src/content/**`
 - `examples/**`
 - generated TypeDoc output after API is stable
 

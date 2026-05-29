@@ -1,0 +1,22 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+import DocPageLayout from '../../layouts/DocPageLayout.astro'
+
+export async function getStaticPaths() {
+	const entries = await getCollection('resources')
+	return entries
+		.filter(entry => entry.id !== 'index')
+		.map(entry => ({ params: { slug: entry.id }, props: { entry } }))
+}
+
+type Props = {
+	entry: CollectionEntry<'resources'>
+}
+
+const { entry } = Astro.props
+const { Content } = await render(entry)
+---
+
+<DocPageLayout title={entry.data.title} description={entry.data.description}>
+  <Content />
+</DocPageLayout>
