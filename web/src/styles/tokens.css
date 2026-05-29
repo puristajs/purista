@@ -11,6 +11,73 @@
    THEME TOKENS
    ======================================== */
 
+:root {
+	/* --- Light Mode (Default) --- */
+	--color-bg: #fafafa;
+	--color-bg-elev: #ffffff;
+	--color-bg-sunk: #f2f2f4;
+	--color-bg-deep: #e8e8ec;
+
+	--color-fg: #08080b;
+	--color-fg-strong: #000000;
+	--color-fg-muted: #4d4d55;
+	--color-fg-subtle: #8b8b92;
+
+	--color-line: rgba(8, 8, 11, 0.08);
+	--color-line-strong: rgba(8, 8, 11, 0.16);
+	--color-line-vivid: rgba(8, 8, 11, 0.28);
+
+	/* Semantic accent colors */
+	--color-pilot: #059669;
+	--color-pilot-hi: #10b981;
+	--color-pilot-glow: rgba(16, 185, 129, 0.18);
+
+	--color-con: #7c3aed;
+	--color-con-hi: #a855f7;
+	--color-con-glow: rgba(168, 85, 247, 0.18);
+
+	--color-found: #2563eb;
+	--color-found-hi: #60a5fa;
+	--color-found-glow: rgba(96, 165, 250, 0.18);
+
+	/* Code blocks */
+	--color-code-bg: #f2f2f5;
+	--color-code-fg: #1a1a1e;
+	--color-code-line: rgba(8, 8, 11, 0.06);
+
+	/* Typography */
+	--font-sans: "Inter", system-ui, -apple-system, sans-serif;
+	--font-display: "Inter Tight", system-ui, -apple-system, sans-serif;
+	--font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+
+	/* Layout */
+	--layout-max-fluid: 1680px;
+	--layout-max-wide: 1440px;
+	--layout-max-page: 1280px;
+	--layout-max-story: 1240px;
+	--layout-max-copy: 960px;
+	--max-width: var(--layout-max-fluid);
+	--gutter: clamp(1.25rem, 4vw, 3rem);
+
+	/* Radius */
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+	--radius-xl: 20px;
+	--radius-2xl: 24px;
+
+	/* Transitions */
+	--transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+	--transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+	--transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+	--transition-bounce: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(8, 8, 11, 0.04);
+	--shadow-md: 0 12px 28px -10px rgba(8, 8, 11, 0.1), 0 3px 8px rgba(8, 8, 11, 0.04);
+	--shadow-lg: 0 32px 80px -24px rgba(8, 8, 11, 0.18), 0 12px 28px -12px rgba(8, 8, 11, 0.08);
+}
+
 @theme {
 	/* --- Light Mode (Default) --- */
 	--color-bg: #fafafa;
