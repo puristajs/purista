@@ -21,7 +21,7 @@ This page lists tools that extend PURISTA for specific platforms and workflows.
 | Package | Category | Use case |
 |---|---|---|
 | `@purista/core` | Core framework | Services, commands, subscriptions, builders, default bridges |
-| `@purista/ai-harness` | AI Harness | Queue-backed AI agents, harness workflows, model provider bindings |
+| `@purista/harness` | AI Harness runtime | Provider-neutral model, agent, workflow, eval, memory, and testing primitives used by core agents |
 | `@purista/amqpbridge` | Event bridge | RabbitMQ / AMQP 0-9-1 transport |
 | `@purista/natsbridge` | Event bridge | NATS / JetStream transport |
 | `@purista/mqttbridge` | Event bridge | MQTT v5 transport |

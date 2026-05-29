@@ -518,6 +518,220 @@
 		color: var(--color-found);
 	}
 
+	/* ── Handbook-native API reference ───────────────────────────── */
+	.api-hero,
+	.api-detail-head {
+		padding-bottom: 2rem;
+		margin-bottom: 2rem;
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	.api-eyebrow,
+	.api-breadcrumb,
+	.api-symbol-package,
+	.api-section-head p,
+	.api-member-head p,
+	.api-more {
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	.api-eyebrow {
+		color: var(--color-pilot-hi);
+		margin-bottom: 0.8rem;
+	}
+
+	.api-hero h1,
+	.api-detail-head h1 {
+		margin: 0 0 1rem;
+		font-family: var(--font-display);
+		font-size: clamp(2.1rem, 4vw, 3.3rem);
+		line-height: 1.08;
+		letter-spacing: -0.04em;
+		color: var(--color-fg-strong);
+	}
+
+	.api-lede,
+	.api-detail-head p {
+		max-width: 72ch;
+		color: var(--color-fg-muted);
+		line-height: 1.7;
+	}
+
+	.api-stats,
+	.api-meta-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+		margin-top: 1.4rem;
+	}
+
+	.api-stats span,
+	.api-meta-row a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		border: 1px solid var(--color-line);
+		border-radius: 999px;
+		padding: 0.38rem 0.7rem;
+		background: var(--color-bg-elev);
+		color: var(--color-fg-muted);
+		font-family: var(--font-display);
+		font-size: 0.82rem;
+		text-decoration: none;
+	}
+
+	.api-stats strong {
+		color: var(--color-fg);
+	}
+
+	.api-intro-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 0.9fr) minmax(18rem, 1.1fr);
+		gap: 1.5rem;
+		align-items: start;
+		margin-bottom: 2rem;
+	}
+
+	.api-intro-copy h2,
+	.api-section h2 {
+		margin-top: 0;
+	}
+
+	.api-card-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		gap: 0.65rem;
+		margin-bottom: 3rem;
+	}
+
+	.api-section {
+		margin-top: 3rem;
+	}
+
+	.api-section-head {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1rem;
+		border-bottom: 1px solid var(--color-line);
+	}
+
+	.api-section-head p,
+	.api-member-head p,
+	.api-more {
+		color: var(--color-fg-subtle);
+	}
+
+	.api-symbol-list,
+	.api-member-list {
+		display: grid;
+		gap: 0.65rem;
+	}
+
+	.api-symbol-card,
+	.api-member {
+		display: block;
+		border: 1px solid var(--color-line);
+		border-radius: 8px;
+		background: var(--color-bg-elev);
+		padding: 1rem;
+		text-decoration: none;
+	}
+
+	.api-symbol-card {
+		transition:
+			border-color 150ms ease,
+			background 150ms ease;
+	}
+
+	.api-symbol-card:hover {
+		border-color: var(--color-line-vivid);
+		background: var(--color-bg-sunk);
+	}
+
+	.api-symbol-main,
+	.api-member-head {
+		display: flex;
+		align-items: start;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.api-symbol-name,
+	.api-member h3 {
+		font-family: var(--font-display);
+		font-weight: 600;
+		color: var(--color-fg);
+	}
+
+	.api-symbol-package {
+		color: var(--color-fg-subtle);
+		white-space: nowrap;
+	}
+
+	.api-symbol-summary {
+		display: block;
+		margin-top: 0.55rem;
+		color: var(--color-fg-muted);
+		font-size: 0.92rem;
+		line-height: 1.55;
+	}
+
+	.api-more {
+		margin-top: 1rem;
+	}
+
+	.api-breadcrumb {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		margin-bottom: 1.25rem;
+		color: var(--color-fg-subtle);
+	}
+
+	.api-breadcrumb a {
+		color: var(--color-found);
+	}
+
+	.api-member {
+		scroll-margin-top: 6rem;
+	}
+
+	.api-member-head {
+		margin-bottom: 0.85rem;
+	}
+
+	.api-member h3 {
+		margin: 0 0 0.15rem;
+		font-size: 1.1rem;
+	}
+
+	.api-member .codeblock {
+		margin-bottom: 0.9rem;
+	}
+
+	@media (max-width: 760px) {
+		.api-intro-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.api-symbol-main,
+		.api-member-head,
+		.api-section-head {
+			display: block;
+		}
+
+		.api-symbol-package {
+			display: block;
+			margin-top: 0.3rem;
+			white-space: normal;
+		}
+	}
+
 	.callout--warning .callout__title {
 		color: var(--color-pilot);
 	}
@@ -651,4 +865,36 @@ html[data-theme="dark"] .prose .astro-code.codeblock-pre {
 
 html[data-theme="dark"] .prose .astro-code span {
 	color: var(--shiki-dark, inherit) !important;
+}
+
+/* API reference pages render without .prose so CodeBlock.astro is not wrapped
+   a second time by the handbook client. These overrides intentionally live
+   outside @layer so Tailwind's reset cannot flatten API headings. */
+.api-hero h1,
+.api-detail-head h1 {
+	margin: 0 0 1rem !important;
+	font-family: var(--font-display) !important;
+	font-size: clamp(2.1rem, 4vw, 3.3rem) !important;
+	font-weight: 600 !important;
+	line-height: 1.08 !important;
+	letter-spacing: -0.04em !important;
+	color: var(--color-fg-strong) !important;
+}
+
+.api-section h2 {
+	margin: 0 0 0.8rem !important;
+	font-family: var(--font-display) !important;
+	font-size: clamp(1.35rem, 2vw, 1.75rem) !important;
+	font-weight: 600 !important;
+	line-height: 1.2 !important;
+	color: var(--color-fg) !important;
+}
+
+.api-member h3 {
+	margin: 0 0 0.15rem !important;
+	font-family: var(--font-display) !important;
+	font-size: 1.05rem !important;
+	font-weight: 600 !important;
+	line-height: 1.25 !important;
+	color: var(--color-fg) !important;
 }

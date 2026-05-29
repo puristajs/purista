@@ -1,0 +1,66 @@
+---
+import '../styles/global.css'
+import SeoHead from '../components/meta/SeoHead.astro'
+
+interface Props {
+	title?: string
+	description?: string
+	siteShell?: boolean
+	markdownUrl?: string
+}
+
+const {
+	title = 'PURISTA — Production-grade by structure.',
+	description = 'PURISTA is the open-source TypeScript framework that turns AI-built software into approval-ready enterprise systems.',
+	siteShell = false,
+	markdownUrl,
+} = Astro.props
+const bodyAttrs = siteShell ? { 'data-site': '' } : {}
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark" class="js">
+  <head>
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('purista-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored ?? (prefersDark ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead title={title} description={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..800&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="generator" content={Astro.generator} />
+    {markdownUrl && <link rel="alternate" type="text/markdown" href={markdownUrl} />}
+    <slot name="head" />
+  </head>
+  <body {...bodyAttrs}>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  main,
+  nav,
+  footer {
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>

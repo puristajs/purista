@@ -34,12 +34,13 @@ const triageAgent = supportV1ServiceBuilder
     reason: z.string(),
   }))
   .addModel('primary', {
+    model: 'support-triage',
     capabilities: ['object'],
     defaults: { temperature: 0 },
   })
-  .setRunFunction(async function(context, payload) {
+  .setRunFunction(async context => {
     const result = await context.harness.models.primary.object({
-      messages: [{ role: 'user', content: payload.text }],
+      messages: [{ role: 'user', content: context.payload.text }],
       schema: {
         type: 'object',
         properties: {
@@ -69,13 +70,18 @@ const refundAgent = billingV1ServiceBuilder
     payloadSchema: z.object({ orderId: z.string() }),
     outputSchema: z.object({ amount: z.number(), status: z.string() }),
   })
-  .setRunFunction(async function(context, payload) {
+  .addModel('primary', {
+    model: 'refund-review',
+    capabilities: ['object'],
+    defaults: { temperature: 0 },
+  })
+  .setRunFunction(async context => {
     const profile = await context.invoke.tools['customer.1.getProfile'].call({
-      customerId: payload.customerId,
+      customerId: context.payload.customerId,
     })
 
     const order = await context.invoke.tools['billing.1.getOrder'].call({
-      orderId: payload.orderId,
+      orderId: context.payload.orderId,
     })
 
     // Model reasoning with tool results
@@ -117,9 +123,9 @@ const deployAgent = opsV1ServiceBuilder
     payloadSchema: z.object({ changeSet: z.string() }),
     outputSchema: z.object({ risk: z.enum(['low', 'medium', 'high']) }),
   })
-  .setRunFunction(async function(context, payload) {
+  .setRunFunction(async context => {
     const security = await context.invoke.agents['securityReview.1'].run({
-      changeSet: payload.changeSet,
+      changeSet: context.payload.changeSet,
     })
 
     if (security.risk === 'high') {
@@ -127,7 +133,7 @@ const deployAgent = opsV1ServiceBuilder
     }
 
     // Proceed with deployment
-    await context.resources.deploy.deploy(payload.changeSet)
+    await context.resources.deploy.deploy(context.payload.changeSet)
     return { approved: true, risk: security.risk }
   })
 ```
@@ -139,7 +145,7 @@ Enable sandboxing for file access, code execution, or MCP tools.
 ```typescript [sandbox.ts]
 .setSandboxPolicy({ enabled: true })
 .useBuiltInTools(['read', 'list', 'grep'])
-.setRunFunction(async function(context, payload) {
+.setRunFunction(async context => {
   // Agent can read files in the sandbox
   const result = await context.harness.models.primary.text({
     messages: [{

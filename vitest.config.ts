@@ -15,7 +15,7 @@ export default defineConfig({
 		coverage: {
 			enabled: false,
 			include: ['**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-			exclude: ['examples/**', 'packages/cli/**', 'website:/**'],
+			exclude: ['examples/**', 'packages/cli/**'],
 			thresholds: {
 				lines: 63,
 				functions: 63,
@@ -27,6 +27,6 @@ export default defineConfig({
 			'**/test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
 			'**/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
 		],
-		exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**', 'website/**'],
+		exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**'],
 	},
 })

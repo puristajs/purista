@@ -112,5 +112,5 @@ export const sendWelcomeEmailSubscriptionBuilder = emailV1ServiceBuilder
 
 ::: info More on subscription builder usage:
 - [Subscription builder](../2_building_business-logic/subscription/the-subscription-builder.md)
-- [API documentation: SubscriptionDefinitionBuilder - Methods](../../api/@purista/core/classes/SubscriptionDefinitionBuilder.md#methods)
+- [API documentation: SubscriptionDefinitionBuilder - Methods](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#methods)
 :::

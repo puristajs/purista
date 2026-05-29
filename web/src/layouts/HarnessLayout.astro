@@ -1,5 +1,6 @@
 ---
 import SiteLayout from './SiteLayout.astro'
+import type { PrimaryNavKey } from '../data/navigation'
 
 /**
  * HarnessLayout keeps legacy harness subpages on the current site shell.
@@ -12,7 +13,7 @@ import SiteLayout from './SiteLayout.astro'
 interface Props {
 	title?: string
 	description?: string
-	active?: 'home' | 'framework' | 'enterprise' | 'handbook' | 'harness'
+	active?: PrimaryNavKey
 }
 
 const { title, description, active = 'harness' } = Astro.props

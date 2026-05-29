@@ -1,0 +1,25 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+import HandbookCard from '../../components/handbook/HandbookCard.astro'
+import DocPageLayout from '../../layouts/DocPageLayout.astro'
+
+const entries = await getCollection('resources')
+const indexEntry = entries.find(entry => entry.id === 'index') as CollectionEntry<'resources'>
+const { Content } = await render(indexEntry)
+const resources = entries.filter(entry => entry.id !== 'index')
+---
+
+<DocPageLayout title={indexEntry.data.title} description={indexEntry.data.description}>
+  <Content />
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 not-prose">
+    {resources.map(resource => (
+      <HandbookCard
+        title={resource.data.title}
+        description={resource.data.description ?? 'PURISTA resource'}
+        icon="book"
+        href={`/resources/${resource.id}/`}
+        color="pilot"
+      />
+    ))}
+  </div>
+</DocPageLayout>

@@ -44,7 +44,7 @@
 		]
 	},
 	"tsconfig": "tsconfig.typedoc.json",
-	"out": "web/public/api",
+	"json": "web/src/generated/purista-api.json",
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,
 	"includeVersion": true,

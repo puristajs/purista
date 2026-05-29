@@ -19,10 +19,9 @@ The builder collects the AI contract and generates four core definitions: queue,
 
 ## Service builder
 
-Import `@purista/ai-harness` to register AI agent support, then create your `ServiceBuilder` from `@purista/core`:
+Create your `ServiceBuilder` from `@purista/core`. Agent support is available directly on the service builder:
 
 ```ts
-import '@purista/ai-harness'
 import { ServiceBuilder } from '@purista/core'
 
 export const supportV1ServiceBuilder = new ServiceBuilder({

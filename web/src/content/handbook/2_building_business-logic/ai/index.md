@@ -1,12 +1,12 @@
 ---
 title: AI Agents
-description: Build queue-backed AI agents and workflows with @purista/ai-harness.
+description: Build queue-backed AI agents and workflows with @purista/core and model providers.
 order: 207000
 ---
 
 # AI agents
 
-AI agent capabilities are provided by `@purista/ai-harness` — a separate package that integrates with `@purista/core`. Install it alongside `@purista/core` to use `getAgentQueueBuilder` on `ServiceBuilder`.
+AI agent capabilities are part of `@purista/core`. Use `getAgentQueueBuilder` on `ServiceBuilder` to attach a queue-backed agent, and install the concrete model provider packages your application needs.
 
 Use an AI agent when a service capability is model-driven, conversational, tool-loop oriented, or needs provider operations such as structured generation, embeddings, reranking, or multimodal input.
 
@@ -21,24 +21,24 @@ This is the most important design point: AI is not a separate application lane. 
 
 ## Model provider packages
 
-The AI agent runtime is provided by `@purista/ai-harness`. You still bind a concrete model provider at runtime. Install both packages and the desired provider only in applications that need them:
+The core package includes the agent builder and depends on the provider-neutral harness runtime. Install the desired provider only in applications that need it:
 
 ::: code-group
 
 ```bash [npm]
-npm install @purista/ai-harness @purista/harness-openai
+npm install @purista/harness-openai
 ```
 
 ```bash [bun]
-bun add @purista/ai-harness @purista/harness-openai
+bun add @purista/harness-openai
 ```
 
 ```bash [yarn]
-yarn add @purista/ai-harness @purista/harness-openai
+yarn add @purista/harness-openai
 ```
 
 ```bash [pnpm]
-pnpm add @purista/ai-harness @purista/harness-openai
+pnpm add @purista/harness-openai
 ```
 
 :::
@@ -52,7 +52,7 @@ flowchart TD
   AgentBuilder --> Worker["generated queue worker"]
   AgentBuilder --> Command["generated command"]
   AgentBuilder --> Stream["generated stream"]
-  Worker --> Harness["@purista/ai-harness session"]
+  Worker --> Harness["@purista/harness session"]
   Command --> Harness
   Stream --> Harness
   Harness --> InnerAgent["harness agent loop"]
@@ -91,29 +91,27 @@ Each attached agent uses exactly one execution definition:
 | Method | Use when |
 | --- | --- |
 | `setRunFunction(...)` | You want a typed PURISTA handler that calls harness model operations, PURISTA command tools, child agents, resources, queues, streams, and stores directly. |
-| `setHarnessAgent(...)` | You already have one reusable `@purista/ai-harness` agent definition and want PURISTA to expose it as a queue-backed service capability. |
-| `setHarnessWorkflow(...)` | You already have one reusable `@purista/ai-harness` workflow that coordinates multiple harness agents inside one session and sandbox. |
+| `setHarnessAgent(...)` | You already have one reusable `@purista/harness` agent definition and want PURISTA to expose it as a queue-backed service capability. |
+| `setHarnessWorkflow(...)` | You already have one reusable `@purista/harness` workflow that coordinates multiple harness agents inside one session and sandbox. |
 
 Start with `setRunFunction(...)` when you are building normal PURISTA application code. Use harness agent/workflow definitions when you want the lower-level harness loop or workflow semantics directly.
 
 ## Typical implementation order
 
-1. Import `@purista/ai-harness` once in the service module to register the AI builder extension.
-2. Create the service with `ServiceBuilder` from `@purista/core`.
-3. Add an agent builder with `getAgentQueueBuilder(agentName, description)`.
-4. Add payload, parameter, and output schemas.
-5. Declare model aliases with the smallest required capabilities.
-6. Declare command tools, child agents, skills, built-in tools, session policy, and sandbox policy as needed.
-7. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
-8. Add HTTP exposure, streaming mode, execution policy, or long-running response mode if needed.
-9. Add the attached agent definition to the service.
-10. Instantiate the service with `queueBridge` and `ai.models`.
-11. Test with `@purista/ai-harness/testing` fake providers before any live-provider smoke test.
+1. Create the service with `ServiceBuilder` from `@purista/core`.
+2. Add an agent builder with `getAgentQueueBuilder(agentName, description)`.
+3. Add payload, parameter, and output schemas.
+4. Declare model aliases with the smallest required capabilities.
+5. Declare command tools, child agents, skills, built-in tools, session policy, and sandbox policy as needed.
+6. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
+7. Add HTTP exposure, streaming mode, execution policy, or long-running response mode if needed.
+8. Add the attached agent definition to the service.
+9. Instantiate the service with `queueBridge` and `ai.models`.
+10. Test with `@purista/core` fake providers before any live-provider smoke test.
 
 ## Smallest useful agent
 
 ```ts
-import '@purista/ai-harness'
 import { ServiceBuilder } from '@purista/core'
 import { z } from 'zod'
 
@@ -186,7 +184,7 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
   },
 })
 
-await service.start()
+await supportService.start()
 ```
 
 Startup fails when:

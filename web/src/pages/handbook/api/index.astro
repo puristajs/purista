@@ -1,0 +1,94 @@
+---
+import HandbookCard from '../../../components/handbook/HandbookCard.astro'
+import CodeBlock from '../../../components/ui/CodeBlock.astro'
+import { getApiOverview } from '../../../lib/api-docs'
+import { getSidebarItems } from '../../../data/handbook'
+import HandbookLayout from '../../../layouts/HandbookLayout.astro'
+
+const overview = getApiOverview()
+const sidebar = getSidebarItems()
+const headings = [
+	{ depth: 2, slug: 'packages', text: 'Packages' },
+	...overview.groups.map(group => ({ depth: 2, slug: group.route, text: group.title })),
+]
+
+const quickExample = `import { ServiceBuilder } from '@purista/core'
+
+const service = new ServiceBuilder({
+  serviceName: 'account',
+  serviceVersion: '1',
+  serviceDescription: 'Account capability',
+})`
+---
+
+<HandbookLayout
+  title="API Documentation"
+  description="Handbook-native API reference generated from the public PURISTA TypeScript packages."
+  sidebar={sidebar}
+  currentId="api"
+  headings={headings}
+  prose={false}
+>
+  <section class="api-hero">
+    <p class="api-eyebrow">API Reference</p>
+    <h1>Public PURISTA API</h1>
+    <p class="api-lede">
+      Generated from TypeDoc and rendered inside the handbook shell. Use this
+      section when you know the PURISTA concept and need package exports,
+      method signatures, source links, and public TypeScript contracts.
+    </p>
+    <div class="api-stats" aria-label="API documentation summary">
+      <span><strong>{overview.packages.length}</strong> packages</span>
+      <span><strong>{overview.totalExports}</strong> exports</span>
+      <span><strong>{overview.groups.length}</strong> symbol groups</span>
+    </div>
+  </section>
+
+  <div class="api-intro-grid">
+    <div class="api-intro-copy">
+      <h2 id="packages">Packages</h2>
+      <p>
+        Start with a package when you are wiring runtime infrastructure, stores,
+        bridges, adapters, or core builders. The package pages keep the same
+        handbook navigation and link onward to classes, interfaces, functions,
+        types, and enums.
+      </p>
+    </div>
+    <CodeBlock code={quickExample} language="typescript" filename="service.ts" />
+  </div>
+
+  <div class="api-card-grid">
+    {overview.packages.map(pkg => (
+      <HandbookCard
+        title={pkg.name}
+        description={pkg.summary || 'Public exports and TypeScript contracts for this PURISTA package.'}
+        icon="api"
+        href={pkg.href}
+        color="pilot"
+      />
+    ))}
+  </div>
+
+  {overview.groups.map(group => (
+    <section id={group.route} class="api-section">
+      <div class="api-section-head">
+        <h2>{group.title}</h2>
+        <p>{group.items.length} public {group.items.length === 1 ? 'symbol' : 'symbols'}</p>
+      </div>
+      <div class="api-symbol-list">
+        {group.items.slice(0, 36).map(item => (
+          <a class="api-symbol-card" href={item.href}>
+            <span class="api-symbol-main">
+              <span class="api-symbol-name">{item.name}</span>
+              <span class="api-symbol-package">{item.packageName}</span>
+            </span>
+            {item.summary && <span class="api-symbol-summary">{item.summary}</span>}
+          </a>
+        ))}
+      </div>
+      {group.items.length > 36 && (
+        <p class="api-more">Showing the first 36 entries. Use package pages to browse the full export set.</p>
+      )}
+    </section>
+  ))}
+</HandbookLayout>

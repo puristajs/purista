@@ -41,7 +41,7 @@
 		"@inquirer/input": "^5.1.0",
 		"@inquirer/select": "^5.2.0",
 		"code-block-writer": "^13.0.3",
-		"commander": "^14.0.3",
+		"commander": "^15.0.0",
 		"sinon": "^22.0.0",
 		"ts-morph": "^28.0.0",
 		"zod": "^4.4.3"

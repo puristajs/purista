@@ -1,0 +1,24 @@
+---
+import '../styles/site.css'
+import Nav from '../components/landing/Nav.astro'
+import BaseLayout from './BaseLayout.astro'
+
+interface Props {
+	title: string
+	description?: string
+}
+
+const { title, description } = Astro.props
+---
+
+<BaseLayout title={`${title} | PURISTA`} description={description} siteShell>
+  <Nav />
+  <main class="min-h-screen pt-[96px] pb-20">
+    <article class="prose max-w-3xl mx-auto px-6">
+      <slot />
+    </article>
+  </main>
+  <script>
+    import '../scripts/handbook-client.ts';
+  </script>
+</BaseLayout>

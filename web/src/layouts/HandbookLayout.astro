@@ -1,7 +1,8 @@
 ---
-import Navigation from '../components/ui/Navigation'
+import '../styles/site.css'
+import Nav from '../components/landing/Nav.astro'
 import type { SidebarItem } from '../lib/sidebar'
-import Layout from './Layout.astro'
+import BaseLayout from './BaseLayout.astro'
 
 interface Props {
 	title: string
@@ -13,6 +14,9 @@ interface Props {
 }
 
 const { title, description, sidebar = [], currentId = '', headings = [], prose = true } = Astro.props
+const pageTitle = title === 'PURISTA Handbook' ? title : `${title} | PURISTA Handbook`
+const handbookPath = Astro.url.pathname.replace(/\/$/, '')
+const markdownUrl = handbookPath === '/handbook' ? '/handbook.md' : `${handbookPath}.md`
 
 function isActive(item: SidebarItem, id: string): boolean {
 	const itemBase = item.id.replace(/\/index$/, '')
@@ -36,17 +40,18 @@ function isParentActive(item: SidebarItem, id: string): boolean {
 }
 
 function getItemHref(item: SidebarItem): string {
+	if (item.href) return item.href
 	const base = item.id.replace(/\/index$/, '')
 	if (base === '') return '/handbook/'
 	return `/handbook/${base}`
 }
 ---
 
-<Layout title={`${title} | PURISTA Handbook`} description={description}>
-  <div class="h-screen flex flex-col overflow-hidden">
-    <Navigation client:load />
+<BaseLayout title={pageTitle} description={description} siteShell markdownUrl={markdownUrl}>
+  <Nav active="handbook" />
 
-    <div class="flex flex-1 overflow-hidden">
+  <div class="h-screen flex flex-col overflow-hidden pt-[72px]">
+    <div class="flex flex-1 min-h-0 overflow-hidden">
       {/* Sidebar */}
       <aside class="hidden lg:block w-64 shrink-0 border-r border-[var(--color-line)] overflow-y-auto" style="background: var(--color-bg)">
         <div class="px-4 py-6">
@@ -149,4 +154,4 @@ function getItemHref(item: SidebarItem): string {
   <script>
     import '../scripts/handbook-client.ts';
   </script>
-</Layout>
+</BaseLayout>

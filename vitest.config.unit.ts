@@ -15,7 +15,7 @@ export default defineConfig({
 		coverage: {
 			enabled: false,
 			include: ['**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-			exclude: ['examples/**', 'packages/cli/**', 'website:/**'],
+			exclude: ['examples/**', 'packages/cli/**'],
 			thresholds: {
 				lines: 63,
 				functions: 63,
@@ -30,7 +30,6 @@ export default defineConfig({
 			'**/node_modules/**',
 			'**/dist/**',
 			'examples/ai-basic/src/frontend/**',
-			'website/**',
 		],
 	},
 })
