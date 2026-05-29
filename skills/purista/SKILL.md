@@ -23,6 +23,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Start from business capabilities and ownership boundaries, not package names or routes.
 - Use the PURISTA CLI whenever it can generate the target artifact; refine generated code instead of hand-writing the skeleton.
 - For a new app, start with `npm create purista@latest` or `purista init <target>` and use deterministic `purista init ... --non-interactive --defaults` flags for agentic setup.
+- Generated PURISTA apps are ESM-only. Do not offer, document, or scaffold CommonJS variants.
 - Keep schemas explicit on every boundary. Prefer consumer-local schemas over one oversized shared schema.
 - Keep external systems behind resources or runtime bindings.
 - Treat tenant isolation, authorization, auditability, and data minimization as architecture requirements, not handler details.

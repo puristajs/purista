@@ -41,6 +41,7 @@ Use this checklist when creating or updating a skill.
 - Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)` and `AgentQueueBuilder.defineMetric(...)`
 - Handler guidance uses typed `context.metrics` and does not expose raw metric recording
 - AI guidance states that `@purista/harness` owns GenAI, model, token, and tool metrics
+- CLI, starter, and `create-purista` guidance treats generated PURISTA apps as ESM-only and contains no CommonJS scaffold option, template, or docs
 - Security guidance treats tenant isolation, authorization guards, data minimization, secret handling, PII redaction, prompt/completion privacy, least-privilege resources, and auditability as first-class architecture requirements
 - Examples do not leak secrets, tokens, PII, prompts, completions, headers, raw payloads, attachments, or tenant/user identifiers into logs, metrics, traces, events, generated fixtures, or model calls without explicit policy
 - Related skill links exist where they help the model navigate prerequisite or next-step concepts
@@ -64,6 +65,7 @@ Use this checklist when creating or updating a skill.
 - Active specs aligned with implementation
 - `starter` aligned when defaults or generated app shape changed
 - `create-purista` aligned when scaffolding or templates changed
+- ESM-only scaffolding stays aligned across `purista`, `starter`, `create-purista`, public docs, and installed skill mirrors
 - `voyage` aligned when framework capability assumptions changed
 - Public docs updated when guidance or migration expectations changed
 - Known planning-doc drift is documented outside the skill when an old draft disagrees with implemented public APIs

@@ -68,12 +68,7 @@ export const resolveProjectBlueprints = (
 		addBlueprint(selectedBlueprints, seen, 'linter-biome', context)
 	}
 	if (context.linter === 'eslint') {
-		addBlueprint(
-			selectedBlueprints,
-			seen,
-			context.type === 'commonjs' ? 'linter-eslint-commonjs' : 'linter-eslint-module',
-			context,
-		)
+		addBlueprint(selectedBlueprints, seen, 'linter-eslint-module', context)
 	}
 
 	const conflicts: string[] = []

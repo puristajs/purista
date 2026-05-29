@@ -8,7 +8,7 @@ order: 101000
 
 In this quickstart step, you create a new project with the PURISTA CLI blueprint engine.
 The generator resolves a local project blueprint based on your runtime, event bridge, HTTP server,
-linting, and module-format choices, then writes a coherent project skeleton for that setup.
+and linting choices, then writes an ESM project skeleton for that setup.
 
 ## Create a new project
 
@@ -49,7 +49,6 @@ purista init my-app \
   --webserver \
   --linter biome \
   --formatter biome \
-  --type module \
   --package-manager npm \
   --non-interactive \
   --defaults \
@@ -74,7 +73,7 @@ Choose the options that fit your runtime and deployment setup:
 - `event bridge`: `default`, `amqp`, `mqtt`, `nats`, or `dapr`
 - `webserver`: add the bundled Hono-based HTTP surface when needed
 - `linter`: `biome`, `eslint`, or `none`
-- `module type`: `module` or `commonjs`
+- generated projects are ESM-only and always use `"type": "module"`
 
 After setup, generate services and business artifacts with the CLI:
 

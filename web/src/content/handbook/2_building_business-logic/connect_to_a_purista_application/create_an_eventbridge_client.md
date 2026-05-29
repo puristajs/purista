@@ -54,7 +54,7 @@ import { ClientBuilder } from '@purista/core'
 const clientBuilder = new ClientBuilder({
   definitionPath: './definitions',
   outputPath: './dist',
-  buildAs: 'both',
+  buildAs: 'esm',
   eventBridgeClient: {
     clientName: 'EventBridgeClient',
   },

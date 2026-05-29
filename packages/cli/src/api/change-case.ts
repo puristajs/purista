@@ -1,7 +1,7 @@
 /**
  * Copied from https://github.com/blakeembrey/change-case/blob/main/packages/change-case/src/index.ts
  *
- * Reason: create the cli in commonjs
+ * Reason: keep CLI casing helpers local and dependency-free.
  */
 
 // Regexps involved with splitting words in various case formats.

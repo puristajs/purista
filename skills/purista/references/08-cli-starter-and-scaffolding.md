@@ -26,7 +26,6 @@ purista init my-app \
   --webserver \
   --linter biome \
   --formatter biome \
-  --type module \
   --package-manager npm \
   --non-interactive \
   --defaults \
@@ -53,8 +52,9 @@ Supported init choices are:
 - `useWebserver`: generate the Hono HTTP surface and `public/`
 - `linter`: `biome`, `eslint`, or `none`
 - `formatter`: `biome`, `prettier`, or `none`
-- `type`: `module` or `commonjs`
 - `packageManager`: `npm`, `bun`, `pnpm`, or `yarn`
+
+Generated PURISTA projects are ESM-only and always use `"type": "module"`.
 
 ## Agentic Scaffolding Flow
 When an AI agent is creating a new PURISTA app, it should keep the workflow deterministic:

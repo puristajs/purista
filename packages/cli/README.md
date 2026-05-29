@@ -64,7 +64,6 @@ const plan = planProjectGeneration({
   eventConvention: 'dotCase',
   linter: 'biome',
   formatter: 'biome',
-  type: 'module',
   packageManager: 'npm',
   installDependencies: false,
 })

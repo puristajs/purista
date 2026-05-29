@@ -84,7 +84,6 @@ describe('createPuristaCliEngine', () => {
 			eventConvention: 'dotCase',
 			linter: 'biome',
 			formatter: 'biome',
-			type: 'module',
 			packageManager: 'npm',
 			installDependencies: false,
 		})
@@ -95,5 +94,29 @@ describe('createPuristaCliEngine', () => {
 		expect(readFileSync(join(TEST_DIR, 'my-app', 'src', 'eventbridge.ts'), 'utf-8')).toContain('DefaultEventBridge')
 		expect(readFileSync(join(TEST_DIR, 'my-app', 'src', 'http.ts'), 'utf-8')).toContain('getHttpServer')
 		expect(readFileSync(join(TEST_DIR, 'my-app', 'purista.json'), 'utf-8')).toContain('"eventBridge": "default"')
+	})
+
+	it('rejects legacy CommonJS project generation input', async () => {
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-init-'))
+		const engine = createPuristaCliEngine({
+			cwd: TEST_DIR,
+			mode: 'non-interactive',
+		})
+
+		await expect(
+			engine.runPuristaCommand('init-project', {
+				target: 'my-app',
+				runtime: 'node',
+				eventBridge: 'default',
+				useWebserver: false,
+				fileConvention: 'camel',
+				eventConvention: 'dotCase',
+				linter: 'biome',
+				formatter: 'biome',
+				type: 'commonjs',
+				packageManager: 'npm',
+				installDependencies: false,
+			}),
+		).rejects.toBeInstanceOf(PuristaCliValidationError)
 	})
 })

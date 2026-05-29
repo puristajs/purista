@@ -14,7 +14,6 @@ describe('resolveProjectBlueprints', () => {
 			eventConvention: 'dotCase',
 			linter: 'eslint',
 			formatter: 'prettier',
-			type: 'commonjs',
 			packageManager: 'npm',
 			installDependencies: false,
 		})
@@ -24,7 +23,7 @@ describe('resolveProjectBlueprints', () => {
 			'runtime-node',
 			'bridge-amqp',
 			'http-node',
-			'linter-eslint-commonjs',
+			'linter-eslint-module',
 		])
 		expect(resolution.conflicts).toEqual([])
 		expect(resolution.warnings).toEqual([])
@@ -41,7 +40,6 @@ describe('resolveProjectBlueprints', () => {
 			eventConvention: 'dotCase',
 			linter: 'biome',
 			formatter: 'biome',
-			type: 'module',
 			packageManager: 'npm',
 			installDependencies: false,
 		})
@@ -66,7 +64,6 @@ describe('planProjectGeneration', () => {
 				eventConvention: 'dotCase',
 				linter: 'biome',
 				formatter: 'biome',
-				type: 'module',
 				packageManager: 'bun',
 				installDependencies: false,
 			},

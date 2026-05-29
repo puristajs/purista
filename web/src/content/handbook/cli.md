@@ -70,7 +70,7 @@ pnpm add -g @purista/cli
 
 ## Project scaffolding
 
-The CLI guides you through runtime, event bridge, HTTP server, linter, and module-format choices. The result is a coherent project skeleton ready for development.
+The CLI guides you through runtime, event bridge, HTTP server, and linter choices. The result is an ESM project skeleton ready for development.
 
 ```bash
 purista init my-app
@@ -87,7 +87,6 @@ purista init my-app \
   --webserver \
   --linter biome \
   --formatter biome \
-  --type module \
   --package-manager npm \
   --non-interactive \
   --defaults \
@@ -105,7 +104,6 @@ Non-interactive mode never prompts. It applies only declared defaults and fails 
 | `webserver` | flag | off | Include Hono-based HTTP server |
 | `linter` | `biome`, `eslint`, `none` | `none` | Code linter |
 | `formatter` | `biome`, `prettier`, `none` | `none` | Code formatter |
-| `type` | `module`, `commonjs` | `module` | Module system |
 
 ## Generating business artifacts
 
