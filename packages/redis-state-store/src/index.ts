@@ -1,34 +1,19 @@
 /**
- * A state store for using redis as storage.
- * State values are stored as stringified JSON.
+ * Redis adapter for PURISTA state values.
  *
- * Per default, setting/changing and removal of values are enabled.
+ * Values are stored as JSON strings in Redis and no local value cache is added.
+ * Use tenant-aware key prefixes, minimize sensitive state, and configure
+ * authenticated/TLS Redis endpoints for shared environments.
  *
  * @example
  * ```typescript
- * const config = {
- *  enableGet: true, // optional, default is true
- *  enableRemove: true, // optional, default is true
- *  enableSet: true, // optional, default is true
- *  url: 'redis://alice:foobared@awesome.redis.server:6379'
- * }
+ * const store = new RedisStateStore({
+ *   config: { url: 'redis://localhost:6379' },
+ * })
  *
- * const store = new RedisStateStore(config)
- *
- * await store.setState('stateKey',{ myState: 'value' })
- *
- * let value = await store.getState('stateKey')
- * console.log(value) // outputs: { myState: 'value' }
- *
- * await store.removeState('stateKey')
- *
- * value = await store.getState('stateKey')
- * console.log(value) // outputs: undefined
+ * await store.setState('tenant:acme:prod:cart:session-123', { step: 'shipping' })
+ * const state = await store.getState('tenant:acme:prod:cart:session-123')
  * ```
- *
- * See documentation of underlaying redis lib package for detailed configuration options.
- *
- * @see [NODE-REDIS](https://redis.js.org)
  *
  * @module
  */

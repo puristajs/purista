@@ -26,6 +26,13 @@ import { serializeOtpToMqtt } from '../serializeOtpToMqtt.impl.js'
 import { getTopicName } from '../topic/getTopicName.impl.js'
 import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
+/**
+ * Creates an MQTT command handler for a PURISTA command address.
+ *
+ * The handler decodes JSON command messages, invokes the registered callback,
+ * and publishes a correlated response. MQTT does not provide bridge-managed
+ * command retry or dead-letter behavior.
+ */
 export const getCommandHandler = (
 	address: EBMessageAddress,
 	cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,

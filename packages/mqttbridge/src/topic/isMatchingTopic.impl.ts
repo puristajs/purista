@@ -1,9 +1,10 @@
 /**
- * Checks if a given topic is matching against a subscription pattern
+ * Checks whether an MQTT topic matches a subscription pattern.
+ *
+ * Supports MQTT `+` single-level and `#` multi-level wildcards.
  *
  * @param input the real full topic
  * @param pattern the topic subscription pattern
- * @returns
  */
 export const isMatchingTopic = (input: string, pattern: string) => {
 	const inputArray = input.split('/')

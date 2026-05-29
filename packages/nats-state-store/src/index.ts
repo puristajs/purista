@@ -1,26 +1,21 @@
 /**
-A state store for using NATS (with JetStream) as storage.  
-
-@example 
-```typescript
-const config = {
-  port: 8222
-}
-
-const store = new NatsStateStore(config)
-
-await store.setState('stateKey',{ myState: 'value' })
-
-let value = await store.getState('stateKey')
-console.log(value) // outputs: { stateKey: { myState: 'value' } }
-
-await store.removeState('stateKey')
-
-value = await store.getState('stateKey')
-console.log(value) // outputs: undefined
-
-```
-@module
+ * NATS JetStream key-value adapter for PURISTA state values.
+ *
+ * JetStream must be enabled. Values are encoded with `JSONCodec`; use
+ * tenant-aware keys, minimize sensitive state, and configure NATS credentials
+ * through connection options or the runtime environment.
+ *
+ * @example
+ * ```typescript
+ * const store = new NatsStateStore({
+ *   servers: 'nats://localhost:4222',
+ *   keyValueStoreName: 'purista-state-store',
+ * })
+ *
+ * const state = await store.getState('tenant.acme.prod.cart.session-123')
+ * ```
+ *
+ * @module
  */
 export * from './NatsStateStore.impl.js'
 export * from './types/index.js'

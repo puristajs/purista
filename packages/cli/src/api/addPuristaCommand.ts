@@ -12,19 +12,27 @@ import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
 /**
- * Add all folders and files for a new command to an existing PURISTA service.
+ * Add a command to an existing PURISTA service version.
+ *
+ * Generates `types.ts`, `schema.ts`, a command builder, a command test, and
+ * appends the command definition to the service composition file.
  */
 export const addPuristaCommand = async (input: {
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
+	/** Human-readable command description used by `getCommandBuilder`. */
 	commandDescription: string
+	/** Logical command name, for example `create user`. */
 	commandName: string
+	/** Event name this command subscribes to, when command triggering is event based. */
 	eventToSubscribe?: string
+	/** Success event emitted by the generated command. */
 	responseEventName?: string
 	serviceName: string
 	serviceVersion: string
 	codeWriterOptions?: Partial<Options>
 	puristaProject: PuristaProjectInfo
+	/** Queue contracts that the generated command may enqueue through `context.queue.enqueue`. */
 	enqueues?: {
 		queueName: string
 		schemaFilePath: string

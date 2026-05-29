@@ -1,5 +1,8 @@
 import type { SpanContext } from '@opentelemetry/api'
 
+/**
+ * Adds OpenTelemetry span identifiers to structured HTTP log fields.
+ */
 export function createHttpLogFields(
 	fields: Record<string, unknown>,
 	spanContext: SpanContext,

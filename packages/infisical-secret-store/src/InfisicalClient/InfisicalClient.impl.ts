@@ -8,7 +8,14 @@ import type { Secret } from './types/Secret.js'
 import type { TokenData } from './types/TokenData.js'
 
 /**
- * The internal http client to connect to the Infisical server.
+ * HTTP client for the Infisical API used by `InfisicalSecretStore`.
+ *
+ * The client derives the project encryption key from the configured service
+ * token and decrypts secret values before returning them. Treat the bearer token,
+ * token data, project key, encrypted payloads, and decrypted values as secrets.
+ *
+ * Most applications should use `InfisicalSecretStore` instead of this lower-level
+ * client so PURISTA store permissions and caching are applied consistently.
  */
 export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	private serviceTokenSecret: string
@@ -28,6 +35,12 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 		return tokenSecret
 	}
 
+	/**
+	 * Creates an Infisical API client.
+	 *
+	 * @param conf HTTP client configuration with a required Infisical service token
+	 * in `bearerToken`.
+	 */
 	constructor(conf: ClientConfig) {
 		const config = {
 			name: 'InfisicalClient',
@@ -43,7 +56,7 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	}
 
 	/**
-	 * Encrypt the given key, value and optional comment
+	 * Encrypts an Infisical secret key, value, and optional comment for API writes.
 	 */
 	private encryptSecret(secretKey: string, secretValue: string, secretComment = '') {
 		const {
@@ -87,7 +100,10 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	}
 
 	/**
-	 * Fetches the token data from the server for given access token
+	 * Fetches service-token metadata and decrypts the project key for later calls.
+	 *
+	 * The returned token data contains sensitive account and encrypted key
+	 * metadata; do not log it.
 	 */
 	async getServiceTokenData() {
 		this.tokenData = await this.get<TokenData>('/api/v2/service-token')
@@ -103,7 +119,11 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	}
 
 	/**
-	 * Get a single secret
+	 * Reads and decrypts a single shared Infisical secret.
+	 *
+	 * Returns `undefined` when Infisical reports that the secret does not exist.
+	 *
+	 * @param name Secret name as stored in Infisical.
 	 */
 	async getSecret(name: string) {
 		if (!this.tokenData) {
@@ -142,8 +162,13 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	}
 
 	/**
-	 * Set a secret.
-	 * It will first try to update and if the secret does not exist, it will create a new one
+	 * Creates or updates a shared Infisical secret.
+	 *
+	 * The method first attempts an update and falls back to create when Infisical
+	 * reports that the secret does not exist.
+	 *
+	 * @param name Secret name as stored in Infisical.
+	 * @param value Plaintext secret value to encrypt before sending.
 	 */
 	async setSecret(name: string, value: string) {
 		if (!this.tokenData) {
@@ -184,7 +209,9 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	}
 
 	/**
-	 * Remove a secret
+	 * Removes a shared Infisical secret from the token's first environment scope.
+	 *
+	 * @param name Secret name as stored in Infisical.
 	 */
 	async removeSecret(name: string) {
 		if (!this.tokenData) {

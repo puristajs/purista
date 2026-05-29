@@ -18,15 +18,22 @@ import type { Subscription } from '../../types/subscription/Subscription.js'
 import type { EventBridgeCapabilities } from './EventBridgeCapabilities.js'
 
 /**
- * Event bridge interface
- * The event bridge must implement this interface.
+ * Event transport adapter contract used by PURISTA services.
+ *
+ * Event bridges route commands, command responses, events, subscriptions, and
+ * streams. Adapters must expose their real reliability behavior through
+ * {@link EventBridge.capabilities}; service definitions use those flags for
+ * strict capability validation at startup.
  *
  * @group Event bridge
  */
 export interface EventBridge {
+	/** Human-readable bridge name used in logs, traces, and metrics. */
 	readonly name: string
+	/** Runtime capability matrix used for strict startup validation. */
 	readonly capabilities: EventBridgeCapabilities
 
+	/** Stable runtime instance id used to distinguish bridge processes. */
 	readonly instanceId: string
 	/**
 	 * The default time until when a command invocation automatically returns a time out error
@@ -39,13 +46,22 @@ export interface EventBridge {
 	start(): Promise<void>
 
 	/**
-	 * Emit a message to the eventbridge without awaiting a result
+	 * Emit a message to the event bridge without awaiting a result.
+	 *
+	 * The bridge adds transport metadata such as message id, timestamp, and
+	 * correlation id. Payloads should already be minimized and schema-validated
+	 * by the caller or service runtime.
+	 *
 	 * @param message the message
 	 */
 	emitMessage(message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>): Promise<Readonly<EBMessage>>
 
 	/**
 	 * Call a command of a service and return the result of this command
+	 *
+	 * Late responses after timeout are handled according to bridge capability,
+	 * commonly ignored with a warning to avoid resolving stale callers.
+	 *
 	 * @param input a partial command message
 	 * @param ttl the time to live (timeout) of the invocation
 	 */
@@ -53,7 +69,10 @@ export interface EventBridge {
 
 	/**
 	 * Open a stream invocation.
-	 * The returned handle can be consumed via async iteration and can be cancelled by caller.
+	 *
+	 * The returned handle can be consumed via async iteration and can be
+	 * cancelled by caller. Late frames after timeout are handled according to
+	 * bridge capability.
 	 */
 	openStream<Chunk = unknown, Final = unknown>(
 		input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
@@ -61,6 +80,7 @@ export interface EventBridge {
 	): Promise<StreamHandle<Chunk, Final>>
 
 	/**
+	 * Register a command handler for a service target.
 	 *
 	 * @param address the address of the service command (service name, version and command name)
 	 * @param cb the function to be called if a matching command arrives
@@ -77,7 +97,7 @@ export interface EventBridge {
 	): Promise<string>
 
 	/**
-	 * Register a service stream.
+	 * Register a service stream handler for a service target.
 	 */
 	registerStream(
 		address: EBMessageAddress,
@@ -98,7 +118,12 @@ export interface EventBridge {
 	unregisterStream(address: EBMessageAddress): Promise<void>
 
 	/**
-	 * Register a new subscription
+	 * Register a new subscription.
+	 *
+	 * Subscription failure semantics depend on the bridge capabilities and the
+	 * subscription definition. Strict failure handling should fail startup when
+	 * the bridge cannot honor it.
+	 *
 	 * @param subscription the subscription definition
 	 * @param cb the function to be called if a matching message arrives
 	 */
@@ -108,8 +133,9 @@ export interface EventBridge {
 	): Promise<string>
 
 	/**
+	 * Unregister a subscription.
 	 *
-	 * @param address
+	 * @param address subscription address to remove
 	 */
 	unregisterSubscription(address: EBMessageAddress): Promise<void>
 

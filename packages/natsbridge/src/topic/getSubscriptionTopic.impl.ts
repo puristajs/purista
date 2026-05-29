@@ -2,8 +2,16 @@ import type { Subscription } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
 import type { INatsBridge } from '../types/INatsBridge.js'
 
+/**
+ * Function signature for building a NATS subscription subject filter.
+ */
 export type GetSubscriptionTopicFn = (this: INatsBridge, subscription: Subscription) => string
 
+/**
+ * Builds the NATS subject filter for a PURISTA subscription definition.
+ *
+ * Unspecified subscription fields become NATS `*` wildcards.
+ */
 export const getSubscriptionTopic: GetSubscriptionTopicFn = function (subscription) {
 	return [
 		this.config.topicPrefix,

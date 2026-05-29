@@ -27,9 +27,13 @@ import type { HttpClientRequestOptions } from './types/HttpClientRequestOptions.
 import type { RestClient } from './types/RestClient.js'
 
 /**
- * A HTTP client which will provide simple methods for GET, POST, PATCH, PUT and DELETE.
- * Body payload will be handled as JSON requests
- * It includes timeout and error handling and simple json response body parsing
+ * HTTP client with JSON helpers, timeout handling, tracing, metrics, and normalized errors.
+ *
+ * Request bodies are serialized as JSON unless a string payload is provided.
+ * The client records low-cardinality HTTP metrics and OpenTelemetry spans; it
+ * does not include request/response payloads in metric attributes. Avoid
+ * placing secrets in URLs or custom headers that may be captured by external
+ * telemetry processors.
  *
  * @example
  * ```typescript
@@ -40,15 +44,22 @@ import type { RestClient } from './types/RestClient.js'
  * ```
  */
 export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObject> implements RestClient {
+	/** Client name used in logs, spans, and metrics. */
 	public name = 'HttpClient'
+	/** Logger scoped to this client. */
 	public logger: Logger
+	/** Resolved client configuration. */
 	public config: HttpClientConfig<CustomConfig>
 
+	/** Default request timeout in milliseconds. */
 	public timeout: number
 
+	/** Parsed base URL, when configured. */
 	public baseUrl: URL | undefined = undefined
 
+	/** Optional OpenTelemetry span processor configured for this client. */
 	spanProcessor: SpanProcessor | undefined
+	/** Node tracer provider owned by this client instance. */
 	traceProvider: NodeTracerProvider
 	private readonly metricsRecorder: PuristaMetricsRecorder
 
@@ -92,7 +103,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * Returns open telemetry tracer of this service
+	 * Returns OpenTelemetry tracer of this client.
 	 *
 	 * @returns Tracer
 	 */
@@ -101,7 +112,10 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * Start a child span for opentelemetry tracking
+	 * Start a child span for OpenTelemetry tracking.
+	 *
+	 * Exceptions are recorded on the span and re-thrown unchanged.
+	 *
 	 * @param name name of span
 	 * @param opts span options
 	 * @param context optional context
@@ -192,6 +206,10 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 
 	/**
 	 * Set the bearer token for all following requests.
+	 *
+	 * The token is stored in memory only and sent as an `Authorization` header.
+	 * Do not pass it through logs, query strings, or metric attributes.
+	 *
 	 * @param token the bearer token
 	 */
 	setBearerToken(token: string | undefined) {
@@ -320,7 +338,11 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * GET request
+	 * GET request.
+	 *
+	 * Parses JSON responses when the response content type starts with
+	 * `application/json`; otherwise returns response text.
+	 *
 	 * @param path
 	 * @param options
 	 * @returns
@@ -330,8 +352,10 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * POST request
+	 * POST request with an optional JSON payload.
+	 *
 	 * @param path
+	 * @param payload
 	 * @param options
 	 * @returns
 	 */
@@ -340,8 +364,10 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * PUT request
+	 * PUT request with an optional JSON payload.
+	 *
 	 * @param path
+	 * @param payload
 	 * @param options
 	 * @returns
 	 */
@@ -350,8 +376,10 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * PATCH request
+	 * PATCH request with an optional JSON payload.
+	 *
 	 * @param path
+	 * @param payload
 	 * @param options
 	 * @returns
 	 */
@@ -360,9 +388,11 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	/**
-	 * DELETE request
+	 * DELETE request.
+	 *
 	 * @param path
 	 * @param options
+	 * @param payload optional request body for APIs that accept DELETE bodies
 	 * @returns
 	 */
 	async delete<T>(path: string, options?: HttpClientRequestOptions, payload?: unknown): Promise<T> {

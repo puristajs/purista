@@ -15,12 +15,12 @@ limitations under the License.
 import type { DaprPubSubRuleType } from './DaprPubSubRuleType.type.js'
 
 /**
- * DaprPubSubRouteType Defines the rules for a route
+ * Rule-based Dapr Pub/Sub route configuration.
  */
 export type DaprPubSubRouteType = {
-	// The rule
+	/** Ordered route rules evaluated by Dapr. */
 	rules?: DaprPubSubRuleType[]
 
-	// The default path to use if no rule was matched
+	/** Default path used when no rule matches. */
 	default?: string
 }

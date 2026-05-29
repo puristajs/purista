@@ -13,51 +13,60 @@ import { createClient } from '@redis/client'
 import type { RedisStoreConfig } from './types.js'
 
 /**
- * A state store for using redis as storage.
- * State values are stored as stringified JSON.
+ * State store backed by Redis string keys.
  *
- * Per default, setting/changing and removal of values are enabled.
+ * State values are serialized with `JSON.stringify` before writing and parsed
+ * with `JSON.parse` on read. This store does not add a local in-memory cache;
+ * Redis is the source of truth for each operation.
+ *
+ * Use tenant-aware key prefixes to avoid collisions, for example
+ * `tenant:acme:prod:cart:session-123`. State can contain sensitive data, so use
+ * data minimization, short retention where possible, and TLS/authenticated Redis
+ * endpoints in shared environments.
+ *
+ * The Redis connection is opened lazily on the first operation and closed by
+ * `destroy()`.
  *
  * @example
  * ```typescript
- * const config = {
- *  enableGet: true, // optional, default is true
- *  enableRemove: true, // optional, default is true
- *  enableSet: true, // optional, default is true
- *  url: 'redis://alice:foobared@awesome.redis.server:6379'
- * }
+ * const store = new RedisStateStore({
+ *   config: { url: 'redis://localhost:6379' },
+ * })
  *
- * const store = new RedisStateStore({ config })
- *
- * await store.setState('stateKey',{ myState: 'value' })
- *
- * let value = await store.getState('stateKey')
- * console.log(value) // outputs: { stateKey: { myState: 'value' } }
- *
- * await store.removeState('stateKey')
- *
- * value = await store.getState('stateKey')
- * console.log(value) // outputs: undefined
+ * await store.setState('tenant:acme:prod:cart:session-123', { step: 'shipping' })
+ * const state = await store.getState('tenant:acme:prod:cart:session-123')
+ * await store.destroy()
  * ```
  *
- * See documentation of underlaying redis lib package for detailed configuration options.
- *
- * @see [NODE-REDIS](https://redis.js.org)
- *
+ * @see [node-redis](https://redis.js.org)
  */
 export class RedisStateStore<
 	M extends RedisModules = RedisModules,
 	F extends RedisFunctions = RedisFunctions,
 	S extends RedisScripts = RedisScripts,
 > extends StateStoreBaseClass<RedisStoreConfig<M, F, S>> {
+	/**
+	 * Redis client used by this store.
+	 *
+	 * The client is created during construction, connected lazily, and disconnected
+	 * by `destroy()`.
+	 */
 	public client: RedisClientType<M, F, S, RespVersions, TypeMapping>
 
+	/**
+	 * Creates a Redis-backed state store.
+	 *
+	 * @param config Store options and node-redis client configuration.
+	 */
 	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
 		super('RedisStateStore', { ...config })
 		this.client = createClient(this.config.config)
 		this.client.on('error', err => this.logger.error({ err }, 'Redis Client Error'))
 	}
 
+	/**
+	 * Returns an open Redis client, connecting it on demand.
+	 */
 	protected async getClient() {
 		if (this.client.isOpen) {
 			return this.client
@@ -111,6 +120,11 @@ export class RedisStateStore<
 		}
 	}
 
+	/**
+	 * Disconnects the Redis client if it is open.
+	 *
+	 * Call this during application shutdown to release sockets cleanly.
+	 */
 	async destroy() {
 		if (this.client.isOpen) {
 			await this.client.disconnect()

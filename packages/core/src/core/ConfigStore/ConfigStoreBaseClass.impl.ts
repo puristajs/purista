@@ -9,6 +9,12 @@ import type { ConfigStoreCacheMap } from './types/ConfigStoreCacheMap.js'
 
 /**
  * Base class for config store adapters.
+ *
+ * The base class enforces operation toggles before delegating to adapter
+ * implementations. Adapter authors should implement only the protected `*Impl`
+ * methods so capability checks, safe logging, and common error behavior stay
+ * consistent.
+ *
  * The actual store implementation must overwrite the protected methods:
  *
  * - `getConfigImpl`
@@ -20,11 +26,15 @@ import type { ConfigStoreCacheMap } from './types/ConfigStoreCacheMap.js'
  * @group Store
  */
 export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, unknown> = EmptyObject> {
+	/** Child logger scoped to the store name. */
 	logger: Logger
+	/** Store configuration including operation toggles and cache settings. */
 	config: StoreBaseConfig<ConfigStoreConfigType>
 
+	/** Store name used in logs and diagnostics. */
 	name: string
 
+	/** Optional local cache used by store implementations that opt in. */
 	cache: ConfigStoreCacheMap = new Map()
 
 	constructor(name: string, config: StoreBaseConfig<ConfigStoreConfigType>) {
@@ -55,6 +65,10 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 
 	/**
 	 * Returns the values for given config properties.
+	 *
+	 * Values may contain sensitive configuration. Avoid logging returned values
+	 * unless an application policy explicitly allows the exact fields.
+	 *
 	 * This function **SHOULD NOT** be overwritten by store implementation.
 	 * For implementation overwrite protected `getConfigImpl`
 	 *
@@ -82,6 +96,7 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 
 	/**
 	 * Removes the config item given by config name.
+	 *
 	 * This function **SHOULD NOT** be overwritten by store implementation.
 	 * For implementation overwrite protected `removeConfigImpl`
 	 *
@@ -107,7 +122,11 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 	protected abstract setConfigImpl(_configName: string, _configValue: unknown): Promise<void>
 
 	/**
-	 * Sets a config value
+	 * Sets a config value.
+	 *
+	 * Values are passed directly to the adapter. Do not emit raw values in
+	 * adapter logs, metrics, or traces.
+	 *
 	 * This function **SHOULD NOT** be overwritten by store implementation.
 	 * For implementation overwrite protected `setConfigImpl`
 	 *
@@ -125,6 +144,7 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 		return this.setConfigImpl(configName, configValue)
 	}
 
+	/** Shutdown hook for store adapters. */
 	async destroy() {
 		this.logger.info('stopped')
 	}

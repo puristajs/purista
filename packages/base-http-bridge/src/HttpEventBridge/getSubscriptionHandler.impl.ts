@@ -24,6 +24,14 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
+/**
+ * Creates the internal subscription route handler for event delivery.
+ *
+ * The handler accepts POST requests only, optionally unwraps CloudEvents, runs
+ * the subscription callback, and emits a follow-up message when the callback
+ * returns one. Subscription delivery is event reaction transport, not queue
+ * worker execution.
+ */
 export const getSubscriptionHandler = function (
 	this: IHttpEventBridge,
 	_subscription: Subscription,

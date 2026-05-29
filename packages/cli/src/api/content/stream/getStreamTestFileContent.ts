@@ -4,6 +4,7 @@ import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate a stream test that runs the builder through `createStreamTestHarness`. */
 export const getStreamTestFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

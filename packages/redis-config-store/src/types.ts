@@ -8,8 +8,17 @@ import type {
 } from '@redis/client'
 
 /**
- * The redis state store configuration.
- * It will extend the StoreBaseConfig.
+ * Redis config store backend configuration.
+ *
+ * The object is nested under PURISTA `StoreBaseConfig`, so pass Redis client
+ * options through the `config` property.
+ *
+ * @example
+ * ```typescript
+ * const store = new RedisConfigStore({
+ *   config: { url: 'redis://localhost:6379' },
+ * })
+ * ```
  */
 export type RedisStoreConfig<
 	M extends RedisModules = RedisModules,
@@ -18,5 +27,11 @@ export type RedisStoreConfig<
 	RESP extends RespVersions = RespVersions,
 	TYPE_MAPPING extends TypeMapping = TypeMapping,
 > = {
+	/**
+	 * node-redis client options passed to `createClient`.
+	 *
+	 * Use authenticated and encrypted connection settings for non-local
+	 * deployments. Avoid embedding credentials in source code.
+	 */
 	config?: RedisClientOptions<M, F, S, RESP, TYPE_MAPPING>
 }

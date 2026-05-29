@@ -5,40 +5,45 @@ import { InfisicalClient } from './InfisicalClient/InfisicalClient.impl.js'
 import type { InfisicalSecretConfig } from './types.js'
 
 /**
-A secret store for using [Infisical](https://infisical.com/) as storage.  
-
-For performance reasons, and to reduce costs, the secret values are cached in memory after first fetch.
-
-You can disable the whole caching via config by setting enableCache to false.  
-If the cache is enabled, you can set the ttl for cached secret values via config cacheTtl (in ms).  
-
-This will return the cached secret if available and if ttl is not exceeded.  
-If a secret value exceeds the ttl, it does not automatically get removed from cache.  
-It will be removed/overwritten on next get request.  
-
-@example
-* ```typescript
-const config = {
-  baseUrl: 'http://example.com'
-}
-
-const store = new InfisicalSecretStore( config )
-
-await store.setSecret('mySecret', 'value')
-
-let value = await store.getSecret('mySecret')
-console.log(value) // outputs: { mySecret: 'value' }
-
-await store.removeSecret('mySecret')
-
-value = await store.getSecret('mySecret')
-console.log(value) // outputs: undefined
-
-```
+ * Secret store backed by Infisical.
+ *
+ * Secret values are cached in memory after the first read to reduce Infisical
+ * API calls. Set `enableCache` to `false` to always read from Infisical, or set
+ * `cacheTtl` in milliseconds to bound cache reuse. Expired entries are refreshed
+ * on the next read.
+ *
+ * The underlying client uses an Infisical service token. Keep the bearer token
+ * in runtime secret management and never log token data, project keys, or secret
+ * values. Secret names should match your Infisical path strategy and include
+ * tenant/environment context when a project is shared, for example
+ * `ACME_PROD_PAYMENTS_API_TOKEN`.
+ *
+ * @example
+ * ```typescript
+ * const store = new InfisicalSecretStore({
+ *   bearerToken: process.env.INFISICAL_TOKEN ?? '',
+ *   baseUrl: 'https://app.infisical.com',
+ *   cacheTtl: 30_000,
+ * })
+ *
+ * await store.setSecret('ACME_PROD_PAYMENTS_API_TOKEN', 'placeholder-secret')
+ * const secret = await store.getSecret('ACME_PROD_PAYMENTS_API_TOKEN')
+ * ```
  */
 export class InfisicalSecretStore extends SecretStoreBaseClass<InfisicalSecretConfig> {
+	/**
+	 * Infisical HTTP client used by this store.
+	 *
+	 * Applications normally configure this through the constructor. Tests may
+	 * replace it with a compatible client.
+	 */
 	public client: InfisicalClient
 
+	/**
+	 * Creates an Infisical-backed secret store.
+	 *
+	 * @param config Store options plus Infisical client configuration.
+	 */
 	constructor(config: StoreBaseConfig<InfisicalSecretConfig>) {
 		super('InfisicalSecretStore', { enableCache: true, ...config })
 

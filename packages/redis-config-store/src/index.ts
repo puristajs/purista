@@ -1,34 +1,19 @@
 /**
- * A state store for using redis as storage.
- * Config values are stored as stringified JSON.
+ * Redis adapter for PURISTA config values.
  *
- * Per default, setting/changing and removal of values are enabled.
+ * Values are stored as JSON strings in Redis and no local value cache is added.
+ * Use tenant-aware key prefixes and authenticated/TLS Redis endpoints for shared
+ * environments.
  *
  * @example
  * ```typescript
- * const config = {
- *  enableGet: true, // optional, default is true
- *  enableRemove: true, // optional, default is true
- *  enableSet: true, // optional, default is true
- *  url: 'redis://alice:foobared@awesome.redis.server:6379'
- * }
+ * const store = new RedisConfigStore({
+ *   config: { url: 'redis://localhost:6379' },
+ * })
  *
- * const store = new RedisConfigStore(config)
- *
- * await store.setConfig('stateKey',{ myConfig: 'value' })
- *
- * let value = await store.getConfig('stateKey')
- * console.log(value) // outputs: { myConfig: 'value' }
- *
- * await store.removeConfig('stateKey')
- *
- * value = await store.getConfig('stateKey')
- * console.log(value) // outputs: undefined
+ * await store.setConfig('tenant:acme:prod:app:features', { checkout: true })
+ * const config = await store.getConfig('tenant:acme:prod:app:features')
  * ```
- *
- * See documentation of underlaying redis lib package for detailed configuration options.
- *
- * @see [NODE-REDIS](https://redis.js.org)
  *
  * @module
  */

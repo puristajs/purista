@@ -5,6 +5,7 @@ import type {
 } from '@purista/harness'
 import { z } from 'zod'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
+import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import type { PuristaMetricDefinition } from '../core/types/PuristaMetrics.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/index.js'
 import { QueueWorkerBuilder } from '../QueueWorkerBuilder/index.js'
@@ -32,7 +33,6 @@ import type {
 	AllowedCommandToolDefinition,
 	AnyAgentQueueBuilderTypes,
 	AttachedAgentDefinition,
-	SupportedHttpMethod,
 } from './types.js'
 
 const defaultExecutionPolicy = {
@@ -135,6 +135,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Add the payload schema used by the generated queue, command, stream, and agent handler. */
 	addPayloadSchema<PayloadSchema extends Schema>(schema: PayloadSchema) {
 		this.payloadSchema = schema
 		return this as unknown as AgentQueueBuilder<
@@ -152,6 +153,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Add the parameter schema used by the generated queue, command, stream, and agent handler. */
 	addParameterSchema<ParameterSchema extends Schema>(schema: ParameterSchema) {
 		this.parameterSchema = schema
 		return this as unknown as AgentQueueBuilder<
@@ -169,6 +171,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Add the final output schema returned by the agent command or aggregate stream response. */
 	addOutputSchema<OutputSchema extends Schema>(schema: OutputSchema) {
 		this.outputSchema = schema
 		return this as unknown as AgentQueueBuilder<
@@ -186,6 +189,17 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/**
+	 * Declare a model alias that must be bound when the owning service is instantiated.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.addModel('primary', {
+	 *   model: 'gpt-4.1-mini',
+	 *   capabilities: ['object'],
+	 * })
+	 * ```
+	 */
 	addModel<const Alias extends string, const Binding extends AgentModelBinding>(alias: Alias, binding: Binding) {
 		assertNonEmpty(alias, 'model alias')
 		this.models[alias] = binding
@@ -204,16 +218,29 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Declare named skill references the runtime can load for this agent. */
 	useSkills(names: readonly string[], resourceName?: string) {
 		this.skills.push({ names, resourceName })
 		return this
 	}
 
+	/** Restrict or disable harness built-in tools for this agent. */
 	useBuiltInTools(namesOrFalse: readonly BuiltinToolName[] | false) {
 		this.builtInTools = namesOrFalse
 		return this
 	}
 
+	/**
+	 * Allow the agent handler to call a PURISTA command through `context.invoke.tools`.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.canInvoke('billing', '1', 'getInvoice', {
+	 *   outputSchema: invoiceSchema,
+	 *   payloadSchema: invoiceLookupSchema,
+	 * })
+	 * ```
+	 */
 	canInvoke<
 		Output extends Schema,
 		Payload extends Schema,
@@ -251,6 +278,17 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/**
+	 * Allow this agent to call another attached agent through `context.invoke.agents`.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.canInvokeAgent('summarizeTicket', '1', {
+	 *   payloadSchema: ticketSchema,
+	 *   outputSchema: summarySchema,
+	 * })
+	 * ```
+	 */
 	canInvokeAgent<
 		Output extends Schema,
 		Payload extends Schema,
@@ -284,6 +322,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Use a provider-neutral `@purista/harness` agent definition as this agent's execution. */
 	setHarnessAgent(
 		this: AgentQueueBuilder<
 			AgentQueueBuilderTypes<
@@ -317,6 +356,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Use a provider-neutral `@purista/harness` workflow definition as this agent's execution. */
 	setHarnessWorkflow(
 		this: AgentQueueBuilder<
 			AgentQueueBuilderTypes<
@@ -350,6 +390,17 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/**
+	 * Use a plain async run function as this agent's execution.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setRunFunction(async context => {
+	 *   context.metrics['app.agent.runs'].add(1)
+	 *   return { answer: `Ticket ${context.payload.ticketId} queued` }
+	 * })
+	 * ```
+	 */
 	setRunFunction(
 		this: AgentQueueBuilder<
 			AgentQueueBuilderTypes<
@@ -392,6 +443,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
+	/** Merge queue worker execution policy for the generated agent worker and queue. */
 	setExecutionPolicy(policy: AgentExecutionPolicy) {
 		this.executionPolicy = { ...this.executionPolicy, ...policy }
 		return this
@@ -439,16 +491,32 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
+	/** Configure harness session behavior for this attached agent. */
 	setSessionPolicy(policy: AgentSessionPolicy) {
 		this.sessionPolicy = policy
 		return this
 	}
 
+	/** Attach sandbox configuration consumed by compatible agent runtimes. */
 	setSandboxPolicy(policy: AgentSandboxPolicy) {
 		this.sandboxPolicy = policy
 		return this
 	}
 
+	/**
+	 * Expose the generated agent command or stream as an HTTP endpoint.
+	 *
+	 * Use `streamingMode: 'aggregate'` to expose the command projection and
+	 * `streamingMode: 'stream'` to expose the stream projection.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.exposeAsHttpEndpoint('POST', 'support/triage', {
+	 *   streamingMode: 'aggregate',
+	 *   responseContentType: 'application/json',
+	 * })
+	 * ```
+	 */
 	exposeAsHttpEndpoint(
 		method: SupportedHttpMethod,
 		path: string,
@@ -461,11 +529,13 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
+	/** Choose whether the generated HTTP projection streams chunks or returns an aggregate response. */
 	setStreamingMode(mode: 'stream' | 'aggregate') {
 		this.streamingMode = mode
 		return this
 	}
 
+	/** Mark the generated HTTP endpoint public in OpenAPI/security metadata. */
 	makeEndpointPublic() {
 		this.httpExposure = {
 			...(this.httpExposure ?? { method: 'POST', path: `/${this.agentName}` }),
@@ -474,16 +544,19 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
+	/** Set the success event name used by generated command and result policies. */
 	setSuccessEventName(eventName: string) {
 		assertNonEmpty(eventName, 'success event name')
 		this.successEventName = eventName
 		return this
 	}
 
+	/** Return the provider-neutral manifest for this agent without generating core definitions. */
 	getManifest(): AgentManifest<S['Models']> {
 		return this.createManifest(this.resolveExecution().kind)
 	}
 
+	/** Generate the attached agent and its queue, worker, command, and stream definitions. */
 	async getDefinition(): Promise<AttachedAgentDefinition<S>> {
 		const execution = this.resolveExecution()
 		const manifest = this.createManifest(execution.kind)

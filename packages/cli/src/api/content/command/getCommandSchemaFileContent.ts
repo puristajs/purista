@@ -3,6 +3,7 @@ import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate the schema module for a command's parameter, payload, and output. */
 export const getCommandSchemaFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

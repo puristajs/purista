@@ -11,11 +11,19 @@ import type { DaprConfigStoreConfig } from './types/DaprConfigStoreConfig.js'
 const DAPR_API_VERSION = 'v1.0-alpha1'
 
 /**
- * DaprConfigStore is an adapter which connects to the config store provided by the underlaying Dapr infrastructure
+ * Config store adapter backed by Dapr configuration components.
+ *
+ * Reads values through the local Dapr sidecar. Dapr's configuration API is read
+ * here; mutation methods throw `NotImplemented`.
  */
 export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig> {
 	private client: HttpClient<DaprClientConfig>
 
+	/**
+	 * Creates a Dapr-backed config store.
+	 *
+	 * @param config - Store name, logger and Dapr sidecar client settings.
+	 */
 	constructor(config?: StoreBaseConfig<DaprConfigStoreConfig>) {
 		super(config?.configStoreName ?? 'DaprConfigStore', { ...config })
 		const logger = this.logger
@@ -51,6 +59,9 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 		})
 	}
 
+	/**
+	 * Reads one or more configuration values from the configured Dapr component.
+	 */
 	async getConfigImpl<ConfigNames extends string[]>(
 		...configNames: ConfigNames
 	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
@@ -75,10 +86,16 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 		return returnValue as ObjectWithKeysFromStringArray<ConfigNames>
 	}
 
+	/**
+	 * Dapr configuration mutation is not implemented by this adapter.
+	 */
 	async setConfigImpl(_configName: string, _configValue: unknown) {
 		throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of configs is not available')
 	}
 
+	/**
+	 * Dapr configuration removal is not implemented by this adapter.
+	 */
 	async removeConfigImpl(_configName: string) {
 		throw new UnhandledError(StatusCode.NotImplemented, 'removing of configs is not available')
 	}

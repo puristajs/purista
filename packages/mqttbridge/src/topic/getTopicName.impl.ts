@@ -4,10 +4,14 @@ import type { Command, EBMessage } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
+/** Function signature for building an MQTT publish topic from a PURISTA message. */
 export type GetTopicNameFn = (this: IMqttBridge, message: EBMessage) => string
 
 /**
  * Calculates the MQTT topic name for a message which should be sent.
+ *
+ * Undefined address parts are replaced with `emptyTopicPartString`; all parts
+ * are snake-cased to keep broker topic names stable.
  * Something like:
  * purista/
  * message_type/

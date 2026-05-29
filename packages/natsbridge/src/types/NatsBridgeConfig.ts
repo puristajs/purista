@@ -1,13 +1,24 @@
 import type { Prettify } from '@purista/core'
 import type { ConnectionOptions } from 'nats'
 
+/**
+ * Default JetStream-backed subscription failure handling.
+ */
 export type NatsConsumerFailureHandlingDefaults = {
+	/** Maximum delivery attempts before the message is dead-lettered. */
 	maxAttempts: number
+	/** Delay in milliseconds before JetStream redelivers a failed message. */
 	retryDelayMs: number
+	/** Suffix appended to the source subject for the default dead-letter subject. */
 	deadLetterSuffix: string
 }
 /**
- * the configuration for the NATS event bridge
+ * Configuration for {@link NatsBridge}.
+ *
+ * Extends NATS connection options. Durable and manual-ack behavior requires
+ * JetStream. `durableSubscriptionMode: 'strict'` fails registrations when
+ * JetStream is unavailable; `'best-effort'` logs a warning and uses core NATS
+ * semantics without durability, retry, or DLQ guarantees.
  */
 export type NatsBridgeConfig = Prettify<
 	{
@@ -67,6 +78,9 @@ export type NatsBridgeConfig = Prettify<
 
 		/**
 		 * Controls how durable registrations behave when JetStream durability is not implemented.
+		 *
+		 * Use `strict` for production guarantees. Use `best-effort` only when
+		 * startup should continue without durable delivery guarantees.
 		 *
 		 * @default strict
 		 */

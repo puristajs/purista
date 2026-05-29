@@ -6,34 +6,49 @@ import { connect, JSONCodec } from 'nats'
 import type { NatsStateStoreConfig } from './types/NatsStateStoreConfig.js'
 
 /**
-A state store for using NATS (with JetStream) as storage.  
-
-@example
-* ```typescript
-const config = {
-  port: 8222
-}
-
-const store = new NatsStateStore({ config })
-
-await store.setState('stateKey',{ myState: 'value' })
-
-let value = await store.getState('stateKey')
-console.log(value) // outputs: { stateKey: { myState: 'value' } }
-
-await store.removeState('stateKey')
-
-value = await store.getState('stateKey')
-console.log(value) // outputs: undefined
-
-```
+ * State store backed by a NATS JetStream key-value bucket.
+ *
+ * JetStream must be enabled on the NATS server. Values are encoded with the NATS
+ * `JSONCodec`, so stored values must be JSON-compatible. This store keeps only
+ * the NATS connection and KV bucket handle in memory; values are read from the
+ * bucket for each operation.
+ *
+ * The default bucket is `purista-state-store`. Use tenant-aware keys such as
+ * `tenant.acme.prod.cart.session-123`. State can contain sensitive data, so keep
+ * payloads minimal and configure NATS authentication/TLS in shared environments.
+ *
+ * @example
+ * ```typescript
+ * const store = new NatsStateStore({
+ *   servers: 'nats://localhost:4222',
+ *   keyValueStoreName: 'purista-state-store',
+ * })
+ *
+ * await store.setState('tenant.acme.prod.cart.session-123', { step: 'shipping' })
+ * const state = await store.getState('tenant.acme.prod.cart.session-123')
+ * await store.destroy()
+ * ```
  */
 export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
+	/**
+	 * Active NATS connection, created lazily by `getStore`.
+	 */
 	public connection: NatsConnection | undefined
 
+	/**
+	 * JSON codec used to encode and decode values in the key-value bucket.
+	 */
 	sc = JSONCodec()
+	/**
+	 * Cached JetStream key-value bucket handle.
+	 */
 	kv: KV | undefined
 
+	/**
+	 * Creates a NATS JetStream-backed state store.
+	 *
+	 * @param config Store options plus NATS connection and KV bucket options.
+	 */
 	constructor(config?: StoreBaseConfig<Partial<NatsStateStoreConfig>>) {
 		const conf = {
 			keyValueStoreName: 'purista-state-store',
@@ -42,6 +57,11 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
 		super('NatsStateStore', { ...conf })
 	}
 
+	/**
+	 * Returns a healthy JetStream key-value bucket handle.
+	 *
+	 * Reconnects when the previous connection was closed or is draining.
+	 */
 	async getStore() {
 		const hasHealthyConnection = this.connection && !this.connection.isClosed() && !this.connection.isDraining()
 		if (this.kv && hasHealthyConnection) {
@@ -115,6 +135,11 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
 		}
 	}
 
+	/**
+	 * Drains and closes the NATS connection and clears cached handles.
+	 *
+	 * Call this during application shutdown.
+	 */
 	async destroy() {
 		await this.connection?.drain()
 		await this.connection?.close()

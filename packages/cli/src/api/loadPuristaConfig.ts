@@ -2,9 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { z } from 'zod'
 
-/**
- * Schema of the purista.json configuration file.
- */
+/** Zod schema for the `purista.json` configuration file consumed by the CLI. */
 export const puristaConfigSchema = z.object({
 	$schema: z.string().optional().default('https://purista.dev/schemas/1.12.0/schema.json'),
 	runtime: z.enum(['node', 'bun']).describe('The runtime used in the project').default('node'),
@@ -34,15 +32,16 @@ export const puristaConfigSchema = z.object({
 		.describe('The path where agents are located relative to the project root'),
 })
 
-/**
- * The type for the Purista configuration.
- */
+/** Parsed `purista.json` configuration with defaults applied. */
 export type PuristaConfig = z.infer<typeof puristaConfigSchema>
 
 /**
- * Load the project configuration file purista.json
- * This file must be placed in the project root (or workspace root).
- * (Same folder where the package.json is located.)
+ * Load and validate `purista.json` from a project root.
+ *
+ * @example
+ * ```ts
+ * const puristaConfig = await loadPuristaConfig('/workspace/my-app')
+ * ```
  */
 export const loadPuristaConfig = async (projectRootPath?: string) => {
 	const projectPath = projectRootPath ?? process.cwd()

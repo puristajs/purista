@@ -52,8 +52,18 @@ import { TopicRouter } from './topic/TopicRouter.js'
 import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
 
 /**
- * The MQTT event bridge connects to a MQTT broker.
- * The broker must support the MQTT 5 protocol version
+ * EventBridge implementation for MQTT 5 brokers.
+ *
+ * The broker must support MQTT protocol version 5 because the bridge uses user
+ * properties, subscription identifiers, message expiry, and correlation data.
+ * Delivery follows MQTT QoS semantics and is best-effort for PURISTA
+ * capabilities: commands and subscriptions are not durable, there is no
+ * broker-managed retry or dead-letter handling, and subscription control
+ * signals are logged but cannot be enforced by the bridge.
+ *
+ * Payloads are JSON strings. Keep messages minimal and avoid secrets or
+ * unnecessary personal data unless the broker connection and persistence are
+ * protected outside the bridge.
  *
  * @example
  * ```typescript
@@ -62,11 +72,14 @@ import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
  * // create and init our eventbridge
  * const eventBridge = new MqttBridge()
  * await eventBridge.start()
+ * ```
  *
  * @group Event bridge
  */
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
+	/** MQTT client instance, available after {@link start}. */
 	public client: MqttClient | undefined
+	/** Pending command invocations waiting for MQTT correlation responses. */
 	public pendingInvocations = new PendingInvocationRegistry<unknown>({
 		onLateResponse: correlationId => {
 			this.logger.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
@@ -82,6 +95,9 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		return this.client
 	}
 
+	/**
+	 * Creates an MQTT bridge with defaults merged into MQTT client options.
+	 */
 	constructor(config?: EventBridgeConfig<Partial<MqttBridgeConfig>>) {
 		const conf = {
 			...getDefaultMqttBridgeConfig(),
@@ -125,6 +141,10 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		}
 	}
 
+	/**
+	 * Connects to the MQTT broker and subscribes to this instance's command
+	 * response topic.
+	 */
 	async start() {
 		this.client = await connectAsync(this.config)
 
@@ -172,6 +192,12 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		})
 	}
 
+	/**
+	 * Publishes a PURISTA event/message as a JSON MQTT payload.
+	 *
+	 * The topic is derived from message metadata and OpenTelemetry context is
+	 * propagated in MQTT user properties. The bridge does not encrypt payloads.
+	 */
 	async emitMessage<T extends EBMessage>(
 		message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
 		contentType = 'application/json',
@@ -241,14 +267,26 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		})
 	}
 
+	/**
+	 * Indicates whether the MQTT client is connected.
+	 */
 	async isReady() {
 		return !!this.client?.connected
 	}
 
+	/**
+	 * Indicates whether the MQTT client is connected.
+	 */
 	async isHealthy() {
 		return !!this.client?.connected
 	}
 
+	/**
+	 * Invokes a command over MQTT and waits for a correlated response message.
+	 *
+	 * MQTT command delivery uses configured QoS and message expiry. Late
+	 * responses are ignored after timeout.
+	 */
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
 		commandTimeout: number = this.defaultCommandTimeout,
@@ -340,6 +378,12 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		)
 	}
 
+	/**
+	 * Registers a command handler on the shared MQTT command topic.
+	 *
+	 * MQTT command handlers are non-durable and do not support broker-managed
+	 * retry or dead-letter handling.
+	 */
 	async registerCommand(
 		address: EBMessageAddress,
 		cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
@@ -364,6 +408,9 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		return topic
 	}
 
+	/**
+	 * Unsubscribes a command handler topic and removes it from the local router.
+	 */
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
 		const client = this.getConnectedClient()
 		const topic = getSharedTopicName.bind(this)(getCommandSubscriptionTopic.bind(this)(address))
@@ -371,6 +418,13 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		this.router.remove(topic)
 	}
 
+	/**
+	 * Registers a subscription handler on a topic derived from the subscription
+	 * filter.
+	 *
+	 * Shared subscriptions use the configured `$share` prefix. MQTT cannot
+	 * enforce PURISTA retry, DLQ, drop, or stop-consumer outcomes.
+	 */
 	async registerSubscription(
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
@@ -402,6 +456,9 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		return topic
 	}
 
+	/**
+	 * Unsubscribes and removes a registered subscription handler.
+	 */
 	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
 		const client = this.getConnectedClient()
 		const key = `${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`
@@ -415,6 +472,10 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		this.registeredSubscriptionTopics.delete(key)
 	}
 
+	/**
+	 * Rejects pending invocations, waits for in-flight handlers, and closes the
+	 * MQTT client.
+	 */
 	async destroy() {
 		this.pendingInvocations.rejectAll(new UnhandledError(StatusCode.ServiceUnavailable, 'mqtt bridge closed'))
 		const drained = await this.waitForInFlightDrain()

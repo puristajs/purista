@@ -133,6 +133,7 @@ const eslintPackage: PKG = {
 	trustedDependencies: [],
 }
 
+/** Registry of built-in project blueprints used by `planProjectGeneration`. */
 export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 	base: {
 		id: 'base',

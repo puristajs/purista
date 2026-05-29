@@ -18,5 +18,9 @@ import type { BulkSubscribeResponseEntry } from './BulkSubscribeResponseEntry.ty
  **/
 export type BulkSubscribeResponse = {
 	// An array of bulk subscribe response entries
+	/**
+	 * Stores the statuses value exposed by BulkSubscribeResponse.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	statuses: BulkSubscribeResponseEntry[]
 }

@@ -12,6 +12,13 @@ const commandDefinitions: CommandDefinition[] = []
 
 const subscriptionDefinitions: SubscriptionDefinition[] = [serviceCommandsToRestApiSubscriptionBuilder.getDefinition()]
 
+/**
+ * Built-in Hono HTTP service definition.
+ *
+ * Create an instance with `honoV1Service.getInstance(eventBridge, ...)`, then
+ * register PURISTA services before starting and passing `honoService.app.fetch`
+ * to a Hono runtime adapter.
+ */
 export const honoV1Service = honoV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)
 	.addSubscriptionDefinition(...subscriptionDefinitions)

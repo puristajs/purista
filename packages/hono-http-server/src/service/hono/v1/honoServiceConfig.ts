@@ -3,25 +3,32 @@ import { z } from 'zod'
 
 // define the service config schema and the default service configuration
 
+/**
+ * Default base path for generated HTTP command and stream endpoints.
+ */
 export const DEFAULT_API_MOUNT_PATH = '/api'
 
+/**
+ * Default OpenAPI info block used when no application-specific metadata is supplied.
+ */
 export const OPENAPI_DEFAULT_INFO = {
 	title: 'Server api',
 	description: 'OpenApi definition for server endpoints',
 	version: '1.0.0',
 }
-
+/** Schema for OpenAPI external documentation objects. */
 export const ExternalDocumentationObjectSchema = z.object({
 	description: z.string().optional(),
 	url: z.string().url(),
 })
-
+/** Schema for OpenAPI tag objects. */
 export const TagObjectSchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
 	externalDocs: ExternalDocumentationObjectSchema.optional(),
 })
 
+/** Schema for the OpenAPI info object. */
 export const InfoObjectSchema = z.object({
 	title: z.string().default('PURISTA'),
 	description: z.string().default('OpenApi definition for server endpoints'),
@@ -42,6 +49,7 @@ export const InfoObjectSchema = z.object({
 	version: z.string().default('1.0.0'),
 })
 
+/** Schema for OpenAPI server objects. */
 export const ServerObjectSchema = z.object({
 	url: z.string(),
 	description: z.string().optional(),
@@ -49,10 +57,18 @@ export const ServerObjectSchema = z.object({
 	variables: z.any().optional(),
 })
 
+/** Schema for RFC 9457 problem details configuration. */
 export const ProblemDetailsObjectSchema = z.object({
 	typeBaseUri: z.string().min(1).optional(),
 })
 
+/**
+ * Runtime configuration schema for the Hono HTTP service.
+ *
+ * Defaults keep the server explicit: health can be enabled separately,
+ * generated OpenAPI is enabled, and dynamic route registration is disabled
+ * unless the application opts in.
+ */
 export const honoServiceV1ConfigSchema = z.object({
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	enableDynamicRoutes: z.boolean().default(false),
@@ -86,8 +102,14 @@ export const honoServiceV1ConfigSchema = z.object({
 		.optional(),
 })
 
-/** Config which will be sent through the schema validation, which will set missing defaults */
+/**
+ * Partial Hono service config accepted by `honoV1Service.getInstance`.
+ *
+ * Missing values are filled by {@link honoServiceV1ConfigSchema}.
+ */
 export type HonoServiceV1ConfigPartial = z.input<typeof honoServiceV1ConfigSchema>
 
-/** The full config with all required fields to be set */
+/**
+ * Fully parsed Hono service config with defaults applied.
+ */
 export type HonoServiceV1Config = z.output<typeof honoServiceV1ConfigSchema>

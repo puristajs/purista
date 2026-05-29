@@ -10,6 +10,13 @@ const toAgentIdentifier = (name: string) => {
 	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
 }
 
+/**
+ * Generate an attached-agent queue builder file.
+ *
+ * The generated agent defines payload, parameter, and output schemas, registers
+ * a `primary` model, attaches a harness agent, configures an ephemeral session,
+ * and exposes the agent as an HTTP endpoint.
+ */
 export const getAgentBuilderFileContent = (input: {
 	agentName: string
 	agentDescription: string

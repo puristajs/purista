@@ -61,15 +61,23 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 	}
 }
 
-type AnyService = Service<any>
+/** Service instance accepted by the Hono HTTP projection registry. */
+export type AnyService = Service<any>
 
 import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
 
 /**
- * A service which creates a Hono server, adds the command endpoints of given services.
- * The webserver needs to be started programmatically, after the `.start` method.
+ * PURISTA service that exposes command, stream and async queue-backed endpoints through Hono.
+ *
+ * Register services before `start()` to project their HTTP metadata into Hono
+ * routes and OpenAPI paths. Synchronous endpoints invoke commands directly,
+ * stream endpoints open PURISTA stream definitions, and async endpoints return
+ * `202 Accepted` with queue job information from the owning command.
+ *
+ * The web server listener is started by the application after this service has
+ * started.
  *
  * Minimal example:
  *
@@ -107,12 +115,12 @@ export class HonoServiceClass<
 	Variables extends VariablesBase = VariablesBase,
 > extends Service<ServiceClassTypes<HonoServiceV1Config>> {
 	/**
-	 * The Hono instance
+	 * Hono application hosting health, OpenAPI and generated endpoint routes.
 	 */
 	public app
 
 	/**
-	 * The OpenApiBuilder instance
+	 * OpenAPI builder populated as command and stream endpoints are registered.
 	 */
 	public openApi: OpenApiBuilder
 
@@ -121,6 +129,7 @@ export class HonoServiceClass<
 
 	private isAvailable = false
 
+	/** Creates the Hono service runtime and configures routing, health, and protection defaults. */
 	constructor(config: ServiceConstructorInput<ServiceClassTypes<HonoServiceV1Config, EmptyObject>>) {
 		super(config)
 		this.openApi = new OpenApiBuilder(this.config.openApi)
@@ -142,8 +151,9 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Set the Hono types for Variables and Bindings.
-	 * @returns The service instance with propper types
+	 * Narrows Hono `Bindings` and `Variables` types for middleware and handlers.
+	 *
+	 * @returns The same service instance with updated generic types.
 	 */
 	setHonoTypes<
 		E extends { Bindings?: Record<string, unknown>; Variables?: Record<string, unknown> } = {
@@ -155,8 +165,11 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Set a custom health function
-	 * @param fn
+	 * Sets the callback used by the configured health endpoint.
+	 *
+	 * Throw from this callback when the process should fail health checks.
+	 *
+	 * @param fn - Health callback bound to this service instance.
 	 */
 	setHealthFunction(fn: HealthFunction<typeof this>) {
 		this.config.healthFunction = fn
@@ -164,19 +177,22 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Set the middleware which will be executed on all endpoints which are marked as secured/protected.
-	 * It can also be used to enhance input information.
+	 * Sets middleware for endpoints marked as protected in HTTP metadata.
+	 *
+	 * The middleware can also enrich `additionalParameter`, `principalId` and
+	 * `tenantId` Hono variables before the generated command or stream handler
+	 * calls PURISTA.
 	 *
 	 * @example
 	 * ```typescript
-	 * honoService.setProtectHandler(async function (c, next) {
-	 * const auth = basicAuth({ username: 'user', password: 'password' })
-	 * c.set('additionalParameter', { userId: '123' })
-	 * return auth(c, next)
+	 * honoService.setProtectMiddleware(async function (c, next) {
+	 *   c.set('principalId', 'user-123')
+	 *   c.set('tenantId', 'tenant-a')
+	 *   return next()
 	 * })
 	 * ```
 	 *
-	 * @param fn
+	 * @param fn - Hono middleware for protected endpoints.
 	 */
 	setProtectMiddleware(fn: EndpointProtectMiddleware<typeof this, Bindings, Variables>) {
 		this.config.protectHandler = fn
@@ -204,6 +220,12 @@ export class HonoServiceClass<
 		return c.body(JSON.stringify(problem), problem.status as ContentfulStatusCode)
 	}
 
+	/**
+	 * Starts the service and registers health, OpenAPI and error handling routes.
+	 *
+	 * If configured, services from `services` are registered automatically before
+	 * the service becomes available.
+	 */
 	async start() {
 		if (this.config.enableHealth) {
 			this.openApi.addPath(this.config.healthPath, {
@@ -340,10 +362,13 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Register a service instance.
-	 * Must be called before `.start`.
-	 * Adds the endpoints of the service commands to the Hono router
-	 * @param services
+	 * Registers service instances and adds their HTTP-exposed commands and streams.
+	 *
+	 * Must be called before `start()`. Commands and streams are distinct PURISTA
+	 * primitives; this method maps both to HTTP only when their definition
+	 * metadata declares HTTP exposure.
+	 *
+	 * @param services - PURISTA service instances to expose.
 	 */
 	registerService(...services: AnyService[]) {
 		if (this.isStarted) {
@@ -369,9 +394,14 @@ export class HonoServiceClass<
 	}
 
 	/**
-	 * Adds a single service command endpoint to the Hono router
-	 * @param metadata Command metadata produced by the builder
-	 * @param service Address of the service hosting the command
+	 * Adds a single command or stream endpoint to the Hono router.
+	 *
+	 * Synchronous command endpoints return command payloads, async command
+	 * endpoints return queue job metadata, and stream endpoints either aggregate
+	 * the final payload or deliver Server-Sent Events based on metadata.
+	 *
+	 * @param metadata - Command or stream metadata produced by a builder.
+	 * @param service - Address of the service hosting the command or stream.
 	 */
 	public addEndpoint(metadata: CommandDefinitionMetadataBase, service: EBMessageAddress) {
 		if (!isHttpExposedServiceMeta(metadata)) {
@@ -640,6 +670,7 @@ export class HonoServiceClass<
 		this.knownEndpoints.set(endpointKey, serviceRegistrationKey)
 	}
 
+	/** Invokes a PURISTA command through the event bridge on behalf of an HTTP endpoint. */
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
 		endpoint: string,
@@ -655,6 +686,7 @@ export class HonoServiceClass<
 		})
 	}
 
+	/** Opens a PURISTA stream through the event bridge on behalf of an HTTP endpoint. */
 	async openStream(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
 		endpoint: string,

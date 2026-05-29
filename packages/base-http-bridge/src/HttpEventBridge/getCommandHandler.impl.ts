@@ -31,6 +31,13 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
+/**
+ * Creates the internal command route handler for full PURISTA command envelopes.
+ *
+ * The handler accepts POST requests only, optionally unwraps CloudEvents, runs
+ * the registered command callback with the bridge timeout, and returns the full
+ * command response envelope.
+ */
 export const getCommandHandler = function (
 	this: IHttpEventBridge,
 	_address: EBMessageAddress,

@@ -6,13 +6,25 @@ import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
+/** Queue import metadata used when generating a command with `.canEnqueue(...)`. */
 export type EnqueueOption = {
+	/** Queue name passed to `.canEnqueue(...)`. */
 	queueName: string
+	/** Relative module path used to import queue schemas. */
 	importPath: string
+	/** Exported identifier for the queue payload schema. */
 	payloadSchemaIdentifier: string
+	/** Exported identifier for the queue parameter schema. */
 	parameterSchemaIdentifier: string
 }
 
+/**
+ * Generate a command builder file for the current PURISTA service shape.
+ *
+ * The generated builder uses `.getCommandBuilder(...)`, attaches payload,
+ * parameter, and output schemas, optionally sets a success event, and can emit
+ * starter queue enqueue calls when `enqueueOptions` is provided.
+ */
 export const getCommandBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

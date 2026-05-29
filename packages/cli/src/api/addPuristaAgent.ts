@@ -95,14 +95,23 @@ const addAgentDefinitionToService = async (input: {
 	await sourceFile.save()
 }
 
+/**
+ * Add an attached AI agent to an existing PURISTA service version.
+ *
+ * Generates an agent queue builder using `.getAgentQueueBuilder(...)`, a harness
+ * test, an index export, and appends the async agent definition to the service.
+ */
 export const addPuristaAgent = async (input: {
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
 	puristaProject: PuristaProjectInfo
 	serviceName: string
 	serviceVersion: string
+	/** Logical agent name, for example `support agent`. */
 	agentName: string
+	/** Human-readable agent description used by the agent queue builder. */
 	agentDescription: string
+	/** Optional success event emitted after agent execution. */
 	responseEventName?: string
 	codeWriterOptions?: Partial<Options>
 }) => {

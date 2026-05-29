@@ -27,6 +27,14 @@ import { serializeOtpToNats } from '../serializeOtpToNats.impl.js'
 import { getTopicName } from '../topic/getTopicName.impl.js'
 import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
+/**
+ * Creates a NATS command handler for a PURISTA command address.
+ *
+ * The handler decodes JSON command messages, invokes the registered callback,
+ * and replies through NATS request/reply. JetStream-backed command consumers
+ * acknowledge command messages without transport redelivery because command
+ * retry belongs at the caller/business level.
+ */
 export const getCommandHandler = (
 	address: EBMessageAddress,
 	cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,

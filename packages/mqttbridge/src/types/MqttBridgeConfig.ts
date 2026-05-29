@@ -3,7 +3,12 @@ import type { IClientOptions } from 'mqtt'
 import type { QoS } from 'mqtt-packet'
 
 /**
- * the configuration for the MQTT event bridge
+ * Configuration for {@link MqttBridge}.
+ *
+ * Extends MQTT.js client options. The bridge requires MQTT 5 features and uses
+ * JSON payloads plus MQTT user properties for PURISTA and OpenTelemetry
+ * metadata. Retry, DLQ, and durable consumer guarantees are not broker-managed
+ * by this bridge.
  */
 export type MqttBridgeConfig = Prettify<
 	{
@@ -50,20 +55,21 @@ export type MqttBridgeConfig = Prettify<
 		qoSSubscription: QoS
 
 		/**
+		 * MQTT session expiry interval in seconds.
 		 *
 		 * @default 0
 		 */
 		defaultSessionExpiryInterval: number
 
 		/**
-		 * the message expiry interval in seconds
+		 * Default message expiry interval in seconds.
 		 *
-		 * @default
+		 * @default 2592000
 		 */
 		defaultMessageExpiryInterval: number
 
 		/**
-		 * allow retry of the initial connect
+		 * Allows MQTT.js to retry the initial connection.
 		 */
 		allowRetries?: boolean
 	} & IClientOptions

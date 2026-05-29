@@ -7,6 +7,7 @@ const toAgentIdentifier = (name: string) => {
 	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
 }
 
+/** Generate an attached-agent harness test with a scripted object model. */
 export const getAgentTestFileContent = (input: {
 	agentName: string
 	builderImportName: string

@@ -55,8 +55,12 @@ import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.
 import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
 
 /**
- * Simple implementation of some simple in-memory event bridge.
- * Does not support threads and does not need any external databases.
+ * Process-local in-memory event bridge for development and tests.
+ *
+ * The bridge supports command invocation, subscriptions, and streams in one
+ * Node.js process. It is not durable: messages, pending invocations, and
+ * subscriptions are lost on process shutdown. Late command responses and late
+ * stream frames are ignored with warnings to avoid resolving timed-out callers.
  *
  * @example
  * ```typescript

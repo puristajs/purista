@@ -4,6 +4,12 @@ import { camelCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/**
+ * Generate a queue builder file.
+ *
+ * The generated builder uses `.getQueueBuilder(...)`, attaches payload and
+ * parameter schemas, and includes a before-enqueue transform stub.
+ */
 export const getQueueBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

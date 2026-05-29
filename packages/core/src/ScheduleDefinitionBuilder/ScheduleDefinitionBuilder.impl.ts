@@ -1,5 +1,11 @@
 import type { ScheduleDefinition, ScheduleOptions, ScheduleTargetKind } from '../core/types/schedule/index.js'
 
+/**
+ * Builds a schedule contract for an external scheduler.
+ *
+ * PURISTA core records schedule intent; production scheduling is performed by
+ * an explicit external trigger or generated provider artifact.
+ */
 export class ScheduleDefinitionBuilder {
 	constructor(
 		private readonly name: string,
@@ -24,6 +30,15 @@ export class ScheduleDefinitionBuilder {
 
 	/**
 	 * Mark this schedule as enqueueing one durable queue job.
+	 *
+	 * @example
+	 * ```ts
+	 * service
+	 *   .getScheduleBuilder('dailyReport', 'Queue daily report generation')
+	 *   .enqueueQueue('reports.daily', {
+	 *     expression: { kind: 'cron', value: '0 6 * * *' },
+	 *   })
+	 * ```
 	 */
 	enqueueQueue(queueName: string, options: ScheduleOptions) {
 		return this.createDefinition('queue', queueName, options)
@@ -31,6 +46,15 @@ export class ScheduleDefinitionBuilder {
 
 	/**
 	 * Mark this schedule as invoking short, idempotent command trigger logic.
+	 *
+	 * @example
+	 * ```ts
+	 * service
+	 *   .getScheduleBuilder('refreshCatalog', 'Refresh catalog cache')
+	 *   .invokeCommand('refreshCatalog', {
+	 *     expression: { kind: 'interval', everyMs: 300_000 },
+	 *   })
+	 * ```
 	 */
 	invokeCommand(commandName: string, options: ScheduleOptions) {
 		return this.createDefinition('command', commandName, options)

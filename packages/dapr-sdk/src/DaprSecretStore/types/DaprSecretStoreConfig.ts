@@ -1,25 +1,25 @@
 import type { DaprClientConfig } from '../../DaprClient/types/DaprClientConfig.js'
 
 /**
- * Dapr secret store configuration
+ * Configuration for {@link DaprSecretStore}.
  */
 export type DaprSecretStoreConfig = {
 	/**
-	 * The name of the secret store
+	 * Dapr secret component name.
 	 */
 	secretStoreName?: string
 
 	/**
-	 * The Dapr client config to interact with Dapr sidecar
+	 * Dapr sidecar client settings.
 	 */
 	clientConfig?: DaprClientConfig
 
 	/**
-	 * Dapr secret store metadata
+	 * Dapr secret store request metadata.
 	 */
 	metadata?: {
 		/**
-		 * In case of deploying into namespace other than default, the namespace (e.g. production) must be set
+		 * Kubernetes namespace for secret stores deployed outside the default namespace.
 		 */
 		namespace?: string
 	}

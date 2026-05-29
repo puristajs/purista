@@ -13,51 +13,59 @@ import { createClient } from '@redis/client'
 import type { RedisStoreConfig } from './types.js'
 
 /**
- * A config store for using redis as storage.
- * Config values are stored as stringified JSON.
+ * Config store backed by Redis string keys.
  *
- * Per default, setting/changing and removal of values are enabled.
+ * Config values are serialized with `JSON.stringify` before writing and parsed
+ * with `JSON.parse` on read. This store does not add a local in-memory cache;
+ * Redis is the source of truth for each operation.
+ *
+ * Use tenant-aware key prefixes to avoid collisions, for example
+ * `tenant:acme:prod:payments:public-api-url`. Keep secrets out of config values
+ * and use TLS/authenticated Redis endpoints in shared environments.
+ *
+ * The Redis connection is opened lazily on the first operation and closed by
+ * `destroy()`.
  *
  * @example
  * ```typescript
- * const config = {
- *  enableGet: true, // optional, default is true
- *  enableRemove: true, // optional, default is true
- *  enableSet: true, // optional, default is true
- *  url: 'redis://alice:foobared@awesome.redis.server:6379'
- * }
+ * const store = new RedisConfigStore({
+ *   config: { url: 'redis://localhost:6379' },
+ * })
  *
- * const store = new RedisConfigStore({ config })
- *
- * await store.setConfig('configKey',{ myConfig: 'value' })
- *
- * let value = await store.getConfig('configKey')
- * console.log(value) // outputs: { configKey: { myConfig: 'value' } }
- *
- * await store.removeConfig('configKey')
- *
- * value = await store.getConfig('configKey')
- * console.log(value) // outputs: undefined
+ * await store.setConfig('tenant:acme:prod:app:features', { checkout: true })
+ * const config = await store.getConfig('tenant:acme:prod:app:features')
+ * await store.destroy()
  * ```
  *
- * See documentation of underlaying redis lib package for detailed configuration options.
- *
- * @see [NODE-REDIS](https://redis.js.org)
- *
+ * @see [node-redis](https://redis.js.org)
  */
 export class RedisConfigStore<
 	M extends RedisModules = RedisModules,
 	F extends RedisFunctions = RedisFunctions,
 	S extends RedisScripts = RedisScripts,
 > extends ConfigStoreBaseClass<RedisStoreConfig<M, F, S>> {
+	/**
+	 * Redis client used by this store.
+	 *
+	 * The client is created during construction, connected lazily, and disconnected
+	 * by `destroy()`.
+	 */
 	public client: RedisClientType<M, F, S, RespVersions, TypeMapping>
 
+	/**
+	 * Creates a Redis-backed config store.
+	 *
+	 * @param config Store options and node-redis client configuration.
+	 */
 	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
 		super('RedisConfigStore', { ...config })
 		this.client = createClient(this.config.config)
 		this.client.on('error', err => this.logger.error({ err }, 'Redis Client Error'))
 	}
 
+	/**
+	 * Returns an open Redis client, connecting it on demand.
+	 */
 	protected async getClient() {
 		if (this.client.isOpen) {
 			return this.client
@@ -107,6 +115,11 @@ export class RedisConfigStore<
 		}
 	}
 
+	/**
+	 * Disconnects the Redis client if it is open.
+	 *
+	 * Call this during application shutdown to release sockets cleanly.
+	 */
 	async destroy() {
 		if (this.client.isOpen) {
 			await this.client.disconnect()

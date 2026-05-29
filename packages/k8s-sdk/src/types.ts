@@ -1,21 +1,24 @@
 import type { Logger, Service } from '@purista/core'
 
 /**
- * The configuration object for creating the k8s http server
+ * Configuration for the Kubernetes-oriented Hono HTTP helper.
+ *
+ * The helper is intentionally small: it creates an app with `/healthz` and,
+ * unless disabled, exposes command HTTP projections from the provided services.
  */
 export type GetHttpServerConfig = {
-	/** a logger instance */
+	/** Logger used for request, health and process error reporting. */
 	logger: Logger
-	/** hostname used in tracing and logging */
+	/** Hostname used in tracing and logging. Defaults to `process.env.HOSTNAME`. */
 	hostname?: string
-	/** health function to be executed on health check */
+	/** Health probe callback. Return `true` only when the process can serve traffic. */
 	healthFn: () => Promise<boolean>
-	/** service or array of services which should expose their commands as endpoints if defined */
+	/** Service or services whose HTTP-exposed commands should be added as endpoints. */
 	services?: Service | Service[]
-	/** disables adding of all  endpoints for commands which are marked to be exposed as http endpoints */
+	/** Disables automatic endpoint registration for commands marked as HTTP-exposed. */
 	disableEndpointExposing?: boolean
-	/** the api mount path @default /api */
+	/** Base path for generated command endpoints. @default /api */
 	apiMountPath?: string
-	/** enable HTTP compression in web server @default true */
+	/** Enables HTTP compression middleware. @default true */
 	enableHttpCompression?: boolean
 }

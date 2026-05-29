@@ -17,8 +17,12 @@ import type { KeyValueType } from './KeyValue.type.js'
  * PubSubBulkPublishEntry defines an entry in a bulk publish request.
  */
 export type PubSubBulkPublishEntry = {
+	/** Caller-provided entry id used to correlate Dapr bulk publish failures. */
 	entryID: string
+	/** Event payload sent to the Dapr pub/sub component. */
 	event: object | string
+	/** Per-message metadata forwarded to the Dapr pub/sub component. */
 	metadata: KeyValueType
+	/** Content type for the event payload. */
 	contentType: string
 }

@@ -2,6 +2,9 @@ import type { QueryParameter } from '@purista/core'
 import type { ParameterObject, SchemaObject } from 'openapi3-ts/oas31'
 import { isReferenceObject } from 'openapi3-ts/oas31'
 
+/**
+ * Converts command HTTP query metadata into OpenAPI query parameters.
+ */
 export const getQueryDefinition = (
 	queryDefinition: QueryParameter<Record<string, unknown>>[] | undefined,
 	parameterschema?: SchemaObject,
@@ -35,6 +38,8 @@ export const getQueryDefinition = (
 }
 
 /**
+ * Backward-compatible alias for the misspelled query definition helper.
+ *
  * @deprecated Use `getQueryDefinition` instead.
  */
 export const getQueryDefintion = getQueryDefinition

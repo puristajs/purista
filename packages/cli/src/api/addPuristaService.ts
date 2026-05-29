@@ -14,14 +14,21 @@ import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
 /**
- * Add all folders and files for a new service to the project.
+ * Add a new PURISTA service version to an existing project.
+ *
+ * Generates general service info, version config, service builder, service
+ * composition, and setup test files using the project's configured file casing.
  */
 export const addPuristaService = async (input: {
+	/** Project root. Defaults to `process.cwd()`. */
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
 	puristaProject: PuristaProjectInfo
+	/** Human-readable service description used in generated service metadata. */
 	serviceDescription: string
+	/** Logical service name, for example `user` or `billing account`. */
 	serviceName: string
+	/** Numeric service version. Defaults to `1`. */
 	serviceVersion?: string
 	codeWriterOptions?: Partial<Options>
 }) => {

@@ -21,16 +21,46 @@ type LeaseEntry = {
 	queueName: string
 }
 
+/**
+ * Configuration for the process-local {@link DefaultQueueBridge}.
+ *
+ * The default bridge is intended for local development and tests. It is not a
+ * durable production queue and does not enforce strict idempotency.
+ *
+ * @group Queue bridge
+ */
 export type DefaultQueueBridgeOptions = {
+	/** Optional stable bridge instance id. */
 	instanceId?: string
+	/** Default lease duration in milliseconds for enqueued jobs. */
 	defaultLeaseTtlMs?: number
+	/** Default maximum attempts before dead-letter handling. */
 	maxAttempts?: number
+	/** Optional recorder for queue framework metrics. */
 	metricsRecorder?: PuristaMetricsRecorder
 }
 
+/**
+ * In-memory queue bridge for development and unit tests.
+ *
+ * Jobs, leases, and dead letters are stored in process memory and are lost on
+ * shutdown. The bridge reports advisory reliability semantics: delayed
+ * delivery and FIFO behavior are local only, while idempotency enforcement and
+ * exactly-once delivery are intentionally unsupported.
+ *
+ * @example
+ * ```ts
+ * const queueBridge = new DefaultQueueBridge({ defaultLeaseTtlMs: 60_000 })
+ * await queueBridge.enqueue({ queueName: 'orders', payload: { id: 'ord_1' } })
+ * ```
+ *
+ * @group Queue bridge
+ */
 export class DefaultQueueBridge implements QueueBridge {
+	/** Human-readable bridge name used in diagnostics and metrics. */
 	public readonly name = 'DefaultQueueBridge'
 
+	/** Process-local capability matrix for strict startup validation. */
 	public readonly capabilities: QueueBridgeCapabilities = {
 		delayedDelivery: true,
 		fifoOrdering: true,
@@ -52,6 +82,7 @@ export class DefaultQueueBridge implements QueueBridge {
 		strictStartupValidation: true,
 	}
 
+	/** Runtime instance id for this in-memory bridge instance. */
 	public readonly instanceId: string
 
 	private readonly defaultLeaseTtlMs: number

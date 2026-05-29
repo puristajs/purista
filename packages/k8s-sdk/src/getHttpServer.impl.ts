@@ -11,14 +11,19 @@ import { puristaVersion } from './version.js'
  * Create a Hono based web server.
  *
  * The server exposes a `/healthz` endpoint and, if configured, adds all HTTP
- * enabled command routes from the given services.
+ * enabled command routes from the given services. It does not start a listener;
+ * use the returned app with the Hono adapter appropriate for the container.
  * The returned `Hono` instance is not started automatically.
  *
  * @param input - Server configuration.
+ * @param name - Logger child name for this helper server.
  * @returns The configured `Hono` application instance.
  *
  * @example
  * ```ts
+ * import { serve } from '@hono/node-server'
+ * import { getHttpServer } from '@purista/k8s-sdk'
+ *
  * const app = getHttpServer({ logger, services: [svc], healthFn: async () => true })
  * serve({ fetch: app.fetch, port: 3000 })
  * ```

@@ -3,6 +3,7 @@ import CodeBlockWriter from 'code-block-writer'
 import { camelCase, pascalCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate TypeScript aliases inferred from a stream schema module. */
 export const getStreamTypeFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

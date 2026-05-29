@@ -16,6 +16,13 @@ import { serializeOtpToNats } from '../serializeOtpToNats.impl.js'
 import { getTopicName } from '../topic/getTopicName.impl.js'
 import type { INatsBridge } from '../types/INatsBridge.js'
 
+/**
+ * Creates a NATS subscription handler for a PURISTA subscription.
+ *
+ * The handler republishes returned events. With JetStream consumers, thrown
+ * subscription control errors are propagated so the bridge can retry,
+ * dead-letter, drop, or pause the consumer according to configuration.
+ */
 export const getSubscriptionHandler = (
 	subscription: Subscription,
 	cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,

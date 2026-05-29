@@ -3,18 +3,33 @@ import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import { getErrorName } from './getErrorName.js'
 
+/**
+ * RFC 9457-style problem details response returned by generated Hono endpoints.
+ */
 export type ProblemDetails = {
+	/** Problem type URI or `about:blank` when no custom base URI is configured. */
 	type: string
+	/** Human-readable status title. */
 	title: string
+	/** HTTP status code. */
 	status: number
+	/** Occurrence-specific error detail safe for the selected error class. */
 	detail: string
+	/** Request path or URI where the problem occurred. */
 	instance?: string
+	/** Application trace identifier propagated through the HTTP request. */
 	traceId?: string
+	/** Validation issues, when available. */
 	errors?: unknown[]
+	/** Additional safe details for handled errors or explicitly allowed internal details. */
 	details?: unknown
 }
 
+/**
+ * Controls generated problem type URIs.
+ */
 export type ProblemTypeConfig = {
+	/** Base URI used for known problem type slugs. */
 	typeBaseUri?: string
 }
 
@@ -48,6 +63,10 @@ const isProblemDetails = (value: unknown): value is ProblemDetails =>
 
 const stringifyPretty = (value: unknown) => JSON.stringify(value, null, 2)
 
+/**
+ * Runs the getProblemTypeUri helper exported by @purista/hono-http-server.
+ * Expose only schemas and metadata that are safe for clients to inspect.
+ */
 const normalizeProblemTypeBaseUri = (value: string) => {
 	let end = value.length
 	while (end > 0 && value[end - 1] === '/') {
@@ -56,6 +75,10 @@ const normalizeProblemTypeBaseUri = (value: string) => {
 	return value.slice(0, end)
 }
 
+/**
+ * Runs the toProblemDetails helper exported by @purista/hono-http-server.
+ * Expose only schemas and metadata that are safe for clients to inspect.
+ */
 const buildProblemTypeUri = (slug: string, config?: ProblemTypeConfig): string => {
 	if (!config?.typeBaseUri) {
 		return 'about:blank'
@@ -63,6 +86,9 @@ const buildProblemTypeUri = (slug: string, config?: ProblemTypeConfig): string =
 	return `${normalizeProblemTypeBaseUri(config.typeBaseUri)}/${slug}`
 }
 
+/**
+ * Resolves the problem type URI for an HTTP status and optional validation data.
+ */
 export const getProblemTypeUri = (status: number, data?: unknown, config?: ProblemTypeConfig): string => {
 	if (isValidationIssueList(data)) {
 		return buildProblemTypeUri(validationErrorType, config)
@@ -71,6 +97,11 @@ export const getProblemTypeUri = (status: number, data?: unknown, config?: Probl
 	return slug ? buildProblemTypeUri(slug, config) : 'about:blank'
 }
 
+/**
+ * Converts PURISTA errors and unknown thrown values into HTTP problem details.
+ *
+ * Server errors are intentionally minimized unless `safeInternalDetails` is set.
+ */
 export const toProblemDetails = (
 	error: unknown,
 	input: {
@@ -137,6 +168,10 @@ export const toProblemDetails = (
 			type: getProblemTypeUri(status, data, input.problemTypeConfig),
 			title: getErrorName(status),
 			status,
+			/**
+			 * Runs the renderProblemDetailsMarkdown helper exported by @purista/hono-http-server.
+			 * Expose only schemas and metadata that are safe for clients to inspect.
+			 */
 			detail: status >= 500 && typeof error.message !== 'string' ? getErrorName(status) : detail,
 			instance: input.instance,
 			traceId,
@@ -160,6 +195,9 @@ export const toProblemDetails = (
 	}
 }
 
+/**
+ * Renders problem details as Markdown for clients that prefer `text/markdown`.
+ */
 export const renderProblemDetailsMarkdown = (problem: ProblemDetails): string => {
 	const lines = [`# ${problem.title}`, '', problem.detail]
 	if (problem.errors && problem.errors.length > 0) {
@@ -179,6 +217,10 @@ export const renderProblemDetailsMarkdown = (problem: ProblemDetails): string =>
 	}
 	lines.push('', '## Metadata', `- \`status\`: ${problem.status}`, `- \`type\`: ${problem.type}`)
 	if (problem.instance) {
+		/**
+		 * Runs the negotiateProblemRepresentation helper exported by @purista/hono-http-server.
+		 * Expose only schemas and metadata that are safe for clients to inspect.
+		 */
 		lines.push(`- \`instance\`: ${problem.instance}`)
 	}
 	if (problem.traceId) {
@@ -205,6 +247,9 @@ const parseAcceptToken = (token: string) => {
 	return { mediaType: mediaTypeRaw.toLowerCase(), q }
 }
 
+/**
+ * Chooses the problem details response representation from an HTTP `Accept` header.
+ */
 export const negotiateProblemRepresentation = (acceptHeader?: string): 'json' | 'markdown' => {
 	if (!acceptHeader) {
 		return 'json'
@@ -232,6 +277,9 @@ export const negotiateProblemRepresentation = (acceptHeader?: string): 'json' | 
 	return 'json'
 }
 
+/**
+ * Builds an OpenAPI schema for problem details responses.
+ */
 export const getProblemDetailsSchema = (
 	code: StatusCode,
 	message: string,

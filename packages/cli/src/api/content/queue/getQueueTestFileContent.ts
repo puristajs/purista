@@ -4,6 +4,7 @@ import { camelCase, capitalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate a queue definition test for a generated queue builder. */
 export const getQueueTestFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

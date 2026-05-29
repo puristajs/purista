@@ -6,6 +6,12 @@ import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
+/**
+ * Generate a subscription builder file.
+ *
+ * The generated builder uses `.getSubscriptionBuilder(...)`, optionally
+ * subscribes to a ServiceEvent, attaches schemas, and emits a starter handler.
+ */
 export const getSubscriptionBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

@@ -14,19 +14,35 @@ import {
 	createResourceProxy,
 } from './sharedContextMocks.js'
 
+/**
+ * Input for {@link createQueueWorkerContextMock}.
+ *
+ * @group Unit test helper
+ */
 export type CreateQueueWorkerContextMockInput<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 > = {
+	/** Queue name used on the generated message. */
 	queueName: string
+	/** Queue payload for the generated message. */
 	payload: Payload
+	/** Optional queue parameters for the generated message. */
 	parameter?: Parameter
+	/** Optional Sinon sandbox used to create stubs. */
 	sandbox?: SinonSandbox
+	/** Runtime resources exposed through the context proxy. */
 	resources?: Partial<Resources>
+	/** Message field overrides for specialized queue scenarios. */
 	message?: Partial<QueueMessage<Payload, Parameter>>
 }
 
+/**
+ * Result returned by {@link createQueueWorkerContextMock}.
+ *
+ * @group Unit test helper
+ */
 export type QueueWorkerContextMockResult<
 	Payload = unknown,
 	Parameter = unknown,

@@ -2,6 +2,7 @@ import type { PuristaMetricContext, PuristaMetricDefinitions } from '../metrics/
 
 export type * from '../metrics/types.js'
 
+/** Adds the typed PURISTA metric context to a handler context type. */
 export type PuristaMetricContextProperty<Metrics extends PuristaMetricDefinitions> = {
 	metrics: PuristaMetricContext<Metrics>
 }

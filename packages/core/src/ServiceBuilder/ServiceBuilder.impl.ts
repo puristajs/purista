@@ -76,20 +76,33 @@ import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/
 import type { SubscriptionDefinitionBuilderTypes } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.js'
 import { type Infer, type InferIn, type Schema, validate } from '../schema/index.js'
 
+/** Constructor type accepted by `ServiceBuilder.setCustomClass(...)`. */
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
+/** Runtime configuration accepted by `ServiceBuilder.getInstance(...)`. */
 export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any, any>> = Prettify<
 	{
+		/** Log level used when no custom logger is provided. */
 		logLevel?: LogLevelName
+		/** Custom service logger. */
 		logger?: Logger
+		/** Optional OpenTelemetry span processor. */
 		spanProcessor?: SpanProcessor
+		/** Secret store used by service handlers. */
 		secretStore?: SecretStore
+		/** Config store used by service handlers. */
 		configStore?: ConfigStore
+		/** State store used by service handlers and attached agents. */
 		stateStore?: StateStore
+		/** Queue bridge used by queue definitions and attached agents. */
 		queueBridge?: QueueBridge
+		/** Optional queue job store for queue bridge implementations that use one. */
 		queueJobStore?: QueueJobStore
+		/** OpenTelemetry metrics runtime options. */
 		metrics?: PuristaMetricsRuntimeOptions
+		/** Low-level metrics recorder override. */
 		metricsRecorder?: PuristaMetricsRecorder
+		/** Runtime model/provider bindings for attached agents. */
 		ai?: AgentRuntimeOptions<Record<string, AgentModelBinding>>
 	} & (keyof S['Resources'] extends never ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends never ? { serviceConfig?: never } : { serviceConfig?: S['ConfigInputType'] })
@@ -129,11 +142,13 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 
 	private customMetricDefinitions: PuristaMetricDefinitions = {}
 
+	/** Service class constructor used by `getInstance(...)`. */
 	SClass: Newable<S['ServiceClassType'], ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>> = Service
 
 	// eslint-disable-next-line no-useless-constructor
 	constructor(public info: ServiceInfoType) {}
 
+	/** Add a configuration schema and infer typed `serviceConfig` for `getInstance(...)`. */
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
 		return this as unknown as ServiceBuilder<
@@ -154,16 +169,19 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		>
 	}
 
+	/** Set default service configuration merged before runtime `serviceConfig`. */
 	setDefaultConfig(config: Complete<S['ConfigType']>): this {
 		this.defaultConfig = config
 		return this
 	}
 
+	/** Mark the entire service definition as deprecated. */
 	markAsDeprecated() {
 		this.deprecated = true
 		return this
 	}
 
+	/** Add one or more resolved or pending command definitions to this service. */
 	addCommandDefinition(...commands: CommandDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -175,6 +193,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this
 	}
 
+	/** Add one or more resolved or pending subscription definitions to this service. */
 	addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -186,6 +205,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this
 	}
 
+	/** Add one or more resolved or pending stream definitions to this service. */
 	addStreamDefinition(...streams: StreamDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -197,6 +217,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this
 	}
 
+	/** Add one or more resolved or pending queue definitions to this service. */
 	addQueueDefinition(...queues: QueueDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -208,6 +229,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this
 	}
 
+	/** Add one or more resolved or pending queue worker definitions to this service. */
 	addQueueWorkerDefinition(...workers: QueueWorkerDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -256,6 +278,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this
 	}
 
+	/** Add one or more schedule contracts to this service. */
 	addScheduleDefinition(...schedules: ScheduleDefinition[]) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -302,6 +325,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this
 	}
 
+	/** Resolve all pending definitions once and cache the resolved service definition lists. */
 	public async resolveDefinitions() {
 		if (this.definitionsResolved) {
 			return {
@@ -343,6 +367,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		}
 	}
 
+	/** Declare a resource required by handlers and enforce `resources` in `getInstance(...)`. */
 	defineResource<ResourceName extends string, ResourcesType>() {
 		this.requiresResources = true
 		return this as unknown as ServiceBuilder<
@@ -367,18 +392,20 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		definition: Definition,
 	) {
 		this.customMetricDefinitions[name] = definition
-		type Metrics = S['Metrics'] & { [K in MetricName]: Definition }
 		return this as unknown as ServiceBuilder<
 			SetNewTypeValues<
 				S,
 				{
-					Metrics: Metrics
-					ServiceClassType: Service<ServiceClassTypes<S['ConfigType'], S['Resources'], Metrics>>
+					Metrics: S['Metrics'] & { [K in MetricName]: Definition }
+					ServiceClassType: Service<
+						ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics'] & { [K in MetricName]: Definition }>
+					>
 				}
 			>
 		>
 	}
 
+	/** Use a custom service subclass when creating service instances. */
 	setCustomClass<T extends Service<ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>>>(
 		customClass: Newable<T, ServiceClassTypes<S['ConfigType'], S['Resources'], S['Metrics']>>,
 	) {
@@ -386,10 +413,12 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>>
 	}
 
+	/** Return the service class constructor currently configured for this builder. */
 	getCustomClass() {
 		return this.SClass
 	}
 
+	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
 		const agentRuntimeScope = createAgentRuntimeScope()
@@ -494,6 +523,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return service
 	}
 
+	/** Create a command builder scoped to this service's resource and metric types. */
 	getCommandBuilder<T extends string, N extends string>(
 		commandName: NonEmptyString<T>,
 		description: string,
@@ -517,6 +547,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		>(commandName, description, eventName, this.deprecated)
 	}
 
+	/** Create a subscription builder scoped to this service's resource and metric types. */
 	getSubscriptionBuilder<T extends string>(
 		subscriptionName: NonEmptyString<T>,
 		description: string,
@@ -554,6 +585,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		>(subscriptionName, description, this.deprecated)
 	}
 
+	/** Create a stream builder scoped to this service's resource and metric types. */
 	getStreamBuilder<T extends string, N extends string>(
 		streamName: NonEmptyString<T>,
 		description: string,
@@ -610,6 +642,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		>
 	}
 
+	/** Return resolved command definitions after `resolveDefinitions()` has completed. */
 	getCommandDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -620,6 +653,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.commandDefinitionListResolved
 	}
 
+	/** Return resolved subscription definitions after `resolveDefinitions()` has completed. */
 	getSubscriptionDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -630,6 +664,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.subscriptionDefinitionListResolved
 	}
 
+	/** Return resolved stream definitions after `resolveDefinitions()` has completed. */
 	getStreamDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -640,18 +675,22 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.streamDefinitionListResolved
 	}
 
+	/** Create a queue definition builder. */
 	getQueueBuilder<T extends string>(queueName: NonEmptyString<T>, description: string) {
 		return new QueueDefinitionBuilder(queueName, description)
 	}
 
+	/** Create a queue worker builder for a queue name. */
 	getQueueWorkerBuilder<T extends string>(queueName: NonEmptyString<T>, workerName: string) {
 		return new QueueWorkerBuilder(queueName, workerName)
 	}
 
+	/** Create a schedule definition builder. */
 	getScheduleBuilder<T extends string>(scheduleName: NonEmptyString<T>, description: string) {
 		return new ScheduleDefinitionBuilder(scheduleName, description)
 	}
 
+	/** Return resolved queue definitions after `resolveDefinitions()` has completed. */
 	getQueueDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -662,6 +701,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.queueDefinitionListResolved
 	}
 
+	/** Return resolved queue worker definitions after `resolveDefinitions()` has completed. */
 	getQueueWorkerDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -672,6 +712,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.queueWorkerDefinitionListResolved
 	}
 
+	/** Return resolved schedule definitions after `resolveDefinitions()` has completed. */
 	getScheduleDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -682,6 +723,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.scheduleDefinitionListResolved
 	}
 
+	/** Return resolved event-to-queue bindings after `resolveDefinitions()` has completed. */
 	getEventToQueueBindings() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -692,6 +734,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.eventToQueueBindingListResolved
 	}
 
+	/** Validate duplicate names and queue-worker references for local tests. */
 	async testServiceSetup() {
 		const { subscriptions, commands, streams, queues, queueWorkers } = await this.resolveDefinitions()
 
@@ -779,6 +822,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		}
 	}
 
+	/** Return service metadata plus all resolved definitions. */
 	async getFullServiceDefinition() {
 		const definitions = await this.resolveDefinitions()
 

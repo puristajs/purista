@@ -1,3 +1,8 @@
+/**
+ * Startup behavior when requested consumer failure semantics are unsupported.
+ *
+ * @group Event bridge
+ */
 export type DefinitionEventBridgeConsumerFailureMode = 'strict' | 'best-effort'
 
 /**
@@ -7,6 +12,8 @@ export type DefinitionEventBridgeConsumerFailureMode = 'strict' | 'best-effort'
  * In `strict` mode the bridge must fail startup if it cannot honor the requested
  * semantics. In `best-effort` mode the bridge may degrade behavior but must log
  * the degradation explicitly.
+ *
+ * @group Event bridge
  */
 export type DefinitionEventBridgeConsumerFailureHandling = {
 	/**

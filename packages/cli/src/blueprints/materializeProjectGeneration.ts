@@ -47,6 +47,11 @@ const materializeExampleService = async (plan: ProjectGenerationPlan) => {
 	}
 }
 
+/**
+ * Write all files from a generation plan and run deferred generator steps.
+ *
+ * Returns absolute paths for the files predicted by `planProjectGeneration`.
+ */
 export const materializeProjectGeneration = async (plan: ProjectGenerationPlan) => {
 	await mkdir(plan.targetDirectoryPath, { recursive: true })
 

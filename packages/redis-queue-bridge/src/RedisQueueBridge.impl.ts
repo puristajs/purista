@@ -34,6 +34,49 @@ const DEFAULT_ORPHAN_RECOVERY_BATCH_SIZE = 50
 const DEAD_LETTER_HEADER = 'x-purista-dead-letter-reason'
 const LAST_RETRY_HEADER = 'x-purista-last-retry-reason'
 
+/**
+ * Strict QueueBridge implementation backed by Redis data structures.
+ *
+ * The bridge uses Redis lists for pending/processing jobs, sorted sets for
+ * scheduled delivery and lease expiry, hashes for message and lease metadata,
+ * and a Redis list for dead-letter entries. It supports delayed delivery,
+ * FIFO leasing, inspectable dead letters, lease inspection, and idempotent
+ * enqueue. It does not provide exactly-once execution; workers must make side
+ * effects idempotent because jobs can be retried after failures or recovered
+ * from expired leases.
+ *
+ * Messages are stored as JSON in Redis. Do not place secrets, tokens, or
+ * unnecessary personal data in queue payloads unless your Redis deployment and
+ * persistence are protected for that data.
+ *
+ * @example
+ * ```typescript
+ * import { RedisQueueBridge } from '@purista/redis-queue-bridge'
+ *
+ * const queueBridge = new RedisQueueBridge({
+ *   config: { url: 'redis://localhost:6379' },
+ * })
+ *
+ * await queueBridge.start()
+ * ```
+ *
+ * @example
+ * ```typescript
+ * const first = await queueBridge.enqueue({
+ *   queueName: 'media.thumbnail',
+ *   payload: { assetId: 'asset_123' },
+ *   idempotencyKey: 'thumbnail:asset_123',
+ * })
+ *
+ * const duplicate = await queueBridge.enqueue({
+ *   queueName: 'media.thumbnail',
+ *   payload: { assetId: 'asset_123' },
+ *   idempotencyKey: 'thumbnail:asset_123',
+ * })
+ *
+ * first.jobId === duplicate.jobId
+ * ```
+ */
 export class RedisQueueBridge<
 	M extends RedisModules = RedisModules,
 	F extends RedisFunctions = RedisFunctions,
@@ -42,8 +85,16 @@ export class RedisQueueBridge<
 	TYPE_MAPPING extends TypeMapping = TypeMapping,
 > implements QueueBridge
 {
+	/** Stable bridge name reported to PURISTA runtime diagnostics. */
 	public readonly name = 'RedisQueueBridge'
 
+	/**
+	 * Queue capabilities supported by this Redis bridge.
+	 *
+	 * `idempotencyEnforcement` and `strictStartupValidation` are true. The
+	 * bridge still reports `exactlyOnce: false` because processing can be
+	 * retried after worker or broker failures.
+	 */
 	public readonly capabilities: QueueBridgeCapabilities = {
 		delayedDelivery: true,
 		fifoOrdering: true,
@@ -65,6 +116,7 @@ export class RedisQueueBridge<
 		strictStartupValidation: true,
 	}
 
+	/** Unique bridge instance identifier for diagnostics. */
 	public readonly instanceId: string
 
 	private client: RedisClientType<M, F, S, RESP, TYPE_MAPPING>
@@ -77,6 +129,7 @@ export class RedisQueueBridge<
 
 	private readonly orphanRecoveryBatchSize: number
 
+	/** Creates a Redis queue bridge with the provided Redis client options. */
 	constructor(private readonly options: RedisQueueBridgeOptions<M, F, S, RESP, TYPE_MAPPING> = {}) {
 		this.instanceId = randomUUID()
 		this.client = createClient(this.options.config)
@@ -90,22 +143,34 @@ export class RedisQueueBridge<
 		this.orphanRecoveryBatchSize = this.options.recoveryBatchSize ?? DEFAULT_ORPHAN_RECOVERY_BATCH_SIZE
 	}
 
+	/**
+	 * Opens the Redis client connection.
+	 */
 	async start() {
 		if (!this.client.isOpen) {
 			await this.client.connect()
 		}
 	}
 
+	/**
+	 * Disconnects the Redis client if it is open.
+	 */
 	async destroy() {
 		if (this.client.isOpen) {
 			await this.client.disconnect()
 		}
 	}
 
+	/**
+	 * Indicates whether the Redis client reports itself as ready.
+	 */
 	async isReady() {
 		return this.client.isReady
 	}
 
+	/**
+	 * Performs a Redis `PING` to verify broker health.
+	 */
 	async isHealthy() {
 		try {
 			await this.client.ping()
@@ -115,6 +180,13 @@ export class RedisQueueBridge<
 		}
 	}
 
+	/**
+	 * Enqueues a job, optionally scheduled for delayed delivery.
+	 *
+	 * When `idempotencyKey` is provided, duplicate enqueue calls for the same
+	 * queue and key return the original `jobId`. Payload, parameter, and headers
+	 * are JSON serialized into Redis.
+	 */
 	async enqueue(options: QueueEnqueueOptions<unknown, unknown>): Promise<QueueEnqueueResult> {
 		const client = await this.getClient()
 		const now = Date.now()
@@ -162,6 +234,13 @@ export class RedisQueueBridge<
 		return result
 	}
 
+	/**
+	 * Leases the next available job from a queue.
+	 *
+	 * The bridge first recovers orphaned processing entries, expired leases, and
+	 * due scheduled jobs. The returned lease must be acknowledged, negatively
+	 * acknowledged, or extended by the worker.
+	 */
 	async leaseNext(queueName: string, options?: QueueLeaseOptions): Promise<QueueLease | undefined> {
 		const client = await this.getClient()
 		await this.recoverOrphanedProcessing(queueName)
@@ -204,6 +283,9 @@ export class RedisQueueBridge<
 		}
 	}
 
+	/**
+	 * Extends a currently active lease by updating the stored expiry timestamp.
+	 */
 	async extendLease(queueName: string, leaseId: string, extensionMs: number): Promise<void> {
 		const client = await this.getClient()
 		const jobId = this.decodeBulkString(await client.hGet(this.leaseMapKey(queueName), leaseId))
@@ -224,14 +306,24 @@ export class RedisQueueBridge<
 			.exec()
 	}
 
+	/**
+	 * Acknowledges successful processing and removes the job and lease metadata.
+	 */
 	async ack(queueName: string, leaseId: string): Promise<void> {
 		await this.ackLease(queueName, leaseId)
 	}
 
+	/**
+	 * Retries or dead-letters a leased job according to the retry request and
+	 * the job's `maxAttempts` value.
+	 */
 	async nack(queueName: string, leaseId: string, request: QueueRetryRequest): Promise<void> {
 		await this.retryLease(queueName, leaseId, request)
 	}
 
+	/**
+	 * Appends a message to the queue dead-letter list.
+	 */
 	async moveToDeadLetter(queueName: string, message: QueueMessage, reason?: string): Promise<void> {
 		const client = await this.getClient()
 		const enrichedMessage = {
@@ -244,6 +336,9 @@ export class RedisQueueBridge<
 		await client.rPush(this.deadLetterKey(queueName), JSON.stringify(enrichedMessage))
 	}
 
+	/**
+	 * Reads dead-lettered messages without removing them.
+	 */
 	async peekDeadLetter(queueName: string, options?: QueueDeadLetterListOptions): Promise<QueueMessage[]> {
 		const client = await this.getClient()
 		const offset = options?.offset ?? 0
@@ -256,11 +351,17 @@ export class RedisQueueBridge<
 			.map(entry => JSON.parse(entry) as QueueMessage)
 	}
 
+	/**
+	 * Moves dead-lettered messages back to the queue for processing.
+	 */
 	async redriveDeadLetter(queueName: string, options?: QueueDeadLetterRedriveOptions): Promise<number> {
 		const limit = options?.limit ?? 1
 		return this.redriveDeadLetterEntries(queueName, limit)
 	}
 
+	/**
+	 * Removes all dead-lettered messages and returns the removed count.
+	 */
 	async purgeDeadLetter(queueName: string): Promise<number> {
 		const client = await this.getClient()
 		const count = this.normalizeNumber(await client.lLen(this.deadLetterKey(queueName)))
@@ -268,6 +369,9 @@ export class RedisQueueBridge<
 		return count
 	}
 
+	/**
+	 * Lists active lease records for a queue from Redis lease metadata.
+	 */
 	async inspectLeases(queueName: string, options?: QueueDeadLetterListOptions): Promise<QueueLeaseInspectionRecord[]> {
 		const client = await this.getClient()
 		const offset = options?.offset ?? 0
@@ -299,6 +403,10 @@ export class RedisQueueBridge<
 		return records
 	}
 
+	/**
+	 * Returns Redis-derived queue metrics for pending, in-flight, dead-letter,
+	 * retry count, and oldest pending job age.
+	 */
 	async metrics(queueName: string) {
 		const client = await this.getClient()
 		const pending = this.normalizeNumber(await client.lLen(this.pendingKey(queueName)))

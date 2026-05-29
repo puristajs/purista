@@ -21,20 +21,44 @@ import type { KeyValueType } from './KeyValue.type.js'
  */
 export type PubSubSubscriptionOptionsType = {
 	// Metadata
+	/**
+	 * Stores the metadata value exposed by PubSubSubscriptionOptionsType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	metadata?: KeyValueType
 
 	// The deadletter topic path
+	/**
+	 * Stores the deadLetterTopic value exposed by PubSubSubscriptionOptionsType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	deadLetterTopic?: string
 
 	// The deadletter callback to call
+	/**
+	 * Stores the deadLetterCallback value exposed by PubSubSubscriptionOptionsType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	deadLetterCallback?: TypeDaprPubSubCallback
 
 	// The default callback
+	/**
+	 * Stores the callback value exposed by PubSubSubscriptionOptionsType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	callback?: TypeDaprPubSubCallback
 
 	// The route creation for a single route or DaprPubSubRouteType
+	/**
+	 * Stores the route value exposed by PubSubSubscriptionOptionsType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	route?: string | DaprPubSubRouteType
 
 	// The settings for bulk subscribe
+	/**
+	 * Stores the bulkSubscribe value exposed by PubSubSubscriptionOptionsType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	bulkSubscribe?: BulkSubscribeConfig
 }

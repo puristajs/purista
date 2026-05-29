@@ -4,29 +4,35 @@ import type { Encoder } from './Encoder.js'
 import type { Encrypter } from './Encrypter.js'
 
 /**
- * AmqpBridge bridge config
+ * Configuration for {@link AmqpBridge}.
+ *
+ * The bridge expects an AMQP broker with headers exchange support. Durable
+ * command and subscription consumers rely on durable queues and manual
+ * acknowledgements. Payload handling is configured separately for serialization
+ * and encryption; the default encryption handler is plain pass-through, so
+ * sensitive payloads require an application-provided encrypter.
  *
  * @see [amqplib documentation](https://amqp-node.github.io/amqplib/)
  */
 export type AmqpBridgeConfig = {
-	/** the AMQP exchage name to be used @default purista */
+	/** AMQP headers exchange name to use. @default purista */
 	exchangeName?: string
-	/** the queue prefix to be used for all PURISTA queues except short living queues created by the broker on request @default purista */
+	/** Queue prefix for PURISTA queues except broker-created exclusive queues. @default purista */
 	namePrefix?: string
-	/** the AMQP exchange options */
+	/** AMQP exchange assertion options. */
 	exchangeOptions?: Options.AssertExchange | undefined
-	/** max unacked messages per consumer channel */
+	/** Maximum unacknowledged messages per manual-ack consumer channel. */
 	prefetch?: number
-	/** optional dead letter exchange name used for durable command/subscription queues */
+	/** Dead-letter exchange name applied to durable command queues when set. */
 	deadLetterExchangeName?: string
-	/** optional dead letter routing key used for durable command/subscription queues */
+	/** Dead-letter routing key used by durable command queues and subscription dead-letter handoff. */
 	deadLetterRoutingKey?: string
-	/** the AMQP broker url @default amqp://localhost */
+	/** AMQP broker URL or connection options. @default amqp://localhost */
 	url?: string | Options.Connect
-	/** socket options */
+	/** Socket options passed to amqplib. */
 	socketOptions?: SocketOptions
-	/** the encoder(s) to be used for AMQP messages @default jsonEncoder  */
+	/** Content-type encoders used for AMQP payload serialization. @default jsonEncoder */
 	encoder?: Encoder
-	/** the encrypter(s) to be used for AMQP messages @default plain  */
+	/** Content-encoding encrypters used for AMQP payload protection. @default plainEncrypter */
 	encrypter?: Encrypter
 }

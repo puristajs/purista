@@ -23,10 +23,12 @@ import type { Hono, Context as HonoContext } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 /**
- * Add HTTP endpoints for all commands that expose HTTP metadata.
+ * Adds HTTP endpoints for all commands that expose HTTP metadata.
  *
  * This helper registers the routes on the provided Hono application and
- * connects them with the corresponding service commands.
+ * connects them with the corresponding service commands. It exposes commands
+ * only; streams, queues and agents must be surfaced through their own declared
+ * command/stream contracts.
  *
  * @param services - Instance or array of services whose commands should be exposed.
  * @param app - The Hono application instance.

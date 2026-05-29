@@ -3,6 +3,13 @@ import { isReferenceObject } from 'openapi3-ts/oas31'
 
 const findPathParamsRegex = /:[^:/]+/gm
 
+/**
+ * Runs the getParameterDefinition helper exported by @purista/hono-http-server.
+ * Expose only schemas and metadata that are safe for clients to inspect.
+ */
+/**
+ * Converts Hono-style route parameters such as `:id` into OpenAPI path parameters.
+ */
 export const getParameterDefinition = (path: string, parameterschema?: SchemaObject): ParameterObject[] => {
 	const routeParams: string[] = []
 	let m: RegExpExecArray | null

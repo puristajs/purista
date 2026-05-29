@@ -1,26 +1,21 @@
 /**
-A config store for using NATS (with JetStream) as storage.
-JetStream must be enabled at the NATS broker.
-
-@example
- ```typescript
-const config = {
-  port: 8222
-}
-
-const store = new NatsConfigStore(config)
-
-await store.setConfig('configKey',{ myConfig: 'value' })
-
-let value = await store.getConfig('configKey')
-console.log(value) // outputs: { configKey: { myConfig: 'value' } }
-
-await store.removeConfig('configKey')
-
-value = await store.getConfig('configKey')
-console.log(value) // outputs: undefined
-```
-@module
+ * NATS JetStream key-value adapter for PURISTA config values.
+ *
+ * JetStream must be enabled. Values are encoded with `JSONCodec`; use
+ * tenant-aware keys and configure NATS credentials through connection options or
+ * the runtime environment.
+ *
+ * @example
+ * ```typescript
+ * const store = new NatsConfigStore({
+ *   servers: 'nats://localhost:4222',
+ *   keyValueStoreName: 'purista-config-store',
+ * })
+ *
+ * const config = await store.getConfig('tenant.acme.prod.app.features')
+ * ```
+ *
+ * @module
  */
 export * from './NatsConfigStore.impl.js'
 export * from './types/index.js'

@@ -30,6 +30,7 @@ export type Locale = string[] | string | false | undefined
  * Options used for converting strings to pascal/camel case.
  */
 export interface PascalCaseOptions extends Options {
+	/** Merge ambiguous characters before applying PascalCase conversion. */
 	mergeAmbiguousCharacters?: boolean
 }
 
@@ -37,12 +38,21 @@ export interface PascalCaseOptions extends Options {
  * Options used for converting strings to any case.
  */
 export interface Options {
+	/** Locale passed to `String.prototype.toLocaleLowerCase` and `toLocaleUpperCase`. */
 	locale?: Locale
+	/** Custom word splitter used before applying the requested case conversion. */
 	split?: (value: string) => string[]
-	/** @deprecated Pass `split: splitSeparateNumbers` instead. */
+	/**
+	 * Enables legacy number splitting during word normalization.
+	 *
+	 * @deprecated Pass `split: splitSeparateNumbers` instead.
+	 */
 	separateNumbers?: boolean
+	/** Delimiter inserted between normalized words for delimiter-based cases. */
 	delimiter?: string
+	/** Characters preserved at the beginning of the converted value. */
 	prefixCharacters?: string
+	/** Characters preserved at the end of the converted value. */
 	suffixCharacters?: string
 }
 

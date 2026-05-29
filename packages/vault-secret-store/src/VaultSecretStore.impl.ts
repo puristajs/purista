@@ -26,12 +26,43 @@ const normalizeMountPath = (mount: string): string => {
 }
 
 /**
- * The secret store adapter for HashiCorp Vault.
- * It will store, retrieve, update or remove secrets in HashiCorp Vault.
+ * Secret store backed by HashiCorp Vault KV v2.
+ *
+ * Secret values are cached in memory after the first read. Set `enableCache` to
+ * `false` to always read from Vault, or set `cacheTtl` in milliseconds to bound
+ * cache reuse. Expired entries are refreshed on the next read.
+ *
+ * Values are written under `{mount}/data/{secretName}` using the field name
+ * `value`, and removals delete `{mount}/metadata/{secretName}`. Use
+ * tenant-aware names such as `tenants/acme/prod/payments/api-token`. Never log
+ * returned secret values or Vault tokens.
+ *
+ * @example
+ * ```typescript
+ * const store = new VaultSecretStore({
+ *   endpoint: 'https://vault.example.internal',
+ *   token: process.env.VAULT_TOKEN ?? '',
+ *   mount: 'secret',
+ * })
+ *
+ * await store.setSecret('tenants/acme/prod/payments/api-token', 'placeholder-secret')
+ * const secret = await store.getSecret('tenants/acme/prod/payments/api-token')
+ * ```
  */
 export class VaultSecretStore extends SecretStoreBaseClass<VaultSecretStoreConfig> {
+	/**
+	 * Node Vault client used for KV requests.
+	 *
+	 * Applications normally configure this through the constructor. Tests may
+	 * replace it with a compatible client.
+	 */
 	client: ReturnType<typeof vault>
 
+	/**
+	 * Creates a Vault KV v2-backed secret store.
+	 *
+	 * @param config Store options, Vault endpoint, token, and optional mount.
+	 */
 	constructor(config: StoreBaseConfig<VaultSecretStoreConfig>) {
 		super('VaultSecretStore', { enableCache: true, ...config })
 		const mount = this.config.mount ?? 'secret'

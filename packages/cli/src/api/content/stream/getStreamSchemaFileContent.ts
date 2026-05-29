@@ -3,6 +3,7 @@ import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
+/** Generate the schema module for stream input, chunk, and final payloads. */
 export const getStreamSchemaFileContent = (input: {
 	serviceName: string
 	serviceVersion: string

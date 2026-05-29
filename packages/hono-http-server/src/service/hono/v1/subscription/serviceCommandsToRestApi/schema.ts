@@ -1,4 +1,6 @@
 import { z } from 'zod'
 
-// define the input payload
+/**
+ * Schema for dynamic endpoint metadata received from service definition info messages.
+ */
 export const honoV1ServiceCommandsToRestApiInputPayloadSchema = z.record(z.string(), z.unknown())

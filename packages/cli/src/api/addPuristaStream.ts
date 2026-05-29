@@ -12,13 +12,19 @@ import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
 /**
- * Add all folders and files for a new stream to an existing PURISTA service.
+ * Add a stream to an existing PURISTA service version.
+ *
+ * Generates `types.ts`, `schema.ts`, a stream builder, a stream test, and
+ * appends the stream definition to the service composition file.
  */
 export const addPuristaStream = async (input: {
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
+	/** Human-readable stream description used by `getStreamBuilder`. */
 	streamDescription: string
+	/** Logical stream name, for example `watch account status`. */
 	streamName: string
+	/** Optional final event emitted when the stream completes. */
 	responseEventName?: string
 	serviceName: string
 	serviceVersion: string

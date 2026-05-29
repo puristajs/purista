@@ -4,6 +4,9 @@ import { join } from 'node:path'
 import { type AsExpression, Project, SyntaxKind } from 'ts-morph'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
+/**
+ * Read `ServiceEvent` enum or const-object values from a project event file.
+ */
 export const getEventNames = (
 	puristaConfig: PuristaConfig,
 	eventEnumFileName: string,

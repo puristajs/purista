@@ -1,18 +1,26 @@
 /**
- * HashiCorp Vault store config
+ * HashiCorp Vault KV v2 secret store configuration.
  */
 export type VaultSecretStoreConfig = {
 	/**
-	 * Vault HTTP endpoint
-	 * @example 'http://localhost:8200'
+	 * Vault HTTP endpoint.
+	 *
+	 * @example
+	 * ```typescript
+	 * 'https://vault.example.internal'
+	 * ```
 	 */
 	endpoint: string
 	/**
-	 * Authentication token
+	 * Vault authentication token.
+	 *
+	 * Prefer short-lived tokens from the runtime environment. Do not commit or log
+	 * real token values.
 	 */
 	token: string
 	/**
-	 * Secret engine mount path
+	 * KV v2 secret engine mount path. Leading and trailing slashes are normalized.
+	 *
 	 * @default 'secret'
 	 */
 	mount?: string

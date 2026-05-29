@@ -4,8 +4,16 @@ import type { Subscription } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
+/**
+ * Function signature for building an MQTT subscription topic filter.
+ */
 export type GetSubscriptionTopicFn = (this: IMqttBridge, subscription: Subscription) => string
 
+/**
+ * Builds the MQTT topic filter for a PURISTA subscription definition.
+ *
+ * Unspecified subscription fields become MQTT `+` wildcards.
+ */
 export const getSubscriptionTopic: GetSubscriptionTopicFn = function (subscription) {
 	return join(
 		this.config.topicPrefix,

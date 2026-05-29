@@ -6,20 +6,33 @@ import type { PuristaConfig } from '../api/loadPuristaConfig.js'
 
 const matchVersionRegex = /^\D*(\d+)$/i
 
+/** Discovered files and artifact directories for one service version. */
 export type ServiceVersionSnapshot = {
+	/** Command artifact directory names. */
 	commands: string[]
+	/** Subscription artifact directory names. */
 	subscriptions: string[]
+	/** Stream artifact directory names. */
 	streams: string[]
+	/** Queue artifact directory names. */
 	queues: string[]
+	/** Queue worker artifact directory names. */
 	queueWorkers: string[]
+	/** Service builder file path relative to `puristaConfig.servicePath`. */
 	builderFile: string
+	/** Service file path relative to `puristaConfig.servicePath`. */
 	serviceFile: string
 }
 
+/** Full project snapshot used by CLI generators to append new definitions safely. */
 export type ProjectSnapshot = {
+	/** Services keyed by service directory name and numeric service version. */
 	services: Record<string, Record<string, ServiceVersionSnapshot>>
+	/** Agents keyed by agent directory name with discovered numeric versions. */
 	agents: Record<string, string[]>
+	/** Known ServiceEvent entries sorted by event value. */
 	eventNames: { name: string; value: string }[]
+	/** ServiceEvent enum/object file name relative to `puristaConfig.servicePath`. */
 	eventEnumFileName: string
 }
 
@@ -39,6 +52,9 @@ const pushUnique = (target: string[], value: string) => {
 	}
 }
 
+/**
+ * Scan a PURISTA project and return all service, queue, worker, agent, and event metadata.
+ */
 export const createProjectSnapshot = async (
 	puristaConfig: PuristaConfig,
 	projectRootPath?: string,

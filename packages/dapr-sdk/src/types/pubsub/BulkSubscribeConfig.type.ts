@@ -18,11 +18,23 @@ limitations under the License.
  **/
 export type BulkSubscribeConfig = {
 	// Flag to enable/disable bulk subscribe
+	/**
+	 * Stores the enabled value exposed by BulkSubscribeConfig.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	enabled: boolean
 
 	// Max number of messages to be sent in a single bulk request
+	/**
+	 * Stores the maxMessagesCount value exposed by BulkSubscribeConfig.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	maxMessagesCount?: number
 
 	// Max duration to wait for messages to be sent in a single bulk request
+	/**
+	 * Stores the maxAwaitDurationMs value exposed by BulkSubscribeConfig.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	maxAwaitDurationMs?: number
 }

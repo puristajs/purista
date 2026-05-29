@@ -82,6 +82,27 @@ const createPredictedExampleArtifacts = (step: ProjectGeneratorStep, puristaConf
 	]
 }
 
+/**
+ * Build a complete project generation plan without writing files.
+ *
+ * @example
+ * ```ts
+ * const plan = planProjectGeneration({
+ *   target: 'my-service',
+ *   projectName: 'my-service',
+ *   runtime: 'node',
+ *   eventBridge: 'default',
+ *   useWebserver: true,
+ *   fileConvention: 'camel',
+ *   eventConvention: 'camel',
+ *   linter: 'biome',
+ *   formatter: 'biome',
+ *   type: 'module',
+ *   packageManager: 'npm',
+ *   installDependencies: false,
+ * })
+ * ```
+ */
 export const planProjectGeneration = (
 	input: CreateProjectInput,
 	options: { cwd?: string } = {},

@@ -11,6 +11,15 @@ import {
 } from './change-case.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
+/**
+ * Convert an event label to the event naming convention configured in `purista.json`.
+ *
+ * @example
+ * ```ts
+ * convertToProjectEventCasing('user created', { ...config, eventConvention: 'constantCase' })
+ * // "USER_CREATED"
+ * ```
+ */
 export const convertToProjectEventCasing = (input: string, puristaProjectConfig: PuristaConfig) => {
 	switch (puristaProjectConfig.eventConvention) {
 		case 'camel':

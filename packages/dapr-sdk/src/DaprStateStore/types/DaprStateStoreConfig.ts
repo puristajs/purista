@@ -1,16 +1,16 @@
 import type { DaprClientConfig } from '../../DaprClient/types/DaprClientConfig.js'
 
 /**
- * Dapr state store configuration
+ * Configuration for {@link DaprStateStore}.
  */
 export type DaprStateStoreConfig = {
 	/**
-	 * The name of the state store
+	 * Dapr state component name.
 	 */
 	stateStoreName?: string
 
 	/**
-	 * The Dapr client config to interact with Dapr sidecar
+	 * Dapr sidecar client settings.
 	 */
 	clientConfig?: DaprClientConfig
 }

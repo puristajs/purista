@@ -1,12 +1,29 @@
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 
-type PendingInvocation<T = unknown> = {
+/**
+ * Internal pending command invocation callbacks and timeout handle.
+ *
+ * @group Event bridge
+ */
+export type PendingInvocation<T = unknown> = {
+	/** Resolve the caller with a command result payload. */
 	resolve: (value: T) => void
+	/** Reject the caller with a PURISTA or provider error. */
 	reject: (reason?: unknown) => void
+	/** Timeout that rejects the invocation when no response arrives. */
 	timeout: ReturnType<typeof setTimeout>
 }
 
+/**
+ * Registry for command invocations awaiting correlated responses.
+ *
+ * The registry rejects timed-out invocations and retains timed-out correlation
+ * ids briefly so late responses can be classified and logged without resolving
+ * stale callers.
+ *
+ * @group Event bridge
+ */
 export class PendingInvocationRegistry<T = unknown> {
 	private readonly pending = new Map<string, PendingInvocation<T>>()
 	private readonly timedOut = new Map<string, number>()
@@ -18,14 +35,17 @@ export class PendingInvocationRegistry<T = unknown> {
 		} = {},
 	) {}
 
+	/** Number of invocations currently awaiting a response. */
 	get size() {
 		return this.pending.size
 	}
 
+	/** Exposes the pending map for low-level bridge diagnostics. */
 	getPendingMap() {
 		return this.pending
 	}
 
+	/** Register one invocation and reject it automatically after `timeoutMs`. */
 	register(correlationId: string, timeoutMs: number, traceId: string | undefined) {
 		return new Promise<T>((resolve, reject) => {
 			const timeout = setTimeout(() => {
@@ -52,6 +72,7 @@ export class PendingInvocationRegistry<T = unknown> {
 		})
 	}
 
+	/** Resolve a pending invocation or classify the response as late/missing. */
 	resolve(correlationId: string, payload: T) {
 		const pending = this.pending.get(correlationId)
 		if (!pending) {
@@ -61,6 +82,7 @@ export class PendingInvocationRegistry<T = unknown> {
 		return 'resolved' as const
 	}
 
+	/** Reject a pending invocation or classify the response as late/missing. */
 	reject(correlationId: string, error: unknown) {
 		const pending = this.pending.get(correlationId)
 		if (!pending) {
@@ -70,6 +92,7 @@ export class PendingInvocationRegistry<T = unknown> {
 		return 'rejected' as const
 	}
 
+	/** Reject all pending invocations, typically during bridge shutdown. */
 	rejectAll(error: unknown) {
 		for (const [correlationId, pending] of Array.from(this.pending.entries())) {
 			clearTimeout(pending.timeout)
@@ -79,6 +102,7 @@ export class PendingInvocationRegistry<T = unknown> {
 		this.timedOut.clear()
 	}
 
+	/** Clear pending and timed-out entries without resolving callers. */
 	clear() {
 		for (const pending of this.pending.values()) {
 			clearTimeout(pending.timeout)

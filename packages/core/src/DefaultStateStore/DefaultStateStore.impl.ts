@@ -5,8 +5,12 @@ import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKe
 import type { DefaultStateStoreConfig } from './types/DefaultStateStoreConfig.js'
 
 /**
+ * Process-local in-memory state store for development and tests.
+ *
  * The DefaultStateStore is a placeholder which offers all needed methods.
  * Getters and setters will throw a UnhandledError with status `Not implemented`
+ * Values are lost on shutdown and should not be used as a production source of
+ * truth.
  *
  * @group Store
  *

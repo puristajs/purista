@@ -15,6 +15,13 @@ import { serializeOtpToMqtt } from '../serializeOtpToMqtt.impl.js'
 import { getTopicName } from '../topic/getTopicName.impl.js'
 import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
+/**
+ * Creates an MQTT subscription handler for a PURISTA subscription.
+ *
+ * The handler invokes the subscription callback and republishes returned events.
+ * PURISTA subscription control signals are logged because MQTT cannot enforce
+ * bridge-managed retry, DLQ, drop, or pause/resume behavior.
+ */
 export const getSubscriptionHandler = (
 	_subscription: Subscription,
 	cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,

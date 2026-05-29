@@ -1,7 +1,13 @@
 import type { Server } from 'node:http'
 import type { Http2SecureServer, Http2Server } from 'node:http2'
 
+/**
+ * Configuration for HTTP event bridges that host PURISTA command/subscription routes.
+ */
 export type HttpEventBridgeConfig = {
+	/**
+	 * Logger and telemetry name for the bridge instance.
+	 */
 	name?: string
 
 	/**
@@ -34,29 +40,31 @@ export type HttpEventBridgeConfig = {
 	serverPort?: number
 
 	/**
-	 * the prefix to be used for exposing commands as endpoints expecting a event bus message
+	 * Prefix for internal command/subscription endpoints that exchange full PURISTA messages.
 	 *
 	 * @default purista
 	 */
 	pathPrefix?: string
 
 	/**
-	 * the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
-	 * needs to `enableRestApiExpose` set to `true`
+	 * Prefix for public REST command projections.
+	 *
+	 * The command definition must declare HTTP exposure and `enableRestApiExpose`
+	 * must be `true`.
 	 *
 	 * @default /api
 	 */
 	apiPrefix?: string
 
 	/**
-	 * expose commands as regular REST endpoints when they are configured as endpoints
+	 * Exposes commands as regular REST endpoints when command metadata declares HTTP exposure.
 	 *
 	 * @default true
 	 */
 	enableRestApiExpose?: boolean
 
 	/**
-	 * subscription invocations are wrapped in CloudEvent
+	 * Whether subscription invocations arrive wrapped as CloudEvents.
 	 *
 	 * CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 	 *
@@ -65,7 +73,7 @@ export type HttpEventBridgeConfig = {
 	subscriptionPayloadAsCloudEvent?: boolean
 
 	/**
-	 * command invocations are wrapped in CloudEvent
+	 * Whether internal command invocations arrive wrapped as CloudEvents.
 	 *
 	 * CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 	 *
@@ -73,7 +81,7 @@ export type HttpEventBridgeConfig = {
 	 */
 	commandPayloadAsCloudEvent?: boolean
 	/**
-	 * enable HTTP compression in web server
+	 * Enables HTTP compression middleware for the hosted Hono server.
 	 * @default true
 	 */
 	enableHttpCompression?: boolean

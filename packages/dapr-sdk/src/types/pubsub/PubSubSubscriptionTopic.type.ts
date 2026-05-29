@@ -19,8 +19,16 @@ import type { PubSubSubscriptionTopicRoutesType } from './PubSubSubscriptionTopi
  */
 export type PubSubSubscriptionTopicType = {
 	// The routes defined in a topic
+	/**
+	 * Stores the routes value exposed by PubSubSubscriptionTopicType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	routes: PubSubSubscriptionTopicRoutesType
 
 	// dapr is configured on topic level
+	/**
+	 * Stores the dapr value exposed by PubSubSubscriptionTopicType.
+	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+	 */
 	dapr: DaprPubSubType
 }
