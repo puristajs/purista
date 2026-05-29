@@ -6,7 +6,7 @@ order: 207020
 
 # Harness agents and workflows
 
-`@purista/ai-harness` integrates behind a PURISTA service boundary when installed. The harness provides lower-level agent loops, workflows, model providers, tools, skills, memory, history, state, sandboxing, telemetry, and streaming events.
+`@purista/harness` integrates behind a PURISTA service boundary through `@purista/core`. The harness provides lower-level agent loops, workflows, model providers, tools, skills, memory, history, state, sandboxing, telemetry, and streaming events.
 
 The PURISTA package exposes those capabilities as queue-backed business logic.
 

@@ -19,7 +19,7 @@ A `triage` agent that:
 ## Prerequisites
 
 - PURISTA project with `@purista/core` installed
-- `@purista/ai-harness` installed (required for `getAgentQueueBuilder` support)
+- `@purista/core` installed; add a model provider package such as `@purista/harness-openai` when running against a live provider
 - An AI provider package installed (e.g. `@purista/harness-openai`)
 
 ## Step 1: Create the service
@@ -79,17 +79,17 @@ Allow the agent to call a business command:
 ## Step 5: Implement the run function
 
 ```typescript [run.ts]
-.setRunFunction(async function(context, payload) {
+.setRunFunction(async context => {
   // Fetch customer profile using the tool
   const profile = await context.invoke.tools['customer.1.getProfile'].call({
-    customerId: payload.customerId,
+    customerId: context.payload.customerId,
   })
 
   // Ask the model to classify
   const result = await context.harness.models.primary.object({
     messages: [{
       role: 'user',
-      content: `Customer tier: ${profile.tier}, Open incidents: ${profile.openIncidents}. Ticket: ${payload.text}`,
+      content: `Customer tier: ${profile.tier}, Open incidents: ${profile.openIncidents}. Ticket: ${context.payload.text}`,
     }],
     schema: {
       type: 'object',

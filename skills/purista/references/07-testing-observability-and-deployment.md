@@ -11,6 +11,7 @@ Test declared boundaries and runtime wiring:
 - schedule export tests should assert deterministic manifests and unsupported expression failures without a live scheduler or cluster
 - strict queue idempotency tests should assert duplicate enqueue returns the original job id and does not create a second job
 - agent tests should use core agent testing helpers
+- security tests should cover missing tenant/principal metadata, unauthorized access, guard failures, redaction, and least-privilege resources
 
 Avoid tests that only validate raw helper functions while skipping builder metadata and runtime wiring.
 
@@ -25,6 +26,7 @@ Metrics guidance:
 - handlers record custom metrics through typed `context.metrics`
 - custom metric names must use `app.*`
 - avoid high-cardinality or sensitive attributes such as headers, raw URLs, prompts, completions, tokens, user IDs, tenant IDs, and payload data
+- prefer stable non-sensitive dimensions and counts; link detailed forensic records through authorized stores/audit systems instead of metric labels
 
 ```ts
 context.metrics['app.orders.created'].add(1, { channel: 'web' })
@@ -45,6 +47,16 @@ Use context logger surfaces instead of ad hoc loggers:
 - AI `context.logger`
 - harness logger bridge where model/tool runtime is involved
 
+Structured logs should include enough identity for operations without exposing content. Safe examples include service, command, queue, agent, run id, correlation id, trace id, status, retry count, and sanitized error class. Avoid payloads, headers, authorization data, cookies, prompts, completions, attachments, raw provider responses, and secrets.
+
+## Privacy And Audit Verification
+Before production, verify:
+- guards reject missing or unauthorized `tenantId` and `principalId`
+- sensitive data is scoped by tenant in resources, stores, queues, cache keys, and idempotency keys
+- logs, spans, metrics, events, queues, streams, and generated OpenAPI examples do not expose secrets or PII
+- model calls receive redacted/minimized context and default AI telemetry does not capture prompt/completion content
+- audit records identify actor, tenant, operation, resource id, decision, and timestamp without storing confidential content unless policy requires it
+
 ## Deployment
 Choose topology after architecture:
 - event bridge selection follows delivery semantics
@@ -60,4 +72,5 @@ Name the commands used:
 - package lint
 - dependency-cycle checks for shared packages
 - stale-reference scans when removing protocols or optional dependencies
+- sensitive-data scans for logs, metrics attributes, spans, events, queue payloads, docs, examples, and AI prompts
 - live Redis/NATS idempotency checks where container infrastructure is available

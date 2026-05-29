@@ -8,7 +8,8 @@ Use this reference when turning architecture into code.
 3. Use the PURISTA CLI to create supported artifacts.
 4. Refine generated builders, schemas, handlers, and tests.
 5. Wire runtime dependencies in `getInstance(...)`.
-6. Verify package boundaries and optional dependencies.
+6. Add guards, resources, and stores for tenant/principal checks and least-privilege data access.
+7. Verify package boundaries, optional dependencies, and sensitive-data handling.
 
 ## Use The CLI First
 Prefer CLI scaffolding for supported app artifacts:
@@ -33,9 +34,12 @@ Use builder APIs directly when:
 ## Builder Refinement Pattern
 Generated artifacts should remain explicit:
 - schema definitions live beside the boundary
+- boundary schemas contain the minimum data needed by that boundary
+- `setBeforeGuardHooks(...)` enforces tenant/principal preconditions before handler logic for sensitive operations
 - handlers use `context.resources`, `context.service`, `context.stream`, `context.queue`, or `context.harness`
 - runtime clients are not created inside handlers
 - service files add definitions via service builder methods
+- logs, metrics, traces, events, queue payloads, streams, and prompts do not include secrets, PII, raw headers, tokens, or full request bodies by default
 
 ## Package-Internal Work
 For framework package changes, do not use CLI scaffolding. Edit the package source and update:
@@ -51,4 +55,5 @@ Run focused package checks first, then wider checks:
 - package tests
 - package lint
 - stale import/reference scans for removed concepts
+- sensitive-data scans in docs/examples/logging/metrics/prompts when touching public examples or AI code
 - dependency-cycle checks when touching shared packages

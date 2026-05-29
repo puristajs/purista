@@ -17,12 +17,16 @@ const headings = handbookSections.map(s => ({
 	depth: 2,
 	slug: s.id,
 	text: `${String(s.num).padStart(2, '0')} — ${s.title}`,
-}))
+})).concat({
+	depth: 2,
+	slug: 'api-documentation',
+	text: 'API Documentation',
+})
 ---
 
 <HandbookLayout
   title="PURISTA Handbook"
-  description="Nine chapters from hands-on tutorials to mental model, building blocks, enterprise patterns and operations — real TypeScript throughout."
+  description="Handbook chapters from hands-on tutorials to mental model, building blocks, enterprise patterns, operations, and API documentation — real TypeScript throughout."
   sidebar={sidebar}
   currentId=""
   headings={headings}
@@ -162,6 +166,39 @@ const headings = handbookSections.map(s => ({
         </div>
       </section>
     ))}
+
+    <section id="api-documentation" class="hb-overview-section">
+      <header class="hb-overview-section-head">
+        <span
+          class="font-mono text-[0.68rem] tracking-[0.14em] uppercase"
+          style="color: var(--color-pilot-hi)"
+        >
+          API
+        </span>
+        <div>
+          <a
+            href="/handbook/api/"
+            class="hb-overview-section-title"
+            style="--sec-color: var(--color-pilot-hi)"
+          >
+            API Documentation
+          </a>
+          <p class="text-[var(--color-fg-muted)] text-sm leading-snug mt-1">
+            Handbook-native reference generated from the public PURISTA TypeScript packages.
+          </p>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-5">
+        <HandbookCard
+          title="Integrated API Reference"
+          description="Browse package exports, classes, interfaces, functions, and TypeScript signatures inside the handbook UI."
+          icon="api"
+          href="/handbook/api/"
+          color="pilot"
+        />
+      </div>
+    </section>
   </div>
 
 </HandbookLayout>

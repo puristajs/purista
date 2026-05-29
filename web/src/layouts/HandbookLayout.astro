@@ -38,6 +38,7 @@ function isParentActive(item: SidebarItem, id: string): boolean {
 }
 
 function getItemHref(item: SidebarItem): string {
+	if (item.href) return item.href
 	const base = item.id.replace(/\/index$/, '')
 	if (base === '') return '/handbook/'
 	return `/handbook/${base}`

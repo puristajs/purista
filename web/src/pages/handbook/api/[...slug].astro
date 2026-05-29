@@ -1,0 +1,110 @@
+---
+import CodeBlock from '../../../components/ui/CodeBlock.astro'
+import { getApiPage, getApiStaticPaths } from '../../../lib/api-docs'
+import { getSidebarItems } from '../../../data/handbook'
+import HandbookLayout from '../../../layouts/HandbookLayout.astro'
+
+export function getStaticPaths() {
+	return getApiStaticPaths()
+}
+
+const { item } = Astro.props
+const page = getApiPage(item)
+const sidebar = getSidebarItems()
+const headings = [
+	{ depth: 2, slug: 'signature', text: 'Signature' },
+	...(page.examples.length > 0 ? [{ depth: 2, slug: 'examples', text: 'Examples' }] : []),
+	...page.memberGroups.map(group => ({
+		depth: 2,
+		slug: group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+		text: group.title,
+	})),
+]
+
+function paragraphs(text: string): string[] {
+	return text.split(/\n{2,}/).map(part => part.trim()).filter(Boolean)
+}
+
+function memberId(member: { name: string; id: number }): string {
+	return `${member.name}-${member.id}`.replace(/[^a-zA-Z0-9_.-]+/g, '-')
+}
+---
+
+<HandbookLayout
+  title={`${page.name} API`}
+  description={page.summary || `${page.name} API reference for ${page.packageName}.`}
+  sidebar={sidebar}
+  currentId="api"
+  headings={headings}
+  prose={false}
+>
+  <nav class="api-breadcrumb" aria-label="Breadcrumb">
+    <a href="/handbook/">Handbook</a>
+    <span>/</span>
+    <a href="/handbook/api/">API Documentation</a>
+    <span>/</span>
+    <span>{page.label}</span>
+  </nav>
+
+  <header class="api-detail-head">
+    <p class="api-eyebrow">{page.label} · {page.packageName}</p>
+    <h1>{page.name}</h1>
+    {page.summary && paragraphs(page.summary).map(part => <p>{part}</p>)}
+    <div class="api-meta-row">
+      <a href={page.module.href}>{page.packageName}</a>
+      {page.source?.url && <a href={page.source.url}>Source</a>}
+    </div>
+  </header>
+
+  <section id="signature" class="api-section">
+    <h2>Signature</h2>
+    <CodeBlock code={page.signature} language="typescript" filename={`${page.name}.ts`} />
+  </section>
+
+  {page.examples.length > 0 && (
+    <section id="examples" class="api-section">
+      <h2>Examples</h2>
+      {page.examples.map((example, index) => (
+        <CodeBlock code={example} language="typescript" filename={`example-${index + 1}.ts`} />
+      ))}
+    </section>
+  )}
+
+  {page.blockTags.length > 0 && (
+    <section class="api-section">
+      {page.blockTags.map(tag => (
+        <div class="callout callout--info">
+          <div class="callout__title">{tag.tag}</div>
+          {paragraphs(tag.text).map(part => <p>{part}</p>)}
+        </div>
+      ))}
+    </section>
+  )}
+
+  {page.memberGroups.map(group => (
+    <section
+      id={group.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}
+      class="api-section"
+    >
+      <div class="api-section-head">
+        <h2>{group.title}</h2>
+        <p>{group.items.length} {group.items.length === 1 ? 'entry' : 'entries'}</p>
+      </div>
+      <div class="api-member-list">
+        {group.items.map(member => (
+          <article id={memberId(member)} class="api-member">
+            <div class="api-member-head">
+              <div>
+                <h3>{member.name}</h3>
+                <p>{member.label}</p>
+              </div>
+              {member.source?.url && <a href={member.source.url}>Source</a>}
+            </div>
+            <CodeBlock code={member.signature} language="typescript" filename={`${member.name}.ts`} />
+            {member.summary && paragraphs(member.summary).map(part => <p>{part}</p>)}
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+</HandbookLayout>

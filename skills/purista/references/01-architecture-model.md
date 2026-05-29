@@ -10,6 +10,8 @@ Start in domain language:
 - external systems
 - sync vs async interactions
 - durability and retry requirements
+- tenant, principal, authorization, privacy, and audit requirements
+- confidential or PII fields that must not cross broad boundaries
 - user-facing delivery shape
 
 Only choose packages, routes, queues, or agents after those choices are clear.
@@ -34,6 +36,17 @@ Keep truth layers explicit:
 - model output, summaries, and conversation history
 
 Agents may propose, classify, synthesize, and orchestrate. Deterministic services should apply canonical mutations.
+
+## Security And Privacy Ownership
+Every capability design must name:
+- who can call it (`principalId`, service identity, or external client)
+- which tenant or data boundary it operates inside
+- which fields are public, internal, confidential, PII, regulated, or unsafe for model/provider exposure
+- which guard rejects missing or unauthorized identity before handler logic
+- which resource/store enforces tenant scoping and least privilege
+- what is safe to emit in events, queue payloads, streams, logs, metrics, traces, and audit records
+
+Prefer narrow privacy-preserving contracts. Emit identifiers and non-sensitive summaries broadly; let authorized consumers fetch sensitive detail through guarded commands/resources.
 
 ## Primitive Selection
 - command: direct action with one result
@@ -66,5 +79,6 @@ For duplicate-safe scheduled handoff, use event-to-queue idempotency. Redis and 
 - What state must survive restarts?
 - Which operations need queue-backed durability?
 - Which contract is public, internal, or transport-specific?
+- Which data must be minimized, redacted, encrypted, tenant-scoped, or excluded from AI/model context?
 - Which packages are optional and must not leak into default apps?
 - Which generated CLI artifacts can create the initial shape?

@@ -230,7 +230,8 @@ export const handbookSections: HandbookSection[] = [
 					{ id: 'blocks/agent-pattern/what-is-agent', title: 'What is an AI Agent?', order: 1 },
 					{ id: 'blocks/agent-pattern/agent-builder', title: 'The Agent Builder', order: 2 },
 					{ id: 'blocks/agent-pattern/agent-workflows', title: 'Agents & Workflows', order: 3 },
-					{ id: 'blocks/agent-pattern/agent-testing', title: 'Testing', order: 4 },
+					{ id: 'blocks/agent-pattern/http-exposure', title: 'HTTP Exposure', order: 4 },
+					{ id: 'blocks/agent-pattern/agent-testing', title: 'Testing', order: 5 },
 				],
 			},
 		],
@@ -486,15 +487,31 @@ export function getAllCards(): (HandbookCard & {
 }
 
 export function getSidebarItems(): SidebarItem[] {
-	return handbookSections.map(section => ({
-		title: section.title,
-		id: section.id,
-		order: section.num,
-		items: section.cards.map(card => ({
-			title: card.title,
-			id: `${section.id}/${card.id}`,
-			order: 0,
-			items: card.items,
+	return [
+		...handbookSections.map(section => ({
+			title: section.title,
+			id: section.id,
+			order: section.num,
+			items: section.cards.map(card => ({
+				title: card.title,
+				id: `${section.id}/${card.id}`,
+				order: 0,
+				items: card.items,
+			})),
 		})),
-	}))
+		{
+			title: 'API Documentation',
+			id: 'api',
+			href: '/handbook/api/',
+			order: handbookSections.length + 1,
+			items: [
+				{ title: 'Overview', id: 'api/overview', href: '/handbook/api/', order: 1 },
+				{ title: 'Packages', id: 'api/packages', href: '/handbook/api/#packages', order: 2 },
+				{ title: 'Classes', id: 'api/classes', href: '/handbook/api/#classes', order: 3 },
+				{ title: 'Interfaces', id: 'api/interfaces', href: '/handbook/api/#interfaces', order: 4 },
+				{ title: 'Functions', id: 'api/functions', href: '/handbook/api/#functions', order: 5 },
+				{ title: 'Types', id: 'api/types', href: '/handbook/api/#types', order: 6 },
+			],
+		},
+	]
 }

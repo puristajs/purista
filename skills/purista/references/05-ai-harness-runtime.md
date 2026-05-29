@@ -53,6 +53,8 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 
 Startup fails fast when aliases or capabilities are missing.
 
+Default AI telemetry should not capture prompt or completion content. Use `captureContent: false` unless a product-specific retention, redaction, consent, and access-control policy has been approved.
+
 Keep telemetry ownership explicit:
 - PURISTA service metrics are configured through service runtime `metrics`
 - existing PURISTA tracing continues to use `spanProcessor`
@@ -69,6 +71,18 @@ Agent handlers use:
 - `context.invoke.agents[...]` for declared child-agent aggregate calls
 - `context.metrics` for service-level and agent-local custom metrics declared on builders
 - `context.logger`
+
+## AI Security And Privacy
+Treat every agent as a service-owned data processor:
+- attach the agent to the service that owns the capability and invariants
+- allowlist command tools and child agents with `canInvoke(...)` and `canInvokeAgent(...)`
+- pass only the minimum context needed for the model task
+- redact or summarize PII, secrets, credentials, tokens, headers, raw payloads, transcripts, attachments, and proprietary data before model calls unless explicitly approved
+- sandbox untrusted file access, code execution, or MCP-style tool access
+- validate model output against schemas and apply canonical mutations through deterministic commands/resources
+- preserve `tenantId`, `principalId`, `traceId`, `correlationId`, and agent `runId` across queued runs, tool calls, child agents, streams, and audit logs
+- never use `correlationId`, message id, queue job id, or trace id as the logical AI conversation id
+- keep prompt/completion content out of non-debug logs, metrics attributes, traces, queue metadata, and emitted events
 
 Agent-local metrics are declared with `AgentQueueBuilder.defineMetric(...)`:
 
@@ -111,3 +125,4 @@ Use core testing helpers:
 - `createAgentContextMock(...)`
 
 Tests should verify output validation, model capability behavior, stream chunks, and declared invoke bridges.
+Security-sensitive agent tests should also verify denied tools, missing tenant/principal metadata, redacted model input, sanitized errors, and no prompt/PII leakage in logs or telemetry fixtures.

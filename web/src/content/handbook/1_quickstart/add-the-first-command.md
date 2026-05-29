@@ -122,7 +122,7 @@ export const signUpCommandBuilder = userV1ServiceBuilder
 ::: info More on command builder usage:
 
 - [Command Builder](../2_building_business-logic/command/the-command-builder.md)
-- [API documentation CommandDefinitionBuilder - Methods](../../api/@purista/core/classes/CommandDefinitionBuilder.md#methods)
+- [API documentation CommandDefinitionBuilder - Methods](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#methods)
 :::
 
 ### Schema file

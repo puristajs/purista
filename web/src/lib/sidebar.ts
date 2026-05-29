@@ -4,6 +4,7 @@ export interface SidebarItem {
   title: string;
   id: string;
   order: number;
+  href?: string;
   items?: SidebarItem[];
 }
 

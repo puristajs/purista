@@ -21,6 +21,8 @@ This repository ships one shared framework skill catalog in `skills/`.
 - Keep current platform decisions visible: Hono as active HTTP runtime, EventBridge/QueueBridge separation, core-owned harness-backed agents, and provider packages as app-level dependencies.
 - Keep current enterprise decisions visible: schedules are contracts, Kubernetes CronJob export is manifest generation, Redis/NATS strict idempotency returns the original job id, and no `@purista/contracts` package is used.
 - Contract guidance should prefer boundary-local consumer schemas over one oversized shared schema reused across many services.
+- Security guidance should treat tenant isolation, authorization, auditability, data minimization, secret handling, and PII/prompt redaction as first-class architecture concerns.
+- AI guidance should prevent accidental leakage of confidential data through prompts, completions, tool arguments, sandbox output, logs, metrics, traces, events, streams, and generated examples.
 
 ## Layering
 Shared roots load first. App-local overlay roots load second. Overlays may override a shared skill of the same name, but the preferred shape is one shared `purista` skill plus app-specific overlays.

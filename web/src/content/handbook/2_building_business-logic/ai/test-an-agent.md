@@ -6,7 +6,7 @@ order: 207040
 
 # Test an agent
 
-Use `@purista/ai-harness/testing` for deterministic tests. Unit and integration tests should not call real model providers.
+Use the testing helpers exported from `@purista/core` for deterministic tests. Unit and integration tests should not call real model providers.
 
 The testing helpers let you:
 
@@ -18,7 +18,7 @@ The testing helpers let you:
 ## Success path
 
 ```ts
-import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/ai-harness/testing'
+import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'
 
 const model = createScriptedHarnessModel()
 model.enqueueObject({
@@ -181,21 +181,14 @@ For full RAG tests, keep the vector index as a fake PURISTA resource and assert 
 For HTTP stream behavior, assert the generated stream chunks rather than real provider protocols.
 
 ```ts
-const chunks: unknown[] = []
+const result = await harness.stream({
+  payload: {
+    ticketId: 'T-5',
+    text: 'Stream this run',
+  },
+})
 
-await harness.stream(
-  {
-    payload: {
-      ticketId: 'T-5',
-      text: 'Stream this run',
-    },
-  },
-  {
-    write: async chunk => {
-      chunks.push(chunk)
-    },
-  },
-)
+const chunks = result.chunks
 
 expect(chunks.some(chunk => chunk.data?.type === 'response.created')).toBe(true)
 expect(chunks.some(chunk => chunk.data?.type === 'response.completed')).toBe(true)

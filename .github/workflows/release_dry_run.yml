@@ -52,5 +52,4 @@ jobs:
           name: release-dry-run-${{ github.run_id }}
           path: |
             CHANGELOG.md
-            web/public/api
             web/dist

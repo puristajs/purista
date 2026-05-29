@@ -46,7 +46,7 @@ Sorting is deterministic:
 import {
   evaluateDeterministicScorer,
   evaluatePromptCandidates
-} from '@purista/ai-harness'
+} from '@purista/harness'
 
 const abort = new AbortController()
 
@@ -168,7 +168,7 @@ If you need per-item score records, datasets, prompt versions, human labels, or 
 Use the testing subpath to validate deterministic scorer definitions before running expensive prompt comparisons:
 
 ```ts
-import { evaluateDeterministicScorer } from '@purista/ai-harness/testing'
+import { evaluateDeterministicScorer } from '@purista/harness/testing'
 
 await expect(evaluateDeterministicScorer({
   type: 'contains',
@@ -195,4 +195,4 @@ await expect(evaluateDeterministicScorer({
 - scorer returns `{ score, passed }` for every target
 - JSON Pointer paths are correct for your output shape
 - eval results are persisted in your application layer if needed
-- scorer behavior is validated with `@purista/ai-harness/testing` before use
+- scorer behavior is validated with `@purista/harness/testing` before use
