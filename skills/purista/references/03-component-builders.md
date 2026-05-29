@@ -2,6 +2,16 @@
 
 Use this reference when implementing or reviewing service components.
 
+## Contents
+- [Service](#service)
+- [Command](#command)
+- [Subscription](#subscription)
+- [Stream](#stream)
+- [Queue And Queue Worker](#queue-and-queue-worker)
+- [Schedules](#schedules)
+- [Agent](#agent)
+- [Contract Rule](#contract-rule)
+
 ## Service
 Use `ServiceBuilder` for a versioned capability. It declares config, resources, and child definitions. Runtime infrastructure is supplied later through `getInstance(...)`.
 

@@ -27,6 +27,7 @@
 		"dev:doc": "npm run dev -w @purista/web",
 		"build:api-docs": "typedoc --options typedoc.json",
 		"audit:api-docs": "node ./scripts/api-docs-audit.mjs",
+		"audit:skills": "node ./scripts/skills-audit.mjs",
 		"build:doc": "git-cliff > CHANGELOG.md && npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && npm run build:api-docs && npm run build -w @purista/web",
 		"preview:doc": "npm run preview -w @purista/web",
 		"check:cycling": "npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages",

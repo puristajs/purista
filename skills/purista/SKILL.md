@@ -101,3 +101,4 @@ PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semant
 - `references/08-cli-starter-and-scaffolding.md`
 - `references/09-implementation-planning.md`
 - `references/10-security-privacy-and-governance.md`
+- `references/11-evaluation-scenarios.md`

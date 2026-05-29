@@ -1,6 +1,6 @@
 ---
 name: purista-skill-maintainer
-description: Create, review, refactor, and keep the canonical PURISTA skill and its maintenance guidance up to date using the shared purista/skills catalog, spec-first sourcing, and cross-repo drift checks.
+description: Maintains the canonical PURISTA skill catalog with spec-first review, implementation-grounded drift checks, progressive disclosure, and evaluation scenarios.
 topics: [skills, documentation, maintenance]
 phases: [spec, architecture, implementation, review]
 ---
@@ -17,16 +17,20 @@ The maintainer skill keeps that model coherent, readable, implementation-grounde
 
 ## Source-of-truth order
 Read sources in this order before changing a skill:
-1. Relevant docs in `specs/`
+1. `specs/00-context.md` and relevant docs in `specs/`
 2. Current implementation in `purista/`
 3. The current `purista` skill and its `references/`
 4. Downstream overlays and consumers in `voyage`, `starter`, and `create-purista`
 
+If older specs conflict with implemented public APIs or with `specs/00-context.md`, document the drift and align skills to the implemented, reviewed behavior. Do not revive stale package names, protocols, or APIs just because an old planning draft mentions them.
+
 ## Hard rules
 - Treat `purista` as the canonical shared framework skill path unless the change is explicitly about the maintainer skill itself.
 - Keep `SKILL.md` compact and navigational; move depth into `references/`.
+- Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
 - Use the filesystem as part of the reasoning surface: good reference taxonomy matters.
 - Verify every file path, package path, and code snippet in the repo.
+- Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Keep `purista/skills` as the source of truth; installed copies under `$CODEX_HOME/skills` are mirrors that may need syncing after repo changes.
 - Do not split the framework back into many sibling skills unless there is a genuinely separate non-runtime concern.
@@ -50,13 +54,16 @@ Read sources in this order before changing a skill:
 - this `SKILL.md`
 - `references/maintenance-checklist.md`
 - `references/catalog-audit-wave1.md`
+- `purista/skills/purista/references/11-evaluation-scenarios.md`
 
 ## What to review for every change
 - One-skill routing quality
 - Accuracy of file references and package paths
 - Definition / implementation / configuration / instantiation coverage
 - Reference taxonomy quality
+- Progressive disclosure quality: `SKILL.md` routes, references teach depth, and no reference requires loading unrelated files
 - Snippet relevance and duplicate-content risk
+- Evaluation scenarios still cover setup, CLI scaffolding, streams, queues, agents, enterprise review, and drift repair
 - Drift in `starter`, `create-purista`, `voyage`, `specs`, and published docs
 - Drift between repo-local skills and installed mirror copies under `$CODEX_HOME/skills`
 - Drift between metric catalog, observability docs, examples, and skill snippets

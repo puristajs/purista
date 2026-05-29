@@ -11,6 +11,16 @@ Source handbook pages:
 - `purista/web/src/content/handbook-cards/mental-model/deployment-flexibility.mdx`
 - `purista/web/src/content/handbook-cards/mental-model/resilience-patterns.mdx`
 
+## Contents
+- [Core Idea](#core-idea)
+- [Component Map](#component-map)
+- [Decision Rules](#decision-rules)
+- [Building Complex Systems](#building-complex-systems)
+- [Reliability Rules](#reliability-rules)
+- [Data And Security Rules](#data-and-security-rules)
+- [Deployment Rules](#deployment-rules)
+- [Architecture Review Checklist](#architecture-review-checklist)
+
 ## Core Idea
 PURISTA is message-driven. Every meaningful interaction is a typed message across an explicit service boundary.
 

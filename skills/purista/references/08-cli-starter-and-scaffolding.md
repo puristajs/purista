@@ -2,6 +2,14 @@
 
 Use this reference when creating or aligning application skeletons.
 
+## Contents
+- [CLI First](#cli-first)
+- [Agentic Scaffolding Flow](#agentic-scaffolding-flow)
+- [Generated Shape](#generated-shape)
+- [Starter And create-purista](#starter-and-create-purista)
+- [Examples](#examples)
+- [Review Cues](#review-cues)
+
 ## CLI First
 For application-level artifacts, prefer the CLI:
 
