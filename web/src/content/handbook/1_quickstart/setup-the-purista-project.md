@@ -58,13 +58,9 @@ purista init my-app \
 The create wrapper and the main CLI use the same underlying command engine, so both entry points generate the same project shape.
 
 ::: tip Recommended for AI-assisted projects
-Install the PURISTA AI skill before asking an assistant to design or modify services:
+Generated projects include `AGENTS.md`, `CLAUDE.md`, `.agents/IMPLEMENTATION.md`, and local PURISTA skill links for coding agents by default. The skill links target `node_modules/@purista/core/skills/purista`, so updating `@purista/core` refreshes the project skill.
 
-```bash
-npx skills add puristajs/purista --skill purista
-```
-
-See [Install the PURISTA AI Skill](../install-ai-skill.md) for agent-specific install options.
+See [Install the PURISTA AI Skill](../install-ai-skill.md) if you need to add the skill to an existing project or an assistant-specific mirror.
 :::
 
 Choose the options that fit your runtime and deployment setup:
@@ -161,12 +157,23 @@ the project config, and an example `ping` service with one starter command. Foll
 |- tsconfig.json
 |- purista.json
 |- README.md
+|- AGENTS.md
+|- CLAUDE.md
+|- .agents/
+| |- IMPLEMENTATION.md
+| |- skills/
+|     |- purista -> node_modules/@purista/core/skills/purista
+|- .claude/
+| |- skills/
+|     |- purista -> node_modules/@purista/core/skills/purista
 |- .gitignore
 ```
 
 Notes:
 
 - `src/service` and `src/agents` are the default CLI-managed roots.
+- `AGENTS.md`, `CLAUDE.md`, and `.agents/IMPLEMENTATION.md` guide coding agents toward PURISTA structure and CLI usage.
+- `.agents/skills/purista` and `.claude/skills/purista` are package-backed links to the PURISTA skill bundled with `@purista/core`.
 - The exact filenames follow the `fileConvention` and `eventConvention` from `purista.json`.
 - `src/eventbridge.ts` is generated from the chosen bridge blueprint.
 - `src/http.ts` and `public/` are only created for the HTTP-enabled project variants.

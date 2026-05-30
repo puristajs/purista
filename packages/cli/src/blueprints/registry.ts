@@ -2,8 +2,11 @@ import type { TsConfigJson } from 'type-fest'
 import type { PuristaConfig } from '../api/loadPuristaConfig.js'
 import type { PKG } from '../create/getPackageJson.js'
 import {
+	createAgentImplementationFile,
+	createAgentsFile,
 	createAmqpConfigFile,
 	createBiomeConfigFile,
+	createClaudeFile,
 	createDaprConfigFile,
 	createDefinitionsFile,
 	createEslintModuleConfigFile,
@@ -142,6 +145,19 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [
 				{ path: '.gitignore', content: createGitIgnoreFile() },
 				{ path: 'README.md', content: createReadmeFile(context) },
+				{ path: 'AGENTS.md', content: createAgentsFile() },
+				{ path: 'CLAUDE.md', content: createClaudeFile() },
+				{ path: '.agents/IMPLEMENTATION.md', content: createAgentImplementationFile() },
+				{
+					type: 'symlink',
+					path: '.agents/skills/purista',
+					target: '../../node_modules/@purista/core/skills/purista',
+				},
+				{
+					type: 'symlink',
+					path: '.claude/skills/purista',
+					target: '../../node_modules/@purista/core/skills/purista',
+				},
 				{ path: 'src/definitions.ts', content: createDefinitionsFile(context) },
 				{ path: 'src/exportDefinitions.ts', content: createExportDefinitionsFile() },
 				{ path: 'src/service/serviceEvent.enum.ts', content: createServiceEventEnumFile(context) },

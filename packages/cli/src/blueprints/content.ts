@@ -32,6 +32,70 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\`
 
 Contract exporters refresh \`purista.definitions.json\` before writing provider-neutral outputs. Update \`src/definitions.ts\` when you add service builders that should be exported.
+
+This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
+`
+
+/** Create default coding-agent guidance for generated PURISTA projects. */
+export const createAgentsFile = () => `# Agent Guide
+
+This is a PURISTA application. Use the PURISTA framework shape and CLI-generated files as the source of truth for project structure.
+
+## Required workflow
+- Read \`purista.json\` before changing services, commands, subscriptions, streams, queues, workers, or agents.
+- Use \`purista add ...\` commands whenever the CLI can create the target artifact. Refine generated code instead of hand-writing framework skeletons.
+- Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
+- Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
+- Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
+- Update \`src/definitions.ts\` when a new service builder should be exported.
+
+## Skills
+- Use the bundled PURISTA skill from \`.agents/skills/purista\` or \`.claude/skills/purista\`.
+- These paths link to \`node_modules/@purista/core/skills/purista\`, so dependency updates refresh the framework skill.
+
+## Verification
+- Run the project test script after framework changes.
+- Run export scripts when definitions, schedules, streams, queues, agents, or HTTP exposure change.
+- Review logs, events, traces, queues, streams, and agent prompts for secret or PII leakage before production changes.
+`
+
+/** Create Claude-specific guidance that delegates to AGENTS.md. */
+export const createClaudeFile = () => `# Claude Guide
+
+Follow [AGENTS.md](./AGENTS.md) for this PURISTA project.
+
+Use the bundled PURISTA skill linked at \`.claude/skills/purista\` before designing or changing PURISTA services, commands, subscriptions, streams, queues, workers, agents, or runtime wiring.
+`
+
+/** Create implementation guidance for agentic development tools. */
+export const createAgentImplementationFile = () => `# Implementation Guide
+
+This project is CLI-first. Prefer generated PURISTA artifacts over manual framework skeletons.
+
+## Project Shape
+- \`purista.json\` defines file casing, event casing, \`servicePath\`, and \`agentPath\`.
+- Service definitions live under \`src/service\` unless \`purista.json\` says otherwise.
+- Agent definitions live under \`src/agents\` unless \`purista.json\` says otherwise.
+- Exportable services must be included in \`src/definitions.ts\`.
+
+## Artifact Creation
+- New service: \`purista add service\`
+- New command: \`purista add command\`
+- New subscription: \`purista add subscription\`
+- New stream: \`purista add stream\`
+- New queue: \`purista add queue\`
+- New queue worker: \`purista add queue-worker\`
+- New agent: \`purista add agent\`
+
+After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
+
+## Guardrails
+- Do not create alternative framework folder structures.
+- Do not bypass builders for public PURISTA contracts.
+- Do not add CommonJS variants. Generated PURISTA apps are ESM-only.
+- Keep external systems behind resources, stores, bridges, or runtime bindings.
+- Keep EventBridge and QueueBridge concerns separate.
+- Keep provider packages as app-level dependencies.
 `
 
 /** Create the starter `ServiceEvent` enum with the example ping event. */
@@ -352,6 +416,15 @@ export const createPublicIndexHtml = (input: CreateProjectInput) => `<!doctype h
 export const createBiomeConfigFile = () => `{
 	"$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
 	"assist": { "actions": { "source": { "organizeImports": "off" } } },
+	"files": {
+		"includes": [
+			"**",
+			"!**/node_modules/**/*",
+			"!**/dist/**/*",
+			"!**/.agents/skills/**/*",
+			"!**/.claude/skills/**/*"
+		]
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {

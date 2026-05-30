@@ -24,11 +24,26 @@ export type BlueprintId = (typeof blueprintIds)[number]
 
 /** A file that a blueprint contributes to a project generation plan. */
 export type ProjectFileContribution = {
+	/** Contribution discriminator. */
+	type?: 'file'
 	/** File path relative to the generated project root. */
 	path: string
 	/** Full UTF-8 file content to write. */
 	content: string
 }
+
+/** A symbolic link that a blueprint contributes to a project generation plan. */
+export type ProjectLinkContribution = {
+	/** Contribution discriminator. */
+	type: 'symlink'
+	/** Link path relative to the generated project root. */
+	path: string
+	/** Link target, relative to the link parent directory. */
+	target: string
+}
+
+/** File-system entry that a blueprint contributes to a project generation plan. */
+export type ProjectEntryContribution = ProjectFileContribution | ProjectLinkContribution
 
 /** Partial project-level configuration merged from a blueprint. */
 export type ProjectConfigPatch = {
@@ -67,7 +82,7 @@ export type ProjectBlueprintContext = CreateProjectInput & {
 
 /** Files, config patches, warnings, and deferred steps emitted by a blueprint. */
 export type ProjectBlueprintContribution = ProjectConfigPatch & {
-	files?: ProjectFileContribution[]
+	files?: ProjectEntryContribution[]
 	warnings?: string[]
 	generatorSteps?: ProjectGeneratorStep[]
 }
@@ -109,7 +124,7 @@ export type ProjectGenerationPlan = {
 	/** Blueprint ids included in the plan. */
 	selectedBlueprints: BlueprintId[]
 	/** Base files to write before deferred generator steps run. */
-	files: ProjectFileContribution[]
+	files: ProjectEntryContribution[]
 	/** Complete package.json to write. */
 	packageJson: PKG
 	/** Complete tsconfig to write. */

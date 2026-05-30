@@ -27,11 +27,7 @@ flowchart TB
 - [Node.js](https://nodejs.org/) LTS (or [Bun](https://bun.sh/))
 - A code editor (VS Code, Zed, or similar)
 - A terminal
-- Recommended for AI-assisted work: [install the PURISTA AI skill](/handbook/install-ai-skill/)
-
-```bash
-npx skills add puristajs/purista --skill purista
-```
+- AI-assisted work is supported by default in new projects through generated `AGENTS.md`, `CLAUDE.md`, `.agents/IMPLEMENTATION.md`, and local PURISTA skill links.
 
 ## Step 1: Scaffold the project
 
@@ -57,6 +53,12 @@ This creates:
 
 ```text
 my-app/
+├── AGENTS.md
+├── CLAUDE.md
+├── .agents/
+│   ├── IMPLEMENTATION.md
+│   └── skills/
+│       └── purista -> node_modules/@purista/core/skills/purista
 ├── src/
 │   ├── service/
 │   │   └── ping/

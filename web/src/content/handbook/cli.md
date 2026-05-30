@@ -36,13 +36,9 @@ This runs the same engine as `purista init my-app`. Both generate an identical p
 
 ## AI-assisted setup
 
-If you use Codex, Claude, Cursor, or another AI coding assistant, install the PURISTA skill before asking it to design services or modify generated files:
+If you use Codex, Claude, Cursor, or another AI coding assistant, new PURISTA projects are ready by default. The initializer writes `AGENTS.md`, `CLAUDE.md`, `.agents/IMPLEMENTATION.md`, and local skill links for `.agents/skills/purista` and `.claude/skills/purista`.
 
-```bash
-npx skills add puristajs/purista --skill purista
-```
-
-The skill teaches the assistant the PURISTA mental model: services as business capability boundaries, builder definitions, command contracts, runtime adapters, event bridges, queues, and scaffold conventions. See [Install the PURISTA AI Skill](./install-ai-skill.md) for package-runner and agent-specific variants.
+The skill links target `node_modules/@purista/core/skills/purista`, so normal dependency updates keep project-local skill guidance aligned with the framework. See [Install the PURISTA AI Skill](./install-ai-skill.md) for existing projects and assistant-specific mirrors.
 
 ## CLI installation
 
@@ -175,6 +171,15 @@ flowchart TD
 The CLI creates a consistent, predictable structure:
 
 ```text
+AGENTS.md
+CLAUDE.md
+.agents/
+├── IMPLEMENTATION.md
+└── skills/
+    └── purista -> node_modules/@purista/core/skills/purista
+.claude/
+└── skills/
+    └── purista -> node_modules/@purista/core/skills/purista
 src/
 ├── service/
 │   ├── serviceEvent.enum.ts

@@ -51,7 +51,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | If you are... | Start here | Then read |
 |---|---|---|
 | **New to PURISTA** | [Quickstart](./1_quickstart/index.md) | [Concept](./concept.md) → [Building Business Logic](./2_building_business-logic/index.md) |
-| **Using an AI coding assistant** | [Install the PURISTA AI Skill](./install-ai-skill.md) | [Quickstart](./1_quickstart/index.md) → [CLI](./cli.md) |
+| **Using an AI coding assistant** | [Quickstart](./1_quickstart/index.md) | [AI Skill](./install-ai-skill.md) for existing projects → [CLI](./cli.md) |
 | **Evaluating the framework** | [Concept](./concept.md) | [Principles](./principles.md) → [From Zero to Production](./from-zero-to-production.md) |
 | **Migrating an existing app** | [Service Builder](./2_building_business-logic/service/the-service-builder.md) | [Command Builder](./2_building_business-logic/command/the-command-builder.md) → [Event Bridges](./3_eco_system/eventbridges/index.md) |
 | **Adding AI agents** | [AI Agents](./2_building_business-logic/ai/index.md) | [Queues](./2_building_business-logic/queue/index.md) → [Streams](./2_building_business-logic/stream/index.md) |
@@ -66,7 +66,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | Page | What you'll learn |
 |---|---|
 | [Quickstart](./1_quickstart/index.md) | Scaffold a project and build your first service in 10 minutes |
-| [Install the PURISTA AI Skill](./install-ai-skill.md) | Teach AI assistants the PURISTA architecture and CLI conventions |
+| [Install the PURISTA AI Skill](./install-ai-skill.md) | Understand the generated skill links and install the skill for existing projects |
 | [Setup the Project](./1_quickstart/setup-the-purista-project.md) | CLI options, project structure, and initial configuration |
 | [Create a Service](./1_quickstart/create-a-service.md) | Generate a service with the CLI and understand the builder pattern |
 | [Add a Command](./1_quickstart/add-the-first-command.md) | Define your first request/response operation |

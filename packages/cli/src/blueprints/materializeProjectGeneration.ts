@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { addPuristaCommand } from '../api/addPuristaCommand.js'
 import { addPuristaService } from '../api/addPuristaService.js'
@@ -11,6 +11,13 @@ const writePlannedFile = async (targetDirectoryPath: string, relativePath: strin
 	const absolutePath = join(targetDirectoryPath, relativePath)
 	await mkdir(dirname(absolutePath), { recursive: true })
 	await writeFile(absolutePath, content, 'utf-8')
+}
+
+const writePlannedSymlink = async (targetDirectoryPath: string, relativePath: string, target: string) => {
+	const absolutePath = join(targetDirectoryPath, relativePath)
+	await mkdir(dirname(absolutePath), { recursive: true })
+	await rm(absolutePath, { force: true, recursive: true })
+	await symlink(target, absolutePath, 'dir')
 }
 
 const materializeExampleService = async (plan: ProjectGenerationPlan) => {
@@ -56,6 +63,11 @@ export const materializeProjectGeneration = async (plan: ProjectGenerationPlan) 
 	await mkdir(plan.targetDirectoryPath, { recursive: true })
 
 	for (const file of plan.files) {
+		if (file.type === 'symlink') {
+			await writePlannedSymlink(plan.targetDirectoryPath, file.path, file.target)
+			continue
+		}
+
 		await writePlannedFile(plan.targetDirectoryPath, file.path, file.content)
 	}
 

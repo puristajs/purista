@@ -8,9 +8,18 @@ order: 15000
 
 PURISTA includes an AI assistant skill for architecture, service design, builders, runtime wiring, adapters, queues, subscriptions, AI Harness work, and implementation planning. Install it before asking an assistant to create or edit PURISTA services.
 
-The skill is published from the PURISTA repository and can be installed with the `skills` CLI.
+New projects created with `npm create purista@latest` or `purista init` are agent-ready by default. The generated app includes:
 
-## Install
+- `AGENTS.md` for agent-neutral coding guidance
+- `CLAUDE.md` for Claude-specific entrypoint guidance
+- `.agents/IMPLEMENTATION.md` for CLI-first implementation rules
+- `.agents/skills/purista` and `.claude/skills/purista` links to the PURISTA skill bundled with `@purista/core`
+
+Those skill links point at `node_modules/@purista/core/skills/purista`, so updating `@purista/core` updates the local project skill.
+
+Use the `skills` CLI only when you need to add the PURISTA skill to an existing project or to an assistant-specific/global skill mirror.
+
+## Existing projects
 
 Use the package runner for your project:
 
@@ -53,7 +62,13 @@ The `purista` skill gives your assistant project-specific rules for:
 
 ## Verify
 
-List installed project skills:
+For new projects, verify the generated links:
+
+```bash
+ls -l .agents/skills/purista .claude/skills/purista
+```
+
+For manually installed project skills, list installed skills:
 
 ```bash
 npx skills list

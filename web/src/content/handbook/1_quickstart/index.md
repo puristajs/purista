@@ -35,13 +35,12 @@ flowchart TB
 - [Node.js](https://nodejs.org/) LTS (or [Bun](https://bun.sh/))
 - A code editor (VS Code, Zed, or similar)
 - A terminal
-- Recommended when using AI coding tools: [install the PURISTA AI skill](../install-ai-skill.md)
+- Optional for existing projects: [install the PURISTA AI skill](../install-ai-skill.md). New projects include agent guidance and PURISTA skill links by default.
 
 ## The steps
 
 | Step | Action | Time |
 |---|---|---|
-| 0 | [Install the PURISTA AI skill](../install-ai-skill.md) when you use an assistant | 1 min |
 | 1 | [Set up the project](./setup-the-purista-project.md) | 2 min |
 | 2 | [Create a service](./create-a-service.md) | 2 min |
 | 3 | [Add your first command](./add-the-first-command.md) | 3 min |
