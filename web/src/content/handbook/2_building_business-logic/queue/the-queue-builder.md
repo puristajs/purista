@@ -11,7 +11,7 @@ Use `serviceBuilder.getQueueBuilder(queueId, description)` to define the payload
 ## CLI scaffolding
 
 ```bash
-purista add queue
+npm run add:queue
 ```
 
 The CLI asks for:

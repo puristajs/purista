@@ -91,6 +91,8 @@ describe('planProjectGeneration', () => {
 			expect(packageJsonFile?.content).toContain('"@purista/mqttbridge"')
 			expect(packageJsonFile?.content).toContain('"@purista/hono-http-server"')
 			expect(packageJsonFile?.content).toContain('"@purista/cli"')
+			expect(packageJsonFile?.content).toContain('"add:service": "purista add service"')
+			expect(packageJsonFile?.content).toContain('"add:agent": "purista add agent"')
 			expect(packageJsonFile?.content).toContain('"export:kubernetes-cronjobs"')
 			expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
 		}
@@ -101,5 +103,14 @@ describe('planProjectGeneration', () => {
 			path: '.agents/skills/purista',
 			target: '../../node_modules/@purista/core/skills/purista',
 		})
+
+		const agentsFile = plan.files.find(file => file.path === 'AGENTS.md')
+		expect(agentsFile?.type).not.toBe('symlink')
+		if (agentsFile?.type !== 'symlink') {
+			expect(agentsFile?.content).toContain('This project installs `@purista/cli` as a dev dependency')
+			expect(agentsFile?.content).toContain('Package manager: `bun`')
+			expect(agentsFile?.content).toContain('bun run add:service -- <name> --description "<description>"')
+			expect(agentsFile?.content).toContain('bun run dev')
+		}
 	})
 })

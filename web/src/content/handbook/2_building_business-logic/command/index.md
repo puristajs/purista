@@ -14,7 +14,7 @@ Think of a command as the PURISTA equivalent of an RPC call or a POST endpoint: 
 
 Commands are also the primary way to expose functionality as HTTP endpoints. When you call `.exposeAsHttpEndpoint(...)` on the command builder, the PURISTA HTTP adapter wires up routing automatically. This means you define your business logic once; the HTTP exposure is a declaration, not a separate layer.
 
-Add a command to an existing service with `purista add command`.
+Add a command to an existing service with `npm run add:command`.
 
 Commands can access service resources (for example database clients/connections) via `context.resources`.
 Resources are provided when creating the service instance with `serviceBuilder.getInstance(eventBridge, { resources: ... })`.

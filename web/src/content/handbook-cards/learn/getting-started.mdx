@@ -78,7 +78,7 @@ my-app/
 
 ```bash
 cd my-app
-purista add service
+npm run add:service
 ```
 
 Name it `user`. The CLI generates:
@@ -93,7 +93,7 @@ src/service/user/v1/
 ## Step 3: Add a command
 
 ```bash
-purista add command
+npm run add:command
 ```
 
 Select the `user` service. Name it `signUp`.
@@ -137,7 +137,7 @@ export const signUpCommandBuilder = userServiceV1ServiceBuilder
 ## Step 4: Add a subscription
 
 ```bash
-purista add subscription
+npm run add:subscription
 ```
 
 Select the `user` service. Name it `sendWelcomeEmail`.

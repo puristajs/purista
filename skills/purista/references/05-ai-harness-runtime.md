@@ -25,7 +25,7 @@ An attached agent is represented as normal PURISTA artifacts:
 Use the CLI first for application code:
 
 ```bash
-purista add agent triage --service support --service-version 1
+npm run add:agent -- triage --service support --service-version 1
 ```
 
 Then refine the generated builder:

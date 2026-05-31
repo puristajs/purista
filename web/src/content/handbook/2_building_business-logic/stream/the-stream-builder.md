@@ -11,7 +11,7 @@ Use `serviceBuilder.getStreamBuilder(...)` to define a stream function.
 Scaffold a stream with:
 
 ```bash
-purista add stream
+npm run add:stream
 ```
 
 ## Minimal example

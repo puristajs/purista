@@ -20,7 +20,7 @@ Create a new PURISTA app for customer onboarding. It needs HTTP support, a servi
 Expected behavior:
 - starts from `npm create purista@latest` or `purista init <target>` with explicit `--non-interactive --defaults` choices when automated
 - keeps generated files under `src/service`
-- uses `purista add service` and `purista add command`
+- uses local package scripts such as `npm run add:service -- ...` and `npm run add:command -- ...`
 - keeps runtime wiring in bootstrap files, not in handlers
 - does not add AI, queue, provider, or broker dependencies without a stated need
 
@@ -39,7 +39,7 @@ Add invoice generation that may run for minutes, must retry safely, and must sup
 Expected behavior:
 - chooses queue plus queue worker instead of subscription or long-running command
 - declares idempotency keys, retry policy, timeout budget, and DLQ handling
-- uses `purista add queue` and `purista add queue-worker`
+- uses local package scripts such as `npm run add:queue -- ...` and `npm run add:queue-worker -- ...`
 - selects Redis or NATS QueueBridge when strict idempotency is required
 - treats DefaultQueueBridge as local/test only
 
@@ -74,7 +74,7 @@ Add a support triage agent that can classify tickets, call an allowed command to
 ```
 
 Expected behavior:
-- attaches the agent to the support service with `purista add agent`
+- attaches the agent to the support service with a local package script such as `npm run add:agent -- ...`
 - uses core agent builder/runtime APIs and `@purista/harness` model bindings
 - installs provider packages only in the app wiring layer
 - allowlists tools and child agents

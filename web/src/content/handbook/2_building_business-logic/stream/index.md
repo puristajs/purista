@@ -23,7 +23,7 @@ If you find yourself wanting a subscription but you need the caller to receive a
 ## Add a stream with the CLI
 
 ```bash
-purista add stream
+npm run add:stream
 ```
 
 The generator scaffolds:

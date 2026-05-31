@@ -57,6 +57,15 @@ const basePuristaConfig: Partial<PuristaConfig> = {
 
 const basePackage: PKG = {
 	private: true,
+	scripts: {
+		'add:service': 'purista add service',
+		'add:command': 'purista add command',
+		'add:subscription': 'purista add subscription',
+		'add:stream': 'purista add stream',
+		'add:queue': 'purista add queue',
+		'add:queue-worker': 'purista add queue-worker',
+		'add:agent': 'purista add agent',
+	},
 	dependencies: {
 		'@purista/core': 'latest',
 		zod: 'latest',
@@ -145,9 +154,9 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [
 				{ path: '.gitignore', content: createGitIgnoreFile() },
 				{ path: 'README.md', content: createReadmeFile(context) },
-				{ path: 'AGENTS.md', content: createAgentsFile() },
+				{ path: 'AGENTS.md', content: createAgentsFile(context) },
 				{ path: 'CLAUDE.md', content: createClaudeFile() },
-				{ path: '.agents/IMPLEMENTATION.md', content: createAgentImplementationFile() },
+				{ path: '.agents/IMPLEMENTATION.md', content: createAgentImplementationFile(context) },
 				{
 					type: 'symlink',
 					path: '.agents/skills/purista',

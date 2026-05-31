@@ -27,16 +27,27 @@ purista init my-app \
   --defaults \
   --no-install
 purista init
-purista add service <name> --description "<description>"
-purista add command <name> --service <serviceName> --service-version <version>
-purista add subscription <name> --service <serviceName> --service-version <version> --event <eventName>
-purista add stream <name> --service <serviceName> --service-version <version>
-purista add queue <name> --service <serviceName> --service-version <version>
-purista add queue-worker <name> --service <serviceName> --service-version <version> --queue <queueName>
-purista add agent <name> --service <serviceName> --service-version <version>
+npm run add:service -- <name> --description "<description>"
+npm run add:command -- <name> --service <serviceName> --service-version <version>
+npm run add:subscription -- <name> --service <serviceName> --service-version <version> --event <eventName>
+npm run add:stream -- <name> --service <serviceName> --service-version <version>
+npm run add:queue -- <name> --service <serviceName> --service-version <version>
+npm run add:queue-worker -- <name> --service <serviceName> --service-version <version> --queue <queueName>
+npm run add:agent -- <name> --service <serviceName> --service-version <version>
 ```
 
 Use `npm create purista@latest` for the normal quickstart path. Use `purista init <target>` when an agent, CI job, or script needs the same blueprint engine directly. For automated setup, pass every relevant choice explicitly and combine `--non-interactive`, `--defaults`, and `--no-install` when dependency installation is handled by the caller.
+
+After dependencies are installed, use the project-local CLI through generated package scripts rather than a global `purista` binary:
+
+```bash
+npm run add:service -- user --description "User management"
+npm run add:command -- sign-up --service user --service-version 1
+pnpm run add:queue-worker -- process-jobs --service user --service-version 1 --queue processJobs
+bun run add:agent -- triage --service support --service-version 1
+```
+
+Match the package manager and runtime recorded in `purista.json` and `package.json`. For Bun projects, use `bun run ...`; for Node.js projects, use the configured package manager scripts (`npm run`, `pnpm run`, or `yarn`).
 
 Use builder APIs directly when:
 - the CLI does not expose the needed advanced option

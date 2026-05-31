@@ -11,7 +11,7 @@ Workers consume jobs produced by queue definitions. Use `serviceBuilder.getQueue
 ## CLI scaffolding
 
 ```bash
-purista add queue-worker
+npm run add:queue-worker
 ```
 
 The wizard prompts for the queue, worker name, polling mode, and whether to reuse the existing resource wiring/tests.

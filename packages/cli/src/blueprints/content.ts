@@ -34,20 +34,45 @@ Generated with \`@purista/cli\`.
 Contract exporters refresh \`purista.definitions.json\` before writing provider-neutral outputs. Update \`src/definitions.ts\` when you add service builders that should be exported.
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
+
+This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
+
+- \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
+- \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
 `
 
+const runScriptCommand = (input: CreateProjectInput, script: string, args = '') => {
+	const suffix = args ? ` -- ${args}` : ''
+	if (input.packageManager === 'yarn') {
+		return `yarn ${script}${args ? ` ${args}` : ''}`
+	}
+	return `${input.packageManager} run ${script}${suffix}`
+}
+
+const createLocalCliUsageGuide = (input: CreateProjectInput) => `## Local CLI
+- This project installs \`@purista/cli\` as a dev dependency. Use the local package scripts instead of a global \`purista\` binary.
+- Runtime: \`${input.runtime}\`
+- Package manager: \`${input.packageManager}\`
+- Create services with \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`.
+- Create commands with \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`.
+- Run the app with \`${input.packageManager === 'yarn' ? 'yarn dev' : `${input.packageManager} run dev`}\`.
+- Run tests with \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`.`
+
 /** Create default coding-agent guidance for generated PURISTA projects. */
-export const createAgentsFile = () => `# Agent Guide
+export const createAgentsFile = (input: CreateProjectInput) => `# Agent Guide
 
 This is a PURISTA application. Use the PURISTA framework shape and CLI-generated files as the source of truth for project structure.
 
 ## Required workflow
 - Read \`purista.json\` before changing services, commands, subscriptions, streams, queues, workers, or agents.
-- Use \`purista add ...\` commands whenever the CLI can create the target artifact. Refine generated code instead of hand-writing framework skeletons.
+- Use the local \`@purista/cli\` package scripts whenever the CLI can create the target artifact. Refine generated code instead of hand-writing framework skeletons.
 - Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
 - Update \`src/definitions.ts\` when a new service builder should be exported.
+
+${createLocalCliUsageGuide(input)}
 
 ## Skills
 - Use the bundled PURISTA skill from \`.agents/skills/purista\` or \`.claude/skills/purista\`.
@@ -68,9 +93,11 @@ Use the bundled PURISTA skill linked at \`.claude/skills/purista\` before design
 `
 
 /** Create implementation guidance for agentic development tools. */
-export const createAgentImplementationFile = () => `# Implementation Guide
+export const createAgentImplementationFile = (input: CreateProjectInput) => `# Implementation Guide
 
 This project is CLI-first. Prefer generated PURISTA artifacts over manual framework skeletons.
+
+${createLocalCliUsageGuide(input)}
 
 ## Project Shape
 - \`purista.json\` defines file casing, event casing, \`servicePath\`, and \`agentPath\`.
@@ -79,13 +106,13 @@ This project is CLI-first. Prefer generated PURISTA artifacts over manual framew
 - Exportable services must be included in \`src/definitions.ts\`.
 
 ## Artifact Creation
-- New service: \`purista add service\`
-- New command: \`purista add command\`
-- New subscription: \`purista add subscription\`
-- New stream: \`purista add stream\`
-- New queue: \`purista add queue\`
-- New queue worker: \`purista add queue-worker\`
-- New agent: \`purista add agent\`
+- New service: \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
+- New command: \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
+- New subscription: \`${runScriptCommand(input, 'add:subscription', '<name> --service <serviceName> --service-version <version> --event <eventName>')}\`
+- New stream: \`${runScriptCommand(input, 'add:stream', '<name> --service <serviceName> --service-version <version>')}\`
+- New queue: \`${runScriptCommand(input, 'add:queue', '<name> --service <serviceName> --service-version <version>')}\`
+- New queue worker: \`${runScriptCommand(input, 'add:queue-worker', '<name> --service <serviceName> --service-version <version> --queue <queueName>')}\`
+- New agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
 
 After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
 
