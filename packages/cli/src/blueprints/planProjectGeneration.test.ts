@@ -75,8 +75,6 @@ describe('planProjectGeneration', () => {
 		expect(plan.installCommand).toBe('bun install')
 		expect(plan.predictedFiles).toContain('src/index.ts')
 		expect(plan.predictedFiles).toContain('src/http.ts')
-		expect(plan.predictedFiles).toContain('src/definitions.ts')
-		expect(plan.predictedFiles).toContain('src/exportDefinitions.ts')
 		expect(plan.predictedFiles).toContain('AGENTS.md')
 		expect(plan.predictedFiles).toContain('CLAUDE.md')
 		expect(plan.predictedFiles).toContain('.agents/IMPLEMENTATION.md')
@@ -93,7 +91,6 @@ describe('planProjectGeneration', () => {
 			expect(packageJsonFile?.content).toContain('"@purista/cli"')
 			expect(packageJsonFile?.content).toContain('"add:service": "purista add service"')
 			expect(packageJsonFile?.content).toContain('"add:agent": "purista add agent"')
-			expect(packageJsonFile?.content).toContain('"export:kubernetes-cronjobs"')
 			expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
 		}
 

@@ -39,7 +39,7 @@ PURISTA provides the client builder, which allows you to create a zero dependenc
 
 The generated client will map the http exposed service commands, similar to the `service` in the context of commands and subscriptions.
 
-The client builder requires the service definitions as input - see [Export Service Definitions](./export_service_definitions.md).
+The client builder requires service definitions as input.
 
 ```typescript
 const client = new HttpClient()
