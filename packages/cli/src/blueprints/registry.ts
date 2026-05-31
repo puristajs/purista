@@ -8,9 +8,7 @@ import {
 	createBiomeConfigFile,
 	createClaudeFile,
 	createDaprConfigFile,
-	createDefinitionsFile,
 	createEslintModuleConfigFile,
-	createExportDefinitionsFile,
 	createGitIgnoreFile,
 	createHttpConfigFile,
 	createMqttConfigFile,
@@ -85,11 +83,6 @@ const runtimeNodePackage: PKG = {
 		build: 'tsc',
 		dev: 'tsx watch src/index.ts',
 		test: 'tsc --noEmit && vitest run',
-		'export:definitions': 'tsx src/exportDefinitions.ts',
-		'export:asyncapi': 'tsx src/exportDefinitions.ts && purista export asyncapi --out asyncapi.json',
-		'export:schedules': 'tsx src/exportDefinitions.ts && purista export schedule-manifest --out schedules.json',
-		'export:kubernetes-cronjobs':
-			'tsx src/exportDefinitions.ts && purista export kubernetes-cronjob --out kubernetes-cronjobs.json',
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
 	},
 	devDependencies: {
@@ -106,11 +99,6 @@ const runtimeBunPackage: PKG = {
 		build: 'tsc',
 		dev: 'bun --watch run src/index.ts',
 		test: 'tsc --noEmit && bun test',
-		'export:definitions': 'bun src/exportDefinitions.ts',
-		'export:asyncapi': 'bun src/exportDefinitions.ts && purista export asyncapi --out asyncapi.json',
-		'export:schedules': 'bun src/exportDefinitions.ts && purista export schedule-manifest --out schedules.json',
-		'export:kubernetes-cronjobs':
-			'bun src/exportDefinitions.ts && purista export kubernetes-cronjob --out kubernetes-cronjobs.json',
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
 	},
 	devDependencies: {
@@ -167,8 +155,6 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 					path: '.claude/skills/purista',
 					target: '../../node_modules/@purista/core/skills/purista',
 				},
-				{ path: 'src/definitions.ts', content: createDefinitionsFile(context) },
-				{ path: 'src/exportDefinitions.ts', content: createExportDefinitionsFile() },
 				{ path: 'src/service/serviceEvent.enum.ts', content: createServiceEventEnumFile(context) },
 			],
 			packageJson: basePackage,

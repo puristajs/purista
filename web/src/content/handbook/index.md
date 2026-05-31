@@ -172,7 +172,6 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | Page | What you'll learn |
 |---|---|
 | [Connect to PURISTA overview](./2_building_business-logic/connect_to_a_purista_application/index.md) | Build typed clients for external consumers |
-| [Export Service Definitions](./2_building_business-logic/connect_to_a_purista_application/export_service_definitions.md) | Extract typed metadata from services |
 | [REST API Client](./2_building_business-logic/connect_to_a_purista_application/create_a_rest_api_client.md) | Generate HTTP clients from definitions |
 | [Event Bridge Client](./2_building_business-logic/connect_to_a_purista_application/create_an_eventbridge_client.md) | Message-based clients for same-fabric services |
 | [Embedded Client](./2_building_business-logic/connect_to_a_purista_application/embedded_client.md) | In-process clients for monoliths and testing |

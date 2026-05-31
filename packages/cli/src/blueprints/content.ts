@@ -28,10 +28,7 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn dev' : `${input.packageManager} run dev`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn build' : `${input.packageManager} run build`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`
-- \`${input.packageManager === 'yarn' ? 'yarn export:asyncapi' : `${input.packageManager} run export:asyncapi`}\`
-- \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\`
-
-Contract exporters refresh \`purista.definitions.json\` before writing provider-neutral outputs. Update \`src/definitions.ts\` when you add service builders that should be exported.
+- \`${input.packageManager === 'yarn' ? 'yarn export:runtime' : `${input.packageManager} run export:runtime`}\`
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
 
@@ -70,7 +67,6 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- Update \`src/definitions.ts\` when a new service builder should be exported.
 
 ${createLocalCliUsageGuide(input)}
 
@@ -103,7 +99,6 @@ ${createLocalCliUsageGuide(input)}
 - \`purista.json\` defines file casing, event casing, \`servicePath\`, and \`agentPath\`.
 - Service definitions live under \`src/service\` unless \`purista.json\` says otherwise.
 - Agent definitions live under \`src/agents\` unless \`purista.json\` says otherwise.
-- Exportable services must be included in \`src/definitions.ts\`.
 
 ## Artifact Creation
 - New service: \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
@@ -144,41 +139,6 @@ export const createServiceEventEnumFile = (input: CreateProjectInput) => {
 }
 `
 }
-
-/** Create `src/definitions.ts` for exporting generated service definitions. */
-export const createDefinitionsFile = (input: CreateProjectInput) => {
-	const puristaConfig: PuristaConfig = {
-		$schema: 'https://purista.dev/schemas/1.12.0/schema.json',
-		runtime: input.runtime,
-		eventBridge: input.eventBridge,
-		fileConvention: input.fileConvention,
-		eventConvention: input.eventConvention,
-		linter: input.linter,
-		formatter: input.formatter,
-		servicePath: 'src/service',
-		agentPath: 'src/agents',
-	}
-	const serviceDirectory = convertToProjectFileCasing('ping', puristaConfig)
-	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)
-	const serviceBuilderName = camelCase('ping v1 service')
-
-	return `import { exportServiceDefinitions } from '@purista/core'
-import { ${serviceBuilderName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
-
-export const serviceBuilders = [${serviceBuilderName}] as const
-
-export const exportPuristaDefinitions = () => exportServiceDefinitions([...serviceBuilders])
-`
-}
-
-/** Create the script that writes `purista.definitions.json`. */
-export const createExportDefinitionsFile = () => `import { writeFile } from 'node:fs/promises'
-import { exportPuristaDefinitions } from './definitions.js'
-
-const definitions = await exportPuristaDefinitions()
-
-await writeFile('purista.definitions.json', \`\${JSON.stringify(definitions, null, 2)}\\n\`, 'utf-8')
-`
 
 const createDefaultEventBridgeFile = () => `import { DefaultEventBridge, type Logger } from '@purista/core'
 

@@ -93,5 +93,3 @@ When a new service is added, it is done via the service builder. The service bui
 With the ability to simply swap out dependencies, vendor lock-in can be significantly reduced. For example, if you move your system from one cloud provider to another, you only need to update the adapter for the secret store or config store—without modifying any of your business logic.
 
 The combination of well-defined interfaces and a message-based architecture makes integrating other systems seamless. It does not matter how these systems are built internally; all that matters is that they provide the correct interfaces. This allows for a combination of different programming languages, the integration of third-party services, and more.
-
-__See__: [Export Service Definitions](../connect_to_a_purista_application/export_service_definitions.md)
