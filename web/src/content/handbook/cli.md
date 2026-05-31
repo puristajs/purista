@@ -36,17 +36,15 @@ This runs the same engine as `purista init my-app`. Both generate an identical p
 
 ## AI-assisted setup
 
-If you use Codex, Claude, Cursor, or another AI coding assistant, install the PURISTA skill before asking it to design services or modify generated files:
+If you use Codex, Claude, Cursor, or another AI coding assistant, new PURISTA projects are ready by default. The initializer writes `AGENTS.md`, `CLAUDE.md`, `.agents/IMPLEMENTATION.md`, and local skill links for `.agents/skills/purista` and `.claude/skills/purista`.
 
-```bash
-npx skills add puristajs/purista --skill purista
-```
-
-The skill teaches the assistant the PURISTA mental model: services as business capability boundaries, builder definitions, command contracts, runtime adapters, event bridges, queues, and scaffold conventions. See [Install the PURISTA AI Skill](./install-ai-skill.md) for package-runner and agent-specific variants.
+The skill links target `node_modules/@purista/core/skills/purista`, so normal dependency updates keep project-local skill guidance aligned with the framework. See [Install the PURISTA AI Skill](./install-ai-skill.md) for existing projects and assistant-specific mirrors.
 
 ## CLI installation
 
-Install globally or use `npx`:
+Generated projects install `@purista/cli` as a dev dependency and expose local scripts such as `add:service`, `add:command`, and `add:agent`. Prefer those scripts inside projects so the CLI version matches the project.
+
+Install globally only when you need an outside-project maintenance command:
 
 ::: code-group
 
@@ -107,50 +105,52 @@ Non-interactive mode never prompts. It applies only declared defaults and fails 
 
 ## Generating business artifacts
 
-After scaffolding, use `purista add` to generate services and their artifacts:
+After scaffolding, use the local package scripts to generate services and their artifacts:
 
 ```bash
-purista add service      # interactive service creation
-purista add command      # add command to existing service
-purista add subscription # add subscription to existing service
-purista add stream       # add stream for live updates
-purista add queue        # add queue for async workloads
-purista add queue-worker # add worker for existing queue
-purista add agent        # add AI agent
+npm run add:service      # interactive service creation
+npm run add:command      # add command to existing service
+npm run add:subscription # add subscription to existing service
+npm run add:stream       # add stream for live updates
+npm run add:queue        # add queue for async workloads
+npm run add:queue-worker # add worker for existing queue
+npm run add:agent        # add AI agent
 ```
+
+Use the matching package manager and runtime for your project: `npm run ...`, `pnpm run ...`, `yarn ...`, or `bun run ...`.
 
 ### Common examples
 
 ```bash
 # Create a service
-purista add service user --description "User management"
+npm run add:service -- user --description "User management"
 
 # Add a command to the service
-purista add command sign-up \
+npm run add:command -- sign-up \
   --service user \
   --service-version 1 \
   --description "Register a new user"
 
 # Add a subscription that reacts to events
-purista add subscription welcome-email \
+npm run add:subscription -- welcome-email \
   --service email \
   --service-version 1 \
   --description "Send welcome email"
 
 # Add a queue for background processing
-purista add queue process-jobs \
+npm run add:queue -- process-jobs \
   --service user \
   --service-version 1 \
   --description "Background job processor"
 
 # Add a queue worker
-purista add queue-worker process-jobs \
+npm run add:queue-worker -- process-jobs \
   --service user \
   --service-version 1 \
   --queue processJobs
 
 # Add an AI agent
-purista add agent triage \
+npm run add:agent -- triage \
   --service support \
   --service-version 1 \
   --description "Ticket triage agent"
@@ -162,11 +162,11 @@ purista add agent triage \
 flowchart TD
     A["`purista init my-app`"] --> B[Choose runtime & bridge]
     B --> C[Project scaffolded]
-    C --> D["`purista add service`"]
-    D --> E["`purista add command`"]
-    E --> F["`purista add subscription`"]
+    C --> D["`npm run add:service`"]
+    D --> E["`npm run add:command`"]
+    E --> F["`npm run add:subscription`"]
     F --> G[Run tests]
-    G --> H["`purista add queue`"]
+    G --> H["`npm run add:queue`"]
     H --> I[Deploy]
 ```
 
@@ -175,6 +175,15 @@ flowchart TD
 The CLI creates a consistent, predictable structure:
 
 ```text
+AGENTS.md
+CLAUDE.md
+.agents/
+├── IMPLEMENTATION.md
+└── skills/
+    └── purista -> node_modules/@purista/core/skills/purista
+.claude/
+└── skills/
+    └── purista -> node_modules/@purista/core/skills/purista
 src/
 ├── service/
 │   ├── serviceEvent.enum.ts

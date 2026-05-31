@@ -91,15 +91,12 @@ const headings = handbookSections.map(s => ({
 
       {/* CLI panel */}
       <div class="hb-preview-panel" data-panel="cli">
-        <pre class="hb-preview-code"><code><span class="hb-tok-comment"># install the PURISTA AI skill</span>
-<span class="hb-tok-cmd">npx</span> skills add puristajs/purista --skill purista
-
-<span class="hb-tok-comment"># scaffold a new project</span>
+        <pre class="hb-preview-code"><code><span class="hb-tok-comment"># scaffold a new project with agent guidance included</span>
 <span class="hb-tok-cmd">npm</span> create purista@latest my-app
 
 <span class="hb-tok-comment"># add a service and its first command</span>
-<span class="hb-tok-cmd">purista</span> add service user
-<span class="hb-tok-cmd">purista</span> add command signup
+<span class="hb-tok-cmd">npm</span> run add:service -- user
+<span class="hb-tok-cmd">npm</span> run add:command -- signup
 
 <span class="hb-tok-comment"># run in development</span>
 <span class="hb-tok-cmd">npm</span> run dev</code></pre>

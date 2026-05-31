@@ -20,7 +20,7 @@ In our example, the subscription will be part of the "Email" business area.
 Because of this, we will first create another service called "Email".
 
 ```bash
-purista add service email
+npm run add:service -- email
 ```
 
 Now, we can create a new subscription, which will be added to the email service.
@@ -30,7 +30,7 @@ Now, we can create a new subscription, which will be added to the email service.
 For adding a subscription to a service, you can use the PURISTA CLI.
 
 ```bash
-purista add subscription
+npm run add:subscription
 ```
 
 The CLI will guide you through all steps and will create all files for you.

@@ -58,13 +58,9 @@ purista init my-app \
 The create wrapper and the main CLI use the same underlying command engine, so both entry points generate the same project shape.
 
 ::: tip Recommended for AI-assisted projects
-Install the PURISTA AI skill before asking an assistant to design or modify services:
+Generated projects include `AGENTS.md`, `CLAUDE.md`, `.agents/IMPLEMENTATION.md`, and local PURISTA skill links for coding agents by default. The skill links target `node_modules/@purista/core/skills/purista`, so updating `@purista/core` refreshes the project skill.
 
-```bash
-npx skills add puristajs/purista --skill purista
-```
-
-See [Install the PURISTA AI Skill](../install-ai-skill.md) for agent-specific install options.
+See [Install the PURISTA AI Skill](../install-ai-skill.md) if you need to add the skill to an existing project or an assistant-specific mirror.
 :::
 
 Choose the options that fit your runtime and deployment setup:
@@ -75,21 +71,23 @@ Choose the options that fit your runtime and deployment setup:
 - `linter`: `biome`, `eslint`, or `none`
 - generated projects are ESM-only and always use `"type": "module"`
 
-After setup, generate services and business artifacts with the CLI:
+After setup, generate services and business artifacts through the project-local `@purista/cli` scripts:
 
-1. `purista add service`
-2. `purista add command`
-3. `purista add subscription`
-4. `purista add stream`
-5. `purista add queue`
-6. `purista add queue-worker`
-7. `purista add agent`
+1. `npm run add:service -- <name>`
+2. `npm run add:command -- <name>`
+3. `npm run add:subscription -- <name>`
+4. `npm run add:stream -- <name>`
+5. `npm run add:queue -- <name>`
+6. `npm run add:queue-worker -- <name>`
+7. `npm run add:agent -- <name>`
+
+Use the matching package manager for your project: `npm run ...`, `pnpm run ...`, `yarn ...`, or `bun run ...`.
 
 Recommended scaffold order for new projects:
 
-1. `purista add service` and first `purista add command`
-2. `purista add stream` if you need push/live updates
-3. `purista add queue` + `purista add queue-worker` for background jobs
+1. `add:service` and first `add:command`
+2. `add:stream` if you need push/live updates
+3. `add:queue` + `add:queue-worker` for background jobs
 4. install optional AI packages in the application when you need LLM-powered workloads
 
 Rule of thumb:
@@ -161,15 +159,26 @@ the project config, and an example `ping` service with one starter command. Foll
 |- tsconfig.json
 |- purista.json
 |- README.md
+|- AGENTS.md
+|- CLAUDE.md
+|- .agents/
+| |- IMPLEMENTATION.md
+| |- skills/
+|     |- purista -> node_modules/@purista/core/skills/purista
+|- .claude/
+| |- skills/
+|     |- purista -> node_modules/@purista/core/skills/purista
 |- .gitignore
 ```
 
 Notes:
 
 - `src/service` and `src/agents` are the default CLI-managed roots.
+- `AGENTS.md`, `CLAUDE.md`, and `.agents/IMPLEMENTATION.md` guide coding agents toward PURISTA structure and CLI usage.
+- `.agents/skills/purista` and `.claude/skills/purista` are package-backed links to the PURISTA skill bundled with `@purista/core`.
 - The exact filenames follow the `fileConvention` and `eventConvention` from `purista.json`.
 - `src/eventbridge.ts` is generated from the chosen bridge blueprint.
 - `src/http.ts` and `public/` are only created for the HTTP-enabled project variants.
-- Additional commands, subscriptions, streams, queues, queue workers, and agents are generated into this structure by `purista add ...`.
+- Additional commands, subscriptions, streams, queues, queue workers, and agents are generated into this structure by the local `add:*` package scripts.
 
 The CLI expects this structure for automated updates and type-safe wiring, so avoid moving the generated roots unless you also update `purista.json`.

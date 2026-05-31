@@ -15,11 +15,11 @@ Queue bridges are separate from event bridges, which is an intentional design ch
 ## CLI-first workflow
 
 ```bash
-purista add queue
-purista add queue-worker
+npm run add:queue
+npm run add:queue-worker
 ```
 
-The CLI scaffolds queue definitions, workers, optional producer commands, schemas, and Vitest specs. Run `purista add queue` to define payload/contracts + lifecycle defaults, then `purista add queue-worker` each time you need a new worker profile (sequential, interval, or continuous).
+The CLI scaffolds queue definitions, workers, optional producer commands, schemas, and Vitest specs. Run `npm run add:queue` to define payload/contracts + lifecycle defaults, then `npm run add:queue-worker` each time you need a new worker profile (sequential, interval, or continuous).
 
 ## Architectural context
 

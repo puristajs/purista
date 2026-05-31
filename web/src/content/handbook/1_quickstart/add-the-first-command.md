@@ -16,7 +16,7 @@ A command is a single function, which will be called (invoked) by someone with t
 Commands can be added to services. The most straightforward way for adding a command is the usage of the PURISTA CLI.
 
 ```bash
-purista add command
+npm run add:command
 ```
 
 The CLI will guide you through all steps and will create all files for you.

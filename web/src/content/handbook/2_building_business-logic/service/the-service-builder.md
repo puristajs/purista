@@ -11,14 +11,14 @@ The service builder defines service metadata, configuration, resources, and atta
 Create a service scaffold with:
 
 ```bash
-purista add service
+npm run add:service
 ```
 
 In most projects, you mainly customize service config/resources and add business artifacts via CLI:
 
-- `purista add command`
-- `purista add subscription`
-- `purista add stream`
+- `npm run add:command`
+- `npm run add:subscription`
+- `npm run add:stream`
 
 ## Service definition
 

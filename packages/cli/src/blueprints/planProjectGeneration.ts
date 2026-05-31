@@ -11,7 +11,7 @@ import { resolveProjectBlueprints } from './resolveProjectBlueprints.js'
 import type {
 	BlueprintId,
 	ProjectBlueprintContext,
-	ProjectFileContribution,
+	ProjectEntryContribution,
 	ProjectGenerationPlan,
 	ProjectGeneratorStep,
 } from './types.js'
@@ -46,7 +46,7 @@ const mergePuristaConfig = (base: Partial<PuristaConfig>, patch: Partial<Purista
 	...patch,
 })
 
-const pushFile = (target: ProjectFileContribution[], file: ProjectFileContribution) => {
+const pushFile = (target: ProjectEntryContribution[], file: ProjectEntryContribution) => {
 	const existingIndex = target.findIndex(entry => entry.path === file.path)
 	if (existingIndex >= 0) {
 		target[existingIndex] = file
@@ -140,7 +140,7 @@ export const planProjectGeneration = (
 		linter: input.linter,
 		formatter: input.formatter,
 	}
-	const files: ProjectFileContribution[] = []
+	const files: ProjectEntryContribution[] = []
 	const generatorSteps: ProjectGeneratorStep[] = []
 	const warnings = [...resolution.warnings]
 

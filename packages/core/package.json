@@ -11,7 +11,8 @@
 	"license": "ISC",
 	"type": "module",
 	"files": [
-		"dist"
+		"dist",
+		"skills"
 	],
 	"publishConfig": {
 		"access": "public"
@@ -22,7 +23,7 @@
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
 		"test": "tsc --noEmit && vitest -c ../../vitest.config.ts",
-		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json",
+		"build": "rimraf dist skills tsconfig.tsbuildinfo && tsc -p tsconfig.build.json && node ../../scripts/syncPackageSkills.mjs .",
 		"test:integration": "vitest -c ../../vitest.config.ts"
 	},
 	"devDependencies": {

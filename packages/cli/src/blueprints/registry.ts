@@ -2,8 +2,11 @@ import type { TsConfigJson } from 'type-fest'
 import type { PuristaConfig } from '../api/loadPuristaConfig.js'
 import type { PKG } from '../create/getPackageJson.js'
 import {
+	createAgentImplementationFile,
+	createAgentsFile,
 	createAmqpConfigFile,
 	createBiomeConfigFile,
+	createClaudeFile,
 	createDaprConfigFile,
 	createDefinitionsFile,
 	createEslintModuleConfigFile,
@@ -54,6 +57,15 @@ const basePuristaConfig: Partial<PuristaConfig> = {
 
 const basePackage: PKG = {
 	private: true,
+	scripts: {
+		'add:service': 'purista add service',
+		'add:command': 'purista add command',
+		'add:subscription': 'purista add subscription',
+		'add:stream': 'purista add stream',
+		'add:queue': 'purista add queue',
+		'add:queue-worker': 'purista add queue-worker',
+		'add:agent': 'purista add agent',
+	},
 	dependencies: {
 		'@purista/core': 'latest',
 		zod: 'latest',
@@ -142,6 +154,19 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 			files: [
 				{ path: '.gitignore', content: createGitIgnoreFile() },
 				{ path: 'README.md', content: createReadmeFile(context) },
+				{ path: 'AGENTS.md', content: createAgentsFile(context) },
+				{ path: 'CLAUDE.md', content: createClaudeFile() },
+				{ path: '.agents/IMPLEMENTATION.md', content: createAgentImplementationFile(context) },
+				{
+					type: 'symlink',
+					path: '.agents/skills/purista',
+					target: '../../node_modules/@purista/core/skills/purista',
+				},
+				{
+					type: 'symlink',
+					path: '.claude/skills/purista',
+					target: '../../node_modules/@purista/core/skills/purista',
+				},
 				{ path: 'src/definitions.ts', content: createDefinitionsFile(context) },
 				{ path: 'src/exportDefinitions.ts', content: createExportDefinitionsFile() },
 				{ path: 'src/service/serviceEvent.enum.ts', content: createServiceEventEnumFile(context) },

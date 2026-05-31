@@ -77,14 +77,40 @@ describe('planProjectGeneration', () => {
 		expect(plan.predictedFiles).toContain('src/http.ts')
 		expect(plan.predictedFiles).toContain('src/definitions.ts')
 		expect(plan.predictedFiles).toContain('src/exportDefinitions.ts')
+		expect(plan.predictedFiles).toContain('AGENTS.md')
+		expect(plan.predictedFiles).toContain('CLAUDE.md')
+		expect(plan.predictedFiles).toContain('.agents/IMPLEMENTATION.md')
+		expect(plan.predictedFiles).toContain('.agents/skills/purista')
+		expect(plan.predictedFiles).toContain('.claude/skills/purista')
 		expect(plan.predictedFiles).toContain('src/service/ping/v1/pingV1Service.ts')
 		expect(plan.predictedFiles).toContain('src/service/ping/v1/command/ping/types.ts')
 
 		const packageJsonFile = plan.files.find(file => file.path === 'package.json')
-		expect(packageJsonFile?.content).toContain('"@purista/mqttbridge"')
-		expect(packageJsonFile?.content).toContain('"@purista/hono-http-server"')
-		expect(packageJsonFile?.content).toContain('"@purista/cli"')
-		expect(packageJsonFile?.content).toContain('"export:kubernetes-cronjobs"')
-		expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
+		expect(packageJsonFile?.type).not.toBe('symlink')
+		if (packageJsonFile?.type !== 'symlink') {
+			expect(packageJsonFile?.content).toContain('"@purista/mqttbridge"')
+			expect(packageJsonFile?.content).toContain('"@purista/hono-http-server"')
+			expect(packageJsonFile?.content).toContain('"@purista/cli"')
+			expect(packageJsonFile?.content).toContain('"add:service": "purista add service"')
+			expect(packageJsonFile?.content).toContain('"add:agent": "purista add agent"')
+			expect(packageJsonFile?.content).toContain('"export:kubernetes-cronjobs"')
+			expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
+		}
+
+		const agentSkillLink = plan.files.find(file => file.path === '.agents/skills/purista')
+		expect(agentSkillLink).toEqual({
+			type: 'symlink',
+			path: '.agents/skills/purista',
+			target: '../../node_modules/@purista/core/skills/purista',
+		})
+
+		const agentsFile = plan.files.find(file => file.path === 'AGENTS.md')
+		expect(agentsFile?.type).not.toBe('symlink')
+		if (agentsFile?.type !== 'symlink') {
+			expect(agentsFile?.content).toContain('This project installs `@purista/cli` as a dev dependency')
+			expect(agentsFile?.content).toContain('Package manager: `bun`')
+			expect(agentsFile?.content).toContain('bun run add:service -- <name> --description "<description>"')
+			expect(agentsFile?.content).toContain('bun run dev')
+		}
 	})
 })
