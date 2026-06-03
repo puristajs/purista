@@ -4,9 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Bug Fixes
+
+- Restore github pages website deploy files ([#302](https://github.com/orhun/git-cliff/issues/302))
+- Restore website landing layout ([#303](https://github.com/orhun/git-cliff/issues/303))
+
 ### Documentation
 
 - Add website open graph assets ([#298](https://github.com/orhun/git-cliff/issues/298))
+
+### Miscellaneous Tasks
+
+- V3.0.1 ([#299](https://github.com/orhun/git-cliff/issues/299))
+- Bump tmp from 0.2.5 to 0.2.7 ([#301](https://github.com/orhun/git-cliff/issues/301))
 
 ### Ci
 
