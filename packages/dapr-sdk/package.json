@@ -43,7 +43,7 @@
 		"@types/sinon": "^21.0.1",
 		"hono": "^4.12.23",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",

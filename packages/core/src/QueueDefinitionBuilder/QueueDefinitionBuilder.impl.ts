@@ -5,7 +5,7 @@ import type { QueueLongRunningExecutionProfile } from '../core/types/queue/Queue
 import type { QueueLifecycleConfig } from '../core/types/queue/QueueLifecycleConfig.js'
 import type { QueueResultPolicy } from '../core/types/queue/QueueResultPolicy.js'
 import type { QueueTransformHook } from '../core/types/queue/QueueTransformHook.js'
-import type { QueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefinition.js'
+import type { AnyQueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefinitionList.js'
 import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
 import type { Schema } from '../schema/index.js'
 
@@ -36,7 +36,7 @@ export class QueueDefinitionBuilder {
 	private beforeExecuteTransform?: QueueTransformHook
 	private tags: string[] = []
 	private deprecated = false
-	private workers: QueueWorkerDefinition[] = []
+	private workers: AnyQueueWorkerDefinition[] = []
 	private deadLetter?: { queueName?: string }
 	private queueBridgeConfig: DefinitionQueueBridgeConfig = {
 		prefetch: 1,
@@ -211,7 +211,7 @@ export class QueueDefinitionBuilder {
 	}
 
 	/** Attach one or more worker definitions that can process jobs from this queue. */
-	addWorkerDefinition(...workers: QueueWorkerDefinition[]) {
+	addWorkerDefinition(...workers: AnyQueueWorkerDefinition[]) {
 		this.workers.push(...workers)
 		return this
 	}

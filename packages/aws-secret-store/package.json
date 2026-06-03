@@ -39,10 +39,10 @@
 		"@types/sinon": "^21.0.1",
 		"sinon": "^22.0.0",
 		"testcontainers": "^12.0.1",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
-		"@aws-sdk/client-secrets-manager": "^3.1056.0",
+		"@aws-sdk/client-secrets-manager": "^3.1060.0",
 		"@purista/core": "*"
 	},
 	"peerDependenciesMeta": {},

@@ -36,7 +36,7 @@
 		"@types/node": "^25.9.1",
 		"@types/sinon": "^21.0.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
 		"@google-cloud/secret-manager": "^6.1.2",

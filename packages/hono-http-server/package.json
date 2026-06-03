@@ -37,7 +37,7 @@
 		"@types/sinon": "^21.0.1",
 		"@hono/swagger-ui": "^0.6.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",

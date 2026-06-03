@@ -1,5 +1,6 @@
 import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
+import type { AgentInvokeMap, AllowedAgentDefinition } from '../../AgentQueueBuilder/types.js'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
@@ -2373,19 +2374,49 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		const traceId = lease.message.traceId
 		const principalId = readHeader('purista.principalId')
 		const tenantId = readHeader('purista.tenantId')
+		const queueClient = this.getQueueNamespace(
+			this.resolveQueueInvokes(worker.queueInvokes),
+			traceId,
+			principalId,
+			tenantId,
+		)
+		const serviceProxy = createInvokeFunctionProxy(
+			this.getInvokeFunction(worker.name, traceId, principalId, tenantId, worker.invokes),
+		)
 
 		return {
 			message: lease.message,
 			job: jobControls,
 			signal: cancellation.controller.signal,
-			emit: this.getEmitFunction(worker.name, traceId, principalId, tenantId, {}),
-			...this.getContextFunctions(logger),
-			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, principalId, tenantId, {})),
+			emit: this.getEmitFunction(worker.name, traceId, principalId, tenantId, worker.emitList),
+			...this.getContextFunctions(logger, queueClient),
+			service: serviceProxy,
 			stream: createOpenStreamFunctionProxy(
-				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, {}),
+				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, worker.streamInvokes),
 			),
+			agent: this.createQueueWorkerAgentInvokeMap(serviceProxy, worker.agentInvokes),
 			resources: this.resources,
 		} as QueueJobContext
+	}
+
+	private createQueueWorkerAgentInvokeMap<Agents extends Record<string, AllowedAgentDefinition>>(
+		serviceProxy: unknown,
+		agents: readonly AllowedAgentDefinition[],
+	): AgentInvokeMap<Agents> {
+		const result: Record<string, { run(payload: unknown, parameter?: unknown): Promise<unknown> }> = {}
+		for (const agent of agents) {
+			const key = `${agent.agentName}.${agent.serviceVersion}`
+			result[key] = {
+				run: async (payload, parameter) => {
+					const serviceMap = serviceProxy as Record<
+						string,
+						Record<string, Record<string, (payload: unknown, parameter?: unknown) => Promise<unknown>>>
+					>
+					return serviceMap[this.info.serviceName][agent.serviceVersion][agent.agentName](payload, parameter)
+				},
+			}
+		}
+		return result as AgentInvokeMap<Agents>
 	}
 
 	private async handleQueueResult(

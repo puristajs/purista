@@ -1,18 +1,31 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
+import { createQueueEnqueueProxy } from '../core/helper/createQueueEnqueueProxy.impl.js'
+import { createQueueScheduleProxy } from '../core/helper/createQueueScheduleProxy.impl.js'
 import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
 import { getNewTraceId } from '../core/helper/getNewTraceId.impl.js'
 import type { QueueRetryRequest } from '../core/QueueBridge/types/QueueRetryRequest.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
+import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueJobContext } from '../core/types/queue/QueueJobContext.js'
 import type { QueueMessage } from '../core/types/queue/QueueMessage.js'
+import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
 import type { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
+import type { QueueWorkerBuilderTypes } from '../QueueWorkerBuilder/QueueWorkerBuilderTypes.js'
+import type { Schema } from '../schema/index.js'
 import {
+	createAgentInvokeProxy,
 	createBaseContextStubs,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
 	createResourceProxy,
 } from './sharedContextMocks.js'
+
+/** Infer the internal builder type configuration from a queue worker builder. */
+export type QueueWorkerContextMockBuilderTypes<T> = T extends QueueWorkerBuilder<infer C> ? C : QueueWorkerBuilderTypes
 
 /**
  * Input for {@link createQueueWorkerContextMock}.
@@ -47,12 +60,23 @@ export type QueueWorkerContextMockResult<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
+	TBuilder extends QueueWorkerBuilder<any> = QueueWorkerBuilder<any>,
 > = {
-	context: QueueJobContext<Payload, Parameter, Resources>
+	context: QueueJobContext<
+		Payload,
+		Parameter,
+		Resources,
+		QueueWorkerContextMockBuilderTypes<TBuilder>['Invokes'],
+		QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes'],
+		QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList'],
+		QueueWorkerContextMockBuilderTypes<TBuilder>['QueueInvokes'],
+		EmptyObject,
+		QueueWorkerContextMockBuilderTypes<TBuilder>['AgentInvokes']
+	>
 	message: QueueMessage<Payload, Parameter>
 	stubs: {
 		logger: Record<string, SinonStub>
-		emit: SinonStub
+		emit: FromEmitToOtherType<QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList'], SinonStub>
 		wrapInSpan: SinonStub
 		startActiveSpan: SinonStub
 		getSecret: SinonStub
@@ -72,8 +96,11 @@ export type QueueWorkerContextMockResult<
 			extendLease: SinonStub
 			cancelRequested: SinonStub
 		}
-		service: QueueJobContext<Payload, Parameter, Resources>['service']
-		stream: QueueJobContext<Payload, Parameter, Resources>['stream']
+		service: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['service']
+		stream: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
+		agent: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
+		enqueue: SinonStub
+		scheduleAt: SinonStub
 	}
 }
 
@@ -107,13 +134,25 @@ export const createQueueWorkerContextMock = <
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
+	TBuilder extends QueueWorkerBuilder<any> = QueueWorkerBuilder<any>,
 >(
-	_builder: QueueWorkerBuilder,
+	builder: TBuilder,
 	input: CreateQueueWorkerContextMockInput<Payload, Parameter, Resources>,
-): QueueWorkerContextMockResult<Payload, Parameter, Resources> => {
-	const base = createBaseContextStubs<Resources, Record<string, never>>({} as Record<string, never>, input.sandbox)
-	const serviceProxy = createInvokeProxy(input.sandbox)
-	const streamProxy = createInvokeProxy(input.sandbox)
+): QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder> => {
+	const internalBuilder = builder as unknown as {
+		invokes: QueueWorkerContextMockBuilderTypes<TBuilder>['Invokes']
+		streamInvokes: QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes']
+		emitList: QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList']
+		queueInvokes: QueueInvokeList
+		agentInvokes: readonly unknown[]
+	}
+	const base = createBaseContextStubs<Resources, QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList']>(
+		internalBuilder.emitList as FromEmitToOtherType<QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList'], Schema>,
+		input.sandbox,
+	)
+	const serviceProxy = createInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
+	const streamProxy = createInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
+	const agentProxy = createAgentInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['AgentInvokes']>(input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 	const message = createQueueMessageMock(input)
 
@@ -126,12 +165,12 @@ export const createQueueWorkerContextMock = <
 	}
 	const abortController = new AbortController()
 
-	const context: QueueJobContext<Payload, Parameter, Resources> = {
+	const context: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context'] = {
 		logger: base.logger.mock,
-		metrics: createMetricContextMock(input.sandbox),
+		metrics: createMetricContextMock<EmptyObject>(input.sandbox),
 		message,
 		signal: abortController.signal,
-		emit: async (_eventName, _payload) => undefined,
+		emit: async (eventName, payload) => base.stubs.emit[eventName](eventName, payload),
 		wrapInSpan: base.stubs.wrapInSpan.callsFake((name, opts, fn) => {
 			void name
 			void opts
@@ -161,9 +200,18 @@ export const createQueueWorkerContextMock = <
 			removeState: base.stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
 		queue: {
-			enqueue: base.stubs.enqueue.rejects(new Error('enqueue is not stubbed')) as any,
-			scheduleAt: base.stubs.scheduleAt.rejects(new Error('scheduleAt is not stubbed')) as any,
+			enqueue: createQueueEnqueueProxy(
+				(async (queueName, payload, parameter, options) =>
+					base.stubs.enqueue(queueName, payload, parameter, options)) as QueueInvokeFunction,
+				internalBuilder.queueInvokes,
+			),
+			scheduleAt: createQueueScheduleProxy(
+				(async (queueName, runAt, payload, parameter, options) =>
+					base.stubs.scheduleAt(queueName, runAt, payload, parameter, options)) as QueueScheduleFunction,
+				internalBuilder.queueInvokes,
+			),
 		},
+		agent: agentProxy.api,
 		job: {
 			complete: async output => job.complete(output),
 			retry: async (request?: QueueRetryRequest) => job.retry(request),
@@ -180,7 +228,7 @@ export const createQueueWorkerContextMock = <
 		message,
 		stubs: {
 			logger: base.stubs.logger,
-			emit: base.stubs.emit as unknown as SinonStub,
+			emit: base.stubs.emit as FromEmitToOtherType<QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList'], SinonStub>,
 			wrapInSpan: base.stubs.wrapInSpan,
 			startActiveSpan: base.stubs.startActiveSpan,
 			getSecret: base.stubs.getSecret,
@@ -194,8 +242,17 @@ export const createQueueWorkerContextMock = <
 			removeState: base.stubs.removeState,
 			resources: base.stubs.resources,
 			job,
-			service: serviceProxy.createApi<QueueJobContext<Payload, Parameter, Resources>['service']>(),
-			stream: streamProxy.createApi<QueueJobContext<Payload, Parameter, Resources>['stream']>(),
+			service:
+				serviceProxy.createApi<
+					QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['service']
+				>(),
+			stream:
+				streamProxy.createApi<
+					QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
+				>(),
+			agent: agentProxy.api,
+			enqueue: base.stubs.enqueue,
+			scheduleAt: base.stubs.scheduleAt,
 		},
 	}
 }
