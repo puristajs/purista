@@ -51,7 +51,7 @@ export type QueueDefinition<
 	/** Required queue bridge capabilities for strict startup validation. */
 	queueBridgeConfig: DefinitionQueueBridgeConfig
 	/** Worker definitions that process messages from this queue. */
-	workers: QueueWorkerDefinition<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes>[]
+	workers: QueueWorkerDefinition<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes, any, any, any, any>[]
 	/** Optional dead-letter queue naming override. */
 	deadLetter?: {
 		queueName?: string

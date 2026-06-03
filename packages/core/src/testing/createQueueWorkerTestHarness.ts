@@ -26,7 +26,7 @@ export type InferQueueWorkerHarnessServiceBuilderConfig<T> = T extends ServiceBu
  */
 export const createQueueWorkerTestHarness = async <TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>>(
 	serviceBuilder: TServiceBuilder,
-	workerBuilder: QueueWorkerBuilder,
+	workerBuilder: QueueWorkerBuilder<any>,
 	options: InstanceConfigType<InferQueueWorkerHarnessServiceBuilderConfig<TServiceBuilder>> & {
 		eventBridge?: EventBridge
 		queueBridge?: QueueBridge

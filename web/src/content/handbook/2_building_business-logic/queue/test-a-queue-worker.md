@@ -35,6 +35,25 @@ Use this level when you want to verify:
 - job completion or retry logic
 - resource usage
 - handler branching
+- declared outbound calls through `mock.stubs.service`, `mock.stubs.stream`, `mock.stubs.enqueue`, `mock.stubs.emit`, and `mock.stubs.agent`
+
+For example, if a worker declares `.canEnqueue('auditJob', ...)` and `.canInvokeAgent('triagePing', '1', ...)`, the context mock exposes matching helpers:
+
+```ts
+const mock = createQueueWorkerContextMock(processJobWorkerBuilder, {
+  queueName: 'pingJob',
+  payload: { ping: 'queued ping' },
+  parameter: { requestId: 'req-1' },
+})
+
+mock.stubs.agent['triagePing.1'].run.resolves({ priority: 'normal' })
+
+const definition = await processJobWorkerBuilder.getDefinition()
+await definition.handler(mock.context, mock.message)
+
+expect(mock.stubs.enqueue.calledWith('auditJob')).toBe(true)
+expect(mock.stubs.agent['triagePing.1'].run.calledOnce).toBe(true)
+```
 
 ## Runtime test
 

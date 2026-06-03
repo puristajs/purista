@@ -7,7 +7,7 @@ Test declared boundaries and runtime wiring:
 - command tests should use command context helpers or service instances
 - subscription tests should assert consumed event behavior
 - stream tests should verify chunks and final payloads
-- queue worker tests should cover retry/ack/dead-letter behavior when relevant
+- queue worker tests should assert declared `canInvoke`, `canConsumeStream`, `canEnqueue`, `canEmit`, and `canInvokeAgent` dependencies through the queue worker context helpers, plus retry/ack/dead-letter behavior when relevant
 - schedule export tests should assert deterministic manifests and unsupported expression failures without a live scheduler or cluster
 - strict queue idempotency tests should assert duplicate enqueue returns the original job id and does not create a second job
 - agent tests should use core agent testing helpers

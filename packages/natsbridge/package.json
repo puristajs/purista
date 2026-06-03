@@ -38,7 +38,7 @@
 		"@types/sinon": "^21.0.1",
 		"@types/ws": "^8.18.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",

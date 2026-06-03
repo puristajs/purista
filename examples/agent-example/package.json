@@ -23,16 +23,16 @@
 	},
 	"devDependencies": {
 		"@types/node": "^25.9.1",
-		"tsx": "^4.22.3",
+		"tsx": "^4.22.4",
 		"typescript": "^6.0.3",
-		"vitest": "^4.1.7"
+		"vitest": "^4.1.8"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.4",
 		"@purista/core": "*",
 		"@purista/harness-openai": "^1.1.0",
 		"@purista/hono-http-server": "*",
-		"@scalar/hono-api-reference": "^0.10.19",
+		"@scalar/hono-api-reference": "^0.10.20",
 		"dotenv": "^17.4.2",
 		"zod": "^4.4.3"
 	}

@@ -30,7 +30,7 @@
 		"@types/node": "^25.9.1",
 		"@types/sinon": "^21.0.1",
 		"rimraf": "^6.1.3",
-		"vitest": "^4.1.7",
+		"vitest": "^4.1.8",
 		"yup": "^1.7.1"
 	},
 	"dependencies": {
@@ -42,7 +42,7 @@
 		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@standard-schema/spec": "^1.1.0",
 		"code-block-writer": "^13.0.3",
-		"openapi3-ts": "^4.5.0",
+		"openapi3-ts": "^4.6.0",
 		"pino": "^10.3.1",
 		"sinon": "^22.0.0",
 		"ts-deepmerge": "^8.0.0",
