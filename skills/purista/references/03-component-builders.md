@@ -64,6 +64,31 @@ npm run add:queue-worker -- invoiceProcessor --service billing --service-version
 
 Use queue-backed execution when work needs leases, retries, delay, dead-letter handling, or operator replay.
 
+Queue workers use the same declared dependency model as other handlers. Declare dependencies before the worker function so the runtime manifest, handler context, and test helpers stay typed and auditable:
+
+```ts
+const worker = service
+	.getQueueWorkerBuilder('invoiceProcessing', 'Processes invoice jobs')
+	.canInvoke('InvoiceService', '1', 'sendInvoice', sendInvoiceOutputSchema, invoicePayloadSchema)
+	.canConsumeStream('InvoiceService', '1', 'renderInvoice', invoiceChunkSchema, invoicePayloadSchema)
+	.canEnqueue('notificationQueue', notificationPayloadSchema, notificationParameterSchema)
+	.canEmit('invoice.completed', invoiceCompletedEventSchema)
+	.canInvokeAgent('reconcileInvoice', '1', {
+		outputSchema: reconcileOutputSchema,
+		payloadSchema: reconcilePayloadSchema,
+		parameterSchema: reconcileParameterSchema,
+	})
+	.setHandler(async function (context) {
+		const payload = context.message.payload as { invoiceId: string }
+		await context.service.InvoiceService['1'].sendInvoice({ invoiceId: payload.invoiceId })
+		await context.queue.enqueue.notificationQueue({ invoiceId: payload.invoiceId })
+		await context.emit('invoice.completed', { invoiceId: payload.invoiceId })
+		await context.agent['reconcileInvoice.1'].run({ invoiceId: payload.invoiceId })
+	})
+```
+
+Use `canInvokeAgent(...)` only for agents attached to the same service. Cross-service AI work should go through explicit command, stream, queue, or event contracts.
+
 ## Schedules
 Use schedules to declare external time-trigger intent. Schedules do not run inside PURISTA.
 

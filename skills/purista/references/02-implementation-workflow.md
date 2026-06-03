@@ -60,7 +60,7 @@ Generated artifacts should remain explicit:
 - schema definitions live beside the boundary
 - boundary schemas contain the minimum data needed by that boundary
 - `setBeforeGuardHooks(...)` enforces tenant/principal preconditions before handler logic for sensitive operations
-- handlers use `context.resources`, `context.service`, `context.stream`, `context.queue`, or `context.harness`
+- handlers use `context.resources`, `context.service`, `context.stream`, `context.queue`, `context.emit`, `context.agent`, or `context.harness` only after the corresponding builder capability has been declared
 - runtime clients are not created inside handlers
 - service files add definitions via service builder methods
 - logs, metrics, traces, events, queue payloads, streams, and prompts do not include secrets, PII, raw headers, tokens, or full request bodies by default

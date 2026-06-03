@@ -29,6 +29,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Keep external systems behind resources or runtime bindings.
 - Treat tenant isolation, authorization, auditability, and data minimization as architecture requirements, not handler details.
 - Do not leak secrets, PII, prompts, completions, tokens, raw payloads, headers, or attachments into logs, metrics, traces, events, generated examples, or model calls unless an explicit product policy allows the exact field.
+- Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
@@ -83,6 +84,7 @@ PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semant
 ## Verification Cues
 - The design can name one owner for each capability and source of truth.
 - Every handler dependency is reachable through resources, stores, context, or declared runtime bindings.
+- Queue workers declare every service, stream, queue, event, and same-service agent dependency before using `context.service`, `context.stream`, `context.queue`, `context.emit`, or `context.agent`.
 - Runtime wiring names required bridges, stores, providers, telemetry, queue bridges, and HTTP servers.
 - Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.
 - Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
