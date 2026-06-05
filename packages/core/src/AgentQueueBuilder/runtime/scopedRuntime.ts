@@ -1,5 +1,6 @@
 import type { AgentModelBinding, AgentRuntimeOptions, AgentRuntimeRef, AttachedAgentDefinition } from '../types.js'
 import { createAgentExecutor } from './executor.js'
+import { resolveAgentRuntimeSkills } from './skills.js'
 
 export type AgentRuntimeExecutor<Output = unknown> = NonNullable<AgentRuntimeRef<Output>['current']>
 
@@ -38,13 +39,15 @@ export async function initializeAttachedAgentRuntimes(
 
 	validateWorkspacePolicies(definitions, aiOptions)
 
-	const executors = definitions.map(definition => {
+	const executors = await Promise.all(definitions.map(async definition => {
+		const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, aiOptions.skills)
 		const executor = createAgentExecutor({
 			definition,
 			manifest: definition.manifest,
 			models: aiOptions.models as never,
 			runtime: aiOptions.runtime,
 			workspaceStore: aiOptions.workspaceStore,
+			skillRuntime,
 			logger: aiOptions.logger,
 			stateStore: aiOptions.stateStore,
 			sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
@@ -52,7 +55,7 @@ export async function initializeAttachedAgentRuntimes(
 		})
 		scope.runtimes.set(definition.runtime, executor)
 		return executor
-	})
+	}))
 
 	return {
 		async shutdown() {

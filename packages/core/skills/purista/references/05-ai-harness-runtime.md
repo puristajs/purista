@@ -67,6 +67,49 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 
 Startup fails fast when aliases or capabilities are missing.
 
+Agent skills follow the same declaration/runtime split. Builders declare the
+skill names they are allowed to use:
+
+```ts
+const triageAgent = supportService
+  .getAgentQueueBuilder('triage', 'Classifies incoming support tickets')
+  .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object', 'tool_use'] })
+  .useSkills(['incident-responder'])
+  .setHarnessAgent({
+    model: 'primary',
+    builtinTools: ['read'],
+    instructions: 'Read relevant skills before returning a result.',
+  })
+```
+
+Runtime wiring supplies the directories. Namespaced bindings win over global
+bindings; trusted discovery is optional and should remain explicit in
+production bootstrap code:
+
+```ts
+await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(eventBridge, {
+  queueBridge,
+  ai: {
+    models,
+    skills: {
+      bindings: {
+        'incident-responder': { directory: './src/skills/incident-responder' },
+      },
+      discovery: {
+        projectRoot: process.cwd(),
+        trustedProjectRoots: [process.cwd()],
+      },
+    },
+  },
+})
+```
+
+PURISTA validates declared skills during startup. A missing binding, missing
+directory, missing `SKILL.md`, or mismatched frontmatter fails before work is
+queued. The harness prompt lists only skill metadata and
+`/skills/<name>/SKILL.md`; the full skill body is mounted into the sandbox and
+loaded through `read`.
+
 Default AI telemetry should not capture prompt or completion content. Use `captureContent: false` unless a product-specific retention, redaction, consent, and access-control policy has been approved.
 
 Keep telemetry ownership explicit:
@@ -195,6 +238,23 @@ Use core testing helpers:
 - `createAgentContextMock(...)`
 
 Tests should verify output validation, model capability behavior, stream chunks, and declared invoke bridges.
+For skill-backed agents, pass the same runtime binding shape to
+`createAgentTestHarness(...)` that application startup uses:
+
+```ts
+const harness = await createAgentTestHarness(await triageAgent.getDefinition(), {
+  models: { primary: { provider: model, model: 'gpt-4.1-mini', capabilities: ['object', 'tool_use'] } },
+  skills: {
+    bindings: {
+      'incident-responder': { directory: skillDir },
+    },
+  },
+})
+```
+
+Assert that the first model request contains the skill catalog entry but not the
+`SKILL.md` body, and that the scripted model reads
+`/skills/incident-responder/SKILL.md` before producing the final result.
 Security-sensitive agent tests should also verify denied tools, missing tenant/principal metadata, redacted model input, sanitized errors, and no prompt/PII leakage in logs or telemetry fixtures.
 Durable workspace tests should also verify missing capability startup failures,
 resume after retry, cleanup behavior, explicit `required: false` fresh

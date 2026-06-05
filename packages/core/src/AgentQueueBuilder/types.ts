@@ -189,6 +189,84 @@ export type AgentSandboxPolicy = {
 	adapter?: unknown
 }
 
+/** Resolves a declared agent skill name to a runtime skill directory. */
+export type AgentSkillResolver = (input: {
+	name: string
+	resourceName?: string
+	serviceName: string
+	serviceVersion: string
+	agentName: string
+}) => Promise<{ directory: string } | undefined> | { directory: string } | undefined
+
+/** Runtime binding for a skill declared with `AgentQueueBuilder.useSkills(...)`. */
+export type AgentSkillRuntimeBinding =
+	| {
+			/** Absolute or application-relative directory containing `SKILL.md`. */
+			directory: string
+			/** Trust level reported to the harness skill catalog. */
+			trust?: 'trusted' | 'project' | 'user'
+			/** Optional source label used in diagnostics and catalogs. */
+			source?: string
+	  }
+	| {
+			/** Lazy resolver for skill directories that depend on service or agent identity. */
+			resolver: AgentSkillResolver
+			trust?: 'trusted' | 'project' | 'user'
+			source?: string
+	  }
+
+/** Optional local skill discovery settings for attached agent runtime startup. */
+export type AgentSkillDiscoveryOptions = {
+	/** Project root used for project-local skill discovery. */
+	projectRoot?: string
+	includeProjectAgentsDir?: boolean
+	includeProjectClientDir?: boolean
+	includeUserAgentsDir?: boolean
+	includeUserClientDir?: boolean
+	includeClaudeCompatDir?: boolean
+	includeAncestorProjectDirs?: boolean
+	trustedProjectRoots?: readonly string[]
+	maxDepth?: number
+	maxDirectories?: number
+}
+
+/** Runtime skill bindings supplied through `ServiceBuilder.getInstance(..., { ai: { skills } })`. */
+export type AgentSkillRuntimeOptions = {
+	/** Global skill bindings keyed by skill name. */
+	bindings?: Record<string, AgentSkillRuntimeBinding>
+	/** Resource-scoped skill bindings keyed by `resourceName`, then skill name. */
+	namespaces?: Record<string, Record<string, AgentSkillRuntimeBinding>>
+	/** Optional trusted discovery. Use explicit bindings for production where possible. */
+	discovery?: false | AgentSkillDiscoveryOptions
+}
+
+/** Metadata-only skill catalog entry exposed to attached agent handlers. */
+export type AgentSkillCatalogEntry = {
+	name: string
+	description: string
+	location: string
+	mountPath: `/skills/${string}`
+	resourceName?: string
+	compatibility?: string
+	trust: 'trusted' | 'project' | 'user'
+	source?: string
+}
+
+/** Handler helper for resolving declared skill metadata without exposing skill bodies. */
+export type AgentSkillContext = {
+	catalog: readonly AgentSkillCatalogEntry[]
+	/** Returns the metadata-only prompt fragment used by harness-backed agents. */
+	systemPromptFragment(): string
+	/** Resolve one declared skill by name from the metadata catalog. */
+	resolve(name: string): AgentSkillCatalogEntry | undefined
+}
+
+/** Internal resolved skill binding passed from PURISTA runtime wiring into `@purista/harness`. */
+export type AgentSkillRuntimeResolved = {
+	harnessSkills: Record<string, { directory: string; trust?: 'trusted' | 'project' | 'user'; source?: string }>
+	catalog: readonly AgentSkillCatalogEntry[]
+}
+
 /** Capability required by a durable attached-agent workspace policy. */
 export type AgentWorkspaceCapabilityRequirement = string
 
@@ -341,6 +419,7 @@ export type AgentHandlerContext<
 	harness: {
 		session: Session<any>
 		models: AgentHandlerModelBindings<Models>
+		skills: AgentSkillContext
 		events: {
 			emit(event: RunEvent): Promise<void>
 		}
@@ -521,6 +600,7 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
 	workspaceStore?: AgentDurableWorkspaceStore
+	skills?: AgentSkillRuntimeOptions
 	stateStore?: unknown
 	logger?: PuristaLogger
 	sandbox?: unknown

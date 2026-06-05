@@ -32,6 +32,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
+- Agent skills are runtime-bound instructions. Builders declare `.useSkills(...)`; application startup binds those declarations through `ai.skills.bindings`, `ai.skills.namespaces`, or trusted discovery. The harness mounts skill files and the prompt contains only metadata until the model reads `/skills/<name>/SKILL.md`.
 - Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.
@@ -93,6 +94,7 @@ non-durable run restart.
 - Every handler dependency is reachable through resources, stores, context, or declared runtime bindings.
 - Queue workers declare every service, stream, queue, event, and same-service agent dependency before using `context.service`, `context.stream`, `context.queue`, `context.emit`, or `context.agent`.
 - Runtime wiring names required bridges, stores, providers, telemetry, queue bridges, and HTTP servers.
+- Skill-backed agent designs name the builder declarations, runtime skill binding or trusted discovery root, sandbox/read availability, and tests proving the skill body is not logged, traced, queued, emitted, or inlined into prompts.
 - Durable agent replay designs name required harness runtime/workspace stores, required capabilities, `required` fallback behavior, cleanup owner, and product-owned retention/encryption/quota policy.
 - Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.
 - Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.

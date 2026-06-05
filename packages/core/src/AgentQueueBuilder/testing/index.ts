@@ -16,11 +16,14 @@ import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
 import { createAgentExecutor } from '../runtime/executor.js'
+import { resolveAgentRuntimeSkills } from '../runtime/skills.js'
 import type {
 	AgentHandlerContext,
 	AgentModelBinding,
 	AgentRunIdentity,
 	AgentRuntimeModelBindings,
+	AgentSkillRuntimeOptions,
+	AgentSkillContext,
 	AttachedAgentDefinition,
 } from '../types.js'
 
@@ -35,6 +38,7 @@ export type CreateAgentContextMockInput<
 	parameter?: Parameter
 	resources?: Resources
 	models?: AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models']
+	skills?: AgentSkillContext
 	metrics?: PuristaMetricContext<Metrics>
 	identity?: Partial<AgentRunIdentity>
 	logger?: PuristaLogger
@@ -80,6 +84,7 @@ export function createAgentContextMock<
 		harness: {
 			session: createSessionMock(identity.harnessSessionId),
 			models: (input.models ?? {}) as AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models'],
+			skills: input.skills ?? emptySkillContext(),
 			events: {
 				emit: async () => undefined,
 			},
@@ -93,23 +98,46 @@ export function createAgentContextMock<
 	}
 }
 
+function emptySkillContext(): AgentSkillContext {
+	return {
+		catalog: [],
+		systemPromptFragment: () => '',
+		resolve: () => undefined,
+	}
+}
+
 export function createScriptedHarnessModel() {
 	return new ScriptedHarnessModelProvider()
 }
 
 export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
+	/**
+	 * Runtime skill bindings for agents that declare `.useSkills(...)`.
+	 *
+	 * @example
+	 * ```ts
+	 * const harness = await createAgentTestHarness(definition, {
+	 *   models,
+	 *   skills: { bindings: { 'incident-responder': { directory: skillDir } } },
+	 * })
+	 * ```
+	 */
+	skills?: AgentSkillRuntimeOptions
 	logger?: PuristaLogger
 }
 
-export function createAgentTestHarness<Definition extends AttachedAgentDefinition<any>>(
+/** Create a deterministic runtime harness for one attached agent definition. */
+export async function createAgentTestHarness<Definition extends AttachedAgentDefinition<any>>(
 	definition: Definition,
 	options: CreateAgentTestHarnessOptions<Definition['manifest']['models']>,
 ) {
+	const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, options.skills)
 	const executor = createAgentExecutor({
 		definition,
 		manifest: definition.manifest,
 		models: options.models,
+		skillRuntime,
 		logger: options.logger,
 	})
 	definition.runtime.current = executor
