@@ -180,8 +180,8 @@ Artifact placement rules:
 ## Examples
 - `purista/examples/agent-example` is the canonical lightweight example for
   core-native agents. It must stay provider-neutral, use
-  `createAgentTestHarness(...)`, and avoid direct app dependencies on
-  `@purista/harness`.
+  `createAgentTestHarness(...)`, use `createAgentSkillTestRuntime(...)` for
+  skill-backed tests, and avoid direct app dependencies on `@purista/harness`.
 
 ## Review Cues
 - CLI generated tests compile against current APIs.

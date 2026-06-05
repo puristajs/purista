@@ -82,7 +82,7 @@ Expected behavior:
 - keeps prompt/completion content out of logs, metrics, traces, events, queues, and examples
 
 Validation:
-- generated agent test uses `createAgentTestHarness(...)` and `createScriptedHarnessModel()`
+- generated agent test uses `createAgentTestHarness(...)`, `createScriptedHarnessModel()`, and documents `createAgentSkillTestRuntime(...)` for skill-backed agents
 - model capabilities are declared and validated at startup
 - model output is schema-validated before deterministic state changes
 

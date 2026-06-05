@@ -1,3 +1,6 @@
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
 import type {
 	EmbeddingRequest,
 	EmbeddingResponse,
@@ -23,6 +26,7 @@ import type {
 	AgentRunIdentity,
 	AgentRuntimeModelBindings,
 	AgentSkillContext,
+	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
 	AttachedAgentDefinition,
 } from '../types.js'
@@ -108,6 +112,105 @@ function emptySkillContext(): AgentSkillContext {
 
 export function createScriptedHarnessModel() {
 	return new ScriptedHarnessModelProvider()
+}
+
+export type CreateAgentSkillTestRuntimeSkill = {
+	/** Skill frontmatter name. Must match the name declared by `.useSkills(...)`. */
+	name: string
+	/** Skill frontmatter description shown in the model-visible skill catalog. */
+	description?: string
+	/** Markdown body written after frontmatter. The body is mounted for `read`, not inlined into prompts. */
+	body?: string
+	/** Optional frontmatter compatibility value surfaced in the skill catalog. */
+	compatibility?: string
+	/** Optional `.useSkills(..., resourceName)` namespace for the generated binding. */
+	resourceName?: string
+	/** Trust value reported to the runtime skill catalog. */
+	trust?: 'trusted' | 'project' | 'user'
+	/** Optional source label reported to the runtime skill catalog. */
+	source?: string
+}
+
+export type AgentSkillTestRuntime = {
+	/** Runtime skill options passed to `createAgentTestHarness(..., { skills })` or service `ai.skills`. */
+	skills: AgentSkillRuntimeOptions
+	/** Absolute skill directories keyed by skill name. */
+	directories: Record<string, string>
+	/** Remove the temporary skill root. Call from test teardown when the process keeps running. */
+	cleanup(): Promise<void>
+}
+
+/**
+ * Create temporary runtime skill bindings for deterministic agent tests.
+ *
+ * The helper writes minimal `SKILL.md` files to a temporary directory and
+ * returns the `skills` runtime option expected by `createAgentTestHarness(...)`.
+ * It mirrors production skill binding behavior without requiring tests to
+ * hand-roll filesystem fixtures or expose skill bodies in prompts.
+ *
+ * @example
+ * ```ts
+ * const skillRuntime = await createAgentSkillTestRuntime([
+ *   { name: 'incident-responder', description: 'Incident response guidance' },
+ * ])
+ *
+ * const harness = await createAgentTestHarness(await triageAgent.getDefinition(), {
+ *   models,
+ *   skills: skillRuntime.skills,
+ * })
+ *
+ * await skillRuntime.cleanup()
+ * ```
+ */
+export async function createAgentSkillTestRuntime(
+	skills: readonly CreateAgentSkillTestRuntimeSkill[],
+): Promise<AgentSkillTestRuntime> {
+	const root = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-agent-skills-'))
+	const bindings: Record<string, AgentSkillRuntimeBinding> = {}
+	const namespaces: NonNullable<AgentSkillRuntimeOptions['namespaces']> = {}
+	const directories: Record<string, string> = {}
+
+	for (const skill of skills) {
+		const directory = path.join(root, skill.resourceName ?? 'global', skill.name)
+		await fs.mkdir(directory, { recursive: true })
+		await fs.writeFile(path.join(directory, 'SKILL.md'), renderTestSkill(skill))
+		const binding: AgentSkillRuntimeBinding = {
+			directory,
+			trust: skill.trust ?? 'trusted',
+			source: skill.source ?? 'test',
+		}
+		directories[skill.name] = directory
+		if (skill.resourceName) {
+			namespaces[skill.resourceName] = {
+				...(namespaces[skill.resourceName] ?? {}),
+				[skill.name]: binding,
+			}
+		} else {
+			bindings[skill.name] = binding
+		}
+	}
+
+	return {
+		skills: {
+			...(Object.keys(bindings).length > 0 ? { bindings } : {}),
+			...(Object.keys(namespaces).length > 0 ? { namespaces } : {}),
+		},
+		directories,
+		cleanup: async () => {
+			await fs.rm(root, { recursive: true, force: true })
+		},
+	}
+}
+
+function renderTestSkill(skill: CreateAgentSkillTestRuntimeSkill): string {
+	const description = skill.description ?? `Test skill fixture for ${skill.name}.`
+	const frontmatter = [`name: ${skill.name}`, `description: ${description}`]
+	if (skill.compatibility) frontmatter.push(`compatibility: ${skill.compatibility}`)
+	return `---
+${frontmatter.join('\n')}
+---
+${skill.body ?? 'Use this deterministic test skill fixture.'}
+`
 }
 
 export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentModelBinding>> = {

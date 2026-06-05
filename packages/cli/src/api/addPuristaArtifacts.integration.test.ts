@@ -276,6 +276,9 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(agentTestContent).toContain(
 			'const harness = await createAgentTestHarness(await triageAgentBuilder.getDefinition(), {',
 		)
+		expect(agentTestContent).toContain(
+			'create test bindings with createAgentSkillTestRuntime(...) and pass skills to this options object',
+		)
 		expect(agentTestContent).toContain("expect(result).toEqual({ message: 'hello' })")
 		expect(agentTestContent).not.toContain('ai: {')
 		expect(agentTestContent).not.toContain('await harness.destroy()')

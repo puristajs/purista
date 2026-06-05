@@ -28,7 +28,7 @@ purista add queue process-jobs --service user --service-version 1 --description 
 purista add agent triage --service user --service-version 1 --description "Review tickets"
 ```
 
-Generated agents use the core-native PURISTA agent builders from `@purista/core`. Live model providers stay app-level dependencies; add provider packages such as `@purista/harness-openai` only when the generated application binds real models at runtime. If you add `.useSkills(...)` to a generated agent, bind the skill directories in application startup through `ai.skills.bindings`, `ai.skills.namespaces`, or explicitly trusted discovery; tests use the same `skills` option on `createAgentTestHarness(...)`.
+Generated agents use the core-native PURISTA agent builders from `@purista/core`. Live model providers stay app-level dependencies; add provider packages such as `@purista/harness-openai` only when the generated application binds real models at runtime. If you add `.useSkills(...)` to a generated agent, bind the skill directories in application startup through `ai.skills.bindings`, `ai.skills.namespaces`, or explicitly trusted discovery; tests should create deterministic skill bindings with `createAgentSkillTestRuntime(...)` and pass its `skills` option to `createAgentTestHarness(...)`.
 
 Non-interactive mode fails fast when a required value has no declared default:
 
@@ -77,7 +77,7 @@ Generated tests import the public testing helpers from `@purista/core`:
 - `createSubscriptionContextMock(...)` for subscription handler tests
 - `createStreamTestHarness(...)` for runtime stream tests
 - `createQueueWorkerTestHarness(...)` for runtime queue worker tests
-- `createAgentTestHarness(...)` and `createScriptedHarnessModel(...)` for agent runtime tests, including skill-backed agents via the `skills` runtime option
+- `createAgentTestHarness(...)`, `createScriptedHarnessModel(...)`, and `createAgentSkillTestRuntime(...)` for agent runtime tests, including skill-backed agents via the `skills` runtime option
 
 **Visit [purista.dev](https://purista.dev)**
 

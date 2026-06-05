@@ -35,6 +35,9 @@ export const getAgentTestFileContent = (input: {
 			})
 			writer.writeLine('})')
 			writer.blankLine()
+			writer.writeLine(
+				'// For agents that declare .useSkills(...), create test bindings with createAgentSkillTestRuntime(...) and pass skills to this options object.',
+			)
 			writer.writeLine(`const harness = await createAgentTestHarness(await ${builderName}.getDefinition(), {`)
 			writer.indent(() => {
 				writer.writeLine('models: {')

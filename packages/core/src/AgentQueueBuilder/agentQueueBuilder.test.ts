@@ -1,10 +1,8 @@
-import fs from 'node:fs/promises'
-import os from 'node:os'
-import path from 'node:path'
 import { z } from 'zod'
 
 import {
 	AgentQueueBuilder,
+	createAgentSkillTestRuntime,
 	createAgentTestHarness,
 	createScriptedHarnessModel,
 	ServiceBuilder,
@@ -180,7 +178,13 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('binds declared skills into a harness agent runtime', async () => {
-		const skillDir = await makeSkill('incident-skill')
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				description: 'Use this skill when triaging incidents.',
+				body: 'SECRET_BODY',
+			},
+		])
 		const model = createScriptedHarnessModel()
 		model.enqueue({
 			object: {},
@@ -209,7 +213,7 @@ describe('AgentQueueBuilder', () => {
 		const scope = createAgentRuntimeScope()
 		await initializeAttachedAgentRuntimes(scope, [definition], {
 			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
-			skills: { bindings: { 'incident-skill': { directory: skillDir } } },
+			skills: skillRuntime.skills,
 		})
 
 		const runtime = getScopedAgentRuntime(scope, definition)
@@ -232,10 +236,17 @@ describe('AgentQueueBuilder', () => {
 		expect(firstRequest?.messages?.[0]?.content).toContain('Available skills')
 		expect(firstRequest?.messages?.[0]?.content).toContain('incident-skill')
 		expect(firstRequest?.messages?.[0]?.content).not.toContain('SECRET_BODY')
+		await skillRuntime.cleanup()
 	})
 
 	it('passes runtime skill bindings through createAgentTestHarness', async () => {
-		const skillDir = await makeSkill('incident-skill')
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				description: 'Use this skill when triaging incidents.',
+				body: 'SECRET_BODY',
+			},
+		])
 		const model = createScriptedHarnessModel()
 		model.enqueue({
 			object: {},
@@ -262,27 +273,26 @@ describe('AgentQueueBuilder', () => {
 			.getDefinition()
 		const harness = await createAgentTestHarness(definition, {
 			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
-			skills: { bindings: { 'incident-skill': { directory: skillDir } } },
+			skills: skillRuntime.skills,
 		})
 
 		await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
 		const firstRequest = model.requests[0] as { messages?: Array<{ content?: string }> } | undefined
 		expect(firstRequest?.messages?.[0]?.content).toContain('Available skills')
 		expect(firstRequest?.messages?.[0]?.content).not.toContain('SECRET_BODY')
+		await skillRuntime.cleanup()
+	})
+
+	it('creates namespaced skill bindings for skill-backed agent tests', async () => {
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				resourceName: 'incident-response-skills',
+				description: 'Use this skill when triaging incidents.',
+			},
+		])
+		expect(skillRuntime.skills.namespaces?.['incident-response-skills']?.['incident-skill']).toBeDefined()
+		expect(skillRuntime.skills.bindings?.['incident-skill']).toBeUndefined()
+		await skillRuntime.cleanup()
 	})
 })
-
-async function makeSkill(name: string): Promise<string> {
-	const root = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-agent-skill-'))
-	const dir = path.join(root, name)
-	await fs.mkdir(dir, { recursive: true })
-	await fs.writeFile(
-		path.join(dir, 'SKILL.md'),
-		`---
-name: ${name}
-description: Use this skill when triaging incidents.
----
-SECRET_BODY`,
-	)
-	return dir
-}

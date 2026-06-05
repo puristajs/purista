@@ -192,9 +192,11 @@ Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, a
 Use core testing helpers:
 - `createAgentTestHarness(...)`
 - `createScriptedHarnessModel()`
+- `createAgentSkillTestRuntime(...)`
 - `createAgentContextMock(...)`
 
 Tests should verify output validation, model capability behavior, stream chunks, and declared invoke bridges.
+For skill-backed agents, use `createAgentSkillTestRuntime(...)` to create temporary `SKILL.md` fixtures and pass `skillRuntime.skills` to `createAgentTestHarness(...)`; do not hand-roll ad hoc skill directories in generated examples. The helper is a deterministic test binding, not a production sandbox, workspace, or provider adapter.
 Security-sensitive agent tests should also verify denied tools, missing tenant/principal metadata, redacted model input, sanitized errors, and no prompt/PII leakage in logs or telemetry fixtures.
 Durable workspace tests should also verify missing capability startup failures,
 resume after retry, cleanup behavior, explicit `required: false` fresh
