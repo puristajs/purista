@@ -4,8 +4,8 @@ import path from 'node:path'
 import type {
 	AgentManifest,
 	AgentSkillCatalogEntry,
-	AgentSkillDiscoveryOptions,
 	AgentSkillContext,
+	AgentSkillDiscoveryOptions,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
 	AgentSkillRuntimeResolved,
@@ -24,7 +24,7 @@ export async function resolveAgentRuntimeSkills(
 	const harnessSkills: AgentSkillRuntimeResolved['harnessSkills'] = {}
 	const catalog: AgentSkillCatalogEntry[] = []
 	for (const declaration of declarations) {
-		const binding = await resolveBinding(declaration, manifest, options)
+		const binding = await resolveBinding(declaration, options)
 		if (!binding) {
 			throw new Error(
 				`Attached agent "${manifest.agentName}" requires skill "${declaration.name}" but no runtime binding was provided`,
@@ -32,9 +32,7 @@ export async function resolveAgentRuntimeSkills(
 		}
 		const directory = await resolveDirectory(binding, declaration, manifest)
 		if (!directory || !fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
-			throw new Error(
-				`Attached agent "${manifest.agentName}" skill "${declaration.name}" directory is missing`,
-			)
+			throw new Error(`Attached agent "${manifest.agentName}" skill "${declaration.name}" directory is missing`)
 		}
 		const entry = readCatalogEntry(directory, declaration, binding)
 		harnessSkills[declaration.name] = {
@@ -84,7 +82,6 @@ function dedupeSkillDeclarations(usedSkills: AgentManifest<any>['usedSkills']): 
 
 async function resolveBinding(
 	declaration: SkillDeclaration,
-	manifest: AgentManifest<any>,
 	options: AgentSkillRuntimeOptions | undefined,
 ): Promise<AgentSkillRuntimeBinding | undefined> {
 	if (!options) return undefined
@@ -99,7 +96,7 @@ function discoverSkillBinding(
 	options: false | AgentSkillDiscoveryOptions | undefined,
 ): AgentSkillRuntimeBinding | undefined {
 	if (!options) return undefined
-	const projectRoot = path.resolve(options.projectRoot ?? process.env['PWD'] ?? '.')
+	const projectRoot = path.resolve(options.projectRoot ?? process.env.PWD ?? '.')
 	const trustedRoots = new Set((options.trustedProjectRoots ?? []).map(root => path.resolve(root)))
 	const roots: Array<{ directory: string; trust: 'project' | 'user'; source: string; trusted: boolean }> = []
 	if (options.includeProjectAgentsDir ?? true) {
@@ -127,10 +124,20 @@ function discoverSkillBinding(
 		})
 	}
 	if (options.includeUserAgentsDir) {
-		roots.push({ directory: path.join(os.homedir(), '.agents', 'skills'), trust: 'user', source: 'user_agents', trusted: true })
+		roots.push({
+			directory: path.join(os.homedir(), '.agents', 'skills'),
+			trust: 'user',
+			source: 'user_agents',
+			trusted: true,
+		})
 	}
 	if (options.includeUserClientDir) {
-		roots.push({ directory: path.join(os.homedir(), '.codex', 'skills'), trust: 'user', source: 'user_client', trusted: true })
+		roots.push({
+			directory: path.join(os.homedir(), '.codex', 'skills'),
+			trust: 'user',
+			source: 'user_client',
+			trusted: true,
+		})
 	}
 	for (const root of roots) {
 		if (!root.trusted) continue
@@ -155,7 +162,7 @@ function findDiscoveredSkillDirectory(
 		const skillPath = path.join(directory, 'SKILL.md')
 		if (fs.existsSync(skillPath)) {
 			const frontmatter = readFrontmatter(fs.readFileSync(skillPath, 'utf8'))
-			return frontmatter['name'] === name ? directory : undefined
+			return frontmatter.name === name ? directory : undefined
 		}
 		for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
 			if (!entry.isDirectory() || shouldSkipDiscoveryDirectory(entry.name)) continue
@@ -187,15 +194,19 @@ async function resolveDirectory(
 	return resolved ? path.resolve(resolved.directory) : undefined
 }
 
-function readCatalogEntry(directory: string, declaration: SkillDeclaration, binding: AgentSkillRuntimeBinding): AgentSkillCatalogEntry {
+function readCatalogEntry(
+	directory: string,
+	declaration: SkillDeclaration,
+	binding: AgentSkillRuntimeBinding,
+): AgentSkillCatalogEntry {
 	const skillPath = path.join(directory, 'SKILL.md')
 	if (!fs.existsSync(skillPath)) {
 		throw new Error(`Attached agent skill "${declaration.name}" is missing SKILL.md`)
 	}
 	const content = fs.readFileSync(skillPath, 'utf8')
 	const frontmatter = readFrontmatter(content)
-	const name = frontmatter['name'] ?? declaration.name
-	const description = frontmatter['description']
+	const name = frontmatter.name ?? declaration.name
+	const description = frontmatter.description
 	if (name !== declaration.name || !description) {
 		throw new Error(`Attached agent skill "${declaration.name}" has invalid SKILL.md frontmatter`)
 	}
@@ -205,7 +216,7 @@ function readCatalogEntry(directory: string, declaration: SkillDeclaration, bind
 		location: `/skills/${name}/SKILL.md`,
 		mountPath: `/skills/${name}`,
 		...(declaration.resourceName ? { resourceName: declaration.resourceName } : {}),
-		...(frontmatter['compatibility'] ? { compatibility: frontmatter['compatibility'] } : {}),
+		...(frontmatter.compatibility ? { compatibility: frontmatter.compatibility } : {}),
 		trust: binding.trust ?? 'trusted',
 		...(binding.source ? { source: binding.source } : {}),
 	}

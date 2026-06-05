@@ -112,24 +112,31 @@ describe('attached agent scoped runtime', () => {
 		const projectRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-agent-project-'))
 		const skillDir = path.join(projectRoot, '.agents', 'skills', 'incident-skill')
 		await fs.mkdir(skillDir, { recursive: true })
-		await fs.writeFile(path.join(skillDir, 'SKILL.md'), `---
+		await fs.writeFile(
+			path.join(skillDir, 'SKILL.md'),
+			`---
 name: incident-skill
 description: Use this skill when handling incidents.
 ---
-SECRET_BODY`)
+SECRET_BODY`,
+		)
 		const definition = createAttachedAgentDefinition({
 			usedSkills: [{ names: ['incident-skill'] }],
 		})
 
-		await expect(initializeAttachedAgentRuntimes(createAgentRuntimeScope(), [definition], {
-			models: {},
-			skills: { discovery: { projectRoot } },
-		})).rejects.toThrow('Attached agent "triage" requires skill "incident-skill" but no runtime binding was provided')
+		await expect(
+			initializeAttachedAgentRuntimes(createAgentRuntimeScope(), [definition], {
+				models: {},
+				skills: { discovery: { projectRoot } },
+			}),
+		).rejects.toThrow('Attached agent "triage" requires skill "incident-skill" but no runtime binding was provided')
 
-		await expect(initializeAttachedAgentRuntimes(createAgentRuntimeScope(), [definition], {
-			models: {},
-			skills: { discovery: { projectRoot, trustedProjectRoots: [projectRoot] } },
-		})).resolves.toEqual({ shutdown: expect.any(Function) })
+		await expect(
+			initializeAttachedAgentRuntimes(createAgentRuntimeScope(), [definition], {
+				models: {},
+				skills: { discovery: { projectRoot, trustedProjectRoots: [projectRoot] } },
+			}),
+		).resolves.toEqual({ shutdown: expect.any(Function) })
 	})
 
 	it('exposes metadata-only skill helpers to run-function handlers', async () => {
@@ -149,7 +156,9 @@ SECRET_BODY`)
 						resourceName: 'ops',
 					}),
 				])
-				expect(context.harness.skills.resolve('incident-skill')?.description).toBe('Use this skill when handling incidents.')
+				expect(context.harness.skills.resolve('incident-skill')?.description).toBe(
+					'Use this skill when handling incidents.',
+				)
 				expect(context.harness.skills.resolve('missing')).toBeUndefined()
 				expect(context.harness.skills.systemPromptFragment()).toContain('Location: /skills/incident-skill/SKILL.md')
 				expect(context.harness.skills.systemPromptFragment()).not.toContain('SECRET_BODY')
@@ -169,12 +178,14 @@ SECRET_BODY`)
 		})
 
 		const runtime = getScopedAgentRuntime(scope, definition)
-		await expect(runtime.executeAggregate({
-			appContext: createCommandContext('skill-message'),
-			message: { id: 'skill-message' },
-			payload: {},
-			parameter: {},
-		})).resolves.toBe('ok')
+		await expect(
+			runtime.executeAggregate({
+				appContext: createCommandContext('skill-message'),
+				message: { id: 'skill-message' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toBe('ok')
 	})
 
 	it('accepts durable workspace agents when runtime and workspace capabilities match', async () => {
@@ -321,10 +332,13 @@ async function makeSkill(name: string): Promise<string> {
 	const root = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-skill-'))
 	const dir = path.join(root, name)
 	await fs.mkdir(dir, { recursive: true })
-	await fs.writeFile(path.join(dir, 'SKILL.md'), `---
+	await fs.writeFile(
+		path.join(dir, 'SKILL.md'),
+		`---
 name: ${name}
 description: Use this skill when handling incidents.
 ---
-SECRET_BODY`)
+SECRET_BODY`,
+	)
 	return dir
 }

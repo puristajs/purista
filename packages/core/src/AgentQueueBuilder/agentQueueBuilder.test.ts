@@ -5,12 +5,16 @@ import { z } from 'zod'
 
 import {
 	AgentQueueBuilder,
-	ServiceBuilder,
 	createAgentTestHarness,
 	createScriptedHarnessModel,
+	ServiceBuilder,
 	type ServiceInfoType,
 } from '../index.js'
-import { createAgentRuntimeScope, getScopedAgentRuntime, initializeAttachedAgentRuntimes } from './runtime/scopedRuntime.js'
+import {
+	createAgentRuntimeScope,
+	getScopedAgentRuntime,
+	initializeAttachedAgentRuntimes,
+} from './runtime/scopedRuntime.js'
 
 describe('AgentQueueBuilder', () => {
 	const serviceInfo: ServiceInfoType = {
@@ -209,12 +213,21 @@ describe('AgentQueueBuilder', () => {
 		})
 
 		const runtime = getScopedAgentRuntime(scope, definition)
-		await expect(runtime.executeAggregate({
-			appContext: { resources: {}, message: { id: 'm1' }, service: {}, stream: {}, queue: {}, emit: async () => undefined },
-			message: { id: 'm1' },
-			payload: {},
-			parameter: {},
-		})).resolves.toEqual({ status: 'ok' })
+		await expect(
+			runtime.executeAggregate({
+				appContext: {
+					resources: {},
+					message: { id: 'm1' },
+					service: {},
+					stream: {},
+					queue: {},
+					emit: async () => undefined,
+				},
+				message: { id: 'm1' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toEqual({ status: 'ok' })
 		const firstRequest = model.requests[0] as { messages?: Array<{ content?: string }> } | undefined
 		expect(firstRequest?.messages?.[0]?.content).toContain('Available skills')
 		expect(firstRequest?.messages?.[0]?.content).toContain('incident-skill')
@@ -263,10 +276,13 @@ async function makeSkill(name: string): Promise<string> {
 	const root = await fs.mkdtemp(path.join(os.tmpdir(), 'purista-agent-skill-'))
 	const dir = path.join(root, name)
 	await fs.mkdir(dir, { recursive: true })
-	await fs.writeFile(path.join(dir, 'SKILL.md'), `---
+	await fs.writeFile(
+		path.join(dir, 'SKILL.md'),
+		`---
 name: ${name}
 description: Use this skill when triaging incidents.
 ---
-SECRET_BODY`)
+SECRET_BODY`,
+	)
 	return dir
 }

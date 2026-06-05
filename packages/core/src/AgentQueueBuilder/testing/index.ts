@@ -22,8 +22,8 @@ import type {
 	AgentModelBinding,
 	AgentRunIdentity,
 	AgentRuntimeModelBindings,
-	AgentSkillRuntimeOptions,
 	AgentSkillContext,
+	AgentSkillRuntimeOptions,
 	AttachedAgentDefinition,
 } from '../types.js'
 

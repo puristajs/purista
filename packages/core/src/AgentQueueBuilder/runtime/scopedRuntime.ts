@@ -39,23 +39,25 @@ export async function initializeAttachedAgentRuntimes(
 
 	validateWorkspacePolicies(definitions, aiOptions)
 
-	const executors = await Promise.all(definitions.map(async definition => {
-		const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, aiOptions.skills)
-		const executor = createAgentExecutor({
-			definition,
-			manifest: definition.manifest,
-			models: aiOptions.models as never,
-			runtime: aiOptions.runtime,
-			workspaceStore: aiOptions.workspaceStore,
-			skillRuntime,
-			logger: aiOptions.logger,
-			stateStore: aiOptions.stateStore,
-			sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
-			telemetry: aiOptions.telemetry,
-		})
-		scope.runtimes.set(definition.runtime, executor)
-		return executor
-	}))
+	const executors = await Promise.all(
+		definitions.map(async definition => {
+			const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, aiOptions.skills)
+			const executor = createAgentExecutor({
+				definition,
+				manifest: definition.manifest,
+				models: aiOptions.models as never,
+				runtime: aiOptions.runtime,
+				workspaceStore: aiOptions.workspaceStore,
+				skillRuntime,
+				logger: aiOptions.logger,
+				stateStore: aiOptions.stateStore,
+				sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
+				telemetry: aiOptions.telemetry,
+			})
+			scope.runtimes.set(definition.runtime, executor)
+			return executor
+		}),
+	)
 
 	return {
 		async shutdown() {

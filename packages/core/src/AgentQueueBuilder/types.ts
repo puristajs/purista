@@ -1,9 +1,9 @@
 import type {
 	BuiltinToolName,
+	DurableRuntime,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
 	WorkflowDefinition as HarnessWorkflowDefinition,
-	DurableRuntime,
 	ModelAlias,
 	ModelCapability,
 	ModelDefaults,

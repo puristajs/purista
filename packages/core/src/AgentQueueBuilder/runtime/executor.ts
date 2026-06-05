@@ -1,6 +1,6 @@
 import {
-	defineHarness,
 	type DurableRuntime,
+	defineHarness,
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
 	type WorkflowDefinition as HarnessWorkflowDefinition,
@@ -128,7 +128,9 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 		if (this.input.definition.execution.kind === 'harnessAgent') {
 			builder = builder.agents({
-				[this.input.manifest.agentName]: this.withDeclaredSkills(this.input.definition.execution.definition) as HarnessAgentDefinition<any>,
+				[this.input.manifest.agentName]: this.withDeclaredSkills(
+					this.input.definition.execution.definition,
+				) as HarnessAgentDefinition<any>,
 			})
 		}
 
@@ -179,7 +181,9 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				appContext: input.appContext,
 				session,
 				models: this.handlerModels,
-				skills: this.input.skillRuntime ? createAgentSkillContext(this.input.skillRuntime.catalog) : createAgentSkillContext([]),
+				skills: this.input.skillRuntime
+					? createAgentSkillContext(this.input.skillRuntime.catalog)
+					: createAgentSkillContext([]),
 				commandTools: this.input.manifest.allowedCommands,
 				agentTools: this.input.manifest.allowedAgents,
 				serviceName: this.input.manifest.serviceName,
