@@ -230,7 +230,7 @@ must resume from committed workspace state after retry or restart.
 })
 ```
 
-At runtime, bind both the harness durable runtime and workspace adapter:
+At runtime, bind both the harness durable runtime and workspace store:
 
 ```ts
 const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
@@ -238,7 +238,7 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
   ai: {
     models,
     runtime,
-    workspace,
+    workspaceStore,
     sandbox,
   },
 })
@@ -248,9 +248,14 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
 `required: false` only when the product can tolerate losing prior workspace
 state and restarting the run in a fresh sandbox.
 
+For local development and tests, the harness package provides
+`inMemoryDurableWorkspaceStore()`. Production services should provide a store
+that persists checkpoint state across process restarts and declares the exact
+`workspace_store.*` capabilities required by the agent policy.
+
 Durable workspace replay requires harness capabilities such as
-`runtime.workspace_checkpoint`, `workspace.durable`, `workspace.snapshot`,
-`workspace.resume`, and `workspace.cleanup`. Retention, encryption, and quota
+`runtime.workspace_checkpoint`, `workspace_store.durable`, `workspace_store.checkpoint`,
+`workspace_store.resume`, and `workspace_store.cleanup`. Retention, encryption, and quota
 requirements can also be declared. PURISTA validates required capabilities at
 service startup before queue workers, commands, or streams run.
 

@@ -186,7 +186,7 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
     },
     sandbox,
     runtime,
-    workspace,
+    workspaceStore,
   },
 })
 
@@ -199,8 +199,8 @@ Startup fails when:
 - `ai.models` is missing
 - a declared model alias is not bound at runtime
 - runtime model capabilities do not satisfy declared alias capabilities
-- durable workspace policy requires `ai.runtime`, `ai.workspace`, or a missing
-  harness capability
+- durable workspace policy declares `required !== false` and `ai.runtime`,
+  `ai.workspaceStore`, or a required harness capability is missing
 
 This fail-fast behavior prevents a production service from silently degrading to a weaker model or transport guarantee.
 
@@ -219,6 +219,12 @@ Use `setSandboxPolicy(...)` when an agent needs mounted skills, filesystem
 built-ins, MCP stdio tools, or code execution. Use `setWorkspacePolicy(...)`
 when a queued or long-running agent must resume from committed workspace state
 after retry or restart.
+
+The sandbox and durable workspace store stay separate even when one
+infrastructure package constructs both. PURISTA validates the store through
+`ai.workspaceStore` and harness `workspace_store.*` capabilities; command
+execution, live filesystem access, and MCP process handling remain sandbox
+responsibilities.
 
 Sandbox file content, prompts, completions, tool inputs, tool outputs,
 workspace references, credentials, tokens, and raw headers must not appear in

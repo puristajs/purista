@@ -105,6 +105,9 @@ Before adding an agent, decide:
 - whether sandboxing is required for file access, code execution, or MCP-style tool use
 - how model output is validated before it affects canonical state
 - whether prompt/completion retention is disabled or explicitly governed
+- whether durable workspace replay is needed, which adapter owns encrypted
+  storage, which product policy owns retention and quotas, and who schedules
+  cleanup
 
 Default guidance:
 - set AI telemetry content capture off unless explicit retention and consent rules exist
@@ -147,6 +150,11 @@ Avoid storing confidential content in audit logs unless a product/legal policy r
 - AI prompts receive only approved, minimized, redacted context.
 - AI telemetry does not capture prompt/completion content by default.
 - Sandbox policy is explicit for untrusted file/code/tool access.
+- Durable workspace policy is explicit for resumable agent runs; sandbox
+  snapshots are not treated as production durable replay.
+- Workspace metadata excludes secrets, raw workspace refs in telemetry, file
+  contents, prompts, completions, tool inputs, tool outputs, credentials,
+  tokens, and raw headers.
 - Model output is schema-validated and applied by deterministic service logic.
 - Queue retries, DLQ handling, idempotency keys, and timeout budgets are defined for sensitive side effects.
 - Audit records capture actor, tenant, operation, resource, decision, and correlation without leaking confidential content.

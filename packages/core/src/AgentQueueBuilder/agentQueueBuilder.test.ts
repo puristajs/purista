@@ -150,7 +150,13 @@ describe('AgentQueueBuilder', () => {
 		expect(manifest.workspacePolicy).toEqual({
 			mode: 'durable',
 			required: true,
-			capabilities: ['runtime.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
+			capabilities: [
+				'runtime.workspace_checkpoint',
+				'workspace_store.durable',
+				'workspace_store.checkpoint',
+				'workspace_store.resume',
+				'workspace_store.cleanup',
+			],
 			cleanup: 'on_terminal',
 			policy: {
 				retention: { cleanupMode: 'manual_only' },

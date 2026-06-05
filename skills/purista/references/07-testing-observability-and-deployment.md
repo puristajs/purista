@@ -11,7 +11,7 @@ Test declared boundaries and runtime wiring:
 - schedule export tests should assert deterministic manifests and unsupported expression failures without a live scheduler or cluster
 - strict queue idempotency tests should assert duplicate enqueue returns the original job id and does not create a second job
 - agent tests should use core agent testing helpers
-- durable agent workspace tests should use a fake durable workspace adapter and
+- durable agent workspace tests should use a fake durable workspace store and
   assert startup capability validation, retry resume, cleanup, and explicit
   ephemeral fallback behavior
 - security tests should cover missing tenant/principal metadata, unauthorized access, guard failures, redaction, and least-privilege resources
@@ -71,7 +71,7 @@ Choose topology after architecture:
 - scheduler selection stays external; Kubernetes CronJob export is manifest generation for an explicit trigger container/script
 - HTTP server selection follows exposed contracts
 - AI provider selection stays optional app runtime wiring
-- durable workspace adapter selection stays optional app runtime wiring; product
+- durable workspace store selection stays optional app runtime wiring; product
   layers own retention durations, encryption key policy, tenant/project quotas,
   and cleanup scheduling
 
@@ -84,5 +84,5 @@ Name the commands used:
 - stale-reference scans when removing protocols or optional dependencies
 - sensitive-data scans for logs, metrics attributes, spans, events, queue payloads, docs, examples, and AI prompts
 - live Redis/NATS idempotency checks where container infrastructure is available
-- durable workspace adapter contract checks where a production replay adapter is
+- durable workspace store contract checks where a production replay adapter is
   configured

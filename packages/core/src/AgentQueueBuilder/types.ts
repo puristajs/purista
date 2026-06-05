@@ -193,14 +193,14 @@ export type AgentSandboxPolicy = {
 export type AgentWorkspaceCapabilityRequirement = string
 
 /** Adapter-neutral durable workspace policy mirrored from `@purista/harness`. */
-export type AgentDurableWorkspaceAdapterPolicy = {
+export type AgentDurableWorkspaceStorePolicy = {
 	retention?: Record<string, unknown>
 	encryption?: Record<string, unknown>
 	quota?: Record<string, unknown>
 }
 
-/** Structural durable workspace adapter accepted until the harness package version is bumped. */
-export type AgentDurableWorkspaceAdapter = {
+/** Structural durable workspace store accepted until the harness package version is bumped. */
+export type AgentDurableWorkspaceStore = {
 	readonly capabilities?: readonly string[]
 	readonly info?: {
 		readonly capabilities?: readonly string[]
@@ -210,12 +210,12 @@ export type AgentDurableWorkspaceAdapter = {
 /** Durable workspace behavior declared by an attached agent manifest. */
 export type AgentWorkspacePolicy = {
 	mode: 'durable'
-	/** Missing runtime/workspace adapters fail service startup. Default: `true`. */
+	/** Missing runtime/workspace stores fail service startup. Default: `true`. */
 	required?: boolean
 	/** Harness adapter capabilities required for this policy. */
 	capabilities?: readonly AgentWorkspaceCapabilityRequirement[]
 	/** Adapter-neutral durable workspace policy forwarded to compatible runtimes. */
-	policy?: AgentDurableWorkspaceAdapterPolicy
+	policy?: AgentDurableWorkspaceStorePolicy
 	/** Cleanup timing requested by the generated agent runtime. */
 	cleanup?: 'on_success' | 'on_terminal' | 'manual'
 }
@@ -520,7 +520,7 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
-	workspace?: AgentDurableWorkspaceAdapter
+	workspaceStore?: AgentDurableWorkspaceStore
 	stateStore?: unknown
 	logger?: PuristaLogger
 	sandbox?: unknown

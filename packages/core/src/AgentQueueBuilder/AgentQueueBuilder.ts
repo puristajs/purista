@@ -43,8 +43,10 @@ const defaultExecutionPolicy = {
 
 const defaultWorkspaceCapabilities = [
 	'runtime.workspace_checkpoint',
-	'workspace.durable',
-	'workspace.resume',
+	'workspace_store.durable',
+	'workspace_store.checkpoint',
+	'workspace_store.resume',
+	'workspace_store.cleanup',
 ] as const
 
 const agentStreamChunkSchema = z

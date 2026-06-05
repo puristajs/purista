@@ -83,17 +83,17 @@ AI agent integration lives in `@purista/core`. Agents attach to services and exp
 PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics.
 
 Durable workspace replay for agents is opt-in. Builders declare it with
-workspace policy, runtime wiring supplies `ai.runtime` and `ai.workspace`, and
+workspace policy, runtime wiring supplies `ai.runtime` and `ai.workspaceStore`, and
 startup fails when required capabilities are missing unless
 `setWorkspacePolicy({ mode: 'durable', required: false })` explicitly allows a
-fresh ephemeral fallback.
+non-durable run restart.
 
 ## Verification Cues
 - The design can name one owner for each capability and source of truth.
 - Every handler dependency is reachable through resources, stores, context, or declared runtime bindings.
 - Queue workers declare every service, stream, queue, event, and same-service agent dependency before using `context.service`, `context.stream`, `context.queue`, `context.emit`, or `context.agent`.
 - Runtime wiring names required bridges, stores, providers, telemetry, queue bridges, and HTTP servers.
-- Durable agent replay designs name required harness runtime/workspace adapters, required capabilities, `required` fallback behavior, cleanup owner, and product-owned retention/encryption/quota policy.
+- Durable agent replay designs name required harness runtime/workspace stores, required capabilities, `required` fallback behavior, cleanup owner, and product-owned retention/encryption/quota policy.
 - Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.
 - Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
 - Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.

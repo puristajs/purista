@@ -44,7 +44,7 @@ export async function initializeAttachedAgentRuntimes(
 			manifest: definition.manifest,
 			models: aiOptions.models as never,
 			runtime: aiOptions.runtime,
-			workspace: aiOptions.workspace,
+			workspaceStore: aiOptions.workspaceStore,
 			logger: aiOptions.logger,
 			stateStore: aiOptions.stateStore,
 			sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
@@ -75,18 +75,18 @@ function validateWorkspacePolicies(
 			continue
 		}
 
-		if (!aiOptions.runtime || !aiOptions.workspace) {
+		if (!aiOptions.runtime || !aiOptions.workspaceStore) {
 			if (policy.required === false) {
 				continue
 			}
 			throw new Error(
-				`Attached agent "${definition.manifest.agentName}" requires durable ai.runtime and ai.workspace in service.getInstance(...) options`,
+				`Attached agent "${definition.manifest.agentName}" requires durable ai.runtime and ai.workspaceStore in service.getInstance(...) options`,
 			)
 		}
 
 		const available = new Set<string>([
 			...(aiOptions.runtime?.capabilities ?? []),
-			...(aiOptions.workspace?.info?.capabilities ?? aiOptions.workspace?.capabilities ?? []),
+			...(aiOptions.workspaceStore?.info?.capabilities ?? aiOptions.workspaceStore?.capabilities ?? []),
 		])
 		const missing = (policy.capabilities ?? []).filter(capability => !available.has(capability))
 		if (missing.length > 0) {

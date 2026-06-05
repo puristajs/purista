@@ -45,17 +45,17 @@ describe('attached agent scoped runtime', () => {
 		expect(firstRuntime).not.toBe(secondRuntime)
 	})
 
-	it('fails startup when a durable workspace agent has no runtime or workspace adapter', async () => {
+	it('fails startup when a durable workspace agent has no runtime or workspace store', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
 			workspacePolicy: {
 				mode: 'durable',
-				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable'],
+				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable'],
 			},
 		})
 
 		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).rejects.toThrow(
-			'Attached agent "triage" requires durable ai.runtime and ai.workspace in service.getInstance(...) options',
+			'Attached agent "triage" requires durable ai.runtime and ai.workspaceStore in service.getInstance(...) options',
 		)
 	})
 
@@ -64,7 +64,7 @@ describe('attached agent scoped runtime', () => {
 		const definition = createAttachedAgentDefinition({
 			workspacePolicy: {
 				mode: 'durable',
-				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
+				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable', 'workspace_store.resume'],
 			},
 		})
 
@@ -72,20 +72,20 @@ describe('attached agent scoped runtime', () => {
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				runtime: { capabilities: ['runtime.checkpoint'] } as never,
-				workspace: { info: { capabilities: ['workspace.durable'] } },
+				workspaceStore: { info: { capabilities: ['workspace_store.durable'] } },
 			}),
 		).rejects.toThrow(
-			'Attached agent "triage" requires unavailable durable workspace capabilities: runtime.workspace_checkpoint, workspace.resume',
+			'Attached agent "triage" requires unavailable durable workspace capabilities: runtime.workspace_checkpoint, workspace_store.resume',
 		)
 	})
 
-	it('allows explicit fresh ephemeral fallback when durable workspace adapters are absent', async () => {
+	it('allows explicit non-durable restart when durable workspace stores are absent', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
 			workspacePolicy: {
 				mode: 'durable',
 				required: false,
-				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable'],
+				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable'],
 			},
 		})
 
@@ -99,7 +99,7 @@ describe('attached agent scoped runtime', () => {
 		const definition = createAttachedAgentDefinition({
 			workspacePolicy: {
 				mode: 'durable',
-				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
+				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable', 'workspace_store.resume'],
 			},
 		})
 
@@ -107,7 +107,7 @@ describe('attached agent scoped runtime', () => {
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				runtime: { capabilities: ['runtime.workspace_checkpoint'] } as never,
-				workspace: { info: { capabilities: ['workspace.durable', 'workspace.resume'] } },
+				workspaceStore: { info: { capabilities: ['workspace_store.durable', 'workspace_store.resume'] } },
 			}),
 		).resolves.toEqual({ shutdown: expect.any(Function) })
 	})

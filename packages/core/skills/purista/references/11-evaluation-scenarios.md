@@ -9,6 +9,7 @@ Use these scenarios to test whether the `purista` skill gives an otherwise untra
 - [Scenario 4: Service-Owned Agent](#scenario-4-service-owned-agent)
 - [Scenario 5: Enterprise Runtime Review](#scenario-5-enterprise-runtime-review)
 - [Scenario 6: Skill Drift Repair](#scenario-6-skill-drift-repair)
+- [Scenario 7: Durable Agent Workspace Replay](#scenario-7-durable-agent-workspace-replay)
 
 ## Scenario 1: Greenfield Project Setup
 Prompt:
@@ -120,3 +121,24 @@ Validation:
 - `rg -n "@purista/ai|AgentProtocolEnvelope|AiSdkProvider|Vercel AI SDK" skills/purista` only finds explicit historical warnings if any
 - `npm run audit:skills` passes
 - `npm run lint` passes when skill changes affect tracked repo files
+
+## Scenario 7: Durable Agent Workspace Replay
+Prompt:
+
+```text
+Add a long-running research agent that may retry after worker restart and must resume from workspace checkpoints.
+```
+
+Expected behavior:
+- attaches the agent to the owning service through `getAgentQueueBuilder`
+- declares durable replay with `setWorkspacePolicy({ mode: 'durable', required: true, cleanup: 'on_terminal' })`
+- keeps concrete durable runtime and workspace stores in `getInstance(..., { ai })` runtime wiring
+- requires harness capabilities such as `runtime.workspace_checkpoint`, `workspace_store.durable`, `workspace_store.checkpoint`, `workspace_store.resume`, and `workspace_store.cleanup`
+- treats retention durations, encryption key policy, tenant/project quotas, and cleanup scheduling as product-owned policy
+- keeps workspace refs, file content, prompts, completions, tool inputs, tool outputs, credentials, tokens, and raw headers out of logs, metrics, traces, queues, events, and examples
+
+Validation:
+- startup fails when required runtime/workspace capabilities are missing
+- retry resumes from the latest committed harness checkpoint and workspace checkpoint
+- terminal success and terminal failure cleanup paths are tested
+- explicit `required: false` non-durable restart is tested only when the product accepts restart semantics

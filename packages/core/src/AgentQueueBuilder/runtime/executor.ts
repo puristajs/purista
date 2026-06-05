@@ -33,7 +33,7 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	manifest: AgentManifest<Models>
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
-	workspace?: unknown
+	workspaceStore?: unknown
 	logger?: PuristaLogger
 	stateStore?: unknown
 	sandbox?: unknown
@@ -111,8 +111,8 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.runtime(this.input.runtime)
 		}
 
-		if (this.input.workspace) {
-			builder = builder.workspace(this.input.workspace)
+		if (this.input.workspaceStore) {
+			builder = builder.workspaceStore(this.input.workspaceStore)
 		}
 
 		if (this.input.manifest.workspacePolicy?.capabilities?.length) {

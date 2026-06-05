@@ -60,7 +60,7 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
     },
     sandbox,
     runtime,
-    workspace,
+    workspaceStore,
   },
 })
 ```
@@ -96,7 +96,7 @@ const agent = service
   })
 ```
 
-Runtime wiring supplies the harness durable runtime and workspace adapters:
+Runtime wiring supplies the harness durable runtime and workspace stores:
 
 ```ts
 await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventBridge, {
@@ -104,17 +104,22 @@ await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventB
   ai: {
     models,
     runtime,
-    workspace,
+    workspaceStore,
     sandbox,
   },
 })
 ```
 
 Required capabilities are validated at service startup. Common durable replay
-requirements are `runtime.workspace_checkpoint`, `workspace.durable`,
-`workspace.snapshot`, `workspace.resume`, and `workspace.cleanup`. Add
-`workspace.retention`, `workspace.encrypted_storage`, and `workspace.quota`
+requirements are `runtime.workspace_checkpoint`, `workspace_store.durable`,
+`workspace_store.checkpoint`, `workspace_store.resume`, and `workspace_store.cleanup`. Add
+`workspace_store.retention`, `workspace_store.encrypted_storage`, and `workspace_store.quota`
 when production policy requires those guarantees.
+
+Use `inMemoryDurableWorkspaceStore()` from `@purista/harness` for local
+development and tests. Do not describe it as production persistence; production
+services need a durable store that survives process restart and declares the
+required `workspace_store.*` capabilities.
 
 Keep ownership clear:
 - `@purista/harness` owns workspace lifecycle, checkpoint references, workspace
