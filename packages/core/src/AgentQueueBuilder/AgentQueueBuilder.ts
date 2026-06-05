@@ -29,6 +29,7 @@ import type {
 	AgentRuntimeRef,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
+	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
 	AllowedCommandToolDefinition,
 	AnyAgentQueueBuilderTypes,
@@ -39,6 +40,14 @@ const defaultExecutionPolicy = {
 	maxAttempts: 3,
 	maxParallelHandlers: 1,
 }
+
+const defaultWorkspaceCapabilities = [
+	'runtime.workspace_checkpoint',
+	'workspace_store.durable',
+	'workspace_store.checkpoint',
+	'workspace_store.resume',
+	'workspace_store.cleanup',
+] as const
 
 const agentStreamChunkSchema = z
 	.object({
@@ -90,6 +99,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private executionPolicy: AgentExecutionPolicy = {}
 	private sessionPolicy: AgentSessionPolicy = { mode: 'ephemeral' }
 	private sandboxPolicy?: AgentSandboxPolicy
+	private workspacePolicy?: AgentWorkspacePolicy
 	private httpExposure?: AgentHttpExposure
 	private streamingMode: 'stream' | 'aggregate' = 'stream'
 	private successEventName?: string
@@ -503,6 +513,18 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
+	/** Require a durable harness workspace for this attached agent. */
+	setWorkspacePolicy(policy: AgentWorkspacePolicy) {
+		const { capabilities, ...rest } = policy
+		this.workspacePolicy = {
+			required: true,
+			cleanup: 'on_terminal',
+			...rest,
+			capabilities: capabilities ?? defaultWorkspaceCapabilities,
+		}
+		return this
+	}
+
 	/**
 	 * Expose the generated agent command or stream as an HTTP endpoint.
 	 *
@@ -773,6 +795,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			session: this.sessionPolicy,
 			execution,
 			sandbox: this.sandboxPolicy,
+			workspacePolicy: this.workspacePolicy?.mode === 'durable' ? this.workspacePolicy : undefined,
 			http: this.httpExposure,
 			response: this.responseMode
 				? {

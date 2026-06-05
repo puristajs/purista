@@ -47,4 +47,5 @@ Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from t
 - generated queue, worker, command, and stream definitions for each agent
 - Hono HTTP exposure with OpenAPI documentation
 - `createAgentTestHarness(...)` with a scripted model provider
+- `createAgentSkillTestRuntime(...)` for skill-backed agent fixtures
 - no direct application dependency on `@purista/harness`

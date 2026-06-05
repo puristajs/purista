@@ -8,6 +8,7 @@ import type {
 	AgentInvokeMap,
 	AgentModelBinding,
 	AgentRunIdentity,
+	AgentSkillContext,
 	AllowedAgentDefinition,
 	AllowedCommandToolDefinition,
 	CommandToolInvokeMap,
@@ -27,6 +28,7 @@ export type CreateAgentHandlerContextInput<
 	metrics?: PuristaMetricContext<Metrics>
 	session: Session<any>
 	models: AgentHandlerModelBindings<Models>
+	skills: AgentSkillContext
 	commandTools?: readonly AllowedCommandToolDefinition[]
 	agentTools?: readonly AllowedAgentDefinition[]
 	serviceName: string
@@ -66,6 +68,7 @@ export function createAgentHandlerContext<
 		harness: {
 			session: input.session,
 			models: input.models,
+			skills: input.skills,
 			events: {
 				emit: input.emitEvent,
 			},

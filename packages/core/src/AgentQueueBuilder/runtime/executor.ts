@@ -1,4 +1,5 @@
 import {
+	type DurableRuntime,
 	defineHarness,
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
@@ -18,12 +19,14 @@ import type {
 	AgentRuntimeInvocationInput,
 	AgentRuntimeModelBindings,
 	AgentRuntimeStreamInvocationInput,
+	AgentSkillRuntimeResolved,
 } from '../types.js'
 import { createAgentHandlerContext } from './context.js'
 import { createAgentRunEvent } from './events.js'
 import { deriveAgentRunIdentity } from './identity.js'
 import { createPuristaHarnessLogger } from './logger.js'
 import { createHandlerModelBindings, resolveRuntimeModelBindings } from './modelBindings.js'
+import { createAgentSkillContext } from './skills.js'
 import { createProviderSseEvent } from './sseEvents.js'
 import { createPuristaHarnessStateStore } from './stateStore.js'
 
@@ -31,6 +34,9 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	definition: AgentDefinition<any>
 	manifest: AgentManifest<Models>
 	models: AgentRuntimeModelBindings<Models>
+	runtime?: DurableRuntime
+	workspaceStore?: unknown
+	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
 	stateStore?: unknown
 	sandbox?: unknown
@@ -104,9 +110,27 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.sandbox(this.input.sandbox as never)
 		}
 
+		if (this.input.runtime) {
+			builder = builder.runtime(this.input.runtime)
+		}
+
+		if (this.input.workspaceStore) {
+			builder = builder.workspaceStore(this.input.workspaceStore)
+		}
+
+		if (this.input.skillRuntime && Object.keys(this.input.skillRuntime.harnessSkills).length > 0) {
+			builder = builder.skills(this.input.skillRuntime.harnessSkills)
+		}
+
+		if (this.input.manifest.workspacePolicy?.capabilities?.length) {
+			builder = builder.requires(this.input.manifest.workspacePolicy.capabilities)
+		}
+
 		if (this.input.definition.execution.kind === 'harnessAgent') {
 			builder = builder.agents({
-				[this.input.manifest.agentName]: this.input.definition.execution.definition as HarnessAgentDefinition<any>,
+				[this.input.manifest.agentName]: this.withDeclaredSkills(
+					this.input.definition.execution.definition,
+				) as HarnessAgentDefinition<any>,
 			})
 		}
 
@@ -157,6 +181,9 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				appContext: input.appContext,
 				session,
 				models: this.handlerModels,
+				skills: this.input.skillRuntime
+					? createAgentSkillContext(this.input.skillRuntime.catalog)
+					: createAgentSkillContext([]),
 				commandTools: this.input.manifest.allowedCommands,
 				agentTools: this.input.manifest.allowedAgents,
 				serviceName: this.input.manifest.serviceName,
@@ -189,6 +216,16 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			return this.harness.getSession(sessionId)
 		}
 		return createLocalSession(sessionId)
+	}
+
+	private withDeclaredSkills(definition: HarnessAgentDefinition<any>) {
+		const skillNames = Object.keys(this.input.skillRuntime?.harnessSkills ?? {})
+		if (skillNames.length === 0) return definition
+		return {
+			...definition,
+			skills: skillNames,
+			...(this.input.manifest.builtInTools !== true ? { builtinTools: this.input.manifest.builtInTools } : {}),
+		}
 	}
 
 	private async streamHarnessCall(

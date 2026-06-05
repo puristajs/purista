@@ -8,7 +8,8 @@ Agent testing helpers are exported from `@purista/core`.
 | Level | API | Validates |
 |---|---|---|
 | **Handler context** | `createAgentContextMock(...)` | Direct `setRunFunction` logic with fake resources and model handles. |
-| **Runtime harness** | `createAgentTestHarness(...)` | Full attached agent definition with model bindings, output validation, and stream execution. |
+| **Runtime harness** | `createAgentTestHarness(...)` | Full attached agent definition with model bindings, output validation, skill bindings, and stream execution. |
+| **Skill fixtures** | `createAgentSkillTestRuntime(...)` | Temporary `SKILL.md` bindings for agents that declare `.useSkills(...)`. |
 
 ## Runtime harness
 

@@ -1,13 +1,21 @@
 export { AgentQueueBuilder } from './AgentQueueBuilder.js'
-export type { CreateAgentContextMockInput, CreateAgentTestHarnessOptions } from './testing/index.js'
+export type {
+	AgentSkillTestRuntime,
+	CreateAgentContextMockInput,
+	CreateAgentSkillTestRuntimeSkill,
+	CreateAgentTestHarnessOptions,
+} from './testing/index.js'
 export {
 	createAgentContextMock,
+	createAgentSkillTestRuntime,
 	createAgentTestHarness,
 	createScriptedHarnessModel,
 	ScriptedHarnessModelProvider,
 } from './testing/index.js'
 export type {
 	AgentDefinition,
+	AgentDurableWorkspaceStore,
+	AgentDurableWorkspaceStorePolicy,
 	AgentExecutionDefinition,
 	AgentExecutionKind,
 	AgentExecutionPolicy,
@@ -35,6 +43,14 @@ export type {
 	AgentRuntimeStreamInvocationInput,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
+	AgentSkillCatalogEntry,
+	AgentSkillContext,
+	AgentSkillDiscoveryOptions,
+	AgentSkillResolver,
+	AgentSkillRuntimeBinding,
+	AgentSkillRuntimeOptions,
+	AgentWorkspaceCapabilityRequirement,
+	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
 	AllowedCommandToolDefinition,
 	AnyAgentQueueBuilderTypes,

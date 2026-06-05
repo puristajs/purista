@@ -29,7 +29,7 @@ describe('triageTicketAgentBuilder', () => {
 		})
 
 		const triageTicketAgentDefinition = await triageTicketAgentBuilder.getDefinition()
-		const harness = createAgentTestHarness(triageTicketAgentDefinition, {
+		const harness = await createAgentTestHarness(triageTicketAgentDefinition, {
 			models: {
 				primary: {
 					provider: model,

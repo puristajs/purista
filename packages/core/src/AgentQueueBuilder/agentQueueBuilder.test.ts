@@ -1,6 +1,18 @@
 import { z } from 'zod'
 
-import { AgentQueueBuilder, ServiceBuilder, type ServiceInfoType } from '../index.js'
+import {
+	AgentQueueBuilder,
+	createAgentSkillTestRuntime,
+	createAgentTestHarness,
+	createScriptedHarnessModel,
+	ServiceBuilder,
+	type ServiceInfoType,
+} from '../index.js'
+import {
+	createAgentRuntimeScope,
+	getScopedAgentRuntime,
+	initializeAttachedAgentRuntimes,
+} from './runtime/scopedRuntime.js'
 
 describe('AgentQueueBuilder', () => {
 	const serviceInfo: ServiceInfoType = {
@@ -132,5 +144,155 @@ describe('AgentQueueBuilder', () => {
 				return { status: 'ok' }
 			})
 			.getDefinition()
+	})
+
+	it('serializes durable workspace policy into the agent manifest', () => {
+		const service = new ServiceBuilder(serviceInfo)
+		const manifest = service
+			.getAgentQueueBuilder('durableTriage', 'Triage a support ticket with durable workspace replay')
+			.setWorkspacePolicy({
+				mode: 'durable',
+				policy: {
+					retention: { cleanupMode: 'manual_only' },
+				},
+			})
+			.setRunFunction(async () => ({ status: 'ok' }))
+			.getManifest()
+
+		expect(manifest.workspacePolicy).toEqual({
+			mode: 'durable',
+			required: true,
+			capabilities: [
+				'runtime.workspace_checkpoint',
+				'workspace_store.durable',
+				'workspace_store.checkpoint',
+				'workspace_store.resume',
+				'workspace_store.cleanup',
+			],
+			cleanup: 'on_terminal',
+			policy: {
+				retention: { cleanupMode: 'manual_only' },
+			},
+		})
+		expect(manifest.runtimeRevision).toMatch(/^rev-/)
+	})
+
+	it('binds declared skills into a harness agent runtime', async () => {
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				description: 'Use this skill when triaging incidents.',
+				body: 'SECRET_BODY',
+			},
+		])
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: {},
+			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const service = new ServiceBuilder(serviceInfo)
+		const definition = await service
+			.getAgentQueueBuilder('skillTriage', 'Triage with a runtime skill')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.useSkills(['incident-skill'])
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Use relevant skills.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			skills: skillRuntime.skills,
+		})
+
+		const runtime = getScopedAgentRuntime(scope, definition)
+		await expect(
+			runtime.executeAggregate({
+				appContext: {
+					resources: {},
+					message: { id: 'm1' },
+					service: {},
+					stream: {},
+					queue: {},
+					emit: async () => undefined,
+				},
+				message: { id: 'm1' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toEqual({ status: 'ok' })
+		const firstRequest = model.requests[0] as { messages?: Array<{ content?: string }> } | undefined
+		expect(firstRequest?.messages?.[0]?.content).toContain('Available skills')
+		expect(firstRequest?.messages?.[0]?.content).toContain('incident-skill')
+		expect(firstRequest?.messages?.[0]?.content).not.toContain('SECRET_BODY')
+		await skillRuntime.cleanup()
+	})
+
+	it('passes runtime skill bindings through createAgentTestHarness', async () => {
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				description: 'Use this skill when triaging incidents.',
+				body: 'SECRET_BODY',
+			},
+		])
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: {},
+			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('skillTriage', 'Triage with a runtime skill')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.useSkills(['incident-skill'])
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Use relevant skills.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			skills: skillRuntime.skills,
+		})
+
+		await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
+		const firstRequest = model.requests[0] as { messages?: Array<{ content?: string }> } | undefined
+		expect(firstRequest?.messages?.[0]?.content).toContain('Available skills')
+		expect(firstRequest?.messages?.[0]?.content).not.toContain('SECRET_BODY')
+		await skillRuntime.cleanup()
+	})
+
+	it('creates namespaced skill bindings for skill-backed agent tests', async () => {
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				resourceName: 'incident-response-skills',
+				description: 'Use this skill when triaging incidents.',
+			},
+		])
+		expect(skillRuntime.skills.namespaces?.['incident-response-skills']?.['incident-skill']).toBeDefined()
+		expect(skillRuntime.skills.bindings?.['incident-skill']).toBeUndefined()
+		await skillRuntime.cleanup()
 	})
 })

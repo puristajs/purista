@@ -7,6 +7,7 @@ Use this reference when implementing PURISTA agents.
 - [Builder Pattern](#builder-pattern)
 - [Runtime Wiring](#runtime-wiring)
 - [Handler Context](#handler-context)
+- [Sandbox And Durable Workspaces](#sandbox-and-durable-workspaces)
 - [AI Security And Privacy](#ai-security-and-privacy)
 - [Streaming](#streaming)
 - [Multimodal](#multimodal)
@@ -57,6 +58,9 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
     models: {
       primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'] },
     },
+    sandbox,
+    runtime,
+    workspaceStore,
   },
 })
 ```
@@ -71,6 +75,62 @@ Keep telemetry ownership explicit:
 - harness telemetry options are passed through `ai.telemetry`
 
 PURISTA records service and agent wrapper metrics. `@purista/harness` owns GenAI semantic-convention metrics, model metrics, token metrics, model call spans, and tool call spans/metrics. Do not re-record token usage or model/tool metrics in PURISTA handlers.
+
+## Sandbox And Durable Workspaces
+Use `setSandboxPolicy(...)` when an attached agent needs mounted skills,
+filesystem built-ins, MCP stdio tools, or code execution. Sandbox capabilities
+such as `sandbox.snapshot`, `sandbox.resume`, and `sandbox.hibernate` describe
+low-level sandbox session behavior.
+
+Use `setWorkspacePolicy(...)` only when an attached agent must resume from
+committed workspace state after queue retry, process restart, pause, or
+hibernate:
+
+```ts
+const agent = service
+  .getAgentQueueBuilder('researchReport', 'Builds a research report')
+  .setWorkspacePolicy({
+    mode: 'durable',
+    required: true,
+    cleanup: 'on_terminal',
+  })
+```
+
+Runtime wiring supplies the harness durable runtime and workspace stores:
+
+```ts
+await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventBridge, {
+  queueBridge,
+  ai: {
+    models,
+    runtime,
+    workspaceStore,
+    sandbox,
+  },
+})
+```
+
+Required capabilities are validated at service startup. Common durable replay
+requirements are `runtime.workspace_checkpoint`, `workspace_store.durable`,
+`workspace_store.checkpoint`, `workspace_store.resume`, and `workspace_store.cleanup`. Add
+`workspace_store.retention`, `workspace_store.encrypted_storage`, and `workspace_store.quota`
+when production policy requires those guarantees.
+
+Use `inMemoryDurableWorkspaceStore()` from `@purista/harness` for local
+development and tests. Do not describe it as production persistence; production
+services need a durable store that survives process restart and declares the
+required `workspace_store.*` capabilities.
+
+Keep ownership clear:
+- `@purista/harness` owns workspace lifecycle, checkpoint references, workspace
+  errors, and workspace operation telemetry
+- `@purista/core` owns builder declaration, runtime binding, queue identity,
+  startup validation, wrapper logs, and wrapper metrics
+- product layers own retention durations, encryption key policy, tenant/project
+  quotas, cleanup scheduling, UI, billing, and product records
+
+Fresh ephemeral fallback must be explicit in the builder policy. Never treat a
+sandbox snapshot as production durable workspace replay.
 
 ## Handler Context
 Agent handlers use:
@@ -132,7 +192,15 @@ Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, a
 Use core testing helpers:
 - `createAgentTestHarness(...)`
 - `createScriptedHarnessModel()`
+- `createAgentSkillTestRuntime(...)`
 - `createAgentContextMock(...)`
 
 Tests should verify output validation, model capability behavior, stream chunks, and declared invoke bridges.
+For skill-backed agents, use `createAgentSkillTestRuntime(...)` to create temporary `SKILL.md` fixtures and pass `skillRuntime.skills` to `createAgentTestHarness(...)`; do not hand-roll ad hoc skill directories in generated examples. The helper is a deterministic test binding, not a production sandbox, workspace, or provider adapter.
 Security-sensitive agent tests should also verify denied tools, missing tenant/principal metadata, redacted model input, sanitized errors, and no prompt/PII leakage in logs or telemetry fixtures.
+Durable workspace tests should also verify missing capability startup failures,
+resume after retry, cleanup behavior, explicit `required: false` fresh
+ephemeral fallback, and
+absence of workspace refs, file content, prompts, completions, tool inputs,
+tool outputs, credentials, tokens, and raw headers from logs, metrics, traces,
+queue metadata, and examples.

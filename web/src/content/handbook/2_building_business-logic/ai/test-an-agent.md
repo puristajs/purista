@@ -13,6 +13,7 @@ The testing helpers let you:
 - execute an attached agent definition without starting a full service
 - inject fake model providers
 - enqueue scripted text, object, embedding, and rerank responses
+- create temporary skill bindings for agents that declare `.useSkills(...)`
 - assert output validation, capability failures, missing aliases, stream errors, and provider failures
 
 ## Success path
@@ -34,7 +35,7 @@ model.enqueueObject({
   finishReason: 'stop',
 })
 
-const harness = createAgentTestHarness(triageAgent, {
+const harness = await createAgentTestHarness(triageAgent, {
   models: {
     primary: {
       provider: model,
@@ -74,7 +75,7 @@ failingModel.enqueueObject({
   finishReason: 'stop',
 })
 
-const failingHarness = createAgentTestHarness(triageAgent, {
+const failingHarness = await createAgentTestHarness(triageAgent, {
   models: {
     primary: {
       provider: failingModel,
@@ -99,15 +100,17 @@ await expect(
 Runtime startup should fail when a declared model alias is not bound.
 
 ```ts
+const missingAliasHarness = createAgentTestHarness(triageAgent, {
+  models: {},
+})
+
 await expect(
-  createAgentTestHarness(triageAgent, {
-    models: {},
-  }).run({
+  missingAliasHarness.then(harness => harness.run({
     payload: {
       ticketId: 'T-3',
       text: 'Missing model binding',
     },
-  }),
+  })),
 ).rejects.toThrow(/missing runtime model binding/i)
 ```
 
@@ -118,16 +121,18 @@ Assert that tests catch provider capability drift before production startup does
 ```ts
 const model = createScriptedHarnessModel()
 
-await expect(
-  createAgentTestHarness(triageAgent, {
-    models: {
-      primary: {
-        provider: model,
-        model: 'fake-text',
-        capabilities: ['text'],
-      },
+const capabilityHarness = await createAgentTestHarness(triageAgent, {
+  models: {
+    primary: {
+      provider: model,
+      model: 'fake-text',
+      capabilities: ['text'],
     },
-  }).run({
+  },
+})
+
+await expect(
+  capabilityHarness.run({
     payload: {
       ticketId: 'T-4',
       text: 'Provider cannot produce objects',
@@ -153,7 +158,7 @@ model.enqueueRerank({
   usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 })
 
-const harness = createAgentTestHarness(answerAgent, {
+const harness = await createAgentTestHarness(answerAgent, {
   models: {
     retrieval: {
       provider: model,
@@ -175,6 +180,77 @@ const harness = createAgentTestHarness(answerAgent, {
 ```
 
 For full RAG tests, keep the vector index as a fake PURISTA resource and assert the handler passes tenant filters and candidate text correctly.
+
+## Skill-backed agents
+
+Agents that declare `.useSkills(...)` need runtime skill bindings in tests, just like they need `ai.skills` bindings in application bootstrap. Use `createAgentSkillTestRuntime(...)` instead of hand-writing temporary skill folders in each test.
+
+```ts
+import {
+  createAgentSkillTestRuntime,
+  createAgentTestHarness,
+  createScriptedHarnessModel,
+} from '@purista/core'
+
+const skillRuntime = await createAgentSkillTestRuntime([
+  {
+    name: 'incident-responder',
+    description: 'Incident response guidance for tests.',
+    body: 'Use the incident severity table before writing the result.',
+  },
+])
+
+const model = createScriptedHarnessModel()
+model.enqueueObject({
+  object: {},
+  toolCalls: [{
+    id: 'read-skill',
+    name: 'read',
+    arguments: { path: '/skills/incident-responder/SKILL.md' },
+  }],
+  usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+  finishReason: 'tool_calls',
+})
+model.enqueueObject({
+  object: { priority: 'high', reason: 'matches severity table' },
+  usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+  finishReason: 'stop',
+})
+
+const harness = await createAgentTestHarness(triageAgent, {
+  models: {
+    primary: {
+      provider: model,
+      model: 'fake-object',
+      capabilities: ['object', 'tool_use'],
+    },
+  },
+  skills: skillRuntime.skills,
+})
+
+await expect(harness.run({ payload: { ticketId: 'T-7', text: 'outage' } })).resolves.toEqual({
+  priority: 'high',
+  reason: 'matches severity table',
+})
+
+expect(String(model.requests[0]?.messages?.[0]?.content)).toContain('Available skills')
+expect(String(model.requests[0]?.messages?.[0]?.content)).not.toContain('severity table')
+
+await skillRuntime.cleanup()
+```
+
+For namespaced declarations such as `.useSkills(['incident-responder'], 'support-skills')`, pass the same `resourceName` to the test helper:
+
+```ts
+const skillRuntime = await createAgentSkillTestRuntime([
+  {
+    name: 'incident-responder',
+    resourceName: 'support-skills',
+  },
+])
+```
+
+`createAgentSkillTestRuntime(...)` is a test binding helper, not a production sandbox or workspace adapter. Production sandbox and workspace adapters remain harness runtime wiring supplied through `ai.sandbox`, `ai.runtime`, or `ai.workspaceStore`.
 
 ## Streams
 
