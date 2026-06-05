@@ -60,6 +60,7 @@ flowchart TD
   InnerWorkflow --> InnerAgent
   Harness --> Models["model providers"]
   Harness --> Sandbox["sandbox"]
+  Harness --> Workspace["durable workspace"]
   Harness --> State["state store"]
 ```
 
@@ -81,6 +82,7 @@ Use the harness level for tightly coupled reasoning steps that should share one 
 - You need streaming progress or model/tool lifecycle events.
 - Work is slow or expensive and should run through queue leases, retries, and dead-letter handling.
 - Different AI steps need separate service ownership, queue policies, model bindings, or sandbox isolation.
+- A retry must resume from committed workspace state instead of restarting in a fresh sandbox.
 
 Keep deterministic business truth in commands, subscriptions, queues, stores, and resources. Agent output should become canonical only after deterministic service logic validates and applies it.
 
@@ -103,11 +105,12 @@ Start with `setRunFunction(...)` when you are building normal PURISTA applicatio
 3. Add payload, parameter, and output schemas.
 4. Declare model aliases with the smallest required capabilities.
 5. Declare command tools, child agents, skills, built-in tools, session policy, and sandbox policy as needed.
-6. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
-7. Add HTTP exposure, streaming mode, execution policy, or long-running response mode if needed.
-8. Add the attached agent definition to the service.
-9. Instantiate the service with `queueBridge` and `ai.models`.
-10. Test with `@purista/core` fake providers before any live-provider smoke test.
+6. Declare workspace policy when the run must resume from durable workspace state.
+7. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
+8. Add HTTP exposure, streaming mode, execution policy, or long-running response mode when the agent exposes those surfaces.
+9. Add the attached agent definition to the service.
+10. Instantiate the service with `queueBridge` and `ai.models`.
+11. Test with `@purista/core` fake providers before any live-provider smoke test.
 
 ## Smallest useful agent
 
@@ -181,6 +184,9 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
     telemetry: {
       captureContent: false,
     },
+    sandbox,
+    runtime,
+    workspace,
   },
 })
 
@@ -193,8 +199,30 @@ Startup fails when:
 - `ai.models` is missing
 - a declared model alias is not bound at runtime
 - runtime model capabilities do not satisfy declared alias capabilities
+- durable workspace policy requires `ai.runtime`, `ai.workspace`, or a missing
+  harness capability
 
 This fail-fast behavior prevents a production service from silently degrading to a weaker model or transport guarantee.
+
+## Sandbox and durable workspaces
+
+Sandbox and durable workspace guarantees are separate:
+
+| Surface | What it means |
+| --- | --- |
+| in-memory sandbox | File-only workspace for local/test runs. No shell execution. |
+| bash sandbox | File workspace plus command execution through the harness sandbox adapter. |
+| sandbox snapshot/resume | Low-level adapter support for capturing and reopening one sandbox session. |
+| durable workspace replay | Production replay contract linking harness runtime checkpoints to persisted workspace state, cleanup, retention, encryption, and quotas. |
+
+Use `setSandboxPolicy(...)` when an agent needs mounted skills, filesystem
+built-ins, MCP stdio tools, or code execution. Use `setWorkspacePolicy(...)`
+when a queued or long-running agent must resume from committed workspace state
+after retry or restart.
+
+Sandbox file content, prompts, completions, tool inputs, tool outputs,
+workspace references, credentials, tokens, and raw headers must not appear in
+logs, metrics, traces, queue metadata, or generated examples.
 
 ## Real-world use cases
 

@@ -1,5 +1,6 @@
 import {
 	defineHarness,
+	type DurableRuntime,
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
 	type WorkflowDefinition as HarnessWorkflowDefinition,
@@ -31,6 +32,8 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	definition: AgentDefinition<any>
 	manifest: AgentManifest<Models>
 	models: AgentRuntimeModelBindings<Models>
+	runtime?: DurableRuntime
+	workspace?: unknown
 	logger?: PuristaLogger
 	stateStore?: unknown
 	sandbox?: unknown
@@ -102,6 +105,18 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 		if (this.input.sandbox) {
 			builder = builder.sandbox(this.input.sandbox as never)
+		}
+
+		if (this.input.runtime) {
+			builder = builder.runtime(this.input.runtime)
+		}
+
+		if (this.input.workspace) {
+			builder = builder.workspace(this.input.workspace)
+		}
+
+		if (this.input.manifest.workspacePolicy?.capabilities?.length) {
+			builder = builder.requires(this.input.manifest.workspacePolicy.capabilities)
 		}
 
 		if (this.input.definition.execution.kind === 'harnessAgent') {

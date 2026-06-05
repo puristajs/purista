@@ -133,4 +133,29 @@ describe('AgentQueueBuilder', () => {
 			})
 			.getDefinition()
 	})
+
+	it('serializes durable workspace policy into the agent manifest', () => {
+		const service = new ServiceBuilder(serviceInfo)
+		const manifest = service
+			.getAgentQueueBuilder('durableTriage', 'Triage a support ticket with durable workspace replay')
+			.setWorkspacePolicy({
+				mode: 'durable',
+				policy: {
+					retention: { cleanupMode: 'manual_only' },
+				},
+			})
+			.setRunFunction(async () => ({ status: 'ok' }))
+			.getManifest()
+
+		expect(manifest.workspacePolicy).toEqual({
+			mode: 'durable',
+			required: true,
+			capabilities: ['runtime.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
+			cleanup: 'on_terminal',
+			policy: {
+				retention: { cleanupMode: 'manual_only' },
+			},
+		})
+		expect(manifest.runtimeRevision).toMatch(/^rev-/)
+	})
 })

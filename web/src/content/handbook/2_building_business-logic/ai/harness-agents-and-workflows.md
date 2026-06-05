@@ -131,6 +131,11 @@ const reviewAgent = await incidentService
 
 All inner harness agents in the workflow share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, and model bindings.
 
+When durable workspace replay is enabled on the attached PURISTA agent, the
+inner harness workflow also shares one durable workspace boundary. Use this
+when retrying the parent run should resume from committed workspace state for
+all inner harness agents.
+
 ## PURISTA-level orchestration
 
 Use PURISTA orchestration when the agents are independent business capabilities.
@@ -211,6 +216,8 @@ Use the same harness workflow sandbox when:
 - the work is one user run and should share memory/history
 - intermediate state should not become a public service contract
 - retrying the whole run is acceptable
+- durable replay should restore one shared workspace for the whole harness
+  workflow
 
 Use independent PURISTA agents when:
 
@@ -220,6 +227,8 @@ Use independent PURISTA agents when:
 - a child result should be reusable by other services
 - sandbox isolation matters because one step can mutate or execute code
 - parallel execution should not contend on one harness session
+- each step needs independent durable workspace retention, cleanup, quota, or
+  encryption policy
 
 ## Real-world pattern: research report
 

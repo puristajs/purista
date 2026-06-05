@@ -45,6 +45,73 @@ describe('attached agent scoped runtime', () => {
 		expect(firstRuntime).not.toBe(secondRuntime)
 	})
 
+	it('fails startup when a durable workspace agent has no runtime or workspace adapter', async () => {
+		const scope = createAgentRuntimeScope()
+		const definition = createAttachedAgentDefinition({
+			workspacePolicy: {
+				mode: 'durable',
+				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable'],
+			},
+		})
+
+		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).rejects.toThrow(
+			'Attached agent "triage" requires durable ai.runtime and ai.workspace in service.getInstance(...) options',
+		)
+	})
+
+	it('fails startup when durable workspace capabilities are missing', async () => {
+		const scope = createAgentRuntimeScope()
+		const definition = createAttachedAgentDefinition({
+			workspacePolicy: {
+				mode: 'durable',
+				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
+			},
+		})
+
+		await expect(
+			initializeAttachedAgentRuntimes(scope, [definition], {
+				models: {},
+				runtime: { capabilities: ['runtime.checkpoint'] } as never,
+				workspace: { info: { capabilities: ['workspace.durable'] } },
+			}),
+		).rejects.toThrow(
+			'Attached agent "triage" requires unavailable durable workspace capabilities: runtime.workspace_checkpoint, workspace.resume',
+		)
+	})
+
+	it('allows explicit fresh ephemeral fallback when durable workspace adapters are absent', async () => {
+		const scope = createAgentRuntimeScope()
+		const definition = createAttachedAgentDefinition({
+			workspacePolicy: {
+				mode: 'durable',
+				required: false,
+				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable'],
+			},
+		})
+
+		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).resolves.toEqual({
+			shutdown: expect.any(Function),
+		})
+	})
+
+	it('accepts durable workspace agents when runtime and workspace capabilities match', async () => {
+		const scope = createAgentRuntimeScope()
+		const definition = createAttachedAgentDefinition({
+			workspacePolicy: {
+				mode: 'durable',
+				capabilities: ['runtime.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
+			},
+		})
+
+		await expect(
+			initializeAttachedAgentRuntimes(scope, [definition], {
+				models: {},
+				runtime: { capabilities: ['runtime.workspace_checkpoint'] } as never,
+				workspace: { info: { capabilities: ['workspace.durable', 'workspace.resume'] } },
+			}),
+		).resolves.toEqual({ shutdown: expect.any(Function) })
+	})
+
 	it('routes generated agent handlers through service-instance scoped runtimes', async () => {
 		const serviceBuilder = new ServiceBuilder({
 			serviceName: 'support',
@@ -83,7 +150,9 @@ describe('attached agent scoped runtime', () => {
 	})
 })
 
-function createAttachedAgentDefinition(): AttachedAgentDefinition {
+function createAttachedAgentDefinition(
+	overrides: Partial<AttachedAgentDefinition['manifest']> = {},
+): AttachedAgentDefinition {
 	return {
 		manifest: {
 			serviceName: 'support',
@@ -102,6 +171,7 @@ function createAttachedAgentDefinition(): AttachedAgentDefinition {
 			allowedAgents: [],
 			usedSkills: [],
 			builtInTools: false,
+			...overrides,
 		},
 		execution: {
 			kind: 'runFunction',

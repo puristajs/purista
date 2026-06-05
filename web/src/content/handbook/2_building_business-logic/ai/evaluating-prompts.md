@@ -19,7 +19,7 @@ Use `evaluatePromptCandidates(...)` for:
 
 Do not use it as a full eval platform. Dataset storage, experiment runs, prompt versioning, annotation queues, optimization loops, dashboards, and regression gate CLIs belong in your application or product layer.
 
-If you want that product layer, use [CloudGrid AI Evaluation](https://cloudgrid.dev/features/ai-evaluation/). CloudGrid keeps datasets, evaluation runs, row-level score records, comparisons, optimization candidates, and trace-backed evidence in the same observability project while the Harness helpers stay the local inner loop.
+If you want that product layer, use [CloudGrid AI Evaluation](https://cloudgrid.dev/features/ai-evaluation/). CloudGrid keeps datasets, evaluation runs, row-level score records, comparisons, optimization candidates, durable replay policy, and trace-backed evidence in the same observability project while the Harness helpers stay the local inner loop.
 
 ## Execution model
 
@@ -187,6 +187,10 @@ await expect(evaluateDeterministicScorer({
 - Do not pass unstable random ids if you want reproducible sorting.
 - Do not treat `json-schema` as a full JSON Schema validator.
 - Do not put product-specific experiment state into the harness core; keep it in your product adapter or application workflow.
+- Do not treat sandbox snapshot support as production durable replay. Use the
+  harness durable workspace contract when eval, backfill, or optimization jobs
+  must pause, resume, retry, clean up, enforce quotas, or retain encrypted
+  workspace state.
 
 ## Checklist
 
@@ -194,5 +198,5 @@ await expect(evaluateDeterministicScorer({
 - `runCandidate` handles cancellation via `signal`
 - scorer returns `{ score, passed }` for every target
 - JSON Pointer paths are correct for your output shape
-- eval results are persisted in your application layer if needed
+- eval results are persisted in your application layer when application retention policy requires them
 - scorer behavior is validated with `@purista/harness/testing` before use

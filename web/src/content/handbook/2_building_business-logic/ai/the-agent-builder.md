@@ -217,6 +217,43 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
 
 Sandbox requirements depend on what the harness agent or workflow does. Read-only prompt and model calls do not need shell execution. Built-in filesystem tools, MCP stdio tools, code execution, and mounted skills need a sandbox with matching capabilities.
 
+## Workspace policy
+
+Agents are ephemeral by default. Use `setWorkspacePolicy(...)` only when a run
+must resume from committed workspace state after retry or restart.
+
+```ts
+.setWorkspacePolicy({
+  mode: 'durable',
+  required: true,
+  cleanup: 'on_terminal',
+})
+```
+
+At runtime, bind both the harness durable runtime and workspace adapter:
+
+```ts
+const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
+  queueBridge,
+  ai: {
+    models,
+    runtime,
+    workspace,
+    sandbox,
+  },
+})
+```
+
+`required: true` is the production default for durable replay. Use
+`required: false` only when the product can tolerate losing prior workspace
+state and restarting the run in a fresh sandbox.
+
+Durable workspace replay requires harness capabilities such as
+`runtime.workspace_checkpoint`, `workspace.durable`, `workspace.snapshot`,
+`workspace.resume`, and `workspace.cleanup`. Retention, encryption, and quota
+requirements can also be declared. PURISTA validates required capabilities at
+service startup before queue workers, commands, or streams run.
+
 ## HTTP exposure and streaming
 
 Expose the generated stream or command through HTTP:

@@ -3,6 +3,7 @@ import type {
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
 	WorkflowDefinition as HarnessWorkflowDefinition,
+	DurableRuntime,
 	ModelAlias,
 	ModelCapability,
 	ModelDefaults,
@@ -188,6 +189,37 @@ export type AgentSandboxPolicy = {
 	adapter?: unknown
 }
 
+/** Capability required by a durable attached-agent workspace policy. */
+export type AgentWorkspaceCapabilityRequirement = string
+
+/** Adapter-neutral durable workspace policy mirrored from `@purista/harness`. */
+export type AgentDurableWorkspaceAdapterPolicy = {
+	retention?: Record<string, unknown>
+	encryption?: Record<string, unknown>
+	quota?: Record<string, unknown>
+}
+
+/** Structural durable workspace adapter accepted until the harness package version is bumped. */
+export type AgentDurableWorkspaceAdapter = {
+	readonly capabilities?: readonly string[]
+	readonly info?: {
+		readonly capabilities?: readonly string[]
+	}
+}
+
+/** Durable workspace behavior declared by an attached agent manifest. */
+export type AgentWorkspacePolicy = {
+	mode: 'durable'
+	/** Missing runtime/workspace adapters fail service startup. Default: `true`. */
+	required?: boolean
+	/** Harness adapter capabilities required for this policy. */
+	capabilities?: readonly AgentWorkspaceCapabilityRequirement[]
+	/** Adapter-neutral durable workspace policy forwarded to compatible runtimes. */
+	policy?: AgentDurableWorkspaceAdapterPolicy
+	/** Cleanup timing requested by the generated agent runtime. */
+	cleanup?: 'on_success' | 'on_terminal' | 'manual'
+}
+
 /** HTTP projection metadata for the generated agent command or stream. */
 export type AgentHttpExposure = {
 	/** HTTP method exposed by the generated definition. */
@@ -368,6 +400,7 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 	execution: Required<Pick<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>> &
 		Omit<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>
 	sandbox?: AgentSandboxPolicy
+	workspacePolicy?: AgentWorkspacePolicy
 	http?: AgentHttpExposure
 	response?: {
 		mode: AgentResponseMode
@@ -486,6 +519,8 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 /** Runtime options required to initialize attached agents for a service instance. */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
+	runtime?: DurableRuntime
+	workspace?: AgentDurableWorkspaceAdapter
 	stateStore?: unknown
 	logger?: PuristaLogger
 	sandbox?: unknown

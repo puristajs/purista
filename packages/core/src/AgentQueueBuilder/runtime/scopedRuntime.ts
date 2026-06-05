@@ -36,11 +36,15 @@ export async function initializeAttachedAgentRuntimes(
 		throw new Error('AI attached agents require runtime ai.models in service.getInstance(...) options')
 	}
 
+	validateWorkspacePolicies(definitions, aiOptions)
+
 	const executors = definitions.map(definition => {
 		const executor = createAgentExecutor({
 			definition,
 			manifest: definition.manifest,
 			models: aiOptions.models as never,
+			runtime: aiOptions.runtime,
+			workspace: aiOptions.workspace,
 			logger: aiOptions.logger,
 			stateStore: aiOptions.stateStore,
 			sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
@@ -58,6 +62,38 @@ export async function initializeAttachedAgentRuntimes(
 				throw rejected.reason
 			}
 		},
+	}
+}
+
+function validateWorkspacePolicies(
+	definitions: readonly AttachedAgentDefinition<any>[],
+	aiOptions: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
+): void {
+	for (const definition of definitions) {
+		const policy = definition.manifest.workspacePolicy
+		if (policy?.mode !== 'durable') {
+			continue
+		}
+
+		if (!aiOptions.runtime || !aiOptions.workspace) {
+			if (policy.required === false) {
+				continue
+			}
+			throw new Error(
+				`Attached agent "${definition.manifest.agentName}" requires durable ai.runtime and ai.workspace in service.getInstance(...) options`,
+			)
+		}
+
+		const available = new Set<string>([
+			...(aiOptions.runtime?.capabilities ?? []),
+			...(aiOptions.workspace?.info?.capabilities ?? aiOptions.workspace?.capabilities ?? []),
+		])
+		const missing = (policy.capabilities ?? []).filter(capability => !available.has(capability))
+		if (missing.length > 0) {
+			throw new Error(
+				`Attached agent "${definition.manifest.agentName}" requires unavailable durable workspace capabilities: ${missing.join(', ')}`,
+			)
+		}
 	}
 }
 
