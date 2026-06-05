@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Features
+
+- Integrate agent runtime skills and durable workspace policy ([#311](https://github.com/orhun/git-cliff/issues/311))
+
+### Miscellaneous Tasks
+
+- Update biome config ([#310](https://github.com/orhun/git-cliff/issues/310))
+
+## [3.1.0] - 2026-06-03
+
 ### Bug Fixes
 
 - Restore github pages website deploy files ([#302](https://github.com/orhun/git-cliff/issues/302))
@@ -17,6 +27,7 @@ All notable changes to this project will be documented in this file.
 
 - V3.0.1 ([#299](https://github.com/orhun/git-cliff/issues/299))
 - Bump tmp from 0.2.5 to 0.2.7 ([#301](https://github.com/orhun/git-cliff/issues/301))
+- V3.1.0 ([#309](https://github.com/orhun/git-cliff/issues/309))
 
 ### Ci
 
