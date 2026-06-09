@@ -1,4 +1,5 @@
 export { AgentQueueBuilder } from './AgentQueueBuilder.js'
+export { AgentRunError } from './runtime/executor.js'
 export type {
 	AgentSkillTestRuntime,
 	CreateAgentContextMockInput,

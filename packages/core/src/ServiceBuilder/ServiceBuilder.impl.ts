@@ -273,6 +273,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			this.queueWorkerDefinitionList.push(definition.worker as never)
 			this.commandDefinitionList.push(definition.command as never)
 			this.streamDefinitionList.push(definition.stream as never)
+			for (const [metricName, metricDefinition] of Object.entries(definition.metricDefinitions ?? {})) {
+				this.customMetricDefinitions[metricName] = metricDefinition
+			}
 		}
 
 		return this
@@ -515,8 +518,13 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		if (this.agentDefinitionList.length > 0) {
 			const destroy = service.destroy.bind(service)
 			service.destroy = async () => {
-				await agentRuntimeShutdown.shutdown()
-				await destroy()
+				try {
+					await agentRuntimeShutdown.shutdown()
+				} finally {
+					// Always release core resources (bridges, stores) even if agent
+					// runtime shutdown fails, so a failing executor cannot leak them.
+					await destroy()
+				}
 			}
 		}
 

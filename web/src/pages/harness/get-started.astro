@@ -581,7 +581,7 @@ const scores = await evaluatePromptCandidates({
           <CodeBlock
             code={`const harness = defineHarness({ name: 'my-service' })
   .logger(new JsonLogger({ level: 'info' }))
-  .telemetry({ captureContent: false })
+  .telemetry({ contentCaptureMode: 'NO_CONTENT' })
   .sandbox(inMemorySandbox())
   .defaults({
     runTimeoutMs: 120_000,

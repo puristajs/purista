@@ -196,6 +196,10 @@ With this policy, `payload.conversation.id` becomes the harness session id. Do n
 ## Sandbox policy
 
 Use `setSandboxPolicy(...)` when the agent needs an explicit sandbox adapter.
+Sandboxing is opt-in per agent: `enabled: false` keeps an agent out of the
+sandbox even when a shared `ai.sandbox` is configured, a policy `adapter` takes
+precedence over `ai.sandbox`, and agents without a sandbox policy fall back to
+the shared `ai.sandbox`.
 
 ```ts
 .setSandboxPolicy({
@@ -339,7 +343,7 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
       },
     },
     telemetry: {
-      captureContent: false,
+      contentCaptureMode: 'NO_CONTENT',
     },
   },
 })

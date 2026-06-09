@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import type {
 	BuiltinToolName,
 	AgentDefinition as HarnessAgentDefinition,
@@ -106,6 +107,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private executionProfile?: AgentQueueLongRunningExecutionProfile
 	private responseMode?: { mode: AgentResponseMode; options?: AgentResponseModeOptions }
 	private executionDefinitions: Array<AgentExecutionDefinition<any, any, any, any, any, any, any>> = []
+	private metricDefinitions: Record<string, PuristaMetricDefinition<any>> = {}
 
 	constructor(
 		private readonly serviceName: string,
@@ -127,9 +129,11 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * ```
 	 */
 	defineMetric<const MetricName extends string, const Definition extends PuristaMetricDefinition<any>>(
-		_name: MetricName,
-		_definition: Definition,
+		name: MetricName,
+		definition: Definition,
 	) {
+		assertNonEmpty(name, 'metric name')
+		this.metricDefinitions[name] = definition
 		return this as unknown as AgentQueueBuilder<
 			AgentQueueBuilderTypes<
 				S['PayloadSchema'],
@@ -544,7 +548,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		path: string,
 		options?: Omit<AgentHttpExposure, 'method' | 'path'>,
 	) {
-		this.httpExposure = { method, path, ...options }
+		// Merge over any previously-set exposure (e.g. an earlier makeEndpointPublic())
+		// so call order does not drop the public flag or streaming mode.
+		this.httpExposure = { ...this.httpExposure, method, path, ...options }
 		if (options?.streamingMode) {
 			this.streamingMode = options.streamingMode
 		}
@@ -585,6 +591,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		const runtime: AgentRuntimeRef<Infer<S['OutputSchema']>> = {}
 		const agentDefinition: AgentDefinition<S> = {
 			manifest,
+			metricDefinitions: { ...this.metricDefinitions },
 			payloadSchema: this.payloadSchema as S['PayloadSchema'],
 			parameterSchema: this.parameterSchema as S['ParameterSchema'],
 			outputSchema: this.outputSchema as S['OutputSchema'],
@@ -815,7 +822,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		}
 		return {
 			...base,
-			runtimeRevision: createRuntimeRevision(base),
+			runtimeRevision: createRuntimeRevision({
+				...base,
+				schemas: {
+					payload: this.payloadSchema,
+					parameter: this.parameterSchema,
+					output: this.outputSchema,
+				},
+			}),
 		} as unknown as AgentManifest<S['Models']>
 	}
 
@@ -830,13 +844,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		const { mode, options } = this.responseMode
 		const defaultEventBase = `${this.serviceName}.${this.agentName}`
 		const defaultMode =
-			mode === 'status'
-				? 'state'
-				: mode === 'event'
-					? 'event'
-					: mode === 'stream' || mode === 'callback'
-						? 'state-and-event'
-						: undefined
+			mode === 'status' ? 'state' : mode === 'event' ? 'event' : mode === 'stream' ? 'state-and-event' : undefined
 		const configured = options?.resultPolicy
 		const basePolicy =
 			typeof configured === 'object'
@@ -902,12 +910,39 @@ function assertNonEmpty(value: string, label: string) {
 }
 
 function createRuntimeRevision(value: unknown) {
-	const input = JSON.stringify(value, (_key, item) => (typeof item === 'function' ? '[function]' : item))
-	let hash = 0
-	for (let index = 0; index < input.length; index += 1) {
-		hash = (hash * 31 + input.charCodeAt(index)) >>> 0
+	const digest = createHash('sha256').update(stableStringify(value)).digest('hex')
+	return `rev-${digest.slice(0, 16)}`
+}
+
+/**
+ * Deterministic, cycle-safe JSON serialization used for the runtime revision
+ * digest. Keys are sorted so structurally-equal manifests produce identical
+ * revisions; functions and circular references are replaced with stable markers
+ * so schema internals never throw or leak non-deterministic output.
+ */
+function stableStringify(value: unknown): string {
+	const seen = new WeakSet<object>()
+	const normalize = (input: unknown): unknown => {
+		if (typeof input === 'function') {
+			return '[function]'
+		}
+		if (input === null || typeof input !== 'object') {
+			return input
+		}
+		if (seen.has(input)) {
+			return '[circular]'
+		}
+		seen.add(input)
+		if (Array.isArray(input)) {
+			return input.map(normalize)
+		}
+		const out: Record<string, unknown> = {}
+		for (const key of Object.keys(input as Record<string, unknown>).sort()) {
+			out[key] = normalize((input as Record<string, unknown>)[key])
+		}
+		return out
 	}
-	return `rev-${hash.toString(36)}`
+	return JSON.stringify(normalize(value)) ?? ''
 }
 
 function cleanLifecycleConfig(policy: AgentExecutionPolicy) {

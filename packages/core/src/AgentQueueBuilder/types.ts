@@ -154,7 +154,7 @@ export type AgentQueueResultPolicy = {
 }
 
 /** Public response contract exposed by the generated agent command or stream. */
-export type AgentResponseMode = 'accepted' | 'status' | 'stream' | 'event' | 'callback'
+export type AgentResponseMode = 'accepted' | 'status' | 'stream' | 'event'
 
 /** Options for long-running agent response contracts. */
 export type AgentResponseModeOptions = {
@@ -174,8 +174,6 @@ export type AgentResponseModeOptions = {
 	statusUrl?: string
 	/** Stream URL returned by stream response mode metadata. */
 	streamUrl?: string
-	/** Resource name used by callback integrations. */
-	callbackResourceName?: string
 }
 
 /** Session behavior used by the harness runtime for each agent run. */
@@ -183,9 +181,15 @@ export type AgentSessionPolicy = { mode: 'ephemeral' } | { mode: 'conversation';
 
 /** Optional sandbox adapter configuration passed through to the agent runtime. */
 export type AgentSandboxPolicy = {
-	/** Enables sandbox usage when a compatible runtime is configured. */
+	/**
+	 * Opt this agent in or out of sandboxing.
+	 *
+	 * `false` disables the sandbox for this agent even when a shared
+	 * `ai.sandbox` is configured. When omitted or `true`, the agent uses
+	 * `adapter` if provided, otherwise the shared `ai.sandbox`.
+	 */
 	enabled?: boolean
-	/** Runtime-specific sandbox adapter. */
+	/** Runtime-specific sandbox adapter. Takes precedence over the shared `ai.sandbox`. */
 	adapter?: unknown
 }
 
@@ -526,6 +530,8 @@ export type AgentRuntimeStreamInvocationInput = AgentRuntimeInvocationInput & {
 /** Attached agent definition before expansion into service definitions. */
 export type AgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes> = {
 	manifest: AgentManifest<S['Models']>
+	/** Agent-local metric definitions registered on the owning service at `addAgentDefinition(...)`. */
+	metricDefinitions: PuristaMetricDefinitions
 	payloadSchema?: S['PayloadSchema']
 	parameterSchema?: S['ParameterSchema']
 	outputSchema?: S['OutputSchema']

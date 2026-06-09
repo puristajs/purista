@@ -175,15 +175,26 @@ export const agentSseEventSchema = z.object({
 export type AgentProviderEventData = z.infer<typeof agentProviderEventDataSchema>
 export type AgentSseEvent = z.infer<typeof agentSseEventSchema>
 
-export function createProviderSseEvent(input: AgentRunEvent, sequenceNumber: number): AgentSseEvent {
+/**
+ * Map one PURISTA agent run event to its provider-style SSE chunk.
+ *
+ * Returns `undefined` for run events that have no provider projection (for
+ * example a future harness event type that this core version does not yet
+ * model). Callers skip `undefined` chunks instead of failing the stream; the
+ * raw run event still flows through the agent run-event bus.
+ */
+export function createProviderSseEvent(input: AgentRunEvent, sequenceNumber: number): AgentSseEvent | undefined {
 	const data = mapRunEventToProviderEvent(input.event, sequenceNumber)
+	if (!data) {
+		return undefined
+	}
 	return {
 		event: data.type,
 		data,
 	}
 }
 
-function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): AgentProviderEventData {
+function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): AgentProviderEventData | undefined {
 	const responseId = event.runId
 	const base = {
 		sequence_number: sequenceNumber,
@@ -305,6 +316,10 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 					message: `Stream dropped ${event.dropped} events.`,
 				},
 			}
+		default:
+			// A run event with no provider projection (e.g. a future harness event
+			// type). Skip it in the SSE projection rather than crash the stream.
+			return undefined
 	}
 }
 

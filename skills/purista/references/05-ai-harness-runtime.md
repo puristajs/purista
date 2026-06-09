@@ -54,7 +54,7 @@ Applications bind concrete models at service startup:
 await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(eventBridge, {
   queueBridge,
   ai: {
-    telemetry: { captureContent: false },
+    telemetry: { contentCaptureMode: 'NO_CONTENT' },
     models: {
       primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'] },
     },
@@ -67,7 +67,7 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 
 Startup fails fast when aliases or capabilities are missing.
 
-Default AI telemetry should not capture prompt or completion content. Use `captureContent: false` unless a product-specific retention, redaction, consent, and access-control policy has been approved.
+Default AI telemetry should not capture prompt or completion content. Core defaults `ai.telemetry` to `contentCaptureMode: 'NO_CONTENT'`; only widen it (`'SPAN_ONLY'`, `'EVENT_ONLY'`, `'SPAN_AND_EVENT'`) after a product-specific retention, redaction, consent, and access-control policy has been approved.
 
 Keep telemetry ownership explicit:
 - PURISTA service metrics are configured through service runtime `metrics`
@@ -81,6 +81,11 @@ Use `setSandboxPolicy(...)` when an attached agent needs mounted skills,
 filesystem built-ins, MCP stdio tools, or code execution. Sandbox capabilities
 such as `sandbox.snapshot`, `sandbox.resume`, and `sandbox.hibernate` describe
 low-level sandbox session behavior.
+
+Sandboxing is opt-in per agent. `setSandboxPolicy({ enabled: false })` keeps an
+agent out of the sandbox even when a shared `ai.sandbox` is configured; a policy
+`adapter` takes precedence over `ai.sandbox`; agents with no sandbox policy fall
+back to the shared `ai.sandbox`.
 
 Use `setWorkspacePolicy(...)` only when an attached agent must resume from
 committed workspace state after queue retry, process restart, pause, or

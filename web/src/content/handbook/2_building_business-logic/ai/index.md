@@ -182,7 +182,7 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
       },
     },
     telemetry: {
-      captureContent: false,
+      contentCaptureMode: 'NO_CONTENT',
     },
     sandbox,
     runtime,

@@ -146,6 +146,80 @@ describe('AgentQueueBuilder', () => {
 			.getDefinition()
 	})
 
+	it('carries agent-local metric definitions on the generated definition', async () => {
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+			.defineMetric('app.agent.escalations', {
+				kind: 'counter',
+				unit: '{escalation}',
+				description: 'Escalations',
+			})
+			.setRunFunction(async () => ({ status: 'ok' }))
+			.getDefinition()
+
+		expect(definition.metricDefinitions['app.agent.escalations']).toMatchObject({ kind: 'counter' })
+	})
+
+	it('streams harness agent output and resolves the final object', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('streamTriage', 'Streaming triage agent')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Stream a result.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+		})
+
+		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
+		expect(final).toEqual({ status: 'ok' })
+		expect(chunks.length).toBeGreaterThan(0)
+	})
+
+	it('surfaces harness errors from streaming runs instead of masking them as validation failures', async () => {
+		const model = createScriptedHarnessModel()
+		// No stream response queued: the provider throws, so the run must finish with an error.
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('streamFail', 'Streaming agent that fails')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Stream a result.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+		})
+
+		await expect(harness.stream({ payload: {}, parameter: {} })).rejects.toThrow()
+	})
+
+	it('produces a stable, change-sensitive runtime revision', async () => {
+		const build = (description: string) =>
+			new ServiceBuilder(serviceInfo)
+				.getAgentQueueBuilder('triageTicket', description)
+				.addOutputSchema(z.object({ status: z.literal('ok') }))
+				.setRunFunction(async () => ({ status: 'ok' }))
+				.getManifest()
+
+		expect(build('same').runtimeRevision).toBe(build('same').runtimeRevision)
+		expect(build('one').runtimeRevision).not.toBe(build('two').runtimeRevision)
+	})
+
 	it('serializes durable workspace policy into the agent manifest', () => {
 		const service = new ServiceBuilder(serviceInfo)
 		const manifest = service
