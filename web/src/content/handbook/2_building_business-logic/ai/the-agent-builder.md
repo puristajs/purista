@@ -285,6 +285,11 @@ Expose the generated stream or command through HTTP:
 - `response.completed`
 - `error`
 
+Opted-in model stream deltas include `stream_id` so clients can aggregate chunks
+from the same model stream invocation, plus source metadata such as `agent_id`,
+`workflow_id`, and `model_alias` when available. Keep display labels and
+client-specific event names in your HTTP/SSE adapter.
+
 Use `streamingMode: 'aggregate'` when the endpoint should return the final validated output instead of incremental chunks.
 
 ## Queue and long-running behavior

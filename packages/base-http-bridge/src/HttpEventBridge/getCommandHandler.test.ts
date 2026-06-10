@@ -132,4 +132,56 @@ describe('getCommandHandler', () => {
 
 		expect(response.status).toBe(StatusCode.NoContent)
 	})
+
+	it('unwraps structured JSON CloudEvents when configured', async () => {
+		const bridge = createBridgeMock()
+		const inputMessage = getCommandMessageMock<{ a: number }, { b: number }>({
+			payload: { payload: { a: 1 }, parameter: { b: 2 } },
+		})
+		const cb = vi.fn(async () => getCommandSuccessMessageMock({ ok: true }, undefined, inputMessage))
+		const handler = getCommandHandler.call(bridge, address, cb, metadata, eventBridgeConfig, true)
+		const app = new Hono()
+		app.post('/command', handler)
+
+		const response = await app.request('http://localhost/command', {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/cloudevents+json',
+			},
+			body: JSON.stringify({
+				specversion: '1.0',
+				id: 'event-1',
+				source: '/test',
+				type: 'purista.command',
+				data: inputMessage,
+			}),
+		})
+
+		expect(response.status).toBe(StatusCode.OK)
+		expect(cb).toHaveBeenCalledWith(expect.objectContaining({ id: inputMessage.id }))
+	})
+
+	it('unwraps binary JSON CloudEvents when configured', async () => {
+		const bridge = createBridgeMock()
+		const inputMessage = getCommandMessageMock()
+		const cb = vi.fn(async () => getCommandSuccessMessageMock({ ok: true }, undefined, inputMessage))
+		const handler = getCommandHandler.call(bridge, address, cb, metadata, eventBridgeConfig, true)
+		const app = new Hono()
+		app.post('/command', handler)
+
+		const response = await app.request('http://localhost/command', {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+				'ce-specversion': '1.0',
+				'ce-id': 'event-1',
+				'ce-source': '/test',
+				'ce-type': 'purista.command',
+			},
+			body: JSON.stringify(inputMessage),
+		})
+
+		expect(response.status).toBe(StatusCode.OK)
+		expect(cb).toHaveBeenCalledWith(expect.objectContaining({ id: inputMessage.id }))
+	})
 })

@@ -25,9 +25,9 @@ import {
 	throwIfNotValidMessage,
 	UnhandledError,
 } from '@purista/core'
-import { HTTP } from 'cloudevents'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
+import { readCloudEventData } from './cloudEventData.js'
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
@@ -74,19 +74,16 @@ export const getCommandHandler = function (
 
 					if (wrappedInCloudEvent) {
 						const body = await c.req.text()
-						const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
-							// biome-ignore lint/performance/noAccumulatingSpread: ok here
-							return { ...prev, [val[0]]: val[1] }
-						}, {})
+						const headers = Object.fromEntries(c.req.raw.headers.entries())
 
-						const event = HTTP.toEvent<Command>({ headers, body })
+						const event = readCloudEventData<Command>({ headers, body })
 						if (Array.isArray(event)) {
 							throw new UnhandledError(
 								StatusCode.NotImplemented,
 								'Support of multiple events per command call is not supported',
 							)
 						}
-						message = event.data as Command
+						message = event
 					} else {
 						try {
 							message = await c.req.json()

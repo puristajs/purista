@@ -188,7 +188,12 @@ AI stream endpoints emit SSE `event`/`data` chunks. The data payload follows pro
 - `response.completed`
 - `error`
 
-OpenAPI chunk schema comes from `agentSseEventSchema`.
+Text and structured model deltas include `stream_id` when they originate from an
+opted-in harness model stream. Use `stream_id` to aggregate chunks from one
+model stream invocation. Use `agent_id`, `workflow_id`, and `model_alias` for
+source attribution. UI labels, semantic buckets, and client-specific event names
+belong in the application adapter, not in PURISTA core. OpenAPI chunk schema
+comes from `agentSseEventSchema`.
 
 ## Multimodal
 Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, and file content. Multimodal methods are capability-gated by model aliases such as `vision_input`, `audio_input`, and `file_input`.

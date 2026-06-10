@@ -52,13 +52,11 @@ export function createAgentExecutor<Models extends Record<string, AgentModelBind
 class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding>> {
 	private readonly harness?: Harness<any>
 	private readonly resolvedModels: Record<string, ModelAlias>
-	private readonly handlerModels
 	private readonly logger?: PuristaLogger
 
 	constructor(private readonly input: CreateAgentExecutorInput<Models>) {
 		this.logger = input.logger
 		this.resolvedModels = resolveRuntimeModelBindings(input.manifest, input.models)
-		this.handlerModels = createHandlerModelBindings(this.resolvedModels)
 		this.harness = this.buildHarness()
 	}
 
@@ -177,6 +175,11 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 		let output: unknown
 		if (this.input.definition.execution.kind === 'runFunction') {
+			const handlerModels = createHandlerModelBindings(this.resolvedModels, {
+				runId: identity.runId,
+				agentId: this.input.manifest.agentName,
+				emit: emitWrapped,
+			})
 			const context = createAgentHandlerContext({
 				payload: input.payload,
 				parameter: input.parameter,
@@ -184,7 +187,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				appContext: input.appContext,
 				metrics: input.appContext.metrics as never,
 				session,
-				models: this.handlerModels,
+				models: handlerModels,
 				skills: this.input.skillRuntime
 					? createAgentSkillContext(this.input.skillRuntime.catalog)
 					: createAgentSkillContext([]),

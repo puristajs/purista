@@ -79,6 +79,9 @@ const baseProviderEventDataSchema = z.object({
 	response_id: z.string(),
 	run_id: z.string(),
 	agent_id: z.string().optional(),
+	workflow_id: z.string().optional(),
+	model_alias: z.string().optional(),
+	stream_id: z.string().optional(),
 })
 
 /**
@@ -162,6 +165,7 @@ export const agentProviderEventDataSchema = z.discriminatedUnion('type', [
  *     "sequence_number": 2,
  *     "response_id": "run_123",
  *     "run_id": "run_123",
+ *     "stream_id": "model_abc",
  *     "delta": "hello"
  *   }
  * }
@@ -200,7 +204,10 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 		sequence_number: sequenceNumber,
 		response_id: responseId,
 		run_id: event.runId,
-		...('agentId' in event ? { agent_id: event.agentId } : {}),
+		...('agentId' in event && event.agentId ? { agent_id: event.agentId } : {}),
+		...('workflowId' in event && event.workflowId ? { workflow_id: event.workflowId } : {}),
+		...('modelAlias' in event && event.modelAlias ? { model_alias: event.modelAlias } : {}),
+		...('streamId' in event && event.streamId ? { stream_id: event.streamId } : {}),
 	}
 
 	switch (event.type) {

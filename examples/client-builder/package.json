@@ -22,12 +22,12 @@
 	"dependencies": {
 		"@purista/core": "*",
 		"@hono/node-server": "^2.0.4",
-		"@scalar/hono-api-reference": "^0.10.20",
+		"@scalar/hono-api-reference": "^0.11.2",
 		"@purista/hono-http-server": "*"
 	},
 	"devDependencies": {
 		"@purista/cli": "*",
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"@types/sinon": "^21.0.1",
 		"@types/jest": "^30.0.0",
 		"typescript": "^6.0.3",

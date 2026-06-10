@@ -34,7 +34,7 @@
 	},
 	"devDependencies": {
 		"@testcontainers/nats": "^12.0.1",
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"vitest": "^4.1.8"
 	},
 	"dependencies": {

@@ -33,7 +33,7 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"@types/sinon": "^21.0.1",
 		"sinon": "^22.0.0",
 		"vitest": "^4.1.8"

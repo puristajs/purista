@@ -187,6 +187,146 @@ describe('AgentQueueBuilder', () => {
 		expect(chunks.length).toBeGreaterThan(0)
 	})
 
+	it('mirrors opted-in run-function model stream chunks with deterministic source metadata', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueueTextStream([
+			{ kind: 'delta', text: 'he' },
+			{ kind: 'delta', text: 'llo' },
+			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 2, totalTokens: 3 }, finishReason: 'stop' },
+		])
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('streamText', 'Stream text from a run function')
+			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
+			.addOutputSchema(z.string())
+			.setRunFunction(async context => {
+				let text = ''
+				for await (const chunk of context.harness.models.primary.textStream(
+					{ messages: [{ role: 'user', content: 'hello' }] },
+					context.signal,
+					{ emitRunEvents: true },
+				)) {
+					if (chunk.kind === 'delta') text += chunk.text
+				}
+				return text
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['text_stream'] } },
+		})
+
+		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
+		const deltas = chunks.filter(
+			(chunk): chunk is { data: { type: 'response.output_text.delta'; stream_id: string; delta: string } } =>
+				typeof chunk === 'object' &&
+				chunk !== null &&
+				'data' in chunk &&
+				(chunk as { data?: { type?: string } }).data?.type === 'response.output_text.delta',
+		)
+		const streamId = deltas[0]?.data.stream_id
+
+		expect(final).toBe('hello')
+		expect(typeof streamId).toBe('string')
+		expect(deltas).toEqual([
+			expect.objectContaining({
+				data: expect.objectContaining({
+					type: 'response.output_text.delta',
+					agent_id: 'streamText',
+					model_alias: 'primary',
+					stream_id: streamId,
+					delta: 'he',
+				}),
+			}),
+			expect.objectContaining({
+				data: expect.objectContaining({
+					type: 'response.output_text.delta',
+					agent_id: 'streamText',
+					model_alias: 'primary',
+					stream_id: streamId,
+					delta: 'llo',
+				}),
+			}),
+		])
+	})
+
+	it('keeps run-function model stream chunks private by default', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueueTextStream([
+			{ kind: 'delta', text: 'hidden' },
+			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+		])
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('privateText', 'Consume text privately')
+			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
+			.addOutputSchema(z.string())
+			.setRunFunction(async context => {
+				let text = ''
+				for await (const chunk of context.harness.models.primary.textStream(
+					{ messages: [{ role: 'user', content: 'hello' }] },
+					context.signal,
+				)) {
+					if (chunk.kind === 'delta') text += chunk.text
+				}
+				return text
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['text_stream'] } },
+		})
+
+		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
+
+		expect(final).toBe('hidden')
+		expect(chunks).toHaveLength(0)
+	})
+
+	it('assigns distinct stream ids for parallel opted-in run-function model streams', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueueTextStream([
+			{ kind: 'delta', text: 'a' },
+			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+		])
+		model.enqueueTextStream([
+			{ kind: 'delta', text: 'b' },
+			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
+		])
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('parallelText', 'Stream text from parallel run-function calls')
+			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
+			.addOutputSchema(z.string())
+			.setRunFunction(async context => {
+				const consume = async (content: string) => {
+					let text = ''
+					for await (const chunk of context.harness.models.primary.textStream(
+						{ messages: [{ role: 'user', content }] },
+						context.signal,
+						{ emitRunEvents: true },
+					)) {
+						if (chunk.kind === 'delta') text += chunk.text
+					}
+					return text
+				}
+				const [left, right] = await Promise.all([consume('left'), consume('right')])
+				return `${left}${right}`
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['text_stream'] } },
+		})
+
+		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
+		const deltas = chunks.filter(
+			(chunk): chunk is { data: { type: 'response.output_text.delta'; stream_id: string; delta: string } } =>
+				typeof chunk === 'object' &&
+				chunk !== null &&
+				'data' in chunk &&
+				(chunk as { data?: { type?: string } }).data?.type === 'response.output_text.delta',
+		)
+
+		expect(final).toBe('ab')
+		expect(deltas.map(chunk => chunk.data.delta).sort()).toEqual(['a', 'b'])
+		expect(new Set(deltas.map(chunk => chunk.data.stream_id)).size).toBe(2)
+	})
+
 	it('surfaces harness errors from streaming runs instead of masking them as validation failures', async () => {
 		const model = createScriptedHarnessModel()
 		// No stream response queued: the provider throws, so the run must finish with an error.

@@ -22,7 +22,7 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"tsx": "^4.22.4",
 		"typescript": "^6.0.3",
 		"vitest": "^4.1.8"
@@ -30,9 +30,9 @@
 	"dependencies": {
 		"@hono/node-server": "^2.0.4",
 		"@purista/core": "*",
-		"@purista/harness-openai": "^1.2.0",
+		"@purista/harness-openai": "^1.2.3",
 		"@purista/hono-http-server": "*",
-		"@scalar/hono-api-reference": "^0.10.20",
+		"@scalar/hono-api-reference": "^0.11.2",
 		"dotenv": "^17.4.2",
 		"zod": "^4.4.3"
 	}

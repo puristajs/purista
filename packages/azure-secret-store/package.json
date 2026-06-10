@@ -35,7 +35,7 @@
 		"env:down": "docker compose -f docker-compose.yml down"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"@types/sinon": "^21.0.1",
 		"dotenv": "^17.4.2",
 		"sinon": "^22.0.0",

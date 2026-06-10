@@ -37,7 +37,10 @@ Streams can be delivered as:
 - SSE `text/event-stream`
 - aggregate JSON, when configured as aggregate
 
-AI stream endpoints use provider-style SSE chunks described by `agentSseEventSchema`.
+AI stream endpoints use provider-style SSE chunks described by
+`agentSseEventSchema`. Opted-in model stream deltas include `stream_id` for
+chunk aggregation and `agent_id` / `workflow_id` / `model_alias` for source
+attribution; client-facing labels remain application-owned.
 
 ## Runtime Wiring
 Runtime infrastructure belongs in `getInstance(...)`, not in builder definitions:

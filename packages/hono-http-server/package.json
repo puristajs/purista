@@ -33,7 +33,7 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"@types/sinon": "^21.0.1",
 		"@hono/swagger-ui": "^0.6.1",
 		"sinon": "^22.0.0",
@@ -43,7 +43,7 @@
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/semantic-conventions": "^1.41.1",
 		"@purista/core": "*",
-		"hono": "^4.12.23"
+		"hono": "^4.12.25"
 	},
 	"peerDependenciesMeta": {},
 	"optionalDependencies": {

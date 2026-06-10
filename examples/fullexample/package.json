@@ -39,7 +39,7 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
+		"@types/node": "^25.9.2",
 		"sinon": "^22.0.0",
 		"tsx": "^4.22.4",
 		"typescript": "^6.0.3",
