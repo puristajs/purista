@@ -41,7 +41,7 @@
 		"@hono/node-server": "^2.0.4",
 		"@types/node": "^25.9.1",
 		"@types/sinon": "^21.0.1",
-		"hono": "^4.12.23",
+		"hono": "^4.12.26",
 		"sinon": "^22.0.0",
 		"vitest": "^4.1.8"
 	},

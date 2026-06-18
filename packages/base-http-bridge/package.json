@@ -32,7 +32,7 @@
 		"@opentelemetry/semantic-conventions": "^1.41.1",
 		"@purista/core": "*",
 		"cloudevents": "^10.0.0",
-		"hono": "^4.12.23"
+		"hono": "^4.12.26"
 	},
 	"peerDependenciesMeta": {},
 	"exports": {
