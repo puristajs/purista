@@ -82,6 +82,12 @@ AI agent integration lives in `@purista/core`. Agents attach to services and exp
 
 PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics.
 
+Harness governance policy is optional. Generated apps and ordinary agents must
+not be forced to configure policy. Use it only when an attached agent needs
+central tool-call policy, approval, audit, or interoperability with external
+policy packs; PURISTA service guards and tenant-scoped resources remain the
+authorization boundary.
+
 Durable workspace replay for agents is opt-in. Builders declare it with
 workspace policy, runtime wiring supplies `ai.runtime` and `ai.workspaceStore`, and
 startup fails when required capabilities are missing unless
