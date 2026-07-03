@@ -38,12 +38,12 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@hono/node-server": "^2.0.4",
-		"@types/node": "^25.9.1",
-		"@types/sinon": "^21.0.1",
-		"hono": "^4.12.23",
+		"@hono/node-server": "^2.0.8",
+		"@types/node": "^26.1.0",
+		"@types/sinon": "^22.0.0",
+		"hono": "^4.12.27",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.8"
+		"vitest": "^4.1.9"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",

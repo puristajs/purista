@@ -1,7 +1,8 @@
 ---
 import { harnessNavLinks } from '../../data/navigation'
+import { getHarnessCanonicalPath } from '../../data/harness-routes'
 
-const currentPath = Astro.url.pathname
+const currentPath = getHarnessCanonicalPath(Astro.url.pathname)
 ---
 
 <div class="w-full border-b border-[var(--color-line)] bg-[var(--color-bg)]">

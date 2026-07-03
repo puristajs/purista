@@ -101,10 +101,6 @@ const incidentReviewWorkflow = {
     risk: z.enum(['low', 'medium', 'high']),
     reasons: z.array(z.string()),
   }),
-  agents: {
-    factExtractor,
-    riskAssessor,
-  },
   handler: async ctx => {
     const facts = await ctx.agents.factExtractor({ text: ctx.input.text })
     const risk = await ctx.agents.riskAssessor({ facts: facts.facts })
@@ -125,16 +121,83 @@ const reviewAgent = await incidentService
     model: 'incident-reasoning',
     capabilities: ['object', 'tool_use'],
   })
-  .setHarnessWorkflow(incidentReviewWorkflow)
+  .setHarnessWorkflow(incidentReviewWorkflow, {
+    agents: {
+      factExtractor,
+      riskAssessor,
+    },
+  })
   .getDefinition()
 ```
 
-All inner harness agents in the workflow share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, and model bindings.
+All inner harness agents passed to `setHarnessWorkflow(..., { agents })` share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, durable runtime, workspace store, governance config, and model bindings.
+
+Local durable execution is a harness runtime concern. When enabled, the runtime writes checkpoint and lease records for the workflow inside your application boundary, so a restarted process can resume from the last committed step instead of replaying the whole run from scratch.
 
 When durable workspace replay is enabled on the attached PURISTA agent, the
 inner harness workflow also shares one durable workspace boundary. Use this
 when retrying the parent run should resume from committed workspace state for
 all inner harness agents.
+
+For local-first deployments, start with the harness local durable execution
+bundle. It keeps the service code small while still using the same adapter
+ports you can later replace with Postgres, object storage, containers, or
+remote workers.
+
+```ts
+import { localDurableExecution } from '@purista/harness'
+
+const local = localDurableExecution({
+  root: './.purista-harness',
+  exec: false,
+  policy: {
+    retention: { cleanupMode: 'manual_only' },
+  },
+})
+
+const harness = defineHarness({ name: 'incident-review' })
+  .state(local.state)
+  .runtime(local.runtime)
+  .sandbox(local.sandbox)
+  .workspaceStore(local.workspaceStore)
+  .checkpoints(local.checkpoints)
+  .build()
+```
+
+Inside a harness workflow, use `ctx.checkpoints` for application-level JSON
+snapshots such as extracted facts, cursor positions, and reviewed decisions.
+Use durable workspace checkpoints for files. Keep external writes idempotent
+and checkpoint after the write result is safely recorded.
+
+Model retry stays on the harness model alias, not inside the workflow handler.
+Use `retry: true` for the default short active retry policy, a policy object
+for tighter budgets, or `retry: false` for strict paths and tests.
+
+```ts
+models: {
+  primary: {
+    provider,
+    model: 'gpt-4.1-mini',
+    capabilities: ['object', 'tool_use'],
+    retry: {
+      maxAttempts: 3,
+      maxActiveElapsedMs: 60_000,
+      maxActiveDelayMs: 20_000,
+    },
+  },
+}
+```
+
+The harness normalizes provider rate limits and transient outages into
+`ModelError` metadata. Short waits are retried within the active model call
+budget. Long provider `Retry-After` windows are returned as deferred retry
+metadata so the PURISTA queue, worker, or workflow policy can decide whether
+to schedule a later run instead of blocking a handler for minutes or hours.
+
+Harness governance also stays on the shared harness runtime. Configure
+`ai.governance` at service instantiation when the workflow needs policy-driven
+tool exposure, approval, or audit across its inner harness agents. Keep
+business authorization at the PURISTA service boundary.
 
 ## PURISTA-level orchestration
 
@@ -212,7 +275,7 @@ Each child agent is a real PURISTA command/queue/stream capability. It can run w
 
 Use the same harness workflow sandbox when:
 
-- several inner agents need the same temporary files or mounted skills
+- several inner harness agents need the same temporary files or mounted skills
 - the work is one user run and should share memory/history
 - intermediate state should not become a public service contract
 - retrying the whole run is acceptable
@@ -236,7 +299,7 @@ Use independent PURISTA agents when:
 2. It invokes independent `sourceDiscovery`, `evidenceExtraction`, and `riskReview` PURISTA agents in parallel.
 3. Each child agent uses its own queue and sandbox because each may call different tools or providers.
 4. The parent agent validates child outputs and runs deterministic policy checks.
-5. The parent invokes one harness workflow for final writing and self-review inside one shared sandbox.
+5. The parent invokes one wrapped harness workflow for final writing and self-review inside one shared sandbox.
 6. The generated command returns a final report or a queued `jobId`, depending on response mode.
 
 This combination is the full power of the stack: harness workflows for tightly coupled AI reasoning, PURISTA orchestration for independent service capabilities.

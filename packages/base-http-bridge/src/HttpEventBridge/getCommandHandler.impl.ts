@@ -25,9 +25,9 @@ import {
 	throwIfNotValidMessage,
 	UnhandledError,
 } from '@purista/core'
-import { HTTP } from 'cloudevents'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
+import { parseCloudEventData } from './parseCloudEventData.impl.js'
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
@@ -79,14 +79,7 @@ export const getCommandHandler = function (
 							return { ...prev, [val[0]]: val[1] }
 						}, {})
 
-						const event = HTTP.toEvent<Command>({ headers, body })
-						if (Array.isArray(event)) {
-							throw new UnhandledError(
-								StatusCode.NotImplemented,
-								'Support of multiple events per command call is not supported',
-							)
-						}
-						message = event.data as Command
+						message = parseCloudEventData<Command>({ headers, body })
 					} else {
 						try {
 							message = await c.req.json()

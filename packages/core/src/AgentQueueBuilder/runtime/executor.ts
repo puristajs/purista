@@ -1,6 +1,7 @@
 import {
 	type DurableRuntime,
 	defineHarness,
+	type GovernanceConfig,
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
 	type WorkflowDefinition as HarnessWorkflowDefinition,
@@ -41,6 +42,7 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	stateStore?: unknown
 	sandbox?: unknown
 	telemetry?: TelemetryOptions
+	governance?: GovernanceConfig<any>
 }
 
 export function createAgentExecutor<Models extends Record<string, AgentModelBinding>>(
@@ -102,6 +104,10 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.telemetry(this.input.telemetry)
 		}
 
+		if (this.input.governance) {
+			builder = builder.governance(this.input.governance)
+		}
+
 		if (this.input.manifest.execution.timeoutMs !== undefined) {
 			builder = builder.defaults({ runTimeoutMs: this.input.manifest.execution.timeoutMs })
 		}
@@ -135,8 +141,30 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		}
 
 		if (this.input.definition.execution.kind === 'harnessWorkflow') {
+			const agents = this.input.definition.execution.agents ?? {}
+			const agentNames = Object.keys(agents)
+			if (Object.keys(agents).length > 0) {
+				builder = builder.agents(
+					Object.fromEntries(
+						Object.entries(agents).map(([agentName, agent]) => [
+							agentName,
+							this.withDeclaredSkills(agent as HarnessAgentDefinition<any>),
+						]),
+					),
+				)
+			}
+			const workflowDefinition = this.input.definition.execution.definition as HarnessWorkflowDefinition<any>
 			builder = builder.workflows({
-				[this.input.manifest.agentName]: this.input.definition.execution.definition as HarnessWorkflowDefinition<any>,
+				[this.input.manifest.agentName]:
+					agentNames.length > 0 && !workflowDefinition.delegation
+						? {
+								...workflowDefinition,
+								delegation: {
+									agents: agentNames,
+									modelAliases: Object.keys(this.resolvedModels),
+								},
+							}
+						: workflowDefinition,
 			})
 		}
 

@@ -185,6 +185,9 @@ Required changes:
 - Expose allowed child agents through normal PURISTA invocation.
 - Support exactly one execution mode per agent:
   `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
+- Support `setHarnessWorkflow(workflow, { agents })` by registering supplied
+  harness-local agent definitions before the wrapped workflow so `ctx.agents`
+  works inside that one harness session.
 - Keep sandbox as an adapter hook only.
 
 Acceptance:

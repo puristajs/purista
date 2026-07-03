@@ -1,6 +1,7 @@
 import type {
 	BuiltinToolName,
 	AgentDefinition as HarnessAgentDefinition,
+	BuilderState as HarnessBuilderState,
 	WorkflowDefinition as HarnessWorkflowDefinition,
 } from '@purista/harness'
 import { z } from 'zod'
@@ -19,6 +20,7 @@ import type {
 	AgentExecutionKind,
 	AgentExecutionPolicy,
 	AgentHandler,
+	AgentHarnessWorkflowOptions,
 	AgentHttpExposure,
 	AgentManifest,
 	AgentModelBinding,
@@ -366,8 +368,32 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
-	/** Use a provider-neutral `@purista/harness` workflow definition as this agent's execution. */
-	setHarnessWorkflow(
+	/**
+	 * Use a provider-neutral `@purista/harness` workflow definition as this agent's execution.
+	 *
+	 * Pass harness-local agent definitions in `options.agents` when the workflow
+	 * handler calls `ctx.agents.<name>(...)`. Those agents run inside the same
+	 * harness session, sandbox, telemetry setup, and durable workflow boundary as
+	 * this attached PURISTA agent.
+	 *
+	 * @example
+	 * ```ts
+	 * service
+	 *   .getAgentQueueBuilder('incidentReview', 'Reviews one incident')
+	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+	 *   .setHarnessWorkflow(reviewWorkflow, {
+	 *     agents: { summarize: summarizeAgent },
+	 *   })
+	 * ```
+	 */
+	setHarnessWorkflow<
+		Agents extends Record<string, HarnessAgentDefinition<any, any, any>> = Record<string, never>,
+		Definition extends HarnessWorkflowDefinition<
+			HarnessBuilderState & { agents: Agents },
+			any,
+			any
+		> = HarnessWorkflowDefinition<HarnessBuilderState & { agents: Agents }, any, any>,
+	>(
 		this: AgentQueueBuilder<
 			AgentQueueBuilderTypes<
 				S['PayloadSchema'],
@@ -381,10 +407,11 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Metrics']
 			>
 		>,
-		definition: HarnessWorkflowDefinition<any>,
+		definition: Definition,
+		options: AgentHarnessWorkflowOptions & { agents?: Agents } = {},
 	) {
 		this.assertNoExecutionDefinition()
-		this.executionDefinitions.push({ kind: 'harnessWorkflow', definition })
+		this.executionDefinitions.push({ kind: 'harnessWorkflow', definition, agents: options.agents })
 		return this as unknown as AgentQueueBuilder<
 			AgentQueueBuilderTypes<
 				S['PayloadSchema'],

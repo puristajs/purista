@@ -49,10 +49,11 @@ Each child agent keeps its own generated queue, worker, command, stream, executi
 
 ## Harness-level workflows
 
-Use `setHarnessWorkflow(...)` only when you already have a workflow definition from `@purista/harness` and want to expose it as one PURISTA agent:
+Use `setHarnessWorkflow(...)` only when you already have a workflow definition from `@purista/harness` and want to expose it as one PURISTA agent. Pass harness-local agents in the second argument when the workflow calls `ctx.agents`:
 
 ```typescript [incidentWorkflowAgentBuilder.ts]
 import { incidentReviewWorkflow } from './incidentReviewWorkflow.js'
+import { evidenceAgent, riskAgent } from './workflowAgents.js'
 
 export const incidentWorkflowAgentBuilder = incidentV1ServiceBuilder
   .getAgentQueueBuilder('incidentReview', 'Reviews incident evidence')
@@ -62,10 +63,15 @@ export const incidentWorkflowAgentBuilder = incidentV1ServiceBuilder
     model: 'gpt-4.1-mini',
     capabilities: ['object', 'tool_use'],
   })
-  .setHarnessWorkflow(incidentReviewWorkflow)
+  .setHarnessWorkflow(incidentReviewWorkflow, {
+    agents: {
+      evidence: evidenceAgent,
+      risk: riskAgent,
+    },
+  })
 ```
 
-In this shape, PURISTA owns the outer queue, command, stream, HTTP exposure, and runtime wiring. The harness workflow owns the inner reasoning loop.
+In this shape, PURISTA owns the outer queue, command, stream, HTTP exposure, and runtime wiring. The harness workflow owns the inner reasoning loop, and the supplied harness-local agents share the same session, sandbox, memory, telemetry, durable runtime, workspace store, and model bindings.
 
 ## Streaming workflow output
 

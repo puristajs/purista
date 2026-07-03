@@ -1,0 +1,259 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import CodeBlock from '../../components/ui/CodeBlock.astro'
+import NumberedBadge from '../../components/ui/NumberedBadge.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout
+  title="Durability | AI Harness | PURISTA"
+  description="Persist AI Harness workflow progress, context checkpoints, state, and workspaces with the local durable execution bundle or custom adapters."
+>
+  <HarnessHero
+    lines={[
+      { text: 'Durable workflows' },
+      { text: 'without a hosted', color: 'found' },
+      { text: 'orchestrator.' },
+    ]}
+    lede="Long-running agents need more than memory. The harness can persist workflow checkpoints, session state, leases, context snapshots, and workspace files inside your application boundary, then resume safely after restart."
+  />
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Recommended default</div>
+        <h2 class="display display-lg">One local bundle for state, runtime, and files</h2>
+        <p class="lede">Use <code class="site-mono">localDurableExecution(&#123; root &#125;)</code> when you want production-shaped durability without adding Redis, Postgres, Docker, or a hosted workflow engine on day one.</p>
+      </div>
+
+      <div class="dur-grid">
+        <div>
+          <CodeBlock
+            code={`import { defineHarness, localDurableExecution } from '@purista/harness'
+
+const local = localDurableExecution({
+  root: './.harness',
+  exec: false,
+  policy: {
+    retention: { cleanupMode: 'manual_only' },
+  },
+})
+
+const harness = defineHarness({ name: 'research' })
+  .state(local.state)
+  .runtime(local.runtime)
+  .sandbox(local.sandbox)
+  .workspaceStore(local.workspaceStore)
+  .checkpoints(local.checkpoints)
+  .workflows(({ workflow }) => ({
+    report: workflow({
+      input,
+      output,
+      durable: { enabled: true },
+      handler: async ctx => {
+        const facts = await collectFacts(ctx)
+        await ctx.checkpoints.write('facts', facts)
+        return writeReport(facts)
+      },
+    }),
+  }))
+  .build()
+
+process.on('SIGTERM', () => local.close())`}
+            label="Local durable execution"
+            language="typescript"
+          />
+        </div>
+
+        <div class="dur-stack">
+          {[
+            ['SQLite state', 'Sessions, messages, runs, run events, workflow checkpoints, leases, and context checkpoints are persisted through the built-in Node or Bun SQLite module.'],
+            ['Host workspace', 'Each durable run gets an active directory under the configured root. Checkpoints copy that active tree so resumed work sees the committed files.'],
+            ['Local sandbox', 'The sandbox maps the run workspace to the virtual root. File operations stay jailed to the run directory; command execution is opt-in.'],
+            ['OTel traces', 'Runtime, workspace, state, and context checkpoint operations emit spans and metrics so retry and resume behavior is visible.'],
+          ].map(([title, text]) => (
+            <div class="dur-stack-item">
+              <span class="dur-stack-title site-mono">{title}</span>
+              <p>{text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={1} color="found" />
+        <div class="eyebrow">Adapter boundaries</div>
+      </div>
+      <h2 class="display display-lg mb-6">Durability is a set of replaceable ports</h2>
+      <p class="lede mb-10">The local bundle is only the default. Each part can be replaced independently when a deployment needs Postgres, S3, encrypted volumes, containers, remote sandboxes, or stricter retention.</p>
+
+      <div class="dur-ports">
+        {[
+          ['StateStore', '.state(...)', 'Session metadata, message history, run records, and run events.'],
+          ['DurableRuntime', '.runtime(...)', 'Workflow step checkpoints, durable leases, cancellation state, and resume position.'],
+          ['DurableWorkspaceStore', '.workspaceStore(...)', 'Run workspace lifecycle, checkpoint snapshots, retention, abort, and cleanup.'],
+          ['SandboxFactory', '.sandbox(...)', 'The filesystem or execution boundary used by agents, tools, MCP, and mounted skills.'],
+          ['ContextCheckpointStore', '.checkpoints(...)', 'Named JSON snapshots written by workflow code through ctx.checkpoints.'],
+        ].map(([port, api, text]) => (
+          <div class="dur-port">
+            <div class="dur-port-head">
+              <span class="dur-port-name site-mono">{port}</span>
+              <code class="site-mono">{api}</code>
+            </div>
+            <p>{text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={2} color="con" />
+        <div class="eyebrow">Execution model</div>
+      </div>
+      <h2 class="display display-lg mb-6">Checkpoint only deterministic boundaries</h2>
+      <p class="lede mb-10">A durable workflow resumes from the last committed harness checkpoint. Keep external writes behind idempotent tools or PURISTA commands, then checkpoint after the result is safely recorded.</p>
+
+      <div class="dur-rules">
+        {[
+          ['Acquire first', 'The harness acquires the durable lease and workspace before it creates the run record, preventing duplicate active workers from mutating the same durable run.'],
+          ['Write explicit context', 'Use ctx.checkpoints for application-level snapshots such as extracted facts, cursor positions, and reviewed decisions.'],
+          ['Keep streams observational', 'Stream events help users and operators watch progress. They are not used as recovery cursors. Recovery is driven by durable checkpoints.'],
+          ['Prefer local files, swap later', 'A host directory is enough for the full API. Container and remote adapters can be plugged in later without changing workflow code.'],
+        ].map(([title, text]) => (
+          <div class="dur-rule">
+            <h3 class="h3">{title}</h3>
+            <p>{text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="flex items-center gap-3 mb-6">
+        <NumberedBadge number={3} color="pilot" />
+        <div class="eyebrow">Security posture</div>
+      </div>
+      <h2 class="display display-lg mb-6">Local persistence still needs policy</h2>
+      <div class="dur-policy">
+        <div class="dur-policy-card">
+          <span class="dur-policy-title site-mono">Default stance</span>
+          <p>Command execution is disabled. Content capture remains disabled unless explicitly enabled. Workspaces are confined to the configured root.</p>
+        </div>
+        <div class="dur-policy-card">
+          <span class="dur-policy-title site-mono">Production stance</span>
+          <p>Put the root on durable storage, set retention by workload, restrict filesystem permissions, and export OTel to your normal platform.</p>
+        </div>
+        <div class="dur-policy-card">
+          <span class="dur-policy-title site-mono">Stronger isolation</span>
+          <p>Keep the same harness API and replace the sandbox/workspace adapters with Docker, Firecracker, Kubernetes, or a remote worker implementation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[
+      { text: 'Durability should be ' },
+      { text: 'boring infrastructure', color: 'found' },
+      { text: '.' },
+    ]}
+    lede="Start with the local bundle, then replace adapters only where your deployment requirements justify it."
+    ctas={[
+      { label: 'Architecture', href: '/harness/architecture/', variant: 'primary' },
+      { label: 'Observability', href: '/harness/observability/', variant: 'ghost' },
+      { label: 'Security', href: '/harness/security/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>
+
+<style>
+  .dur-grid,
+  .dur-rules,
+  .dur-policy {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .dur-stack,
+  .dur-ports {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .dur-stack-item,
+  .dur-port,
+  .dur-rule,
+  .dur-policy-card {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-elev);
+    padding: 1.15rem;
+  }
+
+  .dur-stack-title,
+  .dur-port-name,
+  .dur-policy-title {
+    display: block;
+    color: var(--color-found-hi);
+    font-size: 0.82rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .dur-stack-item p,
+  .dur-port p,
+  .dur-rule p,
+  .dur-policy-card p {
+    color: var(--color-fg-muted);
+    margin: 0;
+  }
+
+  .dur-port-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dur-port-head code {
+    color: var(--color-fg-subtle);
+    font-size: 0.78rem;
+  }
+
+  .dur-rules {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dur-rule .h3 {
+    margin-bottom: 0.55rem;
+  }
+
+  .dur-policy {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 960px) {
+    .dur-grid,
+    .dur-rules,
+    .dur-policy {
+      grid-template-columns: 1fr;
+    }
+
+    .dur-port-head {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+  }
+</style>

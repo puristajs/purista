@@ -1,6 +1,6 @@
 import { serve } from '@hono/node-server'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { AmqpBridge } from '@purista/amqpbridge'
 import {
 	DefaultConfigStore,

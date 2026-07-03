@@ -1,0 +1,43 @@
+---
+import { harnessCanonicalRoutes } from '../../data/harness-routes'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+
+type HarnessCanonicalRoute = (typeof harnessCanonicalRoutes)[keyof typeof harnessCanonicalRoutes]
+
+interface Props {
+	route: HarnessCanonicalRoute
+}
+
+const { route } = Astro.props
+const title = `${route.label} | AI Harness | PURISTA`
+---
+
+<HarnessLayout title={title} description={route.description} canonicalPath={route.to}>
+  <section class="harness-redirect section-pad">
+    <div class="wrap">
+      <div class="harness-redirect-panel">
+        <div class="eyebrow">Moved</div>
+        <h1 class="display display-lg">{route.label}</h1>
+        <p class="lede">{route.description}</p>
+        <a data-harness-redirect-target class="site-btn site-btn-primary" href={route.to}>Continue</a>
+      </div>
+    </div>
+  </section>
+</HarnessLayout>
+
+<style>
+  .harness-redirect {
+    min-height: calc(100svh - var(--site-harness-chrome-height));
+    display: grid;
+    align-items: center;
+  }
+
+  .harness-redirect-panel {
+    max-width: 44rem;
+    padding-block: clamp(3rem, 8vw, 6rem);
+  }
+
+  .harness-redirect-panel .site-btn {
+    margin-top: 1.5rem;
+  }
+</style>

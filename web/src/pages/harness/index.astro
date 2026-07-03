@@ -121,7 +121,7 @@ const outcomes = [
 	{
 		k: 'audit',
 		title: 'Every decision is traceable',
-		body: 'OpenTelemetry GenAI spans on every model call, tool execution, and agent decision. Full observability trail your team can actually inspect.',
+		body: 'OpenTelemetry GenAI spans on every model call, tool execution, and agent decision. Optional local checkpoints record workflow progress so restarts can resume from committed steps.',
 		tone: 'con',
 	},
 	{
@@ -152,7 +152,7 @@ const primitives = [
 	{
 		k: 'workflows',
 		label: 'Workflows',
-		body: 'Sequence · branch · parallel · durable. Multi-agent orchestration.',
+		body: 'Sequence · branch · parallel · local checkpoints. Multi-agent orchestration.',
 		tone: 'con',
 	},
 	{ k: 'sessions', label: 'Sessions', body: 'Isolated memory, history, sandbox per user or run.', tone: 'pilot' },
@@ -338,7 +338,7 @@ const providers = [
             { text: 'Every primitive you need', color: 'shimmer' },
             { text: '.' },
           ]}
-          lede="The Harness provides six primitives that cover the entire agent lifecycle — from model calls and tool execution to multi-agent orchestration, durable workflows, and scoped session memory."
+          lede="The Harness provides six primitives that cover the entire agent lifecycle — from model calls and tool execution to multi-agent orchestration, local durable checkpoints, and scoped session memory."
         />
 
         <div class="site-hrn-prim">

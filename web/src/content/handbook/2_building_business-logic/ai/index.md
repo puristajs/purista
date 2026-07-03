@@ -60,6 +60,7 @@ flowchart TD
   InnerWorkflow --> InnerAgent
   Harness --> Models["model providers"]
   Harness --> Sandbox["sandbox"]
+  Harness --> Runtime["local durable runtime checkpoints"]
   Harness --> Workspace["durable workspace"]
   Harness --> State["state store"]
 ```
@@ -82,7 +83,9 @@ Use the harness level for tightly coupled reasoning steps that should share one 
 - You need streaming progress or model/tool lifecycle events.
 - Work is slow or expensive and should run through queue leases, retries, and dead-letter handling.
 - Different AI steps need separate service ownership, queue policies, model bindings, or sandbox isolation.
+- A long-running harness workflow should checkpoint progress locally and resume after process restart.
 - A retry must resume from committed workspace state instead of restarting in a fresh sandbox.
+- Agent tool calls need opt-in harness governance for policy, approval, or audit.
 
 Keep deterministic business truth in commands, subscriptions, queues, stores, and resources. Agent output should become canonical only after deterministic service logic validates and applies it.
 
@@ -94,7 +97,7 @@ Each attached agent uses exactly one execution definition:
 | --- | --- |
 | `setRunFunction(...)` | You want a typed PURISTA handler that calls harness model operations, PURISTA command tools, child agents, resources, queues, streams, and stores directly. |
 | `setHarnessAgent(...)` | You already have one reusable `@purista/harness` agent definition and want PURISTA to expose it as a queue-backed service capability. |
-| `setHarnessWorkflow(...)` | You already have one reusable `@purista/harness` workflow that coordinates multiple harness agents inside one session and sandbox. |
+| `setHarnessWorkflow(...)` | You already have one reusable `@purista/harness` workflow. Pass `{ agents }` when that workflow coordinates harness-local agents inside one session and sandbox. |
 
 Start with `setRunFunction(...)` when you are building normal PURISTA application code. Use harness agent/workflow definitions when you want the lower-level harness loop or workflow semantics directly.
 
@@ -109,7 +112,7 @@ Start with `setRunFunction(...)` when you are building normal PURISTA applicatio
 7. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
 8. Add HTTP exposure, streaming mode, execution policy, or long-running response mode when the agent exposes those surfaces.
 9. Add the attached agent definition to the service.
-10. Instantiate the service with `queueBridge` and `ai.models`.
+10. Instantiate the service with `queueBridge`, `ai.models`, and optional `ai.governance` when tool policy, approval, or audit is required.
 11. Test with `@purista/core` fake providers before any live-provider smoke test.
 
 ## Smallest useful agent
@@ -206,13 +209,14 @@ This fail-fast behavior prevents a production service from silently degrading to
 
 ## Sandbox and durable workspaces
 
-Sandbox and durable workspace guarantees are separate:
+Local durable execution, sandbox state, and durable workspace guarantees are related but separate. A harness durable runtime records checkpoints and leases for workflow progress inside your application boundary. The workspace store persists the files or workspace state that those checkpoints need in order to resume.
 
 | Surface | What it means |
 | --- | --- |
 | in-memory sandbox | File-only workspace for local/test runs. No shell execution. |
 | bash sandbox | File workspace plus command execution through the harness sandbox adapter. |
 | sandbox snapshot/resume | Low-level adapter support for capturing and reopening one sandbox session. |
+| durable runtime checkpoints | Local checkpoint and lease records for resuming workflow progress after restart. |
 | durable workspace replay | Production replay contract linking harness runtime checkpoints to persisted workspace state, cleanup, retention, encryption, and quotas. |
 
 Use `setSandboxPolicy(...)` when an agent needs mounted skills, filesystem
@@ -245,7 +249,7 @@ Use one queue-backed agent to classify tickets, enrich them through command tool
 
 Use embeddings and rerank operations to retrieve evidence, then pass selected passages to an answer agent.
 
-- Agent shape: `setRunFunction(...)` or `setHarnessWorkflow(...)`
+- Agent shape: `setRunFunction(...)` or `setHarnessWorkflow(..., { agents })`
 - Model capabilities: `embeddings`, `rerank`, `object`
 - Business boundary: vector index is an application resource; the model provider only creates vectors and ranking scores
 - Output: answer, citations, confidence, missing-context notes

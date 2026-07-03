@@ -32,7 +32,7 @@ test('classifies a ticket', async () => {
     finishReason: 'stop',
   })
 
-  const harness = createAgentTestHarness(definition, {
+  const harness = await createAgentTestHarness(definition, {
     models: {
       primary: {
         provider: model,

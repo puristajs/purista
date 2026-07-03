@@ -53,6 +53,7 @@ export async function initializeAttachedAgentRuntimes(
 				stateStore: aiOptions.stateStore,
 				sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
 				telemetry: aiOptions.telemetry,
+				governance: aiOptions.governance,
 			})
 			scope.runtimes.set(definition.runtime, executor)
 			return executor

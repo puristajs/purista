@@ -14,12 +14,16 @@ interface Props {
 	title?: string
 	description?: string
 	active?: PrimaryNavKey
+	canonicalPath?: string
 }
 
-const { title, description, active = 'harness' } = Astro.props
+const { title, description, active = 'harness', canonicalPath } = Astro.props
 ---
 
-<SiteLayout title={title} description={description} active={active}>
+<SiteLayout title={title} description={description} active={active} canonicalPath={canonicalPath}>
+  <Fragment slot="head">
+    <slot name="head" />
+  </Fragment>
   <div class="harness-shell site-layout-story">
     <slot />
   </div>

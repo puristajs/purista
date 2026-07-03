@@ -31,6 +31,9 @@
 		--site-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 		--site-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 		--site-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+		--site-nav-height: 72px;
+		--site-harness-subnav-height: 50px;
+		--site-harness-chrome-height: calc(var(--site-nav-height) + var(--site-harness-subnav-height));
 
 		background: var(--color-bg);
 		color: var(--color-fg);
@@ -133,7 +136,7 @@
 		left: 0;
 		right: 0;
 		z-index: 60;
-		height: 72px;
+		height: var(--site-nav-height);
 		display: flex;
 		align-items: center;
 		backdrop-filter: blur(24px) saturate(160%);

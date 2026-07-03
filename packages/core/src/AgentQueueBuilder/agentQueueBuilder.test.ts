@@ -239,6 +239,85 @@ describe('AgentQueueBuilder', () => {
 		await skillRuntime.cleanup()
 	})
 
+	it('passes governance config into attached harness agent runtimes', async () => {
+		const skillRuntime = await createAgentSkillTestRuntime([
+			{
+				name: 'incident-skill',
+				description: 'Use this skill when triaging incidents.',
+				body: 'SECRET_BODY',
+			},
+		])
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: {},
+			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const auditedDecisions: string[] = []
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('governedSkillTriage', 'Triage with governed skill access')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.useSkills(['incident-skill'])
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Use relevant skills.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			skills: skillRuntime.skills,
+			governance: {
+				policies: [
+					{
+						kind: 'native',
+						id: 'skill-read-audit',
+						rules: [
+							{
+								id: 'audit-read-tool',
+								tools: ['read'],
+								effect: 'audit',
+							},
+						],
+					},
+				],
+				audit: {
+					record: async decision => {
+						auditedDecisions.push(`${decision.policyId}:${decision.ruleId}`)
+					},
+				},
+			},
+		})
+
+		const runtime = getScopedAgentRuntime(scope, definition)
+		await expect(
+			runtime.executeAggregate({
+				appContext: {
+					resources: {},
+					message: { id: 'm1' },
+					service: {},
+					stream: {},
+					queue: {},
+					emit: async () => undefined,
+				},
+				message: { id: 'm1' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toEqual({ status: 'ok' })
+		expect(auditedDecisions).toContain('skill-read-audit:audit-read-tool')
+		await skillRuntime.cleanup()
+	})
+
 	it('passes runtime skill bindings through createAgentTestHarness', async () => {
 		const skillRuntime = await createAgentSkillTestRuntime([
 			{
@@ -281,6 +360,47 @@ describe('AgentQueueBuilder', () => {
 		expect(firstRequest?.messages?.[0]?.content).toContain('Available skills')
 		expect(firstRequest?.messages?.[0]?.content).not.toContain('SECRET_BODY')
 		await skillRuntime.cleanup()
+	})
+
+	it('registers harness-local agents for wrapped harness workflows', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: { summary: 'Checkout outage risk is high.' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const input = z.object({ incident: z.string() })
+		const output = z.object({ summary: z.string() })
+		const summarizeAgent = {
+			model: 'primary',
+			input,
+			output,
+			builtinTools: false as const,
+			instructions: 'Summarize the incident.',
+		}
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('incidentReview', 'Reviews an incident with a harness workflow')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.addPayloadSchema(input)
+			.addOutputSchema(output)
+			.setHarnessWorkflow(
+				{
+					input,
+					output,
+					handler: async context => {
+						return context.agents.summarize({ incident: context.input.incident })
+					},
+				},
+				{ agents: { summarize: summarizeAgent } },
+			)
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object'] } },
+		})
+
+		await expect(harness.run({ payload: { incident: 'Checkout is down' }, parameter: {} })).resolves.toEqual({
+			summary: 'Checkout outage risk is high.',
+		})
 	})
 
 	it('creates namespaced skill bindings for skill-backed agent tests', async () => {

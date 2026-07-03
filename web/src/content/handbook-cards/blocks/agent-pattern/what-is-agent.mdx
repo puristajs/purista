@@ -20,7 +20,7 @@ Agents can be defined in three mutually exclusive ways:
 |---|---|---|
 | **Run function** | `setRunFunction(fn)` | Custom PURISTA logic with direct model, resource, tool, and child-agent access. |
 | **Harness agent** | `setHarnessAgent(definition)` | Wrap one reusable `@purista/harness` agent definition. |
-| **Harness workflow** | `setHarnessWorkflow(definition)` | Wrap one reusable `@purista/harness` workflow definition. |
+| **Harness workflow** | `setHarnessWorkflow(definition, { agents })` | Wrap one reusable `@purista/harness` workflow definition and optional harness-local agents. |
 
 You must pick exactly one execution type per agent.
 

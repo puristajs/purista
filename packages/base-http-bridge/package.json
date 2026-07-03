@@ -22,17 +22,16 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
-		"@types/sinon": "^21.0.1",
+		"@types/node": "^26.1.0",
+		"@types/sinon": "^22.0.0",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.8"
+		"vitest": "^4.1.9"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/semantic-conventions": "^1.41.1",
 		"@purista/core": "*",
-		"cloudevents": "^10.0.0",
-		"hono": "^4.12.23"
+		"hono": "^4.12.27"
 	},
 	"peerDependenciesMeta": {},
 	"exports": {

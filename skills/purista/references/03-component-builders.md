@@ -145,8 +145,14 @@ npm run add:agent -- triage --service support --service-version 1
 
 Agents execute exactly one of:
 - `setHarnessAgent(...)`
-- `setHarnessWorkflow(...)`
+- `setHarnessWorkflow(workflow, { agents })`
 - `setRunFunction(...)`
+
+Use the `agents` option only for harness-local agents that should share the same
+harness session, sandbox, telemetry, durable runtime, workspace store, and
+model bindings as the wrapped workflow. Use `canInvokeAgent(...)` plus
+`setRunFunction(...)` when child agents need independent PURISTA queues,
+retries, service ownership, HTTP exposure, sandboxes, or runtime bindings.
 
 Agent-local custom metrics are declared on `AgentQueueBuilder.defineMetric(...)` and are visible only inside that agent handler. Service-level metrics remain visible to the agent handler too.
 

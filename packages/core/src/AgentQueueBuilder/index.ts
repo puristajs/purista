@@ -22,6 +22,7 @@ export type {
 	AgentHandler,
 	AgentHandlerContext,
 	AgentHandlerModelBindings,
+	AgentHarnessWorkflowOptions,
 	AgentHttpExposure,
 	AgentInvokeMap,
 	AgentManifest,
