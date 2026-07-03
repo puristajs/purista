@@ -18,9 +18,9 @@ import {
 	throwIfNotValidMessage,
 	UnhandledError,
 } from '@purista/core'
-import { HTTP } from 'cloudevents'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
+import { parseCloudEventData } from './parseCloudEventData.impl.js'
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
@@ -66,14 +66,7 @@ export const getSubscriptionHandler = function (
 					if (wrappedInCloudEvent) {
 						const body = await c.req.text()
 
-						const event = HTTP.toEvent<EBMessage>({ headers, body })
-						if (Array.isArray(event)) {
-							throw new UnhandledError(
-								StatusCode.NotImplemented,
-								'Support of multiple events per subscription call is not supported',
-							)
-						}
-						message = event.data as EBMessage
+						message = parseCloudEventData<EBMessage>({ headers, body })
 					} else {
 						try {
 							message = await c.req.json()

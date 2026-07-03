@@ -17,8 +17,10 @@ Use it when an application needs typed tool boundaries, model capability routing
 ## Core Ideas
 
 - Define models by capability, not by scattered provider calls.
+- Let the harness normalize provider outcomes, finish reasons, and retry metadata.
 - Expose tools with typed input and output contracts.
 - Build agents as named, testable runtime components.
+- Add local durable checkpoints when long-running workflows must resume after restart.
 - Keep prompts, tools, memory, and policy boundaries reviewable.
 - Treat security, privacy, and evaluation as part of the architecture.
 
@@ -46,6 +48,7 @@ const harness = defineHarness({ name: 'support' })
       provider: openai({ apiKey }),
       model: 'gpt-4o-mini',
       capabilities: ['object'],
+      retry: true,
     },
   })
   .tools({
@@ -79,6 +82,7 @@ Prefer a narrow first agent over a generic assistant. The harness should make th
 - Tools expose controlled business operations.
 - Agents combine instructions, model selection, tools, memory, and policy.
 - Runtime adapters connect agents to HTTP, queues, jobs, or application flows.
+- Optional durable runtime adapters checkpoint workflow progress locally and resume from the last committed step.
 - Evaluation and observability close the production feedback loop.
 
 ## Design Rule
@@ -93,11 +97,14 @@ Keep every boundary explicit. A model should not decide which private system it 
 
 Use adapters to keep transport concerns outside the agent body. The agent should not know whether it was triggered by an API request, background job, or operator workflow.
 
+Model providers use the same core outcome and retry shape across adapters. Short provider outages and rate limits can be retried actively; long provider retry windows are surfaced as typed metadata so queues or workers decide when to run again.
+
 ## Recommendations
 
 - Validate input before invoking an agent.
 - Preserve trace and correlation IDs.
 - Keep user/session identity in trusted context, not prompt text.
+- Route long \`retryAfterMs\` model errors through queue or workflow retry policy.
 - Return streaming output only when the client workflow benefits from partial progress.
 - Use queued execution for long-running or retryable work.`,
 	},
@@ -116,6 +123,25 @@ Use memory only when the use case needs continuity across turns, sessions, or ta
 - Prefer summaries over raw transcripts.
 - Separate tenant, user, and workflow scopes.
 - Make deletion and audit behavior clear.`,
+	},
+	{
+		id: 'durability',
+		title: 'AI Harness Durability',
+		description: 'Persist workflow progress, state, context checkpoints, leases, and workspace files.',
+		body: `Durability is optional and adapter-based.
+
+Use \`localDurableExecution({ root })\` when a workflow must survive process restarts without adding external infrastructure immediately. The bundle wires a SQLite state store, durable runtime, context checkpoint store, local workspace store, and host-directory sandbox under one root.
+
+## What Gets Persisted
+
+- Session state, messages, runs, and run events.
+- Durable workflow checkpoints and leases.
+- Context checkpoints written through \`ctx.checkpoints\`.
+- Workspace files for active runs and checkpoint snapshots.
+
+## Production Rule
+
+Checkpoint only deterministic boundaries. External writes should be idempotent and recorded before the workflow commits the next durable checkpoint.`,
 	},
 	{
 		id: 'security',
@@ -180,6 +206,7 @@ Capture enough telemetry to debug behavior without logging sensitive data.
 
 - Agent name and version.
 - Model and provider.
+- Provider finish status, normalized finish reason, retry kind, and retry-after metadata.
 - Tool calls and outcomes.
 - Token and cost estimates.
 - Latency by model and tool.
@@ -194,8 +221,9 @@ Capture enough telemetry to debug behavior without logging sensitive data.
 
 - Use direct request/response for short deterministic work.
 - Use streaming when partial output improves the user experience.
-- Use queue-backed execution for long-running or retryable work.
+- Use queue-backed execution for long-running work or model failures that return deferred retry metadata.
 - Use workflow orchestration for multi-step business processes with durable state.
+- Use local durable checkpoints when a workflow must survive process restarts.
 
 The model response mode should be an explicit application decision, not an implementation accident.`,
 	},

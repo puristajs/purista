@@ -47,6 +47,15 @@ Execution definitions are mutually exclusive:
 - `setHarnessWorkflow(...)`
 - `setRunFunction(...)`
 
+Use `setHarnessWorkflow(workflow, { agents })` when a wrapped
+`@purista/harness` workflow calls harness-local agents through `ctx.agents`.
+Core registers those harness-local agents before registering the workflow, so
+they share the same attached-agent harness session, sandbox, state store,
+telemetry setup, durable runtime, workspace store, and model bindings. Use
+PURISTA `setRunFunction(...)` plus `canInvokeAgent(...)` instead when the child
+agents need independent queues, retries, HTTP exposure, service ownership,
+sandboxes, or model/runtime bindings.
+
 ## Runtime Wiring
 Applications bind concrete models at service startup:
 
@@ -56,7 +65,7 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
   ai: {
     telemetry: { captureContent: false },
     models: {
-      primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'] },
+      primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'], retry: true },
     },
     sandbox,
     runtime,
@@ -66,6 +75,19 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 ```
 
 Startup fails fast when aliases or capabilities are missing.
+
+Configure provider retry on model aliases. `retry: true` is the default short
+active retry policy. Use `retry: false` for strict request/response paths and
+tests, or pass a policy object with `maxAttempts`, `maxActiveElapsedMs`,
+`maxActiveDelayMs`, and `retryOn` when a service needs tighter budgets.
+Long provider `Retry-After` windows are surfaced as `ModelError` metadata with
+`retryKind: 'deferred'` and `retryAfterMs`; route those through queue or
+workflow retry policy instead of sleeping inside the handler.
+
+Model responses expose a normalized `finishReason`; `outcome` preserves raw
+provider finish/status metadata for diagnostics and tracing. Application logic
+should branch on `finishReason` first and use `outcome` for operations or
+provider-specific reporting.
 
 Default AI telemetry should not capture prompt or completion content. Use `captureContent: false` unless a product-specific retention, redaction, consent, and access-control policy has been approved.
 

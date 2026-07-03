@@ -1,4 +1,6 @@
 ---
-// Adapter content is now part of the architecture and get-started pages.
-return Astro.redirect('/harness/architecture/', 301)
+import HarnessRedirect from '../../components/harness/HarnessRedirect.astro'
+import { harnessCanonicalRoutes } from '../../data/harness-routes'
 ---
+
+<HarnessRedirect route={harnessCanonicalRoutes.adapters} />

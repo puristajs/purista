@@ -41,7 +41,11 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         </div>
         <div class="obs-value">
           <span class="obs-value-label site-mono">Compare Providers</span>
-          <p>Running A/B tests between OpenAI and Anthropic? Traces carry provider name, model, token usage, and finish reasons on every span. Compare objectively with data.</p>
+          <p>Running A/B tests between OpenAI and Anthropic? Traces carry provider name, model, token usage, normalized finish reason, and raw provider outcome metadata. Compare objectively with data.</p>
+        </div>
+        <div class="obs-value">
+          <span class="obs-value-label site-mono">Respect Rate Limits</span>
+          <p>Model failures include retry kind, retry-after delay, attempt count, and rate-limit scope when providers expose it. Short waits stay inside the call budget; long waits are visible to queues and workers.</p>
         </div>
         <div class="obs-value">
           <span class="obs-value-label site-mono">Audit Tool Usage</span>
@@ -69,6 +73,8 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       'execute_tool search_docs — tool invocation',
       'harness.sandbox.exec — command execution',
       'harness.state.op — persistence operation',
+      'harness.runtime.* — durable lease, checkpoint, resume',
+      'harness.context_checkpoint.* — workflow context snapshots',
     ]}
   >
     <div slot="visualization" class="w-full">

@@ -1,6 +1,7 @@
 import type {
 	BuiltinToolName,
 	DurableRuntime,
+	GovernanceConfig,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
 	WorkflowDefinition as HarnessWorkflowDefinition,
@@ -449,6 +450,17 @@ export type AgentHandler<
 	context: AgentHandlerContext<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Metrics>,
 ) => Promise<Output>
 
+/** Harness-local agents registered together with a wrapped harness workflow. */
+export type AgentHarnessWorkflowOptions = {
+	/**
+	 * Harness agent definitions available to the wrapped workflow through
+	 * `ctx.agents`. These agents run inside the same harness session, sandbox,
+	 * state store, telemetry setup, and durable workflow boundary as the parent
+	 * attached agent execution.
+	 */
+	agents?: Record<string, HarnessAgentDefinition<any, any, any>>
+}
+
 /** Internal execution definition selected by exactly one agent execution setter. */
 export type AgentExecutionDefinition<
 	Payload = unknown,
@@ -461,7 +473,11 @@ export type AgentExecutionDefinition<
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
 > =
 	| { kind: 'harnessAgent'; definition: HarnessAgentDefinition<any, any, any> }
-	| { kind: 'harnessWorkflow'; definition: HarnessWorkflowDefinition<any, any, any> }
+	| {
+			kind: 'harnessWorkflow'
+			definition: HarnessWorkflowDefinition<any, any, any>
+			agents?: Record<string, HarnessAgentDefinition<any, any, any>>
+	  }
 	| {
 			kind: 'runFunction'
 			handler: AgentHandler<Payload, Parameter, Resources, Models, CommandTools, AgentTools, Output, Metrics>
@@ -605,6 +621,7 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	logger?: PuristaLogger
 	sandbox?: unknown
 	telemetry?: TelemetryOptions
+	governance?: GovernanceConfig<any>
 }
 
 /** Resolved harness model aliases keyed by the statically declared model map. */

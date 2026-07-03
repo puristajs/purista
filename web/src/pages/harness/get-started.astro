@@ -106,6 +106,7 @@ const harness = defineHarness({ name: 'hello-world' })
       provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
       model: 'gpt-4o-mini',
       capabilities: ['object'],
+      retry: true,
     },
   })
   .agents(({ agent }) => ({
@@ -475,7 +476,7 @@ impact, timeline, and next action.`}
         <div class="eyebrow">Level 6 — Memory & State</div>
       </div>
       <h2 class="display display-lg mb-6">Remember across runs</h2>
-      <p class="lede mb-10">Sessions have memory and history. Write JSON blobs the agent can recall. List conversation messages. Persist across restarts with a durable StateStore adapter.</p>
+      <p class="lede mb-10">Sessions have memory and history. Write JSON blobs the agent can recall. List conversation messages. Persist across restarts with a durable state adapter or the local durable execution bundle.</p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="card p-5">
@@ -496,22 +497,27 @@ const messages = await
         </div>
         <div class="card p-5">
           <CodeBlock
-            code={`// Implement StateStore or use a community adapter.
-// The harness ships InMemoryStateStore for development.
-// Pass any StateStore-compatible class to .state() for production.
+            code={`// Use the local bundle for production-shaped durability
+// without adding external infrastructure on day one.
 
-import { defineHarness } from '@purista/harness'
-import { MyRedisStateStore } from './myRedisStateStore'
+import { defineHarness, localDurableExecution } from '@purista/harness'
+
+const local = localDurableExecution({
+  root: './.harness',
+})
 
 const harness = defineHarness({ name: 'prod-service' })
-  .state(new MyRedisStateStore({ url: process.env.REDIS_URL }))
-  // sessions survive restart
+  .state(local.state)
+  .runtime(local.runtime)
+  .sandbox(local.sandbox)
+  .workspaceStore(local.workspaceStore)
+  .checkpoints(local.checkpoints)
   .build()`}
             label="Durable state"
             language="typescript"
           />
           <div class="mt-4 p-3 rounded-lg bg-[var(--color-bg-sunk)] border border-[var(--color-line)]">
-            <p class="text-xs text-[var(--color-fg-muted)]"><strong class="text-[var(--color-fg)]">Note:</strong> In-memory state is the default. Use a durable adapter for production.</p>
+            <p class="text-xs text-[var(--color-fg-muted)]"><strong class="text-[var(--color-fg)]">Note:</strong> In-memory state is the default. Use <code class="site-mono">localDurableExecution</code> or custom adapters when progress must survive restart.</p>
           </div>
         </div>
       </div>
@@ -589,12 +595,49 @@ const scores = await evaluatePromptCandidates({
     toolTimeoutMs: 30_000,
     agentMaxIterations: 16,
   })
-  .models({ ... })
+  .models({
+    fast: {
+      provider,
+      model: 'gpt-4o-mini',
+      capabilities: ['object', 'tool_use'],
+      retry: {
+        maxAttempts: 3,
+        maxActiveElapsedMs: 60_000,
+        maxActiveDelayMs: 20_000,
+      },
+    },
+  })
   .build()`}
             label="Recommended Configuration"
             language="typescript"
           />
         </div>
+        <p class="text-sm text-[var(--color-fg-muted)] mt-4">Model retry is provider-neutral. Short outages and rate limits retry inside the active call budget. Long provider retry windows become typed errors with retry metadata, which is better handled by a queue, worker, or workflow retry policy.</p>
+        <div class="card p-6 mt-6">
+          <CodeBlock
+            code={`const harness = defineHarness({ name: 'my-service' })
+  .models({ fast: { provider, model: 'gpt-4o-mini', capabilities: ['object', 'tool_use'] } })
+  .governance({
+    mode: 'enforce',
+    policies: [
+      {
+        kind: 'native',
+        id: 'tool-policy',
+        rules: [
+          { id: 'audit-file-reads', tools: ['read'], effect: 'audit' },
+          { id: 'approve-writes', tools: ['write', 'edit'], effect: 'require_approval' },
+        ],
+      },
+    ],
+    approval: approvalProvider,
+    audit: auditSink,
+  })
+  .build()`}
+            label="Optional Governance"
+            language="typescript"
+          />
+        </div>
+        <p class="text-sm text-[var(--color-fg-muted)] mt-4">Governance is optional. Configure it only when tool exposure, tool execution, approvals, shadow rollout, or central audit needs policy-as-code.</p>
       </div>
     </div>
   </section>

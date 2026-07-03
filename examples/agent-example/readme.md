@@ -13,7 +13,7 @@ The `Support` service models an incident response desk for a checkout outage:
 - deterministic PURISTA command tools load incident evidence, runbooks, and store the final brief
 - `analyzeSignals` reviews alerts, logs, deployments, and metrics
 - `assessRollbackRisk` reviews rollback safety with a sandbox policy
-- `coordinateIncidentResponse` invokes both specialist agents, calls the command tools, and stores an operator brief
+- `coordinateIncidentResponse` is the parent PURISTA workflow agent: it invokes both specialist agents through declared `canInvokeAgent(...)` boundaries, calls command tools, and stores an operator brief
 - the coordinator is exposed through Hono/OpenAPI as `POST /api/v1/incident-response`
 
 ## Run
@@ -42,6 +42,7 @@ Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from t
 - OpenAI as the default live model provider via `.env`
 - command tools through `context.invoke.tools`
 - child-agent delegation through `context.invoke.agents`
+- PURISTA-level workflow orchestration with independent queue/runtime boundaries for each specialist agent
 - declared skills in agent manifests
 - sandbox policy for risk analysis
 - generated queue, worker, command, and stream definitions for each agent

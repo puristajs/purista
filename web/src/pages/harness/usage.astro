@@ -1,4 +1,6 @@
 ---
-// Redirects to the consolidated get-started guide.
-return Astro.redirect('/harness/get-started/', 301)
+import HarnessRedirect from '../../components/harness/HarnessRedirect.astro'
+import { harnessCanonicalRoutes } from '../../data/harness-routes'
 ---
+
+<HarnessRedirect route={harnessCanonicalRoutes.usage} />

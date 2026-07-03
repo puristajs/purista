@@ -4,6 +4,7 @@ import path from 'node:path'
 import type {
 	EmbeddingRequest,
 	EmbeddingResponse,
+	GovernanceConfig,
 	JsonValue,
 	ModelProvider,
 	ObjectRequest,
@@ -228,6 +229,7 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	 */
 	skills?: AgentSkillRuntimeOptions
 	logger?: PuristaLogger
+	governance?: GovernanceConfig<any>
 }
 
 /** Create a deterministic runtime harness for one attached agent definition. */
@@ -242,6 +244,7 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		models: options.models,
 		skillRuntime,
 		logger: options.logger,
+		governance: options.governance,
 	})
 	definition.runtime.current = executor
 

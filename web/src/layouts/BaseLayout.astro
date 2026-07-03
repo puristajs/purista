@@ -7,6 +7,7 @@ interface Props {
 	description?: string
 	siteShell?: boolean
 	markdownUrl?: string
+	canonicalPath?: string
 }
 
 const {
@@ -14,6 +15,7 @@ const {
 	description = 'PURISTA is the open-source TypeScript framework that turns AI-built software into approval-ready enterprise systems.',
 	siteShell = false,
 	markdownUrl,
+	canonicalPath,
 } = Astro.props
 const bodyAttrs = siteShell ? { 'data-site': '' } : {}
 ---
@@ -31,7 +33,7 @@ const bodyAttrs = siteShell ? { 'data-site': '' } : {}
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <SeoHead title={title} description={description} />
+    <SeoHead title={title} description={description} canonicalPath={canonicalPath} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

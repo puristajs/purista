@@ -1,4 +1,6 @@
 ---
-// Redirects to the consolidated security & production-readiness page.
-return Astro.redirect('/harness/security/', 301)
+import HarnessRedirect from '../../components/harness/HarnessRedirect.astro'
+import { harnessCanonicalRoutes } from '../../data/harness-routes'
 ---
+
+<HarnessRedirect route={harnessCanonicalRoutes['before-you-ship']} />

@@ -213,6 +213,17 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 				content_index: 0,
 				delta: event.delta,
 			}
+		case 'policy.evaluated':
+		case 'policy.exposure':
+		case 'approval.requested':
+		case 'approval.finished':
+			return {
+				...base,
+				type: 'response.output_json.delta',
+				output_index: 0,
+				content_index: 0,
+				delta: event,
+			}
 		case 'model.object.partial':
 			return {
 				...base,

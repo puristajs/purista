@@ -35,14 +35,14 @@
 		"env:down": "docker compose -f docker-compose.yml down"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
-		"@types/sinon": "^21.0.1",
+		"@types/node": "^26.1.0",
+		"@types/sinon": "^22.0.0",
 		"sinon": "^22.0.0",
-		"testcontainers": "^12.0.1",
-		"vitest": "^4.1.8"
+		"testcontainers": "^12.0.4",
+		"vitest": "^4.1.9"
 	},
 	"dependencies": {
-		"@aws-sdk/client-secrets-manager": "^3.1060.0",
+		"@aws-sdk/client-secrets-manager": "^3.1079.0",
 		"@purista/core": "*"
 	},
 	"peerDependenciesMeta": {},

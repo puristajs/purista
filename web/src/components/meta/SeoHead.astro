@@ -4,12 +4,13 @@ interface Props {
 	description: string
 	type?: 'website' | 'article'
 	imageRoute?: string
+	canonicalPath?: string
 }
 
-const { title, description, type = 'website', imageRoute } = Astro.props
+const { title, description, type = 'website', imageRoute, canonicalPath } = Astro.props
 
 const site = Astro.site ?? new URL('https://purista.dev')
-const canonicalURL = new URL(Astro.url.pathname, site)
+const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, site)
 const route =
 	imageRoute ??
 	(Astro.url.pathname

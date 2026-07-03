@@ -68,7 +68,7 @@ Choose exactly one execution definition:
 |---|---|
 | `setRunFunction(...)` | Normal PURISTA application code with typed resources, model calls, command tools, and child agents. |
 | `setHarnessAgent(...)` | You already have a reusable `@purista/harness` agent definition. |
-| `setHarnessWorkflow(...)` | You already have a reusable `@purista/harness` workflow definition. |
+| `setHarnessWorkflow(...)` | You already have a reusable `@purista/harness` workflow definition; pass `{ agents }` when it calls harness-local agents. |
 
 Most application agents should start with `setRunFunction(...)`:
 

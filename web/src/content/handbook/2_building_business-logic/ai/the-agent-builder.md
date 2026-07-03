@@ -259,6 +259,45 @@ Durable workspace replay requires harness capabilities such as
 requirements can also be declared. PURISTA validates required capabilities at
 service startup before queue workers, commands, or streams run.
 
+## Optional governance
+
+Harness governance is opt-in. Use it only when a service needs policy-as-code
+for model-requested tool calls, approval gates, shadow rollout, or central audit
+sinks. Ordinary agents and generated projects should not configure it by
+default.
+
+Pass the published `@purista/harness` governance config through `ai.governance`
+when creating the service instance:
+
+```ts
+await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(eventBridge, {
+  queueBridge,
+  ai: {
+    models,
+    governance: {
+      mode: 'enforce',
+      policies: [
+        {
+          kind: 'native',
+          id: 'tool-policy',
+          rules: [
+            {
+              id: 'audit-skill-read',
+              tools: ['read'],
+              effect: 'audit',
+            },
+          ],
+        },
+      ],
+    },
+  },
+})
+```
+
+Use governance for agent/tool behavior. Keep business authorization in PURISTA
+guards, resources, command handlers, and deterministic validation before any
+canonical state mutation.
+
 ## HTTP exposure and streaming
 
 Expose the generated stream or command through HTTP:
@@ -280,6 +319,11 @@ Expose the generated stream or command through HTTP:
 - `response.model_rerank.completed`
 - `response.completed`
 - `error`
+
+When harness governance is enabled, policy and approval run events
+(`policy.evaluated`, `policy.exposure`, `approval.requested`, and
+`approval.finished`) are forwarded as `response.output_json.delta` chunks with
+the original harness event in `data.delta`.
 
 Use `streamingMode: 'aggregate'` when the endpoint should return the final validated output instead of incremental chunks.
 

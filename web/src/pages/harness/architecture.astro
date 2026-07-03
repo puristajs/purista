@@ -57,7 +57,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         </div>
         <div class="arch-block">
           <span class="arch-block-label site-mono">Durable Runtime</span>
-          <p>Optional checkpoint, lease, and resume adapter for long-running workflows. Recovery starts from the last committed checkpoint. Streams remain observation-only.</p>
+          <p>Optional local checkpoint, lease, and resume adapter for long-running workflows. Recovery starts from the last committed checkpoint inside your application boundary. Streams remain observation-only.</p>
         </div>
       </div>
     </div>
@@ -110,9 +110,9 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     layout="viz-left"
     eyebrow="Durable Execution"
     headline={[{ text: 'Long runs.' }, { text: 'Survive restarts.', color: 'con' }]}
-    lede="Optional durable runtime adapters add checkpoints, leases, and resume for long-running workflows. Recovery starts from the last committed checkpoint, not from scratch. Streams remain observation-only."
+    lede="Optional durable runtime adapters add local checkpoints, leases, and resume for long-running workflows. Recovery starts from the last committed checkpoint inside your application boundary, not from scratch or a hosted workflow engine. Streams remain observation-only."
     items={[
-      'Checkpoint state at deterministic boundaries',
+      'Checkpoint state locally at deterministic boundaries',
       'Lease management prevents duplicate execution',
       'Resume from last checkpoint on restart',
       'Declare requirements with .requires(["runtime.checkpoint"])',
