@@ -54,13 +54,11 @@ export function createAgentExecutor<Models extends Record<string, AgentModelBind
 class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding>> {
 	private readonly harness?: Harness<any>
 	private readonly resolvedModels: Record<string, ModelAlias>
-	private readonly handlerModels
 	private readonly logger?: PuristaLogger
 
 	constructor(private readonly input: CreateAgentExecutorInput<Models>) {
 		this.logger = input.logger
 		this.resolvedModels = resolveRuntimeModelBindings(input.manifest, input.models)
-		this.handlerModels = createHandlerModelBindings(this.resolvedModels)
 		this.harness = this.buildHarness()
 	}
 
@@ -75,8 +73,12 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			let sequenceNumber = 0
 			input.writer.onCancel(reason => controller.abort(reason))
 			const result = await this.execute({ ...input, signal: controller.signal }, true, async event => {
+				const chunk = createProviderSseEvent(event, sequenceNumber + 1)
+				if (!chunk) {
+					return
+				}
 				sequenceNumber += 1
-				await input.writer.write(createProviderSseEvent(event, sequenceNumber))
+				await input.writer.write(chunk)
 			})
 			await input.writer.close(result.output)
 		} catch (error) {
@@ -101,7 +103,9 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			.models(this.resolvedModels)
 
 		if (this.input.telemetry) {
-			builder = builder.telemetry(this.input.telemetry)
+			// Secure by default: never capture prompt/completion content unless the
+			// caller explicitly opts in with an approved retention/redaction policy.
+			builder = builder.telemetry({ contentCaptureMode: 'NO_CONTENT', ...this.input.telemetry })
 		}
 
 		if (this.input.governance) {
@@ -193,22 +197,25 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			payload: input.payload,
 		})
 		const session = await this.getSession(identity.harnessSessionId)
-		const events: ReturnType<typeof createAgentRunEvent>[] = []
 		const emitWrapped = async (event: RunEvent) => {
-			const wrapped = createAgentRunEvent(identity, event)
-			events.push(wrapped)
-			await emit?.(wrapped)
+			await emit?.(createAgentRunEvent(identity, event))
 		}
 
 		let output: unknown
 		if (this.input.definition.execution.kind === 'runFunction') {
+			const handlerModels = createHandlerModelBindings(this.resolvedModels, {
+				runId: identity.runId,
+				agentId: this.input.manifest.agentName,
+				emit: emitWrapped,
+			})
 			const context = createAgentHandlerContext({
 				payload: input.payload,
 				parameter: input.parameter,
 				identity,
 				appContext: input.appContext,
+				metrics: input.appContext.metrics as never,
 				session,
-				models: this.handlerModels,
+				models: handlerModels,
 				skills: this.input.skillRuntime
 					? createAgentSkillContext(this.input.skillRuntime.catalog)
 					: createAgentSkillContext([]),
@@ -224,24 +231,29 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			const sessionAny = session as any
 			const agentName = this.input.manifest.agentName
 			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'agent')
+				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'agent', signal)
 				: await sessionAny.agents[agentName].prompt(input.payload, { signal })
 		} else {
 			const sessionAny = session as any
 			const agentName = this.input.manifest.agentName
 			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow')
+				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', signal)
 				: await sessionAny.workflows[agentName].prompt(input.payload, { signal })
 		}
 
 		const validated = await validateOutput(this.input.definition.outputSchema, output)
 		await emitSuccessEvent(this.input.manifest, input.appContext, validated)
-		return { identity, output: validated, events }
+		return { identity, output: validated }
 	}
 
 	private async getSession(sessionId: string): Promise<Session<any>> {
 		if (this.harness) {
 			return this.harness.getSession(sessionId)
+		}
+		if (this.input.manifest.session.mode === 'conversation') {
+			this.logger?.warn(
+				`Attached agent "${this.input.manifest.agentName}" uses conversation session mode but has no harness session (no models configured); conversation memory and history are not persisted`,
+			)
 		}
 		return createLocalSession(sessionId)
 	}
@@ -261,18 +273,30 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		payload: unknown,
 		emitWrapped: (event: RunEvent) => Promise<void>,
 		kind: 'agent' | 'workflow',
+		signal: AbortSignal,
 	) {
 		let output: unknown
+		let finished = false
 		const sessionAny = session as any
 		const agentName = this.input.manifest.agentName
 		const stream =
-			kind === 'agent' ? sessionAny.agents[agentName].stream(payload) : sessionAny.workflows[agentName].stream(payload)
+			kind === 'agent'
+				? sessionAny.agents[agentName].stream(payload, { signal })
+				: sessionAny.workflows[agentName].stream(payload, { signal })
 
-		for await (const event of stream) {
+		for await (const event of stream as AsyncIterable<RunEvent>) {
 			await emitWrapped(event)
-			if (event.type === 'run.finished' && 'output' in event) {
-				output = event.output
+			if (event.type === 'run.finished') {
+				finished = true
+				if (event.error) {
+					throw createHarnessRunError(event.error)
+				}
+				output = 'output' in event ? event.output : undefined
 			}
+		}
+
+		if (!finished) {
+			throw new Error(`Agent ${kind} stream ended before a run.finished event was emitted`)
 		}
 		return output
 	}
@@ -302,6 +326,39 @@ function createLocalSession(id: string): Session<any> {
 		replaceHistory: async () => undefined,
 		close: async () => undefined,
 	} as Session<any>
+}
+
+/** Error raised when a harness run terminates with a serialized error. */
+export class AgentRunError extends Error {
+	readonly code: string
+	readonly category: string
+	readonly retriable: boolean
+	readonly meta?: Record<string, unknown>
+
+	constructor(error: {
+		code: string
+		category: string
+		retriable: boolean
+		message: string
+		meta?: Record<string, unknown>
+	}) {
+		super(error.message)
+		this.name = 'AgentRunError'
+		this.code = error.code
+		this.category = error.category
+		this.retriable = error.retriable
+		this.meta = error.meta
+	}
+}
+
+function createHarnessRunError(error: {
+	code: string
+	category: string
+	retriable: boolean
+	message: string
+	meta?: Record<string, unknown>
+}): AgentRunError {
+	return new AgentRunError(error)
 }
 
 async function validateOutput(schema: Schema | undefined, output: unknown) {

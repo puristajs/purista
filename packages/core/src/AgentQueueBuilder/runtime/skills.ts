@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import type {
@@ -31,10 +31,10 @@ export async function resolveAgentRuntimeSkills(
 			)
 		}
 		const directory = await resolveDirectory(binding, declaration, manifest)
-		if (!directory || !fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
+		if (!directory || !(await isDirectory(directory))) {
 			throw new Error(`Attached agent "${manifest.agentName}" skill "${declaration.name}" directory is missing`)
 		}
-		const entry = readCatalogEntry(directory, declaration, binding)
+		const entry = await readCatalogEntry(directory, declaration, binding)
 		harnessSkills[declaration.name] = {
 			directory,
 			trust: binding.trust ?? 'trusted',
@@ -88,40 +88,46 @@ async function resolveBinding(
 	const namespaced = declaration.resourceName
 		? options.namespaces?.[declaration.resourceName]?.[declaration.name]
 		: undefined
-	return namespaced ?? options.bindings?.[declaration.name] ?? discoverSkillBinding(declaration, options.discovery)
+	return (
+		namespaced ?? options.bindings?.[declaration.name] ?? (await discoverSkillBinding(declaration, options.discovery))
+	)
 }
 
-function discoverSkillBinding(
+async function discoverSkillBinding(
 	declaration: SkillDeclaration,
 	options: false | AgentSkillDiscoveryOptions | undefined,
-): AgentSkillRuntimeBinding | undefined {
+): Promise<AgentSkillRuntimeBinding | undefined> {
 	if (!options) return undefined
 	const projectRoot = path.resolve(options.projectRoot ?? process.env.PWD ?? '.')
 	const trustedRoots = new Set((options.trustedProjectRoots ?? []).map(root => path.resolve(root)))
+	const projectRoots = options.includeAncestorProjectDirs ? ancestorDirectories(projectRoot) : [projectRoot]
 	const roots: Array<{ directory: string; trust: 'project' | 'user'; source: string; trusted: boolean }> = []
-	if (options.includeProjectAgentsDir ?? true) {
-		roots.push({
-			directory: path.join(projectRoot, '.agents', 'skills'),
-			trust: 'project',
-			source: 'project_agents',
-			trusted: trustedRoots.has(projectRoot),
-		})
-	}
-	if (options.includeProjectClientDir) {
-		roots.push({
-			directory: path.join(projectRoot, '.codex', 'skills'),
-			trust: 'project',
-			source: 'project_client',
-			trusted: trustedRoots.has(projectRoot),
-		})
-	}
-	if (options.includeClaudeCompatDir) {
-		roots.push({
-			directory: path.join(projectRoot, '.claude', 'skills'),
-			trust: 'project',
-			source: 'project_claude',
-			trusted: trustedRoots.has(projectRoot),
-		})
+	for (const root of projectRoots) {
+		const trusted = trustedRoots.has(root)
+		if (options.includeProjectAgentsDir ?? true) {
+			roots.push({
+				directory: path.join(root, '.agents', 'skills'),
+				trust: 'project',
+				source: 'project_agents',
+				trusted,
+			})
+		}
+		if (options.includeProjectClientDir) {
+			roots.push({
+				directory: path.join(root, '.codex', 'skills'),
+				trust: 'project',
+				source: 'project_client',
+				trusted,
+			})
+		}
+		if (options.includeClaudeCompatDir) {
+			roots.push({
+				directory: path.join(root, '.claude', 'skills'),
+				trust: 'project',
+				source: 'project_claude',
+				trusted,
+			})
+		}
 	}
 	if (options.includeUserAgentsDir) {
 		roots.push({
@@ -141,7 +147,7 @@ function discoverSkillBinding(
 	}
 	for (const root of roots) {
 		if (!root.trusted) continue
-		const directory = findDiscoveredSkillDirectory(root.directory, declaration.name, {
+		const directory = await findDiscoveredSkillDirectory(root.directory, declaration.name, {
 			maxDepth: options.maxDepth ?? 6,
 			maxDirectories: options.maxDirectories ?? 2000,
 		})
@@ -150,23 +156,37 @@ function discoverSkillBinding(
 	return undefined
 }
 
-function findDiscoveredSkillDirectory(
+/** Project root and every ancestor up to the filesystem root, nearest first. */
+function ancestorDirectories(start: string): string[] {
+	const out: string[] = []
+	let current = path.resolve(start)
+	for (;;) {
+		out.push(current)
+		const parent = path.dirname(current)
+		if (parent === current) break
+		current = parent
+	}
+	return out
+}
+
+async function findDiscoveredSkillDirectory(
 	root: string,
 	name: string,
 	options: { maxDepth: number; maxDirectories: number },
-): string | undefined {
+): Promise<string | undefined> {
 	let visited = 0
-	const walk = (directory: string, depth: number): string | undefined => {
-		if (visited >= options.maxDirectories || depth > options.maxDepth || !fs.existsSync(directory)) return undefined
+	const walk = async (directory: string, depth: number): Promise<string | undefined> => {
+		if (visited >= options.maxDirectories || depth > options.maxDepth) return undefined
+		const entries = await readDirEntries(directory)
+		if (!entries) return undefined
 		visited += 1
-		const skillPath = path.join(directory, 'SKILL.md')
-		if (fs.existsSync(skillPath)) {
-			const frontmatter = readFrontmatter(fs.readFileSync(skillPath, 'utf8'))
+		if (entries.some(entry => entry.isFile() && entry.name === 'SKILL.md')) {
+			const frontmatter = readFrontmatter(await fs.readFile(path.join(directory, 'SKILL.md'), 'utf8'))
 			return frontmatter.name === name ? directory : undefined
 		}
-		for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+		for (const entry of entries) {
 			if (!entry.isDirectory() || shouldSkipDiscoveryDirectory(entry.name)) continue
-			const found = walk(path.join(directory, entry.name), depth + 1)
+			const found = await walk(path.join(directory, entry.name), depth + 1)
 			if (found) return found
 		}
 		return undefined
@@ -194,16 +214,16 @@ async function resolveDirectory(
 	return resolved ? path.resolve(resolved.directory) : undefined
 }
 
-function readCatalogEntry(
+async function readCatalogEntry(
 	directory: string,
 	declaration: SkillDeclaration,
 	binding: AgentSkillRuntimeBinding,
-): AgentSkillCatalogEntry {
+): Promise<AgentSkillCatalogEntry> {
 	const skillPath = path.join(directory, 'SKILL.md')
-	if (!fs.existsSync(skillPath)) {
+	const content = await readFileOrUndefined(skillPath)
+	if (content === undefined) {
 		throw new Error(`Attached agent skill "${declaration.name}" is missing SKILL.md`)
 	}
-	const content = fs.readFileSync(skillPath, 'utf8')
 	const frontmatter = readFrontmatter(content)
 	const name = frontmatter.name ?? declaration.name
 	const description = frontmatter.description
@@ -223,13 +243,39 @@ function readCatalogEntry(
 }
 
 function readFrontmatter(content: string): Record<string, string> {
-	if (!content.startsWith('---\n')) return {}
-	const end = content.indexOf('\n---', 4)
+	// Normalize CRLF/CR so SKILL.md authored on any platform parses identically.
+	const normalized = content.replace(/\r\n?/g, '\n')
+	if (!normalized.startsWith('---\n')) return {}
+	const end = normalized.indexOf('\n---', 4)
 	if (end < 0) return {}
 	const result: Record<string, string> = {}
-	for (const line of content.slice(4, end).split('\n')) {
+	for (const line of normalized.slice(4, end).split('\n')) {
 		const match = /^([A-Za-z0-9_-]+):\s*(.*)$/.exec(line)
 		if (match?.[1] && match[2] !== undefined) result[match[1]] = match[2].trim()
 	}
 	return result
+}
+
+async function readDirEntries(directory: string) {
+	try {
+		return await fs.readdir(directory, { withFileTypes: true })
+	} catch {
+		return undefined
+	}
+}
+
+async function isDirectory(target: string): Promise<boolean> {
+	try {
+		return (await fs.stat(target)).isDirectory()
+	} catch {
+		return false
+	}
+}
+
+async function readFileOrUndefined(target: string): Promise<string | undefined> {
+	try {
+		return await fs.readFile(target, 'utf8')
+	} catch {
+		return undefined
+	}
 }

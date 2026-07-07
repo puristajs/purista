@@ -114,6 +114,37 @@ return {
 
 Avoid parsing free-form text when a structured object would be more reliable.
 
+## Streaming text and objects
+
+`textStream(...)` and `objectStream(...)` return provider chunks to the handler.
+Those chunks stay internal by default. When an agent stream endpoint should
+forward model chunks to the client, pass `{ emitRunEvents: true }` to that
+specific model stream call and still consume the provider chunks in the handler:
+
+```ts
+let answer = ''
+
+for await (const chunk of context.harness.models.primary.textStream(
+  {
+    messages: [{
+      role: 'user',
+      content: context.payload.question,
+    }],
+  },
+  context.signal,
+  { emitRunEvents: true },
+)) {
+  if (chunk.kind === 'delta') answer += chunk.text
+}
+
+return { answer }
+```
+
+PURISTA emits provider-style SSE chunks for opted-in model deltas. Use the
+generated `stream_id` to aggregate chunks from one model stream invocation and
+`agent_id`, `workflow_id`, or `model_alias` for source attribution. Display
+labels and client event names belong in your HTTP/SSE adapter.
+
 ## Embeddings
 
 Use `embeddings` for retrieval, similarity search, clustering, and deduplication. The vector index is application infrastructure; the model provider only creates vectors.

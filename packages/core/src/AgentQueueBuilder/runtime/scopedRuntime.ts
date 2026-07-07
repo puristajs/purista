@@ -1,4 +1,10 @@
-import type { AgentModelBinding, AgentRuntimeOptions, AgentRuntimeRef, AttachedAgentDefinition } from '../types.js'
+import type {
+	AgentModelBinding,
+	AgentRuntimeOptions,
+	AgentRuntimeRef,
+	AgentSandboxPolicy,
+	AttachedAgentDefinition,
+} from '../types.js'
 import { createAgentExecutor } from './executor.js'
 import { resolveAgentRuntimeSkills } from './skills.js'
 
@@ -51,7 +57,7 @@ export async function initializeAttachedAgentRuntimes(
 				skillRuntime,
 				logger: aiOptions.logger,
 				stateStore: aiOptions.stateStore,
-				sandbox: aiOptions.sandbox ?? definition.manifest.sandbox?.adapter,
+				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,
 			})
@@ -63,12 +69,35 @@ export async function initializeAttachedAgentRuntimes(
 	return {
 		async shutdown() {
 			const results = await Promise.allSettled(executors.map(executor => executor.shutdown()))
-			const rejected = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')
-			if (rejected) {
-				throw rejected.reason
+			const reasons = results
+				.filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+				.map(result => result.reason)
+			if (reasons.length === 1) {
+				throw reasons[0]
+			}
+			if (reasons.length > 1) {
+				throw new AggregateError(reasons, `${reasons.length} attached agent runtimes failed to shut down`)
 			}
 		},
 	}
+}
+
+/**
+ * Resolve the sandbox an attached agent should run with.
+ *
+ * Sandboxing is opt-in per agent: an explicit `enabled: false` disables it even
+ * when a shared `ai.sandbox` is configured, a policy-provided adapter takes
+ * precedence over the shared sandbox, and agents without a sandbox policy fall
+ * back to the shared `ai.sandbox`.
+ */
+export function resolveAttachedAgentSandbox(policy: AgentSandboxPolicy | undefined, runtimeSandbox: unknown): unknown {
+	if (!policy) {
+		return runtimeSandbox
+	}
+	if (policy.enabled === false) {
+		return undefined
+	}
+	return policy.adapter ?? runtimeSandbox
 }
 
 function validateWorkspacePolicies(

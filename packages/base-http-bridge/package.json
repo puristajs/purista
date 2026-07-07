@@ -10,6 +10,9 @@
 	"author": "Sebastian Wessel",
 	"license": "ISC",
 	"type": "module",
+	"files": [
+		"dist/**/*"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -25,13 +28,13 @@
 		"@types/node": "^26.1.0",
 		"@types/sinon": "^22.0.0",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.9"
+		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
-		"@opentelemetry/semantic-conventions": "^1.41.1",
+		"@opentelemetry/semantic-conventions": "^1.42.0",
 		"@purista/core": "*",
-		"hono": "^4.12.27"
+		"hono": "^4.12.28"
 	},
 	"peerDependenciesMeta": {},
 	"exports": {

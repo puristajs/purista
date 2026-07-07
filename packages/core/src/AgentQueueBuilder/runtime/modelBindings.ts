@@ -7,12 +7,16 @@ import {
 	type ModelCapability,
 	ModelCapabilityError,
 	ModelError,
+	type ModelInvokeContext,
 	type ObjectRequest,
 	type RerankRequest,
 	type RerankResponse,
+	type RunEvent,
 	type TextRequest,
+	type TokenUsage,
 } from '@purista/harness'
 
+import { getUniqueId } from '../../core/helper/getUniqueId.impl.js'
 import type {
 	AgentHandlerModelBindings,
 	AgentManifest,
@@ -20,6 +24,12 @@ import type {
 	AgentRuntimeModelBindings,
 	ResolvedAgentRuntimeModelBindings,
 } from '../types.js'
+
+export type HandlerModelRunEventContext = {
+	runId: string
+	agentId: string
+	emit(event: RunEvent): Promise<void>
+}
 
 export function resolveRuntimeModelBindings<Models extends Record<string, AgentModelBinding>>(
 	manifest: AgentManifest<Models>,
@@ -57,13 +67,17 @@ export function resolveRuntimeModelBindings<Models extends Record<string, AgentM
 
 export function createHandlerModelBindings<Models extends Record<string, AgentModelBinding>>(
 	resolvedModels: ResolvedAgentRuntimeModelBindings<Models>,
+	runEventContext?: HandlerModelRunEventContext,
 ): AgentHandlerModelBindings<Models> {
 	return Object.fromEntries(
-		Object.entries(resolvedModels).map(([aliasKey, alias]) => [aliasKey, createModelHandle(aliasKey, alias)]),
+		Object.entries(resolvedModels).map(([aliasKey, alias]) => [
+			aliasKey,
+			createModelHandle(aliasKey, alias, runEventContext),
+		]),
 	) as unknown as AgentHandlerModelBindings<Models>
 }
 
-function createModelHandle(aliasKey: string, alias: ModelAlias) {
+function createModelHandle(aliasKey: string, alias: ModelAlias, runEventContext?: HandlerModelRunEventContext) {
 	return {
 		text(req: Omit<TextRequest, 'model' | 'signal' | 'defaults'>, signal: AbortSignal) {
 			ensureProviderCapability(aliasKey, alias, 'text', req)
@@ -80,12 +94,16 @@ function createModelHandle(aliasKey: string, alias: ModelAlias) {
 				traceparent: req.traceparent,
 			})
 		},
-		textStream(req: Omit<TextRequest, 'model' | 'signal' | 'defaults'>, signal: AbortSignal) {
+		textStream(
+			req: Omit<TextRequest, 'model' | 'signal' | 'defaults'>,
+			signal: AbortSignal,
+			modelContext?: ModelInvokeContext,
+		) {
 			ensureProviderCapability(aliasKey, alias, 'text_stream', req)
 			if (!alias.provider.textStream) {
 				throw methodMissing(aliasKey, 'textStream')
 			}
-			return alias.provider.textStream({
+			const stream = alias.provider.textStream({
 				model: alias.model,
 				messages: req.messages,
 				...(req.call ? { call: mergeCallOptions(alias, req.call) } : {}),
@@ -94,6 +112,10 @@ function createModelHandle(aliasKey: string, alias: ModelAlias) {
 				signal,
 				traceparent: req.traceparent,
 			})
+			if (modelContext?.emitRunEvents !== true || !runEventContext) {
+				return stream
+			}
+			return emitTextStreamRunEvents(stream, runEventContext, aliasKey)
 		},
 		object<T extends JsonValue>(req: Omit<ObjectRequest<T>, 'model' | 'signal' | 'defaults'>, signal: AbortSignal) {
 			ensureProviderCapability(aliasKey, alias, 'object', req)
@@ -115,12 +137,13 @@ function createModelHandle(aliasKey: string, alias: ModelAlias) {
 		objectStream<T extends JsonValue>(
 			req: Omit<ObjectRequest<T>, 'model' | 'signal' | 'defaults'>,
 			signal: AbortSignal,
+			modelContext?: ModelInvokeContext,
 		) {
 			ensureProviderCapability(aliasKey, alias, 'object_stream', req)
 			if (!alias.provider.objectStream) {
 				throw methodMissing(aliasKey, 'objectStream')
 			}
-			return alias.provider.objectStream({
+			const stream = alias.provider.objectStream({
 				model: alias.model,
 				messages: req.messages,
 				...(req.call ? { call: mergeCallOptions(alias, req.call) } : {}),
@@ -131,6 +154,10 @@ function createModelHandle(aliasKey: string, alias: ModelAlias) {
 				signal,
 				traceparent: req.traceparent,
 			})
+			if (modelContext?.emitRunEvents !== true || !runEventContext) {
+				return stream
+			}
+			return emitObjectStreamRunEvents(stream, runEventContext, aliasKey)
 		},
 		async embed(req: Omit<EmbeddingRequest, 'model' | 'signal'>, signal: AbortSignal) {
 			ensureProviderCapability(aliasKey, alias, 'embeddings', {})
@@ -335,6 +362,78 @@ function validateRerankResponse(aliasKey: string, alias: ModelAlias, req: Rerank
 		})
 	}
 	return response
+}
+
+async function* emitTextStreamRunEvents(
+	stream: AsyncIterable<unknown>,
+	context: HandlerModelRunEventContext,
+	modelAlias: string,
+): AsyncIterable<unknown> {
+	const streamId = createModelStreamId()
+	for await (const chunk of stream) {
+		if (isTextDeltaChunk(chunk)) {
+			await context.emit({
+				type: 'model.delta',
+				runId: context.runId,
+				agentId: context.agentId,
+				modelAlias,
+				streamId,
+				delta: chunk.text,
+			})
+		}
+		yield chunk
+	}
+}
+
+async function* emitObjectStreamRunEvents(
+	stream: AsyncIterable<unknown>,
+	context: HandlerModelRunEventContext,
+	modelAlias: string,
+): AsyncIterable<unknown> {
+	const streamId = createModelStreamId()
+	for await (const chunk of stream) {
+		if (isObjectPartialChunk(chunk)) {
+			await context.emit({
+				type: 'model.object.partial',
+				runId: context.runId,
+				agentId: context.agentId,
+				modelAlias,
+				streamId,
+				partial: chunk.partial as JsonValue,
+			})
+		} else if (isObjectFinishChunk(chunk)) {
+			await context.emit({
+				type: 'model.object',
+				runId: context.runId,
+				agentId: context.agentId,
+				modelAlias,
+				streamId,
+				object: chunk.object as JsonValue,
+				...(chunk.usage ? { usage: chunk.usage } : {}),
+			})
+		}
+		yield chunk
+	}
+}
+
+function createModelStreamId() {
+	return `model_${getUniqueId()}`
+}
+
+function isTextDeltaChunk(chunk: unknown): chunk is { kind: 'delta'; text: string } {
+	return isRecord(chunk) && chunk.kind === 'delta' && typeof chunk.text === 'string'
+}
+
+function isObjectPartialChunk(chunk: unknown): chunk is { kind: 'partial'; partial: unknown } {
+	return isRecord(chunk) && chunk.kind === 'partial' && 'partial' in chunk
+}
+
+function isObjectFinishChunk(chunk: unknown): chunk is { kind: 'finish'; object: unknown; usage?: TokenUsage } {
+	return isRecord(chunk) && chunk.kind === 'finish' && 'object' in chunk
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null
 }
 
 function assertCapabilities(

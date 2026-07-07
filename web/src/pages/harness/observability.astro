@@ -88,9 +88,9 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     layout="viz-right"
     eyebrow="Privacy Gate"
     headline={[{ text: 'Content is ' }, { text: 'opt-in', color: 'con' }]}
-    lede="By default, prompts and responses are not captured in traces or logs. Events are emitted with content fields set to null. Enable captureContent only for deliberate local diagnostics."
+    lede="By default, prompts and responses are not captured in traces or logs. Events are emitted with content fields set to null. Widen contentCaptureMode only for deliberate local diagnostics."
     items={[
-      'captureContent: false — default, privacy-first',
+      "contentCaptureMode: 'NO_CONTENT' — default, privacy-first",
       'Events emitted but content fields are null',
       'Structured object content omitted unless enabled',
       'Enable only for local debugging, never in production',

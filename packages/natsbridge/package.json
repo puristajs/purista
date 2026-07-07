@@ -38,13 +38,13 @@
 		"@types/sinon": "^22.0.0",
 		"@types/ws": "^8.18.1",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.9"
+		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/resources": "^2.9.0",
 		"@opentelemetry/sdk-trace-node": "^2.9.0",
-		"@opentelemetry/semantic-conventions": "^1.41.1",
+		"@opentelemetry/semantic-conventions": "^1.42.0",
 		"@purista/core": "*",
 		"nats": "^2.29.3"
 	},

@@ -64,7 +64,7 @@ Applications bind concrete models at service startup:
 await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(eventBridge, {
   queueBridge,
   ai: {
-    telemetry: { captureContent: false },
+    telemetry: { contentCaptureMode: 'NO_CONTENT' },
     models: {
       primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'], retry: true },
     },
@@ -123,7 +123,7 @@ provider finish/status metadata for diagnostics and tracing. Application logic
 should branch on `finishReason` first and use `outcome` for operations or
 provider-specific reporting.
 
-Default AI telemetry should not capture prompt or completion content. Use `captureContent: false` unless a product-specific retention, redaction, consent, and access-control policy has been approved.
+Default AI telemetry should not capture prompt or completion content. Core defaults `ai.telemetry` to `contentCaptureMode: 'NO_CONTENT'`; only widen it (`'SPAN_ONLY'`, `'EVENT_ONLY'`, `'SPAN_AND_EVENT'`) after a product-specific retention, redaction, consent, and access-control policy has been approved.
 
 Keep telemetry ownership explicit:
 - PURISTA service metrics are configured through service runtime `metrics`
@@ -273,7 +273,12 @@ Harness governance emits `policy.evaluated`, `policy.exposure`,
 those as `response.output_json.delta` chunks with the original harness event in
 `data.delta` so UIs and audit consumers can branch on the harness `type`.
 
-OpenAPI chunk schema comes from `agentSseEventSchema`.
+Text and structured model deltas include `stream_id` when they originate from an
+opted-in harness model stream. Use `stream_id` to aggregate chunks from one
+model stream invocation. Use `agent_id`, `workflow_id`, and `model_alias` for
+source attribution. UI labels, semantic buckets, and client-specific event names
+belong in the application adapter, not in PURISTA core. OpenAPI chunk schema
+comes from `agentSseEventSchema`.
 
 ## Multimodal
 Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, and file content. Multimodal methods are capability-gated by model aliases such as `vision_input`, `audio_input`, and `file_input`.
