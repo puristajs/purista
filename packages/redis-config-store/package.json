@@ -36,7 +36,7 @@
 		"@types/node": "^26.1.0",
 		"@types/sinon": "^22.0.0",
 		"sinon": "^22.0.0",
-		"vitest": "^4.1.9"
+		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@purista/core": "*",

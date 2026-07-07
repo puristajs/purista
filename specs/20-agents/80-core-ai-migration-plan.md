@@ -57,26 +57,67 @@ concepts. They are not active implementation guidance.
 
 ## 3. Target Public API
 
-`@purista/core` owns the native developer surface:
+`@purista/core` owns the native developer surface. This list is authoritative:
+public agent API names must appear here (rule 10). It reflects the implemented
+and exported surface.
+
+ServiceBuilder integration:
 
 - `ServiceBuilder.getAgentQueueBuilder(agentName, description)`
-- `ServiceBuilder.addAgentDefinition(...definitions)`
-- `AgentQueueBuilder`
-- `AgentHandler`
-- `AgentHandlerContext`
-- `AgentManifest`
-- `AgentRunEvent`
-- `AgentRunIdentity`
-- `AgentRunResult`
-- `AgentModelBinding`
-- `AgentExecutionPolicy`
-- `AgentSessionPolicy`
-- `AgentSandboxPolicy`
-- `createAgentContextMock`
-- `createAgentTestHarness`
-- `createScriptedHarnessModel`
-- selected harness type re-exports required for DX:
-  `ContentPart`, `ModelProvider`, `ModelCapability`, `RunEvent`, `Session`
+- `ServiceBuilder.addAgentDefinition(...definitions)` — also registers any
+  agent-local `defineMetric` definitions on the owning service
+
+`AgentQueueBuilder` methods:
+
+- schema: `addPayloadSchema`, `addParameterSchema`, `addOutputSchema`
+- models and tools: `addModel`, `canInvoke`, `canInvokeAgent`, `useSkills`,
+  `useBuiltInTools`
+- metrics: `defineMetric` (agent-local; registered on the service)
+- execution (exactly one): `setRunFunction`, `setHarnessAgent`,
+  `setHarnessWorkflow`
+- policies: `setExecutionPolicy`, `setExecutionProfile`, `setSessionPolicy`,
+  `setSandboxPolicy`, `setWorkspacePolicy`, `setResponseMode`
+- HTTP/stream exposure: `exposeAsHttpEndpoint`, `makeEndpointPublic`,
+  `setStreamingMode`, `setSuccessEventName`
+- output: `getManifest`, `getDefinition`
+
+Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
+`AttachedCoreDefinition`, `AgentHandler`, `AgentHandlerContext`,
+`AgentHandlerModelBindings`, `AgentManifest`, `AgentRunEvent`,
+`AgentRunIdentity`, `AgentRunResult`, `AgentModelBinding`, `AgentModelCapability`,
+`AgentRuntimeModelBinding(s)`, `AgentRuntimeOptions`, `AgentRuntimeRef`,
+`AgentRuntimeInvocationInput`, `AgentRuntimeStreamInvocationInput`,
+`AgentExecutionDefinition`, `AgentExecutionKind`, `AgentExecutionPolicy`,
+`AgentSessionPolicy`, `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
+`AgentWorkspaceCapabilityRequirement`, `AgentDurableWorkspaceStore(Policy)`,
+`AgentHttpExposure`, `AgentResponseMode`, `AgentResponseModeOptions`,
+`AgentQueueResultPolicy`, `AgentQueueResultPolicyMode`, `AgentQueueBuilderTypes`,
+`AnyAgentQueueBuilderTypes`, `AllowedCommandToolDefinition`,
+`AllowedAgentDefinition`, `CommandToolInvokeMap`, `AgentInvokeMap`,
+`InferOptionalInput`, `InferOptionalOutput`, the `AgentSkill*` types, and the
+`AgentRunError` class.
+
+Testing helpers: `createAgentContextMock`, `createAgentTestHarness`,
+`createScriptedHarnessModel`, `ScriptedHarnessModelProvider`,
+`createAgentSkillTestRuntime`.
+
+Selected harness re-exports required for DX: `ContentPart`, `ModelProvider`,
+`ModelCapability`, `RunEvent`, `Session`.
+
+Contract notes:
+
+- Long-running response modes are `accepted`, `status`, `stream`, and `event`.
+  There is no `callback` mode: callback delivery is not implemented, so the mode
+  and a `callbackResourceName` option must not be reintroduced without a spec
+  that defines callback transport, retries, and security.
+- Sandboxing is opt-in per agent. `setSandboxPolicy({ enabled: false })` disables
+  the sandbox for that agent even when a shared `ai.sandbox` is configured; a
+  policy `adapter` takes precedence over the shared `ai.sandbox`; agents with no
+  sandbox policy fall back to the shared `ai.sandbox`.
+- AI telemetry is secure by default: core forces `contentCaptureMode:
+  'NO_CONTENT'` unless the caller explicitly widens it. The harness telemetry
+  option is `contentCaptureMode` (`'NO_CONTENT' | 'SPAN_ONLY' | 'EVENT_ONLY' |
+  'SPAN_AND_EVENT'`); there is no `captureContent` flag.
 
 Runtime configuration is supplied through core service instantiation:
 
@@ -87,12 +128,17 @@ await serviceBuilder.getInstance(eventBridge, {
     logger,
     stateStore,
     sandbox,
-    telemetry,
+    runtime,
+    workspaceStore,
+    skills,
+    telemetry: { contentCaptureMode: 'NO_CONTENT' },
   },
 })
 ```
 
 `ai.models` is required only when the service has attached agents.
+`ai.runtime` and `ai.workspaceStore` are required only for agents that declare a
+durable workspace policy.
 
 ## 4. Parallel Tickets
 
@@ -368,3 +414,28 @@ The canonical PURISTA skill catalog was updated in `skills/purista/**` and
 `skills/purista-skill-maintainer/**`. Future skill maintenance must keep
 `examples/agent-example`, the AI handbook pages, and this spec aligned whenever
 the core agent builder or harness runtime contract changes.
+
+## 7. Post-Migration Corrections
+
+A correctness review of the implemented runtime produced the following fixes.
+They are part of the active contract; the section 3 surface reflects them.
+
+Runtime correctness:
+
+- `context.metrics` is wired from the service metric context, and agent-local
+  `defineMetric` definitions are registered on the owning service.
+- Streaming runs propagate the abort signal to the harness model call, surface
+  harness errors as `AgentRunError` instead of masking them as output-validation
+  failures, and do not accumulate per-run events that are never consumed.
+- Conversation session ids are namespaced by service/version/agent.
+- `runtimeRevision` is a stable, change-sensitive digest.
+- Service shutdown always releases core resources even if agent runtime
+  shutdown fails, and reports all runtime shutdown failures.
+
+Contract cleanups:
+
+- Removed the half-implemented `callback` response mode and `callbackResourceName`.
+- `AgentSandboxPolicy.enabled` is now honored as a per-agent opt-out.
+- Telemetry uses `contentCaptureMode` and defaults to `'NO_CONTENT'`. The prior
+  `captureContent` flag never existed in the harness and was removed from docs.
+- Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.

@@ -7,13 +7,40 @@ import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Log
 import { getEventBridgeMock } from '../../mocks/index.js'
 import { ServiceBuilder } from '../../ServiceBuilder/ServiceBuilder.impl.js'
 import type { AgentRuntimeOptions, AttachedAgentDefinition } from '../types.js'
-import { createAgentRuntimeScope, getScopedAgentRuntime, initializeAttachedAgentRuntimes } from './scopedRuntime.js'
+import {
+	createAgentRuntimeScope,
+	getScopedAgentRuntime,
+	initializeAttachedAgentRuntimes,
+	resolveAttachedAgentSandbox,
+} from './scopedRuntime.js'
 
 describe('attached agent scoped runtime', () => {
 	const sandbox = createSandbox()
 
 	afterEach(() => {
 		sandbox.restore()
+	})
+
+	describe('resolveAttachedAgentSandbox', () => {
+		const runtimeSandbox = { kind: 'shared-runtime-sandbox' }
+		const policyAdapter = { kind: 'policy-adapter' }
+
+		it('uses the shared runtime sandbox when no policy is declared', () => {
+			expect(resolveAttachedAgentSandbox(undefined, runtimeSandbox)).toBe(runtimeSandbox)
+		})
+
+		it('opts out of sandboxing when the policy explicitly disables it', () => {
+			expect(resolveAttachedAgentSandbox({ enabled: false }, runtimeSandbox)).toBeUndefined()
+			expect(resolveAttachedAgentSandbox({ enabled: false, adapter: policyAdapter }, runtimeSandbox)).toBeUndefined()
+		})
+
+		it('prefers the policy adapter over the shared runtime sandbox', () => {
+			expect(resolveAttachedAgentSandbox({ enabled: true, adapter: policyAdapter }, runtimeSandbox)).toBe(policyAdapter)
+		})
+
+		it('falls back to the shared runtime sandbox when the policy enables sandboxing without an adapter', () => {
+			expect(resolveAttachedAgentSandbox({ enabled: true }, runtimeSandbox)).toBe(runtimeSandbox)
+		})
 	})
 
 	it('does not require ai.models when no attached agents exist', async () => {
@@ -188,6 +215,34 @@ SECRET_BODY`,
 		).resolves.toBe('ok')
 	})
 
+	it('forwards the service metric context into run-function handlers', async () => {
+		const recorded: Array<{ value: number }> = []
+		const definition = createAttachedAgentDefinition()
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async context => {
+				;(context.metrics as Record<string, { add(value: number): void }>)['app.agent.escalations'].add(3)
+				return 'ok'
+			},
+		}
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], { models: {} })
+		const runtime = getScopedAgentRuntime(scope, definition)
+
+		await expect(
+			runtime.executeAggregate({
+				appContext: {
+					...createCommandContext('metric-message'),
+					metrics: { 'app.agent.escalations': { add: (value: number) => recorded.push({ value }) } },
+				},
+				message: { id: 'metric-message' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toBe('ok')
+		expect(recorded).toEqual([{ value: 3 }])
+	})
+
 	it('accepts durable workspace agents when runtime and workspace capabilities match', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
@@ -267,6 +322,7 @@ function createAttachedAgentDefinition(
 			builtInTools: false,
 			...overrides,
 		},
+		metricDefinitions: {},
 		execution: {
 			kind: 'runFunction',
 			handler: async () => 'ok',

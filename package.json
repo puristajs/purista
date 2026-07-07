@@ -46,7 +46,7 @@
 		"@biomejs/biome": "^2.5.2",
 		"@types/node": "^26.1.0",
 		"@types/sinon": "^22.0.0",
-		"@vitest/coverage-v8": "^4.1.9",
+		"@vitest/coverage-v8": "^4.1.10",
 		"check-dependency-version-consistency": "^6.0.0",
 		"git-cliff": "^2.13.1",
 		"npm-check-updates": "^22.2.9",
@@ -55,9 +55,9 @@
 		"testcontainers": "^12.0.4",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.23.0",
-		"typedoc": "^0.28.19",
+		"typedoc": "^0.28.20",
 		"typescript": "^6.0.3",
-		"vitest": "^4.1.9"
+		"vitest": "^4.1.10"
 	},
 	"packageManager": "npm@11.18.0",
 	"overrides": {

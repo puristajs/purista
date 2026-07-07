@@ -51,7 +51,9 @@ export function resolveHarnessSessionId(
 			`Agent conversation session path "${manifest.session.payloadPath.join('.')}" must resolve to a non-empty string`,
 		)
 	}
-	return value
+	// Namespace by service/version/agent so two agents that share the same logical
+	// conversation id never collide on one harness session (cross-agent/tenant leak).
+	return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:conversation:${value}`
 }
 
 function readPayloadPath(payload: unknown, path: readonly string[]) {

@@ -71,7 +71,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <span class="sec-pillar-label site-mono">Content Privacy</span>
           <p>Content capture is disabled by default. Prompts and responses are not persisted in traces or logs unless explicitly enabled for local diagnostics.</p>
           <ul class="sec-pillar-list">
-            <li>captureContent: false by default</li>
+            <li>contentCaptureMode: 'NO_CONTENT' by default</li>
             <li>Enable only for deliberate local diagnostics</li>
             <li>OTel spans include metadata, not content</li>
             <li>Application owns data residency decisions</li>
@@ -173,7 +173,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <span class="sec-check-num site-mono">04</span>
           <div>
             <div class="sec-check-title">Content Capture Off</div>
-            <p>Keep <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">captureContent: false</code> outside local diagnostics. Never log PII, secrets, or model prompts in production traces. OTel spans include metadata, not content.</p>
+            <p>Keep <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">contentCaptureMode: 'NO_CONTENT'</code> outside local diagnostics. Never log PII, secrets, or model prompts in production traces. OTel spans include metadata, not content.</p>
           </div>
         </div>
         <div class="sec-check-row">

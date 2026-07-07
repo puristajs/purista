@@ -34,7 +34,7 @@
 		"sinon": "^22.0.0",
 		"@biomejs/biome": "^2.5.2",
 		"tsx": "^4.23.0",
-		"vitest": "^4.1.9"
+		"vitest": "^4.1.10"
 	},
 	"trustedDependencies": [
 		"@biomejs/biome"

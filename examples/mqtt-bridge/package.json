@@ -28,7 +28,7 @@
 		"sinon": "^22.0.0",
 		"tsx": "^4.23.0",
 		"typescript": "^6.0.3",
-		"vitest": "^4.1.9"
+		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.0.8",
