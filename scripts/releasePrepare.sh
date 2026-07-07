@@ -39,5 +39,8 @@ npm run build -w packages/core
 npm run build --workspaces --if-present
 npm run lint:fix
 
+echo "Running package import smoke tests"
+npm run test:package-imports
+
 echo "Updating changelog and documentation (including API docs)"
 npm run build:doc
