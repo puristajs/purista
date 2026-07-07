@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+## [3.2.0] - 2026-06-05
+
 ### Features
 
 - Integrate agent runtime skills and durable workspace policy ([#311](https://github.com/orhun/git-cliff/issues/311))
@@ -11,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Update biome config ([#310](https://github.com/orhun/git-cliff/issues/310))
+- V3.2.0 ([#312](https://github.com/orhun/git-cliff/issues/312))
 
 ## [3.1.0] - 2026-06-03
 

@@ -7,6 +7,7 @@ Use this reference when implementing PURISTA agents.
 - [Builder Pattern](#builder-pattern)
 - [Runtime Wiring](#runtime-wiring)
 - [Handler Context](#handler-context)
+- [Optional Governance Policy](#optional-governance-policy)
 - [Sandbox And Durable Workspaces](#sandbox-and-durable-workspaces)
 - [AI Security And Privacy](#ai-security-and-privacy)
 - [Streaming](#streaming)
@@ -75,6 +76,39 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 ```
 
 Startup fails fast when aliases or capabilities are missing.
+
+Governance policy is optional. Do not add governance configuration to generated
+apps or simple agents by default. Use it only when a service needs central
+policy-as-code for tool calls, approval, audit, or reuse of external policy
+packs.
+
+Runtime wiring may pass the published harness governance config through
+`ai.governance`:
+
+```ts
+await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventBridge, {
+  queueBridge,
+  ai: {
+    models,
+    governance: {
+      mode: 'enforce',
+      policies: [
+        {
+          kind: 'native',
+          id: 'tool-policy',
+          rules: [
+            {
+              id: 'audit-skill-read',
+              tools: ['read'],
+              effect: 'audit',
+            },
+          ],
+        },
+      ],
+    },
+  },
+})
+```
 
 Configure provider retry on model aliases. `retry: true` is the default short
 active retry policy. Use `retry: false` for strict request/response paths and
@@ -164,6 +198,31 @@ Agent handlers use:
 - `context.metrics` for service-level and agent-local custom metrics declared on builders
 - `context.logger`
 
+## Optional Governance Policy
+`@purista/harness` owns the generic governance policy contract. PURISTA
+attached agents pass it through as `ai.governance`, but normal PURISTA guards
+and resources remain the authorization boundary. Omitted governance config
+leaves harness behavior unchanged.
+
+Use governance for controls that are specifically about agent/tool behavior:
+- deny a model-requested tool call before the tool runs
+- require approval before a sensitive tool call
+- audit tool decisions in a central, content-redacted shape
+- reuse policy packs from OPA/Rego, Microsoft AGT, Eve-policy, or other
+  governance ecosystems through optional harness policy adapters
+
+Do not use governance to replace:
+- service `setBeforeGuardHooks(...)`
+- tenant-scoped repositories/resources
+- command authorization
+- deterministic validation before canonical state mutation
+
+PURISTA runtime wiring should pass tenant, principal, trace, correlation, and
+conversation metadata to the harness explicitly and only as safe scalar
+metadata. If an attached agent configures `require_approval` rules, provide a
+harness `approval` adapter in `ai.governance`. Agents without governance must
+not pay an approval, policy-engine, or audit-sink setup cost.
+
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:
 - attach the agent to the service that owns the capability and invariants
@@ -175,6 +234,10 @@ Treat every agent as a service-owned data processor:
 - preserve `tenantId`, `principalId`, `traceId`, `correlationId`, and agent `runId` across queued runs, tool calls, child agents, streams, and audit logs
 - never use `correlationId`, message id, queue job id, or trace id as the logical AI conversation id
 - keep prompt/completion content out of non-debug logs, metrics attributes, traces, queue metadata, and emitted events
+- when governance is enabled, audit policy names, rule ids, effects, status,
+  risk tags, and correlation metadata only; do not audit raw tool input/output
+  unless an explicit product/legal retention policy owns encrypted storage,
+  access control, and deletion
 
 Agent-local metrics are declared with `AgentQueueBuilder.defineMetric(...)`:
 
@@ -204,6 +267,11 @@ AI stream endpoints emit SSE `event`/`data` chunks. The data payload follows pro
 - `response.tool_call.completed`
 - `response.completed`
 - `error`
+
+Harness governance emits `policy.evaluated`, `policy.exposure`,
+`approval.requested`, and `approval.finished` run events. PURISTA forwards
+those as `response.output_json.delta` chunks with the original harness event in
+`data.delta` so UIs and audit consumers can branch on the harness `type`.
 
 OpenAPI chunk schema comes from `agentSseEventSchema`.
 
