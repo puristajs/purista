@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Bug Fixes
+
+- Migrate missed agent stream updates ([#325](https://github.com/orhun/git-cliff/issues/325))
+
+## [3.2.1] - 2026-07-07
+
+### Miscellaneous Tasks
+
+- V3.2.1 ([#323](https://github.com/orhun/git-cliff/issues/323))
+
 ## [3.2.0] - 2026-06-05
 
 ### Features
