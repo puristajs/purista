@@ -20,20 +20,21 @@
 		"client:code": "tsx src/generateClientFromCode.ts"
 	},
 	"dependencies": {
-		"@purista/core": "*",
 		"@hono/node-server": "^2.0.8",
-		"@scalar/hono-api-reference": "^0.11.8",
-		"@purista/hono-http-server": "*"
+		"@purista/core": "*",
+		"@purista/hono-http-server": "*",
+		"@scalar/hono-api-reference": "^0.11.8"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.5.2",
 		"@purista/cli": "*",
+		"@types/jest": "^30.0.0",
 		"@types/node": "^26.1.0",
 		"@types/sinon": "^22.0.0",
-		"@types/jest": "^30.0.0",
-		"typescript": "^6.0.3",
+		"@typescript/native": "npm:typescript@^7.0.2",
 		"sinon": "^22.0.0",
-		"@biomejs/biome": "^2.5.2",
 		"tsx": "^4.23.0",
+		"typescript": "npm:@typescript/typescript6@^6.0.2",
 		"vitest": "^4.1.10"
 	},
 	"trustedDependencies": [
