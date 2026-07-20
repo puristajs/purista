@@ -1,6 +1,6 @@
 {
 	"name": "@purista/metrics-example",
-	"version": "3.2.2",
+	"version": "3.2.3",
 	"description": "Minimal PURISTA custom metrics example",
 	"homepage": "https://purista.dev",
 	"private": true,

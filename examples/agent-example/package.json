@@ -1,6 +1,6 @@
 {
 	"name": "@purista/agent-example",
-	"version": "3.2.2",
+	"version": "3.2.3",
 	"description": "PURISTA multi-agent incident response example",
 	"homepage": "https://purista.dev",
 	"private": true,

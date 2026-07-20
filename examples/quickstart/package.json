@@ -1,6 +1,6 @@
 {
 	"name": "@purista/quickstart",
-	"version": "3.2.2",
+	"version": "3.2.3",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"private": true,

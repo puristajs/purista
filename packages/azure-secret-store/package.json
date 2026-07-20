@@ -1,6 +1,6 @@
 {
 	"name": "@purista/azure-secret-store",
-	"version": "3.2.2",
+	"version": "3.2.3",
 	"description": "State store adapter for Azure Key Vault",
 	"homepage": "https://purista.dev",
 	"repository": {

@@ -6,7 +6,22 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
+- Limit request body size ([#328](https://github.com/orhun/git-cliff/issues/328))
+
+### Miscellaneous Tasks
+
+- Update dependencies ([#329](https://github.com/orhun/git-cliff/issues/329))
+- Update ai harness to 1.7.1 ([#330](https://github.com/orhun/git-cliff/issues/330))
+
+## [3.2.2] - 2026-07-07
+
+### Bug Fixes
+
 - Migrate missed agent stream updates ([#325](https://github.com/orhun/git-cliff/issues/325))
+
+### Miscellaneous Tasks
+
+- V3.2.2 ([#326](https://github.com/orhun/git-cliff/issues/326))
 
 ## [3.2.1] - 2026-07-07
 
