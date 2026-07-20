@@ -76,6 +76,7 @@ describe('HonoServiceClass', () => {
 			enableHealth: boolean
 			enableDynamicRoutes: boolean
 			autoRegisterServicesFromConfig: boolean
+			maxRequestBodyBytes: number
 			services: unknown[]
 		}>,
 	) =>
@@ -85,6 +86,7 @@ describe('HonoServiceClass', () => {
 				enableHealth: overrides?.enableHealth ?? false,
 				enableDynamicRoutes: overrides?.enableDynamicRoutes ?? false,
 				autoRegisterServicesFromConfig: overrides?.autoRegisterServicesFromConfig ?? false,
+				maxRequestBodyBytes: overrides?.maxRequestBodyBytes,
 				apiMountPath: '/api',
 				services: (overrides?.services ?? []) as any,
 			},
@@ -447,6 +449,59 @@ describe('HonoServiceClass', () => {
 		} finally {
 			invokeMock.mockRestore()
 			await server.setServiceUnavailable()
+			await server.destroy()
+		}
+	})
+
+	it('limits declared and streamed request bodies before parsing', async () => {
+		const server = await createServer({ enableDynamicRoutes: true, maxRequestBodyBytes: 16 })
+		const echoDefinition = await echoCommand.getDefinition()
+		server.addEndpoint(echoDefinition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'echo',
+		})
+		const invokeMock = vi.spyOn(server, 'invoke').mockResolvedValue({ payload: { message: 'x' } })
+		await server.start()
+
+		try {
+			const declaredOversize = await server.app.fetch(
+				new Request('http://localhost/api/v1/echo', {
+					method: 'POST',
+					headers: {
+						'content-length': '17',
+						'content-type': 'application/json',
+					},
+					body: '{}',
+				}),
+			)
+			expect(declaredOversize.status).toBe(StatusCode.PayloadTooLarge)
+			expect(declaredOversize.headers.get('content-type')).toContain('application/problem+json')
+			await expect(declaredOversize.json()).resolves.toMatchObject({
+				title: 'Payload Too Large',
+				status: StatusCode.PayloadTooLarge,
+			})
+
+			const encoder = new TextEncoder()
+			const streamedBody = new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.enqueue(encoder.encode('{"message":"'))
+					controller.enqueue(encoder.encode('oversized"}'))
+					controller.close()
+				},
+			})
+			const streamedOversize = await server.app.fetch(
+				new Request('http://localhost/api/v1/echo', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: streamedBody,
+					duplex: 'half',
+				} as RequestInit),
+			)
+			expect(streamedOversize.status).toBe(StatusCode.PayloadTooLarge)
+			expect(invokeMock).not.toHaveBeenCalled()
+		} finally {
+			invokeMock.mockRestore()
 			await server.destroy()
 		}
 	})

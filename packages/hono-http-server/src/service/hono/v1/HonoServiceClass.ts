@@ -20,6 +20,7 @@ import type {
 import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
 import type { Handler } from 'hono'
 import { Hono } from 'hono'
+import { bodyLimit } from 'hono/body-limit'
 import { HTTPException } from 'hono/http-exception'
 import { PatternRouter } from 'hono/router/pattern-router'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
@@ -660,11 +661,30 @@ export class HonoServiceClass<
 			})
 		}
 
-		if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-			const protectHandler = safeBind(this.config.protectHandler, this.app)
-			this.app[method](path, protectHandler, handler)
+		if (method === 'get' || method === 'delete') {
+			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
+				const protectHandler = safeBind(this.config.protectHandler, this.app)
+				this.app[method](path, protectHandler, handler)
+			} else {
+				this.app[method](path, handler)
+			}
 		} else {
-			this.app[method](path, handler)
+			const limitRequestBody = bodyLimit({
+				maxSize: this.config.maxRequestBodyBytes,
+				onError: c =>
+					this.sendProblemResponse(
+						c,
+						new HandledError(StatusCode.PayloadTooLarge, 'Request body exceeds the configured size limit'),
+						StatusCode.PayloadTooLarge,
+					),
+			})
+
+			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
+				const protectHandler = safeBind(this.config.protectHandler, this.app)
+				this.app[method](path, protectHandler, limitRequestBody, handler)
+			} else {
+				this.app[method](path, limitRequestBody, handler)
+			}
 		}
 		this.knownServices.add(serviceRegistrationKey)
 		this.knownEndpoints.set(endpointKey, serviceRegistrationKey)

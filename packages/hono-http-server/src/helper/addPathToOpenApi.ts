@@ -113,6 +113,10 @@ export const addPathToOpenApi = (
 		errorCodes.add(StatusCode.BadRequest)
 	}
 
+	if (method !== 'get' && method !== 'delete') {
+		errorCodes.add(StatusCode.PayloadTooLarge)
+	}
+
 	const errArray = Array.from(errorCodes).sort((a, b) => a - b)
 
 	for (const code of errArray) {
