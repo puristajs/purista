@@ -9,6 +9,14 @@ import { z } from 'zod'
 export const DEFAULT_API_MOUNT_PATH = '/api'
 
 /**
+ * Default maximum size, in bytes, accepted for an HTTP request body.
+ *
+ * Applications that intentionally accept larger payloads must set
+ * `maxRequestBodyBytes` explicitly in the Hono service configuration.
+ */
+export const DEFAULT_MAX_REQUEST_BODY_BYTES = 1024 * 1024
+
+/**
  * Default OpenAPI info block used when no application-specific metadata is supplied.
  */
 export const OPENAPI_DEFAULT_INFO = {
@@ -73,6 +81,13 @@ export const honoServiceV1ConfigSchema = z.object({
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	enableDynamicRoutes: z.boolean().default(false),
 	streamRequestTimeoutMs: z.number().int().positive().optional().default(300000),
+	/**
+	 * Maximum number of bytes accepted for POST, PUT and PATCH request bodies.
+	 *
+	 * The default is 1 MiB. The limit is enforced for both `Content-Length`
+	 * requests and streamed or chunked request bodies before PURISTA parses them.
+	 */
+	maxRequestBodyBytes: z.number().int().positive().optional().default(DEFAULT_MAX_REQUEST_BODY_BYTES),
 	apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
 	enableHealth: z.boolean().optional().default(false),
 	healthPath: z.string().optional().default('/healthz'),

@@ -255,6 +255,7 @@ describe('openapi helpers', () => {
 		expect(endpoint?.['x-purista-endpoint-security']).toBe('protected-application-middleware')
 		expect(endpoint?.responses?.['202']).toBeDefined()
 		expect(endpoint?.responses?.['202']).not.toHaveProperty('content.application/problem+json')
+		expect(endpoint?.responses?.['413']).toBeDefined()
 		expect(acceptedResponse.content?.['application/json']?.schema?.properties?.jobId).toBeDefined()
 		expect(acceptedResponse.content?.['application/json']?.schema?.properties?.runId).toBeDefined()
 	})

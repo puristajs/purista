@@ -42,6 +42,27 @@ serve({
 })
 ```
 
+## Request body limits
+
+POST, PUT, and PATCH endpoints accept at most 1 MiB by default. The limit is
+enforced before PURISTA parses JSON, form, or text input, including when a
+client streams a request without a `Content-Length` header. Oversized requests
+receive an RFC 9457 `413 Payload Too Large` response.
+
+Set `maxRequestBodyBytes` explicitly for applications that need larger payloads:
+
+```typescript
+const honoService = await honoV1Service.getInstance(eventBridge, {
+  serviceConfig: {
+    maxRequestBodyBytes: 10 * 1024 * 1024, // 10 MiB
+  },
+})
+```
+
+This limit bounds a single request before parsing. Configure authentication,
+rate limiting, timeouts, and deployment-level resource limits for broader
+resource-exhaustion protection.
+
 ## Community servers
 
 | name           | category                                                               | package   | documentation |
