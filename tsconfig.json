@@ -4,15 +4,13 @@
 	"compilerOptions": {
 		"strictNullChecks": true,
 		"outDir": "dist",
-		"baseUrl": ".",
 		"strict": true,
-		"ignoreDeprecations": "6.0",
 		"module": "es2022",
 		"declaration": true,
 		"removeComments": false,
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"moduleResolution": "Node",
+		"moduleResolution": "Bundler",
 		"allowSyntheticDefaultImports": true,
 		"target": "es2022",
 		"sourceMap": true,
@@ -25,11 +23,7 @@
 		"declarationMap": true,
 		"types": ["vitest/globals", "node"],
 		"noFallthroughCasesInSwitch": true,
-		"useUnknownInCatchVariables": true,
-		"paths": {
-			"@purista/cli": ["packages/cli/src/api/index.ts"],
-			"@purista/*": ["packages/*/src/index.ts"]
-		}
+		"useUnknownInCatchVariables": true
 	},
 	"exclude": ["node_modules", "dist"]
 }

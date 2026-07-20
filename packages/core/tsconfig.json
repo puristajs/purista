@@ -6,7 +6,6 @@
 		"declaration": true,
 		"sourceMap": false,
 		"declarationMap": true,
-		"baseUrl": ".",
 		"paths": {
 			"@purista/core": ["./src/index.ts"]
 		},

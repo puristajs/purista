@@ -1,10 +1,9 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
-			"@purista/cli": ["packages/cli/src/api/index.ts"],
-			"@purista/*": ["packages/*/src/index.ts"]
+			"@purista/cli": ["./packages/cli/src/api/index.ts"],
+			"@purista/*": ["./packages/*/src/index.ts"]
 		}
 	},
 	"exclude": [

@@ -2,7 +2,6 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"strictNullChecks": true,
-		"baseUrl": ".",
 		"outDir": "./dist",
 		"declaration": true,
 		"paths": {},

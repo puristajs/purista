@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "npm run dev -w examples/fullexample",
-		"build": "npm run build --workspaces --if-present && npm run lint",
+		"build": "npm run build -w @purista/core && npm run build --workspaces --if-present && npm run lint",
 		"lint": "npx @biomejs/biome check",
 		"lint:fix": "npx @biomejs/biome check --write",
 		"test": "node ./scripts/runWithDockerHost.mjs vitest",
@@ -47,6 +47,7 @@
 		"@biomejs/biome": "^2.5.2",
 		"@types/node": "^26.1.0",
 		"@types/sinon": "^22.0.0",
+		"@typescript/native": "npm:typescript@^7.0.2",
 		"@vitest/coverage-v8": "^4.1.10",
 		"check-dependency-version-consistency": "^6.0.0",
 		"git-cliff": "^2.13.1",
@@ -57,7 +58,7 @@
 		"ts-node": "^10.9.2",
 		"tsx": "^4.23.0",
 		"typedoc": "^0.28.20",
-		"typescript": "^6.0.3",
+		"typescript": "npm:@typescript/typescript6@^6.0.2",
 		"vitest": "^4.1.10"
 	},
 	"packageManager": "npm@11.18.0",
