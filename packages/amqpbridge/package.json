@@ -1,6 +1,6 @@
 {
 	"name": "@purista/amqpbridge",
-	"version": "3.2.2",
+	"version": "3.2.3",
 	"description": "AMQP eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
