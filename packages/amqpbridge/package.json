@@ -34,17 +34,17 @@
 	},
 	"devDependencies": {
 		"@types/amqplib": "^0.10.8",
-		"@types/node": "^26.1.1",
+		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",
-		"sinon": "^22.0.0",
+		"sinon": "^22.1.0",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
-		"@opentelemetry/resources": "^2.9.0",
-		"@opentelemetry/sdk-trace-node": "^2.9.0",
+		"@opentelemetry/resources": "^2.10.0",
+		"@opentelemetry/sdk-trace-node": "^2.10.0",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
-		"@opentelemetry/instrumentation-amqplib": "^0.67.0",
+		"@opentelemetry/instrumentation-amqplib": "^0.68.0",
 		"@purista/core": "*",
 		"amqplib": "^2.0.1"
 	},

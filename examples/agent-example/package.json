@@ -22,18 +22,18 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^26.1.1",
+		"@types/node": "^26.2.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
-		"tsx": "^4.23.1",
+		"tsx": "^4.23.12",
 		"typescript": "npm:@typescript/typescript6@^6.0.2",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
-		"@hono/node-server": "^2.0.10",
+		"@hono/node-server": "^2.1.0",
 		"@purista/core": "*",
-		"@purista/harness-openai": "^1.7.1",
+		"@purista/harness-openai": "^1.7.3",
 		"@purista/hono-http-server": "*",
-		"@scalar/hono-api-reference": "^0.11.11",
+		"@scalar/hono-api-reference": "^0.11.13",
 		"dotenv": "^17.4.2",
 		"zod": "^4.4.3"
 	}

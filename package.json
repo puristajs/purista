@@ -44,27 +44,27 @@
 		"web"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.4",
-		"@types/node": "^26.1.1",
+		"@biomejs/biome": "^2.5.8",
+		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
 		"@vitest/coverage-v8": "^4.1.10",
 		"check-dependency-version-consistency": "^6.0.0",
 		"git-cliff": "^2.13.1",
-		"npm-check-updates": "^22.2.9",
+		"npm-check-updates": "^23.0.2",
 		"rimraf": "^6.1.3",
-		"sinon": "^22.0.0",
-		"testcontainers": "^12.0.4",
+		"sinon": "^22.1.0",
+		"testcontainers": "^12.1.0",
 		"ts-node": "^10.9.2",
-		"tsx": "^4.23.1",
+		"tsx": "^4.23.12",
 		"typedoc": "^0.28.20",
 		"typescript": "npm:@typescript/typescript6@^6.0.2",
 		"vitest": "^4.1.10"
 	},
-	"packageManager": "npm@11.18.0",
+	"packageManager": "npm@12.0.2",
 	"overrides": {
-		"protobufjs": "7.6.4",
-		"vite": "8.1.3"
+		"protobufjs": "8.7.2",
+		"vite": "8.2.1"
 	},
 	"engines": {
 		"node": ">=24.15.0"
