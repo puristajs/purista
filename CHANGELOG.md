@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Miscellaneous Tasks
+
+- Refresh dependencies ([#349](https://github.com/orhun/git-cliff/issues/349))
+
+## [3.2.3] - 2026-07-20
+
 ### Bug Fixes
 
 - Limit request body size ([#328](https://github.com/orhun/git-cliff/issues/328))
@@ -12,6 +18,7 @@ All notable changes to this project will be documented in this file.
 
 - Update dependencies ([#329](https://github.com/orhun/git-cliff/issues/329))
 - Update ai harness to 1.7.1 ([#330](https://github.com/orhun/git-cliff/issues/330))
+- V3.2.3 ([#331](https://github.com/orhun/git-cliff/issues/331))
 
 ## [3.2.2] - 2026-07-07
 
