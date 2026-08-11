@@ -21,14 +21,14 @@
 		"test": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@types/node": "^26.1.1",
+		"@types/node": "^26.2.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
-		"tsx": "^4.23.1",
+		"tsx": "^4.23.12",
 		"typescript": "npm:@typescript/typescript6@^6.0.2"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
-		"@opentelemetry/sdk-metrics": "^2.9.0",
+		"@opentelemetry/sdk-metrics": "^2.10.0",
 		"@purista/core": "*",
 		"zod": "^4.4.3"
 	}

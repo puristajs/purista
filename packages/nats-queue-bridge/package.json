@@ -33,8 +33,8 @@
 		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
 	},
 	"devDependencies": {
-		"@testcontainers/nats": "^12.0.4",
-		"@types/node": "^26.1.1",
+		"@testcontainers/nats": "^12.1.0",
+		"@types/node": "^26.2.0",
 		"vitest": "^4.1.10"
 	},
 	"dependencies": {
