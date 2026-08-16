@@ -29,7 +29,11 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <div class="arch-blocks">
         <div class="arch-block">
           <span class="arch-block-label site-mono">Harness</span>
-          <p>Compiled definition of models, tools, skills, agents, workflows, defaults, and adapters. The harness is the declaration of what capabilities exist in your system.</p>
+          <p>Compiled definition of models, tools, skills, agents, workflows, defaults, adapters, and imported static modules. The harness is the declaration of what capabilities exist in your system.</p>
+        </div>
+        <div class="arch-block">
+          <span class="arch-block-label site-mono">Static module</span>
+          <p>Typed, local application code that contributes reusable configuration. Modules are explicitly imported and composed; they are never discovered, downloaded, hot-reloaded, or allowed to take ownership of application workflows.</p>
         </div>
         <div class="arch-block">
           <span class="arch-block-label site-mono">Session</span>
@@ -199,7 +203,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <div class="arch-adapter-head">
             <span class="arch-adapter-name site-mono">MCP Tools</span>
           </div>
-          <p>Connect to any Model Context Protocol server. Stdio runs through the sandbox executor. HTTP calls remote endpoints. Both sides validate schemas before registering tools to the agent.</p>
+          <p>Connect explicitly selected tools from modern Model Context Protocol servers. Stdio runs through the sandbox executor; HTTP uses the current MCP transport. Both sides validate schemas before a tool becomes available to an agent.</p>
           <ul class="arch-adapter-list">
             <li><code class="site-mono" style="font-size:0.82em">mcp_stdio</code> — local server through sandbox executor</li>
             <li><code class="site-mono" style="font-size:0.82em">mcp_http</code> — remote endpoint over HTTP</li>

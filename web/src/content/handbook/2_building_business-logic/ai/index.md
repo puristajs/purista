@@ -63,6 +63,8 @@ flowchart TD
   Harness --> Runtime["local durable runtime checkpoints"]
   Harness --> Workspace["durable workspace"]
   Harness --> State["state store"]
+  Harness --> Modules["static modules"]
+  Harness --> Plugins["Agent Plugins inspection"]
 ```
 
 There are two orchestration levels:
@@ -73,6 +75,20 @@ There are two orchestration levels:
 | PURISTA level | Queue-backed agents, commands, streams, and other services invoke each other through declared boundaries. | Each attached agent is its own PURISTA runtime capability and can have its own queue, lifecycle, model bindings, state store, and sandbox. |
 
 Use the harness level for tightly coupled reasoning steps that should share one session, memory, history, and sandbox. Use the PURISTA level for larger business workflows where independent agents need their own queue lifecycle, retries, ownership boundaries, and operational isolation.
+
+## Composition and interoperability
+
+Use a **static module** when local, imported TypeScript configuration should be
+reused across harnesses. A module contributes typed definitions such as model,
+tool, skill, or agent configuration, but it does not discover code, download
+packages, hot-reload, or own your application workflow. The application keeps
+ownership of tenant state, authorization, integration bindings, and orchestration.
+
+Use the Agent Plugins integration when a team wants to inspect the open Agent
+Plugins format and deliberately project approved skills and MCP servers into its
+own harness. Plugin files are data, not executable extensions; no plugin hook or
+JavaScript is loaded. See [Agent Plugins](/harness/agent-plugins/) for the trust
+and sandbox boundary.
 
 ## When to use
 
