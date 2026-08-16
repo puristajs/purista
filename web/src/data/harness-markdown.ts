@@ -101,12 +101,12 @@ The first-party \`@purista/harness-agent-plugins\` package validates the Agent P
 
 - Plugins are not executable code. The integration does not load plugin JavaScript, hooks, shell snippets, or arbitrary packages.
 - A plugin declaration does not grant tools to every agent. Skills and MCP tools are selected explicitly per harness or agent.
-- Applications own plugin trust, identity, licensing, locks, updates, credentials, network policy, and sandbox constraints.
+- Applications own plugin trust, identity, reviewed digest locks, licensing, updates, credentials, network policy, and sandbox constraints.
 - Diagnostics and provenance are structured and content-safe; local paths, credentials, prompts, and tool results are not telemetry data.
 
 ## MCP policy
 
-MCP uses the modern 2026-07-28 protocol and v2 MCP client packages only. Stdio and streamable HTTP transports have no legacy negotiation or compatibility fallback. The application owns each executable, endpoint, sandbox, environment, timeout, egress rule, and tool allowlist.
+MCP uses the modern 2026-07-28 protocol and v2 MCP client packages only. Stdio and streamable HTTP transports have no legacy negotiation or compatibility fallback. A trusted stdio plugin needs an existing caller-owned data directory plus an isolating sandbox that can spawn and immutably mount its digest-reviewed package root. The application owns endpoint policy, headers, credentials, timeouts, egress rules, and each tool allowlist; plugin-declared HTTP headers are never forwarded and redirects are rejected.
 
 ## Choose the right composition shape
 

@@ -55,7 +55,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       </div>
       <ol class="plugin-flow" aria-label="Agent plugin adoption flow">
         <li><span>01</span><div><strong>Inspect</strong><p>Read a local plugin through containment checks and local schema validation.</p></div></li>
-        <li><span>02</span><div><strong>Review</strong><p>Apply your own allowlist, lock, identity, license, and update policy.</p></div></li>
+        <li><span>02</span><div><strong>Review</strong><p>Apply your own allowlist, reviewed SHA-256 digest lock, identity, license, and update policy.</p></div></li>
         <li><span>03</span><div><strong>Project</strong><p>Select individual skills and MCP tools for a specific harness or agent.</p></div></li>
         <li><span>04</span><div><strong>Operate</strong><p>Run selected MCP servers with the application-owned sandbox, credentials, network, and telemetry policy.</p></div></li>
       </ol>
@@ -72,11 +72,11 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <div class="plugin-columns">
         <div>
           <h3>For stdio</h3>
-          <p>The application supplies the executable, sandbox, working directory, environment, resource limits, and allowed commands. A plugin declaration alone does not receive host shell access or secrets.</p>
+          <p>A trusted declaration provides only reviewed command data. The application supplies an existing data directory and an isolating sandbox that can both spawn the process and mount the reviewed package root immutably. A plugin never receives host shell access or secrets.</p>
         </div>
         <div>
           <h3>For HTTP</h3>
-          <p>The application owns the endpoint policy, authentication, egress rules, timeouts, and tool selection. Treat remote MCP output as untrusted external input.</p>
+          <p>The application owns the endpoint policy, authentication, egress rules, timeouts, headers, and tool selection. Package-declared headers are never forwarded, and plugin redirects are rejected. Treat remote MCP output as untrusted external input.</p>
         </div>
         <div>
           <h3>For agents</h3>
