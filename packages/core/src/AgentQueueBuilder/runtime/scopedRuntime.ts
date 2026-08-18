@@ -54,6 +54,7 @@ export async function initializeAttachedAgentRuntimes(
 				models: aiOptions.models as never,
 				runtime: aiOptions.runtime,
 				workspaceStore: aiOptions.workspaceStore,
+				harness: aiOptions.harness,
 				skillRuntime,
 				logger: aiOptions.logger,
 				stateStore: aiOptions.stateStore,
@@ -90,7 +91,10 @@ export async function initializeAttachedAgentRuntimes(
  * precedence over the shared sandbox, and agents without a sandbox policy fall
  * back to the shared `ai.sandbox`.
  */
-export function resolveAttachedAgentSandbox(policy: AgentSandboxPolicy | undefined, runtimeSandbox: unknown): unknown {
+export function resolveAttachedAgentSandbox(
+	policy: AgentSandboxPolicy | undefined,
+	runtimeSandbox: AgentRuntimeOptions<Record<string, AgentModelBinding>>['sandbox'],
+) {
 	if (!policy) {
 		return runtimeSandbox
 	}

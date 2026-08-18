@@ -1,9 +1,12 @@
 import type {
 	BuiltinToolName,
 	DurableRuntime,
+	DurableWorkspacePolicy,
+	DurableWorkspaceStore,
 	GovernanceConfig,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
+	HarnessModule,
 	WorkflowDefinition as HarnessWorkflowDefinition,
 	ModelAlias,
 	ModelCapability,
@@ -11,8 +14,11 @@ import type {
 	ModelHandle,
 	ModelProvider,
 	RunEvent,
+	Sandbox,
 	Session,
+	StateStore,
 	TelemetryOptions,
+	ToolsConfig,
 } from '@purista/harness'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
@@ -178,7 +184,20 @@ export type AgentResponseModeOptions = {
 }
 
 /** Session behavior used by the harness runtime for each agent run. */
-export type AgentSessionPolicy = { mode: 'ephemeral' } | { mode: 'conversation'; payloadPath: readonly string[] }
+export type AgentSessionPolicy =
+	| { mode: 'ephemeral' }
+	| {
+			mode: 'conversation'
+			/** Path in the validated payload that resolves to the logical conversation id. */
+			payloadPath: readonly string[]
+			/**
+			 * Isolation scope for the logical conversation id. Defaults to `'tenant'`.
+			 * A tenant-scoped conversation requires the transport context to provide
+			 * `tenantId`; choose `'global'` only for an explicitly single-tenant,
+			 * non-sensitive conversation namespace.
+			 */
+			scope?: 'tenant' | 'global'
+	  }
 
 /** Optional sandbox adapter configuration passed through to the agent runtime. */
 export type AgentSandboxPolicy = {
@@ -191,7 +210,7 @@ export type AgentSandboxPolicy = {
 	 */
 	enabled?: boolean
 	/** Runtime-specific sandbox adapter. Takes precedence over the shared `ai.sandbox`. */
-	adapter?: unknown
+	adapter?: Sandbox<any>
 }
 
 /** Resolves a declared agent skill name to a runtime skill directory. */
@@ -275,20 +294,11 @@ export type AgentSkillRuntimeResolved = {
 /** Capability required by a durable attached-agent workspace policy. */
 export type AgentWorkspaceCapabilityRequirement = string
 
-/** Adapter-neutral durable workspace policy mirrored from `@purista/harness`. */
-export type AgentDurableWorkspaceStorePolicy = {
-	retention?: Record<string, unknown>
-	encryption?: Record<string, unknown>
-	quota?: Record<string, unknown>
-}
+/** Durable workspace policy forwarded to `@purista/harness`. */
+export type AgentDurableWorkspaceStorePolicy = Partial<DurableWorkspacePolicy>
 
-/** Structural durable workspace store accepted until the harness package version is bumped. */
-export type AgentDurableWorkspaceStore = {
-	readonly capabilities?: readonly string[]
-	readonly info?: {
-		readonly capabilities?: readonly string[]
-	}
-}
+/** Durable workspace store supplied by the application at service instantiation time. */
+export type AgentDurableWorkspaceStore = DurableWorkspaceStore
 
 /** Durable workspace behavior declared by an attached agent manifest. */
 export type AgentWorkspacePolicy = {
@@ -301,6 +311,35 @@ export type AgentWorkspacePolicy = {
 	policy?: AgentDurableWorkspaceStorePolicy
 	/** Cleanup timing requested by the generated agent runtime. */
 	cleanup?: 'on_success' | 'on_terminal' | 'manual'
+}
+
+/**
+ * Application-owned Harness composition supplied at service instantiation time.
+ *
+ * Static modules and tools are intentionally explicit runtime bindings. PURISTA
+ * Core neither discovers Agent Plugins nor evaluates their trust, digests, or
+ * credentials; applications must complete that work before passing approved
+ * contributions here. Individual Harness agent definitions still decide which
+ * tool ids are available to a run.
+ *
+ * @example
+ * ```ts
+ * service.getInstance(eventBridge, {
+ *   ai: {
+ *     models,
+ *     harness: {
+ *       modules: [supportModule],
+ *       tools: approvedPluginBindings.tools,
+ *     },
+ *   },
+ * })
+ * ```
+ */
+export type AgentHarnessRuntimeOptions = {
+	/** Static, application-owned modules applied before PURISTA's direct bindings. */
+	modules?: readonly HarnessModule<any, any, string>[]
+	/** Explicit application-approved tool registry available for attached Harness definitions to allowlist. */
+	tools?: ToolsConfig
 }
 
 /** HTTP projection metadata for the generated agent command or stream. */
@@ -425,9 +464,6 @@ export type AgentHandlerContext<
 		session: Session<any>
 		models: AgentHandlerModelBindings<Models>
 		skills: AgentSkillContext
-		events: {
-			emit(event: RunEvent): Promise<void>
-		}
 	}
 	/** Typed command tools and child-agent calls declared on the builder. */
 	invoke: {
@@ -622,10 +658,12 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
 	workspaceStore?: AgentDurableWorkspaceStore
+	/** Explicit Harness modules and tools owned by the application runtime. */
+	harness?: AgentHarnessRuntimeOptions
 	skills?: AgentSkillRuntimeOptions
-	stateStore?: unknown
+	stateStore?: StateStore
 	logger?: PuristaLogger
-	sandbox?: unknown
+	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
 }

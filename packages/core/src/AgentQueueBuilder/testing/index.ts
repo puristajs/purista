@@ -12,6 +12,7 @@ import type {
 	ObjectStreamChunk,
 	RerankRequest,
 	RerankResponse,
+	Sandbox,
 	TextRequest,
 	TextResponse,
 	TextStreamChunk,
@@ -23,9 +24,11 @@ import { createAgentExecutor } from '../runtime/executor.js'
 import { resolveAgentRuntimeSkills } from '../runtime/skills.js'
 import type {
 	AgentHandlerContext,
+	AgentHarnessRuntimeOptions,
 	AgentModelBinding,
 	AgentRunIdentity,
 	AgentRuntimeModelBindings,
+	AgentRuntimeOptions,
 	AgentSkillContext,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
@@ -90,9 +93,6 @@ export function createAgentContextMock<
 			session: createSessionMock(identity.harnessSessionId),
 			models: (input.models ?? {}) as AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models'],
 			skills: input.skills ?? emptySkillContext(),
-			events: {
-				emit: async () => undefined,
-			},
 		},
 		invoke: {
 			tools: {},
@@ -228,6 +228,16 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	 * ```
 	 */
 	skills?: AgentSkillRuntimeOptions
+	/** Explicit static Harness modules and tools to bind for this test runtime. */
+	harness?: AgentHarnessRuntimeOptions
+	/** Optional durable runtime for workflow replay tests. */
+	runtime?: AgentRuntimeOptions<Models>['runtime']
+	/** Optional durable workspace store for workflow replay tests. */
+	workspaceStore?: AgentRuntimeOptions<Models>['workspaceStore']
+	/** Optional sandbox adapter used to verify sandbox-backed agent behavior. */
+	sandbox?: Sandbox
+	/** Optional state store for conversation/session lifecycle tests. */
+	stateStore?: AgentRuntimeOptions<Models>['stateStore']
 	logger?: PuristaLogger
 	governance?: GovernanceConfig<any>
 }
@@ -242,6 +252,11 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		definition,
 		manifest: definition.manifest,
 		models: options.models,
+		harness: options.harness,
+		runtime: options.runtime,
+		workspaceStore: options.workspaceStore,
+		sandbox: options.sandbox,
+		stateStore: options.stateStore,
 		skillRuntime,
 		logger: options.logger,
 		governance: options.governance,
@@ -288,6 +303,10 @@ function createSessionMock(id: string) {
 		id,
 		agents: {},
 		workflows: {},
+		childTasks: {
+			get: async () => undefined,
+			list: async () => [],
+		},
 		memory: {
 			read: async () => undefined,
 			write: async () => undefined,
@@ -301,6 +320,7 @@ function createSessionMock(id: string) {
 		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
+		release: async () => undefined,
 		close: async () => undefined,
 	}
 }

@@ -1,4 +1,4 @@
-import type { RunEvent, Session } from '@purista/harness'
+import type { Session } from '@purista/harness'
 import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
@@ -32,7 +32,6 @@ export type CreateAgentHandlerContextInput<
 	commandTools?: readonly AllowedCommandToolDefinition[]
 	agentTools?: readonly AllowedAgentDefinition[]
 	serviceName: string
-	emitEvent: (event: RunEvent) => Promise<void>
 	logger: PuristaLogger
 	signal: AbortSignal
 }
@@ -69,9 +68,6 @@ export function createAgentHandlerContext<
 			session: input.session,
 			models: input.models,
 			skills: input.skills,
-			events: {
-				emit: input.emitEvent,
-			},
 		},
 		invoke: {
 			tools: createCommandToolInvokeMap(input.appContext.service, input.commandTools ?? []),

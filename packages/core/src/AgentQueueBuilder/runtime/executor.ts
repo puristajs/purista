@@ -1,22 +1,33 @@
+import { createHash, randomUUID } from 'node:crypto'
 import {
 	type DurableRuntime,
+	type DurableWorkspaceStore,
 	defineHarness,
 	type GovernanceConfig,
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
+	type HarnessModule,
 	type WorkflowDefinition as HarnessWorkflowDefinition,
+	type InvokeOptions,
 	type ModelAlias,
 	type RunEvent,
+	type Sandbox,
 	type Session,
+	type StateStore,
 	type TelemetryOptions,
+	type ToolsConfig,
 } from '@purista/harness'
+import { z } from 'zod'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import type {
 	AgentDefinition,
+	AgentHandlerModelBindings,
+	AgentHarnessRuntimeOptions,
 	AgentManifest,
 	AgentModelBinding,
+	AgentRunIdentity,
 	AgentRuntimeInvocationInput,
 	AgentRuntimeModelBindings,
 	AgentRuntimeStreamInvocationInput,
@@ -26,7 +37,7 @@ import { createAgentHandlerContext } from './context.js'
 import { createAgentRunEvent } from './events.js'
 import { deriveAgentRunIdentity } from './identity.js'
 import { createPuristaHarnessLogger } from './logger.js'
-import { createHandlerModelBindings, resolveRuntimeModelBindings } from './modelBindings.js'
+import { resolveRuntimeModelBindings } from './modelBindings.js'
 import { createAgentSkillContext } from './skills.js'
 import { createProviderSseEvent } from './sseEvents.js'
 import { createPuristaHarnessStateStore } from './stateStore.js'
@@ -36,13 +47,22 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	manifest: AgentManifest<Models>
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
-	workspaceStore?: unknown
+	workspaceStore?: DurableWorkspaceStore
+	harness?: AgentHarnessRuntimeOptions
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
-	stateStore?: unknown
-	sandbox?: unknown
+	stateStore?: StateStore
+	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
+}
+
+type RunFunctionInvocation = {
+	payload: unknown
+	parameter: unknown
+	identity: AgentRunIdentity
+	appContext: Record<string, unknown>
+	session: Session<any>
 }
 
 export function createAgentExecutor<Models extends Record<string, AgentModelBinding>>(
@@ -55,6 +75,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 	private readonly harness?: Harness<any>
 	private readonly resolvedModels: Record<string, ModelAlias>
 	private readonly logger?: PuristaLogger
+	private readonly runFunctionInvocations = new Map<string, RunFunctionInvocation>()
 
 	constructor(private readonly input: CreateAgentExecutorInput<Models>) {
 		this.logger = input.logger
@@ -99,8 +120,17 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			name: `${this.input.manifest.serviceName}.${this.input.manifest.agentName}`,
 		})
 			.logger(createPuristaHarnessLogger(this.input.logger))
-			.state(createPuristaHarnessStateStore(this.input.stateStore as never))
-			.models(this.resolvedModels)
+			.state(createPuristaHarnessStateStore(this.input.stateStore))
+
+		for (const module of this.input.harness?.modules ?? []) {
+			builder = builder.use(module as HarnessModule)
+		}
+
+		builder = builder.models(this.resolvedModels)
+
+		if (this.input.harness?.tools && Object.keys(this.input.harness.tools).length > 0) {
+			builder = builder.tools(this.input.harness.tools as ToolsConfig)
+		}
 
 		if (this.input.telemetry) {
 			// Secure by default: never capture prompt/completion content unless the
@@ -117,7 +147,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		}
 
 		if (this.input.sandbox) {
-			builder = builder.sandbox(this.input.sandbox as never)
+			builder = builder.sandbox(this.input.sandbox)
 		}
 
 		if (this.input.runtime) {
@@ -176,8 +206,14 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.agents({
 				[this.input.manifest.agentName]: {
 					model: Object.keys(this.resolvedModels)[0],
-					instructions: 'Run the PURISTA custom agent handler.',
-					handler: async () => undefined,
+					input: z.object({ invocationId: z.string().uuid() }),
+					output: z.unknown(),
+					instructions: 'Run the PURISTA custom agent handler through the Harness runtime.',
+					handler: async (context: {
+						input: { invocationId: string }
+						models: AgentHandlerModelBindings<Models>
+						signal: AbortSignal
+					}) => this.runFunctionThroughHarness(context.input.invocationId, context),
 				},
 			})
 		}
@@ -197,53 +233,44 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			payload: input.payload,
 		})
 		const session = await this.getSession(identity.harnessSessionId)
-		const emitWrapped = async (event: RunEvent) => {
-			await emit?.(createAgentRunEvent(identity, event))
-		}
+		try {
+			const invokeOptions = this.createInvokeOptions(identity, signal)
+			const emitWrapped = async (event: RunEvent) => {
+				await emit?.(createAgentRunEvent(identity, event))
+			}
 
-		let output: unknown
-		if (this.input.definition.execution.kind === 'runFunction') {
-			const handlerModels = createHandlerModelBindings(this.resolvedModels, {
-				runId: identity.runId,
-				agentId: this.input.manifest.agentName,
-				emit: emitWrapped,
-			})
-			const context = createAgentHandlerContext({
-				payload: input.payload,
-				parameter: input.parameter,
-				identity,
-				appContext: input.appContext,
-				metrics: input.appContext.metrics as never,
-				session,
-				models: handlerModels,
-				skills: this.input.skillRuntime
-					? createAgentSkillContext(this.input.skillRuntime.catalog)
-					: createAgentSkillContext([]),
-				commandTools: this.input.manifest.allowedCommands,
-				agentTools: this.input.manifest.allowedAgents,
-				serviceName: this.input.manifest.serviceName,
-				emitEvent: emitWrapped,
-				logger: this.resolvePuristaLogger(input.appContext),
-				signal,
-			})
-			output = await this.input.definition.execution.handler(context)
-		} else if (this.input.definition.execution.kind === 'harnessAgent') {
-			const sessionAny = session as any
-			const agentName = this.input.manifest.agentName
-			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'agent', signal)
-				: await sessionAny.agents[agentName].prompt(input.payload, { signal })
-		} else {
-			const sessionAny = session as any
-			const agentName = this.input.manifest.agentName
-			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', signal)
-				: await sessionAny.workflows[agentName].prompt(input.payload, { signal })
-		}
+			let output: unknown
+			if (this.input.definition.execution.kind === 'runFunction') {
+				output = this.harness
+					? await this.invokeRunFunctionThroughHarness({
+							input,
+							identity,
+							session,
+							streaming,
+							emitWrapped,
+							signal,
+						})
+					: await this.runFunctionWithoutHarness({ input, identity, session, signal })
+			} else if (this.input.definition.execution.kind === 'harnessAgent') {
+				const sessionAny = session as any
+				const agentName = this.input.manifest.agentName
+				output = streaming
+					? await this.streamHarnessCall(session, input.payload, emitWrapped, 'agent', invokeOptions)
+					: await sessionAny.agents[agentName].prompt(input.payload, invokeOptions)
+			} else {
+				const sessionAny = session as any
+				const agentName = this.input.manifest.agentName
+				output = streaming
+					? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', invokeOptions)
+					: await sessionAny.workflows[agentName].prompt(input.payload, invokeOptions)
+			}
 
-		const validated = await validateOutput(this.input.definition.outputSchema, output)
-		await emitSuccessEvent(this.input.manifest, input.appContext, validated)
-		return { identity, output: validated }
+			const validated = await validateOutput(this.input.definition.outputSchema, output)
+			await emitSuccessEvent(this.input.manifest, input.appContext, validated)
+			return { identity, output: validated }
+		} finally {
+			await session.release()
+		}
 	}
 
 	private async getSession(sessionId: string): Promise<Session<any>> {
@@ -260,11 +287,110 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 	private withDeclaredSkills(definition: HarnessAgentDefinition<any>) {
 		const skillNames = Object.keys(this.input.skillRuntime?.harnessSkills ?? {})
-		if (skillNames.length === 0) return definition
 		return {
 			...definition,
-			skills: skillNames,
+			...(skillNames.length > 0 ? { skills: skillNames } : {}),
 			...(this.input.manifest.builtInTools !== true ? { builtinTools: this.input.manifest.builtInTools } : {}),
+		}
+	}
+
+	private async invokeRunFunctionThroughHarness(args: {
+		input: AgentRuntimeInvocationInput
+		identity: AgentRunIdentity
+		session: Session<any>
+		streaming: boolean
+		emitWrapped: (event: RunEvent) => Promise<void>
+		signal: AbortSignal
+	}): Promise<unknown> {
+		const invocationId = randomUUID()
+		this.runFunctionInvocations.set(invocationId, {
+			payload: args.input.payload,
+			parameter: args.input.parameter,
+			identity: args.identity,
+			appContext: args.input.appContext,
+			session: args.session,
+		})
+		try {
+			const sessionAny = args.session as any
+			const invokeOptions: InvokeOptions = { signal: args.signal }
+			return args.streaming
+				? await this.streamHarnessCall(args.session, { invocationId }, args.emitWrapped, 'agent', invokeOptions)
+				: await sessionAny.agents[this.input.manifest.agentName].prompt({ invocationId }, invokeOptions)
+		} finally {
+			this.runFunctionInvocations.delete(invocationId)
+		}
+	}
+
+	private async runFunctionWithoutHarness(args: {
+		input: AgentRuntimeInvocationInput
+		identity: AgentRunIdentity
+		session: Session<any>
+		signal: AbortSignal
+	}): Promise<unknown> {
+		if (this.input.definition.execution.kind !== 'runFunction') {
+			throw new Error('PURISTA custom agent execution is unavailable.')
+		}
+		const context = createAgentHandlerContext({
+			payload: args.input.payload,
+			parameter: args.input.parameter,
+			identity: args.identity,
+			appContext: args.input.appContext,
+			metrics: args.input.appContext.metrics as never,
+			session: args.session,
+			models: {} as AgentHandlerModelBindings<Models>,
+			skills: this.input.skillRuntime
+				? createAgentSkillContext(this.input.skillRuntime.catalog)
+				: createAgentSkillContext([]),
+			commandTools: this.input.manifest.allowedCommands,
+			agentTools: this.input.manifest.allowedAgents,
+			serviceName: this.input.manifest.serviceName,
+			logger: this.resolvePuristaLogger(args.input.appContext),
+			signal: args.signal,
+		})
+		return this.input.definition.execution.handler(context)
+	}
+
+	private async runFunctionThroughHarness(
+		invocationId: string,
+		context: { models: AgentHandlerModelBindings<Models>; signal: AbortSignal },
+	): Promise<unknown> {
+		const invocation = this.runFunctionInvocations.get(invocationId)
+		if (!invocation || this.input.definition.execution.kind !== 'runFunction') {
+			throw new Error('PURISTA custom agent invocation is no longer active.')
+		}
+		const handlerContext = createAgentHandlerContext({
+			payload: invocation.payload,
+			parameter: invocation.parameter,
+			identity: invocation.identity,
+			appContext: invocation.appContext,
+			metrics: invocation.appContext.metrics as never,
+			session: invocation.session,
+			models: context.models,
+			skills: this.input.skillRuntime
+				? createAgentSkillContext(this.input.skillRuntime.catalog)
+				: createAgentSkillContext([]),
+			commandTools: this.input.manifest.allowedCommands,
+			agentTools: this.input.manifest.allowedAgents,
+			serviceName: this.input.manifest.serviceName,
+			logger: this.resolvePuristaLogger(invocation.appContext),
+			signal: context.signal,
+		})
+		return this.input.definition.execution.handler(handlerContext)
+	}
+
+	private createInvokeOptions(identity: AgentRunIdentity, signal: AbortSignal): InvokeOptions {
+		const workspacePolicy = this.input.manifest.workspacePolicy
+		if (workspacePolicy?.mode !== 'durable') {
+			return { signal }
+		}
+		return {
+			signal,
+			durable: {
+				// Harness durable ids have a strict portable character set. A digest
+				// keeps arbitrary transport ids stable without treating them as ids.
+				runId: `purista:${createHash('sha256').update(identity.runId).digest('hex')}`,
+				...(workspacePolicy.policy ? { workspacePolicy: workspacePolicy.policy } : {}),
+			},
 		}
 	}
 
@@ -273,7 +399,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		payload: unknown,
 		emitWrapped: (event: RunEvent) => Promise<void>,
 		kind: 'agent' | 'workflow',
-		signal: AbortSignal,
+		options: InvokeOptions,
 	) {
 		let output: unknown
 		let finished = false
@@ -281,8 +407,8 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		const agentName = this.input.manifest.agentName
 		const stream =
 			kind === 'agent'
-				? sessionAny.agents[agentName].stream(payload, { signal })
-				: sessionAny.workflows[agentName].stream(payload, { signal })
+				? sessionAny.agents[agentName].stream(payload, options)
+				: sessionAny.workflows[agentName].stream(payload, options)
 
 		for await (const event of stream as AsyncIterable<RunEvent>) {
 			await emitWrapped(event)
@@ -311,6 +437,10 @@ function createLocalSession(id: string): Session<any> {
 		id,
 		agents: {},
 		workflows: {},
+		childTasks: {
+			get: async () => undefined,
+			list: async () => [],
+		},
 		memory: {
 			read: async () => undefined,
 			write: async () => undefined,
@@ -324,6 +454,7 @@ function createLocalSession(id: string): Session<any> {
 		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
+		release: async () => undefined,
 		close: async () => undefined,
 	} as Session<any>
 }

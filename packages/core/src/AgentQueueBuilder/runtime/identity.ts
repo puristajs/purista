@@ -18,7 +18,12 @@ export type DeriveAgentRunIdentityInput = {
 
 export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): AgentRunIdentity {
 	const transportMessageId = requireNonEmptyString(input.message.id, 'message.id')
-	const harnessSessionId = resolveHarnessSessionId(input.manifest, transportMessageId, input.payload)
+	const harnessSessionId = resolveHarnessSessionId(
+		input.manifest,
+		transportMessageId,
+		input.payload,
+		input.message.tenantId,
+	)
 
 	return {
 		transportMessageId,
@@ -40,6 +45,7 @@ export function resolveHarnessSessionId(
 	manifest: Pick<AgentManifest, 'agentName' | 'serviceName' | 'serviceVersion' | 'session'>,
 	transportMessageId: string,
 	payload: unknown,
+	tenantId?: unknown,
 ): string {
 	if (manifest.session.mode === 'ephemeral') {
 		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:message:${transportMessageId}`
@@ -51,9 +57,27 @@ export function resolveHarnessSessionId(
 			`Agent conversation session path "${manifest.session.payloadPath.join('.')}" must resolve to a non-empty string`,
 		)
 	}
-	// Namespace by service/version/agent so two agents that share the same logical
-	// conversation id never collide on one harness session (cross-agent/tenant leak).
-	return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:conversation:${value}`
+	const prefix = [
+		'agent',
+		encodeSessionSegment(manifest.serviceName),
+		encodeSessionSegment(manifest.serviceVersion),
+		encodeSessionSegment(manifest.agentName),
+	]
+	if ((manifest.session.scope ?? 'tenant') === 'tenant') {
+		const resolvedTenantId = requireNonEmptyString(tenantId, 'message.tenantId')
+		return [
+			...prefix,
+			'tenant',
+			encodeSessionSegment(resolvedTenantId),
+			'conversation',
+			encodeSessionSegment(value),
+		].join(':')
+	}
+	return [...prefix, 'global', 'conversation', encodeSessionSegment(value)].join(':')
+}
+
+function encodeSessionSegment(value: string): string {
+	return encodeURIComponent(value)
 }
 
 function readPayloadPath(payload: unknown, path: readonly string[]) {

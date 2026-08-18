@@ -1,3 +1,4 @@
+import { defineHarnessModule, inMemoryDurableRuntime, inMemoryDurableWorkspaceStore } from '@purista/harness'
 import { z } from 'zod'
 
 import {
@@ -187,6 +188,72 @@ describe('AgentQueueBuilder', () => {
 		expect(chunks.length).toBeGreaterThan(0)
 	})
 
+	it('composes explicit runtime modules before application-approved tool bindings', async () => {
+		const calls: string[] = []
+		const supportModule = defineHarnessModule()('support-module', {
+			register: builder =>
+				builder.tools({
+					module_lookup: {
+						description: 'Look up one ticket from the static support module.',
+						input: z.object({ ticketId: z.string() }),
+						output: z.object({ source: z.literal('module') }),
+						handler: async (_context, input) => {
+							calls.push(`module:${input.ticketId}`)
+							return { source: 'module' as const }
+						},
+					},
+				}),
+		})
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: {},
+			toolCalls: [
+				{ id: 'module-tool', name: 'module_lookup', arguments: { ticketId: 'T-1' } },
+				{ id: 'runtime-tool', name: 'runtime_lookup', arguments: { ticketId: 'T-1' } },
+			],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('runtimeComposition', 'Uses application-provided Harness contributions')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.useBuiltInTools(false)
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Use both approved lookup tools.',
+				output: z.object({ status: z.literal('ok') }),
+				tools: ['module_lookup', 'runtime_lookup'],
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			harness: {
+				modules: [supportModule],
+				tools: {
+					runtime_lookup: {
+						description: 'Look up one ticket from the application runtime.',
+						input: z.object({ ticketId: z.string() }),
+						output: z.object({ source: z.literal('runtime') }),
+						handler: async (_context, input) => {
+							calls.push(`runtime:${input.ticketId}`)
+							return { source: 'runtime' as const }
+						},
+					},
+				},
+			},
+		})
+
+		await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
+		expect(calls).toEqual(['module:T-1', 'runtime:T-1'])
+	})
+
 	it('mirrors opted-in run-function model stream chunks with deterministic source metadata', async () => {
 		const model = createScriptedHarnessModel()
 		model.enqueueTextStream([
@@ -276,7 +343,15 @@ describe('AgentQueueBuilder', () => {
 		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
 
 		expect(final).toBe('hidden')
-		expect(chunks).toHaveLength(0)
+		expect(
+			chunks.some(
+				chunk =>
+					typeof chunk === 'object' &&
+					chunk !== null &&
+					'data' in chunk &&
+					(chunk as { data?: { type?: string } }).data?.type === 'response.output_text.delta',
+			),
+		).toBe(false)
 	})
 
 	it('assigns distinct stream ids for parallel opted-in run-function model streams', async () => {
@@ -364,13 +439,18 @@ describe('AgentQueueBuilder', () => {
 		const service = new ServiceBuilder(serviceInfo)
 		const manifest = service
 			.getAgentQueueBuilder('durableTriage', 'Triage a support ticket with durable workspace replay')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
 			.setWorkspacePolicy({
 				mode: 'durable',
 				policy: {
 					retention: { cleanupMode: 'manual_only' },
 				},
 			})
-			.setRunFunction(async () => ({ status: 'ok' }))
+			.setHarnessWorkflow({
+				input: z.unknown(),
+				output: z.object({ status: z.literal('ok') }),
+				handler: async () => ({ status: 'ok' as const }),
+			})
 			.getManifest()
 
 		expect(manifest.workspacePolicy).toEqual({
@@ -389,6 +469,46 @@ describe('AgentQueueBuilder', () => {
 			},
 		})
 		expect(manifest.runtimeRevision).toMatch(/^rev-/)
+	})
+
+	it('forwards a durable workspace policy through the Core workflow runtime', async () => {
+		const runtime = inMemoryDurableRuntime()
+		const workspaceStore = inMemoryDurableWorkspaceStore()
+		const startWorkspace = workspaceStore.startWorkspace.bind(workspaceStore)
+		let receivedPolicy: unknown
+		workspaceStore.startWorkspace = async options => {
+			receivedPolicy = options.policy
+			return startWorkspace(options)
+		}
+		const workspacePolicy = { retention: { cleanupMode: 'manual_only' as const } }
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('durableRuntime', 'Runs a durable Harness workflow')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setWorkspacePolicy({ mode: 'durable', policy: workspacePolicy })
+			.setHarnessWorkflow({
+				input: z.unknown(),
+				output: z.object({ status: z.literal('ok') }),
+				handler: async () => ({ status: 'ok' as const }),
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: createScriptedHarnessModel(), model: 'fake', capabilities: ['object'] } },
+			runtime,
+			workspaceStore,
+		})
+
+		await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
+		expect(receivedPolicy).toEqual(workspacePolicy)
+	})
+
+	it('rejects durable workspace policy for non-workflow execution', () => {
+		const builder = new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('invalidDurable', 'Invalid durable custom handler')
+			.setWorkspacePolicy({ mode: 'durable' })
+			.setRunFunction(async () => ({ status: 'ok' }))
+
+		expect(() => builder.getManifest()).toThrow('requires setHarnessWorkflow')
 	})
 
 	it('binds declared skills into a harness agent runtime', async () => {

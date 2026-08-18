@@ -608,12 +608,15 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 	/** Return the provider-neutral manifest for this agent without generating core definitions. */
 	getManifest(): AgentManifest<S['Models']> {
-		return this.createManifest(this.resolveExecution().kind)
+		const execution = this.resolveExecution()
+		this.assertWorkspaceExecution(execution)
+		return this.createManifest(execution.kind)
 	}
 
 	/** Generate the attached agent and its queue, worker, command, and stream definitions. */
 	async getDefinition(): Promise<AttachedAgentDefinition<S>> {
 		const execution = this.resolveExecution()
+		this.assertWorkspaceExecution(execution)
 		const manifest = this.createManifest(execution.kind)
 		const runtime: AgentRuntimeRef<Infer<S['OutputSchema']>> = {}
 		const agentDefinition: AgentDefinition<S> = {
@@ -811,6 +814,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private assertNoExecutionDefinition() {
 		if (this.executionDefinitions.length > 0) {
 			throw new Error('AgentQueueBuilder execution definition is already set')
+		}
+	}
+
+	private assertWorkspaceExecution(execution: AgentExecutionDefinition): void {
+		if (this.workspacePolicy?.mode === 'durable' && execution.kind !== 'harnessWorkflow') {
+			throw new Error(
+				'AgentQueueBuilder durable workspace policy requires setHarnessWorkflow(...); Harness durable execution is workflow-only.',
+			)
 		}
 	}
 

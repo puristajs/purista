@@ -71,11 +71,22 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
     sandbox,
     runtime,
     workspaceStore,
+    harness: {
+      modules: [supportModule],
+      tools: approvedTools,
+    },
   },
 })
 ```
 
 Startup fails fast when aliases or capabilities are missing.
+
+`ai.harness.modules` is for static TypeScript modules imported and versioned by
+the application. `ai.harness.tools` is an explicit application-owned tool
+registry; each attached Harness definition still allowlists the tool ids it can
+use. If an application imports Agent Plugins, inspect and approve them outside
+Core first, then pass only its selected tool bindings here. Core does not load
+plugin packages, decide trust, inject credentials, or run plugin hooks.
 
 Governance policy is optional. Do not add governance configuration to generated
 apps or simple agents by default. Use it only when a service needs central
@@ -192,11 +203,17 @@ sandbox snapshot as production durable workspace replay.
 Agent handlers use:
 - `context.payload` and `context.parameter`
 - `context.harness.models.<alias>` with capability-gated methods
-- `context.harness.events.emit(...)`
 - `context.invoke.tools[...]` for declared command tools
 - `context.invoke.agents[...]` for declared child-agent aggregate calls
 - `context.metrics` for service-level and agent-local custom metrics declared on builders
 - `context.logger`
+
+For a custom `setRunFunction(...)` handler, opt in to Harness-native model
+completion events with `context.harness.models.<alias>.object(request,
+context.signal, { emitRunEvents: true })` (and the equivalent text, embed, or
+rerank calls).
+Harness owns run identity, event ordering, redaction, and final status; custom
+handlers cannot forge lifecycle events directly.
 
 ## Optional Governance Policy
 `@purista/harness` owns the generic governance policy contract. PURISTA

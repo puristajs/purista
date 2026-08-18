@@ -63,6 +63,25 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
   </section>
 
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap plugin-grid">
+      <div>
+        <div class="eyebrow">PURISTA integration</div>
+        <h2 class="display display-lg mt-4 mb-6">First-class runtime wiring. No hidden loader.</h2>
+        <p class="lede">PURISTA services pass static Harness modules and already-approved tools through their normal <code class="site-mono">ai.harness</code> runtime configuration. The service still owns its agent definition, queue, tenant boundary, tool allowlist, and deployment lifecycle.</p>
+      </div>
+      <pre class="plugin-code"><code>{`await service.getInstance(eventBridge, {
+  ai: {
+    models,
+    harness: {
+      modules: [supportModule],
+      tools: approvedPluginBindings.tools,
+    },
+  },
+})`}</code></pre>
+    </div>
+  </section>
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="section-head--center mb-12">
         <div class="eyebrow">Modern MCP only</div>
@@ -126,5 +145,6 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
   .plugin-compare { margin: 0; border-top: 1px solid var(--color-line); }
   .plugin-compare > div { padding: 1.1rem 0; border-bottom: 1px solid var(--color-line); }
   .plugin-compare dt { margin-bottom: 0.3rem; color: var(--color-found-hi); font-family: var(--font-mono); font-size: 0.84rem; }
+  .plugin-code { margin: 0; overflow: auto; padding: 1.25rem; border: 1px solid var(--color-line); background: var(--color-bg); color: var(--color-fg); font-size: 0.82rem; line-height: 1.65; }
   @media (max-width: 720px) { .plugin-grid, .plugin-columns { grid-template-columns: 1fr; } .plugin-row { grid-template-columns: 1fr; gap: 0.55rem; } }
 </style>

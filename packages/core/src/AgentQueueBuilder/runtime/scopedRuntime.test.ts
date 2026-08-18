@@ -22,8 +22,8 @@ describe('attached agent scoped runtime', () => {
 	})
 
 	describe('resolveAttachedAgentSandbox', () => {
-		const runtimeSandbox = { kind: 'shared-runtime-sandbox' }
-		const policyAdapter = { kind: 'policy-adapter' }
+		const runtimeSandbox = { kind: 'shared-runtime-sandbox' } as never
+		const policyAdapter = { kind: 'policy-adapter' } as never
 
 		it('uses the shared runtime sandbox when no policy is declared', () => {
 			expect(resolveAttachedAgentSandbox(undefined, runtimeSandbox)).toBe(runtimeSandbox)
@@ -102,7 +102,7 @@ describe('attached agent scoped runtime', () => {
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				runtime: { capabilities: ['runtime.checkpoint'] } as never,
-				workspaceStore: { info: { capabilities: ['workspace_store.durable'] } },
+				workspaceStore: { info: { capabilities: ['workspace_store.durable'] } } as never,
 			}),
 		).rejects.toThrow(
 			'Attached agent "triage" requires unavailable durable workspace capabilities: runtime.workspace_checkpoint, workspace_store.resume',
@@ -256,7 +256,9 @@ SECRET_BODY`,
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				runtime: { capabilities: ['runtime.workspace_checkpoint'] } as never,
-				workspaceStore: { info: { capabilities: ['workspace_store.durable', 'workspace_store.resume'] } },
+				workspaceStore: {
+					info: { capabilities: ['workspace_store.durable', 'workspace_store.resume'] },
+				} as never,
 			}),
 		).resolves.toEqual({ shutdown: expect.any(Function) })
 	})
