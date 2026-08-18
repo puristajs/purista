@@ -55,6 +55,7 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
+	singleTenantId?: string
 }
 
 type RunFunctionInvocation = {
@@ -231,6 +232,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			manifest: this.input.manifest,
 			message: input.message,
 			payload: input.payload,
+			singleTenantId: this.input.singleTenantId,
 		})
 		const session = await this.getSession(identity.harnessSessionId)
 		try {

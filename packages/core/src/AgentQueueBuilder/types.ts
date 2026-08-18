@@ -342,6 +342,19 @@ export type AgentHarnessRuntimeOptions = {
 	tools?: ToolsConfig
 }
 
+/**
+ * Application-level tenant identity used by attached-agent conversation sessions.
+ *
+ * This is deliberately a single-tenant declaration, not a fallback derived from
+ * a request payload. It lets a genuinely single-tenant application configure
+ * its trusted tenant identity once at service startup. When an incoming message
+ * also carries a tenant id, Core requires it to match this value.
+ */
+export type AgentTenancyRuntimeOptions = {
+	/** Trusted tenant id for a deliberately single-tenant service instance. */
+	singleTenantId?: string
+}
+
 /** HTTP projection metadata for the generated agent command or stream. */
 export type AgentHttpExposure = {
 	/** HTTP method exposed by the generated definition. */
@@ -656,6 +669,14 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 /** Runtime options required to initialize attached agents for a service instance. */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
+	/**
+	 * Explicit tenancy configuration for attached agents.
+	 *
+	 * Multi-tenant services must continue to propagate authenticated
+	 * `message.tenantId`. Use `singleTenantId` only when every request handled by
+	 * this service instance belongs to that one tenant.
+	 */
+	tenancy?: AgentTenancyRuntimeOptions
 	runtime?: DurableRuntime
 	workspaceStore?: AgentDurableWorkspaceStore
 	/** Explicit Harness modules and tools owned by the application runtime. */

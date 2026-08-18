@@ -223,6 +223,32 @@ Startup fails when:
 
 This fail-fast behavior prevents a production service from silently degrading to a weaker model or transport guarantee.
 
+## Conversation tenant identity
+
+`ephemeral` remains the default session mode and needs no tenant configuration.
+For persistent `conversation` sessions, Core isolates the same conversation id
+by `message.tenantId` by default. Standard PURISTA command, queue, and event
+flows already propagate that authenticated metadata.
+
+A genuinely single-tenant service can configure its trusted identity once at
+startup, which keeps legacy callers working without making a shared
+conversation namespace:
+
+```ts
+await service.getInstance(eventBridge, {
+  ai: {
+    models,
+    tenancy: { singleTenantId: 'acme-production' },
+  },
+})
+```
+
+Core uses `singleTenantId` only when the message has no tenant id. If a message
+does carry one, it must match. Do not derive tenant identity from payload data,
+conversation ids, prompts, or unverified headers. Multi-tenant services must
+continue to provide authenticated `message.tenantId`; use `scope: 'global'`
+only for a deliberately shared, non-sensitive conversation namespace.
+
 ## Sandbox and durable workspaces
 
 Local durable execution, sandbox state, and durable workspace guarantees are related but separate. A harness durable runtime records checkpoints and leases for workflow progress inside your application boundary. The workspace store persists the files or workspace state that those checkpoints need in order to resume.

@@ -60,6 +60,18 @@ describe('attached agent scoped runtime', () => {
 		)
 	})
 
+	it('rejects an empty single-tenant identity at service startup', async () => {
+		const scope = createAgentRuntimeScope()
+		const definition = createAttachedAgentDefinition()
+
+		await expect(
+			initializeAttachedAgentRuntimes(scope, [definition], {
+				models: {},
+				tenancy: { singleTenantId: '  ' },
+			}),
+		).rejects.toThrow('ai.tenancy.singleTenantId must be a non-empty string when configured')
+	})
+
 	it('keeps executors scoped per service instance for shared definitions', async () => {
 		const definition = createAttachedAgentDefinition()
 		const firstScope = createAgentRuntimeScope()

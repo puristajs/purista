@@ -14,6 +14,7 @@ export type DeriveAgentRunIdentityInput = {
 	message: IdentityMessage
 	payload: unknown
 	runId?: string
+	singleTenantId?: string
 }
 
 export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): AgentRunIdentity {
@@ -23,14 +24,16 @@ export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): Agen
 		transportMessageId,
 		input.payload,
 		input.message.tenantId,
+		input.singleTenantId,
 	)
+	const tenantId = resolveEffectiveTenantId(input.message.tenantId, input.singleTenantId)
 
 	return {
 		transportMessageId,
 		...optionalStringField('correlationId', input.message.correlationId),
 		...optionalStringField('traceId', input.message.traceId),
 		...optionalStringField('otp', input.message.otp),
-		...optionalStringField('tenantId', input.message.tenantId),
+		...optionalStringField('tenantId', tenantId),
 		...optionalStringField('principalId', input.message.principalId),
 		serviceName: input.manifest.serviceName,
 		serviceVersion: input.manifest.serviceVersion,
@@ -46,7 +49,9 @@ export function resolveHarnessSessionId(
 	transportMessageId: string,
 	payload: unknown,
 	tenantId?: unknown,
+	singleTenantId?: unknown,
 ): string {
+	const effectiveTenantId = resolveEffectiveTenantId(tenantId, singleTenantId)
 	if (manifest.session.mode === 'ephemeral') {
 		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:message:${transportMessageId}`
 	}
@@ -64,7 +69,7 @@ export function resolveHarnessSessionId(
 		encodeSessionSegment(manifest.agentName),
 	]
 	if ((manifest.session.scope ?? 'tenant') === 'tenant') {
-		const resolvedTenantId = requireNonEmptyString(tenantId, 'message.tenantId')
+		const resolvedTenantId = effectiveTenantId ?? requireConversationTenantId()
 		return [
 			...prefix,
 			'tenant',
@@ -74,6 +79,20 @@ export function resolveHarnessSessionId(
 		].join(':')
 	}
 	return [...prefix, 'global', 'conversation', encodeSessionSegment(value)].join(':')
+}
+
+function resolveEffectiveTenantId(tenantId?: unknown, singleTenantId?: unknown): string | undefined {
+	const configuredTenantId =
+		singleTenantId === undefined ? undefined : requireNonEmptyString(singleTenantId, 'ai.tenancy.singleTenantId')
+	const messageTenantId = optionalNonEmptyString(tenantId)
+	if (configuredTenantId && messageTenantId && configuredTenantId !== messageTenantId) {
+		throw new Error('message.tenantId must match ai.tenancy.singleTenantId for a single-tenant service instance')
+	}
+	return messageTenantId ?? configuredTenantId
+}
+
+function requireConversationTenantId(): never {
+	throw new Error('Agent conversation session identity requires message.tenantId or ai.tenancy.singleTenantId')
 }
 
 function encodeSessionSegment(value: string): string {
@@ -96,6 +115,10 @@ function requireNonEmptyString(value: unknown, label: string) {
 		throw new Error(`Agent run identity requires ${label}`)
 	}
 	return value
+}
+
+function optionalNonEmptyString(value: unknown): string | undefined {
+	return typeof value === 'string' && value.trim() !== '' ? value : undefined
 }
 
 function optionalStringField<K extends string>(key: K, value: unknown): Partial<Record<K, string>> {

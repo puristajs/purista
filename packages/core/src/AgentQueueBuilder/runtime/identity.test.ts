@@ -32,6 +32,29 @@ describe('attached-agent harness session identity', () => {
 		expect(() => resolveHarnessSessionId(manifest, 'message', { conversationId: 'shared' })).toThrow('message.tenantId')
 	})
 
+	it('uses an explicit service single-tenant identity when legacy messages omit tenant metadata', () => {
+		const identity = deriveAgentRunIdentity({
+			manifest,
+			message: { id: 'message' },
+			payload: { conversationId: 'shared' },
+			singleTenantId: 'acme',
+		})
+
+		expect(identity.tenantId).toBe('acme')
+		expect(identity.harnessSessionId).toContain(':tenant:acme:conversation:shared')
+	})
+
+	it('rejects a message tenant that conflicts with the configured single-tenant identity', () => {
+		expect(() =>
+			deriveAgentRunIdentity({
+				manifest,
+				message: { id: 'message', tenantId: 'other-tenant' },
+				payload: { conversationId: 'shared' },
+				singleTenantId: 'acme',
+			}),
+		).toThrow('must match ai.tenancy.singleTenantId')
+	})
+
 	it('permits an explicit global scope for a deliberately single-tenant conversation', () => {
 		const sessionId = resolveHarnessSessionId(
 			{ ...manifest, session: { mode: 'conversation', payloadPath: ['conversationId'], scope: 'global' } },

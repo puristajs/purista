@@ -43,6 +43,7 @@ export async function initializeAttachedAgentRuntimes(
 		throw new Error('AI attached agents require runtime ai.models in service.getInstance(...) options')
 	}
 
+	validateTenancyOptions(aiOptions)
 	validateWorkspacePolicies(definitions, aiOptions)
 
 	const executors = await Promise.all(
@@ -61,6 +62,7 @@ export async function initializeAttachedAgentRuntimes(
 				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,
+				singleTenantId: aiOptions.tenancy?.singleTenantId,
 			})
 			scope.runtimes.set(definition.runtime, executor)
 			return executor
@@ -102,6 +104,13 @@ export function resolveAttachedAgentSandbox(
 		return undefined
 	}
 	return policy.adapter ?? runtimeSandbox
+}
+
+function validateTenancyOptions(aiOptions: AgentRuntimeOptions<Record<string, AgentModelBinding>>): void {
+	const singleTenantId = aiOptions.tenancy?.singleTenantId
+	if (singleTenantId !== undefined && singleTenantId.trim() === '') {
+		throw new Error('ai.tenancy.singleTenantId must be a non-empty string when configured')
+	}
 }
 
 function validateWorkspacePolicies(

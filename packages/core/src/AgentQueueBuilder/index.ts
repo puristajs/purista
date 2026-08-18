@@ -52,6 +52,7 @@ export type {
 	AgentSkillResolver,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
+	AgentTenancyRuntimeOptions,
 	AgentWorkspaceCapabilityRequirement,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
