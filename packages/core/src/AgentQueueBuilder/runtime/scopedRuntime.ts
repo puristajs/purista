@@ -1,3 +1,4 @@
+import type { StateStore } from '../../core/StateStore/types/StateStore.js'
 import type {
 	AgentModelBinding,
 	AgentRuntimeOptions,
@@ -34,6 +35,7 @@ export async function initializeAttachedAgentRuntimes(
 	scope: AgentRuntimeScope,
 	definitions: readonly AttachedAgentDefinition<any>[],
 	aiOptions?: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
+	stateStore?: StateStore,
 ): Promise<AttachedAgentRuntimeShutdown> {
 	if (definitions.length === 0) {
 		return { shutdown: async () => undefined }
@@ -58,7 +60,7 @@ export async function initializeAttachedAgentRuntimes(
 				harness: aiOptions.harness,
 				skillRuntime,
 				logger: aiOptions.logger,
-				stateStore: aiOptions.stateStore,
+				stateStore,
 				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,

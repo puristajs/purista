@@ -16,7 +16,6 @@ import type {
 	RunEvent,
 	Sandbox,
 	Session,
-	StateStore,
 	TelemetryOptions,
 	ToolsConfig,
 } from '@purista/harness'
@@ -682,7 +681,6 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	/** Explicit Harness modules and tools owned by the application runtime. */
 	harness?: AgentHarnessRuntimeOptions
 	skills?: AgentSkillRuntimeOptions
-	stateStore?: StateStore
 	logger?: PuristaLogger
 	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions

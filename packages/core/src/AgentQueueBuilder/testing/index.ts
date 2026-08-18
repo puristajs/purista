@@ -17,6 +17,7 @@ import type {
 	TextResponse,
 	TextStreamChunk,
 } from '@purista/harness'
+import type { StateStore } from '../../core/StateStore/types/StateStore.js'
 import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
@@ -239,7 +240,7 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	/** Optional sandbox adapter used to verify sandbox-backed agent behavior. */
 	sandbox?: Sandbox
 	/** Optional state store for conversation/session lifecycle tests. */
-	stateStore?: AgentRuntimeOptions<Models>['stateStore']
+	stateStore?: StateStore
 	logger?: PuristaLogger
 	governance?: GovernanceConfig<any>
 }

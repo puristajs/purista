@@ -223,6 +223,18 @@ Startup fails when:
 
 This fail-fast behavior prevents a production service from silently degrading to a weaker model or transport guarantee.
 
+Attached agents automatically use the service's normal `stateStore` for
+Harness sessions, conversation history, run records, and replayable events.
+Configure the store once through `service.getInstance(..., { stateStore })`;
+there is no separate `ai.stateStore` to configure. Harness records are
+namespaced by service, version, and agent, and the PURISTA service remains the
+only owner responsible for closing the store.
+
+The default state store is intended for local development and tests. For
+durable production conversations, configure a normal PURISTA durable
+`StateStore` implementation (for example Redis, NATS, Dapr, or your own) on
+the service instance; attached agents use it automatically.
+
 ## Conversation tenant identity
 
 `ephemeral` remains the default session mode and needs no tenant configuration.

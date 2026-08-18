@@ -424,6 +424,11 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
+		const stateStore: StateStore =
+			options?.stateStore ??
+			initDefaultStateStore({
+				logger,
+			})
 		const agentRuntimeScope = createAgentRuntimeScope()
 		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
 			agentRuntimeScope,
@@ -434,6 +439,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 						logger: options.ai.logger ?? logger,
 					}
 				: undefined,
+			stateStore,
 		)
 
 		const cfg: S['ConfigInputType'] = {
@@ -474,12 +480,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		const configStore: ConfigStore =
 			options?.configStore ??
 			initDefaultConfigStore({
-				logger,
-			})
-
-		const stateStore: StateStore =
-			options?.stateStore ??
-			initDefaultStateStore({
 				logger,
 			})
 

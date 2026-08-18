@@ -81,6 +81,18 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 
 Startup fails fast when aliases or capabilities are missing.
 
+Attached agents automatically adapt the service's normal `stateStore` for
+Harness sessions, conversation history, run records, and run events. Configure
+that store once in `service.getInstance(..., { stateStore })`; do not create or
+pass a second `ai.stateStore`. The adapter namespaces Harness records by
+service, version, and agent, while the service remains the sole owner of the
+store lifecycle.
+
+The default state store is intended for local development and tests. For
+durable production conversations, configure a normal PURISTA durable
+`StateStore` implementation (for example Redis, NATS, Dapr, or your own) on
+the service instance; attached agents use it automatically.
+
 `ai.harness.modules` is for static TypeScript modules imported and versioned by
 the application. `ai.harness.tools` is an explicit application-owned tool
 registry; each attached Harness definition still allowlists the tool ids it can

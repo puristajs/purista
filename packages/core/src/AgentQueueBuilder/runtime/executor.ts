@@ -13,11 +13,11 @@ import {
 	type RunEvent,
 	type Sandbox,
 	type Session,
-	type StateStore,
 	type TelemetryOptions,
 	type ToolsConfig,
 } from '@purista/harness'
 import { z } from 'zod'
+import type { StateStore as PuristaStateStore } from '../../core/StateStore/types/StateStore.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
@@ -51,7 +51,7 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	harness?: AgentHarnessRuntimeOptions
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
-	stateStore?: StateStore
+	stateStore?: PuristaStateStore
 	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
@@ -121,7 +121,12 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			name: `${this.input.manifest.serviceName}.${this.input.manifest.agentName}`,
 		})
 			.logger(createPuristaHarnessLogger(this.input.logger))
-			.state(createPuristaHarnessStateStore(this.input.stateStore))
+			.state(
+				createPuristaHarnessStateStore({
+					store: this.input.stateStore,
+					namespace: `${this.input.manifest.serviceName}:${this.input.manifest.serviceVersion}:${this.input.manifest.agentName}`,
+				}),
+			)
 
 		for (const module of this.input.harness?.modules ?? []) {
 			builder = builder.use(module as HarnessModule)
