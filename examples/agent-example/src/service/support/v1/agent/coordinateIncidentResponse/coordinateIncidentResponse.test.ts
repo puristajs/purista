@@ -23,6 +23,16 @@ describe('coordinateIncidentResponseAgentBuilder', () => {
 			},
 		])
 		expect(definition.manifest.response).toBeUndefined()
+		expect(definition.manifest.session).toEqual({
+			mode: 'conversation',
+			payloadPath: ['incidentId'],
+			retention: {
+				idleTtlMs: 30 * 24 * 60 * 60_000,
+				history: { maxTurns: 50, maxBytes: 256_000 },
+				runs: { maxPerSession: 20 },
+				events: { maxPerRun: 500 },
+			},
+		})
 		expect(definition.command.commandName).toBe('coordinateIncidentResponse')
 		expect(definition.queue.queueName).toBe('agent:Support:1:coordinateIncidentResponse')
 	})
