@@ -38,7 +38,7 @@
 		"@opentelemetry/resources": "^2.10.0",
 		"@opentelemetry/sdk-trace-node": "^2.10.0",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
-		"@purista/harness": "^2.1.0",
+		"@purista/harness": "^2.1.1",
 		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@standard-schema/spec": "^1.1.0",
 		"code-block-writer": "^13.0.3",

@@ -31,8 +31,8 @@
 	"dependencies": {
 		"@hono/node-server": "^2.1.1",
 		"@purista/core": "*",
-		"@purista/harness": "^2.1.0",
-		"@purista/harness-openai": "^2.1.0",
+		"@purista/harness": "^2.1.1",
+		"@purista/harness-openai": "^2.1.1",
 		"@purista/hono-http-server": "*",
 		"@scalar/hono-api-reference": "^0.11.14",
 		"dotenv": "^17.4.2",
