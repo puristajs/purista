@@ -101,6 +101,9 @@ Use `setSessionPolicy(..., { retention })` to make storage bounds explicit:
 `history: { maxTurns, maxBytes }` is a complete-turn rolling window using UTF-8
 bytes for storage, `idleTtlMs` requires a service StateStore with atomic expiry,
 and optional `runs.maxPerSession` / `events.maxPerRun` bound diagnostic data.
+`history` also works with an explicit Harness-native `ai.stateStore` when it
+implements atomic message replacement; idle, run, and event limits remain
+service-store policies.
 These are not model-token limits. Model context remains a transient,
 provider-specific token decision; never approximate token admission from bytes.
 Harness commits a complete turn only after a successful model loop. PURISTA

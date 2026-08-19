@@ -158,7 +158,7 @@ function validateStateStoreRetention(
 		const retention = definition.manifest.session.retention
 		if (retention?.idleTtlMs !== undefined || retention?.runs || retention?.events) {
 			throw new Error(
-				`Attached agent "${definition.manifest.agentName}" uses service-backed session retention, which requires the service StateStore; remove ai.stateStore or let that Harness-native adapter own its retention.`,
+				`Attached agent "${definition.manifest.agentName}" uses service-owned idle, run, or event retention, which requires the service StateStore; remove those limits or let the Harness-native adapter own its retention.`,
 			)
 		}
 	}

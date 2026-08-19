@@ -1,6 +1,6 @@
 # State retention and conversation context
 
-**Status:** human-approved implementation scope.  
+**Status:** human-approved implementation scope.
 **Date:** 2026-08-19
 
 This specification adds bounded, explicit state retention to `@purista/core`
@@ -76,9 +76,11 @@ write path. It either expires under the documented guarantee or fails clearly.
 
 ## Agent session policy
 
-`AgentSessionPolicy` is extended with an optional retention block. It applies
-only when the attached agent uses the service-backed state adapter. Its safe
-composition is:
+`AgentSessionPolicy` is extended with an optional retention block. `history`
+applies to either the service-backed adapter or an explicit Harness-native
+`ai.stateStore` that implements atomic message replacement. `idleTtlMs`, run,
+and event limits apply only to the service-backed adapter. Its safe composition
+with the service adapter is:
 
 ```ts
 retention: {

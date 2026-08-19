@@ -248,6 +248,11 @@ retains only complete recent history turns, and can cap run summaries and
 replay events. The history byte limit is storage accounting, not a model-token
 estimate.
 
+`history` also works with an explicit `ai.stateStore` when that Harness-native
+store supports atomic message replacement. `idleTtlMs`, `runs`, and `events`
+remain service-store policies and are rejected with `ai.stateStore`, because
+they reuse Core's native-expiry and bounded-record guarantees.
+
 For these agent records, `idleTtlMs` is more specific than the service's
 general `stateRetention` default. An explicit business-state write is more
 specific still. If no policy matches, the existing permanent-state behavior is

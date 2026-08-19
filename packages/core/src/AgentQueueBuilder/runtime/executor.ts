@@ -134,8 +134,16 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 					}),
 			)
 
-		if (this.input.manifest.session.retention?.history) {
-			builder = builder.defaults({ historyRetention: this.input.manifest.session.retention.history })
+		const defaults = {
+			...(this.input.manifest.session.retention?.history
+				? { historyRetention: this.input.manifest.session.retention.history }
+				: {}),
+			...(this.input.manifest.execution.timeoutMs !== undefined
+				? { runTimeoutMs: this.input.manifest.execution.timeoutMs }
+				: {}),
+		}
+		if (Object.keys(defaults).length > 0) {
+			builder = builder.defaults(defaults)
 		}
 
 		for (const module of this.input.harness?.modules ?? []) {
@@ -156,10 +164,6 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 		if (this.input.governance) {
 			builder = builder.governance(this.input.governance)
-		}
-
-		if (this.input.manifest.execution.timeoutMs !== undefined) {
-			builder = builder.defaults({ runTimeoutMs: this.input.manifest.execution.timeoutMs })
 		}
 
 		if (this.input.sandbox) {

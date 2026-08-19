@@ -154,6 +154,61 @@ describe('attached agent scoped runtime', () => {
 		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
 	})
 
+	it('keeps complete-turn history retention when the attached agent also configures a run timeout', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.manifest.session = {
+			mode: 'conversation',
+			payloadPath: ['conversationId'],
+			scope: 'global',
+			retention: { history: { maxTurns: 1 } },
+		}
+		definition.manifest.execution = { ...definition.manifest.execution, timeoutMs: 1_000 }
+		definition.execution = {
+			kind: 'harnessAgent',
+			definition: {
+				model: 'primary',
+				input: z.object({ conversationId: z.string(), question: z.string() }),
+				output: z.object({ status: z.literal('ok') }),
+				instructions: 'Return a scripted result.',
+			},
+		}
+		const agentStateStore = new InMemoryStateStore()
+		const provider = {
+			id: 'scripted',
+			genAiSystem: 'scripted',
+			object: async () => ({
+				object: { status: 'ok' },
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+				finishReason: 'stop' as const,
+			}),
+		}
+		const scope = createAgentRuntimeScope()
+
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: provider as never } },
+			stateStore: agentStateStore,
+		})
+
+		for (const [id, question] of [
+			['delivery-1', 'first'],
+			['delivery-2', 'second'],
+		] as const) {
+			await expect(
+				getScopedAgentRuntime(scope, definition).executeAggregate({
+					appContext: createCommandContext(id),
+					message: { id },
+					payload: { conversationId: 'support-thread', question },
+					parameter: {},
+				}),
+			).resolves.toEqual({ status: 'ok' })
+		}
+
+		const sessionId = 'agent:support:1:triage:global:conversation:support-thread'
+		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
+	})
+
 	it('rejects service-owned idle retention with an explicit Harness-native state store', async () => {
 		const definition = createAttachedAgentDefinition({
 			models: { primary: { model: 'scripted', capabilities: ['object'] } },
@@ -166,7 +221,7 @@ describe('attached agent scoped runtime', () => {
 				models: { primary: { provider: {} as never } },
 				stateStore: new InMemoryStateStore(),
 			}),
-		).rejects.toThrow('uses service-backed session retention, which requires the service StateStore')
+		).rejects.toThrow('uses service-owned idle, run, or event retention, which requires the service StateStore')
 	})
 
 	it('replays a model-capable custom handler with the stable delivery identity', async () => {

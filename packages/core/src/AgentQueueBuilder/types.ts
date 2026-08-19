@@ -185,12 +185,13 @@ export type AgentResponseModeOptions = {
 }
 
 /**
- * Retention owned by one attached agent's service-backed Harness state.
+ * Retention owned by one attached agent's Harness state.
  *
  * `history` bounds durable transcript storage by complete turns and UTF-8
- * bytes. `idleTtlMs` applies Core's native-expiry contract to every persisted
- * record owned by the agent session; it is unavailable for an explicit
- * Harness-native `ai.stateStore` override.
+ * bytes with either the service adapter or an explicit Harness-native
+ * `ai.stateStore` that supports atomic message replacement. `idleTtlMs`, run,
+ * and event limits are service-adapter policies and are unavailable with an
+ * explicit Harness-native store.
  */
 export type AgentSessionRetentionPolicy = {
 	/** Expire each persisted agent artifact after this period without a replacing write. */

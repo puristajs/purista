@@ -134,7 +134,7 @@ const result = await session.agents.answerer.prompt({
 console.log(result.answer)
 // -> "Tools are typed functions..."
 
-await session.close()
+await session.release()
 await harness.shutdown()`}
             label="Run It"
             language="typescript"
