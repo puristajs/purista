@@ -153,6 +153,9 @@ harness session, sandbox, telemetry, durable runtime, workspace store, and
 model bindings as the wrapped workflow. Use `canInvokeAgent(...)` plus
 `setRunFunction(...)` when child agents need independent PURISTA queues,
 retries, service ownership, HTTP exposure, sandboxes, or runtime bindings.
+The `agents` option registers those definitions only. The workflow must still
+declare `delegation.agents` and `delegation.modelAliases`; delegation is never
+inferred from the agents passed to the builder.
 
 Agent-local custom metrics are declared on `AgentQueueBuilder.defineMetric(...)` and are visible only inside that agent handler. Service-level metrics remain visible to the agent handler too.
 

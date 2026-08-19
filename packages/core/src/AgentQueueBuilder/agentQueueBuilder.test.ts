@@ -753,6 +753,7 @@ describe('AgentQueueBuilder', () => {
 				{
 					input,
 					output,
+					delegation: { agents: ['summarize'], modelAliases: ['primary'] },
 					handler: async context => {
 						return context.agents.summarize({ incident: context.input.incident })
 					},

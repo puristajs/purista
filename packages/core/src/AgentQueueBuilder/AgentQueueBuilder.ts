@@ -378,14 +378,19 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * Pass harness-local agent definitions in `options.agents` when the workflow
 	 * handler calls `ctx.agents.<name>(...)`. Those agents run inside the same
 	 * harness session, sandbox, telemetry setup, and durable workflow boundary as
-	 * this attached PURISTA agent.
+	 * this attached PURISTA agent. The workflow definition must declare its own
+	 * `delegation` allowlist and limits; PURISTA never infers authority from
+	 * `options.agents`.
 	 *
 	 * @example
 	 * ```ts
 	 * service
 	 *   .getAgentQueueBuilder('incidentReview', 'Reviews one incident')
 	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
-	 *   .setHarnessWorkflow(reviewWorkflow, {
+	 *   .setHarnessWorkflow({
+	 *     ...reviewWorkflow,
+	 *     delegation: { agents: ['summarize'], modelAliases: ['primary'] },
+	 *   }, {
 	 *     agents: { summarize: summarizeAgent },
 	 *   })
 	 * ```

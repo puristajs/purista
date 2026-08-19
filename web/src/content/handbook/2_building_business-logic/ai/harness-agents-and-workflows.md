@@ -101,6 +101,10 @@ const incidentReviewWorkflow = {
     risk: z.enum(['low', 'medium', 'high']),
     reasons: z.array(z.string()),
   }),
+  delegation: {
+    agents: ['factExtractor', 'riskAssessor'],
+    modelAliases: ['primary'],
+  },
   handler: async ctx => {
     const facts = await ctx.agents.factExtractor({ text: ctx.input.text })
     const risk = await ctx.agents.riskAssessor({ facts: facts.facts })
@@ -130,7 +134,7 @@ const reviewAgent = await incidentService
   .getDefinition()
 ```
 
-All inner harness agents passed to `setHarnessWorkflow(..., { agents })` share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, durable runtime, workspace store, governance config, and model bindings.
+All inner harness agents passed to `setHarnessWorkflow(..., { agents })` share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, durable runtime, workspace store, governance config, and model bindings. Passing local agents does **not** grant delegation automatically: declare the workflow's `delegation.agents` and `delegation.modelAliases` allowlists explicitly. This keeps every delegated capability visible in the workflow definition.
 
 Local durable execution is a harness runtime concern. When enabled, the runtime writes checkpoint and lease records for the workflow inside your application boundary, so a restarted process can resume from the last committed step instead of replaying the whole run from scratch.
 

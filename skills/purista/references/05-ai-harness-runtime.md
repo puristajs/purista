@@ -57,6 +57,11 @@ PURISTA `setRunFunction(...)` plus `canInvokeAgent(...)` instead when the child
 agents need independent queues, retries, HTTP exposure, service ownership,
 sandboxes, or model/runtime bindings.
 
+Passing `{ agents }` only registers harness-local definitions. It never grants
+delegation. Declare the workflow's `delegation.agents` and
+`delegation.modelAliases` allowlists in the workflow itself so the capabilities
+available to `ctx.agents` stay explicit and reviewable.
+
 ## Runtime Wiring
 Applications bind concrete models at service startup:
 

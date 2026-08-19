@@ -258,6 +258,79 @@ describe('attached agent scoped runtime', () => {
 		expect(calls).toBe(1)
 	})
 
+	it('rejects a changed custom-handler input for an existing delivery identity', async () => {
+		let calls = 0
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async () => {
+				calls += 1
+				return { status: 'ok' }
+			},
+		}
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: {} as never } },
+			stateStore: new InMemoryStateStore(),
+		})
+		const runtime = getScopedAgentRuntime(scope, definition)
+
+		await expect(
+			runtime.executeAggregate({
+				appContext: createCommandContext('stable-input'),
+				message: { id: 'stable-input' },
+				payload: { request: 'first' },
+				parameter: {},
+			}),
+		).resolves.toEqual({ status: 'ok' })
+		await expect(
+			runtime.executeAggregate({
+				appContext: createCommandContext('stable-input'),
+				message: { id: 'stable-input' },
+				payload: { request: 'changed' },
+				parameter: {},
+			}),
+		).rejects.toThrow('idempotencyKey is already bound to a different agent invocation')
+
+		expect(calls).toBe(1)
+	})
+
+	it('keeps the active custom-handler invocation when a concurrent duplicate is rejected', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		let handlerCalls = 0
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async () => {
+				handlerCalls += 1
+				return { status: 'ok' }
+			},
+		}
+		const store = new BlockingCreateRunStateStore()
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: {} as never } },
+			stateStore: store,
+		})
+		const runtime = getScopedAgentRuntime(scope, definition)
+		const invocation = {
+			appContext: createCommandContext('concurrent-custom-handler'),
+			message: { id: 'concurrent-custom-handler' },
+			payload: {},
+			parameter: {},
+		}
+
+		const first = runtime.executeAggregate(invocation)
+		await store.waitUntilBlocked()
+		await expect(runtime.executeAggregate(invocation)).rejects.toThrow('Session is busy')
+		store.release()
+		await expect(first).resolves.toEqual({ status: 'ok' })
+		expect(handlerCalls).toBe(1)
+	})
+
 	it('fails startup when a durable workspace agent has no runtime or workspace store', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
@@ -566,6 +639,35 @@ class MemoryLogger implements Logger {
 		if (message) {
 			this.messages.push(message)
 		}
+	}
+}
+
+class BlockingCreateRunStateStore extends InMemoryStateStore {
+	private resolveBlocked!: () => void
+	private resolveGate!: () => void
+	private readonly blocked = new Promise<void>(resolve => {
+		this.resolveBlocked = resolve
+	})
+	private readonly gate = new Promise<void>(resolve => {
+		this.resolveGate = resolve
+	})
+	private blockedOnce = false
+
+	override async createRun(record: Parameters<InMemoryStateStore['createRun']>[0]): Promise<void> {
+		if (!this.blockedOnce) {
+			this.blockedOnce = true
+			this.resolveBlocked()
+			await this.gate
+		}
+		await super.createRun(record)
+	}
+
+	async waitUntilBlocked(): Promise<void> {
+		await this.blocked
+	}
+
+	release(): void {
+		this.resolveGate()
 	}
 }
 

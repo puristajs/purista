@@ -196,7 +196,6 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 		if (this.input.definition.execution.kind === 'harnessWorkflow') {
 			const agents = this.input.definition.execution.agents ?? {}
-			const agentNames = Object.keys(agents)
 			if (Object.keys(agents).length > 0) {
 				builder = builder.agents(
 					Object.fromEntries(
@@ -209,16 +208,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			}
 			const workflowDefinition = this.input.definition.execution.definition as HarnessWorkflowDefinition<any>
 			builder = builder.workflows({
-				[this.input.manifest.agentName]:
-					agentNames.length > 0 && !workflowDefinition.delegation
-						? {
-								...workflowDefinition,
-								delegation: {
-									agents: agentNames,
-									modelAliases: Object.keys(this.resolvedModels),
-								},
-							}
-						: workflowDefinition,
+				[this.input.manifest.agentName]: workflowDefinition,
 			})
 		}
 
@@ -226,11 +216,14 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.agents({
 				[this.input.manifest.agentName]: {
 					model: Object.keys(this.resolvedModels)[0],
-					input: z.object({ invocationId: z.string().regex(/^[A-Za-z0-9_.:-]{1,120}$/) }),
+					input: z.object({
+						invocationId: z.string().regex(/^[A-Za-z0-9_.:-]{1,120}$/),
+						inputFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+					}),
 					output: z.unknown(),
 					instructions: 'Run the PURISTA custom agent handler through the Harness runtime.',
 					handler: async (context: {
-						input: { invocationId: string }
+						input: { invocationId: string; inputFingerprint: string }
 						models: AgentHandlerModelBindings<Models>
 						signal: AbortSignal
 					}) => this.runFunctionThroughHarness(context.input.invocationId, context),
@@ -326,25 +319,31 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		// The same queue delivery must produce the same Harness input as well as
 		// the same idempotency key. A random proxy id would make a redelivery look
 		// like conflicting input and defeat the durable replay safeguard.
-		const invocationId = this.idempotencyKey(args.identity)
-		this.runFunctionInvocations.set(invocationId, {
+		const invocationId = this.runFunctionInvocationId(args.identity)
+		const existing = this.runFunctionInvocations.get(invocationId)
+		const invocation = existing ?? {
 			payload: args.input.payload,
 			parameter: args.input.parameter,
 			identity: args.identity,
 			appContext: args.input.appContext,
 			session: args.session,
-		})
+		}
+		const ownsInvocation = existing === undefined
+		if (ownsInvocation) this.runFunctionInvocations.set(invocationId, invocation)
 		try {
 			const sessionAny = args.session as any
 			const invokeOptions: InvokeOptions = {
 				signal: args.signal,
 				idempotencyKey: this.idempotencyKey(args.identity),
 			}
+			const harnessInput = { invocationId, inputFingerprint: this.runFunctionInputFingerprint(args.input) }
 			return args.streaming
-				? await this.streamHarnessCall(args.session, { invocationId }, args.emitWrapped, 'agent', invokeOptions)
-				: await sessionAny.agents[this.input.manifest.agentName].prompt({ invocationId }, invokeOptions)
+				? await this.streamHarnessCall(args.session, harnessInput, args.emitWrapped, 'agent', invokeOptions)
+				: await sessionAny.agents[this.input.manifest.agentName].prompt(harnessInput, invokeOptions)
 		} finally {
-			this.runFunctionInvocations.delete(invocationId)
+			if (ownsInvocation && this.runFunctionInvocations.get(invocationId) === invocation) {
+				this.runFunctionInvocations.delete(invocationId)
+			}
 		}
 	}
 
@@ -436,6 +435,18 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		return `purista:${createHash('sha256').update(identity.runId).digest('hex')}`
 	}
 
+	private runFunctionInvocationId(identity: AgentRunIdentity): string {
+		return `purista:${createHash('sha256')
+			.update(JSON.stringify([identity.harnessSessionId, this.input.manifest.agentName, identity.runId]))
+			.digest('hex')}`
+	}
+
+	private runFunctionInputFingerprint(input: Pick<AgentRuntimeInvocationInput, 'payload' | 'parameter'>): string {
+		return createHash('sha256')
+			.update(stableJson([input.payload, input.parameter]))
+			.digest('hex')
+	}
+
 	private async streamHarnessCall(
 		session: Session<any>,
 		payload: unknown,
@@ -499,6 +510,46 @@ function createLocalSession(id: string): Session<any> {
 		release: async () => undefined,
 		close: async () => undefined,
 	} as Session<any>
+}
+
+function stableJson(value: unknown): string {
+	return stableJsonValue(value, new Set<object>())
+}
+
+function stableJsonValue(value: unknown, ancestors: Set<object>): string {
+	if (value === undefined) return 'undefined'
+	if (value === null || typeof value === 'boolean' || typeof value === 'string') return JSON.stringify(value)
+	if (typeof value === 'number') {
+		if (!Number.isFinite(value)) throw new Error('Harness-backed run-function input must be JSON-serializable.')
+		return JSON.stringify(value)
+	}
+	if (Array.isArray(value)) {
+		if (ancestors.has(value)) throw new Error('Harness-backed run-function input must be JSON-serializable.')
+		ancestors.add(value)
+		try {
+			return `[${value.map(entry => stableJsonValue(entry, ancestors)).join(',')}]`
+		} finally {
+			ancestors.delete(value)
+		}
+	}
+	if (typeof value === 'object') {
+		if (ancestors.has(value)) throw new Error('Harness-backed run-function input must be JSON-serializable.')
+		const prototype = Object.getPrototypeOf(value)
+		if (prototype !== Object.prototype && prototype !== null) {
+			throw new Error('Harness-backed run-function input must be JSON-serializable.')
+		}
+		const record = value as Record<string, unknown>
+		ancestors.add(value)
+		try {
+			return `{${Object.keys(record)
+				.sort()
+				.map(key => `${JSON.stringify(key)}:${stableJsonValue(record[key], ancestors)}`)
+				.join(',')}}`
+		} finally {
+			ancestors.delete(value)
+		}
+	}
+	throw new Error('Harness-backed run-function input must be JSON-serializable.')
 }
 
 /** Error raised when a harness run terminates with a serialized error. */
