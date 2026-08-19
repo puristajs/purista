@@ -43,6 +43,38 @@ describe('AgentQueueBuilder', () => {
 		expect(resolved.streams[0].streamName).toBe('triageTicketStream')
 	})
 
+	it('carries explicit bounded conversation retention without affecting handler inference', async () => {
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+			.setSessionPolicy({
+				mode: 'conversation',
+				payloadPath: ['conversationId'],
+				retention: {
+					idleTtlMs: 60_000,
+					history: { maxTurns: 10, maxBytes: 32_000 },
+					runs: { maxPerSession: 5 },
+					events: { maxPerRun: 100 },
+				},
+			})
+			.setRunFunction(async () => ({ priority: 'normal' }))
+			.getDefinition()
+
+		expect(definition.manifest.session).toMatchObject({
+			mode: 'conversation',
+			retention: { history: { maxTurns: 10 }, runs: { maxPerSession: 5 } },
+		})
+	})
+
+	it('rejects invalid retention bounds at the builder boundary', () => {
+		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+		expect(() => agent.setSessionPolicy({ mode: 'ephemeral', retention: { history: {} } })).toThrow(
+			'Agent session history retention requires maxTurns or maxBytes',
+		)
+		expect(() => agent.setSessionPolicy({ mode: 'ephemeral', retention: { runs: { maxPerSession: 0 } } })).toThrow(
+			'Agent session retention runs.maxPerSession must be a positive safe integer',
+		)
+	})
+
 	it('cascades resources, schemas, models, command tools and child agents into handler types', async () => {
 		class TicketRepository {
 			async load(ticketId: string) {

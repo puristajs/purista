@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto'
+import { createHash } from 'node:crypto'
 import {
 	type DurableRuntime,
 	type DurableWorkspaceStore,
@@ -130,8 +130,13 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 					createPuristaHarnessStateStore({
 						store: this.input.stateStore,
 						namespace: `${this.input.manifest.serviceName}:${this.input.manifest.serviceVersion}:${this.input.manifest.agentName}`,
+						retention: this.input.manifest.session.retention,
 					}),
 			)
+
+		if (this.input.manifest.session.retention?.history) {
+			builder = builder.defaults({ historyRetention: this.input.manifest.session.retention.history })
+		}
 
 		for (const module of this.input.harness?.modules ?? []) {
 			builder = builder.use(module as HarnessModule)
@@ -217,7 +222,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.agents({
 				[this.input.manifest.agentName]: {
 					model: Object.keys(this.resolvedModels)[0],
-					input: z.object({ invocationId: z.string().uuid() }),
+					input: z.object({ invocationId: z.string().regex(/^[A-Za-z0-9_.:-]{1,120}$/) }),
 					output: z.unknown(),
 					instructions: 'Run the PURISTA custom agent handler through the Harness runtime.',
 					handler: async (context: {
@@ -314,7 +319,10 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		emitWrapped: (event: RunEvent) => Promise<void>
 		signal: AbortSignal
 	}): Promise<unknown> {
-		const invocationId = randomUUID()
+		// The same queue delivery must produce the same Harness input as well as
+		// the same idempotency key. A random proxy id would make a redelivery look
+		// like conflicting input and defeat the durable replay safeguard.
+		const invocationId = this.idempotencyKey(args.identity)
 		this.runFunctionInvocations.set(invocationId, {
 			payload: args.input.payload,
 			parameter: args.input.parameter,
@@ -324,7 +332,10 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		})
 		try {
 			const sessionAny = args.session as any
-			const invokeOptions: InvokeOptions = { signal: args.signal }
+			const invokeOptions: InvokeOptions = {
+				signal: args.signal,
+				idempotencyKey: this.idempotencyKey(args.identity),
+			}
 			return args.streaming
 				? await this.streamHarnessCall(args.session, { invocationId }, args.emitWrapped, 'agent', invokeOptions)
 				: await sessionAny.agents[this.input.manifest.agentName].prompt({ invocationId }, invokeOptions)
@@ -393,10 +404,18 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 	private createInvokeOptions(identity: AgentRunIdentity, signal: AbortSignal): InvokeOptions {
 		const workspacePolicy = this.input.manifest.workspacePolicy
 		if (workspacePolicy?.mode !== 'durable') {
-			return { signal }
+			return {
+				signal,
+				...(this.input.definition.execution.kind === 'harnessAgent'
+					? { idempotencyKey: this.idempotencyKey(identity) }
+					: {}),
+			}
 		}
 		return {
 			signal,
+			...(this.input.definition.execution.kind === 'harnessAgent'
+				? { idempotencyKey: this.idempotencyKey(identity) }
+				: {}),
 			durable: {
 				// Harness durable ids have a strict portable character set. A digest
 				// keeps arbitrary transport ids stable without treating them as ids.
@@ -404,6 +423,13 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				...(workspacePolicy.policy ? { workspacePolicy: workspacePolicy.policy } : {}),
 			},
 		}
+	}
+
+	private idempotencyKey(identity: AgentRunIdentity): string {
+		// Transport ids can contain arbitrary characters and sensitive business
+		// identifiers. The Harness key is bounded, portable, and stable without
+		// exposing that raw value in persisted run ids or diagnostics.
+		return `purista:${createHash('sha256').update(identity.runId).digest('hex')}`
 	}
 
 	private async streamHarnessCall(

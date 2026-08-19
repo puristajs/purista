@@ -28,11 +28,9 @@ describe('createStateStoreQueueJobStore', () => {
 			1_000,
 		)
 
-		expect(setState).toHaveBeenCalledWith(
-			'queue-results:job-1',
-			expect.objectContaining({ jobId: 'job-1' }),
-			{ retention: { mode: 'expire', ttlMs: 1_000 } },
-		)
+		expect(setState).toHaveBeenCalledWith('queue-results:job-1', expect.objectContaining({ jobId: 'job-1' }), {
+			retention: { mode: 'expire', ttlMs: 1_000 },
+		})
 	})
 
 	it('uses the permanent default when no queue result TTL is configured', async () => {

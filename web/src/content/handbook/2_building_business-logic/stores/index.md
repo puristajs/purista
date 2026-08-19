@@ -38,7 +38,7 @@ A practical rule: if you would put it in `.env` or a config file, use the config
 
 For local development and unit tests, all three default in-memory implementations are sufficient. The key discipline is to never call cloud-provider SDKs directly inside your command or subscription functions — always go through the context. This is what makes the implementations swappable: your `userSignUp` command does not know whether `context.secrets.getSecret('stripeApiKey')` is reading from AWS Secrets Manager or from a local in-memory map during a test run.
 
-In staging and production, pick implementations that match your infrastructure. If your team is already on AWS, `@purista/aws-secret-store` and `@purista/aws-config-store` (backed by SSM Parameter Store) are the natural fit. If you're running NATS as your event bridge, `@purista/nats-config-store` and `@purista/nats-state-store` keep your infrastructure footprint minimal. For state stores in production, in-memory is never acceptable — use Redis or NATS KV so that state survives instance restarts and is shared across replicas.
+In staging and production, pick implementations that match your infrastructure. If your team is already on AWS, `@purista/aws-secret-store` and `@purista/aws-config-store` (backed by SSM Parameter Store) are the natural fit. If you're running NATS as your event bridge, `@purista/nats-config-store` and `@purista/nats-state-store` keep your infrastructure footprint minimal. For state stores in production, in-memory is never acceptable — use Redis, NATS KV, Dapr, or another durable adapter so that state survives instance restarts and is shared across replicas. Choose Redis or an explicitly TTL-capable Dapr component when you need per-write expiry.
 
 ## Using stores in a service
 
@@ -99,9 +99,9 @@ Access stores from command and subscription handlers:
 | Package | Backend | Best for |
 |---|---|---|
 | `@purista/core` | In-memory | Development, testing |
-| `@purista/redis-state-store` | Redis | Production sessions, counters, caches |
-| `@purista/nats-state-store` | NATS KV | NATS-first platforms |
-| `@purista/dapr-sdk` | Dapr state store | Polyglot, service-mesh environments |
+| `@purista/redis-state-store` | Redis | Production sessions, counters, caches; atomic per-key expiry |
+| `@purista/nats-state-store` | NATS KV | NATS-first platforms; fixed bucket lifetime only |
+| `@purista/dapr-sdk` | Dapr state store | Polyglot/service mesh; per-write expiry only with a TTL-capable component |
 
 ## Common pitfalls
 

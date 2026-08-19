@@ -121,6 +121,25 @@ describe('DaprStateStore', () => {
 				expect((err as UnhandledError).message).toBe('set state at store is disabled by config')
 			}
 		})
+
+		it('sends TTL metadata only when the configured component declares support', async () => {
+			const post = sandbox.stub(HttpClient.prototype, 'post').resolves()
+			const stateStore = new DaprStateStore({ ...config, supportsTtl: true })
+
+			await stateStore.setState('short-lived', { ok: true }, { retention: { mode: 'expire', ttlMs: 1_500 } })
+
+			expect(post.firstCall.args[1]).toEqual([
+				{ key: 'short-lived', value: { ok: true }, metadata: { ttlInSeconds: '2' } },
+			])
+		})
+
+		it('rejects finite retention when component TTL support is not explicitly declared', async () => {
+			const stateStore = new DaprStateStore(config)
+
+			await expect(
+				stateStore.setState('short-lived', { ok: true }, { retention: { mode: 'expire', ttlMs: 1_000 } }),
+			).rejects.toMatchObject({ errorCode: 501 })
+		})
 	})
 
 	describe('removeState', () => {

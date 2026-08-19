@@ -534,6 +534,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 	/** Configure harness session behavior for this attached agent. */
 	setSessionPolicy(policy: AgentSessionPolicy) {
+		validateSessionRetention(policy.retention)
 		this.sessionPolicy = policy
 		return this
 	}
@@ -944,6 +945,32 @@ function getRuntime<Output>(definition: AgentDefinition<any>, owner?: object) {
 function assertNonEmpty(value: string, label: string) {
 	if (value.trim() === '') {
 		throw new Error(`${label} must be a non-empty string`)
+	}
+}
+
+function validateSessionRetention(retention: AgentSessionPolicy['retention']): void {
+	if (!retention) return
+	if (retention.idleTtlMs !== undefined && (!Number.isSafeInteger(retention.idleTtlMs) || retention.idleTtlMs <= 0)) {
+		throw new Error('Agent session retention idleTtlMs must be a positive safe integer in milliseconds')
+	}
+	const history = retention.history
+	if (history) {
+		if (history.maxTurns === undefined && history.maxBytes === undefined) {
+			throw new Error('Agent session history retention requires maxTurns or maxBytes')
+		}
+		for (const value of [history.maxTurns, history.maxBytes]) {
+			if (value !== undefined && (!Number.isSafeInteger(value) || value < 0)) {
+				throw new Error('Agent session history retention limits must be non-negative safe integers')
+			}
+		}
+	}
+	for (const [label, value] of [
+		['runs.maxPerSession', retention.runs?.maxPerSession],
+		['events.maxPerRun', retention.events?.maxPerRun],
+	] as const) {
+		if (value !== undefined && (!Number.isSafeInteger(value) || value <= 0)) {
+			throw new Error(`Agent session retention ${label} must be a positive safe integer`)
+		}
 	}
 }
 

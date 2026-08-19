@@ -227,8 +227,8 @@ Attached agents automatically use the service's normal `stateStore` for
 Harness sessions, conversation history, run records, and replayable events.
 Configure the store once through `service.getInstance(..., { stateStore })`;
 this shares the application's standard persistence. Harness records are
-namespaced by service, version, and agent, and the PURISTA service remains the
-only owner responsible for closing the service store.
+namespaced by service, version, and agent. The application owns the injected
+store lifecycle; services do not close a shared store.
 
 `ai.stateStore` remains available as an explicit Harness-native override. Use
 it when agent data deliberately needs a separate backend, retention policy, or
@@ -239,6 +239,37 @@ The default state store is intended for local development and tests. For
 durable production conversations, configure a normal PURISTA durable
 `StateStore` implementation (for example Redis, NATS, Dapr, or your own) on
 the service instance; attached agents use it automatically.
+
+### Bounded conversation storage
+
+Add retention to the session policy when a conversation should not grow without
+bound. The service-state adapter applies `idleTtlMs` to agent artifacts,
+retains only complete recent history turns, and can cap run summaries and
+replay events. The history byte limit is storage accounting, not a model-token
+estimate.
+
+For these agent records, `idleTtlMs` is more specific than the service's
+general `stateRetention` default. An explicit business-state write is more
+specific still. If no policy matches, the existing permanent-state behavior is
+preserved.
+
+```ts
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversation', 'id'],
+  retention: {
+    idleTtlMs: 30 * 24 * 60 * 60_000,
+    history: { maxTurns: 50, maxBytes: 256_000 },
+    runs: { maxPerSession: 20 },
+    events: { maxPerRun: 500 },
+  },
+})
+```
+
+Model context is selected separately using the provider/model's token limits.
+It may use fewer retained turns for a smaller model, but it never deletes the
+durable history. PURISTA deliberately does not pretend bytes can reliably be
+converted to tokens.
 
 ## Conversation tenant identity
 

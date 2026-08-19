@@ -128,7 +128,7 @@ State stores hold runtime application state that must survive service restarts â
 | Vendor | Package | Notes |
 |---|---|---|
 | In-memory (default) | `@purista/core` `DefaultStateStore` | Local dev only â€” lost on restart |
-| Redis | `@purista/redis-state-store` | Production-ready; supports TTL, pub/sub |
+| Redis | `@purista/redis-state-store` | Production-ready; supports atomic per-key expiry and pub/sub |
 | NATS JetStream KV | `@purista/nats-state-store` | Best for NATS-first stacks |
 | Dapr | `@purista/dapr-sdk` | Delegates to the configured Dapr component |
 

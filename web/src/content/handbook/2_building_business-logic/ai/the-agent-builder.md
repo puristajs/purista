@@ -188,10 +188,16 @@ By default, agents use an ephemeral session derived from the transport message. 
 .setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversation', 'id'],
+  retention: {
+    history: { maxTurns: 50, maxBytes: 256_000 },
+  },
 })
 ```
 
 With this policy, `payload.conversation.id` becomes the harness session id. Do not treat `correlationId` as a conversation id.
+History retains complete user/assistant/tool turns. Its UTF-8 byte ceiling
+controls stored data only; model request context remains token-based and is
+chosen independently by the Harness provider integration.
 
 ## Sandbox policy
 

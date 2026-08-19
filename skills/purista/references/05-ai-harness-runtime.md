@@ -85,8 +85,8 @@ Attached agents automatically adapt the service's normal `stateStore` for
 Harness sessions, conversation history, run records, and run events. Configure
 that store once in `service.getInstance(..., { stateStore })` to share the
 application's standard persistence. The adapter namespaces Harness records by
-service, version, and agent, while the service remains the sole owner of the
-store lifecycle.
+service, version, and agent. The application owns the injected store lifecycle;
+a service never closes a shared store.
 
 `ai.stateStore` remains an explicit Harness-native override. Use it only when
 agent persistence intentionally needs a separate backend, retention policy, or
@@ -96,6 +96,16 @@ The default state store is intended for local development and tests. For
 durable production conversations, configure a normal PURISTA durable
 `StateStore` implementation (for example Redis, NATS, Dapr, or your own) on
 the service instance; attached agents use it automatically.
+
+Use `setSessionPolicy(..., { retention })` to make storage bounds explicit:
+`history: { maxTurns, maxBytes }` is a complete-turn rolling window using UTF-8
+bytes for storage, `idleTtlMs` requires a service StateStore with atomic expiry,
+and optional `runs.maxPerSession` / `events.maxPerRun` bound diagnostic data.
+These are not model-token limits. Model context remains a transient,
+provider-specific token decision; never approximate token admission from bytes.
+Harness commits a complete turn only after a successful model loop. PURISTA
+passes the stable queue delivery identity as the Harness idempotency key, so a
+redelivery reuses the committed result instead of appending duplicate messages.
 
 `ai.harness.modules` is for static TypeScript modules imported and versioned by
 the application. `ai.harness.tools` is an explicit application-owned tool

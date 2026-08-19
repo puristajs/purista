@@ -103,6 +103,7 @@ describe('attached agent scoped runtime', () => {
 			},
 		}
 		const agentStateStore = new InMemoryStateStore()
+		let providerCalls = 0
 		const serviceStateStore = {
 			name: 'service-state',
 			getState: async () => ({}),
@@ -113,11 +114,14 @@ describe('attached agent scoped runtime', () => {
 		const provider = {
 			id: 'scripted',
 			genAiSystem: 'scripted',
-			object: async () => ({
-				object: { status: 'ok' },
-				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-				finishReason: 'stop' as const,
-			}),
+			object: async () => {
+				providerCalls += 1
+				return {
+					object: { status: 'ok' },
+					usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+					finishReason: 'stop' as const,
+				}
+			},
 		}
 		const scope = createAgentRuntimeScope()
 
@@ -131,16 +135,72 @@ describe('attached agent scoped runtime', () => {
 			serviceStateStore,
 		)
 
-		await expect(
-			getScopedAgentRuntime(scope, definition).executeAggregate({
-				appContext: createCommandContext('state-override'),
-				message: { id: 'state-override' },
-				payload: {},
-				parameter: {},
-			}),
-		).resolves.toEqual({ status: 'ok' })
+		const invocation = {
+			appContext: createCommandContext('state-override'),
+			message: { id: 'state-override' },
+			payload: {},
+			parameter: {},
+		}
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
 
-		expect(await agentStateStore.getSession('agent:support:1:triage:message:state-override')).toBeDefined()
+		const sessionId = 'agent:support:1:triage:message:state-override'
+		expect(providerCalls).toBe(1)
+		expect(await agentStateStore.getSession(sessionId)).toBeDefined()
+		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
+	})
+
+	it('rejects service-owned idle retention with an explicit Harness-native state store', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.manifest.session = { mode: 'ephemeral', retention: { idleTtlMs: 60_000 } }
+		const scope = createAgentRuntimeScope()
+
+		await expect(
+			initializeAttachedAgentRuntimes(scope, [definition], {
+				models: { primary: { provider: {} as never } },
+				stateStore: new InMemoryStateStore(),
+			}),
+		).rejects.toThrow('uses service-backed session retention, which requires the service StateStore')
+	})
+
+	it('replays a model-capable custom handler with the stable delivery identity', async () => {
+		let calls = 0
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async () => {
+				calls += 1
+				return { status: 'ok' }
+			},
+		}
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: {} as never } },
+			stateStore: new InMemoryStateStore(),
+		})
+		const invocation = {
+			appContext: createCommandContext('stable-custom-handler'),
+			message: { id: 'stable-custom-handler' },
+			payload: {},
+			parameter: {},
+		}
+
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+
+		expect(calls).toBe(1)
 	})
 
 	it('fails startup when a durable workspace agent has no runtime or workspace store', async () => {

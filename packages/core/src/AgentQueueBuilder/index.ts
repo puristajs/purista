@@ -46,6 +46,7 @@ export type {
 	AgentRuntimeStreamInvocationInput,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
+	AgentSessionRetentionPolicy,
 	AgentSkillCatalogEntry,
 	AgentSkillContext,
 	AgentSkillDiscoveryOptions,

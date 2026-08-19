@@ -17,6 +17,7 @@ import type {
 	RunEvent,
 	Sandbox,
 	Session,
+	SessionHistoryRetentionPolicy,
 	TelemetryOptions,
 	ToolsConfig,
 } from '@purista/harness'
@@ -183,9 +184,32 @@ export type AgentResponseModeOptions = {
 	streamUrl?: string
 }
 
+/**
+ * Retention owned by one attached agent's service-backed Harness state.
+ *
+ * `history` bounds durable transcript storage by complete turns and UTF-8
+ * bytes. `idleTtlMs` applies Core's native-expiry contract to every persisted
+ * record owned by the agent session; it is unavailable for an explicit
+ * Harness-native `ai.stateStore` override.
+ */
+export type AgentSessionRetentionPolicy = {
+	/** Expire each persisted agent artifact after this period without a replacing write. */
+	idleTtlMs?: number
+	/** Durable complete-turn bounds; this is separate from model token context. */
+	history?: SessionHistoryRetentionPolicy
+	/** Bound retained terminal run summaries for one session. Active runs are never removed. */
+	runs?: {
+		maxPerSession: number
+	}
+	/** Bound persisted lifecycle events for one run. */
+	events?: {
+		maxPerRun: number
+	}
+}
+
 /** Session behavior used by the harness runtime for each agent run. */
 export type AgentSessionPolicy =
-	| { mode: 'ephemeral' }
+	| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
 	| {
 			mode: 'conversation'
 			/** Path in the validated payload that resolves to the logical conversation id. */
@@ -197,6 +221,8 @@ export type AgentSessionPolicy =
 			 * non-sensitive conversation namespace.
 			 */
 			scope?: 'tenant' | 'global'
+			/** Optional bounded retention for this conversation's service-backed state. */
+			retention?: AgentSessionRetentionPolicy
 	  }
 
 /** Optional sandbox adapter configuration passed through to the agent runtime. */

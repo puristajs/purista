@@ -47,6 +47,7 @@ export async function initializeAttachedAgentRuntimes(
 
 	validateTenancyOptions(aiOptions)
 	validateWorkspacePolicies(definitions, aiOptions)
+	validateStateStoreRetention(definitions, aiOptions)
 
 	const executors = await Promise.all(
 		definitions.map(async definition => {
@@ -143,6 +144,21 @@ function validateWorkspacePolicies(
 		if (missing.length > 0) {
 			throw new Error(
 				`Attached agent "${definition.manifest.agentName}" requires unavailable durable workspace capabilities: ${missing.join(', ')}`,
+			)
+		}
+	}
+}
+
+function validateStateStoreRetention(
+	definitions: readonly AttachedAgentDefinition<any>[],
+	aiOptions: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
+): void {
+	if (!aiOptions.stateStore) return
+	for (const definition of definitions) {
+		const retention = definition.manifest.session.retention
+		if (retention?.idleTtlMs !== undefined || retention?.runs || retention?.events) {
+			throw new Error(
+				`Attached agent "${definition.manifest.agentName}" uses service-backed session retention, which requires the service StateStore; remove ai.stateStore or let that Harness-native adapter own its retention.`,
 			)
 		}
 	}
