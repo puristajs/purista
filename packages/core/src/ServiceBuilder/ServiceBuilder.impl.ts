@@ -21,6 +21,8 @@ import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
 import { Service } from '../core/Service/Service.impl.js'
+import { createStateStoreRetentionView } from '../core/StateStore/createStateStoreRetentionView.impl.js'
+import type { StateRetentionPolicy } from '../core/StateStore/types/StateRetention.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
 import type { Complete } from '../core/types/Complete.js'
 import type {
@@ -94,6 +96,11 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 		configStore?: ConfigStore
 		/** State store used by service handlers and attached agents. */
 		stateStore?: StateStore
+		/**
+		 * Optional service-local default retention. This creates an immutable view
+		 * over `stateStore`; it never mutates a shared store instance.
+		 */
+		stateRetention?: StateRetentionPolicy
 		/** Queue bridge used by queue definitions and attached agents. */
 		queueBridge?: QueueBridge
 		/** Optional queue job store for queue bridge implementations that use one. */
@@ -424,11 +431,12 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
-		const stateStore: StateStore =
+		const rawStateStore: StateStore =
 			options?.stateStore ??
 			initDefaultStateStore({
 				logger,
 			})
+		const stateStore = createStateStoreRetentionView(rawStateStore, options?.stateRetention)
 		const agentRuntimeScope = createAgentRuntimeScope()
 		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
 			agentRuntimeScope,

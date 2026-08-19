@@ -5,6 +5,13 @@ import type { EmptyObject } from '../types/EmptyObject.js'
 import type { Logger } from '../types/Logger.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StoreBaseConfig } from '../types/StoreBaseConfig.js'
+import {
+	type ResolvedStateWriteOptions,
+	resolveStateWriteOptions,
+	type StateStoreCapabilities,
+	type StateWriteOptions,
+	stateStoreCapabilitiesWithoutExpiry,
+} from './types/index.js'
 
 /**
  * Base class for state store implementations.
@@ -31,11 +38,25 @@ export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<st
 	/** Store name used in logs and diagnostics. */
 	name: string
 
-	constructor(name: string, config: StoreBaseConfig<StateStoreConfigType>) {
+	/**
+	 * Guarantees provided by this adapter.
+	 *
+	 * The default intentionally supports permanent values only. Adapters must
+	 * opt into `atomicExpiry` only when the value and deadline are committed in
+	 * one backend operation.
+	 */
+	readonly capabilities: StateStoreCapabilities
+
+	constructor(
+		name: string,
+		config: StoreBaseConfig<StateStoreConfigType>,
+		capabilities: StateStoreCapabilities = stateStoreCapabilitiesWithoutExpiry,
+	) {
 		const logger = config?.logger ?? initLogger(config?.logLevel)
 		this.logger = logger.getChildLogger({ name })
 
 		this.name = name
+		this.capabilities = capabilities
 
 		this.config = {
 			enableGet: true,
@@ -84,19 +105,44 @@ export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<st
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	/** Adapter-specific state write implementation. */
-	protected abstract setStateImpl(stateName: string, stateValue: unknown): Promise<void>
+	/**
+	 * Adapter-specific state write implementation.
+	 *
+	 * `options.retention` has already been resolved by the base class. Existing
+	 * adapters can omit this final parameter while they only support permanent
+	 * values; an expiring write will be rejected before reaching them.
+	 */
+	protected abstract setStateImpl(
+		stateName: string,
+		stateValue: unknown,
+		options: ResolvedStateWriteOptions,
+	): Promise<void>
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	/** Store or replace one state value. */
-	async setState(stateName: string, stateValue: unknown) {
+	/**
+	 * Store or replace one state value.
+	 *
+	 * Omitting `options` retains a value forever. Expiring values require an
+	 * adapter that declares native atomic expiry; PURISTA never silently turns a
+	 * requested TTL into a permanent value.
+	 */
+	async setState(stateName: string, stateValue: unknown, options?: StateWriteOptions) {
 		if (!this.config.enableSet) {
 			const err = new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
 			this.logger.error({ err }, err.message)
 			throw err
 		}
 
-		return this.setStateImpl(stateName, stateValue)
+		const resolvedOptions = resolveStateWriteOptions(options)
+		if (resolvedOptions.retention.mode === 'expire' && !this.capabilities.retention.atomicExpiry) {
+			const err = new UnhandledError(
+				StatusCode.NotImplemented,
+				`state store "${this.name}" does not support atomic expiry`,
+			)
+			this.logger.error({ err }, err.message)
+			throw err
+		}
+
+		return this.setStateImpl(stateName, stateValue, resolvedOptions)
 	}
 
 	/** Shutdown hook for store adapters. */

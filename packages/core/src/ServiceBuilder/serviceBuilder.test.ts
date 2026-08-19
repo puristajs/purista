@@ -1,4 +1,5 @@
 import { createSandbox } from 'sinon'
+import { vi } from 'vitest'
 import { z } from 'zod'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
@@ -74,6 +75,31 @@ describe('ServiceBuilder', () => {
 		const _serviceInstance = await service.getInstance(eventBridge.mock, {
 			logger: logger.mock,
 			resources: { x: new ExampleClass() },
+		})
+	})
+
+	it('creates a service-local state retention view without mutating a shared store', async () => {
+		const stateStore = {
+			name: 'shared-state-store',
+			capabilities: { retention: { atomicExpiry: true } },
+			getState: vi.fn(),
+			removeState: vi.fn(),
+			setState: vi.fn().mockResolvedValue(undefined),
+			destroy: vi.fn(),
+		}
+		const service = new ServiceBuilder(serviceInfo)
+		const eventBridge = getEventBridgeMock(sandbox)
+		const logger = getLoggerMock(sandbox)
+
+		const instance = await service.getInstance(eventBridge.mock, {
+			logger: logger.mock,
+			stateStore,
+			stateRetention: { default: { mode: 'expire', ttlMs: 60_000 } },
+		})
+		await instance.getContextFunctions(logger.mock).states.setState('short-lived', 'value')
+
+		expect(stateStore.setState).toHaveBeenCalledWith('short-lived', 'value', {
+			retention: { mode: 'expire', ttlMs: 60_000 },
 		})
 	})
 

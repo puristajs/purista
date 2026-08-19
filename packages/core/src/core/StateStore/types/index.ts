@@ -1,4 +1,6 @@
 export * from './StateDeleteFunction.js'
 export * from './StateGetterFunction.js'
+export * from './StateRetention.js'
 export * from './StateSetterFunction.js'
 export * from './StateStore.js'
+export * from './StateStoreCapabilities.js'

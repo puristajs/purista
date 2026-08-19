@@ -1,4 +1,5 @@
 import { StateStoreBaseClass } from '../core/StateStore/StateStoreBaseClass.impl.js'
+import type { ResolvedStateWriteOptions, StateStoreCapabilities } from '../core/StateStore/types/index.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
 import type { StoreBaseConfig } from '../core/types/StoreBaseConfig.js'
 import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKeysFromStringArray.js'
@@ -16,11 +17,16 @@ import type { DefaultStateStoreConfig } from './types/DefaultStateStoreConfig.js
  *
  */
 export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConfig> implements StateStore {
-	private map = new Map<string, unknown>()
+	private map = new Map<string, { value: unknown; expiresAt?: number }>()
 	constructor(config?: StoreBaseConfig<DefaultStateStoreConfig>) {
-		super('DefaultStateStore', { ...config })
+		const capabilities: StateStoreCapabilities = {
+			retention: {
+				atomicExpiry: true,
+			},
+		}
+		super('DefaultStateStore', { ...config }, capabilities)
 		if (config?.config) {
-			this.map = new Map(Object.entries(config.config))
+			this.map = new Map(Object.entries(config.config).map(([stateName, value]) => [stateName, { value }] as const))
 		}
 		this.logger.warn(
 			'Using the DefaultStateStore is not secure! It should only be used for test or development purpose.',
@@ -32,13 +38,22 @@ export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConf
 	): Promise<ObjectWithKeysFromStringArray<StateNames>> {
 		const result: Record<string, unknown> = {}
 		for (const name of stateNames) {
-			result[name] = this.map.get(name)
+			const entry = this.map.get(name)
+			if (entry?.expiresAt !== undefined && entry.expiresAt <= Date.now()) {
+				this.map.delete(name)
+				result[name] = undefined
+				continue
+			}
+			result[name] = entry?.value
 		}
 		return result as ObjectWithKeysFromStringArray<StateNames>
 	}
 
-	protected async setStateImpl(stateName: string, stateValue: unknown) {
-		this.map.set(stateName, stateValue)
+	protected async setStateImpl(stateName: string, stateValue: unknown, options: ResolvedStateWriteOptions) {
+		this.map.set(stateName, {
+			value: stateValue,
+			expiresAt: options.retention.mode === 'expire' ? Date.now() + options.retention.ttlMs : undefined,
+		})
 	}
 
 	protected async removeStateImpl(stateName: string) {

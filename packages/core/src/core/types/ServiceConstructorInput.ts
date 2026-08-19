@@ -10,6 +10,7 @@ import type {
 } from '../metrics/types.js'
 import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../SecretStore/types/SecretStore.js'
+import type { StateRetentionPolicy } from '../StateStore/types/StateRetention.js'
 import type { StateStore } from '../StateStore/types/StateStore.js'
 import type { CommandDefinitionListResolved } from './commandType/CommandDefinitionList.js'
 import type { ServiceInfoType } from './infoType/ServiceInfoType.js'
@@ -50,6 +51,11 @@ export type ServiceConstructorInput<S extends ServiceClassTypes = ServiceClassTy
 	configStore?: ConfigStore
 	/** the state store instance */
 	stateStore?: StateStore
+	/**
+	 * Optional retention default for this service's immutable state-store view.
+	 * A write-level retention still takes precedence.
+	 */
+	stateRetention?: StateRetentionPolicy
 	/** The opentelemetry span processor instance */
 	spanProcessor?: SpanProcessor
 	/** OpenTelemetry metrics runtime options for the service instance */

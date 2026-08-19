@@ -1,4 +1,5 @@
 import { createSandbox } from 'sinon'
+import { vi } from 'vitest'
 
 import { getLoggerMock } from '../mocks/index.js'
 import { DefaultStateStore } from './DefaultStateStore.impl.js'
@@ -60,5 +61,39 @@ describe('DefaultStateStore', () => {
 		await expect(store.getState('initialValue')).resolves.toEqual({
 			initialValue: undefined,
 		})
+	})
+
+	it('honors native expiry on reads and refreshes it only when a value is written again', async () => {
+		vi.useFakeTimers()
+		vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+		try {
+			const store = new DefaultStateStore({ logger: getLoggerMock(sandbox).mock })
+
+			await store.setState('temporary', 'first', { retention: { mode: 'expire', ttlMs: 1_000 } })
+			await vi.advanceTimersByTimeAsync(999)
+			await expect(store.getState('temporary')).resolves.toEqual({ temporary: 'first' })
+
+			await store.setState('temporary', 'refreshed', { retention: { mode: 'expire', ttlMs: 1_000 } })
+			await vi.advanceTimersByTimeAsync(999)
+			await expect(store.getState('temporary')).resolves.toEqual({ temporary: 'refreshed' })
+
+			await vi.advanceTimersByTimeAsync(1)
+			await expect(store.getState('temporary')).resolves.toEqual({ temporary: undefined })
+		} finally {
+			vi.useRealTimers()
+		}
+	})
+
+	it('keeps state forever when retention is omitted', async () => {
+		vi.useFakeTimers()
+		try {
+			const store = new DefaultStateStore({ logger: getLoggerMock(sandbox).mock })
+			await store.setState('permanent', 'value')
+			await vi.advanceTimersByTimeAsync(365 * 24 * 60 * 60 * 1_000)
+
+			await expect(store.getState('permanent')).resolves.toEqual({ permanent: 'value' })
+		} finally {
+			vi.useRealTimers()
+		}
 	})
 })
