@@ -32,7 +32,10 @@ export type StateRetention =
  * @group Store
  */
 export type StateWriteOptions = {
-	/** Retention for this write. Omit it to retain the value forever. */
+	/**
+	 * Retention for this write. Omit it to use the current store/view default
+	 * (which is `forever` for an unscoped store).
+	 */
 	retention?: StateRetention
 }
 
