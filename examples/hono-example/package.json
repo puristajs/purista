@@ -28,15 +28,15 @@
 		"sinon": "^22.1.0",
 		"tsx": "^4.23.12",
 		"typescript": "npm:@typescript/typescript6@^6.0.2",
-		"vitest": "^4.1.10"
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
-		"@hono/node-server": "^2.1.0",
+		"@hono/node-server": "^2.1.1",
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/sdk-metrics": "^2.10.0",
 		"@purista/core": "*",
 		"@purista/hono-http-server": "*",
-		"@scalar/hono-api-reference": "^0.11.13",
+		"@scalar/hono-api-reference": "^0.11.14",
 		"zod": "^4.4.3"
 	}
 }

@@ -37,17 +37,17 @@
 		"@types/sinon": "^22.0.0",
 		"@hono/swagger-ui": "^0.6.1",
 		"sinon": "^22.1.0",
-		"vitest": "^4.1.10"
+		"vitest": "^4.1.11"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.1",
 		"@opentelemetry/semantic-conventions": "^1.43.0",
 		"@purista/core": "*",
-		"hono": "^4.13.1"
+		"hono": "^4.13.3"
 	},
 	"peerDependenciesMeta": {},
 	"optionalDependencies": {
-		"@hono/node-server": "^2.1.0"
+		"@hono/node-server": "^2.1.1"
 	},
 	"types": "./dist/index.d.ts"
 }

@@ -44,11 +44,11 @@
 		"web"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.8",
+		"@biomejs/biome": "^2.5.9",
 		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
-		"@vitest/coverage-v8": "^4.1.10",
+		"@vitest/coverage-v8": "^4.1.11",
 		"check-dependency-version-consistency": "^6.0.0",
 		"git-cliff": "^2.13.1",
 		"npm-check-updates": "^23.0.2",
@@ -59,7 +59,7 @@
 		"tsx": "^4.23.12",
 		"typedoc": "^0.28.20",
 		"typescript": "npm:@typescript/typescript6@^6.0.2",
-		"vitest": "^4.1.10"
+		"vitest": "^4.1.11"
 	},
 	"packageManager": "npm@12.0.2",
 	"overrides": {
