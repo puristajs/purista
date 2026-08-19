@@ -7,6 +7,7 @@ import {
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
 	type HarnessModule,
+	type StateStore as HarnessStateStore,
 	type WorkflowDefinition as HarnessWorkflowDefinition,
 	type InvokeOptions,
 	type ModelAlias,
@@ -51,6 +52,9 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	harness?: AgentHarnessRuntimeOptions
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
+	/** Explicit Harness persistence override owned by the agent runtime configuration. */
+	harnessStateStore?: HarnessStateStore
+	/** Service-owned generic PURISTA state store used when no Harness override is configured. */
 	stateStore?: PuristaStateStore
 	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions
@@ -122,10 +126,11 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		})
 			.logger(createPuristaHarnessLogger(this.input.logger))
 			.state(
-				createPuristaHarnessStateStore({
-					store: this.input.stateStore,
-					namespace: `${this.input.manifest.serviceName}:${this.input.manifest.serviceVersion}:${this.input.manifest.agentName}`,
-				}),
+				this.input.harnessStateStore ??
+					createPuristaHarnessStateStore({
+						store: this.input.stateStore,
+						namespace: `${this.input.manifest.serviceName}:${this.input.manifest.serviceVersion}:${this.input.manifest.agentName}`,
+					}),
 			)
 
 		for (const module of this.input.harness?.modules ?? []) {

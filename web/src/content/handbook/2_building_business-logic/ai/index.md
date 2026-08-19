@@ -226,9 +226,14 @@ This fail-fast behavior prevents a production service from silently degrading to
 Attached agents automatically use the service's normal `stateStore` for
 Harness sessions, conversation history, run records, and replayable events.
 Configure the store once through `service.getInstance(..., { stateStore })`;
-there is no separate `ai.stateStore` to configure. Harness records are
+this shares the application's standard persistence. Harness records are
 namespaced by service, version, and agent, and the PURISTA service remains the
-only owner responsible for closing the store.
+only owner responsible for closing the service store.
+
+`ai.stateStore` remains available as an explicit Harness-native override. Use
+it when agent data deliberately needs a separate backend, retention policy, or
+isolation boundary. When configured, it takes precedence over the service
+store.
 
 The default state store is intended for local development and tests. For
 durable production conversations, configure a normal PURISTA durable

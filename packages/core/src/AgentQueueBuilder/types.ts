@@ -7,6 +7,7 @@ import type {
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
 	HarnessModule,
+	StateStore as HarnessStateStore,
 	WorkflowDefinition as HarnessWorkflowDefinition,
 	ModelAlias,
 	ModelCapability,
@@ -668,6 +669,14 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 /** Runtime options required to initialize attached agents for a service instance. */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
+	/**
+	 * Optional Harness-native persistence store for agent sessions, history, runs,
+	 * and events. When omitted, attached agents adapt the service `stateStore`.
+	 *
+	 * Use this only when agent persistence intentionally needs a separate
+	 * backend, retention policy, or isolation boundary from service state.
+	 */
+	stateStore?: HarnessStateStore
 	/**
 	 * Explicit tenancy configuration for attached agents.
 	 *

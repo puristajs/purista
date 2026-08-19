@@ -1,7 +1,9 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { InMemoryStateStore } from '@purista/harness'
 import { createSandbox } from 'sinon'
+import { z } from 'zod'
 
 import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Logger.js'
 import { getEventBridgeMock } from '../../mocks/index.js'
@@ -85,6 +87,60 @@ describe('attached agent scoped runtime', () => {
 		const secondRuntime = getScopedAgentRuntime(secondScope, definition)
 
 		expect(firstRuntime).not.toBe(secondRuntime)
+	})
+
+	it('lets ai.stateStore override the service state-store adapter', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.execution = {
+			kind: 'harnessAgent',
+			definition: {
+				model: 'primary',
+				input: z.object({}),
+				output: z.object({ status: z.literal('ok') }),
+				instructions: 'Return a scripted result.',
+			},
+		}
+		const agentStateStore = new InMemoryStateStore()
+		const serviceStateStore = {
+			name: 'service-state',
+			getState: async () => ({}),
+			setState: async () => undefined,
+			removeState: async () => undefined,
+			destroy: async () => undefined,
+		} as never
+		const provider = {
+			id: 'scripted',
+			genAiSystem: 'scripted',
+			object: async () => ({
+				object: { status: 'ok' },
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+				finishReason: 'stop' as const,
+			}),
+		}
+		const scope = createAgentRuntimeScope()
+
+		await initializeAttachedAgentRuntimes(
+			scope,
+			[definition],
+			{
+				models: { primary: { provider: provider as never } },
+				stateStore: agentStateStore,
+			},
+			serviceStateStore,
+		)
+
+		await expect(
+			getScopedAgentRuntime(scope, definition).executeAggregate({
+				appContext: createCommandContext('state-override'),
+				message: { id: 'state-override' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toEqual({ status: 'ok' })
+
+		expect(await agentStateStore.getSession('agent:support:1:triage:message:state-override')).toBeDefined()
 	})
 
 	it('fails startup when a durable workspace agent has no runtime or workspace store', async () => {

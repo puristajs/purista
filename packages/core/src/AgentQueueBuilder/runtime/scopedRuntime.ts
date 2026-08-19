@@ -61,6 +61,7 @@ export async function initializeAttachedAgentRuntimes(
 				skillRuntime,
 				logger: aiOptions.logger,
 				stateStore,
+				harnessStateStore: aiOptions.stateStore,
 				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,

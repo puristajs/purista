@@ -83,10 +83,14 @@ Startup fails fast when aliases or capabilities are missing.
 
 Attached agents automatically adapt the service's normal `stateStore` for
 Harness sessions, conversation history, run records, and run events. Configure
-that store once in `service.getInstance(..., { stateStore })`; do not create or
-pass a second `ai.stateStore`. The adapter namespaces Harness records by
+that store once in `service.getInstance(..., { stateStore })` to share the
+application's standard persistence. The adapter namespaces Harness records by
 service, version, and agent, while the service remains the sole owner of the
 store lifecycle.
+
+`ai.stateStore` remains an explicit Harness-native override. Use it only when
+agent persistence intentionally needs a separate backend, retention policy, or
+isolation boundary. When present, it takes precedence over the service store.
 
 The default state store is intended for local development and tests. For
 durable production conversations, configure a normal PURISTA durable
