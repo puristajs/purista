@@ -48,12 +48,25 @@ npm run build
 ### 2. Make conversation tenancy explicit
 
 Conversation sessions now default to tenant scope. Multi-tenant applications
-must propagate the authenticated `message.tenantId`; do not derive tenant
-identity from user input.
+normally need no agent-specific tenancy configuration: PURISTA uses the
+authenticated `message.tenantId` already carried into the service handler.
+Ensure the inbound adapter or guard establishes that trusted message field;
+never derive tenant identity from the payload, prompt, or conversation id.
 
-For a deliberately single-tenant deployment, configure one trusted runtime
-tenant identity. For a deliberately global, non-sensitive conversation
-namespace, opt in on the agent policy instead.
+The usual multi-tenant agent policy needs only its logical conversation id:
+
+```ts
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
+})
+```
+
+For a genuinely single-tenant deployment, `singleTenantId` is the explicit
+fallback for messages whose `tenantId` is `undefined`, `null`, empty, or
+whitespace. A non-empty `message.tenantId` always takes precedence; when both
+are present, PURISTA rejects a conflict. Configure the fallback once at
+runtime:
 
 ```ts
 await service.getInstance(eventBridge, {
@@ -62,13 +75,10 @@ await service.getInstance(eventBridge, {
     tenancy: { singleTenantId: 'acme-production' },
   },
 })
-
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'global', // only when a global namespace is intentional
-})
 ```
+
+Use `scope: 'global'` only for a deliberately shared, non-sensitive
+conversation namespace; it is independent of the normal tenant-scoped case.
 
 ### 3. Declare workflow delegation
 
