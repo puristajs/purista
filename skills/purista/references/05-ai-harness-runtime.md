@@ -98,9 +98,11 @@ agent persistence intentionally needs a separate backend, retention policy, or
 isolation boundary. When present, it takes precedence over the service store.
 
 The default state store is intended for local development and tests. For
-durable production conversations, configure a normal PURISTA durable
-`StateStore` implementation (for example Redis, NATS, Dapr, or your own) on
-the service instance; attached agents use it automatically.
+durable production conversations, configure a persistent PURISTA `StateStore`
+or an explicit Harness-native `ai.stateStore` that meets the required Harness
+state contract. Persistence does not schedule conversation turns: the
+application owns whether messages for one conversation serialize, receive a
+busy response, or create independent sessions.
 
 Use `setSessionPolicy(..., { retention })` to make storage bounds explicit:
 `history: { maxTurns, maxBytes }` is a complete-turn rolling window using UTF-8

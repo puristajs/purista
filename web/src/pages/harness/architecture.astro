@@ -191,7 +191,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <div class="arch-adapter-head">
             <span class="arch-adapter-name site-mono">State Store</span>
           </div>
-          <p>Persists sessions, run history, messages, and events across process restarts. Use the default for development. Use a durable adapter in production so run history and traces survive deployment cycles.</p>
+          <p>Persists sessions, run history, messages, and events across process restarts. Use the default for development. Use a durable adapter in production so run history and traces survive deployment cycles. Persistence does not schedule same-conversation turns; that is application policy.</p>
           <ul class="arch-adapter-list">
             <li>In-memory default — suitable for local development</li>
             <li>Custom adapter — implement <code class="site-mono" style="font-size:0.82em">StateStore</code> against any backend (Redis, Postgres, etc.)</li>

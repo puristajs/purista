@@ -15,6 +15,7 @@ permanent unless a caller selects a retention policy.
 | write retention, expiry guarantees, and backend capability | Core `StateStore` | Harness, service handlers |
 | service-scoped defaults and per-write override | Core service runtime | a mutable singleton store default |
 | conversation turns, history/run/event bounds | Harness + Core agent-state adapter | generic `StateStore` |
+| conversation turn admission, ordering, and overlap UX | application/service domain | Harness, generic `StateStore` |
 | model input-window selection and token accounting | Harness model/request layer | persistent-store byte limits |
 | purge scheduling and application lifecycle | application deployment / explicit PURISTA worker or command | hidden Core interval or Service destruction |
 
@@ -105,6 +106,12 @@ retention: {
 - Run/event bounds retain terminal summaries while trimming intermediate audit
   entries under their respective explicit limits. Active runs are never pruned.
 - An absent retention block preserves existing persistent behavior.
+
+Retention and atomic message replacement are durability guarantees, not a
+conversation scheduler. Two model calls started from the same history cannot be
+made causally ordered by sorting timestamps after they finish. The application
+must explicitly decide whether same-conversation turns serialize, are rejected
+while a turn is active, or use independent sessions.
 
 ## Model context is token-based
 

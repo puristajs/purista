@@ -42,6 +42,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
 const messages = await session.history.list({ limit: 20 })`}
             language="typescript"
           />
+          <p class="text-[var(--color-fg-muted)] mt-4">A session scopes history; it does not queue concurrent user turns across processes. Decide in application code whether one conversation serializes, returns a busy response, or branches into independent sessions.</p>
         </div>
         <div>
           <div class="eyebrow mb-3" style="color: var(--color-con-hi)">Memory</div>
