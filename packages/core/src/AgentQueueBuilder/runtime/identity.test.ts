@@ -7,11 +7,11 @@ const manifest = {
 	serviceVersion: '1',
 	agentName: 'triage',
 	runtimeRevision: 'rev-test',
-	session: { mode: 'conversation' as const, payloadPath: ['conversationId'] },
+	session: { mode: 'conversation' as const, payloadPath: ['conversationId'], scope: 'tenant' as const },
 }
 
 describe('attached-agent harness session identity', () => {
-	it('isolates a shared logical conversation id by tenant by default', () => {
+	it('isolates a shared logical conversation id by its required tenant scope', () => {
 		const first = deriveAgentRunIdentity({
 			manifest,
 			message: { id: 'message-a', tenantId: 'tenant-a' },
@@ -28,40 +28,30 @@ describe('attached-agent harness session identity', () => {
 		expect(first.harnessSessionId).not.toBe(second.harnessSessionId)
 	})
 
-	it('requires tenant identity for the default conversation scope', () => {
+	it('fails closed when a tenant-scoped conversation has no message tenant', () => {
 		expect(() => resolveHarnessSessionId(manifest, 'message', { conversationId: 'shared' })).toThrow('message.tenantId')
 	})
 
-	it('uses an explicit service single-tenant identity when legacy messages omit tenant metadata', () => {
+	it('uses a service-scoped conversation without fabricating tenant identity', () => {
 		const identity = deriveAgentRunIdentity({
-			manifest,
+			manifest: { ...manifest, session: { mode: 'conversation', payloadPath: ['conversationId'], scope: 'service' } },
 			message: { id: 'message' },
-			payload: { conversationId: 'shared' },
-			singleTenantId: 'acme',
+			payload: { conversationId: 'shared:value' },
 		})
 
-		expect(identity.tenantId).toBe('acme')
-		expect(identity.harnessSessionId).toContain(':tenant:acme:conversation:shared')
+		expect(identity.tenantId).toBeUndefined()
+		expect(identity.harnessSessionId).toContain(':service:conversation:shared%3Avalue')
 	})
 
-	it('rejects a message tenant that conflicts with the configured single-tenant identity', () => {
-		expect(() =>
-			deriveAgentRunIdentity({
-				manifest,
-				message: { id: 'message', tenantId: 'other-tenant' },
-				payload: { conversationId: 'shared' },
-				singleTenantId: 'acme',
-			}),
-		).toThrow('must match ai.tenancy.singleTenantId')
-	})
+	it('keeps message tenant metadata without partitioning a service-scoped conversation', () => {
+		const identity = deriveAgentRunIdentity({
+			manifest: { ...manifest, session: { mode: 'conversation', payloadPath: ['conversationId'], scope: 'service' } },
+			message: { id: 'message', tenantId: 'tenant-a' },
+			payload: { conversationId: 'shared:value' },
+		})
 
-	it('permits an explicit global scope for a deliberately single-tenant conversation', () => {
-		const sessionId = resolveHarnessSessionId(
-			{ ...manifest, session: { mode: 'conversation', payloadPath: ['conversationId'], scope: 'global' } },
-			'message',
-			{ conversationId: 'shared:value' },
-		)
-
-		expect(sessionId).toContain(':global:conversation:shared%3Avalue')
+		expect(identity.tenantId).toBe('tenant-a')
+		expect(identity.harnessSessionId).toContain(':service:conversation:shared%3Avalue')
+		expect(identity.harnessSessionId).not.toContain('tenant-a')
 	})
 })

@@ -14,7 +14,6 @@ export type DeriveAgentRunIdentityInput = {
 	message: IdentityMessage
 	payload: unknown
 	runId?: string
-	singleTenantId?: string
 }
 
 export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): AgentRunIdentity {
@@ -24,9 +23,8 @@ export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): Agen
 		transportMessageId,
 		input.payload,
 		input.message.tenantId,
-		input.singleTenantId,
 	)
-	const tenantId = resolveEffectiveTenantId(input.message.tenantId, input.singleTenantId)
+	const tenantId = optionalNonEmptyString(input.message.tenantId)
 
 	return {
 		transportMessageId,
@@ -49,9 +47,7 @@ export function resolveHarnessSessionId(
 	transportMessageId: string,
 	payload: unknown,
 	tenantId?: unknown,
-	singleTenantId?: unknown,
 ): string {
-	const effectiveTenantId = resolveEffectiveTenantId(tenantId, singleTenantId)
 	if (manifest.session.mode === 'ephemeral') {
 		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:message:${transportMessageId}`
 	}
@@ -68,8 +64,8 @@ export function resolveHarnessSessionId(
 		encodeSessionSegment(manifest.serviceVersion),
 		encodeSessionSegment(manifest.agentName),
 	]
-	if ((manifest.session.scope ?? 'tenant') === 'tenant') {
-		const resolvedTenantId = effectiveTenantId ?? requireConversationTenantId()
+	if (manifest.session.scope === 'tenant') {
+		const resolvedTenantId = optionalNonEmptyString(tenantId) ?? requireConversationTenantId()
 		return [
 			...prefix,
 			'tenant',
@@ -78,21 +74,14 @@ export function resolveHarnessSessionId(
 			encodeSessionSegment(value),
 		].join(':')
 	}
-	return [...prefix, 'global', 'conversation', encodeSessionSegment(value)].join(':')
-}
-
-function resolveEffectiveTenantId(tenantId?: unknown, singleTenantId?: unknown): string | undefined {
-	const configuredTenantId =
-		singleTenantId === undefined ? undefined : requireNonEmptyString(singleTenantId, 'ai.tenancy.singleTenantId')
-	const messageTenantId = optionalNonEmptyString(tenantId)
-	if (configuredTenantId && messageTenantId && configuredTenantId !== messageTenantId) {
-		throw new Error('message.tenantId must match ai.tenancy.singleTenantId for a single-tenant service instance')
+	if (manifest.session.scope === 'service') {
+		return [...prefix, 'service', 'conversation', encodeSessionSegment(value)].join(':')
 	}
-	return messageTenantId ?? configuredTenantId
+	throw new Error('Agent conversation session scope must be "tenant" or "service"')
 }
 
 function requireConversationTenantId(): never {
-	throw new Error('Agent conversation session identity requires message.tenantId or ai.tenancy.singleTenantId')
+	throw new Error('Tenant-scoped agent conversation session identity requires message.tenantId')
 }
 
 function encodeSessionSegment(value: string): string {

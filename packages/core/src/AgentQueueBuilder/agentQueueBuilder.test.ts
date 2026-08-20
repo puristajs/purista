@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import {
 	AgentQueueBuilder,
+	type AgentSessionPolicy,
 	createAgentSkillTestRuntime,
 	createAgentTestHarness,
 	createScriptedHarnessModel,
@@ -49,6 +50,7 @@ describe('AgentQueueBuilder', () => {
 			.setSessionPolicy({
 				mode: 'conversation',
 				payloadPath: ['conversationId'],
+				scope: 'tenant',
 				retention: {
 					idleTtlMs: 60_000,
 					history: { maxTurns: 10, maxBytes: 32_000 },
@@ -72,6 +74,18 @@ describe('AgentQueueBuilder', () => {
 		)
 		expect(() => agent.setSessionPolicy({ mode: 'ephemeral', retention: { runs: { maxPerSession: 0 } } })).toThrow(
 			'Agent session retention runs.maxPerSession must be a positive safe integer',
+		)
+	})
+
+	it('requires an explicit conversation isolation scope at the builder boundary', () => {
+		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+		const withoutScope = { mode: 'conversation', payloadPath: ['conversationId'] } as const
+		// @ts-expect-error conversation policies must choose tenant or service isolation
+		const invalidPolicy: AgentSessionPolicy = withoutScope
+		void invalidPolicy
+
+		expect(() => agent.setSessionPolicy(withoutScope as never)).toThrow(
+			'Agent conversation session policy requires scope "tenant" or "service"',
 		)
 	})
 

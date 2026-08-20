@@ -276,24 +276,30 @@ metadata. If an attached agent configures `require_approval` rules, provide a
 harness `approval` adapter in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
 
-Conversation sessions are tenant-scoped by default. Normal PURISTA command,
-queue, and event flows already propagate authenticated `message.tenantId`; no
-extra handler plumbing is needed. A genuinely single-tenant deployment can
-avoid adding that metadata at every legacy caller by declaring its one trusted
-tenant once at startup:
+`ephemeral` is the default session mode. Persistent `conversation` sessions
+must explicitly choose their isolation boundary; Core never fabricates a tenant
+identity or silently creates a shared conversation namespace.
 
 ```ts
-ai: {
-  models,
-  tenancy: { singleTenantId: 'acme-production' },
-}
+// Multi-tenant service: authenticated message tenant is mandatory.
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
+  scope: 'tenant',
+})
+
+// Single-tenant service: no tenant partition exists.
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
+  scope: 'service',
+})
 ```
 
-Core uses that value only when a message has no tenant id and rejects a
-conflicting incoming tenant. Do not derive a tenant from the payload, prompt,
-conversation id, or unverified header. Multi-tenant services must continue to
-propagate authenticated `message.tenantId`; use `scope: 'global'` only for a
-deliberately shared, non-sensitive conversation namespace.
+`scope: 'tenant'` uses authenticated `message.tenantId` and rejects a missing
+value. `scope: 'service'` remains namespaced by service, version, agent, and
+conversation id but deliberately has no tenant partition. Do not derive tenant
+identity from payload data, prompts, conversation ids, or unverified headers.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:

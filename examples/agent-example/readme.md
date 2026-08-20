@@ -45,7 +45,7 @@ Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from t
 - PURISTA-level workflow orchestration with independent queue/runtime boundaries for each specialist agent
 - declared skills in agent manifests
 - sandbox policy for risk analysis
-- a tenant-scoped incident conversation with bounded complete-turn history,
+- a service-scoped incident conversation with bounded complete-turn history,
   inactive-session expiry, and bounded run/event audit records
 - generated queue, worker, command, and stream definitions for each agent
 - Hono HTTP exposure with OpenAPI documentation

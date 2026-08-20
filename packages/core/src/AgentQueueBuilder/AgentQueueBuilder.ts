@@ -537,8 +537,24 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
-	/** Configure harness session behavior for this attached agent. */
+	/**
+	 * Configure harness session behavior for this attached agent.
+	 *
+	 * Conversation sessions must explicitly choose `'tenant'` isolation for a
+	 * multi-tenant service or `'service'` isolation for a service without a
+	 * tenant partition.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setSessionPolicy({
+	 *   mode: 'conversation',
+	 *   payloadPath: ['conversationId'],
+	 *   scope: 'tenant',
+	 * })
+	 * ```
+	 */
 	setSessionPolicy(policy: AgentSessionPolicy) {
+		validateConversationScope(policy)
 		validateSessionRetention(policy.retention)
 		this.sessionPolicy = policy
 		return this
@@ -950,6 +966,12 @@ function getRuntime<Output>(definition: AgentDefinition<any>, owner?: object) {
 function assertNonEmpty(value: string, label: string) {
 	if (value.trim() === '') {
 		throw new Error(`${label} must be a non-empty string`)
+	}
+}
+
+function validateConversationScope(policy: AgentSessionPolicy): void {
+	if (policy.mode === 'conversation' && policy.scope !== 'tenant' && policy.scope !== 'service') {
+		throw new Error('Agent conversation session policy requires scope "tenant" or "service"')
 	}
 }
 

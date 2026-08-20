@@ -231,8 +231,6 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	skills?: AgentSkillRuntimeOptions
 	/** Explicit static Harness modules and tools to bind for this test runtime. */
 	harness?: AgentHarnessRuntimeOptions
-	/** Explicit single-tenant identity used by conversation-session tests. */
-	tenancy?: AgentRuntimeOptions<Models>['tenancy']
 	/** Optional durable runtime for workflow replay tests. */
 	runtime?: AgentRuntimeOptions<Models>['runtime']
 	/** Optional durable workspace store for workflow replay tests. */
@@ -263,7 +261,6 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		skillRuntime,
 		logger: options.logger,
 		governance: options.governance,
-		singleTenantId: options.tenancy?.singleTenantId,
 	})
 	definition.runtime.current = executor
 

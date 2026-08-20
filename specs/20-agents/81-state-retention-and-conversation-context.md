@@ -92,6 +92,22 @@ retention: {
 }
 ```
 
+Persistent `conversation` sessions also declare their isolation explicitly:
+
+```ts
+type AgentConversationScope = 'tenant' | 'service'
+```
+
+- `scope:'tenant'` requires a non-empty authenticated `message.tenantId` for
+  every turn and includes it in the harness session id. Missing tenant identity
+  fails closed.
+- `scope:'service'` intentionally has no tenant partition. The session remains
+  namespaced by service, version, agent, and logical conversation id, so it is
+  the correct choice for a genuinely single-tenant service.
+- `scope` is required when `mode:'conversation'`. Core does not infer a scope,
+  synthesize a tenant, offer a runtime tenant fallback, or silently fall back
+  to a shared namespace.
+
 - Each persisted artifact receives the configured expiry on a replacing write.
   This bounds inactive state without silently changing a shared service store.
   The complete history value is refreshed when a new turn is committed.

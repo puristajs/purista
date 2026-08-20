@@ -88,7 +88,7 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRuntimeModelBinding(s)`, `AgentRuntimeOptions`, `AgentRuntimeRef`,
 `AgentRuntimeInvocationInput`, `AgentRuntimeStreamInvocationInput`,
 `AgentExecutionDefinition`, `AgentExecutionKind`, `AgentExecutionPolicy`,
-`AgentSessionPolicy`, `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
+`AgentSessionPolicy`, `AgentConversationScope`, `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
 `AgentWorkspaceCapabilityRequirement`, `AgentDurableWorkspaceStore(Policy)`,
 `AgentHttpExposure`, `AgentResponseMode`, `AgentResponseModeOptions`,
 `AgentQueueResultPolicy`, `AgentQueueResultPolicyMode`, `AgentQueueBuilderTypes`,
@@ -439,3 +439,7 @@ Contract cleanups:
 - Telemetry uses `contentCaptureMode` and defaults to `'NO_CONTENT'`. The prior
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
+- Persistent conversation sessions require an explicit `'tenant'` or `'service'`
+  scope. Core has no tenant fallback/runtime tenancy option: tenant scope uses
+  authenticated `message.tenantId`, while service scope intentionally has no
+  tenant partition.

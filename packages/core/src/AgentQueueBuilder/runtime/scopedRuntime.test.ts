@@ -62,18 +62,6 @@ describe('attached agent scoped runtime', () => {
 		)
 	})
 
-	it('rejects an empty single-tenant identity at service startup', async () => {
-		const scope = createAgentRuntimeScope()
-		const definition = createAttachedAgentDefinition()
-
-		await expect(
-			initializeAttachedAgentRuntimes(scope, [definition], {
-				models: {},
-				tenancy: { singleTenantId: '  ' },
-			}),
-		).rejects.toThrow('ai.tenancy.singleTenantId must be a non-empty string when configured')
-	})
-
 	it('keeps executors scoped per service instance for shared definitions', async () => {
 		const definition = createAttachedAgentDefinition()
 		const firstScope = createAgentRuntimeScope()
@@ -161,7 +149,7 @@ describe('attached agent scoped runtime', () => {
 		definition.manifest.session = {
 			mode: 'conversation',
 			payloadPath: ['conversationId'],
-			scope: 'global',
+			scope: 'service',
 			retention: { history: { maxTurns: 1 } },
 		}
 		definition.manifest.execution = { ...definition.manifest.execution, timeoutMs: 1_000 }
@@ -205,7 +193,7 @@ describe('attached agent scoped runtime', () => {
 			).resolves.toEqual({ status: 'ok' })
 		}
 
-		const sessionId = 'agent:support:1:triage:global:conversation:support-thread'
+		const sessionId = 'agent:support:1:triage:service:conversation:support-thread'
 		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
 	})
 

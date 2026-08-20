@@ -188,13 +188,18 @@ By default, agents use an ephemeral session derived from the transport message. 
 .setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversation', 'id'],
+  scope: 'tenant',
   retention: {
     history: { maxTurns: 50, maxBytes: 256_000 },
   },
 })
 ```
 
-With this policy, `payload.conversation.id` becomes the harness session id. Do not treat `correlationId` as a conversation id.
+With this policy, `payload.conversation.id` becomes the tenant-partitioned
+harness session id. A tenant-scoped conversation requires authenticated
+`message.tenantId`; use `scope: 'service'` instead for a genuinely
+single-tenant service with no tenant partition. Do not treat `correlationId` as
+a conversation id.
 History retains complete user/assistant/tool turns. Its UTF-8 byte ceiling
 controls stored data only; model request context remains token-based and is
 chosen independently by the Harness provider integration.

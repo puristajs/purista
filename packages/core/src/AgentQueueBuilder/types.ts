@@ -208,6 +208,16 @@ export type AgentSessionRetentionPolicy = {
 	}
 }
 
+/**
+ * Explicit isolation boundary for a persistent attached-agent conversation.
+ *
+ * Use `'tenant'` for multi-tenant services: every run must carry an
+ * authenticated `message.tenantId`. Use `'service'` when the owning service
+ * intentionally has no tenant partition; the session remains namespaced by
+ * service, version, and agent.
+ */
+export type AgentConversationScope = 'tenant' | 'service'
+
 /** Session behavior used by the harness runtime for each agent run. */
 export type AgentSessionPolicy =
 	| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
@@ -216,12 +226,11 @@ export type AgentSessionPolicy =
 			/** Path in the validated payload that resolves to the logical conversation id. */
 			payloadPath: readonly string[]
 			/**
-			 * Isolation scope for the logical conversation id. Defaults to `'tenant'`.
-			 * A tenant-scoped conversation requires the transport context to provide
-			 * `tenantId`; choose `'global'` only for an explicitly single-tenant,
-			 * non-sensitive conversation namespace.
+			 * Required isolation boundary for the logical conversation id.
+			 * `'tenant'` requires an authenticated `message.tenantId`; `'service'`
+			 * deliberately creates no tenant partition.
 			 */
-			scope?: 'tenant' | 'global'
+			scope: AgentConversationScope
 			/** Optional bounded retention for this conversation's service-backed state. */
 			retention?: AgentSessionRetentionPolicy
 	  }
@@ -367,19 +376,6 @@ export type AgentHarnessRuntimeOptions = {
 	modules?: readonly HarnessModule<any, any, string>[]
 	/** Explicit application-approved tool registry available for attached Harness definitions to allowlist. */
 	tools?: ToolsConfig
-}
-
-/**
- * Application-level tenant identity used by attached-agent conversation sessions.
- *
- * This is deliberately a single-tenant declaration, not a fallback derived from
- * a request payload. It lets a genuinely single-tenant application configure
- * its trusted tenant identity once at service startup. When an incoming message
- * also carries a tenant id, Core requires it to match this value.
- */
-export type AgentTenancyRuntimeOptions = {
-	/** Trusted tenant id for a deliberately single-tenant service instance. */
-	singleTenantId?: string
 }
 
 /** HTTP projection metadata for the generated agent command or stream. */
@@ -704,14 +700,6 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	 * backend, retention policy, or isolation boundary from service state.
 	 */
 	stateStore?: HarnessStateStore
-	/**
-	 * Explicit tenancy configuration for attached agents.
-	 *
-	 * Multi-tenant services must continue to propagate authenticated
-	 * `message.tenantId`. Use `singleTenantId` only when every request handled by
-	 * this service instance belongs to that one tenant.
-	 */
-	tenancy?: AgentTenancyRuntimeOptions
 	runtime?: DurableRuntime
 	workspaceStore?: AgentDurableWorkspaceStore
 	/** Explicit Harness modules and tools owned by the application runtime. */

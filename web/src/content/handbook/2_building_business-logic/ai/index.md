@@ -264,6 +264,7 @@ preserved.
 agent.setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversation', 'id'],
+  scope: 'tenant',
   retention: {
     idleTtlMs: 30 * 24 * 60 * 60_000,
     history: { maxTurns: 50, maxBytes: 256_000 },
@@ -278,31 +279,32 @@ It may use fewer retained turns for a smaller model, but it never deletes the
 durable history. PURISTA deliberately does not pretend bytes can reliably be
 converted to tokens.
 
-## Conversation tenant identity
+## Conversation isolation
 
-`ephemeral` remains the default session mode and needs no tenant configuration.
-For persistent `conversation` sessions, Core isolates the same conversation id
-by `message.tenantId` by default. Standard PURISTA command, queue, and event
-flows already propagate that authenticated metadata.
-
-A genuinely single-tenant service can configure its trusted identity once at
-startup, which keeps legacy callers working without making a shared
-conversation namespace:
+`ephemeral` remains the default session mode and needs no isolation setup.
+Persistent `conversation` sessions require one explicit scope; Core never
+invents a tenant identity or silently falls back to a shared namespace.
 
 ```ts
-await service.getInstance(eventBridge, {
-  ai: {
-    models,
-    tenancy: { singleTenantId: 'acme-production' },
-  },
+// Multi-tenant service: require the authenticated message tenant.
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversation', 'id'],
+  scope: 'tenant',
+})
+
+// Single-tenant service: no tenant is required or synthesized.
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversation', 'id'],
+  scope: 'service',
 })
 ```
 
-Core uses `singleTenantId` only when the message has no tenant id. If a message
-does carry one, it must match. Do not derive tenant identity from payload data,
-conversation ids, prompts, or unverified headers. Multi-tenant services must
-continue to provide authenticated `message.tenantId`; use `scope: 'global'`
-only for a deliberately shared, non-sensitive conversation namespace.
+`tenant` uses authenticated `message.tenantId` and fails when it is missing.
+`service` remains namespaced by service, version, agent, and conversation id,
+but deliberately does not partition by tenant. Do not derive tenant identity
+from payload data, conversation ids, prompts, or unverified headers.
 
 ## Sandbox and durable workspaces
 

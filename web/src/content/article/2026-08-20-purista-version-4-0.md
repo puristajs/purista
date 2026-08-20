@@ -17,7 +17,7 @@ pipeline; do not edit workspace versions by hand.
 ## What changes
 
 - Attached-agent runtime bindings are typed and validated at startup.
-- Conversation sessions are tenant-scoped by default.
+- Conversation sessions declare either tenant or service isolation explicitly.
 - A service StateStore is reused for agent history, runs, and events unless an
   explicit Harness-native `ai.stateStore` is supplied.
 - History can retain complete recent turns with explicit byte/turn bounds.
@@ -45,40 +45,35 @@ npm test
 npm run build
 ```
 
-### 2. Make conversation tenancy explicit
+### 2. Choose conversation isolation explicitly
 
-Conversation sessions now default to tenant scope. Multi-tenant applications
-normally need no agent-specific tenancy configuration: PURISTA uses the
-authenticated `message.tenantId` already carried into the service handler.
-Ensure the inbound adapter or guard establishes that trusted message field;
-never derive tenant identity from the payload, prompt, or conversation id.
+Persistent conversations require one explicit isolation choice. There is no
+tenant fallback or synthesized tenant identity.
 
-The usual multi-tenant agent policy needs only its logical conversation id:
+For a multi-tenant service, choose `tenant`. PURISTA then uses the authenticated
+`message.tenantId` already carried into the service handler and rejects a
+missing tenant. Ensure the inbound adapter or guard establishes that trusted
+message field; never derive it from the payload, prompt, or conversation id.
 
 ```ts
 agent.setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversationId'],
+  scope: 'tenant',
 })
 ```
 
-For a genuinely single-tenant deployment, `singleTenantId` is the explicit
-fallback for messages whose `tenantId` is `undefined`, `null`, empty, or
-whitespace. A non-empty `message.tenantId` always takes precedence; when both
-are present, PURISTA rejects a conflict. Configure the fallback once at
-runtime:
+For a genuinely single-tenant service, choose `service`. No `tenantId` is
+required or fabricated; the session still remains namespaced by service,
+version, agent, and conversation id.
 
 ```ts
-await service.getInstance(eventBridge, {
-  ai: {
-    models,
-    tenancy: { singleTenantId: 'acme-production' },
-  },
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
+  scope: 'service',
 })
 ```
-
-Use `scope: 'global'` only for a deliberately shared, non-sensitive
-conversation namespace; it is independent of the normal tenant-scoped case.
 
 ### 3. Declare workflow delegation
 
@@ -138,6 +133,7 @@ accounting, not a model-token budget.
 agent.setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversationId'],
+  scope: 'tenant',
   retention: {
     idleTtlMs: 30 * 24 * 60 * 60 * 1_000,
     history: { maxTurns: 50, maxBytes: 256_000 },

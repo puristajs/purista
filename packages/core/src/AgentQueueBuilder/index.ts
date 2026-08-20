@@ -14,6 +14,7 @@ export {
 	ScriptedHarnessModelProvider,
 } from './testing/index.js'
 export type {
+	AgentConversationScope,
 	AgentDefinition,
 	AgentDurableWorkspaceStore,
 	AgentDurableWorkspaceStorePolicy,
@@ -53,7 +54,6 @@ export type {
 	AgentSkillResolver,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
-	AgentTenancyRuntimeOptions,
 	AgentWorkspaceCapabilityRequirement,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
