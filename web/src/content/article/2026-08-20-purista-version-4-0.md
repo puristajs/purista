@@ -45,34 +45,26 @@ npm test
 npm run build
 ```
 
-### 2. Choose conversation isolation explicitly
+### 2. Configure conversations safely by default
 
-Persistent conversations require one explicit isolation choice. There is no
-tenant fallback or synthesized tenant identity.
+`setConversation(...)` is tenant-isolated by default. There is no tenant
+fallback or synthesized tenant identity.
 
-For a multi-tenant service, choose `tenant`. PURISTA then uses the authenticated
+For a multi-tenant service, use the default. PURISTA then uses the authenticated
 `message.tenantId` already carried into the service handler and rejects a
 missing tenant. Ensure the inbound adapter or guard establishes that trusted
 message field; never derive it from the payload, prompt, or conversation id.
 
 ```ts
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'tenant',
-})
+agent.setConversation('conversationId')
 ```
 
-For a genuinely single-tenant service, choose `service`. No `tenantId` is
+For a genuinely single-tenant service, choose `{ scope: 'service' }`. No `tenantId` is
 required or fabricated; the session still remains namespaced by service,
 version, agent, and conversation id.
 
 ```ts
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'service',
-})
+agent.setConversation('conversationId', { scope: 'service' })
 ```
 
 ### 3. Declare workflow delegation
@@ -130,10 +122,7 @@ Retention is optional. Add it only where the product needs it; it is storage
 accounting, not a model-token budget.
 
 ```ts
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'tenant',
+agent.setConversation('conversationId', {
   retention: {
     idleTtlMs: 30 * 24 * 60 * 60 * 1_000,
     history: { maxTurns: 50, maxBytes: 256_000 },

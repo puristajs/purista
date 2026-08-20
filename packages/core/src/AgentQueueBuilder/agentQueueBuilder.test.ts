@@ -3,7 +3,6 @@ import { z } from 'zod'
 
 import {
 	AgentQueueBuilder,
-	type AgentSessionPolicy,
 	createAgentSkillTestRuntime,
 	createAgentTestHarness,
 	createScriptedHarnessModel,
@@ -47,10 +46,7 @@ describe('AgentQueueBuilder', () => {
 	it('carries explicit bounded conversation retention without affecting handler inference', async () => {
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-			.setSessionPolicy({
-				mode: 'conversation',
-				payloadPath: ['conversationId'],
-				scope: 'tenant',
+			.setConversation(['conversationId'], {
 				retention: {
 					idleTtlMs: 60_000,
 					history: { maxTurns: 10, maxBytes: 32_000 },
@@ -63,29 +59,39 @@ describe('AgentQueueBuilder', () => {
 
 		expect(definition.manifest.session).toMatchObject({
 			mode: 'conversation',
+			scope: 'tenant',
 			retention: { history: { maxTurns: 10 }, runs: { maxPerSession: 5 } },
 		})
 	})
 
 	it('rejects invalid retention bounds at the builder boundary', () => {
 		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-		expect(() => agent.setSessionPolicy({ mode: 'ephemeral', retention: { history: {} } })).toThrow(
+		expect(() => agent.setConversation(['conversationId'], { retention: { history: {} } })).toThrow(
 			'Agent session history retention requires maxTurns or maxBytes',
 		)
-		expect(() => agent.setSessionPolicy({ mode: 'ephemeral', retention: { runs: { maxPerSession: 0 } } })).toThrow(
+		expect(() => agent.setConversation(['conversationId'], { retention: { runs: { maxPerSession: 0 } } })).toThrow(
 			'Agent session retention runs.maxPerSession must be a positive safe integer',
 		)
 	})
 
-	it('requires an explicit conversation isolation scope at the builder boundary', () => {
-		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-		const withoutScope = { mode: 'conversation', payloadPath: ['conversationId'] } as const
-		// @ts-expect-error conversation policies must choose tenant or service isolation
-		const invalidPolicy: AgentSessionPolicy = withoutScope
-		void invalidPolicy
+	it('defaults conversations to tenant isolation and type-checks their id path against the payload schema', () => {
+		const agent = new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+			.addPayloadSchema(
+				z.object({ conversationId: z.string(), conversation: z.object({ id: z.string() }), count: z.number() }),
+			)
 
-		expect(() => agent.setSessionPolicy(withoutScope as never)).toThrow(
-			'Agent conversation session policy requires scope "tenant" or "service"',
+		agent.setConversation('conversationId')
+		agent.setConversation(['conversation', 'id'])
+		// @ts-expect-error conversation ids must resolve to a string payload field
+		agent.setConversation(['conversation', 'missing'])
+		// @ts-expect-error conversation ids must resolve to a string payload field
+		agent.setConversation(['count'])
+		// @ts-expect-error conversation ids must resolve to a string payload field
+		agent.setConversation('count')
+
+		expect(() => agent.setConversation(['conversation', 'id'], { scope: 'global' as never })).toThrow(
+			'Agent conversation scope must be "tenant" or "service"',
 		)
 	})
 

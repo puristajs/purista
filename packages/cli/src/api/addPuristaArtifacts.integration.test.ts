@@ -255,7 +255,6 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(agentBuilder).toContain('.setHarnessAgent(triageAgentHarnessAgent)')
 		expect(agentBuilder).toContain("capabilities: ['object']")
 		expect(agentBuilder).toContain(".setSuccessEventName('user.triage.completed')")
-		expect(agentBuilder).toContain(".setSessionPolicy({ mode: 'ephemeral' })")
 		expect(agentBuilder).toContain('.setExecutionPolicy({')
 		expect(agentBuilder).toContain("instructions: 'You are a helpful assistant for this service domain.'")
 		for (const term of forbiddenAgentTerms) {

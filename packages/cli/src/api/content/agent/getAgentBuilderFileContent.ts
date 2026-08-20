@@ -104,7 +104,6 @@ export const getAgentBuilderFileContent = (input: {
 		if (successEventName) {
 			writer.writeLine(`.setSuccessEventName('${successEventName}')`)
 		}
-		writer.writeLine(".setSessionPolicy({ mode: 'ephemeral' })")
 		writer.writeLine('.setExecutionPolicy({')
 		writer.indent(() => {
 			writer.writeLine('maxAttempts: 3,')

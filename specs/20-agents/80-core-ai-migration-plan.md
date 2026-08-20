@@ -75,7 +75,7 @@ ServiceBuilder integration:
 - metrics: `defineMetric` (agent-local; registered on the service)
 - execution (exactly one): `setRunFunction`, `setHarnessAgent`,
   `setHarnessWorkflow`
-- policies: `setExecutionPolicy`, `setExecutionProfile`, `setSessionPolicy`,
+- policies: `setExecutionPolicy`, `setExecutionProfile`, `setConversation`,
   `setSandboxPolicy`, `setWorkspacePolicy`, `setResponseMode`
 - HTTP/stream exposure: `exposeAsHttpEndpoint`, `makeEndpointPublic`,
   `setStreamingMode`, `setSuccessEventName`
@@ -88,7 +88,9 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRuntimeModelBinding(s)`, `AgentRuntimeOptions`, `AgentRuntimeRef`,
 `AgentRuntimeInvocationInput`, `AgentRuntimeStreamInvocationInput`,
 `AgentExecutionDefinition`, `AgentExecutionKind`, `AgentExecutionPolicy`,
-`AgentSessionPolicy`, `AgentConversationScope`, `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
+`AgentConversationId`, `AgentConversationIdPath`, `AgentConversationOptions`,
+`AgentConversationScope`,
+`AgentSandboxPolicy`, `AgentWorkspacePolicy`,
 `AgentWorkspaceCapabilityRequirement`, `AgentDurableWorkspaceStore(Policy)`,
 `AgentHttpExposure`, `AgentResponseMode`, `AgentResponseModeOptions`,
 `AgentQueueResultPolicy`, `AgentQueueResultPolicyMode`, `AgentQueueBuilderTypes`,
@@ -439,7 +441,7 @@ Contract cleanups:
 - Telemetry uses `contentCaptureMode` and defaults to `'NO_CONTENT'`. The prior
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
-- Persistent conversation sessions require an explicit `'tenant'` or `'service'`
-  scope. Core has no tenant fallback/runtime tenancy option: tenant scope uses
-  authenticated `message.tenantId`, while service scope intentionally has no
-  tenant partition.
+- `setConversation(...)` creates a persistent conversation that is tenant-scoped
+  by default. Core has no tenant fallback/runtime tenancy option: the default
+  tenant scope uses authenticated `message.tenantId`, while the explicit
+  `{ scope: 'service' }` option intentionally has no tenant partition.

@@ -75,10 +75,10 @@ an optional third argument; no separate untyped state API is introduced.
 Queue result `ttlMs` is an existing public promise and MUST use this same
 write path. It either expires under the documented guarantee or fails clearly.
 
-## Agent session policy
+## Agent conversation configuration
 
-`AgentSessionPolicy` is extended with an optional retention block. `history`
-applies to either the service-backed adapter or an explicit Harness-native
+`setConversation(idPath, options?)` opts an agent into a persistent
+conversation. `history` applies to either the service-backed adapter or an explicit Harness-native
 `ai.stateStore` that implements atomic message replacement. `idleTtlMs`, run,
 and event limits apply only to the service-backed adapter. Its safe composition
 with the service adapter is:
@@ -92,21 +92,25 @@ retention: {
 }
 ```
 
-Persistent `conversation` sessions also declare their isolation explicitly:
+Persistent conversations are tenant-isolated by default. The application-facing
+configuration is:
 
 ```ts
-type AgentConversationScope = 'tenant' | 'service'
+agent.setConversation('conversationId', {
+  retention,
+  // scope: 'service', // only for a service with no tenant partition
+})
 ```
 
-- `scope:'tenant'` requires a non-empty authenticated `message.tenantId` for
+- the default `scope:'tenant'` requires a non-empty authenticated `message.tenantId` for
   every turn and includes it in the harness session id. Missing tenant identity
   fails closed.
-- `scope:'service'` intentionally has no tenant partition. The session remains
+- `{ scope:'service' }` intentionally has no tenant partition. The session remains
   namespaced by service, version, agent, and logical conversation id, so it is
   the correct choice for a genuinely single-tenant service.
-- `scope` is required when `mode:'conversation'`. Core does not infer a scope,
-  synthesize a tenant, offer a runtime tenant fallback, or silently fall back
-  to a shared namespace.
+- Core does not infer a tenant, synthesize one, offer a runtime tenant fallback,
+  or silently fall back to a shared namespace. `{ scope: 'service' }` is the
+  only opt-out from the default tenant partition.
 
 - Each persisted artifact receives the configured expiry on a replacing write.
   This bounds inactive state without silently changing a shared service store.

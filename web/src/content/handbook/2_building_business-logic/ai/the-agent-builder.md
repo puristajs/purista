@@ -170,7 +170,7 @@ Harness skills are mounted instruction directories. Use them when an agent needs
 
 Built-in tools default to enabled at the harness level. For production agents, prefer the smallest useful set. If a skill needs supporting files, keep read-only built-ins such as `read`, `list`, and `grep` enabled so the model can inspect mounted skill content.
 
-## Session policy
+## Conversation
 
 Transport metadata and AI conversation identity are separate.
 
@@ -182,22 +182,19 @@ Transport metadata and AI conversation identity are separate.
 | `runId` | one agent execution |
 | `harnessSessionId` | harness session identity |
 
-By default, agents use an ephemeral session derived from the transport message. Use `setSessionPolicy(...)` when an agent should continue a logical conversation across calls.
+By default, agents use an ephemeral session derived from the transport message. Use `setConversation(...)` when an agent should continue a logical conversation across calls.
 
 ```ts
-.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversation', 'id'],
-  scope: 'tenant',
+.setConversation(['conversation', 'id'], {
   retention: {
     history: { maxTurns: 50, maxBytes: 256_000 },
   },
 })
 ```
 
-With this policy, `payload.conversation.id` becomes the tenant-partitioned
+With this declaration, `payload.conversation.id` becomes the tenant-partitioned
 harness session id. A tenant-scoped conversation requires authenticated
-`message.tenantId`; use `scope: 'service'` instead for a genuinely
+`message.tenantId`; use `{ scope: 'service' }` instead for a genuinely
 single-tenant service with no tenant partition. Do not treat `correlationId` as
 a conversation id.
 History retains complete user/assistant/tool turns. Its UTF-8 byte ceiling

@@ -218,20 +218,69 @@ export type AgentSessionRetentionPolicy = {
  */
 export type AgentConversationScope = 'tenant' | 'service'
 
-/** Session behavior used by the harness runtime for each agent run. */
+/**
+ * Selects a required string field from a validated agent payload as the
+ * logical conversation id. Paths are checked against the payload schema up to
+ * five object levels; an untyped payload deliberately accepts any non-empty
+ * path and is still checked at runtime.
+ */
+export type AgentConversationIdPath<
+	Payload = unknown,
+	Depth extends readonly unknown[] = readonly [1, 2, 3, 4, 5],
+> = unknown extends Payload
+	? readonly [string, ...string[]]
+	: Depth extends readonly [unknown, ...infer Rest]
+		? Payload extends readonly unknown[]
+			? never
+			: Payload extends object
+				? {
+						[K in Extract<keyof Payload, string>]: Payload[K] extends string
+							? readonly [K]
+							: AgentConversationIdPath<Payload[K], Rest> extends infer Tail
+								? Tail extends readonly [string, ...string[]]
+									? readonly [K, ...Tail]
+									: never
+								: never
+					}[Extract<keyof Payload, string>]
+				: never
+		: never
+
+/**
+ * A logical conversation id selected from a validated agent payload.
+ *
+ * Use a top-level string field directly (`'conversationId'`) or an array for
+ * a nested string field (`['conversation', 'id']`).
+ */
+export type AgentConversationId<Payload = unknown> =
+	| (unknown extends Payload
+			? string
+			: Payload extends object
+				? {
+						[K in Extract<keyof Payload, string>]: Payload[K] extends string ? K : never
+					}[Extract<keyof Payload, string>]
+				: never)
+	| AgentConversationIdPath<Payload>
+
+/** Options that refine the default tenant-isolated PURISTA conversation. */
+export type AgentConversationOptions = {
+	/**
+	 * `'tenant'` is the safe default and requires authenticated
+	 * `message.tenantId`. Choose `'service'` only when the owning service has no
+	 * tenant partition.
+	 */
+	scope?: AgentConversationScope
+	/** Optional bounded retention for this conversation's persisted state. */
+	retention?: AgentSessionRetentionPolicy
+}
+
+/** Internal manifest session descriptor consumed by the attached-agent runtime. */
 export type AgentSessionPolicy =
 	| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
 	| {
 			mode: 'conversation'
 			/** Path in the validated payload that resolves to the logical conversation id. */
 			payloadPath: readonly string[]
-			/**
-			 * Required isolation boundary for the logical conversation id.
-			 * `'tenant'` requires an authenticated `message.tenantId`; `'service'`
-			 * deliberately creates no tenant partition.
-			 */
 			scope: AgentConversationScope
-			/** Optional bounded retention for this conversation's service-backed state. */
 			retention?: AgentSessionRetentionPolicy
 	  }
 
@@ -567,7 +616,14 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 	description: string
 	runtimeRevision: string
 	models: Models
-	session: AgentSessionPolicy
+	session:
+		| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
+		| {
+				mode: 'conversation'
+				payloadPath: readonly string[]
+				scope: AgentConversationScope
+				retention?: AgentSessionRetentionPolicy
+		  }
 	execution: Required<Pick<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>> &
 		Omit<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>
 	sandbox?: AgentSandboxPolicy

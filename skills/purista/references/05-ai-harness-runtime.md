@@ -104,7 +104,7 @@ state contract. Persistence does not schedule conversation turns: the
 application owns whether messages for one conversation serialize, receive a
 busy response, or create independent sessions.
 
-Use `setSessionPolicy(..., { retention })` to make storage bounds explicit:
+Use `setConversation(..., { retention })` to make storage bounds explicit:
 `history: { maxTurns, maxBytes }` is a complete-turn rolling window using UTF-8
 bytes for storage, `idleTtlMs` requires a service StateStore with atomic expiry,
 and optional `runs.maxPerSession` / `events.maxPerRun` bound diagnostic data.
@@ -276,28 +276,20 @@ metadata. If an attached agent configures `require_approval` rules, provide a
 harness `approval` adapter in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
 
-`ephemeral` is the default session mode. Persistent `conversation` sessions
-must explicitly choose their isolation boundary; Core never fabricates a tenant
+Agents are ephemeral by default. `setConversation(...)` opts into a persistent
+conversation with tenant isolation by default; Core never fabricates a tenant
 identity or silently creates a shared conversation namespace.
 
 ```ts
-// Multi-tenant service: authenticated message tenant is mandatory.
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'tenant',
-})
+// Multi-tenant service: authenticated message tenant is mandatory by default.
+agent.setConversation('conversationId')
 
 // Single-tenant service: no tenant partition exists.
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'service',
-})
+agent.setConversation('conversationId', { scope: 'service' })
 ```
 
-`scope: 'tenant'` uses authenticated `message.tenantId` and rejects a missing
-value. `scope: 'service'` remains namespaced by service, version, agent, and
+The default `tenant` scope uses authenticated `message.tenantId` and rejects a
+missing value. Explicit `service` scope remains namespaced by service, version, agent, and
 conversation id but deliberately has no tenant partition. Do not derive tenant
 identity from payload data, prompts, conversation ids, or unverified headers.
 

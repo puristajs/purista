@@ -49,9 +49,7 @@ export const coordinateIncidentResponseAgentBuilder = supportV1ServiceBuilder
 	// transcript, run summaries, and event trail must not grow without bound.
 	// History retention is complete-turn based; it does not approximate model
 	// tokens or change the provider's transient context-window selection.
-	.setSessionPolicy({
-		mode: 'conversation',
-		payloadPath: ['incidentId'],
+	.setConversation('incidentId', {
 		scope: 'service',
 		retention: {
 			idleTtlMs: 30 * 24 * 60 * 60_000,
