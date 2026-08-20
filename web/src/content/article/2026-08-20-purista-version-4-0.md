@@ -17,7 +17,8 @@ pipeline; do not edit workspace versions by hand.
 ## What changes
 
 - Attached-agent runtime bindings are typed and validated at startup.
-- Conversation sessions declare either tenant or service isolation explicitly.
+- Persistent conversations are tenant-isolated by default; a no-tenant service
+  can deliberately choose service scope.
 - A service StateStore is reused for agent history, runs, and events unless an
   explicit Harness-native `ai.stateStore` is supplied.
 - History can retain complete recent turns with explicit byte/turn bounds.
@@ -45,27 +46,39 @@ npm test
 npm run build
 ```
 
-### 2. Configure conversations safely by default
+### 2. Replace the published conversation policy
 
-`setConversation(...)` is tenant-isolated by default. There is no tenant
-fallback or synthesized tenant identity.
-
-For a multi-tenant service, use the default. PURISTA then uses the authenticated
-`message.tenantId` already carried into the service handler and rejects a
-missing tenant. Ensure the inbound adapter or guard establishes that trusted
-message field; never derive it from the payload, prompt, or conversation id.
+In 3.2, a persistent conversation was configured with a Harness-shaped,
+runtime-checked payload path. Its session key did not include tenant identity.
+Replace that call with the PURISTA conversation declaration below.
 
 ```ts
+// PURISTA 3.2
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
+})
+
+// PURISTA 4 — normal multi-tenant service
 agent.setConversation('conversationId')
 ```
 
-For a genuinely single-tenant service, choose `{ scope: 'service' }`. No `tenantId` is
-required or fabricated; the session still remains namespaced by service,
-version, agent, and conversation id.
+The new API type-checks the declared payload field. It is tenant-isolated by
+default: PURISTA uses the authenticated `message.tenantId` already carried into
+the service handler and rejects a missing value. Ensure the inbound adapter or
+guard establishes that trusted message field; never derive it from the payload,
+prompt, or conversation id.
+
+Only a genuinely single-tenant service, where no tenant partition exists at
+all, should opt out:
 
 ```ts
 agent.setConversation('conversationId', { scope: 'service' })
 ```
+
+Service scope remains namespaced by service, version, agent, and conversation
+id. It does not fabricate a tenant or turn a missing tenant into a shared
+multi-tenant namespace.
 
 ### 3. Declare workflow delegation
 

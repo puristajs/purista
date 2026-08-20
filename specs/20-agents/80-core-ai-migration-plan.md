@@ -441,7 +441,9 @@ Contract cleanups:
 - Telemetry uses `contentCaptureMode` and defaults to `'NO_CONTENT'`. The prior
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
-- `setConversation(...)` creates a persistent conversation that is tenant-scoped
-  by default. Core has no tenant fallback/runtime tenancy option: the default
-  tenant scope uses authenticated `message.tenantId`, while the explicit
-  `{ scope: 'service' }` option intentionally has no tenant partition.
+- Published 3.2's `setSessionPolicy({ mode:'conversation', payloadPath })` is
+  replaced by `setConversation(id)`. The new declaration type-checks the
+  payload field and is tenant-scoped by default. Core has no tenant
+  fallback/runtime tenancy option: the default uses authenticated
+  `message.tenantId`, while the explicit `{ scope: 'service' }` option is only
+  for a service that has no tenant partition.

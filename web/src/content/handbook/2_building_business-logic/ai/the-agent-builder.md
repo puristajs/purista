@@ -201,6 +201,24 @@ History retains complete user/assistant/tool turns. Its UTF-8 byte ceiling
 controls stored data only; model request context remains token-based and is
 chosen independently by the Harness provider integration.
 
+### Migrating from PURISTA 3.2
+
+Replace the old Harness-shaped session policy with the conversation field:
+
+```ts
+// Before
+.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
+
+// Now: tenant isolation is the safe default
+.setConversation(['conversation', 'id'])
+```
+
+The published 3.2 session key did not contain tenant identity. The new default
+requires trusted `message.tenantId` for every persistent turn. Use
+`{ scope: 'service' }` only when the service truly has no tenant partition.
+See the [4.0 migration guide](/article/2026-08-20-purista-version-4-0/) for the
+full upgrade checklist.
+
 ## Sandbox policy
 
 Use `setSandboxPolicy(...)` when the agent needs an explicit sandbox adapter.

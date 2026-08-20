@@ -112,6 +112,21 @@ agent.setConversation('conversationId', {
   or silently fall back to a shared namespace. `{ scope: 'service' }` is the
   only opt-out from the default tenant partition.
 
+### Published 3.2 migration
+
+Published 3.2 used:
+
+```ts
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
+```
+
+That runtime-checked policy produced a key without tenant identity. The 4.0
+replacement is `agent.setConversation('conversationId')`; it type-checks the
+payload field and partitions the key with authenticated `message.tenantId`.
+The only valid replacement for a service with no tenant partition is
+`setConversation('conversationId', { scope: 'service' })`. No compatibility
+shim or missing-tenant fallback is permitted.
+
 - Each persisted artifact receives the configured expiry on a replacing write.
   This bounds inactive state without silently changing a shared service store.
   The complete history value is refreshed when a new turn is committed.

@@ -296,6 +296,13 @@ version, agent, and conversation id,
 but deliberately does not partition by tenant. Do not derive tenant identity
 from payload data, conversation ids, prompts, or unverified headers.
 
+If you are upgrading from PURISTA 3.2, replace
+`setSessionPolicy({ mode: 'conversation', payloadPath })` with
+`setConversation(...)`. The new declaration type-checks the conversation field
+and prevents two tenants with the same logical id from sharing history. The
+[4.0 migration guide](/article/2026-08-20-purista-version-4-0/) shows the exact
+before-and-after code.
+
 ## Sandbox and durable workspaces
 
 Local durable execution, sandbox state, and durable workspace guarantees are related but separate. A harness durable runtime records checkpoints and leases for workflow progress inside your application boundary. The workspace store persists the files or workspace state that those checkpoints need in order to resume.

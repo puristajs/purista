@@ -293,6 +293,21 @@ missing value. Explicit `service` scope remains namespaced by service, version, 
 conversation id but deliberately has no tenant partition. Do not derive tenant
 identity from payload data, prompts, conversation ids, or unverified headers.
 
+When upgrading a PURISTA 3.2 application, replace the old runtime-shaped
+policy with this builder declaration:
+
+```ts
+// Before
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
+
+// Now: tenant isolation is automatic for ordinary services
+agent.setConversation('conversationId')
+```
+
+The older session key did not include tenant identity. Use
+`{ scope: 'service' }` only for a genuinely single-tenant service; never use
+it as a fallback for a missing tenant.
+
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:
 - attach the agent to the service that owns the capability and invariants
