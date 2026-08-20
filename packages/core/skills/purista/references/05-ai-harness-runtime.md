@@ -304,9 +304,9 @@ agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] }
 agent.setConversation('conversationId')
 ```
 
-The older session key did not include tenant identity. Use
-`{ scope: 'service' }` only for a genuinely single-tenant service; never use
-it as a fallback for a missing tenant.
+The older public policy could not express the scope required by its runtime.
+Use `{ scope: 'service' }` only for a genuinely single-tenant service; never
+use it as a fallback for a missing tenant.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:

@@ -49,8 +49,9 @@ npm run build
 ### 2. Replace the published conversation policy
 
 In 3.2, a persistent conversation was configured with a Harness-shaped,
-runtime-checked payload path. Its session key did not include tenant identity.
-Replace that call with the PURISTA conversation declaration below.
+runtime-checked payload path. That public policy could not express the session
+scope required by the runtime, so a normal typed declaration could not create a
+persistent session. Replace it with the PURISTA conversation declaration below.
 
 ```ts
 // PURISTA 3.2
@@ -79,6 +80,12 @@ agent.setConversation('conversationId', { scope: 'service' })
 Service scope remains namespaced by service, version, agent, and conversation
 id. It does not fabricate a tenant or turn a missing tenant into a shared
 multi-tenant namespace.
+
+This is a source and correctness migration, not an automatic transcript
+migration: the published typed 3.2 policy could not establish a persistent
+session. If an application bypassed that API and wrote Harness records itself,
+review those records against the chosen scope and archive or migrate them in
+application-owned code; PURISTA will not silently re-key conversation data.
 
 ### 3. Declare workflow delegation
 

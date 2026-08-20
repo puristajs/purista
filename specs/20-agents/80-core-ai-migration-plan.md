@@ -442,7 +442,8 @@ Contract cleanups:
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
 - Published 3.2's `setSessionPolicy({ mode:'conversation', payloadPath })` is
-  replaced by `setConversation(id)`. The new declaration type-checks the
+  replaced by `setConversation(id)`: the old public policy could not express
+  the scope required by its runtime. The new declaration type-checks the
   payload field and is tenant-scoped by default. Core has no tenant
   fallback/runtime tenancy option: the default uses authenticated
   `message.tenantId`, while the explicit `{ scope: 'service' }` option is only

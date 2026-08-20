@@ -120,10 +120,11 @@ Published 3.2 used:
 agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 ```
 
-That runtime-checked policy produced a key without tenant identity. The 4.0
+That public policy could not express the scope required by the published runtime,
+so a normal typed declaration could not establish a persistent session. The 4.0
 replacement is `agent.setConversation('conversationId')`; it type-checks the
-payload field and partitions the key with authenticated `message.tenantId`.
-The only valid replacement for a service with no tenant partition is
+payload field and applies authenticated `message.tenantId` by default. The only
+valid replacement for a service with no tenant partition is
 `setConversation('conversationId', { scope: 'service' })`. No compatibility
 shim or missing-tenant fallback is permitted.
 

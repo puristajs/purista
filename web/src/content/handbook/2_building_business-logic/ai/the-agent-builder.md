@@ -213,8 +213,8 @@ Replace the old Harness-shaped session policy with the conversation field:
 .setConversation(['conversation', 'id'])
 ```
 
-The published 3.2 session key did not contain tenant identity. The new default
-requires trusted `message.tenantId` for every persistent turn. Use
+The published 3.2 policy could not express the scope its runtime required. The
+new default requires trusted `message.tenantId` for every persistent turn. Use
 `{ scope: 'service' }` only when the service truly has no tenant partition.
 See the [4.0 migration guide](/article/2026-08-20-purista-version-4-0/) for the
 full upgrade checklist.

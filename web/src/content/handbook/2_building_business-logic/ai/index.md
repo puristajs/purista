@@ -299,7 +299,8 @@ from payload data, conversation ids, prompts, or unverified headers.
 If you are upgrading from PURISTA 3.2, replace
 `setSessionPolicy({ mode: 'conversation', payloadPath })` with
 `setConversation(...)`. The new declaration type-checks the conversation field
-and prevents two tenants with the same logical id from sharing history. The
+and supplies the tenant-safe scope that the published 3.2 runtime required but
+the old policy could not express. The
 [4.0 migration guide](/article/2026-08-20-purista-version-4-0/) shows the exact
 before-and-after code.
 
