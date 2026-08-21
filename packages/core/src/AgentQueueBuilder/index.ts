@@ -16,7 +16,6 @@ export {
 export type {
 	AgentConversationId,
 	AgentConversationIdPath,
-	AgentConversationOptions,
 	AgentConversationScope,
 	AgentDefinition,
 	AgentDurableWorkspaceStore,
@@ -49,6 +48,7 @@ export type {
 	AgentRuntimeRef,
 	AgentRuntimeStreamInvocationInput,
 	AgentSandboxPolicy,
+	AgentSessionPolicy,
 	AgentSessionRetentionPolicy,
 	AgentSkillCatalogEntry,
 	AgentSkillContext,

@@ -75,7 +75,7 @@ ServiceBuilder integration:
 - metrics: `defineMetric` (agent-local; registered on the service)
 - execution (exactly one): `setRunFunction`, `setHarnessAgent`,
   `setHarnessWorkflow`
-- policies: `setExecutionPolicy`, `setExecutionProfile`, `setConversation`,
+- policies: `setExecutionPolicy`, `setExecutionProfile`, `setSessionPolicy`,
   `setSandboxPolicy`, `setWorkspacePolicy`, `setResponseMode`
 - HTTP/stream exposure: `exposeAsHttpEndpoint`, `makeEndpointPublic`,
   `setStreamingMode`, `setSuccessEventName`
@@ -88,8 +88,8 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRuntimeModelBinding(s)`, `AgentRuntimeOptions`, `AgentRuntimeRef`,
 `AgentRuntimeInvocationInput`, `AgentRuntimeStreamInvocationInput`,
 `AgentExecutionDefinition`, `AgentExecutionKind`, `AgentExecutionPolicy`,
-`AgentConversationId`, `AgentConversationIdPath`, `AgentConversationOptions`,
-`AgentConversationScope`,
+`AgentConversationId`, `AgentConversationIdPath`, `AgentConversationScope`,
+`AgentSessionPolicy`,
 `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
 `AgentWorkspaceCapabilityRequirement`, `AgentDurableWorkspaceStore(Policy)`,
 `AgentHttpExposure`, `AgentResponseMode`, `AgentResponseModeOptions`,
@@ -442,8 +442,9 @@ Contract cleanups:
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
 - Published 3.2's `setSessionPolicy({ mode:'conversation', payloadPath })` is
-  replaced by `setConversation(id)`: the old public policy could not express
-  the scope required by its runtime. The new declaration type-checks the
+  retained as `setSessionPolicy({ mode:'conversation', payloadPath })`: the
+  old public policy could not express the scope required by its runtime. The
+  new declaration type-checks the
   payload field and is tenant-scoped by default. Core has no tenant
   fallback/runtime tenancy option: the default uses authenticated
   `message.tenantId`, while the explicit `{ scope: 'service' }` option is only

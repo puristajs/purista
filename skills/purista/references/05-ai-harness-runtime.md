@@ -104,7 +104,8 @@ state contract. Persistence does not schedule conversation turns: the
 application owns whether messages for one conversation serialize, receive a
 busy response, or create independent sessions.
 
-Use `setConversation(..., { retention })` to make storage bounds explicit:
+Use `setSessionPolicy({ mode: 'conversation', payloadPath, retention })` to
+make storage bounds explicit:
 `history: { maxTurns, maxBytes }` is a complete-turn rolling window using UTF-8
 bytes for storage, `idleTtlMs` requires a service StateStore with atomic expiry,
 and optional `runs.maxPerSession` / `events.maxPerRun` bound diagnostic data.
@@ -282,16 +283,16 @@ metadata. If an attached agent configures `require_approval` rules, provide a
 harness `approval` adapter in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
 
-Agents are ephemeral by default. `setConversation(...)` opts into a persistent
+Agents are ephemeral by default. `setSessionPolicy(...)` opts into a persistent
 conversation with tenant isolation by default; Core never fabricates a tenant
 identity or silently creates a shared conversation namespace.
 
 ```ts
 // Multi-tenant service: authenticated message tenant is mandatory by default.
-agent.setConversation('conversationId')
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 
 // Single-tenant service: no tenant partition exists.
-agent.setConversation('conversationId', { scope: 'service' })
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'], scope: 'service' })
 ```
 
 The default `tenant` scope uses authenticated `message.tenantId` and rejects a
@@ -305,15 +306,11 @@ a sandbox, workspace files, or tool permissions. Configure those separately
 with `setSandboxPolicy(...)`, `setWorkspacePolicy(...)`, and explicit tool
 declarations/runtime bindings.
 
-When upgrading a PURISTA 3.2 application, replace the old runtime-shaped
-policy with this builder declaration:
+When upgrading a PURISTA 3.2 application, keep a valid session-policy
+declaration unchanged:
 
 ```ts
-// Before
 agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
-
-// Now: tenant isolation is automatic for ordinary services
-agent.setConversation('conversationId')
 ```
 
 The older public policy could not express the scope required by its runtime.

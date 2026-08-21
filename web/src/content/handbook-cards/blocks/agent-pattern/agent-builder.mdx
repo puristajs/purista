@@ -108,7 +108,7 @@ supportAgentBuilder
   .canInvokeAgent('escalationAgent', '1')
   .useSkills(['customer-support'])
   .useBuiltInTools(false)
-  .setConversation('conversationId')
+  .setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
   .setExecutionPolicy({
     maxAttempts: 3,
     maxParallelHandlers: 1,

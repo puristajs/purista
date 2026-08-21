@@ -182,10 +182,12 @@ Transport metadata and AI conversation identity are separate.
 | `runId` | one agent execution |
 | `harnessSessionId` | harness session identity |
 
-By default, agents use an ephemeral session derived from the transport message. Use `setConversation(...)` when an agent should continue a logical conversation across calls.
+By default, agents use an ephemeral session derived from the transport message. Use `setSessionPolicy(...)` when an agent should continue a logical conversation across calls.
 
 ```ts
-.setConversation(['conversation', 'id'], {
+.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversation', 'id'],
   retention: {
     history: { maxTurns: 50, maxBytes: 256_000 },
   },
@@ -209,14 +211,12 @@ chosen independently by the Harness provider integration.
 
 ### Migrating from PURISTA 3.2
 
-Replace the old Harness-shaped session policy with the conversation field:
+Keep the existing `payloadPath` field; its path is now type-checked and the
+tenant-safe scope is supplied by default. No code change is needed for a valid
+declaration:
 
 ```ts
-// Before
 .setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
-
-// Now: tenant isolation is the safe default
-.setConversation(['conversation', 'id'])
 ```
 
 The published 3.2 policy could not express the scope its runtime required. The

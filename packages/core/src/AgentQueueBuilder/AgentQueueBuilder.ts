@@ -16,8 +16,7 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { getBoundAgentRuntime } from './runtime/scopedRuntime.js'
 
 import type {
-	AgentConversationId,
-	AgentConversationOptions,
+	AgentConversationScope,
 	AgentDefinition,
 	AgentExecutionDefinition,
 	AgentExecutionKind,
@@ -34,6 +33,7 @@ import type {
 	AgentRuntimeRef,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
+	AgentSessionRetentionPolicy,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
 	AllowedCommandToolDefinition,
@@ -102,7 +102,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private skills: Array<{ names: readonly string[]; resourceName?: string }> = []
 	private builtInTools: readonly BuiltinToolName[] | false | true = true
 	private executionPolicy: AgentExecutionPolicy = {}
-	private sessionPolicy: AgentSessionPolicy = { mode: 'ephemeral' }
+	private sessionPolicy: AgentManifest['session'] = { mode: 'ephemeral' }
 	private sandboxPolicy?: AgentSandboxPolicy
 	private workspacePolicy?: AgentWorkspacePolicy
 	private httpExposure?: AgentHttpExposure
@@ -540,29 +540,40 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	}
 
 	/**
-	 * Continue one logical business conversation across agent runs.
+	 * Configure how this attached agent obtains its Harness session.
 	 *
-	 * PURISTA uses tenant isolation by default and requires authenticated
-	 * `message.tenantId` when the conversation runs. A service with no tenant
-	 * partition must deliberately select `{ scope: 'service' }`.
+	 * Conversation mode continues one logical business conversation across
+	 * agent runs. PURISTA uses tenant isolation by default and requires
+	 * authenticated `message.tenantId`. Sandbox, workspace, and tool policies
+	 * are configured independently.
 	 *
 	 * @example
 	 * ```ts
-	 * agent.setConversation('conversationId')
-	 * agent.setConversation(['conversation', 'id'], { scope: 'service' })
+	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
+	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'], scope: 'service' })
 	 * ```
 	 */
-	setConversation(id: AgentConversationId<InferIn<S['PayloadSchema']>>, options: AgentConversationOptions = {}) {
-		const idPath = typeof id === 'string' ? [id] : id
+	setSessionPolicy(policy: AgentSessionPolicy<InferIn<S['PayloadSchema']>>) {
+		validateSessionRetention(policy.retention)
+		if (policy.mode === 'ephemeral') {
+			this.sessionPolicy = policy
+			return this
+		}
+		if (policy.mode !== 'conversation') {
+			throw new Error('Agent session policy mode must be "ephemeral" or "conversation"')
+		}
+		if (policy.payloadPath === undefined) {
+			throw new Error('Agent conversation session policy requires payloadPath')
+		}
+		const idPath = typeof policy.payloadPath === 'string' ? [policy.payloadPath] : policy.payloadPath
 		validateConversationIdPath(idPath)
-		const scope = options.scope ?? 'tenant'
+		const scope = policy.scope ?? 'tenant'
 		validateConversationScope(scope)
-		validateSessionRetention(options.retention)
 		this.sessionPolicy = {
 			mode: 'conversation',
 			payloadPath: [...idPath],
 			scope,
-			retention: options.retention,
+			retention: policy.retention,
 		}
 		return this
 	}
@@ -982,13 +993,13 @@ function validateConversationIdPath(path: readonly string[]): void {
 	}
 }
 
-function validateConversationScope(scope: AgentConversationOptions['scope']): void {
+function validateConversationScope(scope: AgentConversationScope): void {
 	if (scope !== 'tenant' && scope !== 'service') {
 		throw new Error('Agent conversation scope must be "tenant" or "service"')
 	}
 }
 
-function validateSessionRetention(retention: AgentSessionPolicy['retention']): void {
+function validateSessionRetention(retention: AgentSessionRetentionPolicy | undefined): void {
 	if (!retention) return
 	if (retention.idleTtlMs !== undefined && (!Number.isSafeInteger(retention.idleTtlMs) || retention.idleTtlMs <= 0)) {
 		throw new Error('Agent session retention idleTtlMs must be a positive safe integer in milliseconds')

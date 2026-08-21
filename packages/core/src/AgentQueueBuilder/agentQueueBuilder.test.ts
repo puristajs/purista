@@ -46,7 +46,9 @@ describe('AgentQueueBuilder', () => {
 	it('carries explicit bounded conversation retention without affecting handler inference', async () => {
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-			.setConversation(['conversationId'], {
+			.setSessionPolicy({
+				mode: 'conversation',
+				payloadPath: ['conversationId'],
 				retention: {
 					idleTtlMs: 60_000,
 					history: { maxTurns: 10, maxBytes: 32_000 },
@@ -66,11 +68,25 @@ describe('AgentQueueBuilder', () => {
 
 	it('rejects invalid retention bounds at the builder boundary', () => {
 		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-		expect(() => agent.setConversation(['conversationId'], { retention: { history: {} } })).toThrow(
-			'Agent session history retention requires maxTurns or maxBytes',
+		expect(() =>
+			agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'], retention: { history: {} } }),
+		).toThrow('Agent session history retention requires maxTurns or maxBytes')
+		expect(() =>
+			agent.setSessionPolicy({
+				mode: 'conversation',
+				payloadPath: ['conversationId'],
+				retention: { runs: { maxPerSession: 0 } },
+			}),
+		).toThrow('Agent session retention runs.maxPerSession must be a positive safe integer')
+	})
+
+	it('rejects malformed session policies at the builder boundary', () => {
+		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+		expect(() => agent.setSessionPolicy({ mode: 'conversation' } as never)).toThrow(
+			'Agent conversation session policy requires payloadPath',
 		)
-		expect(() => agent.setConversation(['conversationId'], { retention: { runs: { maxPerSession: 0 } } })).toThrow(
-			'Agent session retention runs.maxPerSession must be a positive safe integer',
+		expect(() => agent.setSessionPolicy({ mode: 'shared' } as never)).toThrow(
+			'Agent session policy mode must be "ephemeral" or "conversation"',
 		)
 	})
 
@@ -81,18 +97,22 @@ describe('AgentQueueBuilder', () => {
 				z.object({ conversationId: z.string(), conversation: z.object({ id: z.string() }), count: z.number() }),
 			)
 
-		agent.setConversation('conversationId')
-		agent.setConversation(['conversation', 'id'])
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: 'conversationId' })
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
 		// @ts-expect-error conversation ids must resolve to a string payload field
-		agent.setConversation(['conversation', 'missing'])
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'missing'] })
 		// @ts-expect-error conversation ids must resolve to a string payload field
-		agent.setConversation(['count'])
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['count'] })
 		// @ts-expect-error conversation ids must resolve to a string payload field
-		agent.setConversation('count')
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: 'count' })
 
-		expect(() => agent.setConversation(['conversation', 'id'], { scope: 'global' as never })).toThrow(
-			'Agent conversation scope must be "tenant" or "service"',
-		)
+		expect(() =>
+			agent.setSessionPolicy({
+				mode: 'conversation',
+				payloadPath: ['conversation', 'id'],
+				scope: 'global' as never,
+			}),
+		).toThrow('Agent conversation scope must be "tenant" or "service"')
 	})
 
 	it('cascades resources, schemas, models, command tools and child agents into handler types', async () => {

@@ -79,7 +79,7 @@ Expected behavior:
 - uses core agent builder/runtime APIs and `@purista/harness` model bindings
 - installs provider packages only in the app wiring layer
 - allowlists tools and child agents
-- uses `setConversation('conversationId')` only when the product needs a
+- uses `setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })` only when the product needs a
   continuing conversation; its default tenant isolation requires trusted
   `message.tenantId`
 - keeps prompt/completion content out of logs, metrics, traces, events, queues, and examples

@@ -63,10 +63,10 @@ const service = await supportV1ServiceBuilder.getInstance(eventBridge, {
 
 ## Conversation
 
-Agents default to an ephemeral session. Use `setConversation(...)` when a payload field should identify a continuing AI conversation:
+Agents default to an ephemeral session. Use `setSessionPolicy(...)` when a payload field should identify a continuing AI conversation:
 
 ```typescript
-.setConversation('conversationId')
+.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 ```
 
 Keep transport identifiers (`message.id`, `traceId`, `correlationId`) separate from AI conversation identity.

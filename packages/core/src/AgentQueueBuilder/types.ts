@@ -261,26 +261,40 @@ export type AgentConversationId<Payload = unknown> =
 				: never)
 	| AgentConversationIdPath<Payload>
 
-/** Options that refine the default tenant-isolated PURISTA conversation. */
-export type AgentConversationOptions = {
-	/**
-	 * `'tenant'` is the safe default and requires authenticated
-	 * `message.tenantId`. Choose `'service'` only when the owning service has no
-	 * tenant partition.
-	 */
-	scope?: AgentConversationScope
-	/** Optional bounded retention for this conversation's persisted state. */
-	retention?: AgentSessionRetentionPolicy
-}
-
-/** Internal manifest session descriptor consumed by the attached-agent runtime. */
-export type AgentSessionPolicy =
+/**
+ * Configures how an attached agent obtains its Harness session.
+ *
+ * Conversation mode uses a payload field as the stable business conversation
+ * identity. It persists conversation history and associated run records; it
+ * does not configure sandbox, workspace, or tool behaviour.
+ *
+ * @example
+ * ```ts
+ * agent.setSessionPolicy({
+ *   mode: 'conversation',
+ *   payloadPath: ['conversationId'],
+ *   retention: { history: { maxTurns: 50, maxBytes: 256_000 } },
+ * })
+ * ```
+ */
+export type AgentSessionPolicy<Payload = unknown> =
 	| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
 	| {
 			mode: 'conversation'
-			/** Path in the validated payload that resolves to the logical conversation id. */
-			payloadPath: readonly string[]
-			scope: AgentConversationScope
+			/**
+			 * Validated payload path that identifies the logical conversation.
+			 *
+			 * A top-level string field may use the string shorthand. Use an array for
+			 * nested fields.
+			 */
+			payloadPath: AgentConversationId<Payload>
+			/**
+			 * `'tenant'` is the safe default and requires authenticated
+			 * `message.tenantId`. Choose `'service'` only when the owning service has no
+			 * tenant partition.
+			 */
+			scope?: AgentConversationScope
+			/** Optional bounded retention for this conversation's persisted state. */
 			retention?: AgentSessionRetentionPolicy
 	  }
 
@@ -620,6 +634,7 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 		| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
 		| {
 				mode: 'conversation'
+				/** Path in the validated payload that resolves to the logical conversation id. */
 				payloadPath: readonly string[]
 				scope: AgentConversationScope
 				retention?: AgentSessionRetentionPolicy

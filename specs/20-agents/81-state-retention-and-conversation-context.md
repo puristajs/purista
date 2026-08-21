@@ -77,7 +77,7 @@ write path. It either expires under the documented guarantee or fails clearly.
 
 ## Agent conversation configuration
 
-`setConversation(idPath, options?)` opts an agent into a persistent
+`setSessionPolicy({ mode: 'conversation', payloadPath, ... })` opts an agent into a persistent
 conversation. `history` applies to either the service-backed adapter or an explicit Harness-native
 `ai.stateStore` that implements atomic message replacement. `idleTtlMs`, run,
 and event limits apply only to the service-backed adapter. Its safe composition
@@ -96,9 +96,11 @@ Persistent conversations are tenant-isolated by default. The application-facing
 configuration is:
 
 ```ts
-agent.setConversation('conversationId', {
-  retention,
-  // scope: 'service', // only for a service with no tenant partition
+agent.setSessionPolicy({
+	mode: 'conversation',
+	payloadPath: ['conversationId'],
+	retention,
+	// scope: 'service', // only for a service with no tenant partition
 })
 ```
 
@@ -122,10 +124,10 @@ agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] }
 
 That public policy could not express the scope required by the published runtime,
 so a normal typed declaration could not establish a persistent session. The 4.0
-replacement is `agent.setConversation('conversationId')`; it type-checks the
-payload field and applies authenticated `message.tenantId` by default. The only
-valid replacement for a service with no tenant partition is
-`setConversation('conversationId', { scope: 'service' })`. No compatibility
+policy keeps `agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })`,
+type-checks the payload field, and applies authenticated `message.tenantId` by
+default. The only additional configuration for a service with no tenant partition is
+`setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'], scope: 'service' })`. No compatibility
 shim or missing-tenant fallback is permitted.
 
 - Each persisted artifact receives the configured expiry on a replacing write.

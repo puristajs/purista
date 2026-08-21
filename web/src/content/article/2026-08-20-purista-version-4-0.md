@@ -29,20 +29,26 @@ not use the advanced features below, there is nothing else to migrate.
 
 ## A support-chat conversation
 
-The old session-policy API used one low-level term for several related runtime
-concepts. Its persistent-conversation use case is now a PURISTA conversation
-declaration. Use the payload field that identifies the business conversation—
-not a message, trace, or correlation id.
+The existing session-policy API keeps its `payloadPath`, so a valid PURISTA 3.2
+declaration does not need to change. The path is now type-checked and tenant
+scope is explicit in the policy. Use the payload field that identifies the
+business conversation—not a message, trace, or correlation id.
 
 ```ts
-// PURISTA 3.2
+// Valid PURISTA 3.2 configuration — keep this code unchanged.
 agent.setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversationId'],
 })
+```
 
-// Current PURISTA
-agent.setConversation('conversationId')
+Nested fields keep the same array form:
+
+```ts
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversation', 'id'],
+})
 ```
 
 For an ordinary multi-tenant service, that is the complete configuration.
@@ -53,20 +59,24 @@ two tenants cannot accidentally share a conversation with the same id.
 Only a service that genuinely has no tenant boundary should opt out:
 
 ```ts
-agent.setConversation('conversationId', { scope: 'service' })
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
+  scope: 'service',
+})
 ```
 
 Do not use service scope as a fallback for missing tenant data. Fix the inbound
 authentication or guard instead.
 
-`setConversation(...)` creates or resumes the Harness session identity for the
+`setSessionPolicy(...)` creates or resumes the Harness session identity for the
 logical conversation. It scopes persisted history and the associated agent run
 records. It does **not** make a sandbox persistent, restore files, or grant
 tools. Those are separate application decisions:
 
 | Need | PURISTA declaration and runtime binding |
 | --- | --- |
-| Continue chat history across requests | `setConversation(...)` |
+| Continue chat history across requests | `setSessionPolicy({ mode: 'conversation', payloadPath })` |
 | Use filesystem, code execution, or MCP tools in one run | `setSandboxPolicy(...)` and `ai.sandbox` |
 | Resume workflow files/checkpoints after restart | `setWorkspacePolicy(...)`, `ai.runtime`, and `ai.workspaceStore` |
 | Permit model-requested tools | agent tool declarations and the application’s approved runtime bindings |
@@ -85,7 +95,9 @@ only when the product needs it—for example, a support chat that should retain
 recent context for 30 days and avoid indefinite storage growth.
 
 ```ts
-agent.setConversation('conversationId', {
+agent.setSessionPolicy({
+  mode: 'conversation',
+  payloadPath: ['conversationId'],
   retention: {
     idleTtlMs: 30 * 24 * 60 * 60_000,
     history: { maxTurns: 50, maxBytes: 256_000 },
@@ -174,8 +186,9 @@ when your application intentionally uses them.
 ## Upgrade checklist
 
 - [ ] Upgrade the PURISTA packages used by the application together.
-- [ ] Replace `setSessionPolicy({ mode: 'conversation', ... })` with
-      `setConversation(...)` where persistent conversations are intended.
+- [ ] Keep valid `setSessionPolicy({ mode: 'conversation', payloadPath })`
+      declarations; add `scope: 'service'` only for a genuinely non-tenant
+      service.
 - [ ] Ensure multi-tenant request handling supplies trusted `message.tenantId`.
 - [ ] Use `{ scope: 'service' }` only for a genuinely non-tenant service.
 - [ ] Add workflow delegation only to workflows that call local Harness agents.

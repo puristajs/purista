@@ -261,8 +261,10 @@ specific still. If no policy matches, the existing permanent-state behavior is
 preserved.
 
 ```ts
-agent.setConversation(['conversation', 'id'], {
-  retention: {
+agent.setSessionPolicy({
+	mode: 'conversation',
+	payloadPath: ['conversation', 'id'],
+	retention: {
     idleTtlMs: 30 * 24 * 60 * 60_000,
     history: { maxTurns: 50, maxBytes: 256_000 },
     runs: { maxPerSession: 20 },
@@ -278,16 +280,16 @@ converted to tokens.
 
 ## Conversation isolation
 
-Agents are ephemeral by default. `setConversation(...)` opts into persistent
+Agents are ephemeral by default. `setSessionPolicy(...)` opts into persistent
 history. Its safe default is tenant isolation; Core never invents a tenant
 identity or silently falls back to a shared namespace.
 
 ```ts
 // Multi-tenant service: authenticated message tenant is required by default.
-agent.setConversation(['conversation', 'id'])
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
 
 // Single-tenant service: no tenant is required or synthesized.
-agent.setConversation(['conversation', 'id'], { scope: 'service' })
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'], scope: 'service' })
 ```
 
 The default `tenant` scope uses authenticated `message.tenantId` and fails
@@ -296,16 +298,15 @@ version, agent, and conversation id,
 but deliberately does not partition by tenant. Do not derive tenant identity
 from payload data, conversation ids, prompts, or unverified headers.
 
-`setConversation(...)` chooses the stable Harness session identity for
+`setSessionPolicy(...)` chooses the stable Harness session identity for
 conversation history and associated run records. It does not make a sandbox or
 workspace durable, and it does not change tool permissions. Those concerns have
 their own builder declarations and runtime bindings below.
 
-If you are upgrading from PURISTA 3.2, replace
-`setSessionPolicy({ mode: 'conversation', payloadPath })` with
-`setConversation(...)`. The new declaration type-checks the conversation field
-and supplies the tenant-safe scope that the published 3.2 runtime required but
-the old policy could not express. The
+If you are upgrading from PURISTA 3.2, keep a valid
+`setSessionPolicy({ mode: 'conversation', payloadPath })` declaration unchanged.
+The path is now type-checked and Core supplies the tenant-safe scope that the
+published 3.2 runtime required but the old policy could not express. The
 [4.0 migration guide](/article/2026-08-20-purista-version-4-0/) shows the exact
 before-and-after code.
 
