@@ -98,7 +98,16 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 		stateStore?: StateStore
 		/**
 		 * Optional service-local default retention. This creates an immutable view
-		 * over `stateStore`; it never mutates a shared store instance.
+		 * over `stateStore`; it never mutates a shared store instance. An explicit
+		 * `context.states.setState(..., { retention })` policy takes precedence.
+		 *
+		 * @example
+		 * ```ts
+		 * service.getInstance(eventBridge, {
+		 *   stateStore,
+		 *   stateRetention: { default: { mode: 'expire', ttlMs: 60 * 60_000 } },
+		 * })
+		 * ```
 		 */
 		stateRetention?: StateRetentionPolicy
 		/** Queue bridge used by queue definitions and attached agents. */

@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core'
 import { HttpClient, StateStoreBaseClass } from '@purista/core'
 
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
@@ -13,6 +13,8 @@ import type { DaprStateStoreConfig } from './types/DaprStateStoreConfig.js'
  * State store adapter backed by a Dapr state component.
  *
  * Reads, writes and removes JSON state values through the local Dapr sidecar.
+ * A finite retention policy is available only when `supportsTtl: true` and the
+ * configured Dapr component honours `ttlInSeconds` metadata.
  */
 export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	private client: HttpClient<DaprClientConfig>
@@ -20,9 +22,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	/**
 	 * Creates a Dapr-backed state store.
 	 *
-	 * @param config - Store name, logger and Dapr sidecar client settings.
+	 * @param config - Store name, optional retention, logger and Dapr sidecar client settings.
 	 */
-	constructor(config?: StoreBaseConfig<DaprStateStoreConfig>) {
+	constructor(config?: StateStoreConfig<DaprStateStoreConfig>) {
 		super(
 			config?.stateStoreName ?? 'DaprStateStore',
 			{ ...config },

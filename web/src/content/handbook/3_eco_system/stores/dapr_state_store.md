@@ -13,11 +13,10 @@ When running with the [Dapr](https://dapr.io) sidecar, `@purista/dapr-sdk` route
 | Feature | Support |
 |---|---|
 | Read (`getState`) | ✅ |
-| Write (`setState`) | ✅ (opt-in) |
-| Delete (`removeState`) | ✅ (opt-in) |
+| Write (`setState`) | ✅ |
+| Delete (`removeState`) | ✅ |
 | Backing store | Any Dapr state component |
-| Transactions | ✅ (Dapr-native, where supported by backend) |
-| Optimistic concurrency (ETag) | ✅ (Dapr-native) |
+| StateStore retention | Conditional: `supportsTtl: true` and a TTL-capable component |
 | Infrastructure portability | ✅ (swap component, not code) |
 
 ## Install
@@ -28,19 +27,21 @@ npm install @purista/dapr-sdk
 
 ## Setup
 
-State store access is configured on the `DaprEventBridge` — no separate constructor needed.
+Create a `DaprStateStore` and pass it to the service. Set `supportsTtl: true`
+only after verifying that the deployed Dapr component honours `ttlInSeconds`.
 
 ```typescript
-import { DaprEventBridge } from '@purista/dapr-sdk'
+import { DaprStateStore } from '@purista/dapr-sdk'
 
-const eventBridge = new DaprEventBridge({
-  daprApiToken: process.env.DAPR_API_TOKEN,
+const stateStore = new DaprStateStore({
   stateStoreName: 'my-state-store',
-  secretStoreName: 'my-secret-store',
-  configStoreName: 'my-config-store',
+  supportsTtl: true,
+  clientConfig: {
+    daprApiToken: process.env.DAPR_API_TOKEN,
+  },
 })
 
-const myService = await myV1Service.getInstance(eventBridge)
+const myService = await myV1Service.getInstance(eventBridge, { stateStore })
 ```
 
 ## Dapr component definition
@@ -79,7 +80,8 @@ Swap `spec.type` to `state.azure.cosmosdb`, `state.dynamodb`, `state.postgresql`
 ## Operational tips
 
 - Use [Dapr component scopes](https://docs.dapr.io/operations/components/component-scopes/) to control which services can access which state stores
-- Dapr supports optimistic concurrency with ETags — useful for preventing write conflicts in concurrent workflows
+- When using retention, verify TTL support on the exact deployed Dapr component;
+  PURISTA rounds milliseconds up to whole seconds for `ttlInSeconds`
 - Dapr handles connection retries to the sidecar; implement graceful startup delays if the sidecar needs extra time to initialize
 - Run `dapr dashboard` during development to inspect state store operations and debug state values
 
@@ -90,3 +92,4 @@ Swap `spec.type` to `state.azure.cosmosdb`, `state.dynamodb`, `state.postgresql`
 - [Dapr Config Store](./dapr_config_store.md)
 - [Dapr Secret Store](./dapr_secret_store.md)
 - [Default State Store](./default_state_store.md)
+- [StateStore retention](../../2_building-business-logic/stores/state-stores.md#retention)

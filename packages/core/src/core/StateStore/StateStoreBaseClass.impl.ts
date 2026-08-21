@@ -4,10 +4,10 @@ import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import type { EmptyObject } from '../types/EmptyObject.js'
 import type { Logger } from '../types/Logger.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
-import type { StoreBaseConfig } from '../types/StoreBaseConfig.js'
 import {
 	type ResolvedStateWriteOptions,
 	resolveStateWriteOptions,
+	type StateStoreConfig,
 	type StateStoreCapabilities,
 	type StateWriteOptions,
 	stateStoreCapabilitiesWithoutExpiry,
@@ -32,8 +32,8 @@ import {
 export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<string, unknown> = EmptyObject> {
 	/** Child logger scoped to the store name. */
 	logger: Logger
-	/** Store configuration including operation toggles. */
-	config: StoreBaseConfig<StateStoreConfigType>
+	/** Store configuration including operation toggles and default retention. */
+	config: StateStoreConfig<StateStoreConfigType>
 
 	/** Store name used in logs and diagnostics. */
 	name: string
@@ -49,7 +49,7 @@ export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<st
 
 	constructor(
 		name: string,
-		config: StoreBaseConfig<StateStoreConfigType>,
+		config: StateStoreConfig<StateStoreConfigType>,
 		capabilities: StateStoreCapabilities = stateStoreCapabilitiesWithoutExpiry,
 	) {
 		const logger = config?.logger ?? initLogger(config?.logLevel)
@@ -121,9 +121,10 @@ export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<st
 	/**
 	 * Store or replace one state value.
 	 *
-	 * Omitting `options` retains a value forever. Expiring values require an
-	 * adapter that declares native atomic expiry; PURISTA never silently turns a
-	 * requested TTL into a permanent value.
+	 * Omitting `options` uses the StateStore instance default, or retains a value
+	 * forever when no default exists. Expiring values require an adapter that
+	 * declares native atomic expiry; PURISTA never silently turns a requested TTL
+	 * into a permanent value.
 	 */
 	async setState(stateName: string, stateValue: unknown, options?: StateWriteOptions) {
 		if (!this.config.enableSet) {
@@ -132,7 +133,7 @@ export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<st
 			throw err
 		}
 
-		const resolvedOptions = resolveStateWriteOptions(options)
+		const resolvedOptions = resolveStateWriteOptions(options, this.config.retention?.default)
 		if (resolvedOptions.retention.mode === 'expire' && !this.capabilities.retention.atomicExpiry) {
 			const err = new UnhandledError(
 				StatusCode.NotImplemented,

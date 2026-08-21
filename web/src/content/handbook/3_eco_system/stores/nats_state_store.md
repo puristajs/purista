@@ -15,12 +15,12 @@ order: 302320
 | Feature | Support |
 |---|---|
 | Read (`getState`) | ✅ |
-| Write (`setState`) | ✅ (opt-in) |
-| Delete (`removeState`) | ✅ (opt-in) |
+| Write (`setState`) | ✅ |
+| Delete (`removeState`) | ✅ |
 | Persistence across restarts | ✅ (JetStream) |
 | Watch / reactive updates | ✅ (JetStream KV watchers) |
 | Replication | ✅ (JetStream clustering) |
-| TTL / entry expiry | ✅ (JetStream KV TTL) |
+| StateStore retention | ❌ (bucket max age is not per-key sliding expiry) |
 
 ## Install
 
@@ -36,9 +36,7 @@ import { NatsStateStore } from '@purista/nats-state-store'
 const stateStore = new NatsStateStore({
   servers: process.env.NATS_URL ?? 'nats://localhost:4222',
   // JetStream KV bucket name (created automatically if it does not exist):
-  // bucketName: 'purista-state',
-  enableSet: true,
-  enableRemove: true,
+  keyValueStoreName: 'purista-state',
 })
 
 const myService = await myV1Service.getInstance(eventBridge, { stateStore })
@@ -61,7 +59,9 @@ All [NATS JavaScript client](https://github.com/nats-io/nats.js) connection opti
 
 - Use separate KV buckets per service or environment to avoid key collisions and simplify access control
 - Set `replicas: 3` on the JetStream KV bucket for HA in production NATS clusters
-- JetStream KV supports per-key TTL — use it to implement session expiry or cache invalidation without a separate cleanup job
+- A bucket-level max age applies to every entry in the bucket. It cannot satisfy
+  PURISTA's per-key, write-refreshing retention contract; use Redis or a
+  TTL-capable Dapr component when a handler needs `retention: { mode: 'expire' }`
 - NATS JetStream KV watchers enable real-time state change notifications across services — useful for reactive architectures
 
 ## Related
@@ -70,3 +70,4 @@ All [NATS JavaScript client](https://github.com/nats-io/nats.js) connection opti
 - [Default State Store](./default_state_store.md)
 - [Redis State Store](./redis_state_store.md)
 - [Dapr State Store](./dapr_state_store.md)
+- [StateStore retention](../../2_building-business-logic/stores/state-stores.md#retention)

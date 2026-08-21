@@ -1,9 +1,9 @@
 /**
  * Retention applied to one state write.
  *
- * State is retained forever unless a caller explicitly requests `expire`.
- * The `ttlMs` value is resolved when the write happens, so writing the same
- * key again with this retention refreshes its expiry deadline.
+ * State is retained forever unless a StateStore, service, or caller selects
+ * `expire`. The `ttlMs` value is resolved when the write happens, so writing
+ * the same key again with this retention refreshes its expiry deadline.
  *
  * @group Store
  */
@@ -33,18 +33,19 @@ export type StateRetention =
  */
 export type StateWriteOptions = {
 	/**
-	 * Retention for this write. Omit it to use the current store/view default
-	 * (which is `forever` for an unscoped store).
+	 * Retention for this write. Omit it to use the service or StateStore default
+	 * (which is `forever` when neither provides one).
 	 */
 	retention?: StateRetention
 }
 
 /**
- * Default retention applied by an immutable state-store view.
+ * Default retention applied by a StateStore or an immutable state-store view.
  *
- * A service can create its own view over a shared store with this policy. The
- * view never mutates the shared store, so two services can safely use different
- * defaults. A write-level retention is always more specific than this default.
+ * A service can create its own view over a shared store with this policy, while
+ * a StateStore can use it as its instance default. A service view never mutates
+ * the shared store, so two services can safely use different defaults. A
+ * write-level retention is always more specific than this default.
  *
  * @group Store
  */

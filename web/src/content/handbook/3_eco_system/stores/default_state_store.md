@@ -18,6 +18,7 @@ order: 302300
 | Write (`setState`) | ✅ (configurable) |
 | Delete (`removeState`) | ✅ (configurable) |
 | Persistence across restarts | ❌ |
+| StateStore retention | ✅ (local development and tests only) |
 | External dependency | ❌ |
 
 ## Setup
@@ -35,6 +36,9 @@ const stateStore = new DefaultStateStore({
   config: {
     lastProcessedId: '0',
     requestCount: 0,
+  },
+  retention: {
+    default: { mode: 'expire', ttlMs: 60_000 },
   },
 })
 
@@ -61,6 +65,10 @@ const myService = await myV1Service.getInstance(eventBridge, { stateStore })
 - Unit tests: pre-seed state and assert that handlers read and update it correctly
 - Local development: no Redis or NATS needed to iterate on stateful logic
 - Stateless services: if your service genuinely has no persistent state needs, the default store satisfies the interface without overhead
+
+Retention is deterministic here and useful for tests, but it provides no
+durability after a process restart. See the [StateStore retention guide](../../2_building-business-logic/stores/state-stores.md#retention)
+for production adapter guarantees.
 
 ## Related
 

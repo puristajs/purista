@@ -251,17 +251,21 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
 
 Sandbox requirements depend on what the harness agent or workflow does. Read-only prompt and model calls do not need shell execution. Built-in filesystem tools, MCP stdio tools, code execution, and mounted skills need a sandbox with matching capabilities.
 
-## Workspace policy
+## Workflow workspace policy
 
-Agents are ephemeral by default. Use `setWorkspacePolicy(...)` only when a run
-must resume from committed workspace state after retry or restart.
+Use `setWorkspacePolicy(...)` only with `setHarnessWorkflow(...)`. It preserves
+a workflow's private working files and execution state so that workflow can
+resume after a retry or restart. It is not conversation history, and it is not
+available to `setHarnessAgent(...)` or `setRunFunction(...)`.
 
 ```ts
-.setWorkspacePolicy({
-  mode: 'durable',
-  required: true,
-  cleanup: 'on_terminal',
-})
+agent
+  .setHarnessWorkflow(workflow)
+  .setWorkspacePolicy({
+    mode: 'durable',
+    required: true,
+    cleanup: 'on_terminal',
+  })
 ```
 
 At runtime, bind both the harness durable runtime and workspace store:

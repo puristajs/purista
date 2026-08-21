@@ -45,41 +45,103 @@ It can be used like this:
 })
 ```
 
-## Retention without a second store
+## Retention
 
-State is permanent by default. Choose expiry explicitly for values such as
-one-time tokens, temporary workflow markers, and bounded agent sessions. A
-finite write is never silently converted to a permanent one: it fails if the
-selected store cannot atomically store the value and its expiry together.
+State is permanent by default. Add retention only to data that is deliberately
+temporary: password-reset tokens, checkout drafts, rate-limit windows, job
+progress, or bounded conversation history. An expiry is a **write policy**. A
+successful expiring write sets the deadline; a later write refreshes it, while a
+read never does. PURISTA does not start a generic cleanup timer.
 
-When several services share one store, create an immutable view for the service
-that needs a default. A write-level option always wins, so business code keeps
-control without mutating the shared store's configuration.
+### Choose the scope that owns the lifetime
 
-Retention resolves from most to least specific: the write's `retention` option,
-then an attached agent's `idleTtlMs` for its own records, then the service view,
-then an outer store view, and finally `forever`. A scope cannot silently ignore
-a finite result: the write fails when the concrete store lacks atomic expiry.
+**One temporary value.** Keep the rule beside the business operation when only
+one kind of state has a short lifetime. This is the usual choice for tokens and
+rate-limit windows.
 
 ```typescript
-import { createStateStoreRetentionView } from '@purista/core'
-
-const agentState = createStateStoreRetentionView(redisStateStore, {
-  default: { mode: 'expire', ttlMs: 30 * 24 * 60 * 60_000 },
-})
-
-const service = await supportV1Service.getInstance(eventBridge, {
-  stateStore: agentState,
+await context.states.setState(`password-reset:${tokenId}`, record, {
+  retention: { mode: 'expire', ttlMs: 15 * 60_000 },
 })
 ```
 
-Redis supports per-key atomic expiry. Dapr supports it only when the configured
-component supports `ttlInSeconds` and the adapter is created with
-`supportsTtl: true` (Dapr rounds millisecond durations up to seconds). NATS KV
-can enforce a fixed lifetime per bucket but does not support this per-write
-sliding-expiry contract. A custom store must declare
-`capabilities.retention.atomicExpiry: true` only when its backend performs the
-value write and expiry deadline atomically.
+**All state written by one service.** Use `stateRetention` at service runtime
+wiring when one service owns short-lived operational state, such as checkout
+drafts. It creates a service-local view; another service using the same store is
+not changed.
+
+```typescript
+const checkout = await checkoutV1Service.getInstance(eventBridge, {
+  stateStore,
+  stateRetention: {
+    default: { mode: 'expire', ttlMs: 24 * 60 * 60_000 },
+  },
+})
+```
+
+**A dedicated StateStore instance.** Configure `retention` on the store when
+every consumer of that particular instance shares the same lifetime policy.
+Use a separate instance when permanent business records and temporary state
+need different defaults.
+
+```typescript
+const sessionState = new RedisStateStore({
+  config: { url: process.env.REDIS_URL },
+  retention: {
+    default: { mode: 'expire', ttlMs: 30 * 24 * 60 * 60_000 },
+  },
+})
+```
+
+An explicit write policy always wins. For example, a service with an expiring
+default can deliberately persist one record with
+`{ retention: { mode: 'forever' } }`.
+
+| Priority | Where it is configured | Typical use |
+| --- | --- | --- |
+| 1 | `context.states.setState(..., { retention })` | One token, cache entry, or business exception. |
+| 2 | `service.getInstance(..., { stateRetention })` | One service's temporary operational state. |
+| 3 | `new StateStore({ retention })` | A dedicated state-store instance with one default lifetime. |
+| 4 | No policy | Permanent state. |
+
+### StateStore retention compatibility
+
+A finite policy is never silently changed to permanent storage. It succeeds
+only when the adapter can store the value and expiry deadline atomically;
+otherwise the write fails clearly.
+
+| StateStore | Persists across restart | Atomic per-write expiry | Notes |
+| --- | --- | --- | --- |
+| `DefaultStateStore` | No | Yes | Deterministic local development and tests only. |
+| `RedisStateStore` | Yes | Yes | Writes the value and expiry together. |
+| `DaprStateStore` | Depends on the selected Dapr component | Only with `supportsTtl: true` and a TTL-capable component | Durations round up to whole seconds. |
+| `NatsStateStore` | Yes | No | Bucket max age is not a per-key, write-refreshing TTL. |
+| Custom StateStore | Depends on the implementation | Only when it declares `capabilities.retention.atomicExpiry: true` | The implementation must commit the value and deadline as one backend operation. |
+
+Do not use `DefaultStateStore` as evidence of production durability. For a
+custom store, leave `atomicExpiry` false unless the backend genuinely provides
+this guarantee.
+
+### Attached-agent retention compatibility
+
+Attached agents reuse the same StateStore capability for their service-owned
+records. Their additional history, run, and event bounds are documented in the
+[AI runtime guide](../ai/index.md#retention-is-policy-stores-enforce-it).
+They do not create a generic cleanup job. The selected binding determines which
+agent controls are available:
+
+| Agent policy | Service StateStore (default) | Explicit Harness `ai.stateStore` |
+| --- | --- | --- |
+| `history.maxTurns` / `history.maxBytes` | Supported. Harness keeps complete newest turns by replacing the stored transcript. | Supported only when the Harness store implements atomic `replaceMessages`. |
+| `idleTtlMs` | Supported only when the StateStore reports `capabilities.retention.atomicExpiry: true`. An unsupported store fails the expiring write instead of retaining data forever. | Not available. |
+| `runs.maxPerSession` / `events.maxPerRun` | Supported by PURISTA's agent StateStore adapter. | Not available. |
+
+Use the service StateStore for the ordinary case. Choose `ai.stateStore` only
+when agent persistence intentionally needs a separate Harness-native backend.
+
+Durable workflow workspace retention is separate from StateStore retention. Its
+workspace adapter owns file cleanup, quotas, encryption, and durable-workspace
+policy.
 
 ::: tip Use schemas to validate
 A production ready approach is, to validate the result of store getters against a schema.
@@ -98,7 +160,7 @@ import {
     StateStoreBaseClass,
     UnhandledError,
     StatusCode,
-    StoreBaseConfig,
+    StateStoreConfig,
     ResolvedStateWriteOptions,
     type ObjectWithKeysFromStringArray,
   } from '@purista/core'
@@ -111,7 +173,7 @@ export class CustomStore extends StateStoreBaseClass<CustomStoreConfig> implemen
 
   private client
 
-  constructor(config: StoreBaseConfig<CustomStoreConfig>) {
+  constructor(config: StateStoreConfig<CustomStoreConfig>) {
     super('CustomStoreName', config, {
       retention: { atomicExpiry: true }, // only when client.set is truly atomic with TTL
     })

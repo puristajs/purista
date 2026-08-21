@@ -84,6 +84,23 @@ describe('DefaultStateStore', () => {
 		}
 	})
 
+	it('applies the StateStore instance retention default', async () => {
+		vi.useFakeTimers()
+		vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
+		try {
+			const store = new DefaultStateStore({
+				logger: getLoggerMock(sandbox).mock,
+				retention: { default: { mode: 'expire', ttlMs: 1_000 } },
+			})
+
+			await store.setState('temporary', 'value')
+			await vi.advanceTimersByTimeAsync(1_000)
+			await expect(store.getState('temporary')).resolves.toEqual({ temporary: undefined })
+		} finally {
+			vi.useRealTimers()
+		}
+	})
+
 	it('keeps state forever when retention is omitted', async () => {
 		vi.useFakeTimers()
 		try {

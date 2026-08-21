@@ -583,7 +583,12 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
-	/** Require a durable harness workspace for this attached agent. */
+	/**
+	 * Require a durable workspace for a wrapped Harness workflow.
+	 *
+	 * Durable replay checkpoints workflow progress and its private workspace; it
+	 * is not available to `setHarnessAgent(...)` or `setRunFunction(...)`.
+	 */
 	setWorkspacePolicy(policy: AgentWorkspacePolicy) {
 		const { capabilities, ...rest } = policy
 		this.workspacePolicy = {

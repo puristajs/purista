@@ -1,23 +1,24 @@
 ---
 title: Redis State Store
-description: Store runtime state in Redis — durable, fast, with TTL support and pub/sub for reactive patterns.
+description: Store runtime state in Redis — durable, fast, with atomic per-key expiry.
 order: 302310
 ---
 
 # Redis State Store
 
-`@purista/redis-state-store` stores service state as JSON strings in Redis. It is the most common production choice: Redis is fast, well-understood operationally, and adds TTL-based expiry and pub/sub on top of simple key-value semantics.
+`@purista/redis-state-store` stores service state as JSON strings in Redis. It
+is a common production choice when state must survive process restarts and
+temporary values need atomic, per-key expiry.
 
 ## Capabilities
 
 | Feature | Support |
 |---|---|
 | Read (`getState`) | ✅ (enabled by default) |
-| Write (`setState`) | ✅ (opt-in) |
-| Delete (`removeState`) | ✅ (opt-in) |
-| TTL / automatic expiry | ✅ (via Redis EXPIRE) |
+| Write (`setState`) | ✅ |
+| Delete (`removeState`) | ✅ |
+| StateStore retention | ✅ (atomic Redis `SET` with expiry) |
 | Persistence across restarts | ✅ (Redis persistence) |
-| Pub/sub for reactivity | ✅ (Redis-native) |
 | Cluster / Sentinel | ✅ (node-redis) |
 
 ## Install
@@ -35,8 +36,9 @@ const stateStore = new RedisStateStore({
   config: {
     url: process.env.REDIS_URL ?? 'redis://localhost:6379',
   },
-  enableSet: true,
-  enableRemove: true,
+  retention: {
+    default: { mode: 'expire', ttlMs: 24 * 60 * 60_000 },
+  },
 })
 
 const myService = await myV1Service.getInstance(eventBridge, { stateStore })
@@ -67,11 +69,13 @@ The `config` object is passed directly to [node-redis](https://redis.js.org) —
 
 **Rate limiting:**
 ```typescript
-const key = `ratelimit:${context.userId}`
-const { count } = await context.states.getState(key) ?? { count: 0 }
+const key = `ratelimit:${context.message.principalId ?? 'anonymous'}`
+const state = await context.states.getState(key)
+const count = (state[key] as { count?: number } | undefined)?.count ?? 0
 if (count >= 100) throw new HandledError(StatusCode.TooManyRequests, 'rate limit exceeded')
-await context.states.setState(key, { count: count + 1 })
-// TTL must be set directly via the Redis client if needed
+await context.states.setState(key, { count: count + 1 }, {
+  retention: { mode: 'expire', ttlMs: 60_000 },
+})
 ```
 
 **Job status tracking:**
@@ -87,6 +91,7 @@ await context.states.setState(`job:${jobId}`, { status: 'done', completedAt: Dat
 - Enable Redis persistence (RDB snapshots or AOF) so state survives Redis restarts
 - Use Redis Sentinel or Cluster for HA in production
 - Monitor Redis memory usage — unbounded state writes without expiry or cleanup policies will grow indefinitely
+- Use PURISTA `retention`, not raw Redis expiry calls, so handlers remain store-independent
 
 ## Related
 
@@ -94,3 +99,4 @@ await context.states.setState(`job:${jobId}`, { status: 'done', completedAt: Dat
 - [Default State Store](./default_state_store.md)
 - [NATS State Store](./nats_state_store.md)
 - [Dapr State Store](./dapr_state_store.md)
+- [StateStore retention](../../2_building-business-logic/stores/state-stores.md#retention)

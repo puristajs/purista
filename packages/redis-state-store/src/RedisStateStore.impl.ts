@@ -1,4 +1,4 @@
-import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core'
 import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type {
 	RedisClientType,
@@ -30,6 +30,7 @@ import type { RedisStoreConfig } from './types.js'
  * @example
  * ```typescript
  * const store = new RedisStateStore({
+ *   retention: { default: { mode: 'expire', ttlMs: 24 * 60 * 60_000 } },
  *   config: { url: 'redis://localhost:6379' },
  * })
  *
@@ -56,9 +57,9 @@ export class RedisStateStore<
 	/**
 	 * Creates a Redis-backed state store.
 	 *
-	 * @param config Store options and node-redis client configuration.
+	 * @param config Store options, optional default retention, and node-redis client configuration.
 	 */
-	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
+	constructor(config?: StateStoreConfig<RedisStoreConfig<M, F, S>>) {
 		super('RedisStateStore', { ...config }, { retention: { atomicExpiry: true } })
 		this.client = createClient(this.config.config)
 		this.client.on('error', err => this.logger.error({ err }, 'Redis Client Error'))

@@ -28,6 +28,10 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Keep schemas explicit on every boundary. Prefer consumer-local schemas over one oversized shared schema.
 - Keep external systems behind resources or runtime bindings.
 - Treat tenant isolation, authorization, auditability, and data minimization as architecture requirements, not handler details.
+- State retention is an explicit StateStore policy: use a write override for one
+  value, `stateRetention` for one service, or a StateStore `retention` default
+  for a dedicated store. Finite retention requires atomic expiry; never
+  describe an unsupported backend as best-effort expiry.
 - Do not leak secrets, PII, prompts, completions, tokens, raw payloads, headers, or attachments into logs, metrics, traces, events, generated examples, or model calls unless an explicit product policy allows the exact field.
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.

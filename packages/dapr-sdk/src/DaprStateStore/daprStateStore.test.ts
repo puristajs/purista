@@ -133,6 +133,21 @@ describe('DaprStateStore', () => {
 			])
 		})
 
+		it('uses a StateStore instance retention default', async () => {
+			const post = sandbox.stub(HttpClient.prototype, 'post').resolves()
+			const stateStore = new DaprStateStore({
+				...config,
+				supportsTtl: true,
+				retention: { default: { mode: 'expire', ttlMs: 1_500 } },
+			})
+
+			await stateStore.setState('short-lived', { ok: true })
+
+			expect(post.firstCall.args[1]).toEqual([
+				{ key: 'short-lived', value: { ok: true }, metadata: { ttlInSeconds: '2' } },
+			])
+		})
+
 		it('rejects finite retention when component TTL support is not explicitly declared', async () => {
 			const stateStore = new DaprStateStore(config)
 

@@ -186,13 +186,15 @@ filesystem built-ins, MCP stdio tools, or code execution. Sandbox capabilities
 such as `sandbox.snapshot`, `sandbox.resume`, and `sandbox.hibernate` describe
 low-level sandbox session behavior.
 
-Use `setWorkspacePolicy(...)` only when an attached agent must resume from
-committed workspace state after queue retry, process restart, pause, or
-hibernate:
+Use `setWorkspacePolicy(...)` only with `setHarnessWorkflow(...)`. It lets a
+workflow resume committed private workspace state after queue retry or process
+restart; it is not conversation history and is not available to
+`setHarnessAgent(...)` or `setRunFunction(...)`:
 
 ```ts
 const agent = service
   .getAgentQueueBuilder('researchReport', 'Builds a research report')
+  .setHarnessWorkflow(researchWorkflow)
   .setWorkspacePolicy({
     mode: 'durable',
     required: true,
@@ -235,6 +237,36 @@ Keep ownership clear:
 
 Fresh ephemeral fallback must be explicit in the builder policy. Never treat a
 sandbox snapshot as production durable workspace replay.
+
+### Decision shortcut
+- Use a conversation session for user/business history across requests; it does
+  not retain sandbox files or resume unfinished execution.
+- Use a sandbox for isolated tools, files, code execution, mounted skills, or
+  MCP processes during one run. A capable adapter may snapshot and reopen one
+  sandbox session, but that is not application-managed recovery after failure.
+- Use durable runtime and workspace bindings only with
+  `setHarnessWorkflow(...)` when a multi-step workflow must resume from
+  checkpoints and private files after retry or process restart. This is the
+  correct choice for a CSV analysis or research report that must preserve its
+  intermediate filesystem state after failure.
+- Use separate PURISTA child agents when business capabilities need independent
+  queues, service ownership, model bindings, or operational policies.
+
+### Retention ownership and compatibility
+- Core StateStore retention is shared by ordinary services and attached agents:
+  a write policy wins over a service `stateRetention` default, which wins over
+  the StateStore instance `retention` default; no policy retains state forever.
+  Finite retention requires `capabilities.retention.atomicExpiry: true`.
+- Retention is policy, not a generic PURISTA cleanup worker. Harness applies
+  `history.maxTurns` and `history.maxBytes` by retaining complete turns.
+- `idleTtlMs` is an expiring write through the service StateStore and requires
+  `capabilities.retention.atomicExpiry: true`; unsupported stores fail instead
+  of silently retaining data forever.
+- Run and event caps use PURISTA's service-StateStore adapter. An explicit
+  Harness-native `ai.stateStore` supports history only when it implements
+  `replaceMessages`; it cannot use PURISTA idle, run, or event limits.
+- Durable-workspace retention is separate: its workspace adapter owns cleanup,
+  quotas, encryption, and file retention.
 
 ## Handler Context
 Agent handlers use:
@@ -307,9 +339,9 @@ data, prompts, conversation ids, or unverified headers.
 
 This declaration selects the stable Harness session identity for persisted
 conversation history and associated run records. It does not persist or restore
-a sandbox, workspace files, or tool permissions. Configure those separately
-with `setSandboxPolicy(...)`, `setWorkspacePolicy(...)`, and explicit tool
-declarations/runtime bindings.
+a sandbox, workspace files, or tool permissions. Configure sandbox policy and
+explicit tool declarations/runtime bindings separately; workspace policy applies
+only when the execution definition is a Harness workflow.
 
 When upgrading a PURISTA 3.2 application, keep a valid session-policy
 declaration unchanged:

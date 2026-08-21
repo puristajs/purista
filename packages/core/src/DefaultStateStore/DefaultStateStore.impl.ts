@@ -1,7 +1,7 @@
 import { StateStoreBaseClass } from '../core/StateStore/StateStoreBaseClass.impl.js'
 import type { ResolvedStateWriteOptions, StateStoreCapabilities } from '../core/StateStore/types/index.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
-import type { StoreBaseConfig } from '../core/types/StoreBaseConfig.js'
+import type { StateStoreConfig } from '../core/StateStore/types/StateStoreConfig.js'
 import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKeysFromStringArray.js'
 import type { DefaultStateStoreConfig } from './types/DefaultStateStoreConfig.js'
 
@@ -18,7 +18,7 @@ import type { DefaultStateStoreConfig } from './types/DefaultStateStoreConfig.js
  */
 export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConfig> implements StateStore {
 	private map = new Map<string, { value: unknown; expiresAt?: number }>()
-	constructor(config?: StoreBaseConfig<DefaultStateStoreConfig>) {
+	constructor(config?: StateStoreConfig<DefaultStateStoreConfig>) {
 		const capabilities: StateStoreCapabilities = {
 			retention: {
 				atomicExpiry: true,

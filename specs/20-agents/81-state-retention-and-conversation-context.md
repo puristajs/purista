@@ -40,6 +40,10 @@ type StateWriteOptions = {
 type StateRetentionPolicy = {
   default: StateRetention
 }
+
+type StateStoreConfig<T> = StoreBaseConfig<T> & {
+  retention?: StateRetentionPolicy
+}
 ```
 
 The exact public names may be refined only to preserve existing Core naming
@@ -47,7 +51,7 @@ patterns. Semantics are locked:
 
 1. Resolve the requested value in this order: write option, service instance
    policy, retained-store/view default, then `{ mode: 'forever' }`.
-2. A finite policy is never silently ignored. A state-store view rejects a
+2. A finite policy is never silently ignored. A StateStore instance or view rejects a
    finite write when its store cannot declare atomic expiry; it does not offer a
    best-effort mode.
 3. Expiry is calculated from an absolute deadline at each successful write.
@@ -57,10 +61,11 @@ patterns. Semantics are locked:
    limited, compare-safe scheduled purge capability. Current three-method
    stores MUST NOT gain an unsafe generic sweeper.
 
-Service `stateRetention` creates a service-scoped view; it must not mutate a
-shared store instance used by another service. Existing `stateStore` wiring and
-all string-key / schema-derived handler typing remain intact. `setState` gains
-an optional third argument; no separate untyped state API is introduced.
+`retention` on a StateStore config sets the instance default. Service
+`stateRetention` creates a service-scoped view; it must not mutate a shared
+store instance used by another service. Existing `stateStore` wiring and all
+string-key / schema-derived handler typing remain intact. `setState` gains an
+optional third argument; no separate untyped state API is introduced.
 
 ## Backend guarantees
 

@@ -53,7 +53,8 @@ export type ServiceConstructorInput<S extends ServiceClassTypes = ServiceClassTy
 	stateStore?: StateStore
 	/**
 	 * Optional retention default for this service's immutable state-store view.
-	 * A write-level retention still takes precedence.
+	 * A write-level retention still takes precedence, while the StateStore
+	 * instance default is used when this service does not provide one.
 	 */
 	stateRetention?: StateRetentionPolicy
 	/** The opentelemetry span processor instance */

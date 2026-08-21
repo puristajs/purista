@@ -6,7 +6,7 @@ import { getLoggerMock } from '../../mocks/index.js'
 import { UnhandledError } from '../Error/index.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StateStoreBaseClass } from './StateStoreBaseClass.impl.js'
-import type { ResolvedStateWriteOptions } from './types/StateRetention.js'
+import type { ResolvedStateWriteOptions, StateRetentionPolicy } from './types/StateRetention.js'
 
 class TestClass extends StateStoreBaseClass {
 	protected getStateImpl<StateNames extends string[]>(
@@ -27,8 +27,12 @@ class TestClass extends StateStoreBaseClass {
 class AtomicExpiryTestClass extends StateStoreBaseClass {
 	lastOptions: ResolvedStateWriteOptions | undefined
 
-	constructor() {
-		super('atomic-expiry-test', { logger: getLoggerMock().mock }, { retention: { atomicExpiry: true } })
+	constructor(retention?: StateRetentionPolicy) {
+		super(
+			'atomic-expiry-test',
+			{ logger: getLoggerMock().mock, ...(retention ? { retention } : {}) },
+			{ retention: { atomicExpiry: true } },
+		)
 	}
 
 	protected getStateImpl<StateNames extends string[]>(
@@ -121,6 +125,16 @@ describe('StateStoreBaseClass', () => {
 
 			await store.setState('temporary', 'value', { retention: { mode: 'expire', ttlMs: 1_000 } })
 			expect(store.lastOptions).toEqual({ retention: { mode: 'expire', ttlMs: 1_000 } })
+		})
+
+		it('uses the StateStore instance retention default unless a write overrides it', async () => {
+			const store = new AtomicExpiryTestClass({ default: { mode: 'expire', ttlMs: 60_000 } })
+
+			await store.setState('temporary', 'value')
+			expect(store.lastOptions).toEqual({ retention: { mode: 'expire', ttlMs: 60_000 } })
+
+			await store.setState('permanent', 'value', { retention: { mode: 'forever' } })
+			expect(store.lastOptions).toEqual({ retention: { mode: 'forever' } })
 		})
 	})
 
