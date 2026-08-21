@@ -251,6 +251,12 @@ rerank calls).
 Harness owns run identity, event ordering, redaction, and final status; custom
 handlers cannot forge lifecycle events directly.
 
+These run events are in-process/provider-progress frames for the active agent
+stream. They are not PURISTA EventBridge messages and never trigger
+subscriptions. For a business event after a validated agent result, use the
+agent builder's `setSuccessEventName(...)`; PURISTA then publishes that result
+through the EventBridge.
+
 ## Optional Governance Policy
 `@purista/harness` owns the generic governance policy contract. PURISTA
 attached agents pass it through as `ai.governance`, but normal PURISTA guards

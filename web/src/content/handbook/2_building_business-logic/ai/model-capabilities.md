@@ -145,6 +145,11 @@ generated `stream_id` to aggregate chunks from one model stream invocation and
 `agent_id`, `workflow_id`, or `model_alias` for source attribution. Display
 labels and client event names belong in your HTTP/SSE adapter.
 
+These are frames on the active agent stream, not custom events published through
+the PURISTA EventBridge. They do not trigger subscriptions. Use
+`setSuccessEventName(...)` when the completed, validated agent result is a
+business event that other PURISTA services should consume.
+
 ## Embeddings
 
 Use `embeddings` for retrieval, similarity search, clustering, and deduplication. The vector index is application infrastructure; the model provider only creates vectors.
