@@ -30,9 +30,9 @@ not use the advanced features below, there is nothing else to migrate.
 ## A support-chat conversation
 
 The existing session-policy API keeps its `payloadPath`, so a valid PURISTA 3.2
-declaration does not need to change. The path is now type-checked and tenant
-scope is explicit in the policy. Use the payload field that identifies the
-business conversation—not a message, trace, or correlation id.
+declaration does not need to change. The path is type-checked. Use the payload
+field that identifies the business conversation—not a message, trace, or
+correlation id.
 
 ```ts
 // Valid PURISTA 3.2 configuration — keep this code unchanged.
@@ -51,23 +51,20 @@ agent.setSessionPolicy({
 })
 ```
 
-For an ordinary multi-tenant service, that is the complete configuration.
-PURISTA uses the trusted `message.tenantId` that your transport adapter or
-guard already places on the service message. A missing tenant is rejected, so
-two tenants cannot accidentally share a conversation with the same id.
+That is the complete configuration. The conversation id is the application's
+stable, non-empty business identifier. PURISTA automatically takes trusted
+`message.tenantId` and `message.principalId` into account when they are
+present. Conceptually, the persistent session is partitioned by
+`tenantId:principalId:conversationId` inside the owning service and agent.
 
-Only a service that genuinely has no tenant boundary should opt out:
+Tenant and principal are optional dimensions. When both are absent, the
+conversation id is the whole business boundary. When either trusted value is
+present, it automatically creates stricter separation for the same conversation
+id. No session scope or single-tenant configuration is required.
 
-```ts
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-  scope: 'service',
-})
-```
-
-Do not use service scope as a fallback for missing tenant data. Fix the inbound
-authentication or guard instead.
+Only trusted PURISTA message metadata participates in that partition. Do not
+take tenant or principal identity from agent payload fields, prompts,
+conversation ids, or unverified headers.
 
 `setSessionPolicy(...)` creates or resumes the Harness session identity for the
 logical conversation. It scopes persisted history and the associated agent run
@@ -81,12 +78,19 @@ tools. Those are separate application decisions:
 | Resume workflow files/checkpoints after restart | `setWorkspacePolicy(...)`, `ai.runtime`, and `ai.workspaceStore` |
 | Permit model-requested tools | agent tool declarations and the application’s approved runtime bindings |
 
-The 3.2 policy could not express the scope required by its runtime, so normal
-typed applications did not establish a persistent conversation through that
-API. There is therefore no automatic history conversion to perform. If an
-application bypassed the public API and wrote its own agent records, decide
-whether those records meet the new isolation policy and handle any archival or
-import in application code.
+### Existing persisted history
+
+No application code migration is needed. There is one deliberate behavior
+change for persistent conversations: if a message now carries a tenant or
+principal, its history begins in that more specific namespace instead of
+joining the older conversation-id-only history. PURISTA never reads the old
+shared record into a newly partitioned conversation because it cannot prove
+that record belongs to the current tenant or principal.
+
+Let existing records expire under their retention policy, or archive them using
+your normal data-governance process. Do not copy old shared transcripts into a
+tenant or principal namespace automatically. Conversations whose messages have
+neither optional value continue to use their conversation-id-only identity.
 
 ## A long-running support conversation
 
@@ -187,10 +191,12 @@ when your application intentionally uses them.
 
 - [ ] Upgrade the PURISTA packages used by the application together.
 - [ ] Keep valid `setSessionPolicy({ mode: 'conversation', payloadPath })`
-      declarations; add `scope: 'service'` only for a genuinely non-tenant
-      service.
-- [ ] Ensure multi-tenant request handling supplies trusted `message.tenantId`.
-- [ ] Use `{ scope: 'service' }` only for a genuinely non-tenant service.
+      declarations; no session-scope option is needed.
+- [ ] Ensure the application's `conversationId` is stable and unique for the
+      logical business conversation it represents.
+- [ ] Propagate trusted `message.tenantId` and `message.principalId` when the
+      transport/authentication layer provides them; Core applies them
+      automatically.
 - [ ] Add workflow delegation only to workflows that call local Harness agents.
 - [ ] Replace raw Harness lifecycle emission; use `emitRunEvents: true` for
       active-stream progress and `setSuccessEventName(...)` for a business

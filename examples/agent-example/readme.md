@@ -45,10 +45,10 @@ Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from t
 - PURISTA-level workflow orchestration with independent queue/runtime boundaries for each specialist agent
 - declared skills in agent manifests
 - sandbox policy for risk analysis
-- a deliberately service-scoped incident conversation with bounded complete-turn
-  history, inactive-session expiry, and bounded run/event audit records; the
-  public demo has no authenticated tenant boundary, while a multi-tenant app
-  would omit `scope: 'service'` and use the tenant-safe default
+- an incident conversation with bounded complete-turn history, inactive-session
+  expiry, and bounded run/event audit records; the public demo relies on its
+  incident id, while trusted tenant/principal metadata adds stricter separation
+  automatically in a multi-tenant application
 - generated queue, worker, command, and stream definitions for each agent
 - Hono HTTP exposure with OpenAPI documentation
 - `createAgentTestHarness(...)` with a scripted model provider

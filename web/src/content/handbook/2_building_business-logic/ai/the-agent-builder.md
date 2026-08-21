@@ -194,11 +194,13 @@ By default, agents use an ephemeral session derived from the transport message. 
 })
 ```
 
-With this declaration, `payload.conversation.id` becomes the tenant-partitioned
-harness session id. A tenant-scoped conversation requires authenticated
-`message.tenantId`; use `{ scope: 'service' }` instead for a genuinely
-single-tenant service with no tenant partition. Do not treat `correlationId` as
-a conversation id.
+With this declaration, `payload.conversation.id` identifies the persistent
+conversation. PURISTA automatically adds trusted `message.tenantId` and
+`message.principalId` when present, so the conceptual key is
+`tenantId:principalId:conversationId` within this agent's namespace. Missing
+optional values leave the conversation id as the boundary when both are absent;
+if one is present, Core uses a stable internal default for the other. Do not
+treat `correlationId` as a conversation id.
 
 The session identity lets Harness load persisted conversation history and its
 associated run records. It does **not** persist or restore a sandbox, workspace
@@ -211,19 +213,19 @@ chosen independently by the Harness provider integration.
 
 ### Migrating from PURISTA 3.2
 
-Keep the existing `payloadPath` field; its path is now type-checked and the
-tenant-safe scope is supplied by default. No code change is needed for a valid
+Keep the existing `payloadPath` field; its path is now type-checked and trusted
+message tenant/principal metadata is applied automatically when present. No code change is needed for a valid
 declaration:
 
 ```ts
 .setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
 ```
 
-The published 3.2 policy could not express the scope its runtime required. The
-new default requires trusted `message.tenantId` for every persistent turn. Use
-`{ scope: 'service' }` only when the service truly has no tenant partition.
-See the [4.0 migration guide](/article/2026-08-20-purista-version-4-0/) for the
-full upgrade checklist.
+The published 3.2 policy could not express its runtime's session behavior. The
+current policy preserves that declaration and adds any available trusted
+tenant/principal metadata automatically. See the
+[4.0 migration guide](/article/2026-08-20-purista-version-4-0/) for the full
+upgrade checklist.
 
 ## Sandbox policy
 

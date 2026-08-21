@@ -26,7 +26,6 @@ describe('coordinateIncidentResponseAgentBuilder', () => {
 		expect(definition.manifest.session).toEqual({
 			mode: 'conversation',
 			payloadPath: ['incidentId'],
-			scope: 'service',
 			retention: {
 				idleTtlMs: 30 * 24 * 60 * 60_000,
 				history: { maxTurns: 50, maxBytes: 256_000 },

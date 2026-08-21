@@ -88,8 +88,7 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRuntimeModelBinding(s)`, `AgentRuntimeOptions`, `AgentRuntimeRef`,
 `AgentRuntimeInvocationInput`, `AgentRuntimeStreamInvocationInput`,
 `AgentExecutionDefinition`, `AgentExecutionKind`, `AgentExecutionPolicy`,
-`AgentConversationId`, `AgentConversationIdPath`, `AgentConversationScope`,
-`AgentSessionPolicy`,
+`AgentConversationId`, `AgentConversationIdPath`, `AgentSessionPolicy`,
 `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
 `AgentWorkspaceCapabilityRequirement`, `AgentDurableWorkspaceStore(Policy)`,
 `AgentHttpExposure`, `AgentResponseMode`, `AgentResponseModeOptions`,
@@ -442,10 +441,9 @@ Contract cleanups:
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
 - Published 3.2's `setSessionPolicy({ mode:'conversation', payloadPath })` is
-  retained as `setSessionPolicy({ mode:'conversation', payloadPath })`: the
-  old public policy could not express the scope required by its runtime. The
-  new declaration type-checks the
-  payload field and is tenant-scoped by default. Core has no tenant
-  fallback/runtime tenancy option: the default uses authenticated
-  `message.tenantId`, while the explicit `{ scope: 'service' }` option is only
-  for a service that has no tenant partition.
+  retained as `setSessionPolicy({ mode:'conversation', payloadPath })`. The
+  declaration type-checks the payload field; its required conversation id is
+  automatically namespaced with trusted `message.tenantId` and
+  `message.principalId` when either is present. With neither present,
+  conversation id remains the boundary; no scope or tenancy configuration is
+  required.

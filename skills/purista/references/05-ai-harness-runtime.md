@@ -284,21 +284,21 @@ harness `approval` adapter in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
 
 Agents are ephemeral by default. `setSessionPolicy(...)` opts into a persistent
-conversation with tenant isolation by default; Core never fabricates a tenant
-identity or silently creates a shared conversation namespace.
+conversation. The application supplies its stable, non-empty business
+conversation id; PURISTA automatically adds trusted `message.tenantId` and
+`message.principalId` when they are present.
 
 ```ts
-// Multi-tenant service: authenticated message tenant is mandatory by default.
 agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
-
-// Single-tenant service: no tenant partition exists.
-agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'], scope: 'service' })
 ```
 
-The default `tenant` scope uses authenticated `message.tenantId` and rejects a
-missing value. Explicit `service` scope remains namespaced by service, version, agent, and
-conversation id but deliberately has no tenant partition. Do not derive tenant
-identity from payload data, prompts, conversation ids, or unverified headers.
+The logical identity is `tenantId:principalId:conversationId`, within the
+owning service, version, and agent namespace. Tenant and principal are optional
+dimensions: with neither present, the required conversation id is the whole
+boundary; with either present, a stable internal default fills its missing
+counterpart. Supplied tenant or principal values therefore automatically make
+the boundary stricter. Do not derive tenant or principal identity from payload
+data, prompts, conversation ids, or unverified headers.
 
 This declaration selects the stable Harness session identity for persisted
 conversation history and associated run records. It does not persist or restore
@@ -313,9 +313,9 @@ declaration unchanged:
 agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 ```
 
-The older public policy could not express the scope required by its runtime.
-Use `{ scope: 'service' }` only for a genuinely single-tenant service; never
-use it as a fallback for a missing tenant.
+No tenant or principal session configuration is needed. Existing applications
+gain the automatic message-metadata partition whenever that trusted metadata is
+available.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:

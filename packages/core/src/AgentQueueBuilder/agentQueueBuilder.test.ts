@@ -61,7 +61,6 @@ describe('AgentQueueBuilder', () => {
 
 		expect(definition.manifest.session).toMatchObject({
 			mode: 'conversation',
-			scope: 'tenant',
 			retention: { history: { maxTurns: 10 }, runs: { maxPerSession: 5 } },
 		})
 	})
@@ -90,7 +89,7 @@ describe('AgentQueueBuilder', () => {
 		)
 	})
 
-	it('defaults conversations to tenant isolation and type-checks their id path against the payload schema', () => {
+	it('type-checks conversation id paths against the payload schema', () => {
 		const agent = new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
 			.addPayloadSchema(
@@ -105,14 +104,6 @@ describe('AgentQueueBuilder', () => {
 		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['count'] })
 		// @ts-expect-error conversation ids must resolve to a string payload field
 		agent.setSessionPolicy({ mode: 'conversation', payloadPath: 'count' })
-
-		expect(() =>
-			agent.setSessionPolicy({
-				mode: 'conversation',
-				payloadPath: ['conversation', 'id'],
-				scope: 'global' as never,
-			}),
-		).toThrow('Agent conversation scope must be "tenant" or "service"')
 	})
 
 	it('cascades resources, schemas, models, command tools and child agents into handler types', async () => {

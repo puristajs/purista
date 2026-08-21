@@ -281,22 +281,22 @@ converted to tokens.
 ## Conversation isolation
 
 Agents are ephemeral by default. `setSessionPolicy(...)` opts into persistent
-history. Its safe default is tenant isolation; Core never invents a tenant
-identity or silently falls back to a shared namespace.
+history. The application provides the stable, non-empty conversation id;
+PURISTA automatically includes trusted tenant and principal metadata when it
+is available.
 
 ```ts
-// Multi-tenant service: authenticated message tenant is required by default.
 agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
-
-// Single-tenant service: no tenant is required or synthesized.
-agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'], scope: 'service' })
 ```
 
-The default `tenant` scope uses authenticated `message.tenantId` and fails
-when it is missing. Explicit `service` scope remains namespaced by service,
-version, agent, and conversation id,
-but deliberately does not partition by tenant. Do not derive tenant identity
-from payload data, conversation ids, prompts, or unverified headers.
+Conceptually, the conversation is keyed by
+`tenantId:principalId:conversationId`, inside its service, version, and agent
+namespace. `conversationId` is always required. `tenantId` and `principalId`
+are optional: with neither present, the conversation id is the only boundary;
+when either trusted message value is present it automatically makes the session
+boundary stricter and Core uses a stable internal default for its missing
+counterpart. Do not derive tenant or principal identity from payload data,
+conversation ids, prompts, or unverified headers.
 
 `setSessionPolicy(...)` chooses the stable Harness session identity for
 conversation history and associated run records. It does not make a sandbox or
@@ -305,8 +305,8 @@ their own builder declarations and runtime bindings below.
 
 If you are upgrading from PURISTA 3.2, keep a valid
 `setSessionPolicy({ mode: 'conversation', payloadPath })` declaration unchanged.
-The path is now type-checked and Core supplies the tenant-safe scope that the
-published 3.2 runtime required but the old policy could not express. The
+The path is now type-checked and trusted message tenant/principal metadata is
+included automatically when available. The
 [4.0 migration guide](/article/2026-08-20-purista-version-4-0/) shows the exact
 before-and-after code.
 

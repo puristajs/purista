@@ -9,6 +9,7 @@ import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Log
 import { getEventBridgeMock } from '../../mocks/index.js'
 import { ServiceBuilder } from '../../ServiceBuilder/ServiceBuilder.impl.js'
 import type { AgentRuntimeOptions, AttachedAgentDefinition } from '../types.js'
+import { resolveHarnessSessionId } from './identity.js'
 import {
 	createAgentRuntimeScope,
 	getScopedAgentRuntime,
@@ -149,7 +150,6 @@ describe('attached agent scoped runtime', () => {
 		definition.manifest.session = {
 			mode: 'conversation',
 			payloadPath: ['conversationId'],
-			scope: 'service',
 			retention: { history: { maxTurns: 1 } },
 		}
 		definition.manifest.execution = { ...definition.manifest.execution, timeoutMs: 1_000 }
@@ -193,7 +193,7 @@ describe('attached agent scoped runtime', () => {
 			).resolves.toEqual({ status: 'ok' })
 		}
 
-		const sessionId = 'agent:support:1:triage:service:conversation:support-thread'
+		const sessionId = resolveHarnessSessionId(definition.manifest, 'delivery-2', { conversationId: 'support-thread' })
 		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
 	})
 

@@ -92,27 +92,28 @@ retention: {
 }
 ```
 
-Persistent conversations are tenant-isolated by default. The application-facing
-configuration is:
+Persistent conversations use the application's required conversation id and
+automatically add trusted tenant and principal message metadata when present.
+The application-facing configuration is:
 
 ```ts
-agent.setSessionPolicy({
+	agent.setSessionPolicy({
 	mode: 'conversation',
 	payloadPath: ['conversationId'],
 	retention,
-	// scope: 'service', // only for a service with no tenant partition
 })
 ```
 
-- the default `scope:'tenant'` requires a non-empty authenticated `message.tenantId` for
-  every turn and includes it in the harness session id. Missing tenant identity
-  fails closed.
-- `{ scope:'service' }` intentionally has no tenant partition. The session remains
-  namespaced by service, version, agent, and logical conversation id, so it is
-  the correct choice for a genuinely single-tenant service.
-- Core does not infer a tenant, synthesize one, offer a runtime tenant fallback,
-  or silently fall back to a shared namespace. `{ scope: 'service' }` is the
-  only opt-out from the default tenant partition.
+- the conceptual key is `tenantId:principalId:conversationId`, within the
+  service/version/agent namespace.
+- `conversationId` is required and must be a stable application-owned identifier
+  for one logical business conversation.
+- trusted non-empty `message.tenantId` and `message.principalId` automatically
+  create stricter session separation. With neither present the conversation id
+  is the boundary; when only one is present, Core uses a collision-safe stable
+  default for the other. No tenancy/session scope option is needed.
+- Core does not derive tenant or principal identity from payload data, prompts,
+  conversation ids, or unverified headers.
 
 ### Published 3.2 migration
 
@@ -122,13 +123,11 @@ Published 3.2 used:
 agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 ```
 
-That public policy could not express the scope required by the published runtime,
-so a normal typed declaration could not establish a persistent session. The 4.0
-policy keeps `agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })`,
-type-checks the payload field, and applies authenticated `message.tenantId` by
-default. The only additional configuration for a service with no tenant partition is
-`setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'], scope: 'service' })`. No compatibility
-shim or missing-tenant fallback is permitted.
+The current policy keeps
+`agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })`,
+type-checks the payload field, and automatically adds trusted message tenant
+and principal metadata when present. No session scope, compatibility shim, or
+missing-tenant configuration is required.
 
 - Each persisted artifact receives the configured expiry on a replacing write.
   This bounds inactive state without silently changing a shared service store.

@@ -209,16 +209,6 @@ export type AgentSessionRetentionPolicy = {
 }
 
 /**
- * Explicit isolation boundary for a persistent attached-agent conversation.
- *
- * Use `'tenant'` for multi-tenant services: every run must carry an
- * authenticated `message.tenantId`. Use `'service'` when the owning service
- * intentionally has no tenant partition; the session remains namespaced by
- * service, version, and agent.
- */
-export type AgentConversationScope = 'tenant' | 'service'
-
-/**
  * Selects a required string field from a validated agent payload as the
  * logical conversation id. Paths are checked against the payload schema up to
  * five object levels; an untyped payload deliberately accepts any non-empty
@@ -285,15 +275,11 @@ export type AgentSessionPolicy<Payload = unknown> =
 			 * Validated payload path that identifies the logical conversation.
 			 *
 			 * A top-level string field may use the string shorthand. Use an array for
-			 * nested fields.
+			 * nested fields. PURISTA automatically adds trusted `message.tenantId` and
+			 * `message.principalId` to the persisted-session namespace when either is
+			 * present; without both, the conversation id is the boundary.
 			 */
 			payloadPath: AgentConversationId<Payload>
-			/**
-			 * `'tenant'` is the safe default and requires authenticated
-			 * `message.tenantId`. Choose `'service'` only when the owning service has no
-			 * tenant partition.
-			 */
-			scope?: AgentConversationScope
 			/** Optional bounded retention for this conversation's persisted state. */
 			retention?: AgentSessionRetentionPolicy
 	  }
@@ -636,7 +622,6 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 				mode: 'conversation'
 				/** Path in the validated payload that resolves to the logical conversation id. */
 				payloadPath: readonly string[]
-				scope: AgentConversationScope
 				retention?: AgentSessionRetentionPolicy
 		  }
 	execution: Required<Pick<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>> &

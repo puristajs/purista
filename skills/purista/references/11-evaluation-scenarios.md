@@ -80,16 +80,17 @@ Expected behavior:
 - installs provider packages only in the app wiring layer
 - allowlists tools and child agents
 - uses `setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })` only when the product needs a
-  continuing conversation; its default tenant isolation requires trusted
-  `message.tenantId`
+  continuing conversation; trusted `message.tenantId` and `message.principalId`
+  automatically add optional namespace dimensions
 - keeps prompt/completion content out of logs, metrics, traces, events, queues, and examples
 
 Validation:
 - generated agent test uses `createAgentTestHarness(...)`, `createScriptedHarnessModel()`, and documents `createAgentSkillTestRuntime(...)` for skill-backed agents
 - model capabilities are declared and validated at startup
 - model output is schema-validated before deterministic state changes
-- a non-tenant application uses explicit `{ scope: 'service' }`; missing tenant
-  identity is never silently made global
+- the same logical conversation is reused only when its conversation id and all
+  present trusted tenant/principal dimensions match; absent dimensions use
+  stable framework defaults
 
 ## Scenario 5: Enterprise Runtime Review
 Prompt:

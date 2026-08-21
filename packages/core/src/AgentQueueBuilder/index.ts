@@ -16,7 +16,6 @@ export {
 export type {
 	AgentConversationId,
 	AgentConversationIdPath,
-	AgentConversationScope,
 	AgentDefinition,
 	AgentDurableWorkspaceStore,
 	AgentDurableWorkspaceStorePolicy,

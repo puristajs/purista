@@ -23,6 +23,7 @@ export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): Agen
 		transportMessageId,
 		input.payload,
 		input.message.tenantId,
+		input.message.principalId,
 	)
 	const tenantId = optionalNonEmptyString(input.message.tenantId)
 
@@ -47,6 +48,7 @@ export function resolveHarnessSessionId(
 	transportMessageId: string,
 	payload: unknown,
 	tenantId?: unknown,
+	principalId?: unknown,
 ): string {
 	if (manifest.session.mode === 'ephemeral') {
 		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:message:${transportMessageId}`
@@ -58,34 +60,38 @@ export function resolveHarnessSessionId(
 			`Agent conversation session path "${manifest.session.payloadPath.join('.')}" must resolve to a non-empty string`,
 		)
 	}
+	const resolvedTenantId = optionalNonEmptyString(tenantId)
+	const resolvedPrincipalId = optionalNonEmptyString(principalId)
+	// A conversation with no optional identity dimensions is intentionally
+	// conversation-only. This is the direct representation of the framework's
+	// default tenant/principal values.
+	if (resolvedTenantId === undefined && resolvedPrincipalId === undefined) {
+		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:conversation:${value}`
+	}
 	const prefix = [
 		'agent',
 		encodeSessionSegment(manifest.serviceName),
 		encodeSessionSegment(manifest.serviceVersion),
 		encodeSessionSegment(manifest.agentName),
 	]
-	if (manifest.session.scope === 'tenant') {
-		const resolvedTenantId = optionalNonEmptyString(tenantId) ?? requireConversationTenantId()
-		return [
-			...prefix,
-			'tenant',
-			encodeSessionSegment(resolvedTenantId),
-			'conversation',
-			encodeSessionSegment(value),
-		].join(':')
-	}
-	if (manifest.session.scope === 'service') {
-		return [...prefix, 'service', 'conversation', encodeSessionSegment(value)].join(':')
-	}
-	throw new Error('Agent conversation session scope must be "tenant" or "service"')
-}
-
-function requireConversationTenantId(): never {
-	throw new Error('Tenant-scoped agent conversation session identity requires message.tenantId')
+	return [
+		...prefix,
+		'tenant',
+		encodeOptionalSessionSegment(resolvedTenantId),
+		'principal',
+		encodeOptionalSessionSegment(resolvedPrincipalId),
+		'conversation',
+		encodeSessionSegment(value),
+	].join(':')
 }
 
 function encodeSessionSegment(value: string): string {
 	return encodeURIComponent(value)
+}
+
+function encodeOptionalSessionSegment(value: unknown): string {
+	const resolved = optionalNonEmptyString(value)
+	return resolved === undefined ? 'default' : `value-${encodeSessionSegment(resolved)}`
 }
 
 function readPayloadPath(payload: unknown, path: readonly string[]) {

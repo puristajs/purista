@@ -16,7 +16,6 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { getBoundAgentRuntime } from './runtime/scopedRuntime.js'
 
 import type {
-	AgentConversationScope,
 	AgentDefinition,
 	AgentExecutionDefinition,
 	AgentExecutionKind,
@@ -543,14 +542,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * Configure how this attached agent obtains its Harness session.
 	 *
 	 * Conversation mode continues one logical business conversation across
-	 * agent runs. PURISTA uses tenant isolation by default and requires
-	 * authenticated `message.tenantId`. Sandbox, workspace, and tool policies
-	 * are configured independently.
+	 * agent runs. PURISTA automatically namespaces the session with trusted
+	 * `message.tenantId` and `message.principalId` when they are present.
+	 * Sandbox, workspace, and tool policies are configured independently.
 	 *
 	 * @example
 	 * ```ts
 	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
-	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'], scope: 'service' })
+	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
 	 * ```
 	 */
 	setSessionPolicy(policy: AgentSessionPolicy<InferIn<S['PayloadSchema']>>) {
@@ -567,12 +566,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		}
 		const idPath = typeof policy.payloadPath === 'string' ? [policy.payloadPath] : policy.payloadPath
 		validateConversationIdPath(idPath)
-		const scope = policy.scope ?? 'tenant'
-		validateConversationScope(scope)
 		this.sessionPolicy = {
 			mode: 'conversation',
 			payloadPath: [...idPath],
-			scope,
 			retention: policy.retention,
 		}
 		return this
@@ -990,12 +986,6 @@ function assertNonEmpty(value: string, label: string) {
 function validateConversationIdPath(path: readonly string[]): void {
 	if (path.length === 0 || path.some(segment => typeof segment !== 'string' || segment.trim() === '')) {
 		throw new Error('Agent conversation id path must contain one or more non-empty strings')
-	}
-}
-
-function validateConversationScope(scope: AgentConversationScope): void {
-	if (scope !== 'tenant' && scope !== 'service') {
-		throw new Error('Agent conversation scope must be "tenant" or "service"')
 	}
 }
 

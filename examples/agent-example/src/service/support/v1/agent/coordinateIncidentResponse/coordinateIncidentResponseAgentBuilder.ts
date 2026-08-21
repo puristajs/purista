@@ -52,7 +52,6 @@ export const coordinateIncidentResponseAgentBuilder = supportV1ServiceBuilder
 	.setSessionPolicy({
 		mode: 'conversation',
 		payloadPath: ['incidentId'],
-		scope: 'service',
 		retention: {
 			idleTtlMs: 30 * 24 * 60 * 60_000,
 			history: { maxTurns: 50, maxBytes: 256_000 },

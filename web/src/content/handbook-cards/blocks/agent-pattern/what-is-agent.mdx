@@ -69,6 +69,10 @@ Agents default to an ephemeral session. Use `setSessionPolicy(...)` when a paylo
 .setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 ```
 
+`conversationId` is required. PURISTA automatically adds trusted message
+`tenantId` and `principalId` as optional namespace dimensions when present, so
+applications do not configure conversation tenancy themselves.
+
 Keep transport identifiers (`message.id`, `traceId`, `correlationId`) separate from AI conversation identity.
 
 ## HTTP response shape
