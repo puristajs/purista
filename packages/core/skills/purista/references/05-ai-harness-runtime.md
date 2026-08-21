@@ -299,6 +299,12 @@ missing value. Explicit `service` scope remains namespaced by service, version, 
 conversation id but deliberately has no tenant partition. Do not derive tenant
 identity from payload data, prompts, conversation ids, or unverified headers.
 
+This declaration selects the stable Harness session identity for persisted
+conversation history and associated run records. It does not persist or restore
+a sandbox, workspace files, or tool permissions. Configure those separately
+with `setSandboxPolicy(...)`, `setWorkspacePolicy(...)`, and explicit tool
+declarations/runtime bindings.
+
 When upgrading a PURISTA 3.2 application, replace the old runtime-shaped
 policy with this builder declaration:
 

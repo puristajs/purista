@@ -296,6 +296,11 @@ version, agent, and conversation id,
 but deliberately does not partition by tenant. Do not derive tenant identity
 from payload data, conversation ids, prompts, or unverified headers.
 
+`setConversation(...)` chooses the stable Harness session identity for
+conversation history and associated run records. It does not make a sandbox or
+workspace durable, and it does not change tool permissions. Those concerns have
+their own builder declarations and runtime bindings below.
+
 If you are upgrading from PURISTA 3.2, replace
 `setSessionPolicy({ mode: 'conversation', payloadPath })` with
 `setConversation(...)`. The new declaration type-checks the conversation field

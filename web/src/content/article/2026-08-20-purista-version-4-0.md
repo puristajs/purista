@@ -29,9 +29,10 @@ not use the advanced features below, there is nothing else to migrate.
 
 ## A support-chat conversation
 
-The old session-policy API is replaced by a PURISTA conversation declaration.
-Use the payload field that identifies the business conversation—not a message,
-trace, or correlation id.
+The old session-policy API used one low-level term for several related runtime
+concepts. Its persistent-conversation use case is now a PURISTA conversation
+declaration. Use the payload field that identifies the business conversation—
+not a message, trace, or correlation id.
 
 ```ts
 // PURISTA 3.2
@@ -57,6 +58,18 @@ agent.setConversation('conversationId', { scope: 'service' })
 
 Do not use service scope as a fallback for missing tenant data. Fix the inbound
 authentication or guard instead.
+
+`setConversation(...)` creates or resumes the Harness session identity for the
+logical conversation. It scopes persisted history and the associated agent run
+records. It does **not** make a sandbox persistent, restore files, or grant
+tools. Those are separate application decisions:
+
+| Need | PURISTA declaration and runtime binding |
+| --- | --- |
+| Continue chat history across requests | `setConversation(...)` |
+| Use filesystem, code execution, or MCP tools in one run | `setSandboxPolicy(...)` and `ai.sandbox` |
+| Resume workflow files/checkpoints after restart | `setWorkspacePolicy(...)`, `ai.runtime`, and `ai.workspaceStore` |
+| Permit model-requested tools | agent tool declarations and the application’s approved runtime bindings |
 
 The 3.2 policy could not express the scope required by its runtime, so normal
 typed applications did not establish a persistent conversation through that

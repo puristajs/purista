@@ -197,6 +197,12 @@ harness session id. A tenant-scoped conversation requires authenticated
 `message.tenantId`; use `{ scope: 'service' }` instead for a genuinely
 single-tenant service with no tenant partition. Do not treat `correlationId` as
 a conversation id.
+
+The session identity lets Harness load persisted conversation history and its
+associated run records. It does **not** persist or restore a sandbox, workspace
+files, or tool permissions. Configure those independently with sandbox policy,
+workspace policy, and declared tool bindings.
+
 History retains complete user/assistant/tool turns. Its UTF-8 byte ceiling
 controls stored data only; model request context remains token-based and is
 chosen independently by the Harness provider integration.
