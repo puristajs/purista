@@ -27,27 +27,12 @@ npm run build
 If an application has no attached agents, uses only ephemeral agents, or does
 not use the advanced features below, there is nothing else to migrate.
 
-## Conversation sessions
-
-Valid `setSessionPolicy({ mode: 'conversation', payloadPath })` declarations
-need no code change. `conversationId` remains the required business boundary;
-PURISTA automatically adds trusted `message.tenantId` and
-`message.principalId` when either is present. No scope or single-tenant option
-is configured in application code.
-
-If your existing persistent conversations now receive tenant or principal
-metadata, their future turns begin in the more specific namespace rather than
-joining an older conversation-id-only transcript. This is deliberate: PURISTA
-cannot safely prove that a shared historical transcript belongs to the current
-tenant or principal. Let those old records expire or archive them through your
-normal data-governance process; do not copy them into a new partition. When
-both optional values are absent, the conversation id remains the boundary.
-
 ## Optional: retention for long-lived conversations
 
-This is a new optional capability, not a migration requirement. Add retention
-only when the product needs it—for example, a support chat that should retain
-recent context for 30 days and avoid indefinite storage growth.
+This is a new optional capability, not a breaking change or migration
+requirement. Add retention only when the product needs it—for example, a
+support chat that should retain recent context for 30 days and avoid indefinite
+storage growth.
 
 ```ts
 agent.setSessionPolicy({
@@ -101,8 +86,9 @@ applies if a handler called the removed `context.harness.events.emit(...)`.
 Harness lifecycle events are now owned by the runtime so their ordering, run
 identity, redaction, and completion status remain trustworthy.
 
-If the handler needs provider progress on the active generated stream, opt in
-at the model call:
+The removed method accepted Harness lifecycle events; it was not a general
+application or UI-protocol stream writer. For canonical provider progress on
+the active generated stream, opt in at the model call:
 
 ```ts
 agent
@@ -142,17 +128,11 @@ when your application intentionally uses them.
 ## Upgrade checklist
 
 - [ ] Upgrade the PURISTA packages used by the application together.
-- [ ] Keep valid `setSessionPolicy({ mode: 'conversation', payloadPath })`
-      declarations; no session-scope option is needed.
-- [ ] Ensure the application's `conversationId` is stable and unique for the
-      logical business conversation it represents.
-- [ ] Propagate trusted `message.tenantId` and `message.principalId` when the
-      transport/authentication layer provides them; Core applies them
-      automatically.
 - [ ] If a Harness workflow calls a registered local agent, declare that
       authority in `workflow.delegation`.
 - [ ] If a custom handler used `context.harness.events.emit(...)`, remove it;
-      use `emitRunEvents: true` only for active-stream progress.
+      use `emitRunEvents: true` only for canonical provider progress on the
+      active stream.
 - [ ] If the application supplies an explicit `ai.sandbox`, `ai.workspaceStore`,
       or `ai.stateStore`, verify it is the matching Harness adapter.
 
