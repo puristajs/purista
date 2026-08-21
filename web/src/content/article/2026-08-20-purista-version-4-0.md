@@ -27,74 +27,25 @@ npm run build
 If an application has no attached agents, uses only ephemeral agents, or does
 not use the advanced features below, there is nothing else to migrate.
 
-## A support-chat conversation
+## Conversation sessions
 
-The existing session-policy API keeps its `payloadPath`, so a valid PURISTA 3.2
-declaration does not need to change. The path is type-checked. Use the payload
-field that identifies the business conversation—not a message, trace, or
-correlation id.
+Valid `setSessionPolicy({ mode: 'conversation', payloadPath })` declarations
+need no code change. `conversationId` remains the required business boundary;
+PURISTA automatically adds trusted `message.tenantId` and
+`message.principalId` when either is present. No scope or single-tenant option
+is configured in application code.
 
-```ts
-// Valid PURISTA 3.2 configuration — keep this code unchanged.
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-})
-```
+If your existing persistent conversations now receive tenant or principal
+metadata, their future turns begin in the more specific namespace rather than
+joining an older conversation-id-only transcript. This is deliberate: PURISTA
+cannot safely prove that a shared historical transcript belongs to the current
+tenant or principal. Let those old records expire or archive them through your
+normal data-governance process; do not copy them into a new partition. When
+both optional values are absent, the conversation id remains the boundary.
 
-Nested fields keep the same array form:
+## Optional: retention for long-lived conversations
 
-```ts
-agent.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversation', 'id'],
-})
-```
-
-That is the complete configuration. The conversation id is the application's
-stable, non-empty business identifier. PURISTA automatically takes trusted
-`message.tenantId` and `message.principalId` into account when they are
-present. Conceptually, the persistent session is partitioned by
-`tenantId:principalId:conversationId` inside the owning service and agent.
-
-Tenant and principal are optional dimensions. When both are absent, the
-conversation id is the whole business boundary. When either trusted value is
-present, it automatically creates stricter separation for the same conversation
-id. No session scope or single-tenant configuration is required.
-
-Only trusted PURISTA message metadata participates in that partition. Do not
-take tenant or principal identity from agent payload fields, prompts,
-conversation ids, or unverified headers.
-
-`setSessionPolicy(...)` creates or resumes the Harness session identity for the
-logical conversation. It scopes persisted history and the associated agent run
-records. It does **not** make a sandbox persistent, restore files, or grant
-tools. Those are separate application decisions:
-
-| Need | PURISTA declaration and runtime binding |
-| --- | --- |
-| Continue chat history across requests | `setSessionPolicy({ mode: 'conversation', payloadPath })` |
-| Use filesystem, code execution, or MCP tools in one run | `setSandboxPolicy(...)` and `ai.sandbox` |
-| Resume workflow files/checkpoints after restart | `setWorkspacePolicy(...)`, `ai.runtime`, and `ai.workspaceStore` |
-| Permit model-requested tools | agent tool declarations and the application’s approved runtime bindings |
-
-### Existing persisted history
-
-No application code migration is needed. There is one deliberate behavior
-change for persistent conversations: if a message now carries a tenant or
-principal, its history begins in that more specific namespace instead of
-joining the older conversation-id-only history. PURISTA never reads the old
-shared record into a newly partitioned conversation because it cannot prove
-that record belongs to the current tenant or principal.
-
-Let existing records expire under their retention policy, or archive them using
-your normal data-governance process. Do not copy old shared transcripts into a
-tenant or principal namespace automatically. Conversations whose messages have
-neither optional value continue to use their conversation-id-only identity.
-
-## A long-running support conversation
-
-Conversation history is permanent unless you choose a limit. Add retention
+This is a new optional capability, not a migration requirement. Add retention
 only when the product needs it—for example, a support chat that should retain
 recent context for 30 days and avoid indefinite storage growth.
 
@@ -119,11 +70,11 @@ events by default. You do not need a second store for an ordinary agent. Use
 boundary. Expiring state requires a StateStore with atomic expiry, such as the
 Redis state store or a correctly configured TTL-capable Dapr component.
 
-## A workflow that calls local Harness agents
+## Only if your Harness workflow delegates to local agents
 
-If an attached agent wraps a Harness workflow and registers local agents with
-`setHarnessWorkflow(..., { agents })`, name the agents and models that the
-workflow may call:
+This is a migration only for a workflow that both uses
+`setHarnessWorkflow(..., { agents })` and calls a local `ctx.agents.<name>`.
+Declare the workflow's agent and model authority explicitly:
 
 ```ts
 const workflow = {
@@ -140,17 +91,18 @@ agent.setHarnessWorkflow(workflow, { agents: { summarize } })
 ```
 
 Registering a definition and granting it authority are separate actions. This
-keeps a workflow’s capabilities reviewable. PURISTA child agents that use
-`canInvokeAgent(...)` are unchanged.
+keeps a workflow’s capabilities reviewable. Workflows without local Harness
+agents and PURISTA child agents using `canInvokeAgent(...)` need no change.
 
-## A custom agent handler that exposes model progress
+## Only if a custom handler manually emitted Harness lifecycle events
 
-Use the agent's normal PURISTA success event for a business fact. It is emitted
-only after the run has completed successfully. Include the data consumers need
-in the validated agent output.
+Most custom `setRunFunction(...)` handlers need no change. The migration only
+applies if a handler called the removed `context.harness.events.emit(...)`.
+Harness lifecycle events are now owned by the runtime so their ordering, run
+identity, redaction, and completion status remain trustworthy.
 
-If a custom handler also needs provider model progress on the generated stream,
-opt in at the model call:
+If the handler needs provider progress on the active generated stream, opt in
+at the model call:
 
 ```ts
 agent
@@ -166,21 +118,21 @@ agent
   })
 ```
 
-`context.harness.events.emit(...)` is no longer available. Model lifecycle
-events are owned by the runtime so their ordering, run identity, redaction, and
-completion status remain trustworthy. `{ emitRunEvents: true }` adds
-provider-progress frames to the active generated stream only; it is not a
-PURISTA EventBridge publication and cannot trigger subscriptions. By contrast,
-the configured success event publishes the completed agent output through the
-PURISTA EventBridge, so subscriptions and other services can consume it.
+`{ emitRunEvents: true }` adds provider-progress frames to the active generated
+stream only. It is not a PURISTA EventBridge publication and cannot trigger
+subscriptions. `setSuccessEventName(...)`, by contrast, publishes the completed
+validated agent output through the EventBridge for subscriptions and other
+services.
 
-## Only if you supply advanced runtime adapters
+## Only if you supplied explicit Harness adapters
 
-Applications that already pass `ai.sandbox`, `ai.workspaceStore`, or
-`ai.stateStore` must use the corresponding published Harness adapter. Replace
-ad-hoc placeholder objects with a real adapter. Durable workspaces are for
-Harness workflows; a plain Harness agent or a custom PURISTA run function must
-not claim durable workflow replay.
+Ordinary agents require no adapter migration: they use the owning service's
+standard PURISTA StateStore by default. This section applies only if your
+application explicitly passes `ai.sandbox`, `ai.workspaceStore`, or
+`ai.stateStore`. Each must now be the corresponding published Harness adapter,
+not an ad-hoc placeholder object. Durable workspace replay additionally applies
+only to Harness workflows; a plain Harness agent or custom run function cannot
+claim durable workflow replay.
 
 Static Harness modules and imported Agent Plugin tools remain optional,
 application-owned runtime bindings. PURISTA does not discover plugins, decide
@@ -197,12 +149,12 @@ when your application intentionally uses them.
 - [ ] Propagate trusted `message.tenantId` and `message.principalId` when the
       transport/authentication layer provides them; Core applies them
       automatically.
-- [ ] Add workflow delegation only to workflows that call local Harness agents.
-- [ ] Replace raw Harness lifecycle emission; use `emitRunEvents: true` for
-      active-stream progress and `setSuccessEventName(...)` for a business
-      event on the EventBridge.
-- [ ] Verify any explicit sandbox, workspace, or agent StateStore is a real
-      adapter.
+- [ ] If a Harness workflow calls a registered local agent, declare that
+      authority in `workflow.delegation`.
+- [ ] If a custom handler used `context.harness.events.emit(...)`, remove it;
+      use `emitRunEvents: true` only for active-stream progress.
+- [ ] If the application supplies an explicit `ai.sandbox`, `ai.workspaceStore`,
+      or `ai.stateStore`, verify it is the matching Harness adapter.
 
 For API detail and examples, see the [AI handbook](/handbook/2_building-business-logic/ai/)
 and [agent builder guide](/handbook/2_building-business-logic/ai/the-agent-builder/).
