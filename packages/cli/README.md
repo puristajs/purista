@@ -77,7 +77,7 @@ Generated tests import the public testing helpers from `@purista/core`:
 - `createSubscriptionContextMock(...)` for subscription handler tests
 - `createStreamTestHarness(...)` for runtime stream tests
 - `createQueueWorkerTestHarness(...)` for runtime queue worker tests
-- `createAgentTestHarness(...)`, `createScriptedHarnessModel(...)`, and `createAgentSkillTestRuntime(...)` for agent runtime tests, including skill-backed agents via the `skills` runtime option
+- `createAgentTestHarness(...)`, `FakeModelProvider`, and `createAgentSkillTestRuntime(...)` from `@purista/core/testing` for agent runtime tests, including skill-backed agents via the `skills` runtime option
 
 **Visit [purista.dev](https://purista.dev)**
 

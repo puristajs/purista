@@ -67,6 +67,7 @@ type RunFunctionInvocation = {
 	identity: AgentRunIdentity
 	appContext: Record<string, unknown>
 	session: Session<any>
+	forwardModelEvents: boolean
 }
 
 export function createAgentExecutor<Models extends Record<string, AgentModelBinding>>(
@@ -98,7 +99,11 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			let sequenceNumber = 0
 			input.writer.onCancel(reason => controller.abort(reason))
 			const result = await this.execute({ ...input, signal: controller.signal }, true, async event => {
-				const chunk = createProviderSseEvent(event, sequenceNumber + 1)
+				const chunk = createProviderSseEvent(
+					event,
+					sequenceNumber + 1,
+					this.input.manifest.modelChunkVisibility ?? 'full',
+				)
 				if (!chunk) {
 					return
 				}
@@ -325,6 +330,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			identity: args.identity,
 			appContext: args.input.appContext,
 			session: args.session,
+			forwardModelEvents: this.shouldForwardModelEvents(args.streaming),
 		}
 		const ownsInvocation = existing === undefined
 		if (ownsInvocation) this.runFunctionInvocations.set(invocationId, invocation)
@@ -389,7 +395,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			appContext: invocation.appContext,
 			metrics: invocation.appContext.metrics as never,
 			session: invocation.session,
-			models: context.models,
+			models: this.withModelRunEventProjection(context.models, invocation.forwardModelEvents),
 			skills: this.input.skillRuntime
 				? createAgentSkillContext(this.input.skillRuntime.catalog)
 				: createAgentSkillContext([]),
@@ -424,6 +430,36 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				...(workspacePolicy.policy ? { workspacePolicy: workspacePolicy.policy } : {}),
 			},
 		}
+	}
+
+	private shouldForwardModelEvents(streaming: boolean): boolean {
+		return (
+			streaming &&
+			this.input.definition.execution.kind === 'runFunction' &&
+			(this.input.manifest.modelChunkVisibility === 'safe' || this.input.manifest.modelChunkVisibility === 'full')
+		)
+	}
+
+	private withModelRunEventProjection(
+		models: AgentHandlerModelBindings<Models>,
+		enabled: boolean,
+	): AgentHandlerModelBindings<Models> {
+		if (!enabled) return models
+
+		return new Proxy(models, {
+			get: (bindings, alias, receiver) => {
+				const model = Reflect.get(bindings, alias, receiver)
+				if (!model || typeof model !== 'object') return model
+				return new Proxy(model as Record<PropertyKey, unknown>, {
+					get: (handle, method, handleReceiver) => {
+						const original = Reflect.get(handle, method, handleReceiver)
+						if (typeof original !== 'function' || !isModelEventMethod(method)) return original
+						return (request: unknown, signal: AbortSignal, context?: Record<string, unknown>) =>
+							original.call(handle, request, signal, { ...context, emitRunEvents: true })
+					},
+				})
+			},
+		}) as AgentHandlerModelBindings<Models>
 	}
 
 	private idempotencyKey(identity: AgentRunIdentity): string {
@@ -481,6 +517,18 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 	private resolvePuristaLogger(appContext: Record<string, unknown>) {
 		return (appContext.logger as PuristaLogger | undefined) ?? this.logger ?? createNoopPuristaLogger()
 	}
+}
+
+function isModelEventMethod(method: PropertyKey): boolean {
+	return (
+		typeof method === 'string' &&
+		(method === 'text' ||
+			method === 'textStream' ||
+			method === 'object' ||
+			method === 'objectStream' ||
+			method === 'embed' ||
+			method === 'rerank')
+	)
 }
 
 function createLocalSession(id: string): Session<any> {

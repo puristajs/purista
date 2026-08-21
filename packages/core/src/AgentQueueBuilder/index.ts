@@ -10,8 +10,7 @@ export {
 	createAgentContextMock,
 	createAgentSkillTestRuntime,
 	createAgentTestHarness,
-	createScriptedHarnessModel,
-	ScriptedHarnessModelProvider,
+	FakeModelProvider,
 } from './testing/index.js'
 export type {
 	AgentConversationId,
@@ -32,6 +31,7 @@ export type {
 	AgentManifest,
 	AgentModelBinding,
 	AgentModelCapability,
+	AgentModelChunkVisibility,
 	AgentQueueBuilderTypes,
 	AgentQueueResultPolicy,
 	AgentQueueResultPolicyMode,
@@ -55,6 +55,7 @@ export type {
 	AgentSkillResolver,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
+	AgentStreamingOptions,
 	AgentWorkspaceCapabilityRequirement,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,

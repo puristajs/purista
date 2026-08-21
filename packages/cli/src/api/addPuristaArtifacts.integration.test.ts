@@ -262,12 +262,12 @@ describe('CLI artifact generation (e2e)', () => {
 		}
 		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
 		expect(agentTestContent).toContain(
-			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'",
+			"import { createAgentTestHarness, FakeModelProvider } from '@purista/core/testing'",
 		)
 		expect(agentTestContent).not.toContain('@purista/ai')
 		expect(agentTestContent).not.toContain('@purista/harness')
 		expect(agentTestContent).toContain('runs with the attached-agent harness runtime')
-		expect(agentTestContent).toContain('const model = createScriptedHarnessModel()')
+		expect(agentTestContent).toContain('const model = new FakeModelProvider()')
 		expect(agentTestContent).toContain("object: { message: 'hello' }")
 		expect(agentTestContent).toContain('provider: model')
 		expect(agentTestContent).toContain("model: 'gpt-4.1-mini'")

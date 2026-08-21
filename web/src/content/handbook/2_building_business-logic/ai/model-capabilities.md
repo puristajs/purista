@@ -117,11 +117,13 @@ Avoid parsing free-form text when a structured object would be more reliable.
 ## Streaming text and objects
 
 `textStream(...)` and `objectStream(...)` return provider chunks to the handler.
-Those chunks stay internal by default. When an agent stream endpoint should
-forward model chunks to the client, pass `{ emitRunEvents: true }` to that
-specific model stream call and still consume the provider chunks in the handler:
+When a generated agent stream should include model progress, declare the
+client-chunk policy on the agent. The handler continues to consume model chunks
+normally:
 
 ```ts
+agent.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
+
 let answer = ''
 
 for await (const chunk of context.harness.models.primary.textStream(
@@ -132,7 +134,6 @@ for await (const chunk of context.harness.models.primary.textStream(
     }],
   },
   context.signal,
-  { emitRunEvents: true },
 )) {
   if (chunk.kind === 'delta') answer += chunk.text
 }
@@ -140,7 +141,12 @@ for await (const chunk of context.harness.models.primary.textStream(
 return { answer }
 ```
 
-PURISTA emits provider-style SSE chunks for opted-in model deltas. Use the
+`safe` forwards text and structured-output chunks plus tool name/status. It
+never forwards prompts, reasoning, tool arguments, tool results, policy data,
+sandbox output, or raw errors. Use `full` only for a trusted diagnostic client;
+`off` returns only the final result.
+
+PURISTA emits provider-style SSE chunks for forwarded model deltas. Use the
 generated `stream_id` to aggregate chunks from one model stream invocation and
 `agent_id`, `workflow_id`, or `model_alias` for source attribution. Display
 labels and client event names belong in your HTTP/SSE adapter.

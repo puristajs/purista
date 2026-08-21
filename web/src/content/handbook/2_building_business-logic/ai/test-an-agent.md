@@ -6,7 +6,7 @@ order: 207040
 
 # Test an agent
 
-Use the testing helpers exported from `@purista/core` for deterministic tests. Unit and integration tests should not call real model providers.
+Use the testing helpers exported from `@purista/core/testing` for deterministic tests. Unit and integration tests should not call real model providers.
 
 The testing helpers let you:
 
@@ -19,9 +19,9 @@ The testing helpers let you:
 ## Success path
 
 ```ts
-import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'
+import { createAgentTestHarness, FakeModelProvider } from '@purista/core/testing'
 
-const model = createScriptedHarnessModel()
+const model = new FakeModelProvider()
 model.enqueueObject({
   object: {
     priority: 'high',
@@ -64,7 +64,7 @@ await expect(
 Use invalid fake output to prove the PURISTA output schema is enforced.
 
 ```ts
-const failingModel = createScriptedHarnessModel()
+const failingModel = new FakeModelProvider()
 failingModel.enqueueObject({
   object: { priority: 'unknown' },
   usage: {
@@ -119,7 +119,7 @@ await expect(
 Assert that tests catch provider capability drift before production startup does.
 
 ```ts
-const model = createScriptedHarnessModel()
+const model = new FakeModelProvider()
 
 const capabilityHarness = await createAgentTestHarness(triageAgent, {
   models: {
@@ -146,7 +146,7 @@ await expect(
 Fake provider calls can cover retrieval flows without a vector provider or external model.
 
 ```ts
-const model = createScriptedHarnessModel()
+const model = new FakeModelProvider()
 
 model.enqueueEmbedding({
   embeddings: [{ index: 0, vector: [0.1, 0.2, 0.3] }],
@@ -189,8 +189,8 @@ Agents that declare `.useSkills(...)` need runtime skill bindings in tests, just
 import {
   createAgentSkillTestRuntime,
   createAgentTestHarness,
-  createScriptedHarnessModel,
-} from '@purista/core'
+  FakeModelProvider,
+} from '@purista/core/testing'
 
 const skillRuntime = await createAgentSkillTestRuntime([
   {
@@ -200,7 +200,7 @@ const skillRuntime = await createAgentSkillTestRuntime([
   },
 ])
 
-const model = createScriptedHarnessModel()
+const model = new FakeModelProvider()
 model.enqueueObject({
   object: {},
   toolCalls: [{

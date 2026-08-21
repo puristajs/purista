@@ -17,7 +17,7 @@ export const getAgentTestFileContent = (input: {
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const builderName = `${agentIdentifier}Builder`
 
-	writer.writeLine("import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'")
+	writer.writeLine("import { createAgentTestHarness, FakeModelProvider } from '@purista/core/testing'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
 	writer.blankLine()
 	writer.writeLine(`const { ${builderName} } = await import('${input.builderImportName}')`).blankLine()
@@ -26,7 +26,7 @@ export const getAgentTestFileContent = (input: {
 	writer.indent(() => {
 		writer.writeLine("it('runs with the attached-agent harness runtime', async () => {")
 		writer.indent(() => {
-			writer.writeLine('const model = createScriptedHarnessModel()')
+			writer.writeLine('const model = new FakeModelProvider()')
 			writer.writeLine('model.enqueueObject({')
 			writer.indent(() => {
 				writer.writeLine("object: { message: 'hello' },")

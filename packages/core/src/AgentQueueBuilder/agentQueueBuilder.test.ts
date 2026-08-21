@@ -1,11 +1,12 @@
 import { defineHarnessModule, inMemoryDurableRuntime, inMemoryDurableWorkspaceStore } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { vi } from 'vitest'
 import { z } from 'zod'
 
 import {
 	AgentQueueBuilder,
 	createAgentSkillTestRuntime,
 	createAgentTestHarness,
-	createScriptedHarnessModel,
 	ServiceBuilder,
 	type ServiceInfoType,
 } from '../index.js'
@@ -225,7 +226,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('streams harness agent output and resolves the final object', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: { status: 'ok' },
 			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
@@ -267,7 +268,7 @@ describe('AgentQueueBuilder', () => {
 					},
 				}),
 		})
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [
@@ -317,8 +318,8 @@ describe('AgentQueueBuilder', () => {
 		expect(calls).toEqual(['module:T-1', 'runtime:T-1'])
 	})
 
-	it('mirrors opted-in run-function model stream chunks with deterministic source metadata', async () => {
-		const model = createScriptedHarnessModel()
+	it('streams safe run-function model chunks with deterministic source metadata', async () => {
+		const model = new FakeModelProvider()
 		model.enqueueTextStream([
 			{ kind: 'delta', text: 'he' },
 			{ kind: 'delta', text: 'llo' },
@@ -328,12 +329,12 @@ describe('AgentQueueBuilder', () => {
 			.getAgentQueueBuilder('streamText', 'Stream text from a run function')
 			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
+			.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
 			.setRunFunction(async context => {
 				let text = ''
 				for await (const chunk of context.harness.models.primary.textStream(
 					{ messages: [{ role: 'user', content: 'hello' }] },
 					context.signal,
-					{ emitRunEvents: true },
 				)) {
 					if (chunk.kind === 'delta') text += chunk.text
 				}
@@ -379,7 +380,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('keeps run-function model stream chunks private by default', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueueTextStream([
 			{ kind: 'delta', text: 'hidden' },
 			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
@@ -418,7 +419,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('assigns distinct stream ids for parallel opted-in run-function model streams', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueueTextStream([
 			{ kind: 'delta', text: 'a' },
 			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
@@ -431,13 +432,13 @@ describe('AgentQueueBuilder', () => {
 			.getAgentQueueBuilder('parallelText', 'Stream text from parallel run-function calls')
 			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
+			.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
 			.setRunFunction(async context => {
 				const consume = async (content: string) => {
 					let text = ''
 					for await (const chunk of context.harness.models.primary.textStream(
 						{ messages: [{ role: 'user', content }] },
 						context.signal,
-						{ emitRunEvents: true },
 					)) {
 						if (chunk.kind === 'delta') text += chunk.text
 					}
@@ -466,8 +467,8 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('surfaces harness errors from streaming runs instead of masking them as validation failures', async () => {
-		const model = createScriptedHarnessModel()
-		// No stream response queued: the provider throws, so the run must finish with an error.
+		const model = new FakeModelProvider()
+		vi.spyOn(model, 'object').mockRejectedValue(new Error('provider unavailable'))
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('streamFail', 'Streaming agent that fails')
 			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
@@ -556,7 +557,7 @@ describe('AgentQueueBuilder', () => {
 			})
 			.getDefinition()
 		const harness = await createAgentTestHarness(definition, {
-			models: { primary: { provider: createScriptedHarnessModel(), model: 'fake', capabilities: ['object'] } },
+			models: { primary: { provider: new FakeModelProvider(), model: 'fake', capabilities: ['object'] } },
 			runtime,
 			workspaceStore,
 		})
@@ -582,7 +583,7 @@ describe('AgentQueueBuilder', () => {
 				body: 'SECRET_BODY',
 			},
 		])
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
@@ -644,7 +645,7 @@ describe('AgentQueueBuilder', () => {
 				body: 'SECRET_BODY',
 			},
 		])
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
@@ -723,7 +724,7 @@ describe('AgentQueueBuilder', () => {
 				body: 'SECRET_BODY',
 			},
 		])
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
@@ -760,7 +761,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('registers harness-local agents for wrapped harness workflows', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: { summary: 'Checkout outage risk is high.' },
 			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },

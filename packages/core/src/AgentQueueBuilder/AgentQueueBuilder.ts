@@ -25,6 +25,7 @@ import type {
 	AgentHttpExposure,
 	AgentManifest,
 	AgentModelBinding,
+	AgentModelChunkVisibility,
 	AgentQueueBuilderTypes,
 	AgentQueueResultPolicy,
 	AgentResponseMode,
@@ -33,6 +34,7 @@ import type {
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
 	AgentSessionRetentionPolicy,
+	AgentStreamingOptions,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
 	AllowedCommandToolDefinition,
@@ -106,6 +108,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private workspacePolicy?: AgentWorkspacePolicy
 	private httpExposure?: AgentHttpExposure
 	private streamingMode: 'stream' | 'aggregate' = 'stream'
+	private modelChunkVisibility?: AgentModelChunkVisibility
 	private successEventName?: string
 	private executionProfile?: AgentQueueLongRunningExecutionProfile
 	private responseMode?: { mode: AgentResponseMode; options?: AgentResponseModeOptions }
@@ -620,9 +623,20 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
-	/** Choose whether the generated HTTP projection streams chunks or returns an aggregate response. */
-	setStreamingMode(mode: 'stream' | 'aggregate') {
+	/**
+	 * Choose whether the generated projection streams chunks or returns an
+	 * aggregate response, and optionally control model chunks on that stream.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
+	 * ```
+	 */
+	setStreamingMode(mode: 'stream' | 'aggregate', options?: AgentStreamingOptions) {
 		this.streamingMode = mode
+		if (options?.modelChunkVisibility !== undefined) {
+			this.modelChunkVisibility = options.modelChunkVisibility
+		}
 		return this
 	}
 
@@ -887,6 +901,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 					}
 				: undefined,
 			streamingMode: this.streamingMode,
+			...(this.modelChunkVisibility !== undefined ? { modelChunkVisibility: this.modelChunkVisibility } : {}),
 			successEventName: this.successEventName,
 			allowedCommands: this.commandTools,
 			allowedAgents: this.agentInvokes,

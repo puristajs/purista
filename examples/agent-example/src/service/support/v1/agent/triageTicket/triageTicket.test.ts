@@ -1,4 +1,4 @@
-import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'
+import { createAgentTestHarness, FakeModelProvider } from '@purista/core/testing'
 import { describe, expect, it } from 'vitest'
 
 import { supportV1Service } from '../../supportV1Service.js'
@@ -17,8 +17,8 @@ describe('triageTicketAgentBuilder', () => {
 		expect(streamNames).toContain('triageTicketStream')
 	})
 
-	it('runs with the provider-neutral scripted harness model', async () => {
-		const model = createScriptedHarnessModel()
+	it('runs with the standard deterministic Harness model provider', async () => {
+		const model = new FakeModelProvider()
 		model.enqueueObject({
 			object: {
 				priority: 'high',

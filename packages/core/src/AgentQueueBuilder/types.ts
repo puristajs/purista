@@ -164,6 +164,21 @@ export type AgentQueueResultPolicy = {
 /** Public response contract exposed by the generated agent command or stream. */
 export type AgentResponseMode = 'accepted' | 'status' | 'stream' | 'event'
 
+/** Controls which Harness model run events become chunks on a generated agent stream. */
+export type AgentModelChunkVisibility = 'off' | 'safe' | 'full'
+
+/** Streaming behavior declared by an attached agent. */
+export type AgentStreamingOptions = {
+	/**
+	 * Visibility of model-related chunks on a generated agent stream.
+	 *
+	 * `safe` omits model requests, reasoning, tool arguments/results, policy
+	 * details, sandbox output, and raw errors. `full` is for a trusted client
+	 * that deliberately consumes the canonical Harness event stream.
+	 */
+	modelChunkVisibility?: AgentModelChunkVisibility
+}
+
 /** Options for long-running agent response contracts. */
 export type AgentResponseModeOptions = {
 	/** Queue result handling policy for this response mode. */
@@ -636,6 +651,8 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 		runId: { source: 'queue-job-id'; prefix: 'run:' }
 	}
 	streamingMode: 'stream' | 'aggregate'
+	/** Model chunk projection for generated streams. Omitted manifests preserve the existing stream projection. */
+	modelChunkVisibility?: AgentModelChunkVisibility
 	successEventName?: string
 	allowedCommands: readonly AllowedCommandToolDefinition[]
 	allowedAgents: readonly AllowedAgentDefinition[]

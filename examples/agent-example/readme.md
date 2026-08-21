@@ -3,7 +3,7 @@
 This example shows a real-world, core-native PURISTA agent workflow.
 
 The running demo uses OpenAI through `@purista/harness-openai` and reads the
-API key from `.env`. Tests use `createScriptedHarnessModel` from `@purista/core`,
+API key from `.env`. Tests use `FakeModelProvider` from `@purista/core`,
 so CI stays provider-neutral and does not require API keys.
 
 ## Use case

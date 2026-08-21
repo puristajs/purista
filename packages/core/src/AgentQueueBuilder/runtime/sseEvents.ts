@@ -1,7 +1,7 @@
 import type { RunEvent } from '@purista/harness'
 import { z } from 'zod'
 
-import type { AgentRunEvent } from '../types.js'
+import type { AgentModelChunkVisibility, AgentRunEvent } from '../types.js'
 
 /**
  * Provider-neutral multimodal content part schema used by AI outputs and
@@ -122,7 +122,7 @@ export const agentProviderEventDataSchema = z.discriminatedUnion('type', [
 		type: z.literal('response.tool_call.started'),
 		item_id: z.string(),
 		tool_name: z.string(),
-		input: z.unknown(),
+		input: z.unknown().optional(),
 	}),
 	baseProviderEventDataSchema.extend({
 		type: z.literal('response.tool_call.completed'),
@@ -187,8 +187,12 @@ export type AgentSseEvent = z.infer<typeof agentSseEventSchema>
  * model). Callers skip `undefined` chunks instead of failing the stream; the
  * raw run event still flows through the agent run-event bus.
  */
-export function createProviderSseEvent(input: AgentRunEvent, sequenceNumber: number): AgentSseEvent | undefined {
-	const data = mapRunEventToProviderEvent(input.event, sequenceNumber)
+export function createProviderSseEvent(
+	input: AgentRunEvent,
+	sequenceNumber: number,
+	modelChunkVisibility: AgentModelChunkVisibility = 'full',
+): AgentSseEvent | undefined {
+	const data = mapRunEventToProviderEvent(input.event, sequenceNumber, modelChunkVisibility)
 	if (!data) {
 		return undefined
 	}
@@ -198,7 +202,19 @@ export function createProviderSseEvent(input: AgentRunEvent, sequenceNumber: num
 	}
 }
 
-function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): AgentProviderEventData | undefined {
+function mapRunEventToProviderEvent(
+	event: RunEvent,
+	sequenceNumber: number,
+	modelChunkVisibility: AgentModelChunkVisibility,
+): AgentProviderEventData | undefined {
+	if (modelChunkVisibility === 'off' && event.type !== 'run.finished') {
+		return undefined
+	}
+
+	if (modelChunkVisibility === 'safe' && !isSafeClientEvent(event)) {
+		return undefined
+	}
+
 	const responseId = event.runId
 	const base = {
 		sequence_number: sequenceNumber,
@@ -264,7 +280,7 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 				type: 'response.tool_call.started',
 				item_id: event.callId,
 				tool_name: event.toolId,
-				input: event.input,
+				...(modelChunkVisibility === 'full' ? { input: event.input } : {}),
 			}
 		case 'tool.finished':
 			return {
@@ -272,8 +288,8 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 				type: 'response.tool_call.completed',
 				item_id: event.callId,
 				tool_name: event.toolId,
-				...(event.output !== undefined ? { output: event.output } : {}),
-				...(event.error ? { error: event.error } : {}),
+				...(modelChunkVisibility === 'full' && event.output !== undefined ? { output: event.output } : {}),
+				...(modelChunkVisibility === 'full' && event.error ? { error: event.error } : {}),
 			}
 		case 'model.embedding.completed':
 			return {
@@ -296,7 +312,15 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 				? {
 						...base,
 						type: 'error',
-						error: event.error,
+						error:
+							modelChunkVisibility === 'full'
+								? event.error
+								: {
+										code: event.error.code,
+										category: event.error.category,
+										retriable: event.error.retriable,
+										message: 'Agent run failed.',
+									},
 					}
 				: {
 						...base,
@@ -338,6 +362,22 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 			// A run event with no provider projection (e.g. a future harness event
 			// type). Skip it in the SSE projection rather than crash the stream.
 			return undefined
+	}
+}
+
+function isSafeClientEvent(event: RunEvent): boolean {
+	switch (event.type) {
+		case 'run.started':
+		case 'run.finished':
+		case 'agent.started':
+		case 'model.delta':
+		case 'model.object.partial':
+		case 'model.object':
+		case 'tool.started':
+		case 'tool.finished':
+			return true
+		default:
+			return false
 	}
 }
 

@@ -1,23 +1,7 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import type {
-	EmbeddingRequest,
-	EmbeddingResponse,
-	GovernanceConfig,
-	StateStore as HarnessStateStore,
-	JsonValue,
-	ModelProvider,
-	ObjectRequest,
-	ObjectResponse,
-	ObjectStreamChunk,
-	RerankRequest,
-	RerankResponse,
-	Sandbox,
-	TextRequest,
-	TextResponse,
-	TextStreamChunk,
-} from '@purista/harness'
+import type { GovernanceConfig, StateStore as HarnessStateStore, Sandbox } from '@purista/harness'
 import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
@@ -26,6 +10,7 @@ import { resolveAgentRuntimeSkills } from '../runtime/skills.js'
 import type {
 	AgentHandlerContext,
 	AgentHarnessRuntimeOptions,
+	AgentManifest,
 	AgentModelBinding,
 	AgentRunIdentity,
 	AgentRuntimeModelBindings,
@@ -112,9 +97,8 @@ function emptySkillContext(): AgentSkillContext {
 	}
 }
 
-export function createScriptedHarnessModel() {
-	return new ScriptedHarnessModelProvider()
-}
+/** Standard deterministic Harness model provider for attached-agent tests. */
+export { FakeModelProvider } from '@purista/harness/testing'
 
 export type CreateAgentSkillTestRuntimeSkill = {
 	/** Skill frontmatter name. Must match the name declared by `.useSkills(...)`. */
@@ -244,13 +228,14 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 }
 
 /** Create a deterministic runtime harness for one attached agent definition. */
-export async function createAgentTestHarness<Definition extends AttachedAgentDefinition<any>>(
-	definition: Definition,
-	options: CreateAgentTestHarnessOptions<Definition['manifest']['models']>,
-) {
+export async function createAgentTestHarness<
+	Models extends Record<string, AgentModelBinding>,
+	Definition extends { manifest: AgentManifest<Models> },
+>(definition: Definition, options: CreateAgentTestHarnessOptions<Models>) {
+	const attachedDefinition = definition as unknown as AttachedAgentDefinition<any>
 	const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, options.skills)
 	const executor = createAgentExecutor({
-		definition,
+		definition: attachedDefinition,
 		manifest: definition.manifest,
 		models: options.models,
 		harness: options.harness,
@@ -262,7 +247,7 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		logger: options.logger,
 		governance: options.governance,
 	})
-	definition.runtime.current = executor
+	attachedDefinition.runtime.current = executor
 
 	return {
 		async run(input: { payload?: unknown; parameter?: unknown; message?: Record<string, unknown> }) {
@@ -350,86 +335,4 @@ function createNoopPuristaLogger(): PuristaLogger {
 		trace: write,
 		getChildLogger: () => createNoopPuristaLogger(),
 	} as PuristaLogger
-}
-
-export class ScriptedHarnessModelProvider implements ModelProvider {
-	readonly id = 'scripted'
-	readonly genAiSystem = 'scripted'
-	readonly requests: Array<TextRequest | ObjectRequest | EmbeddingRequest | RerankRequest> = []
-	private readonly textQueue: TextResponse[] = []
-	private readonly objectQueue: ObjectResponse[] = []
-	private readonly embeddingQueue: EmbeddingResponse[] = []
-	private readonly rerankQueue: RerankResponse[] = []
-	private readonly textStreamQueue: TextStreamChunk[][] = []
-	private readonly objectStreamQueue: ObjectStreamChunk[][] = []
-
-	enqueueText(response: TextResponse): void {
-		this.textQueue.push(response)
-	}
-
-	enqueueObject(response: ObjectResponse): void {
-		this.objectQueue.push(response)
-	}
-
-	enqueue(response: ObjectResponse): void {
-		this.enqueueObject(response)
-	}
-
-	enqueueEmbedding(response: EmbeddingResponse): void {
-		this.embeddingQueue.push(response)
-	}
-
-	enqueueRerank(response: RerankResponse): void {
-		this.rerankQueue.push(response)
-	}
-
-	enqueueTextStream(chunks: TextStreamChunk[]): void {
-		this.textStreamQueue.push(chunks)
-	}
-
-	enqueueObjectStream(chunks: ObjectStreamChunk[]): void {
-		this.objectStreamQueue.push(chunks)
-	}
-
-	async text(req: TextRequest): Promise<TextResponse> {
-		this.requests.push(req)
-		return shiftScripted(this.textQueue, 'text')
-	}
-
-	async *textStream(req: TextRequest): AsyncIterable<TextStreamChunk> {
-		this.requests.push(req)
-		for (const chunk of shiftScripted(this.textStreamQueue, 'text stream')) {
-			yield chunk
-		}
-	}
-
-	async object<T extends JsonValue>(req: ObjectRequest<T>): Promise<ObjectResponse<T>> {
-		this.requests.push(req)
-		return shiftScripted(this.objectQueue, 'object') as ObjectResponse<T>
-	}
-
-	async *objectStream<T extends JsonValue>(req: ObjectRequest<T>): AsyncIterable<ObjectStreamChunk<T>> {
-		this.requests.push(req)
-		for (const chunk of shiftScripted(this.objectStreamQueue, 'object stream')) {
-			yield chunk as ObjectStreamChunk<T>
-		}
-	}
-
-	async embed(req: EmbeddingRequest): Promise<EmbeddingResponse> {
-		this.requests.push(req)
-		return shiftScripted(this.embeddingQueue, 'embedding')
-	}
-
-	async rerank(req: RerankRequest): Promise<RerankResponse> {
-		this.requests.push(req)
-		return shiftScripted(this.rerankQueue, 'rerank')
-	}
-}
-
-function shiftScripted<T>(queue: T[], label: string): T {
-	const value = queue.shift()
-	if (!value) {
-		throw new Error(`No scripted ${label} response queued`)
-	}
-	return value
 }

@@ -245,12 +245,17 @@ Agent handlers use:
 - `context.metrics` for service-level and agent-local custom metrics declared on builders
 - `context.logger`
 
-For a custom `setRunFunction(...)` handler, opt in to Harness-native model
-completion events with `context.harness.models.<alias>.object(request,
-context.signal, { emitRunEvents: true })` (and the equivalent text, embed, or
-rerank calls).
-Harness owns run identity, event ordering, redaction, and final status; custom
-handlers cannot forge lifecycle events directly.
+For a custom `setRunFunction(...)` handler, declare model progress once on the
+attached agent:
+
+```ts
+agent.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
+```
+
+The handler consumes `context.harness.models.<alias>` normally. Harness owns
+run identity, event ordering, redaction, and final status; custom handlers
+cannot forge lifecycle events directly. `safe` exposes client-oriented output
+and tool status only; use `full` exclusively for a trusted diagnostic client.
 
 These run events are in-process/provider-progress frames for the active agent
 stream. They are not PURISTA EventBridge messages and never trigger
@@ -378,9 +383,9 @@ comes from `agentSseEventSchema`.
 Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, and file content. Multimodal methods are capability-gated by model aliases such as `vision_input`, `audio_input`, and `file_input`.
 
 ## Testing
-Use core testing helpers:
+Use `@purista/core/testing` helpers:
 - `createAgentTestHarness(...)`
-- `createScriptedHarnessModel()`
+- `FakeModelProvider`
 - `createAgentSkillTestRuntime(...)`
 - `createAgentContextMock(...)`
 

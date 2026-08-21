@@ -79,36 +79,31 @@ Registering a definition and granting it authority are separate actions. This
 keeps a workflow’s capabilities reviewable. Workflows without local Harness
 agents and PURISTA child agents using `canInvokeAgent(...)` need no change.
 
-## Only if a custom handler manually emitted Harness lifecycle events
+## Client progress from a custom agent
 
-Most custom `setRunFunction(...)` handlers need no change. The migration only
-applies if a handler called the removed `context.harness.events.emit(...)`.
-Harness lifecycle events are now owned by the runtime so their ordering, run
-identity, redaction, and completion status remain trustworthy.
-
-The removed method accepted Harness lifecycle events; it was not a general
-application or UI-protocol stream writer. For canonical provider progress on
-the active generated stream, opt in at the model call:
+Harness lifecycle events are owned by the runtime so their ordering, run
+identity, redaction, and completion status remain trustworthy. Configure which
+model progress reaches the generated agent stream once on the agent:
 
 ```ts
 agent
+  .setStreamingMode('stream', { modelChunkVisibility: 'safe' })
   .setSuccessEventName('support.triage.completed')
   .setRunFunction(async context => {
     const result = await context.harness.models.primary.object(
       request,
       context.signal,
-      { emitRunEvents: true },
     )
 
     return { ticketId: context.payload.ticketId, result }
   })
 ```
 
-`{ emitRunEvents: true }` adds provider-progress frames to the active generated
-stream only. It is not a PURISTA EventBridge publication and cannot trigger
-subscriptions. `setSuccessEventName(...)`, by contrast, publishes the completed
-validated agent output through the EventBridge for subscriptions and other
-services.
+`safe` forwards user-facing model output and tool status without tool
+arguments/results, reasoning, prompts, policy details, sandbox output, or raw
+errors. `full` is for a trusted diagnostic client; `off` sends only the final
+result. These frames belong only to the active generated stream. They are not
+PURISTA EventBridge publications and cannot trigger subscriptions.
 
 ## Only if you supplied explicit Harness adapters
 
@@ -130,9 +125,10 @@ when your application intentionally uses them.
 - [ ] Upgrade the PURISTA packages used by the application together.
 - [ ] If a Harness workflow calls a registered local agent, declare that
       authority in `workflow.delegation`.
-- [ ] If a custom handler used `context.harness.events.emit(...)`, remove it;
-      use `emitRunEvents: true` only for canonical provider progress on the
-      active stream.
+- [ ] Configure `modelChunkVisibility` on custom agents that stream model
+      progress to clients.
+- [ ] In agent tests, replace `createScriptedHarnessModel()` with
+      `new FakeModelProvider()` from `@purista/core/testing`.
 - [ ] If the application supplies an explicit `ai.sandbox`, `ai.workspaceStore`,
       or `ai.stateStore`, verify it is the matching Harness adapter.
 

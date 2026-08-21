@@ -99,8 +99,7 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRunError` class.
 
 Testing helpers: `createAgentContextMock`, `createAgentTestHarness`,
-`createScriptedHarnessModel`, `ScriptedHarnessModelProvider`,
-`createAgentSkillTestRuntime`.
+`FakeModelProvider`, `createAgentSkillTestRuntime`.
 
 Selected harness re-exports required for DX: `ContentPart`, `ModelProvider`,
 `ModelCapability`, `RunEvent`, `Session`.

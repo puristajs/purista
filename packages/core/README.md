@@ -33,7 +33,7 @@ PURISTA addresses developers which want to simply focus on implementation, while
 
 `@purista/core` includes agent builders and testing helpers. Agents attach to normal PURISTA services and expand into queue, queue worker, command, and stream definitions so model-driven work runs through the same runtime boundaries as other business logic.
 
-Core is provider-neutral. Applications bind live model providers at runtime with provider packages such as `@purista/harness-openai`; tests can use `createAgentTestHarness(...)`, `createScriptedHarnessModel(...)`, and `createAgentSkillTestRuntime(...)` from `@purista/core/testing`.
+Core is provider-neutral. Applications bind live model providers at runtime with provider packages such as `@purista/harness-openai`; tests can use `createAgentTestHarness(...)`, `FakeModelProvider`, and `createAgentSkillTestRuntime(...)` from `@purista/core/testing`.
 
 **Visit [purista.dev](https://purista.dev)**
 

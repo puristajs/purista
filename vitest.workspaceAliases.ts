@@ -6,6 +6,7 @@ const rootDir = fileURLToPath(new URL('.', import.meta.url))
 const packagesDir = resolve(rootDir, 'packages')
 
 export const getPuristaWorkspaceAliases = () => ({
+	'@purista/core/testing': resolve(packagesDir, 'core', 'src/testing/index.ts'),
 	...Object.fromEntries(
 		readdirSync(packagesDir, { withFileTypes: true })
 			.filter(entry => entry.isDirectory())
