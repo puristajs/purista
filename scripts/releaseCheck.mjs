@@ -157,7 +157,11 @@ const gitStatus = safeGit(['status', '--porcelain=v1'])
 const specDigest = digestPath(specRoot)
 const knowledgeInputs = {
 	canonicalSkill: digestPath(join(repositoryRoot, 'skills')),
-	generatedApiKnowledge: digestPath(join(repositoryRoot, 'skills', 'purista', 'references', 'generated-api-index.md')),
+	generatedApiKnowledge: {
+		index: digestPath(join(repositoryRoot, 'skills', 'purista', 'references', 'generated-api-index.md')),
+		manifest: digestPath(join(repositoryRoot, 'skills', 'purista', 'references', 'generated-api-manifest.json')),
+		primaryDetails: digestPath(join(repositoryRoot, 'skills', 'purista', 'references', 'api')),
+	},
 	llms: digestPath(join(repositoryRoot, 'llms.txt')),
 	publishedLlms: digestPath(join(repositoryRoot, 'web', 'public', 'llms')),
 }

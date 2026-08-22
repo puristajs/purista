@@ -63,10 +63,11 @@ import { AmqpBridge } from '@purista/amqpbridge'
 
 const spanProcessor = getSpanProcessor()
 
-const eventBridge = new AmqpBridge()
+const runtimeObservability = { spanProcessor }
+const eventBridge = new AmqpBridge(runtimeObservability)
 
 const myService = await myV1Service.getInstance(eventBridge, {
-  spanProcessor,
+  ...runtimeObservability,
 })
 await eventBridge.start()
 await myService.start()

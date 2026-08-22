@@ -133,9 +133,9 @@ server.registerService(myService)
 ## HTTP metrics
 
 The Hono service records request duration and in-flight request metrics through
-the same Core `metrics` or `metricsRecorder` configuration used by the service
-instance. Prefer service-owned observability so one application-owned OpenTelemetry
-meter is supplied once:
+its own Core `metrics` or `metricsRecorder` configuration. It can be shared by
+multiple services, so configure it at construction and reuse an application-owned
+metrics object explicitly where that is intentional:
 
 ```typescript
 const honoService = await honoV1Service.getInstance(eventBridge, {

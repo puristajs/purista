@@ -146,7 +146,6 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 	 * response topic.
 	 */
 	async start() {
-		this.markObservabilityStarted()
 		this.client = await connectAsync(this.config)
 
 		this.client.on('connect', () => {

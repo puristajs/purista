@@ -3,7 +3,6 @@ import type { ObjectWithKeysFromStringArray } from '../../helper/types/ObjectWit
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import type { EmptyObject } from '../types/EmptyObject.js'
 import type { Logger } from '../types/Logger.js'
-import type { ServiceObservabilityContext } from '../types/ServiceObservability.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StoreBaseConfig } from '../types/StoreBaseConfig.js'
 import type { ConfigStoreCacheMap } from './types/ConfigStoreCacheMap.js'
@@ -34,14 +33,12 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 
 	/** Store name used in logs and diagnostics. */
 	name: string
-	private readonly hasExplicitLogger: boolean
 
 	/** Optional local cache used by store implementations that opt in. */
 	cache: ConfigStoreCacheMap = new Map()
 
 	constructor(name: string, config: StoreBaseConfig<ConfigStoreConfigType>) {
 		const logger = config?.logger ?? initLogger(config?.logLevel)
-		this.hasExplicitLogger = config?.logger !== undefined
 		this.logger = logger.getChildLogger({ name })
 
 		this.name = name
@@ -52,13 +49,6 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 			enableRemove: false,
 			enableCache: false,
 			...config,
-		}
-	}
-
-	/** Inherit a service logger only when this store was not explicitly configured. */
-	inheritServiceObservability(context: ServiceObservabilityContext): void {
-		if (!this.hasExplicitLogger) {
-			this.logger = context.logger.getChildLogger({ name: this.name })
 		}
 	}
 

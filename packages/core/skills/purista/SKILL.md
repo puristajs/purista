@@ -28,6 +28,7 @@ Start from ownership and contracts—not routes, prompts, or infrastructure. Sto
 - Use typed handler capabilities (`.canInvoke(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and equivalents) before accessing other components. Keep EventBridge and QueueBridge separate.
 - Import application APIs from `@purista/core`; tests from `/testing`; clients from `/client`; adapter-author APIs only from `/adapter`.
 - Hono is the HTTP projection. Applications own OpenTelemetry SDK/exporter setup; Core remains SDK-neutral. Never put secrets, personal data, prompts, completions, tokens, raw payloads, headers, or attachments into telemetry or examples without explicit policy.
+- Runtime adapters are composition-root-owned instances and may be shared. Configure observability on every adapter at construction and on every service separately; `getInstance(...)` never mutates an adapter or cascades service options into one.
 - A schedule declares and emits an event only. `SchedulerRuntime` runs as a separate minimal host; it never boots business services or handlers. Use Redis distributed claims plus strict mode for replicated scheduler hosts.
 - This installed skill never requires framework source paths, internal specifications, or unpublished APIs.
 
@@ -71,4 +72,5 @@ Before handoff, verify a single owner/source of truth per capability, declared h
 - `references/09-implementation-planning.md`
 - `references/10-security-privacy-and-governance.md`
 - `references/11-evaluation-scenarios.md`
-- `references/generated-api-index.md` — generated, manifest-complete lookup for every public PURISTA package and its primary APIs; never use it as a substitute for architecture references
+- `references/generated-api-index.md` — generated TypeDoc-derived package selection, primary API summaries, and verified examples
+- `references/generated-api-manifest.json` — generated complete public export inventory; load it only when the primary index does not answer the API question

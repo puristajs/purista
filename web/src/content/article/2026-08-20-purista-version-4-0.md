@@ -1,6 +1,6 @@
 ---
 title: "PURISTA 4.0: clearer systems, safer automation"
-description: "PURISTA 4.0 adds isolated scheduling, machine-readable architecture checks, inherited observability, typed metrics, and explicit data lifecycles."
+description: "PURISTA 4.0 adds isolated scheduling, machine-readable architecture checks, explicit observability ownership, typed metrics, and explicit data lifecycles."
 date: 2026-08-20
 order: 20260820
 image: /graphic/purista_4_0_cover.webp
@@ -19,7 +19,7 @@ reliable view of the architecture before they change it.
   `purista validate`, and `purista doctor`.
 - **RFC 9457 Problem Details** for generated Hono HTTP endpoints, with matching
   OpenAPI schemas and safe error redaction.
-- **Service-owned observability defaults** that compatible adapters inherit
+- **Explicit observability ownership** for services and runtime adapters
   before startup, without repeated configuration.
 - **Typed application metrics** in service and attached-agent handlers, plus an
   optional OpenTelemetry bootstrap in newly generated projects.
@@ -89,17 +89,15 @@ to preserve message-transport compatibility.
 ## Configure observability once
 
 Service runtime configuration remains flat. Supply logging, tracing, and metrics
-when you create the service; supported Core adapters inherit only values that
-they have not explicitly configured. An explicit adapter configuration always
-wins, and PURISTA never replaces telemetry on a running component.
+when you create each runtime instance. Bridges, stores, and queues can be shared
+by several services, so PURISTA never lets a service mutate their telemetry.
 
 ```ts
-const eventBridge = new AmqpBridge()
+const runtimeObservability = { logger, spanProcessor, metrics: { meter } }
+const eventBridge = new AmqpBridge(runtimeObservability)
 
 const service = await ordersV1Service.getInstance(eventBridge, {
-  logger,
-  spanProcessor,
-  metrics: { meter },
+  ...runtimeObservability,
 })
 
 await eventBridge.start()
@@ -107,10 +105,9 @@ await service.start()
 ```
 
 Existing applications that configure telemetry directly on a bridge continue to
-work. The new cascade simply removes the need to repeat the same values across
-unconfigured compatible adapters. A shared bridge still has one telemetry
-pipeline, so configure it directly when shared services require different
-telemetry. See [OpenTelemetry](/handbook/4-open-telemetry/) for the full setup.
+work. Reuse a single application-level configuration object when several
+instances intentionally share settings, but keep ownership explicit. See
+[OpenTelemetry](/handbook/4-open-telemetry/) for the full setup.
 
 ## Record application metrics with types, not strings
 

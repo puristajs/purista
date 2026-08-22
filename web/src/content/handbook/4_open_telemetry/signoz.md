@@ -63,11 +63,11 @@ const spanProcessor = getSpanProcessor()
 const meterProvider = setupMetrics('my-app')
 const meter = meterProvider.getMeter('my-app')
 
-const eventBridge = new AmqpBridge()
+const runtimeObservability = { spanProcessor, metrics: { meter } }
+const eventBridge = new AmqpBridge(runtimeObservability)
 
 const myService = await myV1Service.getInstance(eventBridge, {
-  spanProcessor,
-  metrics: { meter },
+  ...runtimeObservability,
 })
 await eventBridge.start()
 await myService.start()

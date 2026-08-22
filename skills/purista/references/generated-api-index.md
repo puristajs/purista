@@ -1,14 +1,15 @@
 # Generated Agent API Reference
 
 <!-- Generated from the published API catalog; do not edit manually. -->
-<!-- typedoc-digest: d1739221189c7d32 -->
+<!-- typedoc-digest: 527f17db6c2c34eb -->
 
-This reference covers every published `@purista/*` package. Use it in an installed skill to select the package and primary API for an application. It intentionally omits framework implementation paths, internal helpers, and release tooling. Follow the other skill references for ownership and distributed-system decisions.
+This reference covers every published `@purista/*` package and provides TypeDoc-verified examples for the primary application APIs. Use it to select a package and confirm an API pattern rather than guessing. The complete generated public-export inventory is in `generated-api-manifest.json`; it is loaded only when a primary entry does not answer the question. Follow the other skill references for ownership and distributed-system decisions.
 
 ## Contents
 
 - [Package selection](#package-selection)
 - [Core import boundaries](#core-import-boundaries)
+- [Detailed primary APIs](#detailed-primary-apis)
 - [Framework and scaffolding](#framework-and-scaffolding)
 - [HTTP projection](#http-projection)
 - [Event bridges](#event-bridges)
@@ -30,7 +31,7 @@ This reference covers every published `@purista/*` package. Use it in an install
 
 | Package | Use when | Primary validated API |
 | --- | --- | --- |
-| `@purista/core` | Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports. | `ServiceBuilder`, `CommandDefinitionBuilder`, `SubscriptionDefinitionBuilder`, `StreamDefinitionBuilder`, `QueueDefinitionBuilder`, `QueueWorkerBuilder`, `AgentQueueBuilder`, `SchedulerBuilder`, `SchedulerRuntime`, `DefaultSchedulerProvider`, `createArchitectureManifest`, `validateArchitectureManifest`, `exportServiceDefinitions`, `exportScheduleManifest`, `ServiceObservabilityContext` |
+| `@purista/core` | Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports. | `ServiceBuilder`, `CommandDefinitionBuilder`, `SubscriptionDefinitionBuilder`, `StreamDefinitionBuilder`, `QueueDefinitionBuilder`, `QueueWorkerBuilder`, `AgentQueueBuilder`, `SchedulerBuilder`, `SchedulerRuntime`, `DefaultSchedulerProvider`, `createArchitectureManifest`, `validateArchitectureManifest`, `exportServiceDefinitions`, `exportScheduleManifest` |
 | `@purista/cli` | Initializing or scaffolding a PURISTA application; application agents use the generated project-local CLI, while package authors use this API only to extend CLI tooling. | `createPuristaCliEngine`, `runPuristaCommand` |
 | `@purista/hono-http-server` | Projecting builder-declared commands, streams, and async queue responses through Hono and OpenAPI. | `honoV1Service` |
 | `@purista/amqpbridge` | Connecting commands, events, subscriptions, and streams through an AMQP broker. | `AmqpBridge` |
@@ -71,7 +72,6 @@ This reference covers every published `@purista/*` package. Use it in an install
 | `@purista/core` | `validateArchitectureManifest` | function | Validate static architecture references without contacting runtime infrastructure. |
 | `@purista/core` | `exportServiceDefinitions` | function | Resolve service builders into the JSON-safe definition inventory used by architecture inspection and interoperability exports. |
 | `@purista/core` | `exportScheduleManifest` | function | Export provider-neutral schedule metadata from service definitions. |
-| `@purista/core` | `ServiceObservabilityContext` | type | Immutable observability values resolved for one service instance. |
 | `@purista/cli` | `createPuristaCliEngine` | function | Create a programmatic CLI engine bound to a working directory and prompt adapter. |
 | `@purista/cli` | `runPuristaCommand` | function | Resolve and execute a CLI command in one call. |
 
@@ -135,8 +135,35 @@ This reference covers every published `@purista/*` package. Use it in an install
 | `@purista/k8s-sdk` | `addServiceEndpoints` | function | Adds HTTP endpoints for all commands that expose HTTP metadata. |
 | `@purista/k8s-sdk` | `getHttpServer` | function | Create a Hono based web server. |
 
+## Detailed primary APIs
+
+Read only the package file relevant to the current task. These files contain TypeDoc-derived public method names and verified examples; the index deliberately stays compact.
+
+- [`@purista/core`](api/core.md) — Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports.
+- [`@purista/cli`](api/cli.md) — Initializing or scaffolding a PURISTA application; application agents use the generated project-local CLI, while package authors use this API only to extend CLI tooling.
+- [`@purista/hono-http-server`](api/hono-http-server.md) — Projecting builder-declared commands, streams, and async queue responses through Hono and OpenAPI.
+- [`@purista/amqpbridge`](api/amqpbridge.md) — Connecting commands, events, subscriptions, and streams through an AMQP broker.
+- [`@purista/mqttbridge`](api/mqttbridge.md) — Connecting commands, events, subscriptions, and streams through MQTT topics.
+- [`@purista/natsbridge`](api/natsbridge.md) — Connecting commands, events, subscriptions, and streams through NATS.
+- [`@purista/dapr-sdk`](api/dapr-sdk.md) — Running PURISTA through Dapr building blocks for event transport, state, config, secrets, or service invocation.
+- [`@purista/base-http-bridge`](api/base-http-bridge.md) — Building or operating an HTTP EventBridge adapter; application HTTP APIs should use @purista/hono-http-server instead.
+- [`@purista/nats-queue-bridge`](api/nats-queue-bridge.md) — Running durable queue work on NATS JetStream, including strict idempotency when declared.
+- [`@purista/redis-queue-bridge`](api/redis-queue-bridge.md) — Running durable queue work on Redis with strict idempotency when declared.
+- [`@purista/redis-scheduler-provider`](api/redis-scheduler-provider.md) — Running replicated SchedulerRuntime hosts with Redis-backed distributed occurrence claims; not for business work.
+- [`@purista/aws-config-store`](api/aws-config-store.md) — Supplying service configuration from AWS Systems Manager Parameter Store.
+- [`@purista/nats-config-store`](api/nats-config-store.md) — Supplying service configuration from NATS-backed storage.
+- [`@purista/redis-config-store`](api/redis-config-store.md) — Supplying service configuration from Redis-backed storage.
+- [`@purista/nats-state-store`](api/nats-state-store.md) — Persisting service state in NATS-backed storage when its declared capabilities meet the requirement.
+- [`@purista/redis-state-store`](api/redis-state-store.md) — Persisting service state in Redis when its declared capabilities meet the requirement.
+- [`@purista/aws-secret-store`](api/aws-secret-store.md) — Resolving secrets through AWS Secrets Manager.
+- [`@purista/azure-secret-store`](api/azure-secret-store.md) — Resolving secrets through Azure Key Vault.
+- [`@purista/gcloud-secret-store`](api/gcloud-secret-store.md) — Resolving secrets through Google Cloud Secret Manager.
+- [`@purista/infisical-secret-store`](api/infisical-secret-store.md) — Resolving secrets through Infisical; use InfisicalClient only when building a custom Infisical integration.
+- [`@purista/vault-secret-store`](api/vault-secret-store.md) — Resolving secrets through HashiCorp Vault.
+- [`@purista/k8s-sdk`](api/k8s-sdk.md) — Integrating builder-declared services with Kubernetes HTTP/server helpers.
+
 ## Use this reference safely
 
 - Prefer the package and API listed here over a guessed package name or a deep import.
 - Application code normally imports from a package root. Low-level bridge or adapter construction is for package authors unless the public handbook explicitly directs it.
-- A missing entry is a reason to consult the public PURISTA handbook or package API docs, never to invent a replacement API.
+- A missing primary entry is a reason to inspect `generated-api-manifest.json`, then the public PURISTA handbook or API docs—never to invent a replacement API.

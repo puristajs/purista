@@ -1,7 +1,7 @@
 # Version 4 Migration
 
 PURISTA 4 adds static architecture diagnostics, a standalone event-only
-Scheduler Runtime, service-owned observability defaults, RFC 9457 HTTP Problem
+Scheduler Runtime, explicit observability ownership, RFC 9457 HTTP Problem
 Details, typed metrics, and explicit state retention. Apply only the sections
 that affect the application; features that are not adopted do not require a
 synthetic migration.
@@ -41,11 +41,11 @@ waive diagnostics without a documented, bounded reason.
 
 ## Observability
 
-Keep the established flat `getInstance(...)` configuration. A supported
-adapter can inherit service-owned logging, tracing, and metrics only before it
-starts and only when that adapter did not set a value explicitly. Existing
-direct adapter telemetry configuration remains valid and wins. Never attempt
-to replace a live telemetry provider.
+Keep the established flat `getInstance(...)` configuration. Configure logging,
+tracing, and metrics on each adapter at construction and separately on each
+service instance. Adapters may be shared by several services, so a service
+must never mutate or inherit configuration into them. Reuse one application
+configuration object explicitly where the same settings are intentional.
 
 Applications still own OpenTelemetry SDK setup, exporters, collectors, and
 Prometheus exposure. Do not add secrets, tenant identifiers, prompts,

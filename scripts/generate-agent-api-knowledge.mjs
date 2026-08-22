@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 import { createHash } from 'node:crypto'
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const root = process.cwd()
 const apiPath = resolve(root, 'web/src/generated/purista-api.json')
 const outputPath = resolve(root, 'skills/purista/references/generated-api-index.md')
+const manifestOutputPath = resolve(root, 'skills/purista/references/generated-api-manifest.json')
+const apiDetailDirectory = resolve(root, 'skills/purista/references/api')
 const check = process.argv.includes('--check')
 
 if (!existsSync(apiPath)) {
@@ -43,7 +45,6 @@ const packageCatalog = [
 			'validateArchitectureManifest',
 			'exportServiceDefinitions',
 			'exportScheduleManifest',
-			'ServiceObservabilityContext',
 		],
 	},
 	{
@@ -233,6 +234,12 @@ const text = parts =>
 		.replace(/\s+/g, ' ')
 		.trim()
 
+const rawText = parts =>
+	(parts ?? [])
+		.map(part => part.text ?? part.code ?? '')
+		.join('')
+		.trim()
+
 const sourceOf = node => {
 	const source = node.sources?.[0] ?? node.signatures?.[0]?.sources?.[0]
 	return source ? `${source.fileName}:${source.line}` : 'generated declaration'
@@ -245,6 +252,36 @@ const hasExample = node => {
 	]
 	return tags.some(tag => tag.tag === '@example')
 }
+
+const exampleOf = node => {
+	const tags = [
+		...(node.comment?.blockTags ?? []),
+		...(node.signatures ?? []).flatMap(signature => signature.comment?.blockTags ?? []),
+	]
+	const example = tags.find(tag => tag.tag === '@example')
+	return example ? rawText(example.content) : undefined
+}
+
+const callableMembersOf = node =>
+	(node.children ?? [])
+		.filter(member => member.kind === 2048 && !member.flags?.isPrivate && !member.flags?.isProtected)
+		.map(member => {
+			const signatures = member.signatures ?? []
+			return {
+				name: member.name,
+				signatures: signatures.map(signature => {
+					const parameters = (signature.parameters ?? [])
+						.map(
+							parameter =>
+								`${parameter.flags?.isRest ? '...' : ''}${parameter.name}${parameter.flags?.isOptional ? '?' : ''}`,
+						)
+						.join(', ')
+					return `${member.name}(${parameters})`
+				}),
+				summary: conciseSummary(text(member.comment?.summary ?? signatures[0]?.comment?.summary)),
+				example: exampleOf(member),
+			}
+		})
 
 /**
  * The installed skill needs a quick API selection cue, not the complete
@@ -269,6 +306,7 @@ const publishedMembers = packageNode => {
 	return packageNode.children ?? []
 }
 const entries = []
+const manifestEntries = []
 const issues = []
 
 const publicPackageNames = readdirSync(resolve(root, 'packages'), { withFileTypes: true })
@@ -320,6 +358,22 @@ for (const surface of packageCatalog) {
 		continue
 	}
 
+	const exports = publishedMembers(packageNode)
+		.map(resolveReference)
+		.filter(node => node && kinds.has(node.kind))
+		.sort((left, right) => left.name.localeCompare(right.name))
+
+	manifestEntries.push({
+		packageName: surface.packageName,
+		exports: exports.map(node => ({
+			name: node.name,
+			kind: kinds.get(node.kind),
+			summary: conciseSummary(text(node.comment?.summary ?? node.signatures?.[0]?.comment?.summary)),
+			source: sourceOf(node),
+			hasExample: hasExample(node),
+		})),
+	})
+
 	for (const name of surface.names) {
 		const exportedNode = publishedMembers(packageNode).find(candidate => candidate.name === name)
 		const node = resolveReference(exportedNode)
@@ -343,6 +397,8 @@ for (const surface of packageCatalog) {
 			kind: kinds.get(node.kind),
 			summary: conciseSummary(summary),
 			source: sourceOf(node),
+			example: exampleOf(node),
+			members: node.kind === 128 ? callableMembersOf(node) : [],
 		})
 	}
 }
@@ -352,8 +408,54 @@ if (issues.length) {
 	process.exit(1)
 }
 
-const digest = createHash('sha256').update(JSON.stringify({ packageCatalog, entries })).digest('hex').slice(0, 16)
+const digest = createHash('sha256')
+	.update(JSON.stringify({ packageCatalog, entries, manifestEntries }))
+	.digest('hex')
+	.slice(0, 16)
 const catalogSections = Array.from(new Set(packageCatalog.map(entry => entry.section)))
+const detailFileName = packageName => packageName.replace('@purista/', '').replaceAll(/[^a-z0-9]+/gi, '-')
+
+const detailOutput = surface => {
+	const packageEntries = entries.filter(entry => entry.packageName === surface.packageName)
+	const lines = [
+		`# ${surface.packageName} API Patterns`,
+		'',
+		'<!-- Generated from current TypeDoc; do not edit manually. -->',
+		`<!-- typedoc-digest: ${digest} -->`,
+		'',
+		`Use this reference only when working with \`${surface.packageName}\`. Every API name, callable pattern, and example below is extracted from the current public TypeDoc output. Do not invent a method that is absent here; consult the complete \`../generated-api-manifest.json\` and the public handbook when the API is not listed.`,
+		'',
+		'## Contents',
+		'',
+		...packageEntries.map(entry => `- [${entry.name}](#${entry.name.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')})`),
+		'',
+	]
+
+	for (const entry of packageEntries) {
+		lines.push(`## ${entry.name}`, '', `**${entry.kind}.** ${entry.summary} Source: \`${entry.source}\`.`, '')
+		if (entry.example) lines.push('**Verified example**', '', entry.example, '')
+		if (entry.members.length) {
+			lines.push(
+				'**Public callable patterns**',
+				'',
+				...entry.members.map(
+					member => `- \`${member.signatures.join('` or `')}\`${member.summary ? ` — ${member.summary}` : ''}`,
+				),
+				'',
+			)
+		}
+		for (const member of entry.members.filter(member => member.example)) {
+			lines.push(`**Verified ${member.name} example**`, '', member.example, '')
+		}
+	}
+
+	return `${lines.join('\n')}\n`
+}
+
+const apiDetailOutputs = packageCatalog.map(surface => ({
+	path: resolve(apiDetailDirectory, `${detailFileName(surface.packageName)}.md`),
+	content: detailOutput(surface),
+}))
 
 const lines = [
 	'# Generated Agent API Reference',
@@ -361,12 +463,13 @@ const lines = [
 	'<!-- Generated from the published API catalog; do not edit manually. -->',
 	`<!-- typedoc-digest: ${digest} -->`,
 	'',
-	'This reference covers every published `@purista/*` package. Use it in an installed skill to select the package and primary API for an application. It intentionally omits framework implementation paths, internal helpers, and release tooling. Follow the other skill references for ownership and distributed-system decisions.',
+	'This reference covers every published `@purista/*` package and provides TypeDoc-verified examples for the primary application APIs. Use it to select a package and confirm an API pattern rather than guessing. The complete generated public-export inventory is in `generated-api-manifest.json`; it is loaded only when a primary entry does not answer the question. Follow the other skill references for ownership and distributed-system decisions.',
 	'',
 	'## Contents',
 	'',
 	'- [Package selection](#package-selection)',
 	'- [Core import boundaries](#core-import-boundaries)',
+	'- [Detailed primary APIs](#detailed-primary-apis)',
 	...catalogSections.map(section => `- [${section}](#${section.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')})`),
 	'- [Use this reference safely](#use-this-reference-safely)',
 	'',
@@ -399,17 +502,40 @@ const lines = [
 			'',
 		]
 	}),
+	'## Detailed primary APIs',
+	'',
+	'Read only the package file relevant to the current task. These files contain TypeDoc-derived public method names and verified examples; the index deliberately stays compact.',
+	'',
+	...packageCatalog.map(
+		surface => `- [\`${surface.packageName}\`](api/${detailFileName(surface.packageName)}.md) — ${surface.useWhen}`,
+	),
+	'',
 	'## Use this reference safely',
 	'',
 	'- Prefer the package and API listed here over a guessed package name or a deep import.',
 	'- Application code normally imports from a package root. Low-level bridge or adapter construction is for package authors unless the public handbook explicitly directs it.',
-	'- A missing entry is a reason to consult the public PURISTA handbook or package API docs, never to invent a replacement API.',
+	'- A missing primary entry is a reason to inspect `generated-api-manifest.json`, then the public PURISTA handbook or API docs—never to invent a replacement API.',
 	'',
 ]
 
 const output = lines.join('\n')
+const manifestOutput = `${JSON.stringify(
+	{
+		generatedFrom: 'web/src/generated/purista-api.json',
+		typedocDigest: digest,
+		packages: manifestEntries,
+	},
+	null,
+	'\t',
+)}\n`
 if (check) {
-	if (!existsSync(outputPath) || readFileSync(outputPath, 'utf8') !== output) {
+	if (
+		!existsSync(outputPath) ||
+		readFileSync(outputPath, 'utf8') !== output ||
+		!existsSync(manifestOutputPath) ||
+		readFileSync(manifestOutputPath, 'utf8') !== manifestOutput ||
+		apiDetailOutputs.some(detail => !existsSync(detail.path) || readFileSync(detail.path, 'utf8') !== detail.content)
+	) {
 		process.stderr.write('Generated agent API knowledge is stale. Run npm run generate:agent-api-knowledge.\n')
 		process.exit(1)
 	}
@@ -418,4 +544,7 @@ if (check) {
 }
 
 writeFileSync(outputPath, output, 'utf8')
+writeFileSync(manifestOutputPath, manifestOutput, 'utf8')
+mkdirSync(apiDetailDirectory, { recursive: true })
+for (const detail of apiDetailOutputs) writeFileSync(detail.path, detail.content, 'utf8')
 process.stdout.write(`Generated ${outputPath}\n`)

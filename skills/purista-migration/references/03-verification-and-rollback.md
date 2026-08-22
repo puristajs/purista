@@ -10,7 +10,7 @@
 | Queues | Retry, dead-letter, idempotency, and replay paths survive a duplicate or retry |
 | Schedules | Separate host uses a shared transport; replicated hosts use distributed claims; consumers deduplicate `occurrenceId` |
 | State and agents | Retention, tenant/principal boundaries, access control, and expiry match the data policy |
-| Observability | Application-owned SDK/exporter works; adapter inheritance is visible before startup; no sensitive fields appear |
+| Observability | Application-owned SDK/exporter works; each service and runtime adapter has explicit configuration; no sensitive fields appear |
 | Deployment | Canary, alerts, dashboards, owners, and rollback command are ready |
 
 ## Rollback design

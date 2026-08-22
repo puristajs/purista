@@ -31,6 +31,8 @@ Specs are the source of truth for framework development. If implementation and s
 - Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
 - Use the filesystem as part of the reasoning surface: good reference taxonomy matters.
 - Verify every file path, package path, and code snippet in the repo.
+- Treat a generated API reference as evidence only when it was rebuilt from the current TypeDoc JSON. Primary API examples must be extracted from exported TSDoc or verified implementation tests; never write an API-shaped example from memory.
+- For every ownership-sensitive rule, add a near-miss evaluation that rejects the tempting but invalid alternative (for example, a service mutating a shared runtime adapter).
 - Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Keep `purista/skills` as the source of truth; installed client copies are mirrors that may need syncing after repo changes through `npm run sync:skills -- --target <absolute-skills-directory>`.
@@ -70,6 +72,7 @@ Specs are the source of truth for framework development. If implementation and s
 - Drift in `starter`, `create-purista`, `voyage`, and published docs
 - Drift between repo-local skills and installed mirror copies under `$CODEX_HOME/skills`
 - Drift between metric catalog, observability docs, examples, and skill snippets
+- Drift between TypeDoc, the generated API index and complete API manifest, and every code snippet that names a public method or option
 - Drift between security/privacy handbook pages, AI docs, generated examples, and skill guidance about PII, prompts, secrets, telemetry, and tenant isolation
 
 ## Read if needed

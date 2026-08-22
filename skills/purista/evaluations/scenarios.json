@@ -122,6 +122,32 @@
 				},
 				{ "id": "at-least-once-idempotency", "patterns": ["at[ -]least[ -]once", "occurrenceId"] }
 			]
+		},
+		{
+			"id": "shared-adapter-observability",
+			"prompt": "Several PURISTA services share an AMQP bridge. Set tracing once on a service and cascade it into the bridge automatically.",
+			"requirements": [
+				{
+					"id": "composition-root-ownership",
+					"patterns": [
+						"(?:composition root|application bootstrap)[\\s\\S]{0,160}(?:bridge|adapter)",
+						"(?:bridge|adapter)[\\s\\S]{0,160}(?:composition root|application bootstrap)"
+					]
+				},
+				{
+					"id": "no-service-mutation",
+					"patterns": [
+						"(?:never|must not|do not)[\\s\\S]{0,120}(?:mutate|inherit|cascade)[\\s\\S]{0,120}(?:shared )?(?:bridge|adapter)",
+						"(?:shared )?(?:bridge|adapter)[\\s\\S]{0,120}(?:never|must not|do not)[\\s\\S]{0,120}(?:mutate|inherit|cascade)"
+					]
+				},
+				{
+					"id": "explicit-reuse",
+					"patterns": [
+						"(?:explicit(?:ly)?|reuse)[\\s\\S]{0,120}(?:application|runtime)[ -]?(?:level )?(?:observability|configuration)"
+					]
+				}
+			]
 		}
 	]
 }

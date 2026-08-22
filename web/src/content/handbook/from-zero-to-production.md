@@ -235,9 +235,10 @@ const spanProcessor = new SimpleSpanProcessor(
   new OTLPTraceExporter({ url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces' })
 )
 
-const eventBridge = new DefaultEventBridge()
+const runtimeObservability = { spanProcessor }
+const eventBridge = new DefaultEventBridge(runtimeObservability)
 const myService = await myV1Service.getInstance(eventBridge, {
-  spanProcessor,
+  ...runtimeObservability,
 })
 await eventBridge.start()
 ```

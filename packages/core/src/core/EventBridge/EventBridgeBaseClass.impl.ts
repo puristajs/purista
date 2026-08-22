@@ -18,7 +18,6 @@ import type { EBMessageAddress } from '../types/EBMessageAddress.js'
 import type { InstanceId } from '../types/InstanceId.js'
 import type { Logger } from '../types/Logger.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
-import type { ServiceObservabilityContext } from '../types/ServiceObservability.js'
 import type {
 	InFlightExecutionCounts,
 	PausedSubscriptionConsumersByRegistrationKey,
@@ -45,6 +44,7 @@ import { EventBridgeStreamLateFrameHandling } from './types/EventBridgeStreamLat
  */
 export class EventBridgeBaseClass<ConfigType> {
 	logger: Logger
+	traceProvider: NodeTracerProvider
 	protected metricsRecorder: PuristaMetricsRecorder
 
 	config: Complete<EventBridgeConfig<ConfigType>>
@@ -90,20 +90,8 @@ export class EventBridgeBaseClass<ConfigType> {
 	defaultCommandTimeout: Readonly<number>
 	/** @internal Runtime tracker; adapter implementations must not depend on it. */
 	protected readonly inFlightExecutions = new InFlightExecutionTracker()
-	private readonly hasExplicitLogger: boolean
-	private readonly hasExplicitMetrics: boolean
-	private readonly hasExplicitSpanProcessor: boolean
-	private hasInheritedLogger = false
-	private hasInheritedMetrics = false
-	private hasInheritedSpanProcessor = false
-	private spanProcessor?: SpanProcessor
-	private traceProviderInstance?: NodeTracerProvider
-	private observabilityLocked = false
 	constructor(name: string, config: EventBridgeConfig<ConfigType>) {
 		this.name = name
-		this.hasExplicitLogger = config?.logger !== undefined
-		this.hasExplicitMetrics = config?.metrics !== undefined || config?.metricsRecorder !== undefined
-		this.hasExplicitSpanProcessor = config?.spanProcessor !== undefined
 		const logger = config?.logger ?? initLogger(config?.logLevel)
 		this.logger = logger.getChildLogger({ name })
 
@@ -132,74 +120,7 @@ export class EventBridgeBaseClass<ConfigType> {
 
 		this.defaultCommandTimeout = config.defaultCommandTimeout ?? 30000
 
-		this.spanProcessor = config.spanProcessor
-	}
-
-	/**
-	 * Apply service observability where an event bridge can do so safely before use.
-	 *
-	 * Explicit bridge options always win. Logger and metrics settings can be
-	 * replaced until the bridge starts or creates a tracer. The tracer provider
-	 * is created lazily so a service-owned processor can be selected without
-	 * registering and then replacing an OpenTelemetry provider.
-	 *
-	 * @group Observability
-	 */
-	inheritServiceObservability(context: ServiceObservabilityContext): void {
-		if (this.observabilityLocked) {
-			return
-		}
-
-		if (!this.hasExplicitLogger && !this.hasInheritedLogger) {
-			const logger = context.logger.getChildLogger({ name: this.name })
-			this.logger = logger
-			this.hasInheritedLogger = true
-		}
-
-		if (!this.hasExplicitMetrics && !this.hasInheritedMetrics && (context.metrics || context.metricsRecorder)) {
-			this.metricsRecorder =
-				context.metricsRecorder ??
-				(context.metrics?.enabled === false
-					? createNoopMetricsRecorder()
-					: new OpenTelemetryMetricsRecorder({
-							...context.metrics,
-							defaultAttributes: {
-								'purista.bridge.name': this.name,
-								'purista.bridge.type': 'event',
-								...context.metrics?.defaultAttributes,
-							},
-						}))
-			this.hasInheritedMetrics = true
-		}
-
-		if (!this.hasExplicitSpanProcessor && !this.hasInheritedSpanProcessor && context.spanProcessor) {
-			this.spanProcessor = context.spanProcessor
-			this.hasInheritedSpanProcessor = true
-		}
-	}
-
-	/**
-	 * OpenTelemetry provider used by this bridge.
-	 *
-	 * Reading this property finalizes observability configuration. Applications
-	 * normally let `start()` do that after service instances are constructed.
-	 */
-	get traceProvider(): NodeTracerProvider {
-		return this.getTraceProvider()
-	}
-
-	/** Mark a built-in bridge as started so observability cannot be changed. */
-	protected markObservabilityStarted() {
-		this.observabilityLocked = true
-		this.getTraceProvider()
-	}
-
-	private getTraceProvider(): NodeTracerProvider {
-		this.observabilityLocked = true
-		if (!this.traceProviderInstance) {
-			this.traceProviderInstance = this.createTraceProvider(this.spanProcessor)
-		}
-		return this.traceProviderInstance
+		this.traceProvider = this.createTraceProvider(config.spanProcessor)
 	}
 
 	private createTraceProvider(spanProcessor?: SpanProcessor): NodeTracerProvider {
@@ -223,7 +144,7 @@ export class EventBridgeBaseClass<ConfigType> {
 	 * @returns Tracer
 	 */
 	getTracer() {
-		return this.getTraceProvider().getTracer('DefaultEventBridge', puristaVersion)
+		return this.traceProvider.getTracer('DefaultEventBridge', puristaVersion)
 	}
 
 	/**
@@ -331,9 +252,7 @@ export class EventBridgeBaseClass<ConfigType> {
 	}
 
 	async destroy() {}
-	async start() {
-		this.markObservabilityStarted()
-	}
+	async start() {}
 
 	runInFlight<T>(
 		fn: () => Promise<T>,

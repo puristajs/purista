@@ -100,16 +100,15 @@ const meterProvider = new MeterProvider({ readers: [metricReader] })
 metrics.setGlobalMeterProvider(meterProvider)
 const meter = meterProvider.getMeter('my-app')
 
-// 3. Construct the bridge. Do not repeat telemetry settings here.
-const eventBridge = new AmqpBridge()
+// 3. Configure each runtime instance explicitly. A bridge can be shared by
+// several services, so service construction never mutates it.
+const runtimeObservability = { spanProcessor, metrics: { meter } }
+const eventBridge = new AmqpBridge(runtimeObservability)
 
-// 4. Pass service-owned telemetry once before the bridge starts. Default
-// Core stores inherit a missing logger; Core EventBridgeBaseClass adapters
-// inherit missing logger, span processor, and metrics/metricsRecorder values.
-// DefaultQueueBridge also inherits an explicitly supplied metricsRecorder.
+// 4. Configure the service separately. Reusing the same object is explicit;
+// it is not an adapter cascade.
 const myService = await myV1Service.getInstance(eventBridge, {
-  spanProcessor,
-  metrics: { meter },
+  ...runtimeObservability,
 })
 await eventBridge.start()
 await myService.start()
@@ -117,15 +116,11 @@ await myService.start()
 
 Every command, subscription, stream, and queue job inside `myService` automatically emits spans correlated to the same trace — no changes to your business logic required.
 
-An adapter constructed outside the service can only inherit through its
-documented `inheritServiceObservability(...)` hook and only before it starts
-or creates a tracer. Late changes are ignored; PURISTA never rewires a live
-provider pipeline, and static `purista inspect`/`doctor` does not claim live
-provider health.
-
-A shared event bridge has one telemetry pipeline. If services sharing that
-bridge need different telemetry configuration, configure the bridge explicitly
-instead of relying on service inheritance.
+An adapter constructed outside a service owns its own runtime configuration.
+Pass logger, tracing, and metrics to that adapter when constructing it; do not
+change it through a service. A shared event bridge has one telemetry pipeline,
+so configure it explicitly when services need different telemetry. Static
+`purista inspect`/`doctor` does not claim live provider health.
 
 ### Graceful shutdown
 

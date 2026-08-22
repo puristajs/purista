@@ -103,31 +103,6 @@ describe('ServiceBuilder', () => {
 		})
 	})
 
-	it('cascades service observability through opt-in adapters before service startup', async () => {
-		const stateStore = {
-			name: 'observability-aware-state-store',
-			capabilities: { retention: { atomicExpiry: true } },
-			getState: vi.fn(),
-			removeState: vi.fn(),
-			setState: vi.fn(),
-			destroy: vi.fn(),
-			inheritServiceObservability: vi.fn(),
-		}
-		const service = new ServiceBuilder(serviceInfo)
-		const eventBridge = getEventBridgeMock(sandbox)
-		const logger = getLoggerMock(sandbox)
-
-		const instance = await service.getInstance(eventBridge.mock, {
-			stateStore,
-			logger: logger.mock,
-		})
-
-		expect(stateStore.inheritServiceObservability).toHaveBeenCalledWith(
-			expect.objectContaining({ logger: logger.mock }),
-		)
-		expect(instance).toBeInstanceOf(Service)
-	})
-
 	it('throws when definitions are not resolved', () => {
 		const service = new ServiceBuilder(serviceInfo)
 

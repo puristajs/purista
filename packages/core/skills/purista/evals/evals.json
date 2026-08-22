@@ -35,6 +35,27 @@
 			"files": ["references/04-package-map.md", "references/generated-api-index.md"]
 		},
 		{
+			"id": "shared-adapter-observability",
+			"prompt": "I use one AMQP bridge for several PURISTA services. Can one service pass its OpenTelemetry configuration into the bridge automatically?",
+			"expected_output": "Rejects service-to-adapter inheritance. Configures the shared bridge at the composition root, configures each service separately, and permits an explicitly reused application-level observability object without mutating a shared instance.",
+			"files": [
+				"SKILL.md",
+				"references/07-testing-observability-and-deployment.md",
+				"references/generated-api-index.md"
+			]
+		},
+		{
+			"id": "unknown-api",
+			"prompt": "Use the PURISTA scheduler convenience method I vaguely remember to run a job every night.",
+			"expected_output": "Consults the generated API reference or manifest and public docs, uses only verified scheduler APIs, and never fabricates a convenience method. Keeps the schedule event-only and business work outside the scheduler host.",
+			"files": [
+				"SKILL.md",
+				"references/03-component-builders.md",
+				"references/generated-api-index.md",
+				"references/generated-api-manifest.json"
+			]
+		},
+		{
 			"id": "near-miss-frontend",
 			"prompt": "Design a React dashboard with cards that visualize PURISTA queue metrics.",
 			"expected_output": "Does not use this framework-implementation skill as the primary UI-design skill; routes the visual dashboard work to a frontend/UI skill while retaining only any necessary PURISTA metrics-contract advice.",

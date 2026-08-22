@@ -7,6 +7,11 @@ const root = process.cwd()
 const skillsRoot = resolve(root, 'skills')
 const issues = []
 const requiredSkillNames = ['purista', 'purista-migration', 'purista-skill-maintainer']
+const prohibitedPublicSkillClaims = [
+	[/\bServiceObservability(?:Context|Aware)?\b/, 'must not teach the removed service observability type or hook'],
+	[/\binheritServiceObservability\b/, 'must not teach service-to-adapter observability inheritance'],
+	[/\bobservabilityReport\b/, 'must not teach the removed observability report API'],
+]
 
 const readText = path => readFileSync(path, 'utf8')
 
@@ -79,6 +84,12 @@ for (const skillDir of skillDirs) {
 		addIssue(skillFile, 'SKILL.md should stay under 500 lines and move depth into references')
 	}
 
+	if (skillName !== 'purista-skill-maintainer') {
+		for (const [pattern, message] of prohibitedPublicSkillClaims) {
+			if (pattern.test(skillText)) addIssue(skillFile, message)
+		}
+	}
+
 	if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(skillText)) {
 		addIssue(skillFile, 'user-facing skills must not reference internal specs')
 	}
@@ -107,6 +118,11 @@ for (const skillDir of skillDirs) {
 		}
 
 		const referenceText = readText(reference)
+		if (skillName !== 'purista-skill-maintainer') {
+			for (const [pattern, message] of prohibitedPublicSkillClaims) {
+				if (pattern.test(referenceText)) addIssue(reference, message)
+			}
+		}
 		if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(referenceText)) {
 			addIssue(reference, 'user-facing skill references must not reference internal specs')
 		}
@@ -158,6 +174,24 @@ for (const skillName of requiredSkillNames) {
 const puristaEvalScenarios = join(skillsRoot, 'purista', 'references', '11-evaluation-scenarios.md')
 if (!existsSync(puristaEvalScenarios)) {
 	addIssue(puristaEvalScenarios, 'canonical purista skill should include concrete evaluation scenarios')
+}
+
+const generatedApiIndex = join(skillsRoot, 'purista', 'references', 'generated-api-index.md')
+const generatedApiManifest = join(skillsRoot, 'purista', 'references', 'generated-api-manifest.json')
+if (!existsSync(generatedApiManifest)) {
+	addIssue(generatedApiManifest, 'complete generated public API manifest is missing')
+} else {
+	try {
+		const manifest = JSON.parse(readText(generatedApiManifest))
+		if (!Array.isArray(manifest.packages) || manifest.packages.length === 0) {
+			addIssue(generatedApiManifest, 'must contain generated package export inventories')
+		}
+	} catch {
+		addIssue(generatedApiManifest, 'must be valid JSON')
+	}
+}
+if (!existsSync(generatedApiIndex) || !/TypeDoc-verified examples/.test(readText(generatedApiIndex))) {
+	addIssue(generatedApiIndex, 'must expose TypeDoc-verified primary API examples')
 }
 
 const migrationSkill = join(skillsRoot, 'purista-migration', 'SKILL.md')

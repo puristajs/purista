@@ -31,14 +31,16 @@ Avoid tests that only validate raw helper functions while skipping builder metad
 ## Observability
 PURISTA core wraps service, command, stream, subscription, queue, and HTTP execution with logger, OpenTelemetry trace context, and OpenTelemetry Metrics API recording. Package code should preserve those context surfaces.
 
-Use one `getInstance(..., { logger, spanProcessor, metrics, metricsRecorder })`
-configuration for a service. Opt-in adapters inherit only missing values;
-explicit component configuration wins. Core `EventBridgeBaseClass` adapters
-inherit logger, metrics, and span processor values when they are passed to
-`getInstance(...)` before `eventBridge.start()` or any bridge tracing call.
-That first use fixes the bridge telemetry configuration. Do not change a
-running bridge, and do not infer inheritance for an adapter that does not
-implement `inheritServiceObservability(...)`.
+Observability is owned by the composition root, not by a service. Configure
+each bridge, store, and queue instance when it is constructed; those instances
+may be shared by more than one service and must never be changed by a later
+`getInstance(...)` call. A service receives its own flat
+`{ logger, spanProcessor, metrics, metricsRecorder }` runtime options.
+
+When the same settings are intentional, define one immutable application-level
+configuration object and pass it explicitly to every compatible constructor and
+service instance. Do not invent a cascade, a mutation hook, or a rule that a
+service can own a shared adapter.
 
 Metrics guidance:
 - core records through the OTel Metrics API and stays SDK/exporter-neutral

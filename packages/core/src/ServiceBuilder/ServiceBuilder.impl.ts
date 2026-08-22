@@ -18,7 +18,6 @@ import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/
 import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
-import { createServiceObservabilityContext } from '../core/observability/createServiceObservabilityContext.impl.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
 import { Service } from '../core/Service/Service.impl.js'
@@ -54,7 +53,6 @@ import type {
 import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
-import type { ServiceObservabilityAware, ServiceObservabilityContext } from '../core/types/ServiceObservability.js'
 import type { SetNewTypeValue, SetNewTypeValues } from '../core/types/SetNewTypeValue.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
@@ -65,6 +63,7 @@ import type {
 	SubscriptionDefinitionListResolved,
 } from '../core/types/subscription/SubscriptionDefinitionList.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/initDefaultConfigStore.impl.js'
+import { initLogger } from '../DefaultLogger/initLogger.impl.js'
 import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
@@ -461,23 +460,22 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.SClass
 	}
 
-	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
+	/**
+	 * Create a runnable service instance with runtime bridges, stores, resources,
+	 * telemetry, and agent bindings.
+	 *
+	 * This method configures only the returned service. A supplied EventBridge,
+	 * QueueBridge, or store can be shared by multiple services and is never
+	 * mutated. Configure every runtime adapter explicitly at the application
+	 * composition root.
+	 */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
-		const observability = createServiceObservabilityContext({
-			logger: options?.logger,
-			logLevel: options?.logLevel,
-			spanProcessor: options?.spanProcessor,
-			metrics: options?.metrics,
-			metricsRecorder: options?.metricsRecorder,
-		})
-		const logger = observability.logger
+		const logger = options?.logger ?? initLogger(options?.logLevel)
 		const rawStateStore: StateStore =
 			options?.stateStore ??
 			initDefaultStateStore({
 				logger,
 			})
-		this.inheritServiceObservability(rawStateStore, observability)
-		this.inheritServiceObservability(eventBridge, observability)
 		const stateStore = createStateStoreRetentionView(rawStateStore, options?.stateRetention)
 		const agentRuntimeScope = createAgentRuntimeScope()
 		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
@@ -534,10 +532,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			})
 
 		const queueBridge: QueueBridge = options?.queueBridge ?? new DefaultQueueBridge()
-		this.inheritServiceObservability(secretStore, observability)
-		this.inheritServiceObservability(configStore, observability)
-		this.inheritServiceObservability(queueBridge, observability)
-
 		const { commands, subscriptions, streams, queues, queueWorkers, eventToQueueBindings } =
 			await this.resolveDefinitions()
 
@@ -553,7 +547,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			queueDefinitionList: queues,
 			queueWorkerDefinitionList: queueWorkers,
 			config,
-			spanProcessor: observability.spanProcessor,
+			spanProcessor: options?.spanProcessor,
 			secretStore,
 			configStore,
 			stateStore,
@@ -561,8 +555,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			queueJobStore: options?.queueJobStore,
 			eventToQueueBindingList: eventToQueueBindings,
 			configSchema: this.configSchema,
-			metrics: observability.metrics,
-			metricsRecorder: observability.metricsRecorder,
+			metrics: options?.metrics,
+			metricsRecorder: options?.metricsRecorder,
 			metricDefinitionList: this.customMetricDefinitions,
 			resources: options?.resources,
 		})
@@ -582,13 +576,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		}
 
 		return service
-	}
-
-	private inheritServiceObservability(component: unknown, observability: ServiceObservabilityContext): void {
-		if (typeof component !== 'object' || component === null || !('inheritServiceObservability' in component)) {
-			return
-		}
-		;(component as ServiceObservabilityAware).inheritServiceObservability(observability)
 	}
 
 	/** Create a command builder scoped to this service's resource and metric types. */
