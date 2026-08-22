@@ -1,4 +1,4 @@
-import type { QueryParameter } from '@purista/core'
+import type { QueryParameter } from '@purista/core/adapter'
 import type { ParameterObject, SchemaObject } from 'openapi3-ts/oas31'
 import { isReferenceObject } from 'openapi3-ts/oas31'
 

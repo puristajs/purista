@@ -1,4 +1,4 @@
-import type { EventBridgeBaseClass } from '@purista/core'
+import type { EventBridgeBaseClass } from '@purista/core/adapter'
 import type { Codec, NatsConnection } from 'nats'
 import type { NatsBridgeConfig } from './NatsBridgeConfig.js'
 

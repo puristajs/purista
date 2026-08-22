@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
-import { getLoggerMock } from '@purista/core'
+import { getLoggerMock } from '@purista/core/adapter'
 
 import { InfisicalSecretStore } from '../src/InfisicalSecretStore.impl.js'
 

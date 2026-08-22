@@ -16,7 +16,7 @@ export type StateStoreRetentionCapabilities = {
  * Capability matrix for a state store adapter.
  *
  * Adapters must report guarantees honestly. PURISTA rejects an expiring write
- * through {@link StateStoreBaseClass} when `atomicExpiry` is false instead of
+ * through the adapter base class when `atomicExpiry` is false instead of
  * silently dropping the requested retention.
  *
  * @group Store

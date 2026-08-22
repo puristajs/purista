@@ -5,7 +5,7 @@ import {
 	HandledError,
 	ServiceBuilder,
 	StatusCode,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'

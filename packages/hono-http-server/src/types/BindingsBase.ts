@@ -1,4 +1,4 @@
-import type { EmptyObject } from '@purista/core'
+import type { EmptyObject } from '@purista/core/adapter'
 
 /**
  * Base Hono bindings type used by the Hono HTTP service.

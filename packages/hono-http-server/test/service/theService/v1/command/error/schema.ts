@@ -1,4 +1,4 @@
-import { extendApi } from '@purista/core'
+import { extendApi } from '@purista/core/adapter'
 import { z } from 'zod'
 
 // define the input parameters

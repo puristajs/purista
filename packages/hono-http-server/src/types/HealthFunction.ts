@@ -1,4 +1,4 @@
-import type { Service } from '@purista/core'
+import type { Service } from '@purista/core/adapter'
 
 /**
  * Health callback for the Hono HTTP service.

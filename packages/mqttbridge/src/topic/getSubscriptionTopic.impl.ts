@@ -1,7 +1,7 @@
 import { join } from 'node:path/posix'
 
-import type { Subscription } from '@purista/core'
-import { convertToSnakeCase } from '@purista/core'
+import type { Subscription } from '@purista/core/adapter'
+import { convertToSnakeCase } from '@purista/core/adapter'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
 /**

@@ -1,6 +1,6 @@
 import { getDefaultHttpEventBridgeConfig, HttpEventBridge } from '@purista/base-http-bridge'
-import type { CustomMessage, EBMessage, EventBridge, EventBridgeConfig, Subscription } from '@purista/core'
-import { initLogger, StatusCode, safeBind, UnhandledError } from '@purista/core'
+import type { CustomMessage, EBMessage, EventBridge, EventBridgeConfig, Subscription } from '@purista/core/adapter'
+import { initLogger, StatusCode, safeBind, UnhandledError } from '@purista/core/adapter'
 
 import { DaprClient } from '../DaprClient/DaprClient.impl.js'
 import type { DaprPubSubType } from '../types/pubsub/DaprPubSub.type.js'

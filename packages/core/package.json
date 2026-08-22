@@ -58,6 +58,14 @@
 		"./testing": {
 			"types": "./dist/testing/index.d.ts",
 			"default": "./dist/testing/index.js"
+		},
+		"./adapter": {
+			"types": "./dist/adapter/index.d.ts",
+			"default": "./dist/adapter/index.js"
+		},
+		"./client": {
+			"types": "./dist/client/index.d.ts",
+			"default": "./dist/client/index.js"
 		}
 	},
 	"main": "./dist/index.js",

@@ -16,8 +16,15 @@ import type {
 	ServiceClassTypes,
 	ServiceConstructorInput,
 	StreamHandle,
-} from '@purista/core'
-import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
+} from '@purista/core/adapter'
+import {
+	HandledError,
+	isHttpExposedServiceMeta,
+	Service,
+	StatusCode,
+	safeBind,
+	UnhandledError,
+} from '@purista/core/adapter'
 import type { Handler, MiddlewareHandler } from 'hono'
 import { Hono } from 'hono'
 import { bodyLimit } from 'hono/body-limit'

@@ -2,7 +2,7 @@ import { mkdir, readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { ClientBuilder } from '../src/index.js'
+import { ClientBuilder } from '../src/client/index.js'
 
 describe('client-builder', () => {
 	const workPath = join(fileURLToPath(new URL('.', import.meta.url)))

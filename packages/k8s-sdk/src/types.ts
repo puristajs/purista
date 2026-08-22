@@ -1,4 +1,4 @@
-import type { Logger, Service } from '@purista/core'
+import type { Logger, Service } from '@purista/core/adapter'
 
 /**
  * Configuration for the Kubernetes-oriented Hono HTTP helper.

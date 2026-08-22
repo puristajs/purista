@@ -1,4 +1,4 @@
-import { getCommandMessageMock, getLoggerMock } from '@purista/core'
+import { getCommandMessageMock, getLoggerMock } from '@purista/core/adapter'
 import type { ConsumeMessage } from 'amqplib'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'

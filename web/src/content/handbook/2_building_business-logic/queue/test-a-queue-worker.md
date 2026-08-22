@@ -16,7 +16,7 @@ Queue workers also have two useful levels:
 Use the context mock when you want to focus on the worker logic itself.
 
 ```ts
-import { createQueueWorkerContextMock } from '@purista/core'
+import { createQueueWorkerContextMock } from '@purista/core/testing'
 
 const mock = createQueueWorkerContextMock(pingJobWorkerQueueWorkerBuilder, {
   queueName: 'pingJob',
@@ -60,7 +60,7 @@ expect(mock.stubs.agent['triagePing.1'].run.calledOnce).toBe(true)
 Use the harness when you want to verify the real worker runtime path.
 
 ```ts
-import { createQueueWorkerTestHarness } from '@purista/core'
+import { createQueueWorkerTestHarness } from '@purista/core/testing'
 
 const harness = await createQueueWorkerTestHarness(pingV1Service, pingJobWorkerQueueWorkerBuilder)
 

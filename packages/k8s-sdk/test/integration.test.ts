@@ -1,5 +1,5 @@
 import { serve } from '@hono/node-server'
-import { DefaultEventBridge, getLoggerMock, HttpClient, StatusCode, UnhandledError } from '@purista/core'
+import { DefaultEventBridge, getLoggerMock, HttpClient, StatusCode, UnhandledError } from '@purista/core/adapter'
 import { createSandbox } from 'sinon'
 
 import { getHttpServer } from '../src/index.js'

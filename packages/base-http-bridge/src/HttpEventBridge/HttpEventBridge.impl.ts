@@ -16,7 +16,7 @@ import type {
 	EventBridgeConfig,
 	HttpExposedServiceMeta,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	deserializeOtp,
 	EBMessageType,
@@ -37,7 +37,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import { PatternRouter } from 'hono/router/pattern-router'

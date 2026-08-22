@@ -1,4 +1,4 @@
-import type { Complete, EventBridgeConfig } from '@purista/core'
+import type { Complete, EventBridgeConfig } from '@purista/core/adapter'
 
 import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
 

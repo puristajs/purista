@@ -93,6 +93,7 @@ export class EventBridgeBaseClass<ConfigType> {
 	instanceId: Readonly<InstanceId>
 
 	defaultCommandTimeout: Readonly<number>
+	/** @internal Runtime tracker; adapter implementations must not depend on it. */
 	protected readonly inFlightExecutions = new InFlightExecutionTracker()
 	private readonly hasExplicitLogger: boolean
 	private readonly hasExplicitMetrics: boolean

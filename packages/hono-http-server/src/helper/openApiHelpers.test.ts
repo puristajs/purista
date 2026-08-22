@@ -1,5 +1,5 @@
-import type { HttpExposedServiceMeta } from '@purista/core'
-import { StatusCode } from '@purista/core'
+import type { HttpExposedServiceMeta } from '@purista/core/adapter'
+import { StatusCode } from '@purista/core/adapter'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 import { describe, expect, it } from 'vitest'
 

@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { HttpClient, SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core/adapter'
+import { HttpClient, SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
 import type { DaprClientConfig } from '../DaprClient/types/DaprClientConfig.js'

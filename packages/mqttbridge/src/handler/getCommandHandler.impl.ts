@@ -8,7 +8,7 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessage,
 	EBMessageAddress,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createErrorResponse,
 	deserializeOtp,
@@ -18,7 +18,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
 import { msToSec } from '../msToSec.impl.js'

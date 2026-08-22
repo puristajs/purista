@@ -1,4 +1,4 @@
-import type { ServiceInfoType } from '@purista/core'
+import type { ServiceInfoType } from '@purista/core/adapter'
 
 /**
  * Shared service metadata for the built-in Hono HTTP service.

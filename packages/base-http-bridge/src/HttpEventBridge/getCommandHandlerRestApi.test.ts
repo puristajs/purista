@@ -5,8 +5,8 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessageAddress,
 	HttpExposedServiceMeta,
-} from '@purista/core'
-import { EBMessageType, getLoggerMock, StatusCode } from '@purista/core'
+} from '@purista/core/adapter'
+import { EBMessageType, getLoggerMock, StatusCode } from '@purista/core/adapter'
 import { Hono } from 'hono'
 import { describe, expect, it, vi } from 'vitest'
 

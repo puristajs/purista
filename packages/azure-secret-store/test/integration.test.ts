@@ -4,7 +4,7 @@ import net from 'node:net'
 import { resolve } from 'node:path'
 
 import { DefaultAzureCredential } from '@azure/identity'
-import { getLoggerMock } from '@purista/core'
+import { getLoggerMock } from '@purista/core/adapter'
 import { stub } from 'sinon'
 
 import { AzureSecretStore } from '../src/AzureSecretStore.impl.js'

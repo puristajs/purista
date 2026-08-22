@@ -1,6 +1,6 @@
 import type { SecretsManagerClient } from '@aws-sdk/client-secrets-manager'
 import { CreateSecretCommand, ResourceNotFoundException, UpdateSecretCommand } from '@aws-sdk/client-secrets-manager'
-import { StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core/adapter'
 import { describe, expect, it, vi } from 'vitest'
 import { AWSSecretStore } from './AWSSecretStore.impl.js'
 

@@ -1,4 +1,4 @@
-import { HttpClient, StatusCode, UnhandledError } from '@purista/core'
+import { HttpClient, StatusCode, UnhandledError } from '@purista/core/adapter'
 
 import { SECRET_TYPE } from './constants.js'
 import { decrypt } from './decrypt.impl.js'

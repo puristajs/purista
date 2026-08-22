@@ -11,7 +11,7 @@ import type {
 	EventBridge,
 	EventBridgeConfig,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createErrorResponse,
 	createInfoMessage,
@@ -36,7 +36,7 @@ import {
 	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { ChannelModel, ConfirmChannel } from 'amqplib'
 import amqplib from 'amqplib'
 

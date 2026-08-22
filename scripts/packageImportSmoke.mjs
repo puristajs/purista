@@ -15,6 +15,12 @@ const packages = readdirSync(packageRoot)
 	.filter(({ manifest }) => manifest.private !== true && manifest.name?.startsWith('@purista/'))
 	.sort((left, right) => left.manifest.name.localeCompare(right.manifest.name))
 
+const coreSubpathChecks = [
+	{ specifier: '@purista/core/testing', exports: ['createCommandTestHarness', 'safeBind'] },
+	{ specifier: '@purista/core/client', exports: ['ClientBuilder', 'HttpClient'] },
+	{ specifier: '@purista/core/adapter', exports: ['EventBridgeBaseClass', 'StateStoreBaseClass'] },
+]
+
 if (packages.length === 0) {
 	throw new Error('No public @purista workspace packages found.')
 }
@@ -57,6 +63,12 @@ try {
 			({ manifest }) =>
 				`await import(${JSON.stringify(manifest.name)});\nconsole.log(${JSON.stringify(manifest.name)});`,
 		)
+		.concat(
+			coreSubpathChecks.map(
+				check =>
+					`{ const entry = await import(${JSON.stringify(check.specifier)}); for (const name of ${JSON.stringify(check.exports)}) { if (!(name in entry)) throw new Error(${JSON.stringify(check.specifier)} + ' is missing ' + name); } console.log(${JSON.stringify(check.specifier)}); }`,
+			),
+		)
 		.join('\n')
 
 	execFileSync(process.execPath, ['--input-type=module', '--eval', importChecks], {
@@ -64,7 +76,9 @@ try {
 		stdio: 'inherit',
 	})
 
-	process.stdout.write(`Package import smoke passed for ${packages.length} package(s).\n`)
+	process.stdout.write(
+		`Package import smoke passed for ${packages.length} package(s) and ${coreSubpathChecks.length} Core subpath(s).\n`,
+	)
 } finally {
 	rmSync(tempRoot, { force: true, recursive: true })
 }

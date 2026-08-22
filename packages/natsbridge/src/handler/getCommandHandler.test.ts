@@ -1,5 +1,5 @@
 import type { Span } from '@opentelemetry/api'
-import { EBMessageType, getCommandErrorMessageMock, getCommandMessageMock, getLoggerMock } from '@purista/core'
+import { EBMessageType, getCommandErrorMessageMock, getCommandMessageMock, getLoggerMock } from '@purista/core/adapter'
 import type { Msg } from 'nats'
 import { JSONCodec } from 'nats'
 import { describe, expect, it, vi } from 'vitest'

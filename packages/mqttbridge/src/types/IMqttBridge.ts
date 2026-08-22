@@ -1,4 +1,4 @@
-import type { EventBridgeBaseClass, PendingInvocationRegistry } from '@purista/core'
+import type { EventBridgeBaseClass, PendingInvocationRegistry } from '@purista/core/adapter'
 import type { MqttClient } from 'mqtt'
 import type { MqttBridgeConfig } from './MqttBridgeConfig.js'
 

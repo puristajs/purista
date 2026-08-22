@@ -1,4 +1,4 @@
-import { StatusCode, UnhandledError, type UnhandledError as UnhandledErrorType } from '@purista/core'
+import { StatusCode, UnhandledError, type UnhandledError as UnhandledErrorType } from '@purista/core/adapter'
 import { describe, expect, it, vi } from 'vitest'
 import { InfisicalClient } from './InfisicalClient.impl.js'
 import type { TokenData } from './types/TokenData.js'

@@ -1,6 +1,6 @@
 ---
 title: HTTP Client
-description: Use the fetch-based HttpClient class from @purista/core to call external HTTP APIs with automatic OTel tracing and error handling.
+description: Use the fetch-based HttpClient class from @purista/core/client to call external HTTP APIs with automatic OTel tracing and error handling.
 order: 208000
 ---
 
@@ -24,7 +24,7 @@ Timeout handling is provided out of the box and can be configured in the constru
 ## Example
 
 ```typescript
-import { HttpClient } from '@purista/core'
+import { HttpClient } from '@purista/core/client'
 
 type LoginResponse = {
   token: string

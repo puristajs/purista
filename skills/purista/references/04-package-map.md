@@ -8,7 +8,10 @@ Use this reference when choosing packages or checking dependency boundaries.
 
 ### Framework and HTTP
 
-- `@purista/core`: builders, service runtime, schemas, messages, stores, event/queue contracts, testing helpers, architecture exports, and the trigger-only Scheduler Runtime/Builder. `DefaultSchedulerProvider` is local/test only. Do not add `@purista/contracts` for this release line.
+- `@purista/core`: application builders, service runtime, schemas, message/store/event/queue contracts, architecture exports, and the trigger-only Scheduler Runtime/Builder. `DefaultSchedulerProvider` is local/test only. Do not add `@purista/contracts` for this release line.
+- `@purista/core/testing`: test harnesses, context/message mocks, and `safeBind`. Tests may import builders from this one explicit test subpath; production code must not.
+- `@purista/core/client`: `HttpClient` for outbound HTTP calls and `ClientBuilder` for generated clients from exported service definitions.
+- `@purista/core/adapter`: low-level bridge, store, transport, serialization, and base-class APIs. Use only when authoring a framework adapter; ordinary application code must not import it.
 - `@purista/cli`: project and artifact scaffolding. Applications use the generated project-local CLI for services, commands, subscriptions, streams, queues, workers, event-only schedules, and agents.
 - `@purista/hono-http-server`: active application HTTP/OpenAPI/SSE projection.
 - `@purista/base-http-bridge`: adapter-author infrastructure for HTTP/sidecar EventBridges; application HTTP APIs use Hono.

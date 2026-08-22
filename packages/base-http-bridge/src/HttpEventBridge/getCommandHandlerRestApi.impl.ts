@@ -15,7 +15,7 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessageAddress,
 	HttpExposedServiceMeta,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	EBMessageType,
 	getErrorMessageForCode,
@@ -26,7 +26,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'

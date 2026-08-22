@@ -1,5 +1,5 @@
-import type { ServiceInfoType } from '@purista/core'
-import { ServiceBuilder } from '@purista/core'
+import type { ServiceInfoType } from '@purista/core/adapter'
+import { ServiceBuilder } from '@purista/core/adapter'
 
 import { generalHonoServiceInfo } from '../generalHonoServiceInfo.js'
 import { HonoServiceClass } from './HonoServiceClass.js'

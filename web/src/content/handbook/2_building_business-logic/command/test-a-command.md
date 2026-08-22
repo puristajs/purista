@@ -23,7 +23,7 @@ That maps to the normal PURISTA flow:
 This is the normal starting point.
 
 ```ts
-import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core/testing'
 import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service.js'
@@ -98,7 +98,7 @@ That is the main advantage of the helper: the test stays aligned with the builde
 Use the harness when you care about the real PURISTA runtime path.
 
 ```ts
-import { createCommandTestHarness } from '@purista/core'
+import { createCommandTestHarness } from '@purista/core/testing'
 
 const harness = await createCommandTestHarness(userV1Service, signUpCommandBuilder)
 

@@ -1,5 +1,5 @@
 import type { SecretClient } from '@azure/keyvault-secrets'
-import { StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core/adapter'
 import { describe, expect, it, vi } from 'vitest'
 import { AzureSecretStore } from './AzureSecretStore.impl.js'
 

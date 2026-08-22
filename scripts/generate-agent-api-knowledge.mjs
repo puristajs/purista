@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const root = process.cwd()
 const apiPath = resolve(root, 'web/src/generated/purista-api.json')
@@ -26,7 +27,7 @@ const packageCatalog = [
 		section: 'Framework and scaffolding',
 		packageName: '@purista/core',
 		useWhen:
-			'Declaring service-owned contracts, runtime wiring, queues, agents, schedules, static architecture exports, and testing helpers.',
+			'Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports.',
 		names: [
 			'ServiceBuilder',
 			'CommandDefinitionBuilder',
@@ -178,6 +179,36 @@ const packageCatalog = [
 	},
 ]
 
+/**
+ * These application import boundaries are read directly from the Core package
+ * manifest. Keep the names and intent here compact: TypeDoc is the complete
+ * API reference, while this generated reference prevents an installed skill
+ * from teaching legacy root imports.
+ */
+const coreSubpathCatalog = [
+	{
+		path: '@purista/core',
+		useWhen: 'Application builders, runtime composition, contracts, schemas, and static architecture exports.',
+		names: ['ServiceBuilder', 'SchedulerBuilder', 'SchedulerRuntime'],
+	},
+	{
+		path: '@purista/core/testing',
+		useWhen: 'Test harnesses, context mocks, message mocks, and safeBind. Never use in production wiring.',
+		names: ['createCommandTestHarness', 'createSubscriptionContextMock', 'safeBind'],
+	},
+	{
+		path: '@purista/core/client',
+		useWhen: 'Outbound HttpClient and generated-client ClientBuilder utilities.',
+		names: ['ClientBuilder', 'HttpClient'],
+	},
+	{
+		path: '@purista/core/adapter',
+		useWhen:
+			'Framework adapter authors extending bridges, stores, transports, or low-level contracts; not ordinary application handlers.',
+		names: ['EventBridgeBaseClass', 'ConfigStoreBaseClass', 'StateStoreBaseClass'],
+	},
+]
+
 const kinds = new Map([
 	[32, 'variable'],
 	[64, 'function'],
@@ -228,6 +259,30 @@ if (duplicateCatalogEntries.length || missingCatalogEntries.length || staleCatal
 	)
 }
 
+const coreManifestPath = resolve(root, 'packages', 'core', 'package.json')
+const coreManifest = JSON.parse(readFileSync(coreManifestPath, 'utf8'))
+for (const entry of coreSubpathCatalog) {
+	const exportPath = entry.path.replace('@purista/core', '.')
+	if (!coreManifest.exports?.[exportPath]) {
+		issues.push(`${entry.path} is missing from @purista/core package exports`)
+		continue
+	}
+	const compiledEntryPath = resolve(
+		root,
+		`packages/core/dist/${exportPath === '.' ? 'index' : `${exportPath.slice(2)}/index`}.js`,
+	)
+	if (!existsSync(compiledEntryPath)) {
+		issues.push(`${entry.path} compiled entrypoint is missing; run npm run build -w @purista/core first`)
+		continue
+	}
+	const compiledExports = await import(pathToFileURL(compiledEntryPath).href)
+	for (const name of entry.names) {
+		if (!(name in compiledExports)) {
+			issues.push(`${entry.path}.${name} is not a compiled public export`)
+		}
+	}
+}
+
 for (const surface of packageCatalog) {
 	const packageNode = packageNodes.get(surface.packageName)
 	if (!packageNode) {
@@ -276,6 +331,12 @@ const lines = [
 	`<!-- typedoc-digest: ${digest} -->`,
 	'',
 	'This reference covers every published `@purista/*` package. Use it in an installed skill to select the package and primary API for an application. It intentionally omits framework implementation paths, internal helpers, and release tooling. Follow the other skill references for ownership and distributed-system decisions.',
+	'',
+	'## Core Import Boundaries',
+	'',
+	...coreSubpathCatalog.map(
+		entry => `- \`${entry.path}\`: ${entry.useWhen} Key APIs: ${entry.names.map(name => `\`${name}\``).join(', ')}.`,
+	),
 	'',
 	'## Contents',
 	'',

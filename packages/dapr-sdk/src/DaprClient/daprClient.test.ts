@@ -1,5 +1,5 @@
-import type { EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
-import { getCommandMessageMock, getLoggerMock } from '@purista/core'
+import type { EBMessageAddress, HttpExposedServiceMeta } from '@purista/core/adapter'
+import { getCommandMessageMock, getLoggerMock } from '@purista/core/adapter'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 

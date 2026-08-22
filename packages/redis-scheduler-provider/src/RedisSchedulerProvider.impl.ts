@@ -5,7 +5,7 @@ import type {
 	SchedulerOccurrenceClaim,
 	SchedulerProvider,
 	SchedulerProviderCapabilities,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { createClient } from '@redis/client'
 
 import type { RedisSchedulerClient, RedisSchedulerProviderOptions } from './types.js'

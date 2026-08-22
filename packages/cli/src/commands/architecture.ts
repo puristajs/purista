@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, isAbsolute, join } from 'node:path'
 
-import { createArchitectureManifest, validateArchitectureManifest } from '@purista/core'
+import { createArchitectureManifest, validateArchitectureManifest } from '@purista/core/adapter'
 import { z } from 'zod'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import { captureMutationSnapshot, createIssuesFromZod, createPendingResolution, createResult } from './shared.js'

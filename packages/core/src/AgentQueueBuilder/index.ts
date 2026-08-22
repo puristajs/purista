@@ -1,20 +1,6 @@
 export { AgentQueueBuilder } from './AgentQueueBuilder.js'
 export { AgentRunError } from './runtime/executor.js'
 export type {
-	AgentDurableWorkspaceTestRuntime,
-	AgentSkillTestRuntime,
-	CreateAgentContextMockInput,
-	CreateAgentSkillTestRuntimeSkill,
-	CreateAgentTestHarnessOptions,
-} from './testing/index.js'
-export {
-	createAgentContextMock,
-	createAgentDurableWorkspaceTestRuntime,
-	createAgentSkillTestRuntime,
-	createAgentTestHarness,
-	FakeModelProvider,
-} from './testing/index.js'
-export type {
 	AgentConversationId,
 	AgentConversationIdPath,
 	AgentDefinition,

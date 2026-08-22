@@ -1,5 +1,5 @@
-import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core'
-import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core/adapter'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 import type {
 	RedisClientType,
 	RedisFunctions,

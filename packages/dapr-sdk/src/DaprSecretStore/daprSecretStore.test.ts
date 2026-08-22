@@ -1,4 +1,4 @@
-import { HttpClient, UnhandledError } from '@purista/core'
+import { HttpClient, UnhandledError } from '@purista/core/adapter'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 

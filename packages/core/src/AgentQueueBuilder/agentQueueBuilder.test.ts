@@ -3,13 +3,8 @@ import { FakeModelProvider } from '@purista/harness/testing'
 import { vi } from 'vitest'
 import { z } from 'zod'
 
-import {
-	AgentQueueBuilder,
-	createAgentSkillTestRuntime,
-	createAgentTestHarness,
-	ServiceBuilder,
-	type ServiceInfoType,
-} from '../index.js'
+import { AgentQueueBuilder, ServiceBuilder, type ServiceInfoType } from '../index.js'
+import { createAgentSkillTestRuntime, createAgentTestHarness } from '../testing/index.js'
 import {
 	createAgentRuntimeScope,
 	getScopedAgentRuntime,

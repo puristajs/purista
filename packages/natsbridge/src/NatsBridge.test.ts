@@ -1,5 +1,5 @@
-import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
-import { StatusCode, type UnhandledError } from '@purista/core'
+import type { CustomMessage, EBMessage, Subscription } from '@purista/core/adapter'
+import { StatusCode, type UnhandledError } from '@purista/core/adapter'
 import type { JetStreamClient, JetStreamSubscription, NatsConnection, Subscription as NatsSubscription } from 'nats'
 import { describe, expect, it, vi } from 'vitest'
 import { NatsBridge } from './NatsBridge.js'

@@ -1,4 +1,4 @@
-import type { EBMessage } from '@purista/core'
+import type { EBMessage } from '@purista/core/adapter'
 import type { IPublishPacket } from 'mqtt'
 import type { IMqttBridge } from './IMqttBridge.js'
 

@@ -15,7 +15,7 @@ import type {
 	EventBridge,
 	EventBridgeConfig,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createInfoMessage,
 	deserializeOtp,
@@ -36,7 +36,7 @@ import {
 	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type {
 	JetStreamClient,
 	JetStreamManager,

@@ -49,6 +49,7 @@
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,
 	"includeVersion": true,
+	"treatWarningsAsErrors": true,
 	"excludeInternal": true,
 	"excludeExternals": true,
 	"exclude": [

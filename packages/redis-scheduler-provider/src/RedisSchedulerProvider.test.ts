@@ -1,4 +1,4 @@
-import { assertSchedulerProviderContract, type SchedulerOccurrence } from '@purista/core'
+import { assertSchedulerProviderContract, type SchedulerOccurrence } from '@purista/core/adapter'
 
 import { RedisSchedulerProvider } from './RedisSchedulerProvider.impl.js'
 import type { RedisSchedulerClient } from './types.js'

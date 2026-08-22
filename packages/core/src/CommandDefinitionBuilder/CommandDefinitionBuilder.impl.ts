@@ -37,6 +37,7 @@ import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
+/** Options for projecting a command as a synchronous or queued HTTP operation. */
 export type HttpExposureOptions = {
 	/** Execute HTTP requests synchronously or enqueue asynchronously when queue access is declared. */
 	mode?: 'sync' | 'async'

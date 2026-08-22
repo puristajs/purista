@@ -7,6 +7,8 @@ const packagesDir = resolve(rootDir, 'packages')
 
 export const getPuristaWorkspaceAliases = () => ({
 	'@purista/core/testing': resolve(packagesDir, 'core', 'src/testing/index.ts'),
+	'@purista/core/client': resolve(packagesDir, 'core', 'src/client/index.ts'),
+	'@purista/core/adapter': resolve(packagesDir, 'core', 'src/adapter/index.ts'),
 	...Object.fromEntries(
 		readdirSync(packagesDir, { withFileTypes: true })
 			.filter(entry => entry.isDirectory())

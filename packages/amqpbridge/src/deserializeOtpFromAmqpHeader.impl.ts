@@ -1,6 +1,6 @@
 import { context, propagation } from '@opentelemetry/api'
-import type { EBMessage, Logger } from '@purista/core'
-import { deserializeOtp } from '@purista/core'
+import type { EBMessage, Logger } from '@purista/core/adapter'
+import { deserializeOtp } from '@purista/core/adapter'
 import type { ConsumeMessage } from 'amqplib'
 
 import { decodeContent } from './decodeContent.impl.js'

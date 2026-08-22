@@ -49,7 +49,7 @@ console.log('Service is running. Press Ctrl+C to stop.')
 ### Example: first command test
 
 ```typescript [userSignUp.test.ts]
-import { createCommandTestHarness } from '@purista/core'
+import { createCommandTestHarness } from '@purista/core/testing'
 import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 import { userSignUpCommandBuilder } from './userSignUpCommandBuilder.js'
 

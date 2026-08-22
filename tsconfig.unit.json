@@ -3,6 +3,10 @@
 	"compilerOptions": {
 		"paths": {
 			"@purista/cli": ["./packages/cli/src/api/index.ts"],
+			"@purista/core": ["./packages/core/src/index.ts"],
+			"@purista/core/testing": ["./packages/core/src/testing/index.ts"],
+			"@purista/core/client": ["./packages/core/src/client/index.ts"],
+			"@purista/core/adapter": ["./packages/core/src/adapter/index.ts"],
 			"@purista/*": ["./packages/*/src/index.ts"]
 		}
 	},

@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core'
-import { HttpClient, StateStoreBaseClass } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core/adapter'
+import { HttpClient, StateStoreBaseClass } from '@purista/core/adapter'
 
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
 import type { DaprClientConfig } from '../DaprClient/types/DaprClientConfig.js'

@@ -1,4 +1,4 @@
-import { HandledError, StatusCode, UnhandledError } from '@purista/core'
+import { HandledError, StatusCode, UnhandledError } from '@purista/core/adapter'
 import { describe, expect, it } from 'vitest'
 
 import {

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const apiPath = resolve(process.cwd(), 'web/src/generated/purista-api.json')
 
@@ -50,6 +51,55 @@ const expectedExports = new Map([
 	],
 ])
 
+/**
+ * Runtime values that application code may import from `@purista/core`.
+ * Types remain deliberately broad because builders expose their typed contract
+ * vocabulary from this root. Everything else must use an explicit expert
+ * subpath: `/testing`, `/client`, or `/adapter`.
+ */
+const expectedCoreRuntimeExports = new Set([
+	'AgentQueueBuilder',
+	'AgentRunError',
+	'CommandDefinitionBuilder',
+	'DefaultConfigStore',
+	'DefaultEventBridge',
+	'DefaultLogger',
+	'DefaultQueueBridge',
+	'DefaultSchedulerProvider',
+	'DefaultSecretStore',
+	'DefaultStateStore',
+	'EBMessageType',
+	'HandledError',
+	'PuristaSpanName',
+	'PuristaSpanTag',
+	'QueueDefinitionBuilder',
+	'QueueWorkerBuilder',
+	'ScheduleDefinitionBuilder',
+	'SchedulerBuilder',
+	'SchedulerRuntime',
+	'Service',
+	'ServiceBuilder',
+	'StatusCode',
+	'StreamDefinitionBuilder',
+	'SubscriptionDefinitionBuilder',
+	'UnhandledError',
+	'createArchitectureManifest',
+	'exportCloudEventsSchema',
+	'exportScheduleManifest',
+	'exportServiceDefinitions',
+	'extendApi',
+	'fromCloudEvent',
+	'getNewInstanceId',
+	'getNewTraceId',
+	'gracefulShutdown',
+	'initLogger',
+	'isCustomMessage',
+	'toCloudEvent',
+	'toJSONSchema',
+	'validate',
+	'validateArchitectureManifest',
+])
+
 if (!existsSync(apiPath)) {
 	process.stderr.write(`API documentation JSON was not found at ${apiPath}. Run npm run build:api-docs first.\n`)
 	process.exit(2)
@@ -60,6 +110,53 @@ const packages = new Map(
 	(docs.children ?? []).map(entry => [entry.name, new Set((entry.children ?? []).map(child => child.name))]),
 )
 const issues = []
+
+const coreEntryPath = resolve(process.cwd(), 'packages/core/dist/index.js')
+if (!existsSync(coreEntryPath)) {
+	issues.push('@purista/core: compiled entrypoint is missing; run npm run build -w @purista/core first')
+} else {
+	const actual = new Set(Object.keys(await import(pathToFileURL(coreEntryPath).href)))
+	const missing = [...expectedCoreRuntimeExports].filter(name => !actual.has(name)).sort()
+	const unexpected = [...actual].filter(name => !expectedCoreRuntimeExports.has(name)).sort()
+	if (missing.length) issues.push(`@purista/core: missing approved runtime exports: ${missing.join(', ')}`)
+	if (unexpected.length) issues.push(`@purista/core: unreviewed runtime exports: ${unexpected.join(', ')}`)
+
+	const subpathRuntimeExports = new Set()
+	for (const subpath of ['testing', 'client', 'adapter']) {
+		const entryPath = resolve(process.cwd(), `packages/core/dist/${subpath}/index.js`)
+		if (!existsSync(entryPath)) {
+			issues.push(`@purista/core/${subpath}: compiled entrypoint is missing`)
+			continue
+		}
+		for (const name of Object.keys(await import(pathToFileURL(entryPath).href))) {
+			if (!actual.has(name)) subpathRuntimeExports.add(name)
+		}
+	}
+
+	const collectFiles = directory =>
+		readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+			const path = join(directory, entry.name)
+			return entry.isDirectory() ? collectFiles(path) : entry.isFile() ? [path] : []
+		})
+	const handbookRoot = resolve(process.cwd(), 'web/src/content/handbook')
+	const coreImportPattern = /import\s+(?:type\s+)?\{([\s\S]*?)\}\s+from\s+['"]@purista\/core['"]/g
+	for (const file of collectFiles(handbookRoot).filter(path => path.endsWith('.md'))) {
+		const source = readFileSync(file, 'utf8')
+		for (const match of source.matchAll(coreImportPattern)) {
+			const names = match[1]
+				.split(',')
+				.map(entry => entry.trim())
+				.filter(entry => entry && !entry.startsWith('type '))
+				.map(entry => entry.split(/\s+as\s+/)[0].trim())
+			const moved = names.filter(name => subpathRuntimeExports.has(name))
+			if (moved.length) {
+				issues.push(
+					`${file.replace(`${process.cwd()}/`, '')}: imports subpath API from @purista/core: ${moved.join(', ')}`,
+				)
+			}
+		}
+	}
+}
 
 for (const [packageName, expected] of expectedExports) {
 	const actual = packages.get(packageName)
@@ -80,4 +177,6 @@ if (issues.length) {
 	process.exit(1)
 }
 
-process.stdout.write(`PURISTA public API surface audit passed for ${expectedExports.size} package roots.\n`)
+process.stdout.write(
+	`PURISTA public API surface audit passed for @purista/core and ${expectedExports.size} adapter package roots.\n`,
+)

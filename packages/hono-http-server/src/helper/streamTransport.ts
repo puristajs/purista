@@ -1,5 +1,5 @@
-import type { StreamHandle } from '@purista/core'
-import { StatusCode } from '@purista/core'
+import type { StreamHandle } from '@purista/core/adapter'
+import { StatusCode } from '@purista/core/adapter'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 /**

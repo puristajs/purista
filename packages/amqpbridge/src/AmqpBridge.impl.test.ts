@@ -6,7 +6,7 @@ import {
 	type Subscription,
 	SubscriptionConsumerControlError,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { Channel } from 'amqplib'
 import { describe, expect, it, vi } from 'vitest'
 

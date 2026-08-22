@@ -1,5 +1,5 @@
-import type { ObjectWithKeysFromStringArray, StateStoreConfig } from '@purista/core'
-import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StateStoreConfig } from '@purista/core/adapter'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 import type { KV, NatsConnection } from 'nats'
 import { connect, JSONCodec } from 'nats'
 

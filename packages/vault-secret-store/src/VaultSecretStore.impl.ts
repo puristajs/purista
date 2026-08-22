@@ -4,7 +4,7 @@ import {
 	StatusCode,
 	type StoreBaseConfig,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import vault from 'node-vault'
 
 import type { VaultSecretStoreConfig } from './types.js'

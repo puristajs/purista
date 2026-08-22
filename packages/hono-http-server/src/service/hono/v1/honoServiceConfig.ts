@@ -1,4 +1,4 @@
-import { Service } from '@purista/core'
+import { Service } from '@purista/core/adapter'
 import { z } from 'zod'
 
 // define the service config schema and the default service configuration

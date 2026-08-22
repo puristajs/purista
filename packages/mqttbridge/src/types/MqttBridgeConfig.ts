@@ -1,4 +1,4 @@
-import type { Prettify } from '@purista/core'
+import type { Prettify } from '@purista/core/adapter'
 import type { IClientOptions } from 'mqtt'
 import type { QoS } from 'mqtt-packet'
 

@@ -7,7 +7,7 @@ import type {
 	CommandSuccessResponse,
 	DefinitionEventBridgeConfig,
 	EBMessageAddress,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createErrorResponse,
 	deserializeOtp,
@@ -18,7 +18,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { Msg, MsgHdrs } from 'nats'
 import { headers as getNewHeaders } from 'nats'
 

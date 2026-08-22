@@ -8,7 +8,7 @@ import {
 	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
-import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core'
+import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core/adapter'
 import {
 	EBMessageType,
 	HandledError,
@@ -18,7 +18,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { Hono, Context as HonoContext } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 

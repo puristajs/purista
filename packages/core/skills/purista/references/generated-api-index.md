@@ -1,9 +1,16 @@
 # Generated Agent API Reference
 
 <!-- Generated from the published API catalog; do not edit manually. -->
-<!-- typedoc-digest: 416ce2d9d8b6a834 -->
+<!-- typedoc-digest: 580dbea861a80939 -->
 
 This reference covers every published `@purista/*` package. Use it in an installed skill to select the package and primary API for an application. It intentionally omits framework implementation paths, internal helpers, and release tooling. Follow the other skill references for ownership and distributed-system decisions.
+
+## Core Import Boundaries
+
+- `@purista/core`: Application builders, runtime composition, contracts, schemas, and static architecture exports. Key APIs: `ServiceBuilder`, `SchedulerBuilder`, `SchedulerRuntime`.
+- `@purista/core/testing`: Test harnesses, context mocks, message mocks, and safeBind. Never use in production wiring. Key APIs: `createCommandTestHarness`, `createSubscriptionContextMock`, `safeBind`.
+- `@purista/core/client`: Outbound HttpClient and generated-client ClientBuilder utilities. Key APIs: `ClientBuilder`, `HttpClient`.
+- `@purista/core/adapter`: Framework adapter authors extending bridges, stores, transports, or low-level contracts; not ordinary application handlers. Key APIs: `EventBridgeBaseClass`, `ConfigStoreBaseClass`, `StateStoreBaseClass`.
 
 ## Contents
 
@@ -22,7 +29,7 @@ This reference covers every published `@purista/*` package. Use it in an install
 
 | Package | Use when | Primary validated API |
 | --- | --- | --- |
-| `@purista/core` | Declaring service-owned contracts, runtime wiring, queues, agents, schedules, static architecture exports, and testing helpers. | `ServiceBuilder`, `CommandDefinitionBuilder`, `SubscriptionDefinitionBuilder`, `StreamDefinitionBuilder`, `QueueDefinitionBuilder`, `QueueWorkerBuilder`, `AgentQueueBuilder`, `SchedulerBuilder`, `SchedulerRuntime`, `DefaultSchedulerProvider`, `createArchitectureManifest`, `validateArchitectureManifest`, `exportServiceDefinitions`, `exportScheduleManifest`, `ServiceObservabilityContext` |
+| `@purista/core` | Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports. | `ServiceBuilder`, `CommandDefinitionBuilder`, `SubscriptionDefinitionBuilder`, `StreamDefinitionBuilder`, `QueueDefinitionBuilder`, `QueueWorkerBuilder`, `AgentQueueBuilder`, `SchedulerBuilder`, `SchedulerRuntime`, `DefaultSchedulerProvider`, `createArchitectureManifest`, `validateArchitectureManifest`, `exportServiceDefinitions`, `exportScheduleManifest`, `ServiceObservabilityContext` |
 | `@purista/cli` | Initializing or scaffolding a PURISTA application; application agents use the generated project-local CLI, while package authors use this API only to extend CLI tooling. | `createPuristaCliEngine`, `runPuristaCommand` |
 | `@purista/hono-http-server` | Projecting builder-declared commands, streams, and async queue responses through Hono and OpenAPI. | `honoV1Service` |
 | `@purista/amqpbridge` | Connecting commands, events, subscriptions, and streams through an AMQP broker. | `AmqpBridge` |

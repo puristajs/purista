@@ -49,7 +49,7 @@ Use the generated EventBridge client when:
 ### Generate the client
 
 ```typescript
-import { ClientBuilder } from '@purista/core'
+import { ClientBuilder } from '@purista/core/client'
 
 const clientBuilder = new ClientBuilder({
   definitionPath: './definitions',

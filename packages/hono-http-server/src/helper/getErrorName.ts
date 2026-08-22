@@ -1,4 +1,4 @@
-import { StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core/adapter'
 
 /**
  * Runs the getErrorName helper exported by @purista/hono-http-server.

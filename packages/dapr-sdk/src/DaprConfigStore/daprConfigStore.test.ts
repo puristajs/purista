@@ -1,4 +1,4 @@
-import { HttpClient } from '@purista/core'
+import { HttpClient } from '@purista/core/adapter'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 

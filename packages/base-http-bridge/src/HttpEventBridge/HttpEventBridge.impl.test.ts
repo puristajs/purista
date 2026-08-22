@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events'
 
-import type { CommandResponse, EBMessage, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
-import { StatusCode, UnhandledError } from '@purista/core'
+import type { CommandResponse, EBMessage, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core/adapter'
+import { StatusCode, UnhandledError } from '@purista/core/adapter'
 import { describe, expect, it, vi } from 'vitest'
 import { HttpEventBridge } from './HttpEventBridge.impl.js'
 

@@ -13,8 +13,8 @@ import type {
 	QueueMessage,
 	QueueMetrics,
 	QueueRetryRequest,
-} from '@purista/core'
-import { StatusCode, UnhandledError } from '@purista/core'
+} from '@purista/core/adapter'
+import { StatusCode, UnhandledError } from '@purista/core/adapter'
 import type { Consumer, JetStreamClient, JetStreamManager, JsMsg, KV, NatsConnection, StoredMsg } from 'nats'
 import { AckPolicy, connect, DeliverPolicy, JSONCodec, nanos, RetentionPolicy, StorageType } from 'nats'
 

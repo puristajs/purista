@@ -30,7 +30,7 @@ export const getSubscriptionTestFileContent = (input: {
 
 	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
 	writer.writeLine(
-		`import { createSubscriptionContextMock, getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`,
+		`import { createSubscriptionContextMock, getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core/testing'`,
 	)
 	writer.writeLine(`import { createSandbox } from 'sinon'`)
 	writer.blankLine()

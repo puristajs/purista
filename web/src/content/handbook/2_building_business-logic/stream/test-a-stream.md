@@ -16,7 +16,7 @@ Streams have two useful testing levels:
 Use the context mock when you want to verify chunk and final payload logic directly.
 
 ```ts
-import { createStreamContextMock } from '@purista/core'
+import { createStreamContextMock } from '@purista/core/testing'
 
 const mock = createStreamContextMock(searchUsersStreamBuilder, {
   payload: { query: 'ada' },
@@ -46,7 +46,7 @@ Use this level when you want to verify:
 Use the harness when you want to verify the real stream runtime behavior.
 
 ```ts
-import { createStreamTestHarness } from '@purista/core'
+import { createStreamTestHarness } from '@purista/core/testing'
 
 const harness = await createStreamTestHarness(userV1Service, searchUsersStreamBuilder)
 

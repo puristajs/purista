@@ -35,6 +35,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
+- Import application builders, contracts, schemas, and runtime composition from `@purista/core`; test helpers only from `@purista/core/testing`; outbound HTTP/client generation only from `@purista/core/client`; and low-level adapter-author APIs only from `@purista/core/adapter`.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - Metrics use the OpenTelemetry Metrics API. Core stays SDK/exporter-neutral; applications own MeterProvider, readers, exporters, collectors, and Prometheus exposure.
 - Declare custom application metrics with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record them through typed `context.metrics`, and keep names under `app.*`.

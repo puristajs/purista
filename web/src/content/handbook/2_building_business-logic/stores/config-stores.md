@@ -132,7 +132,7 @@ import {
     StatusCode,
     StoreBaseConfig,
     type ObjectWithKeysFromStringArray 
-  } from '@purista/core'
+  } from '@purista/core/adapter'
 
 type CustomStoreConfig = {
   url: string
