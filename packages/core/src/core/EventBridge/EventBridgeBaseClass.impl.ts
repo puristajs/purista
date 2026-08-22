@@ -93,6 +93,9 @@ export class EventBridgeBaseClass<ConfigType> {
 	private readonly hasExplicitLogger: boolean
 	private readonly hasExplicitMetrics: boolean
 	private readonly hasExplicitSpanProcessor: boolean
+	private hasInheritedLogger = false
+	private hasInheritedMetrics = false
+	private hasInheritedSpanProcessor = false
 	private spanProcessor?: SpanProcessor
 	private traceProviderInstance?: NodeTracerProvider
 	private observabilityLocked = false
@@ -147,12 +150,13 @@ export class EventBridgeBaseClass<ConfigType> {
 			return
 		}
 
-		if (!this.hasExplicitLogger) {
+		if (!this.hasExplicitLogger && !this.hasInheritedLogger) {
 			const logger = context.logger.getChildLogger({ name: this.name })
 			this.logger = logger
+			this.hasInheritedLogger = true
 		}
 
-		if (!this.hasExplicitMetrics && (context.metrics || context.metricsRecorder)) {
+		if (!this.hasExplicitMetrics && !this.hasInheritedMetrics && (context.metrics || context.metricsRecorder)) {
 			this.metricsRecorder =
 				context.metricsRecorder ??
 				(context.metrics?.enabled === false
@@ -165,10 +169,12 @@ export class EventBridgeBaseClass<ConfigType> {
 								...context.metrics?.defaultAttributes,
 							},
 						}))
+			this.hasInheritedMetrics = true
 		}
 
-		if (!this.hasExplicitSpanProcessor && context.spanProcessor) {
+		if (!this.hasExplicitSpanProcessor && !this.hasInheritedSpanProcessor && context.spanProcessor) {
 			this.spanProcessor = context.spanProcessor
+			this.hasInheritedSpanProcessor = true
 		}
 	}
 

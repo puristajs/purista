@@ -133,6 +133,35 @@ describe('DefaultEventBridge', () => {
 		expect(serviceSpanProcessor.onStart.called).toBe(false)
 	})
 
+	it('keeps the first inherited tracer configuration for a shared bridge', async () => {
+		const firstSpanProcessor = {
+			forceFlush: async () => {},
+			onEnd: spy(),
+			onStart: spy(),
+			shutdown: async () => {},
+		}
+		const secondSpanProcessor = {
+			forceFlush: async () => {},
+			onEnd: spy(),
+			onStart: spy(),
+			shutdown: async () => {},
+		}
+		const eventBridge = new DefaultEventBridge()
+
+		eventBridge.inheritServiceObservability({
+			logger: getLoggerMock().mock,
+			spanProcessor: firstSpanProcessor as never,
+		})
+		eventBridge.inheritServiceObservability({
+			logger: getLoggerMock().mock,
+			spanProcessor: secondSpanProcessor as never,
+		})
+
+		await eventBridge.startActiveSpan('shared-observability-test', {}, undefined, async () => undefined)
+		expect(firstSpanProcessor.onStart.called).toBe(true)
+		expect(secondSpanProcessor.onStart.called).toBe(false)
+	})
+
 	it('does not mutate observability after the bridge has started', async () => {
 		const eventBridge = new TestDefaultEventBridge()
 		await eventBridge.start()
