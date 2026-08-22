@@ -7,7 +7,7 @@
 		"node": ">=22.0.0"
 	},
 	"scripts": {
-		"prebuild": "cd .. && npm run build:api-docs",
+		"prebuild": "cd .. && npm run build:api-docs && npm run sync:website-llms",
 		"dev": "NODE_NO_WARNINGS=1 astro dev",
 		"build": "NODE_NO_WARNINGS=1 astro build",
 		"preview": "NODE_NO_WARNINGS=1 astro preview",

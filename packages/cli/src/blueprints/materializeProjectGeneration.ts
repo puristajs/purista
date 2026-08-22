@@ -37,6 +37,7 @@ const materializeExampleService = async (plan: ProjectGenerationPlan) => {
 			serviceDescription: step.serviceDescription,
 			serviceName: step.serviceName,
 			serviceVersion: step.serviceVersion,
+			includeMetricExample: step.includeMetricExample,
 			codeWriterOptions,
 		})
 

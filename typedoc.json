@@ -21,6 +21,7 @@
 		"./packages/natsbridge",
 		"./packages/redis-queue-bridge",
 		"./packages/redis-config-store",
+		"./packages/redis-scheduler-provider",
 		"./packages/redis-state-store",
 		"./packages/vault-secret-store"
 	],

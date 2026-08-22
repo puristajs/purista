@@ -4,8 +4,8 @@ Use this reference when choosing packages or checking dependency boundaries.
 
 ## Core Packages
 - `packages/core`: builders, service runtime, schemas, messages, stores, event bridge contracts, queue contracts, testing helpers.
-- `packages/core`: also owns enterprise export helpers such as AsyncAPI, CloudEvents mapping, provider-neutral schedule manifests, Kubernetes CronJob manifest export, and runtime capability reports. Do not add `@purista/contracts` for this release line.
-- `packages/cli`: project and artifact scaffolding. Use it for app-level services, commands, subscriptions, streams, queues, workers, and agents.
+- `packages/core`: also owns the trigger-only Scheduler Runtime/Builder, local `DefaultSchedulerProvider`, enterprise export helpers such as AsyncAPI, CloudEvents mapping, provider-neutral schedule manifests, Kubernetes CronJob manifest export, and runtime capability reports. Do not add `@purista/contracts` for this release line.
+- `packages/cli`: project and artifact scaffolding. Use it for app-level services, commands, subscriptions, streams, queues, workers, event-only schedules, and agents.
 - `packages/hono-http-server`: active HTTP runtime and OpenAPI/SSE surface.
 - `packages/base-http-bridge`: base HTTP bridge infrastructure.
 
@@ -36,7 +36,7 @@ Stores are runtime wiring. Service builders declare needs; service instances rec
 
 ## Platform Helpers
 - `packages/k8s-sdk`: Kubernetes helper package.
-- Kubernetes CronJob schedule export currently lives in core export helpers and CLI; it generates manifests for an explicit trigger container/script, not a runtime adapter.
+- `packages/redis-scheduler-provider`: Redis `SchedulerProvider` with distributed token leases and bounded durable completion state for replicated scheduler hosts. It owns only Redis coordination, not Core schedule evaluation or message publication. Kubernetes CronJob schedule export lives in core helpers and CLI; it generates manifests for an explicit trigger container/script, not a runtime adapter.
 - `starter`: default application template; keep AI-free by default.
 - `create-purista`: project generator; keep AI-free by default unless the generated application explicitly requests agents.
 

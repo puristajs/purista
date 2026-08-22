@@ -4,7 +4,6 @@ import { getNewEBMessageId } from '../core/helper/getNewEBMessageId.impl.js'
 import { getNewInstanceId } from '../core/helper/getNewInstanceId.impl.js'
 import { getNewTraceId } from '../core/helper/getNewTraceId.impl.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'
-import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import { getEventBridgeMock } from '../mocks/getEventBridge.mock.js'
@@ -69,7 +68,7 @@ const createStreamOpenRequestMock = <Payload, Parameter>(
  * @group Unit test helper
  */
 export const createStreamTestHarness = async <
-	TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>,
+	TServiceBuilder extends ServiceBuilder<any>,
 	TStreamBuilder extends StreamDefinitionBuilder<any, any>,
 >(
 	serviceBuilder: TServiceBuilder,

@@ -24,18 +24,5 @@ jobs:
         run: |
           # rm package-lock.json # https://github.com/npm/cli/issues/4828
           npm ci
-      - name: Lint
-        run: |
-          npm run lint
-      - name: Build purista core
-        run: |
-          npm run build -w packages/core
-      - name: Build purista packages
-        run: |
-          npm run build
-      - name: Build documentation
-        run: |
-          npm run build:doc
-      - name: Test
-        run: |
-          npm run test:unit
+      - name: Release readiness checks
+        run: npm run release:check

@@ -53,7 +53,7 @@ Override any of these via `.setLifecycleConfig(...)` on the queue builder; defau
 
 ## Async HTTP endpoints
 
-Commands exposed with `{ mode: 'async' }` enqueue work, return `202 Accepted`, and respond with `{ queueId, jobId, statusUrl }`. A separate status command (usually `GET /status/:jobId`) reads queue metrics so clients know when to retry or surface errors. Use `context.queue.scheduleAt.<queueId>()` for delayed starts (cron-style tasks). See [Async HTTP exposure](./queue-http-exposure.md) for end-to-end examples.
+Commands exposed with `{ mode: 'async' }` enqueue work, return `202 Accepted`, and respond with `{ queueId, jobId, statusUrl }`. A separate status command (usually `GET /status/:jobId`) reads queue metrics so clients know when to retry or surface errors. Use `context.queue.scheduleAt.<queueId>()` for one delayed start; recurring work belongs to the separate [Scheduler Runtime](../../6_integrations/enterprise_interoperability/scheduling.md). See [Async HTTP exposure](./queue-http-exposure.md) for end-to-end examples.
 
 ## Key topics
 

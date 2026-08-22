@@ -21,6 +21,8 @@ const mapAddComponentToCommand = (component: string) => {
 			return 'add-queue'
 		case 'queue-worker':
 			return 'add-queue-worker'
+		case 'schedule':
+			return 'add-schedule'
 		case 'agent':
 			return 'add-agent'
 		default:
@@ -50,6 +52,10 @@ const registerGlobalModeOptions = (command: Command) => {
 	return command
 }
 
+const renderJsonOutput = (output: unknown) => {
+	process.stdout.write(`${JSON.stringify(output, null, 2)}\n`)
+}
+
 const main = async () => {
 	const program = new Command()
 	program.name('purista').description('CLI for the PURISTA framework').version(puristaVersion)
@@ -57,7 +63,7 @@ const main = async () => {
 	registerGlobalModeOptions(
 		program
 			.command('add')
-			.description('Add a new service, command, subscription, stream, queue, queue worker, or agent.')
+			.description('Add a new service, command, subscription, stream, queue, queue worker, schedule, or agent.')
 			.addArgument(
 				new Argument('[component]', 'Type of component to add').choices([
 					'service',
@@ -66,6 +72,7 @@ const main = async () => {
 					'stream',
 					'queue',
 					'queue-worker',
+					'schedule',
 					'agent',
 				]),
 			)
@@ -74,7 +81,13 @@ const main = async () => {
 			.option('--service <serviceName>', 'service name')
 			.option('--service-version <serviceVersion>', 'service version')
 			.option('--response-event <eventName>', 'response event name')
+			.option('--durable-workspace', 'generate a workflow-backed agent with durable workspace policy')
 			.option('--event <eventName>', 'event to subscribe to')
+			.option('--cron <expression>', 'five-field cron expression for a schedule')
+			.option('--timezone <timezone>', 'IANA timezone for a schedule')
+			.option('--scheduler-group <schedulerGroup>', 'scheduler deployment group')
+			.option('--missed-run-policy <policy>', 'schedule recovery policy: skip, runOnce, or backfill')
+			.option('--disabled', 'create a disabled schedule declaration')
 			.option('--queue <queueName>', 'queue name')
 			.option('--worker-name <workerName>', 'queue worker name')
 			.option('--worker-description <workerDescription>', 'queue worker description')
@@ -99,7 +112,14 @@ const main = async () => {
 					serviceName: options.service,
 					serviceVersion: options.serviceVersion,
 					responseEventName: options.responseEvent,
+					durableWorkspace: options.durableWorkspace,
 					eventToSubscribe: options.event,
+					eventToEmit: options.event,
+					cronExpression: options.cron,
+					timezone: options.timezone,
+					schedulerGroup: options.schedulerGroup,
+					missedRunPolicy: options.missedRunPolicy,
+					enabledByDefault: options.disabled ? false : undefined,
 					queueName: options.queue,
 					workerName: options.workerName,
 					workerDescription: options.workerDescription,
@@ -114,6 +134,45 @@ const main = async () => {
 
 				createTerminalOutputAdapter().renderResult(result)
 			}),
+	)
+
+	const registerArchitectureCommand = (name: 'inspect' | 'validate' | 'doctor', description: string) => {
+		const command = registerGlobalModeOptions(
+			program
+				.command(name)
+				.description(description)
+				.option('--definitions <path>', 'service definitions JSON file', 'purista.definitions.json')
+				.option('--strict', 'promote static architecture warnings to errors')
+				.option('--schemas', 'include normalized JSON Schema in inspect output')
+				.option('--format <format>', 'output format', 'json'),
+		)
+		if (name === 'inspect') {
+			command.option('--out <path>', 'write the static manifest to a JSON file')
+		}
+		command.action(async options => {
+			const engine = createEngineForOptions(options)
+			const result = await engine.runPuristaCommand(name, {
+				definitions: options.definitions,
+				out: options.out,
+				strict: options.strict,
+				includeSchemas: options.schemas,
+				format: options.format,
+			})
+			renderJsonOutput(result.output)
+			if (!result.ok) {
+				process.exitCode = 1
+			}
+		})
+	}
+
+	registerArchitectureCommand('inspect', 'Print a JSON-safe static PURISTA architecture manifest.')
+	registerArchitectureCommand(
+		'validate',
+		'Validate static PURISTA architecture contracts without starting infrastructure.',
+	)
+	registerArchitectureCommand(
+		'doctor',
+		'Report static architecture and project-configuration diagnostics without mutating source.',
 	)
 
 	registerGlobalModeOptions(
@@ -184,6 +243,7 @@ const main = async () => {
 			.option('--formatter <formatter>', 'formatter to use')
 			.option('--webserver', 'include webserver support')
 			.option('--no-webserver', 'do not include webserver support')
+			.option('--telemetry <telemetry>', 'telemetry setup: none or otel')
 			.option('--install', 'install dependencies')
 			.option('--no-install', 'skip dependency installation')
 			.action(async (target, options) => {
@@ -198,6 +258,7 @@ const main = async () => {
 					linter: options.linter,
 					formatter: options.formatter,
 					useWebserver: options.webserver,
+					telemetry: options.telemetry,
 					installDependencies: options.install,
 				})
 

@@ -1,0 +1,109 @@
+{
+	"schemaVersion": 1,
+	"scenarios": [
+		{
+			"id": "durable-background-work",
+			"prompt": "Add invoice generation that may run for minutes, must retry safely, and must support operator replay.",
+			"requirements": [
+				{
+					"id": "queue-worker-boundary",
+					"patterns": ["\\bqueue\\b[\\s\\S]{0,160}\\bqueue worker\\b", "\\bqueue worker\\b[\\s\\S]{0,160}\\bqueue\\b"]
+				},
+				{ "id": "idempotency", "patterns": ["\\bidempotenc(?:y|ent)\\b"] },
+				{
+					"id": "retry-and-dead-letter",
+					"patterns": [
+						"\\b(?:retry|retries)\\b[\\s\\S]{0,160}\\b(?:dead[ -]?letter|DLQ)\\b",
+						"\\b(?:dead[ -]?letter|DLQ)\\b[\\s\\S]{0,160}\\b(?:retry|retries)\\b"
+					]
+				},
+				{
+					"id": "no-local-durability-claim",
+					"patterns": [
+						"(?:DefaultQueueBridge[\\s\\S]{0,120}(?:local|test)|(?:local|test)[\\s\\S]{0,120}DefaultQueueBridge)"
+					]
+				}
+			]
+		},
+		{
+			"id": "service-owned-agent",
+			"prompt": "Add a support triage agent that can classify tickets, call an allowed command tool, and stream progress to the frontend.",
+			"requirements": [
+				{ "id": "service-owned", "patterns": ["(?:service[ -]owned|attached to (?:the )?(?:owning )?service)"] },
+				{ "id": "tool-allowlist", "patterns": ["(?:allowlist|allowlisted|allow-list|allowed command tool)"] },
+				{ "id": "streaming", "patterns": ["\\bstream(?:ing)?\\b"] },
+				{
+					"id": "sensitive-content-boundary",
+					"patterns": [
+						"(?:prompt|completion)[\\s\\S]{0,160}(?:log|metric|trace|telemetry|secret|PII)",
+						"(?:log|metric|trace|telemetry|secret|PII)[\\s\\S]{0,160}(?:prompt|completion)"
+					]
+				}
+			]
+		},
+		{
+			"id": "enterprise-runtime-review",
+			"prompt": "Review a PURISTA architecture for enterprise production readiness, including tenant isolation, observability, schedule exports, and gateway contracts.",
+			"requirements": [
+				{
+					"id": "tenant-and-principal",
+					"patterns": [
+						"\\btenant(?:Id| isolation)?\\b[\\s\\S]{0,160}\\bprincipal(?:Id)?\\b",
+						"\\bprincipal(?:Id)?\\b[\\s\\S]{0,160}\\btenant(?:Id| isolation)?\\b"
+					]
+				},
+				{
+					"id": "observability-owner",
+					"patterns": [
+						"(?:application|app)[ -]owned[\\s\\S]{0,120}(?:OpenTelemetry|OTel|telemetry)",
+						"(?:OpenTelemetry|OTel|telemetry)[\\s\\S]{0,120}(?:application|app)[ -]owned"
+					]
+				},
+				{
+					"id": "scheduler-event-boundary",
+					"patterns": [
+						"(?:scheduler|schedule)[\\s\\S]{0,180}(?:event trigger|emit(?:s|ted)? (?:an )?event)",
+						"(?:event trigger|emit(?:s|ted)? (?:an )?event)[\\s\\S]{0,180}(?:scheduler|schedule)"
+					]
+				},
+				{
+					"id": "no-sensitive-telemetry",
+					"patterns": [
+						"(?:no|avoid|never)[\\s\\S]{0,120}(?:secret|PII|prompt|completion)[\\s\\S]{0,160}(?:telemetry|log|metric|trace)",
+						"(?:telemetry|log|metric|trace)[\\s\\S]{0,160}(?:no|avoid|never)[\\s\\S]{0,120}(?:secret|PII|prompt|completion)"
+					]
+				}
+			]
+		},
+		{
+			"id": "replicated-scheduler-host",
+			"prompt": "Run monthly billing in a horizontally scaled PURISTA deployment. The trigger must be reliable, but the billing work itself may take hours and must retry.",
+			"requirements": [
+				{
+					"id": "separate-scheduler-host",
+					"patterns": [
+						"(?:separate|standalone|independent)[\\s\\S]{0,120}(?:SchedulerRuntime|SchedulerBuilder|scheduler host)",
+						"(?:SchedulerRuntime|SchedulerBuilder|scheduler host)[\\s\\S]{0,120}(?:separate|standalone|independent)"
+					]
+				},
+				{
+					"id": "event-to-queue-boundary",
+					"patterns": [
+						"(?:event[ -]to[ -]queue|event)[\\s\\S]{0,160}\\bqueue worker\\b",
+						"\\bqueue worker\\b[\\s\\S]{0,160}(?:event[ -]to[ -]queue|event)"
+					]
+				},
+				{ "id": "distributed-provider", "patterns": ["RedisSchedulerProvider", "@purista/redis-scheduler-provider"] },
+				{ "id": "distributed-startup-guard", "patterns": ["setRequireDistributedClaims"] },
+				{
+					"id": "local-provider-rejection",
+					"patterns": [
+						"(?:reject|not use|local[ -]only)[\\s\\S]{0,120}DefaultSchedulerProvider",
+						"DefaultSchedulerProvider[\\s\\S]{0,120}(?:reject|not use|local[ -]only)"
+					]
+				},
+				{ "id": "at-least-once-idempotency", "patterns": ["at[ -]least[ -]once", "occurrenceId"] }
+			]
+		}
+	]
+}

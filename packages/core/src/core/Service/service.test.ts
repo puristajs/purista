@@ -854,7 +854,7 @@ describe('Service', () => {
 					name: 'purista.health.status',
 					attributes: expect.objectContaining({
 						'purista.health.component': 'service',
-						'purista.health.state': 'warn',
+						'purista.health.status': 'warn',
 					}),
 				}),
 				expect.objectContaining({

@@ -10,7 +10,10 @@ import type { PuristaConfig } from './loadPuristaConfig.js'
  * // "user-v1-service-builder"
  * ```
  */
-export const convertToProjectFileCasing = (input: string, puristaProjectConfig: PuristaConfig) => {
+export const convertToProjectFileCasing = (
+	input: string,
+	puristaProjectConfig: Pick<PuristaConfig, 'fileConvention'>,
+) => {
 	switch (puristaProjectConfig.fileConvention) {
 		case 'kebab':
 			return kebabCase(input)

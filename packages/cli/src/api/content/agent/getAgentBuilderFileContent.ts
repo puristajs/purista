@@ -14,8 +14,8 @@ const toAgentIdentifier = (name: string) => {
  * Generate an attached-agent queue builder file.
  *
  * The generated agent defines payload, parameter, and output schemas, registers
- * a `primary` model, attaches a harness agent, configures an ephemeral session,
- * and exposes the agent as an HTTP endpoint.
+ * a `primary` model, attaches an ephemeral harness agent by default (or a
+ * durable workflow when requested), and exposes the agent as an HTTP endpoint.
  */
 export const getAgentBuilderFileContent = (input: {
 	agentName: string
@@ -23,6 +23,8 @@ export const getAgentBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string
 	responseEventName?: string
+	/** Generate a workflow-backed agent with the Core durable workspace policy. */
+	durableWorkspace?: boolean
 	puristaConfig: PuristaConfig
 	codeWriterOptions?: Partial<Options>
 }) => {
@@ -100,7 +102,25 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine('defaults: { temperature: 0.2 },')
 		})
 		writer.writeLine('})')
-		writer.writeLine(`.setHarnessAgent(${harnessAgentName})`)
+		if (input.durableWorkspace) {
+			writer.writeLine('// Application bootstrap must supply ai.runtime and ai.workspaceStore for durable replay.')
+			writer.writeLine('.setHarnessWorkflow(')
+			writer.indent(() => {
+				writer.writeLine('{')
+				writer.indent(() => {
+					writer.writeLine(`input: ${payloadSchemaName},`)
+					writer.writeLine(`output: ${outputSchemaName},`)
+					writer.writeLine("delegation: { agents: ['primaryAgent'], modelAliases: ['primary'] },")
+					writer.writeLine('handler: async context => context.agents.primaryAgent(context.input),')
+				})
+				writer.writeLine('},')
+				writer.writeLine(`{ agents: { primaryAgent: ${harnessAgentName} } },`)
+			})
+			writer.writeLine(')')
+			writer.writeLine(".setWorkspacePolicy({ mode: 'durable', required: true, cleanup: 'on_terminal' })")
+		} else {
+			writer.writeLine(`.setHarnessAgent(${harnessAgentName})`)
+		}
 		if (successEventName) {
 			writer.writeLine(`.setSuccessEventName('${successEventName}')`)
 		}

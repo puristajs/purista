@@ -4,6 +4,7 @@ import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import type { EmptyObject } from '../types/EmptyObject.js'
 import type { Logger } from '../types/Logger.js'
 import type { Prettify } from '../types/Prettify.js'
+import type { ServiceObservabilityContext, ServiceObservabilityInheritance } from '../types/ServiceObservability.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StoreBaseConfig } from '../types/StoreBaseConfig.js'
 import type { SecretStoreCacheMap } from './types/SecretStoreCacheMap.js'
@@ -33,12 +34,14 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 
 	/** Store name used in logs and diagnostics. */
 	name: string
+	private readonly hasExplicitLogger: boolean
 
 	/** Optional in-memory cache of secret values. */
 	cache: SecretStoreCacheMap = new Map()
 
 	constructor(name: string, config: StoreBaseConfig<SecretStoreConfigType>) {
 		const logger = config?.logger ?? initLogger(config?.logLevel)
+		this.hasExplicitLogger = config?.logger !== undefined
 		this.logger = logger.getChildLogger({ name })
 
 		this.name = name
@@ -49,6 +52,18 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 			enableRemove: false,
 			enableCache: false,
 			...config,
+		}
+	}
+
+	/** Inherit a service logger only when this store was not explicitly configured. */
+	inheritServiceObservability(context: ServiceObservabilityContext): ServiceObservabilityInheritance {
+		if (!this.hasExplicitLogger) {
+			this.logger = context.logger.getChildLogger({ name: this.name })
+		}
+		return {
+			logger: this.hasExplicitLogger ? 'component' : context.sources.logger,
+			spanProcessor: 'unsupported',
+			metrics: 'unsupported',
 		}
 	}
 

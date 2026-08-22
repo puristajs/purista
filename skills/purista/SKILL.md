@@ -41,7 +41,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.
 - Metrics use the OpenTelemetry Metrics API. Core stays SDK/exporter-neutral; applications own MeterProvider, readers, exporters, collectors, and Prometheus exposure.
 - Declare custom application metrics with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record them through typed `context.metrics`, and keep names under `app.*`.
-- Schedules are contracts, not a PURISTA production scheduler runtime. Kubernetes CronJob export is manifest generation for an explicit trigger container/script.
+- Core owns the trigger-only `SchedulerRuntime` and `SchedulerBuilder`. Run it as a separate minimal host that publishes ordinary events; it must not boot business services or execute handlers. `DefaultSchedulerProvider` is local/test only. For replicated hosts use `@purista/redis-scheduler-provider`, a production EventBridge, `setStrict()`, and `setRequireDistributedClaims()`; providers own only durable claims/completion state, not Core schedule evaluation. Kubernetes CronJob export remains manifest generation for an explicit trigger container/script.
 - Do not create or reference `@purista/contracts`; contract/export helpers for this release live in `@purista/core`.
 - Redis and NATS queue bridges support strict idempotency. Duplicate strict enqueue returns the original queue job id. The default queue bridge remains advisory for local development/tests.
 
@@ -53,7 +53,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - queue: durable background work contract
 - queue worker: execution logic for queue work
 - agent: optional model-driven loop, harness agent/workflow, or custom run function attached to a service
-- schedule: external time-trigger contract targeting an event, queue, or short command
+- schedule: service-owned time declaration; the Core Scheduler Runtime emits an event, then normal consumers own business work
 
 ## Architecture Compass
 Use PURISTA as a message-driven architecture toolkit, not as a route or package generator. The core idea is:
@@ -69,7 +69,7 @@ Choose primitives by intent:
 - "Work may be slow, retried, replayed, delayed, or dead-lettered" -> queue plus queue worker
 - "A caller needs progress or incremental output" -> stream
 - "A model reasons, uses tools, or coordinates a conversation" -> agent attached to the owning service
-- "Time starts the work" -> schedule contract targeting event, queue, or short command
+- "Time starts the work" -> schedule event declaration, then a separate scheduler host emits the event and subscriptions/queues/agents react
 - "External system or SDK is needed" -> resource/runtime binding, never a direct handler import
 
 Production architecture guidance:
@@ -108,7 +108,7 @@ non-durable run restart.
 - Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
 - Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.
 - Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
-- Project setup and scaffolding follow the handbook quickstart shape: `src/service` and `src/agents` are CLI-managed roots, and services, commands, streams, queues, workers, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, and `add:agent`.
+- Project setup and scaffolding follow the handbook quickstart shape: `src/service` and `src/agents` are CLI-managed roots, and services, commands, streams, queues, workers, event-only schedules, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, `add:schedule`, and `add:agent`.
 - Package dependencies do not introduce optional AI or transport coupling into core packages.
 
 ## Read If Needed
@@ -124,3 +124,6 @@ non-durable run restart.
 - `references/09-implementation-planning.md`
 - `references/10-security-privacy-and-governance.md`
 - `references/11-evaluation-scenarios.md`
+- `references/generated-api-index.md` — generated, verified lookup for selected Core public APIs; never use it as a substitute for architecture references
+
+For a recorded model answer, use `npm run evaluate:skill-response -- --response <response.json>` against the deterministic rubric in `evaluations/scenarios.json`.

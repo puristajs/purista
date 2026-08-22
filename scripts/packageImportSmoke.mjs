@@ -22,14 +22,18 @@ if (packages.length === 0) {
 const tempRoot = mkdtempSync(join(tmpdir(), 'purista-package-import-'))
 const packDir = join(tempRoot, 'packs')
 const consumerDir = join(tempRoot, 'consumer')
+const npmCacheDir = join(tempRoot, 'npm-cache')
+const npmEnv = { ...process.env, npm_config_cache: npmCacheDir }
 
 try {
 	mkdirSync(packDir, { recursive: true })
 	mkdirSync(consumerDir, { recursive: true })
+	mkdirSync(npmCacheDir, { recursive: true })
 
 	const tarballs = packages.map(({ dir, manifest }) => {
 		const output = execFileSync('npm', ['pack', '--json', '--pack-destination', packDir], {
 			cwd: dir,
+			env: npmEnv,
 			encoding: 'utf8',
 			stdio: ['ignore', 'pipe', 'pipe'],
 		})
@@ -44,6 +48,7 @@ try {
 
 	execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', ...tarballs], {
 		cwd: consumerDir,
+		env: npmEnv,
 		stdio: 'inherit',
 	})
 

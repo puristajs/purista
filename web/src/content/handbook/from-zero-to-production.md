@@ -235,8 +235,11 @@ const spanProcessor = new SimpleSpanProcessor(
   new OTLPTraceExporter({ url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces' })
 )
 
-const eventBridge = new DefaultEventBridge({ spanProcessor })
-const myService = await myV1Service.getInstance(eventBridge, { spanProcessor })
+const eventBridge = new DefaultEventBridge()
+const myService = await myV1Service.getInstance(eventBridge, {
+  spanProcessor,
+})
+await eventBridge.start()
 ```
 
 PURISTA automatically creates spans for every message. No instrumentation in your business logic.

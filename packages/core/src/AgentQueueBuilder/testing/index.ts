@@ -1,7 +1,13 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import type { GovernanceConfig, StateStore as HarnessStateStore, Sandbox } from '@purista/harness'
+import {
+	type GovernanceConfig,
+	type StateStore as HarnessStateStore,
+	inMemoryDurableRuntime,
+	inMemoryDurableWorkspaceStore,
+	type Sandbox,
+} from '@purista/harness'
 import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
@@ -98,7 +104,37 @@ function emptySkillContext(): AgentSkillContext {
 }
 
 /** Standard deterministic Harness model provider for attached-agent tests. */
-export { FakeModelProvider } from '@purista/harness/testing'
+export { FakeModelProvider } from './FakeModelProvider.js'
+
+export type AgentDurableWorkspaceTestRuntime = {
+	/** In-memory durable workflow runtime suitable for a single hermetic test. */
+	runtime: ReturnType<typeof inMemoryDurableRuntime>
+	/** In-memory durable workspace store paired with `runtime`. */
+	workspaceStore: ReturnType<typeof inMemoryDurableWorkspaceStore>
+}
+
+/**
+ * Create the paired in-memory runtime bindings required by a durable attached-agent workflow.
+ *
+ * Use this only in tests. Production applications must supply provider-backed
+ * `ai.runtime` and `ai.workspaceStore` bindings at their composition root.
+ *
+ * @example
+ * ```ts
+ * const durable = createAgentDurableWorkspaceTestRuntime()
+ * const harness = await createAgentTestHarness(definition, {
+ *   models,
+ *   runtime: durable.runtime,
+ *   workspaceStore: durable.workspaceStore,
+ * })
+ * ```
+ */
+export function createAgentDurableWorkspaceTestRuntime(): AgentDurableWorkspaceTestRuntime {
+	return {
+		runtime: inMemoryDurableRuntime(),
+		workspaceStore: inMemoryDurableWorkspaceStore(),
+	}
+}
 
 export type CreateAgentSkillTestRuntimeSkill = {
 	/** Skill frontmatter name. Must match the name declared by `.useSkills(...)`. */

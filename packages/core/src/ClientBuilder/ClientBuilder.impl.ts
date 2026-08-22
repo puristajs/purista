@@ -100,7 +100,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	/**
 	 * Gets the definitions from the provided service builders
 	 */
-	async getDefinitionsFromServiceBuilders(serviceBuilders: ServiceBuilder[]) {
+	async getDefinitionsFromServiceBuilders(serviceBuilders: readonly ServiceBuilder<any>[]) {
 		const services: FullServiceDefinition = {}
 
 		for (const builder of serviceBuilders) {

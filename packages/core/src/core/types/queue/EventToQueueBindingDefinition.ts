@@ -11,7 +11,7 @@ import type { QueueRetryRequest } from '../../QueueBridge/types/QueueRetryReques
 export type EventToQueueIdempotencyMode = 'advisory' | 'strict'
 
 /**
- * Strategy used to derive an idempotency key from the source event.
+ * Strategy used to derive an idempotency key from the source message.
  *
  * Custom functions should return a stable, non-sensitive key. Do not include
  * payloads, secrets, PII, tokens, or headers in the returned value.
@@ -23,7 +23,7 @@ export type EventToQueueIdempotencyStrategy =
 	| 'correlationId'
 	| 'eventField'
 	| 'none'
-	| ((event: any) => string | undefined)
+	| ((message: any) => string | undefined)
 
 /**
  * Binds an emitted event to a queue enqueue operation.

@@ -53,26 +53,26 @@ Prefer narrow privacy-preserving contracts. Emit identifiers and non-sensitive s
 - subscription: bounded reaction to an event
 - stream: incremental response or SSE/aggregate transport
 - queue: durable work that needs leases, retries, delays, or dead-letter handling
-- schedule: external time-trigger contract that targets an event, queue, or short command
+- schedule: time-trigger declaration that emits an event from a separate Core scheduler host
 - agent: model loop, tool use, conversation, or harness workflow
 
 ## Time-Triggered Work
-PURISTA does not own production time. Model schedules as contracts and let Kubernetes CronJob, Temporal, AWS EventBridge Scheduler, or another scheduler own the clock.
+PURISTA Core owns a minimal trigger-only Scheduler Runtime. Deploy it separately from business services with a selected provider; Kubernetes CronJob, Temporal, AWS EventBridge Scheduler, or another scheduler remain valid external clock choices.
 
 Default architecture:
 
 ```text
-external scheduler
+Core Scheduler Runtime with a selected scheduler provider
   -> PURISTA event target
   -> subscription or event-to-queue binding
   -> queue worker for long-running work
 ```
 
-Prefer event targets for business facts such as `billing.monthlyCycleDue`. Use queue targets only when the scheduled trigger is exactly one durable task. Use command targets only for short idempotent logic. Do not target subscriptions directly; subscriptions react to events.
+The Core runtime accepts event targets only. It emits no business payload and never invokes handlers, queues, or agents directly. Prefer an event such as `billing.monthlyCycleDue`, then use a subscription or event-to-queue binding. Existing queue/command targets remain export-compatible but are rejected by the Core runtime with migration guidance.
 
 For Kubernetes, export CronJob manifests from schedules. The CronJob runs an explicit trigger container/script supplied by the application/deployment, and that trigger calls PURISTA. Do not invent image names, URLs, secrets, service accounts, namespaces, or auth policy in framework code or generated examples.
 
-For duplicate-safe scheduled handoff, use event-to-queue idempotency. Redis and NATS queue bridges can enforce strict mode by returning the original enqueue result/job id for duplicate keys. DefaultQueueBridge is advisory and should stay local/test only for strict workflows.
+Scheduler publication is at-least-once; use `message.schedule.occurrenceId` for downstream idempotency. For duplicate-safe event-to-queue handoff, Redis and NATS queue bridges can enforce strict mode by returning the original enqueue result/job id for duplicate keys. DefaultSchedulerProvider and DefaultQueueBridge are local/test only.
 
 ## Architecture Review Questions
 - Which service owns this capability?

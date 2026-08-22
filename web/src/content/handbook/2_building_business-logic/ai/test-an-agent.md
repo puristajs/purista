@@ -252,6 +252,37 @@ const skillRuntime = await createAgentSkillTestRuntime([
 
 `createAgentSkillTestRuntime(...)` is a test binding helper, not a production sandbox or workspace adapter. Production sandbox and workspace adapters remain harness runtime wiring supplied through `ai.sandbox`, `ai.runtime`, or `ai.workspaceStore`.
 
+## Durable workflow tests
+
+Durable workspace replay is workflow-only. Use the Core fixture for a hermetic
+test; it pairs an in-memory durable runtime with an in-memory workspace store.
+It does not prove restart-safe production persistence.
+
+```ts
+import {
+  createAgentDurableWorkspaceTestRuntime,
+  createAgentTestHarness,
+  FakeModelProvider,
+} from '@purista/core/testing'
+
+const durable = createAgentDurableWorkspaceTestRuntime()
+const harness = await createAgentTestHarness(incidentReviewWorkflowAgent, {
+  models: {
+    primary: {
+      provider: new FakeModelProvider(),
+      model: 'fake-object',
+      capabilities: ['object'],
+    },
+  },
+  runtime: durable.runtime,
+  workspaceStore: durable.workspaceStore,
+})
+```
+
+Keep separate tests for startup failures when the application does not supply
+required runtime/store capabilities. Production composition must provide its
+own durable `ai.runtime` and `ai.workspaceStore` adapters.
+
 ## Streams
 
 For HTTP stream behavior, assert the generated stream chunks rather than real provider protocols.

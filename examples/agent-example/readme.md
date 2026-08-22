@@ -53,4 +53,5 @@ Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from t
 - Hono HTTP exposure with OpenAPI documentation
 - `createAgentTestHarness(...)` with a scripted model provider
 - `createAgentSkillTestRuntime(...)` for skill-backed agent fixtures
-- no direct application dependency on `@purista/harness`
+- live-provider and sandbox dependencies are isolated in the application
+  composition root; service builders and agent handlers remain provider-neutral

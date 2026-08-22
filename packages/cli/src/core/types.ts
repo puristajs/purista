@@ -6,12 +6,16 @@ export const puristaCommandIds = [
 	'add-stream',
 	'add-queue',
 	'add-queue-worker',
+	'add-schedule',
 	'add-agent',
 	'export-asyncapi',
 	'export-runtime-capabilities',
 	'export-schedule-manifest',
 	'export-kubernetes-cronjob',
 	'export-cloudevents-schema',
+	'inspect',
+	'validate',
+	'doctor',
 	'init-project',
 ] as const
 
@@ -55,6 +59,8 @@ export type PuristaCommandResult = {
 	warnings: string[]
 	/** Blocking or non-blocking issues collected during command execution. */
 	errors: PuristaCommandIssue[]
+	/** Optional machine-readable command output. */
+	output?: unknown
 }
 
 /** Output of command input resolution before execution. */

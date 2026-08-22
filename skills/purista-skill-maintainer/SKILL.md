@@ -34,7 +34,7 @@ Specs are the source of truth for framework development. If implementation and s
 - Verify every file path, package path, and code snippet in the repo.
 - Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
-- Keep `purista/skills` as the source of truth; installed copies under `$CODEX_HOME/skills` are mirrors that may need syncing after repo changes.
+- Keep `purista/skills` as the source of truth; installed client copies are mirrors that may need syncing after repo changes through `npm run sync:skills -- --target <absolute-skills-directory>`.
 - Do not split the framework back into many sibling skills unless there is a genuinely separate non-runtime concern.
 - When teaching schemas and contracts, prefer consumer-local schema definitions over one shared cross-service Zod schema unless every consumer truly needs the exact same shape.
 - Keep current platform decisions visible, especially safe defaults, strict capability validation, Hono as the active HTTP server runtime, and the current queue/event bridge reliability model.

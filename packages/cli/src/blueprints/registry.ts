@@ -8,6 +8,8 @@ import {
 	createBiomeConfigFile,
 	createClaudeFile,
 	createDaprConfigFile,
+	createDefinitionsExporterFile,
+	createDefinitionsFile,
 	createEslintModuleConfigFile,
 	createGitIgnoreFile,
 	createHttpConfigFile,
@@ -15,21 +17,24 @@ import {
 	createNatsConfigFile,
 	createPublicIndexHtml,
 	createReadmeFile,
+	createSchedulerHostFile,
 	createServiceEventEnumFile,
+	createTelemetryFile,
 } from './content.js'
 import type { ProjectBlueprint } from './types.js'
 
 const baseTsConfig: TsConfigJson = {
 	compilerOptions: {
 		outDir: 'dist',
+		rootDir: 'src',
 		strict: true,
 		ignoreDeprecations: '6.0',
-		module: 'es2022',
+		module: 'NodeNext',
 		declaration: false,
 		removeComments: false,
 		emitDecoratorMetadata: true,
 		experimentalDecorators: true,
-		moduleResolution: 'Node',
+		moduleResolution: 'NodeNext',
 		allowSyntheticDefaultImports: true,
 		target: 'es2022',
 		sourceMap: true,
@@ -62,6 +67,7 @@ const basePackage: PKG = {
 		'add:stream': 'purista add stream',
 		'add:queue': 'purista add queue',
 		'add:queue-worker': 'purista add queue-worker',
+		'add:schedule': 'purista add schedule',
 		'add:agent': 'purista add agent',
 	},
 	dependencies: {
@@ -84,6 +90,9 @@ const runtimeNodePackage: PKG = {
 		dev: 'tsx watch src/index.ts',
 		test: 'tsc --noEmit && vitest run',
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
+		'export:definitions': 'tsx src/exportDefinitions.ts',
+		'export:schedules': 'tsx src/exportDefinitions.ts && purista export schedule-manifest --out purista.schedules.json',
+		'start:scheduler': 'tsx src/scheduler.ts',
 	},
 	devDependencies: {
 		'@types/node': 'latest',
@@ -100,6 +109,9 @@ const runtimeBunPackage: PKG = {
 		dev: 'bun --watch run src/index.ts',
 		test: 'tsc --noEmit && bun test',
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
+		'export:definitions': 'bun src/exportDefinitions.ts',
+		'export:schedules': 'bun src/exportDefinitions.ts && purista export schedule-manifest --out purista.schedules.json',
+		'start:scheduler': 'bun src/scheduler.ts',
 	},
 	devDependencies: {
 		'@types/bun': 'latest',
@@ -156,6 +168,9 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 					target: '../../node_modules/@purista/core/skills/purista',
 				},
 				{ path: 'src/service/serviceEvent.enum.ts', content: createServiceEventEnumFile(context) },
+				{ path: 'src/definitions.ts', content: createDefinitionsFile(context) },
+				{ path: 'src/exportDefinitions.ts', content: createDefinitionsExporterFile() },
+				{ path: 'src/scheduler.ts', content: createSchedulerHostFile() },
 			],
 			packageJson: basePackage,
 			tsconfig: baseTsConfig,
@@ -168,6 +183,7 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 					serviceVersion: '1',
 					commandName: 'ping',
 					commandDescription: `Ping through the ${context.eventBridge} blueprint`,
+					includeMetricExample: context.telemetry === 'otel',
 				},
 			],
 		}),
@@ -205,6 +221,22 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 		create: () => ({
 			packageJson: {
 				dependencies: {},
+				devDependencies: {},
+				trustedDependencies: [],
+			},
+		}),
+	},
+	'telemetry-otel': {
+		id: 'telemetry-otel',
+		description: 'Application-owned OpenTelemetry Metrics API bootstrap.',
+		tags: ['telemetry', 'opentelemetry', 'metrics'],
+		create: () => ({
+			files: [{ path: 'src/telemetry.ts', content: createTelemetryFile() }],
+			packageJson: {
+				dependencies: {
+					'@opentelemetry/api': 'latest',
+					'@opentelemetry/sdk-metrics': 'latest',
+				},
 				devDependencies: {},
 				trustedDependencies: [],
 			},

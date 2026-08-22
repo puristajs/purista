@@ -46,6 +46,7 @@ For CI, scripts, or agentic tooling, the same command also supports deterministi
 purista init my-app \
   --runtime node \
   --event-bridge default \
+  --telemetry otel \
   --webserver \
   --linter biome \
   --formatter biome \
@@ -95,7 +96,7 @@ Rule of thumb:
 - commands = request/response entrypoints
 - streams = live outbound updates
 - queues/workers = durable async processing
-- agents = optional application-level AI workloads built outside the core runtime
+- agents = optional service-owned Core primitives; model providers and application bindings remain runtime-level wiring
 
 See also:
 

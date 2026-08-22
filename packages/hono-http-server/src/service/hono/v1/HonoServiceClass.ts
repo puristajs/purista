@@ -18,7 +18,7 @@ import type {
 	StreamHandle,
 } from '@purista/core'
 import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
-import type { Handler } from 'hono'
+import type { Handler, MiddlewareHandler } from 'hono'
 import { Hono } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
 import { HTTPException } from 'hono/http-exception'
@@ -129,6 +129,54 @@ export class HonoServiceClass<
 	private knownEndpoints: Map<string, string> = new Map()
 
 	private isAvailable = false
+
+	/**
+	 * Creates route-scoped HTTP metrics middleware without exposing request data.
+	 *
+	 * The route comes from the registered endpoint definition, rather than from
+	 * the incoming URL, so dynamic path values never become metric attributes.
+	 */
+	private createHttpMetricsMiddleware(route: string): MiddlewareHandler {
+		return async (c, next) => {
+			const startedAt = performance.now()
+			const baseAttributes = {
+				'http.request.method': c.req.method.toUpperCase(),
+				'http.route': route,
+			}
+			let thrown: unknown
+
+			this.metricsRecorder.recordFrameworkMetric('http.server.active_requests', 1, baseAttributes)
+
+			try {
+				await next()
+			} catch (error) {
+				thrown = error
+				throw error
+			} finally {
+				const statusCode =
+					c.res.status ??
+					(thrown instanceof HandledError
+						? thrown.errorCode
+						: thrown instanceof HTTPException
+							? thrown.status
+							: StatusCode.InternalServerError)
+				const errorType =
+					thrown instanceof Error ? thrown.name : statusCode >= StatusCode.BadRequest ? 'http.error' : undefined
+				const resultAttributes = {
+					...baseAttributes,
+					'http.response.status_code': statusCode,
+					...(errorType ? { 'error.type': errorType } : {}),
+				}
+
+				this.metricsRecorder.recordFrameworkMetric('http.server.active_requests', -1, baseAttributes)
+				this.metricsRecorder.recordFrameworkMetric(
+					'http.server.request.duration',
+					(performance.now() - startedAt) / 1000,
+					resultAttributes,
+				)
+			}
+		}
+	}
 
 	/** Creates the Hono service runtime and configures routing, health, and protection defaults. */
 	constructor(config: ServiceConstructorInput<ServiceClassTypes<HonoServiceV1Config, EmptyObject>>) {
@@ -241,7 +289,7 @@ export class HonoServiceClass<
 				},
 			})
 
-			this.app.get(this.config.healthPath, async c => {
+			this.app.get(this.config.healthPath, this.createHttpMetricsMiddleware(this.config.healthPath), async c => {
 				const con = propagation.extract(context.active(), c.req.raw.headers)
 				return await this.startActiveSpan('healthHandler', { kind: SpanKind.SERVER }, con, async span => {
 					span.setAttribute(ATTR_HTTP_ROUTE, this.config.healthPath)
@@ -660,13 +708,14 @@ export class HonoServiceClass<
 				}
 			})
 		}
+		const httpMetrics = this.createHttpMetricsMiddleware(path)
 
 		if (method === 'get' || method === 'delete') {
 			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
 				const protectHandler = safeBind(this.config.protectHandler, this.app)
-				this.app[method](path, protectHandler, handler)
+				this.app[method](path, httpMetrics, protectHandler, handler)
 			} else {
-				this.app[method](path, handler)
+				this.app[method](path, httpMetrics, handler)
 			}
 		} else {
 			const limitRequestBody = bodyLimit({
@@ -681,9 +730,9 @@ export class HonoServiceClass<
 
 			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
 				const protectHandler = safeBind(this.config.protectHandler, this.app)
-				this.app[method](path, protectHandler, limitRequestBody, handler)
+				this.app[method](path, httpMetrics, protectHandler, limitRequestBody, handler)
 			} else {
-				this.app[method](path, limitRequestBody, handler)
+				this.app[method](path, httpMetrics, limitRequestBody, handler)
 			}
 		}
 		this.knownServices.add(serviceRegistrationKey)

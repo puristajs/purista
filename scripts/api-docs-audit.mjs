@@ -59,12 +59,10 @@ const getSource = node => {
 	return `${source.fileName}:${source.line}`
 }
 
-const isPuristaSource = record => {
-	if (!record.source) {
-		return false
-	}
-	return record.source.startsWith('packages/') || /^[a-z0-9-]+\/src\//.test(record.source)
-}
+// TypeDoc reads package build declarations in release builds, so source paths
+// can be `core/dist/...`, `packages/core/src/...`, or another package-relative
+// form. The merged package identity is stable across those representations.
+const isPuristaRecord = record => record.packageName.startsWith('@purista/')
 
 const records = []
 
@@ -90,7 +88,7 @@ const walk = (node, packageName = docs.name) => {
 
 walk(docs)
 
-const puristaRecords = records.filter(isPuristaSource)
+const puristaRecords = records.filter(isPuristaRecord)
 
 const totals = new Map()
 for (const record of puristaRecords) {

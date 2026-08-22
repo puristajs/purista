@@ -113,6 +113,8 @@ export const addPuristaAgent = async (input: {
 	agentDescription: string
 	/** Optional success event emitted after agent execution. */
 	responseEventName?: string
+	/** Generate a workflow-backed durable workspace agent instead of the default ephemeral agent. */
+	durableWorkspace?: boolean
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const projectPath = input.projectRootPath ?? process.cwd()
@@ -160,6 +162,7 @@ export const addPuristaAgent = async (input: {
 			serviceName: input.serviceName,
 			serviceVersion: input.serviceVersion,
 			responseEventName: input.responseEventName,
+			durableWorkspace: input.durableWorkspace,
 			puristaConfig: input.puristaConfig,
 			codeWriterOptions: input.codeWriterOptions,
 		}),
@@ -170,6 +173,7 @@ export const addPuristaAgent = async (input: {
 		getAgentTestFileContent({
 			agentName: input.agentName,
 			builderImportName,
+			durableWorkspace: input.durableWorkspace,
 			codeWriterOptions: input.codeWriterOptions,
 		}),
 	)

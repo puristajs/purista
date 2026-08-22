@@ -2,7 +2,6 @@ import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { QueueLease } from '../core/types/queue/QueueLease.js'
 import type { QueueMessage } from '../core/types/queue/QueueMessage.js'
-import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import { getEventBridgeMock } from '../mocks/getEventBridge.mock.js'
 import { getQueueBridgeMock } from '../mocks/getQueueBridge.mock.js'
 import type { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
@@ -24,7 +23,7 @@ export type InferQueueWorkerHarnessServiceBuilderConfig<T> = T extends ServiceBu
  *
  * @group Unit test helper
  */
-export const createQueueWorkerTestHarness = async <TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>>(
+export const createQueueWorkerTestHarness = async <TServiceBuilder extends ServiceBuilder<any>>(
 	serviceBuilder: TServiceBuilder,
 	workerBuilder: QueueWorkerBuilder<any>,
 	options: InstanceConfigType<InferQueueWorkerHarnessServiceBuilderConfig<TServiceBuilder>> & {

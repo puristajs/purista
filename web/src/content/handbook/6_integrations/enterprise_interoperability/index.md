@@ -23,7 +23,7 @@ This pattern keeps each responsibility small and replaceable:
 
 | Component | Responsibility | Replaced by |
 |---|---|---|
-| **Scheduler** | Declares when something should happen | Cron, Airflow, Temporal, cloud schedulers |
+| **Scheduler Runtime** | Evaluates time and publishes one trigger event | Core runtime with a selected scheduler provider |
 | **Event** | Broadcasts a business fact | NATS (`@purista/natsbridge`), AMQP (`@purista/amqpbridge`), MQTT (`@purista/mqttbridge`), or via Dapr pubsub components |
 | **Event-to-queue binding** | Hands off from push to pull semantics | PURISTA bridge adapter |
 | **Queue** | Owns lease, retry, heartbeat, DLQ | Redis (`@purista/redis-queue-bridge`), NATS JetStream (`@purista/nats-queue-bridge`) |
@@ -34,7 +34,7 @@ This pattern keeps each responsibility small and replaceable:
 
 | Topic | Purpose |
 |---|---|
-| [Scheduling](./scheduling.md) | Declare schedule intent as contracts |
+| [Scheduling](./scheduling.md) | Declare schedules and run a separate trigger-only scheduler host |
 | [Event-to-queue](./event-to-queue.md) | Durable handoff from events to pull-based work |
 | [Long-running queues](./long-running-queues.md) | Lease, heartbeat, and retry for background jobs |
 | [Result events](./result-events.md) | Publish queue completion as typed events |
@@ -44,7 +44,7 @@ This pattern keeps each responsibility small and replaceable:
 ## Design principles
 
 1. **Business logic stays in PURISTA** — commands, subscriptions, and queue workers own the domain logic
-2. **Contracts are provider-neutral** — schedules, events, and queues declare intent without vendor specifics
+2. **Schedules are trigger-only** — the Core Scheduler Runtime publishes events; downstream consumers own business work
 3. **Adapters bind at runtime** — the same service runs with different schedulers, brokers, and queue backends
 4. **Exports are generated, not hand-written** — AsyncAPI and OpenAPI schemas derive from builder declarations
 

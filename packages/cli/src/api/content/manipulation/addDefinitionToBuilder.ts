@@ -8,9 +8,15 @@ export const addDefinitionToBuilder = (input: {
 		| 'streamDefinitions'
 		| 'queueDefinitions'
 		| 'queueWorkerDefinitions'
+		| 'scheduleDefinitions'
 	serviceFile: string
 	importFile: string
 	importDefinition: string
+	/**
+	 * Expression added to the definition collection. Most component builders
+	 * expose `getDefinition()`; schedule declarations are already definitions.
+	 */
+	definitionExpression?: string
 }) => {
 	if (!existsSync(input.serviceFile)) {
 		throw new Error(`Service file not found: ${input.serviceFile}`)
@@ -50,7 +56,7 @@ export const addDefinitionToBuilder = (input: {
 		})
 	}
 
-	const definitionExpression = `${input.importDefinition}.getDefinition()`
+	const definitionExpression = input.definitionExpression ?? `${input.importDefinition}.getDefinition()`
 	const normalizedDefinitionExpression = definitionExpression.replace(/\s+/g, '')
 	const alreadyDefined = arrayLiteralExpression.getElements().some(element => {
 		const normalizedElement = element.getText().replace(/\s+/g, '')

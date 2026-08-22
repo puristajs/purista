@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { createNoPromptAdapter } from './adapters/interactive/noPromptAdapter.js'
 import { getFormatConfig } from './api/getFormatConfig.js'
 import { loadPuristaConfig } from './api/loadPuristaConfig.js'
@@ -25,7 +27,9 @@ export type PuristaCliEngineOptions = {
 }
 
 const shouldLoadProjectMetadata = (commandId: PuristaCommandId) =>
-	commandId !== 'init-project' && !commandId.startsWith('export-')
+	commandId !== 'init-project' &&
+	!commandId.startsWith('export-') &&
+	!['inspect', 'validate', 'doctor'].includes(commandId)
 
 /**
  * Create a programmatic CLI engine bound to a working directory and prompt adapter.
@@ -54,7 +58,11 @@ export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) =>
 			applyDefaults: true,
 		}
 
-		if (commandId !== 'init-project') {
+		const isStaticArchitectureCommand = ['inspect', 'validate', 'doctor'].includes(commandId)
+		if (commandId !== 'init-project' && !isStaticArchitectureCommand) {
+			context.puristaConfig = await loadPuristaConfig(cwd)
+		}
+		if (commandId === 'doctor' && existsSync(join(cwd, 'purista.json'))) {
 			context.puristaConfig = await loadPuristaConfig(cwd)
 		}
 

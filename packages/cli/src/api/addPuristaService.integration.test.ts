@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -25,6 +25,11 @@ beforeEach(() => {
 	DIR = mkdtempSync(join(tmpdir(), 'purista-cli-'))
 	process.chdir(DIR)
 	writeFileSync('tsconfig.json', JSON.stringify({ compilerOptions: { module: 'ESNext', target: 'ESNext' } }))
+	mkdirSync('src', { recursive: true })
+	writeFileSync(
+		'src/definitions.ts',
+		"import { exportServiceDefinitions, type ServiceBuilder } from '@purista/core'\n\nexport const serviceBuilders: ServiceBuilder<any>[] = []\nexport const createPuristaDefinitions = () => exportServiceDefinitions(serviceBuilders)\n",
+	)
 })
 
 afterEach(() => {
@@ -72,5 +77,9 @@ describe('service artifact creation', () => {
 		const content = readFileSync(serviceFile, 'utf-8')
 		expect(content).toContain('pingCommandBuilder')
 		expect(content).toContain('pingStreamStreamBuilder')
+
+		const definitions = readFileSync(join(DIR, 'src', 'definitions.ts'), 'utf-8')
+		expect(definitions).toMatch(/import \{ demoV1Service \} from ["']\.\.\/service\/demo\/v1\/demoV1Service\.js["']/)
+		expect(definitions).toMatch(/serviceBuilders(?:: ServiceBuilder(?:<any>)?\[\])? = \[demoV1Service\]/)
 	})
 })

@@ -184,6 +184,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 	 * in-flight work.
 	 */
 	async start() {
+		this.markObservabilityStarted()
 		this.app.notFound(c => {
 			const err = new HandledError(StatusCode.NotFound, getErrorMessageForCode(StatusCode.NotFound), {
 				method: c.req.method,

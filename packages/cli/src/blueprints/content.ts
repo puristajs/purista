@@ -21,6 +21,7 @@ Generated with \`@purista/cli\`.
 - Runtime: ${input.runtime}
 - Event bridge: ${input.eventBridge}
 - Webserver: ${input.useWebserver ? 'enabled' : 'disabled'}
+- Telemetry: ${input.telemetry === 'otel' ? 'OpenTelemetry Metrics API bootstrap' : 'not generated'}
 - Linter: ${input.linter}
 
 ## Scripts
@@ -29,16 +30,21 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn build' : `${input.packageManager} run build`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn export:runtime' : `${input.packageManager} run export:runtime`}\`
+- \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\` when this application declares schedules
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
 
-Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery.
+Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery. Generated agents are ephemeral by default. Use \`--durable-workspace\` only for a resumable \`setHarnessWorkflow(...)\`; it requires application-owned \`ai.runtime\` and \`ai.workspaceStore\` adapters.
+
+Schedules are exported from \`src/definitions.ts\` to \`purista.schedules.json\`. The generated \`start:scheduler\` host consumes that JSON manifest only: it never imports or starts business services. It uses the local \`DefaultSchedulerProvider\` and is therefore useful only for same-process tests or a single local scheduler host. It cannot deliver events to a separately started app when that app also uses \`DefaultEventBridge\`; use one shared transport for that integration. Production hosts must select an application-configured durable, distributed provider and a shared EventBridge before deployment.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
 
 - \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
 - \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:schedule', '<name> --description "<description>" --service <serviceName> --service-version <version> --event <eventName> --cron "0 2 * * *"')}\`
 - \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version> --durable-workspace')}\` for a resumable workflow-backed agent
 `
 
 const runScriptCommand = (input: CreateProjectInput, script: string, args = '') => {
@@ -55,6 +61,8 @@ const createLocalCliUsageGuide = (input: CreateProjectInput) => `## Local CLI
 - Package manager: \`${input.packageManager}\`
 - Create services with \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`.
 - Create commands with \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create an ephemeral agent with \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`.
+- Add \`--durable-workspace\` only for a resumable workflow; bind its \`ai.runtime\` and \`ai.workspaceStore\` adapters in application bootstrap.
 - Run the app with \`${input.packageManager === 'yarn' ? 'yarn dev' : `${input.packageManager} run dev`}\`.
 - Run tests with \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`.`
 
@@ -69,7 +77,10 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery.
+- Keep \`src/definitions.ts\` as the generated export inventory. The local \`add:service\` command updates it when the standard aggregation array is present.
+- Export \`purista.schedules.json\` before starting a scheduler host. The scheduler process consumes that JSON file and infrastructure bindings only; it must never import, instantiate, or start business services.
+- Treat the generated \`start:scheduler\` script as local/test wiring because it uses \`DefaultSchedulerProvider\`. A separate scheduler and app need a shared EventBridge; two \`DefaultEventBridge\` instances are isolated processes. Configure a provider package with durable distributed claims for replicated production hosts.
+- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery. Agents are ephemeral by default; use \`--durable-workspace\` only for a workflow that must resume private workspace state.
 
 ${createLocalCliUsageGuide(input)}
 
@@ -111,7 +122,9 @@ ${createLocalCliUsageGuide(input)}
 - New stream: \`${runScriptCommand(input, 'add:stream', '<name> --service <serviceName> --service-version <version>')}\`
 - New queue: \`${runScriptCommand(input, 'add:queue', '<name> --service <serviceName> --service-version <version>')}\`
 - New queue worker: \`${runScriptCommand(input, 'add:queue-worker', '<name> --service <serviceName> --service-version <version> --queue <queueName>')}\`
+- New event-only schedule: \`${runScriptCommand(input, 'add:schedule', '<name> --description "<description>" --service <serviceName> --service-version <version> --event <eventName> --cron "0 2 * * *"')}\`
 - New agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- Resumable workflow agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version> --durable-workspace')}\`
 
 After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
 
@@ -121,7 +134,96 @@ After generation, edit handlers, schemas, runtime wiring, and tests to fit the d
 - Do not add CommonJS variants. Generated PURISTA apps are ESM-only.
 - Keep external systems behind resources, stores, bridges, or runtime bindings.
 - Keep EventBridge and QueueBridge concerns separate.
+- Keep SchedulerRuntime separate from business services. It emits normal events only; subscriptions, queues, workers, and agents own the business work.
 - Keep provider packages as app-level dependencies.
+`
+
+/** Create the explicit inventory of service builders used for static contract exports. */
+export const createDefinitionsFile = (puristaConfig: Pick<PuristaConfig, 'fileConvention'>) => {
+	const serviceDirectory = convertToProjectFileCasing('ping', puristaConfig)
+	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)
+	const serviceExportName = camelCase('ping v1 service')
+
+	return `import { exportServiceDefinitions, type ServiceBuilder } from '@purista/core'
+import { ${serviceExportName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
+
+// The CLI appends newly generated services to this explicit static export inventory.
+// Keep it free of runtime infrastructure and service instances.
+export const serviceBuilders: ServiceBuilder<any>[] = [${serviceExportName}]
+
+export const createPuristaDefinitions = () => exportServiceDefinitions(serviceBuilders)
+`
+}
+
+/** Create the build-time JSON definition exporter used by CLI contract exports. */
+export const createDefinitionsExporterFile = () => `import { writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import { createPuristaDefinitions } from './definitions.js'
+
+const outPath = resolve(process.cwd(), process.argv[2] ?? 'purista.definitions.json')
+const definitions = await createPuristaDefinitions()
+
+await writeFile(outPath, JSON.stringify(definitions, null, 2) + '\\n', 'utf-8')
+process.stdout.write('PURISTA definitions exported to ' + outPath + '\\n')
+`
+
+/** Create the local-only standalone Scheduler Runtime host. */
+export const createSchedulerHostFile = () => `import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import {
+	DefaultSchedulerProvider,
+	gracefulShutdown,
+	initLogger,
+	SchedulerBuilder,
+	type ScheduleManifest,
+} from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+
+const schedulerGroup = process.env.PURISTA_SCHEDULER_GROUP ?? 'default'
+const manifestPath = resolve(process.cwd(), process.env.PURISTA_SCHEDULE_MANIFEST ?? 'purista.schedules.json')
+const manifest = JSON.parse(await readFile(manifestPath, 'utf-8')) as ScheduleManifest
+
+const logger = initLogger()
+const eventBridge = await getEventBridge(logger)
+const scheduler = new SchedulerBuilder(schedulerGroup)
+	.loadManifest(manifest)
+	.useEventBridge(eventBridge)
+	.useProvider(new DefaultSchedulerProvider())
+	.getInstance()
+
+await scheduler.start()
+logger.warn(
+	{ schedulerGroup, manifestPath },
+	'Local Scheduler Runtime started. DefaultSchedulerProvider is process-local and must not be used for replicated production hosts.',
+)
+
+// This process owns only the clock and event publication. SchedulerRuntime destroys the EventBridge on shutdown.
+gracefulShutdown(logger, [{ name: 'scheduler runtime', destroy: () => scheduler.destroy() }])
+`
+
+/** Create an opt-in, application-owned OpenTelemetry Metrics API setup. */
+export const createTelemetryFile = () => `import { metrics } from '@opentelemetry/api'
+import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+
+/**
+ * Install a process-local MeterProvider for this application.
+ *
+ * PURISTA only uses the OpenTelemetry API; applications own readers and
+ * exporters. Replace the console exporter with an OTLP reader when deploying
+ * telemetry infrastructure. Do not place request, user, tenant, prompt, or
+ * payload data in metric attributes.
+ */
+export const initializeTelemetry = () => {
+	const meterProvider = new MeterProvider({
+		readers: [new PeriodicExportingMetricReader({ exporter: new ConsoleMetricExporter() })],
+	})
+	metrics.setGlobalMeterProvider(meterProvider)
+
+	return {
+		name: 'OpenTelemetry metrics',
+		destroy: async () => meterProvider.shutdown(),
+	}
+}
 `
 
 /** Create the starter `ServiceEvent` enum with the example ping event. */
@@ -494,6 +596,9 @@ export const createEntrypointFile = (input: CreateProjectInput, puristaConfig: P
 	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)
 	const serviceExportName = camelCase('ping v1 service')
 	const bridgeLabel = pascalCase(input.eventBridge)
+	const telemetryImport = input.telemetry === 'otel' ? "import { initializeTelemetry } from './telemetry.js'\n" : ''
+	const telemetryStart = input.telemetry === 'otel' ? '\tconst telemetry = initializeTelemetry()\n' : ''
+	const telemetryShutdown = input.telemetry === 'otel' ? '\t\ttelemetry,\n' : ''
 
 	if (input.useWebserver) {
 		const shutdownServerSnippet =
@@ -520,12 +625,14 @@ export const createEntrypointFile = (input: CreateProjectInput, puristaConfig: P
 		},`
 
 		return `import { type Service, gracefulShutdown, initLogger } from '@purista/core'
+${telemetryImport}
 import { getEventBridge } from './eventbridge.js'
 import { getHttpServer } from './http.js'
 import { ${serviceExportName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
 
 export const main = async () => {
 	const logger = initLogger()
+	${telemetryStart}
 	const eventBridge = await getEventBridge(logger)
 
 	const services: Service[] = []
@@ -542,6 +649,7 @@ export const main = async () => {
 	logger.info('${bridgeLabel} bridge and HTTP server started.')
 
 	gracefulShutdown(logger, [
+	${telemetryShutdown}
 		honoService.prepareDestroy(),
 		eventBridge,
 		...services,
@@ -555,11 +663,13 @@ main()
 	}
 
 	return `import { type Service, gracefulShutdown, initLogger } from '@purista/core'
+${telemetryImport}
 import { getEventBridge } from './eventbridge.js'
 import { ${serviceExportName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
 
 export const main = async () => {
 	const logger = initLogger()
+	${telemetryStart}
 	const eventBridge = await getEventBridge(logger)
 
 	const services: Service[] = []
@@ -568,7 +678,7 @@ export const main = async () => {
 	services.push(pingService)
 
 	logger.info('${bridgeLabel} bridge and ping service started.')
-	gracefulShutdown(logger, [eventBridge, ...services])
+	gracefulShutdown(logger, [${input.telemetry === 'otel' ? 'telemetry, ' : ''}eventBridge, ...services])
 }
 
 main()

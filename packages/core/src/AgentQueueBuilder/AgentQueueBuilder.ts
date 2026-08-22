@@ -689,12 +689,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		const worker = await new QueueWorkerBuilder(queueName, workerName)
 			.setMaxParallelHandlers(this.executionPolicy.maxParallelHandlers ?? defaultExecutionPolicy.maxParallelHandlers)
 			.setHandler(async function (this: object, context, message) {
-				const output = await getRuntime(agentDefinition, this).executeAggregate({
-					appContext: context as unknown as Record<string, unknown>,
-					message: message as unknown as Record<string, unknown>,
-					payload: message.payload,
-					parameter: message.parameter,
-				})
+				const output = await executeAttachedAgent(this, manifest.agentName, 'queue', () =>
+					getRuntime(agentDefinition, this).executeAggregate({
+						appContext: context as unknown as Record<string, unknown>,
+						message: message as unknown as Record<string, unknown>,
+						payload: message.payload,
+						parameter: message.parameter,
+					}),
+				)
 				return { status: 'success', output }
 			})
 			.getDefinition()
@@ -786,12 +788,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 					...(manifest.response.options?.streamUrl ? { streamUrl: manifest.response.options.streamUrl } : {}),
 				}
 			}
-			return getRuntime(agentDefinition, this).executeAggregate({
-				appContext: context as unknown as Record<string, unknown>,
-				message: context.message as unknown as Record<string, unknown>,
-				payload,
-				parameter,
-			})
+			return executeAttachedAgent(this, manifest.agentName, 'command', () =>
+				getRuntime(agentDefinition, this).executeAggregate({
+					appContext: context as unknown as Record<string, unknown>,
+					message: context.message as unknown as Record<string, unknown>,
+					payload,
+					parameter,
+				}),
+			)
 		})
 
 		const streamBuilder = new StreamDefinitionBuilder<any>(`${this.agentName}Stream`, `Stream ${this.description}`)
@@ -838,13 +842,15 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			}
 		}
 		streamBuilder.setStreamFunction(async function (this: object, context, payload, parameter, writer) {
-			await getRuntime(agentDefinition, this).executeStream({
-				appContext: context as unknown as Record<string, unknown>,
-				message: context.message as unknown as Record<string, unknown>,
-				payload,
-				parameter,
-				writer,
-			})
+			await executeAttachedAgent(this, manifest.agentName, 'stream', () =>
+				getRuntime(agentDefinition, this).executeStream({
+					appContext: context as unknown as Record<string, unknown>,
+					message: context.message as unknown as Record<string, unknown>,
+					payload,
+					parameter,
+					writer,
+				}),
+			)
 		})
 
 		return {
@@ -995,6 +1001,27 @@ function getRuntime<Output>(definition: AgentDefinition<any>, owner?: object) {
 		)
 	}
 	return runtime
+}
+
+type AttachedAgentMetricsOwner = {
+	executeAttachedAgent?<T>(
+		agentName: string,
+		executionKind: 'command' | 'queue' | 'stream' | 'tool',
+		execute: () => Promise<T>,
+	): Promise<T>
+}
+
+/** Preserve wrapper metrics when an attached definition runs through a Service instance. */
+function executeAttachedAgent<T>(
+	owner: object,
+	agentName: string,
+	executionKind: 'command' | 'queue' | 'stream' | 'tool',
+	execute: () => Promise<T>,
+): Promise<T> {
+	const metricsOwner = owner as AttachedAgentMetricsOwner
+	return metricsOwner.executeAttachedAgent
+		? metricsOwner.executeAttachedAgent(agentName, executionKind, execute)
+		: execute()
 }
 
 function assertNonEmpty(value: string, label: string) {

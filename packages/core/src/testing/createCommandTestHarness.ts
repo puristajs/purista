@@ -2,7 +2,6 @@ import type { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/Comma
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import { isCommandSuccessResponse } from '../core/types/commandType/isCommandSuccessResponse.impl.js'
-import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import { getEventBridgeMock } from '../mocks/getEventBridge.mock.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import type { InstanceConfigType, ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
@@ -22,11 +21,12 @@ export type InferCommandHarnessServiceBuilderConfig<T> = T extends ServiceBuilde
  */
 export type InferCommandBuilderConfig<T> = T extends CommandDefinitionBuilder<any, infer C> ? C : never
 
-export type CreateCommandTestHarnessOptions<TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>> =
-	InstanceConfigType<InferCommandHarnessServiceBuilderConfig<TServiceBuilder>> & {
-		eventBridge?: EventBridge
-		queueBridge?: QueueBridge
-	}
+export type CreateCommandTestHarnessOptions<TServiceBuilder extends ServiceBuilder<any>> = InstanceConfigType<
+	InferCommandHarnessServiceBuilderConfig<TServiceBuilder>
+> & {
+	eventBridge?: EventBridge
+	queueBridge?: QueueBridge
+}
 
 /**
  * Boot a real service instance and execute one command through the PURISTA runtime.
@@ -37,7 +37,7 @@ export type CreateCommandTestHarnessOptions<TServiceBuilder extends ServiceBuild
  * @group Unit test helper
  */
 export const createCommandTestHarness = async <
-	TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>,
+	TServiceBuilder extends ServiceBuilder<any>,
 	TCommandBuilder extends CommandDefinitionBuilder<any, any>,
 >(
 	serviceBuilder: TServiceBuilder,

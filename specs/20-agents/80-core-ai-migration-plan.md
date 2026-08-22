@@ -1,6 +1,8 @@
 # Core AI Migration Plan
 
-Status: active implementation plan for autonomous agents.
+Status: implemented migration record. The current executable ownership contract
+lives in Core, public API docs, and user-facing skills; this document is kept
+for migration evidence and routing only.
 
 Date: 2026-05-15
 

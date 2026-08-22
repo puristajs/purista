@@ -118,6 +118,12 @@ Harness commits a complete turn only after a successful model loop. PURISTA
 passes the stable queue delivery identity as the Harness idempotency key, so a
 redelivery reuses the committed result instead of appending duplicate messages.
 
+Do not add a second PURISTA `ConversationStore`, transcript builder, generic
+compactor, or vector-memory configuration to solve this. Context projection is
+model-request behavior; retrieval and memory remain explicit Harness runtime
+configuration owned by the application. A direct command remains request/
+response; use an explicit queue boundary for retryable or long-running work.
+
 `ai.harness.modules` is for static TypeScript modules imported and versioned by
 the application. `ai.harness.tools` is an explicit application-owned tool
 registry; each attached Harness definition still allowlists the tool ids it can
@@ -171,7 +177,12 @@ provider finish/status metadata for diagnostics and tracing. Application logic
 should branch on `finishReason` first and use `outcome` for operations or
 provider-specific reporting.
 
-Default AI telemetry should not capture prompt or completion content. Core defaults `ai.telemetry` to `contentCaptureMode: 'NO_CONTENT'`; only widen it (`'SPAN_ONLY'`, `'EVENT_ONLY'`, `'SPAN_AND_EVENT'`) after a product-specific retention, redaction, consent, and access-control policy has been approved.
+Default AI telemetry should not capture prompt or completion content. Harness
+defaults its `contentCaptureMode` to `NO_CONTENT`; Core forwards an explicit
+`ai.telemetry` option without translating the service's Core observability
+context into Harness telemetry. Only widen capture (`'SPAN_ONLY'`,
+`'EVENT_ONLY'`, `'SPAN_AND_EVENT'`) after a product-specific retention,
+redaction, consent, and access-control policy has been approved.
 
 Keep telemetry ownership explicit:
 - PURISTA service metrics are configured through service runtime `metrics`
@@ -222,10 +233,12 @@ requirements are `runtime.workspace_checkpoint`, `workspace_store.durable`,
 `workspace_store.retention`, `workspace_store.encrypted_storage`, and `workspace_store.quota`
 when production policy requires those guarantees.
 
-Use `inMemoryDurableWorkspaceStore()` from `@purista/harness` for local
-development and tests. Do not describe it as production persistence; production
-services need a durable store that survives process restart and declares the
-required `workspace_store.*` capabilities.
+For attached-agent tests, prefer
+`createAgentDurableWorkspaceTestRuntime()` from `@purista/core/testing`. It
+returns a paired in-memory durable runtime and workspace store. Do not describe
+it as production persistence; production services need durable runtime and
+workspace-store adapters that survive process restart and declare the required
+`workspace_store.*` capabilities.
 
 Keep ownership clear:
 - `@purista/harness` owns workspace lifecycle, checkpoint references, workspace

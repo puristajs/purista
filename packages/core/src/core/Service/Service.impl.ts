@@ -200,6 +200,8 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	constructor(config: ServiceConstructorInput<S>) {
 		super({
 			logger: config.logger,
+			observability: config.observability,
+			observabilityReport: config.observabilityReport,
 			info: config.info,
 			eventBridge: config.eventBridge,
 			spanProcessor: config.spanProcessor,
@@ -267,6 +269,48 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		attributes: PuristaMetricAttributes,
 	) {
 		this.recordFrameworkMetric(name, Math.max(0, Date.now() - startedAt), attributes)
+	}
+
+	/**
+	 * Record the PURISTA-owned wrapper metrics for one attached-agent execution.
+	 *
+	 * Harness remains responsible for GenAI, model, token, and tool telemetry.
+	 * This method deliberately records only the agent name, projection kind, and
+	 * sanitized outcome; it never accepts session, run, user, tenant, or content
+	 * identifiers.
+	 *
+	 * @internal Used by generated attached-agent projections.
+	 */
+	public async executeAttachedAgent<T>(
+		agentName: string,
+		executionKind: 'command' | 'queue' | 'stream' | 'tool',
+		execute: () => Promise<T>,
+	): Promise<T> {
+		const startedAt = Date.now()
+		const baseAttributes: PuristaMetricAttributes = {
+			...this.getServiceMetricAttributes(),
+			'purista.agent.name': agentName,
+			'purista.agent.execution.kind': executionKind,
+		}
+		this.recordFrameworkMetric('purista.agent.active', 1, baseAttributes)
+		let outcome: PuristaMetricOutcome = 'success'
+		let errorType: string | undefined
+		try {
+			return await execute()
+		} catch (error) {
+			outcome = error instanceof HandledError ? 'handled_error' : 'unhandled_error'
+			errorType = this.getErrorType(error)
+			throw error
+		} finally {
+			const attributes: PuristaMetricAttributes = {
+				...baseAttributes,
+				'purista.outcome': outcome,
+				...(errorType ? { 'error.type': errorType } : {}),
+			}
+			this.recordFrameworkMetric('purista.agent.runs', 1, attributes)
+			this.recordDurationMetric('purista.agent.run.duration', startedAt, attributes)
+			this.recordFrameworkMetric('purista.agent.active', -1, baseAttributes)
+		}
 	}
 
 	/**
@@ -2691,7 +2735,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		this.recordFrameworkMetric('purista.health.status', status === 'ok' ? 1 : 0, {
 			...this.getServiceMetricAttributes(),
 			'purista.health.component': 'service',
-			'purista.health.state': status,
+			'purista.health.status': status,
 		})
 		this.recordDurationMetric('purista.health.check.duration', startedAt, {
 			...this.getServiceMetricAttributes(),

@@ -49,6 +49,49 @@ describe('resolveProjectBlueprints', () => {
 			'The Dapr blueprint does not enable the bundled HTTP server. The request was ignored.',
 		)
 	})
+
+	it('adds an opt-in OTel bootstrap without changing the default blueprint set', () => {
+		const resolution = resolveProjectBlueprints({
+			target: 'metrics-app',
+			projectName: 'metrics-app',
+			runtime: 'node',
+			eventBridge: 'default',
+			useWebserver: false,
+			telemetry: 'otel',
+			fileConvention: 'camel',
+			eventConvention: 'dotCase',
+			linter: 'biome',
+			formatter: 'biome',
+			packageManager: 'npm',
+			installDependencies: false,
+		})
+
+		expect(resolution.selectedBlueprints).toContain('telemetry-otel')
+
+		const plan = planProjectGeneration({
+			target: 'metrics-app',
+			projectName: 'metrics-app',
+			runtime: 'node',
+			eventBridge: 'default',
+			useWebserver: false,
+			telemetry: 'otel',
+			fileConvention: 'camel',
+			eventConvention: 'dotCase',
+			linter: 'biome',
+			formatter: 'biome',
+			packageManager: 'npm',
+			installDependencies: false,
+		})
+		expect(plan.predictedFiles).toContain('src/telemetry.ts')
+		const telemetryFile = plan.files.find(file => file.path === 'src/telemetry.ts')
+		if (telemetryFile?.type !== 'symlink') {
+			expect(telemetryFile?.content).toContain('MeterProvider')
+		}
+		expect(plan.packageJson.dependencies).toMatchObject({
+			'@opentelemetry/api': 'latest',
+			'@opentelemetry/sdk-metrics': 'latest',
+		})
+	})
 })
 
 describe('planProjectGeneration', () => {
@@ -74,6 +117,9 @@ describe('planProjectGeneration', () => {
 		expect(plan.selectedBlueprints).toEqual(['base', 'runtime-bun', 'bridge-mqtt', 'http-bun', 'linter-biome'])
 		expect(plan.installCommand).toBe('bun install')
 		expect(plan.predictedFiles).toContain('src/index.ts')
+		expect(plan.predictedFiles).toContain('src/definitions.ts')
+		expect(plan.predictedFiles).toContain('src/exportDefinitions.ts')
+		expect(plan.predictedFiles).toContain('src/scheduler.ts')
 		expect(plan.predictedFiles).toContain('src/http.ts')
 		expect(plan.predictedFiles).toContain('AGENTS.md')
 		expect(plan.predictedFiles).toContain('CLAUDE.md')
@@ -91,7 +137,18 @@ describe('planProjectGeneration', () => {
 			expect(packageJsonFile?.content).toContain('"@purista/cli"')
 			expect(packageJsonFile?.content).toContain('"add:service": "purista add service"')
 			expect(packageJsonFile?.content).toContain('"add:agent": "purista add agent"')
+			expect(packageJsonFile?.content).toContain('"add:schedule": "purista add schedule"')
+			expect(packageJsonFile?.content).toContain('"export:definitions": "bun src/exportDefinitions.ts"')
+			expect(packageJsonFile?.content).toContain('"start:scheduler": "bun src/scheduler.ts"')
 			expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
+		}
+
+		const schedulerHost = plan.files.find(file => file.path === 'src/scheduler.ts')
+		expect(schedulerHost?.type).not.toBe('symlink')
+		if (schedulerHost?.type !== 'symlink') {
+			expect(schedulerHost?.content).toContain('new SchedulerBuilder(schedulerGroup)')
+			expect(schedulerHost?.content).toContain('DefaultSchedulerProvider')
+			expect(schedulerHost?.content).not.toContain("from './service/")
 		}
 
 		const agentSkillLink = plan.files.find(file => file.path === '.agents/skills/purista')

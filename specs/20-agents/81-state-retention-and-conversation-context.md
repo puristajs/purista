@@ -1,6 +1,6 @@
 # State retention and conversation context
 
-**Status:** human-approved implementation scope.
+**Status:** implemented, human-approved scope.
 **Date:** 2026-08-19
 
 This specification adds bounded, explicit state retention to `@purista/core`

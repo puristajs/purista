@@ -118,6 +118,16 @@ atomic expiry. The [StateStore retention guide](../stores/state-stores.md#retent
 explains ordinary service defaults, write overrides, and adapter compatibility;
 the table below covers the agent-specific additions.
 
+### Keep the runtime boundary clear
+
+PURISTA does not add a second conversation store or a generic transcript
+compactor. The selected Harness state store owns sessions, history, run records,
+and run events. Model context projection and retrieval/memory are explicit
+Harness runtime concerns configured by the application. This keeps ordinary
+service state, durable agent history, and model-specific context behavior
+separate—and prevents a framework default from silently changing what a model
+receives.
+
 ### Choose by use case
 
 | Use case | Choose |

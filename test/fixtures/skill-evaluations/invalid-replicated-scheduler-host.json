@@ -1,0 +1,4 @@
+{
+	"scenarioId": "replicated-scheduler-host",
+	"response": "Put a timer inside every billing service instance and use DefaultSchedulerProvider. The scheduled handler runs billing exactly once."
+}

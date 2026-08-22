@@ -13,6 +13,10 @@ import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOption
 import type { QueueLease } from '../core/types/queue/QueueLease.js'
 import type { QueueMessage } from '../core/types/queue/QueueMessage.js'
 import type { QueueMetrics } from '../core/types/queue/QueueMetrics.js'
+import type {
+	ServiceObservabilityContext,
+	ServiceObservabilityInheritance,
+} from '../core/types/ServiceObservability.js'
 
 type LeaseEntry = {
 	leaseId: string
@@ -87,7 +91,8 @@ export class DefaultQueueBridge implements QueueBridge {
 
 	private readonly defaultLeaseTtlMs: number
 	private readonly defaultMaxAttempts: number
-	private readonly metricsRecorder?: PuristaMetricsRecorder
+	private metricsRecorder?: PuristaMetricsRecorder
+	private readonly hasExplicitMetricsRecorder: boolean
 	private readonly queues = new Map<string, QueueMessage[]>()
 	private readonly leases = new Map<string, Map<string, LeaseEntry>>()
 	private readonly deadLetters = new Map<string, QueueMessage[]>()
@@ -97,6 +102,23 @@ export class DefaultQueueBridge implements QueueBridge {
 		this.defaultLeaseTtlMs = options?.defaultLeaseTtlMs ?? 30_000
 		this.defaultMaxAttempts = options?.maxAttempts ?? 5
 		this.metricsRecorder = options?.metricsRecorder
+		this.hasExplicitMetricsRecorder = options?.metricsRecorder !== undefined
+	}
+
+	/** Inherit the service metrics recorder unless the bridge received one explicitly. */
+	inheritServiceObservability(context: ServiceObservabilityContext): ServiceObservabilityInheritance {
+		if (!this.hasExplicitMetricsRecorder && context.metricsRecorder) {
+			this.metricsRecorder = context.metricsRecorder
+		}
+		return {
+			logger: 'unsupported',
+			spanProcessor: 'unsupported',
+			metrics: this.hasExplicitMetricsRecorder
+				? 'component'
+				: context.metricsRecorder
+					? context.sources.metrics
+					: 'default',
+		}
 	}
 
 	async start() {}

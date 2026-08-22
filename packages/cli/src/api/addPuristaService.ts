@@ -3,6 +3,8 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import type { Options } from 'code-block-writer'
+import { camelCase } from './change-case.js'
+import { addServiceToDefinitions } from './content/manipulation/addServiceToDefinitions.js'
 import { getGeneralServiceConfigFileContent } from './content/service/getGeneralServiceConfigFileContent.js'
 import { getServiceBuilderFileContent } from './content/service/getServiceBuilderFileContent.js'
 import { getServiceConfigFileContent } from './content/service/getServiceConfigFileContent.js'
@@ -30,6 +32,8 @@ export const addPuristaService = async (input: {
 	serviceName: string
 	/** Numeric service version. Defaults to `1`. */
 	serviceVersion?: string
+	/** Add the optional, declaration-only custom metric example used by the OTel scaffold. */
+	includeMetricExample?: boolean
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const projectPath = input.projectRootPath ?? process.cwd()
@@ -103,4 +107,10 @@ export const addPuristaService = async (input: {
 		}),
 		'utf-8',
 	)
+
+	await addServiceToDefinitions({
+		definitionsFile: join(projectPath, 'src', 'definitions.ts'),
+		serviceFile: serviceFilePath,
+		serviceExport: camelCase(`${serviceName} v${serviceVersion} service`),
+	})
 }

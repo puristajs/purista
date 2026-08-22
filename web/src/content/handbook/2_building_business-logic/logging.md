@@ -58,7 +58,10 @@ PURISTA's default logger (pino) and OpenTelemetry tracing are complementary, not
 - **Pino** emits structured JSON log lines. Each line automatically includes `traceId`, `spanId`, and other context fields so log entries can be correlated with distributed traces.
 - **OpenTelemetry** spans capture timing, status codes, and errors as trace data sent to your configured exporter (Jaeger, OTLP, etc.).
 
-When you pass a `spanProcessor` to your event bridge or service, PURISTA attaches OTel context to every message it processes. That same context is available to the logger, which writes it into every log line emitted during that request.
+When you pass a `spanProcessor` through service-owned `observability` before an
+event bridge starts, PURISTA attaches OTel context to every message it
+processes. That same context is available to the logger, which writes it into
+every log line emitted during that request.
 
 This means you can:
 
@@ -67,14 +70,16 @@ This means you can:
 3. Correlate exactly which log lines belong to which distributed operation.
 
 ```typescript
-// Pass the same spanProcessor to both the event bridge and, optionally, the HTTP client.
-// The logger will pick up the active OTel context automatically.
+// Pass the spanProcessor once through the service. The logger picks up the
+// active OTel context automatically.
 const spanProcessor = new SimpleSpanProcessor(new OTLPTraceExporter({ url: '...' }))
 
-const eventBridge = new AmqpBridge({ spanProcessor, config: { url: process.env.AMQP_URL } })
-await eventBridge.start()
+const eventBridge = new AmqpBridge({ config: { url: process.env.AMQP_URL } })
 
-const myService = await myServiceV1Service.getInstance(eventBridge, { spanProcessor })
+const myService = await myServiceV1Service.getInstance(eventBridge, {
+  spanProcessor,
+})
+await eventBridge.start()
 ```
 
 There is no `NodeSDK` wrapper needed in your PURISTA services — pass `SimpleSpanProcessor` directly to the bridge or service config. `NodeSDK` is used only in separate Temporal workers or other Node.js processes that are not PURISTA services.

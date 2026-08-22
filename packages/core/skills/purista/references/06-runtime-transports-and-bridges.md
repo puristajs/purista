@@ -28,7 +28,9 @@ Common queue bridge packages:
 Redis and NATS queue bridges enforce strict idempotency. Duplicate enqueue with the same queue and `idempotencyKey` returns the original enqueue result/job id. Missing keys still create independent jobs. `DefaultQueueBridge` remains advisory and reports `idempotencyEnforcement: false`.
 
 ## Schedulers
-Schedules are exported contracts. PURISTA does not run production cron. Kubernetes CronJob export generates `batch/v1` manifests for cron schedules and requires an explicit trigger container/script. The trigger calls a PURISTA event, queue, or short command boundary. Do not target subscriptions directly.
+`@purista/core` provides a trigger-only Scheduler Runtime. Host it in a separate process with `SchedulerBuilder`, an EventBridge, and a SchedulerProvider; do not instantiate business services in that process. The Core runtime accepts five-field event schedules only, attaches `message.schedule.occurrenceId`, and has at-least-once delivery. `DefaultSchedulerProvider` is local/test only. A replicated host uses `@purista/redis-scheduler-provider` plus `.setStrict().setRequireDistributedClaims()`; it protects occurrence claims, while the configured EventBridge remains responsible for real transport delivery. `getRuntimeStatus()` is JSON-safe operator evidence for registration, last attempted/published occurrence, lag, pause state, and declared provider capabilities; it is not a live provider-health, ownership, or exactly-once claim. Kubernetes CronJob export remains available for an explicit external trigger container/script. Do not target subscriptions directly.
+
+Generated projects provide `src/definitions.ts`, `export:definitions`, `export:schedules`, and a `start:scheduler` local host. The host reads `purista.schedules.json`, never imports a business service, and uses `DefaultSchedulerProvider`; it is useful only for local/test execution. A process-local `DefaultEventBridge` cannot carry those events to a separate application process. For production, generate the manifest during build/deployment, then configure the isolated host with a shared EventBridge plus an explicit durable distributed provider. Do not generate provider credentials, Redis prefixes, broker URLs, or authorization policy from framework defaults.
 
 ## HTTP
 Use `@purista/hono-http-server` for current HTTP server work. It exposes builder-declared commands and streams and generates OpenAPI metadata.
@@ -58,7 +60,7 @@ await service.getInstance(eventBridge, {
 ## Reliability Rules
 - Use queues for long-running or retry-heavy work.
 - Use subscriptions for bounded reactions.
-- Use schedules to describe external time triggers, not to run work in-process.
+- Use schedules to publish time-trigger events from a separate scheduler host; subscriptions and queues run the work.
 - Use streams for incremental delivery, not durability.
 - Let adapter capability validation fail fast when strict guarantees are unavailable.
 

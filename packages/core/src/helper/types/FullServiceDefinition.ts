@@ -1,3 +1,4 @@
+import type { AgentManifest } from '../../AgentQueueBuilder/types.js'
 import type { Service } from '../../core/Service/Service.impl.js'
 import type { CommandDefinition } from '../../core/types/commandType/CommandDefinition.js'
 import type { EventToQueueBindingDefinition } from '../../core/types/queue/EventToQueueBindingDefinition.js'
@@ -26,6 +27,9 @@ export type FullServiceDefinition<S extends Service = Service> = {
 			}
 			queueWorkers?: {
 				[workerName: string]: QueueWorkerDefinition<any, any, any, any, any>
+			}
+			agents?: {
+				[agentName: string]: AgentManifest
 			}
 			schedules?: {
 				[scheduleName: string]: ScheduleDefinition

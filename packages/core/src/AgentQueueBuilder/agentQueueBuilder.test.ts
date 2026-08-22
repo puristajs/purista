@@ -567,12 +567,25 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('rejects durable workspace policy for non-workflow execution', () => {
-		const builder = new ServiceBuilder(serviceInfo)
+		const customHandler = new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('invalidDurable', 'Invalid durable custom handler')
 			.setWorkspacePolicy({ mode: 'durable' })
 			.setRunFunction(async () => ({ status: 'ok' }))
 
-		expect(() => builder.getManifest()).toThrow('requires setHarnessWorkflow')
+		expect(() => customHandler.getManifest()).toThrow('requires setHarnessWorkflow')
+
+		const harnessAgent = new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('invalidDurableHarnessAgent', 'Invalid durable direct Harness agent')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.setWorkspacePolicy({ mode: 'durable' })
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Return an object.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+
+		expect(() => harnessAgent.getManifest()).toThrow('requires setHarnessWorkflow')
 	})
 
 	it('binds declared skills into a harness agent runtime', async () => {

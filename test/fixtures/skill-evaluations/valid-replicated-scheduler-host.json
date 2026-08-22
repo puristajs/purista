@@ -1,0 +1,4 @@
+{
+	"scenarioId": "replicated-scheduler-host",
+	"response": "Run SchedulerBuilder as a separate scheduler host. It emits an event to an event-to-queue binding, where a queue worker performs billing. Use RedisSchedulerProvider from @purista/redis-scheduler-provider and setRequireDistributedClaims. Reject DefaultSchedulerProvider for replicas because it is local-only. Delivery is at-least-once, so use occurrenceId for downstream idempotency."
+}

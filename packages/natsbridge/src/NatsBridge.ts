@@ -524,6 +524,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 	 * Connects to NATS and initializes JetStream clients when available.
 	 */
 	async start() {
+		this.markObservabilityStarted()
 		const conf = { ...this.config, name: this.instanceId }
 		this.connection = await connect(conf)
 

@@ -63,7 +63,7 @@ export const pingAsyncCommandBuilder = pingV1ServiceBuilder
 
 ## Schedule delayed jobs
 
-`context.queue.scheduleAt.<queueId>(runAt, payload, parameter)` queues work at a specific timestamp (milliseconds or Date). Use this for cron-like tasks or retriable workflows.
+`context.queue.scheduleAt.<queueId>(runAt, payload, parameter)` queues work at a specific timestamp (milliseconds or Date). Use it for one delayed job or a retry workflow. For recurring cron or interval triggers, use the separate [Scheduler Runtime](../../6_integrations/enterprise_interoperability/scheduling.md), which emits an event that can enqueue this queue.
 
 ```ts
 await context.queue.scheduleAt.pingJob(Date.now() + 5 * 60_000, payload, parameter)

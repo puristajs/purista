@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -6,9 +7,11 @@ import { addPuristaAgent } from './addPuristaAgent.js'
 import { addPuristaCommand } from './addPuristaCommand.js'
 import { addPuristaQueue } from './addPuristaQueue.js'
 import { addPuristaQueueWorker } from './addPuristaQueueWorker.js'
+import { addPuristaSchedule } from './addPuristaSchedule.js'
 import { addPuristaService } from './addPuristaService.js'
 import { addPuristaStream } from './addPuristaStream.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
+import { ensureServiceEvent } from './content/manipulation/ensureServiceEvent.js'
 import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
@@ -188,12 +191,35 @@ describe('CLI artifact generation (e2e)', () => {
 			responseEventName: 'user.triage_completed',
 		})
 
+		await ensureServiceEvent({
+			projectRootPath: TEST_DIR,
+			puristaProjectConfig: puristaConfig,
+			puristaProject: project,
+			eventName: 'user.daily_cleanup_due',
+		})
+
+		await addPuristaSchedule({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			scheduleName: 'daily cleanup',
+			scheduleDescription: 'Emit the daily cleanup trigger',
+			eventName: 'user.daily_cleanup_due',
+			cronExpression: '0 2 * * *',
+			timezone: 'Europe/Berlin',
+			schedulerGroup: 'maintenance',
+			missedRunPolicy: 'runOnce',
+		})
+
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		const serviceFile = join(serviceDir, 'userV1Service.ts')
 		const builderFile = join(serviceDir, 'userV1ServiceBuilder.ts')
 		const commandDir = join(serviceDir, 'command', 'signUp')
 		const subscriptionDir = join(serviceDir, 'subscription', 'sendWelcomeEmail')
 		const streamDir = join(serviceDir, 'stream', 'searchUsers')
+		const scheduleDir = join(serviceDir, 'schedule', 'dailyCleanup')
 
 		expect(readFileSync(builderFile, 'utf-8')).toContain('new ServiceBuilder')
 		expect(readFileSync(builderFile, 'utf-8')).toContain("import { ServiceBuilder } from '@purista/core'")
@@ -202,12 +228,14 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('commandDefinitions')
 		expect(serviceFileContent).toContain('subscriptionDefinitions')
 		expect(serviceFileContent).toContain('streamDefinitions')
+		expect(serviceFileContent).toContain('scheduleDefinitions')
 		expect(serviceFileContent).toContain('queueDefinitions')
 		expect(serviceFileContent).toContain('queueWorkerDefinitions')
 		expect(serviceFileContent).toContain('agentDefinitions')
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] =")
+		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addScheduleDefinition']>[0][] =")
 		expect(serviceFileContent).toContain(
 			"type QueueDefinition = Parameters<typeof userV1ServiceBuilder['addQueueDefinition']>[number]",
 		)
@@ -217,11 +245,13 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('signUpCommandBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('searchUsersStreamBuilder.getDefinition()')
+		expect(serviceFileContent).toContain('dailyCleanupScheduleDefinition')
 		expect(serviceFileContent).toContain('enqueueJobCommandBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('triageAgentBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('.addQueueDefinition(...queueDefinitions)')
 		expect(serviceFileContent).toContain('.addQueueWorkerDefinition(...queueWorkerDefinitions)')
 		expect(serviceFileContent).toContain('.addAgentDefinition(...(await Promise.all(agentDefinitions)))')
+		expect(serviceFileContent).toContain('.addScheduleDefinition(...scheduleDefinitions)')
 		expect(serviceFileContent).toContain('processJobsQueueBuilder.getDefinition()')
 
 		const commandSchema = readFileSync(join(commandDir, 'schema.ts'), 'utf-8')
@@ -233,6 +263,19 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(commandTypes).toContain('UserV1SignUpInputPayload')
 		expect(commandTypes).toContain('UserV1SignUpOutputPayload')
 		expect(readFileSync(join(commandDir, 'signUpCommandBuilder.ts'), 'utf-8')).toContain('signUpCommandBuilder')
+
+		const scheduleBuilder = readFileSync(join(scheduleDir, 'dailyCleanupScheduleDefinition.ts'), 'utf-8')
+		expect(scheduleBuilder).toContain('.getScheduleBuilder("dailyCleanup","Emit the daily cleanup trigger")')
+		expect(scheduleBuilder).toContain('.emitEvent(ServiceEvent.UserDailyCleanupDue')
+		expect(scheduleBuilder).toContain('value: "0 2 * * *"')
+		expect(scheduleBuilder).toContain('timezone: "Europe/Berlin"')
+		expect(scheduleBuilder).toContain('schedulerGroup: "maintenance"')
+		expect(readFileSync(join(scheduleDir, 'dailyCleanupScheduleDefinition.test.ts'), 'utf-8')).toContain(
+			"targetKind: 'event'",
+		)
+		expect(readFileSync(join(scheduleDir, 'dailyCleanupScheduleDefinition.test.ts'), 'utf-8').trimEnd()).toMatch(
+			/\}\n\)$/,
+		)
 
 		const queueDirPath = join(serviceDir, 'queue', 'processJobs')
 		expect(readFileSync(join(queueDirPath, 'schema.ts'), 'utf-8')).toContain('userV1ProcessJobsQueuePayloadSchema')
@@ -318,6 +361,9 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(readFileSync(join(subscriptionDir, 'sendWelcomeEmailSubscriptionBuilder.ts'), 'utf-8')).toContain(
 			'sendWelcomeEmailSubscriptionBuilder',
 		)
+		expect(readFileSync(join(subscriptionDir, 'sendWelcomeEmailSubscriptionBuilder.test.ts'), 'utf-8')).toContain(
+			'Readonly<UserV1SendWelcomeEmailInputPayload>',
+		)
 
 		const streamSchema = readFileSync(join(streamDir, 'schema.ts'), 'utf-8')
 		expect(streamSchema).toContain('userV1SearchUsersInputParameterSchema')
@@ -331,4 +377,81 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(streamTypes).toContain('UserV1SearchUsersFinalPayload')
 		expect(readFileSync(join(streamDir, 'searchUsersStreamBuilder.ts'), 'utf-8')).toContain('searchUsersStreamBuilder')
 	}, 60_000)
+
+	it('creates an opt-in workflow-backed durable agent with hermetic test bindings', async () => {
+		createBaseProject()
+		const puristaConfig = puristaConfigSchema.parse({
+			servicePath: 'src/service',
+			fileConvention: 'camel',
+			eventConvention: 'dotCase',
+			formatter: 'none',
+			linter: 'none',
+		})
+
+		let project = await scanPuristaProject(puristaConfig, TEST_DIR)
+		await addPuristaService({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'support',
+			serviceDescription: 'Support service',
+		})
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+
+		await addPuristaAgent({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'support',
+			serviceVersion: '1',
+			agentName: 'incident review',
+			agentDescription: 'Review an incident with durable replay',
+			durableWorkspace: true,
+		})
+
+		const agentDir = join(TEST_DIR, 'src', 'service', 'support', 'v1', 'agent', 'incidentReview')
+		const builder = readFileSync(join(agentDir, 'incidentReviewAgent.ts'), 'utf-8')
+		expect(builder).toContain('Application bootstrap must supply ai.runtime and ai.workspaceStore')
+		expect(builder).toContain('.setHarnessWorkflow(')
+		expect(builder).toContain("delegation: { agents: ['primaryAgent'], modelAliases: ['primary'] }")
+		expect(builder).toContain(".setWorkspacePolicy({ mode: 'durable', required: true, cleanup: 'on_terminal' })")
+		expect(builder).not.toContain('.setHarnessAgent(incidentReviewAgentHarnessAgent)')
+
+		const testContent = readFileSync(join(agentDir, 'incidentReviewAgent.test.ts'), 'utf-8')
+		expect(testContent).toContain('createAgentDurableWorkspaceTestRuntime')
+		expect(testContent).toContain('const durable = createAgentDurableWorkspaceTestRuntime()')
+		expect(testContent).toContain('runtime: durable.runtime')
+		expect(testContent).toContain('workspaceStore: durable.workspaceStore')
+		expect(testContent).not.toContain('@purista/harness')
+
+		const agentTsconfigPath = join(TEST_DIR, 'tsconfig.agent.json')
+		writeFileSync(
+			agentTsconfigPath,
+			JSON.stringify({
+				extends: './tsconfig.json',
+				compilerOptions: { ignoreDeprecations: '6.0' },
+				exclude: ['src/**/*.test.ts'],
+			}),
+		)
+		try {
+			execFileSync(
+				process.execPath,
+				[join(REPO_ROOT, 'node_modules', 'typescript', 'bin', 'tsc'), '--noEmit', '--project', agentTsconfigPath],
+				{ cwd: TEST_DIR, stdio: 'pipe' },
+			)
+		} catch (error) {
+			const commandError = error as { stderr?: Buffer; stdout?: Buffer }
+			throw new Error(`${commandError.stdout?.toString() ?? ''}${commandError.stderr?.toString() ?? ''}`)
+		}
+		try {
+			execFileSync(
+				process.execPath,
+				[join(REPO_ROOT, 'node_modules', 'vitest', 'vitest.mjs'), 'run', join(agentDir, 'incidentReviewAgent.test.ts')],
+				{ cwd: TEST_DIR, stdio: 'pipe' },
+			)
+		} catch (error) {
+			const commandError = error as { stderr?: Buffer; stdout?: Buffer }
+			throw new Error(`${commandError.stdout?.toString() ?? ''}${commandError.stderr?.toString() ?? ''}`)
+		}
+	})
 })

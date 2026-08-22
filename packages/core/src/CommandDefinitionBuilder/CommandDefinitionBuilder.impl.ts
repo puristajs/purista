@@ -1055,6 +1055,7 @@ export class CommandDefinitionBuilder<
 			maxCatchUpCount: options.maxCatchUpCount,
 			jitterWindowMs: options.jitterWindowMs,
 			idempotencyKey: options.idempotencyKey,
+			schedulerGroup: options.schedulerGroup,
 			enabledByDefault: options.enabledByDefault ?? true,
 			providerHints: options.providerHints,
 		})

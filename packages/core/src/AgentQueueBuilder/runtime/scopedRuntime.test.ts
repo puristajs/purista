@@ -5,6 +5,7 @@ import { InMemoryStateStore } from '@purista/harness'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
+import { createMemoryMetricsRecorder } from '../../core/metrics/index.js'
 import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Logger.js'
 import { getEventBridgeMock } from '../../mocks/index.js'
 import { ServiceBuilder } from '../../ServiceBuilder/ServiceBuilder.impl.js'
@@ -542,6 +543,48 @@ SECRET_BODY`,
 		expect(definition.runtime.current).toBeUndefined()
 		expect(firstLogs).toEqual(['agent run'])
 		expect(secondLogs).toEqual(['agent run'])
+	})
+
+	it('records low-cardinality agent wrapper metrics without claiming harness GenAI telemetry', async () => {
+		const serviceBuilder = new ServiceBuilder({
+			serviceName: 'support',
+			serviceVersion: '1',
+			serviceDescription: 'Support service',
+		})
+		const definition = await serviceBuilder
+			.getAgentQueueBuilder('triage', 'Classify support tickets')
+			.setRunFunction(async () => 'resolved')
+			.getDefinition()
+		serviceBuilder.addAgentDefinition(definition)
+
+		const metricsRecorder = createMemoryMetricsRecorder()
+		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+			ai: { models: {} },
+			metricsRecorder,
+		})
+		const command = definition.command as unknown as {
+			call(this: object, context: Record<string, unknown>, payload: unknown, parameter: unknown): Promise<unknown>
+		}
+
+		await expect(command.call.call(service, createCommandContext('agent-metric-message'), {}, {})).resolves.toBe(
+			'resolved',
+		)
+
+		expect(metricsRecorder.records).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: 'purista.agent.runs',
+					value: 1,
+					attributes: expect.objectContaining({
+						'purista.agent.name': 'triage',
+						'purista.agent.execution.kind': 'command',
+						'purista.outcome': 'success',
+					}),
+				}),
+				expect.objectContaining({ name: 'purista.agent.run.duration' }),
+			]),
+		)
+		expect(metricsRecorder.records.some(record => record.name.startsWith('gen_ai.'))).toBe(false)
 	})
 })
 
