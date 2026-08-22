@@ -6,7 +6,7 @@ Use this reference when creating or aligning application skeletons.
 - [CLI First](#cli-first)
 - [Agentic Scaffolding Flow](#agentic-scaffolding-flow)
 - [Generated Shape](#generated-shape)
-- [Starter And create-purista](#starter-and-create-purista)
+- [Generated Project Guarantees](#generated-project-guarantees)
 - [Examples](#examples)
 - [Review Cues](#review-cues)
 
@@ -201,19 +201,18 @@ Artifact placement rules:
 - `src/definitions.ts` is the explicit build-time inventory for static exports; standard `add:service` scaffolding appends generated services to its `serviceBuilders` array
 - `src/scheduler.ts` is a separate local/test host that reads `purista.schedules.json` and contains no business-service import; production copies must replace its local provider and bridge configuration explicitly
 
-## Starter And create-purista
-- `starter` must remain AI-free by default.
-- `create-purista` should initialize projects through CLI blueprint behavior.
-- Defaults should align with current Hono/EventBridge/QueueBridge decisions.
-- Starter may include disabled-by-default schedule contracts, `export:definitions`, `export:schedules`, and a local `start:scheduler` host, but must not assume a scheduler, broker, cluster, URL, auth policy, or provider account exists. The local host must state that `DefaultSchedulerProvider` and `DefaultEventBridge` do not provide cross-process production delivery.
-- Kubernetes CronJob export scripts must use explicit placeholder trigger configuration that users replace before applying manifests.
-- When framework behavior changes, update `purista` first, then starter/create-purista.
+## Generated Project Guarantees
+- The project is AI-free by default. Add model/provider dependencies only when the application actually wires them.
+- The generated application uses the CLI's current blueprint behavior and has local package scripts for future artifact creation.
+- A starter schedule host is local-only: `DefaultSchedulerProvider` and `DefaultEventBridge` never provide cross-process production delivery.
+- Kubernetes CronJob exports contain explicit placeholder trigger configuration. Replace it with a reviewed, authenticated trigger before applying a manifest.
 
-## Examples
-- `purista/examples/agent-example` is the canonical lightweight example for
-  core-native agents. It must stay provider-neutral, use
-  `createAgentTestHarness(...)`, use `createAgentSkillTestRuntime(...)` for
-  skill-backed tests, and avoid direct app dependencies on `@purista/harness`.
+## Agent Example Shape
+
+A lightweight application agent stays provider-neutral at its service boundary,
+uses `createAgentTestHarness(...)`, uses `createAgentSkillTestRuntime(...)` for
+skill-backed tests, and avoids direct application dependencies on
+`@purista/harness` except in explicit bootstrap/provider wiring.
 
 ## Review Cues
 - CLI generated tests compile against current APIs.

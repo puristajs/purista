@@ -78,6 +78,13 @@ for (const skillDir of skillDirs) {
 		addIssue(skillFile, 'user-facing skills must not reference internal specs')
 	}
 
+	if (
+		skillName !== 'purista-skill-maintainer' &&
+		/(?:purista\/(?:packages|web|examples)|npm run (?:audit|generate|sync):)/i.test(skillText)
+	) {
+		addIssue(skillFile, 'user-facing skills must not require a PURISTA source checkout or repository-only commands')
+	}
+
 	const referencesDir = join(skillDir, 'references')
 	if (!existsSync(referencesDir)) {
 		continue
@@ -97,6 +104,16 @@ for (const skillDir of skillDirs) {
 		const referenceText = readText(reference)
 		if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(referenceText)) {
 			addIssue(reference, 'user-facing skill references must not reference internal specs')
+		}
+
+		if (
+			skillName !== 'purista-skill-maintainer' &&
+			/(?:purista\/(?:packages|web|examples)|npm run (?:audit|generate|sync):)/i.test(referenceText)
+		) {
+			addIssue(
+				reference,
+				'user-facing skill references must not require a PURISTA source checkout or repository-only commands',
+			)
 		}
 
 		const lines = lineCount(referenceText)

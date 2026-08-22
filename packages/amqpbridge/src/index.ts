@@ -15,9 +15,9 @@
  *
  * @module
  */
-export * from './AmqpBridge.impl.js'
-export * from './deserializeOtpFromAmqpHeader.impl.js'
-export * from './getDefaultConfig.impl.js'
-export * from './serializeOtpForAmqpHeader.impl.js'
-export * from './types/index.js'
-export * from './version.js'
+export { AmqpBridge } from './AmqpBridge.impl.js'
+export type { AmqpBridgeConfig } from './types/AmqpBridgeConfig.js'
+export type { Encoder } from './types/Encoder.js'
+export type { EncoderFunctions } from './types/EncoderFunctions.js'
+export type { Encrypter } from './types/Encrypter.js'
+export type { EncryptFunctions } from './types/EncryptFunctions.js'

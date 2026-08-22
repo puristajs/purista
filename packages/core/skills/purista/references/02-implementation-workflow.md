@@ -66,8 +66,6 @@ Match the package manager and runtime recorded in `purista.json` and `package.js
 
 Use builder APIs directly when:
 - the CLI does not expose the needed advanced option
-- you are changing framework internals
-- you are writing reusable package code rather than app code
 - you need a tightly scoped test fixture
 
 ## Builder Refinement Pattern
@@ -80,13 +78,10 @@ Generated artifacts should remain explicit:
 - service files add definitions via service builder methods
 - logs, metrics, traces, events, queue payloads, streams, and prompts do not include secrets, PII, raw headers, tokens, or full request bodies by default
 
-## Package-Internal Work
-For framework package changes, do not use CLI scaffolding. Edit the package source and update:
-- public exports
-- TSDoc/JSDoc for exported APIs
-- tests and type tests
-- docs or skills when behavior changes
-- package dependency boundaries
+## Framework Boundary
+Changing PURISTA framework internals or publishing a framework package is not
+an application task. Stop this workflow and use the framework's separate
+contributor process; do not invent package internals from this skill.
 
 ## Verification
 Run focused package checks first, then wider checks:

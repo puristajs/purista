@@ -1,11 +1,6 @@
-import { MqttBridge } from './MqttEventBridge.js'
-import { puristaVersion } from './version.js'
+import { MqttBridge } from './index.js'
 
-describe('exports version', () => {
-	it('has a version', () => {
-		expect(puristaVersion).toBeDefined()
-	})
-
+describe('public exports', () => {
 	it('exports MqttBridge', () => {
 		expect(MqttBridge).toBeDefined()
 	})

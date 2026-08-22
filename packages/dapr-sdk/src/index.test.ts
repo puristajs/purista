@@ -1,19 +1,6 @@
-import {
-	DaprClient,
-	DaprConfigStore,
-	DaprEventBridge,
-	DaprSecretStore,
-	DaprStateStore,
-	puristaVersion,
-} from './index.js'
+import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } from './index.js'
 
-describe('Export', () => {
-	it('has a version', () => {
-		expect(puristaVersion).toBeDefined()
-	})
-	it('exports the DaprClient', () => {
-		expect(DaprClient).toBeDefined()
-	})
+describe('public exports', () => {
 	it('exports the DaprConfigStore', () => {
 		expect(DaprConfigStore).toBeDefined()
 	})

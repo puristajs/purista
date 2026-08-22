@@ -15,7 +15,7 @@ does not pretend to judge general code quality.
 - [Scenario 3: Streaming Or Aggregate HTTP Response](#scenario-3-streaming-or-aggregate-http-response)
 - [Scenario 4: Service-Owned Agent](#scenario-4-service-owned-agent)
 - [Scenario 5: Enterprise Runtime Review](#scenario-5-enterprise-runtime-review)
-- [Scenario 6: Skill Drift Repair](#scenario-6-skill-drift-repair)
+- [Scenario 6: Existing Application Change](#scenario-6-existing-application-change)
 - [Scenario 7: Durable Agent Workspace Replay](#scenario-7-durable-agent-workspace-replay)
 - [Scenario 8: Replicated Scheduler Host](#scenario-8-replicated-scheduler-host)
 - [Scenario 9: Multi-Package Selection](#scenario-9-multi-package-selection)
@@ -120,22 +120,25 @@ Validation:
 - queue retries, DLQ handling, idempotency, health, and replay expectations are explicit
 - runtime wiring lists EventBridge, QueueBridge, stores, resources, HTTP, metrics, and model providers
 
-## Scenario 6: Skill Drift Repair
+## Scenario 6: Existing Application Change
 Prompt:
 
 ```text
-Old planning notes mention @purista/ai and AgentProtocolEnvelope, but the implementation exposes core-native agents. Update the skills.
+Add a new billing command to an existing PURISTA application. The app has local
+CLI scripts, but no source checkout of the PURISTA framework is available.
 ```
 
 Expected behavior:
-- checks current implementation before copying stale planning assumptions
-- documents the implemented API and records planning drift instead of reviving removed APIs
-- updates repo-local `purista/skills` before installed mirror copies
+- reads the application's package scripts and `purista.json` when present
+- uses the local `add:command` script to generate the command skeleton, then
+  refines schemas, authorization, handler capabilities, and tests
+- re-exports definitions and runs static validation when the application
+  provides those scripts
 
 Validation:
-- `rg -n "@purista/ai|AgentProtocolEnvelope|AiSdkProvider|Vercel AI SDK" skills/purista` only finds explicit historical warnings if any
-- `npm run audit:skills` passes
-- `npm run lint` passes when skill changes affect tracked repo files
+- no framework source path or internal package file is required
+- the command is registered once in the generated service definition
+- the application test and build scripts pass
 
 ## Scenario 7: Durable Agent Workspace Replay
 Prompt:

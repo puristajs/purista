@@ -17,6 +17,14 @@ New projects created with `npm create purista@latest` or `purista init` are agen
 
 Those skill links point at `node_modules/@purista/core/skills/purista`, so updating `@purista/core` updates the local project skill.
 
+The installed skill is self-contained for application work. It includes a
+compact API reference generated from the published TypeDoc contract, plus the
+architecture and distributed-systems rules that tell an assistant when to use
+a command, event, queue, stream, agent, or event-only schedule. It never
+requires framework source paths, internal planning files, or a global CLI.
+For setup and changes, an assistant should use the project-local `add:*`,
+`inspect`, `validate`, and `doctor` scripts just as a developer would.
+
 Use the `skills` CLI only when you need to add the PURISTA skill to an existing project or to an assistant-specific/global skill mirror.
 
 ## Keep a runtime skill mirror current
@@ -78,6 +86,7 @@ The `purista` skill gives your assistant project-specific rules for:
 - using schemas and command contracts as reviewable boundaries
 - treating event bridges, queue bridges, stores, sandbox, and providers as runtime wiring
 - planning implementation work that stays aligned with PURISTA CLI conventions
+- selecting published packages and primary APIs from a generated, release-checked reference instead of guessing imports or deep-importing internals
 
 ## Verify
 

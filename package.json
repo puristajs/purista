@@ -33,6 +33,7 @@
 		"dev:doc": "npm run dev -w @purista/web",
 		"build:api-docs": "typedoc --options typedoc.json",
 		"audit:api-docs": "node ./scripts/api-docs-audit.mjs",
+		"audit:public-api-surface": "node ./scripts/public-api-surface-audit.mjs",
 		"audit:specs": "node ./scripts/specs-audit.mjs specs",
 		"generate:agent-api-knowledge": "node ./scripts/generate-agent-api-knowledge.mjs",
 		"audit:agent-api-knowledge": "node ./scripts/generate-agent-api-knowledge.mjs --check",

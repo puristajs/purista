@@ -28,10 +28,12 @@
  * @module
  */
 
-export * from './DaprClient/index.js'
-export * from './DaprConfigStore/index.js'
-export * from './DaprEventBridge/index.js'
-export * from './DaprSecretStore/index.js'
-export * from './DaprStateStore/index.js'
-export * from './types/index.js'
-export * from './version.js'
+export type { DaprClientConfig } from './DaprClient/types/DaprClientConfig.js'
+export { DaprConfigStore } from './DaprConfigStore/DaprConfigStore.impl.js'
+export type { DaprConfigStoreConfig } from './DaprConfigStore/types/DaprConfigStoreConfig.js'
+export { DaprEventBridge } from './DaprEventBridge/DaprEventBridge.impl.js'
+export type { DaprEventBridgeConfig } from './DaprEventBridge/types/DaprEventBridgeConfig.js'
+export { DaprSecretStore } from './DaprSecretStore/DaprSecretStore.impl.js'
+export type { DaprSecretStoreConfig } from './DaprSecretStore/types/DaprSecretStoreConfig.js'
+export { DaprStateStore } from './DaprStateStore/DaprStateStore.impl.js'
+export type { DaprStateStoreConfig } from './DaprStateStore/types/DaprStateStoreConfig.js'

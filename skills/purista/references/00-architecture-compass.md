@@ -2,14 +2,8 @@
 
 Use this reference when designing a PURISTA system before implementation. It condenses the handbook mental model into practical architecture decisions for production systems.
 
-Source handbook pages:
-- `purista/web/src/content/handbook-cards/mental-model/philosophy.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/separation-of-concerns.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/architecture.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/data-control.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/distribution.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/deployment-flexibility.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/resilience-patterns.mdx`
+This is self-contained application guidance. Consult the public PURISTA handbook
+only when a deployment or adapter decision needs more detail.
 
 ## Contents
 - [Core Idea](#core-idea)

@@ -18,6 +18,7 @@ const checks = [
 	'test:generated-project',
 	'build:api-docs',
 	'audit:api-docs',
+	'audit:public-api-surface',
 	'audit:agent-api-knowledge',
 	'audit:specs',
 	'test:skill-evaluations',
