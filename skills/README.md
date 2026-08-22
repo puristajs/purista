@@ -3,9 +3,10 @@
 This repository ships one shared framework skill catalog in `skills/`.
 
 ## Canonical Model
-- `skills/purista/` is the single shared framework skill for PURISTA.
+- `skills/purista/` is the default shared framework skill for PURISTA application work.
+- `skills/purista-migration/` is the focused, evidence-and-rollback workflow for upgrading existing PURISTA applications.
 - `skills/purista-skill-maintainer/` is the meta skill for maintaining that catalog.
-- Applications may add overlay skills, but core framework knowledge should stay in the shared `purista` skill references.
+- Applications may add overlay skills, but core framework knowledge should stay in the shared `purista` references; migration-specific procedure stays in `purista-migration`.
 - Repo-local `skills/` is the source of truth. Installed copies in agent skill directories are mirrors and should be refreshed from here when drift appears.
 - The user-facing `purista` skill must not require internal spec access. The maintainer skill may use specs because it is for developing and aligning PURISTA itself.
 
@@ -13,7 +14,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - Each skill uses `skills/<skill-name>/SKILL.md`.
 - Optional `references/`, `scripts/`, and `assets/` folders may exist beside `SKILL.md`.
 - `SKILL.md` stays compact and navigational.
-- Detailed framework material belongs in `skills/purista/references/`.
+- Detailed framework material belongs in `skills/purista/references/`; upgrade-only procedure belongs in `skills/purista-migration/references/`.
 
 ## Content Expectations
 - Split architecture guidance from implementation guidance.
@@ -30,7 +31,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - AI guidance should prevent accidental leakage of confidential data through prompts, completions, tool arguments, sandbox output, logs, metrics, traces, events, streams, and generated examples.
 
 ## Layering
-Shared roots load first. App-local overlay roots load second. Overlays may override a shared skill of the same name, but the preferred shape is one shared `purista` skill plus app-specific overlays.
+Shared roots load first. App-local overlay roots load second. Overlays may override a shared skill of the same name, but the preferred shape is `purista` for normal application work, `purista-migration` for existing-app upgrades, and app-specific overlays for local policy.
 
 Overlays should document product-local decisions only. They should not fork core framework behavior unless the framework itself changed and the shared catalog is updated first.
 
@@ -51,7 +52,7 @@ npm run sync:skills -- --target /absolute/path/to/agent/skills
 npm run audit:skill-mirror -- --target /absolute/path/to/agent/skills
 ```
 
-The sync command replaces only the two PURISTA-owned skill directories; it
+The sync command replaces only the three PURISTA-owned skill directories; it
 does not alter unrelated skills in the target directory. The audit form is
 read-only and fails when any catalog file differs.
 

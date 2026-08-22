@@ -32,7 +32,7 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn export:runtime' : `${input.packageManager} run export:runtime`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\` when this application declares schedules
 
-This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
+This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local links under \`.agents/skills/\` and \`.claude/skills/\` point to the bundled PURISTA architecture and migration skills in \`@purista/core\`.
 
 Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery. Generated agents are ephemeral by default. Use \`--durable-workspace\` only for a resumable \`setHarnessWorkflow(...)\`; it requires application-owned \`ai.runtime\` and \`ai.workspaceStore\` adapters.
 
@@ -86,7 +86,8 @@ ${createLocalCliUsageGuide(input)}
 
 ## Skills
 - Use the bundled PURISTA skill from \`.agents/skills/purista\` or \`.claude/skills/purista\`.
-- These paths link to \`node_modules/@purista/core/skills/purista\`, so dependency updates refresh the framework skill.
+- Use \`.agents/skills/purista-migration\` or \`.claude/skills/purista-migration\` before upgrading this existing application to a new PURISTA release; it is not the primary skill for new features.
+- These paths link to \`node_modules/@purista/core/skills/\`, so dependency updates refresh both framework skills.
 
 ## Verification
 - Run the project test script after framework changes.
@@ -100,7 +101,7 @@ export const createClaudeFile = () => `# Claude Guide
 
 Follow [AGENTS.md](./AGENTS.md) for this PURISTA project.
 
-Use the bundled PURISTA skill linked at \`.claude/skills/purista\` before designing or changing PURISTA services, commands, subscriptions, streams, queues, workers, agents, or runtime wiring.
+Use the bundled PURISTA skill linked at \`.claude/skills/purista\` before designing or changing PURISTA services, commands, subscriptions, streams, queues, workers, agents, or runtime wiring. Before an existing-application upgrade, use \`.claude/skills/purista-migration\`.
 `
 
 /** Create implementation guidance for agentic development tools. */

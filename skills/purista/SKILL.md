@@ -7,6 +7,8 @@ description: Guides architecture, CLI-first implementation, runtime wiring, test
 
 ## When To Use
 Use this as the default shared skill whenever an agent designs, implements, reviews, tests, or plans a PURISTA application.
+For an existing application upgrade or legacy-to-current framework transition,
+route primary work to `purista-migration`.
 
 ## Operating Model
 

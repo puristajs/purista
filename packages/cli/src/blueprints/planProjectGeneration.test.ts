@@ -125,7 +125,9 @@ describe('planProjectGeneration', () => {
 		expect(plan.predictedFiles).toContain('CLAUDE.md')
 		expect(plan.predictedFiles).toContain('.agents/IMPLEMENTATION.md')
 		expect(plan.predictedFiles).toContain('.agents/skills/purista')
+		expect(plan.predictedFiles).toContain('.agents/skills/purista-migration')
 		expect(plan.predictedFiles).toContain('.claude/skills/purista')
+		expect(plan.predictedFiles).toContain('.claude/skills/purista-migration')
 		expect(plan.predictedFiles).toContain('src/service/ping/v1/pingV1Service.ts')
 		expect(plan.predictedFiles).toContain('src/service/ping/v1/command/ping/types.ts')
 
@@ -156,6 +158,13 @@ describe('planProjectGeneration', () => {
 			type: 'symlink',
 			path: '.agents/skills/purista',
 			target: '../../node_modules/@purista/core/skills/purista',
+		})
+
+		const migrationSkillLink = plan.files.find(file => file.path === '.agents/skills/purista-migration')
+		expect(migrationSkillLink).toEqual({
+			type: 'symlink',
+			path: '.agents/skills/purista-migration',
+			target: '../../node_modules/@purista/core/skills/purista-migration',
 		})
 
 		const agentsFile = plan.files.find(file => file.path === 'AGENTS.md')

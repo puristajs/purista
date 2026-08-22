@@ -168,20 +168,45 @@ project-local knowledge instead of leaving an old prompt file behind.
 
 For an existing project, follow [Install the PURISTA AI skill](/handbook/install-ai-skill/).
 
+## Migrate with evidence, not a prompt-sized guess
+
+Version 4 also ships a dedicated `purista-migration` skill. It is deliberately
+separate from the normal framework skill: an existing application upgrade needs
+a recorded baseline, compatible package versions, a migration ledger, static
+diagnostics, deployment order, and a rollback trigger—not a new-feature
+workflow.
+
+Install it beside the normal skill for an existing project:
+
+```bash
+npx skills add puristajs/purista --skill purista-migration
+```
+
+The skill starts from the application’s `package.json`, lockfile, local CLI,
+definitions, runtime wiring, and deployment manifests. It never assumes a
+framework checkout or a global CLI. It then routes the v4 changes to the right
+boundary: Core import paths, a separate event-only scheduler host, inherited
+observability before startup, RFC 9457 consumers, and state or agent data
+lifecycles. The result is a migration record another engineer or agent can
+verify instead of a pile of untracked edits.
+
 ## Upgrade checklist
 
-1. Export definitions and run `purista validate --strict` before changing the
+1. Capture the lockfile, local scripts, definitions, and current checks before
+   changing the application; use the migration skill to maintain the ledger and
+   rollback trigger.
+2. Export definitions and run `purista validate --strict` before changing the
    application.
-2. Deploy schedules as a separate Scheduler Runtime and make downstream effects
+3. Deploy schedules as a separate Scheduler Runtime and make downstream effects
    idempotent with `occurrenceId`.
-3. Consolidate repeated telemetry into flat `getInstance(...)` options where a
+4. Consolidate repeated telemetry into flat `getInstance(...)` options where a
    compatible adapter is still unconfigured; direct adapter configuration needs
    no migration.
-4. Update HTTP clients that parse legacy Hono error bodies to consume RFC 9457
+5. Update HTTP clients that parse legacy Hono error bodies to consume RFC 9457
    Problem Details instead.
-5. Review retention, encryption, access control, and expiry behavior for every
+6. Review retention, encryption, access control, and expiry behavior for every
    persisted agent conversation.
-6. Add explicit delegation allowlists to Harness workflows and move custom agent
+7. Add explicit delegation allowlists to Harness workflows and move custom agent
    UI frames to an application stream or channel.
 
 The detailed handbook pages linked above contain the operational constraints and

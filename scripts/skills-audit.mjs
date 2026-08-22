@@ -6,6 +6,7 @@ import { join, relative, resolve } from 'node:path'
 const root = process.cwd()
 const skillsRoot = resolve(root, 'skills')
 const issues = []
+const requiredSkillNames = ['purista', 'purista-migration', 'purista-skill-maintainer']
 
 const readText = path => readFileSync(path, 'utf8')
 
@@ -60,6 +61,10 @@ for (const skillDir of skillDirs) {
 
 	if (!/^[a-z0-9-]{1,64}$/.test(frontmatter.name ?? '')) {
 		addIssue(skillFile, 'frontmatter name must be lowercase kebab-case')
+	}
+
+	if (frontmatter.name !== skillName) {
+		addIssue(skillFile, 'frontmatter name must match the skill directory name')
 	}
 
 	if (!frontmatter.description || frontmatter.description.length > 1024) {
@@ -124,9 +129,47 @@ for (const skillDir of skillDirs) {
 	}
 }
 
+for (const requiredSkillName of requiredSkillNames) {
+	const requiredSkill = join(skillsRoot, requiredSkillName, 'SKILL.md')
+	if (!existsSync(requiredSkill)) {
+		addIssue(requiredSkill, 'required canonical skill is missing')
+	}
+}
+
+for (const skillName of requiredSkillNames) {
+	const evalFile = join(skillsRoot, skillName, 'evals', 'evals.json')
+	if (!existsSync(evalFile)) {
+		addIssue(evalFile, 'required canonical skill evaluation catalog is missing')
+		continue
+	}
+
+	try {
+		const evaluationCatalog = JSON.parse(readText(evalFile))
+		if (evaluationCatalog.skill_name !== skillName || !Array.isArray(evaluationCatalog.evals)) {
+			addIssue(evalFile, 'evaluation catalog must identify its skill and contain evals')
+		} else if (evaluationCatalog.evals.length < 5) {
+			addIssue(evalFile, 'evaluation catalog must contain at least five realistic evals')
+		}
+	} catch {
+		addIssue(evalFile, 'evaluation catalog must be valid JSON')
+	}
+}
+
 const puristaEvalScenarios = join(skillsRoot, 'purista', 'references', '11-evaluation-scenarios.md')
 if (!existsSync(puristaEvalScenarios)) {
 	addIssue(puristaEvalScenarios, 'canonical purista skill should include concrete evaluation scenarios')
+}
+
+const migrationSkill = join(skillsRoot, 'purista-migration', 'SKILL.md')
+if (existsSync(migrationSkill)) {
+	const migrationText = readText(migrationSkill)
+	for (const [pattern, message] of [
+		[/\brollback\b/i, 'migration skill must require a rollback path'],
+		[/\bvalidate\b/i, 'migration skill must require static validation'],
+		[/\bStop And Ask\b/i, 'migration skill must define stop conditions'],
+	]) {
+		if (!pattern.test(migrationText)) addIssue(migrationSkill, message)
+	}
 }
 
 if (issues.length) {

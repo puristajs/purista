@@ -63,6 +63,7 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 - Website and handbook source content lives under `web/src/content/`.
 - Canonical framework skills are available under `skills/` and should be loaded selectively.
 - Prefer the shared layered catalog there over app-local copies.
+- Use `purista` for normal application architecture and implementation; use `purista-migration` for existing-application upgrades and release migrations.
 - Specs are the source of truth for framework development. Implementation should follow specs; when they drift, update the specs or mark obsolete material as superseded.
 - User-facing framework skills must not require access to internal specs. They should reflect the current implementation, which should itself follow the specs.
 - The `purista-skill-maintainer` skill is the exception: it may use specs to keep framework skills, docs, examples, and implementation aligned.

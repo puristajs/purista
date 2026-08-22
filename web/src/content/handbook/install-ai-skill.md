@@ -6,16 +6,17 @@ order: 15000
 
 # Install the PURISTA AI skill
 
-PURISTA includes an AI assistant skill for architecture, service design, builders, runtime wiring, adapters, queues, subscriptions, AI Harness work, and implementation planning. Install it before asking an assistant to create or edit PURISTA services.
+PURISTA includes an AI assistant skill for architecture, service design, builders, runtime wiring, adapters, queues, subscriptions, AI Harness work, and implementation planning. It also includes a dedicated migration skill for upgrading an existing application with explicit evidence, rollout, and rollback. Install the relevant skill before asking an assistant to change your project.
 
 New projects created with `npm create purista@latest` or `purista init` are agent-ready by default. The generated app includes:
 
 - `AGENTS.md` for agent-neutral coding guidance
 - `CLAUDE.md` for Claude-specific entrypoint guidance
 - `.agents/IMPLEMENTATION.md` for CLI-first implementation rules
-- `.agents/skills/purista` and `.claude/skills/purista` links to the PURISTA skill bundled with `@purista/core`
+- `.agents/skills/purista` and `.claude/skills/purista` links to the normal PURISTA skill bundled with `@purista/core`
+- `.agents/skills/purista-migration` and `.claude/skills/purista-migration` links to the migration skill bundled with `@purista/core`
 
-Those skill links point at `node_modules/@purista/core/skills/purista`, so updating `@purista/core` updates the local project skill.
+Those skill links point at `node_modules/@purista/core/skills/`, so updating `@purista/core` updates the local project skills.
 
 The installed skill is self-contained for application work. It includes a
 compact API reference generated from the published TypeDoc contract, plus the
@@ -36,7 +37,7 @@ npm run sync:skills -- --target /absolute/path/to/agent/skills
 npm run audit:skill-mirror -- --target /absolute/path/to/agent/skills
 ```
 
-The sync owns only the `purista` and `purista-skill-maintainer` directories in that target; it leaves every other agent skill untouched. Run the audit in CI or before a release to detect drift.
+The sync owns only the `purista`, `purista-migration`, and `purista-skill-maintainer` directories in that target; it leaves every other agent skill untouched. Run the audit in CI or before a release to detect drift.
 
 The repository also contains deterministic, model-neutral response rubrics for the most failure-prone design choices. To validate a captured agent response against them:
 
@@ -52,6 +53,7 @@ Use the package runner for your project:
 
 ```bash
 npx skills add puristajs/purista --skill purista
+npx skills add puristajs/purista --skill purista-migration
 ```
 
 Equivalent package-runner forms:
@@ -59,7 +61,9 @@ Equivalent package-runner forms:
 ```bash
 npx skills add puristajs/purista --skill purista
 pnpm dlx skills add puristajs/purista --skill purista
+pnpm dlx skills add puristajs/purista --skill purista-migration
 yarn dlx skills add puristajs/purista --skill purista
+yarn dlx skills add puristajs/purista --skill purista-migration
 ```
 
 To install only for a specific agent, add `--agent`:
@@ -88,12 +92,19 @@ The `purista` skill gives your assistant project-specific rules for:
 - planning implementation work that stays aligned with PURISTA CLI conventions
 - selecting published packages and primary APIs from a generated, release-checked reference instead of guessing imports or deep-importing internals
 
+The `purista-migration` skill is for existing applications. It starts from the
+installed dependency set, lockfile, local scripts, definitions, and baseline
+checks; it then requires a migration ledger, static diagnostics, behavior
+checks, deployment order, and a rollback trigger. It is intentionally not the
+primary skill for a new feature.
+
 ## Verify
 
 For new projects, verify the generated links:
 
 ```bash
-ls -l .agents/skills/purista .claude/skills/purista
+ls -l .agents/skills/purista .agents/skills/purista-migration \
+  .claude/skills/purista .claude/skills/purista-migration
 ```
 
 For manually installed project skills, list installed skills:
@@ -106,6 +117,12 @@ Then ask your assistant to use the PURISTA skill when designing or editing servi
 
 ```text
 Use the PURISTA skill and add an Order service with createOrder and cancelOrder commands.
+```
+
+For an existing application upgrade:
+
+```text
+Use the PURISTA migration skill to prepare this project for version 4. Start with the current lockfile, definitions, scripts, and a rollback plan.
 ```
 
 Next: [Quickstart](./1_quickstart/index.md).

@@ -6,11 +6,12 @@ description: Maintains the canonical PURISTA skill catalog with spec-grounded dr
 # PURISTA Skill Maintainer
 
 ## When to use this skill
-Use this skill when creating, refactoring, consolidating, or reviewing the shared `purista` framework skill, the `purista-skill-maintainer` meta skill, or any overlay that depends on them.
+Use this skill when creating, refactoring, consolidating, or reviewing the shared `purista` or `purista-migration` user-facing skills, the `purista-skill-maintainer` meta skill, or any overlay that depends on them.
 
 ## What this skill is for
 This skill defines the maintenance workflow for the shared PURISTA skill catalog in `purista/skills`.
-The catalog now has one canonical framework skill, `purista`, plus one separate meta skill, `purista-skill-maintainer`.
+The catalog has the general framework skill `purista`, the separate lifecycle skill
+`purista-migration`, and the meta skill `purista-skill-maintainer`.
 The maintainer skill keeps that model coherent, readable, spec-grounded, implementation-verified, and aligned across `purista`, `starter`, `create-purista`, public docs, and `voyage`.
 
 ## Source-of-truth order
@@ -24,7 +25,7 @@ Read sources in this order before changing a skill:
 Specs are the source of truth for framework development. If implementation and specs conflict, first decide whether the implementation drifted or the spec is stale. Fix the drift in the implementation or update/supersede the spec, then align skills to the implemented behavior that now follows the current spec.
 
 ## Hard rules
-- Treat `purista` as the canonical shared framework skill path unless the change is explicitly about the maintainer skill itself.
+- Treat `purista` as the default shared framework skill path. Route existing-app upgrades to `purista-migration`; use the maintainer skill only for catalog work.
 - Keep user-facing framework skills independent from internal spec access. The `purista-skill-maintainer` skill may reference specs because it is for maintaining PURISTA itself.
 - Keep `SKILL.md` compact and navigational; move depth into `references/`.
 - Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
@@ -33,14 +34,14 @@ Specs are the source of truth for framework development. If implementation and s
 - Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Keep `purista/skills` as the source of truth; installed client copies are mirrors that may need syncing after repo changes through `npm run sync:skills -- --target <absolute-skills-directory>`.
-- Do not split the framework back into many sibling skills unless there is a genuinely separate non-runtime concern.
+- Do not split the framework into many sibling skills. `purista-migration` is the allowed separate lifecycle workflow because upgrades need a distinct evidence, rollback, and stop-condition model.
 - When teaching schemas and contracts, prefer consumer-local schema definitions over one shared cross-service Zod schema unless every consumer truly needs the exact same shape.
 - Keep current platform decisions visible, especially safe defaults, strict capability validation, Hono as the active HTTP server runtime, and the current queue/event bridge reliability model.
 - Keep observability guidance aligned: OTel Metrics API is canonical for metrics, app code owns SDK/exporters, Prometheus stays outside core, and `@purista/harness` owns GenAI/model/token/tool metrics.
 - Keep security and privacy guidance aligned: tenant/principal propagation, guard-based authorization, secret-store usage, least-privilege resources, auditability, and no sensitive data in logs/metrics/traces/prompts/examples.
 
 ## Decision rules
-- Keep one framework skill and split depth into references instead of adding more framework skill folders.
+- Keep one general framework skill and split its depth into references. Keep `purista-migration` narrowly limited to application upgrade work rather than duplicating normal architecture guidance.
 - Keep `purista-skill-maintainer` separate because it is a catalog-authoring workflow, not runtime framework knowledge.
 - Put only the routing model, core mental model, and highest-signal rules into `SKILL.md`.
 - Put examples, nuanced decisions, and topic-specific teaching into `references/`.
@@ -58,7 +59,7 @@ Specs are the source of truth for framework development. If implementation and s
 - `purista/skills/purista/references/11-evaluation-scenarios.md`
 
 ## What to review for every change
-- One-skill routing quality
+- Catalog routing quality, including the migration/new-project boundary
 - Accuracy of file references and package paths
 - Definition / implementation / configuration / instantiation coverage
 - Reference taxonomy quality

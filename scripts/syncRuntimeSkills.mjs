@@ -5,7 +5,7 @@ import { isAbsolute, join, resolve } from 'node:path'
 
 const repositoryRoot = resolve(import.meta.dirname, '..')
 const sourceRoot = resolve(repositoryRoot, 'skills')
-const canonicalSkillNames = ['purista', 'purista-skill-maintainer']
+const canonicalSkillNames = ['purista', 'purista-migration', 'purista-skill-maintainer']
 
 const args = process.argv.slice(2)
 const targetIndex = args.indexOf('--target')

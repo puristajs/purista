@@ -164,8 +164,18 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 				},
 				{
 					type: 'symlink',
+					path: '.agents/skills/purista-migration',
+					target: '../../node_modules/@purista/core/skills/purista-migration',
+				},
+				{
+					type: 'symlink',
 					path: '.claude/skills/purista',
 					target: '../../node_modules/@purista/core/skills/purista',
+				},
+				{
+					type: 'symlink',
+					path: '.claude/skills/purista-migration',
+					target: '../../node_modules/@purista/core/skills/purista-migration',
 				},
 				{ path: 'src/service/serviceEvent.enum.ts', content: createServiceEventEnumFile(context) },
 				{ path: 'src/definitions.ts', content: createDefinitionsFile(context) },
