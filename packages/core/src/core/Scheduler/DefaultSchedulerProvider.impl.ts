@@ -13,6 +13,15 @@ import type {
  * State is lost on restart and claims are not shared with other processes. Do
  * not use this provider to claim distributed or durable scheduling guarantees.
  *
+ * @example
+ * ```ts
+ * const scheduler = new SchedulerBuilder()
+ *   .loadManifest(manifest)
+ *   .useEventBridge(new DefaultEventBridge())
+ *   .useProvider(new DefaultSchedulerProvider())
+ *   .getInstance()
+ * ```
+ *
  * @group Scheduler
  */
 export class DefaultSchedulerProvider implements SchedulerProvider {

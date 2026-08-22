@@ -64,6 +64,15 @@ type RuntimeSchedule = SchedulerRegistration & {
  * This runtime never loads business services or handlers. It can be hosted in
  * a small standalone process with an EventBridge and a SchedulerProvider.
  *
+ * Prefer `SchedulerBuilder` for application code so required scheduler
+ * bindings are explicit and validated before the runtime starts.
+ *
+ * @example
+ * ```ts
+ * const runtime = new SchedulerRuntime({ registrations, eventBridge, provider, strict: true })
+ * await runtime.start()
+ * ```
+ *
  * @group Scheduler
  */
 export class SchedulerRuntime {

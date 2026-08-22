@@ -19,6 +19,12 @@ PURISTA is builder-driven and runtime-explicit. Keep four layers separate:
 
 Do not blur these layers. Most mistakes come from designing routes, prompts, or infrastructure before service ownership and contracts are clear.
 
+## Agent Operating Protocol
+- For a new application, initialize through `npm create purista@latest` or deterministic `purista init <target> ... --non-interactive --defaults --no-install`; then use the generated project-local `add:*` scripts for every supported artifact.
+- Before changing an existing application, read `purista.json` and its package scripts, run its `export:definitions` script, then run `purista inspect`, strict `purista validate`, and `purista doctor` against that generated inventory. These are static preflight checks, not live infrastructure health checks.
+- Turn the requested outcome into an ownership and boundary decision before generating files. Use the local CLI to create the service, command, subscription, stream, queue, worker, event-only schedule, or agent skeleton; edit only the generated refinement points.
+- After changes, re-export definitions and repeat static validation before running the project test and build scripts. Do not claim a deployment/provider guarantee that static diagnostics cannot prove.
+
 ## Hard Rules
 - Start from business capabilities and ownership boundaries, not package names or routes.
 - Use the project-local PURISTA CLI whenever it can generate the target artifact; refine generated code instead of hand-writing the skeleton.

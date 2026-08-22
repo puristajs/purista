@@ -131,7 +131,28 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 >
 
 /**
- * This class is used to build a service.
+ * Declares one versioned PURISTA business capability.
+ *
+ * Start here after the owning domain, invariants, and boundary contracts are
+ * clear. Add commands, subscriptions, streams, queues, schedules, and agents
+ * to this builder; provide bridges, stores, resources, telemetry, and optional
+ * AI runtime bindings only when calling `getInstance(...)` in application
+ * bootstrap code.
+ *
+ * @example
+ * ```ts
+ * const ordersInfo = {
+ *   serviceName: 'orders',
+ *   serviceVersion: '1',
+ *   serviceDescription: 'Owns order lifecycle',
+ * } as const satisfies ServiceInfoType
+ *
+ * const orders = new ServiceBuilder(ordersInfo)
+ *   .addCommandDefinition(createOrderCommand.getDefinition())
+ *
+ * const service = await orders.getInstance(eventBridge)
+ * await service.start()
+ * ```
  *
  * @group Service
  */

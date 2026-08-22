@@ -44,3 +44,9 @@ npm run test:package-imports
 
 echo "Updating changelog and documentation (including API docs)"
 npm run build:doc
+npm run generate:agent-api-knowledge
+npm run sync:packaged-skills
+npm run sync:website-llms
+npm run audit:agent-api-knowledge
+npm run audit:packaged-skills
+npm run audit:website-llms

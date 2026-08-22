@@ -101,13 +101,17 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 }
 
 /**
- * Exports the service definitions.
- * Includes the information about commands and subscriptions.
+ * Resolve service builders into the JSON-safe definition inventory used by
+ * architecture inspection and interoperability exports.
  *
- * The output can be saved as JSON string in a file.
+ * Keep this in an application composition module that imports builders only;
+ * it must not instantiate service runtime dependencies or handlers.
  *
- * @param serviceBuilders
- * @returns
+ * @example
+ * ```ts
+ * const definitions = await exportServiceDefinitions([ordersV1Service, billingV1Service])
+ * await writeFile('purista.definitions.json', JSON.stringify(definitions, null, 2))
+ * ```
  */
 export const exportServiceDefinitions = async (
 	serviceBuilders: readonly ServiceBuilder<any>[],

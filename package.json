@@ -36,6 +36,8 @@
 		"audit:specs": "node ./scripts/specs-audit.mjs specs",
 		"generate:agent-api-knowledge": "node ./scripts/generate-agent-api-knowledge.mjs",
 		"audit:agent-api-knowledge": "node ./scripts/generate-agent-api-knowledge.mjs --check",
+		"sync:packaged-skills": "node ./scripts/syncPackageSkills.mjs ./packages/core",
+		"audit:packaged-skills": "node ./scripts/syncPackageSkills.mjs ./packages/core --check",
 		"sync:skills": "node ./scripts/syncRuntimeSkills.mjs",
 		"sync:website-llms": "node ./scripts/syncWebsiteLlmContext.mjs",
 		"audit:website-llms": "node ./scripts/syncWebsiteLlmContext.mjs --check",
