@@ -1,0 +1,44 @@
+{
+	"skill_name": "purista",
+	"evals": [
+		{
+			"id": "greenfield-cli",
+			"prompt": "Create a new PURISTA app with a customer service and an HTTP command.",
+			"expected_output": "Uses create-purista or deterministic purista init, then generated local CLI scripts; keeps HTTP as a Hono projection of a builder-declared command.",
+			"files": ["SKILL.md", "references/08-cli-starter-and-scaffolding.md"]
+		},
+		{
+			"id": "distributed-invoice-work",
+			"prompt": "Make invoice processing retry safely across replicas and let operators replay failed jobs.",
+			"expected_output": "Chooses a queue and queue worker, declares idempotency, retry and DLQ behavior, and does not claim exactly-once delivery.",
+			"files": [
+				"references/06-runtime-transports-and-bridges.md",
+				"references/07-testing-observability-and-deployment.md"
+			]
+		},
+		{
+			"id": "replicated-schedule",
+			"prompt": "Run monthly billing from a horizontally scaled system.",
+			"expected_output": "Keeps the scheduler as a separate minimal host that emits an event; uses distributed schedule claims and moves billing to normal queue-worker business logic.",
+			"files": ["references/00-architecture-compass.md", "references/07-testing-observability-and-deployment.md"]
+		},
+		{
+			"id": "casual-cli-typo",
+			"prompt": "plz add a schedual for daily clean up in my purista app",
+			"expected_output": "Uses the project-local add:schedule flow, explains that the schedule emits an event only, and directs actual cleanup work to a subscription or queue worker.",
+			"files": ["references/08-cli-starter-and-scaffolding.md"]
+		},
+		{
+			"id": "package-choice",
+			"prompt": "I need AMQP events, Redis strict queue jobs, AWS secrets, and public HTTP commands.",
+			"expected_output": "Selects the exact published AMQP, Redis queue, AWS secret, and Hono packages from the generated catalog and keeps event and queue bridge roles separate.",
+			"files": ["references/04-package-map.md", "references/generated-api-index.md"]
+		},
+		{
+			"id": "near-miss-frontend",
+			"prompt": "Design a React dashboard with cards that visualize PURISTA queue metrics.",
+			"expected_output": "Does not use this framework-implementation skill as the primary UI-design skill; routes the visual dashboard work to a frontend/UI skill while retaining only any necessary PURISTA metrics-contract advice.",
+			"files": []
+		}
+	]
+}

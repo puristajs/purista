@@ -14,6 +14,15 @@ import type { DaprSecretStoreConfig } from './types/DaprSecretStoreConfig.js'
  *
  * The adapter fetches secrets through the local sidecar. Creating, changing and
  * removing secrets is not supported by this implementation.
+ *
+ * @example
+ * ```ts
+ * const secretStore = new DaprSecretStore({
+ *   secretStoreName: 'application-secrets',
+ *   clientConfig: { daprHost: 'http://127.0.0.1', daprPort: '3500' },
+ * })
+ * const { databasePassword } = await secretStore.getSecret('databasePassword')
+ * ```
  */
 export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig> {
 	private client: HttpClient<DaprClientConfig>

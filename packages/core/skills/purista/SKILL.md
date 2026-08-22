@@ -1,6 +1,6 @@
 ---
 name: purista
-description: Canonical PURISTA framework skill for architecture, builder-based implementation, package selection, CLI scaffolding, runtime wiring, testing, and optional AI agents.
+description: Canonical PURISTA framework skill for architecture, builder-based implementation, package selection, CLI scaffolding, runtime wiring, testing, and optional AI agents. Use when designing, implementing, reviewing, or planning a PURISTA application or package change.
 topics: [architecture, implementation, builders, packages, cli, agents, runtime]
 phases: [architecture, implementation, review]
 ---
@@ -19,17 +19,10 @@ PURISTA is builder-driven and runtime-explicit. Keep four layers separate:
 
 Do not blur these layers. Most mistakes come from designing routes, prompts, or infrastructure before service ownership and contracts are clear.
 
-## Agent Operating Protocol
-- For a new application, initialize through `npm create purista@latest` or deterministic `purista init <target> ... --non-interactive --defaults --no-install`; then use the generated project-local `add:*` scripts for every supported artifact.
-- Before changing an existing application, read `purista.json` and its package scripts, run its `export:definitions` script, then run `purista inspect`, strict `purista validate`, and `purista doctor` against that generated inventory. These are static preflight checks, not live infrastructure health checks.
-- Turn the requested outcome into an ownership and boundary decision before generating files. Use the local CLI to create the service, command, subscription, stream, queue, worker, event-only schedule, or agent skeleton; edit only the generated refinement points.
-- After changes, re-export definitions and repeat static validation before running the project test and build scripts. Do not claim a deployment/provider guarantee that static diagnostics cannot prove.
-
 ## Hard Rules
 - Start from business capabilities and ownership boundaries, not package names or routes.
-- Use the project-local PURISTA CLI whenever it can generate the target artifact; refine generated code instead of hand-writing the skeleton.
-- For a new app, start with `npm create purista@latest` or the package-manager/runtime equivalent, then use the generated local CLI scripts such as `npm run add:service -- ...`, `pnpm run add:service -- ...`, `yarn add:service ...`, or `bun run add:service -- ...`.
-- For deterministic agentic setup, use the local or freshly created CLI with explicit `purista init ... --non-interactive --defaults` flags, then continue through the generated package scripts so the project-owned `@purista/cli` version is used.
+- For a new app, run `npm create purista@latest` or `purista init <target> --non-interactive --defaults --no-install`; then use generated project-local `add:*` scripts for every supported artifact and refine only their intended extension points.
+- Before and after an existing-app change, read `purista.json`, run `export:definitions`, `purista inspect`, strict `purista validate`, and `purista doctor`; these are static preflight checks, not infrastructure health guarantees.
 - Generated PURISTA apps are ESM-only. Do not offer, document, or scaffold CommonJS variants.
 - Keep schemas explicit on every boundary. Prefer consumer-local schemas over one oversized shared schema.
 - Keep external systems behind resources or runtime bindings.
@@ -42,7 +35,6 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
-- Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.
 - Metrics use the OpenTelemetry Metrics API. Core stays SDK/exporter-neutral; applications own MeterProvider, readers, exporters, collectors, and Prometheus exposure.
@@ -98,24 +90,14 @@ central tool-call policy, approval, audit, or interoperability with external
 policy packs; PURISTA service guards and tenant-scoped resources remain the
 authorization boundary.
 
-Durable workspace replay for agents is opt-in. Builders declare it with
-workspace policy, runtime wiring supplies `ai.runtime` and `ai.workspaceStore`, and
-startup fails when required capabilities are missing unless
-`setWorkspacePolicy({ mode: 'durable', required: false })` explicitly allows a
-non-durable run restart.
+Durable workspace replay is opt-in: builders declare policy, runtime wiring supplies `ai.runtime` and `ai.workspaceStore`, and startup fails for missing required capabilities unless an explicit non-durable fallback is accepted.
 
 ## Verification Cues
 - The design can name one owner for each capability and source of truth.
-- Every handler dependency is reachable through resources, stores, context, or declared runtime bindings.
-- Queue workers declare every service, stream, queue, event, and same-service agent dependency before using `context.service`, `context.stream`, `context.queue`, `context.emit`, or `context.agent`.
-- Runtime wiring names required bridges, stores, providers, telemetry, queue bridges, and HTTP servers.
-- Durable agent replay designs name required harness runtime/workspace stores, required capabilities, `required` fallback behavior, cleanup owner, and product-owned retention/encryption/quota policy.
-- Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.
-- Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
-- Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.
-- Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
-- Project setup and scaffolding follow the handbook quickstart shape: `src/service` and `src/agents` are CLI-managed roots, and services, commands, streams, queues, workers, event-only schedules, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, `add:schedule`, and `add:agent`.
-- Package dependencies do not introduce optional AI or transport coupling into core packages.
+- Each handler dependency is declared and supplied through a typed context/runtime binding.
+- Runtime wiring names bridges, stores, providers, telemetry, queues, and HTTP servers; code declares custom metrics through typed `context.metrics`.
+- Durable agent replay names required runtime/workspace capabilities, fallback behavior, cleanup owner, and product-owned retention/encryption/quota policy.
+- Review telemetry, messages, and prompts for sensitive-data leakage; generated code follows current CLI templates.
 
 ## Read If Needed
 - `references/00-architecture-compass.md`
@@ -130,6 +112,6 @@ non-durable run restart.
 - `references/09-implementation-planning.md`
 - `references/10-security-privacy-and-governance.md`
 - `references/11-evaluation-scenarios.md`
-- `references/generated-api-index.md` — generated, verified lookup for selected Core public APIs; never use it as a substitute for architecture references
+- `references/generated-api-index.md` — generated, manifest-complete lookup for every public PURISTA package and its primary APIs; never use it as a substitute for architecture references
 
 For a recorded model answer, use `npm run evaluate:skill-response -- --response <response.json>` against the deterministic rubric in `evaluations/scenarios.json`.

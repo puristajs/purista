@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const root = process.cwd()
@@ -21,10 +21,12 @@ const docs = JSON.parse(readFileSync(apiPath, 'utf8'))
  * TypeDoc remains the complete reference, while this document is the
  * deterministic, high-signal lookup table loaded by the canonical skill.
  */
-const agentSurface = [
+const packageCatalog = [
 	{
-		section: 'Service boundaries and message contracts',
+		section: 'Framework and scaffolding',
 		packageName: '@purista/core',
+		useWhen:
+			'Declaring service-owned contracts, runtime wiring, queues, agents, schedules, static architecture exports, and testing helpers.',
 		names: [
 			'ServiceBuilder',
 			'CommandDefinitionBuilder',
@@ -32,12 +34,6 @@ const agentSurface = [
 			'StreamDefinitionBuilder',
 			'QueueDefinitionBuilder',
 			'QueueWorkerBuilder',
-		],
-	},
-	{
-		section: 'Agents, schedules, and static architecture',
-		packageName: '@purista/core',
-		names: [
 			'AgentQueueBuilder',
 			'SchedulerBuilder',
 			'SchedulerRuntime',
@@ -46,22 +42,139 @@ const agentSurface = [
 			'validateArchitectureManifest',
 			'exportServiceDefinitions',
 			'exportScheduleManifest',
+			'ServiceObservabilityContext',
 		],
 	},
 	{
-		section: 'Observability inheritance',
-		packageName: '@purista/core',
-		names: ['ServiceObservabilityContext'],
+		section: 'Framework and scaffolding',
+		packageName: '@purista/cli',
+		useWhen:
+			'Initializing or scaffolding a PURISTA application; application agents use the generated project-local CLI, while package authors use this API only to extend CLI tooling.',
+		names: ['createPuristaCliEngine', 'runPuristaCommand'],
 	},
 	{
 		section: 'HTTP projection',
 		packageName: '@purista/hono-http-server',
+		useWhen: 'Projecting builder-declared commands, streams, and async queue responses through Hono and OpenAPI.',
 		names: ['HonoServiceClass'],
 	},
 	{
-		section: 'Distributed scheduler provider',
+		section: 'Event bridges',
+		packageName: '@purista/amqpbridge',
+		useWhen: 'Connecting commands, events, subscriptions, and streams through an AMQP broker.',
+		names: ['AmqpBridge'],
+	},
+	{
+		section: 'Event bridges',
+		packageName: '@purista/mqttbridge',
+		useWhen: 'Connecting commands, events, subscriptions, and streams through MQTT topics.',
+		names: ['MqttBridge'],
+	},
+	{
+		section: 'Event bridges',
+		packageName: '@purista/natsbridge',
+		useWhen: 'Connecting commands, events, subscriptions, and streams through NATS.',
+		names: ['NatsBridge'],
+	},
+	{
+		section: 'Event bridges',
+		packageName: '@purista/dapr-sdk',
+		useWhen:
+			'Running PURISTA through Dapr building blocks for event transport, state, config, secrets, or service invocation.',
+		names: ['DaprClient', 'DaprEventBridge', 'DaprConfigStore', 'DaprSecretStore', 'DaprStateStore'],
+	},
+	{
+		section: 'Event bridges',
+		packageName: '@purista/base-http-bridge',
+		useWhen:
+			'Building or operating an HTTP EventBridge adapter; application HTTP APIs should use @purista/hono-http-server instead.',
+		names: ['HttpEventBridge'],
+	},
+	{
+		section: 'Queue and scheduling adapters',
+		packageName: '@purista/nats-queue-bridge',
+		useWhen: 'Running durable queue work on NATS JetStream, including strict idempotency when declared.',
+		names: ['NatsQueueBridge'],
+	},
+	{
+		section: 'Queue and scheduling adapters',
+		packageName: '@purista/redis-queue-bridge',
+		useWhen: 'Running durable queue work on Redis with strict idempotency when declared.',
+		names: ['RedisQueueBridge'],
+	},
+	{
+		section: 'Queue and scheduling adapters',
 		packageName: '@purista/redis-scheduler-provider',
+		useWhen:
+			'Running replicated SchedulerRuntime hosts with Redis-backed distributed occurrence claims; not for business work.',
 		names: ['RedisSchedulerProvider'],
+	},
+	{
+		section: 'Config stores',
+		packageName: '@purista/aws-config-store',
+		useWhen: 'Supplying service configuration from AWS Systems Manager Parameter Store.',
+		names: ['AWSConfigStore'],
+	},
+	{
+		section: 'Config stores',
+		packageName: '@purista/nats-config-store',
+		useWhen: 'Supplying service configuration from NATS-backed storage.',
+		names: ['NatsConfigStore'],
+	},
+	{
+		section: 'Config stores',
+		packageName: '@purista/redis-config-store',
+		useWhen: 'Supplying service configuration from Redis-backed storage.',
+		names: ['RedisConfigStore'],
+	},
+	{
+		section: 'State stores',
+		packageName: '@purista/nats-state-store',
+		useWhen: 'Persisting service state in NATS-backed storage when its declared capabilities meet the requirement.',
+		names: ['NatsStateStore'],
+	},
+	{
+		section: 'State stores',
+		packageName: '@purista/redis-state-store',
+		useWhen: 'Persisting service state in Redis when its declared capabilities meet the requirement.',
+		names: ['RedisStateStore'],
+	},
+	{
+		section: 'Secret stores',
+		packageName: '@purista/aws-secret-store',
+		useWhen: 'Resolving secrets through AWS Secrets Manager.',
+		names: ['AWSSecretStore'],
+	},
+	{
+		section: 'Secret stores',
+		packageName: '@purista/azure-secret-store',
+		useWhen: 'Resolving secrets through Azure Key Vault.',
+		names: ['AzureSecretStore'],
+	},
+	{
+		section: 'Secret stores',
+		packageName: '@purista/gcloud-secret-store',
+		useWhen: 'Resolving secrets through Google Cloud Secret Manager.',
+		names: ['GoogleSecretStore'],
+	},
+	{
+		section: 'Secret stores',
+		packageName: '@purista/infisical-secret-store',
+		useWhen:
+			'Resolving secrets through Infisical; use InfisicalClient only when building a custom Infisical integration.',
+		names: ['InfisicalClient', 'InfisicalSecretStore'],
+	},
+	{
+		section: 'Secret stores',
+		packageName: '@purista/vault-secret-store',
+		useWhen: 'Resolving secrets through HashiCorp Vault.',
+		names: ['VaultSecretStore'],
+	},
+	{
+		section: 'Platform helpers',
+		packageName: '@purista/k8s-sdk',
+		useWhen: 'Integrating builder-declared services with Kubernetes HTTP/server helpers.',
+		names: ['addServiceEndpoints', 'getHttpServer'],
 	},
 ]
 
@@ -97,7 +210,25 @@ const packageNodes = new Map((docs.children ?? []).filter(node => node.kind === 
 const entries = []
 const issues = []
 
-for (const surface of agentSurface) {
+const publicPackageNames = readdirSync(resolve(root, 'packages'), { withFileTypes: true })
+	.filter(entry => entry.isDirectory())
+	.map(entry => resolve(root, 'packages', entry.name, 'package.json'))
+	.filter(existsSync)
+	.map(path => JSON.parse(readFileSync(path, 'utf8')))
+	.filter(manifest => manifest.name?.startsWith('@purista/') && manifest.private !== true)
+	.map(manifest => manifest.name)
+	.sort()
+const catalogPackageNames = packageCatalog.map(entry => entry.packageName).sort()
+const duplicateCatalogEntries = catalogPackageNames.filter((name, index) => catalogPackageNames.indexOf(name) !== index)
+const missingCatalogEntries = publicPackageNames.filter(packageName => !catalogPackageNames.includes(packageName))
+const staleCatalogEntries = catalogPackageNames.filter(packageName => !publicPackageNames.includes(packageName))
+if (duplicateCatalogEntries.length || missingCatalogEntries.length || staleCatalogEntries.length) {
+	issues.push(
+		`Package catalog mismatch: duplicate ${duplicateCatalogEntries.join(', ') || 'none'}; missing ${missingCatalogEntries.join(', ') || 'none'}; stale ${staleCatalogEntries.join(', ') || 'none'}`,
+	)
+}
+
+for (const surface of packageCatalog) {
 	const packageNode = packageNodes.get(surface.packageName)
 	if (!packageNode) {
 		issues.push(`TypeDoc package ${surface.packageName} is missing`)
@@ -135,7 +266,8 @@ if (issues.length) {
 	process.exit(1)
 }
 
-const digest = createHash('sha256').update(JSON.stringify({ agentSurface, entries })).digest('hex').slice(0, 16)
+const digest = createHash('sha256').update(JSON.stringify({ packageCatalog, entries })).digest('hex').slice(0, 16)
+const catalogSections = Array.from(new Set(packageCatalog.map(entry => entry.section)))
 
 const lines = [
 	'# Generated Agent API Reference',
@@ -143,15 +275,27 @@ const lines = [
 	'<!-- generated by scripts/generate-agent-api-knowledge.mjs; do not edit manually -->',
 	`<!-- typedoc-digest: ${digest} -->`,
 	'',
-	'This compact reference is derived from current TypeDoc output and enforces documentation quality for the public APIs an implementation agent needs most often. It is an API lookup aid, not architecture guidance; follow the canonical skill references for ownership and distributed-system decisions.',
+	'This compact reference covers every published `@purista/*` package. It is derived from current package manifests and TypeDoc, and enforces documentation quality for the primary public APIs an implementation agent needs to select and wire each package correctly. It is an API lookup aid, not architecture guidance; follow the canonical skill references for ownership and distributed-system decisions.',
 	'',
-	...agentSurface.flatMap(surface => {
-		const sectionEntries = entries.filter(
-			entry => entry.section === surface.section && entry.packageName === surface.packageName,
-		)
+	'## Contents',
+	'',
+	'- [Package selection](#package-selection)',
+	...catalogSections.map(section => `- [${section}](#${section.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')})`),
+	'- [Generation contract](#generation-contract)',
+	'',
+	'## Package selection',
+	'',
+	'| Package | Use when | Primary validated API |',
+	'| --- | --- | --- |',
+	...packageCatalog.map(
+		entry => `| \`${entry.packageName}\` | ${entry.useWhen} | ${entry.names.map(name => `\`${name}\``).join(', ')} |`,
+	),
+	'',
+	...catalogSections.flatMap(section => {
+		const sectionEntries = entries.filter(entry => entry.section === section)
 		if (!sectionEntries.length) return []
 		return [
-			`## ${surface.section}`,
+			`## ${section}`,
 			'',
 			'| Package | API | Kind | Verified purpose | Declaration source |',
 			'| --- | --- | --- | --- | --- |',
@@ -164,7 +308,7 @@ const lines = [
 	}),
 	'## Generation contract',
 	'',
-	'- Run `npm run generate:agent-api-knowledge` after TypeDoc/API changes; it fails when this agent surface is missing, weakly documented, or lacks examples for executable entry points.',
+	'- Run `npm run generate:agent-api-knowledge` after TypeDoc/API changes; it fails when the manifest-derived package catalog drifts, a primary API is missing, documentation is weak, or an executable entry point lacks an example.',
 	'- Verify parity and the documentation contract in CI with `npm run audit:agent-api-knowledge`.',
 	'- The catalog is regenerated in release preparation and mirrored into the published `@purista/core` skill asset.',
 	'- A missing selected entry is a generator failure, never a reason to invent a replacement API.',

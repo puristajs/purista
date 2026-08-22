@@ -15,6 +15,15 @@ const DAPR_API_VERSION = 'v1.0-alpha1'
  *
  * Reads values through the local Dapr sidecar. Dapr's configuration API is read
  * here; mutation methods throw `NotImplemented`.
+ *
+ * @example
+ * ```ts
+ * const configStore = new DaprConfigStore({
+ *   configStoreName: 'application-config',
+ *   clientConfig: { daprHost: 'http://127.0.0.1', daprPort: '3500' },
+ * })
+ * const { featureEnabled } = await configStore.getConfig('featureEnabled')
+ * ```
  */
 export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig> {
 	private client: HttpClient<DaprClientConfig>

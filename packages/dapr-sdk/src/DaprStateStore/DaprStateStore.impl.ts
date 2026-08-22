@@ -15,6 +15,16 @@ import type { DaprStateStoreConfig } from './types/DaprStateStoreConfig.js'
  * Reads, writes and removes JSON state values through the local Dapr sidecar.
  * A finite retention policy is available only when `supportsTtl: true` and the
  * configured Dapr component honours `ttlInSeconds` metadata.
+ *
+ * @example
+ * ```ts
+ * const stateStore = new DaprStateStore({
+ *   stateStoreName: 'application-state',
+ *   supportsTtl: true,
+ *   clientConfig: { daprHost: 'http://127.0.0.1', daprPort: '3500' },
+ * })
+ * await stateStore.setState('invoice-42', { status: 'open' })
+ * ```
  */
 export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	private client: HttpClient<DaprClientConfig>

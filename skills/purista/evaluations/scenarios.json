@@ -76,6 +76,24 @@
 			]
 		},
 		{
+			"id": "package-selection",
+			"prompt": "Expose selected commands through HTTP, publish domain events through AMQP, run strict-idempotent invoice work on Redis, and load deployment secrets from AWS Secrets Manager.",
+			"requirements": [
+				{ "id": "hono-projection", "patterns": ["@purista/hono-http-server", "HonoServiceClass"] },
+				{ "id": "amqp-event-bridge", "patterns": ["@purista/amqpbridge", "AmqpBridge"] },
+				{ "id": "redis-queue-bridge", "patterns": ["@purista/redis-queue-bridge", "RedisQueueBridge"] },
+				{ "id": "aws-secret-store", "patterns": ["@purista/aws-secret-store", "AWSSecretStore"] },
+				{
+					"id": "separate-event-and-queue-roles",
+					"patterns": [
+						"(?:AMQP|AmqpBridge)[\\s\\S]{0,180}(?:event bridge|event transport)[\\s\\S]{0,180}(?:RedisQueueBridge|queue bridge)",
+						"(?:RedisQueueBridge|queue bridge)[\\s\\S]{0,180}(?:AMQP|AmqpBridge)[\\s\\S]{0,180}(?:event bridge|event transport)"
+					]
+				},
+				{ "id": "strict-idempotency", "patterns": ["strict idempotency", "setStrictIdempotency"] }
+			]
+		},
+		{
 			"id": "replicated-scheduler-host",
 			"prompt": "Run monthly billing in a horizontally scaled PURISTA deployment. The trigger must be reliable, but the billing work itself may take hours and must retry.",
 			"requirements": [

@@ -1,6 +1,6 @@
 ---
 name: purista-skill-maintainer
-description: Maintains the canonical PURISTA skill catalog with spec-grounded drift checks, implementation verification, progressive disclosure, and evaluation scenarios.
+description: Maintains the canonical PURISTA skill catalog with spec-grounded drift checks, implementation verification, progressive disclosure, and evaluation scenarios. Use when creating, reviewing, or maintaining the canonical PURISTA skill catalog and its downstream mirrors.
 topics: [skills, documentation, maintenance]
 phases: [spec, architecture, implementation, review]
 ---

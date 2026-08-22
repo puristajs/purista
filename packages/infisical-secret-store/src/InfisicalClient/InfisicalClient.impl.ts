@@ -16,6 +16,16 @@ import type { TokenData } from './types/TokenData.js'
  *
  * Most applications should use `InfisicalSecretStore` instead of this lower-level
  * client so PURISTA store permissions and caching are applied consistently.
+ *
+ * @example
+ * ```ts
+ * // Prefer InfisicalSecretStore in an application. Keep the service token in a
+ * // bootstrap secret source and never log this configuration.
+ * const client = new InfisicalClient({
+ *   baseUrl: 'https://app.infisical.com',
+ *   bearerToken: process.env.INFISICAL_SERVICE_TOKEN!,
+ * })
+ * ```
  */
 export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	private serviceTokenSecret: string

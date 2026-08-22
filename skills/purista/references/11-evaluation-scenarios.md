@@ -18,6 +18,7 @@ does not pretend to judge general code quality.
 - [Scenario 6: Skill Drift Repair](#scenario-6-skill-drift-repair)
 - [Scenario 7: Durable Agent Workspace Replay](#scenario-7-durable-agent-workspace-replay)
 - [Scenario 8: Replicated Scheduler Host](#scenario-8-replicated-scheduler-host)
+- [Scenario 9: Multi-Package Selection](#scenario-9-multi-package-selection)
 
 ## Scenario 1: Greenfield Project Setup
 Prompt:
@@ -187,3 +188,30 @@ Validation:
   independent replica sharing the same test backend
 - the answer never claims exactly-once delivery: a crash after EventBridge
   publication and before durable completion remains at-least-once
+
+## Scenario 9: Multi-Package Selection
+
+Prompt:
+
+```text
+Expose selected commands through HTTP, publish domain events through AMQP, run
+strict-idempotent invoice work on Redis, and load deployment secrets from AWS
+Secrets Manager.
+```
+
+Expected behavior:
+- selects `@purista/hono-http-server` for HTTP projection,
+  `@purista/amqpbridge` for the event transport,
+  `@purista/redis-queue-bridge` for durable strict-idempotent work, and
+  `@purista/aws-secret-store` for secrets
+- keeps the EventBridge and QueueBridge roles separate; an event causes normal
+  queue enqueueing and the queue worker owns invoice work
+- uses a strict queue idempotency key and does not put credentials in handlers,
+  logs, events, or generated code
+
+Validation:
+- package choices are exact published package names rather than assumed aliases
+- the answer names Hono as a projection of builder-declared APIs, not a
+  route-first replacement for service definitions
+- Redis is selected for the strict queue guarantee, not as a substitute for an
+  EventBridge

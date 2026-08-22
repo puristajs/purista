@@ -2,43 +2,41 @@
 
 Use this reference when choosing packages or checking dependency boundaries.
 
-## Core Packages
-- `packages/core`: builders, service runtime, schemas, messages, stores, event bridge contracts, queue contracts, testing helpers.
-- `packages/core`: also owns the trigger-only Scheduler Runtime/Builder, local `DefaultSchedulerProvider`, enterprise export helpers such as AsyncAPI, CloudEvents mapping, provider-neutral schedule manifests, Kubernetes CronJob manifest export, and runtime capability reports. Do not add `@purista/contracts` for this release line.
-- `packages/cli`: project and artifact scaffolding. Use it for app-level services, commands, subscriptions, streams, queues, workers, event-only schedules, and agents.
-- `packages/hono-http-server`: active HTTP runtime and OpenAPI/SSE surface.
-- `packages/base-http-bridge`: base HTTP bridge infrastructure.
+## Canonical Package Inventory
+
+`generated-api-index.md` is the deterministic, manifest-checked inventory. It lists every published `@purista/*` package, its selection rule, and verified primary APIs. Read it before choosing an adapter; do not invent a package from an old example or assumed naming scheme.
+
+### Framework and HTTP
+
+- `@purista/core`: builders, service runtime, schemas, messages, stores, event/queue contracts, testing helpers, architecture exports, and the trigger-only Scheduler Runtime/Builder. `DefaultSchedulerProvider` is local/test only. Do not add `@purista/contracts` for this release line.
+- `@purista/cli`: project and artifact scaffolding. Applications use the generated project-local CLI for services, commands, subscriptions, streams, queues, workers, event-only schedules, and agents.
+- `@purista/hono-http-server`: active application HTTP/OpenAPI/SSE projection.
+- `@purista/base-http-bridge`: adapter-author infrastructure for HTTP/sidecar EventBridges; application HTTP APIs use Hono.
 
 ## AI Runtime
-- `packages/core`: owns native harness-backed service-agent integration.
+- `@purista/core`: owns native harness-backed service-agent integration.
 - Core depends on provider-neutral `@purista/harness`.
 - Provider packages such as `@purista/harness-openai` stay app-level dependencies.
 - Core exports `ServiceBuilder`, `AgentQueueBuilder`, selected agent types, testing helpers, harness contract types, logger/state adapters, and provider-style stream event schemas.
 
-## Bridges
-- `packages/amqpbridge`: AMQP event bridge.
-- `packages/mqttbridge`: MQTT event bridge.
-- `packages/natsbridge`: NATS event bridge.
-- `packages/dapr-sdk`: Dapr integration.
-- `packages/nats-queue-bridge`: NATS queue bridge.
-- `packages/redis-queue-bridge`: Redis queue bridge.
+## Transport and Scheduling
 
-Redis and NATS queue bridges support strict idempotency for queues. With the same queue and `idempotencyKey`, duplicate enqueue returns the original enqueue result/job id and does not create a second job. `DefaultQueueBridge` stays advisory for local development/tests.
+- Event bridges: `@purista/amqpbridge`, `@purista/mqttbridge`, `@purista/natsbridge`, and `@purista/dapr-sdk` connect commands, events, subscriptions, and streams to their respective transports.
+- Queue bridges: `@purista/nats-queue-bridge` and `@purista/redis-queue-bridge` run durable background work. Redis and NATS support strict idempotency: the same queue/idempotency key returns the original job id.
+- Scheduler provider: `@purista/redis-scheduler-provider` coordinates replicated `SchedulerRuntime` hosts with distributed occurrence claims. It owns coordination only, never schedule evaluation or business work.
 
-Event bridges and queue bridges are separate package categories. Do not use an event bridge as a queue bridge unless the adapter implements the queue contract.
+Event bridges and queue bridges are separate package categories. Do not use an event bridge as a queue bridge unless the adapter implements the queue contract. `DefaultQueueBridge` stays advisory for local development/tests.
 
-## Stores
-- config stores: `aws-config-store`, `nats-config-store`, `redis-config-store`
-- state stores: `nats-state-store`, `redis-state-store`
-- secret stores: `aws-secret-store`, `azure-secret-store`, `gcloud-secret-store`, `infisical-secret-store`, `vault-secret-store`
+## Stores and Platform Helpers
+
+- Config stores: `@purista/aws-config-store`, `@purista/nats-config-store`, `@purista/redis-config-store`, and `@purista/dapr-sdk` (`DaprConfigStore`).
+- State stores: `@purista/nats-state-store`, `@purista/redis-state-store`, and `@purista/dapr-sdk` (`DaprStateStore`).
+- Secret stores: `@purista/aws-secret-store`, `@purista/azure-secret-store`, `@purista/gcloud-secret-store`, `@purista/infisical-secret-store`, `@purista/vault-secret-store`, and `@purista/dapr-sdk` (`DaprSecretStore`).
+- Platform helper: `@purista/k8s-sdk` integrates declared services with Kubernetes HTTP/server helpers. Core and CLI export Kubernetes CronJob manifests for an explicit scheduler trigger container/script; this is not a scheduler runtime adapter.
 
 Stores are runtime wiring. Service builders declare needs; service instances receive concrete stores.
 
-## Platform Helpers
-- `packages/k8s-sdk`: Kubernetes helper package.
-- `packages/redis-scheduler-provider`: Redis `SchedulerProvider` with distributed token leases and bounded durable completion state for replicated scheduler hosts. It owns only Redis coordination, not Core schedule evaluation or message publication. Kubernetes CronJob schedule export lives in core helpers and CLI; it generates manifests for an explicit trigger container/script, not a runtime adapter.
-- `starter`: default application template; keep AI-free by default.
-- `create-purista`: project generator; keep AI-free by default unless the generated application explicitly requests agents.
+`starter` is the default application template and `create-purista` is the project generator; both remain AI-free unless the generated application explicitly requests agents.
 
 ## Dependency Rules
 - Shared packages may depend on `@purista/core`.
