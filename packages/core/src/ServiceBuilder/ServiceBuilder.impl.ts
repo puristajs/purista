@@ -54,12 +54,7 @@ import type {
 import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
-import type {
-	ServiceObservabilityAware,
-	ServiceObservabilityContext,
-	ServiceObservabilityInheritance,
-	ServiceObservabilityReport,
-} from '../core/types/ServiceObservability.js'
+import type { ServiceObservabilityAware, ServiceObservabilityContext } from '../core/types/ServiceObservability.js'
 import type { SetNewTypeValue, SetNewTypeValues } from '../core/types/SetNewTypeValue.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
@@ -468,7 +463,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 
 	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
-		const observability = createServiceObservabilityContext(this.info, {
+		const observability = createServiceObservabilityContext({
 			logger: options?.logger,
 			logLevel: options?.logLevel,
 			spanProcessor: options?.spanProcessor,
@@ -481,8 +476,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			initDefaultStateStore({
 				logger,
 			})
-		const stateStoreObservability = this.inheritServiceObservability(rawStateStore, observability)
-		const eventBridgeObservability = this.inheritServiceObservability(eventBridge, observability)
+		this.inheritServiceObservability(rawStateStore, observability)
+		this.inheritServiceObservability(eventBridge, observability)
 		const stateStore = createStateStoreRetentionView(rawStateStore, options?.stateRetention)
 		const agentRuntimeScope = createAgentRuntimeScope()
 		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
@@ -539,16 +534,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			})
 
 		const queueBridge: QueueBridge = options?.queueBridge ?? new DefaultQueueBridge()
-		const secretStoreObservability = this.inheritServiceObservability(secretStore, observability)
-		const configStoreObservability = this.inheritServiceObservability(configStore, observability)
-		const queueBridgeObservability = this.inheritServiceObservability(queueBridge, observability)
-		const observabilityReport: ServiceObservabilityReport = Object.freeze({
-			eventBridge: eventBridgeObservability,
-			stateStore: stateStoreObservability,
-			secretStore: secretStoreObservability,
-			configStore: configStoreObservability,
-			queueBridge: queueBridgeObservability,
-		})
+		this.inheritServiceObservability(secretStore, observability)
+		this.inheritServiceObservability(configStore, observability)
+		this.inheritServiceObservability(queueBridge, observability)
 
 		const { commands, subscriptions, streams, queues, queueWorkers, eventToQueueBindings } =
 			await this.resolveDefinitions()
@@ -575,8 +563,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			configSchema: this.configSchema,
 			metrics: observability.metrics,
 			metricsRecorder: observability.metricsRecorder,
-			observability,
-			observabilityReport,
 			metricDefinitionList: this.customMetricDefinitions,
 			resources: options?.resources,
 		})
@@ -598,20 +584,11 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return service
 	}
 
-	private inheritServiceObservability(
-		component: unknown,
-		observability: ServiceObservabilityContext,
-	): ServiceObservabilityInheritance {
+	private inheritServiceObservability(component: unknown, observability: ServiceObservabilityContext): void {
 		if (typeof component !== 'object' || component === null || !('inheritServiceObservability' in component)) {
-			return { logger: 'unsupported', spanProcessor: 'unsupported', metrics: 'unsupported' }
+			return
 		}
-		return (
-			(component as ServiceObservabilityAware).inheritServiceObservability(observability) ?? {
-				logger: 'unsupported',
-				spanProcessor: 'unsupported',
-				metrics: 'unsupported',
-			}
-		)
+		;(component as ServiceObservabilityAware).inheritServiceObservability(observability)
 	}
 
 	/** Create a command builder scoped to this service's resource and metric types. */

@@ -3,7 +3,7 @@ import type { ObjectWithKeysFromStringArray } from '../../helper/types/ObjectWit
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import type { EmptyObject } from '../types/EmptyObject.js'
 import type { Logger } from '../types/Logger.js'
-import type { ServiceObservabilityContext, ServiceObservabilityInheritance } from '../types/ServiceObservability.js'
+import type { ServiceObservabilityContext } from '../types/ServiceObservability.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { StoreBaseConfig } from '../types/StoreBaseConfig.js'
 import type { ConfigStoreCacheMap } from './types/ConfigStoreCacheMap.js'
@@ -56,14 +56,9 @@ export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<
 	}
 
 	/** Inherit a service logger only when this store was not explicitly configured. */
-	inheritServiceObservability(context: ServiceObservabilityContext): ServiceObservabilityInheritance {
+	inheritServiceObservability(context: ServiceObservabilityContext): void {
 		if (!this.hasExplicitLogger) {
 			this.logger = context.logger.getChildLogger({ name: this.name })
-		}
-		return {
-			logger: this.hasExplicitLogger ? 'component' : context.sources.logger,
-			spanProcessor: 'unsupported',
-			metrics: 'unsupported',
 		}
 	}
 

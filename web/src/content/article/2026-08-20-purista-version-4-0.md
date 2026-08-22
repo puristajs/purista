@@ -108,7 +108,9 @@ await service.start()
 
 Existing applications that configure telemetry directly on a bridge continue to
 work. The new cascade simply removes the need to repeat the same values across
-unconfigured compatible adapters. See [OpenTelemetry](/handbook/4-open-telemetry/) for the full setup.
+unconfigured compatible adapters. A shared bridge still has one telemetry
+pipeline, so configure it directly when shared services require different
+telemetry. See [OpenTelemetry](/handbook/4-open-telemetry/) for the full setup.
 
 ## Record application metrics with types, not strings
 

@@ -21,6 +21,10 @@ class TestDefaultEventBridge extends DefaultEventBridge {
 	public getPendingInvocations() {
 		return this.pendingInvocations.getPendingMap()
 	}
+
+	public getMetricsRecorder() {
+		return this.metricsRecorder
+	}
 }
 
 describe('DefaultEventBridge', () => {
@@ -73,19 +77,13 @@ describe('DefaultEventBridge', () => {
 			recordCustomMetric: stub(),
 		}
 		const observability: ServiceObservabilityContext = {
-			service: { serviceName: 'orders', serviceVersion: '1' },
 			logger: logger.mock,
 			spanProcessor: spanProcessor as never,
 			metricsRecorder,
-			sources: { logger: 'service', spanProcessor: 'service', metrics: 'service' },
 		}
 		const eventBridge = new DefaultEventBridge()
 
-		expect(eventBridge.inheritServiceObservability(observability)).toEqual({
-			logger: 'service',
-			spanProcessor: 'service',
-			metrics: 'service',
-		})
+		eventBridge.inheritServiceObservability(observability)
 
 		await eventBridge.startActiveSpan('observability-test', {}, undefined, async () => undefined)
 
@@ -93,11 +91,24 @@ describe('DefaultEventBridge', () => {
 		expect(spanProcessor.onStart.called).toBe(true)
 	})
 
-	it('keeps explicit bridge observability settings over service inheritance', () => {
+	it('keeps explicit bridge observability settings over service inheritance', async () => {
 		const bridgeLogger = getLoggerMock()
 		const serviceLogger = getLoggerMock()
+		const componentSpanProcessor = {
+			forceFlush: async () => {},
+			onEnd: spy(),
+			onStart: spy(),
+			shutdown: async () => {},
+		}
+		const serviceSpanProcessor = {
+			forceFlush: async () => {},
+			onEnd: spy(),
+			onStart: spy(),
+			shutdown: async () => {},
+		}
+		const componentRecordFrameworkMetric = stub()
 		const componentRecorder: PuristaMetricsRecorder = {
-			recordFrameworkMetric: stub(),
+			recordFrameworkMetric: componentRecordFrameworkMetric,
 			recordCustomMetric: stub(),
 		}
 		const serviceRecorder: PuristaMetricsRecorder = {
@@ -107,31 +118,40 @@ describe('DefaultEventBridge', () => {
 		const eventBridge = new DefaultEventBridge({
 			logger: bridgeLogger.mock,
 			metricsRecorder: componentRecorder,
-			spanProcessor: {} as never,
+			spanProcessor: componentSpanProcessor as never,
 		})
 
-		expect(
-			eventBridge.inheritServiceObservability({
-				service: { serviceName: 'orders', serviceVersion: '1' },
-				logger: serviceLogger.mock,
-				metricsRecorder: serviceRecorder,
-				sources: { logger: 'service', spanProcessor: 'default', metrics: 'service' },
-			}),
-		).toEqual({ logger: 'component', spanProcessor: 'component', metrics: 'component' })
+		eventBridge.inheritServiceObservability({
+			logger: serviceLogger.mock,
+			metricsRecorder: serviceRecorder,
+			spanProcessor: serviceSpanProcessor as never,
+		})
+
+		await eventBridge.startActiveSpan('explicit-observability-test', {}, undefined, async () => undefined)
+		expect(componentRecordFrameworkMetric.called).toBe(true)
+		expect(componentSpanProcessor.onStart.called).toBe(true)
+		expect(serviceSpanProcessor.onStart.called).toBe(false)
 	})
 
-	it('does not replace a tracer after the bridge has started', async () => {
-		const eventBridge = new DefaultEventBridge()
+	it('does not mutate observability after the bridge has started', async () => {
+		const eventBridge = new TestDefaultEventBridge()
 		await eventBridge.start()
+		const logger = eventBridge.logger
+		const metricsRecorder = eventBridge.getMetricsRecorder()
+		const traceProvider = eventBridge.traceProvider
 
-		expect(
-			eventBridge.inheritServiceObservability({
-				service: { serviceName: 'orders', serviceVersion: '1' },
-				logger: getLoggerMock().mock,
-				spanProcessor: {} as never,
-				sources: { logger: 'service', spanProcessor: 'service', metrics: 'default' },
-			}),
-		).toMatchObject({ spanProcessor: 'unsupported' })
+		eventBridge.inheritServiceObservability({
+			logger: getLoggerMock().mock,
+			spanProcessor: {} as never,
+			metricsRecorder: {
+				recordFrameworkMetric: stub(),
+				recordCustomMetric: stub(),
+			},
+		})
+
+		expect(eventBridge.logger).toBe(logger)
+		expect(eventBridge.getMetricsRecorder()).toBe(metricsRecorder)
+		expect(eventBridge.traceProvider).toBe(traceProvider)
 	})
 
 	it('does not expose event-emitter methods on bridge instances', () => {

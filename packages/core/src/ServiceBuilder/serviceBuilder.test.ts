@@ -103,7 +103,7 @@ describe('ServiceBuilder', () => {
 		})
 	})
 
-	it('cascades immutable service observability through opt-in adapters before service startup', async () => {
+	it('cascades service observability through opt-in adapters before service startup', async () => {
 		const stateStore = {
 			name: 'observability-aware-state-store',
 			capabilities: { retention: { atomicExpiry: true } },
@@ -111,11 +111,7 @@ describe('ServiceBuilder', () => {
 			removeState: vi.fn(),
 			setState: vi.fn(),
 			destroy: vi.fn(),
-			inheritServiceObservability: vi.fn(() => ({
-				logger: 'service',
-				spanProcessor: 'unsupported',
-				metrics: 'unsupported',
-			})),
+			inheritServiceObservability: vi.fn(),
 		}
 		const service = new ServiceBuilder(serviceInfo)
 		const eventBridge = getEventBridgeMock(sandbox)
@@ -127,12 +123,9 @@ describe('ServiceBuilder', () => {
 		})
 
 		expect(stateStore.inheritServiceObservability).toHaveBeenCalledWith(
-			expect.objectContaining({ logger: logger.mock, sources: expect.objectContaining({ logger: 'service' }) }),
+			expect.objectContaining({ logger: logger.mock }),
 		)
-		expect(instance.observability).toMatchObject({ sources: { logger: 'service' } })
-		expect(instance.observabilityReport).toMatchObject({
-			stateStore: { logger: 'service', spanProcessor: 'unsupported', metrics: 'unsupported' },
-		})
+		expect(instance).toBeInstanceOf(Service)
 	})
 
 	it('throws when definitions are not resolved', () => {

@@ -23,7 +23,6 @@ import type { StateStore } from '../../StateStore/types/StateStore.js'
 import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
 import type { Logger } from '../../types/Logger.js'
 import { PuristaSpanTag } from '../../types/PuristaSpanTag.enum.js'
-import type { ServiceObservabilityContext, ServiceObservabilityReport } from '../../types/ServiceObservability.js'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 
 /**
@@ -41,10 +40,6 @@ export class ServiceBaseClass {
 	protected eventBridge: EventBridge
 
 	public logger: Logger
-	/** Immutable effective observability context for this service. */
-	public readonly observability?: ServiceObservabilityContext
-	/** Immutable infrastructure inheritance evidence for this service instance. */
-	public readonly observabilityReport?: ServiceObservabilityReport
 
 	spanProcessor: SpanProcessor | undefined
 
@@ -61,8 +56,6 @@ export class ServiceBaseClass {
 
 	constructor(options: {
 		logger: Logger
-		observability?: ServiceObservabilityContext
-		observabilityReport?: ServiceObservabilityReport
 		info: ServiceInfoType
 		eventBridge: EventBridge
 		spanProcessor?: SpanProcessor
@@ -92,8 +85,6 @@ export class ServiceBaseClass {
 			serviceVersion: this.info.serviceVersion,
 			puristaVersion,
 		})
-		this.observability = options.observability
-		this.observabilityReport = options.observabilityReport
 		this.logger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
 		const resource = defaultResource().merge(

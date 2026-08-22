@@ -18,11 +18,7 @@ import type { EBMessageAddress } from '../types/EBMessageAddress.js'
 import type { InstanceId } from '../types/InstanceId.js'
 import type { Logger } from '../types/Logger.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
-import type {
-	ObservabilityValueSource,
-	ServiceObservabilityContext,
-	ServiceObservabilityInheritance,
-} from '../types/ServiceObservability.js'
+import type { ServiceObservabilityContext } from '../types/ServiceObservability.js'
 import type {
 	InFlightExecutionCounts,
 	PausedSubscriptionConsumersByRegistrationKey,
@@ -49,7 +45,6 @@ import { EventBridgeStreamLateFrameHandling } from './types/EventBridgeStreamLat
  */
 export class EventBridgeBaseClass<ConfigType> {
 	logger: Logger
-	traceProvider: NodeTracerProvider
 	protected metricsRecorder: PuristaMetricsRecorder
 
 	config: Complete<EventBridgeConfig<ConfigType>>
@@ -98,8 +93,9 @@ export class EventBridgeBaseClass<ConfigType> {
 	private readonly hasExplicitLogger: boolean
 	private readonly hasExplicitMetrics: boolean
 	private readonly hasExplicitSpanProcessor: boolean
-	private spanProcessorSource: ObservabilityValueSource
-	private observabilityStarted = false
+	private spanProcessor?: SpanProcessor
+	private traceProviderInstance?: NodeTracerProvider
+	private observabilityLocked = false
 	constructor(name: string, config: EventBridgeConfig<ConfigType>) {
 		this.name = name
 		this.hasExplicitLogger = config?.logger !== undefined
@@ -133,29 +129,30 @@ export class EventBridgeBaseClass<ConfigType> {
 
 		this.defaultCommandTimeout = config.defaultCommandTimeout ?? 30000
 
-		this.spanProcessorSource = this.hasExplicitSpanProcessor ? 'component' : 'default'
-		this.traceProvider = this.createTraceProvider(config.spanProcessor)
+		this.spanProcessor = config.spanProcessor
 	}
 
 	/**
-	 * Apply service observability where an event bridge can do so safely before startup.
+	 * Apply service observability where an event bridge can do so safely before use.
 	 *
 	 * Explicit bridge options always win. Logger and metrics settings can be
-	 * replaced before the bridge starts. The tracer provider is rebuilt before
-	 * startup when the bridge has no explicit span processor, so all subclasses
-	 * inherit one service-owned processor without adapter-specific wiring. Once
-	 * startup begins, provider replacement is refused and reported as
-	 * `unsupported`.
+	 * replaced until the bridge starts or creates a tracer. The tracer provider
+	 * is created lazily so a service-owned processor can be selected without
+	 * registering and then replacing an OpenTelemetry provider.
 	 *
 	 * @group Observability
 	 */
-	inheritServiceObservability(context: ServiceObservabilityContext): ServiceObservabilityInheritance {
+	inheritServiceObservability(context: ServiceObservabilityContext): void {
+		if (this.observabilityLocked) {
+			return
+		}
+
 		if (!this.hasExplicitLogger) {
 			const logger = context.logger.getChildLogger({ name: this.name })
 			this.logger = logger
 		}
 
-		if (!this.hasExplicitMetrics) {
+		if (!this.hasExplicitMetrics && (context.metrics || context.metricsRecorder)) {
 			this.metricsRecorder =
 				context.metricsRecorder ??
 				(context.metrics?.enabled === false
@@ -170,31 +167,33 @@ export class EventBridgeBaseClass<ConfigType> {
 						}))
 		}
 
-		let spanProcessor: ObservabilityValueSource = this.spanProcessorSource
 		if (!this.hasExplicitSpanProcessor && context.spanProcessor) {
-			if (this.observabilityStarted) {
-				spanProcessor = 'unsupported'
-			} else {
-				this.traceProvider = this.createTraceProvider(context.spanProcessor)
-				this.spanProcessorSource = context.sources.spanProcessor
-				spanProcessor = this.spanProcessorSource
-			}
-		}
-
-		return {
-			logger: this.hasExplicitLogger ? 'component' : context.sources.logger,
-			spanProcessor,
-			metrics: this.hasExplicitMetrics
-				? 'component'
-				: context.metrics || context.metricsRecorder
-					? context.sources.metrics
-					: 'default',
+			this.spanProcessor = context.spanProcessor
 		}
 	}
 
-	/** Mark a built-in bridge as started so observability cannot be replaced. */
+	/**
+	 * OpenTelemetry provider used by this bridge.
+	 *
+	 * Reading this property finalizes observability configuration. Applications
+	 * normally let `start()` do that after service instances are constructed.
+	 */
+	get traceProvider(): NodeTracerProvider {
+		return this.getTraceProvider()
+	}
+
+	/** Mark a built-in bridge as started so observability cannot be changed. */
 	protected markObservabilityStarted() {
-		this.observabilityStarted = true
+		this.observabilityLocked = true
+		this.getTraceProvider()
+	}
+
+	private getTraceProvider(): NodeTracerProvider {
+		this.observabilityLocked = true
+		if (!this.traceProviderInstance) {
+			this.traceProviderInstance = this.createTraceProvider(this.spanProcessor)
+		}
+		return this.traceProviderInstance
 	}
 
 	private createTraceProvider(spanProcessor?: SpanProcessor): NodeTracerProvider {
@@ -218,7 +217,7 @@ export class EventBridgeBaseClass<ConfigType> {
 	 * @returns Tracer
 	 */
 	getTracer() {
-		return this.traceProvider.getTracer('DefaultEventBridge', puristaVersion)
+		return this.getTraceProvider().getTracer('DefaultEventBridge', puristaVersion)
 	}
 
 	/**

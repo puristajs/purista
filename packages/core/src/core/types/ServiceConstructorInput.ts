@@ -20,7 +20,6 @@ import type { QueueDefinitionListResolved } from './queue/QueueDefinitionList.js
 import type { QueueJobStore } from './queue/QueueJobStore.js'
 import type { QueueWorkerDefinitionListResolved } from './queue/QueueWorkerDefinitionList.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
-import type { ServiceObservabilityContext, ServiceObservabilityReport } from './ServiceObservability.js'
 import type { StreamDefinitionListResolved } from './stream/StreamDefinitionList.js'
 import type { SubscriptionDefinitionListResolved } from './subscription/SubscriptionDefinitionList.js'
 
@@ -30,10 +29,6 @@ import type { SubscriptionDefinitionListResolved } from './subscription/Subscrip
 export type ServiceConstructorInput<S extends ServiceClassTypes = ServiceClassTypes> = {
 	/** A logger instance */
 	logger: Logger
-	/** Immutable effective observability context for this service instance. */
-	observability?: ServiceObservabilityContext
-	/** Effective observability inheritance sources for the service infrastructure. */
-	observabilityReport?: ServiceObservabilityReport
 	/** The service info with name, version and description of service */
 	info: ServiceInfoType
 	/** The eventBridge instance */

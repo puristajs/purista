@@ -13,10 +13,7 @@ import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOption
 import type { QueueLease } from '../core/types/queue/QueueLease.js'
 import type { QueueMessage } from '../core/types/queue/QueueMessage.js'
 import type { QueueMetrics } from '../core/types/queue/QueueMetrics.js'
-import type {
-	ServiceObservabilityContext,
-	ServiceObservabilityInheritance,
-} from '../core/types/ServiceObservability.js'
+import type { ServiceObservabilityContext } from '../core/types/ServiceObservability.js'
 
 type LeaseEntry = {
 	leaseId: string
@@ -106,18 +103,9 @@ export class DefaultQueueBridge implements QueueBridge {
 	}
 
 	/** Inherit the service metrics recorder unless the bridge received one explicitly. */
-	inheritServiceObservability(context: ServiceObservabilityContext): ServiceObservabilityInheritance {
+	inheritServiceObservability(context: ServiceObservabilityContext): void {
 		if (!this.hasExplicitMetricsRecorder && context.metricsRecorder) {
 			this.metricsRecorder = context.metricsRecorder
-		}
-		return {
-			logger: 'unsupported',
-			spanProcessor: 'unsupported',
-			metrics: this.hasExplicitMetricsRecorder
-				? 'component'
-				: context.metricsRecorder
-					? context.sources.metrics
-					: 'default',
 		}
 	}
 

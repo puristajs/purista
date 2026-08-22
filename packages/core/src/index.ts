@@ -95,14 +95,13 @@ export type {
 	ServiceHealthState,
 	ServiceHealthStatus,
 	ServiceInfoType,
-	ServiceObservabilityInheritance,
 	TenantId,
 	TraceId,
 } from './core/types/index.js'
 export { isCustomMessage } from './core/types/isCustomMessage.impl.js'
 export { PuristaSpanName } from './core/types/PuristaSpanName.enum.js'
 export { PuristaSpanTag } from './core/types/PuristaSpanTag.enum.js'
-export type { ServiceObservabilityContext, ServiceObservabilityReport } from './core/types/ServiceObservability.js'
+export type { ServiceObservabilityContext } from './core/types/ServiceObservability.js'
 export { StatusCode } from './core/types/StatusCode.enum.js'
 // Application runtime composition.
 export { DefaultConfigStore } from './DefaultConfigStore/DefaultConfigStore.impl.js'

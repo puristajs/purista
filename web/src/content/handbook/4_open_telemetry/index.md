@@ -72,11 +72,11 @@ For AI evaluation and optimization workflows, see [CloudGrid AI Evaluation](http
 
 ## How to wire OpenTelemetry in PURISTA
 
-PURISTA does **not** use `NodeSDK` or a mutable global framework provider. Create
-a `SpanProcessor` (wrapping your exporter), then pass one service-owned
-`observability` object to each service before its bridge starts. Core defaults
-and built-in event bridges receive missing logger, metrics, and tracing values;
-an explicit component setting always wins.
+PURISTA does **not** require your application to use `NodeSDK`. Create a
+`SpanProcessor` (wrapping your exporter), then pass flat service runtime
+options before the bridge starts. Core defaults and built-in event bridges
+receive missing logger, metrics, and tracing values; an explicit component
+setting always wins.
 
 ```typescript [main.ts]
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
@@ -118,16 +118,14 @@ await myService.start()
 Every command, subscription, stream, and queue job inside `myService` automatically emits spans correlated to the same trace — no changes to your business logic required.
 
 An adapter constructed outside the service can only inherit through its
-documented `inheritServiceObservability(...)` hook and only before it starts.
-Built-in event bridges support missing span-processor inheritance in that
-window; non-aware adapters and all late changes are reported as unsupported.
-PURISTA never rewires an already-running provider pipeline, and static
-`purista inspect`/`doctor` does not claim live provider health.
+documented `inheritServiceObservability(...)` hook and only before it starts
+or creates a tracer. Late changes are ignored; PURISTA never rewires a live
+provider pipeline, and static `purista inspect`/`doctor` does not claim live
+provider health.
 
-After `getInstance(...)`, inspect `service.observabilityReport` when diagnosing
-runtime wiring. It reports only the effective source for each infrastructure
-component (`component`, `service`, `default`, or `unsupported`),
-never provider objects, credentials, payloads, or telemetry content.
+A shared event bridge has one telemetry pipeline. If services sharing that
+bridge need different telemetry configuration, configure the bridge explicitly
+instead of relying on service inheritance.
 
 ### Graceful shutdown
 

@@ -200,8 +200,6 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	constructor(config: ServiceConstructorInput<S>) {
 		super({
 			logger: config.logger,
-			observability: config.observability,
-			observabilityReport: config.observabilityReport,
 			info: config.info,
 			eventBridge: config.eventBridge,
 			spanProcessor: config.spanProcessor,

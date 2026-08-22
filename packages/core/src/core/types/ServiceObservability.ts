@@ -1,73 +1,35 @@
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { PuristaMetricsRecorder, PuristaMetricsRuntimeOptions } from '../metrics/types.js'
-import type { ServiceInfoType } from './infoType/ServiceInfoType.js'
 import type { Logger } from './Logger.js'
 
-/** Source selected for one inherited observability value. @group Observability */
-export type ObservabilityValueSource = 'component' | 'service' | 'default' | 'unsupported'
-
 /**
- * Immutable observability values resolved for one service instance.
+ * Observability values supplied when constructing a service.
  *
- * `ServiceBuilder.getInstance(...)` creates this context once, then adapters
- * may inherit values only before they start. `sources` records whether each
- * effective value came from an explicit component setting, service wiring, or
- * a safe framework default. It never contains telemetry payloads, exporters,
- * credentials, prompts, or runtime provider instances.
+ * `ServiceBuilder.getInstance(...)` creates this context once. Compatible
+ * adapters may use it before they start, but their own explicit configuration
+ * always takes precedence.
  *
  * @group Observability
  */
 export type ServiceObservabilityContext = Readonly<{
-	/** Owning service identity added to safe adapter diagnostics. */
-	service: Pick<ServiceInfoType, 'serviceName' | 'serviceVersion'>
-	/** Service logger inherited only when the adapter did not configure one. */
+	/** Service logger inherited when the adapter did not configure one. */
 	logger: Logger
-	/** Optional span processor inherited only by compatible pre-start adapters. */
+	/** Optional span processor inherited by compatible adapters before use. */
 	spanProcessor?: SpanProcessor
 	/** Application-owned OpenTelemetry metrics configuration. */
 	metrics?: PuristaMetricsRuntimeOptions
 	/** Low-level metrics recorder override used by compatible adapters. */
 	metricsRecorder?: PuristaMetricsRecorder
-	/** Provenance for every inheritable value. */
-	sources: Readonly<{
-		logger: ObservabilityValueSource
-		spanProcessor: ObservabilityValueSource
-		metrics: ObservabilityValueSource
-	}>
-}>
-
-/** Effective sources reported by an adapter that accepts service inheritance. @group Observability */
-export type ServiceObservabilityInheritance = Readonly<{
-	logger: ObservabilityValueSource
-	spanProcessor: ObservabilityValueSource
-	metrics: ObservabilityValueSource
 }>
 
 /**
- * Effective observability sources for the infrastructure used by one service.
+ * Optional adapter hook for safe service observability inheritance.
  *
- * This is runtime evidence, not a static architecture-manifest field: it
- * describes the actual adapter instances passed to `getInstance(...)` and
- * never contains provider objects, credentials, payloads, or telemetry data.
- *
- * @group Observability
- */
-export type ServiceObservabilityReport = Readonly<{
-	eventBridge: ServiceObservabilityInheritance
-	stateStore: ServiceObservabilityInheritance
-	secretStore: ServiceObservabilityInheritance
-	configStore: ServiceObservabilityInheritance
-	queueBridge: ServiceObservabilityInheritance
-}>
-
-/**
- * Optional adapter hook for safe, pre-start service observability inheritance.
- *
- * Adapters must preserve explicit component configuration and return
- * `unsupported` rather than mutating an already-started telemetry pipeline.
+ * Adapters must preserve explicit component configuration and must not mutate
+ * runtime settings after the adapter has started or created a tracer.
  *
  * @group Observability
  */
 export interface ServiceObservabilityAware {
-	inheritServiceObservability(context: ServiceObservabilityContext): ServiceObservabilityInheritance
+	inheritServiceObservability(context: ServiceObservabilityContext): void
 }
