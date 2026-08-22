@@ -217,6 +217,15 @@ const kinds = new Map([
 	[2097152, 'type'],
 ])
 
+const reflections = new Map()
+const indexReflections = node => {
+	if (typeof node?.id === 'number') reflections.set(node.id, node)
+	for (const child of node?.children ?? []) indexReflections(child)
+}
+indexReflections(docs)
+
+const resolveReference = node => (node?.variant === 'reference' ? (reflections.get(node.target) ?? node) : node)
+
 const text = parts =>
 	(parts ?? [])
 		.map(part => part.text ?? part.code ?? '')
@@ -237,7 +246,28 @@ const hasExample = node => {
 	return tags.some(tag => tag.tag === '@example')
 }
 
+/**
+ * The installed skill needs a quick API selection cue, not the complete
+ * TypeDoc prose. Keep a first sentence when it is useful, then cap it so the
+ * generated reference remains cheap to load. The complete API docs stay the
+ * source for detailed behavior and options.
+ */
+const conciseSummary = summary => {
+	const firstSentence = summary.match(/^.*?[.!?](?:\s|$)/)?.[0] ?? summary
+	const concise = firstSentence.trim()
+	return concise.length <= 280 ? concise : `${concise.slice(0, 277).trimEnd()}...`
+}
+
 const packageNodes = new Map((docs.children ?? []).filter(node => node.kind === 2).map(node => [node.name, node]))
+const publishedMembers = packageNode => {
+	// Core documents each declared package export as a module so its root,
+	// testing, client, and adapter contracts can be complete without widening
+	// the application import path. Other packages retain a single root module.
+	if (packageNode.name === '@purista/core') {
+		return packageNode.children?.find(candidate => candidate.name === 'index' && candidate.kind === 2)?.children ?? []
+	}
+	return packageNode.children ?? []
+}
 const entries = []
 const issues = []
 
@@ -291,8 +321,9 @@ for (const surface of packageCatalog) {
 	}
 
 	for (const name of surface.names) {
-		const node = (packageNode.children ?? []).find(candidate => candidate.name === name && kinds.has(candidate.kind))
-		if (!node) {
+		const exportedNode = publishedMembers(packageNode).find(candidate => candidate.name === name)
+		const node = resolveReference(exportedNode)
+		if (!node || !kinds.has(node.kind)) {
 			issues.push(`${surface.packageName}.${name} is not a documented public export`)
 			continue
 		}
@@ -310,7 +341,7 @@ for (const surface of packageCatalog) {
 			packageName: surface.packageName,
 			name,
 			kind: kinds.get(node.kind),
-			summary,
+			summary: conciseSummary(summary),
 			source: sourceOf(node),
 		})
 	}
@@ -332,17 +363,18 @@ const lines = [
 	'',
 	'This reference covers every published `@purista/*` package. Use it in an installed skill to select the package and primary API for an application. It intentionally omits framework implementation paths, internal helpers, and release tooling. Follow the other skill references for ownership and distributed-system decisions.',
 	'',
+	'## Contents',
+	'',
+	'- [Package selection](#package-selection)',
+	'- [Core import boundaries](#core-import-boundaries)',
+	...catalogSections.map(section => `- [${section}](#${section.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')})`),
+	'- [Use this reference safely](#use-this-reference-safely)',
+	'',
 	'## Core Import Boundaries',
 	'',
 	...coreSubpathCatalog.map(
 		entry => `- \`${entry.path}\`: ${entry.useWhen} Key APIs: ${entry.names.map(name => `\`${name}\``).join(', ')}.`,
 	),
-	'',
-	'## Contents',
-	'',
-	'- [Package selection](#package-selection)',
-	...catalogSections.map(section => `- [${section}](#${section.toLowerCase().replaceAll(/[^a-z0-9]+/g, '-')})`),
-	'- [Use this reference safely](#use-this-reference-safely)',
 	'',
 	'## Package selection',
 	'',

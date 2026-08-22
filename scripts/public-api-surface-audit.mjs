@@ -100,16 +100,28 @@ const expectedCoreRuntimeExports = new Set([
 	'validateArchitectureManifest',
 ])
 
+const rootCoreIndexPath = resolve(process.cwd(), 'packages/core/src/index.ts')
+const issues = []
+
 if (!existsSync(apiPath)) {
 	process.stderr.write(`API documentation JSON was not found at ${apiPath}. Run npm run build:api-docs first.\n`)
 	process.exit(2)
+}
+
+if (existsSync(rootCoreIndexPath)) {
+	const rootCoreIndex = readFileSync(rootCoreIndexPath, 'utf8')
+	const wildcardInternalTypeExports = rootCoreIndex.match(/export\s+type\s+\*\s+from\s+['"]\.\/core\//g) ?? []
+	if (wildcardInternalTypeExports.length) {
+		issues.push(
+			`@purista/core: application root must enumerate application types; found internal wildcard type exports: ${wildcardInternalTypeExports.join(', ')}`,
+		)
+	}
 }
 
 const docs = JSON.parse(readFileSync(apiPath, 'utf8'))
 const packages = new Map(
 	(docs.children ?? []).map(entry => [entry.name, new Set((entry.children ?? []).map(child => child.name))]),
 )
-const issues = []
 
 const coreEntryPath = resolve(process.cwd(), 'packages/core/dist/index.js')
 if (!existsSync(coreEntryPath)) {

@@ -67,7 +67,7 @@ const isPuristaRecord = record => record.packageName.startsWith('@purista/')
 const records = []
 
 const walk = (node, packageName = docs.name) => {
-	const currentPackage = node.kind === 2 ? node.name : packageName
+	const currentPackage = node.kind === 2 && node.name.startsWith('@purista/') ? node.name : packageName
 	const kind = publicKinds.get(node.kind)
 
 	if (kind && (!packageFilter || currentPackage === packageFilter)) {

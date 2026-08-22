@@ -28,31 +28,81 @@ export type {
 export * from './AgentQueueBuilder/index.js'
 export type { HttpExposureOptions } from './CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 export * from './CommandDefinitionBuilder/index.js'
-export type * from './core/ConfigStore/types/index.js'
+export type { ConfigStore } from './core/ConfigStore/types/ConfigStore.js'
 export { HandledError } from './core/Error/HandledError.impl.js'
 export { UnhandledError } from './core/Error/UnhandledError.impl.js'
-export type * from './core/EventBridge/types/index.js'
+export type {
+	EventBridge,
+	EventBridgeCapabilities,
+	EventBridgeConfig,
+} from './core/EventBridge/types/index.js'
 export type { QueryParameter } from './core/HttpServer/types/QueryParameter.js'
 export type { SupportedHttpMethod } from './core/HttpServer/types/SupportedHttpMethod.js'
 export { getNewInstanceId } from './core/helper/getNewInstanceId.impl.js'
 export { getNewTraceId } from './core/helper/getNewTraceId.impl.js'
-export type * from './core/metrics/types.js'
-export type * from './core/observability/index.js'
-export type * from './core/QueueBridge/index.js'
+export type {
+	PuristaMetricDefinition,
+	PuristaMetricDefinitions,
+	PuristaMetricsRuntimeOptions,
+} from './core/metrics/types.js'
+export type { QueueBridge, QueueBridgeCapabilities } from './core/QueueBridge/index.js'
 export { DefaultSchedulerProvider } from './core/Scheduler/DefaultSchedulerProvider.impl.js'
 export type { SchedulerRuntimeOptions } from './core/Scheduler/SchedulerRuntime.impl.js'
 export { SchedulerRuntime } from './core/Scheduler/SchedulerRuntime.impl.js'
-export type * from './core/Scheduler/types.js'
-export type * from './core/SecretStore/types/index.js'
+export type { SchedulerRuntimeStatus } from './core/Scheduler/types.js'
+export type { SecretStore } from './core/SecretStore/types/SecretStore.js'
 export { Service } from './core/Service/Service.impl.js'
-export type * from './core/StateStore/types/index.js'
+export type {
+	StateRetention,
+	StateRetentionPolicy,
+	StateStore,
+	StateStoreCapabilities,
+	StateStoreConfig,
+	StateWriteOptions,
+} from './core/StateStore/types/index.js'
 export { EBMessageType } from './core/types/EBMessageType.enum.js'
-// Public contracts used by builders and application bootstrap. Low-level base
-// classes and transport registries live in `@purista/core/adapter`.
-export type * from './core/types/index.js'
+// Application-level contracts. Protocol implementation and transport utility
+// types live in `@purista/core/adapter`.
+export type {
+	Command,
+	CommandDefinition,
+	CommandErrorResponse,
+	CommandFunctionContext,
+	CommandResponse,
+	CommandSuccessResponse,
+	ContentType,
+	ContextBase,
+	CorrelationId,
+	CustomMessage,
+	EBMessage,
+	EBMessageAddress,
+	EBMessageBase,
+	EBMessageId,
+	EBMessageSenderAddress,
+	ErrorResponsePayload,
+	ILogger,
+	InstanceId,
+	Logger,
+	LogLevelName,
+	PrincipalId,
+	QueueContext,
+	QueueDefinition,
+	QueueHandlerResult,
+	QueueMessage,
+	QueueWorkerDefinition,
+	ServiceClass,
+	ServiceClassTypes,
+	ServiceHealthState,
+	ServiceHealthStatus,
+	ServiceInfoType,
+	ServiceObservabilityInheritance,
+	TenantId,
+	TraceId,
+} from './core/types/index.js'
 export { isCustomMessage } from './core/types/isCustomMessage.impl.js'
 export { PuristaSpanName } from './core/types/PuristaSpanName.enum.js'
 export { PuristaSpanTag } from './core/types/PuristaSpanTag.enum.js'
+export type { ServiceObservabilityContext, ServiceObservabilityReport } from './core/types/ServiceObservability.js'
 export { StatusCode } from './core/types/StatusCode.enum.js'
 // Application runtime composition.
 export { DefaultConfigStore } from './DefaultConfigStore/DefaultConfigStore.impl.js'
@@ -110,7 +160,6 @@ export type {
 	FullServiceDefinition,
 } from './helper/types/index.js'
 export type { NonEmptyString } from './helper/types/NonEmptyString.js'
-export type { ObjectWithKeysFromStringArray } from './helper/types/ObjectWithKeysFromStringArray.js'
 export type { ShutdownEntry } from './helper/types/ShutdownEntry.js'
 export * from './QueueDefinitionBuilder/index.js'
 export * from './QueueWorkerBuilder/index.js'
