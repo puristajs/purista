@@ -67,7 +67,7 @@ See the local runnable example in `examples/enterprise-billing-cycle`.
 
 ## Governance and compliance
 
-Use exports to generate provider-neutral documentation. Exports are generated programmatically via the `ClientBuilder` utility — there are no `purista export` CLI subcommands. To generate an AsyncAPI or OpenAPI document, call the appropriate builder method in a script and write the output to a file.
+Use `purista export` to generate deterministic, provider-neutral documentation from exported service definitions. The CLI never starts services or contacts infrastructure. Build pipelines can also call the equivalent Core helpers directly when they need custom composition.
 
 These documents show:
 

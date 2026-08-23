@@ -30,7 +30,6 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn build' : `${input.packageManager} run build`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn export:runtime' : `${input.packageManager} run export:runtime`}\`
-- \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\` when this application declares schedules
 - \`${input.packageManager === 'yarn' ? 'yarn inspect:architecture' : `${input.packageManager} run inspect:architecture`}\` to export definitions and print a scoped, LLM-ready static architecture context
 - \`${input.packageManager === 'yarn' ? 'yarn validate:architecture' : `${input.packageManager} run validate:architecture`}\` before handing off an architecture change
 - \`${input.packageManager === 'yarn' ? 'yarn doctor:architecture' : `${input.packageManager} run doctor:architecture`}\` for static project checks
@@ -39,7 +38,7 @@ This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`
 
 Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery. Generated agents are ephemeral by default. Use \`--durable-workspace\` only for a resumable \`setHarnessWorkflow(...)\`; it requires application-owned \`ai.runtime\` and \`ai.workspaceStore\` adapters.
 
-Schedules are exported from \`src/definitions.ts\` to \`purista.schedules.json\`. The generated \`start:scheduler\` host consumes that JSON manifest only: it never imports or starts business services. It uses the local \`DefaultSchedulerProvider\` and is therefore useful only for same-process tests or a single local scheduler host. It cannot deliver events to a separately started app when that app also uses \`DefaultEventBridge\`; use one shared transport for that integration. Production hosts must select an application-configured durable, distributed provider and a shared EventBridge before deployment.
+Schedules are opt-in. After creating a schedule declaration, export its manifest and deploy a separate Scheduler Runtime with an application-selected provider and shared EventBridge. The scheduler owns only the clock and event publication; business services, queues, subscriptions, and agents consume the emitted event.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
 
@@ -83,8 +82,7 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep \`src/definitions.ts\` as the generated export inventory. The local \`add:service\` command updates it when the standard aggregation array is present.
 - Before changing an existing boundary, run \`${runScriptCommand(input, 'inspect:architecture')}\` and read the scoped graph. After changing it, run \`${runScriptCommand(input, 'validate:architecture')}\`. For a reviewed public contract, persist \`purista inspect --out <artifact>\` and run \`purista diff --base <approved-artifact> --strict\`.
 - A static graph does not prove a live bridge, store, scheduler, model provider, deployment, or external event producer. Do not invent missing external contracts. Multi-repository deployments must use an application-owned composition file with pinned local artifacts and \`purista compose\`.
-- Export \`purista.schedules.json\` before starting a scheduler host. The scheduler process consumes that JSON file and infrastructure bindings only; it must never import, instantiate, or start business services.
-- Treat the generated \`start:scheduler\` script as local/test wiring because it uses \`DefaultSchedulerProvider\`. A separate scheduler and app need a shared EventBridge; two \`DefaultEventBridge\` instances are isolated processes. Configure a provider package with durable distributed claims for replicated production hosts.
+- Schedules are opt-in. Export a schedule manifest only when this application declares schedules, and deploy its Scheduler Runtime separately from business services with an application-selected provider and shared EventBridge.
 - For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery. Agents are ephemeral by default; use \`--durable-workspace\` only for a workflow that must resume private workspace state.
 
 ${createLocalCliUsageGuide(input)}
@@ -172,40 +170,6 @@ const definitions = await createPuristaDefinitions()
 
 await writeFile(outPath, JSON.stringify(definitions, null, 2) + '\\n', 'utf-8')
 process.stdout.write('PURISTA definitions exported to ' + outPath + '\\n')
-`
-
-/** Create the local-only standalone Scheduler Runtime host. */
-export const createSchedulerHostFile = () => `import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
-import {
-	DefaultSchedulerProvider,
-	gracefulShutdown,
-	initLogger,
-	SchedulerBuilder,
-	type ScheduleManifest,
-} from '@purista/core'
-import { getEventBridge } from './eventbridge.js'
-
-const schedulerGroup = process.env.PURISTA_SCHEDULER_GROUP ?? 'default'
-const manifestPath = resolve(process.cwd(), process.env.PURISTA_SCHEDULE_MANIFEST ?? 'purista.schedules.json')
-const manifest = JSON.parse(await readFile(manifestPath, 'utf-8')) as ScheduleManifest
-
-const logger = initLogger()
-const eventBridge = await getEventBridge(logger)
-const scheduler = new SchedulerBuilder(schedulerGroup)
-	.loadManifest(manifest)
-	.useEventBridge(eventBridge)
-	.useProvider(new DefaultSchedulerProvider())
-	.getInstance()
-
-await scheduler.start()
-logger.warn(
-	{ schedulerGroup, manifestPath },
-	'Local Scheduler Runtime started. DefaultSchedulerProvider is process-local and must not be used for replicated production hosts.',
-)
-
-// This process owns only the clock and event publication. SchedulerRuntime destroys the EventBridge on shutdown.
-gracefulShutdown(logger, [{ name: 'scheduler runtime', destroy: () => scheduler.destroy() }])
 `
 
 /** Create an opt-in, application-owned OpenTelemetry Metrics API setup. */

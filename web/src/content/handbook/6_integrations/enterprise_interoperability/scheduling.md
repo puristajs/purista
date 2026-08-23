@@ -70,18 +70,13 @@ start a small process that reads that JSON and imports only scheduler
 infrastructure. It must not instantiate your business `ServiceBuilder`
 instances.
 
-New starter and CLI-generated applications provide this local/test flow:
-
-```bash
-npm run export:schedules
-npm run start:scheduler
-```
-
-`export:schedules` updates `purista.definitions.json` from the explicit
-`src/definitions.ts` inventory and writes `purista.schedules.json`. The
-generated `src/scheduler.ts` imports that JSON manifest only. Its local
-provider is deliberately not a production configuration: a separate process
-using `DefaultEventBridge` cannot deliver events to the application process.
+Starter and CLI-generated applications do not create a scheduler host because
+most applications do not need one. When an application declares schedules,
+export its definitions and schedule manifest during build, then add a small,
+separate scheduler deployment. The deployment imports only the JSON manifest
+and scheduler infrastructure; it never imports business services. A
+process-local `DefaultEventBridge` cannot deliver events to a separately
+started application process.
 
 ```ts [scheduler.ts]
 import { readFile } from 'node:fs/promises'
@@ -217,8 +212,7 @@ an event trigger and a downstream event-to-queue binding.
 Generate an external manifest with the project CLI:
 
 ```bash
-npm run export:schedules
-# equivalent lower-level commands:
+npm run export:definitions
 purista export schedule-manifest --definitions purista.definitions.json --out schedules.json
 ```
 

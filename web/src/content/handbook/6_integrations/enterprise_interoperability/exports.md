@@ -23,9 +23,9 @@ Use the project CLI to export checked-in service definitions. The command writes
 deterministic JSON and does not start services or connect to infrastructure.
 
 ```bash
-purista export-asyncapi --definitions purista.definitions.json --out asyncapi.json
-purista export-schedule-manifest --definitions purista.definitions.json --out schedules.json
-purista export-runtime-capabilities --out runtime-capabilities.json
+purista export asyncapi --definitions purista.definitions.json --out asyncapi.json
+purista export schedule-manifest --definitions purista.definitions.json --out schedules.json
+purista export runtime-capabilities --out runtime-capabilities.json
 ```
 
 The same Core helpers are available programmatically when a build pipeline needs

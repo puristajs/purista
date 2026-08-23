@@ -70,7 +70,7 @@ export type ExampleServiceGeneratorStep = {
 	commandName: string
 	/** Human-readable command description. */
 	commandDescription: string
-	/** Whether the generated service demonstrates the declared custom metric API. */
+	/** Whether this explicitly requested example includes a custom metric. */
 	includeMetricExample?: boolean
 }
 

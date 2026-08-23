@@ -17,7 +17,6 @@ import {
 	createNatsConfigFile,
 	createPublicIndexHtml,
 	createReadmeFile,
-	createSchedulerHostFile,
 	createServiceEventEnumFile,
 	createTelemetryFile,
 } from './content.js'
@@ -94,8 +93,6 @@ const runtimeNodePackage: PKG = {
 		'inspect:architecture': 'tsx src/exportDefinitions.ts && purista inspect --view agent --format json',
 		'validate:architecture': 'tsx src/exportDefinitions.ts && purista validate --strict --format json',
 		'doctor:architecture': 'tsx src/exportDefinitions.ts && purista doctor --format json',
-		'export:schedules': 'tsx src/exportDefinitions.ts && purista export schedule-manifest --out purista.schedules.json',
-		'start:scheduler': 'tsx src/scheduler.ts',
 	},
 	devDependencies: {
 		'@types/node': 'latest',
@@ -116,8 +113,6 @@ const runtimeBunPackage: PKG = {
 		'inspect:architecture': 'bun src/exportDefinitions.ts && purista inspect --view agent --format json',
 		'validate:architecture': 'bun src/exportDefinitions.ts && purista validate --strict --format json',
 		'doctor:architecture': 'bun src/exportDefinitions.ts && purista doctor --format json',
-		'export:schedules': 'bun src/exportDefinitions.ts && purista export schedule-manifest --out purista.schedules.json',
-		'start:scheduler': 'bun src/scheduler.ts',
 	},
 	devDependencies: {
 		'@types/bun': 'latest',
@@ -186,7 +181,6 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 				{ path: 'src/service/serviceEvent.enum.ts', content: createServiceEventEnumFile(context) },
 				{ path: 'src/definitions.ts', content: createDefinitionsFile(context) },
 				{ path: 'src/exportDefinitions.ts', content: createDefinitionsExporterFile() },
-				{ path: 'src/scheduler.ts', content: createSchedulerHostFile() },
 			],
 			packageJson: basePackage,
 			tsconfig: baseTsConfig,
@@ -199,7 +193,6 @@ export const projectBlueprintRegistry: Record<string, ProjectBlueprint> = {
 					serviceVersion: '1',
 					commandName: 'ping',
 					commandDescription: `Ping through the ${context.eventBridge} blueprint`,
-					includeMetricExample: context.telemetry === 'otel',
 				},
 			],
 		}),

@@ -178,7 +178,19 @@ try {
 		throw new Error('Generated definition inventory did not include both the scaffolded and added service.')
 	}
 
-	run(npmExecutable, ['run', 'export:schedules'], applicationDirectory)
+	run(
+		process.execPath,
+		[
+			join(applicationDirectory, 'node_modules', '@purista', 'cli', 'dist', 'bin.js'),
+			'export',
+			'schedule-manifest',
+			'--definitions',
+			'purista.definitions.json',
+			'--out',
+			'purista.schedules.json',
+		],
+		applicationDirectory,
+	)
 	const scheduleManifest = JSON.parse(readFileSync(join(applicationDirectory, 'purista.schedules.json'), 'utf8'))
 	if (scheduleManifest.schedules?.length !== 1 || scheduleManifest.schedules[0]?.targetName !== 'ledgerDailyCloseDue') {
 		throw new Error('Generated schedule export did not include the CLI-created event trigger.')

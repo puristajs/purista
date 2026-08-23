@@ -91,6 +91,7 @@ describe('resolveProjectBlueprints', () => {
 			'@opentelemetry/api': 'latest',
 			'@opentelemetry/sdk-metrics': 'latest',
 		})
+		expect(plan.generatorSteps[0]).not.toHaveProperty('includeMetricExample')
 	})
 })
 
@@ -119,7 +120,7 @@ describe('planProjectGeneration', () => {
 		expect(plan.predictedFiles).toContain('src/index.ts')
 		expect(plan.predictedFiles).toContain('src/definitions.ts')
 		expect(plan.predictedFiles).toContain('src/exportDefinitions.ts')
-		expect(plan.predictedFiles).toContain('src/scheduler.ts')
+		expect(plan.predictedFiles).not.toContain('src/scheduler.ts')
 		expect(plan.predictedFiles).toContain('src/http.ts')
 		expect(plan.predictedFiles).toContain('AGENTS.md')
 		expect(plan.predictedFiles).toContain('CLAUDE.md')
@@ -141,16 +142,8 @@ describe('planProjectGeneration', () => {
 			expect(packageJsonFile?.content).toContain('"add:agent": "purista add agent"')
 			expect(packageJsonFile?.content).toContain('"add:schedule": "purista add schedule"')
 			expect(packageJsonFile?.content).toContain('"export:definitions": "bun src/exportDefinitions.ts"')
-			expect(packageJsonFile?.content).toContain('"start:scheduler": "bun src/scheduler.ts"')
+			expect(packageJsonFile?.content).not.toContain('"start:scheduler"')
 			expect(packageJsonFile?.content).toContain('"@biomejs/biome"')
-		}
-
-		const schedulerHost = plan.files.find(file => file.path === 'src/scheduler.ts')
-		expect(schedulerHost?.type).not.toBe('symlink')
-		if (schedulerHost?.type !== 'symlink') {
-			expect(schedulerHost?.content).toContain('new SchedulerBuilder(schedulerGroup)')
-			expect(schedulerHost?.content).toContain('DefaultSchedulerProvider')
-			expect(schedulerHost?.content).not.toContain("from './service/")
 		}
 
 		const agentSkillLink = plan.files.find(file => file.path === '.agents/skills/purista')

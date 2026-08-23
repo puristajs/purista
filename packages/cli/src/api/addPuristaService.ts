@@ -32,7 +32,7 @@ export const addPuristaService = async (input: {
 	serviceName: string
 	/** Numeric service version. Defaults to `1`. */
 	serviceVersion?: string
-	/** Add the optional, declaration-only custom metric example used by the OTel scaffold. */
+	/** Add an explicit custom metric example to the generated service builder. */
 	includeMetricExample?: boolean
 	codeWriterOptions?: Partial<Options>
 }) => {
