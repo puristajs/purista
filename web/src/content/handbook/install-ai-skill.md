@@ -24,7 +24,12 @@ architecture and distributed-systems rules that tell an assistant when to use
 a command, event, queue, stream, agent, or event-only schedule. It never
 requires framework source paths, internal planning files, or a global CLI.
 For setup and changes, an assistant should use the project-local `add:*`,
-`inspect`, `validate`, and `doctor` scripts just as a developer would.
+`inspect:architecture`, `validate:architecture`, and `doctor:architecture`
+scripts just as a developer would. For a reviewed public contract it persists a
+manifest and runs `purista diff`; a deployment repository uses `purista compose`
+with explicitly supplied, digest-pinned artifacts. The assistant must not claim
+that a static report checked live infrastructure or invent an unresolved
+external contract.
 
 Use the `skills` CLI only when you need to add the PURISTA skill to an existing project or to an assistant-specific/global skill mirror.
 

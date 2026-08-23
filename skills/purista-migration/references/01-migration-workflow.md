@@ -51,7 +51,7 @@ Use the scripts actually declared by the application. A typical sequence is:
 
 ```bash
 npm run export:definitions
-./node_modules/.bin/purista inspect --definitions purista.definitions.json --format json
+./node_modules/.bin/purista inspect --definitions purista.definitions.json --view agent --scope service:<name>/<version> --depth 1 --schemas referenced --format json
 ./node_modules/.bin/purista validate --definitions purista.definitions.json --strict --format json
 ./node_modules/.bin/purista doctor --definitions purista.definitions.json --format json
 npm run lint

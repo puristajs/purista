@@ -15,8 +15,9 @@ reliable view of the architecture before they change it.
 
 - **A standalone scheduler runtime** for cron, interval, and one-shot event
   triggers.
-- **Static architecture inspection and diagnostics** through `purista inspect`,
-  `purista validate`, and `purista doctor`.
+- **Architecture contracts for people, CI, and agents** through `purista
+  inspect`, `purista validate`, `purista doctor`, `purista diff`, and offline
+  `purista compose`.
 - **RFC 9457 Problem Details** for generated Hono HTTP endpoints, with matching
   OpenAPI schemas and safe error redaction.
 - **Explicit observability ownership** for services and runtime adapters
@@ -55,22 +56,40 @@ Read the [scheduling guide](/handbook/6-integrations/enterprise-interoperability
 
 ## Let tools see the architecture before they edit it
 
-PURISTA now exports a JSON-safe static architecture view of services, commands,
-subscriptions, streams, queues, workers, schedules, event-to-queue bindings,
-and agents. It contains definitions and diagnostics—not functions, credentials,
-prompts, provider instances, or live infrastructure claims.
+PURISTA now exports a JSON-safe architecture contract: stable component and
+relation IDs, role-specific input/output/event schemas, a deduplicated schema
+catalog, and a content digest. It contains definitions and diagnostics—not
+functions, credentials, prompts, provider instances, or live infrastructure
+claims.
 
 ```bash
 purista inspect --definitions purista.definitions.json --format json
+purista inspect --definitions purista.definitions.json --view agent --scope service:billing/1 --depth 1 --schemas referenced --format json
 purista validate --definitions purista.definitions.json --strict --format json
 purista doctor --definitions purista.definitions.json --format json
+purista diff --base approved.architecture.json --definitions purista.definitions.json --strict --format json
 ```
 
-Use `inspect` to understand what exists, `validate` to enforce static
-cross-reference rules, and `doctor` to check the generated project files. This
-is particularly useful in CI and for AI-assisted work: a tool can establish the
-real topology before proposing a change. It does not replace health checks for
-your live bridge, store, scheduler provider, or model provider.
+Use scoped `inspect --view agent` to understand the target and its direct
+relations without flooding an assistant with unrelated schemas. The Markdown
+renderer is deterministic; it does not ask a model to summarize the system.
+Use `validate` for static cross-references, `doctor` for generated-project
+files, and `diff` for reviewed contract changes. A schema change is deliberately
+reported as unknown unless compatibility is proven conservatively.
+
+For systems split across repositories, the deployment repository pins each
+supplied artifact digest and resolves explicitly declared external edges:
+
+```bash
+purista compose --composition deployment.architecture.json \
+  --artifact billing.architecture.json --artifact catalog.architecture.json \
+  --strict --format json
+```
+
+This is particularly useful in CI and for AI-assisted work: a tool can
+establish the declared topology before proposing a change. None of these static
+commands replace health checks for a live bridge, store, scheduler provider, or
+model provider.
 
 ## Return errors clients can rely on
 

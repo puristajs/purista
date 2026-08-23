@@ -16,6 +16,8 @@ export const puristaCommandIds = [
 	'inspect',
 	'validate',
 	'doctor',
+	'diff',
+	'compose',
 	'init-project',
 ] as const
 

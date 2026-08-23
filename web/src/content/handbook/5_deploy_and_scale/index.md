@@ -32,17 +32,20 @@ do not connect replicas, containers, or separately started scheduler hosts.
   whenever more than one process can handle the same work.
 - Services are started before HTTP traffic is accepted; stop accepting work
   before destroying services and bridges.
-- The composition root owns telemetry. Pass the flat `logger`, `spanProcessor`,
-  and `metrics` options to `service.getInstance(...)`; components inherit them
-  unless explicitly configured.
+- The composition root owns telemetry. Configure every shared adapter at
+  construction and pass the same explicit `logger`, `spanProcessor`, and
+  `metrics` values to each service; a service never mutates or configures a
+  shared adapter.
 - Scheduler hosts are separate deployable processes. See [Scheduling](../6_integrations/enterprise_interoperability/scheduling.md).
 - Treat message delivery as at-least-once where a bridge or queue backend says
   so. Make externally visible effects idempotent.
 
 ## Before a rollout
 
-1. Run `purista inspect`, `purista validate --strict`, and `purista doctor`
-   against the exported definitions in CI.
+1. Export definitions, persist `purista inspect --out` as the build contract,
+   then run `purista validate --strict`, `purista doctor`, and
+   `purista diff --base <approved-artifact>` in CI. For multiple repositories,
+   run `purista compose` with pinned local artifacts from the deployment build.
 2. Test the selected bridge, stores, queue backend, and graceful shutdown in an
    environment that resembles production.
 3. Configure health/readiness endpoints, structured logs, traces, metrics, and

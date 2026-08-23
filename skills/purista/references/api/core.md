@@ -1,7 +1,7 @@
 # @purista/core API Patterns
 
 <!-- Generated from current TypeDoc; do not edit manually. -->
-<!-- typedoc-digest: 527f17db6c2c34eb -->
+<!-- typedoc-digest: 33dfc6c4700fa85e -->
 
 Use this reference only when working with `@purista/core`. Every API name, callable pattern, and example below is extracted from the current public TypeDoc output. Do not invent a method that is absent here; consult the complete `../generated-api-manifest.json` and the public handbook when the API is not listed.
 
@@ -17,8 +17,13 @@ Use this reference only when working with `@purista/core`. Every API name, calla
 - [SchedulerBuilder](#schedulerbuilder)
 - [SchedulerRuntime](#schedulerruntime)
 - [DefaultSchedulerProvider](#defaultschedulerprovider)
+- [getArchitectureManifestDigest](#getarchitecturemanifestdigest)
 - [createArchitectureManifest](#createarchitecturemanifest)
+- [createArchitectureContext](#createarchitecturecontext)
+- [renderArchitectureContextMarkdown](#renderarchitecturecontextmarkdown)
 - [validateArchitectureManifest](#validatearchitecturemanifest)
+- [compareArchitectureManifests](#comparearchitecturemanifests)
+- [validateArchitectureComposition](#validatearchitecturecomposition)
 - [exportServiceDefinitions](#exportservicedefinitions)
 - [exportScheduleManifest](#exportschedulemanifest)
 
@@ -682,28 +687,78 @@ const scheduler = new SchedulerBuilder()
 - `releaseOccurrence(claim)` — Release a failed occurrence so a later local tick can retry it.
 - `start()` — Initialize the process-local provider.
 
-## createArchitectureManifest
+## getArchitectureManifestDigest
 
-**function.** Create a sorted, JSON-safe static architecture manifest from resolved service definitions. Source: `helper/architectureManifest.ts:250`.
+**function.** Return the content digest of an architecture artifact, excluding its own digest field. Source: `helper/architectureManifest.ts:258`.
 
 **Verified example**
 
 ```ts
-const manifest = await createArchitectureManifest({
-  services: definitions,
-  includeSchemas: false,
+const digest = getArchitectureManifestDigest(manifest)
+```
+
+## createArchitectureManifest
+
+**function.** Create a complete, sorted, JSON-safe architecture contract from resolved service definitions. Source: `helper/architectureManifest.ts:273`.
+
+**Verified example**
+
+```ts
+const manifest = await createArchitectureManifest({ services: definitions, schemaMode: 'full' })
+```
+
+## createArchitectureContext
+
+**function.** Create a bounded, deterministic subgraph suitable for tool output and LLM context. Source: `helper/architectureManifest.ts:747`.
+
+**Verified example**
+
+```ts
+const context = createArchitectureContext(manifest, {
+  scope: ['service:orders/1'],
+  depth: 1,
+  schemaMode: 'referenced',
 })
+```
+
+## renderArchitectureContextMarkdown
+
+**function.** Render a deterministic Markdown projection of an architecture context. Source: `helper/architectureManifest.ts:824`.
+
+**Verified example**
+
+```ts
+const markdown = renderArchitectureContextMarkdown(context)
 ```
 
 ## validateArchitectureManifest
 
-**function.** Validate static architecture references without contacting runtime infrastructure. Source: `helper/architectureManifest.ts:352`.
+**function.** Validate static architecture references without contacting runtime infrastructure. Source: `helper/architectureManifest.ts:620`.
 
 **Verified example**
 
 ```ts
 const diagnostics = validateArchitectureManifest(manifest, { strict: true })
-if (diagnostics.some(item => item.severity === 'error')) process.exitCode = 1
+```
+
+## compareArchitectureManifests
+
+**function.** Compare two static architecture contracts without an unsound schema-evolution guess. Source: `helper/architectureManifest.ts:873`.
+
+**Verified example**
+
+```ts
+const changes = compareArchitectureManifests(baseManifest, candidateManifest, { strict: true })
+```
+
+## validateArchitectureComposition
+
+**function.** Validate explicitly pinned architecture artifacts and cross-artifact relation bindings offline. Source: `helper/architectureManifest.ts:935`.
+
+**Verified example**
+
+```ts
+const diagnostics = validateArchitectureComposition(composition, artifacts, { strict: true })
 ```
 
 ## exportServiceDefinitions

@@ -2,8 +2,16 @@
 
 Use this reference when turning architecture into code.
 
+## Contents
+
+- [Default workflow](#default-workflow)
+- [Use the CLI first](#use-the-cli-first)
+- [Builder refinement pattern](#builder-refinement-pattern)
+- [Framework boundary](#framework-boundary)
+- [Verification](#verification)
+
 ## Default Workflow
-1. Run `purista inspect --definitions purista.definitions.json --format json` and read the static architecture manifest.
+1. Run `purista inspect --definitions purista.definitions.json --view agent --scope service:<name>/<version> --depth 1 --schemas referenced --format json` and read the bounded static architecture context. Use the full manifest only when cross-service scope is required.
 2. Run `purista validate --definitions purista.definitions.json --strict --format json`; resolve every error before changing architecture.
 3. Identify the owning service/package/component.
 4. Use the PURISTA CLI to create supported artifacts.
@@ -18,11 +26,26 @@ omits handler functions, credentials, provider instances, prompts, transcripts,
 and arbitrary provider hints. Use `doctor` for static project/configuration
 checks, never as evidence of production infrastructure health.
 
-`inspect` and `validate` work from the definitions file alone. Use
+`inspect` and `validate` work from the definitions file alone. The manifest has
+stable component/relation IDs, role-specific JSON Schema fingerprints, and a
+digest. Markdown is a deterministic renderer of a selected graph, not a model
+summary. Use
 `purista inspect --definitions purista.definitions.json --out purista.architecture.json --format json`
 only when a reviewed artifact is needed; that explicit `--out` is the only
 write in these static preflight flows. `doctor` reports missing definitions or
 `purista.json` as labelled static checks.
+
+For a contract change, compare the candidate with a reviewed local artifact:
+
+```bash
+purista diff --base approved.architecture.json --definitions purista.definitions.json --strict --format json
+```
+
+Treat `PURISTA_ARCH_SCHEMA_COMPATIBILITY_UNKNOWN` as a stop condition. Do not
+claim compatibility from a changed fingerprint or make a schema exception on
+your own. For a distributed system, a deployment repository supplies pinned
+artifacts and explicit unresolved-edge bindings to `purista compose`; never
+infer an external producer, clone another repository, or contact a registry.
 
 ## Use The CLI First
 Prefer CLI scaffolding for supported app artifacts:

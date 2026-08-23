@@ -47,19 +47,30 @@ purista export schedule-manifest --definitions purista.definitions.json --out sc
 purista export kubernetes-cronjob --definitions purista.definitions.json --out kubernetes-cronjobs.json --trigger-image curlimages/curl:8.8.0 --trigger-url 'https://api.example.com/purista/schedules/{{targetKind}}/{{targetName}}'
 purista inspect --definitions purista.definitions.json --format json
 purista inspect --definitions purista.definitions.json --out purista.architecture.json --format json
+purista inspect --definitions purista.definitions.json --view agent --scope service:billing/1 --depth 1 --schemas referenced --format json
 purista validate --definitions purista.definitions.json --strict --format json
 purista doctor --definitions purista.definitions.json --format json
+purista diff --base approved.architecture.json --definitions purista.definitions.json --strict --format json
+purista compose --composition deployment.architecture.json --artifact billing.architecture.json --artifact catalog.architecture.json --strict --format json
 ```
 
 Use create-package-manager commands for the quickstart path. Use `purista init <target>` when an agent, CI job, or script should call the same blueprint engine directly.
 
 Use `--non-interactive` in automation when all required values are known. Combine it with `--defaults` to apply explicit CLI defaults and `--no-install` when the caller owns dependency installation.
 
-Before an agent changes an existing app, it should run `inspect` and strict
-`validate`. These commands derive static JSON from exported definitions; they
-do not inspect live providers and do not require `purista.json`. `doctor` adds
-labelled definitions/configuration checks. All three are read-only and safe for
-CI or agent preflight unless `inspect --out <file>` is explicitly requested.
+Before an agent changes an existing app, it should run scoped `inspect` and
+strict `validate`. These commands derive static JSON from exported definitions;
+they do not inspect live providers and do not require `purista.json`. `doctor`
+adds labelled definitions/configuration checks. `diff` compares explicitly
+supplied local artifacts; `compose` validates only explicitly supplied pinned
+artifacts and bindings. All five are read-only and safe for CI or agent
+preflight unless `inspect --out <file>` is explicitly requested.
+
+Use `inspect --view agent` for a selected component neighborhood. It keeps the
+full contract digest, exact relation IDs, referenced schemas, and explicit
+unresolved edges while omitting unrelated components. Do not compact JSON into
+positional arrays or ask a model to summarize it before validation. `compose`
+never discovers deployments or fetches another repository.
 
 Generated projects install `@purista/cli` as a dev dependency and expose local package scripts for artifact creation. After project dependencies are installed, prefer those scripts over a global `purista` binary:
 

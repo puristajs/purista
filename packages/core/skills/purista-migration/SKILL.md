@@ -46,7 +46,8 @@ Do not use it to maintain the shared framework catalog: use
    deployment configuration. Use CLI generation only for genuinely new
    artifacts and refine its output in the existing project conventions.
 4. **Prove static topology.** Export definitions with the project script, then
-   run the installed CLI's `inspect`, strict `validate`, and `doctor` flows
+   run the installed CLI's scoped `inspect`, strict `validate`, `doctor`, and
+   reviewed-artifact `diff` flows
    when the project exposes them. Correct diagnostics at their source.
 5. **Prove behavior.** Run the project lint, typecheck, test, build, package,
    and integration checks that exist. Exercise changed HTTP errors, queues,

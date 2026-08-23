@@ -57,7 +57,7 @@ Start monolithic with explicit service boundaries; split only for team, scale, o
 
 ## Completion Check
 
-Before handoff, verify a single owner/source of truth per capability, declared handler dependencies, explicit runtime bindings, required reliability behavior, and no sensitive-data leakage. Run the generated application’s build/test and its available definition export, inspect, strict validate, and doctor scripts.
+Before handoff, verify a single owner/source of truth per capability, declared handler dependencies, explicit runtime bindings, required reliability behavior, and no sensitive-data leakage. Run the generated application’s build/test and its available definition export, scoped agent inspect, strict validate, and doctor scripts. For a reviewed public boundary, persist the canonical artifact and run `purista diff --strict`; a changed schema is unknown until explicitly reviewed, never an invitation to invent compatibility.
 
 ## Read If Needed
 - `references/00-architecture-compass.md`

@@ -31,6 +31,9 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn export:runtime' : `${input.packageManager} run export:runtime`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn export:schedules' : `${input.packageManager} run export:schedules`}\` when this application declares schedules
+- \`${input.packageManager === 'yarn' ? 'yarn inspect:architecture' : `${input.packageManager} run inspect:architecture`}\` to export definitions and print a scoped, LLM-ready static architecture context
+- \`${input.packageManager === 'yarn' ? 'yarn validate:architecture' : `${input.packageManager} run validate:architecture`}\` before handing off an architecture change
+- \`${input.packageManager === 'yarn' ? 'yarn doctor:architecture' : `${input.packageManager} run doctor:architecture`}\` for static project checks
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local links under \`.agents/skills/\` and \`.claude/skills/\` point to the bundled PURISTA architecture and migration skills in \`@purista/core\`.
 
@@ -78,6 +81,8 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
 - Keep \`src/definitions.ts\` as the generated export inventory. The local \`add:service\` command updates it when the standard aggregation array is present.
+- Before changing an existing boundary, run \`${runScriptCommand(input, 'inspect:architecture')}\` and read the scoped graph. After changing it, run \`${runScriptCommand(input, 'validate:architecture')}\`. For a reviewed public contract, persist \`purista inspect --out <artifact>\` and run \`purista diff --base <approved-artifact> --strict\`.
+- A static graph does not prove a live bridge, store, scheduler, model provider, deployment, or external event producer. Do not invent missing external contracts. Multi-repository deployments must use an application-owned composition file with pinned local artifacts and \`purista compose\`.
 - Export \`purista.schedules.json\` before starting a scheduler host. The scheduler process consumes that JSON file and infrastructure bindings only; it must never import, instantiate, or start business services.
 - Treat the generated \`start:scheduler\` script as local/test wiring because it uses \`DefaultSchedulerProvider\`. A separate scheduler and app need a shared EventBridge; two \`DefaultEventBridge\` instances are isolated processes. Configure a provider package with durable distributed claims for replicated production hosts.
 - For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery. Agents are ephemeral by default; use \`--durable-workspace\` only for a workflow that must resume private workspace state.
@@ -92,6 +97,7 @@ ${createLocalCliUsageGuide(input)}
 ## Verification
 - Run the project test script after framework changes.
 - Run export scripts when definitions, schedules, streams, queues, agents, or HTTP exposure change.
+- Run \`${runScriptCommand(input, 'validate:architecture')}\` after a boundary change. Treat a schema compatibility result of \`unknown\` as a stop condition until an owner approves the change.
 - Review logs, events, traces, queues, streams, and agent prompts for secret or PII leakage before production changes.
 - For skill-backed agents, verify startup fails for missing skill bindings and that prompts list only skill metadata plus \`/skills/<name>/SKILL.md\`, never the \`SKILL.md\` body.
 `

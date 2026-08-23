@@ -136,18 +136,29 @@ const main = async () => {
 			}),
 	)
 
-	const registerArchitectureCommand = (name: 'inspect' | 'validate' | 'doctor', description: string) => {
+	const registerArchitectureCommand = (
+		name: 'inspect' | 'validate' | 'doctor' | 'diff' | 'compose',
+		description: string,
+	) => {
 		const command = registerGlobalModeOptions(
 			program
 				.command(name)
 				.description(description)
 				.option('--definitions <path>', 'service definitions JSON file', 'purista.definitions.json')
 				.option('--strict', 'promote static architecture warnings to errors')
-				.option('--schemas', 'include normalized JSON Schema in inspect output')
-				.option('--format <format>', 'output format', 'json'),
+				.option('--schemas <mode>', 'schema detail: fingerprints or referenced', 'fingerprints')
+				.option('--view <view>', 'inspect view: manifest or agent', 'manifest')
+				.option('--scope <selector...>', 'component ID, service, event, or kind selector')
+				.option('--depth <count>', 'relation hops around selected scope', value => Number.parseInt(value, 10), 1)
+				.option('--format <format>', 'output format: json or markdown', 'json'),
 		)
 		if (name === 'inspect') {
 			command.option('--out <path>', 'write the static manifest to a JSON file')
+		}
+		if (name === 'diff') command.requiredOption('--base <path>', 'base architecture JSON artifact')
+		if (name === 'compose') {
+			command.requiredOption('--composition <path>', 'composition JSON file')
+			command.requiredOption('--artifact <path...>', 'pinned local architecture JSON artifacts')
 		}
 		command.action(async options => {
 			const engine = createEngineForOptions(options)
@@ -155,10 +166,17 @@ const main = async () => {
 				definitions: options.definitions,
 				out: options.out,
 				strict: options.strict,
-				includeSchemas: options.schemas,
+				schemaMode: options.schemas,
+				view: options.view,
+				scope: options.scope,
+				depth: options.depth,
 				format: options.format,
+				base: options.base,
+				composition: options.composition,
+				artifacts: options.artifact,
 			})
-			renderJsonOutput(result.output)
+			if (typeof result.output === 'string') process.stdout.write(result.output)
+			else renderJsonOutput(result.output)
 			if (!result.ok) {
 				process.exitCode = 1
 			}
@@ -174,6 +192,8 @@ const main = async () => {
 		'doctor',
 		'Report static architecture and project-configuration diagnostics without mutating source.',
 	)
+	registerArchitectureCommand('diff', 'Compare a candidate architecture contract with a base artifact offline.')
+	registerArchitectureCommand('compose', 'Validate explicit, pinned cross-repository architecture bindings offline.')
 
 	registerGlobalModeOptions(
 		program

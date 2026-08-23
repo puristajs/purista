@@ -1,7 +1,7 @@
 # Generated Agent API Reference
 
 <!-- Generated from the published API catalog; do not edit manually. -->
-<!-- typedoc-digest: 527f17db6c2c34eb -->
+<!-- typedoc-digest: 33dfc6c4700fa85e -->
 
 This reference covers every published `@purista/*` package and provides TypeDoc-verified examples for the primary application APIs. Use it to select a package and confirm an API pattern rather than guessing. The complete generated public-export inventory is in `generated-api-manifest.json`; it is loaded only when a primary entry does not answer the question. Follow the other skill references for ownership and distributed-system decisions.
 
@@ -31,7 +31,7 @@ This reference covers every published `@purista/*` package and provides TypeDoc-
 
 | Package | Use when | Primary validated API |
 | --- | --- | --- |
-| `@purista/core` | Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports. | `ServiceBuilder`, `CommandDefinitionBuilder`, `SubscriptionDefinitionBuilder`, `StreamDefinitionBuilder`, `QueueDefinitionBuilder`, `QueueWorkerBuilder`, `AgentQueueBuilder`, `SchedulerBuilder`, `SchedulerRuntime`, `DefaultSchedulerProvider`, `createArchitectureManifest`, `validateArchitectureManifest`, `exportServiceDefinitions`, `exportScheduleManifest` |
+| `@purista/core` | Declaring service-owned contracts, runtime wiring, queues, agents, schedules, and static architecture exports. | `ServiceBuilder`, `CommandDefinitionBuilder`, `SubscriptionDefinitionBuilder`, `StreamDefinitionBuilder`, `QueueDefinitionBuilder`, `QueueWorkerBuilder`, `AgentQueueBuilder`, `SchedulerBuilder`, `SchedulerRuntime`, `DefaultSchedulerProvider`, `getArchitectureManifestDigest`, `createArchitectureManifest`, `createArchitectureContext`, `renderArchitectureContextMarkdown`, `validateArchitectureManifest`, `compareArchitectureManifests`, `validateArchitectureComposition`, `exportServiceDefinitions`, `exportScheduleManifest` |
 | `@purista/cli` | Initializing or scaffolding a PURISTA application; application agents use the generated project-local CLI, while package authors use this API only to extend CLI tooling. | `createPuristaCliEngine`, `runPuristaCommand` |
 | `@purista/hono-http-server` | Projecting builder-declared commands, streams, and async queue responses through Hono and OpenAPI. | `honoV1Service` |
 | `@purista/amqpbridge` | Connecting commands, events, subscriptions, and streams through an AMQP broker. | `AmqpBridge` |
@@ -68,8 +68,13 @@ This reference covers every published `@purista/*` package and provides TypeDoc-
 | `@purista/core` | `SchedulerBuilder` | class | Builder for a standalone Core Scheduler Runtime host. |
 | `@purista/core` | `SchedulerRuntime` | class | Core-owned scheduler loop that publishes regular PURISTA custom events. |
 | `@purista/core` | `DefaultSchedulerProvider` | class | Process-local SchedulerProvider for development and deterministic tests. |
-| `@purista/core` | `createArchitectureManifest` | function | Create a sorted, JSON-safe static architecture manifest from resolved service definitions. |
+| `@purista/core` | `getArchitectureManifestDigest` | function | Return the content digest of an architecture artifact, excluding its own digest field. |
+| `@purista/core` | `createArchitectureManifest` | function | Create a complete, sorted, JSON-safe architecture contract from resolved service definitions. |
+| `@purista/core` | `createArchitectureContext` | function | Create a bounded, deterministic subgraph suitable for tool output and LLM context. |
+| `@purista/core` | `renderArchitectureContextMarkdown` | function | Render a deterministic Markdown projection of an architecture context. |
 | `@purista/core` | `validateArchitectureManifest` | function | Validate static architecture references without contacting runtime infrastructure. |
+| `@purista/core` | `compareArchitectureManifests` | function | Compare two static architecture contracts without an unsound schema-evolution guess. |
+| `@purista/core` | `validateArchitectureComposition` | function | Validate explicitly pinned architecture artifacts and cross-artifact relation bindings offline. |
 | `@purista/core` | `exportServiceDefinitions` | function | Resolve service builders into the JSON-safe definition inventory used by architecture inspection and interoperability exports. |
 | `@purista/core` | `exportScheduleManifest` | function | Export provider-neutral schedule metadata from service definitions. |
 | `@purista/cli` | `createPuristaCliEngine` | function | Create a programmatic CLI engine bound to a working directory and prompt adapter. |

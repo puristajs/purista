@@ -84,6 +84,8 @@ const expectedCoreRuntimeExports = new Set([
 	'SubscriptionDefinitionBuilder',
 	'UnhandledError',
 	'createArchitectureManifest',
+	'compareArchitectureManifests',
+	'createArchitectureContext',
 	'exportCloudEventsSchema',
 	'exportScheduleManifest',
 	'exportServiceDefinitions',
@@ -91,13 +93,16 @@ const expectedCoreRuntimeExports = new Set([
 	'fromCloudEvent',
 	'getNewInstanceId',
 	'getNewTraceId',
+	'getArchitectureManifestDigest',
 	'gracefulShutdown',
 	'initLogger',
 	'isCustomMessage',
 	'toCloudEvent',
 	'toJSONSchema',
 	'validate',
+	'validateArchitectureComposition',
 	'validateArchitectureManifest',
+	'renderArchitectureContextMarkdown',
 ])
 
 const rootCoreIndexPath = resolve(process.cwd(), 'packages/core/src/index.ts')

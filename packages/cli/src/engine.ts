@@ -29,7 +29,7 @@ export type PuristaCliEngineOptions = {
 const shouldLoadProjectMetadata = (commandId: PuristaCommandId) =>
 	commandId !== 'init-project' &&
 	!commandId.startsWith('export-') &&
-	!['inspect', 'validate', 'doctor'].includes(commandId)
+	!['inspect', 'validate', 'doctor', 'diff', 'compose'].includes(commandId)
 
 /**
  * Create a programmatic CLI engine bound to a working directory and prompt adapter.
@@ -58,7 +58,7 @@ export const createPuristaCliEngine = (options: PuristaCliEngineOptions = {}) =>
 			applyDefaults: true,
 		}
 
-		const isStaticArchitectureCommand = ['inspect', 'validate', 'doctor'].includes(commandId)
+		const isStaticArchitectureCommand = ['inspect', 'validate', 'doctor', 'diff', 'compose'].includes(commandId)
 		if (commandId !== 'init-project' && !isStaticArchitectureCommand) {
 			context.puristaConfig = await loadPuristaConfig(cwd)
 		}

@@ -10,30 +10,50 @@ PURISTA provides a blueprint-driven CLI that scaffolds projects and generates se
 
 ## Inspect architecture before changing it
 
-The CLI can derive a JSON-safe, static architecture view from exported service
-definitions. This is the recommended first step for an AI agent or reviewer: it
-shows declarations without importing handlers or contacting infrastructure.
+The CLI derives a versioned, JSON-safe architecture contract from exported
+service definitions. It contains stable component IDs, typed relations, a
+deduplicated schema catalog, and a content digest. This is the recommended
+first step for an AI agent or reviewer: it shows declared boundaries without
+importing handlers or contacting infrastructure.
 
 ```bash
 purista inspect --definitions purista.definitions.json --format json
 purista inspect --definitions purista.definitions.json --out purista.architecture.json --format json
+purista inspect --definitions purista.definitions.json --view agent --scope service:orders/1 --depth 1 --schemas referenced --format json
+purista inspect --definitions purista.definitions.json --view agent --scope command:createOrder --format markdown
 purista validate --definitions purista.definitions.json --strict --format json
 purista doctor --definitions purista.definitions.json --format json
+purista diff --base approved.architecture.json --definitions purista.definitions.json --strict --format json
+purista compose --composition deployment.architecture.json --artifact orders.architecture.json --artifact billing.architecture.json --strict --format json
 ```
 
-`inspect` returns services, commands, subscriptions, streams, queues, workers,
-schedules, event-to-queue bindings, and declared agents. `validate` applies
-static cross-reference rules and exits non-zero when errors exist. `doctor`
-adds project-configuration checks, but is explicitly **static**: it does not
-claim to test a live bridge, store, scheduler provider, or model provider.
+`inspect --view manifest` returns the complete contract. `inspect --view agent`
+returns a scoped relation neighborhood; `--schemas referenced` embeds only its
+referenced normalized JSON Schemas. Markdown is a deterministic rendering of
+the same selected graph, not an AI summary. `validate` applies static
+cross-reference rules and exits non-zero when errors exist. `diff` compares a
+candidate to a supplied artifact and reports a changed schema as **unknown**
+unless it can be proven safe. `compose` validates only explicitly pinned local
+artifacts and bindings; it never fetches repositories or registries.
+When a binding has schemas on both ends, matching fingerprints pass; different
+fingerprints are intentionally reported as **unknown** (and fail under
+`--strict`) rather than being guessed compatible.
 
-All three flows print stable JSON for automation. They never serialize handler
-functions, provider instances, credentials, prompts, transcripts, or schedule
-provider hints. Use `inspect --schemas` only when an agent needs normalized JSON
-Schema alongside the default schema fingerprints. `inspect` and `validate` need
-only the definitions file; `doctor` additionally reports whether `purista.json`
-and the generated definitions file are present. `inspect --out` is the sole
-explicit write: it persists the same static manifest it prints.
+`doctor` adds project-configuration checks, but is explicitly **static**: it
+does not claim to test a live bridge, store, scheduler provider, or model
+provider. Runtime health requires an application-owned, opt-in probe or
+attestation outside this command.
+
+All architecture flows print stable JSON for automation. They never serialize
+handler functions, provider instances, credentials, prompts, transcripts, or
+schedule provider hints. Default schema mode is fingerprints; use
+`--schemas referenced` for a selected agent context. `inspect` and `validate`
+need only the definitions file; `doctor` additionally reports whether
+`purista.json` and the generated definitions file are present. `inspect --out`
+is the sole explicit write: it persists the same static manifest it prints.
+Schedule components expose `expressionKind` plus the applicable `cron`,
+`everyMs`, or `runAt` field, which keeps the generated contract easy to consume
+without parsing an embedded schedule expression.
 
 ## Quick start
 

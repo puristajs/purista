@@ -64,6 +64,8 @@ try {
 	mkdirSync(packDirectory, { recursive: true })
 	mkdirSync(bootstrapDirectory, { recursive: true })
 	mkdirSync(npmCacheDirectory, { recursive: true })
+	run(npmExecutable, ['run', 'build'], join(packageRoot, 'core'))
+	run(npmExecutable, ['run', 'build'], join(packageRoot, 'cli'))
 
 	const coreTarball = packWorkspacePackage('core')
 	const cliTarball = packWorkspacePackage('cli')
@@ -205,6 +207,24 @@ try {
 	}
 	if (validation.kind !== 'purista.architecture.diagnostics') {
 		throw new Error('Generated project static validation did not produce the architecture diagnostics contract.')
+	}
+
+	const inspectOutput = runCaptured(npmExecutable, ['run', 'inspect:architecture'], applicationDirectory)
+	const inspect = JSON.parse(inspectOutput)
+	if (inspect.kind !== 'purista.architecture.context') {
+		throw new Error('Generated project inspect:architecture script did not produce an architecture context.')
+	}
+
+	const generatedValidation = JSON.parse(
+		runCaptured(npmExecutable, ['run', 'validate:architecture'], applicationDirectory),
+	)
+	if (generatedValidation.kind !== 'purista.architecture.diagnostics') {
+		throw new Error('Generated project validate:architecture script did not produce architecture diagnostics.')
+	}
+
+	const doctor = JSON.parse(runCaptured(npmExecutable, ['run', 'doctor:architecture'], applicationDirectory))
+	if (doctor.kind !== 'purista.doctor' || doctor.mode !== 'static') {
+		throw new Error('Generated project doctor:architecture script did not produce static doctor output.')
 	}
 
 	process.stdout.write('Generated project clean-install smoke passed.\n')

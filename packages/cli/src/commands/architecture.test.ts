@@ -51,6 +51,37 @@ describe('architecture commands', () => {
 			expect(JSON.parse(readFileSync(join(dir, 'architecture.json'), 'utf8'))).toMatchObject({
 				kind: 'purista.architecture',
 			})
+			const agentView = await runPuristaCommand(
+				'inspect',
+				{ definitions: 'definitions.json', view: 'agent', scope: ['service:Billing/1'] },
+				{ cwd: dir },
+			)
+			expect(agentView.output).toMatchObject({ kind: 'purista.architecture.context' })
+			const diff = await runPuristaCommand(
+				'diff',
+				{ definitions: 'definitions.json', base: 'architecture.json' },
+				{ cwd: dir },
+			)
+			expect(diff).toMatchObject({ ok: true, output: { kind: 'purista.architecture.diff', changes: [] } })
+			const artifact = JSON.parse(readFileSync(join(dir, 'architecture.json'), 'utf8'))
+			writeFileSync(
+				join(dir, 'composition.json'),
+				JSON.stringify({
+					kind: 'purista.architecture.composition',
+					version: '1.0.0',
+					artifacts: [{ id: 'billing', digest: artifact.digest }],
+					bindings: [],
+				}),
+			)
+			const composed = await runPuristaCommand(
+				'compose',
+				{ composition: 'composition.json', artifacts: ['architecture.json'] },
+				{ cwd: dir },
+			)
+			expect(composed).toMatchObject({
+				ok: true,
+				output: { kind: 'purista.architecture.composition.diagnostics', diagnostics: [] },
+			})
 
 			const validated = await runPuristaCommand('validate', { definitions: 'definitions.json' }, { cwd: dir })
 			expect(validated.ok).toBe(false)

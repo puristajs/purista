@@ -116,22 +116,36 @@ export type { DefaultSecretStoreConfig } from './DefaultSecretStore/types/Defaul
 export { DefaultStateStore } from './DefaultStateStore/DefaultStateStore.impl.js'
 export type { DefaultStateStoreConfig } from './DefaultStateStore/types/DefaultStateStoreConfig.js'
 export type {
-	ArchitectureAgent,
-	ArchitectureCallable,
+	ArchitectureChange,
+	ArchitectureComponent,
+	ArchitectureComponentAttribute,
+	ArchitectureComponentKind,
+	ArchitectureComposition,
+	ArchitectureCompositionArtifact,
+	ArchitectureCompositionBinding,
+	ArchitectureContext,
+	ArchitectureContracts,
 	ArchitectureDiagnostic,
 	ArchitectureDiagnosticSeverity,
 	ArchitectureManifest,
-	ArchitectureQueue,
-	ArchitectureQueueWorker,
-	ArchitectureSchedule,
-	ArchitectureSchemaSummary,
-	ArchitectureService,
+	ArchitectureRelation,
+	ArchitectureRelationKind,
+	ArchitectureRelationResolution,
+	ArchitectureSchema,
+	ArchitectureSchemaReference,
+	ArchitectureSchemaRole,
 	ArchitectureSourceLocation,
+	CreateArchitectureContextOptions,
 	CreateArchitectureManifestOptions,
 	ValidateArchitectureManifestOptions,
 } from './helper/architectureManifest.js'
 export {
+	compareArchitectureManifests,
+	createArchitectureContext,
 	createArchitectureManifest,
+	getArchitectureManifestDigest,
+	renderArchitectureContextMarkdown,
+	validateArchitectureComposition,
 	validateArchitectureManifest,
 } from './helper/architectureManifest.js'
 export type {

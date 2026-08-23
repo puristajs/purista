@@ -1,6 +1,6 @@
 {
 	"generatedFrom": "web/src/generated/purista-api.json",
-	"typedocDigest": "527f17db6c2c34eb",
+	"typedocDigest": "33dfc6c4700fa85e",
 	"packages": [
 		{
 			"packageName": "@purista/core",
@@ -356,79 +356,135 @@
 					"hasExample": false
 				},
 				{
-					"name": "ArchitectureAgent",
+					"name": "ArchitectureChange",
 					"kind": "type",
-					"summary": "JSON-safe summary of an attached agent declaration.",
-					"source": "helper/architectureManifest.ts:91",
+					"summary": "A deterministic architecture compatibility change.",
+					"source": "helper/architectureManifest.ts:105",
 					"hasExample": false
 				},
 				{
-					"name": "ArchitectureCallable",
+					"name": "ArchitectureComponent",
 					"kind": "type",
-					"summary": "JSON-safe summary of a command, subscription, stream, or queue worker.",
-					"source": "helper/architectureManifest.ts:33",
+					"summary": "A stable node in the architecture graph.",
+					"source": "helper/architectureManifest.ts:47",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComponentAttribute",
+					"kind": "type",
+					"summary": "JSON-safe scalar metadata attached to a graph component.",
+					"source": "helper/architectureManifest.ts:45",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComponentKind",
+					"kind": "type",
+					"summary": "Kinds of nodes in the provider-neutral PURISTA architecture graph.",
+					"source": "helper/architectureManifest.ts:23",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComposition",
+					"kind": "type",
+					"summary": "Application-owned, provider-neutral composition input.",
+					"source": "helper/architectureManifest.ts:122",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureCompositionArtifact",
+					"kind": "type",
+					"summary": "A pinned artifact used by offline multi-repository composition validation.",
+					"source": "helper/architectureManifest.ts:118",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureCompositionBinding",
+					"kind": "type",
+					"summary": "Explicit binding of an unresolved relation to a component in another artifact.",
+					"source": "helper/architectureManifest.ts:120",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureContext",
+					"kind": "type",
+					"summary": "JSON-safe selected architecture view intended for a human or an LLM.",
+					"source": "helper/architectureManifest.ts:94",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureContracts",
+					"kind": "type",
+					"summary": "Role-specific schemas attached to a component or an interaction edge.",
+					"source": "helper/architectureManifest.ts:43",
 					"hasExample": false
 				},
 				{
 					"name": "ArchitectureDiagnostic",
 					"kind": "type",
-					"summary": "A stable static architecture diagnostic with a remediation hint.",
-					"source": "helper/architectureManifest.ts:18",
+					"summary": "Stable static architecture diagnostic with a remediation hint.",
+					"source": "helper/architectureManifest.ts:14",
 					"hasExample": false
 				},
 				{
 					"name": "ArchitectureDiagnosticSeverity",
 					"kind": "type",
 					"summary": "Severity used by static architecture diagnostics.",
-					"source": "helper/architectureManifest.ts:15",
+					"source": "helper/architectureManifest.ts:12",
 					"hasExample": false
 				},
 				{
 					"name": "ArchitectureManifest",
 					"kind": "type",
-					"summary": "Static, JSON-safe architecture manifest.",
-					"source": "helper/architectureManifest.ts:120",
+					"summary": "Complete static architecture contract derived from resolved definitions.",
+					"source": "helper/architectureManifest.ts:84",
 					"hasExample": false
 				},
 				{
-					"name": "ArchitectureQueue",
+					"name": "ArchitectureRelation",
 					"kind": "type",
-					"summary": "JSON-safe summary of a queue declaration.",
-					"source": "helper/architectureManifest.ts:48",
-					"hasExample": false
-				},
-				{
-					"name": "ArchitectureQueueWorker",
-					"kind": "type",
-					"summary": "JSON-safe summary of a queue worker declaration.",
-					"source": "helper/architectureManifest.ts:60",
-					"hasExample": false
-				},
-				{
-					"name": "ArchitectureSchedule",
-					"kind": "type",
-					"summary": "JSON-safe summary of a scheduler declaration.",
+					"summary": "A stable, typed architecture graph edge.",
 					"source": "helper/architectureManifest.ts:74",
 					"hasExample": false
 				},
 				{
-					"name": "ArchitectureSchemaSummary",
+					"name": "ArchitectureRelationKind",
 					"kind": "type",
-					"summary": "A deterministic summary of a declared validation schema.",
-					"source": "helper/architectureManifest.ts:27",
+					"summary": "Typed relation between two declared architecture components.",
+					"source": "helper/architectureManifest.ts:58",
 					"hasExample": false
 				},
 				{
-					"name": "ArchitectureService",
+					"name": "ArchitectureRelationResolution",
 					"kind": "type",
-					"summary": "Static architecture for one service version.",
-					"source": "helper/architectureManifest.ts:104",
+					"summary": "Resolution state for a relation target in the current static artifact.",
+					"source": "helper/architectureManifest.ts:72",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSchema",
+					"kind": "type",
+					"summary": "Normalized schema catalog entry.",
+					"source": "helper/architectureManifest.ts:38",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSchemaReference",
+					"kind": "type",
+					"summary": "Reference to a normalized schema in the manifest catalog.",
+					"source": "helper/architectureManifest.ts:36",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSchemaRole",
+					"kind": "type",
+					"summary": "Schema role on a component or relation.",
+					"source": "helper/architectureManifest.ts:34",
 					"hasExample": false
 				},
 				{
 					"name": "ArchitectureSourceLocation",
 					"kind": "type",
-					"summary": "JSON-safe architecture source location used by diagnostics.",
+					"summary": "JSON-safe location for a static architecture diagnostic.",
 					"source": "helper/architectureManifest.ts:10",
 					"hasExample": false
 				},
@@ -517,6 +573,13 @@
 					"hasExample": false
 				},
 				{
+					"name": "compareArchitectureManifests",
+					"kind": "function",
+					"summary": "Compare two static architecture contracts without an unsound schema-evolution guess.",
+					"source": "helper/architectureManifest.ts:873",
+					"hasExample": true
+				},
+				{
 					"name": "ConfigStore",
 					"kind": "interface",
 					"summary": "Interface definition for config store adapters",
@@ -552,17 +615,31 @@
 					"hasExample": false
 				},
 				{
+					"name": "createArchitectureContext",
+					"kind": "function",
+					"summary": "Create a bounded, deterministic subgraph suitable for tool output and LLM context.",
+					"source": "helper/architectureManifest.ts:747",
+					"hasExample": true
+				},
+				{
+					"name": "CreateArchitectureContextOptions",
+					"kind": "type",
+					"summary": "Options for a compact, deterministic architecture context.",
+					"source": "helper/architectureManifest.ts:136",
+					"hasExample": false
+				},
+				{
 					"name": "createArchitectureManifest",
 					"kind": "function",
-					"summary": "Create a sorted, JSON-safe static architecture manifest from resolved service definitions.",
-					"source": "helper/architectureManifest.ts:250",
+					"summary": "Create a complete, sorted, JSON-safe architecture contract from resolved service definitions.",
+					"source": "helper/architectureManifest.ts:273",
 					"hasExample": true
 				},
 				{
 					"name": "CreateArchitectureManifestOptions",
 					"kind": "type",
-					"summary": "Options for creating a static architecture manifest.",
-					"source": "helper/architectureManifest.ts:128",
+					"summary": "Options for creating the canonical architecture contract.",
+					"source": "helper/architectureManifest.ts:129",
 					"hasExample": false
 				},
 				{
@@ -781,6 +858,13 @@
 					"summary": "",
 					"source": "helper/types/FullServiceDefinition.ts:11",
 					"hasExample": false
+				},
+				{
+					"name": "getArchitectureManifestDigest",
+					"kind": "function",
+					"summary": "Return the content digest of an architecture artifact, excluding its own digest field.",
+					"source": "helper/architectureManifest.ts:258",
+					"hasExample": true
 				},
 				{
 					"name": "getNewInstanceId",
@@ -1042,6 +1126,13 @@
 					"hasExample": false
 				},
 				{
+					"name": "renderArchitectureContextMarkdown",
+					"kind": "function",
+					"summary": "Render a deterministic Markdown projection of an architecture context.",
+					"source": "helper/architectureManifest.ts:824",
+					"hasExample": true
+				},
+				{
 					"name": "ScheduleDefinitionBuilder",
 					"kind": "class",
 					"summary": "Builds a provider-neutral schedule contract.",
@@ -1280,17 +1371,24 @@
 					"hasExample": true
 				},
 				{
+					"name": "validateArchitectureComposition",
+					"kind": "function",
+					"summary": "Validate explicitly pinned architecture artifacts and cross-artifact relation bindings offline.",
+					"source": "helper/architectureManifest.ts:935",
+					"hasExample": true
+				},
+				{
 					"name": "validateArchitectureManifest",
 					"kind": "function",
 					"summary": "Validate static architecture references without contacting runtime infrastructure.",
-					"source": "helper/architectureManifest.ts:352",
+					"source": "helper/architectureManifest.ts:620",
 					"hasExample": true
 				},
 				{
 					"name": "ValidateArchitectureManifestOptions",
 					"kind": "type",
-					"summary": "Options for static manifest validation.",
-					"source": "helper/architectureManifest.ts:135",
+					"summary": "Options for static architecture validation.",
+					"source": "helper/architectureManifest.ts:134",
 					"hasExample": false
 				},
 				{
@@ -1386,7 +1484,7 @@
 					"name": "BasePromptRequest",
 					"kind": "type",
 					"summary": "Shared fields used by prompt requests.",
-					"source": "packages/cli/src/core/types.ts:93",
+					"source": "packages/cli/src/core/types.ts:95",
 					"hasExample": false
 				},
 				{
@@ -1421,7 +1519,7 @@
 					"name": "ConfirmPromptRequest",
 					"kind": "type",
 					"summary": "Boolean confirmation prompt request.",
-					"source": "packages/cli/src/core/types.ts:112",
+					"source": "packages/cli/src/core/types.ts:114",
 					"hasExample": false
 				},
 				{
@@ -1442,77 +1540,77 @@
 					"name": "createAgentImplementationFile",
 					"kind": "function",
 					"summary": "Create implementation guidance for agentic development tools.",
-					"source": "packages/cli/src/blueprints/content.ts:108",
+					"source": "packages/cli/src/blueprints/content.ts:114",
 					"hasExample": false
 				},
 				{
 					"name": "createAgentsFile",
 					"kind": "function",
 					"summary": "Create default coding-agent guidance for generated PURISTA projects.",
-					"source": "packages/cli/src/blueprints/content.ts:70",
+					"source": "packages/cli/src/blueprints/content.ts:73",
 					"hasExample": false
 				},
 				{
 					"name": "createAmqpConfigFile",
 					"kind": "function",
 					"summary": "Create the default AMQP bridge config module.",
-					"source": "packages/cli/src/blueprints/content.ts:320",
+					"source": "packages/cli/src/blueprints/content.ts:326",
 					"hasExample": false
 				},
 				{
 					"name": "createBiomeConfigFile",
 					"kind": "function",
 					"summary": "Create the generated Biome config.",
-					"source": "packages/cli/src/blueprints/content.ts:510",
+					"source": "packages/cli/src/blueprints/content.ts:516",
 					"hasExample": false
 				},
 				{
 					"name": "createClaudeFile",
 					"kind": "function",
 					"summary": "Create Claude-specific guidance that delegates to AGENTS.md.",
-					"source": "packages/cli/src/blueprints/content.ts:100",
+					"source": "packages/cli/src/blueprints/content.ts:106",
 					"hasExample": false
 				},
 				{
 					"name": "createDaprConfigFile",
 					"kind": "function",
 					"summary": "Create the default Dapr event bridge config module.",
-					"source": "packages/cli/src/blueprints/content.ts:349",
+					"source": "packages/cli/src/blueprints/content.ts:355",
 					"hasExample": false
 				},
 				{
 					"name": "createDefinitionsExporterFile",
 					"kind": "function",
 					"summary": "Create the build-time JSON definition exporter used by CLI contract exports.",
-					"source": "packages/cli/src/blueprints/content.ts:160",
+					"source": "packages/cli/src/blueprints/content.ts:166",
 					"hasExample": false
 				},
 				{
 					"name": "createDefinitionsFile",
 					"kind": "function",
 					"summary": "Create the explicit inventory of service builders used for static contract exports.",
-					"source": "packages/cli/src/blueprints/content.ts:143",
+					"source": "packages/cli/src/blueprints/content.ts:149",
 					"hasExample": false
 				},
 				{
 					"name": "createEntrypointFile",
 					"kind": "function",
 					"summary": "Create `src/index.ts` with event bridge, service startup, optional HTTP, and shutdown wiring.",
-					"source": "packages/cli/src/blueprints/content.ts:595",
+					"source": "packages/cli/src/blueprints/content.ts:601",
 					"hasExample": false
 				},
 				{
 					"name": "createEslintModuleConfigFile",
 					"kind": "function",
 					"summary": "Create an ESLint flat config for ESM projects.",
-					"source": "packages/cli/src/blueprints/content.ts:566",
+					"source": "packages/cli/src/blueprints/content.ts:572",
 					"hasExample": false
 				},
 				{
 					"name": "createEventBridgeFile",
 					"kind": "function",
 					"summary": "Create event bridge runtime wiring for the selected bridge blueprint.",
-					"source": "packages/cli/src/blueprints/content.ts:304",
+					"source": "packages/cli/src/blueprints/content.ts:310",
 					"hasExample": false
 				},
 				{
@@ -1526,28 +1624,28 @@
 					"name": "createHttpConfigFile",
 					"kind": "function",
 					"summary": "Create Hono HTTP server config for generated projects.",
-					"source": "packages/cli/src/blueprints/content.ts:362",
+					"source": "packages/cli/src/blueprints/content.ts:368",
 					"hasExample": false
 				},
 				{
 					"name": "createHttpFile",
 					"kind": "function",
 					"summary": "Create runtime-specific Hono HTTP server bootstrap code.",
-					"source": "packages/cli/src/blueprints/content.ts:386",
+					"source": "packages/cli/src/blueprints/content.ts:392",
 					"hasExample": false
 				},
 				{
 					"name": "createMqttConfigFile",
 					"kind": "function",
 					"summary": "Create the default MQTT bridge config module.",
-					"source": "packages/cli/src/blueprints/content.ts:331",
+					"source": "packages/cli/src/blueprints/content.ts:337",
 					"hasExample": false
 				},
 				{
 					"name": "createNatsConfigFile",
 					"kind": "function",
 					"summary": "Create the default NATS bridge config module.",
-					"source": "packages/cli/src/blueprints/content.ts:341",
+					"source": "packages/cli/src/blueprints/content.ts:347",
 					"hasExample": false
 				},
 				{
@@ -1568,7 +1666,7 @@
 					"name": "createPublicIndexHtml",
 					"kind": "function",
 					"summary": "Create the static landing page served by the generated Hono setup.",
-					"source": "packages/cli/src/blueprints/content.ts:467",
+					"source": "packages/cli/src/blueprints/content.ts:473",
 					"hasExample": false
 				},
 				{
@@ -1589,21 +1687,21 @@
 					"name": "createSchedulerHostFile",
 					"kind": "function",
 					"summary": "Create the local-only standalone Scheduler Runtime host.",
-					"source": "packages/cli/src/blueprints/content.ts:172",
+					"source": "packages/cli/src/blueprints/content.ts:178",
 					"hasExample": false
 				},
 				{
 					"name": "createServiceEventEnumFile",
 					"kind": "function",
 					"summary": "Create the starter `ServiceEvent` enum with the example ping event.",
-					"source": "packages/cli/src/blueprints/content.ts:231",
+					"source": "packages/cli/src/blueprints/content.ts:237",
 					"hasExample": false
 				},
 				{
 					"name": "createTelemetryFile",
 					"kind": "function",
 					"summary": "Create an opt-in, application-owned OpenTelemetry Metrics API setup.",
-					"source": "packages/cli/src/blueprints/content.ts:206",
+					"source": "packages/cli/src/blueprints/content.ts:212",
 					"hasExample": false
 				},
 				{
@@ -1792,7 +1890,7 @@
 					"name": "InputPromptRequest",
 					"kind": "type",
 					"summary": "Text input prompt request.",
-					"source": "packages/cli/src/core/types.ts:105",
+					"source": "packages/cli/src/core/types.ts:107",
 					"hasExample": false
 				},
 				{
@@ -1841,7 +1939,7 @@
 					"name": "OutputAdapter",
 					"kind": "type",
 					"summary": "Adapter for rendering CLI results and errors in custom hosts.",
-					"source": "packages/cli/src/core/types.ts:150",
+					"source": "packages/cli/src/core/types.ts:152",
 					"hasExample": false
 				},
 				{
@@ -1918,7 +2016,7 @@
 					"name": "projectBlueprintRegistry",
 					"kind": "variable",
 					"summary": "Registry of built-in project blueprints used by `planProjectGeneration`.",
-					"source": "packages/cli/src/blueprints/registry.ts:148",
+					"source": "packages/cli/src/blueprints/registry.ts:154",
 					"hasExample": false
 				},
 				{
@@ -1974,28 +2072,28 @@
 					"name": "PromptAdapter",
 					"kind": "type",
 					"summary": "Adapter used by the engine when it must collect missing input.",
-					"source": "packages/cli/src/core/types.ts:138",
+					"source": "packages/cli/src/core/types.ts:140",
 					"hasExample": false
 				},
 				{
 					"name": "PromptAnswerMap",
 					"kind": "type",
 					"summary": "Programmatic answer map keyed by prompt `key`.",
-					"source": "packages/cli/src/core/types.ts:135",
+					"source": "packages/cli/src/core/types.ts:137",
 					"hasExample": false
 				},
 				{
 					"name": "PromptChoice",
 					"kind": "type",
 					"summary": "One selectable prompt option.",
-					"source": "packages/cli/src/core/types.ts:83",
+					"source": "packages/cli/src/core/types.ts:85",
 					"hasExample": false
 				},
 				{
 					"name": "PromptRequest",
 					"kind": "type",
 					"summary": "Union of prompt requests emitted by CLI command resolution.",
-					"source": "packages/cli/src/core/types.ts:129",
+					"source": "packages/cli/src/core/types.ts:131",
 					"hasExample": false
 				},
 				{
@@ -2037,7 +2135,7 @@
 					"name": "PuristaCommandId",
 					"kind": "type",
 					"summary": "Command identifiers accepted by the programmatic CLI engine.",
-					"source": "packages/cli/src/core/types.ts:23",
+					"source": "packages/cli/src/core/types.ts:25",
 					"hasExample": false
 				},
 				{
@@ -2051,28 +2149,28 @@
 					"name": "PuristaCommandIssue",
 					"kind": "type",
 					"summary": "A validation or execution issue reported by a CLI command.",
-					"source": "packages/cli/src/core/types.ts:37",
+					"source": "packages/cli/src/core/types.ts:39",
 					"hasExample": false
 				},
 				{
 					"name": "PuristaCommandMode",
 					"kind": "type",
 					"summary": "Controls how unresolved command input is completed before execution.",
-					"source": "packages/cli/src/core/types.ts:26",
+					"source": "packages/cli/src/core/types.ts:28",
 					"hasExample": false
 				},
 				{
 					"name": "PuristaCommandResolution",
 					"kind": "type",
 					"summary": "Output of command input resolution before execution.",
-					"source": "packages/cli/src/core/types.ts:67",
+					"source": "packages/cli/src/core/types.ts:69",
 					"hasExample": false
 				},
 				{
 					"name": "PuristaCommandResult",
 					"kind": "type",
 					"summary": "Result returned after a CLI command has executed.",
-					"source": "packages/cli/src/core/types.ts:47",
+					"source": "packages/cli/src/core/types.ts:49",
 					"hasExample": false
 				},
 				{
@@ -2100,7 +2198,7 @@
 					"name": "PuristaFileMutation",
 					"kind": "type",
 					"summary": "Describes one file path changed by a CLI command.",
-					"source": "packages/cli/src/core/types.ts:29",
+					"source": "packages/cli/src/core/types.ts:31",
 					"hasExample": false
 				},
 				{
@@ -2170,7 +2268,7 @@
 					"name": "SelectPromptRequest",
 					"kind": "type",
 					"summary": "Single-choice prompt request.",
-					"source": "packages/cli/src/core/types.ts:118",
+					"source": "packages/cli/src/core/types.ts:120",
 					"hasExample": false
 				},
 				{

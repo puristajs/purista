@@ -8,7 +8,13 @@ import { addScheduleCommand } from './add-schedule.js'
 import { addServiceCommand } from './add-service.js'
 import { addStreamCommand } from './add-stream.js'
 import { addSubscriptionCommand } from './add-subscription.js'
-import { doctorArchitectureCommand, inspectArchitectureCommand, validateArchitectureCommand } from './architecture.js'
+import {
+	composeArchitectureCommand,
+	diffArchitectureCommand,
+	doctorArchitectureCommand,
+	inspectArchitectureCommand,
+	validateArchitectureCommand,
+} from './architecture.js'
 import {
 	exportAsyncApiCommand,
 	exportCloudEventsSchemaCommand,
@@ -35,6 +41,8 @@ export const commandRegistry = {
 	inspect: inspectArchitectureCommand,
 	validate: validateArchitectureCommand,
 	doctor: doctorArchitectureCommand,
+	diff: diffArchitectureCommand,
+	compose: composeArchitectureCommand,
 	'init-project': initProjectCommand,
 } as const
 

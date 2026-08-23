@@ -1,7 +1,7 @@
 # @purista/aws-secret-store API Patterns
 
 <!-- Generated from current TypeDoc; do not edit manually. -->
-<!-- typedoc-digest: 527f17db6c2c34eb -->
+<!-- typedoc-digest: 33dfc6c4700fa85e -->
 
 Use this reference only when working with `@purista/aws-secret-store`. Every API name, callable pattern, and example below is extracted from the current public TypeDoc output. Do not invent a method that is absent here; consult the complete `../generated-api-manifest.json` and the public handbook when the API is not listed.
 
