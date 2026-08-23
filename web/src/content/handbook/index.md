@@ -143,6 +143,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | [AI Agents overview](./2_building_business-logic/ai/index.md) | LLM-powered workflows and the harness pattern |
 | [Agent Builder](./2_building_business-logic/ai/the-agent-builder.md) | Define agents with model bindings and capabilities |
 | [Harness, Agents & Workflows](./2_building_business-logic/ai/harness-agents-and-workflows.md) | Orchestrate multi-step AI workflows |
+| [Guardrails for Harness Agents](./2_building_business-logic/ai/guardrails.md) | Add typed, observable safety controls around models and tools |
 | [Model Capabilities](./2_building_business-logic/ai/model-capabilities.md) | Capability-based gating for LLM providers |
 | [Test an Agent](./2_building_business-logic/ai/test-an-agent.md) | Validate agent behavior with test harnesses |
 

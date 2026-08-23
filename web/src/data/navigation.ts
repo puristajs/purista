@@ -12,6 +12,7 @@ export const harnessNavLinks = [
 	{ href: '/harness/', label: 'Overview' },
 	{ href: '/harness/get-started/', label: 'Get Started' },
 	{ href: '/harness/architecture/', label: 'Architecture' },
+	{ href: '/harness/guardrails/', label: 'Guardrails' },
 	{ href: '/harness/use-cases/', label: 'Use Cases' },
 	{ href: '/harness/memory/', label: 'Memory' },
 	{ href: '/harness/durability/', label: 'Durability' },

@@ -1,0 +1,166 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import CodeBlock from '../../components/ui/CodeBlock.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout
+  title="Guardrails | AI Harness | PURISTA"
+  description="Typed, observable content and tool guardrails for PURISTA AI Harness agents and workflows."
+>
+  <HarnessHero
+    lines={[
+      { text: 'Safety controls' },
+      { text: 'with evidence.', color: 'con' },
+    ]}
+    lede="Guardrails add typed, fail-closed decisions around a Harness agent loop: input, output, retrieval, and tool calls. They work alongside Zod, permissions, governance, and application authorization — not instead of them."
+  />
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-10">
+        <div class="eyebrow">What is protected</div>
+        <h2 class="display display-lg">One agent loop, four control points</h2>
+        <p class="lede">Attach a portable NeMo-shaped rail configuration to a default-loop agent. Each configured action returns an explicit allow, block, or typed transformation decision.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="card">
+          <h3 class="h3">Input & output</h3>
+          <p>Input rails run after schema parsing and before instructions, transcript, or a model call. Output rails run after a provider result and before validation, persistence, or tool dispatch.</p>
+        </div>
+        <div class="card">
+          <h3 class="h3">Tools & skills</h3>
+          <p>Tool-input rails run before permissions, governance, schema validation, and side effects. Tool-output rails run before the result returns to the model. Skill activation is covered when the agent uses its built-in <code>read</code> tool.</p>
+        </div>
+        <div class="card">
+          <h3 class="h3">Retrieval</h3>
+          <p>Retrieval remains application-owned. Filter JSON-compatible chunks explicitly before adding them to an agent input, so vector-store ownership and retention remain clear.</p>
+        </div>
+        <div class="card">
+          <h3 class="h3">Evidence without content</h3>
+          <p>Every decision is traceable with a rail ID, phase, outcome, duration, and controlled reason code. Prompts, documents, tool values, and secrets stay out of telemetry.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Setup</div>
+        <h2 class="display display-lg">Keep configuration portable, keep authority local.</h2>
+        <p class="lede">The addon reads the compatible YAML vocabulary, but your TypeScript actions own policy implementation. It never creates a provider, reads credentials, or creates a vector store from configuration.</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <CodeBlock
+          language="yaml"
+          label="guardrails/config.yaml"
+          code={`models:
+  - type: main
+    engine: harness
+    model: assistant
+
+rails:
+  input:
+    flows: [remove-secret-marker]
+  output:
+    flows: [redact-contact-details]
+  tool_input:
+    flows: [approve-transfer]`}
+        />
+        <CodeBlock
+          language="typescript"
+          label="guardrails.ts"
+          code={`const rails = defineGuardrails({
+  config: await loadGuardrailsConfig('./guardrails'),
+  modelAliases: { main: 'assistant' },
+  actions: {
+    'remove-secret-marker': {
+      evaluate: ({ value }) => ({
+        decision: 'transform',
+        target: 'user_message',
+        value: redact(value),
+        reasonCode: 'secret_redacted',
+      }),
+    },
+    'approve-transfer': {
+      evaluate: ({ value }) => isApproved(value)
+        ? { decision: 'allow' }
+        : { decision: 'block', reasonCode: 'approval_required' },
+    },
+  },
+})`}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Workflow use case</div>
+        <h2 class="display display-lg">Guard the agent; orchestrate in the workflow.</h2>
+        <p class="lede">A workflow delegates model and tool work to an attached default-loop agent. It filters its own retrieval result before that hand-off. The result is one correlated workflow → guardrail → model/tool trace tree.</p>
+      </div>
+      <CodeBlock
+        language="typescript"
+        label="support-workflow.ts"
+        code={`const support = rails.attach(agent({
+  model: 'assistant',
+  instructions: 'Help customers safely.',
+  tools: ['transfer_money'],
+  skills: ['refund_policy'],
+  builtinTools: ['read'],
+}))
+
+const answerCustomer = workflow({
+  input: z.object({ question: z.string() }),
+  output: z.string(),
+  delegation: { agents: ['support'] },
+  handler: async (ctx) => {
+    const chunks = await searchApprovedKnowledge(ctx.input.question)
+    const safeChunks = await rails.filterRetrievedChunks(chunks, {
+      workflowId: ctx.workflowId,
+      runId: ctx.runId,
+      sessionId: ctx.sessionId,
+      models: ctx.models,
+      signal: ctx.signal,
+      logger: ctx.log,
+    })
+
+    return ctx.agents.support({
+      question: ctx.input.question,
+      context: safeChunks,
+    })
+  },
+})`}
+      />
+      <p class="mt-6 text-[var(--color-fg-muted)]">Custom-handler agents and direct <code>ctx.models.*</code> calls own their lifecycle, so they are intentionally not intercepted. The addon rejects <code>rails.attach(...)</code> for a custom handler rather than giving a false sense of coverage.</p>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="section-head--center mb-10">
+        <div class="eyebrow">Operations</div>
+        <h2 class="display display-lg">Trace safety and model cost together.</h2>
+        <p class="lede">Guardrail evaluations are OpenTelemetry/OpenInference spans with content-free outcome attributes. A block is a successful control decision; failures and timeouts are errors.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="card"><h3 class="h3">Decision trace</h3><p><code>evaluate_guardrail {'{id}'}</code> records rail ID, phase, allow/block/transform/error, duration, and an optional deployment-controlled reason code.</p></div>
+        <div class="card"><h3 class="h3">Metrics</h3><p><code>harness.guardrail.evaluations</code> and <code>harness.guardrail.duration</code> make policy behavior visible without exposing content.</p></div>
+        <div class="card"><h3 class="h3">Safety-model cost</h3><p>A model check nests its normal LLM span below the guardrail span. Provider, model, and reported input/output/total tokens remain canonical there for cost attribution.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[{ text: 'Build a ' }, { text: 'typed safety boundary', color: 'con' }, { text: '.' }]}
+    lede="Use guardrails with narrow schemas, tool allowlists, permissions, governance, and deterministic business authorization."
+    ctas={[
+      { label: 'Observability', href: '/harness/observability/', variant: 'primary' },
+      { label: 'Security', href: '/harness/security/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>

@@ -90,6 +90,86 @@ Prefer a narrow first agent over a generic assistant. The harness should make th
 Keep every boundary explicit. A model should not decide which private system it can call; the agent definition and tool registry decide that.`,
 	},
 	{
+		id: 'guardrails',
+		title: 'Guardrails | AI Harness',
+		description: 'Add typed, observable input, output, retrieval, and tool guardrails to Harness default-loop agents.',
+		body: `@purista/harness-guardrails is an optional addon for the Harness default agent loop. It uses a portable NVIDIA NeMo-shaped configuration vocabulary while keeping providers, credentials, vector stores, authorization, and business rules application-owned.
+
+## What it protects
+
+- Input before instructions, history, or a model call.
+- Output before validation, persistence, or tool dispatch.
+- TypeScript, MCP, and built-in tool input before permission, governance, validation, and side effects.
+- Tool output before it returns to the model.
+- Application-owned retrieval through an explicit filter call.
+
+## Default setup
+
+\`\`\`yaml
+models:
+  - type: main
+    engine: harness
+    model: assistant
+rails:
+  input:
+    flows: [remove-secret-marker]
+  tool_input:
+    flows: [approve-transfer]
+\`\`\`
+
+\`\`\`typescript
+const rails = defineGuardrails({
+  config: await loadGuardrailsConfig('./guardrails'),
+  modelAliases: { main: 'assistant' },
+  actions: {
+    'remove-secret-marker': {
+      evaluate: ({ value }) => ({
+        decision: 'transform',
+        target: 'user_message',
+        value: redact(value),
+        reasonCode: 'secret_redacted',
+      }),
+    },
+    'approve-transfer': {
+      evaluate: ({ value }) => isApproved(value)
+        ? { decision: 'allow' }
+        : { decision: 'block', reasonCode: 'approval_required' },
+    },
+  },
+})
+
+const guardedSupport = rails.attach({
+  model: 'assistant',
+  instructions: 'Help safely.',
+  tools: ['transfer_money'],
+})
+\`\`\`
+
+## Workflow, tool, and skill boundary
+
+A workflow gets automatic protection whenever it delegates to an attached default-loop agent. Retrieval remains application-owned, so filter chunks explicitly before giving them to an agent. Skills are mounted files; when an agent opens a skill through the built-in \`read\` tool, normal tool rails apply. The addon intentionally rejects custom-handler agents and does not intercept direct model calls, because those callers own their own model and tool lifecycle.
+
+\`\`\`typescript
+const chunks = await searchApprovedKnowledge(ctx.input.question)
+const safeChunks = await rails.filterRetrievedChunks(chunks, {
+  workflowId: ctx.workflowId,
+  runId: ctx.runId,
+  sessionId: ctx.sessionId,
+  models: ctx.models,
+  signal: ctx.signal,
+  logger: ctx.log,
+})
+
+return ctx.agents.support({ question: ctx.input.question, context: safeChunks })
+\`\`\`
+
+## Observable by default
+
+Each evaluation creates an \`evaluate_guardrail {id}\` OpenInference \`GUARDRAIL\` span plus a decision counter and duration histogram. Block is a successful control decision; an invalid action or timeout is an error. A model-backed check creates a nested standard LLM span containing provider, model, and reported input/output/total token usage. This makes safety-model spend attributable without recording content or inventing token counts or prices.
+
+Use guardrails alongside Zod schemas, agent tool allowlists, permissions, governance, and business authorization. They control content and execution flow; they do not replace identity or deterministic business rules.`,
+	},
+	{
 		id: 'adapters',
 		title: 'AI Harness Adapters',
 		description: 'Connect harness agents to runtime entry points without leaking provider-specific details.',

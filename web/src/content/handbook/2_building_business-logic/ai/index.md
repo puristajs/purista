@@ -276,6 +276,7 @@ Use PURISTA-level orchestration when agents need independent runtime boundaries.
 
 - [The agent builder](./the-agent-builder.md)
 - [Harness agents and workflows](./harness-agents-and-workflows.md)
+- [Guardrails for Harness agents](./guardrails.md)
 - [Model capabilities](./model-capabilities.md)
 - [Test an agent](./test-an-agent.md)
 - [Evaluating prompts](./evaluating-prompts.md)
@@ -291,6 +292,7 @@ Use PURISTA-level orchestration when agents need independent runtime boundaries.
 - Using PURISTA child-agent orchestration for tiny inner reasoning steps that should share one harness session.
 - Reusing `correlationId` as an AI conversation id.
 - Hitting real model providers from unit tests.
+- Assuming a guardrail replaces deterministic authorization, tool allowlists, or governance.
 
 ## Checklist
 
