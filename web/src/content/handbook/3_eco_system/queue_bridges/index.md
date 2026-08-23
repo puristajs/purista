@@ -12,7 +12,7 @@ Queue bridges provide the persistence, leasing, and dead-letter mechanics for pu
 
 | bridge | durability | delayed delivery | DLQ | lease expiry recovery | idempotency enforcement | recommended use cases |
 | --- | --- | --- | --- | --- | --- | --- |
-| [DefaultQueueBridge](./default_queue_bridge.md) | in-memory per service instance | yes (timer based) | yes (in-memory) | yes, within the current process | no | unit tests, local dev, single-instance cron-like jobs |
+| [DefaultQueueBridge](./default_queue_bridge.md) | in-memory per service instance | yes (timer based) | yes (in-memory) | yes, within the current process | no | unit tests, local development, one-off delayed jobs |
 | [RedisQueueBridge](./redis_queue_bridge.md) | Redis persistence | yes (sorted set scheduling) | yes (separate Redis keys) | yes, with atomic recovery / requeue scripts and orphan-processing recovery | no | production CQRS, AI job pools, delayed processing |
 | [NatsQueueBridge](./nats_queue_bridge.md) | JetStream persistence | yes (scheduled stream + due-job release) | yes (dedicated DLQ streams) | yes, via JetStream ack timeout redelivery | no | production event-native workloads already standardized on NATS |
 

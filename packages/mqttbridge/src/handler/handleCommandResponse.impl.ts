@@ -7,7 +7,7 @@ import {
 	PuristaSpanName,
 	StatusCode,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
 import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'

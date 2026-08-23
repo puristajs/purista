@@ -1,3 +1,4 @@
+import type { StateStore } from '../../core/StateStore/types/StateStore.js'
 import type {
 	AgentModelBinding,
 	AgentRuntimeOptions,
@@ -34,6 +35,7 @@ export async function initializeAttachedAgentRuntimes(
 	scope: AgentRuntimeScope,
 	definitions: readonly AttachedAgentDefinition<any>[],
 	aiOptions?: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
+	stateStore?: StateStore,
 ): Promise<AttachedAgentRuntimeShutdown> {
 	if (definitions.length === 0) {
 		return { shutdown: async () => undefined }
@@ -44,6 +46,7 @@ export async function initializeAttachedAgentRuntimes(
 	}
 
 	validateWorkspacePolicies(definitions, aiOptions)
+	validateStateStoreRetention(definitions, aiOptions)
 
 	const executors = await Promise.all(
 		definitions.map(async definition => {
@@ -54,9 +57,11 @@ export async function initializeAttachedAgentRuntimes(
 				models: aiOptions.models as never,
 				runtime: aiOptions.runtime,
 				workspaceStore: aiOptions.workspaceStore,
+				harness: aiOptions.harness,
 				skillRuntime,
 				logger: aiOptions.logger,
-				stateStore: aiOptions.stateStore,
+				stateStore,
+				harnessStateStore: aiOptions.stateStore,
 				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,
@@ -90,7 +95,10 @@ export async function initializeAttachedAgentRuntimes(
  * precedence over the shared sandbox, and agents without a sandbox policy fall
  * back to the shared `ai.sandbox`.
  */
-export function resolveAttachedAgentSandbox(policy: AgentSandboxPolicy | undefined, runtimeSandbox: unknown): unknown {
+export function resolveAttachedAgentSandbox(
+	policy: AgentSandboxPolicy | undefined,
+	runtimeSandbox: AgentRuntimeOptions<Record<string, AgentModelBinding>>['sandbox'],
+) {
 	if (!policy) {
 		return runtimeSandbox
 	}
@@ -127,6 +135,21 @@ function validateWorkspacePolicies(
 		if (missing.length > 0) {
 			throw new Error(
 				`Attached agent "${definition.manifest.agentName}" requires unavailable durable workspace capabilities: ${missing.join(', ')}`,
+			)
+		}
+	}
+}
+
+function validateStateStoreRetention(
+	definitions: readonly AttachedAgentDefinition<any>[],
+	aiOptions: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
+): void {
+	if (!aiOptions.stateStore) return
+	for (const definition of definitions) {
+		const retention = definition.manifest.session.retention
+		if (retention?.idleTtlMs !== undefined || retention?.runs || retention?.events) {
+			throw new Error(
+				`Attached agent "${definition.manifest.agentName}" uses service-owned idle, run, or event retention, which requires the service StateStore; remove those limits or let the Harness-native adapter own its retention.`,
 			)
 		}
 	}

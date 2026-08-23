@@ -23,7 +23,7 @@ export const getStreamTestFileContent = (input: {
 	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
 
 	writer.writeLine(`import { describe, expect, test } from '${testLib}'`)
-	writer.writeLine(`import { createStreamTestHarness } from '@purista/core'`)
+	writer.writeLine(`import { createStreamTestHarness } from '@purista/core/testing'`)
 	writer.blankLine()
 	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
 	writer.writeLine(`import { ${streamBuilderName} } from './${streamBuilderFileName}.js'`)

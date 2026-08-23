@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Release readiness checks
+        run: npm run release:check
+
       - name: Prepare release (no publish)
         run: ./scripts/releasePrepare.sh ${{ inputs.version }}
 

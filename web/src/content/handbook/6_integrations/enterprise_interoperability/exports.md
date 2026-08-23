@@ -15,11 +15,21 @@ PURISTA service declarations contain rich metadata: schemas, event names, queue 
 | **AsyncAPI** | YAML/JSON | Events, subscriptions, queues, stream channels | Async contract documentation |
 | **OpenAPI** | YAML/JSON | HTTP-exposed commands, streams, queue status endpoints | REST API documentation |
 | **Runtime capabilities** | JSON | Bridge features, delivery guarantees, limitations | Operational review |
-| **Schedule manifest** | JSON | Schedule declarations, triggers, payloads | Scheduler configuration |
+| **Schedule manifest** | JSON | Schedule declarations, target identity, group, and policies | Scheduler configuration |
 
 ## Generating exports
 
-Exports are generated programmatically via the `ClientBuilder` utility — there are no `purista export` CLI subcommands. To generate an AsyncAPI or OpenAPI document, call the appropriate builder method in a script and write the output to a file.
+Use the project CLI to export checked-in service definitions. The command writes
+deterministic JSON and does not start services or connect to infrastructure.
+
+```bash
+purista export asyncapi --definitions purista.definitions.json --out asyncapi.json
+purista export schedule-manifest --definitions purista.definitions.json --out schedules.json
+purista export runtime-capabilities --out runtime-capabilities.json
+```
+
+The same Core helpers are available programmatically when a build pipeline needs
+to compose exports itself.
 
 ## AsyncAPI export
 

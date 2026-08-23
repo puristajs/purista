@@ -1,0 +1,50 @@
+{
+  "format": "purista.spec-readiness.v1",
+  "decision": "approved",
+  "manifestDigest": "bb372d943d708909164c89538c9a7763d016625e01706d500cf1bfc8b66ed576",
+  "specifications": [
+    {
+      "path": "20-agents/77-ai-harness-integration-strategy.md",
+      "status": "superseded",
+      "approval": null,
+      "digest": "771283e577f01e1e83af53b699f2d656ee50aee16f79f9d13475ad03c1954a30"
+    },
+    {
+      "path": "20-agents/78-clean-ai-package-architecture.md",
+      "status": "superseded",
+      "approval": null,
+      "digest": "d412eb18b3708577cb5b51c53c204aaa55562f3d08ac7d5296becd3c98bd4c34"
+    },
+    {
+      "path": "20-agents/80-core-ai-migration-plan.md",
+      "status": "implemented",
+      "approval": "release branch auto-approved 2026-08-22",
+      "digest": "2ac852938b72c8c73137b9c102fbc850baceae1ee92d2d9b62d8d7fa1f0e1702"
+    },
+    {
+      "path": "20-agents/81-state-retention-and-conversation-context.md",
+      "status": "implemented",
+      "approval": "release branch auto-approved 2026-08-22",
+      "digest": "eb55c37a4246f680644ad21789802669ea1158c5b68bf8166a31e3c0b5bd5b0f"
+    },
+    {
+      "path": "ai-phase2.md",
+      "status": "historical",
+      "approval": null,
+      "digest": "81ec68b5dc758711e05e1e04fdab5ba515744f8667cc8cd14a205e7360ff71de"
+    },
+    {
+      "path": "bridge-reliability-hardening.md",
+      "status": "implemented",
+      "approval": "release branch auto-approved 2026-08-22",
+      "digest": "9b6d9cc168c206fd4852056c19a938c433171b0a56891bc49bb81f04175f764d"
+    },
+    {
+      "path": "http-error-rfc9457.md",
+      "status": "proposed",
+      "approval": null,
+      "digest": "2a9557807d0fc185bbd2969ccaed5c31cb6fc3c9465e908eccc444e2a23a5b86"
+    }
+  ],
+  "diagnostics": []
+}

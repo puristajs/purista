@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { HttpClient, SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core/adapter'
+import { HttpClient, SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
 import type { DaprClientConfig } from '../DaprClient/types/DaprClientConfig.js'
@@ -14,6 +14,15 @@ import type { DaprSecretStoreConfig } from './types/DaprSecretStoreConfig.js'
  *
  * The adapter fetches secrets through the local sidecar. Creating, changing and
  * removing secrets is not supported by this implementation.
+ *
+ * @example
+ * ```ts
+ * const secretStore = new DaprSecretStore({
+ *   secretStoreName: 'application-secrets',
+ *   clientConfig: { daprHost: 'http://127.0.0.1', daprPort: '3500' },
+ * })
+ * const { databasePassword } = await secretStore.getSecret('databasePassword')
+ * ```
  */
 export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig> {
 	private client: HttpClient<DaprClientConfig>

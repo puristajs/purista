@@ -129,3 +129,31 @@ const server = await honoV1Service.getInstance(eventBridge, {
 })
 server.registerService(myService)
 ```
+
+## HTTP metrics
+
+The Hono service records request duration and in-flight request metrics through
+its own Core `metrics` or `metricsRecorder` configuration. It can be shared by
+multiple services, so configure it at construction and reuse an application-owned
+metrics object explicitly where that is intentional:
+
+```typescript
+const honoService = await honoV1Service.getInstance(eventBridge, {
+  metrics: { meter },
+  serviceConfig: {
+    enableDynamicRoutes: false,
+  },
+})
+```
+
+The adapter emits `http.server.request.duration` and
+`http.server.active_requests`. Its attributes are deliberately limited to the
+HTTP method, the registered route template, response status (for duration),
+and a safe error category. Dynamic path values, raw URLs, queries, headers,
+request bodies, response bodies, principals, tenants, trace IDs, and
+correlation IDs are never metric attributes.
+
+Core stays exporter-neutral: applications own the OpenTelemetry MeterProvider,
+readers, exporters, collectors, and any Prometheus endpoint. See
+[OpenTelemetry](../4_open_telemetry/index.md) for typed custom business metrics
+and provider setup.

@@ -1,10 +1,6 @@
-import { AmqpBridge, puristaVersion } from './index.js'
+import { AmqpBridge } from './index.js'
 
-describe('exports Version', () => {
-	it('has a version', () => {
-		expect(puristaVersion).toBeDefined()
-	})
-
+describe('public exports', () => {
 	it('exports AmqpBridge', () => {
 		expect(AmqpBridge).toBeDefined()
 	})

@@ -8,8 +8,8 @@ import type {
 	EBMessageAddress,
 	EventBridgeConfig,
 	HttpExposedServiceMeta,
-} from '@purista/core'
-import { convertToKebabCase, HttpClient, StatusCode, UnhandledError } from '@purista/core'
+} from '@purista/core/adapter'
+import { convertToKebabCase, HttpClient, StatusCode, UnhandledError } from '@purista/core/adapter'
 
 import type { DaprEventBridgeConfig } from '../DaprEventBridge/types/DaprEventBridgeConfig.js'
 import { DAPR_API_VERSION } from '../types/constants.js'
@@ -20,6 +20,16 @@ import { DAPR_API_VERSION } from '../types/constants.js'
  * It implements PURISTA's HTTP bridge client contract by mapping command
  * invocation to Dapr service invocation, event emission to Dapr Pub/Sub, and
  * health checks to the sidecar metadata endpoint.
+ *
+ * @example
+ * ```ts
+ * // Applications normally construct DaprEventBridge, which owns this client.
+ * // Use DaprClient directly only when authoring a compatible HTTP bridge.
+ * const client = new DaprClient({
+ *   serve,
+ *   clientConfig: { daprHost: 'http://127.0.0.1', daprPort: '3500' },
+ * })
+ * ```
  */
 export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConfig>> implements HttpEventBridgeClient {
 	/**

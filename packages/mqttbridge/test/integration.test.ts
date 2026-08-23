@@ -1,8 +1,8 @@
 import { join } from 'node:path'
 import { emitWarning } from 'node:process'
 
-import type { Service } from '@purista/core'
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, StatusCode } from '@purista/core'
+import type { Service } from '@purista/core/adapter'
+import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, StatusCode } from '@purista/core/adapter'
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'

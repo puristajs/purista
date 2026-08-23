@@ -263,7 +263,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | Page | What you'll learn |
 |---|---|
 | [Enterprise Interoperability overview](./6_integrations/enterprise_interoperability/index.md) | Provider-neutral contracts for enterprise systems |
-| [Scheduling](./6_integrations/enterprise_interoperability/scheduling.md) | Declare schedule contracts for external schedulers |
+| [Scheduling](./6_integrations/enterprise_interoperability/scheduling.md) | Declare schedules and run a separate trigger-only scheduler host |
 | [Event-to-Queue](./6_integrations/enterprise_interoperability/event-to-queue.md) | Durable handoff from events to pull-based work |
 | [Long-running Queues](./6_integrations/enterprise_interoperability/long-running-queues.md) | Lease, heartbeat, and retry for background jobs |
 | [Result Events](./6_integrations/enterprise_interoperability/result-events.md) | Publish queue completion as typed events |

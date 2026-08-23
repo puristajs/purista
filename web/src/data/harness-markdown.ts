@@ -90,6 +90,31 @@ Prefer a narrow first agent over a generic assistant. The harness should make th
 Keep every boundary explicit. A model should not decide which private system it can call; the agent definition and tool registry decide that.`,
 	},
 	{
+		id: 'agent-plugins',
+		title: 'Agent Plugins | AI Harness',
+		description: 'Inspect open Agent Plugins data and explicitly project approved skills and modern MCP tools into an AI Harness application.',
+		body: `Agent Plugins support is an interoperability surface, not an extension runtime.
+
+The first-party \`@purista/harness-agent-plugins\` package validates the Agent Plugins v1 layout locally: \`plugin.json\`, immediate-child skills containing \`SKILL.md\`, and declared MCP servers in \`mcp.json\`. Applications inspect those files as data and decide which skills or tools to project into a harness.
+
+## Security and trust
+
+- Plugins are not executable code. The integration does not load plugin JavaScript, hooks, shell snippets, or arbitrary packages.
+- A plugin declaration does not grant tools to every agent. Skills and MCP tools are selected explicitly per harness or agent.
+- Applications own plugin trust, identity, reviewed digest locks, licensing, updates, credentials, network policy, and sandbox constraints.
+- Diagnostics and provenance are structured and content-safe; local paths, credentials, prompts, and tool results are not telemetry data.
+
+## MCP policy
+
+MCP uses the modern 2026-07-28 protocol and v2 MCP client packages only. Stdio and streamable HTTP transports have no legacy negotiation or compatibility fallback. A trusted stdio plugin needs an existing caller-owned data directory plus an isolating sandbox that can spawn and immutably mount its digest-reviewed package root. The application owns endpoint policy, headers, credentials, timeouts, egress rules, and each tool allowlist; plugin-declared HTTP headers are never forwarded and redirects are rejected.
+
+## Choose the right composition shape
+
+- Static modules are trusted TypeScript imported and versioned with an application.
+- Agent Plugins are external on-disk data that must be inspected and explicitly adopted.
+- PURISTA child agents are independently operated business capabilities with their own queue and service boundary.`,
+	},
+	{
 		id: 'adapters',
 		title: 'AI Harness Adapters',
 		description: 'Connect harness agents to runtime entry points without leaking provider-specific details.',

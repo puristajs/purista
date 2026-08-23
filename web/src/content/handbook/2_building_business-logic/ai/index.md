@@ -63,6 +63,8 @@ flowchart TD
   Harness --> Runtime["local durable runtime checkpoints"]
   Harness --> Workspace["durable workspace"]
   Harness --> State["state store"]
+  Harness --> Modules["static modules"]
+  Harness --> Plugins["Agent Plugins inspection"]
 ```
 
 There are two orchestration levels:
@@ -73,6 +75,82 @@ There are two orchestration levels:
 | PURISTA level | Queue-backed agents, commands, streams, and other services invoke each other through declared boundaries. | Each attached agent is its own PURISTA runtime capability and can have its own queue, lifecycle, model bindings, state store, and sandbox. |
 
 Use the harness level for tightly coupled reasoning steps that should share one session, memory, history, and sandbox. Use the PURISTA level for larger business workflows where independent agents need their own queue lifecycle, retries, ownership boundaries, and operational isolation.
+
+## Runtime durability model
+
+```mermaid
+flowchart TD
+  Request["Agent request"] --> Queue["PURISTA queue and worker"]
+  Queue --> Session{"Session policy"}
+  Session -->|"conversation"| History["Service StateStore\nconversation history, runs, events"]
+  Session -->|"ephemeral"| RunSession["run-local session"]
+
+  Queue --> Execution{"Execution definition"}
+  Execution --> Handler["setRunFunction"]
+  Execution --> HarnessAgent["setHarnessAgent"]
+  Execution --> Workflow["setHarnessWorkflow"]
+
+  Handler -. "optional" .-> Sandbox["Sandbox\nisolated tools, files, code execution"]
+  HarnessAgent -. "optional" .-> Sandbox
+  Workflow -. "optional" .-> Sandbox
+  Workflow -. "optional" .-> Runtime["Durable runtime\nworkflow checkpoints and leases"]
+  Runtime -. "optional" .-> Workspace["Durable workspace store\npersisted workflow files and state"]
+```
+
+These concerns are independent:
+
+| Concern | Use it for | It does not do |
+| --- | --- | --- |
+| Conversation | Continuing a user's business conversation across requests. PURISTA derives its storage namespace from the conversation id and, when present, trusted tenant/principal metadata. | Run tools, preserve sandbox files, or resume unfinished work. |
+| Sandbox | Isolating filesystem tools, code execution, mounted skills, or MCP processes during a run. A capable adapter may snapshot and reopen one sandbox session. | Guarantee framework-managed recovery of files and progress after a retry or restart. |
+| Durable workflow and workspace | Resuming a multi-step `setHarnessWorkflow(...)` after a retry or process restart, including its checkpointed private files. | Replace business conversation history or make external side effects safe automatically. |
+
+The queue retries delivery. A durable workflow decides where a retried run can
+resume. Keep external writes idempotent in either case.
+
+### Retention is policy; stores enforce it
+
+Agent retention does not create a generic cleanup worker. Harness trims
+`history.maxTurns` and `history.maxBytes`; PURISTA passes `idleTtlMs` to the
+service StateStore as an expiring write; and the service-store adapter applies
+run and event caps. `idleTtlMs` therefore requires a StateStore with native
+atomic expiry. The [StateStore retention guide](../stores/state-stores.md#retention)
+explains ordinary service defaults, write overrides, and adapter compatibility;
+the table below covers the agent-specific additions.
+
+### Keep the runtime boundary clear
+
+PURISTA does not add a second conversation store or a generic transcript
+compactor. The selected Harness state store owns sessions, history, run records,
+and run events. Model context projection and retrieval/memory are explicit
+Harness runtime concerns configured by the application. This keeps ordinary
+service state, durable agent history, and model-specific context behavior
+separate—and prevents a framework default from silently changing what a model
+receives.
+
+### Choose by use case
+
+| Use case | Choose |
+| --- | --- |
+| Support chat that remembers earlier turns | Conversation session; add retention when history must be bounded. |
+| One-off classification or extraction | `setRunFunction(...)` or `setHarnessAgent(...)`; no conversation or durable workspace is needed. |
+| Short-lived, isolated tool run whose files may be discarded if the run fails | Add a sandbox. A sandbox does not require a durable workspace. |
+| CSV analysis, research, or report generation that must continue from intermediate files and completed steps after a failure or pod restart | `setHarnessWorkflow(...)` with a durable runtime and workspace store. |
+| Several independently owned business agents | PURISTA-level child agents with their own queues and policies, rather than one shared Harness workflow. |
+
+## Composition and interoperability
+
+Use a **static module** when local, imported TypeScript configuration should be
+reused across harnesses. A module contributes typed definitions such as model,
+tool, skill, or agent configuration, but it does not discover code, download
+packages, hot-reload, or own your application workflow. The application keeps
+ownership of tenant state, authorization, integration bindings, and orchestration.
+
+Use the Agent Plugins integration when a team wants to inspect the open Agent
+Plugins format and deliberately project approved skills and MCP servers into its
+own harness. Plugin files are data, not executable extensions; no plugin hook or
+JavaScript is loaded. See [Agent Plugins](/harness/agent-plugins/) for the trust
+and sandbox boundary.
 
 ## When to use
 
@@ -108,8 +186,8 @@ Start with `setRunFunction(...)` when you are building normal PURISTA applicatio
 3. Add payload, parameter, and output schemas.
 4. Declare model aliases with the smallest required capabilities.
 5. Declare command tools, child agents, skills, built-in tools, session policy, and sandbox policy as needed.
-6. Declare workspace policy when the run must resume from durable workspace state.
-7. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
+6. Choose one execution definition: `setRunFunction`, `setHarnessAgent`, or `setHarnessWorkflow`.
+7. For a Harness workflow that must resume private workspace state after a restart, declare its workspace policy.
 8. Add HTTP exposure, streaming mode, execution policy, or long-running response mode when the agent exposes those surfaces.
 9. Add the attached agent definition to the service.
 10. Instantiate the service with `queueBridge`, `ai.models`, and optional `ai.governance` when tool policy, approval, or audit is required.
@@ -207,6 +285,93 @@ Startup fails when:
 
 This fail-fast behavior prevents a production service from silently degrading to a weaker model or transport guarantee.
 
+Attached agents automatically use the service's normal `stateStore` for
+Harness sessions, conversation history, run records, and replayable events.
+Configure the store once through `service.getInstance(..., { stateStore })`;
+this shares the application's standard persistence. Harness records are
+namespaced by service, version, and agent. The application owns the injected
+store lifecycle; services do not close a shared store.
+
+`ai.stateStore` remains available as an explicit Harness-native override. Use
+it when agent data deliberately needs a separate backend, retention policy, or
+isolation boundary. When configured, it takes precedence over the service
+store.
+
+The default state store is intended for local development and tests. For
+durable production conversations, configure a persistent PURISTA `StateStore`
+or an explicit Harness-native `ai.stateStore` that meets the Harness state
+contract. Persistence is not a conversation scheduler: your application owns
+whether same-conversation turns serialize, receive a busy response, or become
+independent sessions.
+
+### Bounded conversation storage
+
+Add retention to the conversation declaration when a conversation should not grow without
+bound. The service-state adapter applies `idleTtlMs` to agent artifacts,
+retains only complete recent history turns, and can cap run summaries and
+replay events. The history byte limit is storage accounting, not a model-token
+estimate.
+
+`history` also works with an explicit `ai.stateStore` when that Harness-native
+store supports atomic message replacement. `idleTtlMs`, `runs`, and `events`
+remain service-store policies and are rejected with `ai.stateStore`, because
+they reuse Core's native-expiry and bounded-record guarantees.
+
+For these agent records, `idleTtlMs` is more specific than the service's
+general `stateRetention` default. An explicit business-state write is more
+specific still. If no policy matches, the existing permanent-state behavior is
+preserved.
+
+```ts
+agent.setSessionPolicy({
+	mode: 'conversation',
+	payloadPath: ['conversation', 'id'],
+	retention: {
+    idleTtlMs: 30 * 24 * 60 * 60_000,
+    history: { maxTurns: 50, maxBytes: 256_000 },
+    runs: { maxPerSession: 20 },
+    events: { maxPerRun: 500 },
+  },
+})
+```
+
+Model context is selected separately using the provider/model's token limits.
+It may use fewer retained turns for a smaller model, but it never deletes the
+durable history. PURISTA deliberately does not pretend bytes can reliably be
+converted to tokens.
+
+## Conversation isolation
+
+Agents are ephemeral by default. `setSessionPolicy(...)` opts into persistent
+history. The application provides the stable, non-empty conversation id;
+PURISTA automatically includes trusted tenant and principal metadata when it
+is available.
+
+```ts
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
+```
+
+Conceptually, the conversation is keyed by
+`tenantId:principalId:conversationId`, inside its service, version, and agent
+namespace. `conversationId` is always required. `tenantId` and `principalId`
+are optional: with neither present, the conversation id is the only boundary;
+when either trusted message value is present it automatically makes the session
+boundary stricter and Core uses a stable internal default for its missing
+counterpart. Do not derive tenant or principal identity from payload data,
+conversation ids, prompts, or unverified headers.
+
+`setSessionPolicy(...)` chooses the stable Harness session identity for
+conversation history and associated run records. It does not make a sandbox or
+workspace durable, and it does not change tool permissions. Those concerns have
+their own builder declarations and runtime bindings below.
+
+If you are upgrading from PURISTA 3.2, keep a valid
+`setSessionPolicy({ mode: 'conversation', payloadPath })` declaration unchanged.
+The path is now type-checked and trusted message tenant/principal metadata is
+included automatically when available. The
+[4.0 migration guide](/article/2026-08-20-purista-version-4-0/) shows the exact
+before-and-after code.
+
 ## Sandbox and durable workspaces
 
 Local durable execution, sandbox state, and durable workspace guarantees are related but separate. A harness durable runtime records checkpoints and leases for workflow progress inside your application boundary. The workspace store persists the files or workspace state that those checkpoints need in order to resume.
@@ -220,9 +385,12 @@ Local durable execution, sandbox state, and durable workspace guarantees are rel
 | durable workspace replay | Production replay contract linking harness runtime checkpoints to persisted workspace state, cleanup, retention, encryption, and quotas. |
 
 Use `setSandboxPolicy(...)` when an agent needs mounted skills, filesystem
-built-ins, MCP stdio tools, or code execution. Use `setWorkspacePolicy(...)`
-when a queued or long-running agent must resume from committed workspace state
-after retry or restart.
+built-ins, MCP stdio tools, or code execution. A snapshot-capable sandbox can
+capture and reopen one sandbox session, but that adapter-level mechanism is not
+the application recovery guarantee. Use `setWorkspacePolicy(...)` only with
+`setHarnessWorkflow(...)` when a failed CSV analysis, research task, or other
+workflow must resume committed workspace files and progress after retry or
+restart.
 
 The sandbox and durable workspace store stay separate even when one
 infrastructure package constructs both. PURISTA validates the store through

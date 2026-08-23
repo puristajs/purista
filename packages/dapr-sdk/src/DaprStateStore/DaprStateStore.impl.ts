@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { HttpClient, StateStoreBaseClass } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core/adapter'
+import { HttpClient, StateStoreBaseClass } from '@purista/core/adapter'
 
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
 import type { DaprClientConfig } from '../DaprClient/types/DaprClientConfig.js'
@@ -13,6 +13,18 @@ import type { DaprStateStoreConfig } from './types/DaprStateStoreConfig.js'
  * State store adapter backed by a Dapr state component.
  *
  * Reads, writes and removes JSON state values through the local Dapr sidecar.
+ * A finite retention policy is available only when `supportsTtl: true` and the
+ * configured Dapr component honours `ttlInSeconds` metadata.
+ *
+ * @example
+ * ```ts
+ * const stateStore = new DaprStateStore({
+ *   stateStoreName: 'application-state',
+ *   supportsTtl: true,
+ *   clientConfig: { daprHost: 'http://127.0.0.1', daprPort: '3500' },
+ * })
+ * await stateStore.setState('invoice-42', { status: 'open' })
+ * ```
  */
 export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	private client: HttpClient<DaprClientConfig>
@@ -20,10 +32,16 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	/**
 	 * Creates a Dapr-backed state store.
 	 *
-	 * @param config - Store name, logger and Dapr sidecar client settings.
+	 * @param config - Store name, optional retention, logger and Dapr sidecar client settings.
 	 */
-	constructor(config?: StoreBaseConfig<DaprStateStoreConfig>) {
-		super(config?.stateStoreName ?? 'DaprStateStore', { ...config })
+	constructor(config?: StateStoreConfig<DaprStateStoreConfig>) {
+		super(
+			config?.stateStoreName ?? 'DaprStateStore',
+			{ ...config },
+			{
+				retention: { atomicExpiry: config?.supportsTtl === true },
+			},
+		)
 		const logger = this.logger
 		const conf = {
 			stateStoreName: 'stateStore',
@@ -92,7 +110,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	/**
 	 * Writes a state value to the configured Dapr component.
 	 */
-	protected async setStateImpl(stateName: string, stateValue: unknown) {
+	protected async setStateImpl(stateName: string, stateValue: unknown, options: ResolvedStateWriteOptions) {
 		const path = join(
 			this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 			'state',
@@ -103,6 +121,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 			{
 				key: stateName,
 				value: stateValue,
+				...(options.retention.mode === 'expire'
+					? { metadata: { ttlInSeconds: String(Math.ceil(options.retention.ttlMs / 1_000)) } }
+					: {}),
 			},
 		]
 

@@ -1,0 +1,3035 @@
+{
+	"generatedFrom": "web/src/generated/purista-api.json",
+	"typedocDigest": "33dfc6c4700fa85e",
+	"packages": [
+		{
+			"packageName": "@purista/core",
+			"exports": [
+				{
+					"name": "AgentConversationId",
+					"kind": "type",
+					"summary": "A logical conversation id selected from a validated agent payload.",
+					"source": "AgentQueueBuilder/types.ts:259",
+					"hasExample": false
+				},
+				{
+					"name": "AgentConversationIdPath",
+					"kind": "type",
+					"summary": "Selects a required string field from a validated agent payload as the logical conversation id.",
+					"source": "AgentQueueBuilder/types.ts:232",
+					"hasExample": false
+				},
+				{
+					"name": "AgentDefinition",
+					"kind": "type",
+					"summary": "Attached agent definition before expansion into service definitions.",
+					"source": "AgentQueueBuilder/types.ts:692",
+					"hasExample": false
+				},
+				{
+					"name": "AgentDurableWorkspaceStore",
+					"kind": "type",
+					"summary": "Durable workspace store supplied by the application at service instantiation time.",
+					"source": "AgentQueueBuilder/types.ts:401",
+					"hasExample": false
+				},
+				{
+					"name": "AgentDurableWorkspaceStorePolicy",
+					"kind": "type",
+					"summary": "Durable workspace policy forwarded to `@purista/harness`.",
+					"source": "AgentQueueBuilder/types.ts:398",
+					"hasExample": false
+				},
+				{
+					"name": "AgentExecutionDefinition",
+					"kind": "type",
+					"summary": "Internal execution definition selected by exactly one agent execution setter.",
+					"source": "AgentQueueBuilder/types.ts:605",
+					"hasExample": false
+				},
+				{
+					"name": "AgentExecutionKind",
+					"kind": "type",
+					"summary": "Execution implementation kind used by an attached agent definition.",
+					"source": "AgentQueueBuilder/types.ts:34",
+					"hasExample": false
+				},
+				{
+					"name": "AgentExecutionPolicy",
+					"kind": "type",
+					"summary": "Queue execution policy applied to the generated agent worker and queue.",
+					"source": "AgentQueueBuilder/types.ts:122",
+					"hasExample": false
+				},
+				{
+					"name": "AgentHandler",
+					"kind": "type",
+					"summary": "Run function shape accepted by `AgentQueueBuilder.setRunFunction(...)`.",
+					"source": "AgentQueueBuilder/types.ts:580",
+					"hasExample": false
+				},
+				{
+					"name": "AgentHandlerContext",
+					"kind": "type",
+					"summary": "Context passed to an attached agent run function.",
+					"source": "AgentQueueBuilder/types.ts:525",
+					"hasExample": false
+				},
+				{
+					"name": "AgentHandlerModelBindings",
+					"kind": "type",
+					"summary": "Typed model handles exposed to an agent run function.",
+					"source": "AgentQueueBuilder/types.ts:79",
+					"hasExample": false
+				},
+				{
+					"name": "AgentHarnessRuntimeOptions",
+					"kind": "type",
+					"summary": "Application-owned Harness composition supplied at service instantiation time.",
+					"source": "AgentQueueBuilder/types.ts:438",
+					"hasExample": true
+				},
+				{
+					"name": "AgentHarnessWorkflowOptions",
+					"kind": "type",
+					"summary": "Harness-local agents registered together with a wrapped harness workflow.",
+					"source": "AgentQueueBuilder/types.ts:594",
+					"hasExample": false
+				},
+				{
+					"name": "AgentHttpExposure",
+					"kind": "type",
+					"summary": "HTTP projection metadata for the generated agent command or stream.",
+					"source": "AgentQueueBuilder/types.ts:446",
+					"hasExample": false
+				},
+				{
+					"name": "AgentInvokeMap",
+					"kind": "type",
+					"summary": "Typed child-agent invocation map exposed at `context.invoke.agents`.",
+					"source": "AgentQueueBuilder/types.ts:515",
+					"hasExample": false
+				},
+				{
+					"name": "AgentManifest",
+					"kind": "type",
+					"summary": "Provider-neutral manifest describing an attached PURISTA agent.",
+					"source": "AgentQueueBuilder/types.ts:627",
+					"hasExample": false
+				},
+				{
+					"name": "AgentModelBinding",
+					"kind": "type",
+					"summary": "Declares a model alias required by an attached PURISTA agent.",
+					"source": "AgentQueueBuilder/types.ts:51",
+					"hasExample": true
+				},
+				{
+					"name": "AgentModelCapability",
+					"kind": "type",
+					"summary": "Model capability names supported by `@purista/harness` model bindings.",
+					"source": "AgentQueueBuilder/types.ts:31",
+					"hasExample": false
+				},
+				{
+					"name": "AgentModelChunkVisibility",
+					"kind": "type",
+					"summary": "Controls which Harness model run events become chunks on a generated agent stream.",
+					"source": "AgentQueueBuilder/types.ts:168",
+					"hasExample": false
+				},
+				{
+					"name": "AgentQueueBuilder",
+					"kind": "class",
+					"summary": "Builds an attached PURISTA agent from normal core queue, worker, command, stream definitions, and a provider-neutral agent manifest.",
+					"source": "AgentQueueBuilder/AgentQueueBuilder.ts:96",
+					"hasExample": true
+				},
+				{
+					"name": "AgentQueueBuilderTypes",
+					"kind": "type",
+					"summary": "Type accumulator used by `AgentQueueBuilder` to preserve typed schemas, tools, models, and metrics.",
+					"source": "AgentQueueBuilder/types.ts:727",
+					"hasExample": false
+				},
+				{
+					"name": "AgentQueueResultPolicy",
+					"kind": "type",
+					"summary": "Controls how generated queues persist and/or emit agent worker completion metadata.",
+					"source": "AgentQueueBuilder/types.ts:139",
+					"hasExample": false
+				},
+				{
+					"name": "AgentQueueResultPolicyMode",
+					"kind": "type",
+					"summary": "Storage or event side effect used for queued agent run results.",
+					"source": "AgentQueueBuilder/types.ts:136",
+					"hasExample": false
+				},
+				{
+					"name": "AgentResponseMode",
+					"kind": "type",
+					"summary": "Public response contract exposed by the generated agent command or stream.",
+					"source": "AgentQueueBuilder/types.ts:165",
+					"hasExample": false
+				},
+				{
+					"name": "AgentResponseModeOptions",
+					"kind": "type",
+					"summary": "Options for long-running agent response contracts.",
+					"source": "AgentQueueBuilder/types.ts:183",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRunError",
+					"kind": "class",
+					"summary": "Error raised when a harness run terminates with a serialized error.",
+					"source": "AgentQueueBuilder/runtime/executor.ts:602",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRunEvent",
+					"kind": "type",
+					"summary": "Harness run event decorated with PURISTA agent identity metadata.",
+					"source": "AgentQueueBuilder/types.ts:478",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRunIdentity",
+					"kind": "type",
+					"summary": "Stable run identity propagated through attached agent execution events and results.",
+					"source": "AgentQueueBuilder/types.ts:462",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRunResult",
+					"kind": "type",
+					"summary": "Aggregate result returned by an attached agent runtime.",
+					"source": "AgentQueueBuilder/types.ts:484",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRuntimeInvocationInput",
+					"kind": "type",
+					"summary": "Aggregate invocation input passed from generated PURISTA definitions into the agent runtime.",
+					"source": "AgentQueueBuilder/types.ts:673",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRuntimeModelBinding",
+					"kind": "type",
+					"summary": "",
+					"source": "AgentQueueBuilder/types.ts:60",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRuntimeModelBindings",
+					"kind": "type",
+					"summary": "Runtime model bindings keyed by every model alias declared on an agent builder.",
+					"source": "AgentQueueBuilder/types.ts:74",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRuntimeOptions",
+					"kind": "type",
+					"summary": "Runtime options required to initialize attached agents for a service instance.",
+					"source": "AgentQueueBuilder/types.ts:766",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRuntimeRef",
+					"kind": "type",
+					"summary": "Mutable runtime reference bound when the owning service instance is created.",
+					"source": "AgentQueueBuilder/types.ts:664",
+					"hasExample": false
+				},
+				{
+					"name": "AgentRuntimeStreamInvocationInput",
+					"kind": "type",
+					"summary": "Streaming invocation input passed from generated PURISTA stream definitions into the agent runtime.",
+					"source": "AgentQueueBuilder/types.ts:682",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSandboxPolicy",
+					"kind": "type",
+					"summary": "Optional sandbox adapter configuration passed through to the agent runtime.",
+					"source": "AgentQueueBuilder/types.ts:303",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSessionPolicy",
+					"kind": "type",
+					"summary": "Configures how an attached agent obtains its Harness session.",
+					"source": "AgentQueueBuilder/types.ts:285",
+					"hasExample": true
+				},
+				{
+					"name": "AgentSessionRetentionPolicy",
+					"kind": "type",
+					"summary": "Retention owned by one attached agent's Harness state.",
+					"source": "AgentQueueBuilder/types.ts:211",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSkillCatalogEntry",
+					"kind": "type",
+					"summary": "Metadata-only skill catalog entry exposed to attached agent handlers.",
+					"source": "AgentQueueBuilder/types.ts:368",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSkillContext",
+					"kind": "type",
+					"summary": "Handler helper for resolving declared skill metadata without exposing skill bodies.",
+					"source": "AgentQueueBuilder/types.ts:380",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSkillDiscoveryOptions",
+					"kind": "type",
+					"summary": "Optional local skill discovery settings for attached agent runtime startup.",
+					"source": "AgentQueueBuilder/types.ts:343",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSkillResolver",
+					"kind": "type",
+					"summary": "Resolves a declared agent skill name to a runtime skill directory.",
+					"source": "AgentQueueBuilder/types.ts:317",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSkillRuntimeBinding",
+					"kind": "type",
+					"summary": "Runtime binding for a skill declared with `AgentQueueBuilder.useSkills(...)`.",
+					"source": "AgentQueueBuilder/types.ts:326",
+					"hasExample": false
+				},
+				{
+					"name": "AgentSkillRuntimeOptions",
+					"kind": "type",
+					"summary": "Runtime skill bindings supplied through `ServiceBuilder.getInstance(..., { ai: { skills } })`.",
+					"source": "AgentQueueBuilder/types.ts:358",
+					"hasExample": false
+				},
+				{
+					"name": "AgentStreamingOptions",
+					"kind": "type",
+					"summary": "Streaming behavior declared by an attached agent.",
+					"source": "AgentQueueBuilder/types.ts:171",
+					"hasExample": false
+				},
+				{
+					"name": "AgentWorkspaceCapabilityRequirement",
+					"kind": "type",
+					"summary": "Capability required by a durable attached-agent workspace policy.",
+					"source": "AgentQueueBuilder/types.ts:395",
+					"hasExample": false
+				},
+				{
+					"name": "AgentWorkspacePolicy",
+					"kind": "type",
+					"summary": "Durable workspace behavior declared by an attached agent manifest.",
+					"source": "AgentQueueBuilder/types.ts:404",
+					"hasExample": false
+				},
+				{
+					"name": "AllowedAgentDefinition",
+					"kind": "type",
+					"summary": "Declares one attached agent that this attached agent may call.",
+					"source": "AgentQueueBuilder/types.ts:104",
+					"hasExample": false
+				},
+				{
+					"name": "AllowedCommandToolDefinition",
+					"kind": "type",
+					"summary": "Declares one service command that an attached agent may call as a typed tool.",
+					"source": "AgentQueueBuilder/types.ts:84",
+					"hasExample": false
+				},
+				{
+					"name": "AnyAgentQueueBuilderTypes",
+					"kind": "type",
+					"summary": "Broad agent builder type used where any attached agent definition is accepted.",
+					"source": "AgentQueueBuilder/types.ts:750",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureChange",
+					"kind": "type",
+					"summary": "A deterministic architecture compatibility change.",
+					"source": "helper/architectureManifest.ts:105",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComponent",
+					"kind": "type",
+					"summary": "A stable node in the architecture graph.",
+					"source": "helper/architectureManifest.ts:47",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComponentAttribute",
+					"kind": "type",
+					"summary": "JSON-safe scalar metadata attached to a graph component.",
+					"source": "helper/architectureManifest.ts:45",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComponentKind",
+					"kind": "type",
+					"summary": "Kinds of nodes in the provider-neutral PURISTA architecture graph.",
+					"source": "helper/architectureManifest.ts:23",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureComposition",
+					"kind": "type",
+					"summary": "Application-owned, provider-neutral composition input.",
+					"source": "helper/architectureManifest.ts:122",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureCompositionArtifact",
+					"kind": "type",
+					"summary": "A pinned artifact used by offline multi-repository composition validation.",
+					"source": "helper/architectureManifest.ts:118",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureCompositionBinding",
+					"kind": "type",
+					"summary": "Explicit binding of an unresolved relation to a component in another artifact.",
+					"source": "helper/architectureManifest.ts:120",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureContext",
+					"kind": "type",
+					"summary": "JSON-safe selected architecture view intended for a human or an LLM.",
+					"source": "helper/architectureManifest.ts:94",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureContracts",
+					"kind": "type",
+					"summary": "Role-specific schemas attached to a component or an interaction edge.",
+					"source": "helper/architectureManifest.ts:43",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureDiagnostic",
+					"kind": "type",
+					"summary": "Stable static architecture diagnostic with a remediation hint.",
+					"source": "helper/architectureManifest.ts:14",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureDiagnosticSeverity",
+					"kind": "type",
+					"summary": "Severity used by static architecture diagnostics.",
+					"source": "helper/architectureManifest.ts:12",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureManifest",
+					"kind": "type",
+					"summary": "Complete static architecture contract derived from resolved definitions.",
+					"source": "helper/architectureManifest.ts:84",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureRelation",
+					"kind": "type",
+					"summary": "A stable, typed architecture graph edge.",
+					"source": "helper/architectureManifest.ts:74",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureRelationKind",
+					"kind": "type",
+					"summary": "Typed relation between two declared architecture components.",
+					"source": "helper/architectureManifest.ts:58",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureRelationResolution",
+					"kind": "type",
+					"summary": "Resolution state for a relation target in the current static artifact.",
+					"source": "helper/architectureManifest.ts:72",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSchema",
+					"kind": "type",
+					"summary": "Normalized schema catalog entry.",
+					"source": "helper/architectureManifest.ts:38",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSchemaReference",
+					"kind": "type",
+					"summary": "Reference to a normalized schema in the manifest catalog.",
+					"source": "helper/architectureManifest.ts:36",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSchemaRole",
+					"kind": "type",
+					"summary": "Schema role on a component or relation.",
+					"source": "helper/architectureManifest.ts:34",
+					"hasExample": false
+				},
+				{
+					"name": "ArchitectureSourceLocation",
+					"kind": "type",
+					"summary": "JSON-safe location for a static architecture diagnostic.",
+					"source": "helper/architectureManifest.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "AttachedAgentDefinition",
+					"kind": "type",
+					"summary": "Agent plus the generated queue, worker, command, and stream definitions added to a service.",
+					"source": "AgentQueueBuilder/types.ts:718",
+					"hasExample": false
+				},
+				{
+					"name": "AttachedCoreDefinition",
+					"kind": "type",
+					"summary": "Core definition metadata attached to generated queue, worker, command, and stream artifacts.",
+					"source": "AgentQueueBuilder/types.ts:713",
+					"hasExample": false
+				},
+				{
+					"name": "CloudEvent",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:131",
+					"hasExample": false
+				},
+				{
+					"name": "Command",
+					"kind": "type",
+					"summary": "Command is a event bridge message, which is emitted by sender to event bridge.",
+					"source": "core/types/commandType/Command.ts:18",
+					"hasExample": false
+				},
+				{
+					"name": "CommandDefinition",
+					"kind": "type",
+					"summary": "The definition for a command provided by some service.",
+					"source": "core/types/commandType/CommandDefinition.ts:20",
+					"hasExample": false
+				},
+				{
+					"name": "CommandDefinitionBuilder",
+					"kind": "class",
+					"summary": "Declares a typed request/response operation owned by one service.",
+					"source": "CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:66",
+					"hasExample": true
+				},
+				{
+					"name": "CommandDefinitionBuilderTypes",
+					"kind": "type",
+					"summary": "Type accumulator used by `CommandDefinitionBuilder` for schemas, hooks, invocations, events, and queues.",
+					"source": "CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "CommandErrorResponse",
+					"kind": "type",
+					"summary": "CommandErrorResponse is a response to a specific previously received command which indicates some failure.",
+					"source": "core/types/commandType/CommandErrorResponse.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "CommandFunctionContext",
+					"kind": "type",
+					"summary": "The command function context which will be passed into command function.",
+					"source": "core/types/commandType/CommandFunctionContext.ts:67",
+					"hasExample": false
+				},
+				{
+					"name": "CommandResponse",
+					"kind": "type",
+					"summary": "CommandResponse is a response to a specific previously received command which can be either a success or failure",
+					"source": "core/types/commandType/CommandResponse.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "CommandSuccessResponse",
+					"kind": "type",
+					"summary": "CommandSuccessResponse is a response to a specific previously received command.",
+					"source": "core/types/commandType/CommandSuccessResponse.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "CommandToolInvokeMap",
+					"kind": "type",
+					"summary": "Typed command tool call map exposed at `context.invoke.tools`.",
+					"source": "AgentQueueBuilder/types.ts:505",
+					"hasExample": false
+				},
+				{
+					"name": "compareArchitectureManifests",
+					"kind": "function",
+					"summary": "Compare two static architecture contracts without an unsound schema-evolution guess.",
+					"source": "helper/architectureManifest.ts:873",
+					"hasExample": true
+				},
+				{
+					"name": "ConfigStore",
+					"kind": "interface",
+					"summary": "Interface definition for config store adapters",
+					"source": "core/ConfigStore/types/ConfigStore.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "Constructor",
+					"kind": "type",
+					"summary": "Generic constructor type that preserves argument tuple inference.",
+					"source": "helper/types/Constructor.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "ContentType",
+					"kind": "type",
+					"summary": "List of content types for message payloads.",
+					"source": "core/types/ContentType.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "ContextBase",
+					"kind": "type",
+					"summary": "The ContextBase provides is a basic type.",
+					"source": "core/types/ContextBase.ts:21",
+					"hasExample": false
+				},
+				{
+					"name": "CorrelationId",
+					"kind": "type",
+					"summary": "the correlation id links the command invocation message with the command response message",
+					"source": "core/types/CorrelationId.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "createArchitectureContext",
+					"kind": "function",
+					"summary": "Create a bounded, deterministic subgraph suitable for tool output and LLM context.",
+					"source": "helper/architectureManifest.ts:747",
+					"hasExample": true
+				},
+				{
+					"name": "CreateArchitectureContextOptions",
+					"kind": "type",
+					"summary": "Options for a compact, deterministic architecture context.",
+					"source": "helper/architectureManifest.ts:136",
+					"hasExample": false
+				},
+				{
+					"name": "createArchitectureManifest",
+					"kind": "function",
+					"summary": "Create a complete, sorted, JSON-safe architecture contract from resolved service definitions.",
+					"source": "helper/architectureManifest.ts:273",
+					"hasExample": true
+				},
+				{
+					"name": "CreateArchitectureManifestOptions",
+					"kind": "type",
+					"summary": "Options for creating the canonical architecture contract.",
+					"source": "helper/architectureManifest.ts:129",
+					"hasExample": false
+				},
+				{
+					"name": "CustomMessage",
+					"kind": "type",
+					"summary": "A custom message is a message which can be used to pass business information.",
+					"source": "core/types/CustomMessage.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultConfigStore",
+					"kind": "class",
+					"summary": "Process-local in-memory config store for development and tests.",
+					"source": "DefaultConfigStore/DefaultConfigStore.impl.ts:36",
+					"hasExample": true
+				},
+				{
+					"name": "DefaultConfigStoreConfig",
+					"kind": "type",
+					"summary": "",
+					"source": "DefaultConfigStore/types/DefaultConfigStoreConfig.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultEventBridge",
+					"kind": "class",
+					"summary": "Process-local in-memory event bridge for development and tests.",
+					"source": "DefaultEventBridge/DefaultEventBridge.impl.ts:77",
+					"hasExample": true
+				},
+				{
+					"name": "DefaultEventBridgeConfig",
+					"kind": "type",
+					"summary": "The configuration for the DefaultEventBridge.",
+					"source": "DefaultEventBridge/types/DefaultEventBridgeConfig.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultLogger",
+					"kind": "class",
+					"summary": "",
+					"source": "DefaultLogger/DefaultLogger.impl.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultQueueBridge",
+					"kind": "class",
+					"summary": "In-memory queue bridge for development and unit tests.",
+					"source": "DefaultQueueBridge/DefaultQueueBridge.impl.ts:59",
+					"hasExample": true
+				},
+				{
+					"name": "DefaultQueueBridgeOptions",
+					"kind": "type",
+					"summary": "Configuration for the process-local DefaultQueueBridge.",
+					"source": "DefaultQueueBridge/DefaultQueueBridge.impl.ts:32",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultSchedulerProvider",
+					"kind": "class",
+					"summary": "Process-local SchedulerProvider for development and deterministic tests.",
+					"source": "core/Scheduler/DefaultSchedulerProvider.impl.ts:27",
+					"hasExample": true
+				},
+				{
+					"name": "DefaultSecretStore",
+					"kind": "class",
+					"summary": "Process-local in-memory secret store for development and tests.",
+					"source": "DefaultSecretStore/DefaultSecretStore.impl.ts:42",
+					"hasExample": true
+				},
+				{
+					"name": "DefaultSecretStoreConfig",
+					"kind": "type",
+					"summary": "",
+					"source": "DefaultSecretStore/types/DefaultSecretStoreConfig.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultStateStore",
+					"kind": "class",
+					"summary": "Process-local in-memory state store for development and tests.",
+					"source": "DefaultStateStore/DefaultStateStore.impl.ts:19",
+					"hasExample": false
+				},
+				{
+					"name": "DefaultStateStoreConfig",
+					"kind": "type",
+					"summary": "",
+					"source": "DefaultStateStore/types/DefaultStateStoreConfig.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "EBMessage",
+					"kind": "type",
+					"summary": "EBMessage is some message which is handled by the event bridge.",
+					"source": "core/types/EBMessage.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "EBMessageAddress",
+					"kind": "type",
+					"summary": "A event bridge message address describes the sender or receiver of a message.",
+					"source": "core/types/EBMessageAddress.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "EBMessageBase",
+					"kind": "type",
+					"summary": "Default fields which are part of any purista message",
+					"source": "core/types/EBMessageBase.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "EBMessageId",
+					"kind": "type",
+					"summary": "Unique id of the event bridge message",
+					"source": "core/types/EBMessageId.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "EBMessageSenderAddress",
+					"kind": "type",
+					"summary": "A event bridge message address describes the sender or receiver of a message.",
+					"source": "core/types/EBMessageSenderAddress.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "ErrorResponsePayload",
+					"kind": "type",
+					"summary": "Error message payload",
+					"source": "core/types/ErrorResponsePayload.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "EventBridge",
+					"kind": "interface",
+					"summary": "Event transport adapter contract used by PURISTA services.",
+					"source": "core/EventBridge/types/EventBridge.ts:30",
+					"hasExample": false
+				},
+				{
+					"name": "EventBridgeCapabilities",
+					"kind": "type",
+					"summary": "Capability matrix reported by an EventBridge.",
+					"source": "core/EventBridge/types/EventBridgeCapabilities.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "EventBridgeConfig",
+					"kind": "type",
+					"summary": "The config object for an event bridge.",
+					"source": "core/EventBridge/types/EventBridgeConfig.ts:12",
+					"hasExample": false
+				},
+				{
+					"name": "exportCloudEventsSchema",
+					"kind": "function",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:847",
+					"hasExample": false
+				},
+				{
+					"name": "exportScheduleManifest",
+					"kind": "function",
+					"summary": "Export provider-neutral schedule metadata from service definitions.",
+					"source": "helper/enterpriseInterop.ts:425",
+					"hasExample": true
+				},
+				{
+					"name": "ExportScheduleManifestOptions",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:32",
+					"hasExample": false
+				},
+				{
+					"name": "exportServiceDefinitions",
+					"kind": "function",
+					"summary": "Resolve service builders into the JSON-safe definition inventory used by architecture inspection and interoperability exports.",
+					"source": "helper/exportServiceDefinitions.ts:116",
+					"hasExample": true
+				},
+				{
+					"name": "extendApi",
+					"kind": "function",
+					"summary": "Attach OpenAPI metadata to a Zod schema.",
+					"source": "zodOpenApi/extendApi.ts:24",
+					"hasExample": true
+				},
+				{
+					"name": "fromCloudEvent",
+					"kind": "function",
+					"summary": "Convert a CloudEvents 1.0 object into a PURISTA custom event message.",
+					"source": "helper/enterpriseInterop.ts:799",
+					"hasExample": false
+				},
+				{
+					"name": "FromCloudEventOptions",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:142",
+					"hasExample": false
+				},
+				{
+					"name": "FullDefinition",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/types/FullDefinition.ts:3",
+					"hasExample": false
+				},
+				{
+					"name": "FullServiceDefinition",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/types/FullServiceDefinition.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "getArchitectureManifestDigest",
+					"kind": "function",
+					"summary": "Return the content digest of an architecture artifact, excluding its own digest field.",
+					"source": "helper/architectureManifest.ts:258",
+					"hasExample": true
+				},
+				{
+					"name": "getNewInstanceId",
+					"kind": "function",
+					"summary": "",
+					"source": "core/helper/getNewInstanceId.impl.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "getNewTraceId",
+					"kind": "function",
+					"summary": "",
+					"source": "core/helper/getNewTraceId.impl.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "gracefulShutdown",
+					"kind": "function",
+					"summary": "Helps to gracefully shut down your application.",
+					"source": "helper/gracefulShutdown.impl.ts:37",
+					"hasExample": true
+				},
+				{
+					"name": "HandledError",
+					"kind": "class",
+					"summary": "A handled error is an error which is handled or thrown by business logic.",
+					"source": "core/Error/HandledError.impl.ts:12",
+					"hasExample": false
+				},
+				{
+					"name": "HttpExposureOptions",
+					"kind": "type",
+					"summary": "Options for projecting a command as a synchronous or queued HTTP operation.",
+					"source": "CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:41",
+					"hasExample": false
+				},
+				{
+					"name": "ILogger",
+					"kind": "interface",
+					"summary": "",
+					"source": "core/types/Logger.ts:33",
+					"hasExample": false
+				},
+				{
+					"name": "Infer",
+					"kind": "type",
+					"summary": "Infers output type from a schema.",
+					"source": "schema/standardSchema.ts:14",
+					"hasExample": false
+				},
+				{
+					"name": "InferIn",
+					"kind": "type",
+					"summary": "Infers input type from a schema.",
+					"source": "schema/standardSchema.ts:16",
+					"hasExample": false
+				},
+				{
+					"name": "InferOptionalInput",
+					"kind": "type",
+					"summary": "Infers an agent tool input schema when one is declared, otherwise falls back to `unknown`.",
+					"source": "AgentQueueBuilder/types.ts:491",
+					"hasExample": false
+				},
+				{
+					"name": "InferOptionalOutput",
+					"kind": "type",
+					"summary": "Infers an agent tool output schema when one is declared, otherwise falls back to `unknown`.",
+					"source": "AgentQueueBuilder/types.ts:498",
+					"hasExample": false
+				},
+				{
+					"name": "initLogger",
+					"kind": "function",
+					"summary": "Create a new logger instance using pino.",
+					"source": "DefaultLogger/initLogger.impl.ts:21",
+					"hasExample": true
+				},
+				{
+					"name": "InstanceConfigType",
+					"kind": "type",
+					"summary": "Runtime configuration accepted by `ServiceBuilder.getInstance(...)`.",
+					"source": "ServiceBuilder/ServiceBuilder.impl.ts:85",
+					"hasExample": false
+				},
+				{
+					"name": "InstanceId",
+					"kind": "type",
+					"summary": "the instance id of the event bridge",
+					"source": "core/types/InstanceId.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "InstanceOrType",
+					"kind": "type",
+					"summary": "Resolves a constructor to its instance type while preserving object instances.",
+					"source": "helper/types/InstanceOrType.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "isCustomMessage",
+					"kind": "function",
+					"summary": "Checks if a PURISTA message is type of custom message",
+					"source": "core/types/isCustomMessage.impl.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "JsonRecord",
+					"kind": "type",
+					"summary": "JSON object shape used by provider export helpers for provider-native manifest fragments.",
+					"source": "helper/enterpriseInterop.ts:22",
+					"hasExample": true
+				},
+				{
+					"name": "JsonSchemaOptions",
+					"kind": "type",
+					"summary": "",
+					"source": "schema/standardSchema.ts:28",
+					"hasExample": false
+				},
+				{
+					"name": "KubernetesCronJobScheduleInput",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:44",
+					"hasExample": false
+				},
+				{
+					"name": "Logger",
+					"kind": "class",
+					"summary": "",
+					"source": "core/types/Logger.ts:23",
+					"hasExample": false
+				},
+				{
+					"name": "LogLevelName",
+					"kind": "type",
+					"summary": "",
+					"source": "core/types/LogLevelName.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "Newable",
+					"kind": "type",
+					"summary": "Constructor type accepted by `ServiceBuilder.setCustomClass(...)`.",
+					"source": "ServiceBuilder/ServiceBuilder.impl.ts:82",
+					"hasExample": false
+				},
+				{
+					"name": "NonEmptyString",
+					"kind": "type",
+					"summary": "Rejects the empty string literal in builder type constraints.",
+					"source": "helper/types/NonEmptyString.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "PrincipalId",
+					"kind": "type",
+					"summary": "the principal id",
+					"source": "core/types/PrincipalId.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaMetricDefinition",
+					"kind": "interface",
+					"summary": "Declares one framework or application metric.",
+					"source": "core/metrics/types.ts:46",
+					"hasExample": true
+				},
+				{
+					"name": "PuristaMetricDefinitions",
+					"kind": "type",
+					"summary": "Named metric definitions keyed by their metric name.",
+					"source": "core/metrics/types.ts:63",
+					"hasExample": true
+				},
+				{
+					"name": "PuristaMetricsRuntimeOptions",
+					"kind": "interface",
+					"summary": "Runtime metrics options consumed by PURISTA recorders.",
+					"source": "core/metrics/types.ts:125",
+					"hasExample": true
+				},
+				{
+					"name": "QueryParameter",
+					"kind": "type",
+					"summary": "One declared HTTP query parameter for a command projection.",
+					"source": "core/HttpServer/types/QueryParameter.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "QueueBridge",
+					"kind": "interface",
+					"summary": "Queue transport adapter contract used by PURISTA services and queue workers.",
+					"source": "core/QueueBridge/types/QueueBridge.ts:28",
+					"hasExample": false
+				},
+				{
+					"name": "QueueBridgeCapabilities",
+					"kind": "type",
+					"summary": "Capability matrix reported by a QueueBridge.",
+					"source": "core/QueueBridge/types/QueueBridgeCapabilities.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "QueueContext",
+					"kind": "type",
+					"summary": "",
+					"source": "core/types/queue/QueueContext.ts:37",
+					"hasExample": false
+				},
+				{
+					"name": "QueueDefinition",
+					"kind": "type",
+					"summary": "Public definition of a queue contract attached to a PURISTA service.",
+					"source": "core/types/queue/QueueDefinition.ts:24",
+					"hasExample": false
+				},
+				{
+					"name": "QueueDefinitionBuilder",
+					"kind": "class",
+					"summary": "Builds a durable queue contract for background work.",
+					"source": "QueueDefinitionBuilder/QueueDefinitionBuilder.impl.ts:28",
+					"hasExample": true
+				},
+				{
+					"name": "QueueHandlerResult",
+					"kind": "type",
+					"summary": "Result returned by a queue worker handler.",
+					"source": "core/types/queue/QueueHandlerResult.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "QueueMessage",
+					"kind": "type",
+					"summary": "Provider-neutral queue message shape used by bridges and workers.",
+					"source": "core/types/queue/QueueMessage.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "QueueWorkerBuilder",
+					"kind": "class",
+					"summary": "Builds a queue worker definition for one queue.",
+					"source": "QueueWorkerBuilder/QueueWorkerBuilder.impl.ts:36",
+					"hasExample": true
+				},
+				{
+					"name": "QueueWorkerBuilderTypes",
+					"kind": "type",
+					"summary": "Type accumulator used by `QueueWorkerBuilder` for handler capabilities.",
+					"source": "QueueWorkerBuilder/QueueWorkerBuilderTypes.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "QueueWorkerDefinition",
+					"kind": "type",
+					"summary": "Public definition of a worker attached to a queue.",
+					"source": "core/types/queue/QueueWorkerDefinition.ts:60",
+					"hasExample": false
+				},
+				{
+					"name": "renderArchitectureContextMarkdown",
+					"kind": "function",
+					"summary": "Render a deterministic Markdown projection of an architecture context.",
+					"source": "helper/architectureManifest.ts:824",
+					"hasExample": true
+				},
+				{
+					"name": "ScheduleDefinitionBuilder",
+					"kind": "class",
+					"summary": "Builds a provider-neutral schedule contract.",
+					"source": "ScheduleDefinitionBuilder/ScheduleDefinitionBuilder.impl.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "ScheduleManifest",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:38",
+					"hasExample": false
+				},
+				{
+					"name": "SchedulerBuilder",
+					"kind": "class",
+					"summary": "Builder for a standalone Core Scheduler Runtime host.",
+					"source": "SchedulerBuilder/SchedulerBuilder.impl.ts:27",
+					"hasExample": true
+				},
+				{
+					"name": "SchedulerRuntime",
+					"kind": "class",
+					"summary": "Core-owned scheduler loop that publishes regular PURISTA custom events.",
+					"source": "core/Scheduler/SchedulerRuntime.impl.ts:78",
+					"hasExample": true
+				},
+				{
+					"name": "SchedulerRuntimeOptions",
+					"kind": "type",
+					"summary": "Configuration for one independently deployed Scheduler Runtime host.",
+					"source": "core/Scheduler/SchedulerRuntime.impl.ts:30",
+					"hasExample": false
+				},
+				{
+					"name": "SchedulerRuntimeStatus",
+					"kind": "type",
+					"summary": "JSON-safe operational view of one Scheduler Runtime host.",
+					"source": "core/Scheduler/types.ts:98",
+					"hasExample": false
+				},
+				{
+					"name": "Schema",
+					"kind": "type",
+					"summary": "Common Standard Schema abstraction used across PURISTA boundaries.",
+					"source": "schema/standardSchema.ts:12",
+					"hasExample": false
+				},
+				{
+					"name": "SecretStore",
+					"kind": "interface",
+					"summary": "Interface definition for a secret store implementation",
+					"source": "core/SecretStore/types/SecretStore.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "Service",
+					"kind": "class",
+					"summary": "Base class for all services.",
+					"source": "core/Service/Service.impl.ts:152",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceBuilder",
+					"kind": "class",
+					"summary": "Declares one versioned PURISTA business capability.",
+					"source": "ServiceBuilder/ServiceBuilder.impl.ts:153",
+					"hasExample": true
+				},
+				{
+					"name": "ServiceClass",
+					"kind": "interface",
+					"summary": "The ServiceClass interface",
+					"source": "core/types/ServiceClass.ts:18",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceClassTypes",
+					"kind": "type",
+					"summary": "",
+					"source": "core/types/ServiceClassTypes.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceContractInput",
+					"kind": "type",
+					"summary": "",
+					"source": "helper/enterpriseInterop.ts:24",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceHealthState",
+					"kind": "type",
+					"summary": "",
+					"source": "core/types/ServiceHealthState.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceHealthStatus",
+					"kind": "type",
+					"summary": "",
+					"source": "core/types/ServiceHealthState.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceInfoType",
+					"kind": "type",
+					"summary": "General service information",
+					"source": "core/types/infoType/ServiceInfoType.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "ShutdownEntry",
+					"kind": "type",
+					"summary": "One runtime dependency that participates in graceful shutdown.",
+					"source": "helper/types/ShutdownEntry.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "StateRetention",
+					"kind": "type",
+					"summary": "Retention applied to one state write.",
+					"source": "core/StateStore/types/StateRetention.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "StateRetentionPolicy",
+					"kind": "type",
+					"summary": "Default retention applied by a StateStore or an immutable state-store view.",
+					"source": "core/StateStore/types/StateRetention.ts:52",
+					"hasExample": false
+				},
+				{
+					"name": "StateStore",
+					"kind": "interface",
+					"summary": "Interface definition for state store implementations",
+					"source": "core/StateStore/types/StateStore.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "StateStoreCapabilities",
+					"kind": "type",
+					"summary": "Capability matrix for a state store adapter.",
+					"source": "core/StateStore/types/StateStoreCapabilities.ts:24",
+					"hasExample": false
+				},
+				{
+					"name": "StateStoreConfig",
+					"kind": "type",
+					"summary": "Configuration shared by StateStore adapters.",
+					"source": "core/StateStore/types/StateStoreConfig.ts:22",
+					"hasExample": true
+				},
+				{
+					"name": "StateWriteOptions",
+					"kind": "type",
+					"summary": "Optional controls for a single state write.",
+					"source": "core/StateStore/types/StateRetention.ts:34",
+					"hasExample": true
+				},
+				{
+					"name": "StreamDefinitionBuilder",
+					"kind": "class",
+					"summary": "Builds a stream definition for incremental output or aggregate stream results.",
+					"source": "StreamDefinitionBuilder/StreamDefinitionBuilder.impl.ts:45",
+					"hasExample": true
+				},
+				{
+					"name": "StreamDefinitionBuilderTypes",
+					"kind": "type",
+					"summary": "Type accumulator used by `StreamDefinitionBuilder` for schemas, invocations, events, and queue access.",
+					"source": "StreamDefinitionBuilder/StreamDefinitionBuilderTypes.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "SubscriptionDefinitionBuilder",
+					"kind": "class",
+					"summary": "Declares a bounded, typed reaction to a business event.",
+					"source": "SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:56",
+					"hasExample": true
+				},
+				{
+					"name": "SubscriptionDefinitionBuilderTypes",
+					"kind": "type",
+					"summary": "Type accumulator used by `SubscriptionDefinitionBuilder` for schemas, hooks, invocations, events, and queues.",
+					"source": "SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "SupportedHttpMethod",
+					"kind": "type",
+					"summary": "HTTP methods accepted by builder-declared endpoint projections.",
+					"source": "core/HttpServer/types/SupportedHttpMethod.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "TenantId",
+					"kind": "type",
+					"summary": "the tenant id",
+					"source": "core/types/TenantId.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "toCloudEvent",
+					"kind": "function",
+					"summary": "Convert a PURISTA custom event message to a CloudEvents 1.0 structured object.",
+					"source": "helper/enterpriseInterop.ts:772",
+					"hasExample": true
+				},
+				{
+					"name": "toJSONSchema",
+					"kind": "function",
+					"summary": "Converts supported schema formats into OpenAPI-compatible JSON Schema.",
+					"source": "schema/standardSchema.ts:97",
+					"hasExample": false
+				},
+				{
+					"name": "TraceId",
+					"kind": "type",
+					"summary": "The trace id which will be passed through all commands, invocations and subscriptions",
+					"source": "core/types/TraceId.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "UnhandledError",
+					"kind": "class",
+					"summary": "A unhandled error will be thrown if some error response is returned during invoking a service function or when the invocation timed out.",
+					"source": "core/Error/UnhandledError.impl.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "validate",
+					"kind": "function",
+					"summary": "Validates input data with a Standard Schema compatible validator.",
+					"source": "schema/standardSchema.ts:79",
+					"hasExample": true
+				},
+				{
+					"name": "validateArchitectureComposition",
+					"kind": "function",
+					"summary": "Validate explicitly pinned architecture artifacts and cross-artifact relation bindings offline.",
+					"source": "helper/architectureManifest.ts:935",
+					"hasExample": true
+				},
+				{
+					"name": "validateArchitectureManifest",
+					"kind": "function",
+					"summary": "Validate static architecture references without contacting runtime infrastructure.",
+					"source": "helper/architectureManifest.ts:620",
+					"hasExample": true
+				},
+				{
+					"name": "ValidateArchitectureManifestOptions",
+					"kind": "type",
+					"summary": "Options for static architecture validation.",
+					"source": "helper/architectureManifest.ts:134",
+					"hasExample": false
+				},
+				{
+					"name": "ValidationResult",
+					"kind": "type",
+					"summary": "Unified validation result shape for all supported schema vendors.",
+					"source": "schema/standardSchema.ts:24",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/cli",
+			"exports": [
+				{
+					"name": "addPuristaAgent",
+					"kind": "function",
+					"summary": "Add an attached AI agent to an existing PURISTA service version.",
+					"source": "packages/cli/src/api/addPuristaAgent.ts:104",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaCommand",
+					"kind": "function",
+					"summary": "Add a command to an existing PURISTA service version.",
+					"source": "packages/cli/src/api/addPuristaCommand.ts:20",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaQueue",
+					"kind": "function",
+					"summary": "Add a queue contract, queue worker, and optional producer command to a service.",
+					"source": "packages/cli/src/api/addPuristaQueue.ts:74",
+					"hasExample": false
+				},
+				{
+					"name": "AddPuristaQueueInput",
+					"kind": "type",
+					"summary": "Input for generating a queue, its primary worker, and optional producer command.",
+					"source": "packages/cli/src/api/addPuristaQueue.ts:45",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaQueueWorker",
+					"kind": "function",
+					"summary": "Add a queue worker for an existing service queue.",
+					"source": "packages/cli/src/api/addPuristaQueueWorker.ts:49",
+					"hasExample": false
+				},
+				{
+					"name": "AddPuristaQueueWorkerInput",
+					"kind": "type",
+					"summary": "Input for generating an additional worker for an existing queue.",
+					"source": "packages/cli/src/api/addPuristaQueueWorker.ts:16",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaSchedule",
+					"kind": "function",
+					"summary": "Add an event-only schedule declaration to an existing service version.",
+					"source": "packages/cli/src/api/addPuristaSchedule.ts:37",
+					"hasExample": false
+				},
+				{
+					"name": "AddPuristaScheduleInput",
+					"kind": "type",
+					"summary": "Input for generating an event-only Scheduler Runtime declaration.",
+					"source": "packages/cli/src/api/addPuristaSchedule.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaService",
+					"kind": "function",
+					"summary": "Add a new PURISTA service version to an existing project.",
+					"source": "packages/cli/src/api/addPuristaService.ts:24",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaStream",
+					"kind": "function",
+					"summary": "Add a stream to an existing PURISTA service version.",
+					"source": "packages/cli/src/api/addPuristaStream.ts:20",
+					"hasExample": false
+				},
+				{
+					"name": "addPuristaSubscription",
+					"kind": "function",
+					"summary": "Add a subscription to an existing PURISTA service version.",
+					"source": "packages/cli/src/api/addPuristaSubscription.ts:20",
+					"hasExample": false
+				},
+				{
+					"name": "BasePromptRequest",
+					"kind": "type",
+					"summary": "Shared fields used by prompt requests.",
+					"source": "packages/cli/src/core/types.ts:95",
+					"hasExample": false
+				},
+				{
+					"name": "BlueprintId",
+					"kind": "type",
+					"summary": "Built-in project blueprint identifiers understood by the generator.",
+					"source": "packages/cli/src/blueprints/types.ts:24",
+					"hasExample": false
+				},
+				{
+					"name": "blueprintIds",
+					"kind": "variable",
+					"summary": "Ordered list of built-in project blueprint identifiers.",
+					"source": "packages/cli/src/blueprints/types.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "camelCase",
+					"kind": "function",
+					"summary": "Convert a string to camel case (`fooBar`).",
+					"source": "packages/cli/src/api/change-case.ts:107",
+					"hasExample": false
+				},
+				{
+					"name": "capitalCase",
+					"kind": "function",
+					"summary": "Convert a string to capital case (`Foo Bar`).",
+					"source": "packages/cli/src/api/change-case.ts:149",
+					"hasExample": false
+				},
+				{
+					"name": "ConfirmPromptRequest",
+					"kind": "type",
+					"summary": "Boolean confirmation prompt request.",
+					"source": "packages/cli/src/core/types.ts:114",
+					"hasExample": false
+				},
+				{
+					"name": "constantCase",
+					"kind": "function",
+					"summary": "Convert a string to constant case (`FOO_BAR`).",
+					"source": "packages/cli/src/api/change-case.ts:159",
+					"hasExample": false
+				},
+				{
+					"name": "convertToProjectFileCasing",
+					"kind": "function",
+					"summary": "Convert a logical artifact name to the file casing configured in `purista.json`.",
+					"source": "packages/cli/src/api/convertToProjectFileCasing.ts:13",
+					"hasExample": true
+				},
+				{
+					"name": "createAgentImplementationFile",
+					"kind": "function",
+					"summary": "Create implementation guidance for agentic development tools.",
+					"source": "packages/cli/src/blueprints/content.ts:114",
+					"hasExample": false
+				},
+				{
+					"name": "createAgentsFile",
+					"kind": "function",
+					"summary": "Create default coding-agent guidance for generated PURISTA projects.",
+					"source": "packages/cli/src/blueprints/content.ts:73",
+					"hasExample": false
+				},
+				{
+					"name": "createAmqpConfigFile",
+					"kind": "function",
+					"summary": "Create the default AMQP bridge config module.",
+					"source": "packages/cli/src/blueprints/content.ts:326",
+					"hasExample": false
+				},
+				{
+					"name": "createBiomeConfigFile",
+					"kind": "function",
+					"summary": "Create the generated Biome config.",
+					"source": "packages/cli/src/blueprints/content.ts:516",
+					"hasExample": false
+				},
+				{
+					"name": "createClaudeFile",
+					"kind": "function",
+					"summary": "Create Claude-specific guidance that delegates to AGENTS.md.",
+					"source": "packages/cli/src/blueprints/content.ts:106",
+					"hasExample": false
+				},
+				{
+					"name": "createDaprConfigFile",
+					"kind": "function",
+					"summary": "Create the default Dapr event bridge config module.",
+					"source": "packages/cli/src/blueprints/content.ts:355",
+					"hasExample": false
+				},
+				{
+					"name": "createDefinitionsExporterFile",
+					"kind": "function",
+					"summary": "Create the build-time JSON definition exporter used by CLI contract exports.",
+					"source": "packages/cli/src/blueprints/content.ts:166",
+					"hasExample": false
+				},
+				{
+					"name": "createDefinitionsFile",
+					"kind": "function",
+					"summary": "Create the explicit inventory of service builders used for static contract exports.",
+					"source": "packages/cli/src/blueprints/content.ts:149",
+					"hasExample": false
+				},
+				{
+					"name": "createEntrypointFile",
+					"kind": "function",
+					"summary": "Create `src/index.ts` with event bridge, service startup, optional HTTP, and shutdown wiring.",
+					"source": "packages/cli/src/blueprints/content.ts:601",
+					"hasExample": false
+				},
+				{
+					"name": "createEslintModuleConfigFile",
+					"kind": "function",
+					"summary": "Create an ESLint flat config for ESM projects.",
+					"source": "packages/cli/src/blueprints/content.ts:572",
+					"hasExample": false
+				},
+				{
+					"name": "createEventBridgeFile",
+					"kind": "function",
+					"summary": "Create event bridge runtime wiring for the selected bridge blueprint.",
+					"source": "packages/cli/src/blueprints/content.ts:310",
+					"hasExample": false
+				},
+				{
+					"name": "createGitIgnoreFile",
+					"kind": "function",
+					"summary": "Create the default `.gitignore` content for generated projects.",
+					"source": "packages/cli/src/blueprints/content.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "createHttpConfigFile",
+					"kind": "function",
+					"summary": "Create Hono HTTP server config for generated projects.",
+					"source": "packages/cli/src/blueprints/content.ts:368",
+					"hasExample": false
+				},
+				{
+					"name": "createHttpFile",
+					"kind": "function",
+					"summary": "Create runtime-specific Hono HTTP server bootstrap code.",
+					"source": "packages/cli/src/blueprints/content.ts:392",
+					"hasExample": false
+				},
+				{
+					"name": "createMqttConfigFile",
+					"kind": "function",
+					"summary": "Create the default MQTT bridge config module.",
+					"source": "packages/cli/src/blueprints/content.ts:337",
+					"hasExample": false
+				},
+				{
+					"name": "createNatsConfigFile",
+					"kind": "function",
+					"summary": "Create the default NATS bridge config module.",
+					"source": "packages/cli/src/blueprints/content.ts:347",
+					"hasExample": false
+				},
+				{
+					"name": "CreateProjectInput",
+					"kind": "type",
+					"summary": "Normalized input used to plan and materialize a new PURISTA project.",
+					"source": "packages/cli/src/create/types.ts:5",
+					"hasExample": false
+				},
+				{
+					"name": "createProjectSnapshot",
+					"kind": "function",
+					"summary": "Scan a PURISTA project and return all service, queue, worker, agent, and event metadata.",
+					"source": "packages/cli/src/project/createProjectSnapshot.ts:58",
+					"hasExample": false
+				},
+				{
+					"name": "createPublicIndexHtml",
+					"kind": "function",
+					"summary": "Create the static landing page served by the generated Hono setup.",
+					"source": "packages/cli/src/blueprints/content.ts:473",
+					"hasExample": false
+				},
+				{
+					"name": "createPuristaCliEngine",
+					"kind": "function",
+					"summary": "Create a programmatic CLI engine bound to a working directory and prompt adapter.",
+					"source": "packages/cli/src/engine.ts:48",
+					"hasExample": true
+				},
+				{
+					"name": "createReadmeFile",
+					"kind": "function",
+					"summary": "Create the generated project README content.",
+					"source": "packages/cli/src/blueprints/content.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "createSchedulerHostFile",
+					"kind": "function",
+					"summary": "Create the local-only standalone Scheduler Runtime host.",
+					"source": "packages/cli/src/blueprints/content.ts:178",
+					"hasExample": false
+				},
+				{
+					"name": "createServiceEventEnumFile",
+					"kind": "function",
+					"summary": "Create the starter `ServiceEvent` enum with the example ping event.",
+					"source": "packages/cli/src/blueprints/content.ts:237",
+					"hasExample": false
+				},
+				{
+					"name": "createTelemetryFile",
+					"kind": "function",
+					"summary": "Create an opt-in, application-owned OpenTelemetry Metrics API setup.",
+					"source": "packages/cli/src/blueprints/content.ts:212",
+					"hasExample": false
+				},
+				{
+					"name": "dotCase",
+					"kind": "function",
+					"summary": "Convert a string to dot case (`foo.bar`).",
+					"source": "packages/cli/src/api/change-case.ts:167",
+					"hasExample": false
+				},
+				{
+					"name": "EnqueueOption",
+					"kind": "type",
+					"summary": "Queue import metadata used when generating a command with `.canEnqueue(...)`.",
+					"source": "packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "ExampleServiceGeneratorStep",
+					"kind": "type",
+					"summary": "Deferred generator action that creates the example service after base files exist.",
+					"source": "packages/cli/src/blueprints/types.ts:60",
+					"hasExample": false
+				},
+				{
+					"name": "getCommandBuilderFileContent",
+					"kind": "function",
+					"summary": "Generate a command builder file for the current PURISTA service shape.",
+					"source": "packages/cli/src/api/content/command/getCommandBuilderFileContent.ts:28",
+					"hasExample": false
+				},
+				{
+					"name": "getCommandSchemaFileContent",
+					"kind": "function",
+					"summary": "Generate the schema module for a command's parameter, payload, and output.",
+					"source": "packages/cli/src/api/content/command/getCommandSchemaFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getCommandTestFileContent",
+					"kind": "function",
+					"summary": "Generate a command unit test using the current command context mock shape.",
+					"source": "packages/cli/src/api/content/command/getCommandTestFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getCommandTypeFileContent",
+					"kind": "function",
+					"summary": "Generate TypeScript aliases inferred from a command schema module.",
+					"source": "packages/cli/src/api/content/command/getCommandTypeFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getGeneralServiceConfigFileContent",
+					"kind": "function",
+					"summary": "Generate the general service configuration file content.",
+					"source": "packages/cli/src/api/content/service/getGeneralServiceConfigFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getQueueBuilderFileContent",
+					"kind": "function",
+					"summary": "Generate a queue builder file.",
+					"source": "packages/cli/src/api/content/queue/getQueueBuilderFileContent.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "getQueueSchemaFileContent",
+					"kind": "function",
+					"summary": "Generate the schema module for a queue payload and parameter.",
+					"source": "packages/cli/src/api/content/queue/getQueueSchemaFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getQueueTestFileContent",
+					"kind": "function",
+					"summary": "Generate a queue definition test for a generated queue builder.",
+					"source": "packages/cli/src/api/content/queue/getQueueTestFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getQueueTypeFileContent",
+					"kind": "function",
+					"summary": "Generate TypeScript aliases inferred from a queue schema module.",
+					"source": "packages/cli/src/api/content/queue/getQueueTypeFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getQueueWorkerBuilderFileContent",
+					"kind": "function",
+					"summary": "Generate a queue worker builder file.",
+					"source": "packages/cli/src/api/content/queueWorker/getQueueWorkerBuilderFileContent.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "getQueueWorkerTestFileContent",
+					"kind": "function",
+					"summary": "Generate a queue worker test using `createQueueWorkerTestHarness`.",
+					"source": "packages/cli/src/api/content/queueWorker/getQueueWorkerTestFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getServiceBuilderFileContent",
+					"kind": "function",
+					"summary": "Generate the builder file, which contains the creation of the service builder.",
+					"source": "packages/cli/src/api/content/service/getServiceBuilderFileContent.ts:12",
+					"hasExample": false
+				},
+				{
+					"name": "getServiceConfigFileContent",
+					"kind": "function",
+					"summary": "Generate the service config file, which contains the configuration schema and type for the service",
+					"source": "packages/cli/src/api/content/service/getServiceConfigFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getServiceFileContent",
+					"kind": "function",
+					"summary": "Generate the service file content for a given service name and version.",
+					"source": "packages/cli/src/api/content/service/getServiceFileContent.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "getServiceTestFileContent",
+					"kind": "function",
+					"summary": "Create the content of the service test file.",
+					"source": "packages/cli/src/api/content/service/getServiceTestFileContent.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "getStreamBuilderFileContent",
+					"kind": "function",
+					"summary": "Generate a stream builder file.",
+					"source": "packages/cli/src/api/content/stream/getStreamBuilderFileContent.ts:16",
+					"hasExample": false
+				},
+				{
+					"name": "getStreamSchemaFileContent",
+					"kind": "function",
+					"summary": "Generate the schema module for stream input, chunk, and final payloads.",
+					"source": "packages/cli/src/api/content/stream/getStreamSchemaFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getStreamTestFileContent",
+					"kind": "function",
+					"summary": "Generate a stream test that runs the builder through `createStreamTestHarness`.",
+					"source": "packages/cli/src/api/content/stream/getStreamTestFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getStreamTypeFileContent",
+					"kind": "function",
+					"summary": "Generate TypeScript aliases inferred from a stream schema module.",
+					"source": "packages/cli/src/api/content/stream/getStreamTypeFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getSubscriptionBuilderFileContent",
+					"kind": "function",
+					"summary": "Generate a subscription builder file.",
+					"source": "packages/cli/src/api/content/subscription/getSubscriptionBuilderFileContent.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "getSubscriptionSchemaFileContent",
+					"kind": "function",
+					"summary": "Generate the schema module for a subscription parameter, payload, and optional output.",
+					"source": "packages/cli/src/api/content/subscription/getSubscriptionSchemaFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "getSubscriptionTestFileContent",
+					"kind": "function",
+					"summary": "Generate a subscription unit test using the current subscription context mock shape.",
+					"source": "packages/cli/src/api/content/subscription/getSubscriptionTestFileContent.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "getSubscriptionTypeFileContent",
+					"kind": "function",
+					"summary": "Generate TypeScript aliases inferred from a subscription schema module.",
+					"source": "packages/cli/src/api/content/subscription/getSubscriptionTypeFileContent.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "InputPromptRequest",
+					"kind": "type",
+					"summary": "Text input prompt request.",
+					"source": "packages/cli/src/core/types.ts:107",
+					"hasExample": false
+				},
+				{
+					"name": "kebabCase",
+					"kind": "function",
+					"summary": "Convert a string to kebab case (`foo-bar`).",
+					"source": "packages/cli/src/api/change-case.ts:174",
+					"hasExample": false
+				},
+				{
+					"name": "loadPuristaConfig",
+					"kind": "function",
+					"summary": "Load and validate `purista.json` from a project root.",
+					"source": "packages/cli/src/api/loadPuristaConfig.ts:46",
+					"hasExample": true
+				},
+				{
+					"name": "Locale",
+					"kind": "type",
+					"summary": "Supported locale values.",
+					"source": "packages/cli/src/api/change-case.ts:27",
+					"hasExample": false
+				},
+				{
+					"name": "materializeProjectGeneration",
+					"kind": "function",
+					"summary": "Write all files from a generation plan and run deferred generator steps.",
+					"source": "packages/cli/src/blueprints/materializeProjectGeneration.ts:63",
+					"hasExample": false
+				},
+				{
+					"name": "noCase",
+					"kind": "function",
+					"summary": "Convert a string to space separated lower case (`foo bar`).",
+					"source": "packages/cli/src/api/change-case.ts:99",
+					"hasExample": false
+				},
+				{
+					"name": "Options",
+					"kind": "interface",
+					"summary": "Options used for converting strings to any case.",
+					"source": "packages/cli/src/api/change-case.ts:40",
+					"hasExample": false
+				},
+				{
+					"name": "OutputAdapter",
+					"kind": "type",
+					"summary": "Adapter for rendering CLI results and errors in custom hosts.",
+					"source": "packages/cli/src/core/types.ts:152",
+					"hasExample": false
+				},
+				{
+					"name": "PackageManager",
+					"kind": "type",
+					"summary": "Package managers supported by the project generator.",
+					"source": "packages/cli/src/create/types.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "pascalCase",
+					"kind": "function",
+					"summary": "Convert a string to pascal case (`FooBar`).",
+					"source": "packages/cli/src/api/change-case.ts:129",
+					"hasExample": false
+				},
+				{
+					"name": "PascalCaseOptions",
+					"kind": "interface",
+					"summary": "Options used for converting strings to pascal/camel case.",
+					"source": "packages/cli/src/api/change-case.ts:32",
+					"hasExample": false
+				},
+				{
+					"name": "pascalSnakeCase",
+					"kind": "function",
+					"summary": "Convert a string to pascal snake case (`Foo_Bar`).",
+					"source": "packages/cli/src/api/change-case.ts:142",
+					"hasExample": false
+				},
+				{
+					"name": "pathCase",
+					"kind": "function",
+					"summary": "Convert a string to path case (`foo/bar`).",
+					"source": "packages/cli/src/api/change-case.ts:181",
+					"hasExample": false
+				},
+				{
+					"name": "PKG",
+					"kind": "type",
+					"summary": "Package.json shape used by the CLI project blueprint merger.",
+					"source": "packages/cli/src/create/getPackageJson.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "planProjectGeneration",
+					"kind": "function",
+					"summary": "Build a complete project generation plan without writing files.",
+					"source": "packages/cli/src/blueprints/planProjectGeneration.ts:105",
+					"hasExample": true
+				},
+				{
+					"name": "ProjectBlueprint",
+					"kind": "type",
+					"summary": "A reusable project generator unit.",
+					"source": "packages/cli/src/blueprints/types.ts:94",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectBlueprintContext",
+					"kind": "type",
+					"summary": "Input visible to a blueprint while it decides and creates contributions.",
+					"source": "packages/cli/src/blueprints/types.ts:81",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectBlueprintContribution",
+					"kind": "type",
+					"summary": "Files, config patches, warnings, and deferred steps emitted by a blueprint.",
+					"source": "packages/cli/src/blueprints/types.ts:87",
+					"hasExample": false
+				},
+				{
+					"name": "projectBlueprintRegistry",
+					"kind": "variable",
+					"summary": "Registry of built-in project blueprints used by `planProjectGeneration`.",
+					"source": "packages/cli/src/blueprints/registry.ts:154",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectConfigPatch",
+					"kind": "type",
+					"summary": "Partial project-level configuration merged from a blueprint.",
+					"source": "packages/cli/src/blueprints/types.ts:50",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectEntryContribution",
+					"kind": "type",
+					"summary": "File-system entry that a blueprint contributes to a project generation plan.",
+					"source": "packages/cli/src/blueprints/types.ts:47",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectFileContribution",
+					"kind": "type",
+					"summary": "A file that a blueprint contributes to a project generation plan.",
+					"source": "packages/cli/src/blueprints/types.ts:27",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectGenerationPlan",
+					"kind": "type",
+					"summary": "Complete dry-run project generation plan.",
+					"source": "packages/cli/src/blueprints/types.ts:122",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectGeneratorStep",
+					"kind": "type",
+					"summary": "Union of deferred generator steps executed while materializing a project.",
+					"source": "packages/cli/src/blueprints/types.ts:78",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectLinkContribution",
+					"kind": "type",
+					"summary": "A symbolic link that a blueprint contributes to a project generation plan.",
+					"source": "packages/cli/src/blueprints/types.ts:37",
+					"hasExample": false
+				},
+				{
+					"name": "ProjectSnapshot",
+					"kind": "type",
+					"summary": "Full project snapshot used by CLI generators to append new definitions safely.",
+					"source": "packages/cli/src/project/createProjectSnapshot.ts:28",
+					"hasExample": false
+				},
+				{
+					"name": "PromptAdapter",
+					"kind": "type",
+					"summary": "Adapter used by the engine when it must collect missing input.",
+					"source": "packages/cli/src/core/types.ts:140",
+					"hasExample": false
+				},
+				{
+					"name": "PromptAnswerMap",
+					"kind": "type",
+					"summary": "Programmatic answer map keyed by prompt `key`.",
+					"source": "packages/cli/src/core/types.ts:137",
+					"hasExample": false
+				},
+				{
+					"name": "PromptChoice",
+					"kind": "type",
+					"summary": "One selectable prompt option.",
+					"source": "packages/cli/src/core/types.ts:85",
+					"hasExample": false
+				},
+				{
+					"name": "PromptRequest",
+					"kind": "type",
+					"summary": "Union of prompt requests emitted by CLI command resolution.",
+					"source": "packages/cli/src/core/types.ts:131",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCliEngineOptions",
+					"kind": "type",
+					"summary": "Options for creating a reusable programmatic PURISTA CLI engine.",
+					"source": "packages/cli/src/engine.ts:20",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCliError",
+					"kind": "class",
+					"summary": "Base error type thrown by the programmatic CLI API.",
+					"source": "packages/cli/src/core/errors.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCliPromptError",
+					"kind": "class",
+					"summary": "Error thrown by prompt adapters when interactive input cannot be collected.",
+					"source": "packages/cli/src/core/errors.ts:35",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCliValidationError",
+					"kind": "class",
+					"summary": "Error thrown when command input or project state cannot be resolved.",
+					"source": "packages/cli/src/core/errors.ts:26",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCommandContext",
+					"kind": "type",
+					"summary": "Runtime context passed to CLI command resolvers and executors.",
+					"source": "packages/cli/src/core/command.ts:14",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCommandId",
+					"kind": "type",
+					"summary": "Command identifiers accepted by the programmatic CLI engine.",
+					"source": "packages/cli/src/core/types.ts:25",
+					"hasExample": false
+				},
+				{
+					"name": "puristaCommandIds",
+					"kind": "variable",
+					"summary": "Ordered list of command identifiers supported by the programmatic CLI engine.",
+					"source": "packages/cli/src/core/types.ts:2",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCommandIssue",
+					"kind": "type",
+					"summary": "A validation or execution issue reported by a CLI command.",
+					"source": "packages/cli/src/core/types.ts:39",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCommandMode",
+					"kind": "type",
+					"summary": "Controls how unresolved command input is completed before execution.",
+					"source": "packages/cli/src/core/types.ts:28",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCommandResolution",
+					"kind": "type",
+					"summary": "Output of command input resolution before execution.",
+					"source": "packages/cli/src/core/types.ts:69",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaCommandResult",
+					"kind": "type",
+					"summary": "Result returned after a CLI command has executed.",
+					"source": "packages/cli/src/core/types.ts:49",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaConfig",
+					"kind": "type",
+					"summary": "Parsed `purista.json` configuration with defaults applied.",
+					"source": "packages/cli/src/api/loadPuristaConfig.ts:36",
+					"hasExample": false
+				},
+				{
+					"name": "puristaConfigSchema",
+					"kind": "variable",
+					"summary": "Zod schema for the `purista.json` configuration file consumed by the CLI.",
+					"source": "packages/cli/src/api/loadPuristaConfig.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaExecutableCommand",
+					"kind": "type",
+					"summary": "Definition contract implemented by commands registered in the CLI engine.",
+					"source": "packages/cli/src/core/command.ts:34",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaFileMutation",
+					"kind": "type",
+					"summary": "Describes one file path changed by a CLI command.",
+					"source": "packages/cli/src/core/types.ts:31",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaProjectInfo",
+					"kind": "type",
+					"summary": "Public project information required by scaffolding helpers.",
+					"source": "packages/cli/src/api/scanPuristaProject.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "PuristaProjectServices",
+					"kind": "type",
+					"summary": "Public service scan result used by legacy generator helpers.",
+					"source": "packages/cli/src/api/scanPuristaProject.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "QueueProducerOptions",
+					"kind": "type",
+					"summary": "Optional command generated together with a queue to enqueue work.",
+					"source": "packages/cli/src/api/addPuristaQueue.ts:21",
+					"hasExample": false
+				},
+				{
+					"name": "QueueWorkerOptions",
+					"kind": "type",
+					"summary": "Queue worker generated together with a queue.",
+					"source": "packages/cli/src/api/addPuristaQueue.ts:31",
+					"hasExample": false
+				},
+				{
+					"name": "ResolvedProjectBlueprints",
+					"kind": "type",
+					"summary": "Result of selecting project blueprints for a concrete init input.",
+					"source": "packages/cli/src/blueprints/types.ts:112",
+					"hasExample": false
+				},
+				{
+					"name": "resolveProjectBlueprints",
+					"kind": "function",
+					"summary": "Select the built-in blueprints required for a project input.",
+					"source": "packages/cli/src/blueprints/resolveProjectBlueprints.ts:40",
+					"hasExample": false
+				},
+				{
+					"name": "resolvePuristaCommand",
+					"kind": "function",
+					"summary": "Resolve a CLI command without writing files.",
+					"source": "packages/cli/src/engine.ts:132",
+					"hasExample": false
+				},
+				{
+					"name": "runPuristaCommand",
+					"kind": "function",
+					"summary": "Resolve and execute a CLI command in one call.",
+					"source": "packages/cli/src/engine.ts:149",
+					"hasExample": true
+				},
+				{
+					"name": "scanPuristaProject",
+					"kind": "function",
+					"summary": "Scan a PURISTA project for service, command, subscription, stream, and event metadata.",
+					"source": "packages/cli/src/api/scanPuristaProject.ts:30",
+					"hasExample": false
+				},
+				{
+					"name": "SelectPromptRequest",
+					"kind": "type",
+					"summary": "Single-choice prompt request.",
+					"source": "packages/cli/src/core/types.ts:120",
+					"hasExample": false
+				},
+				{
+					"name": "sentenceCase",
+					"kind": "function",
+					"summary": "Convert a string to path case (`Foo bar`).",
+					"source": "packages/cli/src/api/change-case.ts:188",
+					"hasExample": false
+				},
+				{
+					"name": "ServiceVersionSnapshot",
+					"kind": "type",
+					"summary": "Discovered files and artifact directories for one service version.",
+					"source": "packages/cli/src/project/createProjectSnapshot.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "snakeCase",
+					"kind": "function",
+					"summary": "Convert a string to snake case (`foo_bar`).",
+					"source": "packages/cli/src/api/change-case.ts:208",
+					"hasExample": false
+				},
+				{
+					"name": "split",
+					"kind": "function",
+					"summary": "Split any cased input strings into an array of words.",
+					"source": "packages/cli/src/api/change-case.ts:62",
+					"hasExample": false
+				},
+				{
+					"name": "splitSeparateNumbers",
+					"kind": "function",
+					"summary": "Split the input string into an array of words, separating numbers.",
+					"source": "packages/cli/src/api/change-case.ts:83",
+					"hasExample": false
+				},
+				{
+					"name": "trainCase",
+					"kind": "function",
+					"summary": "Convert a string to header case (`Foo-Bar`).",
+					"source": "packages/cli/src/api/change-case.ts:215",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/hono-http-server",
+			"exports": [
+				{
+					"name": "AnyService",
+					"kind": "type",
+					"summary": "Service instance accepted by the Hono HTTP projection registry.",
+					"source": "hono-http-server/src/service/hono/v1/HonoServiceClass.ts:73",
+					"hasExample": false
+				},
+				{
+					"name": "BindingsBase",
+					"kind": "type",
+					"summary": "Base Hono bindings type used by the Hono HTTP service.",
+					"source": "hono-http-server/src/types/BindingsBase.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "EndpointProtectMiddleware",
+					"kind": "type",
+					"summary": "Middleware type for protected generated Hono endpoints.",
+					"source": "hono-http-server/src/types/EndpointProtectMiddleware.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "HealthFunction",
+					"kind": "type",
+					"summary": "Health callback for the Hono HTTP service.",
+					"source": "hono-http-server/src/types/HealthFunction.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "HonoServiceClass",
+					"kind": "class",
+					"summary": "PURISTA service that exposes command, stream and async queue-backed endpoints through Hono.",
+					"source": "hono-http-server/src/service/hono/v1/HonoServiceClass.ts:121",
+					"hasExample": true
+				},
+				{
+					"name": "HonoServiceV1Config",
+					"kind": "type",
+					"summary": "Fully parsed Hono service config with defaults applied.",
+					"source": "hono-http-server/src/service/hono/v1/honoServiceConfig.ts:130",
+					"hasExample": false
+				},
+				{
+					"name": "HonoServiceV1ConfigPartial",
+					"kind": "type",
+					"summary": "Partial Hono service config accepted by `honoV1Service.getInstance`.",
+					"source": "hono-http-server/src/service/hono/v1/honoServiceConfig.ts:125",
+					"hasExample": false
+				},
+				{
+					"name": "honoServiceV1ConfigSchema",
+					"kind": "variable",
+					"summary": "Runtime configuration schema for the Hono HTTP service.",
+					"source": "hono-http-server/src/service/hono/v1/honoServiceConfig.ts:80",
+					"hasExample": false
+				},
+				{
+					"name": "honoV1Service",
+					"kind": "variable",
+					"summary": "Built-in Hono HTTP service definition.",
+					"source": "hono-http-server/src/service/hono/v1/honoV1Service.ts:29",
+					"hasExample": true
+				},
+				{
+					"name": "ProblemDetails",
+					"kind": "type",
+					"summary": "RFC 9457-style problem details response returned by generated Hono endpoints.",
+					"source": "hono-http-server/src/helper/problemDetails.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "ProblemTypeConfig",
+					"kind": "type",
+					"summary": "Controls generated problem type URIs.",
+					"source": "hono-http-server/src/helper/problemDetails.ts:31",
+					"hasExample": false
+				},
+				{
+					"name": "VariablesBase",
+					"kind": "type",
+					"summary": "Hono variables read by generated PURISTA HTTP handlers.",
+					"source": "hono-http-server/src/types/VariablesBase.ts:4",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/amqpbridge",
+			"exports": [
+				{
+					"name": "AmqpBridge",
+					"kind": "class",
+					"summary": "EventBridge implementation for AMQP brokers such as RabbitMQ.",
+					"source": "amqpbridge/src/AmqpBridge.impl.ts:115",
+					"hasExample": true
+				},
+				{
+					"name": "AmqpBridgeConfig",
+					"kind": "type",
+					"summary": "Configuration for AmqpBridge.",
+					"source": "amqpbridge/src/types/AmqpBridgeConfig.ts:17",
+					"hasExample": false
+				},
+				{
+					"name": "Encoder",
+					"kind": "type",
+					"summary": "Map of content-type to codec implementation.",
+					"source": "amqpbridge/src/types/Encoder.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "EncoderFunctions",
+					"kind": "type",
+					"summary": "Encode/decode contract for one content-type codec.",
+					"source": "amqpbridge/src/types/EncoderFunctions.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "Encrypter",
+					"kind": "type",
+					"summary": "Map of content-encoding to encryption implementation.",
+					"source": "amqpbridge/src/types/Encrypter.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "EncryptFunctions",
+					"kind": "type",
+					"summary": "Encrypt/decrypt contract for one content-encoding implementation.",
+					"source": "amqpbridge/src/types/EncryptFunctions.ts:4",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/mqttbridge",
+			"exports": [
+				{
+					"name": "MqttBridge",
+					"kind": "class",
+					"summary": "EventBridge implementation for MQTT 5 brokers.",
+					"source": "mqttbridge/src/MqttEventBridge.ts:79",
+					"hasExample": true
+				},
+				{
+					"name": "MqttBridgeConfig",
+					"kind": "type",
+					"summary": "Configuration for MqttBridge.",
+					"source": "mqttbridge/src/types/MqttBridgeConfig.ts:13",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/natsbridge",
+			"exports": [
+				{
+					"name": "NatsBridge",
+					"kind": "class",
+					"summary": "EventBridge implementation for NATS core messaging with optional JetStream.",
+					"source": "natsbridge/src/NatsBridge.ts:127",
+					"hasExample": true
+				},
+				{
+					"name": "NatsBridgeConfig",
+					"kind": "type",
+					"summary": "Configuration for NatsBridge.",
+					"source": "natsbridge/src/types/NatsBridgeConfig.ts:23",
+					"hasExample": false
+				},
+				{
+					"name": "NatsConsumerFailureHandlingDefaults",
+					"kind": "type",
+					"summary": "Default JetStream-backed subscription failure handling.",
+					"source": "natsbridge/src/types/NatsBridgeConfig.ts:7",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/dapr-sdk",
+			"exports": [
+				{
+					"name": "DaprClientConfig",
+					"kind": "type",
+					"summary": "Configuration for clients that call the local Dapr sidecar.",
+					"source": "dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "DaprConfigStore",
+					"kind": "class",
+					"summary": "Config store adapter backed by Dapr configuration components.",
+					"source": "dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:28",
+					"hasExample": true
+				},
+				{
+					"name": "DaprConfigStoreConfig",
+					"kind": "type",
+					"summary": "Configuration for DaprConfigStore.",
+					"source": "dapr-sdk/src/DaprConfigStore/types/DaprConfigStoreConfig.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "DaprEventBridge",
+					"kind": "class",
+					"summary": "Event bridge that connects PURISTA services to the local Dapr sidecar.",
+					"source": "dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:45",
+					"hasExample": true
+				},
+				{
+					"name": "DaprEventBridgeConfig",
+					"kind": "type",
+					"summary": "Configuration for DaprEventBridge.",
+					"source": "dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "DaprSecretStore",
+					"kind": "class",
+					"summary": "Secret store adapter backed by a Dapr secret component.",
+					"source": "dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:27",
+					"hasExample": true
+				},
+				{
+					"name": "DaprSecretStoreConfig",
+					"kind": "type",
+					"summary": "Configuration for DaprSecretStore.",
+					"source": "dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "DaprStateStore",
+					"kind": "class",
+					"summary": "State store adapter backed by a Dapr state component.",
+					"source": "dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:29",
+					"hasExample": true
+				},
+				{
+					"name": "DaprStateStoreConfig",
+					"kind": "type",
+					"summary": "Configuration for DaprStateStore.",
+					"source": "dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts:6",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/base-http-bridge",
+			"exports": [
+				{
+					"name": "getDefaultHttpEventBridgeConfig",
+					"kind": "function",
+					"summary": "Returns default HTTP event bridge settings shared by sidecar-based bridges.",
+					"source": "base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts:13",
+					"hasExample": false
+				},
+				{
+					"name": "HttpEventBridge",
+					"kind": "class",
+					"summary": "Generic HTTP-based event bridge for runtimes that deliver PURISTA messages over HTTP.",
+					"source": "base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:85",
+					"hasExample": true
+				},
+				{
+					"name": "HttpEventBridgeClient",
+					"kind": "interface",
+					"summary": "Adapter contract between HttpEventBridge and a sidecar or platform HTTP API.",
+					"source": "base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:15",
+					"hasExample": false
+				},
+				{
+					"name": "HttpEventBridgeConfig",
+					"kind": "type",
+					"summary": "Configuration for HTTP event bridges that host PURISTA command/subscription routes.",
+					"source": "base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:7",
+					"hasExample": false
+				},
+				{
+					"name": "IHttpEventBridge",
+					"kind": "type",
+					"summary": "Minimal bridge shape required by HTTP route handlers.",
+					"source": "base-http-bridge/src/HttpEventBridge/types/IHttpEventBridge.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "base-http-bridge/src/version.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "RouterFunction",
+					"kind": "type",
+					"summary": "Hono route handler bound to an HTTP event bridge instance.",
+					"source": "base-http-bridge/src/HttpEventBridge/types/RouterFunction.ts:8",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/nats-queue-bridge",
+			"exports": [
+				{
+					"name": "NatsQueueBridge",
+					"kind": "class",
+					"summary": "Strict QueueBridge implementation backed by NATS JetStream streams and KV.",
+					"source": "NatsQueueBridge.impl.ts:87",
+					"hasExample": true
+				},
+				{
+					"name": "NatsQueueBridgeOptions",
+					"kind": "type",
+					"summary": "Configuration for NatsQueueBridge.",
+					"source": "types.ts:22",
+					"hasExample": true
+				}
+			]
+		},
+		{
+			"packageName": "@purista/redis-queue-bridge",
+			"exports": [
+				{
+					"name": "RedisQueueBridge",
+					"kind": "class",
+					"summary": "Strict QueueBridge implementation backed by Redis data structures.",
+					"source": "RedisQueueBridge.impl.ts:80",
+					"hasExample": true
+				},
+				{
+					"name": "RedisQueueBridgeOptions",
+					"kind": "type",
+					"summary": "Configuration for RedisQueueBridge.",
+					"source": "types.ts:29",
+					"hasExample": true
+				}
+			]
+		},
+		{
+			"packageName": "@purista/redis-scheduler-provider",
+			"exports": [
+				{
+					"name": "RedisSchedulerClient",
+					"kind": "interface",
+					"summary": "Minimal Redis commands required by RedisSchedulerProvider.",
+					"source": "types.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "RedisSchedulerProvider",
+					"kind": "class",
+					"summary": "Redis-backed distributed occurrence provider for standalone Scheduler hosts.",
+					"source": "RedisSchedulerProvider.impl.ts:47",
+					"hasExample": true
+				},
+				{
+					"name": "RedisSchedulerProviderOptions",
+					"kind": "type",
+					"summary": "Configuration for RedisSchedulerProvider.",
+					"source": "types.ts:29",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/aws-config-store",
+			"exports": [
+				{
+					"name": "AWSConfigStore",
+					"kind": "class",
+					"summary": "Config store backed by AWS Systems Manager Parameter Store.",
+					"source": "aws-config-store/src/AWSConfigStore.impl.ts:40",
+					"hasExample": true
+				},
+				{
+					"name": "AWSConfigStoreConfig",
+					"kind": "type",
+					"summary": "AWS Systems Manager Parameter Store configuration.",
+					"source": "aws-config-store/src/types.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "aws-config-store/src/version.ts:1",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/nats-config-store",
+			"exports": [
+				{
+					"name": "NatsConfigStore",
+					"kind": "class",
+					"summary": "Config store backed by a NATS JetStream key-value bucket.",
+					"source": "nats-config-store/src/NatsConfigStore.impl.ts:32",
+					"hasExample": true
+				},
+				{
+					"name": "NatsConfigStoreConfig",
+					"kind": "type",
+					"summary": "NATS JetStream key-value configuration for `NatsConfigStore`.",
+					"source": "nats-config-store/src/types/NatsConfigStoreConfig.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "nats-config-store/src/version.ts:1",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/redis-config-store",
+			"exports": [
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "redis-config-store/src/version.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "RedisConfigStore",
+					"kind": "class",
+					"summary": "Config store backed by Redis string keys.",
+					"source": "redis-config-store/src/RedisConfigStore.impl.ts:42",
+					"hasExample": true
+				},
+				{
+					"name": "RedisStoreConfig",
+					"kind": "type",
+					"summary": "Redis config store backend configuration.",
+					"source": "redis-config-store/src/types.ts:23",
+					"hasExample": true
+				}
+			]
+		},
+		{
+			"packageName": "@purista/nats-state-store",
+			"exports": [
+				{
+					"name": "NatsStateStore",
+					"kind": "class",
+					"summary": "State store backed by a NATS JetStream key-value bucket.",
+					"source": "nats-state-store/src/NatsStateStore.impl.ts:34",
+					"hasExample": true
+				},
+				{
+					"name": "NatsStateStoreConfig",
+					"kind": "type",
+					"summary": "NATS JetStream key-value configuration for `NatsStateStore`.",
+					"source": "nats-state-store/src/types/NatsStateStoreConfig.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "nats-state-store/src/version.ts:1",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/redis-state-store",
+			"exports": [
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "redis-state-store/src/version.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "RedisStateStore",
+					"kind": "class",
+					"summary": "State store backed by Redis string keys.",
+					"source": "redis-state-store/src/RedisStateStore.impl.ts:44",
+					"hasExample": true
+				},
+				{
+					"name": "RedisStoreConfig",
+					"kind": "type",
+					"summary": "Redis state store backend configuration.",
+					"source": "redis-state-store/src/types.ts:23",
+					"hasExample": true
+				}
+			]
+		},
+		{
+			"packageName": "@purista/aws-secret-store",
+			"exports": [
+				{
+					"name": "AWSSecretStore",
+					"kind": "class",
+					"summary": "Secret store backed by AWS Secrets Manager.",
+					"source": "aws-secret-store/src/AWSSecretStore.impl.ts:45",
+					"hasExample": true
+				},
+				{
+					"name": "AWSSecretStoreConfig",
+					"kind": "type",
+					"summary": "AWS Secrets Manager store configuration.",
+					"source": "aws-secret-store/src/types.ts:10",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "aws-secret-store/src/version.ts:1",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/azure-secret-store",
+			"exports": [
+				{
+					"name": "AzureSecretStore",
+					"kind": "class",
+					"summary": "Secret store backed by Azure Key Vault.",
+					"source": "azure-secret-store/src/AzureSecretStore.impl.ts:39",
+					"hasExample": true
+				},
+				{
+					"name": "AzureSecretStoreConfig",
+					"kind": "type",
+					"summary": "Azure Key Vault secret store configuration.",
+					"source": "azure-secret-store/src/types.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "azure-secret-store/src/version.ts:1",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/gcloud-secret-store",
+			"exports": [
+				{
+					"name": "GoogleSecretStore",
+					"kind": "class",
+					"summary": "Secret store backed by Google Secret Manager.",
+					"source": "gcloud-secret-store/src/GoogleSecretStore.impl.ts:41",
+					"hasExample": true
+				},
+				{
+					"name": "GoogleSecretStoreConfig",
+					"kind": "type",
+					"summary": "Google Secret Manager store configuration.",
+					"source": "gcloud-secret-store/src/types.ts:6",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "gcloud-secret-store/src/version.ts:1",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/infisical-secret-store",
+			"exports": [
+				{
+					"name": "ClientConfig",
+					"kind": "type",
+					"summary": "HTTP client configuration for `InfisicalClient`.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts:17",
+					"hasExample": false
+				},
+				{
+					"name": "DecryptInput",
+					"kind": "type",
+					"summary": "Input required to decrypt an Infisical encrypted field.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/DecryptInput.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "EncryptInput",
+					"kind": "type",
+					"summary": "Input required to encrypt an Infisical secret field.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "HttpClientConfigCustom",
+					"kind": "type",
+					"summary": "Infisical client-specific HTTP configuration extension.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "InfisicalClient",
+					"kind": "class",
+					"summary": "HTTP client for the Infisical API used by `InfisicalSecretStore`.",
+					"source": "infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:30",
+					"hasExample": true
+				},
+				{
+					"name": "InfisicalSecretConfig",
+					"kind": "type",
+					"summary": "Configuration for `InfisicalSecretStore`.",
+					"source": "infisical-secret-store/src/types.ts:11",
+					"hasExample": false
+				},
+				{
+					"name": "InfisicalSecretStore",
+					"kind": "class",
+					"summary": "Secret store backed by Infisical.",
+					"source": "infisical-secret-store/src/InfisicalSecretStore.impl.ts:33",
+					"hasExample": true
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "infisical-secret-store/src/version.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "Scope",
+					"kind": "type",
+					"summary": "Environment and path scope granted to an Infisical service token.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/Scope.ts:4",
+					"hasExample": false
+				},
+				{
+					"name": "Secret",
+					"kind": "type",
+					"summary": "Encrypted secret payload returned by the Infisical API.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/Secret.ts:8",
+					"hasExample": false
+				},
+				{
+					"name": "TokenData",
+					"kind": "type",
+					"summary": "Service token metadata returned by Infisical.",
+					"source": "infisical-secret-store/src/InfisicalClient/types/TokenData.ts:9",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/vault-secret-store",
+			"exports": [
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "vault-secret-store/src/version.ts:1",
+					"hasExample": false
+				},
+				{
+					"name": "VaultSecretStore",
+					"kind": "class",
+					"summary": "Secret store backed by HashiCorp Vault KV v2.",
+					"source": "vault-secret-store/src/VaultSecretStore.impl.ts:52",
+					"hasExample": true
+				},
+				{
+					"name": "VaultSecretStoreConfig",
+					"kind": "type",
+					"summary": "HashiCorp Vault KV v2 secret store configuration.",
+					"source": "vault-secret-store/src/types.ts:4",
+					"hasExample": false
+				}
+			]
+		},
+		{
+			"packageName": "@purista/k8s-sdk",
+			"exports": [
+				{
+					"name": "addServiceEndpoints",
+					"kind": "function",
+					"summary": "Adds HTTP endpoints for all commands that expose HTTP metadata.",
+					"source": "addServiceEndpoints.impl.ts:44",
+					"hasExample": true
+				},
+				{
+					"name": "getHttpServer",
+					"kind": "function",
+					"summary": "Create a Hono based web server.",
+					"source": "getHttpServer.impl.ts:31",
+					"hasExample": true
+				},
+				{
+					"name": "GetHttpServerConfig",
+					"kind": "type",
+					"summary": "Configuration for the Kubernetes-oriented Hono HTTP helper.",
+					"source": "types.ts:9",
+					"hasExample": false
+				},
+				{
+					"name": "puristaVersion",
+					"kind": "variable",
+					"summary": "",
+					"source": "version.ts:1",
+					"hasExample": false
+				}
+			]
+		}
+	]
+}

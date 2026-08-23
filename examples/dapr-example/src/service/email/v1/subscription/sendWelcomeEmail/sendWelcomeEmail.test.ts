@@ -4,7 +4,7 @@ import {
 	getEventBridgeMock,
 	getLoggerMock,
 	safeBind,
-} from '@purista/core'
+} from '@purista/core/testing'
 import { createSandbox } from 'sinon'
 
 import type { User } from '../../../../../types/index.js'

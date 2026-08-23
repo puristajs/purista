@@ -14,7 +14,7 @@ This page lists tools that extend PURISTA for specific platforms and workflows.
 |---|---|---|---|
 | **CLI** | `@purista/cli` | Scaffold projects, generate services, commands, subscriptions | [CLI guide](../cli.md) |
 | **Hono HTTP Server** | `@purista/hono-http-server` | REST endpoints, SSE streaming, OpenAPI generation | [HTTP Server](./http_server.md) |
-| **Kubernetes SDK** | `@purista/k8s-sdk` | K8s deployment helpers, health checks, service discovery | [Kubernetes](../5_deploy_and_scale/microservice_style/kubernetes.md) |
+| **Kubernetes** | — | Deploy standard PURISTA service and Scheduler Runtime containers | [Kubernetes](../5_deploy_and_scale/microservice_style/kubernetes.md) |
 
 ## Ecosystem packages
 

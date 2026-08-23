@@ -18,14 +18,21 @@ export type DeriveAgentRunIdentityInput = {
 
 export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): AgentRunIdentity {
 	const transportMessageId = requireNonEmptyString(input.message.id, 'message.id')
-	const harnessSessionId = resolveHarnessSessionId(input.manifest, transportMessageId, input.payload)
+	const harnessSessionId = resolveHarnessSessionId(
+		input.manifest,
+		transportMessageId,
+		input.payload,
+		input.message.tenantId,
+		input.message.principalId,
+	)
+	const tenantId = optionalNonEmptyString(input.message.tenantId)
 
 	return {
 		transportMessageId,
 		...optionalStringField('correlationId', input.message.correlationId),
 		...optionalStringField('traceId', input.message.traceId),
 		...optionalStringField('otp', input.message.otp),
-		...optionalStringField('tenantId', input.message.tenantId),
+		...optionalStringField('tenantId', tenantId),
 		...optionalStringField('principalId', input.message.principalId),
 		serviceName: input.manifest.serviceName,
 		serviceVersion: input.manifest.serviceVersion,
@@ -40,6 +47,8 @@ export function resolveHarnessSessionId(
 	manifest: Pick<AgentManifest, 'agentName' | 'serviceName' | 'serviceVersion' | 'session'>,
 	transportMessageId: string,
 	payload: unknown,
+	tenantId?: unknown,
+	principalId?: unknown,
 ): string {
 	if (manifest.session.mode === 'ephemeral') {
 		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:message:${transportMessageId}`
@@ -51,9 +60,38 @@ export function resolveHarnessSessionId(
 			`Agent conversation session path "${manifest.session.payloadPath.join('.')}" must resolve to a non-empty string`,
 		)
 	}
-	// Namespace by service/version/agent so two agents that share the same logical
-	// conversation id never collide on one harness session (cross-agent/tenant leak).
-	return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:conversation:${value}`
+	const resolvedTenantId = optionalNonEmptyString(tenantId)
+	const resolvedPrincipalId = optionalNonEmptyString(principalId)
+	// A conversation with no optional identity dimensions is intentionally
+	// conversation-only. This is the direct representation of the framework's
+	// default tenant/principal values.
+	if (resolvedTenantId === undefined && resolvedPrincipalId === undefined) {
+		return `agent:${manifest.serviceName}:${manifest.serviceVersion}:${manifest.agentName}:conversation:${value}`
+	}
+	const prefix = [
+		'agent',
+		encodeSessionSegment(manifest.serviceName),
+		encodeSessionSegment(manifest.serviceVersion),
+		encodeSessionSegment(manifest.agentName),
+	]
+	return [
+		...prefix,
+		'tenant',
+		encodeOptionalSessionSegment(resolvedTenantId),
+		'principal',
+		encodeOptionalSessionSegment(resolvedPrincipalId),
+		'conversation',
+		encodeSessionSegment(value),
+	].join(':')
+}
+
+function encodeSessionSegment(value: string): string {
+	return encodeURIComponent(value)
+}
+
+function encodeOptionalSessionSegment(value: unknown): string {
+	const resolved = optionalNonEmptyString(value)
+	return resolved === undefined ? 'default' : `value-${encodeSessionSegment(resolved)}`
 }
 
 function readPayloadPath(payload: unknown, path: readonly string[]) {
@@ -72,6 +110,10 @@ function requireNonEmptyString(value: unknown, label: string) {
 		throw new Error(`Agent run identity requires ${label}`)
 	}
 	return value
+}
+
+function optionalNonEmptyString(value: unknown): string | undefined {
+	return typeof value === 'string' && value.trim() !== '' ? value : undefined
 }
 
 function optionalStringField<K extends string>(key: K, value: unknown): Partial<Record<K, string>> {

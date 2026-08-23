@@ -21,6 +21,7 @@ Generated with \`@purista/cli\`.
 - Runtime: ${input.runtime}
 - Event bridge: ${input.eventBridge}
 - Webserver: ${input.useWebserver ? 'enabled' : 'disabled'}
+- Telemetry: ${input.telemetry === 'otel' ? 'OpenTelemetry Metrics API bootstrap' : 'not generated'}
 - Linter: ${input.linter}
 
 ## Scripts
@@ -29,16 +30,23 @@ Generated with \`@purista/cli\`.
 - \`${input.packageManager === 'yarn' ? 'yarn build' : `${input.packageManager} run build`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`
 - \`${input.packageManager === 'yarn' ? 'yarn export:runtime' : `${input.packageManager} run export:runtime`}\`
+- \`${input.packageManager === 'yarn' ? 'yarn inspect:architecture' : `${input.packageManager} run inspect:architecture`}\` to export definitions and print a scoped, LLM-ready static architecture context
+- \`${input.packageManager === 'yarn' ? 'yarn validate:architecture' : `${input.packageManager} run validate:architecture`}\` before handing off an architecture change
+- \`${input.packageManager === 'yarn' ? 'yarn doctor:architecture' : `${input.packageManager} run doctor:architecture`}\` for static project checks
 
-This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
+This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local links under \`.agents/skills/\` and \`.claude/skills/\` point to the bundled PURISTA architecture and migration skills in \`@purista/core\`.
 
-Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery.
+Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery. Generated agents are ephemeral by default. Use \`--durable-workspace\` only for a resumable \`setHarnessWorkflow(...)\`; it requires application-owned \`ai.runtime\` and \`ai.workspaceStore\` adapters.
+
+Schedules are opt-in. After creating a schedule declaration, export its manifest and deploy a separate Scheduler Runtime with an application-selected provider and shared EventBridge. The scheduler owns only the clock and event publication; business services, queues, subscriptions, and agents consume the emitted event.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
 
 - \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
 - \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:schedule', '<name> --description "<description>" --service <serviceName> --service-version <version> --event <eventName> --cron "0 2 * * *"')}\`
 - \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version> --durable-workspace')}\` for a resumable workflow-backed agent
 `
 
 const runScriptCommand = (input: CreateProjectInput, script: string, args = '') => {
@@ -55,6 +63,8 @@ const createLocalCliUsageGuide = (input: CreateProjectInput) => `## Local CLI
 - Package manager: \`${input.packageManager}\`
 - Create services with \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`.
 - Create commands with \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`.
+- Create an ephemeral agent with \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`.
+- Add \`--durable-workspace\` only for a resumable workflow; bind its \`ai.runtime\` and \`ai.workspaceStore\` adapters in application bootstrap.
 - Run the app with \`${input.packageManager === 'yarn' ? 'yarn dev' : `${input.packageManager} run dev`}\`.
 - Run tests with \`${input.packageManager === 'yarn' ? 'yarn test' : `${input.packageManager} run test`}\`.`
 
@@ -69,17 +79,23 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery.
+- Keep \`src/definitions.ts\` as the generated export inventory. The local \`add:service\` command updates it when the standard aggregation array is present.
+- Before changing an existing boundary, run \`${runScriptCommand(input, 'inspect:architecture')}\` and read the scoped graph. After changing it, run \`${runScriptCommand(input, 'validate:architecture')}\`. For a reviewed public contract, persist \`purista inspect --out <artifact>\` and run \`purista diff --base <approved-artifact> --strict\`.
+- A static graph does not prove a live bridge, store, scheduler, model provider, deployment, or external event producer. Do not invent missing external contracts. Multi-repository deployments must use an application-owned composition file with pinned local artifacts and \`purista compose\`.
+- Schedules are opt-in. Export a schedule manifest only when this application declares schedules, and deploy its Scheduler Runtime separately from business services with an application-selected provider and shared EventBridge.
+- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery. Agents are ephemeral by default; use \`--durable-workspace\` only for a workflow that must resume private workspace state.
 
 ${createLocalCliUsageGuide(input)}
 
 ## Skills
 - Use the bundled PURISTA skill from \`.agents/skills/purista\` or \`.claude/skills/purista\`.
-- These paths link to \`node_modules/@purista/core/skills/purista\`, so dependency updates refresh the framework skill.
+- Use \`.agents/skills/purista-migration\` or \`.claude/skills/purista-migration\` before upgrading this existing application to a new PURISTA release; it is not the primary skill for new features.
+- These paths link to \`node_modules/@purista/core/skills/\`, so dependency updates refresh both framework skills.
 
 ## Verification
 - Run the project test script after framework changes.
 - Run export scripts when definitions, schedules, streams, queues, agents, or HTTP exposure change.
+- Run \`${runScriptCommand(input, 'validate:architecture')}\` after a boundary change. Treat a schema compatibility result of \`unknown\` as a stop condition until an owner approves the change.
 - Review logs, events, traces, queues, streams, and agent prompts for secret or PII leakage before production changes.
 - For skill-backed agents, verify startup fails for missing skill bindings and that prompts list only skill metadata plus \`/skills/<name>/SKILL.md\`, never the \`SKILL.md\` body.
 `
@@ -89,7 +105,7 @@ export const createClaudeFile = () => `# Claude Guide
 
 Follow [AGENTS.md](./AGENTS.md) for this PURISTA project.
 
-Use the bundled PURISTA skill linked at \`.claude/skills/purista\` before designing or changing PURISTA services, commands, subscriptions, streams, queues, workers, agents, or runtime wiring.
+Use the bundled PURISTA skill linked at \`.claude/skills/purista\` before designing or changing PURISTA services, commands, subscriptions, streams, queues, workers, agents, or runtime wiring. Before an existing-application upgrade, use \`.claude/skills/purista-migration\`.
 `
 
 /** Create implementation guidance for agentic development tools. */
@@ -111,7 +127,9 @@ ${createLocalCliUsageGuide(input)}
 - New stream: \`${runScriptCommand(input, 'add:stream', '<name> --service <serviceName> --service-version <version>')}\`
 - New queue: \`${runScriptCommand(input, 'add:queue', '<name> --service <serviceName> --service-version <version>')}\`
 - New queue worker: \`${runScriptCommand(input, 'add:queue-worker', '<name> --service <serviceName> --service-version <version> --queue <queueName>')}\`
+- New event-only schedule: \`${runScriptCommand(input, 'add:schedule', '<name> --description "<description>" --service <serviceName> --service-version <version> --event <eventName> --cron "0 2 * * *"')}\`
 - New agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- Resumable workflow agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version> --durable-workspace')}\`
 
 After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
 
@@ -121,7 +139,62 @@ After generation, edit handlers, schemas, runtime wiring, and tests to fit the d
 - Do not add CommonJS variants. Generated PURISTA apps are ESM-only.
 - Keep external systems behind resources, stores, bridges, or runtime bindings.
 - Keep EventBridge and QueueBridge concerns separate.
+- Keep SchedulerRuntime separate from business services. It emits normal events only; subscriptions, queues, workers, and agents own the business work.
 - Keep provider packages as app-level dependencies.
+`
+
+/** Create the explicit inventory of service builders used for static contract exports. */
+export const createDefinitionsFile = (puristaConfig: Pick<PuristaConfig, 'fileConvention'>) => {
+	const serviceDirectory = convertToProjectFileCasing('ping', puristaConfig)
+	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)
+	const serviceExportName = camelCase('ping v1 service')
+
+	return `import { exportServiceDefinitions, type ServiceBuilder } from '@purista/core'
+import { ${serviceExportName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
+
+// The CLI appends newly generated services to this explicit static export inventory.
+// Keep it free of runtime infrastructure and service instances.
+export const serviceBuilders: ServiceBuilder<any>[] = [${serviceExportName}]
+
+export const createPuristaDefinitions = () => exportServiceDefinitions(serviceBuilders)
+`
+}
+
+/** Create the build-time JSON definition exporter used by CLI contract exports. */
+export const createDefinitionsExporterFile = () => `import { writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
+import { createPuristaDefinitions } from './definitions.js'
+
+const outPath = resolve(process.cwd(), process.argv[2] ?? 'purista.definitions.json')
+const definitions = await createPuristaDefinitions()
+
+await writeFile(outPath, JSON.stringify(definitions, null, 2) + '\\n', 'utf-8')
+process.stdout.write('PURISTA definitions exported to ' + outPath + '\\n')
+`
+
+/** Create an opt-in, application-owned OpenTelemetry Metrics API setup. */
+export const createTelemetryFile = () => `import { metrics } from '@opentelemetry/api'
+import { ConsoleMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics'
+
+/**
+ * Install a process-local MeterProvider for this application.
+ *
+ * PURISTA only uses the OpenTelemetry API; applications own readers and
+ * exporters. Replace the console exporter with an OTLP reader when deploying
+ * telemetry infrastructure. Do not place request, user, tenant, prompt, or
+ * payload data in metric attributes.
+ */
+export const initializeTelemetry = () => {
+	const meterProvider = new MeterProvider({
+		readers: [new PeriodicExportingMetricReader({ exporter: new ConsoleMetricExporter() })],
+	})
+	metrics.setGlobalMeterProvider(meterProvider)
+
+	return {
+		name: 'OpenTelemetry metrics',
+		destroy: async () => meterProvider.shutdown(),
+	}
+}
 `
 
 /** Create the starter `ServiceEvent` enum with the example ping event. */
@@ -494,6 +567,9 @@ export const createEntrypointFile = (input: CreateProjectInput, puristaConfig: P
 	const serviceFileName = convertToProjectFileCasing('ping v1 service', puristaConfig)
 	const serviceExportName = camelCase('ping v1 service')
 	const bridgeLabel = pascalCase(input.eventBridge)
+	const telemetryImport = input.telemetry === 'otel' ? "import { initializeTelemetry } from './telemetry.js'\n" : ''
+	const telemetryStart = input.telemetry === 'otel' ? '\tconst telemetry = initializeTelemetry()\n' : ''
+	const telemetryShutdown = input.telemetry === 'otel' ? '\t\ttelemetry,\n' : ''
 
 	if (input.useWebserver) {
 		const shutdownServerSnippet =
@@ -520,12 +596,14 @@ export const createEntrypointFile = (input: CreateProjectInput, puristaConfig: P
 		},`
 
 		return `import { type Service, gracefulShutdown, initLogger } from '@purista/core'
+${telemetryImport}
 import { getEventBridge } from './eventbridge.js'
 import { getHttpServer } from './http.js'
 import { ${serviceExportName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
 
 export const main = async () => {
 	const logger = initLogger()
+	${telemetryStart}
 	const eventBridge = await getEventBridge(logger)
 
 	const services: Service[] = []
@@ -542,6 +620,7 @@ export const main = async () => {
 	logger.info('${bridgeLabel} bridge and HTTP server started.')
 
 	gracefulShutdown(logger, [
+	${telemetryShutdown}
 		honoService.prepareDestroy(),
 		eventBridge,
 		...services,
@@ -555,11 +634,13 @@ main()
 	}
 
 	return `import { type Service, gracefulShutdown, initLogger } from '@purista/core'
+${telemetryImport}
 import { getEventBridge } from './eventbridge.js'
 import { ${serviceExportName} } from './service/${serviceDirectory}/v1/${serviceFileName}.js'
 
 export const main = async () => {
 	const logger = initLogger()
+	${telemetryStart}
 	const eventBridge = await getEventBridge(logger)
 
 	const services: Service[] = []
@@ -568,7 +649,7 @@ export const main = async () => {
 	services.push(pingService)
 
 	logger.info('${bridgeLabel} bridge and ping service started.')
-	gracefulShutdown(logger, [eventBridge, ...services])
+	gracefulShutdown(logger, [${input.telemetry === 'otel' ? 'telemetry, ' : ''}eventBridge, ...services])
 }
 
 main()

@@ -3,6 +3,7 @@ import type { CorrelationId } from './CorrelationId.js'
 import type { EBMessageId } from './EBMessageId.js'
 import type { EBMessageSenderAddress } from './EBMessageSenderAddress.js'
 import type { PrincipalId } from './PrincipalId.js'
+import type { ScheduleTriggerMetadata } from './schedule/ScheduleDefinition.js'
 import type { TenantId } from './TenantId.js'
 import type { TraceId } from './TraceId.js'
 
@@ -30,5 +31,10 @@ export type EBMessageBase = {
 	eventName?: string
 	/** stringified Opentelemetry parent trace id */
 	otp?: string
+	/**
+	 * Scheduler occurrence metadata when this custom event was emitted by a
+	 * Scheduler Runtime. It is absent for ordinary application events.
+	 */
+	schedule?: ScheduleTriggerMetadata
 	sender: EBMessageSenderAddress
 }

@@ -1,9 +1,13 @@
 import type {
 	BuiltinToolName,
 	DurableRuntime,
+	DurableWorkspacePolicy,
+	DurableWorkspaceStore,
 	GovernanceConfig,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
+	HarnessModule,
+	StateStore as HarnessStateStore,
 	WorkflowDefinition as HarnessWorkflowDefinition,
 	ModelAlias,
 	ModelCapability,
@@ -11,8 +15,11 @@ import type {
 	ModelHandle,
 	ModelProvider,
 	RunEvent,
+	Sandbox,
 	Session,
+	SessionHistoryRetentionPolicy,
 	TelemetryOptions,
+	ToolsConfig,
 } from '@purista/harness'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
@@ -157,6 +164,21 @@ export type AgentQueueResultPolicy = {
 /** Public response contract exposed by the generated agent command or stream. */
 export type AgentResponseMode = 'accepted' | 'status' | 'stream' | 'event'
 
+/** Controls which Harness model run events become chunks on a generated agent stream. */
+export type AgentModelChunkVisibility = 'off' | 'safe' | 'full'
+
+/** Streaming behavior declared by an attached agent. */
+export type AgentStreamingOptions = {
+	/**
+	 * Visibility of model-related chunks on a generated agent stream.
+	 *
+	 * `safe` omits model requests, reasoning, tool arguments/results, policy
+	 * details, sandbox output, and raw errors. `full` is for a trusted client
+	 * that deliberately consumes the canonical Harness event stream.
+	 */
+	modelChunkVisibility?: AgentModelChunkVisibility
+}
+
 /** Options for long-running agent response contracts. */
 export type AgentResponseModeOptions = {
 	/** Queue result handling policy for this response mode. */
@@ -177,8 +199,105 @@ export type AgentResponseModeOptions = {
 	streamUrl?: string
 }
 
-/** Session behavior used by the harness runtime for each agent run. */
-export type AgentSessionPolicy = { mode: 'ephemeral' } | { mode: 'conversation'; payloadPath: readonly string[] }
+/**
+ * Retention owned by one attached agent's Harness state.
+ *
+ * `history` bounds durable transcript storage by complete turns and UTF-8
+ * bytes with either the service adapter or an explicit Harness-native
+ * `ai.stateStore` that supports atomic message replacement. `idleTtlMs`, run,
+ * and event limits are service-adapter policies and are unavailable with an
+ * explicit Harness-native store.
+ */
+export type AgentSessionRetentionPolicy = {
+	/** Expire each persisted agent artifact after this period without a replacing write. */
+	idleTtlMs?: number
+	/** Durable complete-turn bounds; this is separate from model token context. */
+	history?: SessionHistoryRetentionPolicy
+	/** Bound retained terminal run summaries for one session. Active runs are never removed. */
+	runs?: {
+		maxPerSession: number
+	}
+	/** Bound persisted lifecycle events for one run. */
+	events?: {
+		maxPerRun: number
+	}
+}
+
+/**
+ * Selects a required string field from a validated agent payload as the
+ * logical conversation id. Paths are checked against the payload schema up to
+ * five object levels; an untyped payload deliberately accepts any non-empty
+ * path and is still checked at runtime.
+ */
+export type AgentConversationIdPath<
+	Payload = unknown,
+	Depth extends readonly unknown[] = readonly [1, 2, 3, 4, 5],
+> = unknown extends Payload
+	? readonly [string, ...string[]]
+	: Depth extends readonly [unknown, ...infer Rest]
+		? Payload extends readonly unknown[]
+			? never
+			: Payload extends object
+				? {
+						[K in Extract<keyof Payload, string>]: Payload[K] extends string
+							? readonly [K]
+							: AgentConversationIdPath<Payload[K], Rest> extends infer Tail
+								? Tail extends readonly [string, ...string[]]
+									? readonly [K, ...Tail]
+									: never
+								: never
+					}[Extract<keyof Payload, string>]
+				: never
+		: never
+
+/**
+ * A logical conversation id selected from a validated agent payload.
+ *
+ * Use a top-level string field directly (`'conversationId'`) or an array for
+ * a nested string field (`['conversation', 'id']`).
+ */
+export type AgentConversationId<Payload = unknown> =
+	| (unknown extends Payload
+			? string
+			: Payload extends object
+				? {
+						[K in Extract<keyof Payload, string>]: Payload[K] extends string ? K : never
+					}[Extract<keyof Payload, string>]
+				: never)
+	| AgentConversationIdPath<Payload>
+
+/**
+ * Configures how an attached agent obtains its Harness session.
+ *
+ * Conversation mode uses a payload field as the stable business conversation
+ * identity. It persists conversation history and associated run records; it
+ * does not configure sandbox, workspace, or tool behaviour.
+ *
+ * @example
+ * ```ts
+ * agent.setSessionPolicy({
+ *   mode: 'conversation',
+ *   payloadPath: ['conversationId'],
+ *   retention: { history: { maxTurns: 50, maxBytes: 256_000 } },
+ * })
+ * ```
+ */
+export type AgentSessionPolicy<Payload = unknown> =
+	| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
+	| {
+			mode: 'conversation'
+			/**
+			 * Validated payload path that identifies the logical conversation.
+			 *
+			 * A top-level string field may use the string shorthand. Use an array for
+			 * nested fields. PURISTA automatically adds trusted `message.tenantId` and
+			 * `message.principalId` to the persisted-session namespace when either is
+			 * present; without both, the conversation id is the boundary.
+			 */
+			payloadPath: AgentConversationId<Payload>
+			/** Optional bounded retention for this conversation's persisted state. */
+			retention?: AgentSessionRetentionPolicy
+	  }
 
 /** Optional sandbox adapter configuration passed through to the agent runtime. */
 export type AgentSandboxPolicy = {
@@ -191,7 +310,7 @@ export type AgentSandboxPolicy = {
 	 */
 	enabled?: boolean
 	/** Runtime-specific sandbox adapter. Takes precedence over the shared `ai.sandbox`. */
-	adapter?: unknown
+	adapter?: Sandbox<any>
 }
 
 /** Resolves a declared agent skill name to a runtime skill directory. */
@@ -275,20 +394,11 @@ export type AgentSkillRuntimeResolved = {
 /** Capability required by a durable attached-agent workspace policy. */
 export type AgentWorkspaceCapabilityRequirement = string
 
-/** Adapter-neutral durable workspace policy mirrored from `@purista/harness`. */
-export type AgentDurableWorkspaceStorePolicy = {
-	retention?: Record<string, unknown>
-	encryption?: Record<string, unknown>
-	quota?: Record<string, unknown>
-}
+/** Durable workspace policy forwarded to `@purista/harness`. */
+export type AgentDurableWorkspaceStorePolicy = Partial<DurableWorkspacePolicy>
 
-/** Structural durable workspace store accepted until the harness package version is bumped. */
-export type AgentDurableWorkspaceStore = {
-	readonly capabilities?: readonly string[]
-	readonly info?: {
-		readonly capabilities?: readonly string[]
-	}
-}
+/** Durable workspace store supplied by the application at service instantiation time. */
+export type AgentDurableWorkspaceStore = DurableWorkspaceStore
 
 /** Durable workspace behavior declared by an attached agent manifest. */
 export type AgentWorkspacePolicy = {
@@ -301,6 +411,35 @@ export type AgentWorkspacePolicy = {
 	policy?: AgentDurableWorkspaceStorePolicy
 	/** Cleanup timing requested by the generated agent runtime. */
 	cleanup?: 'on_success' | 'on_terminal' | 'manual'
+}
+
+/**
+ * Application-owned Harness composition supplied at service instantiation time.
+ *
+ * Static modules and tools are intentionally explicit runtime bindings. PURISTA
+ * Core neither discovers Agent Plugins nor evaluates their trust, digests, or
+ * credentials; applications must complete that work before passing approved
+ * contributions here. Individual Harness agent definitions still decide which
+ * tool ids are available to a run.
+ *
+ * @example
+ * ```ts
+ * service.getInstance(eventBridge, {
+ *   ai: {
+ *     models,
+ *     harness: {
+ *       modules: [supportModule],
+ *       tools: approvedPluginBindings.tools,
+ *     },
+ *   },
+ * })
+ * ```
+ */
+export type AgentHarnessRuntimeOptions = {
+	/** Static, application-owned modules applied before PURISTA's direct bindings. */
+	modules?: readonly HarnessModule<any, any, string>[]
+	/** Explicit application-approved tool registry available for attached Harness definitions to allowlist. */
+	tools?: ToolsConfig
 }
 
 /** HTTP projection metadata for the generated agent command or stream. */
@@ -425,9 +564,6 @@ export type AgentHandlerContext<
 		session: Session<any>
 		models: AgentHandlerModelBindings<Models>
 		skills: AgentSkillContext
-		events: {
-			emit(event: RunEvent): Promise<void>
-		}
 	}
 	/** Typed command tools and child-agent calls declared on the builder. */
 	invoke: {
@@ -495,7 +631,14 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 	description: string
 	runtimeRevision: string
 	models: Models
-	session: AgentSessionPolicy
+	session:
+		| { mode: 'ephemeral'; retention?: AgentSessionRetentionPolicy }
+		| {
+				mode: 'conversation'
+				/** Path in the validated payload that resolves to the logical conversation id. */
+				payloadPath: readonly string[]
+				retention?: AgentSessionRetentionPolicy
+		  }
 	execution: Required<Pick<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>> &
 		Omit<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>
 	sandbox?: AgentSandboxPolicy
@@ -508,6 +651,8 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 		runId: { source: 'queue-job-id'; prefix: 'run:' }
 	}
 	streamingMode: 'stream' | 'aggregate'
+	/** Model chunk projection for generated streams. Omitted manifests preserve the existing stream projection. */
+	modelChunkVisibility?: AgentModelChunkVisibility
 	successEventName?: string
 	allowedCommands: readonly AllowedCommandToolDefinition[]
 	allowedAgents: readonly AllowedAgentDefinition[]
@@ -620,12 +765,21 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 /** Runtime options required to initialize attached agents for a service instance. */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
+	/**
+	 * Optional Harness-native persistence store for agent sessions, history, runs,
+	 * and events. When omitted, attached agents adapt the service `stateStore`.
+	 *
+	 * Use this only when agent persistence intentionally needs a separate
+	 * backend, retention policy, or isolation boundary from service state.
+	 */
+	stateStore?: HarnessStateStore
 	runtime?: DurableRuntime
 	workspaceStore?: AgentDurableWorkspaceStore
+	/** Explicit Harness modules and tools owned by the application runtime. */
+	harness?: AgentHarnessRuntimeOptions
 	skills?: AgentSkillRuntimeOptions
-	stateStore?: unknown
 	logger?: PuristaLogger
-	sandbox?: unknown
+	sandbox?: Sandbox<any>
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
 }

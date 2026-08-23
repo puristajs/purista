@@ -6,7 +6,7 @@ order: 600000
 
 # Integrations
 
-PURISTA focuses on business logic and message-driven architecture. For orchestration, scheduling, and enterprise interoperability, integrate with specialized tools rather than building everything in-house.
+PURISTA focuses on business logic and message-driven architecture. It provides a minimal Core Scheduler Runtime for trigger events; durable workflows and provider-specific orchestration remain explicit integrations.
 
 ## Integration philosophy
 
@@ -28,7 +28,7 @@ flowchart TB
 The integration pattern is always the same:
 
 1. **Keep business logic in PURISTA** — commands, subscriptions, and queues
-2. **Use adapters for orchestration** — Temporal workflows, enterprise gateways, schedulers
+2. **Use explicit runtime boundaries** — Core scheduler trigger hosts, Temporal workflows, enterprise gateways, and provider adapters
 3. **Pass only typed data** — schemas define what crosses the boundary
 
 ## Available integrations
@@ -68,7 +68,7 @@ For organizations with existing messaging infrastructure:
 | Pattern | Use case |
 |---|---|
 | [Async agent queues](./enterprise_interoperability/async-agent-queues.md) | Bridge PURISTA queues to enterprise MQ systems |
-| [Scheduling](./enterprise_interoperability/scheduling.md) | Time-based job triggering from external schedulers |
+| [Scheduling](./enterprise_interoperability/scheduling.md) | Time-based trigger events from a separate Core scheduler host with a selected provider |
 | [Result events](./enterprise_interoperability/result-events.md) | Publish PURISTA command results to enterprise topics |
 | [Exports](./enterprise_interoperability/exports.md) | Export service definitions and schemas for enterprise governance |
 | [Long-running queues](./enterprise_interoperability/long-running-queues.md) | Durable queue workers that survive restarts and retries |

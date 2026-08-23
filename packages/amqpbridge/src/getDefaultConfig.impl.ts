@@ -1,4 +1,4 @@
-import type { Complete } from '@purista/core'
+import type { Complete } from '@purista/core/adapter'
 
 import type { AmqpBridgeConfig } from './types/AmqpBridgeConfig.js'
 

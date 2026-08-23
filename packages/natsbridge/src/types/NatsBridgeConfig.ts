@@ -1,4 +1,4 @@
-import type { Prettify } from '@purista/core'
+import type { Prettify } from '@purista/core/adapter'
 import type { ConnectionOptions } from 'nats'
 
 /**

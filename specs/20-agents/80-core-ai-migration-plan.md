@@ -1,6 +1,8 @@
 # Core AI Migration Plan
 
-Status: active implementation plan for autonomous agents.
+Status: implemented migration record. The current executable ownership contract
+lives in Core, public API docs, and user-facing skills; this document is kept
+for migration evidence and routing only.
 
 Date: 2026-05-15
 
@@ -88,7 +90,8 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRuntimeModelBinding(s)`, `AgentRuntimeOptions`, `AgentRuntimeRef`,
 `AgentRuntimeInvocationInput`, `AgentRuntimeStreamInvocationInput`,
 `AgentExecutionDefinition`, `AgentExecutionKind`, `AgentExecutionPolicy`,
-`AgentSessionPolicy`, `AgentSandboxPolicy`, `AgentWorkspacePolicy`,
+`AgentConversationId`, `AgentConversationIdPath`, `AgentSessionPolicy`,
+`AgentSandboxPolicy`, `AgentWorkspacePolicy`,
 `AgentWorkspaceCapabilityRequirement`, `AgentDurableWorkspaceStore(Policy)`,
 `AgentHttpExposure`, `AgentResponseMode`, `AgentResponseModeOptions`,
 `AgentQueueResultPolicy`, `AgentQueueResultPolicyMode`, `AgentQueueBuilderTypes`,
@@ -98,8 +101,7 @@ Exported types: `AgentDefinition`, `AttachedAgentDefinition`,
 `AgentRunError` class.
 
 Testing helpers: `createAgentContextMock`, `createAgentTestHarness`,
-`createScriptedHarnessModel`, `ScriptedHarnessModelProvider`,
-`createAgentSkillTestRuntime`.
+`FakeModelProvider`, `createAgentSkillTestRuntime`.
 
 Selected harness re-exports required for DX: `ContentPart`, `ModelProvider`,
 `ModelCapability`, `RunEvent`, `Session`.
@@ -439,3 +441,10 @@ Contract cleanups:
 - Telemetry uses `contentCaptureMode` and defaults to `'NO_CONTENT'`. The prior
   `captureContent` flag never existed in the harness and was removed from docs.
 - Implemented previously-unused `AgentSkillDiscoveryOptions.includeAncestorProjectDirs`.
+- Published 3.2's `setSessionPolicy({ mode:'conversation', payloadPath })` is
+  retained as `setSessionPolicy({ mode:'conversation', payloadPath })`. The
+  declaration type-checks the payload field; its required conversation id is
+  automatically namespaced with trusted `message.tenantId` and
+  `message.principalId` when either is present. With neither present,
+  conversation id remains the boundary; no scope or tenancy configuration is
+  required.

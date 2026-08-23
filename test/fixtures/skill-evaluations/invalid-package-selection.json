@@ -1,0 +1,4 @@
+{
+	"scenarioId": "package-selection",
+	"response": "Use AMQP for everything and have the HTTP route run invoice work directly."
+}

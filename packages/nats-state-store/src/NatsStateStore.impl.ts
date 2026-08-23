@@ -1,5 +1,5 @@
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StateStoreConfig } from '@purista/core/adapter'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 import type { KV, NatsConnection } from 'nats'
 import { connect, JSONCodec } from 'nats'
 
@@ -12,6 +12,8 @@ import type { NatsStateStoreConfig } from './types/NatsStateStoreConfig.js'
  * `JSONCodec`, so stored values must be JSON-compatible. This store keeps only
  * the NATS connection and KV bucket handle in memory; values are read from the
  * bucket for each operation.
+ * NATS KV bucket max age is not a per-key sliding expiry guarantee, so this
+ * adapter rejects finite StateStore retention policies.
  *
  * The default bucket is `purista-state-store`. Use tenant-aware keys such as
  * `tenant.acme.prod.cart.session-123`. State can contain sensitive data, so keep
@@ -49,7 +51,7 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
 	 *
 	 * @param config Store options plus NATS connection and KV bucket options.
 	 */
-	constructor(config?: StoreBaseConfig<Partial<NatsStateStoreConfig>>) {
+	constructor(config?: StateStoreConfig<Partial<NatsStateStoreConfig>>) {
 		const conf = {
 			keyValueStoreName: 'purista-state-store',
 			...config,

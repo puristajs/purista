@@ -1,7 +1,7 @@
 import { emitWarning } from 'node:process'
 
-import type { Service } from '@purista/core'
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, StatusCode } from '@purista/core'
+import type { Service } from '@purista/core/adapter'
+import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, StatusCode } from '@purista/core/adapter'
 import type { ConsumeMessage } from 'amqplib'
 import amqplib from 'amqplib'
 import { createSandbox } from 'sinon'

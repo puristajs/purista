@@ -25,7 +25,7 @@ The real testing happens at the command and subscription level using PURISTA's t
 Use `createCommandTestHarness` to test business logic in isolation:
 
 ```typescript [userSignUp.test.ts]
-import { createCommandTestHarness } from '@purista/core'
+import { createCommandTestHarness } from '@purista/core/testing'
 import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 import { userSignUpCommandBuilder } from './userSignUpCommandBuilder.js'
 
@@ -67,15 +67,15 @@ The harness:
 
 ## Testing subscriptions
 
-Use `createSubscriptionContextMock` from `@purista/core` to test event reactions:
+Use `createSubscriptionContextMock` from `@purista/core/testing` to test event reactions:
 
 ```typescript [sendWelcomeEmail.test.ts]
-import { createSubscriptionContextMock } from '@purista/core'
+import { createSubscriptionContextMock } from '@purista/core/testing'
 import { sendWelcomeEmailSubscriptionBuilder } from './sendWelcomeEmailSubscriptionBuilder.js'
 
 describe('sendWelcomeEmail subscription', () => {
   it('sends email on new user event', async () => {
-    // Use createSubscriptionContextMock from @purista/core for subscription testing
+    // Use createSubscriptionContextMock from @purista/core/testing for subscription testing
     const { context, stubs } = createSubscriptionContextMock(sendWelcomeEmailSubscriptionBuilder)
 
     const payload = { userId: 'user-123' }

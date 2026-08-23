@@ -1,4 +1,10 @@
-import type { Command, CommandResponse, EBMessage, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
+import type {
+	Command,
+	CommandResponse,
+	EBMessage,
+	EBMessageAddress,
+	HttpExposedServiceMeta,
+} from '@purista/core/adapter'
 
 /**
  * Adapter contract between {@link HttpEventBridge} and a sidecar or platform HTTP API.

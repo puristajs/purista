@@ -23,6 +23,7 @@ const schema = baseAddInputSchema.extend({
 	serviceName: z.string().trim().min(1),
 	serviceVersion: z.string().trim().min(1),
 	responseEventName: nonEmptyOptionalStringSchema,
+	durableWorkspace: z.boolean().optional().default(false),
 })
 
 export type AddAgentInput = z.input<typeof schema>
@@ -89,6 +90,7 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 			agentName: resolvedInput.name,
 			agentDescription: resolvedInput.description,
 			responseEventName: resolvedInput.responseEventName,
+			durableWorkspace: resolvedInput.durableWorkspace,
 			codeWriterOptions: context.codeWriterOptions,
 		})
 

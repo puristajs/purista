@@ -185,7 +185,7 @@ It contains a real test, which can then be extended and aligned to your actual i
 ::: code-group
 
 ```typescript [signUpCommandBuilder.test.ts]
-import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core/testing'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service'

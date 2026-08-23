@@ -1,12 +1,16 @@
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { InMemoryStateStore } from '@purista/harness'
 import { createSandbox } from 'sinon'
+import { z } from 'zod'
 
+import { createMemoryMetricsRecorder } from '../../core/metrics/index.js'
 import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Logger.js'
 import { getEventBridgeMock } from '../../mocks/index.js'
 import { ServiceBuilder } from '../../ServiceBuilder/ServiceBuilder.impl.js'
 import type { AgentRuntimeOptions, AttachedAgentDefinition } from '../types.js'
+import { resolveHarnessSessionId } from './identity.js'
 import {
 	createAgentRuntimeScope,
 	getScopedAgentRuntime,
@@ -22,8 +26,8 @@ describe('attached agent scoped runtime', () => {
 	})
 
 	describe('resolveAttachedAgentSandbox', () => {
-		const runtimeSandbox = { kind: 'shared-runtime-sandbox' }
-		const policyAdapter = { kind: 'policy-adapter' }
+		const runtimeSandbox = { kind: 'shared-runtime-sandbox' } as never
+		const policyAdapter = { kind: 'policy-adapter' } as never
 
 		it('uses the shared runtime sandbox when no policy is declared', () => {
 			expect(resolveAttachedAgentSandbox(undefined, runtimeSandbox)).toBe(runtimeSandbox)
@@ -75,6 +79,247 @@ describe('attached agent scoped runtime', () => {
 		expect(firstRuntime).not.toBe(secondRuntime)
 	})
 
+	it('lets ai.stateStore override the service state-store adapter', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.execution = {
+			kind: 'harnessAgent',
+			definition: {
+				model: 'primary',
+				input: z.object({}),
+				output: z.object({ status: z.literal('ok') }),
+				instructions: 'Return a scripted result.',
+			},
+		}
+		const agentStateStore = new InMemoryStateStore()
+		let providerCalls = 0
+		const serviceStateStore = {
+			name: 'service-state',
+			getState: async () => ({}),
+			setState: async () => undefined,
+			removeState: async () => undefined,
+			destroy: async () => undefined,
+		} as never
+		const provider = {
+			id: 'scripted',
+			genAiSystem: 'scripted',
+			object: async () => {
+				providerCalls += 1
+				return {
+					object: { status: 'ok' },
+					usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+					finishReason: 'stop' as const,
+				}
+			},
+		}
+		const scope = createAgentRuntimeScope()
+
+		await initializeAttachedAgentRuntimes(
+			scope,
+			[definition],
+			{
+				models: { primary: { provider: provider as never } },
+				stateStore: agentStateStore,
+			},
+			serviceStateStore,
+		)
+
+		const invocation = {
+			appContext: createCommandContext('state-override'),
+			message: { id: 'state-override' },
+			payload: {},
+			parameter: {},
+		}
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+
+		const sessionId = 'agent:support:1:triage:message:state-override'
+		expect(providerCalls).toBe(1)
+		expect(await agentStateStore.getSession(sessionId)).toBeDefined()
+		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
+	})
+
+	it('keeps complete-turn history retention when the attached agent also configures a run timeout', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.manifest.session = {
+			mode: 'conversation',
+			payloadPath: ['conversationId'],
+			retention: { history: { maxTurns: 1 } },
+		}
+		definition.manifest.execution = { ...definition.manifest.execution, timeoutMs: 1_000 }
+		definition.execution = {
+			kind: 'harnessAgent',
+			definition: {
+				model: 'primary',
+				input: z.object({ conversationId: z.string(), question: z.string() }),
+				output: z.object({ status: z.literal('ok') }),
+				instructions: 'Return a scripted result.',
+			},
+		}
+		const agentStateStore = new InMemoryStateStore()
+		const provider = {
+			id: 'scripted',
+			genAiSystem: 'scripted',
+			object: async () => ({
+				object: { status: 'ok' },
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+				finishReason: 'stop' as const,
+			}),
+		}
+		const scope = createAgentRuntimeScope()
+
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: provider as never } },
+			stateStore: agentStateStore,
+		})
+
+		for (const [id, question] of [
+			['delivery-1', 'first'],
+			['delivery-2', 'second'],
+		] as const) {
+			await expect(
+				getScopedAgentRuntime(scope, definition).executeAggregate({
+					appContext: createCommandContext(id),
+					message: { id },
+					payload: { conversationId: 'support-thread', question },
+					parameter: {},
+				}),
+			).resolves.toEqual({ status: 'ok' })
+		}
+
+		const sessionId = resolveHarnessSessionId(definition.manifest, 'delivery-2', { conversationId: 'support-thread' })
+		expect(await agentStateStore.listMessages(sessionId)).toHaveLength(2)
+	})
+
+	it('rejects service-owned idle retention with an explicit Harness-native state store', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.manifest.session = { mode: 'ephemeral', retention: { idleTtlMs: 60_000 } }
+		const scope = createAgentRuntimeScope()
+
+		await expect(
+			initializeAttachedAgentRuntimes(scope, [definition], {
+				models: { primary: { provider: {} as never } },
+				stateStore: new InMemoryStateStore(),
+			}),
+		).rejects.toThrow('uses service-owned idle, run, or event retention, which requires the service StateStore')
+	})
+
+	it('replays a model-capable custom handler with the stable delivery identity', async () => {
+		let calls = 0
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async () => {
+				calls += 1
+				return { status: 'ok' }
+			},
+		}
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: {} as never } },
+			stateStore: new InMemoryStateStore(),
+		})
+		const invocation = {
+			appContext: createCommandContext('stable-custom-handler'),
+			message: { id: 'stable-custom-handler' },
+			payload: {},
+			parameter: {},
+		}
+
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+		await expect(getScopedAgentRuntime(scope, definition).executeAggregate(invocation)).resolves.toEqual({
+			status: 'ok',
+		})
+
+		expect(calls).toBe(1)
+	})
+
+	it('rejects a changed custom-handler input for an existing delivery identity', async () => {
+		let calls = 0
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async () => {
+				calls += 1
+				return { status: 'ok' }
+			},
+		}
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: {} as never } },
+			stateStore: new InMemoryStateStore(),
+		})
+		const runtime = getScopedAgentRuntime(scope, definition)
+
+		await expect(
+			runtime.executeAggregate({
+				appContext: createCommandContext('stable-input'),
+				message: { id: 'stable-input' },
+				payload: { request: 'first' },
+				parameter: {},
+			}),
+		).resolves.toEqual({ status: 'ok' })
+		await expect(
+			runtime.executeAggregate({
+				appContext: createCommandContext('stable-input'),
+				message: { id: 'stable-input' },
+				payload: { request: 'changed' },
+				parameter: {},
+			}),
+		).rejects.toThrow('idempotencyKey is already bound to a different agent invocation')
+
+		expect(calls).toBe(1)
+	})
+
+	it('keeps the active custom-handler invocation when a concurrent duplicate is rejected', async () => {
+		const definition = createAttachedAgentDefinition({
+			models: { primary: { model: 'scripted', capabilities: ['object'] } },
+		})
+		let handlerCalls = 0
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async () => {
+				handlerCalls += 1
+				return { status: 'ok' }
+			},
+		}
+		const store = new BlockingCreateRunStateStore()
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], {
+			models: { primary: { provider: {} as never } },
+			stateStore: store,
+		})
+		const runtime = getScopedAgentRuntime(scope, definition)
+		const invocation = {
+			appContext: createCommandContext('concurrent-custom-handler'),
+			message: { id: 'concurrent-custom-handler' },
+			payload: {},
+			parameter: {},
+		}
+
+		const first = runtime.executeAggregate(invocation)
+		await store.waitUntilBlocked()
+		await expect(runtime.executeAggregate(invocation)).rejects.toThrow('Session is busy')
+		store.release()
+		await expect(first).resolves.toEqual({ status: 'ok' })
+		expect(handlerCalls).toBe(1)
+	})
+
 	it('fails startup when a durable workspace agent has no runtime or workspace store', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
@@ -102,7 +347,7 @@ describe('attached agent scoped runtime', () => {
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				runtime: { capabilities: ['runtime.checkpoint'] } as never,
-				workspaceStore: { info: { capabilities: ['workspace_store.durable'] } },
+				workspaceStore: { info: { capabilities: ['workspace_store.durable'] } } as never,
 			}),
 		).rejects.toThrow(
 			'Attached agent "triage" requires unavailable durable workspace capabilities: runtime.workspace_checkpoint, workspace_store.resume',
@@ -256,7 +501,9 @@ SECRET_BODY`,
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				runtime: { capabilities: ['runtime.workspace_checkpoint'] } as never,
-				workspaceStore: { info: { capabilities: ['workspace_store.durable', 'workspace_store.resume'] } },
+				workspaceStore: {
+					info: { capabilities: ['workspace_store.durable', 'workspace_store.resume'] },
+				} as never,
 			}),
 		).resolves.toEqual({ shutdown: expect.any(Function) })
 	})
@@ -296,6 +543,48 @@ SECRET_BODY`,
 		expect(definition.runtime.current).toBeUndefined()
 		expect(firstLogs).toEqual(['agent run'])
 		expect(secondLogs).toEqual(['agent run'])
+	})
+
+	it('records low-cardinality agent wrapper metrics without claiming harness GenAI telemetry', async () => {
+		const serviceBuilder = new ServiceBuilder({
+			serviceName: 'support',
+			serviceVersion: '1',
+			serviceDescription: 'Support service',
+		})
+		const definition = await serviceBuilder
+			.getAgentQueueBuilder('triage', 'Classify support tickets')
+			.setRunFunction(async () => 'resolved')
+			.getDefinition()
+		serviceBuilder.addAgentDefinition(definition)
+
+		const metricsRecorder = createMemoryMetricsRecorder()
+		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+			ai: { models: {} },
+			metricsRecorder,
+		})
+		const command = definition.command as unknown as {
+			call(this: object, context: Record<string, unknown>, payload: unknown, parameter: unknown): Promise<unknown>
+		}
+
+		await expect(command.call.call(service, createCommandContext('agent-metric-message'), {}, {})).resolves.toBe(
+			'resolved',
+		)
+
+		expect(metricsRecorder.records).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: 'purista.agent.runs',
+					value: 1,
+					attributes: expect.objectContaining({
+						'purista.agent.name': 'triage',
+						'purista.agent.execution.kind': 'command',
+						'purista.outcome': 'success',
+					}),
+				}),
+				expect.objectContaining({ name: 'purista.agent.run.duration' }),
+			]),
+		)
+		expect(metricsRecorder.records.some(record => record.name.startsWith('gen_ai.'))).toBe(false)
 	})
 })
 
@@ -381,6 +670,35 @@ class MemoryLogger implements Logger {
 		if (message) {
 			this.messages.push(message)
 		}
+	}
+}
+
+class BlockingCreateRunStateStore extends InMemoryStateStore {
+	private resolveBlocked!: () => void
+	private resolveGate!: () => void
+	private readonly blocked = new Promise<void>(resolve => {
+		this.resolveBlocked = resolve
+	})
+	private readonly gate = new Promise<void>(resolve => {
+		this.resolveGate = resolve
+	})
+	private blockedOnce = false
+
+	override async createRun(record: Parameters<InMemoryStateStore['createRun']>[0]): Promise<void> {
+		if (!this.blockedOnce) {
+			this.blockedOnce = true
+			this.resolveBlocked()
+			await this.gate
+		}
+		await super.createRun(record)
+	}
+
+	async waitUntilBlocked(): Promise<void> {
+		await this.blocked
+	}
+
+	release(): void {
+		this.resolveGate()
 	}
 }
 

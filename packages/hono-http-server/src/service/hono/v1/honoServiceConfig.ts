@@ -1,4 +1,4 @@
-import { Service } from '@purista/core'
+import { Service } from '@purista/core/adapter'
 import { z } from 'zod'
 
 // define the service config schema and the default service configuration
@@ -120,7 +120,7 @@ export const honoServiceV1ConfigSchema = z.object({
 /**
  * Partial Hono service config accepted by `honoV1Service.getInstance`.
  *
- * Missing values are filled by {@link honoServiceV1ConfigSchema}.
+ * Missing values are filled by the built-in Hono service configuration schema.
  */
 export type HonoServiceV1ConfigPartial = z.input<typeof honoServiceV1ConfigSchema>
 

@@ -20,6 +20,9 @@ const renderMutations = (result: PuristaCommandResult) => {
 export const createTerminalOutputAdapter = (): OutputAdapter => ({
 	renderResult: result => {
 		renderMutations(result)
+		if (result.output !== undefined) {
+			console.log(JSON.stringify(result.output, null, 2))
+		}
 		for (const warning of result.warnings) {
 			console.warn(`warning: ${warning}`)
 		}

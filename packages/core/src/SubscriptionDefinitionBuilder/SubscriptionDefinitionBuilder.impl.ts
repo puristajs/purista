@@ -34,10 +34,22 @@ import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunction
 import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
 
 /**
- * Subscription definition builder is a helper to create and define a subscriptions for a service.
- * It helps to set all needed filters.
+ * Declares a bounded, typed reaction to a business event.
  *
- * A working schema definition needs at least a subscription name, a short description and the subscription implementation.
+ * Use a subscription for decoupled event handling that can finish promptly and
+ * be idempotent. For slow, retry-heavy, or operator-replayable work, let this
+ * subscription enqueue a queue job instead of performing the work directly.
+ *
+ * @example
+ * ```ts
+ * const orderCreated = service
+ *   .getSubscriptionBuilder('reserveInventory', 'Reserve stock after an order is created')
+ *   .subscribeToEvent('orders.orderCreated')
+ *   .addPayloadSchema(orderCreatedSchema)
+ *   .setSubscriptionFunction(async function (_context, _payload) {
+ *     // Keep this bounded and idempotent; enqueue durable work when needed.
+ *   })
+ * ```
  *
  * @group Subscription
  */

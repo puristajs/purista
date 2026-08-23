@@ -1,3 +1,3 @@
-export * from './CommandDefinitionBuilder.impl.js'
-export * from './CommandDefinitionBuilderTypes.js'
-export * from './getCommandFunctionWithValidation.impl.js'
+export type { HttpExposureOptions } from './CommandDefinitionBuilder.impl.js'
+export { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl.js'
+export type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'

@@ -57,6 +57,11 @@ PURISTA `setRunFunction(...)` plus `canInvokeAgent(...)` instead when the child
 agents need independent queues, retries, HTTP exposure, service ownership,
 sandboxes, or model/runtime bindings.
 
+Passing `{ agents }` only registers harness-local definitions. It never grants
+delegation. Declare the workflow's `delegation.agents` and
+`delegation.modelAliases` allowlists in the workflow itself so the capabilities
+available to `ctx.agents` stay explicit and reviewable.
+
 ## Runtime Wiring
 Applications bind concrete models at service startup:
 
@@ -71,11 +76,60 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
     sandbox,
     runtime,
     workspaceStore,
+    harness: {
+      modules: [supportModule],
+      tools: approvedTools,
+    },
   },
 })
 ```
 
 Startup fails fast when aliases or capabilities are missing.
+
+Attached agents automatically adapt the service's normal `stateStore` for
+Harness sessions, conversation history, run records, and run events. Configure
+that store once in `service.getInstance(..., { stateStore })` to share the
+application's standard persistence. The adapter namespaces Harness records by
+service, version, and agent. The application owns the injected store lifecycle;
+a service never closes a shared store.
+
+`ai.stateStore` remains an explicit Harness-native override. Use it only when
+agent persistence intentionally needs a separate backend, retention policy, or
+isolation boundary. When present, it takes precedence over the service store.
+
+The default state store is intended for local development and tests. For
+durable production conversations, configure a persistent PURISTA `StateStore`
+or an explicit Harness-native `ai.stateStore` that meets the required Harness
+state contract. Persistence does not schedule conversation turns: the
+application owns whether messages for one conversation serialize, receive a
+busy response, or create independent sessions.
+
+Use `setSessionPolicy({ mode: 'conversation', payloadPath, retention })` to
+make storage bounds explicit:
+`history: { maxTurns, maxBytes }` is a complete-turn rolling window using UTF-8
+bytes for storage, `idleTtlMs` requires a service StateStore with atomic expiry,
+and optional `runs.maxPerSession` / `events.maxPerRun` bound diagnostic data.
+`history` also works with an explicit Harness-native `ai.stateStore` when it
+implements atomic message replacement; idle, run, and event limits remain
+service-store policies.
+These are not model-token limits. Model context remains a transient,
+provider-specific token decision; never approximate token admission from bytes.
+Harness commits a complete turn only after a successful model loop. PURISTA
+passes the stable queue delivery identity as the Harness idempotency key, so a
+redelivery reuses the committed result instead of appending duplicate messages.
+
+Do not add a second PURISTA `ConversationStore`, transcript builder, generic
+compactor, or vector-memory configuration to solve this. Context projection is
+model-request behavior; retrieval and memory remain explicit Harness runtime
+configuration owned by the application. A direct command remains request/
+response; use an explicit queue boundary for retryable or long-running work.
+
+`ai.harness.modules` is for static TypeScript modules imported and versioned by
+the application. `ai.harness.tools` is an explicit application-owned tool
+registry; each attached Harness definition still allowlists the tool ids it can
+use. If an application imports Agent Plugins, inspect and approve them outside
+Core first, then pass only its selected tool bindings here. Core does not load
+plugin packages, decide trust, inject credentials, or run plugin hooks.
 
 Governance policy is optional. Do not add governance configuration to generated
 apps or simple agents by default. Use it only when a service needs central
@@ -123,7 +177,12 @@ provider finish/status metadata for diagnostics and tracing. Application logic
 should branch on `finishReason` first and use `outcome` for operations or
 provider-specific reporting.
 
-Default AI telemetry should not capture prompt or completion content. Core defaults `ai.telemetry` to `contentCaptureMode: 'NO_CONTENT'`; only widen it (`'SPAN_ONLY'`, `'EVENT_ONLY'`, `'SPAN_AND_EVENT'`) after a product-specific retention, redaction, consent, and access-control policy has been approved.
+Default AI telemetry should not capture prompt or completion content. Harness
+defaults its `contentCaptureMode` to `NO_CONTENT`; Core forwards an explicit
+`ai.telemetry` option without translating the service's Core observability
+context into Harness telemetry. Only widen capture (`'SPAN_ONLY'`,
+`'EVENT_ONLY'`, `'SPAN_AND_EVENT'`) after a product-specific retention,
+redaction, consent, and access-control policy has been approved.
 
 Keep telemetry ownership explicit:
 - PURISTA service metrics are configured through service runtime `metrics`
@@ -138,13 +197,15 @@ filesystem built-ins, MCP stdio tools, or code execution. Sandbox capabilities
 such as `sandbox.snapshot`, `sandbox.resume`, and `sandbox.hibernate` describe
 low-level sandbox session behavior.
 
-Use `setWorkspacePolicy(...)` only when an attached agent must resume from
-committed workspace state after queue retry, process restart, pause, or
-hibernate:
+Use `setWorkspacePolicy(...)` only with `setHarnessWorkflow(...)`. It lets a
+workflow resume committed private workspace state after queue retry or process
+restart; it is not conversation history and is not available to
+`setHarnessAgent(...)` or `setRunFunction(...)`:
 
 ```ts
 const agent = service
   .getAgentQueueBuilder('researchReport', 'Builds a research report')
+  .setHarnessWorkflow(researchWorkflow)
   .setWorkspacePolicy({
     mode: 'durable',
     required: true,
@@ -172,10 +233,12 @@ requirements are `runtime.workspace_checkpoint`, `workspace_store.durable`,
 `workspace_store.retention`, `workspace_store.encrypted_storage`, and `workspace_store.quota`
 when production policy requires those guarantees.
 
-Use `inMemoryDurableWorkspaceStore()` from `@purista/harness` for local
-development and tests. Do not describe it as production persistence; production
-services need a durable store that survives process restart and declares the
-required `workspace_store.*` capabilities.
+For attached-agent tests, prefer
+`createAgentDurableWorkspaceTestRuntime()` from `@purista/core/testing`. It
+returns a paired in-memory durable runtime and workspace store. Do not describe
+it as production persistence; production services need durable runtime and
+workspace-store adapters that survive process restart and declare the required
+`workspace_store.*` capabilities.
 
 Keep ownership clear:
 - `@purista/harness` owns workspace lifecycle, checkpoint references, workspace
@@ -188,15 +251,62 @@ Keep ownership clear:
 Fresh ephemeral fallback must be explicit in the builder policy. Never treat a
 sandbox snapshot as production durable workspace replay.
 
+### Decision shortcut
+- Use a conversation session for user/business history across requests; it does
+  not retain sandbox files or resume unfinished execution.
+- Use a sandbox for isolated tools, files, code execution, mounted skills, or
+  MCP processes during one run. A capable adapter may snapshot and reopen one
+  sandbox session, but that is not application-managed recovery after failure.
+- Use durable runtime and workspace bindings only with
+  `setHarnessWorkflow(...)` when a multi-step workflow must resume from
+  checkpoints and private files after retry or process restart. This is the
+  correct choice for a CSV analysis or research report that must preserve its
+  intermediate filesystem state after failure.
+- Use separate PURISTA child agents when business capabilities need independent
+  queues, service ownership, model bindings, or operational policies.
+
+### Retention ownership and compatibility
+- Core StateStore retention is shared by ordinary services and attached agents:
+  a write policy wins over a service `stateRetention` default, which wins over
+  the StateStore instance `retention` default; no policy retains state forever.
+  Finite retention requires `capabilities.retention.atomicExpiry: true`.
+- Retention is policy, not a generic PURISTA cleanup worker. Harness applies
+  `history.maxTurns` and `history.maxBytes` by retaining complete turns.
+- `idleTtlMs` is an expiring write through the service StateStore and requires
+  `capabilities.retention.atomicExpiry: true`; unsupported stores fail instead
+  of silently retaining data forever.
+- Run and event caps use PURISTA's service-StateStore adapter. An explicit
+  Harness-native `ai.stateStore` supports history only when it implements
+  `replaceMessages`; it cannot use PURISTA idle, run, or event limits.
+- Durable-workspace retention is separate: its workspace adapter owns cleanup,
+  quotas, encryption, and file retention.
+
 ## Handler Context
 Agent handlers use:
 - `context.payload` and `context.parameter`
 - `context.harness.models.<alias>` with capability-gated methods
-- `context.harness.events.emit(...)`
 - `context.invoke.tools[...]` for declared command tools
 - `context.invoke.agents[...]` for declared child-agent aggregate calls
 - `context.metrics` for service-level and agent-local custom metrics declared on builders
 - `context.logger`
+
+For a custom `setRunFunction(...)` handler, declare model progress once on the
+attached agent:
+
+```ts
+agent.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
+```
+
+The handler consumes `context.harness.models.<alias>` normally. Harness owns
+run identity, event ordering, redaction, and final status; custom handlers
+cannot forge lifecycle events directly. `safe` exposes client-oriented output
+and tool status only; use `full` exclusively for a trusted diagnostic client.
+
+These run events are in-process/provider-progress frames for the active agent
+stream. They are not PURISTA EventBridge messages and never trigger
+subscriptions. For a business event after a validated agent result, use the
+agent builder's `setSuccessEventName(...)`; PURISTA then publishes that result
+through the EventBridge.
 
 ## Optional Governance Policy
 `@purista/harness` owns the generic governance policy contract. PURISTA
@@ -222,6 +332,40 @@ conversation metadata to the harness explicitly and only as safe scalar
 metadata. If an attached agent configures `require_approval` rules, provide a
 harness `approval` adapter in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
+
+Agents are ephemeral by default. `setSessionPolicy(...)` opts into a persistent
+conversation. The application supplies its stable, non-empty business
+conversation id; PURISTA automatically adds trusted `message.tenantId` and
+`message.principalId` when they are present.
+
+```ts
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
+```
+
+The logical identity is `tenantId:principalId:conversationId`, within the
+owning service, version, and agent namespace. Tenant and principal are optional
+dimensions: with neither present, the required conversation id is the whole
+boundary; with either present, a stable internal default fills its missing
+counterpart. Supplied tenant or principal values therefore automatically make
+the boundary stricter. Do not derive tenant or principal identity from payload
+data, prompts, conversation ids, or unverified headers.
+
+This declaration selects the stable Harness session identity for persisted
+conversation history and associated run records. It does not persist or restore
+a sandbox, workspace files, or tool permissions. Configure sandbox policy and
+explicit tool declarations/runtime bindings separately; workspace policy applies
+only when the execution definition is a Harness workflow.
+
+When upgrading a PURISTA 3.2 application, keep a valid session-policy
+declaration unchanged:
+
+```ts
+agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
+```
+
+No tenant or principal session configuration is needed. Existing applications
+gain the automatic message-metadata partition whenever that trusted metadata is
+available.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:
@@ -284,9 +428,9 @@ comes from `agentSseEventSchema`.
 Use harness `ContentPart` and `agentContentPartSchema` for text, image, audio, and file content. Multimodal methods are capability-gated by model aliases such as `vision_input`, `audio_input`, and `file_input`.
 
 ## Testing
-Use core testing helpers:
+Use `@purista/core/testing` helpers:
 - `createAgentTestHarness(...)`
-- `createScriptedHarnessModel()`
+- `FakeModelProvider`
 - `createAgentSkillTestRuntime(...)`
 - `createAgentContextMock(...)`
 

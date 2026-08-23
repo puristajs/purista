@@ -63,6 +63,9 @@ export const resolveProjectBlueprints = (
 			addBlueprint(selectedBlueprints, seen, context.runtime === 'bun' ? 'http-bun' : 'http-node', context)
 		}
 	}
+	if (context.telemetry === 'otel') {
+		addBlueprint(selectedBlueprints, seen, 'telemetry-otel', context)
+	}
 
 	if (context.linter === 'biome') {
 		addBlueprint(selectedBlueprints, seen, 'linter-biome', context)

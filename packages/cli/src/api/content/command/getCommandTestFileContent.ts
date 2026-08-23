@@ -28,7 +28,7 @@ export const getCommandTestFileContent = (input: {
 	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
 
 	writer.writeLine(
-		`import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`,
+		`import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core/testing'`,
 	)
 	writer.writeLine(`import { createSandbox } from 'sinon'`)
 	writer.blankLine()

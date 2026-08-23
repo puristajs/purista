@@ -13,7 +13,7 @@ import type {
 	QueueLeaseOptions,
 	QueueMessage,
 	QueueRetryRequest,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type {
 	RedisClientType,
 	RedisFunctions,

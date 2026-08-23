@@ -31,8 +31,10 @@ import type { QueueRetryRequest } from '../QueueBridge/types/QueueRetryRequest.j
 import type { SecretDeleteFunction } from '../SecretStore/types/SecretDeleteFunction.js'
 import type { SecretGetterFunction } from '../SecretStore/types/SecretGetterFunction.js'
 import type { SecretSetterFunction } from '../SecretStore/types/SecretSetterFunction.js'
+import { createStateStoreRetentionView } from '../StateStore/createStateStoreRetentionView.impl.js'
 import type { StateDeleteFunction } from '../StateStore/types/StateDeleteFunction.js'
 import type { StateGetterFunction } from '../StateStore/types/StateGetterFunction.js'
+import type { StateWriteOptions } from '../StateStore/types/StateRetention.js'
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
 import type { ContextBase } from '../types/ContextBase.js'
 import type { CustomMessage } from '../types/CustomMessage.js'
@@ -203,7 +205,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			spanProcessor: config.spanProcessor,
 			secretStore: config.secretStore ?? new DefaultSecretStore(),
 			configStore: config.configStore ?? new DefaultConfigStore(),
-			stateStore: config.stateStore ?? new DefaultStateStore(),
+			stateStore: createStateStoreRetentionView(config.stateStore ?? new DefaultStateStore(), config.stateRetention),
 			configSchema: config.configSchema,
 			metrics: config.metrics,
 			metricsRecorder: config.metricsRecorder,
@@ -265,6 +267,48 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		attributes: PuristaMetricAttributes,
 	) {
 		this.recordFrameworkMetric(name, Math.max(0, Date.now() - startedAt), attributes)
+	}
+
+	/**
+	 * Record the PURISTA-owned wrapper metrics for one attached-agent execution.
+	 *
+	 * Harness remains responsible for GenAI, model, token, and tool telemetry.
+	 * This method deliberately records only the agent name, projection kind, and
+	 * sanitized outcome; it never accepts session, run, user, tenant, or content
+	 * identifiers.
+	 *
+	 * @internal Used by generated attached-agent projections.
+	 */
+	public async executeAttachedAgent<T>(
+		agentName: string,
+		executionKind: 'command' | 'queue' | 'stream' | 'tool',
+		execute: () => Promise<T>,
+	): Promise<T> {
+		const startedAt = Date.now()
+		const baseAttributes: PuristaMetricAttributes = {
+			...this.getServiceMetricAttributes(),
+			'purista.agent.name': agentName,
+			'purista.agent.execution.kind': executionKind,
+		}
+		this.recordFrameworkMetric('purista.agent.active', 1, baseAttributes)
+		let outcome: PuristaMetricOutcome = 'success'
+		let errorType: string | undefined
+		try {
+			return await execute()
+		} catch (error) {
+			outcome = error instanceof HandledError ? 'handled_error' : 'unhandled_error'
+			errorType = this.getErrorType(error)
+			throw error
+		} finally {
+			const attributes: PuristaMetricAttributes = {
+				...baseAttributes,
+				'purista.outcome': outcome,
+				...(errorType ? { 'error.type': errorType } : {}),
+			}
+			this.recordFrameworkMetric('purista.agent.runs', 1, attributes)
+			this.recordDurationMetric('purista.agent.run.duration', startedAt, attributes)
+			this.recordFrameworkMetric('purista.agent.active', -1, baseAttributes)
+		}
 	}
 
 	/**
@@ -1807,15 +1851,20 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		}
 		const getState: StateGetterFunction = getStateFunction.bind(this)
 
-		const setStateFunction = async function (this: Service<S>, stateName: string, value: unknown) {
-			return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async span => {
+		const setStateFunction = async function (
+			this: Service<S>,
+			stateName: string,
+			value: unknown,
+			options?: StateWriteOptions,
+		) {
+			return this.wrapInSpan(PuristaSpanName.StateStoreSetValue, {}, async span => {
 				try {
 					span.setAttributes({
 						[PuristaSpanTag.StoreName]: this.stateStore.name,
 						[PuristaSpanTag.StoreType]: StoreType.StateStore,
 					})
 					return this.recordStoreOperation('state', this.stateStore.name, 'set', () =>
-						this.stateStore.setState(stateName, value),
+						this.stateStore.setState(stateName, value, options),
 					)
 				} catch (err) {
 					span.recordException(err as Error)
@@ -1826,7 +1875,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		const setState: StateSetterFunction = setStateFunction.bind(this)
 
 		const removeStateFunction = async function (this: Service<S>, stateName: string) {
-			return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async span => {
+			return this.wrapInSpan(PuristaSpanName.StateStoreRemoveValue, {}, async span => {
 				try {
 					span.setAttributes({
 						[PuristaSpanTag.StoreName]: this.stateStore.name,
@@ -2684,7 +2733,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		this.recordFrameworkMetric('purista.health.status', status === 'ok' ? 1 : 0, {
 			...this.getServiceMetricAttributes(),
 			'purista.health.component': 'service',
-			'purista.health.state': status,
+			'purista.health.status': status,
 		})
 		this.recordDurationMetric('purista.health.check.duration', startedAt, {
 			...this.getServiceMetricAttributes(),

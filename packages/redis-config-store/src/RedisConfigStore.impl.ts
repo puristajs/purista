@@ -1,5 +1,5 @@
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core/adapter'
+import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 import type {
 	RedisClientType,
 	RedisFunctions,

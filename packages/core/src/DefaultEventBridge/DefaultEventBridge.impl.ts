@@ -89,17 +89,20 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 	>()
 
 	protected streamFunctions = new Map<string, (message: StreamMessage) => Promise<void>>()
+	/** @internal Runtime registry; adapter implementations must not depend on it. */
 	protected pendingInvocations = new PendingInvocationRegistry<unknown>({
 		onLateResponse: correlationId => {
 			this.logger.warn({ correlationId }, 'Ignoring late command response after invocation timeout')
 		},
 	})
+	/** @internal Runtime registry; adapter implementations must not depend on it. */
 	protected pendingStreams = new PendingStreamRegistry<any, any>({
 		onLateFrame: correlationId => {
 			this.logger.warn({ correlationId }, 'Ignoring late stream frame after stream timeout')
 		},
 	})
 
+	/** @internal Runtime registry; adapter implementations must not depend on it. */
 	protected subscriptions = new Map<string, SubscriptionStorageEntry>()
 
 	protected hasStarted = false

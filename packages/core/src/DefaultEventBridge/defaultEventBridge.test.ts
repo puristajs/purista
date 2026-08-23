@@ -3,12 +3,14 @@ import { describe, expect, it } from 'vitest'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Subscription } from '../core/index.js'
 import { createInfoMessage, EBMessageType } from '../core/index.js'
+import { createNoopMetricsRecorder } from '../core/metrics/createNoopMetricsRecorder.js'
 import {
 	getCommandMessageMock,
 	getCommandSuccessMessageMock,
 	getCustomMessageMessageMock,
 	getLoggerMock,
 } from '../mocks/index.js'
+import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { DefaultEventBridge } from './DefaultEventBridge.impl.js'
 
 class TestDefaultEventBridge extends DefaultEventBridge {
@@ -18,6 +20,10 @@ class TestDefaultEventBridge extends DefaultEventBridge {
 
 	public getPendingInvocations() {
 		return this.pendingInvocations.getPendingMap()
+	}
+
+	public getMetricsRecorder() {
+		return this.metricsRecorder
 	}
 }
 
@@ -55,6 +61,22 @@ describe('DefaultEventBridge', () => {
 		const eventBridge = new DefaultEventBridge({ logger: logger.mock })
 
 		expect(eventBridge).toBeDefined()
+	})
+
+	it('keeps shared bridge observability owned by the bridge', async () => {
+		const bridgeRecorder = createNoopMetricsRecorder()
+		const bridge = new TestDefaultEventBridge({ metricsRecorder: bridgeRecorder })
+		const traceProvider = bridge.traceProvider
+		const service = new ServiceBuilder({
+			serviceName: 'orders',
+			serviceVersion: '1',
+			serviceDescription: 'Owns orders',
+		})
+
+		await service.getInstance(bridge, { metricsRecorder: createNoopMetricsRecorder() })
+
+		expect(bridge.getMetricsRecorder()).toBe(bridgeRecorder)
+		expect(bridge.traceProvider).toBe(traceProvider)
 	})
 
 	it('does not expose event-emitter methods on bridge instances', () => {

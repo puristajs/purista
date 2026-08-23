@@ -1,6 +1,6 @@
 import { join } from 'node:path/posix'
 
-import { convertToSnakeCase } from '@purista/core'
+import { convertToSnakeCase } from '@purista/core/adapter'
 
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 

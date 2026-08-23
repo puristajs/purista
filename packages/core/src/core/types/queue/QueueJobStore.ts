@@ -1,3 +1,4 @@
+import { createStateStoreRetentionView } from '../../StateStore/createStateStoreRetentionView.impl.js'
 import type { StateStore } from '../../StateStore/types/StateStore.js'
 import type { QueueResultStatus } from './QueueResultPolicy.js'
 
@@ -35,13 +36,21 @@ export type QueueJobStore = {
  * const jobStore = createStateStoreQueueJobStore(stateStore)
  * ```
  */
-export const createStateStoreQueueJobStore = (stateStore: StateStore, prefix = 'purista:queue-job'): QueueJobStore => ({
-	async get(jobId) {
-		const key = `${prefix}:${jobId}`
-		const result = await stateStore.getState(key)
-		return result[key] as QueueJobStatusRecord | undefined
-	},
-	async set(record, _ttlMs) {
-		await stateStore.setState(`${prefix}:${record.jobId}`, record)
-	},
-})
+export const createStateStoreQueueJobStore = (stateStore: StateStore, prefix = 'purista:queue-job'): QueueJobStore => {
+	const retainedStore = createStateStoreRetentionView(stateStore)
+
+	return {
+		async get(jobId) {
+			const key = `${prefix}:${jobId}`
+			const result = await retainedStore.getState(key)
+			return result[key] as QueueJobStatusRecord | undefined
+		},
+		async set(record, ttlMs) {
+			await retainedStore.setState(
+				`${prefix}:${record.jobId}`,
+				record,
+				ttlMs === undefined ? undefined : { retention: { mode: 'expire', ttlMs } },
+			)
+		},
+	}
+}

@@ -6,7 +6,54 @@ order: 30
 
 # Installation & CLI
 
-PURISTA provides a blueprint-driven CLI that scaffolds projects and generates services, commands, subscriptions, streams, queues, and AI agents. It supports interactive, non-interactive, and programmatic usage.
+PURISTA provides a blueprint-driven CLI that scaffolds projects and generates services, commands, subscriptions, streams, queues, event-only schedules, and AI agents. It supports interactive, non-interactive, and programmatic usage.
+
+## Inspect architecture before changing it
+
+The CLI derives a versioned, JSON-safe architecture contract from exported
+service definitions. It contains stable component IDs, typed relations, a
+deduplicated schema catalog, and a content digest. This is the recommended
+first step for an AI agent or reviewer: it shows declared boundaries without
+importing handlers or contacting infrastructure.
+
+```bash
+purista inspect --definitions purista.definitions.json --format json
+purista inspect --definitions purista.definitions.json --out purista.architecture.json --format json
+purista inspect --definitions purista.definitions.json --view agent --scope service:orders/1 --depth 1 --schemas referenced --format json
+purista inspect --definitions purista.definitions.json --view agent --scope command:createOrder --format markdown
+purista validate --definitions purista.definitions.json --strict --format json
+purista doctor --definitions purista.definitions.json --format json
+purista diff --base approved.architecture.json --definitions purista.definitions.json --strict --format json
+purista compose --composition deployment.architecture.json --artifact orders.architecture.json --artifact billing.architecture.json --strict --format json
+```
+
+`inspect --view manifest` returns the complete contract. `inspect --view agent`
+returns a scoped relation neighborhood; `--schemas referenced` embeds only its
+referenced normalized JSON Schemas. Markdown is a deterministic rendering of
+the same selected graph, not an AI summary. `validate` applies static
+cross-reference rules and exits non-zero when errors exist. `diff` compares a
+candidate to a supplied artifact and reports a changed schema as **unknown**
+unless it can be proven safe. `compose` validates only explicitly pinned local
+artifacts and bindings; it never fetches repositories or registries.
+When a binding has schemas on both ends, matching fingerprints pass; different
+fingerprints are intentionally reported as **unknown** (and fail under
+`--strict`) rather than being guessed compatible.
+
+`doctor` adds project-configuration checks, but is explicitly **static**: it
+does not claim to test a live bridge, store, scheduler provider, or model
+provider. Runtime health requires an application-owned, opt-in probe or
+attestation outside this command.
+
+All architecture flows print stable JSON for automation. They never serialize
+handler functions, provider instances, credentials, prompts, transcripts, or
+schedule provider hints. Default schema mode is fingerprints; use
+`--schemas referenced` for a selected agent context. `inspect` and `validate`
+need only the definitions file; `doctor` additionally reports whether
+`purista.json` and the generated definitions file are present. `inspect --out`
+is the sole explicit write: it persists the same static manifest it prints.
+Schedule components expose `expressionKind` plus the applicable `cron`,
+`everyMs`, or `runAt` field, which keeps the generated contract easy to consume
+without parsing an embedded schedule expression.
 
 ## Quick start
 
@@ -42,7 +89,7 @@ The skill links target `node_modules/@purista/core/skills/purista`, so normal de
 
 ## CLI installation
 
-Generated projects install `@purista/cli` as a dev dependency and expose local scripts such as `add:service`, `add:command`, and `add:agent`. Prefer those scripts inside projects so the CLI version matches the project.
+Generated projects install `@purista/cli` as a dev dependency and expose local scripts such as `add:service`, `add:command`, `add:schedule`, and `add:agent`. Prefer those scripts inside projects so the CLI version matches the project.
 
 Install globally only when you need an outside-project maintenance command:
 
@@ -68,7 +115,7 @@ pnpm add -g @purista/cli
 
 ## Project scaffolding
 
-The CLI guides you through runtime, event bridge, HTTP server, and linter choices. The result is an ESM project skeleton ready for development.
+The CLI guides you through runtime, event bridge, HTTP server, telemetry, and linter choices. The result is an ESM project skeleton ready for development.
 
 ```bash
 purista init my-app
@@ -79,10 +126,11 @@ purista init my-app
 For CI, scripts, or agentic tooling:
 
 ```bash
-purista init my-app \
-  --runtime node \
-  --event-bridge default \
-  --webserver \
+	purista init my-app \
+	  --runtime node \
+	  --event-bridge default \
+	  --telemetry otel \
+	  --webserver \
   --linter biome \
   --formatter biome \
   --package-manager npm \
@@ -99,9 +147,12 @@ Non-interactive mode never prompts. It applies only declared defaults and fails 
 |---|---|---|---|
 | `runtime` | `node`, `bun` | `node` | JavaScript runtime |
 | `event-bridge` | `default`, `amqp`, `mqtt`, `nats`, `dapr` | `default` | Message transport |
+| `telemetry` | `none`, `otel` | `none` | Add a minimal OpenTelemetry metric-provider bootstrap |
 | `webserver` | flag | off | Include Hono-based HTTP server |
 | `linter` | `biome`, `eslint`, `none` | `none` | Code linter |
 | `formatter` | `biome`, `prettier`, `none` | `none` | Code formatter |
+
+`--telemetry otel` adds the OpenTelemetry metric packages plus `src/telemetry.ts`, and starts that provider at the application's composition root. It is opt-in: PURISTA's metrics work with its provider-neutral recorder either way, while the generated OpenTelemetry bootstrap uses a console exporter until the application deliberately replaces it with a production exporter.
 
 ## Generating business artifacts
 
@@ -114,6 +165,7 @@ npm run add:subscription # add subscription to existing service
 npm run add:stream       # add stream for live updates
 npm run add:queue        # add queue for async workloads
 npm run add:queue-worker # add worker for existing queue
+npm run add:schedule     # add an event-only scheduler declaration
 npm run add:agent        # add AI agent
 ```
 
@@ -149,12 +201,43 @@ npm run add:queue-worker -- process-jobs \
   --service-version 1 \
   --queue processJobs
 
+# Add a scheduler declaration; it emits a normal event, not business work
+npm run add:schedule -- daily-close \
+  --service billing \
+  --service-version 1 \
+  --description "Emit the daily closing trigger" \
+  --event billing.daily_close_due \
+  --cron "0 2 * * *" \
+  --scheduler-group billing
+
 # Add an AI agent
 npm run add:agent -- triage \
   --service support \
   --service-version 1 \
   --description "Ticket triage agent"
+
+# Opt in to a workflow-backed agent that can use durable workspace replay
+npm run add:agent -- incident-review \
+  --service support \
+  --service-version 1 \
+  --description "Resumable incident review" \
+  --durable-workspace
 ```
+
+### Durable agent template
+
+`add:agent` creates an ephemeral `setHarnessAgent(...)` by default. Pass
+`--durable-workspace` only for a multi-step agent that must resume its private
+workspace after retry or restart. The CLI then generates a small
+`setHarnessWorkflow(...)`, its explicit delegation allowlist, and
+`.setWorkspacePolicy({ mode: 'durable', required: true, cleanup: 'on_terminal' })`.
+
+The generated test uses `createAgentDurableWorkspaceTestRuntime()` from
+`@purista/core/testing`; it is hermetic and is not a production adapter. At the
+application composition root, supply provider-backed `ai.runtime` and
+`ai.workspaceStore` bindings. Do not select this option for a simple one-step
+agent, and do not apply durable workspace policy to `setHarnessAgent(...)` or
+`setRunFunction(...)`—Core rejects those shapes.
 
 ## CLI workflow
 

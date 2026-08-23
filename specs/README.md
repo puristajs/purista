@@ -19,6 +19,32 @@ aligned.
 - If historical context must remain, mark it as superseded and point to the
   current implementation or migration record.
 
+## Lifecycle Contract
+
+`spec-manifest.yaml` is the machine-readable lifecycle index for every
+canonical Markdown spec in this directory. It is deliberately JSON-compatible
+YAML so it can be checked without a parser dependency. An entry must declare:
+
+- `status`: `proposed`, `active`, `implemented`, `superseded`, or `historical`
+- the accountable `owner`, in-scope capability, and any `supersedes` or
+  `dependsOn` links
+- concrete `acceptance` and `verification` commands
+- security/privacy, recovery/operations, public API, generated-artifact, and
+  release/migration impact statements
+- approval evidence for `active` and `implemented` entries
+
+The repository does not use a document's prose status as execution authority.
+`node scripts/specs-audit.mjs specs` validates the manifest, calculates a
+content digest for every indexed spec, and rejects unindexed files, ambiguous
+status, missing acceptance/verification details, or executable status without
+approval evidence. `--write` refreshes `.readiness-report.yaml`; ordinary CI
+uses the default read-only verification mode.
+
+An implementation agent may act only on an `active` or `implemented` manifest
+entry whose report decision is `approved`. `proposed`, `historical`, and
+`superseded` entries are context only. This protects agents from turning
+historical planning language into new behavior by accident.
+
 ## Knowledge Alignment
 - Specs define intended framework behavior.
 - Implementation realizes the specs.

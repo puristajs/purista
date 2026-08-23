@@ -18,6 +18,13 @@ const subscriptionDefinitions: SubscriptionDefinition[] = [serviceCommandsToRest
  * Create an instance with `honoV1Service.getInstance(eventBridge, ...)`, then
  * register PURISTA services before starting and passing `honoService.app.fetch`
  * to a Hono runtime adapter.
+ *
+ * @example
+ * ```ts
+ * const honoService = await honoV1Service.getInstance(eventBridge)
+ * honoService.addPuristaService(ordersV1Service)
+ * await honoService.start()
+ * ```
  */
 export const honoV1Service = honoV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

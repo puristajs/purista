@@ -1,5 +1,5 @@
-import type { CustomMessage, EBMessage, EBMessageAddress, Subscription } from '@purista/core'
-import { StatusCode } from '@purista/core'
+import type { CustomMessage, EBMessage, EBMessageAddress, Subscription } from '@purista/core/adapter'
+import { StatusCode } from '@purista/core/adapter'
 import type { MqttClient } from 'mqtt'
 import { describe, expect, it, vi } from 'vitest'
 import { MqttBridge } from './MqttEventBridge.js'

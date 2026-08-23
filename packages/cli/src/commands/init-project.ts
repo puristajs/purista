@@ -17,6 +17,7 @@ const schema = z.strictObject({
 	runtime: z.enum(['node', 'bun']).default('node'),
 	eventBridge: z.enum(['default', 'mqtt', 'amqp', 'nats', 'dapr']).default('default'),
 	useWebserver: z.coerce.boolean().default(false),
+	telemetry: z.enum(['none', 'otel']).default('none'),
 	fileConvention: z.enum(['camel', 'snake', 'kebab', 'pascal', 'pascalSnake']).default('camel'),
 	eventConvention: z
 		.enum(['camel', 'snake', 'kebab', 'pascal', 'pascalSnake', 'constantCase', 'dotCase', 'pathCase', 'trainCase'])

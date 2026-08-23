@@ -1,3 +1,2 @@
-export * from './getSubscriptionFunctionWithValidation.impl.js'
-export * from './SubscriptionDefinitionBuilder.impl.js'
-export * from './SubscriptionDefinitionBuilderTypes.js'
+export { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl.js'
+export type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'

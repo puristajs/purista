@@ -1,5 +1,5 @@
-import type { HttpExposedServiceMeta } from '@purista/core'
-import { StatusCode } from '@purista/core'
+import type { HttpExposedServiceMeta } from '@purista/core/adapter'
+import { StatusCode } from '@purista/core/adapter'
 import type { OpenApiBuilder, OperationObject, ParameterObject, ResponsesObject } from 'openapi3-ts/oas31'
 
 import { getErrorName } from './getErrorName.js'

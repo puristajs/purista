@@ -1,10 +1,11 @@
 import type { ScheduleDefinition, ScheduleOptions, ScheduleTargetKind } from '../core/types/schedule/index.js'
 
 /**
- * Builds a schedule contract for an external scheduler.
+ * Builds a provider-neutral schedule contract.
  *
- * PURISTA core records schedule intent; production scheduling is performed by
- * an explicit external trigger or generated provider artifact.
+ * The Core Scheduler Runtime can consume event targets in a separate
+ * scheduler deployment. Queue and command targets remain available for
+ * external provider exports.
  */
 export class ScheduleDefinitionBuilder {
 	constructor(
@@ -82,6 +83,7 @@ export class ScheduleDefinitionBuilder {
 			maxCatchUpCount: options.maxCatchUpCount,
 			jitterWindowMs: options.jitterWindowMs,
 			idempotencyKey: options.idempotencyKey,
+			schedulerGroup: options.schedulerGroup,
 			enabledByDefault: options.enabledByDefault ?? true,
 			providerHints: options.providerHints,
 		}

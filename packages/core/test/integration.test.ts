@@ -4,9 +4,15 @@ import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import type { ServiceInfoType } from '../src/index.js'
-import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode, safeBind } from '../src/index.js'
-import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../src/mocks/index.js'
-import { createCommandContextMock, createSubscriptionContextMock } from '../src/testing/index.js'
+import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode } from '../src/index.js'
+import {
+	createCommandContextMock,
+	createSubscriptionContextMock,
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	safeBind,
+} from '../src/testing/index.js'
 
 describe('integration test', () => {
 	const sandbox = createSandbox()

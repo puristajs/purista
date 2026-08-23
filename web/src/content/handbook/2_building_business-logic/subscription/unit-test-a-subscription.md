@@ -25,7 +25,7 @@ import {
   getEventBridgeMock,
   getLoggerMock,
   safeBind,
-} from '@purista/core'
+} from '@purista/core/testing'
 import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service.js'

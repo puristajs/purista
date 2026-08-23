@@ -1,4 +1,4 @@
-import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core/testing'
 import { createSandbox } from 'sinon'
 
 import { delayV1Service } from '../../delayV1Service.js'

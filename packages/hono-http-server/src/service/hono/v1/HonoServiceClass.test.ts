@@ -1,4 +1,11 @@
-import { getEventBridgeMock, getLoggerMock, ServiceBuilder, StatusCode } from '@purista/core'
+import {
+	createMemoryMetricsRecorder,
+	getEventBridgeMock,
+	getLoggerMock,
+	HandledError,
+	ServiceBuilder,
+	StatusCode,
+} from '@purista/core/adapter'
 import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
@@ -143,6 +150,82 @@ describe('HonoServiceClass', () => {
 			const response = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
 			expect(response.status).toBe(200)
 			expect(await response.text()).toBe('plain-text')
+		} finally {
+			invokeMock.mockRestore()
+			await server.destroy()
+		}
+	})
+
+	it('records route-template HTTP metrics without request data', async () => {
+		const recorder = createMemoryMetricsRecorder()
+		const server = await honoV1Service.getInstance(getEventBridgeMock().mock, {
+			logger: getLoggerMock().mock,
+			metricsRecorder: recorder,
+			serviceConfig: {
+				enableHealth: false,
+				enableDynamicRoutes: false,
+				autoRegisterServicesFromConfig: false,
+				apiMountPath: '/api',
+				services: [],
+			},
+		})
+		const definition = await plainTextCommand.getDefinition()
+		server.addEndpoint(definition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'plainText',
+		})
+		const invokeMock = vi.spyOn(server, 'invoke').mockResolvedValue('plain-text')
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(
+				new Request('http://localhost/api/v1/plain-text?private=value', { headers: { authorization: 'secret' } }),
+			)
+			expect(response.status).toBe(200)
+
+			expect(recorder.records).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						name: 'http.server.active_requests',
+						value: 1,
+						attributes: { 'http.request.method': 'GET', 'http.route': '/api/v1/plain-text' },
+					}),
+					expect.objectContaining({
+						name: 'http.server.active_requests',
+						value: -1,
+						attributes: { 'http.request.method': 'GET', 'http.route': '/api/v1/plain-text' },
+					}),
+					expect.objectContaining({
+						name: 'http.server.request.duration',
+						attributes: {
+							'http.request.method': 'GET',
+							'http.route': '/api/v1/plain-text',
+							'http.response.status_code': 200,
+						},
+					}),
+				]),
+			)
+			expect(JSON.stringify(recorder.records)).not.toContain('private=value')
+			expect(JSON.stringify(recorder.records)).not.toContain('secret')
+
+			recorder.clear()
+			invokeMock.mockRejectedValueOnce(new HandledError(StatusCode.BadRequest, 'invalid request'))
+			const invalidResponse = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
+			expect(invalidResponse.status).toBe(400)
+			expect(recorder.records).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						name: 'http.server.request.duration',
+						attributes: {
+							'http.request.method': 'GET',
+							'http.route': '/api/v1/plain-text',
+							'http.response.status_code': 400,
+							'error.type': 'http.error',
+						},
+					}),
+				]),
+			)
 		} finally {
 			invokeMock.mockRestore()
 			await server.destroy()

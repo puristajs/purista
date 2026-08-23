@@ -1,0 +1,4 @@
+{
+	"scenarioId": "durable-background-work",
+	"response": "Use a queue and a queue worker because invoice generation is durable background work. Give each request an idempotency key, configure retries and a dead-letter queue for operator replay, and use Redis or NATS rather than DefaultQueueBridge, which is local/test only."
+}

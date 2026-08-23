@@ -1,0 +1,4 @@
+{
+	"scenarioId": "enterprise-runtime-review",
+	"response": "Carry tenantId and principalId through every boundary. Application-owned OpenTelemetry wiring supplies the telemetry provider. The scheduler emits an event trigger and does not run business work. Never place secrets, PII, prompts, or completions in telemetry, logs, metrics, or traces."
+}

@@ -1,4 +1,4 @@
-import { StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core/adapter'
 
 import type { RouterFunction } from './types/RouterFunction.js'
 

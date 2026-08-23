@@ -101,6 +101,10 @@ const incidentReviewWorkflow = {
     risk: z.enum(['low', 'medium', 'high']),
     reasons: z.array(z.string()),
   }),
+  delegation: {
+    agents: ['factExtractor', 'riskAssessor'],
+    modelAliases: ['primary'],
+  },
   handler: async ctx => {
     const facts = await ctx.agents.factExtractor({ text: ctx.input.text })
     const risk = await ctx.agents.riskAssessor({ facts: facts.facts })
@@ -130,7 +134,7 @@ const reviewAgent = await incidentService
   .getDefinition()
 ```
 
-All inner harness agents passed to `setHarnessWorkflow(..., { agents })` share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, durable runtime, workspace store, governance config, and model bindings.
+All inner harness agents passed to `setHarnessWorkflow(..., { agents })` share the harness runtime for that attached PURISTA agent. That means shared session identity, memory, history, sandbox adapter, state store, logger, telemetry, durable runtime, workspace store, governance config, and model bindings. Passing local agents does **not** grant delegation automatically: declare the workflow's `delegation.agents` and `delegation.modelAliases` allowlists explicitly. This keeps every delegated capability visible in the workflow definition.
 
 Local durable execution is a harness runtime concern. When enabled, the runtime writes checkpoint and lease records for the workflow inside your application boundary, so a restarted process can resume from the last committed step instead of replaying the whole run from scratch.
 
@@ -292,6 +296,47 @@ Use independent PURISTA agents when:
 - parallel execution should not contend on one harness session
 - each step needs independent durable workspace retention, cleanup, quota, or
   encryption policy
+
+## Background child tasks and context boundaries
+
+Inside a harness workflow, use a child task only for explicitly delegated,
+isolated work that may outlive the parent response. A child task gets its own
+sandbox and private history. It does not inherit the parent conversation or
+ambient authority, and only the owning session can retrieve its status or
+result. The workflow must opt into delegation and apply an agent allowlist and
+parallelism limits before it can start child tasks.
+
+For a short private back-and-forth, a continuable child task can accept serialized
+follow-up turns. It is intentionally in-process; it is not a durable job. Use a
+PURISTA queue worker or an application-owned durable workflow whenever a task
+must survive a process restart or cross a deployment boundary.
+
+Treat context as three separate things:
+
+- **memory** is scoped state deliberately retained for a session, user, tenant,
+  or workflow;
+- **run context** is the bounded working information passed between the current
+  orchestration steps;
+- **checkpointed context** is an explicit, durable handoff record used for
+  replay and recovery.
+
+Do not use telemetry as a context store. Harness traces and child-task lifecycle
+events are content-free by default. If a model rejects an oversized context, a
+retry-only projection may reduce the next model request, but it must not mutate
+the durable history or audit record.
+
+## Replay is an explicit contract
+
+Mark deterministic workflow boundaries as durable steps and invoke the workflow
+with a stable durable run identity when recovery matters. A committed step
+returns its stored result on replay; an uncommitted step runs again. Make
+external writes idempotent and checkpoint only after the application has safely
+recorded the effect.
+
+Durability never silently falls back to an ephemeral run. If the required
+runtime or workspace capabilities are unavailable, startup or invocation fails
+clearly. This preserves the difference between a convenient retry and a real
+restart-safe workflow.
 
 ## Real-world pattern: research report
 

@@ -1,5 +1,5 @@
-import type { Subscription } from '@purista/core'
-import { convertToSnakeCase } from '@purista/core'
+import type { Subscription } from '@purista/core/adapter'
+import { convertToSnakeCase } from '@purista/core/adapter'
 import type { INatsBridge } from '../types/INatsBridge.js'
 
 /**

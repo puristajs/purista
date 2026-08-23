@@ -66,6 +66,7 @@ Use this checklist when creating or updating a skill.
 - `starter` aligned when defaults or generated app shape changed
 - `create-purista` aligned when scaffolding or templates changed
 - ESM-only scaffolding stays aligned across `purista`, `starter`, `create-purista`, public docs, and installed skill mirrors
+- Installed mirrors are checked with `npm run audit:skill-mirror -- --target <absolute-skills-directory>` and refreshed only with the matching `sync:skills` command
 - `voyage` aligned when framework capability assumptions changed
 - Public docs updated when guidance or migration expectations changed
 - Known planning-doc drift is documented outside the skill when an old draft disagrees with implemented public APIs

@@ -1,4 +1,4 @@
-import { StatusCode, UnhandledError } from '@purista/core'
+import { StatusCode, UnhandledError } from '@purista/core/adapter'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'

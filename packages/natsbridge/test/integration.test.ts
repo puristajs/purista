@@ -1,7 +1,12 @@
 import { emitWarning } from 'node:process'
 
-import type { Service, ServiceInfoType } from '@purista/core'
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, ServiceBuilder } from '@purista/core'
+import type { Service, ServiceInfoType } from '@purista/core/adapter'
+import {
+	getCommandMessageMock,
+	getCommandSuccessMessageMock,
+	getLoggerMock,
+	ServiceBuilder,
+} from '@purista/core/adapter'
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 import { connect } from 'nats'

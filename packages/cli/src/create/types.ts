@@ -13,6 +13,8 @@ export type CreateProjectInput = {
 	eventBridge: 'default' | 'mqtt' | 'amqp' | 'nats' | 'dapr'
 	/** Whether to generate Hono HTTP server wiring. */
 	useWebserver: boolean
+	/** Optional application-owned OpenTelemetry Metrics API bootstrap. */
+	telemetry?: 'none' | 'otel'
 	/** File naming convention used for generated services and artifacts. */
 	fileConvention: 'camel' | 'snake' | 'kebab' | 'pascal' | 'pascalSnake'
 	/** Event naming convention used for generated event values. */

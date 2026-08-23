@@ -1,0 +1,35 @@
+{
+	"skill_name": "purista-skill-maintainer",
+	"evals": [
+		{
+			"id": "catalog-change",
+			"prompt": "A new public PURISTA adapter package was added. Update agent guidance safely.",
+			"expected_output": "Checks specs and implementation, adds the package to the manifest-validated API catalog with documented primary APIs, regenerates knowledge, syncs mirrors, and runs audits.",
+			"files": ["SKILL.md", "references/maintenance-checklist.md"]
+		},
+		{
+			"id": "stale-guidance",
+			"prompt": "The skill says to use a removed package. Repair the drift.",
+			"expected_output": "Verifies current implementation before changing guidance, updates the canonical repo-local skill and downstream artifacts, and records/reconciles spec drift rather than reviving removed APIs.",
+			"files": ["references/catalog-audit-wave1.md"]
+		},
+		{
+			"id": "documentation-coverage",
+			"prompt": "Review whether public adapter APIs have enough TSDoc for TypeDoc and AI agents.",
+			"expected_output": "Audits exported APIs for useful summaries and non-obvious examples, runs TypeDoc and generated knowledge checks, and rejects unsupported or invented snippets.",
+			"files": ["references/maintenance-checklist.md"]
+		},
+		{
+			"id": "casual-drift-report",
+			"prompt": "skills seem out of date after the scheduler work, can u fix em?",
+			"expected_output": "Uses the catalog-maintenance workflow, checks implementation/spec/doc alignment, updates deterministic evaluations, and validates the canonical skill before mirrors.",
+			"files": ["references/maintenance-checklist.md"]
+		},
+		{
+			"id": "near-miss-application-feature",
+			"prompt": "Add an invoice queue worker to my PURISTA app.",
+			"expected_output": "Routes primary implementation to the canonical purista framework skill; this maintainer skill is used only if shared catalog/documentation maintenance is also requested.",
+			"files": []
+		}
+	]
+}

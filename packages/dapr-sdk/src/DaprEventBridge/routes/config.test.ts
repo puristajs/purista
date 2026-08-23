@@ -1,4 +1,4 @@
-import { getLoggerMock, safeBind } from '@purista/core'
+import { getLoggerMock, safeBind } from '@purista/core/adapter'
 import { Hono } from 'hono'
 
 import { configRoute } from './config.impl.js'

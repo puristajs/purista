@@ -3,7 +3,7 @@
 This example shows a real-world, core-native PURISTA agent workflow.
 
 The running demo uses OpenAI through `@purista/harness-openai` and reads the
-API key from `.env`. Tests use `createScriptedHarnessModel` from `@purista/core`,
+API key from `.env`. Tests use `FakeModelProvider` from `@purista/core`,
 so CI stays provider-neutral and does not require API keys.
 
 ## Use case
@@ -45,8 +45,13 @@ Open <http://localhost:3000/api> and run `POST /api/v1/incident-response` from t
 - PURISTA-level workflow orchestration with independent queue/runtime boundaries for each specialist agent
 - declared skills in agent manifests
 - sandbox policy for risk analysis
+- an incident conversation with bounded complete-turn history, inactive-session
+  expiry, and bounded run/event audit records; the public demo relies on its
+  incident id, while trusted tenant/principal metadata adds stricter separation
+  automatically in a multi-tenant application
 - generated queue, worker, command, and stream definitions for each agent
 - Hono HTTP exposure with OpenAPI documentation
 - `createAgentTestHarness(...)` with a scripted model provider
 - `createAgentSkillTestRuntime(...)` for skill-backed agent fixtures
-- no direct application dependency on `@purista/harness`
+- live-provider and sandbox dependencies are isolated in the application
+  composition root; service builders and agent handlers remain provider-neutral

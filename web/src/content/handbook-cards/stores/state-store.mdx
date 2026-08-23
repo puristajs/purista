@@ -46,7 +46,9 @@ Pass a state store when creating the service instance:
 ```typescript [main.ts]
 import { RedisStateStore } from '@purista/redis-state-store'
 
-const stateStore = new RedisStateStore({ url: process.env.REDIS_URL })
+const stateStore = new RedisStateStore({
+  config: { url: process.env.REDIS_URL },
+})
 
 const userService = await userServiceV1Service.getInstance(eventBridge, {
   stateStore,
@@ -75,6 +77,44 @@ Access from commands and subscriptions:
   await context.states.removeState('session:abc123')
 })
 ```
+
+## Bound temporary state
+
+State is permanent unless you choose a lifetime. Put the shortest useful
+retention rule at the scope that owns it:
+
+```typescript [one-value.ts]
+// One password-reset token expires after 15 minutes.
+await context.states.setState(`password-reset:${tokenId}`, record, {
+  retention: { mode: 'expire', ttlMs: 15 * 60_000 },
+})
+```
+
+```typescript [one-service.ts]
+// Every checkout draft written by this service expires after one day.
+const checkout = await checkoutV1Service.getInstance(eventBridge, {
+  stateStore,
+  stateRetention: {
+    default: { mode: 'expire', ttlMs: 24 * 60 * 60_000 },
+  },
+})
+```
+
+An explicit write policy wins over the service default; use
+`{ retention: { mode: 'forever' } }` for an intentional exception. A successful
+write refreshes expiry, while reads never do. A requested expiry fails rather
+than becoming permanent when the adapter cannot atomically write the value and
+its deadline.
+
+| Adapter | Per-write expiry |
+|---|---|
+| Redis | Yes |
+| Dapr | Only with `supportsTtl: true` and a TTL-capable component |
+| NATS KV | No; bucket max age is not a per-key sliding TTL |
+| DefaultStateStore | Yes, for development and tests only |
+
+See the [StateStore retention guide](/handbook/2_building-business-logic/stores/state-stores/#retention)
+for store-instance defaults, exact precedence, and custom adapter requirements.
 
 ## Validate state reads
 
@@ -125,14 +165,14 @@ const stateStore = new DefaultStateStore({
 Extend `StateStoreBaseClass` to build your own:
 
 ```typescript [custom.ts]
-import { StateStoreBaseClass, StoreBaseConfig } from '@purista/core'
+import { StateStoreBaseClass, StateStoreConfig } from '@purista/core'
 
 type MyStateConfig = { url: string }
 
 export class MyStateStore extends StateStoreBaseClass<MyStateConfig> {
   private client
 
-  constructor(config: StoreBaseConfig<MyStateConfig>) {
+  constructor(config: StateStoreConfig<MyStateConfig>) {
     super('MyStateStore', config)
     this.client = customClient.connect(this.config.config.url)
   }

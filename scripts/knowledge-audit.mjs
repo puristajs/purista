@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { execFileSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 
@@ -109,6 +110,18 @@ requireContains(resolve(root, 'specs', 'README.md'), [
 		'must state that specs are authoritative for framework development',
 	],
 ])
+
+try {
+	execFileSync('node', ['./scripts/generate-agent-api-knowledge.mjs', '--check'], {
+		cwd: root,
+		stdio: 'pipe',
+	})
+} catch {
+	addIssue(
+		resolve(root, 'skills', 'purista', 'references', 'generated-api-index.md'),
+		'generated API knowledge is stale',
+	)
+}
 
 if (issues.length) {
 	process.stderr.write(`PURISTA knowledge audit found ${issues.length} issue(s):\n`)

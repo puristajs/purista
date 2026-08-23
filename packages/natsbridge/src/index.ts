@@ -16,13 +16,5 @@ import { NatsBridge } from '@purista/natsbridge'
 ```
  @module
  */
-export * from './getDefaultNatsBridgeConfig.js'
-export * from './getQueueGroupName.impl.js'
-export * from './NatsBridge.js'
-export * from './topic/getCommandSubscriptionTopic.impl.js'
-export * from './topic/getSubscriptionTopic.impl.js'
-export * from './topic/getTopicName.impl.js'
-export * from './types/INatsBridge.js'
-export * from './types/IncomingMessageFunction.js'
-export * from './types/NatsBridgeConfig.js'
-export * from './version.js'
+export { NatsBridge } from './NatsBridge.js'
+export type { NatsBridgeConfig, NatsConsumerFailureHandlingDefaults } from './types/NatsBridgeConfig.js'

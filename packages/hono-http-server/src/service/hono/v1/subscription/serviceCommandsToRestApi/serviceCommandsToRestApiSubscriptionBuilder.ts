@@ -1,4 +1,4 @@
-import { EBMessageType, isHttpExposedServiceMeta } from '@purista/core'
+import { EBMessageType, isHttpExposedServiceMeta } from '@purista/core/adapter'
 
 import { honoV1ServiceBuilder } from '../../honoV1ServiceBuilder.js'
 import { honoV1ServiceCommandsToRestApiInputPayloadSchema } from './schema.js'

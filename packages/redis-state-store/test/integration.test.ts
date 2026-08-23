@@ -60,4 +60,15 @@ describe('@purista/redis-state-store', () => {
 
 		await expect(store.destroy()).resolves.toBeUndefined()
 	})
+
+	it('atomically applies requested state retention', async () => {
+		const store = new RedisStateStore({ config: { url: `redis://127.0.0.1:${REDIS_PORT}` } })
+
+		await store.setState('short-lived', { some: 'value' }, { retention: { mode: 'expire', ttlMs: 100 } })
+		expect((await store.getState('short-lived'))['short-lived']).toEqual({ some: 'value' })
+
+		await new Promise(resolve => setTimeout(resolve, 250))
+		expect((await store.getState('short-lived'))['short-lived']).toBeUndefined()
+		await store.destroy()
+	})
 })

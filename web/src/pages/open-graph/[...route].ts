@@ -60,6 +60,11 @@ const landingPages: Record<string, PageMeta> = {
 		description: 'How the AI Harness works: primitives, adapter model, agent lifecycle, durable execution, and observability.',
 		accent: 'gold',
 	},
+	'harness/agent-plugins': {
+		title: 'Agent Plugins | AI Harness | PURISTA',
+		description: 'Inspect open Agent Plugins and deliberately project approved skills and modern MCP tools into your own application boundary.',
+		accent: 'mint',
+	},
 	'harness/security': {
 		title: 'Security & Production Readiness | AI Harness | PURISTA',
 		description: 'Sandboxed execution, human review gates, content privacy, and the full production checklist.',

@@ -1,0 +1,39 @@
+# PURISTA LLM Full Context
+
+## Primary reading order
+1. https://github.com/puristajs/purista/blob/master/AGENTS.md
+2. https://github.com/puristajs/purista/blob/master/skills/purista/SKILL.md
+3. https://github.com/puristajs/purista/blob/master/web/src/content/handbook/index.md
+4. https://github.com/puristajs/purista/blob/master/web/src/content/handbook/3_eco_system/index.md
+
+## Service and distributed-system rules
+
+- Begin with `ServiceBuilder`; obtain commands, subscriptions, streams, queues,
+  workers, schedules, and attached agents through its builder methods.
+- Use Zod schemas and versioned service directories. Keep handlers thin and
+  resource-driven.
+- Commands are request/response business actions. Events are immutable facts.
+  Subscriptions react to facts. Queues provide asynchronous, retryable work.
+  Streams provide progressive output. Do not interchange these semantics just
+  because their TypeScript shapes are similar.
+- Workers and schedule consumers must be idempotent. PURISTA does not promise
+  exactly-once delivery or exactly-once external side effects.
+- A scheduler host is separate deployment infrastructure that emits regular
+  events; it never runs service business handlers. Use an external distributed
+  scheduler provider when replicas can overlap.
+- Run `purista inspect` and `purista validate --strict` before modifying an
+  existing project. Their output is a static architecture projection and must
+  not be represented as runtime/provider health.
+- Keep tests adjacent to behavior. Update public TSDoc, handbook docs, skills,
+  and generated knowledge whenever public behavior changes.
+
+## Skills
+- https://github.com/puristajs/purista/blob/master/skills/README.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/01-architecture-model.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/02-implementation-workflow.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/03-component-builders.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/04-package-map.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/05-ai-harness-runtime.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/06-runtime-transports-and-bridges.md
+- https://github.com/puristajs/purista/blob/master/skills/purista/references/07-testing-observability-and-deployment.md

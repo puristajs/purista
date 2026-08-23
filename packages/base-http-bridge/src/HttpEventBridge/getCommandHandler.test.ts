@@ -1,12 +1,12 @@
 import type { Span } from '@opentelemetry/api'
-import type { DefinitionEventBridgeConfig, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
+import type { DefinitionEventBridgeConfig, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core/adapter'
 import {
 	EBMessageType,
 	getCommandMessageMock,
 	getCommandSuccessMessageMock,
 	getLoggerMock,
 	StatusCode,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { Hono } from 'hono'
 import { describe, expect, it, vi } from 'vitest'
 

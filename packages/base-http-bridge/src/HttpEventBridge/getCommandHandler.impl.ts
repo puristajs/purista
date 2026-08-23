@@ -15,7 +15,7 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessageAddress,
 	HttpExposedServiceMeta,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	getTimeoutPromise,
 	HandledError,
@@ -24,7 +24,7 @@ import {
 	serializeOtp,
 	throwIfNotValidMessage,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import { parseCloudEventData } from './parseCloudEventData.impl.js'

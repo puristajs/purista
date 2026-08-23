@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
-import { getLoggerMock } from '@purista/core'
+import { getLoggerMock } from '@purista/core/adapter'
 
 import { AWSConfigStore } from '../src/AWSConfigStore.impl.js'
 

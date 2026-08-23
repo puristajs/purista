@@ -1,9 +1,9 @@
 ---
 title: Testing
-description: Test agents with core testing helpers and scripted model providers.
+description: Test agents with core testing helpers and the deterministic Harness model provider.
 ---
 
-Agent testing helpers are exported from `@purista/core`.
+Agent testing helpers are exported from `@purista/core/testing`.
 
 | Level | API | Validates |
 |---|---|---|
@@ -16,12 +16,12 @@ Agent testing helpers are exported from `@purista/core`.
 Use `createAgentTestHarness(...)` when you want to test the generated attached agent definition without starting a full service:
 
 ```typescript [triageTicket.test.ts]
-import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'
+import { createAgentTestHarness, FakeModelProvider } from '@purista/core/testing'
 import { triageTicketAgentBuilder } from './triageTicketAgentBuilder.js'
 
 test('classifies a ticket', async () => {
   const definition = await triageTicketAgentBuilder.getDefinition()
-  const model = createScriptedHarnessModel()
+  const model = new FakeModelProvider()
 
   model.enqueueObject({
     object: {
@@ -61,10 +61,10 @@ test('classifies a ticket', async () => {
 Use `createAgentContextMock(...)` for narrow tests around custom `setRunFunction(...)` logic:
 
 ```typescript [supportAgent.test.ts]
-import { createAgentContextMock, createScriptedHarnessModel } from '@purista/core'
+import { createAgentContextMock, FakeModelProvider } from '@purista/core/testing'
 
 test('uses the primary model alias', async () => {
-  const model = createScriptedHarnessModel()
+  const model = new FakeModelProvider()
   model.enqueueObject({
     object: { answer: 'Reset your password from settings.' },
     usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },

@@ -1,0 +1,4 @@
+{
+	"scenarioId": "service-owned-agent",
+	"response": "Attach the service-owned agent to the support service, allowlist its command tool, and expose streaming progress. Keep prompts and completions out of logs, metrics, traces, and telemetry."
+}

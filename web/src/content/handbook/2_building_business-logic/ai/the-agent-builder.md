@@ -170,7 +170,7 @@ Harness skills are mounted instruction directories. Use them when an agent needs
 
 Built-in tools default to enabled at the harness level. For production agents, prefer the smallest useful set. If a skill needs supporting files, keep read-only built-ins such as `read`, `list`, and `grep` enabled so the model can inspect mounted skill content.
 
-## Session policy
+## Conversation
 
 Transport metadata and AI conversation identity are separate.
 
@@ -188,10 +188,44 @@ By default, agents use an ephemeral session derived from the transport message. 
 .setSessionPolicy({
   mode: 'conversation',
   payloadPath: ['conversation', 'id'],
+  retention: {
+    history: { maxTurns: 50, maxBytes: 256_000 },
+  },
 })
 ```
 
-With this policy, `payload.conversation.id` becomes the harness session id. Do not treat `correlationId` as a conversation id.
+With this declaration, `payload.conversation.id` identifies the persistent
+conversation. PURISTA automatically adds trusted `message.tenantId` and
+`message.principalId` when present, so the conceptual key is
+`tenantId:principalId:conversationId` within this agent's namespace. Missing
+optional values leave the conversation id as the boundary when both are absent;
+if one is present, Core uses a stable internal default for the other. Do not
+treat `correlationId` as a conversation id.
+
+The session identity lets Harness load persisted conversation history and its
+associated run records. It does **not** persist or restore a sandbox, workspace
+files, or tool permissions. Configure those independently with sandbox policy,
+workspace policy, and declared tool bindings.
+
+History retains complete user/assistant/tool turns. Its UTF-8 byte ceiling
+controls stored data only; model request context remains token-based and is
+chosen independently by the Harness provider integration.
+
+### Migrating from PURISTA 3.2
+
+Keep the existing `payloadPath` field; its path is now type-checked and trusted
+message tenant/principal metadata is applied automatically when present. No code change is needed for a valid
+declaration:
+
+```ts
+.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
+```
+
+The published 3.2 policy could not express its runtime's session behavior. The
+current policy preserves that declaration and adds any available trusted
+tenant/principal metadata automatically. See the
+[4.0 migration guide](/article/2026-08-20-purista-version-4-0/) for the full
+upgrade checklist.
 
 ## Sandbox policy
 
@@ -217,17 +251,21 @@ const supportService = await supportV1ServiceBuilder.getInstance(eventBridge, {
 
 Sandbox requirements depend on what the harness agent or workflow does. Read-only prompt and model calls do not need shell execution. Built-in filesystem tools, MCP stdio tools, code execution, and mounted skills need a sandbox with matching capabilities.
 
-## Workspace policy
+## Workflow workspace policy
 
-Agents are ephemeral by default. Use `setWorkspacePolicy(...)` only when a run
-must resume from committed workspace state after retry or restart.
+Use `setWorkspacePolicy(...)` only with `setHarnessWorkflow(...)`. It preserves
+a workflow's private working files and execution state so that workflow can
+resume after a retry or restart. It is not conversation history, and it is not
+available to `setHarnessAgent(...)` or `setRunFunction(...)`.
 
 ```ts
-.setWorkspacePolicy({
-  mode: 'durable',
-  required: true,
-  cleanup: 'on_terminal',
-})
+agent
+  .setHarnessWorkflow(workflow)
+  .setWorkspacePolicy({
+    mode: 'durable',
+    required: true,
+    cleanup: 'on_terminal',
+  })
 ```
 
 At runtime, bind both the harness durable runtime and workspace store:

@@ -13,7 +13,7 @@ import type {
 	EventBridge,
 	EventBridgeConfig,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createInfoMessage,
 	deserializeOtp,
@@ -33,7 +33,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
 import { connectAsync } from 'mqtt'
 

@@ -29,7 +29,7 @@ flowchart LR
 
 ## Generating a REST client
 
-HTTP client generation uses the `ClientBuilder` utility — `createHttpClient` is not exported from `@purista/core`. See the [REST API client guide](./create_a_rest_api_client.md) for the correct pattern using `ClientBuilder`.
+HTTP client generation uses `ClientBuilder` from `@purista/core/client`; `createHttpClient` is not exported. See the [REST API client guide](./create_a_rest_api_client.md) for the correct pattern.
 
 ## When to use which client
 

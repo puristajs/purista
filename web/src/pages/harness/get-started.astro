@@ -134,7 +134,7 @@ const result = await session.agents.answerer.prompt({
 console.log(result.answer)
 // -> "Tools are typed functions..."
 
-await session.close()
+await session.release()
 await harness.shutdown()`}
             label="Run It"
             language="typescript"
@@ -476,7 +476,7 @@ impact, timeline, and next action.`}
         <div class="eyebrow">Level 6 — Memory & State</div>
       </div>
       <h2 class="display display-lg mb-6">Remember across runs</h2>
-      <p class="lede mb-10">Sessions have memory and history. Write JSON blobs the agent can recall. List conversation messages. Persist across restarts with a durable state adapter or the local durable execution bundle.</p>
+      <p class="lede mb-10">Sessions have memory and history. Write JSON blobs the agent can recall. List conversation messages. Persist across restarts with a durable state adapter or the local durable execution bundle. Your application still decides how overlapping turns for one conversation behave.</p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="card p-5">

@@ -2,7 +2,7 @@
  * Example on how to generate a client from JSON definition files
  */
 /** biome-ignore-all lint/suspicious/noConsole: is ok as it is a CLI tool example */
-import { ClientBuilder } from '@purista/core'
+import { ClientBuilder } from '@purista/core/client'
 
 const generate = async () => {
 	const clientBuilder = new ClientBuilder()

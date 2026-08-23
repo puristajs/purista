@@ -30,7 +30,7 @@ export const getSubscriptionTestFileContent = (input: {
 
 	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
 	writer.writeLine(
-		`import { createSubscriptionContextMock, getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`,
+		`import { createSubscriptionContextMock, getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core/testing'`,
 	)
 	writer.writeLine(`import { createSandbox } from 'sinon'`)
 	writer.blankLine()
@@ -76,11 +76,14 @@ export const getSubscriptionTestFileContent = (input: {
 						`const ${camelCase(input.subscriptionName)} = safeBind(${subscriptionBuilderName}.getSubscriptionFunction(), service)`,
 					)
 					writer.blankLine()
-					writer.writeLine(`const payload: ${typePrefix}InputPayload = undefined`)
+					writer.writeLine(`const payload: Readonly<${typePrefix}InputPayload> = {}`)
 					writer.blankLine()
 					writer.writeLine(`const parameter: ${typePrefix}InputParameter = {}`)
 					writer.blankLine()
-					writer.writeLine('const message = getCommandSuccessMessageMock(payload)')
+					// The message is only context metadata for this direct handler test. Keep
+					// its payload object-shaped so the generated test remains type-safe when
+					// the starter schema intentionally uses z.unknown().
+					writer.writeLine('const message = getCommandSuccessMessageMock({})')
 					writer.blankLine()
 					writer.writeLine(`const { context } = createSubscriptionContextMock(${subscriptionBuilderName}, {`)
 					writer.withIndentationLevel(1, () => {

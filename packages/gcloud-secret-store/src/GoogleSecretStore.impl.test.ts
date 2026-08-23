@@ -1,5 +1,5 @@
 import type { SecretManagerServiceClient } from '@google-cloud/secret-manager'
-import { StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core/adapter'
 import { describe, expect, it, vi } from 'vitest'
 import { GoogleSecretStore } from './GoogleSecretStore.impl.js'
 

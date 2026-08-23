@@ -1,4 +1,4 @@
-import { StatusCode, UnhandledError } from '@purista/core'
+import { StatusCode, UnhandledError } from '@purista/core/adapter'
 
 type CloudEventHttpInput = {
 	headers: Record<string, string>

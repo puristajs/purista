@@ -2,6 +2,7 @@ import 'dotenv/config'
 
 import { serve } from '@hono/node-server'
 import { DefaultEventBridge, initLogger } from '@purista/core'
+import { inMemorySandbox } from '@purista/harness'
 import { honoV1Service } from '@purista/hono-http-server'
 import { apiReference } from '@scalar/hono-api-reference'
 
@@ -28,11 +29,9 @@ export const main = async () => {
 					capabilities: ['object'],
 				},
 			},
-			sandbox: {
-				kind: 'example-readonly-sandbox',
-				network: false,
-				filesystem: 'ephemeral',
-			},
+			// This example deliberately uses an ephemeral sandbox. Production code
+			// must supply an adapter that declares and enforces its own capabilities.
+			sandbox: inMemorySandbox(),
 		},
 	})
 	await supportService.start()

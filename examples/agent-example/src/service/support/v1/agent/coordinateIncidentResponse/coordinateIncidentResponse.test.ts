@@ -23,17 +23,24 @@ describe('coordinateIncidentResponseAgentBuilder', () => {
 			},
 		])
 		expect(definition.manifest.response).toBeUndefined()
+		expect(definition.manifest.session).toEqual({
+			mode: 'conversation',
+			payloadPath: ['incidentId'],
+			retention: {
+				idleTtlMs: 30 * 24 * 60 * 60_000,
+				history: { maxTurns: 50, maxBytes: 256_000 },
+				runs: { maxPerSession: 20 },
+				events: { maxPerRun: 500 },
+			},
+		})
 		expect(definition.command.commandName).toBe('coordinateIncidentResponse')
 		expect(definition.queue.queueName).toBe('agent:Support:1:coordinateIncidentResponse')
 	})
 
-	it('declares a sandbox policy for rollback risk assessment', async () => {
+	it('uses the application-wired sandbox for rollback risk assessment', async () => {
 		const definition = await assessRollbackRiskAgentBuilder.getDefinition()
 
-		expect(definition.manifest.sandbox).toEqual({
-			enabled: true,
-			adapter: { kind: 'example-readonly-sandbox', network: false, filesystem: 'ephemeral' },
-		})
+		expect(definition.manifest.sandbox).toEqual({ enabled: true })
 		expect(definition.manifest.usedSkills).toEqual([
 			{
 				names: ['rollback-safety-review', 'change-impact-analysis'],

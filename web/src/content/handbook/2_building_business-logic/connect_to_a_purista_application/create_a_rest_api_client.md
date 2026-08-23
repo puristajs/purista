@@ -8,13 +8,13 @@ order: 210020
 
 External code — frontend applications, CLI tools, other backend services — can reach PURISTA commands that are exposed as HTTP endpoints in two ways:
 
-1. **`HttpClient` (built-in, no code generation needed)** — a thin fetch wrapper from `@purista/core` with OTel tracing, bearer token support, and automatic JSON handling. Use this for quick integrations and internal service-to-service HTTP calls.
-2. **Generated typed client via `ClientBuilder`** — generates a fully typed package from exported service definitions. Use this when you want compile-time safety and IDE auto-completion for all command payloads across a larger codebase.
+1. **`HttpClient` (built-in, no code generation needed)** — a thin fetch wrapper from `@purista/core/client` with OTel tracing, bearer token support, and automatic JSON handling. Use this for quick integrations and internal service-to-service HTTP calls.
+2. **Generated typed client via `ClientBuilder`** — generates a fully typed package from exported service definitions. Import it from `@purista/core/client` when you want compile-time safety and IDE auto-completion for all command payloads across a larger codebase.
 
 ## Quick start: HttpClient
 
 ```typescript
-import { HttpClient } from '@purista/core'
+import { HttpClient } from '@purista/core/client'
 
 const client = new HttpClient({ baseUrl: 'http://my-service:3000' })
 
@@ -175,7 +175,7 @@ This small code snippet can be used to create your client.
 ::: code-group
 
 ```typescript [generate.ts]
-import { ClientBuilder } from '@purista/core'
+import { ClientBuilder } from '@purista/core/client'
 
 const generate = async ()=> {
   const clientBuilder = new ClientBuilder()

@@ -1,13 +1,10 @@
+import { defineHarnessModule, inMemoryDurableRuntime, inMemoryDurableWorkspaceStore } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { vi } from 'vitest'
 import { z } from 'zod'
 
-import {
-	AgentQueueBuilder,
-	createAgentSkillTestRuntime,
-	createAgentTestHarness,
-	createScriptedHarnessModel,
-	ServiceBuilder,
-	type ServiceInfoType,
-} from '../index.js'
+import { AgentQueueBuilder, ServiceBuilder, type ServiceInfoType } from '../index.js'
+import { createAgentSkillTestRuntime, createAgentTestHarness } from '../testing/index.js'
 import {
 	createAgentRuntimeScope,
 	getScopedAgentRuntime,
@@ -40,6 +37,69 @@ describe('AgentQueueBuilder', () => {
 		expect(resolved.queueWorkers[0].queueName).toBe(resolved.queues[0].queueName)
 		expect(resolved.commands[0].commandName).toBe('triageTicket')
 		expect(resolved.streams[0].streamName).toBe('triageTicketStream')
+	})
+
+	it('carries explicit bounded conversation retention without affecting handler inference', async () => {
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+			.setSessionPolicy({
+				mode: 'conversation',
+				payloadPath: ['conversationId'],
+				retention: {
+					idleTtlMs: 60_000,
+					history: { maxTurns: 10, maxBytes: 32_000 },
+					runs: { maxPerSession: 5 },
+					events: { maxPerRun: 100 },
+				},
+			})
+			.setRunFunction(async () => ({ priority: 'normal' }))
+			.getDefinition()
+
+		expect(definition.manifest.session).toMatchObject({
+			mode: 'conversation',
+			retention: { history: { maxTurns: 10 }, runs: { maxPerSession: 5 } },
+		})
+	})
+
+	it('rejects invalid retention bounds at the builder boundary', () => {
+		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+		expect(() =>
+			agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'], retention: { history: {} } }),
+		).toThrow('Agent session history retention requires maxTurns or maxBytes')
+		expect(() =>
+			agent.setSessionPolicy({
+				mode: 'conversation',
+				payloadPath: ['conversationId'],
+				retention: { runs: { maxPerSession: 0 } },
+			}),
+		).toThrow('Agent session retention runs.maxPerSession must be a positive safe integer')
+	})
+
+	it('rejects malformed session policies at the builder boundary', () => {
+		const agent = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+		expect(() => agent.setSessionPolicy({ mode: 'conversation' } as never)).toThrow(
+			'Agent conversation session policy requires payloadPath',
+		)
+		expect(() => agent.setSessionPolicy({ mode: 'shared' } as never)).toThrow(
+			'Agent session policy mode must be "ephemeral" or "conversation"',
+		)
+	})
+
+	it('type-checks conversation id paths against the payload schema', () => {
+		const agent = new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
+			.addPayloadSchema(
+				z.object({ conversationId: z.string(), conversation: z.object({ id: z.string() }), count: z.number() }),
+			)
+
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: 'conversationId' })
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
+		// @ts-expect-error conversation ids must resolve to a string payload field
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'missing'] })
+		// @ts-expect-error conversation ids must resolve to a string payload field
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['count'] })
+		// @ts-expect-error conversation ids must resolve to a string payload field
+		agent.setSessionPolicy({ mode: 'conversation', payloadPath: 'count' })
 	})
 
 	it('cascades resources, schemas, models, command tools and child agents into handler types', async () => {
@@ -161,7 +221,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('streams harness agent output and resolves the final object', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: { status: 'ok' },
 			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
@@ -187,8 +247,74 @@ describe('AgentQueueBuilder', () => {
 		expect(chunks.length).toBeGreaterThan(0)
 	})
 
-	it('mirrors opted-in run-function model stream chunks with deterministic source metadata', async () => {
-		const model = createScriptedHarnessModel()
+	it('composes explicit runtime modules before application-approved tool bindings', async () => {
+		const calls: string[] = []
+		const supportModule = defineHarnessModule()('support-module', {
+			register: builder =>
+				builder.tools({
+					module_lookup: {
+						description: 'Look up one ticket from the static support module.',
+						input: z.object({ ticketId: z.string() }),
+						output: z.object({ source: z.literal('module') }),
+						handler: async (_context, input) => {
+							calls.push(`module:${input.ticketId}`)
+							return { source: 'module' as const }
+						},
+					},
+				}),
+		})
+		const model = new FakeModelProvider()
+		model.enqueue({
+			object: {},
+			toolCalls: [
+				{ id: 'module-tool', name: 'module_lookup', arguments: { ticketId: 'T-1' } },
+				{ id: 'runtime-tool', name: 'runtime_lookup', arguments: { ticketId: 'T-1' } },
+			],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('runtimeComposition', 'Uses application-provided Harness contributions')
+			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.useBuiltInTools(false)
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Use both approved lookup tools.',
+				output: z.object({ status: z.literal('ok') }),
+				tools: ['module_lookup', 'runtime_lookup'],
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			harness: {
+				modules: [supportModule],
+				tools: {
+					runtime_lookup: {
+						description: 'Look up one ticket from the application runtime.',
+						input: z.object({ ticketId: z.string() }),
+						output: z.object({ source: z.literal('runtime') }),
+						handler: async (_context, input) => {
+							calls.push(`runtime:${input.ticketId}`)
+							return { source: 'runtime' as const }
+						},
+					},
+				},
+			},
+		})
+
+		await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
+		expect(calls).toEqual(['module:T-1', 'runtime:T-1'])
+	})
+
+	it('streams safe run-function model chunks with deterministic source metadata', async () => {
+		const model = new FakeModelProvider()
 		model.enqueueTextStream([
 			{ kind: 'delta', text: 'he' },
 			{ kind: 'delta', text: 'llo' },
@@ -198,12 +324,12 @@ describe('AgentQueueBuilder', () => {
 			.getAgentQueueBuilder('streamText', 'Stream text from a run function')
 			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
+			.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
 			.setRunFunction(async context => {
 				let text = ''
 				for await (const chunk of context.harness.models.primary.textStream(
 					{ messages: [{ role: 'user', content: 'hello' }] },
 					context.signal,
-					{ emitRunEvents: true },
 				)) {
 					if (chunk.kind === 'delta') text += chunk.text
 				}
@@ -249,7 +375,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('keeps run-function model stream chunks private by default', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueueTextStream([
 			{ kind: 'delta', text: 'hidden' },
 			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
@@ -276,11 +402,19 @@ describe('AgentQueueBuilder', () => {
 		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
 
 		expect(final).toBe('hidden')
-		expect(chunks).toHaveLength(0)
+		expect(
+			chunks.some(
+				chunk =>
+					typeof chunk === 'object' &&
+					chunk !== null &&
+					'data' in chunk &&
+					(chunk as { data?: { type?: string } }).data?.type === 'response.output_text.delta',
+			),
+		).toBe(false)
 	})
 
 	it('assigns distinct stream ids for parallel opted-in run-function model streams', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueueTextStream([
 			{ kind: 'delta', text: 'a' },
 			{ kind: 'finish', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }, finishReason: 'stop' },
@@ -293,13 +427,13 @@ describe('AgentQueueBuilder', () => {
 			.getAgentQueueBuilder('parallelText', 'Stream text from parallel run-function calls')
 			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
+			.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
 			.setRunFunction(async context => {
 				const consume = async (content: string) => {
 					let text = ''
 					for await (const chunk of context.harness.models.primary.textStream(
 						{ messages: [{ role: 'user', content }] },
 						context.signal,
-						{ emitRunEvents: true },
 					)) {
 						if (chunk.kind === 'delta') text += chunk.text
 					}
@@ -328,8 +462,8 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('surfaces harness errors from streaming runs instead of masking them as validation failures', async () => {
-		const model = createScriptedHarnessModel()
-		// No stream response queued: the provider throws, so the run must finish with an error.
+		const model = new FakeModelProvider()
+		vi.spyOn(model, 'object').mockRejectedValue(new Error('provider unavailable'))
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('streamFail', 'Streaming agent that fails')
 			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
@@ -364,13 +498,18 @@ describe('AgentQueueBuilder', () => {
 		const service = new ServiceBuilder(serviceInfo)
 		const manifest = service
 			.getAgentQueueBuilder('durableTriage', 'Triage a support ticket with durable workspace replay')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
 			.setWorkspacePolicy({
 				mode: 'durable',
 				policy: {
 					retention: { cleanupMode: 'manual_only' },
 				},
 			})
-			.setRunFunction(async () => ({ status: 'ok' }))
+			.setHarnessWorkflow({
+				input: z.unknown(),
+				output: z.object({ status: z.literal('ok') }),
+				handler: async () => ({ status: 'ok' as const }),
+			})
 			.getManifest()
 
 		expect(manifest.workspacePolicy).toEqual({
@@ -391,6 +530,59 @@ describe('AgentQueueBuilder', () => {
 		expect(manifest.runtimeRevision).toMatch(/^rev-/)
 	})
 
+	it('forwards a durable workspace policy through the Core workflow runtime', async () => {
+		const runtime = inMemoryDurableRuntime()
+		const workspaceStore = inMemoryDurableWorkspaceStore()
+		const startWorkspace = workspaceStore.startWorkspace.bind(workspaceStore)
+		let receivedPolicy: unknown
+		workspaceStore.startWorkspace = async options => {
+			receivedPolicy = options.policy
+			return startWorkspace(options)
+		}
+		const workspacePolicy = { retention: { cleanupMode: 'manual_only' as const } }
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('durableRuntime', 'Runs a durable Harness workflow')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setWorkspacePolicy({ mode: 'durable', policy: workspacePolicy })
+			.setHarnessWorkflow({
+				input: z.unknown(),
+				output: z.object({ status: z.literal('ok') }),
+				handler: async () => ({ status: 'ok' as const }),
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: new FakeModelProvider(), model: 'fake', capabilities: ['object'] } },
+			runtime,
+			workspaceStore,
+		})
+
+		await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
+		expect(receivedPolicy).toEqual(workspacePolicy)
+	})
+
+	it('rejects durable workspace policy for non-workflow execution', () => {
+		const customHandler = new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('invalidDurable', 'Invalid durable custom handler')
+			.setWorkspacePolicy({ mode: 'durable' })
+			.setRunFunction(async () => ({ status: 'ok' }))
+
+		expect(() => customHandler.getManifest()).toThrow('requires setHarnessWorkflow')
+
+		const harnessAgent = new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('invalidDurableHarnessAgent', 'Invalid durable direct Harness agent')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.setWorkspacePolicy({ mode: 'durable' })
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Return an object.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+
+		expect(() => harnessAgent.getManifest()).toThrow('requires setHarnessWorkflow')
+	})
+
 	it('binds declared skills into a harness agent runtime', async () => {
 		const skillRuntime = await createAgentSkillTestRuntime([
 			{
@@ -399,7 +591,7 @@ describe('AgentQueueBuilder', () => {
 				body: 'SECRET_BODY',
 			},
 		])
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
@@ -461,7 +653,7 @@ describe('AgentQueueBuilder', () => {
 				body: 'SECRET_BODY',
 			},
 		])
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
@@ -540,7 +732,7 @@ describe('AgentQueueBuilder', () => {
 				body: 'SECRET_BODY',
 			},
 		])
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: {},
 			toolCalls: [{ id: 'read-skill', name: 'read', arguments: { path: '/skills/incident-skill/SKILL.md' } }],
@@ -577,7 +769,7 @@ describe('AgentQueueBuilder', () => {
 	})
 
 	it('registers harness-local agents for wrapped harness workflows', async () => {
-		const model = createScriptedHarnessModel()
+		const model = new FakeModelProvider()
 		model.enqueue({
 			object: { summary: 'Checkout outage risk is high.' },
 			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
@@ -601,6 +793,7 @@ describe('AgentQueueBuilder', () => {
 				{
 					input,
 					output,
+					delegation: { agents: ['summarize'], modelAliases: ['primary'] },
 					handler: async context => {
 						return context.agents.summarize({ incident: context.input.incident })
 					},

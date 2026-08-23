@@ -7,7 +7,7 @@ import {
 	StatusCode,
 	type StoreBaseConfig,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 
 import type { GoogleSecretStoreConfig } from './types.js'
 

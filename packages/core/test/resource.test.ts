@@ -1,14 +1,14 @@
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
+import { ServiceBuilder, type ServiceInfoType } from '../src/index.js'
 import {
+	createCommandContextMock,
+	createSubscriptionContextMock,
 	getCommandSuccessMessageMock,
 	getEventBridgeMock,
 	getLoggerMock,
-	ServiceBuilder,
-	type ServiceInfoType,
 	safeBind,
-} from '../src/index.js'
-import { createCommandContextMock, createSubscriptionContextMock } from '../src/testing/index.js'
+} from '../src/testing/index.js'
 
 describe('service resource test', () => {
 	let sandbox = createSandbox()

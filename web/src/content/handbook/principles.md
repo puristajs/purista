@@ -210,7 +210,9 @@ Every message carries:
 - `span context` — timing and metadata for each hop
 - `structured logs` — JSON logs with correlation IDs built in
 
-Enable tracing by passing a `SpanProcessor` to the event bridge and each service:
+Configure tracing explicitly on every runtime instance that emits spans. Reuse
+one application-owned configuration object when the service and event bridge
+intentionally share a pipeline:
 
 ```typescript [main.ts]
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
@@ -221,8 +223,12 @@ const spanProcessor = new SimpleSpanProcessor(
   new OTLPTraceExporter({ url: 'http://localhost:4318/v1/traces' })
 )
 
-const eventBridge = new AmqpBridge({ spanProcessor })
-const myService = await myV1Service.getInstance(eventBridge, { spanProcessor })
+const runtimeObservability = { spanProcessor }
+const eventBridge = new AmqpBridge(runtimeObservability)
+const myService = await myV1Service.getInstance(eventBridge, {
+  ...runtimeObservability,
+})
+await eventBridge.start()
 ```
 
 No custom instrumentation in your commands or subscriptions.

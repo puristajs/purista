@@ -55,7 +55,7 @@ The Hono HTTP server automatically:
 - Validates query/path params against `inputParameterSchema`
 - Returns the command response as JSON
 - Generates OpenAPI documentation from schemas
-- Returns problem details (RFC 7807) for errors
+- Returns RFC 9457 Problem Details for errors
 
 ## Streaming with SSE
 

@@ -11,7 +11,7 @@ import type {
 	EventBridge,
 	EventBridgeConfig,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createErrorResponse,
 	createInfoMessage,
@@ -36,7 +36,7 @@ import {
 	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { ChannelModel, ConfirmChannel } from 'amqplib'
 import amqplib from 'amqplib'
 
@@ -56,7 +56,7 @@ const RETRY_ATTEMPT_HEADER = 'x-purista-retry-attempt'
 const DEAD_LETTER_REASON_HEADER = 'x-purista-dead-letter-reason'
 
 /** Runtime pause metadata for a subscription consumer managed by the AMQP bridge. */
-export type PausedSubscriptionState = {
+type PausedSubscriptionState = {
 	/** Unix timestamp in milliseconds when the consumer was paused. */
 	pausedAt: number
 	/** Operational reason for the pause. */
@@ -64,7 +64,7 @@ export type PausedSubscriptionState = {
 }
 
 /** Consumer registration tracked by the AMQP bridge for cleanup and retry handling. */
-export type RegisteredSubscription = {
+type RegisteredSubscription = {
 	/** PURISTA subscription callback registered for the queue. */
 	cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
 	/** AMQP channel used by this consumer. */
@@ -144,9 +144,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		},
 	})
 
-	/** Registered subscription consumers keyed by generated subscription queue name. */
+	/** @internal Runtime subscription registry; use bridge lifecycle methods instead. */
 	protected subscriptions = new Map<string, RegisteredSubscription>()
-	/** Subscription consumers paused by control signals. */
+	/** @internal Runtime pause registry; use {@link getPausedSubscriptionConsumers} instead. */
 	protected pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
 	/** Content-type codecs used before encryption. */
@@ -1280,7 +1280,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 	}
 
-	getPausedSubscriptionConsumers() {
+	getPausedSubscriptionConsumers(): Record<string, { pausedAt: number; reason: string }> {
 		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
 	}
 

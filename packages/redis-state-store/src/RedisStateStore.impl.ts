@@ -1,5 +1,5 @@
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, ResolvedStateWriteOptions, StateStoreConfig } from '@purista/core/adapter'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 import type {
 	RedisClientType,
 	RedisFunctions,
@@ -30,6 +30,7 @@ import type { RedisStoreConfig } from './types.js'
  * @example
  * ```typescript
  * const store = new RedisStateStore({
+ *   retention: { default: { mode: 'expire', ttlMs: 24 * 60 * 60_000 } },
  *   config: { url: 'redis://localhost:6379' },
  * })
  *
@@ -56,10 +57,10 @@ export class RedisStateStore<
 	/**
 	 * Creates a Redis-backed state store.
 	 *
-	 * @param config Store options and node-redis client configuration.
+	 * @param config Store options, optional default retention, and node-redis client configuration.
 	 */
-	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
-		super('RedisStateStore', { ...config })
+	constructor(config?: StateStoreConfig<RedisStoreConfig<M, F, S>>) {
+		super('RedisStateStore', { ...config }, { retention: { atomicExpiry: true } })
 		this.client = createClient(this.config.config)
 		this.client.on('error', err => this.logger.error({ err }, 'Redis Client Error'))
 	}
@@ -105,14 +106,19 @@ export class RedisStateStore<
 		}
 	}
 
-	protected async setStateImpl(stateName: string, stateValue: unknown) {
+	protected async setStateImpl(stateName: string, stateValue: unknown, options: ResolvedStateWriteOptions) {
 		if (!this.config.enableSet) {
 			throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
 		}
 
 		const client = await this.getClient()
 		try {
-			await client.set(stateName, JSON.stringify(stateValue))
+			const serialized = JSON.stringify(stateValue)
+			if (options.retention.mode === 'expire') {
+				await client.set(stateName, serialized, { PX: options.retention.ttlMs })
+			} else {
+				await client.set(stateName, serialized)
+			}
 		} catch (err) {
 			const msg = `error in state store setting value ${stateName}`
 			this.logger.error({ err }, msg)

@@ -90,47 +90,34 @@ const worker = service
 Use `canInvokeAgent(...)` only for agents attached to the same service. Cross-service AI work should go through explicit command, stream, queue, or event contracts.
 
 ## Schedules
-Use schedules to declare external time-trigger intent. Schedules do not run inside PURISTA.
+Use schedules to declare time-trigger intent. The Core Scheduler Runtime runs in a separate host, not inside a business service, and emits a normal event only.
 
 ```ts
 const schedule = service
 	.getScheduleBuilder('monthlyBillingCycle', 'Monthly billing cycle trigger')
 	.emitEvent('billing.monthlyCycleDue', {
 		expression: { kind: 'cron', value: '0 2 1 * *', timezone: 'Europe/Berlin' },
-		concurrencyPolicy: 'forbid',
 		missedRunPolicy: 'runOnce',
-		idempotencyKey: 'payload.cycleId',
+		schedulerGroup: 'billing',
 	})
 
 service.addScheduleDefinition(schedule)
 ```
 
-Queue and command builders can be direct schedule targets:
-
-```ts
-queue.markSchedulable({
-	name: 'monthly-invoice-generation',
-	expression: { kind: 'cron', value: '0 2 1 * *' },
-	concurrencyPolicy: 'forbid',
-})
-
-command.markSchedulable({
-	name: 'refresh-cache',
-	expression: { kind: 'interval', everyMs: 300_000 },
-	concurrencyPolicy: 'replace',
-})
-```
-
-Do not schedule subscriptions directly. Emit an event and let the subscription or an event-to-queue binding react.
+Queue and command builders can remain direct schedule targets for external-provider exports, but the Core runtime rejects them. Use an event plus event-to-queue binding for durable Core scheduler work:
 
 ```ts
 service.bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
 	idempotencyMode: 'strict',
-	idempotencyKey: event => `billing-cycle:${event.cycleId}`,
-	mapPayload: event => ({ cycleId: event.cycleId }),
-	mapParameter: event => ({ tenantId: event.tenantId }),
+	idempotencyKey: message => message.schedule?.occurrenceId,
 })
 ```
+
+Do not schedule subscriptions directly. Emit an event and let the subscription or an event-to-queue binding react.
+The queue worker owns retries, concurrency, and business logic.
+When the queue payload itself needs `scheduledAt`, `occurrenceId`, or another
+envelope field, use a bounded subscription and read `context.message.schedule`;
+event-to-queue payload mappers receive only the application payload.
 
 ## Agent
 Agents are native core service components. Generated agents attach to a service and expand into:
@@ -153,6 +140,9 @@ harness session, sandbox, telemetry, durable runtime, workspace store, and
 model bindings as the wrapped workflow. Use `canInvokeAgent(...)` plus
 `setRunFunction(...)` when child agents need independent PURISTA queues,
 retries, service ownership, HTTP exposure, sandboxes, or runtime bindings.
+The `agents` option registers those definitions only. The workflow must still
+declare `delegation.agents` and `delegation.modelAliases`; delegation is never
+inferred from the agents passed to the builder.
 
 Agent-local custom metrics are declared on `AgentQueueBuilder.defineMetric(...)` and are visible only inside that agent handler. Service-level metrics remain visible to the agent handler too.
 

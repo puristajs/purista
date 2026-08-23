@@ -1,7 +1,7 @@
 import { join } from 'node:path/posix'
 
-import type { EBMessageAddress } from '@purista/core'
-import { convertToSnakeCase, EBMessageType } from '@purista/core'
+import type { EBMessageAddress } from '@purista/core/adapter'
+import { convertToSnakeCase, EBMessageType } from '@purista/core/adapter'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
 /**

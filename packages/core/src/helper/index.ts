@@ -1,3 +1,4 @@
+export * from './architectureManifest.js'
 export * from './convertEmitValidationsToSchema.impl.js'
 export * from './convertInvokeValidationsToSchema.impl.js'
 export * from './enterpriseInterop.js'

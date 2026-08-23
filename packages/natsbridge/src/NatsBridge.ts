@@ -15,7 +15,7 @@ import type {
 	EventBridge,
 	EventBridgeConfig,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	createInfoMessage,
 	deserializeOtp,
@@ -36,7 +36,7 @@ import {
 	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type {
 	JetStreamClient,
 	JetStreamManager,
@@ -83,7 +83,7 @@ type ResolvedConsumerFailureHandling = {
 }
 
 /** Runtime pause metadata for a subscription consumer managed by the NATS bridge. */
-export type PausedSubscriptionState = {
+type PausedSubscriptionState = {
 	/** Unix timestamp in milliseconds when the consumer was paused. */
 	pausedAt: number
 	/** Operational reason for the pause. */
@@ -91,7 +91,7 @@ export type PausedSubscriptionState = {
 }
 
 /** NATS or JetStream subscription tracked by the bridge for cleanup. */
-export type RegisteredSubscription = {
+type RegisteredSubscription = {
 	/** Broker subscription handle used by the bridge. */
 	subscription: JetStreamSubscription | NatsSubscription
 }
@@ -136,9 +136,9 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 	/** JetStream client used for durable publications and subscriptions. */
 	public js: JetStreamClient | undefined
 
-	/** Registered command subscriptions keyed by PURISTA service address. */
+	/** @internal Runtime command registry; use bridge lifecycle methods instead. */
 	commands = new Map<string, JetStreamSubscription | NatsSubscription>()
-	/** Registered event subscriptions keyed by PURISTA subscriber address. */
+	/** @internal Runtime subscription registry; use bridge lifecycle methods instead. */
 	subscriptions = new Map<string, RegisteredSubscription>()
 	private pausedSubscriptionConsumers = new Map<string, PausedSubscriptionState>()
 
@@ -897,7 +897,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 	}
 
 	/** Returns currently paused subscription consumers keyed by registration key. */
-	getPausedSubscriptionConsumers() {
+	getPausedSubscriptionConsumers(): Record<string, { pausedAt: number; reason: string }> {
 		return Object.fromEntries(this.pausedSubscriptionConsumers.entries())
 	}
 

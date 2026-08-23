@@ -4,7 +4,7 @@ import {
 	getEventBridgeMock,
 	getLoggerMock,
 	safeBind,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { createSandbox } from 'sinon'
 
 import { honoV1Service } from '../../honoV1Service.js'

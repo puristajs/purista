@@ -1,9 +1,9 @@
 /**
- * Entry of thing you like to shutdown gracefully
+ * One runtime dependency that participates in graceful shutdown.
  */
 export type ShutdownEntry = {
-	/** the name */
+	/** Human-readable dependency name used in shutdown diagnostics. */
 	name: string
-	/** a async function that is called during shutdown  */
+	/** Async cleanup operation called during shutdown. */
 	destroy: () => Promise<void>
 }

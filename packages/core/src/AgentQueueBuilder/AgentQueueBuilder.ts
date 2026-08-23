@@ -25,6 +25,7 @@ import type {
 	AgentHttpExposure,
 	AgentManifest,
 	AgentModelBinding,
+	AgentModelChunkVisibility,
 	AgentQueueBuilderTypes,
 	AgentQueueResultPolicy,
 	AgentResponseMode,
@@ -32,6 +33,8 @@ import type {
 	AgentRuntimeRef,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
+	AgentSessionRetentionPolicy,
+	AgentStreamingOptions,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,
 	AllowedCommandToolDefinition,
@@ -100,11 +103,12 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private skills: Array<{ names: readonly string[]; resourceName?: string }> = []
 	private builtInTools: readonly BuiltinToolName[] | false | true = true
 	private executionPolicy: AgentExecutionPolicy = {}
-	private sessionPolicy: AgentSessionPolicy = { mode: 'ephemeral' }
+	private sessionPolicy: AgentManifest['session'] = { mode: 'ephemeral' }
 	private sandboxPolicy?: AgentSandboxPolicy
 	private workspacePolicy?: AgentWorkspacePolicy
 	private httpExposure?: AgentHttpExposure
 	private streamingMode: 'stream' | 'aggregate' = 'stream'
+	private modelChunkVisibility?: AgentModelChunkVisibility
 	private successEventName?: string
 	private executionProfile?: AgentQueueLongRunningExecutionProfile
 	private responseMode?: { mode: AgentResponseMode; options?: AgentResponseModeOptions }
@@ -378,14 +382,19 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * Pass harness-local agent definitions in `options.agents` when the workflow
 	 * handler calls `ctx.agents.<name>(...)`. Those agents run inside the same
 	 * harness session, sandbox, telemetry setup, and durable workflow boundary as
-	 * this attached PURISTA agent.
+	 * this attached PURISTA agent. The workflow definition must declare its own
+	 * `delegation` allowlist and limits; PURISTA never infers authority from
+	 * `options.agents`.
 	 *
 	 * @example
 	 * ```ts
 	 * service
 	 *   .getAgentQueueBuilder('incidentReview', 'Reviews one incident')
 	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
-	 *   .setHarnessWorkflow(reviewWorkflow, {
+	 *   .setHarnessWorkflow({
+	 *     ...reviewWorkflow,
+	 *     delegation: { agents: ['summarize'], modelAliases: ['primary'] },
+	 *   }, {
 	 *     agents: { summarize: summarizeAgent },
 	 *   })
 	 * ```
@@ -532,9 +541,39 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
-	/** Configure harness session behavior for this attached agent. */
-	setSessionPolicy(policy: AgentSessionPolicy) {
-		this.sessionPolicy = policy
+	/**
+	 * Configure how this attached agent obtains its Harness session.
+	 *
+	 * Conversation mode continues one logical business conversation across
+	 * agent runs. PURISTA automatically namespaces the session with trusted
+	 * `message.tenantId` and `message.principalId` when they are present.
+	 * Sandbox, workspace, and tool policies are configured independently.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
+	 * agent.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversation', 'id'] })
+	 * ```
+	 */
+	setSessionPolicy(policy: AgentSessionPolicy<InferIn<S['PayloadSchema']>>) {
+		validateSessionRetention(policy.retention)
+		if (policy.mode === 'ephemeral') {
+			this.sessionPolicy = policy
+			return this
+		}
+		if (policy.mode !== 'conversation') {
+			throw new Error('Agent session policy mode must be "ephemeral" or "conversation"')
+		}
+		if (policy.payloadPath === undefined) {
+			throw new Error('Agent conversation session policy requires payloadPath')
+		}
+		const idPath = typeof policy.payloadPath === 'string' ? [policy.payloadPath] : policy.payloadPath
+		validateConversationIdPath(idPath)
+		this.sessionPolicy = {
+			mode: 'conversation',
+			payloadPath: [...idPath],
+			retention: policy.retention,
+		}
 		return this
 	}
 
@@ -544,7 +583,12 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
-	/** Require a durable harness workspace for this attached agent. */
+	/**
+	 * Require a durable workspace for a wrapped Harness workflow.
+	 *
+	 * Durable replay checkpoints workflow progress and its private workspace; it
+	 * is not available to `setHarnessAgent(...)` or `setRunFunction(...)`.
+	 */
 	setWorkspacePolicy(policy: AgentWorkspacePolicy) {
 		const { capabilities, ...rest } = policy
 		this.workspacePolicy = {
@@ -584,9 +628,20 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		return this
 	}
 
-	/** Choose whether the generated HTTP projection streams chunks or returns an aggregate response. */
-	setStreamingMode(mode: 'stream' | 'aggregate') {
+	/**
+	 * Choose whether the generated projection streams chunks or returns an
+	 * aggregate response, and optionally control model chunks on that stream.
+	 *
+	 * @example
+	 * ```ts
+	 * agent.setStreamingMode('stream', { modelChunkVisibility: 'safe' })
+	 * ```
+	 */
+	setStreamingMode(mode: 'stream' | 'aggregate', options?: AgentStreamingOptions) {
 		this.streamingMode = mode
+		if (options?.modelChunkVisibility !== undefined) {
+			this.modelChunkVisibility = options.modelChunkVisibility
+		}
 		return this
 	}
 
@@ -608,12 +663,15 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 	/** Return the provider-neutral manifest for this agent without generating core definitions. */
 	getManifest(): AgentManifest<S['Models']> {
-		return this.createManifest(this.resolveExecution().kind)
+		const execution = this.resolveExecution()
+		this.assertWorkspaceExecution(execution)
+		return this.createManifest(execution.kind)
 	}
 
 	/** Generate the attached agent and its queue, worker, command, and stream definitions. */
 	async getDefinition(): Promise<AttachedAgentDefinition<S>> {
 		const execution = this.resolveExecution()
+		this.assertWorkspaceExecution(execution)
 		const manifest = this.createManifest(execution.kind)
 		const runtime: AgentRuntimeRef<Infer<S['OutputSchema']>> = {}
 		const agentDefinition: AgentDefinition<S> = {
@@ -631,12 +689,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		const worker = await new QueueWorkerBuilder(queueName, workerName)
 			.setMaxParallelHandlers(this.executionPolicy.maxParallelHandlers ?? defaultExecutionPolicy.maxParallelHandlers)
 			.setHandler(async function (this: object, context, message) {
-				const output = await getRuntime(agentDefinition, this).executeAggregate({
-					appContext: context as unknown as Record<string, unknown>,
-					message: message as unknown as Record<string, unknown>,
-					payload: message.payload,
-					parameter: message.parameter,
-				})
+				const output = await executeAttachedAgent(this, manifest.agentName, 'queue', () =>
+					getRuntime(agentDefinition, this).executeAggregate({
+						appContext: context as unknown as Record<string, unknown>,
+						message: message as unknown as Record<string, unknown>,
+						payload: message.payload,
+						parameter: message.parameter,
+					}),
+				)
 				return { status: 'success', output }
 			})
 			.getDefinition()
@@ -728,12 +788,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 					...(manifest.response.options?.streamUrl ? { streamUrl: manifest.response.options.streamUrl } : {}),
 				}
 			}
-			return getRuntime(agentDefinition, this).executeAggregate({
-				appContext: context as unknown as Record<string, unknown>,
-				message: context.message as unknown as Record<string, unknown>,
-				payload,
-				parameter,
-			})
+			return executeAttachedAgent(this, manifest.agentName, 'command', () =>
+				getRuntime(agentDefinition, this).executeAggregate({
+					appContext: context as unknown as Record<string, unknown>,
+					message: context.message as unknown as Record<string, unknown>,
+					payload,
+					parameter,
+				}),
+			)
 		})
 
 		const streamBuilder = new StreamDefinitionBuilder<any>(`${this.agentName}Stream`, `Stream ${this.description}`)
@@ -780,13 +842,15 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			}
 		}
 		streamBuilder.setStreamFunction(async function (this: object, context, payload, parameter, writer) {
-			await getRuntime(agentDefinition, this).executeStream({
-				appContext: context as unknown as Record<string, unknown>,
-				message: context.message as unknown as Record<string, unknown>,
-				payload,
-				parameter,
-				writer,
-			})
+			await executeAttachedAgent(this, manifest.agentName, 'stream', () =>
+				getRuntime(agentDefinition, this).executeStream({
+					appContext: context as unknown as Record<string, unknown>,
+					message: context.message as unknown as Record<string, unknown>,
+					payload,
+					parameter,
+					writer,
+				}),
+			)
 		})
 
 		return {
@@ -811,6 +875,14 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private assertNoExecutionDefinition() {
 		if (this.executionDefinitions.length > 0) {
 			throw new Error('AgentQueueBuilder execution definition is already set')
+		}
+	}
+
+	private assertWorkspaceExecution(execution: AgentExecutionDefinition): void {
+		if (this.workspacePolicy?.mode === 'durable' && execution.kind !== 'harnessWorkflow') {
+			throw new Error(
+				'AgentQueueBuilder durable workspace policy requires setHarnessWorkflow(...); Harness durable execution is workflow-only.',
+			)
 		}
 	}
 
@@ -840,6 +912,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 					}
 				: undefined,
 			streamingMode: this.streamingMode,
+			...(this.modelChunkVisibility !== undefined ? { modelChunkVisibility: this.modelChunkVisibility } : {}),
 			successEventName: this.successEventName,
 			allowedCommands: this.commandTools,
 			allowedAgents: this.agentInvokes,
@@ -930,9 +1003,62 @@ function getRuntime<Output>(definition: AgentDefinition<any>, owner?: object) {
 	return runtime
 }
 
+type AttachedAgentMetricsOwner = {
+	executeAttachedAgent?<T>(
+		agentName: string,
+		executionKind: 'command' | 'queue' | 'stream' | 'tool',
+		execute: () => Promise<T>,
+	): Promise<T>
+}
+
+/** Preserve wrapper metrics when an attached definition runs through a Service instance. */
+function executeAttachedAgent<T>(
+	owner: object,
+	agentName: string,
+	executionKind: 'command' | 'queue' | 'stream' | 'tool',
+	execute: () => Promise<T>,
+): Promise<T> {
+	const metricsOwner = owner as AttachedAgentMetricsOwner
+	return metricsOwner.executeAttachedAgent
+		? metricsOwner.executeAttachedAgent(agentName, executionKind, execute)
+		: execute()
+}
+
 function assertNonEmpty(value: string, label: string) {
 	if (value.trim() === '') {
 		throw new Error(`${label} must be a non-empty string`)
+	}
+}
+
+function validateConversationIdPath(path: readonly string[]): void {
+	if (path.length === 0 || path.some(segment => typeof segment !== 'string' || segment.trim() === '')) {
+		throw new Error('Agent conversation id path must contain one or more non-empty strings')
+	}
+}
+
+function validateSessionRetention(retention: AgentSessionRetentionPolicy | undefined): void {
+	if (!retention) return
+	if (retention.idleTtlMs !== undefined && (!Number.isSafeInteger(retention.idleTtlMs) || retention.idleTtlMs <= 0)) {
+		throw new Error('Agent session retention idleTtlMs must be a positive safe integer in milliseconds')
+	}
+	const history = retention.history
+	if (history) {
+		if (history.maxTurns === undefined && history.maxBytes === undefined) {
+			throw new Error('Agent session history retention requires maxTurns or maxBytes')
+		}
+		for (const value of [history.maxTurns, history.maxBytes]) {
+			if (value !== undefined && (!Number.isSafeInteger(value) || value < 0)) {
+				throw new Error('Agent session history retention limits must be non-negative safe integers')
+			}
+		}
+	}
+	for (const [label, value] of [
+		['runs.maxPerSession', retention.runs?.maxPerSession],
+		['events.maxPerRun', retention.events?.maxPerRun],
+	] as const) {
+		if (value !== undefined && (!Number.isSafeInteger(value) || value <= 0)) {
+			throw new Error(`Agent session retention ${label} must be a positive safe integer`)
+		}
 	}
 }
 

@@ -28,7 +28,7 @@ export const getQueueWorkerTestFileContent = (input: {
 	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
 
 	writer.writeLine(`import { describe, expect, it } from '${testLib}'`)
-	writer.writeLine(`import { createQueueWorkerTestHarness } from '@purista/core'`)
+	writer.writeLine(`import { createQueueWorkerTestHarness } from '@purista/core/testing'`)
 	writer.blankLine()
 	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
 	writer.writeLine(`import { ${workerBuilderName} } from './${workerBuilderFileName}.js'`)

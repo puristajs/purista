@@ -1,6 +1,7 @@
 import type { StateDeleteFunction } from './StateDeleteFunction.js'
 import type { StateGetterFunction } from './StateGetterFunction.js'
 import type { StateSetterFunction } from './StateSetterFunction.js'
+import type { StateStoreCapabilities } from './StateStoreCapabilities.js'
 
 /**
  * Interface definition for state store implementations
@@ -10,6 +11,13 @@ import type { StateSetterFunction } from './StateSetterFunction.js'
 export interface StateStore {
 	/** name of store */
 	name: string
+	/**
+	 * Guarantees offered by this adapter.
+	 *
+	 * This is optional for existing custom stores. Such stores must treat an
+	 * expiry request as unsupported unless they explicitly document otherwise.
+	 */
+	readonly capabilities?: StateStoreCapabilities
 	/**
 	 * get a state value
 	 * @param string name of state

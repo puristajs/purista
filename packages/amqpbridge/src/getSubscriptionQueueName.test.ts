@@ -1,4 +1,4 @@
-import type { EBMessageAddress } from '@purista/core'
+import type { EBMessageAddress } from '@purista/core/adapter'
 
 import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl.js'
 

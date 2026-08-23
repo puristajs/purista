@@ -1,7 +1,7 @@
 import { join } from 'node:path/posix'
 
-import type { Command, EBMessage } from '@purista/core'
-import { convertToSnakeCase } from '@purista/core'
+import type { Command, EBMessage } from '@purista/core/adapter'
+import { convertToSnakeCase } from '@purista/core/adapter'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
 /** Function signature for building an MQTT publish topic from a PURISTA message. */

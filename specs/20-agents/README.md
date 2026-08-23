@@ -47,6 +47,9 @@ history. Their old package-boundary recommendations have been replaced by
 - Framework implementation, architecture, CLI, docs, and examples should use
   [80-core-ai-migration-plan.md](./80-core-ai-migration-plan.md) for migration
   history and current ownership decisions.
+- State retention, bounded conversation history, context-window ownership, and
+  retry/idempotency semantics are defined in
+  [81-state-retention-and-conversation-context.md](./81-state-retention-and-conversation-context.md).
 - User-facing skill updates must not reference internal specs. They should use
   current implementation and public handbook/API docs, then run
   `npm run audit:skills` and `npm run audit:knowledge`.

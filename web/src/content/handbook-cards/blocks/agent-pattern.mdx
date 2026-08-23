@@ -64,7 +64,7 @@ flowchart LR
 - Model capabilities gate which methods are available on `context.harness.models`.
 - Tools: `canInvoke` for command tools, `canInvokeAgent` for child agents.
 - Skills: `useSkills(names)`, `useBuiltInTools(names|false)`.
-- Session: `setSessionPolicy({ mode: 'ephemeral'|'conversation', payloadPath? })`.
+- Session policy: `setSessionPolicy({ mode: 'conversation', payloadPath, ... })`; agents are ephemeral by default.
 - Runtime requires `queueBridge` and `ai.models` in service instance options.
 - HTTP exposure: `exposeAsHttpEndpoint(method, path, options)` registers either a JSON response endpoint or an SSE stream endpoint.
 - `canEmit` and `canConsumeStream` are **not implemented** on AgentQueueBuilder.

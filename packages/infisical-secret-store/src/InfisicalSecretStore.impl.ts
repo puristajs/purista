@@ -1,5 +1,5 @@
-import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
-import { SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core/adapter'
+import { SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core/adapter'
 
 import { InfisicalClient } from './InfisicalClient/InfisicalClient.impl.js'
 import type { InfisicalSecretConfig } from './types.js'

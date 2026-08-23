@@ -25,7 +25,7 @@ order: 301510
 
 - Unit/integration tests without external dependencies.
 - Local development or demos where determinism is more important than durability.
-- Single-instance cron-like tasks.
+- One-off delayed jobs in a single process. Use the Scheduler Runtime for recurring triggers.
 
 ## Configuration
 

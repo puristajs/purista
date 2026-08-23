@@ -10,7 +10,7 @@ import {
 	exportKubernetesCronJobs,
 	exportRuntimeCapabilities,
 	exportScheduleManifest,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { z } from 'zod'
 import type { PuristaExecutableCommand } from '../core/command.js'
 import { createIssuesFromZod, createPendingResolution, createResult } from './shared.js'

@@ -49,7 +49,7 @@ console.log('Service is running. Press Ctrl+C to stop.')
 ### Example: first command test
 
 ```typescript [userSignUp.test.ts]
-import { createCommandTestHarness } from '@purista/core'
+import { createCommandTestHarness } from '@purista/core/testing'
 import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 import { userSignUpCommandBuilder } from './userSignUpCommandBuilder.js'
 
@@ -235,8 +235,12 @@ const spanProcessor = new SimpleSpanProcessor(
   new OTLPTraceExporter({ url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? 'http://localhost:4318/v1/traces' })
 )
 
-const eventBridge = new DefaultEventBridge({ spanProcessor })
-const myService = await myV1Service.getInstance(eventBridge, { spanProcessor })
+const runtimeObservability = { spanProcessor }
+const eventBridge = new DefaultEventBridge(runtimeObservability)
+const myService = await myV1Service.getInstance(eventBridge, {
+  ...runtimeObservability,
+})
+await eventBridge.start()
 ```
 
 PURISTA automatically creates spans for every message. No instrumentation in your business logic.

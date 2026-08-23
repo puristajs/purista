@@ -27,6 +27,10 @@ const createMinimalProject = () => {
 		join(TEST_DIR, 'src', 'service', 'serviceEvent.enum.ts'),
 		'export enum ServiceEvent { Example = "example" }\n',
 	)
+	writeFileSync(
+		join(TEST_DIR, 'tsconfig.json'),
+		JSON.stringify({ compilerOptions: { module: 'NodeNext', moduleResolution: 'NodeNext' } }),
+	)
 }
 
 afterEach(() => {
@@ -68,6 +72,62 @@ describe('createPuristaCliEngine', () => {
 		).rejects.toBeInstanceOf(PuristaCliValidationError)
 	})
 
+	it('creates an event-only schedule declaration and registers its event', async () => {
+		createMinimalProject()
+		const engine = createPuristaCliEngine({
+			cwd: TEST_DIR,
+			mode: 'non-interactive',
+		})
+
+		await engine.runPuristaCommand('add-service', {
+			name: 'maintenance',
+			description: 'Maintenance service',
+		})
+		const result = await engine.runPuristaCommand('add-schedule', {
+			name: 'daily cleanup',
+			description: 'Trigger daily cleanup work',
+			serviceName: 'maintenance',
+			serviceVersion: '1',
+			eventToEmit: 'maintenance.daily_cleanup_due',
+			cronExpression: '0 2 * * *',
+			schedulerGroup: 'maintenance',
+		})
+
+		expect(result.ok).toBe(true)
+		expect(result.command).toBe('add-schedule')
+		const scheduleFile = join(
+			TEST_DIR,
+			'src',
+			'service',
+			'maintenance',
+			'v1',
+			'schedule',
+			'dailyCleanup',
+			'dailyCleanupScheduleDefinition.ts',
+		)
+		expect(readFileSync(scheduleFile, 'utf-8')).toContain('.emitEvent(ServiceEvent.MaintenanceDailyCleanupDue')
+		expect(readFileSync(join(TEST_DIR, 'src', 'service', 'serviceEvent.enum.ts'), 'utf-8')).toContain(
+			'MaintenanceDailyCleanupDue',
+		)
+	})
+
+	it('rejects a schedule cron expression that is not five fields', async () => {
+		createMinimalProject()
+		const engine = createPuristaCliEngine({ cwd: TEST_DIR, mode: 'non-interactive' })
+		await engine.runPuristaCommand('add-service', { name: 'maintenance', description: 'Maintenance service' })
+
+		await expect(
+			engine.runPuristaCommand('add-schedule', {
+				name: 'invalid schedule',
+				description: 'Invalid cron shape',
+				serviceName: 'maintenance',
+				serviceVersion: '1',
+				eventToEmit: 'maintenance.invalid_schedule',
+				cronExpression: '0 2 * *',
+			}),
+		).rejects.toBeInstanceOf(PuristaCliValidationError)
+	})
+
 	it('runs init-project through the blueprint engine', async () => {
 		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-init-'))
 		const engine = createPuristaCliEngine({
@@ -80,6 +140,7 @@ describe('createPuristaCliEngine', () => {
 			runtime: 'node',
 			eventBridge: 'default',
 			useWebserver: true,
+			telemetry: 'otel',
 			fileConvention: 'camel',
 			eventConvention: 'dotCase',
 			linter: 'biome',
@@ -93,6 +154,8 @@ describe('createPuristaCliEngine', () => {
 		expect(result.createdFiles).toContain(join(TEST_DIR, 'my-app', 'src', 'index.ts'))
 		expect(readFileSync(join(TEST_DIR, 'my-app', 'src', 'eventbridge.ts'), 'utf-8')).toContain('DefaultEventBridge')
 		expect(readFileSync(join(TEST_DIR, 'my-app', 'src', 'http.ts'), 'utf-8')).toContain('getHttpServer')
+		expect(readFileSync(join(TEST_DIR, 'my-app', 'src', 'telemetry.ts'), 'utf-8')).toContain('MeterProvider')
+		expect(readFileSync(join(TEST_DIR, 'my-app', 'src', 'index.ts'), 'utf-8')).toContain('initializeTelemetry')
 		expect(readFileSync(join(TEST_DIR, 'my-app', 'purista.json'), 'utf-8')).toContain('"eventBridge": "default"')
 	})
 

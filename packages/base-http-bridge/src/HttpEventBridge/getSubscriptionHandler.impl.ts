@@ -8,7 +8,7 @@ import {
 	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
-import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
+import type { CustomMessage, EBMessage, Subscription } from '@purista/core/adapter'
 import {
 	getTimeoutPromise,
 	HandledError,
@@ -17,7 +17,7 @@ import {
 	serializeOtp,
 	throwIfNotValidMessage,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import { parseCloudEventData } from './parseCloudEventData.impl.js'

@@ -27,10 +27,7 @@ export const assessRollbackRiskAgentBuilder = supportV1ServiceBuilder
 		outputSchema: supportV1IncidentRunbookSchema,
 	})
 	.useSkills(['rollback-safety-review', 'change-impact-analysis'], 'incident-response-skills')
-	.setSandboxPolicy({
-		enabled: true,
-		adapter: { kind: 'example-readonly-sandbox', network: false, filesystem: 'ephemeral' },
-	})
+	.setSandboxPolicy({ enabled: true })
 	.useBuiltInTools(false)
 	.setRunFunction(async context => {
 		const snapshot = await context.invoke.tools['Support.1.getIncidentSnapshot'].call({

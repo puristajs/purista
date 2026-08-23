@@ -1,0 +1,4 @@
+{
+	"scenarioId": "package-selection",
+	"response": "Use @purista/hono-http-server (HonoServiceClass) to project builder-declared commands. Use @purista/amqpbridge with AmqpBridge as the event transport. Keep that event bridge separate from @purista/redis-queue-bridge and RedisQueueBridge, where a queue worker performs the invoice work with strict idempotency. Resolve credentials using @purista/aws-secret-store and AWSSecretStore; never place them in the handler or telemetry."
+}

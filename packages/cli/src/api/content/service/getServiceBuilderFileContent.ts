@@ -13,6 +13,7 @@ export const getServiceBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string
 	puristaConfig: PuristaConfig
+	includeMetricExample?: boolean
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
@@ -48,6 +49,15 @@ export const getServiceBuilderFileContent = (input: {
 	writer.blankLine()
 	writer.writeLine(`const ${serviceBuilderName}Instance = new ServiceBuilder(${serviceInfoName})`)
 	writer.writeLine(`${serviceBuilderName}Instance.setConfigSchema(${serviceConfigSchema})`)
+	if (input.includeMetricExample) {
+		writer.writeLine(`${serviceBuilderName}Instance.defineMetric('app.${camelCase(input.serviceName)}.requests', {`)
+		writer.indent(() => {
+			writer.writeLine("kind: 'counter',")
+			writer.writeLine("unit: '{request}',")
+			writer.writeLine("description: 'Requests handled by this service',")
+		})
+		writer.writeLine('})')
+	}
 	writer.blankLine()
 	writer.writeLine(`export const ${serviceBuilderName} = ${serviceBuilderName}Instance`)
 

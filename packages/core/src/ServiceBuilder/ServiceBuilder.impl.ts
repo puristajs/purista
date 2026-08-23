@@ -21,6 +21,8 @@ import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
 import { Service } from '../core/Service/Service.impl.js'
+import { createStateStoreRetentionView } from '../core/StateStore/createStateStoreRetentionView.impl.js'
+import type { StateRetentionPolicy } from '../core/StateStore/types/StateRetention.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
 import type { Complete } from '../core/types/Complete.js'
 import type {
@@ -94,6 +96,20 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 		configStore?: ConfigStore
 		/** State store used by service handlers and attached agents. */
 		stateStore?: StateStore
+		/**
+		 * Optional service-local default retention. This creates an immutable view
+		 * over `stateStore`; it never mutates a shared store instance. An explicit
+		 * `context.states.setState(..., { retention })` policy takes precedence.
+		 *
+		 * @example
+		 * ```ts
+		 * service.getInstance(eventBridge, {
+		 *   stateStore,
+		 *   stateRetention: { default: { mode: 'expire', ttlMs: 60 * 60_000 } },
+		 * })
+		 * ```
+		 */
+		stateRetention?: StateRetentionPolicy
 		/** Queue bridge used by queue definitions and attached agents. */
 		queueBridge?: QueueBridge
 		/** Optional queue job store for queue bridge implementations that use one. */
@@ -109,7 +125,28 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 >
 
 /**
- * This class is used to build a service.
+ * Declares one versioned PURISTA business capability.
+ *
+ * Start here after the owning domain, invariants, and boundary contracts are
+ * clear. Add commands, subscriptions, streams, queues, schedules, and agents
+ * to this builder; provide bridges, stores, resources, telemetry, and optional
+ * AI runtime bindings only when calling `getInstance(...)` in application
+ * bootstrap code.
+ *
+ * @example
+ * ```ts
+ * const ordersInfo = {
+ *   serviceName: 'orders',
+ *   serviceVersion: '1',
+ *   serviceDescription: 'Owns order lifecycle',
+ * } as const satisfies ServiceInfoType
+ *
+ * const orders = new ServiceBuilder(ordersInfo)
+ *   .addCommandDefinition(createOrderCommand.getDefinition())
+ *
+ * const service = await orders.getInstance(eventBridge)
+ * await service.start()
+ * ```
  *
  * @group Service
  */
@@ -299,7 +336,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 * @example
 	 * ```ts
 	 * service.bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
-	 *   idempotencyKey: event => `billing-cycle:${event.cycleId}`,
+	 *   idempotencyKey: message => message.schedule?.occurrenceId,
 	 * })
 	 * ```
 	 */
@@ -339,6 +376,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				queueWorkers: this.queueWorkerDefinitionListResolved,
 				schedules: this.scheduleDefinitionListResolved,
 				eventToQueueBindings: this.eventToQueueBindingListResolved,
+				agents: this.agentDefinitionList.map(definition => definition.manifest),
 			}
 		}
 
@@ -367,6 +405,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			queueWorkers: this.queueWorkerDefinitionListResolved,
 			schedules: this.scheduleDefinitionListResolved,
 			eventToQueueBindings: this.eventToQueueBindingListResolved,
+			agents: this.agentDefinitionList.map(definition => definition.manifest),
 		}
 	}
 
@@ -421,9 +460,23 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		return this.SClass
 	}
 
-	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
+	/**
+	 * Create a runnable service instance with runtime bridges, stores, resources,
+	 * telemetry, and agent bindings.
+	 *
+	 * This method configures only the returned service. A supplied EventBridge,
+	 * QueueBridge, or store can be shared by multiple services and is never
+	 * mutated. Configure every runtime adapter explicitly at the application
+	 * composition root.
+	 */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
+		const rawStateStore: StateStore =
+			options?.stateStore ??
+			initDefaultStateStore({
+				logger,
+			})
+		const stateStore = createStateStoreRetentionView(rawStateStore, options?.stateRetention)
 		const agentRuntimeScope = createAgentRuntimeScope()
 		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
 			agentRuntimeScope,
@@ -434,6 +487,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 						logger: options.ai.logger ?? logger,
 					}
 				: undefined,
+			stateStore,
 		)
 
 		const cfg: S['ConfigInputType'] = {
@@ -477,14 +531,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				logger,
 			})
 
-		const stateStore: StateStore =
-			options?.stateStore ??
-			initDefaultStateStore({
-				logger,
-			})
-
 		const queueBridge: QueueBridge = options?.queueBridge ?? new DefaultQueueBridge()
-
 		const { commands, subscriptions, streams, queues, queueWorkers, eventToQueueBindings } =
 			await this.resolveDefinitions()
 

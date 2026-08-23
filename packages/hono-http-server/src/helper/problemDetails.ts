@@ -1,4 +1,4 @@
-import { HandledError, StatusCode, UnhandledError } from '@purista/core'
+import { HandledError, StatusCode, UnhandledError } from '@purista/core/adapter'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import { getErrorName } from './getErrorName.js'

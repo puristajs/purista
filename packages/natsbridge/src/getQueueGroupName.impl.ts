@@ -1,4 +1,4 @@
-import type { EBMessageAddress } from '@purista/core'
+import type { EBMessageAddress } from '@purista/core/adapter'
 
 /**
  * Builds the NATS queue group name for a shared command/subscription address.

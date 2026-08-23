@@ -1,94 +1,61 @@
 ---
 title: Deploy & Scale
-description: Deploy PURISTA applications as monoliths, microservices, serverless functions, or edge workers.
+description: Choose a PURISTA deployment topology and make its infrastructure boundaries explicit.
 order: 500000
 ---
 
 # Deploy & Scale
 
-PURISTA services are infrastructure-agnostic. The same business logic runs on a laptop, in a Docker container, on Kubernetes, or as a serverless function. The only thing that changes is the event bridge adapter and bootstrap configuration.
+PURISTA service boundaries do not prescribe deployment boundaries. Start one or
+many services in one process when that is useful; split them only when scaling,
+ownership, or isolation requires it. The service definition and handler code
+stay the same. Bootstrap, transport, stores, and operations change.
 
-## Choosing a deployment pattern
+## Choose the smallest topology that meets the requirement
 
-The most common mistake when adopting a service-oriented framework is jumping straight to a microservice deployment because it feels like the "right" architecture. The cost of that choice is paid immediately in infrastructure complexity, operational overhead, and inter-service networking problems — before a single real user has seen the product. PURISTA is designed so you do not have to make that call up front.
-
-Start with the monolithic pattern: all services running in one process, one event bridge, one deployment artifact. You get all the domain separation benefits (bounded contexts, clean command/subscription boundaries) with zero distributed-systems overhead. When a team or scaling requirement genuinely demands it, you split a service out by pointing it at the same external event bridge and running it as a separate process. No business logic changes. No interface changes.
-
-The serverless and edge patterns are for workloads with fundamentally different runtime characteristics. Serverless fits bursty, sporadic invocations where you do not want to pay for idle capacity — a webhook processor or a nightly batch trigger are good candidates, not an always-on order pipeline. The edge pattern targets constrained environments (IoT devices, on-premises edge nodes) where the process footprint must be minimal and connectivity may be intermittent.
-
-## Deployment patterns
-
-| Pattern | Architecture | Best for | Complexity |
+| Topology | Use it when | Required infrastructure | Next guide |
 |---|---|---|---|
-| [Monolithic](./monolithic.md) | All services in one process | Fastest delivery, smallest ops overhead | Low |
-| [Microservice](./microservice_style/index.md) | One service per process/container | Independent release cycles, team autonomy | Medium |
-| [Edge](./edge.md) | Lightweight single-process | IoT, on-device, constrained environments | Low |
-| [Serverless / FaaS](./serverless_function_fass.md) | Function-per-trigger | Bursty workloads, platform-managed scaling | Medium |
+| Local test | You need fast, deterministic feedback. | In-memory bridge and stores in **one process**. | [Monolithic](./monolithic.md) |
+| One application process | One artifact and one availability boundary are enough. | A process/container; external stores only when the application needs durable state. | [Monolithic](./monolithic.md) |
+| Distributed services | Services need independent release, scale, or fault boundaries. | A shared EventBridge; shared durable stores and queue backend where required. | [Microservice style](./microservice_style/index.md) |
+| Kubernetes | You need declarative rollout, replica management, and platform probes. | The distributed-service requirements plus cluster operations. | [Kubernetes](./microservice_style/kubernetes.md) |
+| Serverless or edge | The runtime model, not organisation, is the constraint. | Provider-specific invocation and persistence boundaries. | [Serverless / FaaS](./serverless_function_fass.md), [Edge](./edge.md) |
 
-## Deployment decision tree
+`DefaultEventBridge`, `DefaultQueueBridge`, and default in-memory stores are
+process-local. They are excellent for a local test or a one-process app. They
+do not connect replicas, containers, or separately started scheduler hosts.
 
-```mermaid
-flowchart TD
-    A["Start here"] --> B{"Team size?"}
-    B -->|Small, one team| C["Monolithic"]
-    B -->|Multiple teams| D{"Release independence needed?"}
-    D -->|No| C
-    D -->|Yes| E["Microservice"]
-    A --> F{"Workload pattern?"}
-    F -->|Bursty, sporadic| G["Serverless / FaaS"]
-    F -->|Continuous, low latency| H{"Environment?"}
-    H -->|Cloud / Data center| E
-    H -->|Edge / Device| I["Edge"]
-```
+## Production invariants
 
-The decision tree prioritises two independent signals: team structure and workload shape. They are independent because a large team can still benefit from a monolith during early development, and a single developer can have workloads that are genuinely bursty and better served by serverless. Evaluate both branches and let the more constraining factor win.
+- Every replica that must exchange messages uses the same external EventBridge.
+- State, secrets, configuration, queues, and idempotency records are shared
+  whenever more than one process can handle the same work.
+- Services are started before HTTP traffic is accepted; stop accepting work
+  before destroying services and bridges.
+- The composition root owns telemetry. Configure every shared adapter at
+  construction and pass the same explicit `logger`, `spanProcessor`, and
+  `metrics` values to each service; a service never mutates or configures a
+  shared adapter.
+- Scheduler hosts are separate deployable processes. See [Scheduling](../6_integrations/enterprise_interoperability/scheduling.md).
+- Treat message delivery as at-least-once where a bridge or queue backend says
+  so. Make externally visible effects idempotent.
 
-## Scaling model
+## Before a rollout
 
-Because PURISTA services are stateless, scaling is horizontal:
-
-```mermaid
-flowchart LR
-    LB["Load Balancer<br/>or Broker"] --> I1["Instance 1"]
-    LB --> I2["Instance 2"]
-    LB --> I3["Instance 3"]
-    I1 --> DB[(Database)]
-    I2 --> DB
-    I3 --> DB
-```
-
-- **The broker distributes messages** across service instances
-- **No session affinity** required
-- **Instances are interchangeable** — start more, stop some, no data loss
-- **Scale per service** — User Service needs 3 instances, Email Service needs 1
-
-## Runtime configuration
-
-The same service code, different bootstrap:
-
-| Environment | Event Bridge | Queue Bridge | Store |
-|---|---|---|---|
-| Local dev | `DefaultEventBridge` | `DefaultQueueBridge` | `DefaultStateStore` |
-| CI / testing | `DefaultEventBridge` | `DefaultQueueBridge` | `DefaultStateStore` |
-| Staging | `AmqpBridge` or `NatsBridge` | `RedisQueueBridge` | `RedisStateStore` |
-| Production | `AmqpBridge` or `NatsBridge` | `RedisQueueBridge` or `NatsQueueBridge` | `RedisStateStore` or cloud-native |
-| Serverless | `DefaultEventBridge` | `RedisQueueBridge` | `DefaultConfigStore` or `@purista/aws-config-store` |
-| Edge | `MqttBridge` | `DefaultQueueBridge` | `DefaultStateStore` or Dapr state store |
-
-## Production checklist
-
-- [ ] Event bridge chosen and configured for durability requirements
-- [ ] Queue bridge configured for pull-based workloads
-- [ ] Graceful shutdown implemented (`gracefulShutdown(logger, [eventBridge, ...services])`)
-- [ ] Health checks exposed
-- [ ] OpenTelemetry exporter configured
-- [ ] Secrets in secret stores, not environment variables or code
-- [ ] Integration tests pass against real broker/store setup
-- [ ] Retry policies defined and documented
-- [ ] Idempotency implemented for command side effects
+1. Export definitions, persist `purista inspect --out` as the build contract,
+   then run `purista validate --strict`, `purista doctor`, and
+   `purista diff --base <approved-artifact>` in CI. For multiple repositories,
+   run `purista compose` with pinned local artifacts from the deployment build.
+2. Test the selected bridge, stores, queue backend, and graceful shutdown in an
+   environment that resembles production.
+3. Configure health/readiness endpoints, structured logs, traces, metrics, and
+   alerts for each independently deployed process.
+4. Define rollout, retry, retention, backup, and recovery ownership rather than
+   relying on framework defaults.
 
 ## Related
 
-- [Event Bridges](../3_eco_system/eventbridges/index.md) — choose your transport
-- [Stores](../2_building_business-logic/stores/index.md) — externalize state
-- [OpenTelemetry](../4_open_telemetry/index.md) — observability in production
+- [Event Bridges](../3_eco_system/eventbridges/index.md)
+- [Stores](../2_building_business-logic/stores/index.md)
+- [OpenTelemetry](../4_open_telemetry/index.md)
+- [Scheduling](../6_integrations/enterprise_interoperability/scheduling.md)

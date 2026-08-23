@@ -11,22 +11,28 @@ const toAgentIdentifier = (name: string) => {
 export const getAgentTestFileContent = (input: {
 	agentName: string
 	builderImportName: string
+	/** Generate the paired durable runtime/store test bindings. */
+	durableWorkspace?: boolean
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const builderName = `${agentIdentifier}Builder`
 
-	writer.writeLine("import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'")
+	writer.writeLine(
+		`import { ${input.durableWorkspace ? 'createAgentDurableWorkspaceTestRuntime, ' : ''}createAgentTestHarness, FakeModelProvider } from '@purista/core/testing'`,
+	)
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
 	writer.blankLine()
 	writer.writeLine(`const { ${builderName} } = await import('${input.builderImportName}')`).blankLine()
 
 	writer.writeLine(`describe('${agentIdentifier}', () => {`)
 	writer.indent(() => {
-		writer.writeLine("it('runs with the attached-agent harness runtime', async () => {")
+		writer.writeLine(
+			`it('runs with the attached-agent ${input.durableWorkspace ? 'durable workflow' : 'harness'} runtime', async () => {`,
+		)
 		writer.indent(() => {
-			writer.writeLine('const model = createScriptedHarnessModel()')
+			writer.writeLine('const model = new FakeModelProvider()')
 			writer.writeLine('model.enqueueObject({')
 			writer.indent(() => {
 				writer.writeLine("object: { message: 'hello' },")
@@ -35,6 +41,10 @@ export const getAgentTestFileContent = (input: {
 			})
 			writer.writeLine('})')
 			writer.blankLine()
+			if (input.durableWorkspace) {
+				writer.writeLine('const durable = createAgentDurableWorkspaceTestRuntime()')
+				writer.blankLine()
+			}
 			writer.writeLine(
 				'// For agents that declare .useSkills(...), create test bindings with createAgentSkillTestRuntime(...) and pass skills to this options object.',
 			)
@@ -51,6 +61,10 @@ export const getAgentTestFileContent = (input: {
 					writer.writeLine('},')
 				})
 				writer.writeLine('},')
+				if (input.durableWorkspace) {
+					writer.writeLine('runtime: durable.runtime,')
+					writer.writeLine('workspaceStore: durable.workspaceStore,')
+				}
 			})
 			writer.writeLine('})')
 			writer.blankLine()

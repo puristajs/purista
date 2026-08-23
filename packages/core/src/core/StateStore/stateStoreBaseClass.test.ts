@@ -6,6 +6,7 @@ import { getLoggerMock } from '../../mocks/index.js'
 import { UnhandledError } from '../Error/index.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StateStoreBaseClass } from './StateStoreBaseClass.impl.js'
+import type { ResolvedStateWriteOptions, StateRetentionPolicy } from './types/StateRetention.js'
 
 class TestClass extends StateStoreBaseClass {
 	protected getStateImpl<StateNames extends string[]>(
@@ -14,8 +15,34 @@ class TestClass extends StateStoreBaseClass {
 		throw new Error('Not implemented')
 	}
 
-	protected setStateImpl(_stateName: string, _stateValue: unknown): Promise<void> {
+	protected setStateImpl(_stateName: string, _stateValue: unknown, _options: ResolvedStateWriteOptions): Promise<void> {
 		throw new Error('Not implemented')
+	}
+
+	protected removeStateImpl(_stateName: string): Promise<void> {
+		throw new Error('Not implemented')
+	}
+}
+
+class AtomicExpiryTestClass extends StateStoreBaseClass {
+	lastOptions: ResolvedStateWriteOptions | undefined
+
+	constructor(retention?: StateRetentionPolicy) {
+		super(
+			'atomic-expiry-test',
+			{ logger: getLoggerMock().mock, ...(retention ? { retention } : {}) },
+			{ retention: { atomicExpiry: true } },
+		)
+	}
+
+	protected getStateImpl<StateNames extends string[]>(
+		..._stateNames: StateNames
+	): Promise<ObjectWithKeysFromStringArray<StateNames>> {
+		throw new Error('Not implemented')
+	}
+
+	protected async setStateImpl(_stateName: string, _stateValue: unknown, options: ResolvedStateWriteOptions) {
+		this.lastOptions = options
 	}
 
 	protected removeStateImpl(_stateName: string): Promise<void> {
@@ -72,6 +99,42 @@ describe('StateStoreBaseClass', () => {
 			sandbox.stub(stateStore.config, 'enableSet').value(true)
 
 			await expect(stateStore.setState('test', 'state_value')).rejects.toEqual(new Error('Not implemented'))
+		})
+
+		it('rejects expiry when the adapter has not declared atomic expiry support', async () => {
+			await expect(
+				stateStore.setState('test', 'state_value', { retention: { mode: 'expire', ttlMs: 1_000 } }),
+			).rejects.toEqual(
+				new UnhandledError(StatusCode.NotImplemented, 'state store "test" does not support atomic expiry'),
+			)
+
+			sandbox.assert.calledOnce(logger.stubs.error)
+		})
+
+		it('validates expiry durations before calling an adapter', async () => {
+			await expect(
+				stateStore.setState('test', 'state_value', { retention: { mode: 'expire', ttlMs: 0 } }),
+			).rejects.toThrow('state retention ttlMs must be a positive finite number of milliseconds')
+		})
+
+		it('resolves permanent retention and forwards native expiry options to an capable adapter', async () => {
+			const store = new AtomicExpiryTestClass()
+
+			await store.setState('permanent', 'value')
+			expect(store.lastOptions).toEqual({ retention: { mode: 'forever' } })
+
+			await store.setState('temporary', 'value', { retention: { mode: 'expire', ttlMs: 1_000 } })
+			expect(store.lastOptions).toEqual({ retention: { mode: 'expire', ttlMs: 1_000 } })
+		})
+
+		it('uses the StateStore instance retention default unless a write overrides it', async () => {
+			const store = new AtomicExpiryTestClass({ default: { mode: 'expire', ttlMs: 60_000 } })
+
+			await store.setState('temporary', 'value')
+			expect(store.lastOptions).toEqual({ retention: { mode: 'expire', ttlMs: 60_000 } })
+
+			await store.setState('permanent', 'value', { retention: { mode: 'forever' } })
+			expect(store.lastOptions).toEqual({ retention: { mode: 'forever' } })
 		})
 	})
 

@@ -1,5 +1,5 @@
-import type { Logger } from '@purista/core'
-import { initLogger } from '@purista/core'
+import type { Logger } from '@purista/core/adapter'
+import { initLogger } from '@purista/core/adapter'
 
 import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 import { isMatchingTopic } from './isMatchingTopic.impl.js'

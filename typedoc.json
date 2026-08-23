@@ -21,6 +21,7 @@
 		"./packages/natsbridge",
 		"./packages/redis-queue-bridge",
 		"./packages/redis-config-store",
+		"./packages/redis-scheduler-provider",
 		"./packages/redis-state-store",
 		"./packages/vault-secret-store"
 	],
@@ -48,6 +49,7 @@
 	"readme": "CHANGELOG.md",
 	"hideGenerator": true,
 	"includeVersion": true,
+	"treatWarningsAsErrors": true,
 	"excludeInternal": true,
 	"excludeExternals": true,
 	"exclude": [

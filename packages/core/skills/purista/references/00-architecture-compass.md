@@ -2,14 +2,8 @@
 
 Use this reference when designing a PURISTA system before implementation. It condenses the handbook mental model into practical architecture decisions for production systems.
 
-Source handbook pages:
-- `purista/web/src/content/handbook-cards/mental-model/philosophy.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/separation-of-concerns.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/architecture.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/data-control.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/distribution.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/deployment-flexibility.mdx`
-- `purista/web/src/content/handbook-cards/mental-model/resilience-patterns.mdx`
+This is self-contained application guidance. Consult the public PURISTA handbook
+only when a deployment or adapter decision needs more detail.
 
 ## Contents
 - [Core Idea](#core-idea)
@@ -42,7 +36,7 @@ Business logic should not know whether it runs in one process, several container
 | Queue | Durable work contract. | Work needs leases, retries, delay, dead-lettering, idempotency, or operator replay. | Queue worker owns execution; QueueBridge owns delivery mechanics. |
 | Queue worker | Execution logic for queued work. | A queue item must be processed with bounded retry and lifecycle policy. | Uses resources and typed context; returns explicit outcomes. |
 | Agent | Model-driven service capability. | Work involves model reasoning, tool use, conversation, synthesis, or harness workflows. | Attaches to a service and expands into queue, worker, command, and stream definitions. |
-| Schedule | External time-trigger contract. | Time should initiate a business event, queue job, or short command. | PURISTA declares the contract; Kubernetes CronJob or another scheduler owns the clock. |
+| Schedule | Time-trigger declaration. | Time should initiate a business event. | A separate Core Scheduler Runtime host with a selected provider owns the clock; subscriptions and queues own downstream work. |
 | Resource | External dependency behind a service-owned interface. | A handler needs DB, API, SDK, repository, or domain adapter access. | Supplied at `getInstance(...)`, not imported directly into handlers. |
 | Store | Config, secret, or state access abstraction. | Runtime values, secrets, or state must be externalized. | Supplied through runtime wiring and scoped by tenant/security rules where needed. |
 | EventBridge | Command/event routing abstraction. | Services exchange messages. | Swappable distribution boundary: local, AMQP, NATS, MQTT, Dapr. |
@@ -68,7 +62,7 @@ Then choose:
 - queue plus worker for durable background execution
 - stream for incremental output
 - agent for model-driven reasoning inside an owning service
-- schedule for time-trigger intent
+- schedule declaration plus a separate scheduler host for time-trigger events
 - resource/store/runtime binding for infrastructure dependencies
 
 Do not choose:

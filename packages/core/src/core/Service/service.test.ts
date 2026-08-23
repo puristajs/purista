@@ -36,6 +36,78 @@ describe('Service', () => {
 		await expect(service.destroy()).resolves.toBeUndefined()
 	})
 
+	it('forwards typed state write options through the handler context', async () => {
+		const logger = getLoggerMock().mock
+		const setState = vi.fn().mockResolvedValue(undefined)
+		const service = new Service({
+			logger,
+			eventBridge: getEventBridgeMock().mock,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			config: {},
+			stateStore: {
+				name: 'test-state-store',
+				capabilities: { retention: { atomicExpiry: true } },
+				getState: vi.fn(),
+				removeState: vi.fn(),
+				setState,
+				destroy: vi.fn(),
+			},
+		})
+
+		await service.getContextFunctions(logger).states.setState(
+			'verification:abc',
+			{ valid: true },
+			{
+				retention: { mode: 'expire', ttlMs: 60_000 },
+			},
+		)
+
+		expect(setState).toHaveBeenCalledWith(
+			'verification:abc',
+			{ valid: true },
+			{
+				retention: { mode: 'expire', ttlMs: 60_000 },
+			},
+		)
+	})
+
+	it('applies a service retention default without changing the shared store instance', async () => {
+		const logger = getLoggerMock().mock
+		const setState = vi.fn().mockResolvedValue(undefined)
+		const sharedStateStore = {
+			name: 'shared-state-store',
+			capabilities: { retention: { atomicExpiry: true } },
+			getState: vi.fn(),
+			removeState: vi.fn(),
+			setState,
+			destroy: vi.fn(),
+		}
+		const service = new Service({
+			logger,
+			eventBridge: getEventBridgeMock().mock,
+			info: serviceInfo,
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [],
+			config: {},
+			stateStore: sharedStateStore,
+			stateRetention: { default: { mode: 'expire', ttlMs: 60_000 } },
+		})
+
+		await service.getContextFunctions(logger).states.setState('service-default', 'value')
+		await service.getContextFunctions(logger).states.setState('write-override', 'value', {
+			retention: { mode: 'expire', ttlMs: 1_000 },
+		})
+
+		expect(setState).toHaveBeenNthCalledWith(1, 'service-default', 'value', {
+			retention: { mode: 'expire', ttlMs: 60_000 },
+		})
+		expect(setState).toHaveBeenNthCalledWith(2, 'write-override', 'value', {
+			retention: { mode: 'expire', ttlMs: 1_000 },
+		})
+	})
+
 	it('records command execution metrics with safe framework attributes', async () => {
 		const logger = getLoggerMock().mock
 		const eventBridge = getEventBridgeMock().mock
@@ -782,7 +854,7 @@ describe('Service', () => {
 					name: 'purista.health.status',
 					attributes: expect.objectContaining({
 						'purista.health.component': 'service',
-						'purista.health.state': 'warn',
+						'purista.health.status': 'warn',
 					}),
 				}),
 				expect.objectContaining({

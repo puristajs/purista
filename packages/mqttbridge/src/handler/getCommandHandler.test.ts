@@ -1,5 +1,10 @@
 import type { Span } from '@opentelemetry/api'
-import { EBMessageType, getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
+import {
+	EBMessageType,
+	getCommandMessageMock,
+	getCommandSuccessMessageMock,
+	getLoggerMock,
+} from '@purista/core/adapter'
 import type { IPublishPacket } from 'mqtt'
 import { describe, expect, it, vi } from 'vitest'
 

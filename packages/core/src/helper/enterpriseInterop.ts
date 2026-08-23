@@ -57,6 +57,7 @@ export type KubernetesCronJobScheduleInput = {
 	maxCatchUpCount?: number
 	jitterWindowMs?: number
 	idempotencyKey?: string
+	schedulerGroup?: string
 	enabledByDefault?: boolean
 	providerHints?: Record<string, unknown>
 }
@@ -590,6 +591,7 @@ const puristaScheduleAnnotations = (schedule: KubernetesCronJobScheduleInput) =>
 		'purista.dev/max-catch-up-count': annotationValue(schedule.maxCatchUpCount),
 		'purista.dev/jitter-window-ms': annotationValue(schedule.jitterWindowMs),
 		'purista.dev/idempotency-key': schedule.idempotencyKey,
+		'purista.dev/scheduler-group': schedule.schedulerGroup,
 		'purista.dev/provider-hints': annotationValue(schedule.providerHints),
 	}) as Record<string, string>
 
@@ -707,6 +709,7 @@ const serializeSchedule = async (schedule: ScheduleDefinition, serviceName: stri
 		maxCatchUpCount: schedule.maxCatchUpCount,
 		jitterWindowMs: schedule.jitterWindowMs,
 		idempotencyKey: schedule.idempotencyKey,
+		schedulerGroup: schedule.schedulerGroup,
 		enabledByDefault: schedule.enabledByDefault,
 		providerHints: schedule.providerHints,
 	})

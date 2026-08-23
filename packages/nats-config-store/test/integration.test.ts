@@ -1,4 +1,4 @@
-import { getLoggerMock } from '@purista/core'
+import { getLoggerMock } from '@purista/core/adapter'
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 

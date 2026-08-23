@@ -1,0 +1,45 @@
+{
+	"name": "@purista/redis-scheduler-provider",
+	"version": "3.2.4",
+	"description": "Distributed SchedulerProvider implementation backed by Redis",
+	"homepage": "https://purista.dev",
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"type": "module",
+	"main": "./dist/index.js",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist/**/*"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"lint": "npx @biomejs/biome check --write",
+		"test": "vitest",
+		"build": "rimraf dist tsconfig.tsbuildinfo && tsc -p tsconfig.build.json"
+	},
+	"devDependencies": {
+		"@types/node": "^26.2.0",
+		"rimraf": "^6.1.3",
+		"vitest": "^4.1.11"
+	},
+	"dependencies": {
+		"@purista/core": "*",
+		"@redis/client": "^6.2.1"
+	},
+	"types": "./dist/index.d.ts"
+}

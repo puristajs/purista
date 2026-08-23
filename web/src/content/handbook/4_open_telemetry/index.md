@@ -1,12 +1,12 @@
 ---
 title: OpenTelemetry
-description: Enable distributed tracing, metrics, and structured logging in PURISTA with zero instrumentation.
+description: Enable distributed tracing, framework metrics, and structured logging in PURISTA without manual trace instrumentation.
 order: 400000
 ---
 
 # OpenTelemetry
 
-PURISTA has built-in OpenTelemetry support. Every message — command, subscription, stream, or queue job — automatically creates spans, carries trace context, and emits structured logs. You do not instrument your business logic.
+PURISTA has built-in OpenTelemetry support. Every message — command, subscription, stream, or queue job — automatically creates spans, carries trace context, and emits structured logs. You do not manually instrument framework tracing. Declare business measurements explicitly, with typed custom metrics, when they express a product outcome.
 
 ## How tracing works in PURISTA
 
@@ -72,7 +72,11 @@ For AI evaluation and optimization workflows, see [CloudGrid AI Evaluation](http
 
 ## How to wire OpenTelemetry in PURISTA
 
-PURISTA does **not** use `NodeSDK` or a global tracer registration. Instead, you create a `SpanProcessor` (wrapping your exporter) and pass it directly to the event bridge and each service instance. This keeps instrumentation explicit, testable, and entirely under your control.
+PURISTA does **not** require your application to use `NodeSDK`. Create a
+`SpanProcessor` (wrapping your exporter), then pass flat service runtime
+options before the bridge starts. Core defaults and built-in event bridges
+receive missing logger, metrics, and tracing values; an explicit component
+setting always wins.
 
 ```typescript [main.ts]
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
@@ -96,19 +100,27 @@ const meterProvider = new MeterProvider({ readers: [metricReader] })
 metrics.setGlobalMeterProvider(meterProvider)
 const meter = meterProvider.getMeter('my-app')
 
-// 3. Pass spanProcessor and meter to the event bridge
-const eventBridge = new AmqpBridge({ spanProcessor, metrics: { meter } })
-await eventBridge.start()
+// 3. Configure each runtime instance explicitly. A bridge can be shared by
+// several services, so service construction never mutates it.
+const runtimeObservability = { spanProcessor, metrics: { meter } }
+const eventBridge = new AmqpBridge(runtimeObservability)
 
-// 4. Pass the same spanProcessor and meter to each service
+// 4. Configure the service separately. Reusing the same object is explicit;
+// it is not an adapter cascade.
 const myService = await myV1Service.getInstance(eventBridge, {
-  spanProcessor,
-  metrics: { meter },
+  ...runtimeObservability,
 })
+await eventBridge.start()
 await myService.start()
 ```
 
 Every command, subscription, stream, and queue job inside `myService` automatically emits spans correlated to the same trace — no changes to your business logic required.
+
+An adapter constructed outside a service owns its own runtime configuration.
+Pass logger, tracing, and metrics to that adapter when constructing it; do not
+change it through a service. A shared event bridge has one telemetry pipeline,
+so configure it explicitly when services need different telemetry. Static
+`purista inspect`/`doctor` does not claim live provider health.
 
 ### Graceful shutdown
 
@@ -134,13 +146,74 @@ gracefulShutdown(logger, [
 | Type | Examples | How to collect |
 |---|---|---|
 | **Technical** | Response time, error rate, throughput, resource usage | OpenTelemetry metrics + exporter |
-| **Business** | Daily active users, order volume, conversion rate | Emit custom events from commands, aggregate in analytics |
+| **Business operational** | Orders created, payment latency, cache hits | Declare a typed `app.*` custom metric on the builder |
+| **Business audit/analytics** | Order lifecycle, conversion funnel, detailed user activity | Emit a domain event and aggregate it in an analytics service |
 
-For business metrics, emit custom events from your commands and subscribe to them with an analytics service:
+### Typed custom metrics
+
+Use a custom metric when a low-cardinality counter, up/down counter, or histogram is the operational answer. Declare it on the builder before handler code records it. The declaration gives agents and TypeScript the metric name, allowed operation, unit, and attributes; handlers never receive a raw arbitrary-name recorder.
+
+```typescript [serviceBuilder.ts]
+import { ServiceBuilder } from '@purista/core'
+import { z } from 'zod'
+
+const metricAttributes = z.object({
+  source: z.enum(['web', 'api']),
+})
+
+export const ordersService = new ServiceBuilder(serviceInfo)
+  .defineMetric('app.orders.created', {
+    kind: 'counter',
+    unit: '{order}',
+    description: 'Orders accepted by the service',
+    attributes: metricAttributes,
+  })
+  .defineMetric('app.orders.processing.duration', {
+    kind: 'histogram',
+    unit: 'ms',
+    description: 'Order processing duration',
+    attributes: metricAttributes,
+  })
+```
+
+```typescript [createOrderCommandBuilder.ts]
+.setCommandFunction(async (context, payload) => {
+  const startedAt = Date.now()
+
+  try {
+    const order = await createOrder(payload)
+    context.metrics['app.orders.created'].add(1, { source: 'api' })
+    return order
+  } finally {
+    context.metrics['app.orders.processing.duration'].record(Date.now() - startedAt, { source: 'api' })
+  }
+})
+```
+
+Service metrics cascade to commands, subscriptions, streams, queue workers, and attached agent handlers. An agent can additionally declare a metric on `AgentQueueBuilder`; that agent-local metric is available only in that agent handler.
+
+```typescript
+serviceBuilder
+  .getAgentQueueBuilder('triageTicket', 'Triages a support ticket')
+  .defineMetric('app.agent.escalations', {
+    kind: 'counter',
+    unit: '{escalation}',
+    description: 'Escalated support tickets',
+  })
+```
+
+Metric attributes must be stable, low-cardinality, and non-sensitive. Never use order IDs, user IDs, tenant IDs, correlation IDs, request URLs, headers, payload values, prompts, completions, tokens, or stack traces as attributes. Put detailed records in authorized state, audit, or analytics systems instead.
+
+PURISTA uses the OpenTelemetry **Metrics API** only. Core does not create an exporter, collector, or Prometheus endpoint; your application owns the MeterProvider, reader, exporter, and any Prometheus or OTLP setup. PURISTA records service and agent wrapper metrics; `@purista/harness` owns GenAI/model/token/tool telemetry and must not be duplicated in handlers.
+
+### When an event is the right business signal
+
+Emit a domain event when downstream services need the fact itself, its durable business context, or a complete audit/analytics record. Events and metrics often complement each other:
 
 ```typescript
 .setCommandFunction(async function (context, payload) {
   const result = await processOrder(payload)
+  context.metrics['app.orders.created'].add(1, { source: 'api' })
   await context.emit('orderCompleted', { orderId: result.id, amount: result.amount })
   return result
 })

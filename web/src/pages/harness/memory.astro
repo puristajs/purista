@@ -32,12 +32,17 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <div class="mem-two-col">
         <div>
           <div class="eyebrow mb-3" style="color: var(--color-found-hi)">History</div>
-          <p class="text-[var(--color-fg-muted)] mb-4">The ordered message log for the current session. The harness feeds the configured <code class="site-mono text-xs">historyWindow</code> into each new model request. Persisted through the <code class="site-mono text-xs">StateStore</code>.</p>
+          <p class="text-[var(--color-fg-muted)] mb-4">The ordered message log for the current session. The harness feeds the configured <code class="site-mono text-xs">historyWindow</code> into each new model request. Persisted through the <code class="site-mono text-xs">StateStore</code>. Bound durable history by complete turns and UTF-8 storage bytes; that limit is separate from the model’s token context window.</p>
           <CodeBlock
-            code={`const messages = await session.history.list({ limit: 20 })
-// returns: Message[] — role, content, timestamps`}
+            code={`const harness = defineHarness({ name: 'support' })
+  .state(stateStore) // must support atomic replaceMessages
+  .defaults({ historyRetention: { maxTurns: 50, maxBytes: 256_000 } })
+  .build()
+
+const messages = await session.history.list({ limit: 20 })`}
             language="typescript"
           />
+          <p class="text-[var(--color-fg-muted)] mt-4">A session scopes history; it does not queue concurrent user turns across processes. Decide in application code whether one conversation serializes, returns a busy response, or branches into independent sessions.</p>
         </div>
         <div>
           <div class="eyebrow mb-3" style="color: var(--color-con-hi)">Memory</div>

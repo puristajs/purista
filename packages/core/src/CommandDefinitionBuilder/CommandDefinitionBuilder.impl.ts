@@ -37,17 +37,29 @@ import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
+/** Options for projecting a command as a synchronous or queued HTTP operation. */
 export type HttpExposureOptions = {
 	/** Execute HTTP requests synchronously or enqueue asynchronously when queue access is declared. */
 	mode?: 'sync' | 'async'
 }
 
 /**
- * Command definition builder is a helper to create and define a command for a service.
- * It helps to set all needed information like schemas and hooks.
- * With these information, the types are automatically set and extended.
+ * Declares a typed request/response operation owned by one service.
  *
- * A working schema definition needs at least a command name, a short description and the function implementation.
+ * Use a command when the caller needs an immediate validated result. Keep the
+ * business handler behind declared schemas, guards, and capabilities; expose
+ * HTTP from this definition only after the command contract is complete.
+ *
+ * @example
+ * ```ts
+ * const createOrder = service
+ *   .getCommandBuilder('createOrder', 'Create an order')
+ *   .addPayloadSchema(createOrderPayloadSchema)
+ *   .addOutputSchema(orderSchema)
+ *   .setCommandFunction(async function (_context, payload) {
+ *     return createOrderInRepository(payload)
+ *   })
+ * ```
  *
  * @group Command
  */
@@ -1055,6 +1067,7 @@ export class CommandDefinitionBuilder<
 			maxCatchUpCount: options.maxCatchUpCount,
 			jitterWindowMs: options.jitterWindowMs,
 			idempotencyKey: options.idempotencyKey,
+			schedulerGroup: options.schedulerGroup,
 			enabledByDefault: options.enabledByDefault ?? true,
 			providerHints: options.providerHints,
 		})

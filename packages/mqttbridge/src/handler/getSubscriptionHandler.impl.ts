@@ -1,5 +1,5 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
-import type { BrokerHeaderCustomMsg, CustomMessage, EBMessage, Subscription } from '@purista/core'
+import type { BrokerHeaderCustomMsg, CustomMessage, EBMessage, Subscription } from '@purista/core/adapter'
 import {
 	deserializeOtp,
 	PuristaSpanName,
@@ -8,7 +8,7 @@ import {
 	SubscriptionConsumerControlError,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
 import { serializeOtpToMqtt } from '../serializeOtpToMqtt.impl.js'

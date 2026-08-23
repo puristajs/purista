@@ -1,19 +1,8 @@
 export { AgentQueueBuilder } from './AgentQueueBuilder.js'
 export { AgentRunError } from './runtime/executor.js'
 export type {
-	AgentSkillTestRuntime,
-	CreateAgentContextMockInput,
-	CreateAgentSkillTestRuntimeSkill,
-	CreateAgentTestHarnessOptions,
-} from './testing/index.js'
-export {
-	createAgentContextMock,
-	createAgentSkillTestRuntime,
-	createAgentTestHarness,
-	createScriptedHarnessModel,
-	ScriptedHarnessModelProvider,
-} from './testing/index.js'
-export type {
+	AgentConversationId,
+	AgentConversationIdPath,
 	AgentDefinition,
 	AgentDurableWorkspaceStore,
 	AgentDurableWorkspaceStorePolicy,
@@ -23,12 +12,14 @@ export type {
 	AgentHandler,
 	AgentHandlerContext,
 	AgentHandlerModelBindings,
+	AgentHarnessRuntimeOptions,
 	AgentHarnessWorkflowOptions,
 	AgentHttpExposure,
 	AgentInvokeMap,
 	AgentManifest,
 	AgentModelBinding,
 	AgentModelCapability,
+	AgentModelChunkVisibility,
 	AgentQueueBuilderTypes,
 	AgentQueueResultPolicy,
 	AgentQueueResultPolicyMode,
@@ -45,12 +36,14 @@ export type {
 	AgentRuntimeStreamInvocationInput,
 	AgentSandboxPolicy,
 	AgentSessionPolicy,
+	AgentSessionRetentionPolicy,
 	AgentSkillCatalogEntry,
 	AgentSkillContext,
 	AgentSkillDiscoveryOptions,
 	AgentSkillResolver,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
+	AgentStreamingOptions,
 	AgentWorkspaceCapabilityRequirement,
 	AgentWorkspacePolicy,
 	AllowedAgentDefinition,

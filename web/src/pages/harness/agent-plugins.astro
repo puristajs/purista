@@ -1,0 +1,150 @@
+---
+import CTASection from '../../components/sections/CTASection.astro'
+import HarnessHero from '../../components/harness/HarnessHero.astro'
+import HarnessLayout from '../../layouts/HarnessLayout.astro'
+---
+
+<HarnessLayout
+  title="Agent Plugins | AI Harness | PURISTA"
+  description="Bring open Agent Plugins skills and MCP server declarations into the AI Harness through explicit inspection, trust, and sandbox boundaries."
+>
+  <HarnessHero
+    lines={[
+      { text: 'Open plugins.' },
+      { text: 'Explicit trust.', color: 'found' },
+      { text: 'Your boundary.' },
+    ]}
+    lede="The AI Harness supports the Agent Plugins format as an interoperability surface, not an extension runtime. Inspect plugin metadata and skills, then deliberately select what becomes part of your own typed harness."
+  />
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">What is supported</div>
+        <h2 class="display display-lg">Data in. Application control stays out.</h2>
+        <p class="lede">The first-party <code class="site-mono">@purista/harness-agent-plugins</code> package understands the Agent Plugins v1 layout: a root manifest, immediate-child skills with <code class="site-mono">SKILL.md</code>, and declared MCP servers. It gives your application a validated, inspectable view of that data.</p>
+      </div>
+
+      <div class="plugin-rows">
+        <div class="plugin-row">
+          <span class="plugin-row-label site-mono">plugin.json</span>
+          <p>Identity, description, and declared plugin metadata are validated locally. Invalid plugin manifests reject that plugin instead of producing a partial runtime.</p>
+        </div>
+        <div class="plugin-row">
+          <span class="plugin-row-label site-mono">skills/*/SKILL.md</span>
+          <p>Skills are inspected as content and provenance. A malformed skill is isolated from the rest of the plugin, so an application can diagnose and choose its policy without accepting unvalidated instructions.</p>
+        </div>
+        <div class="plugin-row">
+          <span class="plugin-row-label site-mono">mcp.json</span>
+          <p>Declared stdio and streamable HTTP MCP servers can be projected into explicitly chosen harness tools. Server configuration is not an automatic grant of authority to every agent.</p>
+        </div>
+        <div class="plugin-row">
+          <span class="plugin-row-label site-mono">diagnostics</span>
+          <p>Inspection returns structured, content-safe diagnostics and provenance. It avoids emitting local paths, credentials, plugin file bodies, prompts, or tool results into telemetry.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap plugin-grid">
+      <div>
+        <div class="eyebrow">Trust model</div>
+        <h2 class="display display-lg mt-4 mb-6">Plugins are not code execution.</h2>
+        <p class="lede">A plugin is external input. The integration never evaluates plugin JavaScript, lifecycle hooks, shell snippets, or arbitrary package code. It does not fetch remote schemas or silently install dependencies. Extensions outside the open format are ignored unless your application explicitly owns them.</p>
+      </div>
+      <ol class="plugin-flow" aria-label="Agent plugin adoption flow">
+        <li><span>01</span><div><strong>Inspect</strong><p>Read a local plugin through containment checks and local schema validation.</p></div></li>
+        <li><span>02</span><div><strong>Review</strong><p>Apply your own allowlist, reviewed SHA-256 digest lock, identity, license, and update policy.</p></div></li>
+        <li><span>03</span><div><strong>Project</strong><p>Select individual skills and MCP tools for a specific harness or agent.</p></div></li>
+        <li><span>04</span><div><strong>Operate</strong><p>Run selected MCP servers with the application-owned sandbox, credentials, network, and telemetry policy.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap plugin-grid">
+      <div>
+        <div class="eyebrow">PURISTA integration</div>
+        <h2 class="display display-lg mt-4 mb-6">First-class runtime wiring. No hidden loader.</h2>
+        <p class="lede">PURISTA services pass static Harness modules and already-approved tools through their normal <code class="site-mono">ai.harness</code> runtime configuration. The service still owns its agent definition, queue, tenant boundary, tool allowlist, and deployment lifecycle.</p>
+      </div>
+      <pre class="plugin-code"><code>{`await service.getInstance(eventBridge, {
+  ai: {
+    models,
+    harness: {
+      modules: [supportModule],
+      tools: approvedPluginBindings.tools,
+    },
+  },
+})`}</code></pre>
+    </div>
+  </section>
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head--center mb-12">
+        <div class="eyebrow">Modern MCP only</div>
+        <h2 class="display display-lg">No compatibility tunnel.</h2>
+        <p class="lede">MCP integration targets the current 2026-07-28 protocol through the v2 MCP client packages. It uses modern stdio or streamable HTTP transports, discovers tools from the server, and pins the current protocol rather than keeping a legacy negotiation or transport fallback in the harness.</p>
+      </div>
+      <div class="plugin-columns">
+        <div>
+          <h3>For stdio</h3>
+          <p>A trusted declaration provides only reviewed command data. The application supplies an existing data directory and an isolating sandbox that can both spawn the process and mount the reviewed package root immutably. A plugin never receives host shell access or secrets.</p>
+        </div>
+        <div>
+          <h3>For HTTP</h3>
+          <p>The application owns the endpoint policy, authentication, egress rules, timeouts, headers, and tool selection. Package-declared headers are never forwarded, and plugin redirects are rejected. Treat remote MCP output as untrusted external input.</p>
+        </div>
+        <div>
+          <h3>For agents</h3>
+          <p>Tools and skills are mounted by explicit agent configuration. Nothing in a plugin is automatically exposed to all agents, tenants, or sessions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad">
+    <div class="wrap plugin-grid">
+      <div>
+        <div class="eyebrow">When to use what</div>
+        <h2 class="display display-lg mt-4 mb-6">Compose locally. Interoperate deliberately.</h2>
+      </div>
+      <dl class="plugin-compare">
+        <div><dt>Static modules</dt><dd>For trusted, imported TypeScript configuration owned and versioned with your application. Use them to share typed model, tool, skill, or agent definitions without giving up workflow ownership.</dd></div>
+        <div><dt>Agent Plugins</dt><dd>For an open on-disk interchange format. Inspect it as data and project the approved pieces through application policy; do not treat it as a package-loading system.</dd></div>
+        <div><dt>PURISTA child agents</dt><dd>For independently operated business capabilities with their own service owner, queue, retry policy, and deployment boundary.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <CTASection
+    headline={[{ text: 'Start small. Keep ' }, { text: 'authority explicit', color: 'found' }, { text: '.' }]}
+    lede="Use the package reference and harness guides for the current integration API, then verify each chosen skill and tool with deterministic tests before production rollout."
+    ctas={[
+      { label: 'Harness testing', href: '/harness/testing/', variant: 'primary' },
+      { label: 'Security guide', href: '/harness/security/', variant: 'ghost' },
+    ]}
+  />
+</HarnessLayout>
+
+<style>
+  .plugin-rows { border-top: 1px solid var(--color-line); }
+  .plugin-row { display: grid; grid-template-columns: minmax(10rem, 0.45fr) 1fr; gap: clamp(1rem, 3vw, 3rem); padding: clamp(1.2rem, 2vw, 1.75rem) 0; border-bottom: 1px solid var(--color-line); }
+  .plugin-row-label { color: var(--color-found-hi); font-size: 0.84rem; }
+  .plugin-row p, .plugin-columns p, .plugin-flow p, .plugin-compare dd { margin: 0; color: var(--color-fg-muted); line-height: 1.65; }
+  .plugin-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 7vw, 7rem); align-items: start; }
+  .plugin-flow { padding: 0; margin: 0; list-style: none; border-top: 1px solid var(--color-line); }
+  .plugin-flow li { display: grid; grid-template-columns: 2.6rem 1fr; gap: 0.75rem; padding: 1.1rem 0; border-bottom: 1px solid var(--color-line); }
+  .plugin-flow span { color: var(--color-found-hi); font-family: var(--font-mono); font-size: 0.78rem; }
+  .plugin-flow strong { display: block; margin-bottom: 0.25rem; }
+  .plugin-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 3rem); border-top: 1px solid var(--color-line); }
+  .plugin-columns > div { padding-top: 1.15rem; }
+  .plugin-columns h3 { margin: 0 0 0.55rem; font-size: 1rem; }
+  .plugin-compare { margin: 0; border-top: 1px solid var(--color-line); }
+  .plugin-compare > div { padding: 1.1rem 0; border-bottom: 1px solid var(--color-line); }
+  .plugin-compare dt { margin-bottom: 0.3rem; color: var(--color-found-hi); font-family: var(--font-mono); font-size: 0.84rem; }
+  .plugin-code { margin: 0; overflow: auto; padding: 1.25rem; border: 1px solid var(--color-line); background: var(--color-bg); color: var(--color-fg); font-size: 0.82rem; line-height: 1.65; }
+  @media (max-width: 720px) { .plugin-grid, .plugin-columns { grid-template-columns: 1fr; } .plugin-row { grid-template-columns: 1fr; gap: 0.55rem; } }
+</style>

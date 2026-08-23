@@ -1,4 +1,4 @@
-import type { EmptyObject, HttpClientConfig, Prettify } from '@purista/core'
+import type { EmptyObject, HttpClientConfig, Prettify } from '@purista/core/adapter'
 
 /**
  * Infisical client-specific HTTP configuration extension.

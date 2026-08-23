@@ -1,4 +1,4 @@
-import type { EBMessage, EventBridgeBaseClass } from '@purista/core'
+import type { EBMessage, EventBridgeBaseClass } from '@purista/core/adapter'
 import type { HttpEventBridgeConfig } from './HttpEventBridgeConfig.js'
 
 /**

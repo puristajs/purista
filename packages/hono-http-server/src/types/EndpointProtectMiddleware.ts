@@ -1,4 +1,4 @@
-import type { Service } from '@purista/core'
+import type { Service } from '@purista/core/adapter'
 import type { Context, Next } from 'hono'
 
 import type { BindingsBase } from './BindingsBase.js'

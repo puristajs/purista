@@ -1,6 +1,6 @@
 import type { SSMClient } from '@aws-sdk/client-ssm'
 import { ParameterNotFound } from '@aws-sdk/client-ssm'
-import { StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core/adapter'
 import { describe, expect, it, vi } from 'vitest'
 import { AWSConfigStore } from './AWSConfigStore.impl.js'
 

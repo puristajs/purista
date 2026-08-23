@@ -45,7 +45,20 @@ export const coordinateIncidentResponseAgentBuilder = supportV1ServiceBuilder
 		outputSchema: supportV1RollbackRiskOutputPayloadSchema,
 	})
 	.useSkills(['incident-command', 'customer-communication', 'rollback-decisioning'], 'incident-response-skills')
-	.setSessionPolicy({ mode: 'conversation', payloadPath: ['incidentId'] })
+	// Incident conversations can be revisited for weeks, but their durable
+	// transcript, run summaries, and event trail must not grow without bound.
+	// History retention is complete-turn based; it does not approximate model
+	// tokens or change the provider's transient context-window selection.
+	.setSessionPolicy({
+		mode: 'conversation',
+		payloadPath: ['incidentId'],
+		retention: {
+			idleTtlMs: 30 * 24 * 60 * 60_000,
+			history: { maxTurns: 50, maxBytes: 256_000 },
+			runs: { maxPerSession: 20 },
+			events: { maxPerRun: 500 },
+		},
+	})
 	.setExecutionProfile('longRunning', { maxRuntimeMs: 10 * 60_000, strict: true })
 	.exposeAsHttpEndpoint('POST', 'incident-response', { streamingMode: 'aggregate' })
 	.makeEndpointPublic()

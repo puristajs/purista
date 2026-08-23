@@ -15,6 +15,7 @@ export const blueprintIds = [
 	'bridge-dapr',
 	'http-node',
 	'http-bun',
+	'telemetry-otel',
 	'linter-biome',
 	'linter-eslint-module',
 ] as const
@@ -69,6 +70,8 @@ export type ExampleServiceGeneratorStep = {
 	commandName: string
 	/** Human-readable command description. */
 	commandDescription: string
+	/** Whether this explicitly requested example includes a custom metric. */
+	includeMetricExample?: boolean
 }
 
 /** Union of deferred generator steps executed while materializing a project. */

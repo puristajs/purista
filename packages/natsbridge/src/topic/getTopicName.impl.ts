@@ -1,5 +1,5 @@
-import type { Command, EBMessage } from '@purista/core'
-import { convertToSnakeCase } from '@purista/core'
+import type { Command, EBMessage } from '@purista/core/adapter'
+import { convertToSnakeCase } from '@purista/core/adapter'
 
 import type { INatsBridge } from '../types/INatsBridge.js'
 

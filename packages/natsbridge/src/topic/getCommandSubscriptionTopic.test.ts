@@ -1,4 +1,4 @@
-import { getLoggerMock, safeBind } from '@purista/core'
+import { getLoggerMock, safeBind } from '@purista/core/adapter'
 
 import { NatsBridge } from '../NatsBridge.js'
 import { getCommandSubscriptionTopic } from './getCommandSubscriptionTopic.impl.js'

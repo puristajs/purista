@@ -61,16 +61,17 @@ const service = await supportV1ServiceBuilder.getInstance(eventBridge, {
 })
 ```
 
-## Session policy
+## Conversation
 
-Agents default to an ephemeral session. Use `conversation` mode when a payload field should identify a continuing AI conversation:
+Agents default to an ephemeral session. Use `setSessionPolicy(...)` when a payload field should identify a continuing AI conversation:
 
 ```typescript
-.setSessionPolicy({
-  mode: 'conversation',
-  payloadPath: ['conversationId'],
-})
+.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })
 ```
+
+`conversationId` is required. PURISTA automatically adds trusted message
+`tenantId` and `principalId` as optional namespace dimensions when present, so
+applications do not configure conversation tenancy themselves.
 
 Keep transport identifiers (`message.id`, `traceId`, `correlationId`) separate from AI conversation identity.
 

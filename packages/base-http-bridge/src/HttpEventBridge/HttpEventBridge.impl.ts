@@ -16,7 +16,7 @@ import type {
 	EventBridgeConfig,
 	HttpExposedServiceMeta,
 	Subscription,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import {
 	deserializeOtp,
 	EBMessageType,
@@ -37,7 +37,7 @@ import {
 	StatusCode,
 	serializeOtp,
 	UnhandledError,
-} from '@purista/core'
+} from '@purista/core/adapter'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import { PatternRouter } from 'hono/router/pattern-router'
@@ -70,35 +70,22 @@ import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
  *
  * - hono
  * - trouter
- */
-/**
- * Stores the app value exposed by HttpEventBridge.
- * Start the bridge before registering services and stop it during graceful shutdown.
- * Expose only schemas and metadata that are safe for clients to inspect.
- * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
+ *
+ * @example
+ * ```ts
+ * // Usually use a concrete adapter such as `DaprEventBridge`. Adapter authors
+ * // provide an HttpEventBridgeClient that translates PURISTA traffic for their platform.
+ * const bridge = new HttpEventBridge(
+ *   { name: 'platform-bridge', serve, serverPort: 8080 },
+ *   platformClient,
+ * )
+ * await bridge.start()
+ * ```
  */
 export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
-	/**
-	 * Stores the isShuttingDown value exposed by HttpEventBridge.
-	 * Start the bridge before registering services and stop it during graceful shutdown.
-	 * Expose only schemas and metadata that are safe for clients to inspect.
-	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
-	 */
 	extends EventBridgeBaseClass<CustomConfig>
-	/**
-	 * Stores the isStarted value exposed by HttpEventBridge.
-	 * Start the bridge before registering services and stop it during graceful shutdown.
-	 * Expose only schemas and metadata that are safe for clients to inspect.
-	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
-	 */
 	implements EventBridge
 {
-	/**
-	 * Stores the client value exposed by HttpEventBridge.
-	 * Start the bridge before registering services and stop it during graceful shutdown.
-	 * Expose only schemas and metadata that are safe for clients to inspect.
-	 * Treat this property as runtime state unless the concrete API documents a stronger guarantee.
-	 */
 	/**
 	 * Runtime server returned by the configured Hono `serve` adapter.
 	 *

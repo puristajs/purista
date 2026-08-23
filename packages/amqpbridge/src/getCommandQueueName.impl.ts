@@ -1,4 +1,4 @@
-import type { EBMessageAddress } from '@purista/core'
+import type { EBMessageAddress } from '@purista/core/adapter'
 
 /**
  * Builds the AMQP queue name for a command endpoint.

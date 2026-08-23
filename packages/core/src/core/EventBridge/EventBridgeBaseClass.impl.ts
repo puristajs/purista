@@ -1,6 +1,7 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
 import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 
@@ -87,6 +88,7 @@ export class EventBridgeBaseClass<ConfigType> {
 	instanceId: Readonly<InstanceId>
 
 	defaultCommandTimeout: Readonly<number>
+	/** @internal Runtime tracker; adapter implementations must not depend on it. */
 	protected readonly inFlightExecutions = new InFlightExecutionTracker()
 	constructor(name: string, config: EventBridgeConfig<ConfigType>) {
 		this.name = name
@@ -118,19 +120,22 @@ export class EventBridgeBaseClass<ConfigType> {
 
 		this.defaultCommandTimeout = config.defaultCommandTimeout ?? 30000
 
+		this.traceProvider = this.createTraceProvider(config.spanProcessor)
+	}
+
+	private createTraceProvider(spanProcessor?: SpanProcessor): NodeTracerProvider {
 		const resource = defaultResource().merge(
 			resourceFromAttributes({
-				[ATTR_SERVICE_NAME]: name,
+				[ATTR_SERVICE_NAME]: this.name,
 				[ATTR_SERVICE_VERSION]: puristaVersion,
 			}),
 		)
-
-		this.traceProvider = new NodeTracerProvider({
+		const traceProvider = new NodeTracerProvider({
 			resource,
-			spanProcessors: config.spanProcessor ? [config.spanProcessor] : undefined,
+			spanProcessors: spanProcessor ? [spanProcessor] : undefined,
 		})
-
-		this.traceProvider.register()
+		traceProvider.register()
+		return traceProvider
 	}
 
 	/**
