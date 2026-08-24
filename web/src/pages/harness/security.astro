@@ -7,7 +7,7 @@ import SecurityBoundary from '../../components/harness/SecurityBoundary.astro'
 import HarnessLayout from '../../layouts/HarnessLayout.astro'
 ---
 
-<HarnessLayout title="Security & Production Readiness | AI Harness | PURISTA" description="Sandboxed execution, human review gates, content policies, and production checklist for deploying the AI Harness.">
+<HarnessLayout title="Security & Production Readiness | AI Harness | PURISTA" description="Sandboxed execution, application-owned review, content policies, and a production checklist for deploying the AI Harness.">
 
   <HarnessHero
     lines={[
@@ -15,7 +15,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       { text: 'design,', color: 'con' },
       { text: 'not by accident.' },
     ]}
-    lede="The Harness treats security as infrastructure, not an afterthought. Sandboxed execution, explicit review gates, content capture disabled by default, and a clear production checklist."
+    lede="The Harness treats security as infrastructure, not an afterthought. Sandboxed execution, application-owned review, content capture disabled by default, and a clear production checklist."
   />
 
   {/* ── The boundary that matters ─────────────────────────────────── */}
@@ -58,13 +58,13 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         </div>
         <div class="sec-pillar">
           <span class="sec-pillar-label site-mono">Human-in-the-Loop</span>
-          <p>No mutation before approval. Review gates and harness governance approval providers block sensitive tools until a human or policy system approves. Full OTel trace for every decision.</p>
+          <p>No mutation before approval. The application creates and authorizes durable review tasks. A Harness governance approval provider can also block a sensitive tool while it receives an application decision. Both paths remain traceable.</p>
           <ul class="sec-pillar-list">
-            <li>Visible review questions with recommended answers</li>
-            <li>Immediate answer capture on selection</li>
-            <li>Idempotent final decision submission</li>
-            <li>Optional governance events for policy and approval audit</li>
-            <li>Stale run/review IDs fail with clear errors</li>
+            <li>Application-owned reviewer identity, questions, and task UI</li>
+            <li>Application-owned stale-decision, expiry, and idempotency checks</li>
+            <li>Typed governance approval provider for immediate tool controls</li>
+            <li>Governance policy and approval events for audit</li>
+            <li>Domain authorization and transaction checks remain mandatory</li>
           </ul>
         </div>
         <div class="sec-pillar">
@@ -112,23 +112,24 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     </div>
   </HarnessStory>
 
-  {/* ── Review Gate ──────────────────────────────────────────────── */}
+  {/* ── Application review ───────────────────────────────────────── */}
   <HarnessStory
     id="review-gate"
     layout="viz-right"
-    eyebrow="Review Gates"
+    eyebrow="Application Review"
     headline={[
       { text: 'No mutations ' },
       { text: 'without approval', color: 'found' },
     ]}
-    lede="When an agent proposes a change, the workflow creates a ReviewRequest. The user sees questions, selects answers, and submits a decision. Only approved changes execute write tools."
+    lede="When an agent proposes a change, the application stores an authenticated review task and exposes it through its normal UI or transport. The application verifies the decision before it invokes the domain write."
     items={[
       'Proposal agent drafts the change',
-      'Workflow creates ReviewRequest with questions',
-      'User selects answers in questionnaire UI',
-      'Decision submitted — approved, revise, or reject',
-      'Write tool executes only on approved',
-      'All steps traced and logged',
+      'Workflow records a typed proposal and review reference',
+      'Application UI and identity provider collect a decision',
+      'Application validates task version, authorization, and idempotency',
+      'Domain write runs only after an approved decision',
+      'Governance can add a separate immediate tool control',
+      'All selected lifecycle signals are traced and logged',
     ]}
   >
     <div slot="visualization" class="w-full">
@@ -180,7 +181,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <span class="sec-check-num site-mono">05</span>
           <div>
             <div class="sec-check-title">Permission and Governance Gates</div>
-            <p>Use review gates, explicit permission checks, or opt-in harness governance before sensitive tools. No write should happen without workflow approval, service authorization, or an enforced tool policy.</p>
+            <p>Use an application-owned review task, explicit permission checks, or opt-in Harness governance before sensitive tools. No write should happen without domain authorization, an idempotent transaction boundary, and an enforced policy where required.</p>
           </div>
         </div>
         <div class="sec-check-row">

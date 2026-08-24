@@ -6,13 +6,13 @@ import CTASection from '../../components/sections/CTASection.astro'
 import HarnessLayout from '../../layouts/HarnessLayout.astro'
 ---
 
-<HarnessLayout title="AI Harness Use Cases | PURISTA" description="Production AI patterns — from RAG and triage to human review gates, parallel agents, and living wikis.">
+<HarnessLayout title="AI Harness Use Cases | PURISTA" description="Production AI patterns — from RAG and triage to application-owned review, parallel agents, and living wikis.">
   <HarnessHero
     lines={[
       { text: 'AI patterns' },
       { text: 'that ship.', color: 'found' },
     ]}
-    lede="Start with the smallest useful shape: a direct agent, a grounded answer, a workflow, or a review gate. Add orchestration only when the product risk asks for it."
+		lede="Start with the smallest useful shape: a direct agent, a grounded answer, a workflow, or an application-owned review task. Add orchestration only when the product risk asks for it."
   />
 
   <HarnessStory
@@ -105,7 +105,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     layout="viz-right"
     eyebrow="Use Case 06"
     headline={[{ text: 'Living ' }, { text: 'Wiki', color: 'found' }]}
-    lede="A self-updating knowledge base that combines direct Q&A, ingest workflows, decision memos, architecture reviews, and continuous audit — all with human review gates."
+		lede="A self-updating knowledge base that combines direct Q&A, ingest workflows, decision memos, architecture reviews, and continuous audit — with application-owned review before canonical writes."
     items={[
       'Ingest turns sources into grounded references.',
       'Q&A uses citations instead of memory guesses.',

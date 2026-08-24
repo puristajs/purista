@@ -67,14 +67,14 @@ const scenes: Record<Variant, Scene> = {
 	},
 	review: {
 		eyebrow: 'Human-in-the-loop',
-		title: 'The write path only opens after approval.',
+		title: 'Application review controls the write path.',
 		steps: [
 			{ label: 'Proposal', detail: 'agent drafts change', tone: 'con' },
-			{ label: 'Review gate', detail: 'human decides', tone: 'pilot' },
+			{ label: 'Review task', detail: 'application records decision', tone: 'pilot' },
 		],
 		branches: [
 			{ label: 'Approve', detail: 'apply mutation', tone: 'found' },
-			{ label: 'Revise', detail: 'loop back with feedback', tone: 'con' },
+			{ label: 'Revise', detail: 'application requests changes', tone: 'con' },
 			{ label: 'Reject', detail: 'record audit decision', tone: 'pilot' },
 		],
 	},
@@ -301,7 +301,7 @@ const objectFor = (label: string) => {
 	if (key.includes('search') || key.includes('retrieve')) return 'search'
 	if (key.includes('read') || key.includes('source') || key.includes('docs') || key.includes('wiki') || key.includes('state') || key.includes('log')) return 'docs'
 	if (key.includes('answer') || key.includes('q&a') || key.includes('publish') || key.includes('artifact') || key.includes('finish')) return 'answer'
-	if (key.includes('validate') || key.includes('approve') || key.includes('judge') || key.includes('review gate') || key.includes('gate') || key.includes('policy')) return 'shield'
+	if (key.includes('validate') || key.includes('approve') || key.includes('judge') || key.includes('review') || key.includes('gate') || key.includes('policy')) return 'shield'
 	if (key.includes('classifier') || key.includes('route') || key.includes('triage') || key.includes('router') || key.includes('http')) return 'router'
 	if (key.includes('planner') || key === 'plan') return 'board'
 	if (key.includes('risk') || key.includes('reject') || key.includes('escalate') || key.includes('audit') || key.includes('critical') || key.includes('fail')) return 'warning'

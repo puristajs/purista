@@ -107,10 +107,10 @@ export class CustomConfigStore extends ConfigStoreBaseClass<CustomConfigStoreCon
 
 ## Documentation updates
 
-While the documentation is still in progress, a new section [integrations](../handbook/6_integrations/index.md) has been added. Here, we will provide information and examples on how you can integrate and interact with third-party solutions.
+While the documentation is still in progress, a new section on [integrations](/handbook/6_integrations/) has been added. Here, we will provide information and examples on how you can integrate and interact with third-party solutions.
 
 ### Temporal integration
 
 We've included a comprehensive guide on setting up Temporal on your local machine. Learn how to establish communication between Temporal and your PURISTA application, and vice versa. Additionally, discover how to seamlessly integrate your temporal workflow into OpenTelemetry traces.
 
-Read more about the [Temporal integration](../handbook/6_integrations/temporal_and_purista/index.md)
+Read more about the [Temporal integration](/handbook/6_integrations/temporal_and_purista/)

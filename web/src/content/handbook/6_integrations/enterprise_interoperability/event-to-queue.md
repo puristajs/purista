@@ -42,4 +42,4 @@ Capability checks:
 | queue bridge durability | queued job survives process restart |
 | queue bridge idempotency enforcement | required for `idempotencyMode: 'strict'` |
 
-See [Subscriptions](../../2_building_business-logic/subscription/) for bounded reactions and [Queues](../../2_building_business-logic/queue/) for durable work.
+See [Subscriptions](/handbook/2_building_business-logic/subscription/) for bounded reactions and [Queues](/handbook/2_building_business-logic/queue/) for durable work.

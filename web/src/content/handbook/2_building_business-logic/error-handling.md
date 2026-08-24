@@ -17,7 +17,7 @@ Error handling is done in different layers of your application, and errors are a
 
 PURISTA has deeply integrated support for [OpenTelemetry](https://opentelemetry.io/).
 This provides an industrial standard way to keep track of errors and issues.
-See [Logging](./logging.md) and [Tracing](../4_open_telemetry/) section.
+See [Logging](./logging.md) and the [Tracing](/handbook/4_open_telemetry/) section.
 
 Errors are automatically added to the OpenTelemetry trace.
 

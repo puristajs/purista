@@ -50,7 +50,7 @@ const readNext = nextSection?.cards[0]
   description={card.description}
   sidebar={sidebar}
   currentId={`${sectionId}/${cardId}`}
-  headings={cardHeadings}
+  headings={card.id === 'separation-of-concerns' ? [] : cardHeadings}
 >
   <nav class="flex items-center gap-2 text-sm text-[var(--color-fg-subtle)] mb-8">
     <a href="/handbook/" class="hover:text-[var(--color-fg)] transition-colors">Handbook</a>

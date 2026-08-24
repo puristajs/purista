@@ -142,90 +142,18 @@ reviewed method, checklist, or file-backed reference. Use MCP only for a
 reviewed external tool server; stdio MCP needs a spawn-capable, isolating
 sandbox.
 
-## Review Agent Plugins before binding them
+## Add a reviewed Agent Plugin only when it is needed
 
-An Agent Plugin is declarative package data, not code that the Harness loads or
-executes. The optional `@purista/harness-agent-plugins` package inspects an
-already-installed directory, produces a digest for an application-owned review
-lockfile, and creates only the skills and MCP tools you explicitly select.
+An Agent Plugin is declarative package data, not code the Harness executes.
+The optional `@purista/harness-agent-plugins` package inspects an
+already-installed directory, pins an application-reviewed digest, and creates
+only the skills and MCP tools you explicitly select. It cannot add models,
+agents, workflows, credentials, or sandbox authority.
 
-```bash
-npm install @purista/harness-agent-plugins
-```
-
-```ts
-import { inspectAgentPlugin, loadAgentPlugins } from '@purista/harness-agent-plugins'
-
-const source = { root: './plugins/claims-knowledge' } as const
-const inspection = await inspectAgentPlugin(source)
-if (!inspection.valid || !inspection.digest) {
-  throw new Error('Plugin manifest is invalid; inspect its safe diagnostics before approving it.')
-}
-
-// Persist `inspection.digest` in a reviewed, application-owned lockfile.
-const [plugin] = await loadAgentPlugins({
-  plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest }]
-})
-if (!plugin) throw new Error('The approved plugin changed or was not trusted.')
-
-const bindings = plugin.bindings({
-  skills: { claims_playbook: 'claims-playbook' },
-  tools: {
-    search_claims_knowledge: {
-      server: 'knowledge',
-      tool: 'search',
-      description: 'Search the reviewed claims knowledge server.'
-    }
-  }
-})
-if (bindings.diagnostics.some(item => item.level === 'error')) {
-  throw new Error('Selected plugin components cannot be bound safely.')
-}
-
-// Add bindings.skills and bindings.tools to the Harness composition root, then
-// allow the resulting local IDs on the intended agent only.
-```
-
-Plugin manifests cannot add application code, models, agents, workflows,
-credentials, or sandbox authority. A selected stdio plugin additionally needs
-a caller-owned data directory and an isolating sandbox that can enforce an
-immutable package mount. Never auto-trust a plugin digest or forward
-package-declared HTTP headers; bind non-secret static headers in application
-code.
-
-For a selected stdio server, set `dataDirectory` on the reviewed source to an
-existing application-owned directory outside the plugin root. Its sandbox must
-support spawning **and** immutable package mounts; the built-in local host
-sandbox deliberately does not claim that guarantee. Compose the inspected
-bindings directly into the normal builder and keep only their local aliases on
-the agent allowlist:
-
-```ts
-const [plugin] = await loadAgentPlugins({
-  plugins: [{
-    root: './plugins/claims-knowledge',
-    trust: 'trusted',
-    expectedDigest: reviewedDigest,
-    dataDirectory: '/srv/claims-plugin-data'
-  }]
-})
-if (!plugin) throw new Error('Approved plugin is unavailable.')
-
-const bindings = plugin.bindings({
-  skills: { claims_playbook: 'claims-playbook' },
-  tools: { extract_evidence: { server: 'extractor', tool: 'extract', description: 'Extract reviewed evidence.' } }
-})
-
-const harness = defineHarness({ name: 'claims' })
-  .sandbox(isolatingSpawnAndImmutableMountSandbox)
-  .skills(bindings.skills)
-  .tools(bindings.tools)
-  // models
-  .agents(({ agent }) => ({
-    reviewer: agent({ model: 'assistant', skills: ['claims_playbook'], tools: ['extract_evidence'], builtinTools: ['read'] })
-  }))
-  .build()
-```
+Read [Agent Plugins](/handbook/harness/guide/agent-plugins/) for the full
+inspection → review → exact-digest loading → explicit-binding path, including
+the Streamable HTTP and stdio MCP boundaries, immutable-mount requirement, and
+deterministic tests.
 
 ## Add Harness-side governance to a sensitive tool
 

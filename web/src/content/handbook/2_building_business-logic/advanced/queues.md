@@ -109,4 +109,4 @@ Queues are **at-least-once by design**: if a worker crashes before calling `comp
 
 For Redis specifically, PURISTA uses a `pending` list, a `processing` list, and a `scheduled` sorted set. The bridge now applies atomic recovery scripts for delayed release, lease expiry, nack/requeue, and DLQ redrive, and it recovers orphaned `processing` entries when a worker crashes between claim and lease metadata registration.
 
-For the enterprise event-to-queue storyline, see [Enterprise interoperability](../../6_integrations/enterprise_interoperability/).
+For the enterprise event-to-queue storyline, see [Enterprise interoperability](/handbook/6_integrations/enterprise_interoperability/).

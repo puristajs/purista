@@ -41,7 +41,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         </div>
         <div class="arch-block">
           <span class="arch-block-label site-mono">Workflow</span>
-          <p>Application-owned orchestration around one or more agent invocations. Sequence, branch, fan out, reflect, judge, request human approval, write state.</p>
+			<p>Application-owned orchestration around one or more agent invocations. Sequence, branch, fan out, reflect, judge, create a review task, write state.</p>
         </div>
         <div class="arch-block">
           <span class="arch-block-label site-mono">Tool</span>
@@ -69,12 +69,12 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     layout="viz-left"
     eyebrow="Composition Model"
     headline={[{ text: 'Stack agents' }, { text: 'into workflows.', color: 'con' }]}
-    lede="An agent is one typed LLM conversation loop with its own tools, skills, and instructions — the smallest unit of AI reasoning. A workflow composes multiple agents into a named sequence with branching, fan-out, human review gates, and deterministic logic between each step. One workflow can run a research agent, hand off to a writing agent, and gate on a review agent — each with its own tools and skills, all coordinated by your application code."
+		lede="An agent is one typed LLM conversation loop with its own tools, skills, and instructions — the smallest unit of AI reasoning. A workflow composes multiple agents into a named sequence with branching, fan-out, application-owned review tasks, and deterministic logic between each step. One workflow can run a research agent, hand off to a writing agent, and create a review task before a domain write — each with its own tools and skills, all coordinated by your application code."
     items={[
       'Agent: one typed LLM loop with tools, skills, and typed output',
       'Workflow: orchestrates one or more agents with full application control',
       'Fan-out: run multiple agents in parallel, synthesize results',
-      'Human gates: block progression until a human decision is recorded',
+		'Human review: the application records the decision before the domain write',
       'Each agent in a workflow has its own instructions and tool set',
     ]}
   >
@@ -251,7 +251,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
 
   <CTASection
     headline={[{ text: 'See it ' }, { text: 'in practice', color: 'found' }, { text: '.' }]}
-    lede="Explore production AI patterns — RAG, triage, review gates, parallel agents — then layer on memory adapters for context that persists across sessions."
+		lede="Explore production AI patterns — RAG, triage, application-owned review, parallel agents — then layer on memory adapters for context that persists across sessions."
     ctas={[
       { label: 'Use Cases', href: '/harness/use-cases/', variant: 'primary' },
       { label: 'Memory & Context', href: '/harness/memory/', variant: 'ghost' },

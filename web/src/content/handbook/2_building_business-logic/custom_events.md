@@ -117,4 +117,4 @@ To ensure critical events are not lost:
 - Use [event-to-queue bindings](../6_integrations/enterprise_interoperability/event-to-queue.md) for durable handoff
 - Monitor event emission in your observability platform
 
-Next: [Subscription Builder](../subscription/the-subscription-builder.md) for consuming events.
+Next: [Subscription Builder](/handbook/2_building_business-logic/subscription/the-subscription-builder/) for consuming events.

@@ -52,7 +52,7 @@ const landingPages: Record<string, PageMeta> = {
 	},
 	'harness/use-cases': {
 		title: 'Use Cases | AI Harness | PURISTA',
-		description: 'Production AI patterns — from RAG and triage to human review gates, parallel agents, and living wikis.',
+		description: 'Production AI patterns — from RAG and triage to governed tool approvals, parallel agents, and living wikis.',
 		accent: 'coral',
 	},
 	'harness/architecture': {
@@ -62,7 +62,7 @@ const landingPages: Record<string, PageMeta> = {
 	},
 	'harness/security': {
 		title: 'Security & Production Readiness | AI Harness | PURISTA',
-		description: 'Sandboxed execution, human review gates, content privacy, and the full production checklist.',
+		description: 'Sandboxed execution, application-owned review workflows, content privacy, and the production checklist.',
 		accent: 'blue',
 	},
 	'harness/observability': {
@@ -78,7 +78,7 @@ const landingPages: Record<string, PageMeta> = {
 	'harness/testing': {
 		title: 'Testing | AI Harness | PURISTA',
 		description:
-			'Test AI Harness applications without calling external model providers: fake providers, contracts, streams, and review gates.',
+			'Test AI Harness applications without calling external model providers: fake providers, contracts, streams, and governance decisions.',
 		accent: 'blue',
 	},
 	'harness/evaluations': {

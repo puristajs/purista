@@ -1,354 +1,154 @@
 ---
 import CTASection from '../../components/sections/CTASection.astro'
-import CodeBlock from '../../components/ui/CodeBlock.astro'
-import HarnessFlow from '../../components/harness/HarnessFlow.astro'
+import GuardrailsArchitecture from '../../components/harness/GuardrailsArchitecture.astro'
 import HarnessHero from '../../components/harness/HarnessHero.astro'
 import HarnessLayout from '../../layouts/HarnessLayout.astro'
 ---
 
 <HarnessLayout
   title="Guardrails | AI Harness | PURISTA"
-  description="Typed, observable content and tool guardrails for PURISTA AI Harness agents and workflows."
+  description="A provider-neutral guardrail architecture for typed, observable AI agent and tool boundaries."
 >
   <HarnessHero
     lines={[
       { text: 'Safety controls' },
       { text: 'with evidence.', color: 'con' },
     ]}
-    lede="Guardrails add typed, fail-closed decisions around a Harness agent loop: input, output, retrieval, tools, and sensitive data. They work alongside Zod, permissions, governance, and application authorization — not instead of them."
+    lede="Guardrails add typed, fail-closed decisions around a Harness default-loop agent: before a model call, around every tool handoff, and before a completed result leaves the loop. They complement schemas, permissions, governance, and application authorization."
+    ctas={[
+      { label: 'Read the implementation guide', href: '/handbook/harness/guide/guardrails-governance/', variant: 'primary' },
+      { label: 'Compare privacy detectors', href: '/handbook/harness/guide/privacy-detectors/', variant: 'ghost' },
+    ]}
   />
 
   <section class="section-pad border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="section-head mb-8">
-        <div class="eyebrow">Runtime lifecycle</div>
-        <h2 class="display display-lg">Protect each handoff, not just the final answer.</h2>
-        <p class="lede">A guarded default-loop agent checks typed input before the model, checks every completed model result, wraps each tool request and result, and lets application-owned retrieval opt into its own filter. Every rail produces a content-free trace decision.</p>
+        <div class="eyebrow">Architecture</div>
+        <h2 class="display display-lg">Protect every handoff in the agent loop.</h2>
+        <p class="lede">A rail has one of three outcomes: allow, block, or transform. Ordered rails run sequentially, so a transformation becomes the next rail’s input. A block or operational fault ends the protected path before the next model, tool, or delivery boundary.</p>
       </div>
-      <HarnessFlow variant="guardrails-lifecycle" />
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-        <div class="card"><h3 class="h3">Ordered controls</h3><p>Rails in one phase run sequentially. A transform becomes the next rail’s input; a block ends that path before the next model, tool, or delivery boundary.</p></div>
-        <div class="card"><h3 class="h3">Explicit limits</h3><p>Retrieval needs an explicit filter call. Direct model calls and custom-handler agents own their lifecycle and are not automatically intercepted.</p></div>
-        <div class="card"><h3 class="h3">Evidence without content</h3><p>Each decision emits an OpenInference <code>GUARDRAIL</code> span, metric, and structured log. A model-backed check nests its normal model span for token and cost analysis.</p></div>
-      </div>
-      <p class="mt-8 text-[var(--color-fg-muted)]">The full implementation diagram, tool-loop sequence, supported NeMo-shaped configuration, edge cases, and exact coverage boundary are in the <a href="/handbook/harness/guide/guardrails-governance/">Guardrails &amp; Governance handbook guide</a>.</p>
-    </div>
-  </section>
-
-  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
-    <div class="wrap">
-      <div class="section-head mb-8">
-        <div class="eyebrow">Sensitive-data adapters</div>
-        <h2 class="display display-lg">Keep detection interchangeable.</h2>
-        <p class="lede">The Guardrails addon owns strict policy and enforcement. Your composition root owns the detector and its security boundary.</p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="card"><h3 class="h3">Original Presidio sidecar</h3><p>Install <code>@purista/harness-guardrails-presidio</code> when you need Presidio recognizers such as <code>PERSON</code> or custom deployment-side recognizers. It calls only <code>POST /analyze</code> through an injected authenticated internal HTTP(S) endpoint, never from YAML or a browser.</p></div>
-        <div class="card"><h3 class="h3">Native local subset</h3><p>Install <code>@purista/harness-guardrails-native-privacy</code> for local <code>EMAIL_ADDRESS</code>, <code>PHONE_NUMBER</code>, <code>CREDIT_CARD</code>, <code>IP_ADDRESS</code> (IPv4/IPv6 syntax), <code>IBAN_CODE</code>, <code>US_SSN</code>, and <code>URL</code> recognition. One Node-API prebuild family is tested with Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail instead of falling back.</p></div>
-        <div class="card"><h3 class="h3">Optional local NER</h3><p>Install <code>@purista/harness-guardrails-local-ner</code> and its optional <code>@huggingface/transformers</code> peer only for model-based entities. Provide a pinned absolute local model directory, SHA-256 asset manifest, explicit label mapping, and call <code>warmup()</code>; it never downloads a model or calls a registry.</p></div>
-      </div>
-      <p class="mt-6 text-[var(--color-fg-muted)]">Masking is provider-neutral and happens in Guardrails after inspection. For structured tool values, provide a reviewed codec that selects exact fields; the addon never recursively scans arbitrary JSON.</p>
-    </div>
-  </section>
-
-  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
-    <div class="wrap">
-      <div class="section-head mb-8">
-        <div class="eyebrow">Local NER</div>
-        <h2 class="display display-lg">Load verified local model assets.</h2>
-        <p class="lede">The optional NER adapter has no default model. Your deployment owns the pinned files, SHA-256 manifest, language evaluation, label mapping, and startup warmup.</p>
-      </div>
-      <CodeBlock
-        language="typescript"
-        label="local-ner.ts"
-        code={`import { createLocalNerDetector, LocalNerDetectorError } from '@purista/harness-guardrails-local-ner'
-import { NER_EN_V1_ASSETS } from './models/ner-en-v1.integrity.js'
-
-const detector = createLocalNerDetector({
-  id: 'ner-en',
-  modelId: 'ner-en-v1',
-  modelPath: '/srv/purista-models/ner-en-v1',
-  modelFiles: NER_EN_V1_ASSETS,
-  labels: { PER: 'PERSON', ORG: 'ORGANIZATION', LOC: 'LOCATION' },
-})
-
-try {
-  await detector.warmup()
-} catch (error) {
-  if (error instanceof LocalNerDetectorError) {
-    console.error({ local_ner_failure_kind: error.kind, message: error.message })
-  }
-  throw error
-}`}
-      />
-      <p class="mt-6 text-[var(--color-fg-muted)]"><code>NER_EN_V1_ASSETS</code> is your application-owned manifest of every model asset and its lower-case SHA-256 digest. A missing peer, invalid asset, or model fault fails closed. The Guardrails trace and log record only the safe failure kind.</p>
+      <GuardrailsArchitecture />
+      <p class="mt-6 max-w-[80ch] text-[var(--color-fg-muted)]">Retrieval can be prepared alongside other application work, but it enters the model context only after an explicit <code>filterRetrievedChunks(...)</code> call. Guardrail phases themselves are intentionally ordered rather than parallel.</p>
     </div>
   </section>
 
   <section class="section-pad">
     <div class="wrap">
       <div class="section-head mb-8">
-        <div class="eyebrow">Choose by outcome</div>
-        <h2 class="display display-lg">What can each detector do?</h2>
-        <p class="lede">“Deployment recognizer dependent” means the application-owned Presidio Analyzer deployment must already provide the recognizer or model. The Harness adapter does not install or configure it.</p>
+        <div class="eyebrow">Control boundaries</div>
+        <h2 class="display display-lg">What Guardrails cover — and what remains yours.</h2>
       </div>
-      <div class="overflow-x-auto border border-[var(--color-line)] rounded-xl">
-        <table class="w-full min-w-[1100px] text-left text-sm">
-          <thead class="bg-[var(--color-bg-sunk)] text-[var(--color-fg)]">
-            <tr>
-              <th class="p-4 font-semibold">I want to…</th>
-              <th class="p-4 font-semibold">Presidio sidecar</th>
-              <th class="p-4 font-semibold">Native privacy</th>
-              <th class="p-4 font-semibold">Local NER</th>
-            </tr>
+      <div class="guardrail-boundaries">
+        <div class="guardrail-boundaries__row">
+          <strong>Automatic on an attached default-loop agent</strong>
+          <p>Parsed input, each completed model result, tool input before permissions/governance/schema validation, and tool output before it returns to the model.</p>
+        </div>
+        <div class="guardrail-boundaries__row">
+          <strong>Explicit application call</strong>
+          <p>Retrieval filtering. Your workflow selects the chunks, calls the filter, and keeps vector-store authorization, residency, and retention visible.</p>
+        </div>
+        <div class="guardrail-boundaries__row">
+          <strong>Not intercepted automatically</strong>
+          <p>Direct <code>ctx.models.*</code> calls, custom-handler agents, arbitrary streaming chunks, and unselected fields in structured tool values.</p>
+        </div>
+        <div class="guardrail-boundaries__row">
+          <strong>Never replaced</strong>
+          <p>Authentication, tenant isolation, business authorization, approval ownership, idempotency, rate limits, and the final side-effect transaction.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Package ecosystem</div>
+        <h2 class="display display-lg">One policy layer, replaceable detectors.</h2>
+        <p class="lede">The core addon enforces policy. Optional privacy adapters implement one shared detector contract and are chosen at the composition root — never through YAML, a browser, or provider-specific guardrail configuration.</p>
+      </div>
+      <div class="overflow-x-auto border border-[var(--color-line)]">
+        <table class="guardrail-package-table">
+          <thead>
+            <tr><th>Package</th><th>Choose it for</th><th>Execution boundary</th><th>Start here</th></tr>
           </thead>
-          <tbody class="divide-y divide-[var(--color-line)] text-[var(--color-fg-muted)]">
-            <tr><td class="p-4 text-[var(--color-fg)]">Block PII before an agent, model, tool, or retrieval boundary</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Replace a detected whole value with the configured fixed token</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Remove a detected whole value with an empty mask token</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect email address</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, regex-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect phone number</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect payment-card number</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, Luhn-checked</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect IPv4 address</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, syntax-validated</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect IPv6 address</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, syntax-validated</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect IBAN-shaped value</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect US Social Security number-shaped value</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect HTTP(S) URL</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, HTTP(S) only</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect names, locations, organizations, medical, or other NER/model entities</td><td class="p-4">Deployment recognizer/model dependent</td><td class="p-4">Not supplied</td><td class="p-4">Yes, only selected local model labels</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect my application-specific identifier</td><td class="p-4">Custom recognizer dependent</td><td class="p-4">Not supplied</td><td class="p-4">Not supplied; inject a dedicated detector</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Choose a detection language</td><td class="p-4">One fixed composition-root language per detector</td><td class="p-4">No NLP language model</td><td class="p-4">Selected local model and label mapping</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Keep detection in-process with no detector network hop</td><td class="p-4">Not supplied</td><td class="p-4">Yes</td><td class="p-4">Yes, with an installed local model</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Protect reviewed text fields of a structured tool value</td><td class="p-4">Yes, explicit codec</td><td class="p-4">Yes, explicit codec</td><td class="p-4">Yes, explicit codec</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Script deterministic tests</td><td class="p-4"><code>FakePresidioSidecar</code></td><td class="p-4"><code>FakeSensitiveDataDetector</code></td><td class="p-4"><code>FakeLocalNerRuntime</code></td></tr>
+          <tbody>
+            <tr>
+              <td><code>@purista/harness-guardrails</code></td>
+              <td>Typed input, output, tool, retrieval, and model-check controls</td>
+              <td>In-process interceptor on a default-loop agent; TypeScript actions stay application-owned</td>
+              <td><a href="/handbook/harness/guide/guardrails-governance/">Guardrails &amp; Governance</a></td>
+            </tr>
+            <tr>
+              <td><code>@purista/harness-guardrails-presidio</code></td>
+              <td>Existing Microsoft Presidio Analyzer deployment, custom recognizers, or deployment-selected languages</td>
+              <td>Application-injected authenticated internal <code>POST /analyze</code> call; masking remains in Guardrails</td>
+              <td><a href="/handbook/harness/guide/privacy-detectors/#presidio-keep-the-sidecar-application-owned">Presidio sidecar</a></td>
+            </tr>
+            <tr>
+              <td><code>@purista/harness-guardrails-native-privacy</code></td>
+              <td>Local common identifiers: email, phone, card, IPv4/IPv6, IBAN, US SSN, and URL</td>
+              <td>Rust Node-API prebuild in process for Node.js and Bun; no network, model, or fallback implementation</td>
+              <td><a href="/handbook/harness/guide/privacy-detectors/#native-privacy-smallest-local-setup">Native privacy</a></td>
+            </tr>
+            <tr>
+              <td><code>@purista/harness-guardrails-local-ner</code></td>
+              <td>Locally provisioned model labels such as person, organization, or location</td>
+              <td>Optional Transformers.js peer with a pinned local model, asset manifest, label map, and startup warmup</td>
+              <td><a href="/handbook/harness/guide/privacy-detectors/#local-ner-install-only-where-it-is-needed">Local NER</a></td>
+            </tr>
           </tbody>
         </table>
       </div>
-      <p class="mt-6 text-[var(--color-fg-muted)]">None of these options generates realistic replacement data, applies per-entity replacements, partially masks, hashes or encrypts values, processes entire CSV/JSON datasets, redacts image/PDF OCR, or provides batch processing. The Presidio adapter intentionally uses Analyzer detection only, not Presidio Anonymizer.</p>
-      <p class="mt-3 text-[var(--color-fg-muted)]">For local NER, provision the model through your application artifact process and call <code>warmup()</code> before traffic. Missing optional dependencies and local-model faults fail closed; traces and logs contain only the stable failure kind, never inspected text, local paths, model output, or credentials.</p>
+      <p class="mt-6 text-[var(--color-fg-muted)]">See the <a href="/handbook/harness/guide/ecosystem-packages/">complete Harness package catalogue</a> for model providers, Agent Plugins, MCP peers, test utilities, and every first-party package.</p>
     </div>
   </section>
 
   <section class="section-pad">
     <div class="wrap">
       <div class="section-head mb-8">
-        <div class="eyebrow">Deterministic testing</div>
-        <h2 class="display display-lg">Script outcomes, never private data.</h2>
-        <p class="lede">Use the public fakes for agent, workflow, tool, and adapter tests. They make no recognition or network call: your test supplies each finding, failure, or Presidio HTTP response.</p>
+        <div class="eyebrow">Operational evidence</div>
+        <h2 class="display display-lg">Enforcement is visible without recording content.</h2>
       </div>
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <CodeBlock
-          language="typescript"
-          label="guardrails.test.ts"
-          code={`import { FakeSensitiveDataDetector } from '@purista/harness-guardrails/testing'
-
-const detector = new FakeSensitiveDataDetector({
-  supportedEntities: ['EMAIL_ADDRESS'],
-})
-detector.enqueue([
-  { category: 'EMAIL_ADDRESS', start: 0, end: 22, score: 0.99 },
-])
-
-// The next unscripted inspection is an empty finding list.
-// Use enqueueError(...) to exercise the fail-closed path.`}
-        />
-        <CodeBlock
-          language="typescript"
-          label="local-ner-adapter.test.ts"
-          code={`import { createLocalNerDetectorWithRuntime, FakeLocalNerRuntime } from '@purista/harness-guardrails-local-ner/testing'
-
-const runtime = new FakeLocalNerRuntime()
-runtime.enqueue([{ entity_group: 'PER', score: 0.99, start: 0, end: 5 }])
-const detector = createLocalNerDetectorWithRuntime(localNerOptions, async () => runtime)
-
-// The fake scripts model output only.
-// It never loads a model, reports tokens, or records inspected text.`}
-        />
-        <CodeBlock
-          language="typescript"
-          label="presidio-adapter.test.ts"
-          code={`import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
-import { FakePresidioSidecar } from '@purista/harness-guardrails-presidio/testing'
-
-const sidecar = new FakePresidioSidecar()
-sidecar.enqueueAnalyzeResponse([])
-const detector = createPresidioDetector({
-  id: 'presidio-test',
-  endpoint: 'https://presidio.test/',
-  fetch: sidecar.fetch,
-})
-
-// Assert sidecar.requests for the POST /analyze wire contract.
-// It scripts HTTP/transport behavior; it does not imitate Presidio NLP.`}
-        />
+      <div class="grid grid-cols-1 md:grid-cols-3">
+        <div class="card"><h3 class="h3">Guardrail decisions</h3><p>Every evaluation creates a content-free OpenInference <code>GUARDRAIL</code> span, outcome metric, and structured log with the rail, phase, duration, outcome, and controlled reason code.</p></div>
+        <div class="card"><h3 class="h3">Model-backed checks</h3><p>A <code>modelCheckRail</code> nests the standard model span. Provider, model, and reported token usage remain on that LLM span, so cost analysis stays accurate when available.</p></div>
+        <div class="card"><h3 class="h3">Fail closed</h3><p>Missing actions, invalid outcomes, timeouts, detector faults, codec faults, and optional-local-NER setup failures block the protected path. Logs expose stable failure kinds, never inspected text or secrets.</p></div>
       </div>
-      <p class="mt-6 text-[var(--color-fg-muted)]">The fakes retain test-only in-memory request data, which may include synthetic input. Never copy it to telemetry, logs, snapshots, or production fixtures.</p>
-    </div>
-  </section>
-
-  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
-    <div class="wrap">
-      <div class="section-head--center mb-10">
-        <div class="eyebrow">What is protected</div>
-        <h2 class="display display-lg">One agent loop, four control points</h2>
-        <p class="lede">Attach a portable NeMo-shaped rail configuration to a default-loop agent. Each configured action returns an explicit allow, block, or typed transformation decision.</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="card">
-          <h3 class="h3">Input & output</h3>
-          <p>Input rails run after schema parsing and before instructions, transcript, or a model call. Output rails run after a provider result and before validation, persistence, or tool dispatch.</p>
-        </div>
-        <div class="card">
-          <h3 class="h3">Tools & skills</h3>
-          <p>Tool-input rails run before permissions, governance, schema validation, and side effects. Tool-output rails run before the result returns to the model. Skill activation is covered when the agent uses its built-in <code>read</code> tool.</p>
-        </div>
-        <div class="card">
-          <h3 class="h3">Retrieval</h3>
-          <p>Retrieval remains application-owned. Filter JSON-compatible chunks explicitly before adding them to an agent input, so vector-store ownership and retention remain clear.</p>
-        </div>
-        <div class="card">
-          <h3 class="h3">Evidence without content</h3>
-          <p>Every decision is traceable with a rail ID, phase, outcome, duration, and controlled reason code. Prompts, documents, tool values, and secrets stay out of telemetry.</p>
-        </div>
-        <div class="card">
-          <h3 class="h3">Sensitive data</h3>
-          <p>Portable policy can detect or mask configured data categories. Choose an injected Presidio sidecar or the local native subset without coupling policy to a provider or endpoint.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-pad">
-    <div class="wrap">
-      <div class="section-head mb-8">
-        <div class="eyebrow">Setup</div>
-        <h2 class="display display-lg">Keep configuration portable, keep authority local.</h2>
-        <p class="lede">The addon reads the compatible YAML vocabulary, but your TypeScript actions own policy implementation. It never creates a provider, reads credentials, or creates a vector store from configuration.</p>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <CodeBlock
-          language="yaml"
-          label="guardrails/config.yaml"
-          code={`models:
-  - type: main
-    engine: harness
-    model: assistant
-
-rails:
-  config:
-    sensitive_data_detection:
-      input:
-        entities: [EMAIL_ADDRESS]
-        mask_token: '<MASKED>'
-        score_threshold: 0.6
-  input:
-    flows: ['mask sensitive data on input', remove-secret-marker]
-  output:
-    flows: [redact-contact-details]
-  tool_input:
-    flows: [approve-transfer]`}
-        />
-        <CodeBlock
-          language="typescript"
-          label="guardrails.ts"
-          code={`import { createSensitiveDataActions, defineGuardrails } from '@purista/harness-guardrails'
-import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
-
-const detector = createPresidioDetector({
-  id: 'presidio-private',
-  endpoint: 'https://presidio.internal/',
-})
-
-const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  modelAliases: { main: 'assistant' },
-  actions: {
-    ...createSensitiveDataActions({ detector }),
-    'remove-secret-marker': {
-      evaluate: ({ value }) => ({
-        decision: 'transform',
-        target: 'user_message',
-        value: redact(value),
-        reasonCode: 'secret_redacted',
-      }),
-    },
-    'approve-transfer': {
-      evaluate: ({ value }) => isApproved(value)
-        ? { decision: 'allow' }
-        : { decision: 'block', reasonCode: 'approval_required' },
-    },
-  },
-})`}
-        />
-      </div>
-    </div>
-  </section>
-
-  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
-    <div class="wrap">
-      <div class="section-head mb-8">
-        <div class="eyebrow">Workflow use case</div>
-        <h2 class="display display-lg">Guard the agent; orchestrate in the workflow.</h2>
-        <p class="lede">A workflow delegates model and tool work to an attached default-loop agent. It filters its own retrieval result before that hand-off. The result is one correlated workflow → guardrail → model/tool trace tree.</p>
-      </div>
-      <CodeBlock
-        language="typescript"
-        label="support-workflow.ts"
-        code={`const support = rails.attach(agent({
-  model: 'assistant',
-  instructions: 'Help customers safely.',
-  tools: ['transfer_money'],
-  skills: ['refund_policy'],
-  builtinTools: ['read'],
-}))
-
-const answerCustomer = workflow({
-  input: z.object({ question: z.string() }),
-  output: z.string(),
-  delegation: { agents: ['support'] },
-  handler: async (ctx) => {
-    const chunks = await searchApprovedKnowledge(ctx.input.question)
-    const safeChunks = await rails.filterRetrievedChunks(chunks, {
-      workflowId: ctx.workflowId,
-      runId: ctx.runId,
-      sessionId: ctx.sessionId,
-      models: ctx.models,
-      signal: ctx.signal,
-      logger: ctx.log,
-    })
-
-    return ctx.agents.support({
-      question: ctx.input.question,
-      context: safeChunks,
-    })
-  },
-})`}
-      />
-      <p class="mt-6 text-[var(--color-fg-muted)]">Custom-handler agents and direct <code>ctx.models.*</code> calls own their lifecycle, so they are intentionally not intercepted. The addon rejects <code>rails.attach(...)</code> for a custom handler rather than giving a false sense of coverage.</p>
-    </div>
-  </section>
-
-  <section class="section-pad">
-    <div class="wrap">
-      <div class="section-head--center mb-10">
-        <div class="eyebrow">Operations</div>
-        <h2 class="display display-lg">Trace safety and model cost together.</h2>
-        <p class="lede">Guardrail evaluations are OpenTelemetry/OpenInference spans with content-free outcome attributes. A block is a successful control decision; failures and timeouts are errors.</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="card"><h3 class="h3">Decision trace</h3><p><code>evaluate_guardrail {'{id}'}</code> records rail ID, phase, allow/block/transform/error, duration, and an optional deployment-controlled reason code.</p></div>
-        <div class="card"><h3 class="h3">Metrics</h3><p><code>harness.guardrail.evaluations</code> and <code>harness.guardrail.duration</code> make policy behavior visible without exposing content.</p></div>
-        <div class="card"><h3 class="h3">Safety-model cost</h3><p>A model check nests its normal LLM span below the guardrail span. Provider, model, and reported input/output/total tokens remain canonical there for cost attribution.</p></div>
-      </div>
-      <div class="card mt-8"><h3 class="h3">Sensitive-data operations</h3><p>Every inspection creates a child <code>harness.sensitive_data.inspect</code> GUARDRAIL span plus inspection and duration metrics. It contains only detector id, local/cloud mode, detect/mask operation, outcome, bounded finding count, configured categories, and failure type. It contains no source text, offsets, endpoint data, model, token, or cost fields.</p></div>
     </div>
   </section>
 
   <CTASection
-    headline={[{ text: 'Build a ' }, { text: 'typed safety boundary', color: 'con' }, { text: '.' }]}
-    lede="Use guardrails with narrow schemas, tool allowlists, permissions, governance, and deterministic business authorization."
+    headline={[{ text: 'Implement the ' }, { text: 'right boundary', color: 'con' }, { text: '.' }]}
+    lede="The handbook contains the exact portable NeMo-shaped configuration subset, working TypeScript actions, full coverage matrix, detector feature comparison, workflow/tool/skill behavior, and deterministic test patterns."
     ctas={[
-      { label: 'Observability', href: '/harness/observability/', variant: 'primary' },
-      { label: 'Security', href: '/harness/security/', variant: 'ghost' },
+      { label: 'Guardrails implementation guide', href: '/handbook/harness/guide/guardrails-governance/', variant: 'primary' },
+      { label: 'Privacy detector guide', href: '/handbook/harness/guide/privacy-detectors/', variant: 'ghost' },
     ]}
   />
 </HarnessLayout>
+
+<style>
+  .guardrail-boundaries { border-top: 1px solid var(--color-line); }
+  .guardrail-boundaries__row {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(13rem, 0.7fr) minmax(0, 1.3fr);
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .guardrail-boundaries__row strong { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--color-con-hi); }
+  .guardrail-boundaries__row p { color: var(--color-fg-muted); margin: 0; max-width: 75ch; }
+
+  .guardrail-package-table { border-collapse: collapse; min-width: 900px; width: 100%; }
+  .guardrail-package-table th { background: var(--color-bg-sunk); color: var(--color-fg); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.03em; text-align: left; }
+  .guardrail-package-table :is(th, td) { border-bottom: 1px solid var(--color-line); padding: 1rem; vertical-align: top; }
+  .guardrail-package-table td { color: var(--color-fg-muted); font-size: 0.9rem; line-height: 1.55; }
+  .guardrail-package-table tr:last-child td { border-bottom: 0; }
+  .guardrail-package-table td:first-child { color: var(--color-fg); width: 24%; }
+  .guardrail-package-table a { color: var(--color-found-hi); }
+
+  @media (max-width: 640px) {
+    .guardrail-boundaries__row { grid-template-columns: 1fr; gap: 0.55rem; }
+  }
+</style>

@@ -16,6 +16,17 @@ interface Props {
 
 const { eyebrow, eyebrowTone = 'found', headline, lede, align = 'left', size = 'h2', class: cls = '' } = Astro.props
 
+const displayHeadline = headline.map((segment, index) => {
+	const next = headline[index + 1]
+	const needsSeparator = Boolean(
+		next
+		&& !/\s$/.test(segment.text)
+		&& !/^\s|^[.!?,:;)]/.test(next.text)
+	)
+
+	return { ...segment, text: `${segment.text}${needsSeparator ? ' ' : ''}` }
+})
+
 function tone(c?: string) {
 	if (!c || c === 'fg') return ''
 	if (c === 'shimmer') return ''
@@ -43,7 +54,7 @@ function cls2(c?: string) {
 
   <h2 class:list={[size === 'h1' ? 'site-h1' : 'site-h2', 'site-reveal']} style="--site-reveal-delay:120ms">
     {
-      headline.map((seg) => (
+      displayHeadline.map((seg) => (
         <span class={cls2(seg.color)} style={tone(seg.color)}>
           {seg.text}
         </span>

@@ -136,7 +136,7 @@ const outcomes = [
 	{
 		k: 'hitl',
 		title: 'No mutation without approval',
-		body: 'Workflows pause at human review gates. Write tools execute only after an explicit human decision. Approve, revise, or reject — each path is logged.',
+		body: 'Your application records the human decision before a domain write. Governance can also block a sensitive tool through an explicit approval provider. Both paths remain auditable.',
 		tone: 'pilot',
 	},
 	{
@@ -192,7 +192,7 @@ const providers = [
         { text: 'your boundary', color: 'shimmer' },
         { text: '.' },
       ]}
-      lede="The PURISTA AI Harness runs inside your application — not in a SaaS platform. Your data stays within your perimeter. Every decision leaves an OpenTelemetry trace. Human review gates block mutations until approved. Provider-neutral. Self-hosted. Built for production."
+		lede="The PURISTA AI Harness runs inside your application — not in a SaaS platform. Your data stays within your perimeter. Every decision leaves an OpenTelemetry trace. Your application owns human review and mutation approval. Provider-neutral. Self-hosted. Built for production."
       ctas={[
         { label: 'Explore the architecture', href: '/harness/architecture/', variant: 'primary' },
         { label: 'Read the implementation guide', href: '/handbook/harness/guide/', variant: 'ghost' },

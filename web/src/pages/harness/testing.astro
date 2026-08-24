@@ -8,7 +8,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
 
 <HarnessLayout
   title="Testing | AI Harness | PURISTA"
-  description="Test PURISTA AI Harness applications without calling external model providers. Fake providers, contract tests, streaming assertions, MCP fakes, and review gate tests."
+  description="Test PURISTA AI Harness applications without calling external model providers. Fake providers, contract tests, streaming assertions, MCP fakes, and governance approval checks."
 >
 
   <HarnessHero
@@ -49,7 +49,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
             level: '3',
             label: 'Integration tests',
             color: 'pilot',
-            items: ['Full session agent runs', 'Workflow sequences', 'Streaming event assertions', 'MCP runner', 'Review gate flows'],
+            items: ['Full session agent runs', 'Workflow sequences', 'Streaming event assertions', 'MCP runner', 'Governance approval decisions'],
             note: 'Use a fake model provider. Real sessions, real sandboxes, fake model responses.',
           },
           {
@@ -459,36 +459,36 @@ it('throws ToolError when MCP signals isError', async () => {
     </div>
   </section>
 
-  {/* ── 7. Review gates ──────────────────────────────────────────── */}
+  {/* ── 7. Approval and review boundaries ────────────────────────── */}
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="flex items-center gap-3 mb-6">
         <NumberedBadge number={6} color="pilot" />
-        <div class="eyebrow">Integration tests — review gates</div>
+        <div class="eyebrow">Integration tests — approval and review</div>
       </div>
-      <h2 class="display display-lg mb-6">Prove human-in-the-loop flows work correctly</h2>
-      <p class="lede mb-10">Review gates are stateful flows. Four invariants must hold. Test each one explicitly.</p>
+      <h2 class="display display-lg mb-6">Prove the application-owned approval boundary</h2>
+      <p class="lede mb-10">Harness can synchronously ask an injected governance approval provider before a matching tool call. Durable human-review tasks remain application-owned today, so test their storage, identity, expiry, and decision endpoint alongside the Harness workflow.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {[
           {
-            invariant: 'No mutation before approval',
-            test: 'Run the workflow, assert write tools were not called before the review decision resolves.',
+            invariant: 'No tool mutation on rejection',
+            test: 'Script a rejected governance approval result and assert the tool handler did not run.',
             tone: 'found',
           },
           {
-            invariant: 'Review questions visible and submittable',
-            test: 'Assert answer choices are returned and that each can be submitted independently.',
+            invariant: 'Review task is application-owned',
+            test: 'Assert the application persists only the intended proposal reference and exposes its own authenticated UI/endpoint.',
             tone: 'con',
           },
           {
-            invariant: 'Decisions are idempotent',
-            test: 'Submit the same decision twice. Assert the second submission succeeds or returns a clear idempotency signal.',
+            invariant: 'Decision submission is idempotent',
+            test: 'Submit the same application review decision twice. Assert the repository returns the original terminal result or a clear idempotency outcome.',
             tone: 'pilot',
           },
           {
-            invariant: 'Stale ids fail cleanly',
-            test: 'Submit a decision with a stale review id or run id. Assert a meaningful error, not a silent no-op.',
+            invariant: 'Stale decisions fail cleanly',
+            test: 'Submit an outdated task revision or expired task. Assert a meaningful application error, not a silent overwrite.',
             tone: 'found',
           },
         ].map((row) => (
@@ -500,51 +500,7 @@ it('throws ToolError when MCP signals isError', async () => {
         ))}
       </div>
 
-      <CodeBlock
-        code={`it('does not write before review approval', async () => {
-  const writesSpy = vi.fn()
-
-  const harness = defineHarness({ name: 'test' })
-    .tools({
-      write_wiki: {
-        description: 'Write to wiki.',
-        input: z.object({ content: z.string() }),
-        output: z.object({ ok: z.boolean() }),
-        handler: async (_ctx, input) => {
-          writesSpy(input)
-          return { ok: true }
-        },
-      },
-    })
-    .workflows(({ workflow }) => ({
-      propose_and_review: workflow({
-        input: z.object({ topic: z.string() }),
-        output: z.object({ approved: z.boolean() }),
-        handler: async (ctx) => {
-          const proposal = await ctx.agents.writer(ctx.input)
-          const decision = await ctx.reviewGate(proposal)
-          if (decision.approved) {
-            await ctx.tools.write_wiki({ content: proposal.content })
-          }
-          return { approved: decision.approved }
-        },
-      }),
-    }))
-    .build()
-
-  const session = await harness.getSession('test')
-
-  // pause at review gate — do not approve
-  const run = session.workflows.propose_and_review.stream({ topic: 'AI policy' })
-  for await (const event of run) {
-    if (event.type === 'review.requested') break
-  }
-
-  expect(writesSpy).not.toHaveBeenCalled()
-})`}
-        label="No mutation before approval"
-        language="typescript"
-      />
+      <p class="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-5 text-[var(--color-fg-muted)]">The focused, complete governance test is in <a href="/handbook/harness/guide/tools-and-skills/#add-harness-side-governance-to-a-sensitive-tool">Tools &amp; Skills</a>. For a long-running human review, test the application record and authenticated decision endpoint separately, then test that the following workflow or domain step receives only an approved decision. Do not use a process-local Promise as a durable approval queue.</p>
     </div>
   </section>
 
