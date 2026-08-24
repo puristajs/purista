@@ -1,12 +1,12 @@
 ---
-title: Agents, Workflows & State
+title: Agents, Workflows & Storage
 description: Keep model loops focused and use typed workflows for the application-owned process around them.
 ---
 
 ## Prerequisites
 
 Start with the typed tool or skill path in
-[Tools & Skills](/handbook/harness/guide/tools-and-skills/). An agent is a
+[Tools & Skills](/handbook/harness/tools-and-skills/). An agent is a
 bounded model loop; a workflow is typed TypeScript that coordinates those
 loops and deterministic application work.
 
@@ -41,13 +41,13 @@ try {
   )
   return answer
 } finally {
-  // Frees live MCP and sandbox resources; retained state/history stays intact.
+  // Frees live MCP and sandbox resources; retained storage/history stays intact.
   await session.release()
 }
 ```
 
 Use `session.close()` only for a deliberate deletion or retention workflow: it
-removes persisted session state. Call `harness.shutdown()` once during
+removes persisted session data. Call `harness.shutdown()` once during
 application shutdown, not after every request.
 
 ## Stream a run without coupling to HTTP
@@ -173,11 +173,11 @@ For an explicitly sequenced private follow-up, start with
 `task.close()` to settle its final output. This is in-process and cannot run in
 a durable workflow. Queue durable work instead.
 
-## State, history, and memory
+## Storage, history, and memory
 
-The session scopes one active run, conversation history, state, and live
+The session scopes one active run, conversation history, and live
 resources. It is not a distributed scheduler. Give each tenant/thread a stable
-application-owned session ID, use a durable `StateStore` when history must
+application-owned session ID, use a durable `HarnessStorage` when history must
 survive restart, and configure retention as a storage boundary.
 
 Memory adapters are separate from session history. Use history for the
@@ -187,7 +187,7 @@ code.
 
 Configure history retention as an operational storage limit, not as a token
 budget. `maxTurns` retains complete turns and `maxBytes` bounds serialized
-history. A durable state adapter must support atomic message replacement when
+history. A durable `HarnessStorage` adapter must support atomic message replacement when
 this policy is enabled; otherwise construction fails rather than silently
 retaining more than the configured boundary.
 
@@ -201,17 +201,17 @@ choose the durable workflow path for restart recovery.
 
 | Need | API or adapter choice | Operational rule |
 | --- | --- | --- |
-| Finish request resources, retain state | `session.release()` | Always call in `finally`. |
+| Finish request resources, retain stored history | `session.release()` | Always call in `finally`. |
 | Remove session record and history | `session.close()` | Use only for an explicit deletion/retention flow. |
-| Keep a long workflow after restart | Durable runtime plus workspace/checkpoint adapters | Invoke a workflow with a stable durable run ID. |
+| Keep a long workflow after restart | Persistent `HarnessStorage` plus optional durable workspace | Invoke a workflow with a stable durable run ID. |
 | Continue an in-process child-agent conversation | `ctx.childTasks.start(..., { mode: 'continuable' })` | It is not restart-safe. |
 | Deliver work after an outage | Application queue or worker | Own retry, idempotency, and delivery outside the Harness. |
 
 Treat session identifiers as privacy-safe application identifiers. Select a
-durable state store before using them for customer conversations across restarts,
+durable Harness storage before using them for customer conversations across restarts,
 and implement deletion/retention in the storage layer.
 
 ## Next
 
 Add content and execution controls in
-[Guardrails & Governance](/handbook/harness/guide/guardrails-governance/).
+[Guardrails & Governance](/handbook/harness/guardrails-governance/).

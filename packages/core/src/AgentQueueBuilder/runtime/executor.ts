@@ -1,5 +1,5 @@
 import {
-	type DurableRuntime,
+	type DurableWorkspace,
 	defineHarness,
 	type GovernanceConfig,
 	type Harness,
@@ -8,7 +8,7 @@ import {
 	type ModelAlias,
 	type RunEvent,
 	type Session,
-	type StateStore,
+	type HarnessStorage,
 	type TelemetryOptions,
 } from '@purista/harness'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
@@ -16,8 +16,7 @@ import type { Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import type {
 	AgentDefinition,
-	AgentExternalWaitAdapter,
-	AgentExternalWaitPendingNotice,
+	AgentSuspendedNotice,
 	AgentManifest,
 	AgentModelBinding,
 	AgentRuntimeInvocationInput,
@@ -32,20 +31,16 @@ import { createPuristaHarnessLogger } from './logger.js'
 import { createHandlerModelBindings, resolveRuntimeModelBindings } from './modelBindings.js'
 import { createAgentSkillContext } from './skills.js'
 import { createProviderSseEvent } from './sseEvents.js'
-import { createPuristaHarnessStateStore } from './stateStore.js'
 
 export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBinding>> = {
 	definition: AgentDefinition<any>
 	manifest: AgentManifest<Models>
 	models: AgentRuntimeModelBindings<Models>
-	runtime?: DurableRuntime
-	durableWorkflows?: boolean
-	externalWait?: AgentExternalWaitAdapter
-	onExternalWaitPending?: (notice: AgentExternalWaitPendingNotice) => Promise<unknown> | unknown
-	workspaceStore?: unknown
+	storage?: HarnessStorage
+	onSuspended?: (notice: AgentSuspendedNotice) => Promise<unknown> | unknown
+	workspace?: DurableWorkspace
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
-	stateStore?: StateStore
 	sandbox?: unknown
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
@@ -101,13 +96,15 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			return undefined
 		}
 
-		const stateStore = createPuristaHarnessStateStore(this.input.stateStore)
 		let builder: any = defineHarness({
 			name: `${this.input.manifest.serviceName}.${this.input.manifest.agentName}`,
 		})
 			.logger(createPuristaHarnessLogger(this.input.logger))
-			.state(stateStore)
 			.models(this.resolvedModels)
+
+		if (this.input.storage) {
+			builder = builder.storage(this.input.storage)
+		}
 
 		if (this.input.telemetry) {
 			// Secure by default: never capture prompt/completion content unless the
@@ -127,19 +124,8 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.sandbox(this.input.sandbox as never)
 		}
 
-		if (this.input.runtime) {
-			builder = builder.runtime(this.input.runtime)
-		}
-
-		if (this.input.externalWait) {
-			if (typeof builder.externalWait !== 'function') {
-				throw new Error('ai.externalWait requires @purista/harness with durable external-wait support (>=2.1.1).')
-			}
-			builder = builder.externalWait(this.input.externalWait as never)
-		}
-
-		if (this.input.workspaceStore) {
-			builder = builder.workspaceStore(this.input.workspaceStore)
+		if (this.input.workspace) {
+			builder = builder.workspace(this.input.workspace)
 		}
 
 		if (this.input.skillRuntime && Object.keys(this.input.skillRuntime.harnessSkills).length > 0) {
@@ -251,7 +237,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		} else {
 			const sessionAny = session as any
 			const agentName = this.input.manifest.agentName
-			const durable = this.input.runtime && (this.input.durableWorkflows === true || this.input.manifest.workspacePolicy?.mode === 'durable')
+			const durable = this.input.manifest.durability
 				? { runId: identity.runId }
 				: undefined
 			output = streaming
@@ -259,8 +245,8 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				: await sessionAny.workflows[agentName].prompt(input.payload, { signal, ...(durable ? { durable } : {}) })
 		}
 		} catch (error) {
-			if (!isExternalWaitPending(error) || !this.input.onExternalWaitPending) throw error
-			output = await this.input.onExternalWaitPending({
+			if (!isExternalWaitPending(error) || !this.input.onSuspended) throw error
+			output = await this.input.onSuspended({
 				runId: identity.runId,
 				serviceName: this.input.manifest.serviceName,
 				serviceVersion: this.input.manifest.serviceVersion,

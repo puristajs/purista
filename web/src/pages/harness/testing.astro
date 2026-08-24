@@ -17,7 +17,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       { text: 'without calling', color: 'found' },
       { text: 'external APIs.' },
     ]}
-    lede="Every layer of a harness application is testable in isolation. Inject a fake model provider. Contract-test your state store. Assert streaming event sequences. Run fake MCP servers in CI. No real API keys needed."
+    lede="Every layer of a harness application is testable in isolation. Inject a fake model provider. Contract-test your Harness storage. Assert streaming event sequences. Run fake MCP servers in CI. No real API keys needed."
   />
 
   {/* ── 1. Test pyramid ──────────────────────────────────────────── */}
@@ -42,7 +42,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
             level: '2',
             label: 'Contract tests',
             color: 'con',
-            items: ['StateStore adapter', 'MemoryAdapter', 'SandboxSession', 'Model provider adapter'],
+            items: ['HarnessStorage adapter', 'MemoryAdapter', 'SandboxSession', 'Model provider adapter'],
             note: 'Use the shared contract test helpers from @purista/harness/testing.',
           },
           {
@@ -500,7 +500,7 @@ it('throws ToolError when MCP signals isError', async () => {
         ))}
       </div>
 
-      <p class="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-5 text-[var(--color-fg-muted)]">The focused, complete governance test is in <a href="/handbook/harness/guide/tools-and-skills/#add-harness-side-governance-to-a-sensitive-tool">Tools &amp; Skills</a>. For a long-running human review, test the application record and authenticated decision endpoint separately, then test that the following workflow or domain step receives only an approved decision. Do not use a process-local Promise as a durable approval queue.</p>
+      <p class="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-bg-elev)] p-5 text-[var(--color-fg-muted)]">The focused, complete governance test is in <a href="/handbook/harness/tools-and-skills/#add-harness-side-governance-to-a-sensitive-tool">Tools &amp; Skills</a>. For a long-running human review, test the application record and authenticated decision endpoint separately, then test that the following workflow or domain step receives only an approved decision. Do not use a process-local Promise as a durable approval queue.</p>
     </div>
   </section>
 
@@ -516,17 +516,17 @@ it('throws ToolError when MCP signals isError', async () => {
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div>
-          <h3 class="h3 mb-3">State store</h3>
+          <h3 class="h3 mb-3">Harness storage</h3>
           <CodeBlock
-            code={`import { stateStoreContract } from '@purista/harness/testing'
-import { myStateStore } from './myStateStore'
+            code={`import { harnessStorageContract } from '@purista/harness/testing'
+import { myHarnessStorage } from './myHarnessStorage'
 
-describe('myStateStore', () => {
-  stateStoreContract(() => myStateStore({
+describe('myHarnessStorage', () => {
+  harnessStorageContract(() => myHarnessStorage({
     url: process.env.TEST_DB_URL,
   }))
 })`}
-            label="stateStoreContract"
+            label="harnessStorageContract"
             language="typescript"
           />
           <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates session CRUD, run write/read, message append, event persistence, and concurrent-write behaviour.</p>

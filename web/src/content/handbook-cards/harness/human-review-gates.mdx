@@ -35,21 +35,21 @@ the durable checkpoint.
 
 ## Smallest secure setup
 
-Production deployments supply one shared `DurableStateStore`. It owns
+Production deployments supply one shared `HarnessStorage`. It owns
 conversation history, run records, durable checkpoints, leases, and opaque
 external waits in the same transactional backing system. Passing it to
-`.state(store)` derives the runtime/checkpoint/wait facets automatically.
+`.storage(store)` derives the runtime/checkpoint/wait facets automatically.
 
-`SqliteDurableStateStore` and `localDurableExecution()` remain zero-dependency,
+`SqliteHarnessStorage` and `localDurableExecution()` remain zero-dependency,
 single-host Node.js/Bun choices for development, demos, and restart tests—not
 for replicated PURISTA services.
 
 ```ts
-const durableState: DurableStateStore = createProductionConversationStore()
+const storage: HarnessStorage = createProductionHarnessStorage()
 
 const harness = defineHarness({ name: 'payment-review' })
-  .state(durableState)
-  .requires(['runtime.persistent', 'external_wait.durable', 'external_wait.signal'])
+  .storage(storage)
+  .requires(['storage.persistent', 'storage.external_wait'])
   // models, agents, and workflow definitions
   .build()
 ```
@@ -92,7 +92,7 @@ or leave a worker blocked. Once an authenticated reviewer commits a compare-and
 set decision, deliver exactly one terminal signal:
 
 ```ts
-const result = await durableState.signal({
+const result = await storage.signalWait({
   waitId: task.waitRef,
   eventId: decision.outboxEventId,
   outcome: decision.outcome // approved | rejected | expired | cancelled
@@ -100,8 +100,8 @@ const result = await durableState.signal({
 // applied, duplicate, already_terminal, or not_found: all are deterministic.
 ```
 
-For a wrapped PURISTA attached Harness workflow, opt into `ai.durableWorkflows`
-and pass `ai.onExternalWaitPending`. That callback is the explicit delivery
+For a wrapped PURISTA attached Harness workflow, declare `.setDurability(...)`
+and pass `ai.onSuspended`. That callback is the explicit delivery
 acknowledgement point: commit or publish the already-created application task
 and return an output that your agent schema models as `waiting`. Without it,
 the pending error intentionally propagates instead of being mistaken for a
@@ -132,8 +132,8 @@ and run correlation plus kind, schema/definition version, deadline state, and
 terminal outcome. They intentionally exclude review content, tool arguments,
 comments, and reviewer identity; do not add those values as metric dimensions.
 
-Use `inMemoryExternalWait()` and `inMemoryDurableRuntime()` in deterministic
-tests. Cover: pending suspension, restart/replay, approved/rejected/expired/
+Use `InMemoryHarnessStorage` in deterministic tests. Cover: pending suspension,
+restart/replay, approved/rejected/expired/
 cancelled outcomes, duplicate and late delivery, stale task revision, changed
 action digest, and the idempotent final command. The Harness adapter test does
 not replace application authorization or review-task tests.

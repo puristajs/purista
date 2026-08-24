@@ -158,4 +158,4 @@ Avoid storing confidential content in audit logs unless a product/legal policy r
 - Model output is schema-validated and applied by deterministic service logic.
 - Queue retries, DLQ handling, idempotency keys, and timeout budgets are defined for sensitive side effects.
 - Audit records capture actor, tenant, operation, resource, decision, and correlation without leaking confidential content.
-- Deployment topology has production-grade event bridge, queue bridge, state store, secret store, health checks, and observability.
+- Deployment topology has production-grade event bridge, queue bridge, Harness storage, secret store, health checks, and observability.

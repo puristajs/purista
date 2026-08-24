@@ -75,53 +75,53 @@ describe('attached agent scoped runtime', () => {
 		expect(firstRuntime).not.toBe(secondRuntime)
 	})
 
-	it('fails startup when a durable workspace agent has no runtime or workspace store', async () => {
+	it('fails startup when a durable workspace agent has no storage or workspace', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
+			durability: { mode: 'required', runIdPath: ['runId'] },
 			workspacePolicy: {
 				mode: 'durable',
-				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable'],
+				capabilities: ['storage.workspace_checkpoint', 'workspace.durable'],
 			},
 		})
 
 		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).rejects.toThrow(
-			'Attached agent "triage" requires durable ai.runtime and ai.workspaceStore in service.getInstance(...) options',
+			'Attached agent "triage" requires persistent ai.storage in service.getInstance(...) options',
 		)
 	})
 
 	it('fails startup when durable workspace capabilities are missing', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
+			durability: { mode: 'required', runIdPath: ['runId'] },
 			workspacePolicy: {
 				mode: 'durable',
-				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable', 'workspace_store.resume'],
+				capabilities: ['storage.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
 			},
 		})
 
 		await expect(
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
-				runtime: { capabilities: ['runtime.checkpoint'] } as never,
-				workspaceStore: { info: { capabilities: ['workspace_store.durable'] } },
+				storage: { capabilities: ['storage.persistent'] } as never,
+				workspace: { info: { capabilities: ['workspace.durable'] }, capabilities: ['workspace.durable'] } as never,
 			}),
 		).rejects.toThrow(
-			'Attached agent "triage" requires unavailable durable workspace capabilities: runtime.workspace_checkpoint, workspace_store.resume',
+			'Attached agent "triage" requires unavailable durable workspace capabilities: storage.workspace_checkpoint, workspace.resume',
 		)
 	})
 
-	it('allows explicit non-durable restart when durable workspace stores are absent', async () => {
+	it('does not allow a durable workspace to silently downgrade', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
+			durability: { mode: 'required', runIdPath: ['runId'] },
 			workspacePolicy: {
 				mode: 'durable',
-				required: false,
-				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable'],
+				capabilities: ['storage.workspace_checkpoint', 'workspace.durable'],
 			},
 		})
 
-		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).resolves.toEqual({
-			shutdown: expect.any(Function),
-		})
+		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).rejects.toThrow(/persistent ai\.storage/)
 	})
 
 	it('fails startup when a declared skill has no runtime binding', async () => {
@@ -246,17 +246,18 @@ SECRET_BODY`,
 	it('accepts durable workspace agents when runtime and workspace capabilities match', async () => {
 		const scope = createAgentRuntimeScope()
 		const definition = createAttachedAgentDefinition({
+			durability: { mode: 'required', runIdPath: ['runId'] },
 			workspacePolicy: {
 				mode: 'durable',
-				capabilities: ['runtime.workspace_checkpoint', 'workspace_store.durable', 'workspace_store.resume'],
+				capabilities: ['storage.workspace_checkpoint', 'workspace.durable', 'workspace.resume'],
 			},
 		})
 
 		await expect(
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
-				runtime: { capabilities: ['runtime.workspace_checkpoint'] } as never,
-				workspaceStore: { info: { capabilities: ['workspace_store.durable', 'workspace_store.resume'] } },
+				storage: { capabilities: ['storage.persistent', 'storage.workspace_checkpoint'] } as never,
+				workspace: { info: { capabilities: ['workspace.durable', 'workspace.resume'] }, capabilities: ['workspace.durable', 'workspace.resume'] } as never,
 			}),
 		).resolves.toEqual({ shutdown: expect.any(Function) })
 	})

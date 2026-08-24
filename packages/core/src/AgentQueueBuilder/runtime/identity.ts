@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import type { AgentManifest, AgentRunIdentity } from '../types.js'
 
 type IdentityMessage = {
@@ -10,7 +11,7 @@ type IdentityMessage = {
 }
 
 export type DeriveAgentRunIdentityInput = {
-	manifest: Pick<AgentManifest, 'agentName' | 'runtimeRevision' | 'serviceName' | 'serviceVersion' | 'session'>
+	manifest: Pick<AgentManifest, 'agentName' | 'runtimeRevision' | 'serviceName' | 'serviceVersion' | 'session' | 'durability'>
 	message: IdentityMessage
 	payload: unknown
 	runId?: string
@@ -31,9 +32,27 @@ export function deriveAgentRunIdentity(input: DeriveAgentRunIdentityInput): Agen
 		serviceVersion: input.manifest.serviceVersion,
 		agentName: input.manifest.agentName,
 		runtimeRevision: input.manifest.runtimeRevision,
-		runId: input.runId ?? `run:${transportMessageId}`,
+		runId: input.runId ?? resolveRunId(input.manifest, transportMessageId, input.payload),
 		harnessSessionId,
 	}
+}
+
+function resolveRunId(
+	manifest: Pick<AgentManifest, 'agentName' | 'serviceName' | 'serviceVersion' | 'durability'>,
+	transportMessageId: string,
+	payload: unknown,
+): string {
+	if (!manifest.durability) return `run:${transportMessageId}`
+	const value = readPayloadPath(payload, manifest.durability.runIdPath)
+	if (typeof value !== 'string' || value.trim() === '') {
+		throw new Error(
+			`Agent durability run id path "${manifest.durability.runIdPath.join('.')}" must resolve to a non-empty string`,
+		)
+	}
+	const digest = createHash('sha256')
+		.update(JSON.stringify([manifest.serviceName, manifest.serviceVersion, manifest.agentName, value]))
+		.digest('hex')
+	return `agent-run:${digest}`
 }
 
 export function resolveHarnessSessionId(

@@ -124,11 +124,11 @@ error to your HTTP, queue, or UI protocol in application code; do not expose a
 raw provider response to callers.
 
 The session scopes history, state, and live resources. `release()` ends live
-resources while retaining durable state; `close()` is destructive and deletes
+resources while retaining durable history; `close()` is destructive and deletes
 the session record. Use a stable, privacy-safe application session key and let
 your transport decide whether same-session requests serialize or receive a
 busy response.
 
 ## Next
 
-Continue with [Models & Configuration](/handbook/harness/guide/models-and-configuration/).
+Continue with [Models & Configuration](/handbook/harness/models-and-configuration/).

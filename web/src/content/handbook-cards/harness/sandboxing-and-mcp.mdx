@@ -51,7 +51,7 @@ not a replacement for an operating-system or tenant isolation boundary.
 For a production executor, make isolation visible in the adapter contract and
 deployment design: root filesystem/mount policy, network egress, process user,
 CPU/memory/PID/time limits, image provenance, per-tenant workspace lifecycle,
-and cleanup. Use [Custom Adapters](/handbook/harness/guide/custom-adapters/)
+and cleanup. Use [Custom Adapters](/handbook/harness/custom-adapters/)
 to implement and test that boundary.
 
 ## Build the safe path first
@@ -180,7 +180,7 @@ that mount.
 
 Neither `inMemorySandbox()` nor `localDirectorySandbox()` supplies this
 guarantee. Use an isolating custom adapter for trusted Agent Plugin stdio, even
-when the plugin is reviewed. Read [Agent Plugins](/handbook/harness/guide/agent-plugins/)
+when the plugin is reviewed. Read [Agent Plugins](/handbook/harness/agent-plugins/)
 for inspection and binding controls.
 
 ## Handle failures at the transport boundary
@@ -224,7 +224,7 @@ For a custom adapter, run
 truthfully supports snapshot/resume. Add platform integration tests for the
 isolation claims that a generic contract cannot prove.
 
-Continue with [Durable Workflows & Queues](/handbook/harness/guide/durable-workflows-and-queues/)
+Continue with [Durable Workflows & Queues](/handbook/harness/durable-workflows-and-queues/)
 when a claims review must survive a worker restart, or
-[Custom Adapters](/handbook/harness/guide/custom-adapters/) to build the
+[Custom Adapters](/handbook/harness/custom-adapters/) to build the
 production execution boundary.

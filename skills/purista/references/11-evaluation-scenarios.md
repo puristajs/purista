@@ -133,17 +133,18 @@ Add a long-running research agent that may retry after worker restart and must r
 
 Expected behavior:
 - attaches the agent to the owning service through `getAgentQueueBuilder`
-- declares durable replay with `setWorkspacePolicy({ mode: 'durable', required: true, cleanup: 'on_terminal' })`
-- keeps concrete durable runtime and workspace stores in `getInstance(..., { ai })` runtime wiring
-- requires harness capabilities such as `runtime.workspace_checkpoint`, `workspace_store.durable`, `workspace_store.checkpoint`, `workspace_store.resume`, and `workspace_store.cleanup`
+- declares stable execution with `setDurability({ mode: 'required', runIdPath: ['requestId'] })`
+- declares file replay with `setWorkspacePolicy({ mode: 'durable', cleanup: 'on_terminal' })`
+- keeps concrete Harness storage and workspace adapters in `getInstance(..., { ai })` runtime wiring
+- requires harness capabilities such as `storage.workspace_checkpoint`, `workspace.durable`, `workspace.checkpoint`, `workspace.resume`, and `workspace.cleanup`
 - treats retention durations, encryption key policy, tenant/project quotas, and cleanup scheduling as product-owned policy
 - keeps workspace refs, file content, prompts, completions, tool inputs, tool outputs, credentials, tokens, and raw headers out of logs, metrics, traces, queues, events, and examples
 
 Validation:
-- startup fails when required runtime/workspace capabilities are missing
+- startup fails when required storage/workspace capabilities are missing
 - retry resumes from the latest committed harness checkpoint and workspace checkpoint
 - terminal success and terminal failure cleanup paths are tested
-- explicit `required: false` non-durable restart is tested only when the product accepts restart semantics
+- omitting durability is deliberate and tested only when the product accepts restart semantics
 
 ## Scenario 8: Command-Capable Agent Boundary
 

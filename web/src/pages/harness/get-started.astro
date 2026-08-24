@@ -325,7 +325,7 @@ await harness.shutdown()`}
         <div class="eyebrow">Level 4 — Workflows</div>
       </div>
       <h2 class="display display-lg mb-6">Orchestrate agents with deterministic logic</h2>
-      <p class="lede mb-10">Workflows are application-owned orchestration around agents. Sequence them, branch on results, request human approval, and write durable state. The workflow handler owns the process. Agents own the reasoning.</p>
+      <p class="lede mb-10">Workflows are application-owned orchestration around agents. Sequence them, branch on results, request human approval, and persist durable workflow data. The workflow handler owns the process. Agents own the reasoning.</p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="card p-5">
@@ -476,7 +476,7 @@ impact, timeline, and next action.`}
         <div class="eyebrow">Level 6 — Memory & State</div>
       </div>
       <h2 class="display display-lg mb-6">Remember across runs</h2>
-      <p class="lede mb-10">Sessions have memory and history. Write JSON blobs the agent can recall. List conversation messages. Persist across restarts with a durable state adapter or the local durable execution bundle.</p>
+      <p class="lede mb-10">Sessions have memory and history. Write JSON blobs the agent can recall. List conversation messages. Persist across restarts with a durable Harness storage adapter or the local durable execution bundle.</p>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="card p-5">
@@ -507,13 +507,11 @@ const local = localDurableExecution({
 })
 
 const harness = defineHarness({ name: 'prod-service' })
-  .state(local.state)
-  .runtime(local.runtime)
+  .storage(local.storage)
   .sandbox(local.sandbox)
-  .workspaceStore(local.workspaceStore)
-  .checkpoints(local.checkpoints)
+  .workspace(local.workspace)
   .build()`}
-            label="Durable state"
+            label="Durable storage"
             language="typescript"
           />
           <div class="mt-4 p-3 rounded-lg bg-[var(--color-bg-sunk)] border border-[var(--color-line)]">

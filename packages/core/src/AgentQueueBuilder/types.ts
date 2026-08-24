@@ -1,6 +1,6 @@
 import type {
 	BuiltinToolName,
-	DurableRuntime,
+	DurableWorkspace,
 	GovernanceConfig,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
@@ -12,7 +12,7 @@ import type {
 	ModelProvider,
 	RunEvent,
 	Session,
-	StateStore,
+	HarnessStorage,
 	TelemetryOptions,
 } from '@purista/harness'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
@@ -277,32 +277,14 @@ export type AgentSkillRuntimeResolved = {
 export type AgentWorkspaceCapabilityRequirement = string
 
 /** Adapter-neutral durable workspace policy mirrored from `@purista/harness`. */
-export type AgentDurableWorkspaceStorePolicy = {
+export type AgentDurableWorkspacePolicy = {
 	retention?: Record<string, unknown>
 	encryption?: Record<string, unknown>
 	quota?: Record<string, unknown>
 }
 
-/** Structural durable workspace store accepted until the harness package version is bumped. */
-export type AgentDurableWorkspaceStore = {
-	readonly capabilities?: readonly string[]
-	readonly info?: {
-		readonly capabilities?: readonly string[]
-	}
-}
-
-/** Structural pass-through contract for a Harness durable external-wait adapter. */
-export type AgentExternalWaitAdapter = {
-	readonly id?: string
-	readonly capabilities: readonly string[]
-	register(request: { waitId: string; kind: string; schemaVersion: string; definitionVersion: string; deadline: string }): Promise<unknown>
-	get(waitId: string): Promise<unknown>
-	signal(signal: { waitId: string; eventId: string; outcome: 'approved' | 'rejected' | 'expired' | 'cancelled'; observedAt?: string }): Promise<unknown>
-	cancel(waitId: string, eventId: string, observedAt?: string): Promise<unknown>
-}
-
 /** Safe suspension information supplied to an application-owned review/outbox handoff. */
-export type AgentExternalWaitPendingNotice = {
+export type AgentSuspendedNotice = {
 	runId: string
 	serviceName: string
 	serviceVersion: string
@@ -310,15 +292,20 @@ export type AgentExternalWaitPendingNotice = {
 	wait: { waitId: string; kind: string; status: 'waiting' }
 }
 
+/** Definition-owned stable durable run identity. */
+export type AgentDurabilityPolicy = {
+	mode: 'required'
+	/** Payload path resolving to a non-empty application-owned logical run id. */
+	runIdPath: readonly string[]
+}
+
 /** Durable workspace behavior declared by an attached agent manifest. */
 export type AgentWorkspacePolicy = {
 	mode: 'durable'
-	/** Missing runtime/workspace stores fail service startup. Default: `true`. */
-	required?: boolean
 	/** Harness adapter capabilities required for this policy. */
 	capabilities?: readonly AgentWorkspaceCapabilityRequirement[]
 	/** Adapter-neutral durable workspace policy forwarded to compatible runtimes. */
-	policy?: AgentDurableWorkspaceStorePolicy
+	policy?: AgentDurableWorkspacePolicy
 	/** Cleanup timing requested by the generated agent runtime. */
 	cleanup?: 'on_success' | 'on_terminal' | 'manual'
 }
@@ -478,8 +465,8 @@ export type AgentHandler<
 export type AgentHarnessWorkflowOptions = {
 	/**
 	 * Harness agent definitions available to the wrapped workflow through
-	 * `ctx.agents`. These agents run inside the same harness session, sandbox,
-	 * state store, telemetry setup, and durable workflow boundary as the parent
+	 * `ctx.agents`. These agents run inside the same Harness session, sandbox,
+	 * Harness storage, telemetry setup, and durable workflow boundary as the parent
 	 * attached agent execution.
 	 */
 	agents?: Record<string, HarnessAgentDefinition<any, any, any>>
@@ -520,6 +507,7 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 		Omit<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>
 	sandbox?: AgentSandboxPolicy
 	workspacePolicy?: AgentWorkspacePolicy
+	durability?: AgentDurabilityPolicy
 	http?: AgentHttpExposure
 	response?: {
 		mode: AgentResponseMode
@@ -640,17 +628,13 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 /** Runtime options required to initialize attached agents for a service instance. */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
-	runtime?: DurableRuntime
-	/** Run attached Harness workflows with a stable durable run id derived from the delivery message. */
-	durableWorkflows?: boolean
-	/** Optional durable opaque wait/signal adapter for application-owned human review workflows. */
-	externalWait?: AgentExternalWaitAdapter
-	/** Handles a durable wait as an application-owned successful delivery. */
-	onExternalWaitPending?: (notice: AgentExternalWaitPendingNotice) => Promise<unknown> | unknown
-	workspaceStore?: AgentDurableWorkspaceStore
+	/** Harness-owned conversation and recoverable execution persistence. */
+	storage?: HarnessStorage
+	/** Optional durable file/snapshot lifecycle. */
+	workspace?: DurableWorkspace
+	/** Handles a durable suspension as an application-owned successful delivery. */
+	onSuspended?: (notice: AgentSuspendedNotice) => Promise<unknown> | unknown
 	skills?: AgentSkillRuntimeOptions
-	/** Harness conversation state; use a DurableStateStore here for durable multi-instance workflows. */
-	stateStore?: StateStore
 	logger?: PuristaLogger
 	sandbox?: unknown
 	telemetry?: TelemetryOptions

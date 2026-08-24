@@ -32,7 +32,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <div class="mem-two-col">
         <div>
           <div class="eyebrow mb-3" style="color: var(--color-found-hi)">History</div>
-          <p class="text-[var(--color-fg-muted)] mb-4">The ordered message log for the current session. The harness feeds the configured <code class="site-mono text-xs">historyWindow</code> into each new model request. Persisted through the <code class="site-mono text-xs">StateStore</code>.</p>
+          <p class="text-[var(--color-fg-muted)] mb-4">The ordered message log for the current session. The harness feeds the configured <code class="site-mono text-xs">historyWindow</code> into each new model request. Persisted through the <code class="site-mono text-xs">HarnessStorage</code>.</p>
           <CodeBlock
             code={`const messages = await session.history.list({ limit: 20 })
 // returns: Message[] — role, content, timestamps`}

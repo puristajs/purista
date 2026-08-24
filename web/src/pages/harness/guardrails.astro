@@ -16,8 +16,8 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     ]}
     lede="Guardrails add typed, fail-closed decisions around a Harness default-loop agent: before a model call, around every tool handoff, and before a completed result leaves the loop. They complement schemas, permissions, governance, and application authorization."
     ctas={[
-      { label: 'Read the implementation guide', href: '/handbook/harness/guide/guardrails-governance/', variant: 'primary' },
-      { label: 'Compare privacy detectors', href: '/handbook/harness/guide/privacy-detectors/', variant: 'ghost' },
+      { label: 'Read the implementation guide', href: '/handbook/harness/guardrails-governance/', variant: 'primary' },
+      { label: 'Compare privacy detectors', href: '/handbook/harness/privacy-detectors/', variant: 'ghost' },
     ]}
   />
 
@@ -77,30 +77,30 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
               <td><code>@purista/harness-guardrails</code></td>
               <td>Typed input, output, tool, retrieval, and model-check controls</td>
               <td>In-process interceptor on a default-loop agent; TypeScript actions stay application-owned</td>
-              <td><a href="/handbook/harness/guide/guardrails-governance/">Guardrails &amp; Governance</a></td>
+              <td><a href="/handbook/harness/guardrails-governance/">Guardrails &amp; Governance</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-presidio</code></td>
               <td>Existing Microsoft Presidio Analyzer deployment, custom recognizers, or deployment-selected languages</td>
               <td>Application-injected authenticated internal <code>POST /analyze</code> call; masking remains in Guardrails</td>
-              <td><a href="/handbook/harness/guide/privacy-detectors/#presidio-keep-the-sidecar-application-owned">Presidio sidecar</a></td>
+              <td><a href="/handbook/harness/privacy-detectors/#presidio-keep-the-sidecar-application-owned">Presidio sidecar</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-native-privacy</code></td>
               <td>Local common identifiers: email, phone, card, IPv4/IPv6, IBAN, US SSN, and URL</td>
               <td>Rust Node-API prebuild in process for Node.js and Bun; no network, model, or fallback implementation</td>
-              <td><a href="/handbook/harness/guide/privacy-detectors/#native-privacy-smallest-local-setup">Native privacy</a></td>
+              <td><a href="/handbook/harness/privacy-detectors/#native-privacy-smallest-local-setup">Native privacy</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-local-ner</code></td>
               <td>Locally provisioned model labels such as person, organization, or location</td>
               <td>Optional Transformers.js peer with a pinned local model, asset manifest, label map, and startup warmup</td>
-              <td><a href="/handbook/harness/guide/privacy-detectors/#local-ner-install-only-where-it-is-needed">Local NER</a></td>
+              <td><a href="/handbook/harness/privacy-detectors/#local-ner-install-only-where-it-is-needed">Local NER</a></td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="mt-6 text-[var(--color-fg-muted)]">See the <a href="/handbook/harness/guide/ecosystem-packages/">complete Harness package catalogue</a> for model providers, Agent Plugins, MCP peers, test utilities, and every first-party package.</p>
+      <p class="mt-6 text-[var(--color-fg-muted)]">See the <a href="/handbook/harness/ecosystem-packages/">complete Harness package catalogue</a> for model providers, Agent Plugins, MCP peers, test utilities, and every first-party package.</p>
     </div>
   </section>
 
@@ -122,8 +122,8 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     headline={[{ text: 'Implement the ' }, { text: 'right boundary', color: 'con' }, { text: '.' }]}
     lede="The handbook contains the exact portable NeMo-shaped configuration subset, working TypeScript actions, full coverage matrix, detector feature comparison, workflow/tool/skill behavior, and deterministic test patterns."
     ctas={[
-      { label: 'Guardrails implementation guide', href: '/handbook/harness/guide/guardrails-governance/', variant: 'primary' },
-      { label: 'Privacy detector guide', href: '/handbook/harness/guide/privacy-detectors/', variant: 'ghost' },
+      { label: 'Guardrails implementation guide', href: '/handbook/harness/guardrails-governance/', variant: 'primary' },
+      { label: 'Privacy detector guide', href: '/handbook/harness/privacy-detectors/', variant: 'ghost' },
     ]}
   />
 </HarnessLayout>

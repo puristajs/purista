@@ -5,7 +5,7 @@ description: Declare truthful model capabilities and configure safe runtime defa
 
 ## Prerequisites
 
-Complete the [Quickstart](/handbook/harness/guide/quickstart/) first. Keep all
+Complete the [Quickstart](/handbook/harness/quickstart/) first. Keep all
 provider credentials and provider-specific options at this composition root.
 Agents, workflows, tools, and skills should reference a model alias, never a
 provider SDK client.
@@ -143,7 +143,7 @@ const harness = defineHarness({ name: 'claims-review' })
 Use the in-memory sandbox only when command execution is not required. The
 Harness does not create an HTTP server, queue, secret manager, or database; the
 application selects and supplies those boundaries. Continue with
-[Tools & Skills](/handbook/harness/guide/tools-and-skills/) to add the first
+[Tools & Skills](/handbook/harness/tools-and-skills/) to add the first
 capability safely.
 
 ## Configuration failures are deployment failures
@@ -152,7 +152,7 @@ Treat invalid aliases, unavailable adapter capabilities, missing optional
 packages, expired credentials, and unsupported model operations as safe startup
 or invocation failures. Log the normalized error kind together with a
 deployment or run correlation ID, never the secret, raw provider payload, or
-prompt. The [Observability & Operations](/handbook/harness/guide/observability-operations/)
+prompt. The [Observability & Operations](/handbook/harness/observability-operations/)
 guide maps those error categories to operator actions.
 
 ## Configure adapters intentionally
@@ -198,4 +198,4 @@ grounded context and use an output schema that includes document IDs/citations.
 
 ## Next
 
-Expose the smallest useful capability in [Tools & Skills](/handbook/harness/guide/tools-and-skills/).
+Expose the smallest useful capability in [Tools & Skills](/handbook/harness/tools-and-skills/).

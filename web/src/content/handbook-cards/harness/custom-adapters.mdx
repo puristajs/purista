@@ -1,6 +1,6 @@
 ---
 title: Custom Adapters
-description: Extend model, state, memory, sandbox, and durable runtime boundaries while retaining the Harness session API, safety defaults, and contract tests.
+description: Extend model, storage, memory, sandbox, and workspace boundaries while retaining the Harness session API, safety defaults, and contract tests.
 ---
 
 ## Start with the existing ports
@@ -12,10 +12,10 @@ example, select the smallest port that owns the integration:
 | Requirement | Existing core option | Extend this port when | Required evidence |
 | --- | --- | --- | --- |
 | Provider-neutral model calls | First-party `@purista/harness-<provider>` addon | The provider is not already supported | Provider contract tests and a scripted client |
-| Conversation history and run records | `InMemoryStateStore`, `SqliteDurableStateStore` for one host | History/runs must use your database or tenancy model, or durable workflows need multi-instance safety | State-store/durable-state contract tests and migration/retention tests |
+| Conversation history and run records | `InMemoryHarnessStorage`, `SqliteHarnessStorage` for one host | History/runs must use your database or tenancy model, or durable workflows need multi-instance safety | State-store/durable-state contract tests and migration/retention tests |
 | Scoped facts or semantic recall | Default `sandboxMemory()` | Memory needs persistence, TTL, search, user/tenant scope, or external retrieval | Memory contract tests and scope-isolation tests |
 | Files and optional command execution | `inMemorySandbox()`, `bashSandbox()`, local durable sandbox | You need containers, microVMs, remote runners, or immutable mounts | Sandbox contract plus isolation/cancellation tests |
-| Restart-safe workflow checkpoints | In-memory helpers or `localDurableExecution` | Workers need distributed leases or cloud persistence | Durable/workspace contract and replay tests |
+| Restart-safe workflow checkpoints | `InMemoryHarnessStorage` or `localDurableExecution` | Workers need distributed leases or cloud persistence | Storage/workspace contracts and replay tests |
 | External capability | TypeScript tool or `mcp_http` / `mcp_stdio` | The capability has its own tool/server protocol | Tool tests plus authorization and outage tests |
 
 Keep a portable model alias, tool schema, agent, and workflow while swapping an
@@ -128,9 +128,9 @@ keep live-provider tests explicit and outside normal CI.
 
 ## Implement state and memory independently
 
-`StateStore` persists sessions, messages, runs, and run events. It is the right
+`HarnessStorage` persists sessions, messages, runs, and run events. It is the right
 adapter for claims conversation history and run audit metadata. Implement the
-complete port or extend `StateStoreAdapterBase`; partial persistence creates
+complete port or extend `HarnessStorage`; partial persistence creates
 inconsistent session lifecycle behavior. If you enable
 `defaults.historyRetention`, implement `replaceMessages` atomically so whole
 turns are trimmed without a read/clear/append race.
@@ -155,34 +155,27 @@ Add application tests around the port contract: tenant isolation, TTL expiry,
 search-result authorization, deletion, and data residency. Do not use memory
 as a replacement for the authoritative claim record.
 
-### State-store lifecycle and logger contracts
+### Storage lifecycle and logger contracts
 
-Use `StateStoreAdapterBase` only to inherit Harness context attachment and
-normalized `StateError` creation. A concrete store must still implement session
+Implement `HarnessStorage` directly. A concrete adapter must implement session
 upsert/close, ordered message append/list/clear, run create/finish/read/list,
 and event append/list. Implement `replaceMessages(sessionId, messages)` as one
 database transaction when history retention is enabled—never as an unlocked
 clear followed by append.
 
 ```ts
-import { StateStoreAdapterBase, type Message } from '@purista/harness'
-import { stateStoreContract } from '@purista/harness/testing'
+import type { HarnessStorage } from '@purista/harness'
+import { harnessStorageContract } from '@purista/harness/testing'
+import { PostgresHarnessStorage } from '@acme/harness-storage-postgres'
 
-class PostgresStateStore extends StateStoreAdapterBase {
-  async replaceMessages(sessionId: string, messages: Message[]) {
-    await this.pool.transaction(async tx => {
-      await tx.deleteMessages(sessionId)
-      await tx.insertMessages(sessionId, messages)
-    })
-  }
-  // Implement the remaining StateStore methods against the same backend.
-}
+const createStorage = (): HarnessStorage =>
+  new PostgresHarnessStorage({ connectionString: process.env.TEST_DATABASE_URL! })
 
-stateStoreContract(() => new PostgresStateStore(testPool))
+harnessStorageContract(createStorage)
 ```
 
-The base's `configureHarnessContext` receives the inherited logger, telemetry,
-and harness name automatically. Use them only for content-free backend spans or
+The optional `configureHarnessContext` hook receives the logger, telemetry,
+and harness name. Use them only for content-free backend spans or
 safe normalized diagnostics. `close()` must drain pools predictably so
 `harness.shutdown()` can report a controlled shutdown failure.
 
@@ -221,16 +214,16 @@ cancellation, cleanup, and tenant isolation—not merely that a command runs.
 The core `bashSandbox()` is an in-process execution helper, not an isolation
 boundary for untrusted documents or commands.
 
-A durable runtime owns run leases and committed checkpoints. A durable workspace
-store owns workspace lifecycle, snapshots/checkpoints, retention, encryption
-metadata, quota reporting, and cleanup. Keep the two ports separate: a sandbox
+A `HarnessStorage` owns run leases and committed step checkpoints. A durable
+workspace owns workspace lifecycle, snapshots, retention, encryption metadata,
+quota reporting, and cleanup. Keep the two ports separate: a sandbox
 snapshot alone does not make a workflow replayable after a restart.
 
 ```ts
-import { durableWorkspaceStoreContract } from '@purista/harness/testing'
+import { durableWorkspaceContract } from '@purista/harness/testing'
 import { claimsWorkspaceStore } from '@acme/harness-workspace-postgres'
 
-durableWorkspaceStoreContract(() => claimsWorkspaceStore({
+durableWorkspaceContract(() => claimsWorkspaceStore({
   connectionString: process.env.TEST_WORKSPACE_DATABASE_URL!
 }))
 ```
@@ -248,7 +241,7 @@ orphan cleanup, retention expiry, and no raw workspace content in telemetry.
 3. Declare only truthful capabilities and use `.requires(...)` in the
    application for mandatory ones.
 4. Honor `AbortSignal` and close adapter-owned pools/processes in `close()`.
-5. Reuse `BaseModelProvider` or `StateStoreAdapterBase` where they fit rather
+5. Reuse `BaseModelProvider` where it fits and implement `HarnessStorage` once
    than reimplementing common logging, telemetry, timeout, and error behavior.
 6. Run the matching public contract suite with deterministic fakes.
 7. Add adapter-specific integration tests for the backend's failure and
@@ -257,6 +250,6 @@ orphan cleanup, retention expiry, and no raw workspace content in telemetry.
    are useful; prompts, evidence, tool payloads, credentials, and files are
    not emitted.
 
-Return to [Sandboxing & MCP](/handbook/harness/guide/sandboxing-and-mcp/) for the
-execution boundary, or [Durable Workflows & Queues](/handbook/harness/guide/durable-workflows-and-queues/)
+Return to [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/) for the
+execution boundary, or [Durable Workflows & Queues](/handbook/harness/durable-workflows-and-queues/)
 for the replay and delivery design.

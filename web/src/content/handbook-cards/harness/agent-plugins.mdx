@@ -5,7 +5,7 @@ description: Safely inspect, review, and selectively bind data-only Agent Plugin
 
 ## Prerequisites
 
-Complete [Tools & Skills](/handbook/harness/guide/tools-and-skills/) first.
+Complete [Tools & Skills](/handbook/harness/tools-and-skills/) first.
 Use an Agent Plugin only when a reviewed, already-installed package should
 contribute selected skills or MCP tools. Use normal TypeScript modules for
 trusted application behavior that you own and ship with the application.
@@ -156,7 +156,7 @@ const [plugin] = await loadAgentPlugins({
 })
 ```
 
-See [Sandboxing & MCP](/handbook/harness/guide/sandboxing-and-mcp/) before
+See [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/) before
 binding any stdio component.
 
 ## What remains outside the plugin boundary
@@ -201,5 +201,5 @@ not put a real plugin, credentials, or request payloads in test snapshots.
 
 ## Next
 
-Continue with [Sandboxing & MCP](/handbook/harness/guide/sandboxing-and-mcp/)
+Continue with [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/)
 to choose and verify the execution boundary for selected MCP tools.

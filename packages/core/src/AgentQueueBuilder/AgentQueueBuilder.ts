@@ -17,6 +17,7 @@ import { getBoundAgentRuntime } from './runtime/scopedRuntime.js'
 
 import type {
 	AgentDefinition,
+	AgentDurabilityPolicy,
 	AgentExecutionDefinition,
 	AgentExecutionKind,
 	AgentExecutionPolicy,
@@ -45,11 +46,11 @@ const defaultExecutionPolicy = {
 }
 
 const defaultWorkspaceCapabilities = [
-	'runtime.workspace_checkpoint',
-	'workspace_store.durable',
-	'workspace_store.checkpoint',
-	'workspace_store.resume',
-	'workspace_store.cleanup',
+	'storage.workspace_checkpoint',
+	'workspace.durable',
+	'workspace.checkpoint',
+	'workspace.resume',
+	'workspace.cleanup',
 ] as const
 
 const agentStreamChunkSchema = z
@@ -103,6 +104,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private sessionPolicy: AgentSessionPolicy = { mode: 'ephemeral' }
 	private sandboxPolicy?: AgentSandboxPolicy
 	private workspacePolicy?: AgentWorkspacePolicy
+	private durability?: AgentDurabilityPolicy
 	private httpExposure?: AgentHttpExposure
 	private streamingMode: 'stream' | 'aggregate' = 'stream'
 	private successEventName?: string
@@ -548,11 +550,23 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	setWorkspacePolicy(policy: AgentWorkspacePolicy) {
 		const { capabilities, ...rest } = policy
 		this.workspacePolicy = {
-			required: true,
 			cleanup: 'on_terminal',
 			...rest,
 			capabilities: capabilities ?? defaultWorkspaceCapabilities,
 		}
+		return this
+	}
+
+	/**
+	 * Require recoverable Harness workflow execution with a stable run id read
+	 * from the validated payload. Queue retries and later enqueues containing the
+	 * same value resume the same logical run.
+	 */
+	setDurability(policy: AgentDurabilityPolicy) {
+		if (policy.mode !== 'required' || policy.runIdPath.length === 0 || policy.runIdPath.some(segment => segment.trim() === '')) {
+			throw new Error('Agent durability requires a non-empty runIdPath')
+		}
+		this.durability = { mode: 'required', runIdPath: [...policy.runIdPath] }
 		return this
 	}
 
@@ -815,6 +829,12 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	}
 
 	private createManifest(kind: AgentExecutionKind): AgentManifest<S['Models']> {
+		if (this.durability && kind !== 'harnessWorkflow') {
+			throw new Error('Agent durability is supported only for Harness workflow execution')
+		}
+		if (this.workspacePolicy?.mode === 'durable' && !this.durability) {
+			throw new Error('A durable agent workspace requires setDurability({ mode: \'required\', runIdPath })')
+		}
 		const execution = {
 			...this.executionPolicy,
 			maxAttempts: this.executionPolicy.maxAttempts ?? defaultExecutionPolicy.maxAttempts,
@@ -830,6 +850,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			execution,
 			sandbox: this.sandboxPolicy,
 			workspacePolicy: this.workspacePolicy?.mode === 'durable' ? this.workspacePolicy : undefined,
+			durability: this.durability,
 			http: this.httpExposure,
 			response: this.responseMode
 				? {

@@ -104,14 +104,14 @@ CI proves the intended provider calls were exercised.
 Adapter packages run their contract suites before application integration:
 
 ```ts
-import { loggerContract, stateStoreContract } from '@purista/harness/testing'
+import { loggerContract, harnessStorageContract } from '@purista/harness/testing'
 
-stateStoreContract(() => createTestStateStore())
+harnessStorageContract(() => createTestHarnessStorage())
 loggerContract(() => createTestLogger())
 ```
 
 Use `sandboxContract`, `sandboxSnapshotContract`, `memoryAdapterContract`,
-`modelProviderContract`, and `durableWorkspaceStoreContract` for the matching
+`modelProviderContract`, and `durableWorkspaceContract` for the matching
 port. Contract tests establish Harness compatibility; add backend-specific
 tests for tenancy, migrations, retention, outages, and credentials.
 
@@ -158,4 +158,4 @@ provider smoke test separate from CI's deterministic suite.
 ## Next
 
 Export safe evidence and operate a run in
-[Observability & Operations](/handbook/harness/guide/observability-operations/).
+[Observability & Operations](/handbook/harness/observability-operations/).

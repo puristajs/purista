@@ -149,7 +149,7 @@ Agents execute exactly one of:
 - `setRunFunction(...)`
 
 Use the `agents` option only for harness-local agents that should share the same
-harness session, sandbox, telemetry, durable runtime, workspace store, and
+harness session, sandbox, telemetry, Harness storage, durable workspace, and
 model bindings as the wrapped workflow. Use `canInvokeAgent(...)` plus
 `setRunFunction(...)` when child agents need independent PURISTA queues,
 retries, service ownership, HTTP exposure, sandboxes, or runtime bindings.

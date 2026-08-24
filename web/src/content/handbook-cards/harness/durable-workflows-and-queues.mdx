@@ -22,12 +22,12 @@ message, or coordinate a distributed payment transaction. It records and
 replays **workflow steps**. The optional external-wait adapter can safely
 suspend a run for an application-owned terminal decision; the application still
 owns reviewer identity, review state, authorization, outbox delivery, and the
-final idempotent business command. See [Human Review Gates](/handbook/harness/guide/human-review-gates/).
+final idempotent business command. See [Human Review Gates](/handbook/harness/human-review-gates/).
 
 ## Configure a local durable claims worker
 
 For local development or a single-host worker, `localDurableExecution` provides
-SQLite state/runtime/checkpoints and a local durable workspace. Command
+one SQLite `HarnessStorage`, a local durable workspace, and a local sandbox. Command
 execution stays disabled by default.
 
 ```ts
@@ -40,19 +40,15 @@ const durable = localDurableExecution({
 })
 
 const harness = defineHarness({ name: 'claims-review-worker' })
-  .state(durable.state)
-  .runtime(durable.runtime)
-  .externalWait(durable.externalWait)
+  .storage(durable.storage)
   .sandbox(durable.sandbox)
-  .workspaceStore(durable.workspaceStore)
-  .checkpoints(durable.checkpoints)
+  .workspace(durable.workspace)
   .requires([
-    'runtime.persistent',
-    'runtime.workspace_checkpoint',
-    'workspace_store.persistent',
-    'workspace_store.checkpoint',
-    'workspace_store.resume',
-    'context_checkpoint.persistent'
+    'storage.persistent',
+    'storage.workspace_checkpoint',
+    'workspace.persistent',
+    'workspace.checkpoint',
+    'workspace.resume'
   ])
   // models, agents, and workflows are declared next
   .build()
@@ -60,7 +56,7 @@ const harness = defineHarness({ name: 'claims-review-worker' })
 
 `.requires(...)` is a startup contract, not documentation. It fails before a
 run starts if an adapter cannot provide a capability required by the worker. The
-in-memory durable runtime and workspace store are useful for tests but do not
+in-memory storage and workspace are useful for tests but do not
 survive process exit. For a distributed deployment, implement or install
 durable adapters with leases, persistence, retention, quota, and encryption
 policies appropriate to the environment.
@@ -81,7 +77,7 @@ const ClaimReview = z.object({
 })
 
 const claimsHarness = defineHarness({ name: 'claims-review-worker' })
-  // state/runtime/sandbox/workspace/checkpoints and models are configured above
+  // storage, sandbox, workspace, and models are configured above
   .agents(({ agent }) => ({
     assessor: agent({
       model: 'reviewer',
@@ -198,16 +194,15 @@ record, approver identity, stale-decision checks, and final side effect.
 
 ## Retention, checkpoints, and cleanup
 
-`ctx.checkpoints.write(...)` stores an explicit typed handoff record; it does
-not summarize prompts automatically. Use it for a safe process marker such as
-the evidence revision and the next application step. Do not put raw evidence,
-credentials, or prompt content in checkpoint metadata.
+Workflow step outputs are the replay record. Keep them minimal and JSON-safe;
+do not put raw evidence, credentials, or prompt content in checkpoint output or
+metadata. Application process state belongs in the application database.
 
-Workspace snapshots and runtime checkpoints are complementary. At a durable
-step boundary the workspace checkpoint is saved before the runtime checkpoint
+Workspace snapshots and storage checkpoints are complementary. At a durable
+step boundary the workspace checkpoint is saved before the storage checkpoint
 references it. Configure retention, encryption, and quotas in the workspace
 adapter. A successful workflow may be cleaned automatically only when the
-store declares `cleanupMode: 'adapter_automatic'`; otherwise the application
+workspace declares `cleanupMode: 'adapter_automatic'`; otherwise the application
 must run the documented cleanup schedule.
 
 ## Test the recovery story
@@ -225,6 +220,6 @@ Write deterministic tests for the exact operational promises:
 5. Verify retention/cleanup and quota-exceeded behavior with the production
    workspace adapter's test environment.
 
-Continue with [Custom Adapters](/handbook/harness/guide/custom-adapters/) to build a
-provider, state, memory, sandbox, or durable-runtime integration without
+Continue with [Custom Adapters](/handbook/harness/custom-adapters/) to build a
+provider, storage, memory, sandbox, or workspace integration without
 breaking Harness lifecycle, cancellation, or telemetry behavior.

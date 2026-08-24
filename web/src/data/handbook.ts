@@ -78,35 +78,28 @@ export const handbookSections: HandbookSection[] = [
 		color: 'pilot',
 		cards: [
 			{
-				id: 'guide',
-				title: 'AI Harness Guide',
-				description: 'A progressive implementation path from a first typed agent to production operations.',
+				id: 'overview',
+				title: 'Overview',
+				description: 'Understand the Harness architecture, boundaries, and execution model.',
 				icon: 'robot',
 				featured: true,
-				items: [
-					{ id: 'harness/guide/overview', title: 'Overview', order: 1 },
-					{ id: 'harness/guide/quickstart', title: 'Quickstart', order: 2 },
-					{ id: 'harness/guide/ecosystem-packages', title: 'Ecosystem & Packages', order: 3 },
-					{ id: 'harness/guide/models-and-configuration', title: 'Models & Configuration', order: 4 },
-					{ id: 'harness/guide/tools-and-skills', title: 'Tools & Skills', order: 5 },
-					{ id: 'harness/guide/agent-plugins', title: 'Agent Plugins', order: 6 },
-					{ id: 'harness/guide/sandboxing-and-mcp', title: 'Sandboxing & MCP', order: 7 },
-					{ id: 'harness/guide/agents-workflows-state', title: 'Agents, Workflows & State', order: 8 },
-					{ id: 'harness/guide/durable-workflows-and-queues', title: 'Durable Workflows & Queues', order: 9 },
-					{ id: 'harness/guide/human-review-gates', title: 'Human Review Gates', order: 10 },
-					{ id: 'harness/guide/guardrails-governance', title: 'Guardrails & Governance', order: 10 },
-					{ id: 'harness/guide/privacy-detectors', title: 'Privacy Detectors', order: 11 },
-					{ id: 'harness/guide/custom-adapters', title: 'Custom Adapters', order: 12 },
-					{ id: 'harness/guide/testing-and-evaluations', title: 'Testing & Evaluations', order: 13 },
-					{ id: 'harness/guide/observability-operations', title: 'Observability & Operations', order: 14 },
-					{
-						id: 'harness/adapters-durability-reference',
-						href: '/handbook/harness/adapters-durability-reference/',
-						title: 'Adapters, Durability & Reference',
-						order: 15,
-					},
-				],
 			},
+			{ id: 'quickstart', title: 'Quickstart', description: 'Build and test a first typed Harness application.', icon: 'rocket' },
+			{ id: 'ecosystem-packages', title: 'Ecosystem & Packages', description: 'Choose the core, provider, guardrail, privacy, and plugin packages.', icon: 'box' },
+			{ id: 'models-and-configuration', title: 'Models & Configuration', description: 'Configure provider-neutral model aliases, defaults, and capabilities.', icon: 'settings' },
+			{ id: 'tools-and-skills', title: 'Tools & Skills', description: 'Expose typed tools and mount reusable skill directories safely.', icon: 'bolt' },
+			{ id: 'agent-plugins', title: 'Agent Plugins', description: 'Verify and bind data-only plugin packages without executing package code.', icon: 'api' },
+			{ id: 'sandboxing-and-mcp', title: 'Sandboxing & MCP', description: 'Choose isolation boundaries and connect MCP servers securely.', icon: 'shield' },
+			{ id: 'agents-workflows-storage', title: 'Agents & Workflows', description: 'Compose typed agents, workflows, memory, and Harness storage.', icon: 'network' },
+			{ id: 'durable-workflows-and-queues', title: 'Durable Workflows', description: 'Recover workflows with stable run identities, checkpoints, and queues.', icon: 'stairs' },
+			{ id: 'human-review-gates', title: 'Human Review Gates', description: 'Suspend and resume durable work through application-owned approvals.', icon: 'check-circle' },
+			{ id: 'guardrails-governance', title: 'Guardrails', description: 'Apply typed content rails, policy decisions, and governance controls.', icon: 'certificate' },
+			{ id: 'privacy-detectors', title: 'Privacy Detectors', description: 'Select local native, Presidio, or optional local NER detection.', icon: 'lock' },
+			{ id: 'custom-adapters', title: 'Custom Adapters', description: 'Implement provider, storage, workspace, memory, and sandbox ports.', icon: 'settings-auto' },
+			{ id: 'testing-and-evaluations', title: 'Tests & Evaluations', description: 'Use deterministic fakes, contracts, scorers, and replay fixtures.', icon: 'check-circle' },
+			{ id: 'observability-operations', title: 'Observability', description: 'Operate content-free traces, metrics, logs, and cost attribution.', icon: 'wave' },
+			{ id: 'migrating-to-v3', title: 'Migrate to v3', description: 'Adopt the clean HarnessStorage and DurableWorkspace boundaries.', icon: 'stairs' },
+			{ id: 'adapters-durability-reference', title: 'Adapters & Deployment', description: 'Compare adapter capabilities and production deployment requirements.', icon: 'database' },
 		],
 	},
 	{
@@ -530,7 +523,6 @@ export function getAllCards(): (HandbookCard & {
 export function getSidebarItems(): SidebarItem[] {
 	const frameworkSections = handbookSections.filter(section => section.id !== 'harness')
 	const harnessSection = handbookSections.find(section => section.id === 'harness')
-	const harnessGuide = harnessSection?.cards.find(card => card.id === 'guide')
 
 	const frameworkLabels: Record<string, string> = {
 		learn: 'Start Here',
@@ -561,20 +553,21 @@ export function getSidebarItems(): SidebarItem[] {
 	}
 
 	const harnessLabels: Record<string, string> = {
-		'harness/guide/overview': 'Overview',
-		'harness/guide/quickstart': 'Quickstart',
-		'harness/guide/models-and-configuration': 'Configuration',
-		'harness/guide/tools-and-skills': 'Tools & Skills',
-		'harness/guide/agent-plugins': 'Agent Plugins',
-		'harness/guide/sandboxing-and-mcp': 'Sandboxing & MCP',
-		'harness/guide/agents-workflows-state': 'Agents & Workflows',
-		'harness/guide/durable-workflows-and-queues': 'Durable Workflows',
-		'harness/guide/human-review-gates': 'Human Review Gates',
-		'harness/guide/guardrails-governance': 'Guardrails',
-		'harness/guide/privacy-detectors': 'Privacy Detectors',
-		'harness/guide/custom-adapters': 'Custom Adapters',
-		'harness/guide/testing-and-evaluations': 'Tests & Evaluations',
-		'harness/guide/observability-operations': 'Observability',
+		'harness/overview': 'Overview',
+		'harness/quickstart': 'Quickstart',
+		'harness/models-and-configuration': 'Configuration',
+		'harness/tools-and-skills': 'Tools & Skills',
+		'harness/agent-plugins': 'Agent Plugins',
+		'harness/sandboxing-and-mcp': 'Sandboxing & MCP',
+		'harness/agents-workflows-storage': 'Agents & Workflows',
+		'harness/durable-workflows-and-queues': 'Durable Workflows',
+		'harness/human-review-gates': 'Human Review Gates',
+		'harness/guardrails-governance': 'Guardrails',
+		'harness/privacy-detectors': 'Privacy Detectors',
+		'harness/custom-adapters': 'Custom Adapters',
+		'harness/testing-and-evaluations': 'Tests & Evaluations',
+		'harness/observability-operations': 'Observability',
+		'harness/migrating-to-v3': 'Migrate to v3',
 		'harness/adapters-durability-reference': 'Adapters & Deployment',
 	}
 
@@ -604,7 +597,7 @@ export function getSidebarItems(): SidebarItem[] {
 				{ title: 'Types', id: 'api/types', href: '/handbook/api/#types', order: 6 },
 			],
 		},
-		...(harnessGuide
+		...(harnessSection
 			? [
 				{
 					title: 'AI Harness',
@@ -615,9 +608,10 @@ export function getSidebarItems(): SidebarItem[] {
 					kind: 'sectionHeader' as const,
 					iconLabel: 'AI',
 				},
-				...(harnessGuide.items ?? []).map(item => ({
-					...item,
-					title: harnessLabels[item.id] ?? item.title,
+				...harnessSection.cards.map((card, index) => ({
+					id: `harness/${card.id}`,
+					title: harnessLabels[`harness/${card.id}`] ?? card.title,
+					order: index + 1,
 				})),
 			]
 			: []),

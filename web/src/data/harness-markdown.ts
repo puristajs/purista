@@ -83,7 +83,7 @@ Prefer a narrow first agent over a generic assistant. The harness should make th
 - Tools expose controlled business operations.
 - Agents combine instructions, model selection, tools, memory, and policy.
 - Runtime adapters connect agents to HTTP, queues, jobs, or application flows.
-- Optional durable runtime adapters checkpoint workflow progress locally and resume from the last committed step.
+- Persistent Harness storage checkpoints workflow progress and resumes from the last committed step.
 - Evaluation and observability close the production feedback loop.
 
 ## Design Rule
@@ -243,16 +243,16 @@ Use memory only when the use case needs continuity across turns, sessions, or ta
 	{
 		id: 'durability',
 		title: 'AI Harness Durability',
-		description: 'Persist workflow progress, state, context checkpoints, leases, and workspace files.',
+		description: 'Persist conversations, workflow checkpoints, leases, external waits, and workspace files.',
 		body: `Durability is optional and adapter-based.
 
-Use \`localDurableExecution({ root })\` when a workflow must survive process restarts without adding external infrastructure immediately. The bundle wires a SQLite state store, durable runtime, context checkpoint store, local workspace store, and host-directory sandbox under one root.
+Use \`localDurableExecution({ root })\` when a workflow must survive process restarts without adding external infrastructure immediately. The bundle wires one SQLite \`HarnessStorage\`, a local durable workspace, and a host-directory sandbox under one root.
 
 ## What Gets Persisted
 
 - Session state, messages, runs, and run events.
-- Durable workflow checkpoints and leases.
-- Context checkpoints written through \`ctx.checkpoints\`.
+- Durable workflow step checkpoints and leases.
+- Opaque external waits bound transactionally to their run and session.
 - Workspace files for active runs and checkpoint snapshots.
 
 ## Production Rule

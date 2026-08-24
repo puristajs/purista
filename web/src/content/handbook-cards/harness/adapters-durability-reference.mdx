@@ -5,7 +5,7 @@ description: Select infrastructure ports, make restart behavior explicit, and us
 
 ## Prerequisites
 
-Complete [Observability & Operations](/handbook/harness/guide/observability-operations/).
+Complete [Observability & Operations](/handbook/harness/observability-operations/).
 This final guide translates an application requirement into an explicit Harness
 port. Start local and in memory, then replace only the boundary that needs
 production behavior.
@@ -15,10 +15,10 @@ production behavior.
 | Need | Harness boundary | Start local | Production decision |
 | --- | --- | --- | --- |
 | Provider-neutral inference | Model provider addon | One provider adapter and a truthful model alias | Select a provider adapter per deployment; keep aliases stable. |
-| Persisted history and runs | `StateStore` | In-memory state | Own retention, deletion, tenant isolation, encryption, and migrations. |
+| Persisted history and runs | `HarnessStorage` | In-memory state | Own retention, deletion, tenant isolation, encryption, and migrations. |
 | Scoped memory | `MemoryAdapter` | Sandbox memory | Select scope, search, TTL, and data residency deliberately. |
 | File access or commands | `Sandbox` | In-memory/files-only sandbox | Isolate process, filesystem, network, mounts, timeouts, and cleanup. |
-| Restart-safe workflow state | Durable runtime, workspace store, checkpoints | In-memory durable helpers | Provision durable storage, leases, quotas, cleanup, and recovery. |
+| Restart-safe workflow state | `HarnessStorage` plus optional `DurableWorkspace` | In-memory storage/workspace | Provision distributed storage, leases, quotas, cleanup, and recovery. |
 | External tool server | MCP through sandbox or HTTP boundary | Local test fake | Own authentication, endpoint policy, schema validation, and availability. |
 | Privacy inspection | `SensitiveDataDetector` adapter | Native privacy fake/detector | Choose native, a private Presidio sidecar, local NER, or an injected implementation. |
 
@@ -45,8 +45,8 @@ try {
 }
 ```
 
-Before enabling `durable`, configure and verify the required durable runtime,
-workspace store, and checkpoint store. Use stable run IDs only for an
+Before enabling `durable`, configure and verify one persistent `HarnessStorage`
+and, when files must replay, a `DurableWorkspace`. Use stable run IDs only for an
 idempotent business operation. A direct agent call cannot be made durable;
 place long-running orchestration in a workflow, and use a queue/worker when an
 HTTP request must return before the workflow completes.
@@ -63,10 +63,10 @@ For example, a durable workspace adapter must pass the shared contract suite
 before it is used by application workflows:
 
 ```ts
-import { durableWorkspaceStoreContract } from '@purista/harness/testing'
+import { durableWorkspaceContract } from '@purista/harness/testing'
 import { createWorkspaceStore } from './workspace-store.js'
 
-durableWorkspaceStoreContract(() => createWorkspaceStore({ connectionString: process.env.WORKSPACE_DB_URL! }))
+durableWorkspaceContract(() => createWorkspaceStore({ connectionString: process.env.WORKSPACE_DB_URL! }))
 ```
 
 Run this contract suite in the adapter package. Application tests should then
@@ -75,7 +75,7 @@ retesting the port protocol itself.
 
 ## Production checklist
 
-1. Provide provider, state, sandbox, memory, and durable adapters explicitly;
+1. Provide provider, Harness storage, sandbox, memory, and workspace adapters explicitly;
    do not rely on development defaults.
 2. Validate all required adapter capabilities during startup with
    `.requires(...)`; fail readiness before accepting traffic when a mandatory
@@ -107,13 +107,13 @@ organized by responsibility:
 
 Use these first-party references while implementing:
 
-- [Model and runtime configuration](/handbook/harness/guide/models-and-configuration/#a-production-composition-root)
-- [Tool, skill, and MCP boundary](/handbook/harness/guide/tools-and-skills/#add-a-skill-when-the-method-needs-reviewed-files)
-- [Reviewed Agent Plugin bindings](/handbook/harness/guide/agent-plugins/)
-- [Workflow lifecycle and durability](/handbook/harness/guide/agents-workflows-state/#lifecycle-and-durability-choices)
-- [Guardrail and privacy configuration](/handbook/harness/guide/guardrails-governance/#2-create-a-portable-policy-file)
-- [Tests and evaluation reference](/handbook/harness/guide/testing-and-evaluations/)
-- [OpenTelemetry and operational runbook](/handbook/harness/guide/observability-operations/#operational-runbook)
+- [Model and runtime configuration](/handbook/harness/models-and-configuration/#a-production-composition-root)
+- [Tool, skill, and MCP boundary](/handbook/harness/tools-and-skills/#add-a-skill-when-the-method-needs-reviewed-files)
+- [Reviewed Agent Plugin bindings](/handbook/harness/agent-plugins/)
+- [Workflow lifecycle and durability](/handbook/harness/agents-workflows-storage/#lifecycle-and-durability-choices)
+- [Guardrail and privacy configuration](/handbook/harness/guardrails-governance/#2-create-a-portable-policy-file)
+- [Tests and evaluation reference](/handbook/harness/testing-and-evaluations/)
+- [OpenTelemetry and operational runbook](/handbook/harness/observability-operations/#operational-runbook)
 - [Harness architecture and adoption](/harness/architecture/)
 
 For PURISTA-specific transport, service, queue, stream, contract, and framework

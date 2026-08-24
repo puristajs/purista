@@ -112,7 +112,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <HarnessFlow variant="sandbox" />
       <p class="mt-5 text-sm leading-relaxed text-[var(--color-fg-muted)]">
         The developer guide covers the threat model, exact built-in limits, MCP and Agent Plugin constraints, adapter contract, and negative-test baseline:
-        <a class="text-[var(--color-con)] underline underline-offset-4" href="/handbook/harness/guide/sandboxing-and-mcp/">Sandboxing &amp; MCP</a>.
+        <a class="text-[var(--color-con)] underline underline-offset-4" href="/handbook/harness/sandboxing-and-mcp/">Sandboxing &amp; MCP</a>.
       </p>
     </div>
   </HarnessStory>
@@ -157,7 +157,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         <div class="sec-check-row">
           <span class="sec-check-num site-mono">01</span>
           <div>
-            <div class="sec-check-title">Durable StateStore</div>
+            <div class="sec-check-title">Durable HarnessStorage</div>
             <p>Use a durable adapter so sessions, run history, and OTel traces survive process restart. In-memory state is fine for local development. Production needs persistence.</p>
           </div>
         </div>

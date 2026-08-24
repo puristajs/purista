@@ -52,14 +52,11 @@ export async function initializeAttachedAgentRuntimes(
 				definition,
 				manifest: definition.manifest,
 				models: aiOptions.models as never,
-				runtime: aiOptions.runtime,
-				durableWorkflows: aiOptions.durableWorkflows,
-				externalWait: aiOptions.externalWait,
-				onExternalWaitPending: aiOptions.onExternalWaitPending,
-				workspaceStore: aiOptions.workspaceStore,
+				storage: aiOptions.storage,
+				onSuspended: aiOptions.onSuspended,
+				workspace: aiOptions.workspace,
 				skillRuntime,
 				logger: aiOptions.logger,
-				stateStore: aiOptions.stateStore,
 				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,
@@ -108,23 +105,29 @@ function validateWorkspacePolicies(
 	aiOptions: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
 ): void {
 	for (const definition of definitions) {
+		if (definition.manifest.durability) {
+			if (!aiOptions.storage) {
+				throw new Error(`Attached agent "${definition.manifest.agentName}" requires persistent ai.storage in service.getInstance(...) options`)
+			}
+			if (!aiOptions.storage.capabilities.includes('storage.persistent')) {
+				throw new Error(`Attached agent "${definition.manifest.agentName}" requires ai.storage with storage.persistent capability`)
+			}
+		}
 		const policy = definition.manifest.workspacePolicy
 		if (policy?.mode !== 'durable') {
 			continue
 		}
 
-		if (!aiOptions.runtime || !aiOptions.workspaceStore) {
-			if (policy.required === false) {
-				continue
-			}
-			throw new Error(
-				`Attached agent "${definition.manifest.agentName}" requires durable ai.runtime and ai.workspaceStore in service.getInstance(...) options`,
-			)
+		if (!definition.manifest.durability) {
+			throw new Error(`Attached agent "${definition.manifest.agentName}" has a durable workspace without a durability policy`)
+		}
+		if (!aiOptions.storage || !aiOptions.workspace) {
+			throw new Error(`Attached agent "${definition.manifest.agentName}" requires ai.storage and ai.workspace in service.getInstance(...) options`)
 		}
 
 		const available = new Set<string>([
-			...(aiOptions.runtime?.capabilities ?? []),
-			...(aiOptions.workspaceStore?.info?.capabilities ?? aiOptions.workspaceStore?.capabilities ?? []),
+			...(aiOptions.storage.capabilities ?? []),
+			...(aiOptions.workspace.info.capabilities ?? aiOptions.workspace.capabilities ?? []),
 		])
 		const missing = (policy.capabilities ?? []).filter(capability => !available.has(capability))
 		if (missing.length > 0) {

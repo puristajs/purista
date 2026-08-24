@@ -29,7 +29,7 @@ Event bridges and queue bridges are separate package categories. Do not use an e
 
 ## Stores
 - config stores: `aws-config-store`, `nats-config-store`, `redis-config-store`
-- state stores: `nats-state-store`, `redis-state-store`
+- Harness storages: `nats-storage`, `redis-storage`
 - secret stores: `aws-secret-store`, `azure-secret-store`, `gcloud-secret-store`, `infisical-secret-store`, `vault-secret-store`
 
 Stores are runtime wiring. Service builders declare needs; service instances receive concrete stores.

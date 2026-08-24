@@ -6,7 +6,7 @@ description: Trace the entire run without exposing prompts or tool data, then us
 ## Prerequisites
 
 Finish the deterministic tests in
-[Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+[Testing & Evaluations](/handbook/harness/testing-and-evaluations/).
 Configure your application's OpenTelemetry SDK and OTLP exporter before the
 Harness is built. The Harness creates spans and metrics; your application owns
 the exporter, resource attributes, sampling, trace propagation, and backend.
@@ -79,7 +79,7 @@ const summary = runId ? await session.getRunSummary(runId) : undefined
 ```
 
 Invalid trace headers are ignored with a warning rather than breaking a user
-request. `getRunSummary` reads the configured state store and returns run
+request. `getRunSummary` reads the configured Harness storage and returns run
 status/timestamps, model/tool/agent counts, token totals, optional cache and
 reasoning-token details, and serialized normalized errors. It does not invent
 prices or require an OpenTelemetry backend.
@@ -111,7 +111,7 @@ Before accepting traffic:
    secret content.
 5. Confirm `harness.shutdown()` closes adapters and live MCP/sandbox resources
    during graceful shutdown.
-6. Validate retention, deletion, quota, and recovery behavior for session state
+6. Validate retention, deletion, quota, and recovery behavior for Harness storage
    and durable workspaces.
 
 A guardrail block is a successful control decision, not a system failure.

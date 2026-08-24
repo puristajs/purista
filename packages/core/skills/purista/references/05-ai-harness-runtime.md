@@ -71,8 +71,8 @@ Execution definitions are mutually exclusive:
 Use `setHarnessWorkflow(workflow, { agents })` when a wrapped
 `@purista/harness` workflow calls harness-local agents through `ctx.agents`.
 Core registers those harness-local agents before registering the workflow, so
-they share the same attached-agent harness session, sandbox, state store,
-telemetry setup, durable runtime, workspace store, and model bindings. Use
+they share the same attached-agent harness session, sandbox, Harness storage,
+telemetry setup, durable workspace, and model bindings. Use
 PURISTA `setRunFunction(...)` plus `canInvokeAgent(...)` instead when the child
 agents need independent queues, retries, HTTP exposure, service ownership,
 sandboxes, or model/runtime bindings.
@@ -89,10 +89,9 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
       primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'], retry: true },
     },
     sandbox,
-    durableWorkflows: true,
-    // One shared Harness DurableStateStore; do not use Core's generic key/value store here.
-    stateStore: durableConversationStore,
-    workspaceStore,
+    // Harness-owned persistence; not PURISTA's general top-level StateStore.
+    storage: harnessStorage,
+    workspace,
   },
 })
 ```
@@ -100,15 +99,15 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 Startup fails fast when aliases or capabilities are missing.
 
 For an application-owned durable human review, provide a Harness
-`DurableStateStore` through `ai.stateStore` and set `ai.durableWorkflows: true`
-for a wrapped Harness workflow. It is one shared conversation/run/checkpoint/
-wait adapter; the framework's generic key/value state store cannot substitute
+`HarnessStorage` through `ai.storage` and declare `.setDurability(...)` on the
+wrapped Harness workflow. It is one shared conversation/run/checkpoint/wait
+adapter; the framework's generic key/value `StateStore` cannot substitute
 for it. `ExternalWaitPendingError` is a normal queue suspension, not a failed
 domain action. The application owns the guarded review task, reviewer identity,
 outbox signal, digest comparison on resume, and final idempotent command; Core
 does not provide review CRUD or a reviewer UI.
 
-For attached workflows, use `ai.onExternalWaitPending` as the explicit queue
+For attached workflows, use `ai.onSuspended` as the explicit queue
 handoff: commit/publish the review task through the application outbox and
 return a schema-valid `waiting` output. Without this callback Core propagates
 the pending signal so delivery code cannot accidentally acknowledge the wait.
@@ -199,7 +198,7 @@ Keep domain authorization in PURISTA guards/resources and stage only
 tenant-authorized files. A schema and a tenant-looking session ID validate a
 shape or identify a run; neither grants access. For the implementation matrix,
 MCP lifecycle, and negative-test baseline, use the public Handbook page
-`/handbook/harness/guide/sandboxing-and-mcp/`.
+`/handbook/harness/sandboxing-and-mcp/`.
 
 Use `setWorkspacePolicy(...)` only when an attached agent must resume from
 committed workspace state after queue retry, process restart, pause, or
@@ -208,37 +207,37 @@ hibernate:
 ```ts
 const agent = service
   .getAgentQueueBuilder('researchReport', 'Builds a research report')
+  .setDurability({ mode: 'required', runIdPath: ['requestId'] })
   .setWorkspacePolicy({
     mode: 'durable',
-    required: true,
     cleanup: 'on_terminal',
   })
 ```
 
-Runtime wiring supplies the harness durable runtime and workspace stores:
+Runtime wiring supplies Harness storage and the optional durable workspace:
 
 ```ts
 await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventBridge, {
   queueBridge,
   ai: {
     models,
-    runtime,
-    workspaceStore,
+    storage: harnessStorage,
+    workspace,
     sandbox,
   },
 })
 ```
 
 Required capabilities are validated at service startup. Common durable replay
-requirements are `runtime.workspace_checkpoint`, `workspace_store.durable`,
-`workspace_store.checkpoint`, `workspace_store.resume`, and `workspace_store.cleanup`. Add
-`workspace_store.retention`, `workspace_store.encrypted_storage`, and `workspace_store.quota`
+requirements are `storage.workspace_checkpoint`, `workspace.durable`,
+`workspace.checkpoint`, `workspace.resume`, and `workspace.cleanup`. Add
+`workspace.retention`, `workspace.encrypted_storage`, and `workspace.quota`
 when production policy requires those guarantees.
 
-Use `inMemoryDurableWorkspaceStore()` from `@purista/harness` for local
+Use `inMemoryDurableWorkspace()` from `@purista/harness` for local
 development and tests. Do not describe it as production persistence; production
 services need a durable store that survives process restart and declares the
-required `workspace_store.*` capabilities.
+required `workspace.*` capabilities.
 
 Keep ownership clear:
 - `@purista/harness` owns workspace lifecycle, checkpoint references, workspace
@@ -248,8 +247,8 @@ Keep ownership clear:
 - product layers own retention durations, encryption key policy, tenant/project
   quotas, cleanup scheduling, UI, billing, and product records
 
-Fresh ephemeral fallback must be explicit in the builder policy. Never treat a
-sandbox snapshot as production durable workspace replay.
+Durability is fail-closed: omit `.setDurability(...)` for an intentionally
+ephemeral workflow. Never treat a sandbox snapshot as durable workspace replay.
 
 ## Handler Context
 Agent handlers use:
@@ -329,8 +328,8 @@ must not recreate those GenAI metrics.
 
 For complete standalone setup, YAML vocabulary, detector capability matrix,
 and production tests, route users to the public Handbook pages
-`/handbook/harness/guide/guardrails-governance/` and
-`/handbook/harness/guide/privacy-detectors/`.
+`/handbook/harness/guardrails-governance/` and
+`/handbook/harness/privacy-detectors/`.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:
@@ -403,8 +402,7 @@ Tests should verify output validation, model capability behavior, stream chunks,
 For skill-backed agents, use `createAgentSkillTestRuntime(...)` to create temporary `SKILL.md` fixtures and pass `skillRuntime.skills` to `createAgentTestHarness(...)`; do not hand-roll ad hoc skill directories in generated examples. The helper is a deterministic test binding, not a production sandbox, workspace, or provider adapter.
 Security-sensitive agent tests should also verify denied tools, missing tenant/principal metadata, redacted model input, sanitized errors, and no prompt/PII leakage in logs or telemetry fixtures.
 Durable workspace tests should also verify missing capability startup failures,
-resume after retry, cleanup behavior, explicit `required: false` fresh
-ephemeral fallback, and
+resume after retry, cleanup behavior, deliberately ephemeral definitions, and
 absence of workspace refs, file content, prompts, completions, tool inputs,
 tool outputs, credentials, tokens, and raw headers from logs, metrics, traces,
 queue metadata, and examples.

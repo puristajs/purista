@@ -59,8 +59,8 @@ npm install @purista/harness
 
 `@purista/harness` is the required package. It is provider-neutral: registering
 a model alias is what connects it to one configured provider adapter. Use the
-[Quickstart](/handbook/harness/guide/quickstart/) for the smallest runnable
-agent and [Models & configuration](/handbook/harness/guide/models-and-configuration/)
+[Quickstart](/handbook/harness/quickstart/) for the smallest runnable
+agent and [Models & configuration](/handbook/harness/models-and-configuration/)
 for capabilities, retries, model aliases, and credentials.
 
 ```ts
@@ -81,9 +81,9 @@ const harness = defineHarness({ name: 'support' })
 
 | Dependency | Install it when | Configuration guide |
 | --- | --- | --- |
-| `@modelcontextprotocol/client` | An agent uses MCP over Streamable HTTP or a sandboxed stdio server. | [Sandboxing & MCP](/handbook/harness/guide/sandboxing-and-mcp/) |
-| `just-bash` | An agent needs the exec-capable `bashSandbox()` instead of the safer in-memory default. | [Sandboxing & MCP](/handbook/harness/guide/sandboxing-and-mcp/) |
-| `@opentelemetry/api` | Your application has an OpenTelemetry context/provider and you want Harness spans to join it. | [Observability & operations](/handbook/harness/guide/observability-operations/) |
+| `@modelcontextprotocol/client` | An agent uses MCP over Streamable HTTP or a sandboxed stdio server. | [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/) |
+| `just-bash` | An agent needs the exec-capable `bashSandbox()` instead of the safer in-memory default. | [Sandboxing & MCP](/handbook/harness/sandboxing-and-mcp/) |
+| `@opentelemetry/api` | Your application has an OpenTelemetry context/provider and you want Harness spans to join it. | [Observability & operations](/handbook/harness/observability-operations/) |
 
 Do not add an optional peer merely because it is available. In particular,
 stdio MCP needs a sandbox with the required spawning and read-only mounting
@@ -119,7 +119,7 @@ const harness = defineHarness()
 
 Declare only capabilities that the selected model and adapter actually support.
 The builder validates agent requirements against these declarations before a
-run starts. See [Models & configuration](/handbook/harness/guide/models-and-configuration/)
+run starts. See [Models & configuration](/handbook/harness/models-and-configuration/)
 for a capability matrix and provider-specific options.
 
 ## Guardrails
@@ -154,7 +154,7 @@ const guardedAgent = rails.attach({
 })
 ```
 
-Read [Guardrails & governance](/handbook/harness/guide/guardrails-governance/)
+Read [Guardrails & governance](/handbook/harness/guardrails-governance/)
 for the lifecycle diagram, exact portable configuration subset, coverage
 limits, model-check costs, and workflow/tool/skill behavior.
 
@@ -178,7 +178,7 @@ const detector = createNativePrivacyDetector({ id: 'local-pii' })
 const sensitiveDataActions = createSensitiveDataActions({ detector })
 ```
 
-Use [Privacy detectors](/handbook/harness/guide/privacy-detectors/) for the
+Use [Privacy detectors](/handbook/harness/privacy-detectors/) for the
 feature matrix, local NER asset verification, deployment guidance, and
 deterministic test helpers.
 
@@ -211,7 +211,7 @@ const bindings = plugin?.bindings({
 })
 ```
 
-See [Agent Plugins](/handbook/harness/guide/agent-plugins/) for inspection,
+See [Agent Plugins](/handbook/harness/agent-plugins/) for inspection,
 reviewed-digest loading, explicit binding, trusted roots, and the sandbox
 requirements for stdio.
 
@@ -228,5 +228,5 @@ Before adding a package, verify its execution boundary and test strategy:
 - No package replaces your application’s identity, authorization, tenancy,
   transport, data-retention, or incident-response policy.
 
-Continue with [Testing & evaluations](/handbook/harness/guide/testing-and-evaluations/)
+Continue with [Testing & evaluations](/handbook/harness/testing-and-evaluations/)
 once the smallest package set is wired.

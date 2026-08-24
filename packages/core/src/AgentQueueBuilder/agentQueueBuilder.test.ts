@@ -362,32 +362,37 @@ describe('AgentQueueBuilder', () => {
 
 	it('serializes durable workspace policy into the agent manifest', () => {
 		const service = new ServiceBuilder(serviceInfo)
+		const input = z.object({ runId: z.string() })
+		const output = z.object({ status: z.literal('ok') })
 		const manifest = service
 			.getAgentQueueBuilder('durableTriage', 'Triage a support ticket with durable workspace replay')
+			.addPayloadSchema(input)
+			.addOutputSchema(output)
+			.setDurability({ mode: 'required', runIdPath: ['runId'] })
 			.setWorkspacePolicy({
 				mode: 'durable',
 				policy: {
 					retention: { cleanupMode: 'manual_only' },
 				},
 			})
-			.setRunFunction(async () => ({ status: 'ok' }))
+			.setHarnessWorkflow({ input, output, handler: async () => ({ status: 'ok' as const }) })
 			.getManifest()
 
 		expect(manifest.workspacePolicy).toEqual({
 			mode: 'durable',
-			required: true,
 			capabilities: [
-				'runtime.workspace_checkpoint',
-				'workspace_store.durable',
-				'workspace_store.checkpoint',
-				'workspace_store.resume',
-				'workspace_store.cleanup',
+				'storage.workspace_checkpoint',
+				'workspace.durable',
+				'workspace.checkpoint',
+				'workspace.resume',
+				'workspace.cleanup',
 			],
 			cleanup: 'on_terminal',
 			policy: {
 				retention: { cleanupMode: 'manual_only' },
 			},
 		})
+		expect(manifest.durability).toEqual({ mode: 'required', runIdPath: ['runId'] })
 		expect(manifest.runtimeRevision).toMatch(/^rev-/)
 	})
 
@@ -625,6 +630,7 @@ describe('AgentQueueBuilder', () => {
 			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
 			.addPayloadSchema(input)
 			.addOutputSchema(output)
+			.setDurability({ mode: 'required', runIdPath: ['paymentId'] })
 			.setHarnessWorkflow({
 				input,
 				output,
@@ -639,14 +645,14 @@ describe('AgentQueueBuilder', () => {
 		const notices: string[] = []
 		const harness = await createAgentTestHarness(definition, {
 			models: { primary: { provider: createScriptedHarnessModel(), model: 'fake', capabilities: ['object'] } },
-			onExternalWaitPending: notice => {
+			onSuspended: notice => {
 				notices.push(`${notice.runId}:${notice.wait.waitId}`)
 				return { status: 'waiting' }
 			},
 		})
 
 		await expect(harness.run({ payload: { paymentId: 'payment-1' }, parameter: {} })).resolves.toEqual({ status: 'waiting' })
-		expect(notices).toEqual(['run:test-message:review:payment-1'])
+		expect(notices[0]).toMatch(/^agent-run:[0-9a-f]{64}:review:payment-1$/)
 	})
 
 	it('creates namespaced skill bindings for skill-backed agent tests', async () => {

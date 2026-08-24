@@ -54,7 +54,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 | **Using an AI coding assistant** | [Quickstart](./1_quickstart/index.md) | [AI Skill](./install-ai-skill.md) for existing projects → [CLI](./cli.md) |
 | **Evaluating the framework** | [Concept](./concept.md) | [Principles](./principles.md) → [From Zero to Production](./from-zero-to-production.md) |
 | **Migrating an existing app** | [Service Builder](./2_building_business-logic/service/the-service-builder.md) | [Command Builder](./2_building_business-logic/command/the-command-builder.md) → [Event Bridges](./3_eco_system/eventbridges/index.md) |
-| **Building with AI** | [AI Harness Guide](/handbook/harness/guide/) | [Harness integration](/handbook/blocks/agent-pattern/harness-integration/) → [Queues](./2_building_business-logic/queue/index.md) |
+| **Building with AI** | [AI Harness Guide](/handbook/harness/) | [Harness integration](/handbook/blocks/agent-pattern/harness-integration/) → [Queues](./2_building_business-logic/queue/index.md) |
 | **Going to production** | [From Zero to Production](./from-zero-to-production.md) | [Deploy & Scale](./5_deploy_and_scale/index.md) → [OpenTelemetry](./4_open_telemetry/index.md) |
 
 ---
@@ -140,7 +140,7 @@ Not everyone starts from the same place. Pick the path that matches your situati
 
 | Page | What you'll learn |
 |---|---|
-| [AI Harness Guide](/handbook/harness/guide/) | Standalone models, tools, skills, agents, workflows, state, safety, tests, and operations |
+| [AI Harness Guide](/handbook/harness/) | Standalone models, tools, skills, agents, workflows, state, safety, tests, and operations |
 | [Harness Integration](/handbook/blocks/agent-pattern/harness-integration/) | Attach the runtime to PURISTA services, commands, queues, and streams |
 | [Guardrails in PURISTA](/handbook/blocks/agent-pattern/guardrails/) | Combine content controls with framework authorization and delivery guarantees |
 | [AI Agent Builder](/handbook/blocks/agent-pattern/agent-builder/) | Define the PURISTA-owned agent boundary and runtime requirements |

@@ -1,0 +1,69 @@
+---
+title: Migrating to Harness 3
+description: Replace overlapping state, runtime, wait, and checkpoint adapters with one HarnessStorage boundary.
+---
+
+Harness 3 is a deliberate clean break. It keeps one run record and one storage
+contract for conversations and recoverable execution.
+
+## Replace the public APIs
+
+| Harness 2 | Harness 3 |
+| --- | --- |
+| `.state(store)` | `.storage(storage)` |
+| `.runtime(runtime)` | Removed; `HarnessStorage` owns leases and checkpoints. |
+| `.externalWait(adapter)` | Removed; `HarnessStorage` owns opaque waits. |
+| `.checkpoints(store)` / `ctx.checkpoints` | Removed; use `ctx.step(...)` output or application storage. |
+| `.workspaceStore(store)` | `.workspace(workspace)` |
+| `StateStore` / `DurableStateStore` | `HarnessStorage` |
+| `InMemoryStateStore` | `InMemoryHarnessStorage` |
+| `SqliteDurableStateStore` | `SqliteHarnessStorage` |
+| `stateStoreContract` | `harnessStorageContract` |
+
+```ts
+const local = localDurableExecution({ root: './.harness' })
+
+const harness = defineHarness()
+  .storage(local.storage)
+  .workspace(local.workspace)
+  .sandbox(local.sandbox)
+  .build()
+```
+
+## Replace the SQLite database
+
+Harness 3 rejects legacy `harness_durable_runs` and
+`harness_context_checkpoints` tables with `sqlite_schema_incompatible`. Stop all
+old workers, create a new database, and import only reviewed conversation data
+through an application migration. Direct table copying can recreate the split
+run state that this release removes.
+
+## PURISTA wiring
+
+PURISTA's top-level `stateStore` remains the standard general-purpose framework
+component for AI and non-AI services. It is not a Harness adapter.
+
+```ts
+await service.getInstance(eventBridge, {
+  stateStore, // general PURISTA application KV state
+  ai: {
+    models,
+    storage: harnessStorage, // AI conversations, runs, checkpoints, waits
+    workspace,
+    onSuspended,
+  },
+})
+```
+
+Attached Harness workflows opt into recovery with
+`.setDurability({ mode: 'required', runIdPath: ['requestId'] })`. Add
+`.setWorkspacePolicy(...)` only when files must replay with the run.
+
+## Verify before rollout
+
+1. Run `harnessStorageContract` against the production adapter.
+2. Test lease contention with two workers.
+3. Test restart after every committed `ctx.step(...)`.
+4. Test wait registration, duplicate signal, terminal signal, and resume.
+5. Confirm traces contain `harness.storage.*` operations but no checkpoint
+   output, wait IDs, prompts, tool arguments, or credentials.
