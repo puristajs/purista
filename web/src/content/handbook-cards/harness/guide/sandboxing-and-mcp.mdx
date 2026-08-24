@@ -1,43 +1,64 @@
 ---
 title: Sandboxing & MCP
-description: Give a claims-review agent the smallest execution and external-tool boundary it needs, with explicit isolation and failure behavior.
+description: Select and operate the smallest execution boundary an agent needs, with an enterprise threat model, clear ownership, and verified failure handling.
 ---
 
-## What this protects
+## Start with the boundary, not a command
 
-A claims-review agent may need to read a submitted evidence file, consult a
-policy service, and produce a recommendation. Those are three different
-boundaries:
+For a claims-review agent, an evidence file, a policy lookup, and a claim
+decision are different security concerns. The sandbox is the session-owned file
+and optional process-execution boundary. It is **not** authentication,
+authorization, tenant isolation, a secret manager, or automatically a
+container or microVM.
 
-| Boundary | Harness facility | What it does not decide |
-| --- | --- | --- |
-| Evidence files | `Sandbox` | Whether the claimant may access a file |
-| Policy lookup | TypeScript or MCP tool | Whether a claim should be approved |
-| Claim decision | Typed workflow and application service | Authentication, authorization, and payment |
+```mermaid
+flowchart LR
+  Caller[Caller] --> App[Application\nauthentication · authorization · secret delivery]
+  App --> Harness[Harness\nschemas · tool selection · lifecycle]
+  Harness --> Model[Model provider]
+  Harness --> Sandbox[Sandbox adapter\nfiles · optional exec/spawn]
+  Sandbox --> Stdio[Reviewed stdio MCP process]
+  Harness --> Http[Remote Streamable HTTP MCP]
+  App --> Domain[Domain service\ntransaction · audit · side effect]
+```
 
-The application authenticates the adjuster and validates that they can review
-the claim before it opens a Harness session. The model, its output, and every
-tool argument remain untrusted. Start with no executable built-ins and add a
-capability only when the reviewed use case requires it.
+The application admits the caller, scopes data to a claim and tenant, stages
+only authorized files, selects credentials, and performs domain writes. The
+Harness validates declared agent/tool schemas and owns the session lifecycle.
+The sandbox adapter and its deployment platform enforce any process,
+filesystem, network, identity, or quota isolation that the use case needs. A
+model, its tool arguments, tool output, and retrieved content remain untrusted.
 
-## Choose the narrowest sandbox
+## Choose an execution boundary
 
-| Need | Configure | Execution guarantee | Suitable for |
-| --- | --- | --- | --- |
-| Mount and read reviewed files | `inMemorySandbox()` | File APIs only; `executor` is unavailable | Policy skills, uploaded evidence staged by the application |
-| Run a limited local command | `bashSandbox()` | In-process `just-bash` execution; not a container or VM | Trusted development and tightly controlled transformations |
-| Persist local files with a checkpointed workflow | `localDurableExecution({ exec: false })` | Local files plus SQLite-backed durable workspace | Single-host claims-review workers |
-| Launch a long-lived stdio MCP server | A custom spawn-capable sandbox | Sandbox owns the server process and its lifetime | Isolated container, microVM, or remote execution adapter |
+The four rows below are deliberately not equivalent. Choose the first one that
+meets the use case; do not turn a local development helper into a production
+isolation claim.
 
-`inMemorySandbox()` is the safe default for a text-and-tool claims review. It
-does not provide command execution. `bashSandbox()` adds `sandbox.exec`, but
-does **not** add `sandbox.spawn`; it cannot run `mcp_stdio`. The local durable
-bundle is files-only unless you explicitly set `exec`. Host execution is a
-trust decision, not a model feature.
+| Option | Files and lifetime | Commands / long-lived processes | Isolation it actually provides | Use for | Do not use for |
+| --- | --- | --- | --- | --- | --- |
+| `inMemorySandbox()` | Per-session in-memory filesystem; released with the session | No executor, no `spawn` | A Harness filesystem boundary only | Reviewed files, mounted skills, regular TypeScript or HTTP tools | Commands, stdio MCP, persisted workspaces, untrusted-code isolation |
+| `bashSandbox()` | Per-session in-memory filesystem | `exec` through optional `just-bash`; no `spawn` | In-process execution helper, **not** a container or VM | Trusted development or narrowly controlled transformations | Untrusted documents/commands, stdio MCP, tenant/process isolation |
+| `localDurableExecution({ exec })` | Host-directory workspace; durable when configured | Files-only by default; `exec` starts a host child process when enabled | Realpath and symlink escape protections; **not** a hardened host boundary | Single-host trusted workers and local durability | Untrusted model-directed commands, tenant isolation, trusted Agent Plugin stdio |
+| Custom isolating adapter | Adapter- and platform-owned | Declare only capabilities actually enforced, including `spawn` when needed | Whatever the container, microVM, remote runner, filesystem, network and identity policy enforce | Production command execution and stdio MCP | Any control the adapter does not explicitly enforce |
 
-Install `zod` explicitly and import it from `zod`. The Harness accepts its
-schemas at every typed boundary; it does not replace the application's schema
-dependency:
+`inMemorySandbox()` is the default for a text-and-tool claims review. It is
+the safest built-in choice because it has no executor. `bashSandbox()` supports
+`network` and `executionLimits` options passed to `just-bash`, but those are
+not a replacement for an operating-system or tenant isolation boundary.
+`localDurableExecution({ exec: false })` remains files-only by default.
+
+For a production executor, make isolation visible in the adapter contract and
+deployment design: root filesystem/mount policy, network egress, process user,
+CPU/memory/PID/time limits, image provenance, per-tenant workspace lifecycle,
+and cleanup. Use [Custom Adapters](/handbook/harness/guide/custom-adapters/)
+to implement and test that boundary.
+
+## Build the safe path first
+
+This claims-review configuration gives the model one read-only TypeScript tool
+over evidence that the application has already authorized and staged. It has no
+command execution and no ambient file access.
 
 ```ts
 import { defineHarness, inMemorySandbox } from '@purista/harness'
@@ -51,31 +72,47 @@ const harness = defineHarness({ name: 'claims-review' })
       input: z.object({ filename: z.string().regex(/^[a-z0-9._-]+$/i) }),
       output: z.object({ text: z.string().max(20_000) }),
       handler: async (ctx, { filename }) => ({
-        text: await ctx.sandbox.readText(`/workspace/evidence/${filename}`)
-      })
-    }
+        text: await ctx.sandbox.readText(`/workspace/evidence/${filename}`),
+      }),
+    },
   })
-  // Define models before agents; give the review agent only this explicit tool.
   .build()
 ```
 
-The application, not the model, stages only files that belong to the authorized
-claim. Validate the filename and constrain the base path even though the
-sandbox normalizes paths. Do not use a model-generated path as an access-control
-decision, and do not log evidence content.
+The tool schema and filename check are still necessary: path normalization is
+not authorization, and a model-generated path must not select data. Keep
+`builtinTools: false` for tool-only agents. A skill-reading agent normally
+needs only a deliberate read-only allowlist such as `['read']`, never `bash`,
+`write`, or `edit` by default.
 
-## Add a policy MCP server over HTTP
+## Shared responsibility: threats and controls
 
-Use `mcp_http` when the policy server is already available through modern
-Streamable HTTP. It avoids local process launch and works with the file-only
-sandbox above. The Harness obtains the upstream tool schema with `tools/list`,
-validates the call and result, and exposes a normalized JSON result to the
-agent.
+| Risk | Harness control | Required adapter / platform control | Required application control |
+| --- | --- | --- | --- |
+| Prompt injection asks for an unsafe action | Explicit agent tool list, built-in allowlist, schemas, permissions/governance hooks | None replaces tool policy | Keep domain authorization and mutations outside model control; use approval workflow where required |
+| Host files or files from another claim become visible | Session file APIs; local adapter path-jail validation | Read-only mounts and per-session roots where execution is isolated | Stage only authorized data; tenant- and claim-scope every lookup |
+| Arbitrary command execution | Files-only sandbox yields `SandboxNoExecutorError`; explicit exec capability | Command/image allowlist, unprivileged identity, immutable root, syscall/runtime policy | Do not expose command-capable tools unless the use case is reviewed |
+| Network exfiltration or metadata-service access | None is universally enforced by the core contract | Default-deny egress, DNS/proxy policy, metadata-service block, destination allowlist | Do not give a tool or MCP server credentials broader than its task |
+| Secret exposure | Content-free telemetry defaults and normalized errors | Secret injection scoped to the process, short-lived credentials, no host environment inheritance | Keep secrets out of prompts, skills, files, tool results, logs, and unreviewed plugin configuration |
+| CPU, memory, process, or disk exhaustion | Cancellation/timeout signals and session close semantics | CPU/memory/PID/disk quotas and an enforced wall-clock kill policy | Set operation budgets and capacity/alert thresholds |
+| Cross-tenant state or stale workspace data | Run/session lifecycle and adapter capability declarations | Per-tenant/run workspace allocation, encryption and secure wipe/retention where needed | Authorize every request; state/workspace keys and cleanup policy must include tenant scope |
+| MCP or custom-tool overreach | Declared schema, tool exposure, normalized errors | Process isolation for stdio; remote TLS transport | MCP server independently authenticates and authorizes each call; tokens are scoped |
+| Sensitive data in diagnostics | Core traces/logs avoid prompt, tool, file and result content | Secure exporter, collector, retention, access control | Keep production content capture off and audit logger/exporter configuration |
+
+Session IDs are identifiers, not an access-control mechanism. Schema validation
+is necessary at the tool boundary, but it does not prove a caller is authorized
+or make an unsafe implementation safe.
+
+## Remote MCP: prefer a server-side boundary when it fits
+
+Use `mcp_http` when a reviewed policy service already exposes modern Streamable
+HTTP. This works with `inMemorySandbox()` because no local process is launched.
+The Harness obtains `tools/list`, validates call/result shapes, and normalizes
+the response for the agent; the server must still authenticate and authorize
+the scoped request itself.
 
 ```ts
 import { defineHarness, inMemorySandbox } from '@purista/harness'
-import { openai } from '@purista/harness-openai'
-import { z } from 'zod'
 
 const harness = defineHarness({ name: 'claims-review' })
   .sandbox(inMemorySandbox())
@@ -86,42 +123,26 @@ const harness = defineHarness({ name: 'claims-review' })
       url: process.env.CLAIMS_POLICY_MCP_URL!,
       auth: { kind: 'bearer', token: process.env.CLAIMS_POLICY_MCP_TOKEN! },
       redirect: 'error',
-      tool: 'policy.lookup'
-    }
+      tool: 'policy.lookup',
+    },
   })
-  .models({
-    reviewer: {
-      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
-      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-      capabilities: ['object', 'tool_use']
-    }
-  })
-  .agents(({ agent }) => ({
-    review: agent({
-      model: 'reviewer',
-      tools: ['claim_policy'],
-      builtinTools: false,
-      input: z.object({ claimId: z.string(), policyNumber: z.string(), incidentType: z.string() }),
-      output: z.object({ recommendation: z.enum(['approve', 'refer']), rationale: z.string() }),
-      instructions: 'Use claim_policy for a policy clause. Refer any uncertain claim.'
-    })
-  }))
   .build()
 ```
 
-Keep the MCP URL and scoped token in deployment configuration. `redirect:
-'error'` is appropriate for credentialed servers because it prevents a redirect
-from forwarding credentials to another origin. An MCP tool is not an
-authorization mechanism: its server must independently authorize the token and
-scope access to the claim/policy data it returns.
+Use HTTPS, short-lived scoped credentials, and `redirect: 'error'` for a
+credentialed endpoint so a redirect cannot forward a token to another origin.
+The endpoint, its authorization, rate limits, residency, and audit trail stay
+application/service responsibilities. Legacy stateful MCP and HTTP+SSE are not
+the supported transports; use modern Streamable HTTP.
 
-## When stdio MCP is appropriate
+## Stdio MCP: a process is a production boundary
 
-`mcp_stdio` is for a reviewed local command, such as a document-extraction MCP
-server running in a tenant-isolated worker. It needs a sandbox session that
-implements `spawn`, so the Harness can start one persistent server, perform one
-initialization handshake, reuse its state, and terminate it when the session is
-released.
+`mcp_stdio` runs a reviewed local command through a spawn-capable sandbox
+session. The Harness starts one persistent server, performs the initialization
+handshake, multiplexes calls through it, and terminates it on runner/session
+cleanup. If the process exits during a call, that call fails as
+`McpProtocolError`; a later call creates a new process. Design server operations
+to be idempotent.
 
 ```ts
 .tools({
@@ -132,58 +153,78 @@ released.
     args: ['--workspace', '/workspace'],
     cwd: '/workspace',
     env: { EXTRACTION_MODE: 'text-only' },
-    tool: 'evidence.extract'
-  }
+    tool: 'evidence.extract',
+  },
 })
 ```
 
-Do not copy this configuration onto `inMemorySandbox()` or `bashSandbox()`;
-the call fails with `SandboxNoExecutorError` because neither can spawn a
-long-lived process. A production adapter should isolate filesystem mounts,
-network egress, process identity, CPU/memory limits, and cleanup. If the MCP
-server exits during a call, the current call fails as `McpProtocolError`; a
-later call opens a fresh server. Design the server operation to be idempotent.
+`inMemorySandbox()` and `bashSandbox()` cannot run this configuration: neither
+can spawn a long-lived process, so the call fails with
+`SandboxNoExecutorError`. A local host-directory sandbox with host execution is
+also not an isolating production answer. Use a custom adapter backed by a
+container, microVM, or remote execution service that owns process lifetime,
+mounts, egress, limits, identity, and cleanup.
 
-An optional `install` command is available for sandbox-local bootstrapping, but
-it should be idempotent, pinned, and run only in a pre-reviewed image or a
-separate staging step. Do not let a model choose a package, command, or
-installation source.
+An optional `install` command bootstraps a stdio server in the sandbox. Keep it
+idempotent, source-pinned, and image-reviewed; a model must never choose the
+package, command, or install source. Cancellation is passed into sandbox and
+MCP operations, and a session close must terminate adapter-owned processes.
 
-## Make failures and cancellation visible
+### Agent Plugin stdio adds an immutable package requirement
 
-| Situation | Result to handle at the application boundary |
-| --- | --- |
-| A file-only sandbox is asked to run stdio MCP | `SandboxNoExecutorError` |
-| MCP server rejects authentication | `McpAuthError` |
-| MCP negotiation, list, or call fails | `McpProtocolError` |
-| The configured upstream tool does not exist | `ToolNotFoundError` |
-| Input or returned data misses a schema | `ValidationError` |
-| The caller cancels or a timeout expires | Normalized cancellation/timeout error |
+A trusted Agent Plugin is not simply a directory to execute. Its reviewed,
+digest-checked package bytes must be mounted immutably, while mutable state uses
+an application-owned data directory outside the plugin root. The sandbox must
+implement `mountReadOnly(...)` and prevent the spawned process from changing
+that mount.
 
-Pass the request abort signal when invoking the agent or workflow. The Harness
-propagates it to models, TypeScript tools, MCP calls, memory, and sandbox
-operations. Return a safe retryable/non-retryable response from the transport;
-do not reveal command lines, paths, credentials, or policy payloads.
+Neither `inMemorySandbox()` nor `localDirectorySandbox()` supplies this
+guarantee. Use an isolating custom adapter for trusted Agent Plugin stdio, even
+when the plugin is reviewed. Read [Agent Plugins](/handbook/harness/guide/agent-plugins/)
+for inspection and binding controls.
 
-Keep `builtinTools: false` unless the agent needs a specific built-in. A
-skill-backed agent normally needs only `builtinTools: ['read']`; it does not
-need `write`, `edit`, or `bash` to read its mounted `SKILL.md`.
+## Handle failures at the transport boundary
 
-## Verify the boundary
+| Situation | Normalized result | Safe response |
+| --- | --- | --- |
+| Files-only sandbox asked to execute or start stdio | `SandboxNoExecutorError` | Remove the capability or select a reviewed isolating adapter |
+| Stdio server dies, negotiation fails, or an MCP call fails | `McpProtocolError` | Return a safe retryable/non-retryable result; do not expose command lines or stderr |
+| Remote MCP rejects credentials | `McpAuthError` | Rotate/re-scope credentials; do not retry blindly |
+| MCP tool is absent or input/result misses the schema | `ToolNotFoundError` or `ValidationError` | Treat as configuration/integration failure and alert the owner |
+| A command/MCP operation exceeds its budget or caller cancels | Normalized timeout/cancellation error | Propagate cancellation, release the session, and record content-free diagnostics |
 
-Test the behavior users can observe, not an MCP implementation detail:
+Pass the caller's `AbortSignal` when invoking agents and workflows. For a
+custom adapter, honor it while opening, executing, and spawning; make
+`close()` idempotent and verify that it releases every process and workspace.
 
-1. The application stages an authorized evidence file and the agent can read it.
-2. A path outside the evidence directory is rejected by the TypeScript tool.
-3. A model cannot invoke a tool that is not listed on its agent definition.
-4. The policy MCP server receives a scoped identity and denies an unrelated
-   claim.
-5. A missing spawn capability produces `SandboxNoExecutorError` before a local
-   process starts.
-6. Cancellation closes live sandbox/MCP resources when the session is released.
+## Production baseline and verification
 
-For a custom sandbox, run `sandboxContract(() => createClaimsSandbox(), {
-executor: 'available' })` from `@purista/harness/testing`; add the snapshot
-contract when the adapter claims snapshot/resume support. Continue with
-[Durable Workflows & Queues](/handbook/harness/guide/durable-workflows-and-queues/)
-when a claim review must survive a worker restart.
+Before enabling a command-capable agent in production:
+
+1. Start files-only and explicitly enable only the built-ins, tools, agents,
+   and model aliases that a reviewed task needs.
+2. Give each run/tenant a scoped workspace lifecycle. Define retention,
+   encryption, quotas, and cleanup in the workspace platform—not only in a
+   session ID.
+3. Pass only task-scoped, short-lived credentials to a remote service or
+   isolated process. Never inherit broad host credentials into the sandbox.
+4. Enforce image/package provenance, immutable reviewed plugin mounts,
+   unprivileged process identity, default-deny egress, and resource ceilings in
+   the adapter platform.
+5. Keep logs and OpenTelemetry content-free; record IDs, decisions, durations,
+   usage where available, and normalized errors rather than evidence, prompts,
+   file contents, or credentials.
+6. Test denied paths as rigorously as successful ones: cross-tenant file
+   access, forbidden command, blocked egress, missing executor, expired token,
+   cancellation, quota/timeout, process cleanup, and stale workspace cleanup.
+
+For a custom adapter, run
+`sandboxContract(() => createClaimsSandbox(), { executor: 'available' })` from
+`@purista/harness/testing`; add the snapshot contract only when the adapter
+truthfully supports snapshot/resume. Add platform integration tests for the
+isolation claims that a generic contract cannot prove.
+
+Continue with [Durable Workflows & Queues](/handbook/harness/guide/durable-workflows-and-queues/)
+when a claims review must survive a worker restart, or
+[Custom Adapters](/handbook/harness/guide/custom-adapters/) to build the
+production execution boundary.

@@ -10,6 +10,7 @@ Use this reference when implementing PURISTA agents.
 - [Handler Context](#handler-context)
 - [Optional Governance Policy](#optional-governance-policy)
 - [Sandbox And Durable Workspaces](#sandbox-and-durable-workspaces)
+- [Enterprise Sandbox Boundary](#enterprise-sandbox-boundary)
 - [AI Security And Privacy](#ai-security-and-privacy)
 - [Streaming](#streaming)
 - [Multimodal](#multimodal)
@@ -155,6 +156,33 @@ Use `setSandboxPolicy(...)` when an attached agent needs mounted skills,
 filesystem built-ins, MCP stdio tools, or code execution. Sandbox capabilities
 such as `sandbox.snapshot`, `sandbox.resume`, and `sandbox.hibernate` describe
 low-level sandbox session behavior.
+
+## Enterprise Sandbox Boundary
+
+`setSandboxPolicy(...)` only selects or overrides the Harness adapter supplied
+in `getInstance(..., { ai: { sandbox } })`; it does not create a container,
+authorize a caller, or impose network and resource limits. Treat the adapter as
+an explicit deployment boundary.
+
+- Use the Harness `inMemorySandbox()` for files-only agent paths. It has no
+  executor and is the safest default.
+- Treat `bashSandbox()` as a trusted in-process helper, not a VM/container. It
+  cannot host `mcp_stdio` because it has no long-lived-process `spawn` support.
+- Treat local host-directory execution as a trusted-worker/durability option,
+  not isolation for untrusted model-directed commands or tenant boundaries.
+- For code execution or stdio MCP in production, wire a custom container,
+  microVM, or remote sandbox adapter that enforces mounts, egress, unprivileged
+  process identity, CPU/memory/PID/time limits, per-run/tenant workspace
+  lifecycle, cancellation and cleanup.
+- A trusted Agent Plugin stdio server needs both spawn support and an immutable
+  reviewed package mount. Neither the in-memory nor local host-directory
+  sandbox provides this `mountReadOnly(...)` guarantee.
+
+Keep domain authorization in PURISTA guards/resources and stage only
+tenant-authorized files. A schema and a tenant-looking session ID validate a
+shape or identify a run; neither grants access. For the implementation matrix,
+MCP lifecycle, and negative-test baseline, use the public Handbook page
+`/handbook/harness/guide/sandboxing-and-mcp/`.
 
 Use `setWorkspacePolicy(...)` only when an attached agent must resume from
 committed workspace state after queue retry, process restart, pause, or

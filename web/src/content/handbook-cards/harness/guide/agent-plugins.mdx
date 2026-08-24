@@ -136,7 +136,7 @@ request independently.
 | Plugin MCP type | Use it when | Required application control | Do not assume |
 | --- | --- | --- | --- |
 | Streamable HTTP | A reviewed remote MCP service already exists | Application-selected endpoint security, non-secret static headers, remote authorization | Package headers, redirects, or a package credential are accepted automatically |
-| Stdio | A reviewed local MCP server must run beside the agent | Application-owned `dataDirectory` outside the plugin root and a sandbox that supports spawning **and immutable package mounts** | `inMemorySandbox()` or the local host-directory sandbox can enforce an immutable mount |
+| Stdio | A reviewed local MCP server must run beside the agent | Application-owned `dataDirectory` outside the plugin root and a sandbox that supports spawning **and immutable package mounts** | `inMemorySandbox()` and the local host-directory sandbox cannot enforce an immutable mount |
 
 For a selected stdio server, attach an application-owned data directory when
 loading. The loader stages the reviewed package immutably and serializes its

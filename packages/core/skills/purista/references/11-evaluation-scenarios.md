@@ -10,6 +10,7 @@ Use these scenarios to test whether the `purista` skill gives an otherwise untra
 - [Scenario 5: Enterprise Runtime Review](#scenario-5-enterprise-runtime-review)
 - [Scenario 6: Skill Drift Repair](#scenario-6-skill-drift-repair)
 - [Scenario 7: Durable Agent Workspace Replay](#scenario-7-durable-agent-workspace-replay)
+- [Scenario 8: Command-Capable Agent Boundary](#scenario-8-command-capable-agent-boundary)
 
 ## Scenario 1: Greenfield Project Setup
 Prompt:
@@ -142,3 +143,35 @@ Validation:
 - retry resumes from the latest committed harness checkpoint and workspace checkpoint
 - terminal success and terminal failure cleanup paths are tested
 - explicit `required: false` non-durable restart is tested only when the product accepts restart semantics
+
+## Scenario 8: Command-Capable Agent Boundary
+
+Prompt:
+
+```text
+Attach a document-extraction agent to a PURISTA service. It receives customer
+uploads and must run a local stdio MCP extractor in a regulated multi-tenant
+deployment.
+```
+
+Expected behavior:
+- keeps caller and tenant authorization in PURISTA guards/resources and stages
+  only the authorized upload into the agent workspace
+- does not recommend `bashSandbox()` or local host-directory execution as the
+  production isolation boundary
+- wires a custom Harness sandbox adapter through the `ai.sandbox` runtime
+  binding and uses `setSandboxPolicy(...)` only to select/override that adapter
+- requires a spawn-capable isolating runtime with default-deny egress,
+  unprivileged identity, workload limits, per-run/tenant mounts, cancellation,
+  and cleanup
+- requires immutable reviewed package mounts in addition to spawn capability
+  when the extractor is a trusted Agent Plugin
+
+Validation:
+- the design names the adapter/platform owner for mounts, egress, process
+  identity, CPU/memory/PID/time limits, secrets, and retention cleanup
+- negative tests cover missing executor, cross-tenant file access, blocked
+  egress, forbidden command, cancellation/process cleanup, and stale workspace
+  cleanup
+- it explicitly rejects the near miss “a tenant-prefixed session ID and Zod
+  schema make host execution tenant-safe”

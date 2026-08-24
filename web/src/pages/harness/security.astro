@@ -23,13 +23,13 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     id="in-process"
     layout="viz-right"
     eyebrow="Security Architecture"
-    headline={[{ text: 'The harness lives ' }, { text: 'outside the sandbox.', color: 'con' }]}
-    lede="Most AI agent frameworks place the orchestration layer — credentials, API keys, access policies — inside or alongside the execution environment. When the model can reach them through tool calls or environment variables, so can an attacker with a prompt injection. PURISTA takes the opposite approach: the Harness runs in your application process. Only typed tool inputs ever cross the process boundary. Secrets never enter the sandbox."
+    headline={[{ text: 'Security follows ' }, { text: 'declared boundaries.', color: 'con' }]}
+    lede="The Harness runs in your application composition root and opens a session-owned sandbox through an adapter. Typed schemas, explicit tools, lifecycle control, and content-safe diagnostics reduce exposure. The selected adapter and its platform—not the word sandbox—enforce process, filesystem, network, identity, and resource isolation."
     items={[
-      'API keys and credentials stay in your application process — never injected into the sandbox environment.',
-      'Only typed, schema-validated tool inputs cross the boundary. No raw strings, no env vars, no secrets.',
-      'The sandbox handles execution only: LLM calls, file ops, and commands — nothing sensitive is visible there.',
-      'Even under successful prompt injection, the model cannot reach keys it was never given.',
+      'The application owns caller identity, domain authorization, secret delivery, tenancy, and business side effects.',
+      'Schemas validate model and tool data shapes; they do not grant access or make a remote service safe.',
+      'Files-only is the default. Command execution and long-lived processes require an explicit adapter capability.',
+      'Secrets stay protected only when the application and platform do not mount or inject them into model-reachable paths.',
     ]}
   >
     <div slot="visualization" class="w-full">
@@ -47,13 +47,13 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <div class="sec-pillars">
         <div class="sec-pillar">
           <span class="sec-pillar-label site-mono">Sandboxed Execution</span>
-          <p>Every agent runs in a controlled sandbox with explicit resource limits and timeout boundaries. File operations, tool calls, and MCP servers all respect the same boundary.</p>
+          <p>Each Harness session receives an adapter-owned filesystem and optional execution boundary. The platform must enforce any stronger isolation, egress, process identity, and resource limits.</p>
           <ul class="sec-pillar-list">
             <li>inMemorySandbox() — file-only, no command execution</li>
-            <li>bashSandbox() — command execution through just-bash</li>
+            <li>bashSandbox() — in-process execution helper, not a VM or container</li>
             <li>Declared skills mount under /skills/&lt;name&gt; and are read on demand</li>
-            <li>Custom adapters for containers or remote execution</li>
-            <li>Explicit executor availability: unavailable vs available</li>
+            <li>Custom adapters for containers, microVMs, or remote execution</li>
+            <li>Explicit filesystem, exec, spawn, and lifecycle capabilities</li>
           </ul>
         </div>
         <div class="sec-pillar">
@@ -97,18 +97,23 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     layout="viz-left"
     eyebrow="Sandbox"
     headline={[{ text: 'Controlled ' }, { text: 'execution', color: 'con' }]}
-    lede="Choose the right sandbox for your risk profile. File-only for safe agents. Command execution only where needed. Custom adapters for containers or remote isolation."
+    lede="Choose the smallest runtime boundary that meets the task. The built-ins are excellent files-only and trusted-development defaults; an enterprise command or stdio workload needs an isolating adapter and a platform policy you can test."
     items={[
       'inMemorySandbox() — file operations, no commands',
-      'bashSandbox() — command execution through just-bash',
+      'bashSandbox() — trusted in-process command helper; no stdio-process hosting',
       'Skills are mounted as files and the prompt lists only metadata plus /skills/<name>/SKILL.md',
-      'Custom Sandbox/SandboxSession for containers',
+      'Custom Sandbox/SandboxSession for a container, microVM, or remote runner',
+      'Platform-enforced mounts, egress, identity, quotas, and cleanup for command-capable work',
       'Snapshot, resume, and hibernate capabilities opt-in',
       'Preview ports and browser routing stay application-owned',
     ]}
   >
     <div slot="visualization" class="w-full">
       <HarnessFlow variant="sandbox" />
+      <p class="mt-5 text-sm leading-relaxed text-[var(--color-fg-muted)]">
+        The developer guide covers the threat model, exact built-in limits, MCP and Agent Plugin constraints, adapter contract, and negative-test baseline:
+        <a class="text-[var(--color-con)] underline underline-offset-4" href="/handbook/harness/guide/sandboxing-and-mcp/">Sandboxing &amp; MCP</a>.
+      </p>
     </div>
   </HarnessStory>
 
@@ -160,7 +165,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <span class="sec-check-num site-mono">02</span>
           <div>
             <div class="sec-check-title">Tenant-safe Session IDs</div>
-            <p>Define session IDs that include tenant boundaries. A session ID like <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">tenant-a:user-42</code> prevents cross-tenant data leakage by design.</p>
+            <p>Scope session, state, and workspace records to the tenant, but do not mistake an ID such as <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">tenant-a:user-42</code> for access control. Enforce authorization and per-tenant workspace lifecycle in the application and storage platform.</p>
           </div>
         </div>
         <div class="sec-check-row">
@@ -188,7 +193,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <span class="sec-check-num site-mono">06</span>
           <div>
             <div class="sec-check-title">Minimal Sandbox Permissions</div>
-            <p>Use <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">inMemorySandbox()</code> unless command execution is explicitly required. Bind skills explicitly, keep project discovery trusted-root gated, and never grant more than needed. The sandbox is an adapter — choose the right isolation level.</p>
+            <p>Use <code class="site-mono" style="font-size:0.82em;background:var(--color-bg);padding:0 0.3em;border-radius:3px">inMemorySandbox()</code> unless command execution is explicitly required. For commands or stdio MCP, use a custom adapter whose platform enforces mounts, egress, unprivileged identity, CPU/memory/PID limits, and cleanup; local host execution is not that boundary.</p>
           </div>
         </div>
         <div class="sec-check-row">
