@@ -12,6 +12,7 @@ import type {
 	ModelProvider,
 	RunEvent,
 	Session,
+	StateStore,
 	TelemetryOptions,
 } from '@purista/harness'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
@@ -648,7 +649,8 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	onExternalWaitPending?: (notice: AgentExternalWaitPendingNotice) => Promise<unknown> | unknown
 	workspaceStore?: AgentDurableWorkspaceStore
 	skills?: AgentSkillRuntimeOptions
-	stateStore?: unknown
+	/** Harness conversation state; use a DurableStateStore here for durable multi-instance workflows. */
+	stateStore?: StateStore
 	logger?: PuristaLogger
 	sandbox?: unknown
 	telemetry?: TelemetryOptions

@@ -8,6 +8,7 @@ import {
 	type ModelAlias,
 	type RunEvent,
 	type Session,
+	type StateStore,
 	type TelemetryOptions,
 } from '@purista/harness'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
@@ -44,7 +45,7 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	workspaceStore?: unknown
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
-	stateStore?: unknown
+	stateStore?: StateStore
 	sandbox?: unknown
 	telemetry?: TelemetryOptions
 	governance?: GovernanceConfig<any>
@@ -100,11 +101,12 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			return undefined
 		}
 
+		const stateStore = createPuristaHarnessStateStore(this.input.stateStore)
 		let builder: any = defineHarness({
 			name: `${this.input.manifest.serviceName}.${this.input.manifest.agentName}`,
 		})
 			.logger(createPuristaHarnessLogger(this.input.logger))
-			.state(createPuristaHarnessStateStore(this.input.stateStore as never))
+			.state(stateStore)
 			.models(this.resolvedModels)
 
 		if (this.input.telemetry) {

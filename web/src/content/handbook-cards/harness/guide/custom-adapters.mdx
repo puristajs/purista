@@ -12,7 +12,7 @@ example, select the smallest port that owns the integration:
 | Requirement | Existing core option | Extend this port when | Required evidence |
 | --- | --- | --- | --- |
 | Provider-neutral model calls | First-party `@purista/harness-<provider>` addon | The provider is not already supported | Provider contract tests and a scripted client |
-| Conversation history and run records | `InMemoryStateStore`, local SQLite via `localDurableExecution` | History/runs must use your database or tenancy model | State-store contract tests and migration/retention tests |
+| Conversation history and run records | `InMemoryStateStore`, `SqliteDurableStateStore` for one host | History/runs must use your database or tenancy model, or durable workflows need multi-instance safety | State-store/durable-state contract tests and migration/retention tests |
 | Scoped facts or semantic recall | Default `sandboxMemory()` | Memory needs persistence, TTL, search, user/tenant scope, or external retrieval | Memory contract tests and scope-isolation tests |
 | Files and optional command execution | `inMemorySandbox()`, `bashSandbox()`, local durable sandbox | You need containers, microVMs, remote runners, or immutable mounts | Sandbox contract plus isolation/cancellation tests |
 | Restart-safe workflow checkpoints | In-memory helpers or `localDurableExecution` | Workers need distributed leases or cloud persistence | Durable/workspace contract and replay tests |

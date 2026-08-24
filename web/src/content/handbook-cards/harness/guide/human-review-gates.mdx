@@ -35,17 +35,20 @@ the durable checkpoint.
 
 ## Smallest secure setup
 
-`localDurableExecution()` supplies SQLite-backed state, runtime, checkpoints,
-and the external-wait adapter for Node.js and Bun. Production deployments may
-provide their own adapter with the same contract.
+Production deployments supply one shared `DurableStateStore`. It owns
+conversation history, run records, durable checkpoints, leases, and opaque
+external waits in the same transactional backing system. Passing it to
+`.state(store)` derives the runtime/checkpoint/wait facets automatically.
+
+`SqliteDurableStateStore` and `localDurableExecution()` remain zero-dependency,
+single-host Node.js/Bun choices for development, demos, and restart tests—not
+for replicated PURISTA services.
 
 ```ts
-const durable = localDurableExecution({ root: '.purista/reviews', exec: false })
+const durableState: DurableStateStore = createProductionConversationStore()
 
 const harness = defineHarness({ name: 'payment-review' })
-  .state(durable.state)
-  .runtime(durable.runtime)
-  .externalWait(durable.externalWait)
+  .state(durableState)
   .requires(['runtime.persistent', 'external_wait.durable', 'external_wait.signal'])
   // models, agents, and workflow definitions
   .build()
@@ -89,7 +92,7 @@ or leave a worker blocked. Once an authenticated reviewer commits a compare-and
 set decision, deliver exactly one terminal signal:
 
 ```ts
-const result = await durable.externalWait.signal({
+const result = await durableState.signal({
   waitId: task.waitRef,
   eventId: decision.outboxEventId,
   outcome: decision.outcome // approved | rejected | expired | cancelled

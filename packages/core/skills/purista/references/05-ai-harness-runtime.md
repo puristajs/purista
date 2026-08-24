@@ -89,9 +89,9 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
       primary: { provider, model: 'gpt-4.1-mini', capabilities: ['object'], retry: true },
     },
     sandbox,
-    runtime,
     durableWorkflows: true,
-    externalWait,
+    // One shared Harness DurableStateStore; do not use Core's generic key/value store here.
+    stateStore: durableConversationStore,
     workspaceStore,
   },
 })
@@ -99,9 +99,11 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 
 Startup fails fast when aliases or capabilities are missing.
 
-For an application-owned durable human review, provide a Harness-compatible
-`ai.externalWait` and set `ai.durableWorkflows: true` for a wrapped Harness
-workflow. `ExternalWaitPendingError` is a normal queue suspension, not a failed
+For an application-owned durable human review, provide a Harness
+`DurableStateStore` through `ai.stateStore` and set `ai.durableWorkflows: true`
+for a wrapped Harness workflow. It is one shared conversation/run/checkpoint/
+wait adapter; the framework's generic key/value state store cannot substitute
+for it. `ExternalWaitPendingError` is a normal queue suspension, not a failed
 domain action. The application owns the guarded review task, reviewer identity,
 outbox signal, digest comparison on resume, and final idempotent command; Core
 does not provide review CRUD or a reviewer UI.
