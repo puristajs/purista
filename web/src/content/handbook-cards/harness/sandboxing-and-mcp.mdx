@@ -1,0 +1,183 @@
+---
+title: Sandboxing & MCP
+description: Give a claims-review agent the smallest execution and external-tool boundary it needs, with explicit isolation and failure behavior.
+---
+
+## What this protects
+
+A claims-review agent may need to read a submitted evidence file, consult a
+policy service, and produce a recommendation. Those are three different
+boundaries:
+
+| Boundary | Harness facility | What it does not decide |
+| --- | --- | --- |
+| Evidence files | `Sandbox` | Whether the claimant may access a file |
+| Policy lookup | TypeScript or MCP tool | Whether a claim should be approved |
+| Claim decision | Typed workflow and application service | Authentication, authorization, and payment |
+
+The application authenticates the adjuster and validates that they can review
+the claim before it opens a Harness session. The model, its output, and every
+tool argument remain untrusted. Start with no executable built-ins and add a
+capability only when the reviewed use case requires it.
+
+## Choose the narrowest sandbox
+
+| Need | Configure | Execution guarantee | Suitable for |
+| --- | --- | --- | --- |
+| Mount and read reviewed files | `inMemorySandbox()` | File APIs only; `executor` is unavailable | Policy skills, uploaded evidence staged by the application |
+| Run a limited local command | `bashSandbox()` | In-process `just-bash` execution; not a container or VM | Trusted development and tightly controlled transformations |
+| Persist local files with a checkpointed workflow | `localDurableExecution({ exec: false })` | Local files plus SQLite-backed durable workspace | Single-host claims-review workers |
+| Launch a long-lived stdio MCP server | A custom spawn-capable sandbox | Sandbox owns the server process and its lifetime | Isolated container, microVM, or remote execution adapter |
+
+`inMemorySandbox()` is the safe default for a text-and-tool claims review. It
+does not provide command execution. `bashSandbox()` adds `sandbox.exec`, but
+does **not** add `sandbox.spawn`; it cannot run `mcp_stdio`. The local durable
+bundle is files-only unless you explicitly set `exec`. Host execution is a
+trust decision, not a model feature.
+
+The core package exports `z`, so code can use it without adding `zod` to the
+application's install command:
+
+```ts
+import { defineHarness, inMemorySandbox, z } from '@purista/harness'
+
+const harness = defineHarness({ name: 'claims-review' })
+  .sandbox(inMemorySandbox())
+  .tools({
+    read_claim_evidence: {
+      description: 'Read one reviewed evidence file already staged for this claim.',
+      input: z.object({ filename: z.string().regex(/^[a-z0-9._-]+$/i) }),
+      output: z.object({ text: z.string().max(20_000) }),
+      handler: async (ctx, { filename }) => ({
+        text: await ctx.sandbox.readText(`/workspace/evidence/${filename}`)
+      })
+    }
+  })
+  // Define models before agents; give the review agent only this explicit tool.
+  .build()
+```
+
+The application, not the model, stages only files that belong to the authorized
+claim. Validate the filename and constrain the base path even though the
+sandbox normalizes paths. Do not use a model-generated path as an access-control
+decision, and do not log evidence content.
+
+## Add a policy MCP server over HTTP
+
+Use `mcp_http` when the policy server is already available through modern
+Streamable HTTP. It avoids local process launch and works with the file-only
+sandbox above. The Harness obtains the upstream tool schema with `tools/list`,
+validates the call and result, and exposes a normalized JSON result to the
+agent.
+
+```ts
+const harness = defineHarness({ name: 'claims-review' })
+  .sandbox(inMemorySandbox())
+  .tools({
+    claim_policy: {
+      kind: 'mcp_http',
+      description: 'Look up an insurance-policy clause by policy and topic.',
+      url: process.env.CLAIMS_POLICY_MCP_URL!,
+      auth: { kind: 'bearer', token: process.env.CLAIMS_POLICY_MCP_TOKEN! },
+      redirect: 'error',
+      tool: 'policy.lookup'
+    }
+  })
+  .models({
+    reviewer: {
+      provider: claimsModelProvider,
+      model: 'claims-review-v1',
+      capabilities: ['object', 'tool_use']
+    }
+  })
+  .agents(({ agent }) => ({
+    review: agent({
+      model: 'reviewer',
+      tools: ['claim_policy'],
+      builtinTools: false,
+      input: z.object({ claimId: z.string(), policyNumber: z.string(), incidentType: z.string() }),
+      output: z.object({ recommendation: z.enum(['approve', 'refer']), rationale: z.string() }),
+      instructions: 'Use claim_policy for a policy clause. Refer any uncertain claim.'
+    })
+  }))
+  .build()
+```
+
+Keep the MCP URL and scoped token in deployment configuration. `redirect:
+'error'` is appropriate for credentialed servers because it prevents a redirect
+from forwarding credentials to another origin. An MCP tool is not an
+authorization mechanism: its server must independently authorize the token and
+scope access to the claim/policy data it returns.
+
+## When stdio MCP is appropriate
+
+`mcp_stdio` is for a reviewed local command, such as a document-extraction MCP
+server running in a tenant-isolated worker. It needs a sandbox session that
+implements `spawn`, so the Harness can start one persistent server, perform one
+initialization handshake, reuse its state, and terminate it when the session is
+released.
+
+```ts
+.tools({
+  extract_evidence: {
+    kind: 'mcp_stdio',
+    description: 'Extract text from a reviewed claim document in the sandbox workspace.',
+    command: '/opt/claims-mcp/bin/server',
+    args: ['--workspace', '/workspace'],
+    cwd: '/workspace',
+    env: { EXTRACTION_MODE: 'text-only' },
+    tool: 'evidence.extract'
+  }
+})
+```
+
+Do not copy this configuration onto `inMemorySandbox()` or `bashSandbox()`;
+the call fails with `SandboxNoExecutorError` because neither can spawn a
+long-lived process. A production adapter should isolate filesystem mounts,
+network egress, process identity, CPU/memory limits, and cleanup. If the MCP
+server exits during a call, the current call fails as `McpProtocolError`; a
+later call opens a fresh server. Design the server operation to be idempotent.
+
+An optional `install` command is available for sandbox-local bootstrapping, but
+it should be idempotent, pinned, and run only in a pre-reviewed image or a
+separate staging step. Do not let a model choose a package, command, or
+installation source.
+
+## Make failures and cancellation visible
+
+| Situation | Result to handle at the application boundary |
+| --- | --- |
+| A file-only sandbox is asked to run stdio MCP | `SandboxNoExecutorError` |
+| MCP server rejects authentication | `McpAuthError` |
+| MCP negotiation, list, or call fails | `McpProtocolError` |
+| The configured upstream tool does not exist | `ToolNotFoundError` |
+| Input or returned data misses a schema | `ValidationError` |
+| The caller cancels or a timeout expires | Normalized cancellation/timeout error |
+
+Pass the request abort signal when invoking the agent or workflow. The Harness
+propagates it to models, TypeScript tools, MCP calls, memory, and sandbox
+operations. Return a safe retryable/non-retryable response from the transport;
+do not reveal command lines, paths, credentials, or policy payloads.
+
+Keep `builtinTools: false` unless the agent needs a specific built-in. A
+skill-backed agent normally needs only `builtinTools: ['read']`; it does not
+need `write`, `edit`, or `bash` to read its mounted `SKILL.md`.
+
+## Verify the boundary
+
+Test the behavior users can observe, not an MCP implementation detail:
+
+1. The application stages an authorized evidence file and the agent can read it.
+2. A path outside the evidence directory is rejected by the TypeScript tool.
+3. A model cannot invoke a tool that is not listed on its agent definition.
+4. The policy MCP server receives a scoped identity and denies an unrelated
+   claim.
+5. A missing spawn capability produces `SandboxNoExecutorError` before a local
+   process starts.
+6. Cancellation closes live sandbox/MCP resources when the session is released.
+
+For a custom sandbox, run `sandboxContract(() => createClaimsSandbox(), {
+executor: 'available' })` from `@purista/harness/testing`; add the snapshot
+contract when the adapter claims snapshot/resume support. Continue with
+[Durable Workflows & Queues](/handbook/harness/durable-workflows-and-queues/)
+when a claim review must survive a worker restart.
