@@ -104,6 +104,26 @@ Use \`rails.config.sensitive_data_detection\` for exact entity, mask-token, and 
 
 Sensitive-data inspection is content-free and fail-closed. It creates a nested \`harness.sensitive_data.inspect\` GUARDRAIL span and inspection/duration metrics, but no model, token, or cost attributes. A nested standard LLM span remains the authoritative token/cost record for a model-backed check.
 
+## What can I do with each detector?
+
+“Deployment recognizer dependent” means the application-owned Presidio Analyzer deployment must already contain the relevant recognizer or model; the Harness adapter does not install or configure it.
+
+| I want to… | Presidio sidecar | Native privacy |
+| --- | --- | --- |
+| Block PII before an agent, model, tool, or retrieval boundary | Yes | Yes |
+| Replace or remove a detected whole value with the configured mask token | Yes | Yes |
+| Detect email, phone, payment-card, IPv4, IBAN, or US SSN values | Deployment recognizer dependent | Built in; validation depth varies by entity |
+| Detect IPv6 addresses | Deployment recognizer dependent | Not supplied |
+| Detect HTTP(S) URLs | Deployment recognizer dependent | Built in, HTTP(S) only |
+| Detect names, locations, organizations, medical, or other NER/model entities | Deployment recognizer/model dependent | Not supplied |
+| Detect application-specific identifiers | Custom recognizer dependent | Not supplied |
+| Choose a detection language | One fixed composition-root language per detector | No NLP language model |
+| Keep detection in-process without a network hop | Not supplied | Yes |
+| Protect reviewed structured tool fields | Yes, explicit codec | Yes, explicit codec |
+| Script deterministic tests | \`FakePresidioSidecar\` | \`FakeSensitiveDataDetector\` |
+
+Neither option currently generates realistic replacement data, applies per-entity replacements, partially masks, hashes/encrypts values, processes full CSV/JSON data, redacts image/PDF OCR, or provides batch APIs. The adapter calls Presidio Analyzer detection only, not Presidio Anonymizer.
+
 ## Deterministic testing
 
 Use \`FakeSensitiveDataDetector\` from \`@purista/harness-guardrails/testing\` to script findings, results, or errors for unit, workflow, and tool tests. Use \`FakePresidioSidecar\` from \`@purista/harness-guardrails-presidio/testing\` as the injected fetch implementation to script \`POST /analyze\` responses and transport faults. It validates the wire contract without imitating Presidio recognizers or NLP. Both helpers retain test-only in-memory request records; never copy those records to logs, snapshots, or telemetry.
