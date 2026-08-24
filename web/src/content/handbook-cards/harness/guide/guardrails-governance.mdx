@@ -53,6 +53,61 @@ Create `guardrails/config.yml`. It uses a strict, portable subset of the NeMo
 Guardrails vocabulary. The flow names are application-owned identifiers: YAML
 selects and orders them, while TypeScript implements their behavior.
 
+### Supported NeMo-shaped configuration: exact v1 surface
+
+The parser rejects unknown fields at every accepted mapping. This is a compact
+interoperability format, not a general NeMo runtime. The following is the full
+YAML surface accepted by the current package.
+
+| YAML location | Accepted fields | Runtime meaning in Harness |
+| --- | --- | --- |
+| Root | `models`, `instructions`, `prompts`, `custom_data`, `rails` | Only these root keys are accepted. |
+| `models[]` | required `type`; optional `engine`, `model`, `parameters` (JSON-compatible) | Preserved inventory metadata. It never creates a provider; `modelAliases` in TypeScript maps a model `type` to an existing Harness alias for a model-check action. |
+| `instructions` | array of non-empty strings | Preserved migration metadata; it does **not** inject an agent system prompt. Use the typed agent `instructions` field. |
+| `prompts`, `custom_data` | any JSON-compatible value | Preserved migration metadata only. The Harness does not render templates or execute values from them. |
+| `rails.input`, `rails.output`, `rails.tool_input`, `rails.tool_output`, `rails.retrieval` | `flows`: ordered array of non-empty flow IDs | Each ID must have an application-owned TypeScript action. Actions run sequentially; no parallel mode exists because transforms have observable order. |
+| `rails.config` | `sensitive_data_detection` only | Contains the strict input/output/retrieval PII policies described below. |
+
+The supported phase semantics are deliberately direct:
+
+| Phase | What the action sees | Required transform target | How it is invoked |
+| --- | --- | --- | --- |
+| `input` | Parsed agent input | `user_message` | Automatic default-loop interceptor before transcript/model work |
+| `output` | Model object/result value | `bot_message` | Automatic default-loop interceptor before output validation, events, or persistence |
+| `tool_input` | Parsed JSON-compatible tool input | `tool_input` | Automatic interceptor before permissions, governance, schema validation, and side effect |
+| `tool_output` | Validated JSON-compatible tool result | `tool_output` | Automatic interceptor before the model receives the result |
+| `retrieval` | Application-provided JSON-compatible chunk array | `relevant_chunks` | Explicit `rails.filterRetrievedChunks(chunks, context)` call in an application workflow |
+
+Every action returns exactly `allow`, `block`, or a phase-appropriate
+`transform`. A missing action, invalid target/outcome, action exception, or
+timeout fails closed. The six reserved sensitive-data IDs are
+`detect`/`mask sensitive data on input`, `detect`/`mask sensitive data on
+output`, and `detect`/`mask sensitive data on retrieval`; they must be created
+with `createSensitiveDataActions`, not a hand-written action.
+
+### Not supported — and the Harness-native alternative
+
+The package rejects `.co` and `.py` files anywhere below the config directory,
+`prompts.yml`/`prompts.yaml`, and NeMo `actions` or `kb` directories. It also
+rejects `rails.dialog`, `rails.execution`, every other rail category,
+`parallel`, NeMo action/server settings, provider endpoints/keys, implicit
+knowledge bases/vector stores, and NeMo prompt-template execution.
+
+This is intentional. Colang dialog execution would require a second workflow
+and dialogue-state runtime with different cancellation, persistence, tool, and
+security semantics. Python files and NeMo server/provider construction would
+break the TypeScript, provider-neutral, application-owned composition boundary.
+Implicit RAG would hide authorization and data residency. Use typed Harness
+workflows and state for dialogue/process control, TypeScript rail actions and
+tools for checks/side effects, Harness provider adapters/model aliases for
+models, and application-owned retrieval for vectors and access control.
+
+We should not promise full NeMo compatibility without a separate approved
+runtime and migration contract. It would be a different product surface, not a
+parser extension, and would weaken the Harness's static typing, predictable
+lifecycle, and security model. The portable subset is intentionally designed
+to share policy vocabulary while making every executable behavior explicit.
+
 ```yaml
 models:
   - type: main
@@ -108,10 +163,11 @@ The `models` entries are portable policy metadata. `engine: harness` and the
 portable `type` names to aliases already registered with Harness in TypeScript.
 
 Only `input`, `output`, `tool_input`, `tool_output`, and `retrieval` rails are
-supported. `config.py`, `actions.py`, Colang (`.co`) files, dialog rails,
-execution rails, implicit vector stores, and server configuration are rejected
-rather than silently approximated. The config directory must contain exactly
-one `config.yml` or `config.yaml`.
+supported. `.co` and `.py` files anywhere below the configuration directory,
+`prompts.yml`/`prompts.yaml`, and NeMo `actions` or `kb` directories are
+rejected, as are dialog rails, execution rails, implicit vector stores, and
+server configuration. The config directory must contain exactly one
+`config.yml` or `config.yaml`.
 
 ### Sensitive-data policy fields
 
