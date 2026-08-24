@@ -29,7 +29,8 @@ SQLite state/runtime/checkpoints and a local durable workspace. Command
 execution stays disabled by default.
 
 ```ts
-import { defineHarness, localDurableExecution, z } from '@purista/harness'
+import { defineHarness, localDurableExecution } from '@purista/harness'
+import { z } from 'zod'
 
 const durable = localDurableExecution({
   root: '.purista/claims-review',
@@ -69,6 +70,8 @@ same run ID; its callback does not run again. Make a call outside a step only
 when rerunning it is explicitly safe.
 
 ```ts
+import { z } from 'zod'
+
 const ClaimReview = z.object({
   recommendation: z.enum(['approve', 'refer']),
   reasons: z.array(z.string())
@@ -219,6 +222,6 @@ Write deterministic tests for the exact operational promises:
 5. Verify retention/cleanup and quota-exceeded behavior with the production
    workspace adapter's test environment.
 
-Continue with [Custom Adapters](/handbook/harness/custom-adapters/) to build a
+Continue with [Custom Adapters](/handbook/harness/guide/custom-adapters/) to build a
 provider, state, memory, sandbox, or durable-runtime integration without
 breaking Harness lifecycle, cancellation, or telemetry behavior.

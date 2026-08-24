@@ -35,11 +35,13 @@ does **not** add `sandbox.spawn`; it cannot run `mcp_stdio`. The local durable
 bundle is files-only unless you explicitly set `exec`. Host execution is a
 trust decision, not a model feature.
 
-The core package exports `z`, so code can use it without adding `zod` to the
-application's install command:
+Install `zod` explicitly and import it from `zod`. The Harness accepts its
+schemas at every typed boundary; it does not replace the application's schema
+dependency:
 
 ```ts
-import { defineHarness, inMemorySandbox, z } from '@purista/harness'
+import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { z } from 'zod'
 
 const harness = defineHarness({ name: 'claims-review' })
   .sandbox(inMemorySandbox())
@@ -71,6 +73,10 @@ validates the call and result, and exposes a normalized JSON result to the
 agent.
 
 ```ts
+import { defineHarness, inMemorySandbox } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+import { z } from 'zod'
+
 const harness = defineHarness({ name: 'claims-review' })
   .sandbox(inMemorySandbox())
   .tools({
@@ -85,8 +91,8 @@ const harness = defineHarness({ name: 'claims-review' })
   })
   .models({
     reviewer: {
-      provider: claimsModelProvider,
-      model: 'claims-review-v1',
+      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
       capabilities: ['object', 'tool_use']
     }
   })
@@ -179,5 +185,5 @@ Test the behavior users can observe, not an MCP implementation detail:
 For a custom sandbox, run `sandboxContract(() => createClaimsSandbox(), {
 executor: 'available' })` from `@purista/harness/testing`; add the snapshot
 contract when the adapter claims snapshot/resume support. Continue with
-[Durable Workflows & Queues](/handbook/harness/durable-workflows-and-queues/)
+[Durable Workflows & Queues](/handbook/harness/guide/durable-workflows-and-queues/)
 when a claim review must survive a worker restart.
