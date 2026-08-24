@@ -57,11 +57,11 @@ function getItemHref(item: SidebarItem): string {
         <div class="px-4 py-6">
           <a href="/handbook" class="flex items-center gap-2.5 mb-7 px-2">
             <div class="w-6 h-6 grid place-items-center bg-[var(--color-fg)] text-[var(--color-bg)] rounded text-xs font-extrabold font-display shrink-0">P</div>
-            <span class="font-display font-semibold text-sm tracking-tight" style="color: var(--color-fg-strong)">Handbook</span>
+            <span class="font-display font-semibold text-sm tracking-tight" style="color: var(--color-fg-strong)">PURISTA Framework</span>
           </a>
           <nav class="space-y-0.5">
             {sidebar.map((item) => (
-              <div class="hbl-group">
+              <div class:list={['hbl-group', { 'pt-5 mt-5 border-t border-[var(--color-line)]': item.sectionStart }]}>
                 <a
                   href={getItemHref(item)}
                   class={`hbl-item ${

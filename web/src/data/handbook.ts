@@ -521,20 +521,64 @@ export function getAllCards(): (HandbookCard & {
 }
 
 export function getSidebarItems(): SidebarItem[] {
+	const frameworkSections = handbookSections.filter(section => section.id !== 'harness')
+	const harnessSection = handbookSections.find(section => section.id === 'harness')
+	const harnessGuide = harnessSection?.cards.find(card => card.id === 'guide')
+
+	const frameworkLabels: Record<string, string> = {
+		learn: 'Start Here',
+		'mental-model': 'Foundations',
+		service: 'Services',
+		blocks: 'Building Blocks',
+		stores: 'Stores',
+		expose: 'APIs & Clients',
+		bridges: 'Messaging',
+		patterns: 'Patterns',
+		ops: 'Operations',
+	}
+
+	const frameworkCardLabels: Record<string, string> = {
+		'learn/getting-started': 'Quickstart',
+		'service/what-is-service': 'Service Overview',
+		'service/service-builder': 'Service Builder',
+		'service/service-config': 'Configuration',
+		'service/service-resources': 'Resources',
+		'service/custom-service-class': 'Custom Service',
+		'service/service-testing': 'Service Tests',
+		'expose/rest-api': 'REST API',
+		'expose/graphql': 'GraphQL',
+		'expose/service-discovery': 'Service Discovery',
+		'bridges/direct-calls': 'Service Calls',
+		'ops/opentelemetry': 'OpenTelemetry',
+		'ops/deployment': 'Deployment',
+	}
+
+	const harnessLabels: Record<string, string> = {
+		'harness/guide/overview': 'Overview',
+		'harness/guide/quickstart': 'Quickstart',
+		'harness/guide/models-and-configuration': 'Configuration',
+		'harness/guide/tools-and-skills': 'Tools & Skills',
+		'harness/guide/agents-workflows-state': 'Agents & Workflows',
+		'harness/guide/guardrails-governance': 'Guardrails',
+		'harness/guide/testing-and-evaluations': 'Tests & Evaluations',
+		'harness/guide/observability-operations': 'Observability',
+		'harness/adapters-durability-reference': 'Adapters & Deployment',
+	}
+
 	return [
-		...handbookSections.map(section => ({
-			title: section.title,
+		...frameworkSections.map(section => ({
+			title: frameworkLabels[section.id] ?? section.title,
 			id: section.id,
 			order: section.num,
 			items: section.cards.map(card => ({
-				title: card.title,
+				title: frameworkCardLabels[`${section.id}/${card.id}`] ?? card.title,
 				id: `${section.id}/${card.id}`,
 				order: 0,
 				items: card.items,
 			})),
 		})),
 		{
-			title: 'API Documentation',
+			title: 'API Reference',
 			id: 'api',
 			href: '/handbook/api/',
 			order: handbookSections.length + 1,
@@ -547,5 +591,16 @@ export function getSidebarItems(): SidebarItem[] {
 				{ title: 'Types', id: 'api/types', href: '/handbook/api/#types', order: 6 },
 			],
 		},
+		...(harnessGuide ? [{
+			title: 'AI Harness',
+			id: 'harness',
+			href: '/handbook/harness/',
+			order: handbookSections.length + 2,
+			sectionStart: true,
+			items: harnessGuide.items?.map(item => ({
+				...item,
+				title: harnessLabels[item.id] ?? item.title,
+			})),
+		}] : []),
 	]
 }

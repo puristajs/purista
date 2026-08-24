@@ -5,6 +5,7 @@ export interface SidebarItem {
   id: string;
   order: number;
   href?: string;
+  sectionStart?: boolean;
   items?: SidebarItem[];
 }
 
