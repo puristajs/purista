@@ -16,6 +16,7 @@ type Variant =
 	| 'agent-lifecycle'
 	| 'durable-run'
 	| 'trace-tree'
+	| 'guardrails-lifecycle'
 	| 'privacy'
 	| 'jaeger'
 	| 'severity'
@@ -220,6 +221,18 @@ const scenes: Record<Variant, Scene> = {
 			{ label: 'Tool', detail: 'input, output, error', tone: 'con' },
 			{ label: 'Finish', detail: 'status + cost signal', tone: 'pilot' },
 		],
+	},
+	'guardrails-lifecycle': {
+		eyebrow: 'Guardrails lifecycle',
+		title: 'Every protected boundary produces a decision and evidence.',
+		steps: [
+			{ label: 'Input', detail: 'schema, then rails', tone: 'pilot' },
+			{ label: 'Retrieval', detail: 'explicit filter', tone: 'found' },
+			{ label: 'Model', detail: 'provider call', tone: 'con' },
+			{ label: 'Tools', detail: 'in and out rails', tone: 'pilot' },
+			{ label: 'Output', detail: 'validate or block', tone: 'found' },
+		],
+		note: 'Configured rails run sequentially. A block, timeout, invalid outcome, or detector failure stops the protected path fail-closed.',
 	},
 	privacy: {
 		eyebrow: 'Content capture',

@@ -33,6 +33,78 @@ business approvals, rate limits, persistence, and the final HTTP/queue error
 mapping. Guardrails add content and execution controls to those existing
 boundaries.
 
+## Guardrails lifecycle and coverage
+
+The diagram shows one complete **default-loop agent** run. Solid arrows are
+ordered execution. The tool path may repeat until the model produces a final
+object. The retrieval path is optional and explicitly invoked by application
+code; it is not an implicit vector-store integration.
+
+```mermaid
+flowchart TD
+  request[Typed request] --> schema[Zod input schema and application authentication]
+  schema --> input[Input rails: ordered allow, block, or transform]
+  input --> retrieve[Application retrieval, if used]
+  retrieve --> retrieval[Retrieval rails: explicit filterRetrievedChunks call]
+  retrieval --> model[Registered Harness model call]
+  model --> output[Output rails: completed structured model value]
+  output --> tool{Model requested a tool?}
+  tool -- yes --> toolInput[Tool-input rails: ordered allow, block, or transform]
+  toolInput --> authority[Permissions, governance, schema validation]
+  authority --> sideEffect[Application or MCP tool side effect]
+  sideEffect --> toolOutput[Tool-output rails: before result returns to model]
+  toolOutput --> model
+  tool -- no --> validate[Output schema, persistence, event, or client response]
+
+  input -. content-free span, metric, log .-> evidence[(OpenTelemetry evidence)]
+  retrieval -. content-free span, metric, log .-> evidence
+  output -. content-free span, metric, log .-> evidence
+  toolInput -. content-free span, metric, log .-> evidence
+  toolOutput -. content-free span, metric, log .-> evidence
+
+  classDef control fill:#dbeafe,stroke:#2563eb,color:#172554
+  classDef boundary fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef external fill:#fef3c7,stroke:#d97706,color:#78350f
+  class input,retrieval,output,toolInput,toolOutput control
+  class schema,authority,validate boundary
+  class retrieve,model,sideEffect external
+```
+
+### What is automatic, explicit, and outside the boundary
+
+| Path or situation | Coverage | What the application must know |
+| --- | --- | --- |
+| Input to an attached default-loop agent | Automatic | Rails run after the agent input schema and before dynamic instructions, transcript use, or a model call. |
+| Completed structured model result | Automatic | Output rails run after each model result and before tool dispatch, output validation, persistence, or delivery. They evaluate the completed object, not arbitrary partial stream chunks. |
+| TypeScript, built-in, and MCP tool calls | Automatic | Tool-input rails run before permissions, governance, schema validation, and side effects. Tool-output rails run before the result returns to the model. Authorization and approval still remain application controls. |
+| Workflow that delegates to a guarded agent | Automatic for that agent invocation | The workflow and rail spans share the normal run context. Guardrails do not turn the whole workflow into a policy engine. |
+| Application retrieval | Explicit | Call `filterRetrievedChunks(...)` before chunks are added to an agent input. Skipping that call skips retrieval rails. |
+| Skill files | Indirect through the `read` tool | A rail can govern a skill read call; it does not scan every mounted skill file at startup. |
+| Direct `ctx.models.*` call or custom-handler agent | Not automatic | The caller owns model and tool lifecycle. `rails.attach(...)` rejects custom-handler agents instead of promising incomplete coverage. |
+| Structured JSON fields for sensitive-data inspection | Explicit codec required | The PII addon never recursively scans arbitrary tool JSON; select and reconstruct reviewed fields with a `SensitiveDataValueCodec`. |
+
+### Ordering, concurrency, and failure behavior
+
+- Rails listed within one phase always execute **sequentially** in YAML order.
+  A transform becomes the value seen by the next rail. There is no `parallel`
+  mode because ordering changes the result.
+- A workflow may concurrently prepare independent application work, such as a
+  search request and a deterministic lookup, but it must apply the relevant
+  input/retrieval rails before that data reaches the model. Guardrails do not
+  schedule or synchronize application concurrency.
+- `block` stops the protected path without calling the next model, tool, or
+  delivery boundary. Missing actions, invalid outcomes, detector/codec faults,
+  cancellation-protocol faults, and action timeouts fail closed.
+- A guardrail is a content and execution control, not an identity, tenancy,
+  rate-limit, or business-authorization system. Keep those controls in schemas,
+  trusted context, permissions, governance, and application code.
+
+Every evaluation creates a content-free OpenInference `GUARDRAIL` child span,
+a decision counter, and a duration metric. When a `modelCheckRail` invokes a
+registered model, its nested LLM span carries the provider, model, and reported
+token usage when available; this attributes safety-model cost without putting
+content or invented prices on the guardrail span.
+
 ## 1. Install the optional addon
 
 Install the core Harness, your selected model adapter, and Guardrails. A

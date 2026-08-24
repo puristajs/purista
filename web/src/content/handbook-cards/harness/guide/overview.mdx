@@ -3,6 +3,25 @@ title: Overview
 description: Decide where the Harness fits and keep responsibility boundaries explicit from the first agent.
 ---
 
+## Choose the smallest useful package set
+
+The Harness is one typed runtime plus optional, explicitly selected packages.
+Start with the core package and one model provider. Add Guardrails, local
+privacy detection, Agent Plugins, MCP, or a more capable sandbox only when the
+use case needs that boundary.
+
+| Need | Install | Next step |
+| --- | --- | --- |
+| Typed agents, workflows, tools, state, streaming, and telemetry | `@purista/harness` | [Quickstart](/handbook/harness/guide/quickstart/) |
+| A model provider | One of the four first-party provider adapters | [Models and configuration](/handbook/harness/guide/models-and-configuration/) |
+| Content, tool, retrieval, or PII controls | `@purista/harness-guardrails` and, when required, one privacy detector | [Guardrails and governance](/handbook/harness/guide/guardrails-governance/) |
+| Reviewed local Agent Plugins v1 | `@purista/harness-agent-plugins` | [Tools and skills](/handbook/harness/guide/tools-and-skills/) |
+| A complete package-by-package decision map | Any first-party Harness package | [Ecosystem and packages](/handbook/harness/guide/ecosystem-packages/) |
+
+The [Ecosystem and packages](/handbook/harness/guide/ecosystem-packages/) page
+is the authoritative catalogue for all first-party packages, optional peers,
+minimal configuration, and the focused implementation guides.
+
 ## Before you begin
 
 This chapter assumes a TypeScript application on Node.js or Bun and a package

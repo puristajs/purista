@@ -11,6 +11,7 @@ export type PrimaryNavKey = (typeof primaryNavLinks)[number]['key']
 export const harnessNavLinks = [
 	{ href: '/harness/', label: 'Overview' },
 	{ href: '/harness/architecture/', label: 'Architecture' },
+	{ href: '/handbook/harness/guide/ecosystem-packages/', label: 'Packages' },
 	{ href: '/harness/guardrails/', label: 'Guardrails' },
 	{ href: '/harness/security/', label: 'Production' },
 	{ href: '/harness/use-cases/', label: 'Use Cases' },
