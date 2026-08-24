@@ -1,6 +1,6 @@
 ---
 title: Durable Workflows & Queues
-description: Resume a claims-review workflow from committed steps while keeping message delivery, idempotency, and human approval in the application.
+description: Resume a claims-review workflow from committed steps while keeping message delivery, idempotency, and application-owned review decisions explicit.
 ---
 
 ## Two kinds of durability
@@ -18,9 +18,11 @@ claims. The queue and the Harness solve different failures:
 | Approve, reject, or request more evidence | Domain process | Typed, authenticated review/approval endpoint and audit record |
 
 Harness durable execution does not enqueue work, acknowledge a PURISTA queue
-message, coordinate a distributed payment transaction, or make a human
-approval durable by itself. It records and replays **workflow steps**. Keep
-business delivery and review state in your application records.
+message, or coordinate a distributed payment transaction. It records and
+replays **workflow steps**. The optional external-wait adapter can safely
+suspend a run for an application-owned terminal decision; the application still
+owns reviewer identity, review state, authorization, outbox delivery, and the
+final idempotent business command. See [Human Review Gates](/handbook/harness/guide/human-review-gates/).
 
 ## Configure a local durable claims worker
 
@@ -40,6 +42,7 @@ const durable = localDurableExecution({
 const harness = defineHarness({ name: 'claims-review-worker' })
   .state(durable.state)
   .runtime(durable.runtime)
+  .externalWait(durable.externalWait)
   .sandbox(durable.sandbox)
   .workspaceStore(durable.workspaceStore)
   .checkpoints(durable.checkpoints)

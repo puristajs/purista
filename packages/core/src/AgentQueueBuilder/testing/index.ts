@@ -230,6 +230,8 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	skills?: AgentSkillRuntimeOptions
 	logger?: PuristaLogger
 	governance?: GovernanceConfig<any>
+	durableWorkflows?: boolean
+	externalWait?: import('../types.js').AgentExternalWaitAdapter
 }
 
 /** Create a deterministic runtime harness for one attached agent definition. */
@@ -245,6 +247,8 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		skillRuntime,
 		logger: options.logger,
 		governance: options.governance,
+		durableWorkflows: options.durableWorkflows,
+		externalWait: options.externalWait,
 	})
 	definition.runtime.current = executor
 

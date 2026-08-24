@@ -53,6 +53,8 @@ export async function initializeAttachedAgentRuntimes(
 				manifest: definition.manifest,
 				models: aiOptions.models as never,
 				runtime: aiOptions.runtime,
+				durableWorkflows: aiOptions.durableWorkflows,
+				externalWait: aiOptions.externalWait,
 				workspaceStore: aiOptions.workspaceStore,
 				skillRuntime,
 				logger: aiOptions.logger,

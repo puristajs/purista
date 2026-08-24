@@ -15,6 +15,7 @@ export {
 } from './testing/index.js'
 export type {
 	AgentDefinition,
+	AgentExternalWaitAdapter,
 	AgentDurableWorkspaceStore,
 	AgentDurableWorkspaceStorePolicy,
 	AgentExecutionDefinition,

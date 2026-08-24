@@ -290,6 +290,16 @@ export type AgentDurableWorkspaceStore = {
 	}
 }
 
+/** Structural pass-through contract for a Harness durable external-wait adapter. */
+export type AgentExternalWaitAdapter = {
+	readonly id?: string
+	readonly capabilities: readonly string[]
+	register(request: { waitId: string; kind: string; schemaVersion: string; definitionVersion: string; deadline: string }): Promise<unknown>
+	get(waitId: string): Promise<unknown>
+	signal(signal: { waitId: string; eventId: string; outcome: 'approved' | 'rejected' | 'expired' | 'cancelled'; observedAt?: string }): Promise<unknown>
+	cancel(waitId: string, eventId: string, observedAt?: string): Promise<unknown>
+}
+
 /** Durable workspace behavior declared by an attached agent manifest. */
 export type AgentWorkspacePolicy = {
 	mode: 'durable'
@@ -621,6 +631,10 @@ export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ?
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
+	/** Run attached Harness workflows with a stable durable run id derived from the delivery message. */
+	durableWorkflows?: boolean
+	/** Optional durable opaque wait/signal adapter for application-owned human review workflows. */
+	externalWait?: AgentExternalWaitAdapter
 	workspaceStore?: AgentDurableWorkspaceStore
 	skills?: AgentSkillRuntimeOptions
 	stateStore?: unknown

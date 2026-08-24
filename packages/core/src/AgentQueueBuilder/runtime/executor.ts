@@ -15,6 +15,7 @@ import type { Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import type {
 	AgentDefinition,
+	AgentExternalWaitAdapter,
 	AgentManifest,
 	AgentModelBinding,
 	AgentRuntimeInvocationInput,
@@ -36,6 +37,8 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	manifest: AgentManifest<Models>
 	models: AgentRuntimeModelBindings<Models>
 	runtime?: DurableRuntime
+	durableWorkflows?: boolean
+	externalWait?: AgentExternalWaitAdapter
 	workspaceStore?: unknown
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
@@ -122,6 +125,13 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 		if (this.input.runtime) {
 			builder = builder.runtime(this.input.runtime)
+		}
+
+		if (this.input.externalWait) {
+			if (typeof builder.externalWait !== 'function') {
+				throw new Error('ai.externalWait requires @purista/harness with durable external-wait support (>=2.1.1).')
+			}
+			builder = builder.externalWait(this.input.externalWait as never)
 		}
 
 		if (this.input.workspaceStore) {
@@ -236,9 +246,12 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		} else {
 			const sessionAny = session as any
 			const agentName = this.input.manifest.agentName
+			const durable = this.input.runtime && (this.input.durableWorkflows === true || this.input.manifest.workspacePolicy?.mode === 'durable')
+				? { runId: identity.runId }
+				: undefined
 			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', signal)
-				: await sessionAny.workflows[agentName].prompt(input.payload, { signal })
+				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', signal, durable)
+				: await sessionAny.workflows[agentName].prompt(input.payload, { signal, ...(durable ? { durable } : {}) })
 		}
 
 		const validated = await validateOutput(this.input.definition.outputSchema, output)
@@ -274,6 +287,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		emitWrapped: (event: RunEvent) => Promise<void>,
 		kind: 'agent' | 'workflow',
 		signal: AbortSignal,
+		durable?: { runId: string },
 	) {
 		let output: unknown
 		let finished = false
@@ -282,7 +296,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		const stream =
 			kind === 'agent'
 				? sessionAny.agents[agentName].stream(payload, { signal })
-				: sessionAny.workflows[agentName].stream(payload, { signal })
+				: sessionAny.workflows[agentName].stream(payload, { signal, ...(durable ? { durable } : {}) })
 
 		for await (const event of stream as AsyncIterable<RunEvent>) {
 			await emitWrapped(event)
