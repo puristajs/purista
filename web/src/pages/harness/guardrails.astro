@@ -24,11 +24,46 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         <h2 class="display display-lg">Keep detection interchangeable.</h2>
         <p class="lede">The Guardrails addon owns strict policy and enforcement. Your composition root owns the detector and its security boundary.</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="card"><h3 class="h3">Original Presidio sidecar</h3><p>Install <code>@purista/harness-guardrails-presidio</code> when you need Presidio recognizers such as <code>PERSON</code> or custom deployment-side recognizers. It calls only <code>POST /analyze</code> through an injected authenticated internal HTTP(S) endpoint, never from YAML or a browser.</p></div>
-        <div class="card"><h3 class="h3">Native local subset</h3><p>Install <code>@purista/harness-guardrails-native-privacy</code> for local <code>EMAIL_ADDRESS</code>, <code>PHONE_NUMBER</code>, <code>CREDIT_CARD</code>, <code>IP_ADDRESS</code>, <code>IBAN_CODE</code>, <code>US_SSN</code>, and <code>URL</code> recognition. One Node-API prebuild family is tested with Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail instead of falling back.</p></div>
+        <div class="card"><h3 class="h3">Native local subset</h3><p>Install <code>@purista/harness-guardrails-native-privacy</code> for local <code>EMAIL_ADDRESS</code>, <code>PHONE_NUMBER</code>, <code>CREDIT_CARD</code>, <code>IP_ADDRESS</code> (IPv4/IPv6 syntax), <code>IBAN_CODE</code>, <code>US_SSN</code>, and <code>URL</code> recognition. One Node-API prebuild family is tested with Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail instead of falling back.</p></div>
+        <div class="card"><h3 class="h3">Optional local NER</h3><p>Install <code>@purista/harness-guardrails-local-ner</code> and its optional <code>@huggingface/transformers</code> peer only for model-based entities. Provide a pinned absolute local model directory, SHA-256 asset manifest, explicit label mapping, and call <code>warmup()</code>; it never downloads a model or calls a registry.</p></div>
       </div>
       <p class="mt-6 text-[var(--color-fg-muted)]">Masking is provider-neutral and happens in Guardrails after inspection. For structured tool values, provide a reviewed codec that selects exact fields; the addon never recursively scans arbitrary JSON.</p>
+    </div>
+  </section>
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Local NER</div>
+        <h2 class="display display-lg">Load verified local model assets.</h2>
+        <p class="lede">The optional NER adapter has no default model. Your deployment owns the pinned files, SHA-256 manifest, language evaluation, label mapping, and startup warmup.</p>
+      </div>
+      <CodeBlock
+        language="typescript"
+        label="local-ner.ts"
+        code={`import { createLocalNerDetector, LocalNerDetectorError } from '@purista/harness-guardrails-local-ner'
+import { NER_EN_V1_ASSETS } from './models/ner-en-v1.integrity.js'
+
+const detector = createLocalNerDetector({
+  id: 'ner-en',
+  modelId: 'ner-en-v1',
+  modelPath: '/srv/purista-models/ner-en-v1',
+  modelFiles: NER_EN_V1_ASSETS,
+  labels: { PER: 'PERSON', ORG: 'ORGANIZATION', LOC: 'LOCATION' },
+})
+
+try {
+  await detector.warmup()
+} catch (error) {
+  if (error instanceof LocalNerDetectorError) {
+    console.error({ local_ner_failure_kind: error.kind, message: error.message })
+  }
+  throw error
+}`}
+      />
+      <p class="mt-6 text-[var(--color-fg-muted)]"><code>NER_EN_V1_ASSETS</code> is your application-owned manifest of every model asset and its lower-case SHA-256 digest. A missing peer, invalid asset, or model fault fails closed. The Guardrails trace and log record only the safe failure kind.</p>
     </div>
   </section>
 
@@ -40,36 +75,31 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         <p class="lede">“Deployment recognizer dependent” means the application-owned Presidio Analyzer deployment must already provide the recognizer or model. The Harness adapter does not install or configure it.</p>
       </div>
       <div class="overflow-x-auto border border-[var(--color-line)] rounded-xl">
-        <table class="w-full min-w-[900px] text-left text-sm">
+        <table class="w-full min-w-[1100px] text-left text-sm">
           <thead class="bg-[var(--color-bg-sunk)] text-[var(--color-fg)]">
             <tr>
               <th class="p-4 font-semibold">I want to…</th>
               <th class="p-4 font-semibold">Presidio sidecar</th>
               <th class="p-4 font-semibold">Native privacy</th>
+              <th class="p-4 font-semibold">Local NER</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-[var(--color-line)] text-[var(--color-fg-muted)]">
-            <tr><td class="p-4 text-[var(--color-fg)]">Block PII before an agent, model, tool, or retrieval boundary</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Replace each detected whole value with a fixed configured token</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Remove each detected whole value</td><td class="p-4">Yes, empty <code>mask_token</code></td><td class="p-4">Yes, empty <code>mask_token</code></td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect email addresses</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, regex-based</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect phone numbers</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect payment-card numbers</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, Luhn-checked</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect IPv4 addresses</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, IPv4 only</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect IPv6 addresses</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Not supplied</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect IBANs</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, IBAN-shaped format</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect US Social Security numbers</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, US-SSN-shaped format</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect HTTP(S) URLs</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, HTTP(S) only</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect names, locations, organizations, medical, or other NER/model entities</td><td class="p-4">Deployment recognizer/model dependent</td><td class="p-4">Not supplied</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect my application-specific identifier</td><td class="p-4">Custom recognizer dependent</td><td class="p-4">Not supplied</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Choose a detection language</td><td class="p-4">One fixed composition-root language per detector</td><td class="p-4">No NLP language model</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Keep detection in-process with no detector network hop</td><td class="p-4">Not supplied</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Protect reviewed text fields of a structured tool value</td><td class="p-4">Yes, explicit codec</td><td class="p-4">Yes, explicit codec</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Script deterministic tests</td><td class="p-4"><code>FakePresidioSidecar</code></td><td class="p-4"><code>FakeSensitiveDataDetector</code></td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Block PII before an agent, model, tool, or retrieval boundary</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Replace or remove a detected whole value with a fixed configured token</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect email, phone, payment-card, IPv4, IPv6, IBAN, or US SSN values</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in; validation depth varies by entity</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect HTTP(S) URLs</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, HTTP(S) only</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect names, locations, organizations, medical, or other NER/model entities</td><td class="p-4">Deployment recognizer/model dependent</td><td class="p-4">Not supplied</td><td class="p-4">Yes, only selected local model labels</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect my application-specific identifier</td><td class="p-4">Custom recognizer dependent</td><td class="p-4">Not supplied</td><td class="p-4">Not supplied; inject a dedicated detector</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Choose a detection language</td><td class="p-4">One fixed composition-root language per detector</td><td class="p-4">No NLP language model</td><td class="p-4">Selected local model and label mapping</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Keep detection in-process with no detector network hop</td><td class="p-4">Not supplied</td><td class="p-4">Yes</td><td class="p-4">Yes, with an installed local model</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Protect reviewed text fields of a structured tool value</td><td class="p-4">Yes, explicit codec</td><td class="p-4">Yes, explicit codec</td><td class="p-4">Yes, explicit codec</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Script deterministic tests</td><td class="p-4"><code>FakePresidioSidecar</code></td><td class="p-4"><code>FakeSensitiveDataDetector</code></td><td class="p-4"><code>FakeLocalNerRuntime</code></td></tr>
           </tbody>
         </table>
       </div>
-      <p class="mt-6 text-[var(--color-fg-muted)]">Neither option currently generates realistic replacement data, applies per-entity replacements, partially masks, hashes or encrypts values, processes entire CSV/JSON datasets, redacts image/PDF OCR, or provides batch processing. The Presidio adapter intentionally uses Analyzer detection only, not Presidio Anonymizer.</p>
+      <p class="mt-6 text-[var(--color-fg-muted)]">None of these options generates realistic replacement data, applies per-entity replacements, partially masks, hashes or encrypts values, processes entire CSV/JSON datasets, redacts image/PDF OCR, or provides batch processing. The Presidio adapter intentionally uses Analyzer detection only, not Presidio Anonymizer.</p>
+      <p class="mt-3 text-[var(--color-fg-muted)]">For local NER, provision the model through your application artifact process and call <code>warmup()</code> before traffic. Missing optional dependencies and local-model faults fail closed; traces and logs contain only the stable failure kind, never inspected text, local paths, model output, or credentials.</p>
     </div>
   </section>
 
@@ -80,7 +110,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
         <h2 class="display display-lg">Script outcomes, never private data.</h2>
         <p class="lede">Use the public fakes for agent, workflow, tool, and adapter tests. They make no recognition or network call: your test supplies each finding, failure, or Presidio HTTP response.</p>
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <CodeBlock
           language="typescript"
           label="guardrails.test.ts"
@@ -95,6 +125,18 @@ detector.enqueue([
 
 // The next unscripted inspection is an empty finding list.
 // Use enqueueError(...) to exercise the fail-closed path.`}
+        />
+        <CodeBlock
+          language="typescript"
+          label="local-ner-adapter.test.ts"
+          code={`import { createLocalNerDetectorWithRuntime, FakeLocalNerRuntime } from '@purista/harness-guardrails-local-ner/testing'
+
+const runtime = new FakeLocalNerRuntime()
+runtime.enqueue([{ entity_group: 'PER', score: 0.99, start: 0, end: 5 }])
+const detector = createLocalNerDetectorWithRuntime(localNerOptions, async () => runtime)
+
+// The fake scripts aggregate model tokens.
+// It never loads a model or records inspected text.`}
         />
         <CodeBlock
           language="typescript"

@@ -100,7 +100,8 @@ Keep every boundary explicit. A model should not decide which private system it 
 Use \`rails.config.sensitive_data_detection\` for exact entity, mask-token, and score-threshold policy, then bind an injected \`SensitiveDataDetector\` through \`createSensitiveDataActions({ detector })\`. YAML never contains detector endpoints, credentials, recognizers, cloud settings, or fallbacks.
 
 - \`@purista/harness-guardrails-presidio\` calls original Presidio \`POST /analyze\` only through an application-owned authenticated internal HTTP(S) gateway. It supports Presidio deployment-side recognizers and converts Python code-point offsets to JavaScript UTF-16 indexes.
-- \`@purista/harness-guardrails-native-privacy\` is local Rust/Node-API recognition for \`EMAIL_ADDRESS\`, \`PHONE_NUMBER\`, \`CREDIT_CARD\`, \`IP_ADDRESS\`, \`IBAN_CODE\`, \`US_SSN\`, and \`URL\`. Its prebuilds are tested under Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail without a fallback.
+- \`@purista/harness-guardrails-native-privacy\` is local Rust/Node-API recognition for \`EMAIL_ADDRESS\`, \`PHONE_NUMBER\`, \`CREDIT_CARD\`, \`IP_ADDRESS\` (IPv4/IPv6 syntax), \`IBAN_CODE\`, \`US_SSN\`, and \`URL\`. Its prebuilds are tested under Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail without a fallback.
+- \`@purista/harness-guardrails-local-ner\` is an optional local model-based detector. Install its optional \`@huggingface/transformers\` peer only where needed, provide a pinned absolute local model directory, SHA-256 asset manifest, and explicit label mapping, and call \`warmup()\` during startup. It never downloads model files or calls a model registry.
 
 Sensitive-data inspection is content-free and fail-closed. It creates a nested \`harness.sensitive_data.inspect\` GUARDRAIL span and inspection/duration metrics, but no model, token, or cost attributes. A nested standard LLM span remains the authoritative token/cost record for a model-backed check.
 
@@ -108,21 +109,22 @@ Sensitive-data inspection is content-free and fail-closed. It creates a nested \
 
 “Deployment recognizer dependent” means the application-owned Presidio Analyzer deployment must already contain the relevant recognizer or model; the Harness adapter does not install or configure it.
 
-| I want to… | Presidio sidecar | Native privacy |
-| --- | --- | --- |
-| Block PII before an agent, model, tool, or retrieval boundary | Yes | Yes |
-| Replace or remove a detected whole value with the configured mask token | Yes | Yes |
-| Detect email, phone, payment-card, IPv4, IBAN, or US SSN values | Deployment recognizer dependent | Built in; validation depth varies by entity |
-| Detect IPv6 addresses | Deployment recognizer dependent | Not supplied |
-| Detect HTTP(S) URLs | Deployment recognizer dependent | Built in, HTTP(S) only |
-| Detect names, locations, organizations, medical, or other NER/model entities | Deployment recognizer/model dependent | Not supplied |
-| Detect application-specific identifiers | Custom recognizer dependent | Not supplied |
-| Choose a detection language | One fixed composition-root language per detector | No NLP language model |
-| Keep detection in-process without a network hop | Not supplied | Yes |
-| Protect reviewed structured tool fields | Yes, explicit codec | Yes, explicit codec |
-| Script deterministic tests | \`FakePresidioSidecar\` | \`FakeSensitiveDataDetector\` |
+| I want to… | Presidio sidecar | Native privacy | Local NER |
+| --- | --- | --- | --- |
+| Block PII before an agent, model, tool, or retrieval boundary | Yes | Yes | Yes |
+| Replace or remove a detected whole value with the configured mask token | Yes | Yes | Yes |
+| Detect email, phone, payment-card, IPv4, IPv6, IBAN, or US SSN values | Deployment recognizer dependent | Built in; validation depth varies by entity | Model/label dependent; not built in |
+| Detect HTTP(S) URLs | Deployment recognizer dependent | Built in, HTTP(S) only | Model/label dependent; not built in |
+| Detect names, locations, organizations, medical, or other NER/model entities | Deployment recognizer/model dependent | Not supplied | Yes, only selected local model labels |
+| Detect application-specific identifiers | Custom recognizer dependent | Not supplied | Not supplied; inject a dedicated detector |
+| Choose a detection language | One fixed composition-root language per detector | No NLP language model | Selected local model and label mapping |
+| Keep detection in-process without a network hop | Not supplied | Yes | Yes, with an installed local model |
+| Protect reviewed structured tool fields | Yes, explicit codec | Yes, explicit codec | Yes, explicit codec |
+| Script deterministic tests | \`FakePresidioSidecar\` | \`FakeSensitiveDataDetector\` | \`FakeLocalNerRuntime\` |
 
-Neither option currently generates realistic replacement data, applies per-entity replacements, partially masks, hashes/encrypts values, processes full CSV/JSON data, redacts image/PDF OCR, or provides batch APIs. The adapter calls Presidio Analyzer detection only, not Presidio Anonymizer.
+None of these options generates realistic replacement data, applies per-entity replacements, partially masks, hashes/encrypts values, processes full CSV/JSON data, redacts image/PDF OCR, or provides batch APIs. The adapter calls Presidio Analyzer detection only, not Presidio Anonymizer.
+
+For local NER, call \`warmup()\` before accepting traffic. A missing optional peer or local-model failure remains fail-closed and emits only the stable \`harness.sensitive_data.failure_kind\` / \`sensitive_data_failure_kind\`; inspected text, local paths, model output, and credentials are never logged.
 
 ## Deterministic testing
 
