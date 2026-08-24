@@ -104,6 +104,10 @@ Use \`rails.config.sensitive_data_detection\` for exact entity, mask-token, and 
 
 Sensitive-data inspection is content-free and fail-closed. It creates a nested \`harness.sensitive_data.inspect\` GUARDRAIL span and inspection/duration metrics, but no model, token, or cost attributes. A nested standard LLM span remains the authoritative token/cost record for a model-backed check.
 
+## Deterministic testing
+
+Use \`FakeSensitiveDataDetector\` from \`@purista/harness-guardrails/testing\` to script findings, results, or errors for unit, workflow, and tool tests. Use \`FakePresidioSidecar\` from \`@purista/harness-guardrails-presidio/testing\` as the injected fetch implementation to script \`POST /analyze\` responses and transport faults. It validates the wire contract without imitating Presidio recognizers or NLP. Both helpers retain test-only in-memory request records; never copy those records to logs, snapshots, or telemetry.
+
 ## What it protects
 
 - Input before instructions, history, or a model call.

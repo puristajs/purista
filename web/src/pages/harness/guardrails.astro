@@ -32,6 +32,51 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     </div>
   </section>
 
+  <section class="section-pad">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Deterministic testing</div>
+        <h2 class="display display-lg">Script outcomes, never private data.</h2>
+        <p class="lede">Use the public fakes for agent, workflow, tool, and adapter tests. They make no recognition or network call: your test supplies each finding, failure, or Presidio HTTP response.</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <CodeBlock
+          language="typescript"
+          label="guardrails.test.ts"
+          code={`import { FakeSensitiveDataDetector } from '@purista/harness-guardrails/testing'
+
+const detector = new FakeSensitiveDataDetector({
+  supportedEntities: ['EMAIL_ADDRESS'],
+})
+detector.enqueue([
+  { category: 'EMAIL_ADDRESS', start: 0, end: 22, score: 0.99 },
+])
+
+// The next unscripted inspection is an empty finding list.
+// Use enqueueError(...) to exercise the fail-closed path.`}
+        />
+        <CodeBlock
+          language="typescript"
+          label="presidio-adapter.test.ts"
+          code={`import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
+import { FakePresidioSidecar } from '@purista/harness-guardrails-presidio/testing'
+
+const sidecar = new FakePresidioSidecar()
+sidecar.enqueueAnalyzeResponse([])
+const detector = createPresidioDetector({
+  id: 'presidio-test',
+  endpoint: 'https://presidio.test/',
+  fetch: sidecar.fetch,
+})
+
+// Assert sidecar.requests for the POST /analyze wire contract.
+// It scripts HTTP/transport behavior; it does not imitate Presidio NLP.`}
+        />
+      </div>
+      <p class="mt-6 text-[var(--color-fg-muted)]">The fakes retain test-only in-memory request data, which may include synthetic input. Never copy it to telemetry, logs, snapshots, or production fixtures.</p>
+    </div>
+  </section>
+
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="section-head--center mb-10">

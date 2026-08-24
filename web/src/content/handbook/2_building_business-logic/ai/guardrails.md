@@ -106,6 +106,44 @@ contract or operational telemetry.
 The native detector rejects an unsupported configured entity at construction. It
 is intentionally not a Presidio or NER/ML port.
 
+### Test deterministic outcomes, not recognizer internals
+
+Use the public test helpers in unit tests, workflow tests, tool tests, and
+adapter contract tests. They do not scan data or call a network; each test
+scripts the exact outcome it needs. Their in-memory request records may contain
+synthetic test input, so never copy them to logs, snapshots, or telemetry.
+
+```ts
+import { FakeSensitiveDataDetector } from '@purista/harness-guardrails/testing'
+
+const detector = new FakeSensitiveDataDetector({
+  supportedEntities: ['EMAIL_ADDRESS'],
+})
+detector.enqueue([{ category: 'EMAIL_ADDRESS', start: 0, end: 22, score: 0.99 }])
+// The next unscripted inspection returns { findings: [] }.
+```
+
+For the Presidio adapter, script its narrow HTTP contract rather than imitating
+Presidio recognizers or NLP:
+
+```ts
+import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
+import { FakePresidioSidecar } from '@purista/harness-guardrails-presidio/testing'
+
+const sidecar = new FakePresidioSidecar()
+sidecar.enqueueAnalyzeResponse([
+  { entity_type: 'EMAIL_ADDRESS', start: 0, end: 22, score: 0.99 },
+])
+const detector = createPresidioDetector({
+  id: 'presidio-test',
+  endpoint: 'https://presidio.test/',
+  fetch: sidecar.fetch,
+})
+```
+
+Use `sidecar.requests` to assert the exact `POST /analyze` payload and
+`sidecar.enqueueTransportError()` to prove a sidecar fault fails closed.
+
 For structured tool values, never recursively scan every JSON string. Bind a
 selected tool flow to an application-owned `SensitiveDataValueCodec` that
 extracts the specific fields approved for inspection and applies only the
