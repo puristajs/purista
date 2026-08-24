@@ -92,7 +92,12 @@ export const handbookSections: HandbookSection[] = [
 					{ id: 'harness/guide/guardrails-governance', title: 'Guardrails & Governance', order: 6 },
 					{ id: 'harness/guide/testing-and-evaluations', title: 'Testing & Evaluations', order: 7 },
 					{ id: 'harness/guide/observability-operations', title: 'Observability & Operations', order: 8 },
-					{ id: 'harness/guide/adapters-durability-reference', title: 'Adapters, Durability & Reference', order: 9 },
+					{
+						id: 'harness/adapters-durability-reference',
+						href: '/handbook/harness/adapters-durability-reference/',
+						title: 'Adapters, Durability & Reference',
+						order: 9,
+					},
 				],
 			},
 		],

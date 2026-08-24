@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from 'astro:content'
+import { getCardBySlug, getSidebarItems } from '../../../data/handbook'
+import HandbookLayout from '../../../layouts/HandbookLayout.astro'
+
+const result = getCardBySlug('harness', 'guide')
+if (!result) {
+	throw new Error('AI Harness Guide card is not configured')
+}
+
+const { section, card } = result
+const sidebar = getSidebarItems()
+const entries = await getCollection('handbookCards', entry => entry.id === 'harness/adapters-durability-reference')
+const entry = entries[0]
+if (!entry) {
+	throw new Error('AI Harness adapters and durability reference content is missing')
+}
+
+const { Content, headings } = await render(entry)
+---
+
+<HandbookLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  sidebar={sidebar}
+  currentId="harness/adapters-durability-reference"
+  headings={headings}
+>
+  <nav class="flex items-center gap-2 text-sm text-[var(--color-fg-subtle)] mb-8">
+    <a href="/handbook/" class="hover:text-[var(--color-fg)] transition-colors">Handbook</a>
+    <span class="text-[var(--color-line-strong)]">/</span>
+    <a href={`/handbook/${section.id}/`} class="hover:text-[var(--color-fg)] transition-colors">{section.title}</a>
+    <span class="text-[var(--color-line-strong)]">/</span>
+    <a href={`/handbook/${section.id}/${card.id}/`} class="hover:text-[var(--color-fg)] transition-colors">{card.title}</a>
+    <span class="text-[var(--color-line-strong)]">/</span>
+    <span class="text-[var(--color-fg)]">{entry.data.title}</span>
+  </nav>
+
+  <div class="mb-10">
+    <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${section.color}-hi)`}>
+      {section.title} / {card.title}
+    </p>
+    <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
+      {entry.data.title}
+    </h1>
+    {entry.data.description && <p class="lede max-w-[70ch]">{entry.data.description}</p>}
+  </div>
+
+  <Content />
+</HandbookLayout>

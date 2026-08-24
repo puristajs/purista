@@ -3,6 +3,13 @@ title: Quickstart
 description: Build and invoke one typed agent with the smallest safe configuration.
 ---
 
+## Prerequisites
+
+Use Node.js 20 or newer, or a supported Bun runtime, and a TypeScript runner.
+This example uses the OpenAI adapter only to make the first live call concrete;
+the Harness API remains the same when you replace it with another provider
+adapter. Do not install adapters for providers your application does not use.
+
 ## Install
 
 Install the core runtime, Zod for schemas, and only the provider adapter your
@@ -10,10 +17,19 @@ application uses:
 
 ```sh
 npm install @purista/harness @purista/harness-openai zod
+npm install --save-dev tsx typescript
 ```
 
-Set `OPENAI_API_KEY` and optionally `OPENAI_MODEL`. Keep credentials in your
-deployment secret store; do not put them in source, skills, fixtures, or logs.
+Create a local `.env` that is ignored by version control:
+
+```dotenv
+OPENAI_API_KEY=replace-with-a-development-secret
+OPENAI_MODEL=gpt-5-mini
+```
+
+Set `OPENAI_API_KEY` and optionally `OPENAI_MODEL` through your deployment
+secret store in production. Do not put credentials in source, skills, fixtures,
+or logs.
 
 ## Define one model and one agent
 
@@ -45,6 +61,12 @@ const harness = defineHarness({ name: 'support' })
   .build()
 ```
 
+The model alias (`assistant`) is the provider-neutral contract used everywhere
+else. Its `capabilities` are intentionally narrow: this agent requests a
+validated object and cannot use tools yet. Zod validates the external input
+before the model loop and the returned output before the application receives
+it.
+
 ## Invoke through a session
 
 ```ts
@@ -60,6 +82,27 @@ try {
   await harness.shutdown()
 }
 ```
+
+Run the example with the TypeScript runner you chose. For example, if the code
+is in `src/support.ts`, add this script to `package.json`:
+
+```json
+{
+  "scripts": {
+    "support:example": "tsx --env-file=.env src/support.ts"
+  }
+}
+```
+
+```sh
+npm run support:example
+```
+
+The output is a validated `{ answer: string }`, not a provider response. If the
+provider is unavailable, credentials are invalid, or the returned value cannot
+match the schema, the call rejects with a normalized Harness error. Map that
+error to your HTTP, queue, or UI protocol in application code; do not expose a
+raw provider response to callers.
 
 The session scopes history, state, and live resources. `release()` ends live
 resources while retaining durable state; `close()` is destructive and deletes

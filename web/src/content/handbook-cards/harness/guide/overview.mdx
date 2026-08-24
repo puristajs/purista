@@ -3,6 +3,14 @@ title: Overview
 description: Decide where the Harness fits and keep responsibility boundaries explicit from the first agent.
 ---
 
+## Before you begin
+
+This chapter assumes a TypeScript application on Node.js or Bun and a package
+manager. You do not need PURISTA to use the Harness. If your application is a
+PURISTA service, command, queue consumer, or stream producer, first build the
+standalone Harness here and then attach it at the framework boundary in
+[Harness Integration](/handbook/blocks/agent-pattern/harness-integration/).
+
 ## What the Harness owns
 
 The Harness runs in your process and composes typed model aliases, tools,
@@ -35,6 +43,32 @@ code; it is not another prompt.
 The design goal is reviewable capability. A model alias says what inference can
 do; an agent says which tools and skills it can use; a workflow says which
 agents it may call; schemas protect every data boundary.
+
+## A real-world boundary: support answer with an order lookup
+
+For a support API, keep identity and transport in the route or PURISTA handler.
+Pass only the validated business input into the session. The Harness may decide
+whether to use an allowlisted `lookup_order` tool, but the tool handler checks
+the caller's authorization before it reads an order. The application writes an
+audit record after a validated result returns.
+
+```text
+HTTP/PURISTA handler → authenticate and validate → Harness session
+Harness agent → typed lookup tool → application order service
+Harness result → application response, audit record, or queue message
+```
+
+This division prevents two common problems: putting identity claims into an
+untrusted prompt, and allowing an agent to call a provider or database SDK
+without the application's policy boundary. The next pages implement this shape
+incrementally.
+
+## Choose the next page
+
+Start at [Quickstart](/handbook/harness/guide/quickstart/) if you need a first
+working agent. Go to [Models & Configuration](/handbook/harness/guide/models-and-configuration/)
+when you already have a Harness and need timeouts, retries, or a second model
+alias.
 
 ## Next
 

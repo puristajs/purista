@@ -3,6 +3,13 @@ title: Agents, Workflows & State
 description: Keep model loops focused and use typed workflows for the application-owned process around them.
 ---
 
+## Prerequisites
+
+Start with the typed tool or skill path in
+[Tools & Skills](/handbook/harness/guide/tools-and-skills/). An agent is a
+bounded model loop; a workflow is typed TypeScript that coordinates those
+loops and deterministic application work.
+
 ## Direct agent or workflow?
 
 | Use a direct agent when… | Use a workflow when… |
@@ -14,21 +21,57 @@ description: Keep model loops focused and use typed workflows for the applicatio
 Workflows call registered agents only after declaring delegation. This makes
 authority, call budgets, and model overrides visible beside the handler.
 
+## Implement a review workflow
+
+An incident process often needs factual extraction, a risk classification, and
+an application-owned decision. Keep each model responsibility narrow and make
+the allowed delegation visible with the workflow:
+
 ```ts
+.agents(({ agent }) => ({
+  facts: agent({
+    model: 'fast',
+    input: z.object({ report: z.string().min(1) }),
+    output: z.object({ facts: z.array(z.string()) }),
+    builtinTools: false,
+    instructions: 'Extract only concrete, testable facts.'
+  }),
+  risk: agent({
+    model: 'fast',
+    input: z.object({ facts: z.array(z.string()) }),
+    output: z.object({ level: z.enum(['low', 'medium', 'high']) }),
+    builtinTools: false,
+    instructions: 'Classify operational risk from the supplied facts only.'
+  })
+}))
 .workflows(({ workflow }) => ({
-  review_ticket: workflow({
-    input: z.object({ ticketId: z.string() }),
-    output: z.object({ priority: z.enum(['low', 'normal', 'high']) }),
-    delegation: { agents: ['triage'] },
-    handler: async (ctx) => ctx.agents.triage(ctx.input)
+  review_incident: workflow({
+    input: z.object({ report: z.string().min(1) }),
+    output: z.object({ facts: z.array(z.string()), level: z.enum(['low', 'medium', 'high']) }),
+    delegation: { agents: ['facts', 'risk'], maxChildAgentCalls: 2 },
+    handler: async (ctx) => {
+      const facts = await ctx.agents.facts({ report: ctx.input.report })
+      const risk = await ctx.agents.risk({ facts: facts.facts })
+      return { ...facts, ...risk }
+    }
   })
 }))
 ```
 
-Use `ctx.fanOut(...)` for ordered, bounded independent work. Use
-`ctx.childTasks.start(...)` for isolated workflow-owned background work. A
-continuable task is deliberately in-process; use your application queue/worker
-for work that must survive a process restart.
+Call it through the session, exactly as you call a direct agent:
+
+```ts
+const result = await session.workflows.review_incident.prompt({ report })
+if (result.level === 'high') await incidentService.requestHumanReview(result)
+```
+
+The workflow makes the deterministic high-risk escalation. It does not ask a
+model to grant approval. Use `ctx.fanOut(items, callback, { concurrency })`
+for independently reviewable documents; use `Promise.allSettled` and a typed
+partial-result schema when individual failure is acceptable. Use
+`ctx.childTasks.start(...)` only for isolated workflow-owned work; a
+continuable child task remains in-process, so use an application queue or worker
+for work that must survive a restart.
 
 ## State, history, and memory
 
@@ -41,6 +84,20 @@ Memory adapters are separate from session history. Use history for the
 conversation record and memory for deliberately scoped, application-governed
 facts. Keep retrieval orchestration and vector storage in application/workflow
 code.
+
+## Lifecycle and durability choices
+
+| Need | API or adapter choice | Operational rule |
+| --- | --- | --- |
+| Finish request resources, retain state | `session.release()` | Always call in `finally`. |
+| Remove session record and history | `session.close()` | Use only for an explicit deletion/retention flow. |
+| Keep a long workflow after restart | Durable runtime plus workspace/checkpoint adapters | Invoke a workflow with a stable durable run ID. |
+| Continue an in-process child-agent conversation | `ctx.childTasks.start(..., { mode: 'continuable' })` | It is not restart-safe. |
+| Deliver work after an outage | Application queue or worker | Own retry, idempotency, and delivery outside the Harness. |
+
+Treat session identifiers as privacy-safe application identifiers. Select a
+durable state store before using them for customer conversations across restarts,
+and implement deletion/retention in the storage layer.
 
 ## Next
 

@@ -3,6 +3,13 @@ title: Guardrails & Governance
 description: Add fail-closed content controls and explicit tool decisions without coupling policy to a model provider.
 ---
 
+## Prerequisites
+
+Guardrails are an optional addon. Start with Zod schemas, tool authorization,
+and application policy from the earlier pages; then use rails for content that
+enters or leaves an agent, a tool, or a retrieval boundary. A rail does not
+authenticate a caller or replace a deterministic business rule.
+
 ## Use the right control at the right boundary
 
 | Control | Protects | Owner |
@@ -41,6 +48,73 @@ YAML defines portable policy such as entity, threshold, and mask token. It
 never contains endpoints, credentials, cloud settings, recognizer setup, or
 fallback policy. The composition root chooses the detector.
 
+## Configure PII redaction without selecting a cloud provider
+
+Install the Guardrails addon and one detector adapter appropriate to the
+deployment. The native detector runs in-process; the Presidio adapter calls an
+application-controlled sidecar; local NER is a separate heavy optional package
+for reviewed local model assets.
+
+```sh
+npm install @purista/harness-guardrails @purista/harness-guardrails-native-privacy
+# Alternative: npm install @purista/harness-guardrails-presidio
+# Alternative: npm install @purista/harness-guardrails-local-ner @huggingface/transformers
+```
+
+Create `guardrails/config.yml` with policy, not connectivity:
+
+```yaml
+rails:
+  config:
+    sensitive_data_detection:
+      input:
+        entities: [EMAIL_ADDRESS, PHONE_NUMBER]
+        mask_token: '<MASKED>'
+        score_threshold: 0.6
+      output:
+        entities: [EMAIL_ADDRESS]
+        mask_token: '<MASKED>'
+        score_threshold: 0.6
+  input:
+    flows: ['mask sensitive data on input']
+  output:
+    flows: ['detect sensitive data on output']
+```
+
+Then bind the local implementation explicitly at the composition root:
+
+```ts
+import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
+import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
+
+const rails = defineGuardrails({
+  config: await loadGuardrailsConfig('./guardrails'),
+  actions: createSensitiveDataActions({
+    detector: createNativePrivacyDetector({ id: 'local-pii' })
+  })
+})
+
+const harness = defineHarness({ name: 'safe-support' })
+  .models({ assistant: modelAlias })
+  .agents(({ agent }) => ({
+    support: rails.attach(agent({
+      model: 'assistant',
+      input: z.object({ question: z.string().min(1) }),
+      output: z.object({ answer: z.string() }),
+      builtinTools: false,
+      instructions: 'Give safe, concise support answers.'
+    }))
+  }))
+  .build()
+```
+
+Mask flows transform the matched whole value before it crosses the selected
+boundary. Detect flows block the run with a stable reason such as
+`sensitive_data_detected`; malformed results, detector failures, missing
+optional dependencies, cancellation faults, and codec errors fail closed.
+Handle the normalized error in the application boundary and show a safe message
+to the caller. Do not retry a blocked request automatically.
+
 ## Choose a sensitive-data detector by outcome
 
 | I want to… | Presidio sidecar | Native privacy | Local NER |
@@ -70,6 +144,20 @@ SHA-256 manifest for every asset, explicit model-label mapping, and startup
 Current detectors do not generate fake replacement data, choose per-entity
 transformations, partially mask values, encrypt/hash values, process batch
 datasets, or redact image/PDF OCR.
+
+## Protect tool fields deliberately
+
+Sensitive-data rails inspect text values. A structured tool input is not
+recursively scanned because the application must decide which fields are safe
+to inspect and alter. Bind a reviewed codec to the relevant tool flow, preserve
+all other fields unchanged, and retain Zod, governance, and business
+authorization before the side effect. This makes a transfer memo redaction
+policy explicit instead of silently changing an amount, recipient, or ID.
+
+## Next
+
+Prove both the allowed and blocked paths with
+[Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
 
 ## Evidence without content
 

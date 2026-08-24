@@ -3,6 +3,13 @@ title: Models & Configuration
 description: Declare truthful model capabilities and configure safe runtime defaults before adding application complexity.
 ---
 
+## Prerequisites
+
+Complete the [Quickstart](/handbook/harness/guide/quickstart/) first. Keep all
+provider credentials and provider-specific options at this composition root.
+Agents, workflows, tools, and skills should reference a model alias, never a
+provider SDK client.
+
 ## Model aliases are capability contracts
 
 Register a model by the operations it can actually perform. TypeScript handles
@@ -32,6 +39,35 @@ operation from becoming a late provider surprise.
 Prefer structured output for business decisions. It reduces parsing ambiguity
 and ensures the application sees validated values.
 
+## Use aliases to keep providers replaceable
+
+The following alias names represent workload intent, not a vendor. An agent
+that uses `fast` remains unchanged if you switch the adapter behind it.
+
+```ts
+const harness = defineHarness({ name: 'claims' })
+  .models({
+    fast: {
+      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+      model: process.env.OPENAI_FAST_MODEL ?? 'gpt-5-mini',
+      capabilities: ['object', 'tool_use'],
+      defaults: { maxTokens: 1_200 },
+      retry: { maxAttempts: 3, longRetry: 'defer' }
+    },
+    retrieval: {
+      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+      model: process.env.OPENAI_EMBEDDING_MODEL ?? 'text-embedding-3-small',
+      capabilities: ['embeddings']
+    }
+  })
+```
+
+`longRetry: 'defer'` gives application workers a normalized retry result rather
+than waiting through a long provider `Retry-After`. An interactive API can use
+`longRetry: 'error'` and respond promptly. Use provider-specific options only
+on the adapter/model configuration that requires them; do not let them leak
+into agent contracts.
+
 ## Establish safe defaults
 
 ```ts
@@ -48,6 +84,39 @@ and ensures the application sees validated values.
 Keep user-facing budgets short. Move slow or retryable business work to an
 application worker or queue. History retention bounds persisted storage by
 complete turns; it is not a model-context or token estimator.
+
+## A production composition root
+
+This order is deliberate. Static infrastructure is configured before models;
+agents are defined after models; workflows follow agents so TypeScript can
+verify declared delegation.
+
+```ts
+const harness = defineHarness({ name: 'claims-review' })
+  .logger(new JsonLogger({ level: process.env.LOG_LEVEL === 'debug' ? 'debug' : 'info' }))
+  .telemetry({ contentCaptureMode: 'NO_CONTENT' })
+  .sandbox(inMemorySandbox()) // Replace explicitly if tools must execute commands.
+  .defaults({
+    runTimeoutMs: 60_000,
+    modelTimeoutMs: 30_000,
+    toolTimeoutMs: 10_000,
+    agentMaxIterations: 8,
+    maxParallelToolCalls: 4,
+    historyRetention: { maxTurns: 50, maxBytes: 256_000 }
+  })
+  .models({ /* aliases */ })
+  .tools({ /* typed capabilities */ })
+  .skills({ /* mounted directories */ })
+  .agents(({ agent }) => ({ /* model loops */ }))
+  .workflows(({ workflow }) => ({ /* orchestration */ }))
+  .build()
+```
+
+Use the in-memory sandbox only when command execution is not required. The
+Harness does not create an HTTP server, queue, secret manager, or database; the
+application selects and supplies those boundaries. Continue with
+[Tools & Skills](/handbook/harness/guide/tools-and-skills/) to add the first
+capability safely.
 
 ## Configure adapters intentionally
 

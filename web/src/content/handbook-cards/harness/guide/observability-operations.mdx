@@ -3,37 +3,94 @@ title: Observability & Operations
 description: Trace the entire run without exposing prompts or tool data, then use that evidence to operate safely.
 ---
 
+## Prerequisites
+
+Finish the deterministic tests in
+[Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+Configure your application's OpenTelemetry SDK and OTLP exporter before the
+Harness is built. The Harness creates spans and metrics; your application owns
+the exporter, resource attributes, sampling, trace propagation, and backend.
+
 ## One trace, clear ownership
 
+Start production with content capture disabled and structured logs enabled:
+
+```ts
+const harness = defineHarness({ name: 'claims-review' })
+  .logger(new JsonLogger({ level: 'info' }))
+  .telemetry({
+    flavor: 'dual',
+    contentCaptureMode: 'NO_CONTENT'
+  })
+  // adapters, models, agents, and workflows
+  .build()
+```
+
 The Harness emits OpenTelemetry spans and metrics for session, workflow, agent,
-model, tool, sandbox, state, and guardrail work. Set
-`contentCaptureMode: 'NO_CONTENT'` for production. Prompts, documents, tool
-inputs/results, secrets, and attachments do not belong in telemetry.
+model, tool, sandbox, state, and guardrail work. Prompts, documents, tool
+inputs/results, secrets, and attachments do not belong in production telemetry.
 
-| Signal | Use it to answer |
-| --- | --- |
-| Run events | What did the application observe during a run? |
-| Traces | Which step was slow, failed, blocked, or retried? |
-| Model span | Which provider/model ran, and what token usage did it report? |
-| Guardrail span | Which policy phase allowed, transformed, blocked, or failed closed? |
-| Structured logs | Which stable IDs and safe error kinds need operator action? |
+| Signal | Use it to answer | Safe correlation |
+| --- | --- | --- |
+| Run events | What did the application observe during a run? | `runId`, agent/workflow/tool ID |
+| Traces | Which step was slow, failed, blocked, or retried? | Trace context, session ID where allowed |
+| Nested model span | Which provider/model ran, and what token usage did it report? | Model alias, provider, model, usage attributes |
+| Guardrail span | Which policy phase allowed, transformed, blocked, or failed closed? | Rail ID, phase, decision, failure kind |
+| Structured logs | Which stable error kind needs action? | Run/session/workflow IDs and normalized error code |
 
-The nested standard LLM span is the source of model/provider/token usage. Do
-not duplicate token metrics in a PURISTA wrapper or invent cost values. A local
-privacy or local NER detector has no LLM token/cost telemetry.
+## Account for model usage correctly
 
-## Readiness before traffic
+The nested standard LLM span is the source of model, provider, and token usage.
+When a provider reports it, model spans carry attributes such as
+`gen_ai.provider.name`, `gen_ai.request.model`, and
+`gen_ai.usage.total_tokens` (with compatible `llm.token_count.*` attributes).
+The Harness also emits the standard model token-usage metric. Export your
+backend's pricing catalog separately if you need cost calculations; prices are
+deployment data and must not be invented from telemetry.
 
-1. Run a deterministic smoke test for the agent/workflow entry point.
+A guardrail decision spans the same trace and reports rail identity, phase, and
+outcome. A model-backed rail contains a nested LLM span, which is the
+authoritative cost and token record for that check. Native PII and local NER
+detectors are not LLM calls, so they emit no model, token, or cost attributes.
+
+## Operational runbook
+
+Before accepting traffic:
+
+1. Run deterministic smoke tests for every public agent and workflow entry
+   point.
 2. Exercise model, tool, MCP, guardrail, cancellation, and timeout failures.
 3. Verify parent/child trace context reaches the chosen OTLP backend.
-4. Confirm `harness.shutdown()` closes adapters and live MCP/sandbox resources.
-5. Validate retention and deletion behavior for session state and workspaces.
+4. Confirm production telemetry has no captured prompt, document, tool, or
+   secret content.
+5. Confirm `harness.shutdown()` closes adapters and live MCP/sandbox resources
+   during graceful shutdown.
+6. Validate retention, deletion, quota, and recovery behavior for session state
+   and durable workspaces.
 
 A guardrail block is a successful control decision, not a system failure.
-Action, detector, codec, or timeout failure is an error and remains fail closed.
+Action, detector, codec, optional-dependency, or timeout failure is an error
+and remains fail closed.
+
+## Diagnose common failures
+
+| Symptom | Likely cause | Operator action |
+| --- | --- | --- |
+| `SessionBusyError` | A second run started in one session. | Serialize the session or use a distinct application session ID. |
+| `OperationTimeoutError` | Run, model, tool, or skill exceeded its budget. | Inspect the relevant child span; adjust the narrowest budget or move work to a worker. |
+| `OperationCancelledError` | Client, parent run, or shutdown aborted the signal. | Verify request-disconnect and cancellation propagation before retrying. |
+| `ModelError` | Provider, network, rate limit, or malformed response. | Inspect safe normalized status/retry metadata and the model span; never log raw provider content. |
+| `GuardrailBlockedError` | Content matched a blocking policy. | Return the approved safe user response; do not retry automatically. |
+| Guardrail evaluation error | Detector, codec, action, or optional dependency failed. | Keep the fail-closed result; fix deployment/configuration and retest with the selected fake. |
+| `SandboxNoExecutorError` | A command-backed tool ran in a files-only sandbox. | Supply an isolating executor or remove that capability. |
+| `McpProtocolError` or `McpAuthError` | MCP transport, schema, or authentication failed. | Validate endpoint/command, secret rotation, timeout, and safe protocol logs. |
+
+To investigate an incident, start from the application's run ID, locate the
+trace, inspect the deepest failed span, then use only normalized error metadata
+to determine the adapter or configuration action. Do not add prompt or tool
+payload logging as a debugging shortcut.
 
 ## Next
 
-Choose the required infrastructure boundary in
-[Adapters, Durability & Reference](/handbook/harness/guide/adapters-durability-reference/).
+Choose and contract-test the infrastructure boundary in
+[Adapters, Durability & Reference](/handbook/harness/adapters-durability-reference/).

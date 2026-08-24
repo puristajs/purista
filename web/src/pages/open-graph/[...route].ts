@@ -160,7 +160,8 @@ for (const section of handbookSections) {
 		if (card.items) {
 			for (const item of card.items) {
 				const slug = item.id.split('/').pop()!
-				setPage(`handbook/${section.id}/${card.id}/${slug}`, {
+				const route = item.href ?? `/handbook/${section.id}/${card.id}/${slug}`
+				setPage(route, {
 					title: item.title,
 					description: card.description,
 					accent: 'mint',

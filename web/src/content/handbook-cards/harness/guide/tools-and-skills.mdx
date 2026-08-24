@@ -3,7 +3,16 @@ title: Tools & Skills
 description: Give agents explicit, typed capabilities while keeping business authorization outside the model.
 ---
 
+## Prerequisites
+
+Complete [Models & Configuration](/handbook/harness/guide/models-and-configuration/).
+Use a tool only for an explicit application capability. A model instruction is
+never authorization; the handler must receive or obtain a trusted caller scope.
+
 ## Define a typed tool
+
+An order-support agent needs only a narrow order-status capability. Define its
+input and output, then expose only that tool to the agent.
 
 ```ts
 .tools({
@@ -27,28 +36,92 @@ description: Give agents explicit, typed capabilities while keeping business aut
 ```
 
 Schemas validate shape. The handler still enforces authorization, idempotency,
-and business invariants. Never treat an instruction as a substitute for a
-deterministic policy check.
+rate limits, and domain rules. Return a deliberate domain-safe error or throw a
+normalized application error; do not return a raw database, HTTP, or provider
+payload for the model to inspect.
 
-## Add skills as mounted methods
+## Put the caller scope in application code
+
+The session ID identifies a conversation, not an authorization principal. A
+common pattern is to resolve the caller before starting the session and make a
+short-lived authorization facade available to the tool composition root:
 
 ```ts
-.skills({ returns_method: './skills/returns-method' })
+function createSupportHarness(authorize: (orderId: string) => Promise<void>) {
+  return defineHarness({ name: 'support' })
+    .tools({
+      lookup_order: {
+        description: 'Return the current status for an order visible to the caller.',
+        input: z.object({ orderId: z.string().min(1) }),
+        output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
+        handler: async (_ctx, { orderId }) => {
+          await authorize(orderId)
+          return orderService.getPublicStatus(orderId)
+        }
+      }
+    })
+    // Compose models and agents as shown in the previous guides.
+}
+```
+
+Construct this Harness per trusted request scope only when the dependencies are
+cheap and request-specific; otherwise keep a process-level Harness and use an
+application-owned authorization service that checks the trusted request context.
+Never place an access token in a model message or rely on the model to select a
+permitted ID.
+
+## Add a skill when the method needs reviewed files
+
+Use a skill when the agent needs a maintained method or reference that is too
+large or too changeable to embed in an instruction. Create a directory under
+your application source tree:
+
+```text
+src/skills/return-policy/
+└── SKILL.md
+```
+
+```md
+---
+name: return-policy
+description: Check return eligibility before offering a return action.
+---
+
+1. Read the order status with `lookup_order`.
+2. Explain the applicable policy in plain language.
+3. Never promise a refund; request human approval for exceptions.
+```
+
+Register the directory with explicit provenance and permit the `read` builtin:
+
+```ts
+.skills({
+  return_policy: {
+    directory: './src/skills/return-policy',
+    trust: 'trusted',
+    source: 'application'
+  }
+})
 .agents(({ agent }) => ({
   support: agent({
-    model: 'assistant',
-    skills: ['returns_method'],
+    model: 'fast',
+    skills: ['return_policy'],
     builtinTools: ['read'],
     tools: ['lookup_order'],
-    instructions: 'Read the returns method before handling a return request.'
+    instructions: 'Use the return-policy skill before answering return questions.'
   })
 }))
 ```
 
-Skills are mounted files, not prompt text. Their `SKILL.md` is opened through
-the normal `read` tool and therefore remains subject to tool permissions and
-guardrails. Use MCP only for a reviewed external tool server; stdio MCP needs a
-spawn-capable, isolating sandbox.
+The catalog describes the skill in the model context; the body is mounted and
+read on demand. This keeps large guidance out of every request and leaves a
+reviewable file boundary. Test the skill frontmatter and the model's `read`
+tool call just as you test a normal tool.
+
+Use a TypeScript tool for a business operation. Use a skill for a reusable,
+reviewed method, checklist, or file-backed reference. Use MCP only for a
+reviewed external tool server; stdio MCP needs a spawn-capable, isolating
+sandbox.
 
 ## Next
 
