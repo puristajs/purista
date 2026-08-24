@@ -10,6 +10,21 @@ provider credentials and provider-specific options at this composition root.
 Agents, workflows, tools, and skills should reference a model alias, never a
 provider SDK client.
 
+## Validate deployment configuration before building
+
+Read environment values once at the application composition root and validate
+them there. Keep provider credentials out of agent input, tool parameters,
+skills, logs, fixtures, and traces. A useful deployment contract has a required
+credential, an explicit primary alias/model, and bounded values for every
+timeout or concurrency setting. Fail application startup with a safe
+configuration error when that contract is incomplete rather than discovering a
+missing secret in a customer request.
+
+The Harness's own build-time validation catches inconsistent aliases,
+capabilities, dependencies, and adapter requirements. Your configuration layer
+owns environment parsing, secret retrieval, tenant policy, and choosing which
+provider adapter is installed.
+
 ## Model aliases are capability contracts
 
 Register a model by the operations it can actually perform. TypeScript handles
@@ -85,6 +100,19 @@ Keep user-facing budgets short. Move slow or retryable business work to an
 application worker or queue. History retention bounds persisted storage by
 complete turns; it is not a model-context or token estimator.
 
+| Setting | Protects | Choose it from |
+| --- | --- | --- |
+| `runTimeoutMs` | The complete session run | Request or worker SLA |
+| `modelTimeoutMs` | One provider operation | Provider latency and failover policy |
+| `toolTimeoutMs` | One tool handler | Downstream service budget |
+| `agentMaxIterations` | A tool/model loop | Maximum useful reasoning rounds |
+| `maxParallelToolCalls` | A wide tool-call batch | Downstream concurrency capacity |
+| `historyRetention` | Persisted conversation size | Retention and privacy policy |
+
+Set the narrowest appropriate limit. A longer model timeout is not a substitute
+for a durable worker, and a retry policy must be consistent with the tool's
+side-effect/idempotency design.
+
 ## A production composition root
 
 This order is deliberate. Static infrastructure is configured before models;
@@ -118,12 +146,55 @@ application selects and supplies those boundaries. Continue with
 [Tools & Skills](/handbook/harness/guide/tools-and-skills/) to add the first
 capability safely.
 
+## Configuration failures are deployment failures
+
+Treat invalid aliases, unavailable adapter capabilities, missing optional
+packages, expired credentials, and unsupported model operations as safe startup
+or invocation failures. Log the normalized error kind together with a
+deployment or run correlation ID, never the secret, raw provider payload, or
+prompt. The [Observability & Operations](/handbook/harness/guide/observability-operations/)
+guide maps those error categories to operator actions.
+
 ## Configure adapters intentionally
 
 In-memory state and sandbox adapters are useful for local development. Choose
 explicit production adapters when history, memory, sandbox execution, or durable
 workspaces must survive restart. The Harness never creates an HTTP server,
 queue worker, secret manager, or database on your behalf.
+
+## Build grounded retrieval in a workflow
+
+Embeddings and reranking are provider operations, not hidden agent message
+types. The application owns document authorization, vector storage, retention,
+and final context assembly. A workflow makes each boundary visible and passes
+only a bounded, authorized evidence set into its answering agent.
+
+```ts
+const queryEmbedding = await ctx.models.retrieval.embed({
+  input: ctx.input.question
+}, ctx.signal)
+
+const candidates = await vectorIndex.search({
+  tenantId: ctx.metadata.tenantId,
+  vector: queryEmbedding.embeddings[0].vector,
+  limit: 20
+})
+
+const ranked = await ctx.models.ranker.rerank({
+  query: ctx.input.question,
+  documents: candidates.map(doc => ({ id: doc.id, text: doc.text, metadata: { source: doc.source } })),
+  topN: 5
+}, ctx.signal)
+
+const evidence = selectAuthorizedDocuments(ranked, candidates).slice(0, 5)
+return ctx.agents.answerer({ question: ctx.input.question, evidence })
+```
+
+The `retrieval` and `ranker` aliases need the `embeddings` and `rerank`
+capabilities respectively. Authorization happens before and after retrieval;
+never trust document metadata returned by a model or use the Harness session
+identifier as a tenant authorization claim. Apply a strict size/count limit to
+grounded context and use an output schema that includes document IDs/citations.
 
 ## Next
 

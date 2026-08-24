@@ -1,172 +1,434 @@
 ---
 title: Guardrails & Governance
-description: Add fail-closed content controls and explicit tool decisions without coupling policy to a model provider.
+description: Build a fail-closed claims-support agent that protects customer data, governs tools, and leaves content-free operational evidence.
 ---
 
-## Prerequisites
+This guide builds one realistic claims-support assistant. Customers can ask
+about a claim, the agent can read approved policy material, and it can submit a
+settlement request. The assistant must never expose a customer identifier,
+accept a prompt-injection instruction from retrieved material, or submit a
+settlement without the application's approval decision.
 
-Guardrails are an optional addon. Start with Zod schemas, tool authorization,
-and application policy from the earlier pages; then use rails for content that
-enters or leaves an agent, a tool, or a retrieval boundary. A rail does not
-authenticate a caller or replace a deterministic business rule.
+Guardrails are an optional `@purista/harness-guardrails` addon for **default-loop
+agents**. They are provider-neutral: they do not create a provider, read
+credentials, call a cloud endpoint, or own retrieval. The application supplies
+those pieces at the composition root.
 
-## Use the right control at the right boundary
+## What belongs where
 
-| Control | Protects | Owner |
+Use the narrowest control that can enforce the requirement. A rail is not an
+authorization system and it does not make an unsafe tool safe by itself.
+
+| Requirement in the claims assistant | Control | Where it runs |
 | --- | --- | --- |
-| Zod schema | Input/output shape | Agent, workflow, tool definition |
-| Tool permissions | Capability family | Agent definition |
-| Governance | Tool exposure, approval, and typed execution policy | Harness composition root |
-| Guardrails | Input, output, retrieval, and tool content | Optional Guardrails addon |
-| Application authorization | Identity and business invariants | Application/service handler |
+| A request has a valid `claimId` and a text question | Zod input schema | Before agent execution |
+| An agent may use `submit_settlement` | Agent tool allowlist and tool permissions | Harness agent definition |
+| A settlement is permitted for this claim and caller | Application authorization and governance | Before the side effect |
+| Customer email or phone number must be masked | Sensitive-data guardrail | Input, output, retrieval, or an explicitly selected tool field |
+| An unsafe or evasive request must stop | Custom or model-check rail | Input or tool-input phase |
+| The model response must not expose an internal note | Custom output rail | Before persistence or client output |
 
-Guardrails complement these controls; they do not replace authorization or
-deterministic business rules. Attach rails to a default-loop agent. Workflows
-receive automatic protection when they delegate to that agent; retrieval stays
-application-owned and is filtered explicitly before it enters agent input.
+The application remains responsible for authentication, tenant isolation,
+business approvals, rate limits, persistence, and the final HTTP/queue error
+mapping. Guardrails add content and execution controls to those existing
+boundaries.
 
-## Configure portable rails, inject the detector
+## 1. Install the optional addon
 
-```ts
-import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
-import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
-
-const detector = createNativePrivacyDetector({ id: 'local-pii' })
-const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  actions: createSensitiveDataActions({ detector })
-})
-
-const guardedAgent = rails.attach({
-  model: 'assistant',
-  instructions: 'Help safely.',
-  tools: ['lookup_order']
-})
-```
-
-YAML defines portable policy such as entity, threshold, and mask token. It
-never contains endpoints, credentials, cloud settings, recognizer setup, or
-fallback policy. The composition root chooses the detector.
-
-## Configure PII redaction without selecting a cloud provider
-
-Install the Guardrails addon and one detector adapter appropriate to the
-deployment. The native detector runs in-process; the Presidio adapter calls an
-application-controlled sidecar; local NER is a separate heavy optional package
-for reviewed local model assets.
+Install the core Harness, your selected model adapter, and Guardrails. A
+privacy detector is selected separately in the next guide; do not install a
+detector merely to use custom actions or model checks.
 
 ```sh
-npm install @purista/harness-guardrails @purista/harness-guardrails-native-privacy
-# Alternative: npm install @purista/harness-guardrails-presidio
-# Alternative: npm install @purista/harness-guardrails-local-ner @huggingface/transformers
+npm install @purista/harness @purista/harness-guardrails
 ```
 
-Create `guardrails/config.yml` with policy, not connectivity:
+The addon attaches to a normal Harness default-loop agent. It deliberately
+rejects a custom-handler agent because that handler owns its own model and tool
+lifecycle, so automatic interception would be incomplete.
+
+## 2. Create a portable policy file
+
+Create `guardrails/config.yml`. It uses a strict, portable subset of the NeMo
+Guardrails vocabulary. The flow names are application-owned identifiers: YAML
+selects and orders them, while TypeScript implements their behavior.
 
 ```yaml
+models:
+  - type: main
+    engine: harness
+    model: claims-assistant
+  - type: safety
+    engine: harness
+    model: claims-safety
+
+instructions:
+  - Answer only from approved claim policy and the submitted claim context.
+
 rails:
+  input:
+    flows:
+      - normalize claim question
+      - deny prompt override
+      - review claim request
+      - mask sensitive data on input
+  output:
+    flows:
+      - remove internal note
+      - mask sensitive data on output
+  tool_input:
+    flows:
+      - require settlement approval
+      - mask settlement memo
+  tool_output:
+    flows:
+      - remove settlement evidence
+  retrieval:
+    flows:
+      - deny untrusted retrieval
+      - mask sensitive data on retrieval
   config:
     sensitive_data_detection:
       input:
         entities: [EMAIL_ADDRESS, PHONE_NUMBER]
-        mask_token: '<MASKED>'
-        score_threshold: 0.6
+        mask_token: '<REDACTED>'
+        score_threshold: 0.8
       output:
+        entities: [EMAIL_ADDRESS, PHONE_NUMBER]
+        mask_token: '<REDACTED>'
+        score_threshold: 0.8
+      retrieval:
         entities: [EMAIL_ADDRESS]
-        mask_token: '<MASKED>'
-        score_threshold: 0.6
-  input:
-    flows: ['mask sensitive data on input']
-  output:
-    flows: ['detect sensitive data on output']
+        mask_token: '<REDACTED>'
+        score_threshold: 0.8
 ```
 
-Then bind the local implementation explicitly at the composition root:
+The `models` entries are portable policy metadata. `engine: harness` and the
+`model` value do **not** construct a provider or select credentials. Map the
+portable `type` names to aliases already registered with Harness in TypeScript.
+
+Only `input`, `output`, `tool_input`, `tool_output`, and `retrieval` rails are
+supported. `config.py`, `actions.py`, Colang (`.co`) files, dialog rails,
+execution rails, implicit vector stores, and server configuration are rejected
+rather than silently approximated. The config directory must contain exactly
+one `config.yml` or `config.yaml`.
+
+### Sensitive-data policy fields
+
+| Field | Meaning | Validation |
+| --- | --- | --- |
+| `entities` | Portable categories to inspect | Non-empty, unique uppercase identifiers |
+| `mask_token` | Full replacement for each detected match | A string up to 128 UTF-16 code units; an empty string removes a match |
+| `score_threshold` | Minimum detector confidence | Finite number from `0` to `1` |
+
+The reserved sensitive-data flow names must match their phase and policy. For
+example, `mask sensitive data on output` requires an `output` policy. The
+portable file never contains detector endpoints, authentication headers,
+provider names, recognizer configuration, local paths, or fallback behavior.
+
+## 3. Implement the claims controls in TypeScript
+
+The following actions demonstrate all three outcomes:
+
+- `allow` continues to the next rail.
+- `block` ends the run before the protected boundary; use a stable,
+  deployment-controlled snake-case `reasonCode`.
+- `transform` replaces the current value and passes it to the next rail. Its
+  target must exactly match the phase.
 
 ```ts
-import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
+import { z } from 'zod'
+import {
+  createSensitiveDataActions,
+  defineGuardrails,
+  loadGuardrailsConfig,
+  modelCheckRail,
+  type GuardrailAction,
+} from '@purista/harness-guardrails'
 import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
 
-const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  actions: createSensitiveDataActions({
-    detector: createNativePrivacyDetector({ id: 'local-pii' })
-  })
+const detector = createNativePrivacyDetector({ id: 'claims-local-pii' })
+
+const normalizeClaimQuestion: GuardrailAction = {
+  evaluate: ({ value }) => {
+    if (typeof value !== 'string') return { decision: 'block', reasonCode: 'invalid_claim_question' }
+    return {
+      decision: 'transform',
+      target: 'user_message',
+      value: value.trim(),
+      reasonCode: 'claim_question_normalized',
+    }
+  },
+}
+
+const denyPromptOverride: GuardrailAction = {
+  mayTransform: false,
+  evaluate: ({ value }) =>
+    typeof value === 'string' && /ignore (all |the )?(previous|prior) instructions/i.test(value)
+      ? { decision: 'block', reasonCode: 'prompt_override_attempt' }
+      : { decision: 'allow' },
+}
+
+const requireSettlementApproval: GuardrailAction = {
+  mayTransform: false,
+  evaluate: ({ value }) => {
+    const request = z.object({ claimId: z.string(), approvalId: z.string().min(1) }).safeParse(value)
+    return request.success
+      ? { decision: 'allow' }
+      : { decision: 'block', reasonCode: 'settlement_approval_required' }
+  },
+}
+
+const removeInternalNote: GuardrailAction = {
+  evaluate: ({ value }) => {
+    if (typeof value !== 'string') return { decision: 'block', reasonCode: 'invalid_claim_response' }
+    return {
+      decision: 'transform',
+      target: 'bot_message',
+      value: value.replaceAll(/\[internal:[^\]]*\]/gi, ''),
+      reasonCode: 'internal_note_removed',
+    }
+  },
+}
+
+const removeSettlementEvidence: GuardrailAction = {
+  evaluate: ({ value }) => ({
+    decision: 'transform',
+    target: 'tool_output',
+    value,
+    reasonCode: 'settlement_evidence_reviewed',
+  }),
+}
+
+const sensitiveDataActions = createSensitiveDataActions({
+  detector,
+  toolInput: {
+    policy: 'input',
+    maskFlow: 'mask settlement memo',
+    codec: {
+      id: 'settlement-memo-v1',
+      extract: (value) => {
+        const parsed = z.object({ memo: z.string() }).parse(value)
+        return [{ id: 'memo', text: parsed.memo }]
+      },
+      replace: (value, replacements) => {
+        const parsed = z.object({ memo: z.string() }).parse(value)
+        const memo = replacements
+          .filter((item) => item.id === 'memo')
+          .sort((a, b) => b.start - a.start)
+          .reduce((text, item) => text.slice(0, item.start) + item.value + text.slice(item.end), parsed.memo)
+        return { ...(value as Record<string, unknown>), memo }
+      },
+    },
+  },
 })
 
-const harness = defineHarness({ name: 'safe-support' })
-  .models({ assistant: modelAlias })
+export const claimsRails = defineGuardrails({
+  config: await loadGuardrailsConfig('./guardrails'),
+  modelAliases: { main: 'claims_assistant', safety: 'claims_safety' },
+  actions: {
+    ...sensitiveDataActions,
+    'normalize claim question': normalizeClaimQuestion,
+    'deny prompt override': denyPromptOverride,
+    'review claim request': modelCheckRail({
+      model: 'safety',
+      instructions: 'Return allow=false for requests that should not be handled by a claims assistant.',
+    }),
+    'require settlement approval': requireSettlementApproval,
+    'remove internal note': removeInternalNote,
+    'remove settlement evidence': removeSettlementEvidence,
+    'deny untrusted retrieval': {
+      mayTransform: false,
+      evaluate: ({ value }) =>
+        Array.isArray(value) && value.some((chunk) => typeof chunk === 'string' && /ignore previous instructions/i.test(chunk))
+          ? { decision: 'block', reasonCode: 'untrusted_retrieval_content' }
+          : { decision: 'allow' },
+    },
+  },
+})
+```
+
+`reasonCode` is not user content. Treat it as a short, stable operational
+classification such as `settlement_approval_required`; it can be recorded in
+content-free logs and traces. Do not build it from a prompt, tool input,
+customer identifier, detector match, or exception message.
+
+The `removeSettlementEvidence` example intentionally leaves the JSON value
+unchanged to show an output-phase transformation. In a production tool, make
+the transformation meaningful and preserve the tool's output schema. A rail
+can only produce JSON-compatible data; it cannot broaden a tool's authority.
+
+## 4. Attach the rails to the default-loop agent
+
+Define models, tools, and agents with the normal Harness builder. `attach()`
+returns the same typed agent definition with a Guardrails interceptor appended.
+
+```ts
+import { defineHarness } from '@purista/harness'
+
+const harness = defineHarness({ name: 'claims-support' })
+  .telemetry({ contentCaptureMode: 'NO_CONTENT' })
+  .models({
+    claims_assistant: claimsAssistantModel,
+    claims_safety: claimsSafetyModel,
+  })
+  .tools({
+    submit_settlement: submitSettlementTool,
+  })
   .agents(({ agent }) => ({
-    support: rails.attach(agent({
-      model: 'assistant',
-      input: z.object({ question: z.string().min(1) }),
-      output: z.object({ answer: z.string() }),
+    claims_support: claimsRails.attach(agent({
+      model: 'claims_assistant',
+      input: z.string().min(1),
+      output: z.string(),
       builtinTools: false,
-      instructions: 'Give safe, concise support answers.'
-    }))
+      tools: ['submit_settlement'],
+      instructions: 'Assist with claims using only approved policy and tools.',
+    })),
   }))
   .build()
 ```
 
-Mask flows transform the matched whole value before it crosses the selected
-boundary. Detect flows block the run with a stable reason such as
-`sensitive_data_detected`; malformed results, detector failures, missing
-optional dependencies, cancellation faults, and codec errors fail closed.
-Handle the normalized error in the application boundary and show a safe message
-to the caller. Do not retry a blocked request automatically.
+The automatic interception order is precise:
 
-## Choose a sensitive-data detector by outcome
+1. **Input:** after the agent input schema parses, before dynamic instructions,
+   transcript use, or a model call.
+2. **Output:** after a provider result, before output validation, persistence,
+   client-facing model events, or tool dispatch.
+3. **Tool input:** before permissions, governance, the tool input schema, and
+   any side effect.
+4. **Tool output:** before the result returns to the model.
 
-| I want to… | Presidio sidecar | Native privacy | Local NER |
-| --- | --- | --- | --- |
-| Block protected text before an agent, model, tool, or retrieval boundary | Yes | Yes | Yes |
-| Replace a detected whole value with a fixed configured token | Yes | Yes | Yes |
-| Remove a detected whole value with an empty mask token | Yes | Yes | Yes |
-| Detect email address | Deployment recognizer dependent | Built in, regex-based | Model/label dependent; not built in |
-| Detect phone number | Deployment recognizer dependent | Built in, format-based | Model/label dependent; not built in |
-| Detect payment-card number | Deployment recognizer dependent | Built in, Luhn-checked | Model/label dependent; not built in |
-| Detect IPv4 address | Deployment recognizer dependent | Built in, syntax-validated | Model/label dependent; not built in |
-| Detect IPv6 address | Deployment recognizer dependent | Built in, syntax-validated | Model/label dependent; not built in |
-| Detect IBAN-shaped value | Deployment recognizer dependent | Built in, format-based | Model/label dependent; not built in |
-| Detect US SSN-shaped value | Deployment recognizer dependent | Built in, format-based | Model/label dependent; not built in |
-| Detect HTTP(S) URL | Deployment recognizer dependent | Built in, HTTP(S) only | Model/label dependent; not built in |
-| Detect people, organizations, locations, or other NER entities | Deployment recognizer/model dependent | Not supplied | Selected local model labels |
-| Add an application-specific identifier | Custom recognizer | Inject a detector | Inject a detector |
-| Run in-process with no detector hop | No | Yes | Yes, with local model assets |
-| Test deterministically | `FakePresidioSidecar` | `FakeSensitiveDataDetector` | `FakeLocalNerRuntime` |
+Normal tool permissions and governance remain authoritative after a transform.
+For the settlement flow, the application should additionally verify that
+`approvalId` belongs to the authenticated caller and exact claim. A blocked
+rail means there is no tool call and no side effect; a transformed tool input
+is what the later permission, governance, Zod schema, and handler receive.
 
-The native package is a local deterministic subset, not a Presidio or NER port.
-The local NER package is intentionally separate and requires an installed
-optional `@huggingface/transformers` peer, an absolute model directory, a
-SHA-256 manifest for every asset, explicit model-label mapping, and startup
-`warmup()`. It never downloads a model or queries a model registry.
+Skills remain mounted files opened through the normal `read` built-in tool.
+Rails do not scan every skill file at startup, but a tool rail can govern the
+`read` call and its result when your policy requires it. See
+[Tools & Skills](/handbook/harness/guide/tools-and-skills/) for the skill
+allowlist and sandbox requirements.
 
-Current detectors do not generate fake replacement data, choose per-entity
-transformations, partially mask values, encrypt/hash values, process batch
-datasets, or redact image/PDF OCR.
+## 5. Filter retrieval explicitly in a workflow
 
-## Protect tool fields deliberately
+Retrieval remains application-owned: Guardrails never build a vector store or
+infer which documents a caller may access. Filter JSON-compatible text chunks
+before they become part of the agent's input.
 
-Sensitive-data rails inspect text values. A structured tool input is not
-recursively scanned because the application must decide which fields are safe
-to inspect and alter. Bind a reviewed codec to the relevant tool flow, preserve
-all other fields unchanged, and retain Zod, governance, and business
-authorization before the side effect. This makes a transfer memo redaction
-policy explicit instead of silently changing an amount, recipient, or ID.
+```ts
+const answerClaim = workflow({
+  input: z.object({ claimId: z.string(), question: z.string() }),
+  output: z.string(),
+  delegation: { agents: ['claims_support'] },
+  handler: async (ctx) => {
+    const chunks = await searchApprovedClaimPolicy(ctx.input.claimId, ctx.input.question)
+    const safeChunks = await claimsRails.filterRetrievedChunks(chunks, {
+      workflowId: ctx.workflowId,
+      runId: ctx.runId,
+      sessionId: ctx.sessionId,
+      models: ctx.models,
+      signal: ctx.signal,
+      logger: ctx.log,
+    })
 
-## Next
+    return ctx.agents.claims_support(`${ctx.input.question}\n\nApproved policy:\n${safeChunks.join('\n')}`)
+  },
+})
+```
 
-Prove both the allowed and blocked paths with
-[Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+Pass the workflow run context so standalone retrieval checks are correlated
+with the existing trace and structured logs. If retrieval runs outside a
+Harness session, pass `observability: { telemetry, logger }` to
+`defineGuardrails()` for a content-free process-level fallback.
 
-## Evidence without content
+## 6. Use model checks deliberately
 
-Every rail creates a content-free `GUARDRAIL` span, decision metric, and duration metric.
-Sensitive-data inspection emits `harness.sensitive_data.inspect`; detector faults fail closed and expose only a stable failure kind.
-Model-backed rails create a nested LLM span; that span is the authoritative provider, model, and token/cost evidence.
-Local native and NER detection do not invent model tokens or costs.
+`modelCheckRail()` is a small provider-neutral action. It calls an already
+registered Harness model handle with a fixed `{ allow: boolean }` schema. The
+portable `model: safety` value in the example resolves through
+`modelAliases.safety` to `claims_safety`; it never reads provider credentials
+from YAML and cannot construct an SDK.
 
-## Next
+Use a model check for judgement that cannot be expressed as a deterministic
+rule, such as detecting a disguised request to disclose claim data. Keep
+deterministic requirements—claim ownership, monetary limits, approval state,
+and destination account ownership—in application authorization or governance.
+Set a clear model capability and evaluate the safety model independently before
+using it as a control.
 
-Script safe success and failure paths in
-[Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+Each action has a 10-second timeout by default. Override the global value with
+`actionTimeoutMs` or one action with `timeoutMs`. A timeout, thrown action,
+invalid outcome, detector fault, malformed detector result, or codec fault
+fails closed.
+
+## 7. Return safe errors at the transport boundary
+
+Treat a block as an expected product decision and an evaluation failure as an
+unavailable safety dependency. Neither error should reveal customer text,
+retrieval chunks, tool values, detector offsets, model output, credentials, or
+filesystem paths.
+
+```ts
+import {
+  GuardrailBlockedError,
+  GuardrailEvaluationError,
+} from '@purista/harness-guardrails'
+
+export async function answerClaimRequest(question: string) {
+  const session = await harness.getSession('claims:user-42')
+  try {
+    return await session.agents.claims_support.prompt(question)
+  } catch (error) {
+    if (error instanceof GuardrailBlockedError) {
+      return { status: 422, body: { code: 'request_not_accepted' } }
+    }
+    if (error instanceof GuardrailEvaluationError) {
+      return { status: 503, body: { code: 'safety_check_unavailable' } }
+    }
+    throw error
+  } finally {
+    await session.release()
+  }
+}
+```
+
+Log only stable fields at this boundary: the run correlation already provided
+by Harness, the error code, rail id, phase, and stable reason code or failure
+kind. A blocked request is not automatically retryable. Operations should
+investigate a safety dependency failure before allowing retries.
+
+## 8. Observe decisions and safety-model cost
+
+With `telemetry({ contentCaptureMode: 'NO_CONTENT' })`, every rail evaluation
+creates a nested `evaluate_guardrail {rail.id}` span with
+`openinference.span.kind=GUARDRAIL`. It includes the rail id, phase, and outcome
+(`allow`, `block`, `transform`, or `error`), plus a stable reason code when one
+was supplied. The addon emits:
+
+- `harness.guardrail.evaluations`
+- `harness.guardrail.duration`
+- content-free warning logs for blocks, info logs for transforms, and error
+  logs for fail-closed evaluation failures
+
+Sensitive-data actions add nested `harness.sensitive_data.inspect` guardrail
+spans and the `harness.sensitive_data.inspections` and
+`harness.sensitive_data.duration` metrics. They contain detector id, execution
+mode, operation, outcome, configured categories, a bounded finding count, and
+a stable failure kind on failure—not inspected text or offsets.
+
+A model-check rail nests the standard LLM span inside its guardrail span. When
+the provider reports them, that LLM span carries the configured provider/model,
+`gen_ai.usage.*`, and `llm.token_count.*` attributes and emits normal
+`gen_ai.client.token.usage`. This is the authoritative safety-model token and
+cost-attribution evidence. Detector rails are not LLM calls and do not invent
+model, token, or cost attributes.
+
+## Next steps
+
+- Select, configure, warm up, and test a detector in
+  [Privacy detectors](/handbook/harness/guide/privacy-detectors/).
+- Add deterministic allow, block, transform, and fault tests in
+  [Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+- Configure exporter, log correlation, and production alerts in
+  [Observability & Operations](/handbook/harness/guide/observability-operations/).

@@ -17,11 +17,19 @@ HTTP API, queue, authorization, or business data.
 3. Add [Models & Configuration](/handbook/harness/guide/models-and-configuration/)
    and [Tools & Skills](/handbook/harness/guide/tools-and-skills/) only as the
    use case requires them.
-4. Use [Agents, Workflows & State](/handbook/harness/guide/agents-workflows-state/)
-   when work needs orchestration or durability.
-5. Add [Guardrails & Governance](/handbook/harness/guide/guardrails-governance/),
-   then prove it with [Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
-6. Finish with [Observability & Operations](/handbook/harness/guide/observability-operations/)
+4. Choose the execution boundary in
+   [Sandboxing & MCP](/handbook/harness/guide/sandboxing-and-mcp/) before an
+   agent can run commands or connect to an MCP server.
+5. Use [Agents, Workflows & State](/handbook/harness/guide/agents-workflows-state/)
+   and [Durable Workflows & Queues](/handbook/harness/guide/durable-workflows-and-queues/)
+   when work needs orchestration, recovery, or asynchronous delivery.
+6. Add [Guardrails & Governance](/handbook/harness/guide/guardrails-governance/)
+   and [Privacy Detectors](/handbook/harness/guide/privacy-detectors/) before
+   sensitive content crosses a model or tool boundary.
+7. Learn [Custom Adapters](/handbook/harness/guide/custom-adapters/) when the
+   built-in ports no longer meet the deployment requirement, then prove the
+   result with [Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+8. Finish with [Observability & Operations](/handbook/harness/guide/observability-operations/)
    and [Adapters, Durability & Reference](/handbook/harness/adapters-durability-reference/).
 
 If you are attaching the runtime to a PURISTA service, command, queue, or

@@ -155,6 +155,52 @@ Add application tests around the port contract: tenant isolation, TTL expiry,
 search-result authorization, deletion, and data residency. Do not use memory
 as a replacement for the authoritative claim record.
 
+### State-store lifecycle and logger contracts
+
+Use `StateStoreAdapterBase` only to inherit Harness context attachment and
+normalized `StateError` creation. A concrete store must still implement session
+upsert/close, ordered message append/list/clear, run create/finish/read/list,
+and event append/list. Implement `replaceMessages(sessionId, messages)` as one
+database transaction when history retention is enabled—never as an unlocked
+clear followed by append.
+
+```ts
+import { StateStoreAdapterBase, type Message } from '@purista/harness'
+import { stateStoreContract } from '@purista/harness/testing'
+
+class PostgresStateStore extends StateStoreAdapterBase {
+  async replaceMessages(sessionId: string, messages: Message[]) {
+    await this.pool.transaction(async tx => {
+      await tx.deleteMessages(sessionId)
+      await tx.insertMessages(sessionId, messages)
+    })
+  }
+  // Implement the remaining StateStore methods against the same backend.
+}
+
+stateStoreContract(() => new PostgresStateStore(testPool))
+```
+
+The base's `configureHarnessContext` receives the inherited logger, telemetry,
+and harness name automatically. Use them only for content-free backend spans or
+safe normalized diagnostics. `close()` must drain pools predictably so
+`harness.shutdown()` can report a controlled shutdown failure.
+
+A custom logger implements the complete `Logger` surface (`trace` through
+`fatal`) and `child(bindings)`. Make binding merges deterministic and redact at
+the sink as a final defense. Test it with the public contract before attaching
+it through `.logger(...)`:
+
+```ts
+import { loggerContract } from '@purista/harness/testing'
+
+loggerContract(() => createClaimsJsonLogger({ destination: testSink }))
+```
+
+The logger contract checks every level, child logger behavior, and—when the
+test logger exposes records—one RFC3339 timestamped record per call. Never make
+captured test records contain raw prompts, evidence, tool values, or secrets.
+
 ## Build a sandbox or durable adapter deliberately
 
 A `Sandbox` opens one session-owned filesystem/execution boundary. It must

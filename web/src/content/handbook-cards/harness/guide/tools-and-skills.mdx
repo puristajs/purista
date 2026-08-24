@@ -12,9 +12,13 @@ never authorization; the handler must receive or obtain a trusted caller scope.
 ## Define a typed tool
 
 An order-support agent needs only a narrow order-status capability. Define its
-input and output, then expose only that tool to the agent.
+input and output, then expose only that tool to the agent. Install and import
+Zod explicitly; the application owns that dependency and the Harness does not
+re-export it.
 
 ```ts
+import { z } from 'zod'
+
 .tools({
   lookup_order: {
     description: 'Look up an order that the current caller may view.',
@@ -70,6 +74,21 @@ application-owned authorization service that checks the trusted request context.
 Never place an access token in a model message or rely on the model to select a
 permitted ID.
 
+## Make failure behavior part of the contract
+
+The handler's return value is shown to the model only after its output schema
+passes. Validate business errors before returning them and normalize unexpected
+infrastructure failures at the application boundary. A tool must respect
+`ctx.signal`: a user disconnect, timeout, or workflow cancellation must stop
+database and HTTP work rather than leave a side effect running in the
+background.
+
+For an operation that changes money, entitlements, or customer data, keep the
+tool narrow: validate input, authorize with trusted caller context, make an
+idempotent application call, and return a small result. Put approval and
+multi-step business decisions in a workflow; do not make a general-purpose
+`execute` tool and try to constrain it with prompt text.
+
 ## Add a skill when the method needs reviewed files
 
 Use a skill when the agent needs a maintained method or reference that is too
@@ -122,6 +141,126 @@ Use a TypeScript tool for a business operation. Use a skill for a reusable,
 reviewed method, checklist, or file-backed reference. Use MCP only for a
 reviewed external tool server; stdio MCP needs a spawn-capable, isolating
 sandbox.
+
+## Review Agent Plugins before binding them
+
+An Agent Plugin is declarative package data, not code that the Harness loads or
+executes. The optional `@purista/harness-agent-plugins` package inspects an
+already-installed directory, produces a digest for an application-owned review
+lockfile, and creates only the skills and MCP tools you explicitly select.
+
+```bash
+npm install @purista/harness-agent-plugins
+```
+
+```ts
+import { inspectAgentPlugin, loadAgentPlugins } from '@purista/harness-agent-plugins'
+
+const source = { root: './plugins/claims-knowledge' } as const
+const inspection = await inspectAgentPlugin(source)
+if (!inspection.valid || !inspection.digest) {
+  throw new Error('Plugin manifest is invalid; inspect its safe diagnostics before approving it.')
+}
+
+// Persist `inspection.digest` in a reviewed, application-owned lockfile.
+const [plugin] = await loadAgentPlugins({
+  plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest }]
+})
+if (!plugin) throw new Error('The approved plugin changed or was not trusted.')
+
+const bindings = plugin.bindings({
+  skills: { claims_playbook: 'claims-playbook' },
+  tools: {
+    search_claims_knowledge: {
+      server: 'knowledge',
+      tool: 'search',
+      description: 'Search the reviewed claims knowledge server.'
+    }
+  }
+})
+if (bindings.diagnostics.some(item => item.level === 'error')) {
+  throw new Error('Selected plugin components cannot be bound safely.')
+}
+
+// Add bindings.skills and bindings.tools to the Harness composition root, then
+// allow the resulting local IDs on the intended agent only.
+```
+
+Plugin manifests cannot add application code, models, agents, workflows,
+credentials, or sandbox authority. A selected stdio plugin additionally needs
+a caller-owned data directory and an isolating sandbox that can enforce an
+immutable package mount. Never auto-trust a plugin digest or forward
+package-declared HTTP headers; bind non-secret static headers in application
+code.
+
+For a selected stdio server, set `dataDirectory` on the reviewed source to an
+existing application-owned directory outside the plugin root. Its sandbox must
+support spawning **and** immutable package mounts; the built-in local host
+sandbox deliberately does not claim that guarantee. Compose the inspected
+bindings directly into the normal builder and keep only their local aliases on
+the agent allowlist:
+
+```ts
+const [plugin] = await loadAgentPlugins({
+  plugins: [{
+    root: './plugins/claims-knowledge',
+    trust: 'trusted',
+    expectedDigest: reviewedDigest,
+    dataDirectory: '/srv/claims-plugin-data'
+  }]
+})
+if (!plugin) throw new Error('Approved plugin is unavailable.')
+
+const bindings = plugin.bindings({
+  skills: { claims_playbook: 'claims-playbook' },
+  tools: { extract_evidence: { server: 'extractor', tool: 'extract', description: 'Extract reviewed evidence.' } }
+})
+
+const harness = defineHarness({ name: 'claims' })
+  .sandbox(isolatingSpawnAndImmutableMountSandbox)
+  .skills(bindings.skills)
+  .tools(bindings.tools)
+  // models
+  .agents(({ agent }) => ({
+    reviewer: agent({ model: 'assistant', skills: ['claims_playbook'], tools: ['extract_evidence'], builtinTools: ['read'] })
+  }))
+  .build()
+```
+
+## Add Harness-side governance to a sensitive tool
+
+The TypeScript handler remains the final authorization and domain boundary.
+Governance gives the Harness an additional typed exposure, policy, and approval
+layer for tool use. Keep approval decisions authenticated and application-owned.
+
+```ts
+.governance(({ native, rule, exposureRule }) => ({
+  defaultEffect: 'allow',
+  exposure: {
+    id: 'claims-tool-exposure',
+    rules: [exposureRule({
+      id: 'hide-settlement-for-readonly', effect: 'hide', tools: ['submit_settlement'],
+      when: ({ metadata }) => metadata.plan === 'readonly'
+    })]
+  },
+  approval: {
+    request: async ({ approvalId }) => applicationApprovals.waitForDecision(approvalId)
+  },
+  policies: [native({
+    id: 'settlement-policy',
+    rules: [rule({
+      id: 'large-settlement-review', effect: 'require_approval', tools: ['submit_settlement'],
+      when: ({ input }) => input.amount > 1_000
+    })]
+  })]
+}))
+```
+
+Exposure rules run before the model call and see safe scalar metadata; native
+tool rules receive the parsed tool input. Do not put a bearer token, customer
+message, prompt, or document body in invocation metadata. A governance approval
+is not a replacement for the domain service's idempotency, authorization, or
+transaction checks.
 
 ## Next
 

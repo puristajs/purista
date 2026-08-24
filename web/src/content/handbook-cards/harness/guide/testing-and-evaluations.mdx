@@ -69,6 +69,52 @@ response. Assert the tool's side effect, Zod validation failure, and a denied
 authorization path separately. The fake provider is deterministic but retains
 the real Harness loop, telemetry shape, and session lifecycle.
 
+## Cover the boundaries around the model loop
+
+Keep each integration test small and synthetic. These checks prove the behavior
+that an HTTP route, worker, or operator can observe:
+
+| Boundary | Deterministic test |
+| --- | --- |
+| Streaming | Collect `session.*.stream()` event types; assert `run.started`, tool lifecycle, and `run.finished`. For `emitRunEvents: true`, assert `streamId`, alias, and partial/delta behavior. |
+| Skills | Mount a temporary `SKILL.md`; script a `read` call then final object; assert the catalog is present but the skill body was not injected into the initial request. |
+| MCP | Use a local fake server; assert stdio rejects a file-only sandbox, and HTTP covers auth, protocol, schema, cancellation, and safe failure. |
+| Guardrails/privacy | Script allow, transform, block, and detector failure; assert a block prevents the model/tool side effect and contains no inspected content in logs or events. |
+| Adapter setup | Assert `.requires(...)` rejects missing capabilities before accepting work; run each port's public contract suite. |
+
+`RecordingTelemetry` lets an integration test verify span names and safe
+attributes without an OTLP backend. Assert model alias, provider, token usage,
+rail decision, and error kind—not prompts, tool values, or detector findings.
+
+```ts
+import { RecordingTelemetry } from '@purista/harness/testing'
+
+const telemetry = new RecordingTelemetry()
+// Build the Harness with the recorder, run the synthetic case, then inspect
+// only content-free attributes emitted by the expected span.
+expect(telemetry.spans.some(span => span.name === 'harness.guardrail')).toBe(true)
+```
+
+For a regression fixture, record an approved synthetic interaction with
+`createReplayInteractionRecorder`, then replay it with `replayModelProvider`.
+Fixtures are reviewable test data—not captured production conversations—and
+must contain no customer or credential content. Use `assertReplayConsumed` so
+CI proves the intended provider calls were exercised.
+
+Adapter packages run their contract suites before application integration:
+
+```ts
+import { loggerContract, stateStoreContract } from '@purista/harness/testing'
+
+stateStoreContract(() => createTestStateStore())
+loggerContract(() => createTestLogger())
+```
+
+Use `sandboxContract`, `sandboxSnapshotContract`, `memoryAdapterContract`,
+`modelProviderContract`, and `durableWorkspaceStoreContract` for the matching
+port. Contract tests establish Harness compatibility; add backend-specific
+tests for tenancy, migrations, retention, outages, and credentials.
+
 ## Test a rail block and detector failure
 
 Use `FakeSensitiveDataDetector`, `FakePresidioSidecar`, or

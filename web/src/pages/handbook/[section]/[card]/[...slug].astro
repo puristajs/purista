@@ -14,6 +14,9 @@ export async function getStaticPaths() {
 		for (const card of section.cards) {
 			if (card.items) {
 				for (const item of card.items) {
+					// An explicit href has its own canonical route. Do not also
+					// generate the card-derived nested route from its trailing id.
+					if (item.href) continue
 					// Item id is like "blocks/command-pattern/what-is-command"
 					// Extract slug from the end
 					const parts = item.id.split('/')

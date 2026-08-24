@@ -5,20 +5,22 @@ description: Build and invoke one typed agent with the smallest safe configurati
 
 ## Prerequisites
 
-Use Node.js 20 or newer, or a supported Bun runtime, and a TypeScript runner.
+Use Node.js 24.15 or newer, or a supported Bun runtime, and a TypeScript runner.
 This example uses the OpenAI adapter only to make the first live call concrete;
 the Harness API remains the same when you replace it with another provider
 adapter. Do not install adapters for providers your application does not use.
 
 ## Install
 
-Install the core runtime, Zod for schemas, and only the provider adapter your
-application uses:
+Install the core runtime and only the provider adapter your application uses:
 
 ```sh
 npm install @purista/harness @purista/harness-openai zod
 npm install --save-dev tsx typescript
 ```
+
+`zod` is an explicit application dependency: it owns the schemas at your input,
+tool, and output boundaries. The Harness deliberately does not re-export it.
 
 Create a local `.env` that is ignored by version control:
 

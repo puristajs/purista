@@ -53,6 +53,52 @@ outcome. A model-backed rail contains a nested LLM span, which is the
 authoritative cost and token record for that check. Native PII and local NER
 detectors are not LLM calls, so they emit no model, token, or cost attributes.
 
+## Continue the caller trace and inspect a completed run
+
+Pass W3C Trace Context from the inbound transport as invocation options. Keep
+metadata to safe scalar routing context only; it is exposed to handlers and
+telemetry sanitizers, so it must never contain a prompt, evidence, token,
+email address, or secret.
+
+```ts
+let runId: string | undefined
+for await (const event of session.agents.claims_support.stream(
+  { question },
+  {
+    traceparent: request.headers.get('traceparent') ?? undefined,
+    tracestate: request.headers.get('tracestate') ?? undefined,
+    metadata: { tenantId: trustedTenantId, requestClass: 'interactive' }
+  }
+)) {
+  if (event.type === 'run.started') runId = event.runId
+}
+
+const summary = runId ? await session.getRunSummary(runId) : undefined
+// Use status, call counts, and provider-reported token totals for an
+// application dashboard when a trace backend is sampled or unavailable.
+```
+
+Invalid trace headers are ignored with a warning rather than breaking a user
+request. `getRunSummary` reads the configured state store and returns run
+status/timestamps, model/tool/agent counts, token totals, optional cache and
+reasoning-token details, and serialized normalized errors. It does not invent
+prices or require an OpenTelemetry backend.
+
+Handlers can record a domain metric through the scoped helper; use stable,
+low-cardinality attributes only:
+
+```ts
+await ctx.metrics.duration(
+  'claims.review.approval_wait_seconds',
+  { workflow_id: ctx.workflowId, outcome: 'referred' },
+  () => applicationApprovals.wait(ctx.input.claimId, ctx.signal)
+)
+```
+
+The Harness meter attaches active Harness/session/run correlation. Do not use
+customer IDs, claim IDs, prompts, URLs with secrets, or raw error messages as
+metric attributes.
+
 ## Operational runbook
 
 Before accepting traffic:
