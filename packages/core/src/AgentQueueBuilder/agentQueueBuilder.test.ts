@@ -617,6 +617,38 @@ describe('AgentQueueBuilder', () => {
 		})
 	})
 
+	it('lets an application acknowledge an external-wait suspension with typed waiting output', async () => {
+		const input = z.object({ paymentId: z.string() })
+		const output = z.object({ status: z.literal('waiting') })
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('paymentReview', 'Durable payment review')
+			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.addPayloadSchema(input)
+			.addOutputSchema(output)
+			.setHarnessWorkflow({
+				input,
+				output,
+				handler: async () => {
+					const error = new Error('waiting') as Error & { snapshot: { waitId: string; kind: string; status: 'waiting' } }
+					error.name = 'ExternalWaitPendingError'
+					error.snapshot = { waitId: 'review:payment-1', kind: 'human_review', status: 'waiting' }
+					throw error
+				},
+			})
+			.getDefinition()
+		const notices: string[] = []
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: createScriptedHarnessModel(), model: 'fake', capabilities: ['object'] } },
+			onExternalWaitPending: notice => {
+				notices.push(`${notice.runId}:${notice.wait.waitId}`)
+				return { status: 'waiting' }
+			},
+		})
+
+		await expect(harness.run({ payload: { paymentId: 'payment-1' }, parameter: {} })).resolves.toEqual({ status: 'waiting' })
+		expect(notices).toEqual(['run:test-message:review:payment-1'])
+	})
+
 	it('creates namespaced skill bindings for skill-backed agent tests', async () => {
 		const skillRuntime = await createAgentSkillTestRuntime([
 			{

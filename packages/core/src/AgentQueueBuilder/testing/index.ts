@@ -232,6 +232,7 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	governance?: GovernanceConfig<any>
 	durableWorkflows?: boolean
 	externalWait?: import('../types.js').AgentExternalWaitAdapter
+	onExternalWaitPending?: import('../types.js').AgentRuntimeOptions<Models>['onExternalWaitPending']
 }
 
 /** Create a deterministic runtime harness for one attached agent definition. */
@@ -249,6 +250,7 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		governance: options.governance,
 		durableWorkflows: options.durableWorkflows,
 		externalWait: options.externalWait,
+		onExternalWaitPending: options.onExternalWaitPending,
 	})
 	definition.runtime.current = executor
 

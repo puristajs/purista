@@ -16,6 +16,7 @@ import { validate } from '../../schema/index.js'
 import type {
 	AgentDefinition,
 	AgentExternalWaitAdapter,
+	AgentExternalWaitPendingNotice,
 	AgentManifest,
 	AgentModelBinding,
 	AgentRuntimeInvocationInput,
@@ -39,6 +40,7 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	runtime?: DurableRuntime
 	durableWorkflows?: boolean
 	externalWait?: AgentExternalWaitAdapter
+	onExternalWaitPending?: (notice: AgentExternalWaitPendingNotice) => Promise<unknown> | unknown
 	workspaceStore?: unknown
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
@@ -212,6 +214,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		}
 
 		let output: unknown
+		try {
 		if (this.input.definition.execution.kind === 'runFunction') {
 			const handlerModels = createHandlerModelBindings(this.resolvedModels, {
 				runId: identity.runId,
@@ -252,6 +255,16 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			output = streaming
 				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', signal, durable)
 				: await sessionAny.workflows[agentName].prompt(input.payload, { signal, ...(durable ? { durable } : {}) })
+		}
+		} catch (error) {
+			if (!isExternalWaitPending(error) || !this.input.onExternalWaitPending) throw error
+			output = await this.input.onExternalWaitPending({
+				runId: identity.runId,
+				serviceName: this.input.manifest.serviceName,
+				serviceVersion: this.input.manifest.serviceVersion,
+				agentName: this.input.manifest.agentName,
+				wait: error.snapshot,
+			})
 		}
 
 		const validated = await validateOutput(this.input.definition.outputSchema, output)
@@ -409,4 +422,12 @@ function createNoopPuristaLogger(): PuristaLogger {
 		trace: write,
 		getChildLogger: () => createNoopPuristaLogger(),
 	} as PuristaLogger
+}
+
+function isExternalWaitPending(error: unknown): error is { name: string; snapshot: { waitId: string; kind: string; status: 'waiting' } } {
+	return Boolean(error && typeof error === 'object'
+		&& (error as { name?: unknown }).name === 'ExternalWaitPendingError'
+		&& typeof (error as { snapshot?: { waitId?: unknown } }).snapshot?.waitId === 'string'
+		&& typeof (error as { snapshot?: { kind?: unknown } }).snapshot?.kind === 'string'
+		&& (error as { snapshot?: { status?: unknown } }).snapshot?.status === 'waiting')
 }

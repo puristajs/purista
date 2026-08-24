@@ -300,6 +300,15 @@ export type AgentExternalWaitAdapter = {
 	cancel(waitId: string, eventId: string, observedAt?: string): Promise<unknown>
 }
 
+/** Safe suspension information supplied to an application-owned review/outbox handoff. */
+export type AgentExternalWaitPendingNotice = {
+	runId: string
+	serviceName: string
+	serviceVersion: string
+	agentName: string
+	wait: { waitId: string; kind: string; status: 'waiting' }
+}
+
 /** Durable workspace behavior declared by an attached agent manifest. */
 export type AgentWorkspacePolicy = {
 	mode: 'durable'
@@ -635,6 +644,8 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	durableWorkflows?: boolean
 	/** Optional durable opaque wait/signal adapter for application-owned human review workflows. */
 	externalWait?: AgentExternalWaitAdapter
+	/** Handles a durable wait as an application-owned successful delivery. */
+	onExternalWaitPending?: (notice: AgentExternalWaitPendingNotice) => Promise<unknown> | unknown
 	workspaceStore?: AgentDurableWorkspaceStore
 	skills?: AgentSkillRuntimeOptions
 	stateStore?: unknown

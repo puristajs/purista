@@ -55,6 +55,7 @@ export async function initializeAttachedAgentRuntimes(
 				runtime: aiOptions.runtime,
 				durableWorkflows: aiOptions.durableWorkflows,
 				externalWait: aiOptions.externalWait,
+				onExternalWaitPending: aiOptions.onExternalWaitPending,
 				workspaceStore: aiOptions.workspaceStore,
 				skillRuntime,
 				logger: aiOptions.logger,

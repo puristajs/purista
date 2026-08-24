@@ -16,6 +16,7 @@ export {
 export type {
 	AgentDefinition,
 	AgentExternalWaitAdapter,
+	AgentExternalWaitPendingNotice,
 	AgentDurableWorkspaceStore,
 	AgentDurableWorkspaceStorePolicy,
 	AgentExecutionDefinition,

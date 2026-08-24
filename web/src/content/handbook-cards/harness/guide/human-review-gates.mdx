@@ -97,6 +97,13 @@ const result = await durable.externalWait.signal({
 // applied, duplicate, already_terminal, or not_found: all are deterministic.
 ```
 
+For a wrapped PURISTA attached Harness workflow, opt into `ai.durableWorkflows`
+and pass `ai.onExternalWaitPending`. That callback is the explicit delivery
+acknowledgement point: commit or publish the already-created application task
+and return an output that your agent schema models as `waiting`. Without it,
+the pending error intentionally propagates instead of being mistaken for a
+successful queue completion.
+
 ## Rules that keep approval meaningful
 
 1. Authenticate and authorize the reviewer in a normal PURISTA command or
@@ -127,3 +134,8 @@ tests. Cover: pending suspension, restart/replay, approved/rejected/expired/
 cancelled outcomes, duplicate and late delivery, stale task revision, changed
 action digest, and the idempotent final command. The Harness adapter test does
 not replace application authorization or review-task tests.
+
+The repository’s executable `examples/durable-human-review` reference contains
+the application-side task store, revision CAS, action descriptor, terminal
+signal, resume path, and focused tests. It is deliberately a reference pattern,
+not a framework-owned review subsystem.

@@ -106,6 +106,11 @@ domain action. The application owns the guarded review task, reviewer identity,
 outbox signal, digest comparison on resume, and final idempotent command; Core
 does not provide review CRUD or a reviewer UI.
 
+For attached workflows, use `ai.onExternalWaitPending` as the explicit queue
+handoff: commit/publish the review task through the application outbox and
+return a schema-valid `waiting` output. Without this callback Core propagates
+the pending signal so delivery code cannot accidentally acknowledge the wait.
+
 Governance policy is optional. Do not add governance configuration to generated
 apps or simple agents by default. Use it only when a service needs central
 policy-as-code for tool calls, approval, audit, or reuse of external policy
