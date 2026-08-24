@@ -4,6 +4,7 @@ Use this reference when implementing PURISTA agents.
 
 ## Contents
 - [Current Model](#current-model)
+- [Documentation Navigation](#documentation-navigation)
 - [Builder Pattern](#builder-pattern)
 - [Runtime Wiring](#runtime-wiring)
 - [Handler Context](#handler-context)
@@ -22,6 +23,23 @@ An attached agent is represented as normal PURISTA artifacts:
 - queue worker for processing queued runs
 - command for aggregate calls
 - stream for live SSE events
+
+## Documentation Navigation
+
+Keep two user journeys distinct:
+
+- The standalone runtime journey is the PURISTA Handbook **AI Harness** chapter:
+  overview, quickstart, models/configuration, tools/skills, agents/workflows/state,
+  guardrails/governance, testing/evaluations, observability/operations, then
+  adapters/durability/reference.
+- The PURISTA framework journey is Handbook **Core Building Blocks → AI Agent**:
+  service attachment, builder/contract ownership, queue/stream delivery, and
+  framework integration tests.
+
+When answering an implementation question, link or route users to the first
+journey for generic Harness behavior. Use the second only when a PURISTA
+service, command, queue, stream, resource, or framework-owned identity/runtime
+binding is involved. Do not duplicate standalone setup in framework guidance.
 
 ## Builder Pattern
 Use the CLI first for application code:

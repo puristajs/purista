@@ -288,6 +288,10 @@ function createSessionMock(id: string) {
 		id,
 		agents: {},
 		workflows: {},
+		childTasks: {
+			get: async () => undefined,
+			list: async () => [],
+		},
 		memory: {
 			read: async () => undefined,
 			write: async () => undefined,
@@ -301,6 +305,7 @@ function createSessionMock(id: string) {
 		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
+		release: async () => undefined,
 		close: async () => undefined,
 	}
 }

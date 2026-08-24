@@ -26,7 +26,7 @@
 		"commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh && npm run build",
 		"commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh && npm run build",
 		"dev:doc": "npm run dev -w @purista/web",
-		"build:api-docs": "typedoc --options typedoc.json",
+		"build:api-docs": "npm run build -w @purista/core && npm run build -w @purista/base-http-bridge && typedoc --options typedoc.json",
 		"audit:api-docs": "node ./scripts/api-docs-audit.mjs",
 		"audit:skills": "node ./scripts/skills-audit.mjs",
 		"audit:knowledge": "node ./scripts/knowledge-audit.mjs",

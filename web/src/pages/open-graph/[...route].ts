@@ -214,18 +214,24 @@ export const { getStaticPaths, GET } = await OGImageRoute({
 			side: 'inline-start',
 		},
 		padding: 64,
+		fonts: [
+			'../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff',
+			'../node_modules/@fontsource/inter/files/inter-latin-700-normal.woff',
+		],
 		font: {
 			title: {
 				color: [255, 252, 242],
 				size: 56,
 				weight: 'Bold',
 				lineHeight: 1.08,
+				families: ['Inter'],
 			},
 			description: {
 				color: [214, 220, 226],
 				size: 28,
 				weight: 'Normal',
 				lineHeight: 1.3,
+				families: ['Inter'],
 			},
 		},
 		format: 'PNG',

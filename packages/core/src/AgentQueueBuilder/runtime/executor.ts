@@ -311,6 +311,10 @@ function createLocalSession(id: string): Session<any> {
 		id,
 		agents: {},
 		workflows: {},
+		childTasks: {
+			get: async () => undefined,
+			list: async () => [],
+		},
 		memory: {
 			read: async () => undefined,
 			write: async () => undefined,
@@ -324,8 +328,9 @@ function createLocalSession(id: string): Session<any> {
 		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
+		release: async () => undefined,
 		close: async () => undefined,
-	} as Session<any>
+	}
 }
 
 /** Error raised when a harness run terminates with a serialized error. */
