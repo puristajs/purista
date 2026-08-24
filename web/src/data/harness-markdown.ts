@@ -92,8 +92,17 @@ Keep every boundary explicit. A model should not decide which private system it 
 	{
 		id: 'guardrails',
 		title: 'Guardrails | AI Harness',
-		description: 'Add typed, observable input, output, retrieval, and tool guardrails to Harness default-loop agents.',
+		description: 'Add typed, observable input, output, retrieval, tool, and sensitive-data guardrails to Harness default-loop agents.',
 		body: `@purista/harness-guardrails is an optional addon for the Harness default agent loop. It uses a portable NVIDIA NeMo-shaped configuration vocabulary while keeping providers, credentials, vector stores, authorization, and business rules application-owned.
+
+## Sensitive data
+
+Use \`rails.config.sensitive_data_detection\` for exact entity, mask-token, and score-threshold policy, then bind an injected \`SensitiveDataDetector\` through \`createSensitiveDataActions({ detector })\`. YAML never contains detector endpoints, credentials, recognizers, cloud settings, or fallbacks.
+
+- \`@purista/harness-guardrails-presidio\` calls original Presidio \`POST /analyze\` only through an application-owned authenticated internal HTTP(S) gateway. It supports Presidio deployment-side recognizers and converts Python code-point offsets to JavaScript UTF-16 indexes.
+- \`@purista/harness-guardrails-native-privacy\` is local Rust/Node-API recognition for \`EMAIL_ADDRESS\`, \`PHONE_NUMBER\`, \`CREDIT_CARD\`, \`IP_ADDRESS\`, \`IBAN_CODE\`, \`US_SSN\`, and \`URL\`. Its prebuilds are tested under Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail without a fallback.
+
+Sensitive-data inspection is content-free and fail-closed. It creates a nested \`harness.sensitive_data.inspect\` GUARDRAIL span and inspection/duration metrics, but no model, token, or cost attributes. A nested standard LLM span remains the authoritative token/cost record for a model-backed check.
 
 ## What it protects
 

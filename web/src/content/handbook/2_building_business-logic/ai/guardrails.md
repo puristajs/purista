@@ -32,6 +32,86 @@ pnpm add @purista/harness-guardrails
 The normal `@purista/harness` and the chosen provider adapter remain separate
 dependencies.
 
+## Sensitive data: choose a detector, keep policy portable
+
+Sensitive-data policy belongs in `@purista/harness-guardrails`; the detector is
+an application-owned adapter. Add one optional package only when needed:
+
+```bash
+# Original Presidio Analyzer behind an authenticated internal gateway
+npm install @purista/harness-guardrails-presidio
+
+# Or a local Rust/Node-API recognizer subset for Node.js and Bun
+npm install @purista/harness-guardrails-native-privacy
+```
+
+Extend `guardrails/config.yaml` with the strict compatible NeMo-shaped policy:
+
+```yaml
+rails:
+  config:
+    sensitive_data_detection:
+      input:
+        entities: [EMAIL_ADDRESS, PHONE_NUMBER]
+        mask_token: '<MASKED>'
+        score_threshold: 0.6
+      output:
+        entities: [EMAIL_ADDRESS]
+        mask_token: '<MASKED>'
+        score_threshold: 0.6
+      retrieval:
+        entities: [EMAIL_ADDRESS]
+        mask_token: '<MASKED>'
+        score_threshold: 0.6
+  input:
+    flows: ['mask sensitive data on input']
+  output:
+    flows: ['detect sensitive data on output']
+  retrieval:
+    flows: ['mask sensitive data on retrieval']
+```
+
+YAML contains only policy. Endpoints, tokens, languages, recognizers, provider
+names, cloud settings, and fallbacks are rejected instead of ignored.
+
+```ts
+import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
+import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
+
+const detector = createPresidioDetector({
+  id: 'presidio-private',
+  endpoint: 'https://presidio.internal/',
+  headers: { authorization: process.env.PRESIDIO_GATEWAY_TOKEN! },
+})
+
+const rails = defineGuardrails({
+  config: await loadGuardrailsConfig('./guardrails'),
+  actions: createSensitiveDataActions({ detector }),
+})
+```
+
+A detect flow blocks with `sensitive_data_detected`; a mask flow replaces only
+the validated matching ranges with `mask_token` and records
+`sensitive_data_masked`. Detector, result-validation, cancellation, and codec
+errors fail closed. Matched text and offsets never cross the public detector
+contract or operational telemetry.
+
+### Which detector should I use?
+
+| Adapter | Use it when | Important boundary |
+| --- | --- | --- |
+| `@purista/harness-guardrails-presidio` | You need original Presidio recognizers such as `PERSON`, custom deployment-side recognizers, or Presidio language support. | It calls only original Presidio `POST /analyze` through an injected internal HTTP(S) gateway, forces `return_decision_process: false`, validates the result, and converts Python code-point offsets to JavaScript UTF-16. Presidio itself needs your gateway/network authentication boundary. |
+| `@purista/harness-guardrails-native-privacy` | You need a local detector with no detector network hop. | Its first release supports exactly `EMAIL_ADDRESS`, `PHONE_NUMBER`, `CREDIT_CARD`, `IP_ADDRESS`, `IBAN_CODE`, `US_SSN`, and `URL`. Node-API prebuilds are tested with Node.js and Bun on macOS, Linux glibc, and Windows; there is no JavaScript, WASM, model, or remote fallback. |
+
+The native detector rejects an unsupported configured entity at construction. It
+is intentionally not a Presidio or NER/ML port.
+
+For structured tool values, never recursively scan every JSON string. Bind a
+selected tool flow to an application-owned `SensitiveDataValueCodec` that
+extracts the specific fields approved for inspection and applies only the
+validated replacements. `tool_input`/`tool_output` rails still run before the
+existing permissions, governance, schemas, and tool side effects.
+
 ## What an attached rail covers
 
 `rails.attach(...)` appends a fail-closed interceptor to a **default-loop
@@ -217,6 +297,15 @@ model cost attribution without duplicating token values on the parent rail
 span. Pricing stays in the application's cost model or observability backend;
 the addon does not guess prices.
 
+Sensitive-data inspection adds a child
+`harness.sensitive_data.inspect` `GUARDRAIL` span plus
+`harness.sensitive_data.inspections` and `harness.sensitive_data.duration`.
+Those records contain only the detector id, `local|cloud` mode,
+`detect|mask` operation, outcome, bounded finding count, configured categories,
+and error type. They never include content, offsets, endpoint metadata, model,
+tokens, or cost. A model-backed check's nested normal LLM span remains the
+authoritative model/provider/token record for cost attribution.
+
 ## Production checklist
 
 - Keep `telemetry({ contentCaptureMode: 'NO_CONTENT' })` in production.
@@ -228,6 +317,11 @@ the addon does not guess prices.
   authorization enabled.
 - Pass run-scoped model, signal, logger, and identity context to retrieval
   rails so traces, cancellation, and cost attribution remain correlated.
+- Treat Presidio as an internal service with gateway/network authentication;
+  never expose its Analyzer endpoint directly to a browser. Pin its upstream
+  image tag in the application deployment.
+- Use the native subset only for its documented entity list. A missing native
+  prebuild is a startup failure, not permission to silently call a cloud service.
 - Treat NeMo Python actions, Colang, dialog/execution rails, servers, and
   implicit vector stores as unsupported: the addon rejects them rather than
   executing unreviewed code.

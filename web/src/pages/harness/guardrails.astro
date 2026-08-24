@@ -14,8 +14,23 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       { text: 'Safety controls' },
       { text: 'with evidence.', color: 'con' },
     ]}
-    lede="Guardrails add typed, fail-closed decisions around a Harness agent loop: input, output, retrieval, and tool calls. They work alongside Zod, permissions, governance, and application authorization — not instead of them."
+    lede="Guardrails add typed, fail-closed decisions around a Harness agent loop: input, output, retrieval, tools, and sensitive data. They work alongside Zod, permissions, governance, and application authorization — not instead of them."
   />
+
+  <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
+        <div class="eyebrow">Sensitive-data adapters</div>
+        <h2 class="display display-lg">Keep detection interchangeable.</h2>
+        <p class="lede">The Guardrails addon owns strict policy and enforcement. Your composition root owns the detector and its security boundary.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="card"><h3 class="h3">Original Presidio sidecar</h3><p>Install <code>@purista/harness-guardrails-presidio</code> when you need Presidio recognizers such as <code>PERSON</code> or custom deployment-side recognizers. It calls only <code>POST /analyze</code> through an injected authenticated internal HTTP(S) endpoint, never from YAML or a browser.</p></div>
+        <div class="card"><h3 class="h3">Native local subset</h3><p>Install <code>@purista/harness-guardrails-native-privacy</code> for local <code>EMAIL_ADDRESS</code>, <code>PHONE_NUMBER</code>, <code>CREDIT_CARD</code>, <code>IP_ADDRESS</code>, <code>IBAN_CODE</code>, <code>US_SSN</code>, and <code>URL</code> recognition. One Node-API prebuild family is tested with Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail instead of falling back.</p></div>
+      </div>
+      <p class="mt-6 text-[var(--color-fg-muted)]">Masking is provider-neutral and happens in Guardrails after inspection. For structured tool values, provide a reviewed codec that selects exact fields; the addon never recursively scans arbitrary JSON.</p>
+    </div>
+  </section>
 
   <section class="section-pad bg-[var(--color-bg-sunk)] border-y border-[var(--color-line)]">
     <div class="wrap">
@@ -41,6 +56,10 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
           <h3 class="h3">Evidence without content</h3>
           <p>Every decision is traceable with a rail ID, phase, outcome, duration, and controlled reason code. Prompts, documents, tool values, and secrets stay out of telemetry.</p>
         </div>
+        <div class="card">
+          <h3 class="h3">Sensitive data</h3>
+          <p>Portable policy can detect or mask configured data categories. Choose an injected Presidio sidecar or the local native subset without coupling policy to a provider or endpoint.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -62,8 +81,14 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     model: assistant
 
 rails:
+  config:
+    sensitive_data_detection:
+      input:
+        entities: [EMAIL_ADDRESS]
+        mask_token: '<MASKED>'
+        score_threshold: 0.6
   input:
-    flows: [remove-secret-marker]
+    flows: ['mask sensitive data on input', remove-secret-marker]
   output:
     flows: [redact-contact-details]
   tool_input:
@@ -72,10 +97,19 @@ rails:
         <CodeBlock
           language="typescript"
           label="guardrails.ts"
-          code={`const rails = defineGuardrails({
+          code={`import { createSensitiveDataActions, defineGuardrails } from '@purista/harness-guardrails'
+import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
+
+const detector = createPresidioDetector({
+  id: 'presidio-private',
+  endpoint: 'https://presidio.internal/',
+})
+
+const rails = defineGuardrails({
   config: await loadGuardrailsConfig('./guardrails'),
   modelAliases: { main: 'assistant' },
   actions: {
+    ...createSensitiveDataActions({ detector }),
     'remove-secret-marker': {
       evaluate: ({ value }) => ({
         decision: 'transform',
@@ -152,6 +186,7 @@ const answerCustomer = workflow({
         <div class="card"><h3 class="h3">Metrics</h3><p><code>harness.guardrail.evaluations</code> and <code>harness.guardrail.duration</code> make policy behavior visible without exposing content.</p></div>
         <div class="card"><h3 class="h3">Safety-model cost</h3><p>A model check nests its normal LLM span below the guardrail span. Provider, model, and reported input/output/total tokens remain canonical there for cost attribution.</p></div>
       </div>
+      <div class="card mt-8"><h3 class="h3">Sensitive-data operations</h3><p>Every inspection creates a child <code>harness.sensitive_data.inspect</code> GUARDRAIL span plus inspection and duration metrics. It contains only detector id, local/cloud mode, detect/mask operation, outcome, bounded finding count, configured categories, and failure type. It contains no source text, offsets, endpoint data, model, token, or cost fields.</p></div>
     </div>
   </section>
 
