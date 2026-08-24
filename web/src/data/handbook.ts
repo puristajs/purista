@@ -591,16 +591,22 @@ export function getSidebarItems(): SidebarItem[] {
 				{ title: 'Types', id: 'api/types', href: '/handbook/api/#types', order: 6 },
 			],
 		},
-		...(harnessGuide ? [{
-			title: 'AI Harness',
-			id: 'harness',
-			href: '/handbook/harness/',
-			order: handbookSections.length + 2,
-			sectionStart: true,
-			items: harnessGuide.items?.map(item => ({
-				...item,
-				title: harnessLabels[item.id] ?? item.title,
-			})),
-		}] : []),
+		...(harnessGuide
+			? [
+				{
+					title: 'AI Harness',
+					id: 'harness',
+					href: '/handbook/harness/',
+					order: handbookSections.length + 2,
+					sectionStart: true,
+					kind: 'sectionHeader' as const,
+					iconLabel: 'AI',
+				},
+				...(harnessGuide.items ?? []).map(item => ({
+					...item,
+					title: harnessLabels[item.id] ?? item.title,
+				})),
+			]
+			: []),
 	]
 }

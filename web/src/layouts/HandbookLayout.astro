@@ -61,56 +61,67 @@ function getItemHref(item: SidebarItem): string {
           </a>
           <nav class="space-y-0.5">
             {sidebar.map((item) => (
-              <div class:list={['hbl-group', { 'pt-5 mt-5 border-t border-[var(--color-line)]': item.sectionStart }]}>
-                <a
-                  href={getItemHref(item)}
-                  class={`hbl-item ${
-                    isActive(item, currentId)
-                      ? 'hbl-item--active'
-                      : isParentActive(item, currentId)
-                      ? 'hbl-item--parent'
-                      : 'hbl-item--default'
-                  }`}
-                >
-                  {item.title}
-                </a>
-                {item.items && item.items.length > 0 && isParentActive(item, currentId) && (
-                  <div class="hbl-children">
-                    {item.items.map((sub) => (
-                      <div>
-                        <a
-                          href={getItemHref(sub)}
-                          class={`hbl-item hbl-item--sub ${
-                            isActive(sub, currentId)
-                              ? 'hbl-item--active'
-                              : isParentActive(sub, currentId)
-                              ? 'hbl-item--parent'
-                              : 'hbl-item--default'
-                          }`}
-                        >
-                          {sub.title}
-                        </a>
-                        {sub.items && sub.items.length > 0 && isParentActive(sub, currentId) && (
-                          <div class="hbl-children">
-                            {sub.items.map((subsub) => (
-                              <a
-                                href={getItemHref(subsub)}
-                                class={`hbl-item hbl-item--sub ${
-                                  isActive(subsub, currentId)
-                                    ? 'hbl-item--active'
-                                    : 'hbl-item--default'
-                                }`}
-                              >
-                                {subsub.title}
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              item.kind === 'sectionHeader' ? (
+                <div class:list={['pt-7 mt-7', { 'border-t border-[var(--color-line)]': item.sectionStart }]}>
+                  <a href={getItemHref(item)} class="flex items-center gap-2.5 mb-7 px-2 group">
+                    <div class="w-6 h-6 grid place-items-center bg-[var(--color-fg)] text-[var(--color-bg)] rounded text-[0.55rem] font-extrabold font-display tracking-[-0.08em] shrink-0 group-hover:bg-[var(--color-found)] transition-colors">
+                      {item.iconLabel}
+                    </div>
+                    <span class="font-display font-semibold text-sm tracking-tight group-hover:text-[var(--color-found)] transition-colors" style="color: var(--color-fg-strong)">{item.title}</span>
+                  </a>
+                </div>
+              ) : (
+                <div class="hbl-group">
+                  <a
+                    href={getItemHref(item)}
+                    class={`hbl-item ${
+                      isActive(item, currentId)
+                        ? 'hbl-item--active'
+                        : isParentActive(item, currentId)
+                        ? 'hbl-item--parent'
+                        : 'hbl-item--default'
+                    }`}
+                  >
+                    {item.title}
+                  </a>
+                  {item.items && item.items.length > 0 && isParentActive(item, currentId) && (
+                    <div class="hbl-children">
+                      {item.items.map((sub) => (
+                        <div>
+                          <a
+                            href={getItemHref(sub)}
+                            class={`hbl-item hbl-item--sub ${
+                              isActive(sub, currentId)
+                                ? 'hbl-item--active'
+                                : isParentActive(sub, currentId)
+                                ? 'hbl-item--parent'
+                                : 'hbl-item--default'
+                            }`}
+                          >
+                            {sub.title}
+                          </a>
+                          {sub.items && sub.items.length > 0 && isParentActive(sub, currentId) && (
+                            <div class="hbl-children">
+                              {sub.items.map((subsub) => (
+                                <a
+                                  href={getItemHref(subsub)}
+                                  class={`hbl-item hbl-item--sub ${
+                                    isActive(subsub, currentId)
+                                      ? 'hbl-item--active'
+                                      : 'hbl-item--default'
+                                  }`}
+                                >
+                                  {subsub.title}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
             ))}
           </nav>
         </div>

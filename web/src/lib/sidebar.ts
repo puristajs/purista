@@ -6,6 +6,8 @@ export interface SidebarItem {
   order: number;
   href?: string;
   sectionStart?: boolean;
+  kind?: 'item' | 'sectionHeader';
+  iconLabel?: string;
   items?: SidebarItem[];
 }
 
