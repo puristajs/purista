@@ -9,6 +9,7 @@ Use this reference when implementing PURISTA agents.
 - [Runtime Wiring](#runtime-wiring)
 - [Handler Context](#handler-context)
 - [Optional Governance Policy](#optional-governance-policy)
+- [Guardrails And Sensitive Data](#guardrails-and-sensitive-data)
 - [Sandbox And Durable Workspaces](#sandbox-and-durable-workspaces)
 - [Enterprise Sandbox Boundary](#enterprise-sandbox-boundary)
 - [AI Security And Privacy](#ai-security-and-privacy)
@@ -268,6 +269,52 @@ conversation metadata to the harness explicitly and only as safe scalar
 metadata. If an attached agent configures `require_approval` rules, provide a
 harness `approval` adapter in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
+
+`require_approval` is a synchronous decision for one tool call. It is not a
+durable human-review workflow: application services own review records,
+reviewer identity, expiry, decision persistence, guarded decision commands,
+and restart-safe queue continuation. Do not suspend a worker on an in-process
+Promise. Recheck tenant authorization and the canonical action before an
+approved decision reaches an idempotent domain command.
+
+## Guardrails And Sensitive Data
+
+Use `@purista/harness-guardrails` only for a Harness **default-loop** agent.
+Keep it in the application composition root; `@purista/core` deliberately has
+no dependency on the optional addon. Attach the rail interceptor when defining
+the Harness agent passed to `setHarnessAgent(...)` or
+`setHarnessWorkflow(...)`; the normal PURISTA service boundary still owns
+identity, guards, command/queue contracts, and the final mutation.
+
+- Input, output, tool-input, and tool-output rails run automatically for the
+  attached default-loop agent. Retrieval is application-owned and requires an
+  explicit `filterRetrievedChunks(...)` call before chunks enter agent input.
+- Keep NeMo-shaped YAML portable and declarative: it selects ordered flow IDs
+  and narrow sensitive-data policy only. Register TypeScript actions, model
+  aliases, and detector implementations at the composition root. Never put
+  endpoints, credentials, local model paths, recognizer setup, or fallback
+  behavior in YAML.
+- Use exactly one injected `SensitiveDataDetector`: deterministic local native
+  privacy for its documented subset, an authenticated private Presidio Analyzer
+  sidecar for deployment-provided recognizers, local NER only with an explicitly
+  installed and pre-provisioned model, or an application implementation. All
+  detector failures fail closed. Do not claim Anonymizer, fake-value generation,
+  image/PDF OCR, batch processing, hashing, or encryption from the detector
+  contract.
+- Use the Harness fake detector and Presidio/local-NER testing helpers in
+  deterministic tests. Never copy detector requests, offsets, text, prompts,
+  or findings into snapshots, logs, metrics, or spans.
+
+Guardrail decisions are content-free Harness `GUARDRAIL` spans, metrics, and
+structured logs. Blocks are expected enforcement decisions; action failures
+are errors. A model-backed rail creates its normal nested model span, which is
+the only source for provider/model and reported token/cost attribution. PURISTA
+must not recreate those GenAI metrics.
+
+For complete standalone setup, YAML vocabulary, detector capability matrix,
+and production tests, route users to the public Handbook pages
+`/handbook/harness/guide/guardrails-governance/` and
+`/handbook/harness/guide/privacy-detectors/`.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:

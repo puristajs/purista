@@ -25,6 +25,119 @@ spans, never through inspected content. The Harness owns GenAI/model/tool and
 guardrail telemetry; PURISTA records its service and agent-wrapper telemetry
 around that work without duplicating token metrics.
 
+## Attach a guarded agent to a service
+
+The optional package remains in the application composition root. Core does not
+need an addon dependency or a second configuration surface: give
+`setHarnessAgent(...)` the normal Harness definition returned by
+`rails.attach(...)`.
+
+```ts [claimsAnswerAgentBuilder.ts]
+import { z } from 'zod'
+import {
+  createSensitiveDataActions,
+  defineGuardrails,
+  parseGuardrailsConfig,
+} from '@purista/harness-guardrails'
+import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
+import { claimsV1ServiceBuilder } from '../claimsV1ServiceBuilder.js'
+
+const rails = defineGuardrails({
+  config: parseGuardrailsConfig({
+    rails: {
+      config: {
+        sensitive_data_detection: {
+          input: {
+            entities: ['EMAIL_ADDRESS'],
+            mask_token: '<REDACTED>',
+            score_threshold: 0.8,
+          },
+        },
+      },
+      input: {
+        flows: ['deny prompt override', 'mask sensitive data on input'],
+      },
+      output: {
+        flows: ['remove internal note'],
+      },
+    },
+  }),
+  actions: {
+    ...createSensitiveDataActions({
+      detector: createNativePrivacyDetector({ id: 'claims-local-privacy' }),
+    }),
+    'deny prompt override': {
+      evaluate: ({ value }) =>
+        typeof value === 'string' && value.includes('ignore previous instructions')
+          ? { decision: 'block', reasonCode: 'prompt_override' }
+          : { decision: 'allow' },
+    },
+    'remove internal note': {
+      evaluate: ({ value }) =>
+        typeof value === 'string'
+          ? {
+              decision: 'transform',
+              target: 'bot_message',
+              value: value.replaceAll('[internal]', ''),
+              reasonCode: 'internal_note_removed',
+            }
+          : { decision: 'allow' },
+    },
+  },
+})
+
+export const claimsAnswerAgentBuilder = claimsV1ServiceBuilder
+  .getAgentQueueBuilder('claimsAnswer', 'Answers a claims question safely')
+  .addPayloadSchema(z.string().min(1))
+  .addOutputSchema(z.string())
+  .addModel('assistant', { model: 'claims-assistant', capabilities: ['object'] as const })
+  .setHarnessAgent(
+    rails.attach({
+      model: 'assistant',
+      input: z.string().min(1),
+      output: z.string(),
+      instructions: 'Answer only with approved claims information.',
+      builtinTools: false,
+    }),
+  )
+```
+
+Bind only the normal Harness model at service startup. The rail configuration
+and its detector are already part of the attached definition; they are not
+passed through `ai` and are never inferred from provider configuration.
+
+```ts [bootstrap.ts]
+const claimsService = await claimsV1ServiceBuilder
+  .addAgentDefinition(await claimsAnswerAgentBuilder.getDefinition())
+  .getInstance(eventBridge, {
+    queueBridge,
+    ai: {
+      models: {
+        assistant: {
+          provider,
+          model: 'claims-assistant',
+          capabilities: ['object'],
+        },
+      },
+      telemetry: { contentCaptureMode: 'NO_CONTENT' },
+    },
+  })
+```
+
+Use a private Presidio sidecar or reviewed local NER detector instead when the
+native subset is insufficient. Keep its endpoint/authentication or local-model
+integrity configuration in bootstrap code, not the policy YAML.
+
+## Human approval is a separate workflow
+
+For an immediate sensitive tool call, `ai.governance.approval` can return a
+synchronous `require_approval` decision. It is not a persisted human-review
+workflow. A review that can outlive the current worker belongs to the owning
+service: persist an application review task, accept an authenticated guarded
+compare-and-set decision, emit an idempotent continuation event, then recheck
+authorization and the approved action before the final command. Do not wait on
+a Promise in an agent or queue worker.
+
 ## Next
 
 Configure detectors, policy YAML, and deterministic fakes in the standalone

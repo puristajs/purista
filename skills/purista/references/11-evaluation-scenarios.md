@@ -11,6 +11,7 @@ Use these scenarios to test whether the `purista` skill gives an otherwise untra
 - [Scenario 6: Skill Drift Repair](#scenario-6-skill-drift-repair)
 - [Scenario 7: Durable Agent Workspace Replay](#scenario-7-durable-agent-workspace-replay)
 - [Scenario 8: Command-Capable Agent Boundary](#scenario-8-command-capable-agent-boundary)
+- [Scenario 9: Guarded Claims Agent](#scenario-9-guarded-claims-agent)
 
 ## Scenario 1: Greenfield Project Setup
 Prompt:
@@ -175,3 +176,35 @@ Validation:
   cleanup
 - it explicitly rejects the near miss “a tenant-prefixed session ID and Zod
   schema make host execution tenant-safe”
+
+## Scenario 9: Guarded Claims Agent
+
+Prompt:
+
+```text
+Attach an agent to the claims service. It must mask customer email addresses,
+reject a prompt-injection instruction from retrieved policy text, and require a
+human before a settlement tool may execute.
+```
+
+Expected behavior:
+- uses `@purista/harness-guardrails` in the application composition root rather
+  than adding it as a Core dependency or claiming a PURISTA review subsystem
+- attaches rails only to a default-loop Harness agent and explicitly filters
+  application-owned retrieval before its contents are supplied to the agent
+- keeps YAML to portable flow order and sensitive-data policy; TypeScript owns
+  actions, model aliases, and one injected detector implementation
+- preserves PURISTA guard/resource authorization and uses governance only for
+  the sensitive tool decision
+- explains that `require_approval` is synchronous; a long human review is a
+  normal application review task plus guarded idempotent queue continuation
+
+Validation:
+- output/tool checks do not replace tenant authorization or final domain
+  validation
+- detector/model content, findings, offsets, prompts, and tool arguments are
+  absent from logs, metrics, traces, and fixtures
+- guardrail decisions use Harness observability; Core does not duplicate model
+  token or cost metrics
+- tests use deterministic Harness/detector fakes and include allow, transform,
+  block, and detector-failure paths
