@@ -1,0 +1,61 @@
+---
+title: Models & Configuration
+description: Declare truthful model capabilities and configure safe runtime defaults before adding application complexity.
+---
+
+## Model aliases are capability contracts
+
+Register a model by the operations it can actually perform. TypeScript handles
+and runtime validation both use the capability list, preventing an unsupported
+operation from becoming a late provider surprise.
+
+```ts
+.models({
+  fast: {
+    provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+    model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+    capabilities: ['object', 'tool_use'],
+    defaults: { maxTokens: 1200 },
+    retry: true
+  }
+})
+```
+
+| Capability | Use it for |
+| --- | --- |
+| `object` / `object_stream` | Structured, schema-validated output |
+| `text` / `text_stream` | Plain text or streaming text |
+| `tool_use` | Model-directed calls to explicitly registered tools |
+| `embeddings` / `rerank` | Application-owned retrieval orchestration |
+| input capabilities | A provider-supported image, audio, or file input boundary |
+
+Prefer structured output for business decisions. It reduces parsing ambiguity
+and ensures the application sees validated values.
+
+## Establish safe defaults
+
+```ts
+.defaults({
+  runTimeoutMs: 60_000,
+  modelTimeoutMs: 30_000,
+  toolTimeoutMs: 10_000,
+  agentMaxIterations: 8,
+  maxParallelToolCalls: 4,
+  historyRetention: { maxTurns: 50, maxBytes: 256_000 }
+})
+```
+
+Keep user-facing budgets short. Move slow or retryable business work to an
+application worker or queue. History retention bounds persisted storage by
+complete turns; it is not a model-context or token estimator.
+
+## Configure adapters intentionally
+
+In-memory state and sandbox adapters are useful for local development. Choose
+explicit production adapters when history, memory, sandbox execution, or durable
+workspaces must survive restart. The Harness never creates an HTTP server,
+queue worker, secret manager, or database on your behalf.
+
+## Next
+
+Expose the smallest useful capability in [Tools & Skills](/handbook/harness/guide/tools-and-skills/).

@@ -86,9 +86,16 @@ try {
           </thead>
           <tbody class="divide-y divide-[var(--color-line)] text-[var(--color-fg-muted)]">
             <tr><td class="p-4 text-[var(--color-fg)]">Block PII before an agent, model, tool, or retrieval boundary</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Replace or remove a detected whole value with a fixed configured token</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect email, phone, payment-card, IPv4, IPv6, IBAN, or US SSN values</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in; validation depth varies by entity</td><td class="p-4">Model/label dependent; not built in</td></tr>
-            <tr><td class="p-4 text-[var(--color-fg)]">Detect HTTP(S) URLs</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, HTTP(S) only</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Replace a detected whole value with the configured fixed token</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Remove a detected whole value with an empty mask token</td><td class="p-4">Yes</td><td class="p-4">Yes</td><td class="p-4">Yes</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect email address</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, regex-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect phone number</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect payment-card number</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, Luhn-checked</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect IPv4 address</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, syntax-validated</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect IPv6 address</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, syntax-validated</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect IBAN-shaped value</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect US Social Security number-shaped value</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, format-based</td><td class="p-4">Model/label dependent; not built in</td></tr>
+            <tr><td class="p-4 text-[var(--color-fg)]">Detect HTTP(S) URL</td><td class="p-4">Deployment recognizer dependent</td><td class="p-4">Built in, HTTP(S) only</td><td class="p-4">Model/label dependent; not built in</td></tr>
             <tr><td class="p-4 text-[var(--color-fg)]">Detect names, locations, organizations, medical, or other NER/model entities</td><td class="p-4">Deployment recognizer/model dependent</td><td class="p-4">Not supplied</td><td class="p-4">Yes, only selected local model labels</td></tr>
             <tr><td class="p-4 text-[var(--color-fg)]">Detect my application-specific identifier</td><td class="p-4">Custom recognizer dependent</td><td class="p-4">Not supplied</td><td class="p-4">Not supplied; inject a dedicated detector</td></tr>
             <tr><td class="p-4 text-[var(--color-fg)]">Choose a detection language</td><td class="p-4">One fixed composition-root language per detector</td><td class="p-4">No NLP language model</td><td class="p-4">Selected local model and label mapping</td></tr>
@@ -135,8 +142,8 @@ const runtime = new FakeLocalNerRuntime()
 runtime.enqueue([{ entity_group: 'PER', score: 0.99, start: 0, end: 5 }])
 const detector = createLocalNerDetectorWithRuntime(localNerOptions, async () => runtime)
 
-// The fake scripts aggregate model tokens.
-// It never loads a model or records inspected text.`}
+// The fake scripts model output only.
+// It never loads a model, reports tokens, or records inspected text.`}
         />
         <CodeBlock
           language="typescript"

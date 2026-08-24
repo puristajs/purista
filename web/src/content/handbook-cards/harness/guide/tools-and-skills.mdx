@@ -1,0 +1,56 @@
+---
+title: Tools & Skills
+description: Give agents explicit, typed capabilities while keeping business authorization outside the model.
+---
+
+## Define a typed tool
+
+```ts
+.tools({
+  lookup_order: {
+    description: 'Look up an order that the current caller may view.',
+    input: z.object({ orderId: z.string().min(1) }),
+    output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
+    handler: async (ctx, { orderId }) => {
+      return orderService.lookupVisibleOrder({ sessionId: ctx.sessionId, orderId })
+    }
+  }
+})
+.agents(({ agent }) => ({
+  support: agent({
+    model: 'assistant',
+    tools: ['lookup_order'],
+    builtinTools: false,
+    instructions: 'Use lookup_order only after the customer provides an order id.'
+  })
+}))
+```
+
+Schemas validate shape. The handler still enforces authorization, idempotency,
+and business invariants. Never treat an instruction as a substitute for a
+deterministic policy check.
+
+## Add skills as mounted methods
+
+```ts
+.skills({ returns_method: './skills/returns-method' })
+.agents(({ agent }) => ({
+  support: agent({
+    model: 'assistant',
+    skills: ['returns_method'],
+    builtinTools: ['read'],
+    tools: ['lookup_order'],
+    instructions: 'Read the returns method before handling a return request.'
+  })
+}))
+```
+
+Skills are mounted files, not prompt text. Their `SKILL.md` is opened through
+the normal `read` tool and therefore remains subject to tool permissions and
+guardrails. Use MCP only for a reviewed external tool server; stdio MCP needs a
+spawn-capable, isolating sandbox.
+
+## Next
+
+Choose direct agents or explicit orchestration in
+[Agents, Workflows & State](/handbook/harness/guide/agents-workflows-state/).

@@ -1,0 +1,48 @@
+---
+title: Agents, Workflows & State
+description: Keep model loops focused and use typed workflows for the application-owned process around them.
+---
+
+## Direct agent or workflow?
+
+| Use a direct agent when… | Use a workflow when… |
+| --- | --- |
+| One model loop can complete the work | The application sequences or coordinates several steps |
+| The agent may use a small allowed tool set | You need fan-out, review, deterministic logic, or durable writes |
+| The output is one validated result | Different agents or models have separate responsibilities |
+
+Workflows call registered agents only after declaring delegation. This makes
+authority, call budgets, and model overrides visible beside the handler.
+
+```ts
+.workflows(({ workflow }) => ({
+  review_ticket: workflow({
+    input: z.object({ ticketId: z.string() }),
+    output: z.object({ priority: z.enum(['low', 'normal', 'high']) }),
+    delegation: { agents: ['triage'] },
+    handler: async (ctx) => ctx.agents.triage(ctx.input)
+  })
+}))
+```
+
+Use `ctx.fanOut(...)` for ordered, bounded independent work. Use
+`ctx.childTasks.start(...)` for isolated workflow-owned background work. A
+continuable task is deliberately in-process; use your application queue/worker
+for work that must survive a process restart.
+
+## State, history, and memory
+
+The session scopes one active run, conversation history, state, and live
+resources. It is not a distributed scheduler. Give each tenant/thread a stable
+application-owned session ID, use a durable `StateStore` when history must
+survive restart, and configure retention as a storage boundary.
+
+Memory adapters are separate from session history. Use history for the
+conversation record and memory for deliberately scoped, application-governed
+facts. Keep retrieval orchestration and vector storage in application/workflow
+code.
+
+## Next
+
+Add content and execution controls in
+[Guardrails & Governance](/handbook/harness/guide/guardrails-governance/).

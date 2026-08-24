@@ -1,0 +1,72 @@
+---
+title: Quickstart
+description: Build and invoke one typed agent with the smallest safe configuration.
+---
+
+## Install
+
+Install the core runtime, Zod for schemas, and only the provider adapter your
+application uses:
+
+```sh
+npm install @purista/harness @purista/harness-openai zod
+```
+
+Set `OPENAI_API_KEY` and optionally `OPENAI_MODEL`. Keep credentials in your
+deployment secret store; do not put them in source, skills, fixtures, or logs.
+
+## Define one model and one agent
+
+```ts
+import { z } from 'zod'
+import { defineHarness, JsonLogger, inMemorySandbox } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
+
+const harness = defineHarness({ name: 'support' })
+  .logger(new JsonLogger({ level: 'info' }))
+  .telemetry({ contentCaptureMode: 'NO_CONTENT' })
+  .sandbox(inMemorySandbox())
+  .models({
+    assistant: {
+      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+      capabilities: ['object']
+    }
+  })
+  .agents(({ agent }) => ({
+    support: agent({
+      model: 'assistant',
+      input: z.object({ question: z.string().min(1) }),
+      output: z.object({ answer: z.string() }),
+      builtinTools: false,
+      instructions: 'Answer clearly. Return the requested object only.'
+    })
+  }))
+  .build()
+```
+
+## Invoke through a session
+
+```ts
+const session = await harness.getSession('tenant-a:customer-42')
+
+try {
+  const result = await session.agents.support.prompt({
+    question: 'How do I change my delivery address?'
+  })
+  console.log(result.answer)
+} finally {
+  await session.release()
+  await harness.shutdown()
+}
+```
+
+The session scopes history, state, and live resources. `release()` ends live
+resources while retaining durable state; `close()` is destructive and deletes
+the session record. Use a stable, privacy-safe application session key and let
+your transport decide whether same-session requests serialize or receive a
+busy response.
+
+## Next
+
+Continue with [Models & Configuration](/handbook/harness/guide/models-and-configuration/).

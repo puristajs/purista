@@ -1,0 +1,33 @@
+---
+title: Adapters, Durability & Reference
+description: Select infrastructure ports intentionally and know where the standalone guide ends and application ownership begins.
+---
+
+## Adapter choices
+
+| Need | Harness boundary |
+| --- | --- |
+| Provider-neutral inference | Install a provider addon and register a truthful model alias |
+| Persisted history and runs | `StateStore` adapter |
+| Scoped memory | `MemoryAdapter` |
+| File access or command execution | `Sandbox` with least privilege |
+| Restart-safe workflow state | Durable runtime, workspace store, and checkpoints |
+| External tool server | MCP through an appropriate sandbox/HTTP boundary |
+| Policy approval/audit | Optional governance adapter |
+
+Start local with in-memory adapters. For restart-safe work, use the local
+durable execution bundle only when its local filesystem and SQLite lifecycle
+matches your deployment. Replace individual ports for managed database,
+workspace, sandbox, or remote-worker requirements; do not make a direct model
+or storage SDK call from an agent merely to avoid an adapter decision.
+
+## Reference and implementation help
+
+- [Public API](https://github.com/puristajs/ai-harness/tree/main/docs/reference/public-api.md)
+- [Configuration guide](https://github.com/puristajs/ai-harness/tree/main/docs/guides/configuration.md)
+- [Security model](https://github.com/puristajs/ai-harness/tree/main/docs/security/security-model.md)
+- [Operations runbook](https://github.com/puristajs/ai-harness/tree/main/docs/operations/runbook.md)
+- [Harness architecture and adoption](/harness/architecture/)
+
+For a PURISTA-owned service, continue with
+[Harness Integration](/handbook/blocks/agent-pattern/harness-integration/).

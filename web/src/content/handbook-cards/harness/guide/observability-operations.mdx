@@ -1,0 +1,39 @@
+---
+title: Observability & Operations
+description: Trace the entire run without exposing prompts or tool data, then use that evidence to operate safely.
+---
+
+## One trace, clear ownership
+
+The Harness emits OpenTelemetry spans and metrics for session, workflow, agent,
+model, tool, sandbox, state, and guardrail work. Set
+`contentCaptureMode: 'NO_CONTENT'` for production. Prompts, documents, tool
+inputs/results, secrets, and attachments do not belong in telemetry.
+
+| Signal | Use it to answer |
+| --- | --- |
+| Run events | What did the application observe during a run? |
+| Traces | Which step was slow, failed, blocked, or retried? |
+| Model span | Which provider/model ran, and what token usage did it report? |
+| Guardrail span | Which policy phase allowed, transformed, blocked, or failed closed? |
+| Structured logs | Which stable IDs and safe error kinds need operator action? |
+
+The nested standard LLM span is the source of model/provider/token usage. Do
+not duplicate token metrics in a PURISTA wrapper or invent cost values. A local
+privacy or local NER detector has no LLM token/cost telemetry.
+
+## Readiness before traffic
+
+1. Run a deterministic smoke test for the agent/workflow entry point.
+2. Exercise model, tool, MCP, guardrail, cancellation, and timeout failures.
+3. Verify parent/child trace context reaches the chosen OTLP backend.
+4. Confirm `harness.shutdown()` closes adapters and live MCP/sandbox resources.
+5. Validate retention and deletion behavior for session state and workspaces.
+
+A guardrail block is a successful control decision, not a system failure.
+Action, detector, codec, or timeout failure is an error and remains fail closed.
+
+## Next
+
+Choose the required infrastructure boundary in
+[Adapters, Durability & Reference](/handbook/harness/guide/adapters-durability-reference/).

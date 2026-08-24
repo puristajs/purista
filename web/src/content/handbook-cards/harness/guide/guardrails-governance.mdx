@@ -1,0 +1,84 @@
+---
+title: Guardrails & Governance
+description: Add fail-closed content controls and explicit tool decisions without coupling policy to a model provider.
+---
+
+## Use the right control at the right boundary
+
+| Control | Protects | Owner |
+| --- | --- | --- |
+| Zod schema | Input/output shape | Agent, workflow, tool definition |
+| Tool permissions | Capability family | Agent definition |
+| Governance | Tool exposure, approval, and typed execution policy | Harness composition root |
+| Guardrails | Input, output, retrieval, and tool content | Optional Guardrails addon |
+| Application authorization | Identity and business invariants | Application/service handler |
+
+Guardrails complement these controls; they do not replace authorization or
+deterministic business rules. Attach rails to a default-loop agent. Workflows
+receive automatic protection when they delegate to that agent; retrieval stays
+application-owned and is filtered explicitly before it enters agent input.
+
+## Configure portable rails, inject the detector
+
+```ts
+import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
+import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
+
+const detector = createNativePrivacyDetector({ id: 'local-pii' })
+const rails = defineGuardrails({
+  config: await loadGuardrailsConfig('./guardrails'),
+  actions: createSensitiveDataActions({ detector })
+})
+
+const guardedAgent = rails.attach({
+  model: 'assistant',
+  instructions: 'Help safely.',
+  tools: ['lookup_order']
+})
+```
+
+YAML defines portable policy such as entity, threshold, and mask token. It
+never contains endpoints, credentials, cloud settings, recognizer setup, or
+fallback policy. The composition root chooses the detector.
+
+## Choose a sensitive-data detector by outcome
+
+| I want to… | Presidio sidecar | Native privacy | Local NER |
+| --- | --- | --- | --- |
+| Block protected text before an agent, model, tool, or retrieval boundary | Yes | Yes | Yes |
+| Replace a detected whole value with a fixed configured token | Yes | Yes | Yes |
+| Remove a detected whole value with an empty mask token | Yes | Yes | Yes |
+| Detect email address | Deployment recognizer dependent | Built in, regex-based | Model/label dependent; not built in |
+| Detect phone number | Deployment recognizer dependent | Built in, format-based | Model/label dependent; not built in |
+| Detect payment-card number | Deployment recognizer dependent | Built in, Luhn-checked | Model/label dependent; not built in |
+| Detect IPv4 address | Deployment recognizer dependent | Built in, syntax-validated | Model/label dependent; not built in |
+| Detect IPv6 address | Deployment recognizer dependent | Built in, syntax-validated | Model/label dependent; not built in |
+| Detect IBAN-shaped value | Deployment recognizer dependent | Built in, format-based | Model/label dependent; not built in |
+| Detect US SSN-shaped value | Deployment recognizer dependent | Built in, format-based | Model/label dependent; not built in |
+| Detect HTTP(S) URL | Deployment recognizer dependent | Built in, HTTP(S) only | Model/label dependent; not built in |
+| Detect people, organizations, locations, or other NER entities | Deployment recognizer/model dependent | Not supplied | Selected local model labels |
+| Add an application-specific identifier | Custom recognizer | Inject a detector | Inject a detector |
+| Run in-process with no detector hop | No | Yes | Yes, with local model assets |
+| Test deterministically | `FakePresidioSidecar` | `FakeSensitiveDataDetector` | `FakeLocalNerRuntime` |
+
+The native package is a local deterministic subset, not a Presidio or NER port.
+The local NER package is intentionally separate and requires an installed
+optional `@huggingface/transformers` peer, an absolute model directory, a
+SHA-256 manifest for every asset, explicit model-label mapping, and startup
+`warmup()`. It never downloads a model or queries a model registry.
+
+Current detectors do not generate fake replacement data, choose per-entity
+transformations, partially mask values, encrypt/hash values, process batch
+datasets, or redact image/PDF OCR.
+
+## Evidence without content
+
+Every rail creates a content-free `GUARDRAIL` span, decision metric, and duration metric.
+Sensitive-data inspection emits `harness.sensitive_data.inspect`; detector faults fail closed and expose only a stable failure kind.
+Model-backed rails create a nested LLM span; that span is the authoritative provider, model, and token/cost evidence.
+Local native and NER detection do not invent model tokens or costs.
+
+## Next
+
+Script safe success and failure paths in
+[Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).

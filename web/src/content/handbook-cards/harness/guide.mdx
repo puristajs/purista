@@ -1,0 +1,30 @@
+---
+title: AI Harness Guide
+description: A progressive implementation path from a first typed agent to production operations.
+---
+
+The AI Harness is a standalone, self-hosted TypeScript runtime. It gives your
+application one typed boundary for model providers, tools, skills, agents,
+workflows, state, safety controls, and OpenTelemetry. It does not own your
+HTTP API, queue, authorization, or business data.
+
+## Follow this path
+
+1. Start with [Overview](/handbook/harness/guide/overview/) to choose the
+   correct runtime boundary.
+2. Complete [Quickstart](/handbook/harness/guide/quickstart/) with one model,
+   one agent, and one session.
+3. Add [Models & Configuration](/handbook/harness/guide/models-and-configuration/)
+   and [Tools & Skills](/handbook/harness/guide/tools-and-skills/) only as the
+   use case requires them.
+4. Use [Agents, Workflows & State](/handbook/harness/guide/agents-workflows-state/)
+   when work needs orchestration or durability.
+5. Add [Guardrails & Governance](/handbook/harness/guide/guardrails-governance/),
+   then prove it with [Testing & Evaluations](/handbook/harness/guide/testing-and-evaluations/).
+6. Finish with [Observability & Operations](/handbook/harness/guide/observability-operations/)
+   and [Adapters, Durability & Reference](/handbook/harness/guide/adapters-durability-reference/).
+
+If you are attaching the runtime to a PURISTA service, command, queue, or
+stream, continue with [Harness Integration](/handbook/blocks/agent-pattern/harness-integration/)
+after the standalone quickstart. That section owns the framework boundary; this
+chapter owns Harness behavior.

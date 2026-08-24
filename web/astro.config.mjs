@@ -11,6 +11,13 @@ export default defineConfig({
 	integrations: [react(), mdx()],
 	redirects: {
 		'/ai-harness': '/harness',
+		'/handbook/2_building_business-logic/ai/': '/handbook/blocks/agent-pattern/',
+		'/handbook/2_building_business-logic/ai/the-agent-builder/': '/handbook/blocks/agent-pattern/agent-builder/',
+		'/handbook/2_building_business-logic/ai/harness-agents-and-workflows/': '/handbook/blocks/agent-pattern/agent-workflows/',
+		'/handbook/2_building_business-logic/ai/guardrails/': '/handbook/harness/guide/guardrails-governance/',
+		'/handbook/2_building_business-logic/ai/model-capabilities/': '/handbook/harness/guide/models-and-configuration/',
+		'/handbook/2_building_business-logic/ai/test-an-agent/': '/handbook/harness/guide/testing-and-evaluations/',
+		'/handbook/2_building_business-logic/ai/evaluating-prompts/': '/handbook/harness/guide/testing-and-evaluations/',
 	},
 
 	markdown: {

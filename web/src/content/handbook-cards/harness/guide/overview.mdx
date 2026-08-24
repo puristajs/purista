@@ -1,0 +1,42 @@
+---
+title: Overview
+description: Decide where the Harness fits and keep responsibility boundaries explicit from the first agent.
+---
+
+## What the Harness owns
+
+The Harness runs in your process and composes typed model aliases, tools,
+skills, agents, workflows, sessions, state adapters, sandboxes, logs, and
+OpenTelemetry. Provider SDKs and optional governance or guardrail packages are
+adapters around that runtime.
+
+| Concern | Owner |
+| --- | --- |
+| Model invocation, tool loop, run events, token telemetry | Harness |
+| HTTP/SSE, authentication, tenant policy, business writes | Your application |
+| Long-running transport delivery and retries | Your worker or queue integration |
+| PURISTA service contracts, commands, queues, streams | PURISTA framework |
+
+Use a direct agent for one typed conversation loop. Use a workflow for
+deterministic orchestration around one or more agents: branching, fan-out,
+review, persistence, or approval. A workflow is ordinary typed application
+code; it is not another prompt.
+
+## Choose the smallest runtime shape
+
+| Need | Start with |
+| --- | --- |
+| Extract, classify, summarize, or answer with constrained tools | One direct agent |
+| Coordinate specialists, a review, or deterministic work | One workflow with declared delegation |
+| Resume after restart with workspace state | Durable runtime and workspace adapters |
+| Make external capabilities available | Typed TypeScript tool, then MCP only where a server is justified |
+| Reuse a method or file-backed guidance | Mounted skill directory and the `read` built-in |
+
+The design goal is reviewable capability. A model alias says what inference can
+do; an agent says which tools and skills it can use; a workflow says which
+agents it may call; schemas protect every data boundary.
+
+## Next
+
+Build one working agent in [Quickstart](/handbook/harness/guide/quickstart/).
+Architects evaluating the platform can start with the [Harness overview](/harness/).

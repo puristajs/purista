@@ -1,0 +1,47 @@
+---
+title: Testing & Evaluations
+description: Use deterministic fakes and explicit evaluation data to prove behavior without relying on live providers.
+---
+
+## Test from the boundary inward
+
+| Level | Prove | Preferred evidence |
+| --- | --- | --- |
+| Tool unit test | Authorization, validation, and business rules | Invoke the handler with a small fixture |
+| Agent integration test | Prompt-to-output, tool loop, error mapping | `@purista/harness/testing` fake provider |
+| Workflow test | Delegation, branching, side effects, cancellation | Fake agent/model outcomes and asserted contracts |
+| Guardrail test | Allow, transform, block, and failure-closed paths | Sensitive-data and action fakes |
+| Live smoke test | Provider credentials and deployment wiring | Explicit opt-in environment only |
+
+Use the fake provider to retain real Harness sessions, schemas, tools, and
+run-event flow while controlling the model response. Do not record production
+prompts or tool payloads to create fixtures.
+
+```ts
+import { fakeModelProvider } from '@purista/harness/testing'
+
+const provider = fakeModelProvider({
+  object: { answer: 'Reset the password from Account settings.' }
+})
+```
+
+Guardrail tests use `FakeSensitiveDataDetector`, `FakePresidioSidecar`, or
+`FakeLocalNerRuntime`. Those helpers script findings or safe failures; they do
+not recognize real data and must not export test-recorded input to snapshots or
+telemetry.
+
+## Evaluate a change deliberately
+
+An evaluation compares explicit candidate behavior against an explicit dataset
+and scorer. Keep datasets, expected output, human labels, and experiment
+history in your application or evaluation system. Harness helpers return
+aggregate evidence and do not persist prompt or output content by default.
+
+Start with deterministic scoring: schema validity, required citation, selected
+tool use, policy outcome, latency budget, or a domain rule. Add model judges or
+human review only after their criteria and failure handling are explicit.
+
+## Next
+
+Connect evidence to production in
+[Observability & Operations](/handbook/harness/guide/observability-operations/).

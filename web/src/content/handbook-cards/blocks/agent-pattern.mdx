@@ -7,6 +7,11 @@ An **agent** is an AI-powered participant in your PURISTA system. Unlike a comma
 
 Agent support is part of `@purista/core` via `ServiceBuilder.getAgentQueueBuilder(...)`. Concrete model backends come from provider packages such as `@purista/harness-openai`.
 
+For standalone runtime setup, tools, skills, guardrails, tests, evaluations,
+and operations, use the [AI Harness Guide](/handbook/harness/guide/). This
+section remains deliberately focused on the PURISTA service, command, queue,
+and stream boundary.
+
 <div class="callout callout--info">
   <div class="callout__title">AI on normal PURISTA rails</div>
   <p>Agents reuse the same service, queue, command, stream, event bridge, and HTTP infrastructure as the rest of PURISTA. They are not a separate application lane.</p>
@@ -15,6 +20,10 @@ Agent support is part of `@purista/core` via `ServiceBuilder.getAgentQueueBuilde
 ## In this section
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+  <a href="/handbook/blocks/agent-pattern/harness-integration/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Harness Integration</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Place service contracts, delivery, authorization, and runtime ownership on the correct side of the boundary.</div>
+  </a>
   <a href="/handbook/blocks/agent-pattern/what-is-agent/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
     <div class="font-semibold text-[var(--color-fg)] mb-1">What is an Agent?</div>
     <div class="text-sm text-[var(--color-fg-muted)]">Understand agent types, model capabilities, session policies, and runtime requirements.</div>
@@ -30,6 +39,10 @@ Agent support is part of `@purista/core` via `ServiceBuilder.getAgentQueueBuilde
   <a href="/handbook/blocks/agent-pattern/http-exposure/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
     <div class="font-semibold text-[var(--color-fg)] mb-1">HTTP Exposure</div>
     <div class="text-sm text-[var(--color-fg-muted)]">Expose agents as REST endpoints with aggregate or accepted response contracts.</div>
+  </a>
+  <a href="/handbook/blocks/agent-pattern/guardrails/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
+    <div class="font-semibold text-[var(--color-fg)] mb-1">Guardrails in PURISTA</div>
+    <div class="text-sm text-[var(--color-fg-muted)]">Combine Harness content controls with framework authorization and durable delivery boundaries.</div>
   </a>
   <a href="/handbook/blocks/agent-pattern/agent-testing/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
     <div class="font-semibold text-[var(--color-fg)] mb-1">Testing</div>

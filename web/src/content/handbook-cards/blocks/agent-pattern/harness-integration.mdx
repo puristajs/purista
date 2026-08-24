@@ -1,0 +1,42 @@
+---
+title: Harness Integration
+description: Attach a standalone Harness agent or workflow to the PURISTA service and transport model without mixing ownership.
+---
+
+## Keep the boundary clear
+
+The Harness owns generic model execution, tools, skills, sessions, run events,
+and its own OpenTelemetry instrumentation. PURISTA owns service contracts,
+commands, streams, queue-backed delivery, resources, tenant/principal context,
+and application authorization.
+
+| Need | Put it in |
+| --- | --- |
+| Provider alias, agent loop, skills, tools, workflow | `@purista/harness` composition |
+| Service-owned business contract and authorization | PURISTA service builder or handler |
+| Slow, retried, or replayed delivery | PURISTA queue and worker |
+| HTTP/SSE mapping | PURISTA transport or application edge |
+| Domain state write | Service command, resource, or explicit tool handler |
+
+Build and test the Harness independently first. Then attach the selected agent
+or workflow to the owning PURISTA service. The framework adds the enterprise
+envelope around the runtime; it does not turn the Harness into a hidden global
+or provider-specific SDK.
+
+## Delivery choices
+
+Use a command when a caller needs a bounded synchronous result. Use a stream
+when the caller needs typed progress. Use a queue/worker when work may be slow,
+retryable, delayed, or needs durable delivery. A Harness session ID scopes
+conversation/state; it does not provide distributed scheduling or exactly-once
+business semantics.
+
+Carry tenant, principal, trace, and correlation identity at the service
+boundary. Keep the model and tool context content-free in telemetry and use
+explicit runtime bindings for external systems.
+
+## Next
+
+- Learn the standalone runtime in the [AI Harness Guide](/handbook/harness/guide/).
+- Configure the framework attachment in [The Agent Builder](/handbook/blocks/agent-pattern/agent-builder/).
+- Choose orchestration ownership in [Agents & Workflows](/handbook/blocks/agent-pattern/agent-workflows/).

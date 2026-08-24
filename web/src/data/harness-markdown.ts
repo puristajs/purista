@@ -40,7 +40,8 @@ Use it when an application needs typed tool boundaries, model capability routing
 		body: `A harness starts from explicit runtime definitions. Keep the first version small: one model, one or two tools, and one agent with a clear business purpose.
 
 \`\`\`typescript
-import { defineHarness, openai } from '@purista/harness'
+import { defineHarness } from '@purista/harness'
+import { openai } from '@purista/harness-openai'
 
 const harness = defineHarness({ name: 'support' })
   .models({

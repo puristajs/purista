@@ -1,0 +1,31 @@
+---
+title: Guardrails in PURISTA
+description: Apply Harness content controls inside a service without weakening PURISTA authorization or delivery guarantees.
+---
+
+Guardrails protect content crossing a Harness agent boundary. PURISTA still
+owns identity, authorization, service contracts, command/queue semantics, and
+business decisions. Use both layers.
+
+| Boundary | Primary control |
+| --- | --- |
+| Request into a service | PURISTA schema and authorization |
+| Input/output/tool/retrieval content in a Harness agent | Guardrails |
+| Tool side effect | Tool schema, governance/approval, and service authorization |
+| Durable delivery and retry | PURISTA queue/worker plus idempotent business action |
+
+Attach guardrails to the default-loop agent inside your harness composition.
+When a PURISTA-owned workflow invokes that agent, the guardrail applies to the
+agent loop. If framework orchestration retrieves documents, filter the selected
+chunks explicitly before they enter the guarded agent; vector storage and
+retention stay application-owned.
+
+Keep fail-closed detector errors visible through stable error kinds and OTel
+spans, never through inspected content. The Harness owns GenAI/model/tool and
+guardrail telemetry; PURISTA records its service and agent-wrapper telemetry
+around that work without duplicating token metrics.
+
+## Next
+
+Configure detectors, policy YAML, and deterministic fakes in the standalone
+[Guardrails & Governance guide](/handbook/harness/guide/guardrails-governance/).

@@ -11,10 +11,19 @@ const harnessCode = [
 	{
 		tokens: [
 			{ t: 'kw', v: 'import' },
-			{ t: 'plain', v: ' { defineHarness, openai } ' },
+			{ t: 'plain', v: ' { defineHarness } ' },
 			{ t: 'kw', v: 'from' },
 			{ t: 'plain', v: ' ' },
 			{ t: 'str', v: "'@purista/harness'" },
+		],
+	},
+	{
+		tokens: [
+			{ t: 'kw', v: 'import' },
+			{ t: 'plain', v: ' { openai } ' },
+			{ t: 'kw', v: 'from' },
+			{ t: 'plain', v: ' ' },
+			{ t: 'str', v: "'@purista/harness-openai'" },
 		],
 	},
 	{ tokens: [{ t: 'plain', v: '' }] },
@@ -185,8 +194,8 @@ const providers = [
       ]}
       lede="The PURISTA AI Harness runs inside your application — not in a SaaS platform. Your data stays within your perimeter. Every decision leaves an OpenTelemetry trace. Human review gates block mutations until approved. Provider-neutral. Self-hosted. Built for production."
       ctas={[
-        { label: 'See how it works', href: '#challenge', variant: 'primary' },
-        { label: 'Get started',      href: '/harness/get-started/', variant: 'ghost' },
+        { label: 'Explore the architecture', href: '/harness/architecture/', variant: 'primary' },
+        { label: 'Read the implementation guide', href: '/handbook/harness/guide/', variant: 'ghost' },
       ]}
       strip={[
         { label: 'Self-hosted',      title: 'Your process. Your data. No SaaS in the path.',    tone: 'found' },
@@ -194,6 +203,22 @@ const providers = [
         { label: 'Provider-neutral', title: 'OpenAI · Anthropic · Bedrock · Azure.',              tone: 'pilot' },
       ]}
     />
+
+    <section class="site-section site-section--tight">
+      <div class="site-wrap">
+        <div class="site-hrn-brief site-reveal">
+          <div class="site-hrn-brief__lead">
+            <span class="site-mono">ARCHITECTURE BRIEF</span>
+            <h2>One runtime boundary. Three operating decisions.</h2>
+          </div>
+          <ol class="site-hrn-brief__decisions">
+            <li><span>01</span><div><strong>Inference</strong><p>Select models by declared capability, not provider SDK calls scattered through services.</p></div></li>
+            <li><span>02</span><div><strong>Authority</strong><p>Expose typed tools deliberately; keep approvals and business authorization outside the model.</p></div></li>
+            <li><span>03</span><div><strong>Evidence</strong><p>Trace model, tool, workflow, and guardrail outcomes with standard OpenTelemetry signals.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
 
     {/* ─── Enterprise problem ─── */}
     <section id="challenge" class="site-section site-section-divider">
@@ -465,6 +490,65 @@ const providers = [
     grid-template-columns: 1fr 1fr;
     border-top: 1px solid var(--color-line);
     border-left: 1px solid var(--color-line);
+  }
+
+  /* ─── Architecture brief ─── */
+  .site-hrn-brief {
+    display: grid;
+    grid-template-columns: minmax(15rem, 0.72fr) minmax(0, 1.28fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+    border-block: 1px solid var(--color-line);
+    padding-block: clamp(1.4rem, 3vw, 2.3rem);
+  }
+  .site-hrn-brief__lead .site-mono {
+    color: var(--color-found-hi);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+  .site-hrn-brief__lead h2 {
+    margin-top: 0.75rem;
+    color: var(--color-fg-strong);
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+  }
+  .site-hrn-brief__decisions {
+    display: grid;
+    gap: 0.8rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-hrn-brief__decisions li {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    gap: 0.8rem;
+    align-items: baseline;
+  }
+  .site-hrn-brief__decisions span {
+    color: var(--color-fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+  .site-hrn-brief__decisions strong {
+    color: var(--color-fg);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+  }
+  .site-hrn-brief__decisions p {
+    display: inline;
+    margin-left: 0.55rem;
+    color: var(--color-fg-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  @media (max-width: 720px) {
+    .site-hrn-brief { grid-template-columns: 1fr; }
+    .site-hrn-brief__decisions p { display: block; margin: 0.25rem 0 0; }
   }
   @media (max-width: 640px) { .site-hrn-outcomes { grid-template-columns: 1fr; } }
 
