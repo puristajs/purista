@@ -1,6 +1,6 @@
 ---
 title: Custom Adapters
-description: Extend model, storage, memory, sandbox, and workspace boundaries while retaining the Harness session API, safety defaults, and contract tests.
+description: Extend model, memory-engine, storage, sandbox, and workspace boundaries while retaining the Harness session API, safety defaults, and contract tests.
 ---
 
 ## Start with the existing ports
@@ -13,7 +13,7 @@ example, select the smallest port that owns the integration:
 | --- | --- | --- | --- |
 | Provider-neutral model calls | First-party `@purista/harness-<provider>` addon | The provider is not already supported | Provider contract tests and a scripted client |
 | Conversation history and run records | `InMemoryHarnessStorage`, `SqliteHarnessStorage` for one host | History/runs must use your database or tenancy model, or durable workflows need multi-instance safety | State-store/durable-state contract tests and migration/retention tests |
-| Scoped facts or semantic recall | Default `sandboxMemory()` | Memory needs persistence, TTL, search, user/tenant scope, or external retrieval | Memory contract tests and scope-isolation tests |
+| Scoped facts or semantic recall | Default in-memory engine | Memory needs persistence, cross-instance use, text search, or vector recall | Memory-engine contract tests and scope-isolation tests |
 | Files and optional command execution | `inMemorySandbox()`, `bashSandbox()`, local durable sandbox | You need containers, microVMs, remote runners, or immutable mounts | Sandbox contract plus isolation/cancellation tests |
 | Restart-safe workflow checkpoints | `InMemoryHarnessStorage` or `localDurableExecution` | Workers need distributed leases or cloud persistence | Storage/workspace contracts and replay tests |
 | External capability | TypeScript tool or `mcp_http` / `mcp_stdio` | The capability has its own tool/server protocol | Tool tests plus authorization and outage tests |
@@ -27,22 +27,22 @@ provider SDK itself.
 
 Put a reusable integration in its own package, for example
 `@acme/harness-memory-postgres`. Its factory validates its own configuration,
-declares only capabilities it actually implements, and returns a public Harness
-port. The application owns credentials and chooses the adapter at the
+declares only capabilities it actually implements, and returns a `MemoryEngine`.
+The application owns credentials and chooses the engine at the
 composition root.
 
 ```ts
 import { defineHarness } from '@purista/harness'
-import { postgresClaimsMemory } from '@acme/harness-memory-postgres'
+import { postgresClaimsMemoryEngine } from '@acme/harness-memory-postgres'
 
-const memory = postgresClaimsMemory({
+const memory = postgresClaimsMemoryEngine({
   connectionString: process.env.CLAIMS_MEMORY_DATABASE_URL!,
   table: 'claim_memory'
 })
 
 const harness = defineHarness({ name: 'claims-review' })
   .memory(memory)
-  .requires(['memory.kv', 'memory.session', 'memory.tenant', 'memory.persistent'])
+  .requires(['memory.kv', 'memory.persistent', 'memory.multi_instance'])
   // models, tools, agents, and workflows
   .build()
 ```
@@ -135,18 +135,18 @@ inconsistent session lifecycle behavior. If you enable
 `defaults.historyRetention`, implement `replaceMessages` atomically so whole
 turns are trimmed without a read/clear/append race.
 
-`MemoryAdapter` is a separate, typed key/value boundary. Its `info` and
-`capabilities` must match exactly, and it opens a backend store for each scope.
-For a claims system, a tenant-scoped profile should never be reachable from a
+`MemoryEngine` is a separate typed persistence boundary. It receives a
+canonical scope and record from core; it cannot open a session or choose a
+model. For a claims system, a tenant-scoped profile must not be reachable from a
 different tenant merely because two sessions share an agent ID. Respect
-`ctx.signal` on every backend request and let core own standard telemetry and
-error wrapping.
+`ctx.signal` on every backend request and let core own standard telemetry,
+identity binding, model routing, and error wrapping.
 
 ```ts
-import { memoryAdapterContract } from '@purista/harness/testing'
-import { postgresClaimsMemory } from '@acme/harness-memory-postgres'
+import { memoryEngineContract } from '@purista/harness/testing'
+import { postgresClaimsMemoryEngine } from '@acme/harness-memory-postgres'
 
-memoryAdapterContract(() => postgresClaimsMemory({
+memoryEngineContract(() => postgresClaimsMemoryEngine({
   connectionString: process.env.TEST_DATABASE_URL!
 }))
 ```

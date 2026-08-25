@@ -42,7 +42,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
             level: '2',
             label: 'Contract tests',
             color: 'con',
-            items: ['HarnessStorage adapter', 'MemoryAdapter', 'SandboxSession', 'Model provider adapter'],
+            items: ['HarnessStorage adapter', 'MemoryEngine', 'SandboxSession', 'Model provider adapter'],
             note: 'Use the shared contract test helpers from @purista/harness/testing.',
           },
           {
@@ -162,7 +162,7 @@ await expect(
             language="typescript"
           />
           <div class="mt-4 p-4 border border-[var(--color-line)] rounded-[var(--radius-md)]">
-            <p class="text-sm text-[var(--color-fg-muted)] m-0">The harness also ships <code class="site-mono text-xs">fakeModelProvider()</code> and <code class="site-mono text-xs">fakeMemoryAdapter()</code> helpers from <code class="site-mono text-xs">@purista/harness/testing</code> for common fixture patterns.</p>
+            <p class="text-sm text-[var(--color-fg-muted)] m-0">The harness also ships <code class="site-mono text-xs">fakeModelProvider()</code> and <code class="site-mono text-xs">fakeMemoryEngine()</code> helpers from <code class="site-mono text-xs">@purista/harness/testing</code> for common fixture patterns.</p>
           </div>
         </div>
       </div>
@@ -534,15 +534,15 @@ describe('myHarnessStorage', () => {
         <div>
           <h3 class="h3 mb-3">Memory adapter</h3>
           <CodeBlock
-            code={`import { memoryAdapterContract } from '@purista/harness/testing'
-import { myMemoryAdapter } from './myMemoryAdapter'
+            code={`import { memoryEngineContract } from '@purista/harness/testing'
+import { myMemoryEngine } from './myMemoryEngine'
 
-describe('myMemoryAdapter', () => {
-  memoryAdapterContract(() => myMemoryAdapter({
+describe('myMemoryEngine', () => {
+  memoryEngineContract(() => myMemoryEngine({
     url: process.env.TEST_REDIS_URL,
   }))
 })`}
-            label="memoryAdapterContract"
+            label="memoryEngineContract"
             language="typescript"
           />
           <p class="text-sm text-[var(--color-fg-muted)] mt-3">Validates scope isolation, read/write round-trips, list with prefix, delete, TTL expiry, and search when declared.</p>

@@ -14,6 +14,7 @@ use case needs that boundary.
 | --- | --- | --- |
 | Typed agents, workflows, tools, state, streaming, and telemetry | `@purista/harness` | [Quickstart](/handbook/harness/quickstart/) |
 | A model provider | One of the four first-party provider adapters | [Models and configuration](/handbook/harness/models-and-configuration/) |
+| Scoped facts, recall, or application memory | Built-in in-memory engine or a tested `MemoryEngine` | [Memory](/handbook/harness/memory/) |
 | Content, tool, retrieval, or PII controls | `@purista/harness-guardrails` and, when required, one privacy detector | [Guardrails and governance](/handbook/harness/guardrails-governance/) |
 | Reviewed local Agent Plugins v1 | `@purista/harness-agent-plugins` | [Agent Plugins](/handbook/harness/agent-plugins/) |
 | A complete package-by-package decision map | Any first-party Harness package | [Ecosystem and packages](/handbook/harness/ecosystem-packages/) |
@@ -39,7 +40,7 @@ adapters around that runtime.
 
 | Concern | Owner |
 | --- | --- |
-| Model invocation, tool loop, run events, token telemetry | Harness |
+| Model invocation, tool loop, run events, token telemetry, memory orchestration | Harness |
 | HTTP/SSE, authentication, tenant policy, business writes | Your application |
 | Long-running transport delivery and retries | Your worker or queue integration |
 | PURISTA service contracts, commands, queues, streams | PURISTA framework |
@@ -87,7 +88,7 @@ incrementally.
 Start at [Quickstart](/handbook/harness/quickstart/) if you need a first
 working agent. Go to [Models & Configuration](/handbook/harness/models-and-configuration/)
 when you already have a Harness and need timeouts, retries, or a second model
-alias.
+alias. Go to [Memory](/handbook/harness/memory/) when you need scoped facts or recall.
 
 ## Next
 

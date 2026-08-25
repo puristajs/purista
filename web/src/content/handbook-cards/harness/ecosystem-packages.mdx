@@ -25,6 +25,11 @@ flowchart TD
   privacy --> ner[Optional local NER]
   core --> plugins{Need reviewed Agent Plugins v1?}
   plugins --> agentPlugins[@purista/harness-agent-plugins]
+  core --> memory{Need durable memory?}
+  memory --> sqlite[SQLite]
+  memory --> postgres[PostgreSQL + pgvector]
+  memory --> redis[Redis Search]
+  memory --> nats[NATS JetStream KV]
   core --> peers[Optional core peers\nMCP, bash sandbox, OpenTelemetry]
 ```
 
@@ -46,6 +51,10 @@ send data anywhere by itself.
 | [`@purista/harness-guardrails-native-privacy`](#privacy-detectors) | You need deterministic local detection for common identifiers without a detector network hop. | Rust Node-API prebuild, in process; no model, WASM, or network fallback. | Construct `createNativePrivacyDetector({ id })`. |
 | [`@purista/harness-guardrails-local-ner`](#privacy-detectors) | You need local model-based people, organization, location, or other mapped NER labels. | In-process Transformers.js model loaded from your reviewed local files. | Install the optional peer, provide a SHA-256 manifest and label map, then call `warmup()`. |
 | [`@purista/harness-agent-plugins`](#agent-plugins) | You accept reviewed local Agent Plugins v1 with selected skills or MCP tools. | Reads local data-only manifests; selected stdio tools run through a qualifying sandbox. | Inspect, persist the digest, explicitly trust, then bind selected components. |
+| [`@purista/harness-memory-sqlite`](#memory-engines) | A local app needs durable facts, TTL, lists, and full-text recall. | Built-in Node.js/Bun SQLite; optional explicitly loaded `sqlite-vec` peer for exact vectors. | Call `sqliteMemoryEngine({ file })`; add `vector: true` only after installing `sqlite-vec@0.1.9`. |
+| [`@purista/harness-memory-postgres`](#memory-engines) | A shared deployment already runs PostgreSQL 16+ with pgvector. | Official `pg` client and application database. | Call `postgresMemoryEngine({ connectionString })` or pass an owned pool. |
+| [`@purista/harness-memory-redis`](#memory-engines) | A shared low-latency deployment runs Redis Search. | Official `redis` client and Redis Search/vector index. | Call `redisMemoryEngine({ url, namespace })`; fix dimensions once before vector use. |
+| [`@purista/harness-memory-nats`](#memory-engines) | A shared deployment has JetStream KV but does not require relevance search. | Official modular NATS client and JetStream KV bucket. | Call `natsMemoryEngine({ servers })` or inject a caller-owned connection. |
 
 The core test utilities are exported as `@purista/harness/testing`; privacy
 and Agent Plugin packages expose their own documented testing subpaths where
@@ -214,6 +223,73 @@ const bindings = plugin?.bindings({
 See [Agent Plugins](/handbook/harness/agent-plugins/) for inspection,
 reviewed-digest loading, explicit binding, trusted roots, and the sandbox
 requirements for stdio.
+
+## Memory engines
+
+```sh
+npm install @purista/harness-memory-sqlite
+```
+
+All engines implement the same scoped `MemoryEngine` contract. Core keeps
+identity binding, scope construction, model-backed embeddings and summaries,
+validation, operation telemetry, and cost-bearing model spans; an engine owns
+only its storage representation and backend lifecycle.
+
+| Package | Required backend | Search capabilities | Ownership and immutable boundary |
+| --- | --- | --- | --- |
+| SQLite | Built-in SQLite with FTS5 | Text; exact semantic and hybrid only with optional `sqlite-vec@0.1.9` | One local file; first vector fixes descriptor and dimensions. |
+| PostgreSQL | PostgreSQL 16+ with pgvector | Text, semantic, hybrid | Connection string or caller-owned `pg` pool; first vector fixes descriptor and dimensions. |
+| Redis | Redis 8+ with Search | Text; semantic and hybrid when `vector: { dimensions }` is configured | URL or caller-owned official client; use a new versioned namespace for a schema/dimension change. |
+| NATS | JetStream enabled | No text, semantic, or hybrid search | Servers or caller-owned NATS connection; KV bucket persists scoped records. |
+
+### SQLite: local durable defaults
+
+```ts
+import { sqliteMemoryEngine } from '@purista/harness-memory-sqlite'
+
+const memory = sqliteMemoryEngine({ file: '.purista/memory.sqlite' })
+```
+
+The base engine has no third-party runtime dependency. Exact local vectors are
+an explicit native opt-in:
+
+```sh
+npm install sqlite-vec@0.1.9
+```
+
+```ts
+const memory = sqliteMemoryEngine({
+  file: '.purista/memory.sqlite',
+  vector: true,
+})
+```
+
+Missing dependencies or blocked extension loading fail before work begins with
+an actionable `HarnessConfigError`; there is no silent text-only downgrade.
+
+### PostgreSQL, Redis, and NATS
+
+```ts
+import { postgresMemoryEngine } from '@purista/harness-memory-postgres'
+import { redisMemoryEngine } from '@purista/harness-memory-redis'
+import { natsMemoryEngine } from '@purista/harness-memory-nats'
+
+const postgres = postgresMemoryEngine({ connectionString: process.env.DATABASE_URL! })
+const redis = redisMemoryEngine({
+  url: process.env.REDIS_URL!,
+  namespace: 'claims:memory:v1',
+  vector: { dimensions: 1536 },
+})
+const nats = natsMemoryEngine({ servers: process.env.NATS_URL! })
+```
+
+Use exactly one engine per Harness. PostgreSQL and Redis search engines are
+tested both in-process/unit paths and against their real CI services. NATS is
+a deliberate durable KV choice, not a search substitute. Dapr is not a
+supported memory backend.
+
+Read [Memory](/handbook/harness/memory/) for identity scopes, typed embedding
+and summary configuration, operations, tests, and tracing.
 
 ## Package selection checks
 

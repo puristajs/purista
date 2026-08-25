@@ -16,7 +16,7 @@ production behavior.
 | --- | --- | --- | --- |
 | Provider-neutral inference | Model provider addon | One provider adapter and a truthful model alias | Select a provider adapter per deployment; keep aliases stable. |
 | Persisted history and runs | `HarnessStorage` | In-memory state | Own retention, deletion, tenant isolation, encryption, and migrations. |
-| Scoped memory | `MemoryAdapter` | Sandbox memory | Select scope, search, TTL, and data residency deliberately. |
+| Scoped memory | `MemoryEngine` | Built-in in-memory engine | Select persistence, search, TTL, and data residency deliberately. |
 | File access or commands | `Sandbox` | In-memory/files-only sandbox | Isolate process, filesystem, network, mounts, timeouts, and cleanup. |
 | Restart-safe workflow state | `HarnessStorage` plus optional `DurableWorkspace` | In-memory storage/workspace | Provision distributed storage, leases, quotas, cleanup, and recovery. |
 | External tool server | MCP through sandbox or HTTP boundary | Local test fake | Own authentication, endpoint policy, schema validation, and availability. |

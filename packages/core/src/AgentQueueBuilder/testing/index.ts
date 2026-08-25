@@ -302,7 +302,7 @@ function createSessionMock(id: string) {
 			read: async () => undefined,
 			write: async () => undefined,
 			delete: async () => undefined,
-			list: async () => [],
+			list: async () => ({ records: [] }),
 			search: async () => [],
 		},
 		history: {

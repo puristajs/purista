@@ -19,6 +19,8 @@ contract for conversations and recoverable execution.
 | `InMemoryStateStore` | `InMemoryHarnessStorage` |
 | `SqliteDurableStateStore` | `SqliteHarnessStorage` |
 | `stateStoreContract` | `harnessStorageContract` |
+| `sandboxMemory()` / `MemoryAdapter` | Omit `.memory()` for the built-in engine, or configure a `MemoryEngine`. |
+| `user` memory scope / `userId` | `principal` scope / `principalId` on `getSession(id, identity)`. |
 
 ```ts
 const local = localDurableExecution({ root: './.harness' })
@@ -32,8 +34,8 @@ const harness = defineHarness()
 
 ## Replace the SQLite database
 
-Harness 3 rejects legacy `harness_durable_runs` and
-`harness_context_checkpoints` tables with `sqlite_schema_incompatible`. Stop all
+Harness 3 rejects legacy `harness_durable_runs`, `harness_context_checkpoints`,
+and session tables without `identity_json` with `sqlite_schema_incompatible`. Stop all
 old workers, create a new database, and import only reviewed conversation data
 through an application migration. Direct table copying can recreate the split
 run state that this release removes.
@@ -67,3 +69,6 @@ Attached Harness workflows opt into recovery with
 4. Test wait registration, duplicate signal, terminal signal, and resume.
 5. Confirm traces contain `harness.storage.*` operations but no checkpoint
    output, wait IDs, prompts, tool arguments, or credentials.
+6. For memory, reopen representative sessions with the same optional identity,
+   verify a changed or omitted bound dimension fails before resource access, and
+   run `memoryEngineContract` for every non-default engine.

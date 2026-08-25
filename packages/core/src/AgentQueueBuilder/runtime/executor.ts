@@ -9,6 +9,7 @@ import {
 	type RunEvent,
 	type Session,
 	type HarnessStorage,
+	type HarnessIdentity,
 	type TelemetryOptions,
 } from '@purista/harness'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
@@ -196,7 +197,13 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			message: input.message,
 			payload: input.payload,
 		})
-		const session = await this.getSession(identity.harnessSessionId)
+		const sessionIdentity = identity.tenantId || identity.principalId
+			? {
+					...(identity.tenantId ? { tenantId: identity.tenantId } : {}),
+					...(identity.principalId ? { principalId: identity.principalId } : {}),
+				}
+			: undefined
+		const session = await this.getSession(identity.harnessSessionId, sessionIdentity)
 		const emitWrapped = async (event: RunEvent) => {
 			await emit?.(createAgentRunEvent(identity, event))
 		}
@@ -260,9 +267,9 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		return { identity, output: validated }
 	}
 
-	private async getSession(sessionId: string): Promise<Session<any>> {
+	private async getSession(sessionId: string, identity?: HarnessIdentity): Promise<Session<any>> {
 		if (this.harness) {
-			return this.harness.getSession(sessionId)
+			return this.harness.getSession(sessionId, identity)
 		}
 		if (this.input.manifest.session.mode === 'conversation') {
 			this.logger?.warn(
@@ -334,7 +341,7 @@ function createLocalSession(id: string): Session<any> {
 			read: async () => undefined,
 			write: async () => undefined,
 			delete: async () => undefined,
-			list: async () => [],
+			list: async () => ({ records: [] }),
 			search: async () => [],
 		},
 		history: {

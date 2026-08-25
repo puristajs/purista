@@ -237,7 +237,7 @@ Use memory only when the use case needs continuity across turns, sessions, or ta
 - Store the minimum useful context.
 - Keep PII and confidential data out unless the business case and controls are explicit.
 - Prefer summaries over raw transcripts.
-- Separate tenant, user, and workflow scopes.
+- Separate tenant, principal, session, and workflow scopes.
 - Make deletion and audit behavior clear.`,
 	},
 	{

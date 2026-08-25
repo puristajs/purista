@@ -89,7 +89,7 @@ const landingPages: Record<string, PageMeta> = {
 	},
 	'harness/memory': {
 		title: 'Memory | AI Harness | PURISTA',
-		description: 'Agent memory scopes, the memory facade, sandbox defaults, TTL, search, and custom MemoryAdapter implementations.',
+		description: 'Agent memory scopes, the memory facade, local defaults, durable engines, TTL, semantic recall, and custom MemoryEngine implementations.',
 		accent: 'coral',
 	},
 	'harness/adapters': {
