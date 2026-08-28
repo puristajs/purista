@@ -32,7 +32,7 @@ Generated with \`@purista/cli\`.
 
 This project includes agent guidance files (\`AGENTS.md\`, \`CLAUDE.md\`, and \`.agents/IMPLEMENTATION.md\`). Local skill links under \`.agents/skills/purista\` and \`.claude/skills/purista\` point to the PURISTA skill bundled with \`@purista/core\`.
 
-Attached agents keep model, skill, sandbox, durable runtime, and durable workspace stores in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery.
+Attached agents keep model, skill, sandbox, Harness storage, and durable workspace bindings in application bootstrap/config via \`ai.models\`, \`ai.skills\`, \`ai.sandbox\`, \`ai.storage\`, and \`ai.workspace\`. If an agent declares \`.useSkills(...)\`, bind the skill directories through \`ai.skills.bindings\`, \`ai.skills.namespaces\`, or explicitly trusted discovery.
 
 This project installs \`@purista/cli\` as a dev dependency. Use the local add scripts instead of a global CLI:
 
@@ -69,7 +69,7 @@ This is a PURISTA application. Use the PURISTA framework shape and CLI-generated
 - Keep service code under the configured \`servicePath\` and agent code under the configured \`agentPath\`.
 - Keep schemas explicit at every command, subscription, stream, queue, worker, and agent boundary.
 - Keep runtime wiring in application bootstrap/config files. Do not import infrastructure clients directly in handlers when a PURISTA resource or runtime binding is appropriate.
-- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.runtime\`, and \`ai.workspaceStore\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery.
+- For attached agents, keep \`ai.models\`, optional \`ai.skills\`, \`ai.sandbox\`, \`ai.storage\`, and \`ai.workspace\` bindings in service bootstrap/config. Use \`.useSkills(...)\` only with matching runtime skill bindings or explicitly trusted discovery.
 
 ${createLocalCliUsageGuide(input)}
 

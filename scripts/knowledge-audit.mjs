@@ -2,6 +2,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
+import { auditHandbookManifest } from './handbook-audit.mjs'
 
 const root = process.cwd()
 const issues = []
@@ -51,9 +52,111 @@ for (const file of skillMarkdown) {
 	if (
 		rel !== 'skills/README.md' &&
 		!rel.startsWith('skills/purista-skill-maintainer/') &&
+		!rel.startsWith('skills/purista-docs-maintainer/') &&
 		/\bspecs?\b|specs\//i.test(text)
 	) {
 		addIssue(file, 'user-facing skills must not reference internal specs')
+	}
+}
+
+const guardrailKnowledgeSources = [
+	'web/src/data/guardrails-content.ts',
+	'web/src/content/handbook/harness/secure-and-govern/guardrails.md',
+	'web/src/content/handbook/harness/secure-and-govern/privacy-detectors.md',
+	'web/src/content/handbook-cards/harness/guardrails-governance.mdx',
+	'web/src/content/handbook-cards/harness/privacy-detectors.mdx',
+	'web/src/content/handbook-cards/harness/ecosystem-packages.mdx',
+	'web/src/content/handbook-cards/blocks/agent-pattern/guardrails.mdx',
+	'web/src/data/harness-markdown.ts',
+	'web/src/pages/harness/guardrails.astro',
+	'web/src/components/harness/GuardrailsArchitecture.astro',
+	'skills/purista/references/05-ai-harness-runtime.md',
+	'skills/purista/references/11-evaluation-scenarios.md',
+]
+const retiredGuardrailConfiguration = /\bNeMo\b|\bloadGuardrailsConfig\b|\bparseGuardrailsConfig\b|guardrails\/config\.(?:yaml|yml)|rails\.config\.sensitive_data_detection|\bpolicy YAML\b|\bconfiguration[- ]file\b|\bpolicy file\b|\b(?:policy )?loader\b|\bsecond policy language\b|\balternate policy format\b|\bexternal policy format\b|\bcompatibility vocabulary\b/i
+for (const relativePath of guardrailKnowledgeSources) {
+	const file = resolve(root, relativePath)
+	if (!existsSync(file)) {
+		addIssue(file, 'required guardrail knowledge source is missing')
+		continue
+	}
+	if (retiredGuardrailConfiguration.test(readText(file))) {
+		addIssue(file, 'must not reference retired Guardrails file configuration')
+	}
+}
+
+const guardrailsContentFile = resolve(root, 'web/src/data/guardrails-content.ts')
+if (!existsSync(guardrailsContentFile)) {
+	addIssue(guardrailsContentFile, 'canonical Guardrails lifecycle content is missing')
+} else {
+	const text = readText(guardrailsContentFile)
+	for (const phase of ['input', 'output', 'tool_input', 'tool_output', 'retrieval']) {
+		if (!new RegExp(`id: '${phase}'`).test(text)) {
+			addIssue(guardrailsContentFile, `must define the ${phase} phase`)
+		}
+	}
+	if (!/Output rails run only on final answer candidates\./.test(text) || !/Intermediate tool-call responses skip output rails\./.test(text)) {
+		addIssue(guardrailsContentFile, 'must define final-candidate-only output rails')
+	}
+	if (!/build\(\) verifies selected tool IDs and required model aliases\/capabilities/.test(text)) {
+		addIssue(guardrailsContentFile, 'must define the build preflight guarantee')
+	}
+	for (const stage of ['TypeScript inline configuration', 'Zod parse/compile', 'Harness build\\(\\)', 'Invocation']) {
+		if (!new RegExp(`stage: '${stage}'`).test(text)) {
+			addIssue(guardrailsContentFile, `must define the ${stage} guarantee stage`)
+		}
+	}
+}
+
+for (const [relativePath, projections, renderings] of [
+	[
+		'web/src/data/harness-markdown.ts',
+		['guardrailsPhases', 'guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee'],
+		['const guardrailsPhaseMarkdown = guardrailsPhases', '${guardrailsPhaseMarkdown}', '${guardrailsOutputRailGuarantee}', '${guardrailsBuildGuarantee}'],
+	],
+	[
+		'web/src/pages/harness/guardrails.astro',
+		['guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee', 'guardrailsStageGuarantees'],
+		['{guardrailsOutputRailGuarantee}', '{guardrailsBuildGuarantee}', 'guardrailsStageGuarantees.map'],
+	],
+	[
+		'web/src/components/harness/GuardrailsArchitecture.astro',
+		['guardrailsPhasesById', 'guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee'],
+		['{output.diagramTiming}', '{output.diagramDescription}', '{guardrailsOutputRailGuarantee}', '{guardrailsBuildGuarantee}'],
+	],
+]) {
+	const file = resolve(root, relativePath)
+	if (!existsSync(file)) {
+		addIssue(file, 'required Guardrails projection is missing')
+		continue
+	}
+	const text = readText(file)
+	if (
+		!/guardrails-content\.ts/.test(text) ||
+		projections.some(projection => !new RegExp(`\\b${projection}\\b`).test(text)) ||
+		renderings.some(rendering => !text.includes(rendering))
+	) {
+		addIssue(file, 'must project canonical Guardrails lifecycle content')
+	}
+}
+
+for (const relativePath of [
+	'web/src/content/handbook/harness/secure-and-govern/guardrails.md',
+	'web/src/content/handbook-cards/harness/guardrails-governance.mdx',
+]) {
+	const file = resolve(root, relativePath)
+	if (!existsSync(file) || !/\[Guardrails overview\]\(\/harness\/guardrails\/\)/.test(readText(file))) {
+		addIssue(file, 'must link lifecycle prose to the canonical Guardrails overview')
+	}
+}
+
+const canonicalGuardrailsSkill = resolve(root, 'skills/purista/references/05-ai-harness-runtime.md')
+if (!existsSync(canonicalGuardrailsSkill)) {
+	addIssue(canonicalGuardrailsSkill, 'canonical Guardrails skill reference is missing')
+} else {
+	const text = readText(canonicalGuardrailsSkill)
+	if (!/final[- ]answer candidates?/i.test(text) || !/intermediate tool-call responses skip output rails/i.test(text)) {
+		addIssue(canonicalGuardrailsSkill, 'must state final-candidate-only output rails')
 	}
 }
 
@@ -109,6 +212,8 @@ requireContains(resolve(root, 'specs', 'README.md'), [
 		'must state that specs are authoritative for framework development',
 	],
 ])
+
+issues.push(...(await auditHandbookManifest(root)))
 
 if (issues.length) {
 	process.stderr.write(`PURISTA knowledge audit found ${issues.length} issue(s):\n`)

@@ -626,7 +626,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 * ```ts
 	 * const triage = service
 	 *   .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
-	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+	 *   .addModel('primary', { capabilities: ['object'] })
 	 * ```
 	 */
 	getAgentQueueBuilder<const AgentName extends string>(agentName: NonEmptyString<AgentName>, description: string) {

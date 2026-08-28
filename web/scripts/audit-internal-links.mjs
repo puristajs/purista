@@ -1,13 +1,15 @@
 import { access, readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distRoot = path.join(webRoot, 'dist')
 const siteOrigin = 'https://purista.dev'
+const handbook = await import(pathToFileURL(path.join(webRoot, 'src', 'data', 'handbook.ts')).href)
 const htmlFiles = await listFiles(distRoot, file => file.endsWith('.html'))
 const failures = []
+const compatibilityFragments = []
 
 for (const file of htmlFiles) {
 	const source = await readFile(file, 'utf8')
@@ -17,9 +19,16 @@ for (const file of htmlFiles) {
 		if (!isInternal(target)) continue
 
 		const targetUrl = new URL(target, `${siteOrigin}${sourceUrl}`)
-		const resolved = await resolveOutputFile(targetUrl.pathname)
+		const compatibilityTarget = handbook.getHandbookRedirectTarget(normalizeHandbookRoute(targetUrl.pathname))
+		const resolvedRoute = compatibilityTarget ?? targetUrl.pathname
+		const resolved = await resolveOutputFile(resolvedRoute)
 		if (!resolved) {
-			failures.push(`${sourceUrl} → ${target} (missing target)`)
+			failures.push(`${sourceUrl} → ${target} (missing target${compatibilityTarget ? ` ${compatibilityTarget}` : ''})`)
+			continue
+		}
+
+		if (compatibilityTarget && targetUrl.hash) {
+			compatibilityFragments.push(`${sourceUrl} → ${target} → ${compatibilityTarget}`)
 			continue
 		}
 
@@ -34,7 +43,12 @@ if (failures.length > 0) {
 	process.stderr.write(`${failures.join('\n')}\n`)
 	process.exitCode = 1
 } else {
-	process.stdout.write(`Checked ${htmlFiles.length} generated HTML pages: all internal links resolve.\n`)
+	process.stdout.write(`Checked ${htmlFiles.length} generated HTML pages: all internal links resolve.`)
+	if (compatibilityFragments.length) {
+		process.stdout.write(` ${compatibilityFragments.length} fragment link${compatibilityFragments.length === 1 ? '' : 's'} use approved compatibility redirects.\n`)
+	} else {
+		process.stdout.write('\n')
+	}
 }
 
 function isInternal(href) {
@@ -46,6 +60,11 @@ function routeForFile(file) {
 	if (relative === 'index.html') return '/'
 	if (relative.endsWith('/index.html')) return `/${relative.slice(0, -'index.html'.length)}`
 	return `/${relative}`
+}
+
+function normalizeHandbookRoute(pathname) {
+	if (!pathname.startsWith('/handbook/')) return pathname
+	return pathname.endsWith('/') ? pathname : `${pathname}/`
 }
 
 async function resolveOutputFile(pathname) {

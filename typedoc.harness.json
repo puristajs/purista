@@ -1,0 +1,46 @@
+{
+	"name": "PURISTA AI Harness API",
+	"entryPointStrategy": "packages",
+	"entryPoints": [
+		"../ai-harness/packages/harness",
+		"../ai-harness/packages/harness-agent-plugins",
+		"../ai-harness/packages/harness-anthropic",
+		"../ai-harness/packages/harness-azure-foundry",
+		"../ai-harness/packages/harness-bedrock",
+		"../ai-harness/packages/harness-guardrails",
+		"../ai-harness/packages/harness-guardrails-local-ner",
+		"../ai-harness/packages/harness-guardrails-native-privacy",
+		"../ai-harness/packages/harness-guardrails-presidio",
+		"../ai-harness/packages/harness-memory-nats",
+		"../ai-harness/packages/harness-memory-postgres",
+		"../ai-harness/packages/harness-memory-redis",
+		"../ai-harness/packages/harness-memory-sqlite",
+		"../ai-harness/packages/harness-openai",
+		"../ai-harness/packages/harness-sandbox-docker"
+	],
+	"packageOptions": {
+		"tsconfig": "tsconfig.json",
+		"exclude": [
+			"**/*.test.ts",
+			"**/*.spec.ts",
+			"**/*.e2e.ts",
+			"**/test/**",
+			"**/tests/**",
+			"dist/**",
+			"lib/**",
+			"node_modules/**"
+		]
+	},
+	"json": "web/src/generated/purista-harness-api.json",
+	"readme": "none",
+	"hideGenerator": true,
+	"excludeInternal": true,
+	"excludeExternals": true,
+	"exclude": [
+		"**/**/*.(test).ts",
+		"**/*+(.spec|.e2e|.test).ts",
+		"dist/**",
+		"lib/**",
+		"**/node_modules"
+	]
+}

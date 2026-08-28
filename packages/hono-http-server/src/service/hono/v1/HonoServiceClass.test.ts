@@ -3,6 +3,7 @@ import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
+import { OPENAPI_DEFAULT_INFO } from './honoServiceConfig.js'
 import { honoV1Service } from './honoV1Service.js'
 
 const serviceBuilder = new ServiceBuilder({
@@ -110,6 +111,26 @@ describe('HonoServiceClass', () => {
 		}
 	})
 
+	it('publishes OpenAPI with the default configuration', async () => {
+		const server = await honoV1Service.getInstance(getEventBridgeMock().mock, {
+			logger: getLoggerMock().mock,
+			serviceConfig: {},
+		})
+		expect(server.config.openApi).toMatchObject({ enabled: true, info: OPENAPI_DEFAULT_INFO })
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/api/openapi.json'))
+			expect(response.status).toBe(200)
+			await expect(response.json()).resolves.toMatchObject({
+				openapi: '3.1.0',
+				info: OPENAPI_DEFAULT_INFO,
+			})
+		} finally {
+			await server.destroy()
+		}
+	})
+
 	it('does not auto-register configured services unless explicitly enabled', async () => {
 		const endpointService = await getEndpointService()
 
@@ -161,12 +182,17 @@ describe('HonoServiceClass', () => {
 				services: [],
 			},
 		})
+		const healthFunction = vi.fn(async function (this: typeof server) {
+			expect(this).toBe(server)
+		})
+		server.setHealthFunction(healthFunction)
 		await server.start()
 		eventBridge.stubs.isHealthy.resolves(false)
 
 		try {
 			const response = await server.app.fetch(new Request('http://localhost/healthz'))
 			expect(response.status).toBe(200)
+			expect(healthFunction).toHaveBeenCalledTimes(1)
 			await expect(response.json()).resolves.toMatchObject({
 				status: 200,
 				message: 'OK',
@@ -342,10 +368,12 @@ describe('HonoServiceClass', () => {
 
 	it('covers plain-text, async, bad-content-type, invalid-json and protect middleware branches', async () => {
 		const server = await createServer({ enableDynamicRoutes: true })
-		server.setProtectMiddleware(async (c, next) => {
+		const protectMiddleware = vi.fn(async function (this: typeof server, c, next) {
+			expect(this).toBe(server)
 			c.set('additionalParameter', { principalId: 'from-middleware' })
 			await next()
 		})
+		server.setProtectMiddleware(protectMiddleware)
 		const plainTextDefinition = await plainTextCommand.getDefinition()
 		const asyncDefinition = await asyncCommand.getDefinition()
 		const echoDefinition = await echoCommand.getDefinition()
@@ -445,6 +473,7 @@ describe('HonoServiceClass', () => {
 
 			const secured = await server.app.fetch(new Request('http://localhost/api/v1/secure'))
 			expect(secured.status).toBe(200)
+			expect(protectMiddleware).toHaveBeenCalled()
 			await expect(secured.json()).resolves.toEqual({ principalId: 'from-middleware' })
 		} finally {
 			invokeMock.mockRestore()
@@ -512,7 +541,7 @@ describe('HonoServiceClass', () => {
 
 		const prepare = server.prepareDestroy()
 		expect(prepare.name).toContain('prepare shutdown')
-		await prepare.destroy.call(server)
+		await prepare.destroy()
 		const response = await server.app.fetch(new Request('http://localhost/unknown'))
 		expect(response.status).toBe(503)
 		await server.destroy()

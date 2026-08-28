@@ -20,7 +20,6 @@ export const coordinateIncidentResponseAgentBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(supportV1CoordinateIncidentInputPayloadSchema)
 	.addOutputSchema(supportV1CoordinateIncidentOutputPayloadSchema)
 	.addModel('primary', {
-		model: 'gpt-4.1-mini',
 		capabilities: ['object'] as const,
 		defaults: { temperature: 0.2 },
 	})

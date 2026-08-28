@@ -5,7 +5,9 @@
   - the only shared framework skill consumed by apps and agents
   - teaches concepts, architecture, implementation, runtime wiring, and planning through `references/`
 - `purista-skill-maintainer`
-  - the only separate meta skill
+  - internal meta skill for the shared skill catalog
+- `purista-docs-maintainer`
+  - internal meta skill for the public website, handbook, API documentation, and coverage
 
 ## Consolidation inputs
 The old fragmented framework skill set is folded into `purista`:

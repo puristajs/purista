@@ -281,7 +281,7 @@ Before going live, verify:
 | **Docs** | Streaming and event-bridge behavior matches implementation |
 | **Config** | Runtime config is documented and version-controlled |
 | **Observability** | Traces, logs, and metrics are visible in your dashboard |
-| **Security** | Secrets are in secret stores, not env vars or code |
+| **Security** | Runtime-managed secrets use secret stores; bootstrap credentials use approved platform secret delivery or workload identity |
 | **Shutdown** | Graceful shutdown behavior verified |
 
 ## Summary

@@ -27,12 +27,12 @@ describe('coordinateIncidentResponseAgentBuilder', () => {
 		expect(definition.queue.queueName).toBe('agent:Support:1:coordinateIncidentResponse')
 	})
 
-	it('declares a sandbox policy for rollback risk assessment', async () => {
+	it('uses the runtime sandbox for rollback risk assessment', async () => {
 		const definition = await assessRollbackRiskAgentBuilder.getDefinition()
 
 		expect(definition.manifest.sandbox).toEqual({
-			enabled: true,
-			adapter: { kind: 'example-readonly-sandbox', network: false, filesystem: 'ephemeral' },
+			sharing: 'private',
+			usesExplicitOwner: false,
 		})
 		expect(definition.manifest.usedSkills).toEqual([
 			{

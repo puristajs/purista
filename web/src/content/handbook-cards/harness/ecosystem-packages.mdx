@@ -46,7 +46,7 @@ send data anywhere by itself.
 | [`@purista/harness-anthropic`](#model-providers) | You use Anthropic models. | Provider SDK request from your application process. | Call `anthropic({ apiKey })`, then register it under a Harness model alias. |
 | [`@purista/harness-bedrock`](#model-providers) | You use Amazon Bedrock with the AWS credential chain. | AWS SDK request from your application process. | Call `bedrock({ region })`, then register it under a Harness model alias. |
 | [`@purista/harness-azure-foundry`](#model-providers) | You use Azure AI Foundry inference endpoints. | Azure SDK request from your application process. | Call `azureFoundry({ endpoint, apiKey or credential })`, then register it under a Harness model alias. |
-| [`@purista/harness-guardrails`](#guardrails) | You need fail-closed input, output, tool, retrieval, or model-check controls. | In-process interceptor on a default-loop agent; actions remain application TypeScript. | Load policy YAML, provide action implementations, then call `rails.attach(...)`. |
+| [`@purista/harness-guardrails`](#guardrails) | You need fail-closed input, output, tool, retrieval, or model-check controls. | In-process interceptor on a default-loop agent; actions remain application TypeScript. | Define opaque action tokens and one typed inline configuration, then call `rails.attach(...)`. |
 | [`@purista/harness-guardrails-presidio`](#privacy-detectors) | You already operate Microsoft Presidio Analyzer and need its recognizers or languages. | Calls an application-owned, authenticated internal Presidio `POST /analyze` endpoint. | Inject `createPresidioDetector({ endpoint, ... })`; masking remains in the core Guardrails addon. |
 | [`@purista/harness-guardrails-native-privacy`](#privacy-detectors) | You need deterministic local detection for common identifiers without a detector network hop. | Rust Node-API prebuild, in process; no model, WASM, or network fallback. | Construct `createNativePrivacyDetector({ id })`. |
 | [`@purista/harness-guardrails-local-ner`](#privacy-detectors) | You need local model-based people, organization, location, or other mapped NER labels. | In-process Transformers.js model loaded from your reviewed local files. | Install the optional peer, provide a SHA-256 manifest and label map, then call `warmup()`. |
@@ -138,21 +138,25 @@ npm install @purista/harness-guardrails
 ```
 
 The Guardrails addon is optional and attaches one ordered interceptor to a
-default-loop agent. YAML selects ordered application-owned flow IDs; TypeScript
-provides the action behavior. It never creates a provider, reads credentials,
-or opens a vector store.
+default-loop agent. One typed inline configuration selects opaque,
+application-owned action tokens; TypeScript provides the action behavior. It
+never creates a provider, reads credentials, or opens a vector store.
 
-```ts
-import { defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
+```ts title="src/guardrails.ts: content-only action"
+import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+import { z } from 'zod'
 
 const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
+  config: { rails: { input: { flows: ['block secrets'] } } },
   actions: {
-    'block secrets': {
+    'block secrets': defineGuardrailAction({
+      phase: 'input',
+      valueSchema: z.string(),
+      mayTransform: false,
       evaluate: ({ value }) => containsSecret(value)
         ? { decision: 'block', reasonCode: 'secret_detected' }
         : { decision: 'allow' },
-    },
+    }),
   },
 })
 
@@ -164,8 +168,8 @@ const guardedAgent = rails.attach({
 ```
 
 Read [Guardrails & governance](/handbook/harness/guardrails-governance/)
-for the lifecycle diagram, exact portable configuration subset, coverage
-limits, model-check costs, and workflow/tool/skill behavior.
+for lifecycle coverage, inline action/configuration rules, model-check costs,
+and workflow/tool/skill behavior.
 
 ## Privacy detectors
 

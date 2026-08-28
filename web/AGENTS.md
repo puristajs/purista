@@ -7,6 +7,20 @@ This directory contains the new Astro-based PURISTA website.
 Before changing website layout, copy, UI components, visualizations, or page
 structure, read `DESIGN.md` in this directory.
 
+For website or handbook audits, information architecture, page authoring,
+navigation changes, adapter documentation, or public coverage work, also use
+`../skills/purista-docs-maintainer/SKILL.md` and load only its references that
+match the task.
+
+For handbook restructuring or route migration, the approved target is defined
+in `../../specs/50-handbook/00-information-architecture.md` and, for the
+Framework task flow, `../../specs/50-handbook/01-framework-task-flow.md`.
+Current parallel work and write-scope ownership are defined in
+`../../plans/handbook-refactor/storyline-refactor-plan.md`; the older
+`implementation-plan.md` is the historical Framework/Harness split and initial
+route-migration record. Do not reconstruct the target hierarchy from legacy
+folders, cards, or the currently rendered order.
+
 For handbook or API content, use the public handbook source in `web/src/content`
 and the implemented TypeScript APIs as source material. Specs are the source of
 truth for framework development, but public website and user-facing skill

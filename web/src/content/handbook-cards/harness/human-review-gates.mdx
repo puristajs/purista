@@ -25,8 +25,9 @@ sequenceDiagram
   R->>H: signal(waitId, eventId, outcome)
   W->>H: invoke same durable runId
   H-->>W: replay prepare; return terminal outcome
-  W->>R: reread, reauthorize, compare action digest
-  W->>R: idempotent final domain command
+  W->>R: bind action, reauthorize, atomically claim execution
+  W->>R: execute immutable claim with stable idempotency key
+  W->>R: persist receipt; reuse on recovery
 ```
 
 The workflow never holds a Promise or trace open while waiting. A later worker
@@ -44,7 +45,7 @@ external waits in the same transactional backing system. Passing it to
 single-host Node.js/Bun choices for development, demos, and restart tests—not
 for replicated PURISTA services.
 
-```ts
+```ts title="src/bootstrap.ts: durable storage composition"
 const storage: HarnessStorage = createProductionHarnessStorage()
 
 const harness = defineHarness({ name: 'payment-review' })
@@ -60,30 +61,27 @@ policy/definition version, target revision, expiry, delivery idempotency key,
 and canonical action digest. Store question text, proposed values, and reviewer
 comments only in the application task record—not in the Harness wait request.
 
-```ts
-const proposal = await ctx.step('proposal-v1', () => reviewTasks.create({
-  businessKey: `payment:${ctx.input.paymentId}:v1`,
-  actionDigest: canonicalDigest(ctx.input),
-  definitionVersion: 'payment-v1',
-  expiresAt: '2026-09-01T12:00:00.000Z'
-}))
+The [executable payment-review workflow](https://github.com/puristajs/harness/tree/main/examples/durable-human-review)
+creates and validates the application task before registering this wait:
 
-const wait = await ctx.externalWait.wait({
-  waitId: proposal.waitRef,       // opaque, stable application reference
+```ts title="payment-review.ts: safe external wait"
+const outcome = await ctx.externalWait.wait({
+  waitId: task.waitId,
   kind: 'human_review',
   schemaVersion: 'payment-review-v1',
-  definitionVersion: 'payment-v1',
-  deadline: proposal.expiresAt
+  definitionVersion: task.descriptor.definitionVersion,
+  deadline: task.descriptor.expiresAt
 })
 
-if (wait.status !== 'approved') return { status: wait.status }
-
-const approved = await reviewTasks.readApproved(proposal.businessKey)
-if (!approved || approved.actionDigest !== canonicalDigest(ctx.input)) {
-  throw new Error('Approved review is stale or does not bind this action')
-}
-await payments.executeIdempotently({ ...ctx.input, idempotencyKey: ctx.runId })
+if (outcome.status !== 'approved') return { status: outcome.status }
 ```
+
+An approved wait alone does not authorize a payment. The reference binds the
+task and invocation outside replay-skipped steps, then atomically claims one
+immutable execution after authorization, action/revision/version, and expiry
+checks. The executor receives the claimed action and stable execution ID;
+the application records its receipt. A separate read of approval followed by
+execution races with concurrent resumes and must not be used.
 
 On the first pending result, `wait()` throws `ExternalWaitPendingError`. Treat
 that as successful queue handling: persist/publish the task through your normal
@@ -91,9 +89,9 @@ outbox, then stop the delivery. Do not convert it into a failed business action
 or leave a worker blocked. Once an authenticated reviewer commits a compare-and
 set decision, deliver exactly one terminal signal:
 
-```ts
+```ts title="Review decision outbox: signal the committed outcome"
 const result = await storage.signalWait({
-  waitId: task.waitRef,
+  waitId: task.waitId,
   eventId: decision.outboxEventId,
   outcome: decision.outcome // approved | rejected | expired | cancelled
 })
@@ -113,16 +111,24 @@ successful queue completion.
    subscription guard. The adapter never authenticates a signal.
 2. Decide with compare-and-set against the pending task revision. Return typed
    stale, already-decided, expired, and not-found outcomes.
-3. On resume, reread the task, reauthorize the final side effect, and compare
-   the current action digest, target revision, definition version, and expiry.
-   Any mismatch fails closed and creates a fresh task.
-4. Use an idempotent final command. Durable checkpoints prevent replaying
-   completed callback code; they cannot turn an external transaction into a
-   universal exactly-once operation.
+3. Before a new claim, reauthorize and compare the approved revision, canonical
+   action digest, target revision, definition version, and expiry. Bind current
+   invocation data outside replay-skipped steps. Any mismatch fails closed.
+4. Atomically claim the immutable action, execute with the claim's stable
+   idempotency key, and persist its receipt. Concurrent resumes converge on the
+   same claim; do not mark a task consumed before success.
+5. Recovery reuses a recorded receipt or reconciles an uncertain effect with
+   the same execution ID. Once admitted, a claim is not revoked by later expiry
+   or decision changes. Durable checkpoints do not make an external side effect
+   universally exactly-once.
 
 For immediate approval of a single model tool call, use the existing
 `GovernanceApprovalProvider`. It is in-process policy enforcement, not a
-long-running business review process.
+long-running business review process. Permission and policy can demand
+`require_approval`; the shared provider returns `approved` or `rejected` with
+an optional safe `reasonCode`, honouring its finite `signal`/`deadline` budget.
+Content rails return `allow`, `block`, or a phase transform and never request
+approval or durable suspension.
 
 ## Operations and tests
 
@@ -135,10 +141,12 @@ comments, and reviewer identity; do not add those values as metric dimensions.
 Use `InMemoryHarnessStorage` in deterministic tests. Cover: pending suspension,
 restart/replay, approved/rejected/expired/
 cancelled outcomes, duplicate and late delivery, stale task revision, changed
-action digest, and the idempotent final command. The Harness adapter test does
+action digest, concurrent claims, and crashes before/after the external effect
+and receipt. Verify recovery reuses the immutable action and idempotency key.
+The Harness adapter test does
 not replace application authorization or review-task tests.
 
 The repository’s executable `examples/durable-human-review` reference contains
-the application-side task store, revision CAS, action descriptor, terminal
-signal, resume path, and focused tests. It is deliberately a reference pattern,
+the application-side task store, revision CAS, action descriptor, execution
+claim, receipt, terminal signal, resume path, and focused tests. It is a reference pattern,
 not a framework-owned review subsystem.

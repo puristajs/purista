@@ -209,17 +209,6 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 		...('modelAlias' in event && event.modelAlias ? { model_alias: event.modelAlias } : {}),
 		...('streamId' in event && event.streamId ? { stream_id: event.streamId } : {}),
 	}
-	const eventType = (event as { type: string }).type
-	if (eventType === 'external_wait.requested' || eventType === 'external_wait.waiting' || eventType === 'external_wait.resolved') {
-		return {
-			...base,
-			type: 'response.output_json.delta',
-			output_index: 0,
-			content_index: 0,
-			delta: event,
-		}
-	}
-
 	switch (event.type) {
 		case 'run.started':
 			return {
@@ -245,6 +234,10 @@ function mapRunEventToProviderEvent(event: RunEvent, sequenceNumber: number): Ag
 		case 'policy.exposure':
 		case 'approval.requested':
 		case 'approval.finished':
+		case 'model.completed':
+		case 'external_wait.requested':
+		case 'external_wait.waiting':
+		case 'external_wait.resolved':
 			return {
 				...base,
 				type: 'response.output_json.delta',

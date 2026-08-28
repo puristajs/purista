@@ -1,3 +1,4 @@
+import canonicalContentManifest from './handbook-content-manifest.ts'
 import type { SidebarItem } from '../lib/sidebar'
 
 export type PuristaColor = 'pilot' | 'con' | 'found'
@@ -21,6 +22,65 @@ export interface HandbookSection {
 	cards: HandbookCard[]
 }
 
+/** Product that owns a handbook topic. Product-local navigation never crosses this boundary. */
+export type HandbookProduct = 'framework' | 'harness'
+
+export type HandbookPageRole = 'landing' | 'chapter' | 'hub' | 'tutorial' | 'concept' | 'task' | 'adapter' | 'operations' | 'migration' | 'reference'
+
+/**
+ * Canonical handbook navigation record.
+ *
+ * Existing numbered Markdown routes remain compatibility routes while their
+ * content is migrated into this manifest-backed structure.
+ */
+export interface HandbookManifestTopic {
+	topicId: string
+	product: HandbookProduct
+	chapterId: string
+	parentTopicId?: string
+	order: number
+	title: string
+	description: string
+	canonicalRoute: string
+	source?: {
+		collection: 'handbook' | 'handbookCards'
+		id: string
+	}
+	pageRole: HandbookPageRole
+	status: 'canonical' | 'deprecated' | 'redirected' | 'private'
+	redirects: string[]
+	availabilityOwner?: string
+	relatedTopicIds?: string[]
+	icon?: string
+	tags?: string[]
+	featured?: boolean
+	sectionId?: string
+	cardId?: string
+}
+
+export interface HandbookProductDefinition {
+	id: HandbookProduct
+	topicId: string
+	title: string
+	description: string
+	canonicalRoute: string
+}
+
+export type HandbookCompatibilityDisposition = 'redirect' | 'merge-before-redirect' | 'evaluator-separate' | 'retain' | 'retire-approved'
+
+/**
+ * A public legacy route whose target has been reviewed against the canonical
+ * product tree. Only `redirect` records are emitted as transport redirects;
+ * merge and evaluator records deliberately retain their current pages.
+ */
+export interface HandbookCompatibilityAlias {
+	sourceRoute: string
+	targetTopicId: string
+	disposition: HandbookCompatibilityDisposition
+	/** Explicitly reviewed legacy hash aliases. Unknown source fragments are dropped. */
+	fragmentAliases?: Record<string, string>
+}
+
 export interface LearningPath {
 	title: string
 	duration: string
@@ -28,7 +88,11 @@ export interface LearningPath {
 	slug: string
 }
 
-export const handbookSections: HandbookSection[] = [
+/**
+ * Migration input only. All consumers use manifest selectors below. Keeping
+ * this compact input temporarily preserves every current card/item route.
+ */
+const legacySectionDefinitions: HandbookSection[] = [
 	{
 		num: 1,
 		id: 'learn',
@@ -492,130 +556,633 @@ export const handbookSections: HandbookSection[] = [
 	},
 ]
 
-export function getSectionById(id: string): HandbookSection | undefined {
-	return handbookSections.find(s => s.id === id)
+export const handbookProducts: HandbookProductDefinition[] = [
+	{
+		id: 'framework',
+		topicId: 'framework',
+		title: 'PURISTA Framework',
+		description: 'Build, configure, test, and operate production-grade PURISTA services.',
+		canonicalRoute: '/handbook/framework/',
+	},
+	{
+		id: 'harness',
+		topicId: 'handbook-harness',
+		title: 'AI Harness',
+		description: 'Build, secure, evaluate, and operate typed AI agents and workflows.',
+		canonicalRoute: '/handbook/harness/',
+	},
+]
+
+const frameworkSectionLabels: Record<string, string> = {
+	learn: 'Start',
+	'mental-model': 'Understand the Framework',
+	service: 'Build services',
+	blocks: 'Build services',
+	stores: 'Configure and persist',
+	expose: 'Expose and consume services',
+	bridges: 'Connect distributed infrastructure',
+	patterns: 'Apply patterns and recipes',
+	ops: 'Secure and operate',
 }
 
-export function getCardBySlug(
-	sectionId: string,
-	cardId: string,
-): { section: HandbookSection; card: HandbookCard } | undefined {
-	const section = getSectionById(sectionId)
-	if (!section) return undefined
-	const card = section.cards.find(c => c.id === cardId)
-	if (!card) return undefined
-	return { section, card }
+const frameworkCardLabels: Record<string, string> = {
+	'learn/getting-started': 'Quickstart',
+	'service/what-is-service': 'Service overview',
+	'service/service-builder': 'Define a service',
+	'service/service-config': 'Service configuration',
+	'service/service-resources': 'Resources and dependencies',
+	'service/custom-service-class': 'Custom service classes',
+	'service/service-testing': 'Test a service',
 }
 
-export function getAllCards(): (HandbookCard & {
-	sectionId: string
-	sectionColor: PuristaColor
-	sectionTitle: string
-})[] {
-	const all: (HandbookCard & { sectionId: string; sectionColor: PuristaColor; sectionTitle: string })[] = []
-	for (const section of handbookSections) {
-		for (const card of section.cards) {
-			all.push({ ...card, sectionId: section.id, sectionColor: section.color, sectionTitle: section.title })
+const cardOrderOverrides: Record<string, number> = {
+	'blocks/command-pattern': 1,
+	'blocks/subscription-pattern': 2,
+	'blocks/stream-pattern': 3,
+	'blocks/queue-pattern': 4,
+	'blocks/agent-pattern': 5,
+}
+
+const handbookCompatibilityAliasInputs: HandbookCompatibilityAlias[] = [
+	{ sourceRoute: '/handbook/learn/getting-started/', targetTopicId: 'framework/start', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/learn/building-microservices/', targetTopicId: 'framework/apply-patterns-and-recipes/distributed-microservices', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/1_quickstart/', targetTopicId: 'framework/start', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/1_quickstart/setup-the-purista-project/', targetTopicId: 'framework/start/requirements-and-installation', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/1_quickstart/create-a-service/', targetTopicId: 'framework/start/create-the-first-service', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/1_quickstart/add-the-first-command/', targetTopicId: 'framework/start/add-a-command', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/1_quickstart/add-the-first-subscription/', targetTopicId: 'framework/start/add-a-subscription', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/stores/config-store/', targetTopicId: 'framework/configure-applications/configuration-stores', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/stores/secret-store/', targetTopicId: 'framework/configure-applications/secret-stores', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/stores/state-store/', targetTopicId: 'framework/persist-application-state', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/expose/rest-api/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/expose/graphql/', targetTopicId: 'framework/expose-and-consume-services/graphql', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/expose/http-client/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/expose/service-discovery/', targetTopicId: 'framework/expose-and-consume-services/service-discovery', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/mental-model/deployment-flexibility/', targetTopicId: 'framework/understand-the-framework/distribution-and-deployment-models', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/mental-model/distribution/', targetTopicId: 'framework/understand-the-framework/distribution-and-deployment-models', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/bridges/event-bridges/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/bridges/queue-bridges/', targetTopicId: 'framework/connect-distributed-infrastructure/queue-delivery', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/default_config_store/', targetTopicId: 'framework/configure-applications/configuration-stores/default', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/redis_config_store/', targetTopicId: 'framework/configure-applications/configuration-stores/redis', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/aws_config_store/', targetTopicId: 'framework/configure-applications/configuration-stores/aws-systems-manager', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/nats_config_store/', targetTopicId: 'framework/configure-applications/configuration-stores/nats-jetstream-kv', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/dapr_config_store/', targetTopicId: 'framework/configure-applications/configuration-stores/dapr', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/default_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/default', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/aws_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/aws-secrets-manager', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/azure_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/azure-key-vault', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/gcloud_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/gcloud-secret-manager', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/vault_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/vault', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/infisical_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/infisical', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/dapr_secret_store/', targetTopicId: 'framework/configure-applications/secret-stores/dapr', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/default_state_store/', targetTopicId: 'framework/persist-application-state/default', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/redis_state_store/', targetTopicId: 'framework/persist-application-state/redis', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/nats_state_store/', targetTopicId: 'framework/persist-application-state/nats-jetstream-kv', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/dapr_state_store/', targetTopicId: 'framework/persist-application-state/dapr', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/eventbridges/default_event_bridge/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/eventbridges/amqp/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery/amqp-rabbitmq', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/eventbridges/nats/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery/nats', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/eventbridges/mqtt/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery/mqtt', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/eventbridges/dapr/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery/dapr', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/queue_bridges/default_queue_bridge/', targetTopicId: 'framework/connect-distributed-infrastructure/queue-delivery', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/queue_bridges/redis_queue_bridge/', targetTopicId: 'framework/connect-distributed-infrastructure/queue-delivery/redis', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/queue_bridges/nats_queue_bridge/', targetTopicId: 'framework/connect-distributed-infrastructure/queue-delivery/nats', disposition: 'merge-before-redirect' },
+
+	{ sourceRoute: '/handbook/harness/overview/', targetTopicId: 'harness/understand-the-harness/mental-model-and-runtime-architecture', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/quickstart/', targetTopicId: 'harness/start', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/ecosystem-packages/', targetTopicId: 'harness/reference', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/models-and-configuration/', targetTopicId: 'harness/configure-the-runtime', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/tools-and-skills/', targetTopicId: 'harness/add-capabilities', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/agent-plugins/', targetTopicId: 'harness/add-capabilities/agent-plugins', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/sandboxing-and-mcp/', targetTopicId: 'harness/secure-and-govern/sandbox-and-mcp', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/agents-workflows-storage/', targetTopicId: 'harness/understand-the-harness', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/durable-workflows-and-queues/', targetTopicId: 'harness/orchestrate-work/durable-workflows', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/human-review-gates/', targetTopicId: 'harness/orchestrate-work/human-review', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/memory/', targetTopicId: 'harness/manage-context-and-state/memory', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/guardrails-governance/', targetTopicId: 'harness/secure-and-govern/guardrails', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/privacy-detectors/', targetTopicId: 'harness/secure-and-govern/privacy-detectors', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/custom-adapters/', targetTopicId: 'harness/reference', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/testing-and-evaluations/', targetTopicId: 'harness/test-and-evaluate', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/observability-operations/', targetTopicId: 'harness/understand-the-harness/failure-and-durability-model', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/migrating-to-v3/', targetTopicId: 'harness/upgrade-and-migrate/migrate-to-v3', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/adapters-durability-reference/', targetTopicId: 'harness/reference', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/extend-the-harness/', targetTopicId: 'harness/reference', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/extend-the-harness/custom-ports-and-contracts/', targetTopicId: 'harness/reference', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/operate-in-production/', targetTopicId: 'harness/understand-the-harness/failure-and-durability-model', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/operate-in-production/deployment-and-topology/', targetTopicId: 'harness/understand-the-harness/failure-and-durability-model', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/operate-in-production/observability-and-troubleshooting/', targetTopicId: 'harness/understand-the-harness/failure-and-durability-model', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/patterns-and-recipes/', targetTopicId: 'harness/orchestrate-work', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/harness/use-with-purista-framework/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/what-is-agent/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/harness-integration/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/agent-builder/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/agent-workflows/', targetTopicId: 'harness/orchestrate-work', disposition: 'retire-approved' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/http-exposure/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/guardrails/', targetTopicId: 'harness/orchestrate-work', disposition: 'retire-approved' },
+	{ sourceRoute: '/handbook/blocks/agent-pattern/agent-testing/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/handbook/learn/ai-agent-tutorial/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'merge-before-redirect' },
+	{ sourceRoute: '/harness/', targetTopicId: 'harness/start', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/get-started/', targetTopicId: 'harness/start', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/architecture/', targetTopicId: 'harness/understand-the-harness/mental-model-and-runtime-architecture', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/guardrails/', targetTopicId: 'harness/secure-and-govern/guardrails', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/security/', targetTopicId: 'harness/secure-and-govern/sandbox-and-mcp', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/durability/', targetTopicId: 'harness/orchestrate-work/durable-workflows', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/memory/', targetTopicId: 'harness/manage-context-and-state/memory', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/testing/', targetTopicId: 'harness/test-and-evaluate/test-harness-applications', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/evaluations/', targetTopicId: 'harness/test-and-evaluate/evaluate-prompts-and-outputs', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/observability/', targetTopicId: 'harness/understand-the-harness/failure-and-durability-model', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/use-cases/', targetTopicId: 'harness/orchestrate-work', disposition: 'evaluator-separate' },
+	{ sourceRoute: '/harness/adapters/', targetTopicId: 'harness/reference', disposition: 'retain' },
+	{ sourceRoute: '/harness/before-you-ship/', targetTopicId: 'harness/secure-and-govern', disposition: 'retain' },
+	{ sourceRoute: '/harness/usage/', targetTopicId: 'harness/start', disposition: 'retain' },
+]
+
+/**
+ * Concrete Framework routes expanded from the finalized migration map. Entries
+ * deliberately avoid pattern-only and vendor-specific routes: every source is
+ * an authored legacy page with one reviewed canonical destination.
+ */
+const frameworkReadyCompatibilityAliases: HandbookCompatibilityAlias[] = [
+	{
+		sourceRoute: '/handbook/learn/from-zero-to-production/',
+		targetTopicId: 'framework/start/from-zero-to-production',
+		disposition: 'redirect',
+		fragmentAliases: {
+			'#phase-1-foundation': '#phase-1-foundation',
+			'#phase-2-integration-ready-logic': '#phase-2-integration-ready-logic',
+			'#phase-3-runtime-architecture': '#phase-3-runtime-architecture',
+			'#phase-4-production-readiness': '#phase-4-production-readiness',
+			'#pre-launch-checklist': '#pre-launch-checklist',
+		},
+	},
+	{ sourceRoute: '/handbook/mental-model/architecture/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/mental-model/philosophy/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/mental-model/separation-of-concerns/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/mental-model/data-control/', targetTopicId: 'framework/secure-and-operate/security/secrets-and-sensitive-data', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/mental-model/resilience-patterns/', targetTopicId: 'framework/understand-the-framework/reliability-and-delivery-guarantees', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/service/what-is-service/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/service/service-builder/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/service/service-resources/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/service/service-config/', targetTopicId: 'framework/configure-applications/configuration-model-defaults-validation-and-precedence', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/service/custom-service-class/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/service/service-testing/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/command-pattern/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/command-pattern/what-is-command/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/command-pattern/command-builder/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/command-pattern/cross-service/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/command-pattern/http-exposure/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/command-pattern/testing/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/commands/define-and-validate/', targetTopicId: 'framework/build-services/commands/create-and-validate', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/commands/call-another-service/', targetTopicId: 'framework/build-services/commands/call-other-capabilities', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/commands/handle-errors-and-events/', targetTopicId: 'framework/build-services/commands/handle-errors', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/subscriptions/define-and-route/', targetTopicId: 'framework/build-services/subscriptions/create-and-validate', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/streams/define-and-consume/', targetTopicId: 'framework/build-services/streams/create-and-validate', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/streams/compose-and-customize-a-stream/', targetTopicId: 'framework/build-services/streams/invoke-enqueue-emit-and-consume', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/queues-and-workers/define-a-queue-and-worker/', targetTopicId: 'framework/build-services/queues-and-workers/create-a-queue-and-worker', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/queues-and-workers/customize-queue-and-worker-behavior/', targetTopicId: 'framework/build-services/queues-and-workers/configure-leases-retries-idempotency-and-dead-letters', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/queues-and-workers/expose-asynchronous-work-over-http/', targetTopicId: 'framework/build-services/queues-and-workers/expose-queued-work', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/queues-and-workers/retries-failures-and-idempotency/', targetTopicId: 'framework/build-services/queues-and-workers/configure-leases-retries-idempotency-and-dead-letters', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/services/define-and-version/', targetTopicId: 'framework/build-services/services/create-and-version-a-service', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/services/resources-and-dependencies/', targetTopicId: 'framework/build-services/services/provide-resources-and-metrics', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/services/configuration/', targetTopicId: 'framework/build-services/services/configure-a-service', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/services/custom-service-classes/', targetTopicId: 'framework/build-services/services/customize-service-lifecycle', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/subscription-pattern/', targetTopicId: 'framework/build-services/subscriptions', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/subscription-pattern/what-is-subscription/', targetTopicId: 'framework/build-services/subscriptions', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/subscription-pattern/subscription-builder/', targetTopicId: 'framework/build-services/subscriptions', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/subscription-pattern/subscription-testing/', targetTopicId: 'framework/test-applications/message-flows-queues-and-retries', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/stream-pattern/', targetTopicId: 'framework/build-services/streams', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/stream-pattern/what-is-stream/', targetTopicId: 'framework/build-services/streams', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/stream-pattern/stream-builder/', targetTopicId: 'framework/build-services/streams', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/stream-pattern/stream-testing/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/queue-pattern/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/queue-pattern/what-is-queue/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/queue-pattern/queue-builder/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/queue-pattern/queue-worker/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/queue-pattern/queue-http-exposure/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/blocks/queue-pattern/queue-testing/', targetTopicId: 'framework/test-applications/message-flows-queues-and-retries', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/bridges/direct-calls/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/patterns/scheduling/', targetTopicId: 'framework/build-services/schedule-event-queue-result', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/apply-patterns-and-recipes/schedule-event-queue-result/', targetTopicId: 'framework/build-services/schedule-event-queue-result', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/patterns/enterprise-pattern/', targetTopicId: 'framework/apply-patterns-and-recipes/enterprise-interoperability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/patterns/agent-patterns/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/ai-powered-services/', targetTopicId: 'framework/build-ai-powered-services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/ai-powered-services/configure-an-attached-agent/', targetTopicId: 'framework/build-ai-powered-services/build-the-first-attached-agent', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/ai-powered-services/agent-builder-and-context/', targetTopicId: 'framework/build-ai-powered-services/configure-agent-builder-and-runtime-binding', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/ai-powered-services/queue-and-durable-agent-work/', targetTopicId: 'framework/build-ai-powered-services/manage-sessions-workspaces-and-durable-work', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/ai-powered-services/expose-and-invoke-agents/', targetTopicId: 'framework/build-ai-powered-services/expose-and-invoke-an-attached-agent', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/build-services/ai-powered-services/test-an-ai-powered-service/', targetTopicId: 'framework/build-ai-powered-services/test-an-ai-powered-service-deterministically', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/ops/security/', targetTopicId: 'framework/secure-and-operate/security', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/ops/observability/', targetTopicId: 'framework/secure-and-operate/observability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/ops/opentelemetry/', targetTopicId: 'framework/secure-and-operate/observability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/ops/reliability/', targetTopicId: 'framework/secure-and-operate/reliability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/ops/deployment/', targetTopicId: 'framework/secure-and-operate/deployment', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/ops/performance/', targetTopicId: 'framework/secure-and-operate/performance-and-scaling', disposition: 'redirect' },
+
+	{ sourceRoute: '/handbook/2_building_business-logic/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/builders/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/schemas/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/custom_events/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/error-handling/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/logging/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/advanced/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/advanced/structure_of_a_message/', targetTopicId: 'framework/understand-the-framework', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/advanced/delivery-semantics-and-reliability/', targetTopicId: 'framework/secure-and-operate/reliability/delivery-semantics', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/advanced/queues/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/service/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/service/the-service-builder/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/service/define-resources/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/service/add-a-service-config/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/service/custom-service-class/', targetTopicId: 'framework/build-services/services', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/service/unit-test-a-service/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/command/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/command/the-command-builder/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/command/invoke_command_from_command/', targetTopicId: 'framework/build-services/commands', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/command/exposing-a-command-as-http-endpoint/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/command/test-a-command/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/subscription/', targetTopicId: 'framework/build-services/subscriptions', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/subscription/the-subscription-builder/', targetTopicId: 'framework/build-services/subscriptions', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/subscription/unit-test-a-subscription/', targetTopicId: 'framework/test-applications/message-flows-queues-and-retries', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stream/', targetTopicId: 'framework/build-services/streams', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stream/the-stream-builder/', targetTopicId: 'framework/build-services/streams', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stream/test-a-stream/', targetTopicId: 'framework/test-applications/business-logic-and-service-contracts', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/queue/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/queue/the-queue-builder/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/queue/the-queue-worker-builder/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/queue/queue-http-exposure/', targetTopicId: 'framework/build-services/queues-and-workers', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/queue/test-a-queue-worker/', targetTopicId: 'framework/test-applications/message-flows-queues-and-retries', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/exposing_endpoints/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/exposing_endpoints/rest_api_http_endpoints/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/connect_to_a_purista_application/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/connect_to_a_purista_application/embedded_client/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/connect_to_a_purista_application/create_a_rest_api_client/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/connect_to_a_purista_application/create_an_eventbridge_client/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/fetch_based_http_client/', targetTopicId: 'framework/expose-and-consume-services/service-clients', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stores/', targetTopicId: 'framework/configure-applications', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stores/config-stores/', targetTopicId: 'framework/configure-applications', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stores/secret-stores/', targetTopicId: 'framework/configure-applications', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/stores/state-stores/', targetTopicId: 'framework/persist-application-state', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/2_building_business-logic/exposing_endpoints/graphql_mutation_and_query/', targetTopicId: 'framework/expose-and-consume-services/graphql', disposition: 'redirect' },
+
+	{ sourceRoute: '/handbook/3_eco_system/', targetTopicId: 'framework/reference/packages-and-feature-availability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/tools/', targetTopicId: 'framework/reference/packages-and-feature-availability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/eventbridges/', targetTopicId: 'framework/connect-distributed-infrastructure/event-delivery', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/queue_bridges/', targetTopicId: 'framework/connect-distributed-infrastructure/queue-delivery', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/http_server/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest/hono', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/connect-distributed-infrastructure/http-servers/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest/hono', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/framework/connect-distributed-infrastructure/http-servers/hono/', targetTopicId: 'framework/expose-and-consume-services/http-and-rest/hono', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/3_eco_system/stores/', targetTopicId: 'framework/reference/packages-and-feature-availability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/', targetTopicId: 'framework/secure-and-operate/observability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/aws/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/azure_monitor/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/google_cloud_trace/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/grafana/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/jaeger/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/signoz/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/teletrace/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/uptrace/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/4_open_telemetry/zipkin/', targetTopicId: 'framework/secure-and-operate/observability/backend-guides', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/5_deploy_and_scale/', targetTopicId: 'framework/secure-and-operate/deployment', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/5_deploy_and_scale/monolithic/', targetTopicId: 'framework/secure-and-operate/deployment', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/5_deploy_and_scale/microservice_style/', targetTopicId: 'framework/secure-and-operate/deployment/kubernetes-and-dapr', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/5_deploy_and_scale/microservice_style/dapr/', targetTopicId: 'framework/secure-and-operate/deployment/kubernetes-and-dapr', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/5_deploy_and_scale/microservice_style/kubernetes/', targetTopicId: 'framework/secure-and-operate/deployment/kubernetes-and-dapr', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/', targetTopicId: 'framework/apply-patterns-and-recipes/enterprise-interoperability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/', targetTopicId: 'framework/apply-patterns-and-recipes/enterprise-interoperability', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/async-agent-queues/', targetTopicId: 'framework/apply-patterns-and-recipes/asynchronous-request-processing', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/long-running-queues/', targetTopicId: 'framework/apply-patterns-and-recipes/asynchronous-request-processing', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/result-events/', targetTopicId: 'framework/apply-patterns-and-recipes/asynchronous-request-processing', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/event-to-queue/', targetTopicId: 'framework/apply-patterns-and-recipes/asynchronous-request-processing', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/scheduling/', targetTopicId: 'framework/build-services/schedule-event-queue-result', disposition: 'redirect' },
+	{ sourceRoute: '/handbook/6_integrations/enterprise_interoperability/exports/', targetTopicId: 'framework/reference/packages-and-feature-availability', disposition: 'redirect' },
+]
+
+const frameworkReadySourceRoutes = new Set(
+	handbookCompatibilityAliasInputs
+		.filter(alias =>
+			alias.disposition === 'merge-before-redirect' &&
+			alias.sourceRoute.startsWith('/handbook/') &&
+			!['/handbook/blocks/agent-pattern/agent-workflows/', '/handbook/blocks/agent-pattern/guardrails/'].includes(alias.sourceRoute),
+		)
+		.map(alias => alias.sourceRoute),
+)
+
+export const handbookCompatibilityAliases: HandbookCompatibilityAlias[] = [
+	...handbookCompatibilityAliasInputs,
+	...frameworkReadyCompatibilityAliases,
+].map(alias => (frameworkReadySourceRoutes.has(alias.sourceRoute) ? { ...alias, disposition: 'redirect' } : alias))
+
+function markdownRoute(route: string): string {
+	return route === '/handbook/' ? '/handbook.md' : `${route.replace(/\/$/, '')}.md`
+}
+
+function redirectSourcesForTopic(topicId: string): string[] {
+	return handbookCompatibilityAliases
+		.filter(alias => alias.targetTopicId === topicId && alias.disposition === 'redirect')
+		.flatMap(alias => [alias.sourceRoute, markdownRoute(alias.sourceRoute)])
+}
+
+function getCanonicalContentTopics(product: HandbookProduct): HandbookManifestTopic[] {
+	return canonicalContentManifest
+		.filter(topic => topic.product === product)
+		.map(topic => ({
+			...topic,
+			product,
+			chapterId: topic.topicId.split('/')[1],
+			canonicalRoute: `/handbook/${topic.topicId}/`,
+			source: { collection: 'handbook', id: topic.topicId },
+			pageRole: topic.pageRole as HandbookPageRole,
+			status: 'canonical' as const,
+			redirects: redirectSourcesForTopic(topic.topicId),
+		}))
+}
+
+function normalizeRoute(route: string): string {
+	return route.endsWith('/') ? route : `${route}/`
+}
+
+function legacySourceId(item: SidebarItem): string {
+	return item.id.replace(/\/index$/, '')
+}
+
+function buildManifest(): HandbookManifestTopic[] {
+	const topics: HandbookManifestTopic[] = handbookProducts.map((product, index) => ({
+		topicId: product.topicId,
+		product: product.id,
+		chapterId: 'root',
+		order: index + 1,
+		title: product.title,
+		description: product.description,
+		canonicalRoute: product.canonicalRoute,
+		pageRole: 'landing',
+		status: 'canonical',
+		redirects: [],
+	}))
+
+	for (const product of handbookProducts) {
+		for (const topic of getCanonicalContentTopics(product.id)) {
+			topics.push(topic)
 		}
 	}
-	return all
+
+	for (const section of legacySectionDefinitions) {
+		const product: HandbookProduct = section.id === 'harness' ? 'harness' : 'framework'
+		const productDefinition = handbookProducts.find(candidate => candidate.id === product)!
+		const sectionTopicId = product === 'harness' ? productDefinition.topicId : section.id
+
+		if (product === 'framework') {
+			topics.push({
+				topicId: sectionTopicId,
+				product,
+				chapterId: section.id,
+				parentTopicId: productDefinition.topicId,
+				order: section.num,
+				title: frameworkSectionLabels[section.id] ?? section.title,
+				description: section.subtitle,
+				canonicalRoute: `/handbook/${section.id}/`,
+				pageRole: 'chapter',
+				status: 'deprecated',
+				redirects: [],
+				sectionId: section.id,
+			})
+		}
+
+		for (const [index, card] of section.cards.entries()) {
+			const cardOrder = cardOrderOverrides[`${section.id}/${card.id}`] ?? index + 1
+			const topicId = `${section.id}/${card.id}`
+			topics.push({
+				topicId,
+				product,
+				chapterId: product === 'harness' ? 'root' : section.id,
+				parentTopicId: sectionTopicId,
+				order: cardOrder,
+				title: frameworkCardLabels[topicId] ?? card.title,
+				description: card.description,
+				canonicalRoute: `/handbook/${section.id}/${card.id}/`,
+				source: { collection: 'handbookCards', id: topicId },
+				pageRole: card.items?.length ? 'hub' : 'concept',
+				status: 'deprecated',
+				redirects: [],
+				icon: card.icon,
+				tags: card.tags,
+				featured: card.featured,
+				sectionId: section.id,
+				cardId: card.id,
+			})
+
+			for (const item of card.items ?? []) {
+				const cardSourcePrefix = `${section.id}/${card.id}/`
+				const isCardSource = item.id.startsWith(cardSourcePrefix)
+				const hasLegacyRoute = Boolean(item.href) || !isCardSource
+				const slug = item.id.split('/').at(-1)!
+				topics.push({
+					topicId: item.id,
+					product,
+					chapterId: product === 'harness' ? 'root' : section.id,
+					parentTopicId: topicId,
+					order: item.order,
+					title: item.title,
+					description: card.description,
+					canonicalRoute: hasLegacyRoute
+						? normalizeRoute(item.href ?? `/handbook/${legacySourceId(item)}/`)
+						: `/handbook/${section.id}/${card.id}/${slug}/`,
+					source: hasLegacyRoute
+						? { collection: 'handbook', id: legacySourceId(item) }
+						: { collection: 'handbookCards', id: item.id },
+					pageRole: 'task',
+					status: 'deprecated',
+					redirects: [],
+					sectionId: section.id,
+					cardId: card.id,
+				})
+			}
+		}
+	}
+
+	return topics
 }
 
-export function getSidebarItems(): SidebarItem[] {
-	const frameworkSections = handbookSections.filter(section => section.id !== 'harness')
-	const harnessSection = handbookSections.find(section => section.id === 'harness')
+/** The only canonical handbook navigation graph. */
+export const handbookManifest = buildManifest()
 
-	const frameworkLabels: Record<string, string> = {
-		learn: 'Start Here',
-		'mental-model': 'Foundations',
-		service: 'Services',
-		blocks: 'Building Blocks',
-		stores: 'Stores',
-		expose: 'APIs & Clients',
-		bridges: 'Messaging',
-		patterns: 'Patterns',
-		ops: 'Operations',
+function byOrder(left: HandbookManifestTopic, right: HandbookManifestTopic): number {
+	return left.order - right.order || left.title.localeCompare(right.title)
+}
+
+export function getHandbookProduct(product: HandbookProduct): HandbookProductDefinition {
+	return handbookProducts.find(candidate => candidate.id === product)!
+}
+
+export function getManifestTopic(topicId: string): HandbookManifestTopic | undefined {
+	return handbookManifest.find(topic => topic.topicId === topicId)
+}
+
+export function getManifestTopicByRoute(route: string): HandbookManifestTopic | undefined {
+	const normalized = normalizeRoute(route)
+	return handbookManifest.find(topic => topic.canonicalRoute === normalized)
+}
+
+/** Compatibility target for an old handbook route, including its Markdown endpoint. */
+export function getHandbookRedirectTarget(route: string): string | undefined {
+	const alias = handbookCompatibilityAliases.find(candidate => candidate.disposition === 'redirect' && candidate.sourceRoute === route)
+	if (!alias) return undefined
+	const target = getManifestTopic(alias.targetTopicId)
+	if (!target || target.status !== 'canonical') return undefined
+	return target.canonicalRoute
+}
+
+/** Astro-compatible permanent redirects derived from reviewed, one-to-one manifest aliases. */
+export function getHandbookCompatibilityRedirects(): Record<string, string> {
+	const redirects: Record<string, string> = {}
+	for (const alias of handbookCompatibilityAliases) {
+		if (alias.disposition !== 'redirect') continue
+		const target = getHandbookRedirectTarget(alias.sourceRoute)
+		if (!target) continue
+		redirects[alias.sourceRoute] = target
 	}
+	return redirects
+}
 
-	const frameworkCardLabels: Record<string, string> = {
-		'learn/getting-started': 'Quickstart',
-		'service/what-is-service': 'Service Overview',
-		'service/service-builder': 'Service Builder',
-		'service/service-config': 'Configuration',
-		'service/service-resources': 'Resources',
-		'service/custom-service-class': 'Custom Service',
-		'service/service-testing': 'Service Tests',
-		'expose/rest-api': 'REST API',
-		'expose/graphql': 'GraphQL',
-		'expose/service-discovery': 'Service Discovery',
-		'bridges/direct-calls': 'Service Calls',
-		'ops/opentelemetry': 'OpenTelemetry',
-		'ops/deployment': 'Deployment',
+export function getProductForHandbookRoute(route: string): HandbookProduct {
+	return getManifestTopicByRoute(route)?.product ?? (route.startsWith('/handbook/harness/') ? 'harness' : 'framework')
+}
+
+export function getProductChapterTopics(product: HandbookProduct): HandbookManifestTopic[] {
+	const productRootTopicId = getHandbookProduct(product).topicId
+	return handbookManifest
+		.filter(
+			topic =>
+				topic.product === product &&
+				topic.pageRole === 'chapter' &&
+				topic.status === 'canonical' &&
+				topic.parentTopicId === productRootTopicId,
+		)
+		.sort(byOrder)
+}
+
+export function getProductCardTopics(product: HandbookProduct): HandbookManifestTopic[] {
+	return handbookManifest
+		.filter(topic => topic.product === product && (topic.pageRole === 'hub' || topic.pageRole === 'concept') && topic.cardId)
+		.sort((left, right) => {
+			const leftChapter = getManifestTopic(left.parentTopicId ?? '')?.order ?? 0
+			const rightChapter = getManifestTopic(right.parentTopicId ?? '')?.order ?? 0
+			return leftChapter - rightChapter || byOrder(left, right)
+		})
+}
+
+/** All canonical content pages in product-local reading order. */
+export function getProductPageTopics(product: HandbookProduct): HandbookManifestTopic[] {
+	const rootTopicId = getHandbookProduct(product).topicId
+	const topics: HandbookManifestTopic[] = []
+	const visit = (parentTopicId: string) => {
+		for (const topic of handbookManifest.filter(candidate => candidate.parentTopicId === parentTopicId && candidate.status === 'canonical').sort(byOrder)) {
+			if (topic.source) topics.push(topic)
+			visit(topic.topicId)
+		}
 	}
+	visit(rootTopicId)
+	return topics
+}
 
-	const harnessLabels: Record<string, string> = {
-		'harness/overview': 'Overview',
-		'harness/quickstart': 'Quickstart',
-		'harness/models-and-configuration': 'Configuration',
-		'harness/tools-and-skills': 'Tools & Skills',
-		'harness/agent-plugins': 'Agent Plugins',
-		'harness/sandboxing-and-mcp': 'Sandboxing & MCP',
-		'harness/memory': 'Memory',
-		'harness/agents-workflows-storage': 'Agents & Workflows',
-		'harness/durable-workflows-and-queues': 'Durable Workflows',
-		'harness/human-review-gates': 'Human Review Gates',
-		'harness/guardrails-governance': 'Guardrails',
-		'harness/privacy-detectors': 'Privacy Detectors',
-		'harness/custom-adapters': 'Custom Adapters',
-		'harness/testing-and-evaluations': 'Tests & Evaluations',
-		'harness/observability-operations': 'Observability',
-		'harness/migrating-to-v3': 'Migrate to v3',
-		'harness/adapters-durability-reference': 'Adapters & Deployment',
-	}
+export function getCardTopic(sectionId: string, cardId: string): HandbookManifestTopic | undefined {
+	return getManifestTopic(`${sectionId}/${cardId}`)
+}
 
-	return [
-		...frameworkSections.map(section => ({
-			title: frameworkLabels[section.id] ?? section.title,
-			id: section.id,
-			order: section.num,
-			items: section.cards.map(card => ({
-				title: frameworkCardLabels[`${section.id}/${card.id}`] ?? card.title,
-				id: `${section.id}/${card.id}`,
-				order: 0,
-				items: card.items,
-			})),
-		})),
-		{
-			title: 'API Reference',
-			id: 'api',
-			href: '/handbook/api/',
-			order: handbookSections.length + 1,
-			items: [
-				{ title: 'Overview', id: 'api/overview', href: '/handbook/api/', order: 1 },
-				{ title: 'Packages', id: 'api/packages', href: '/handbook/api/#packages', order: 2 },
-				{ title: 'Classes', id: 'api/classes', href: '/handbook/api/#classes', order: 3 },
-				{ title: 'Interfaces', id: 'api/interfaces', href: '/handbook/api/#interfaces', order: 4 },
-				{ title: 'Functions', id: 'api/functions', href: '/handbook/api/#functions', order: 5 },
-				{ title: 'Types', id: 'api/types', href: '/handbook/api/#types', order: 6 },
-			],
-		},
-		...(harnessSection
-			? [
-				{
-					title: 'AI Harness',
-					id: 'harness',
-					href: '/handbook/harness/',
-					order: handbookSections.length + 2,
-					sectionStart: true,
-					kind: 'sectionHeader' as const,
-					iconLabel: 'AI',
-				},
-				...harnessSection.cards.map((card, index) => ({
-					id: `harness/${card.id}`,
-					title: harnessLabels[`harness/${card.id}`] ?? card.title,
-					order: index + 1,
+export function getCardChildTopics(sectionId: string, cardId: string): HandbookManifestTopic[] {
+	return handbookManifest.filter(topic => topic.parentTopicId === `${sectionId}/${cardId}`).sort(byOrder)
+}
+
+export function getPreviousTopic(topic: HandbookManifestTopic): HandbookManifestTopic | undefined {
+	const graph = topic.status === 'canonical' ? getProductPageTopics(topic.product) : getProductCardTopics(topic.product)
+	const index = graph.findIndex(candidate => candidate.topicId === topic.topicId)
+	return index > 0 ? graph[index - 1] : undefined
+}
+
+export function getNextTopic(topic: HandbookManifestTopic): HandbookManifestTopic | undefined {
+	const graph = topic.status === 'canonical' ? getProductPageTopics(topic.product) : getProductCardTopics(topic.product)
+	const index = graph.findIndex(candidate => candidate.topicId === topic.topicId)
+	return index >= 0 && index < graph.length - 1 ? graph[index + 1] : undefined
+}
+
+/**
+ * Compatibility projection for legacy page components. New consumers should
+ * select topics from `handbookManifest` directly.
+ */
+export const handbookSections: HandbookSection[] = legacySectionDefinitions.map(section => ({
+	...section,
+	cards: section.cards
+		.map(card => {
+			const topic = getCardTopic(section.id, card.id)!
+			return {
+				...card,
+				title: topic.title,
+				items: getCardChildTopics(section.id, card.id).map(item => ({
+					id: item.topicId,
+					title: item.title,
+					order: item.order,
+					href: item.canonicalRoute === `/handbook/${section.id}/${card.id}/${item.topicId.split('/').at(-1)}/` ? undefined : item.canonicalRoute,
 				})),
-			]
-			: []),
-	]
+			}
+		})
+		.sort((left, right) => getCardTopic(section.id, left.id)!.order - getCardTopic(section.id, right.id)!.order),
+}))
+
+export function getSectionById(id: string): HandbookSection | undefined {
+	return handbookSections.find(section => section.id === id)
+}
+
+export function getCardBySlug(sectionId: string, cardId: string): { section: HandbookSection; card: HandbookCard; product: HandbookProduct } | undefined {
+	const section = getSectionById(sectionId)
+	const card = section?.cards.find(candidate => candidate.id === cardId)
+	const topic = getCardTopic(sectionId, cardId)
+	return section && card && topic ? { section, card, product: topic.product } : undefined
+}
+
+export function getAllCards(): (HandbookCard & { sectionId: string; sectionColor: PuristaColor; sectionTitle: string; product: HandbookProduct })[] {
+	return handbookSections.flatMap(section =>
+		section.cards.map(card => ({
+			...card,
+			sectionId: section.id,
+			sectionColor: section.color,
+			sectionTitle: section.title,
+			product: getCardTopic(section.id, card.id)!.product,
+		})),
+	)
+}
+
+function getProductSidebarItems(product: HandbookProduct): SidebarItem[] {
+	const chapters = getProductChapterTopics(product)
+	const toSidebarItem = (topic: HandbookManifestTopic): SidebarItem => ({
+		title: topic.title,
+		id: topic.topicId,
+		href: topic.canonicalRoute,
+		order: topic.order,
+		items: handbookManifest
+			.filter(candidate => candidate.parentTopicId === topic.topicId && candidate.status === 'canonical')
+			.sort(byOrder)
+			.map(toSidebarItem),
+	})
+
+	return chapters.map(toSidebarItem)
+}
+
+/**
+ * Navigation for the handbook shell.
+ *
+ * The handbook is the shared developer entry point, so its sidebar always
+ * exposes both product graphs. Product headings link to their own landing
+ * pages; nested topics and previous/next navigation remain product-local.
+ */
+export function getSidebarItems(): SidebarItem[] {
+	return handbookProducts.flatMap((definition, index) => [
+		{
+			title: definition.title,
+			id: definition.id,
+			href: definition.canonicalRoute,
+			order: index * 100,
+			kind: 'sectionHeader' as const,
+			iconLabel: definition.id === 'framework' ? 'F' : 'AI',
+			sectionStart: index > 0,
+		},
+		...getProductSidebarItems(definition.id),
+	])
 }

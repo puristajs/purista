@@ -94,7 +94,7 @@ The Redis client connects lazily on first use. Connection errors are logged thro
 
 ## Secret stores
 
-Secret stores hold sensitive credentials that should never appear in environment variables or config files — API keys, OAuth tokens, database passwords.
+Secret stores hold sensitive values managed while the service runs, such as tenant API keys and delegated OAuth tokens. Fixed technical credentials needed to start adapters or resources use approved platform secret delivery or workload identity at the composition root.
 
 ### Available secret stores
 

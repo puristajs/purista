@@ -25,13 +25,7 @@ export const main = async () => {
 				primary: {
 					provider: createOpenAiIncidentModel(),
 					model,
-					capabilities: ['object'],
 				},
-			},
-			sandbox: {
-				kind: 'example-readonly-sandbox',
-				network: false,
-				filesystem: 'ephemeral',
 			},
 		},
 	})

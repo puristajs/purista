@@ -7,6 +7,7 @@ Use this checklist when creating or updating a skill.
 - Current implementation paths verified in `purista/`
 - Public handbook/API docs checked when behavior is documented for users
 - Neighboring skills reviewed for overlap
+- Documentation work routed to `purista-docs-maintainer` instead of expanding the user-facing framework skill
 - Downstream repos checked when capability changes affect generated or default behavior
 - The framework knowledge required by an otherwise untrained model has been identified explicitly
 - Older planning notes checked for stale assumptions before copying package names, protocols, or API shapes into skills
@@ -37,6 +38,7 @@ Use this checklist when creating or updating a skill.
 - “Decision rules” help choose the right PURISTA primitive
 - The PURISTA concept is taught, not only referenced
 - The builder role is clear where relevant: definition, implementation, configuration, instantiation
+- Documentation-maintainer guidance distinguishes default, opt-in, separately installed, peer, package-manager optional, development-only, and external-service prerequisites
 - Schema guidance reinforces boundary-local consumer schemas instead of one oversized shared cross-service schema
 - Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)` and `AgentQueueBuilder.defineMetric(...)`
 - Handler guidance uses typed `context.metrics` and does not expose raw metric recording

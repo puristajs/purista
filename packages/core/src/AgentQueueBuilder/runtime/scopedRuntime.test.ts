@@ -11,7 +11,6 @@ import {
 	createAgentRuntimeScope,
 	getScopedAgentRuntime,
 	initializeAttachedAgentRuntimes,
-	resolveAttachedAgentSandbox,
 } from './scopedRuntime.js'
 
 describe('attached agent scoped runtime', () => {
@@ -21,27 +20,6 @@ describe('attached agent scoped runtime', () => {
 		sandbox.restore()
 	})
 
-	describe('resolveAttachedAgentSandbox', () => {
-		const runtimeSandbox = { kind: 'shared-runtime-sandbox' }
-		const policyAdapter = { kind: 'policy-adapter' }
-
-		it('uses the shared runtime sandbox when no policy is declared', () => {
-			expect(resolveAttachedAgentSandbox(undefined, runtimeSandbox)).toBe(runtimeSandbox)
-		})
-
-		it('opts out of sandboxing when the policy explicitly disables it', () => {
-			expect(resolveAttachedAgentSandbox({ enabled: false }, runtimeSandbox)).toBeUndefined()
-			expect(resolveAttachedAgentSandbox({ enabled: false, adapter: policyAdapter }, runtimeSandbox)).toBeUndefined()
-		})
-
-		it('prefers the policy adapter over the shared runtime sandbox', () => {
-			expect(resolveAttachedAgentSandbox({ enabled: true, adapter: policyAdapter }, runtimeSandbox)).toBe(policyAdapter)
-		})
-
-		it('falls back to the shared runtime sandbox when the policy enables sandboxing without an adapter', () => {
-			expect(resolveAttachedAgentSandbox({ enabled: true }, runtimeSandbox)).toBe(runtimeSandbox)
-		})
-	})
 
 	it('does not require ai.models when no attached agents exist', async () => {
 		const scope = createAgentRuntimeScope()
@@ -60,6 +38,28 @@ describe('attached agent scoped runtime', () => {
 		)
 	})
 
+	it('requires every declared model alias to receive a concrete runtime model', async () => {
+		const definition = await new ServiceBuilder({
+			serviceName: 'support',
+			serviceVersion: '1',
+			serviceDescription: 'Support service',
+		})
+			.getAgentQueueBuilder('triage', 'Classify support tickets')
+			.addModel('primary', { capabilities: ['object'] as const })
+			.setRunFunction(async () => 'ok')
+			.getDefinition()
+
+		await expect(
+			initializeAttachedAgentRuntimes(createAgentRuntimeScope(), [definition], {
+				models: {
+					primary: { provider: { id: 'test', genAiSystem: 'test' } } as never,
+				},
+			}),
+		).rejects.toThrow(
+			'Missing concrete runtime model for agent model alias "primary". Set ai.models["primary"].model in service.getInstance(...) options',
+		)
+	})
+
 	it('keeps executors scoped per service instance for shared definitions', async () => {
 		const definition = createAttachedAgentDefinition()
 		const firstScope = createAgentRuntimeScope()
@@ -74,6 +74,47 @@ describe('attached agent scoped runtime', () => {
 
 		expect(firstRuntime).not.toBe(secondRuntime)
 	})
+
+	it.each([true, false])(
+		'maps handler failures at the attached-agent boundary (invocation failed: %s)',
+		async invocationFails => {
+			const invocationError = new Error('Invocation failed')
+			const logs: string[] = []
+			const logger = new MemoryLogger(logs)
+			const service = new ServiceBuilder({ serviceName: 'support', serviceVersion: '1', serviceDescription: 'Support' })
+			const definition = await service
+				.getAgentQueueBuilder('releaseFailure', 'Check invocation cleanup')
+				.addModel('primary', { capabilities: ['object'] as const })
+				.setRunFunction(async () => {
+					if (invocationFails) throw invocationError
+					return 'ok'
+				})
+				.getDefinition()
+			const scope = createAgentRuntimeScope()
+			const lifecycle = await initializeAttachedAgentRuntimes(scope, [definition], {
+				models: {
+					primary: { provider: { id: 'unused', genAiSystem: 'test' }, model: 'unused', capabilities: ['object'] },
+				},
+				logger,
+			})
+			try {
+				const invocation = getScopedAgentRuntime(scope, definition).executeAggregate({
+					appContext: createCommandContext('attached-agent-boundary'),
+					message: { id: 'attached-agent-boundary' },
+					payload: {},
+					parameter: {},
+				})
+				if (invocationFails) {
+					await expect(invocation).rejects.toMatchObject({ message: 'Attached agent execution failed.' })
+				} else {
+					await expect(invocation).resolves.toBe('ok')
+				}
+				expect(logs).toEqual([])
+			} finally {
+				await lifecycle.shutdown()
+			}
+		},
+	)
 
 	it('fails startup when a durable workspace agent has no storage or workspace', async () => {
 		const scope = createAgentRuntimeScope()
@@ -121,7 +162,9 @@ describe('attached agent scoped runtime', () => {
 			},
 		})
 
-		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).rejects.toThrow(/persistent ai\.storage/)
+		await expect(initializeAttachedAgentRuntimes(scope, [definition], { models: {} })).rejects.toThrow(
+			/persistent ai\.storage/,
+		)
 	})
 
 	it('fails startup when a declared skill has no runtime binding', async () => {
@@ -257,7 +300,10 @@ SECRET_BODY`,
 			initializeAttachedAgentRuntimes(scope, [definition], {
 				models: {},
 				storage: { capabilities: ['storage.persistent', 'storage.workspace_checkpoint'] } as never,
-				workspace: { info: { capabilities: ['workspace.durable', 'workspace.resume'] }, capabilities: ['workspace.durable', 'workspace.resume'] } as never,
+				workspace: {
+					info: { capabilities: ['workspace.durable', 'workspace.resume'] },
+					capabilities: ['workspace.durable', 'workspace.resume'],
+				} as never,
 			}),
 		).resolves.toEqual({ shutdown: expect.any(Function) })
 	})
@@ -369,7 +415,7 @@ class MemoryLogger implements Logger {
 
 	fatal(): void {}
 	error(): void {}
-	warn(): void {}
+	warn(..._args: LogFnParamType): void {}
 	debug(): void {}
 	trace(): void {}
 

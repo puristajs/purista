@@ -134,7 +134,7 @@ Add a long-running research agent that may retry after worker restart and must r
 Expected behavior:
 - attaches the agent to the owning service through `getAgentQueueBuilder`
 - declares stable execution with `setDurability({ mode: 'required', runIdPath: ['requestId'] })`
-- declares file replay with `setWorkspacePolicy({ mode: 'durable', cleanup: 'on_terminal' })`
+- declares file replay with `setWorkspacePolicy({ mode: 'durable' })`
 - keeps concrete Harness storage and workspace adapters in `getInstance(..., { ai })` runtime wiring
 - requires harness capabilities such as `storage.workspace_checkpoint`, `workspace.durable`, `workspace.checkpoint`, `workspace.resume`, and `workspace.cleanup`
 - treats retention durations, encryption key policy, tenant/project quotas, and cleanup scheduling as product-owned policy
@@ -162,7 +162,7 @@ Expected behavior:
 - does not recommend `bashSandbox()` or local host-directory execution as the
   production isolation boundary
 - wires a custom Harness sandbox adapter through the `ai.sandbox` runtime
-  binding and uses `setSandboxPolicy(...)` only to select/override that adapter
+  binding and uses `setSandboxPolicy(...)` only to select its sharing partition
 - requires a spawn-capable isolating runtime with default-deny egress,
   unprivileged identity, workload limits, per-run/tenant mounts, cancellation,
   and cleanup
@@ -193,12 +193,18 @@ Expected behavior:
   than adding it as a Core dependency or claiming a PURISTA review subsystem
 - attaches rails only to a default-loop Harness agent and explicitly filters
   application-owned retrieval before its contents are supplied to the agent
-- keeps YAML to portable flow order and sensitive-data policy; TypeScript owns
-  actions, model aliases, and one injected detector implementation
+- uses one typed inline guardrail configuration and opaque action tokens;
+  TypeScript owns action behavior, model aliases, and one injected detector
+  implementation
 - preserves PURISTA guard/resource authorization and uses governance only for
   the sensitive tool decision
-- explains that `require_approval` is synchronous; a long human review is a
-  normal application review task plus guarded idempotent queue continuation
+- separates content `allow`/`block`/phase transform, permission/policy
+  `require_approval`, immediate provider `approved`/`rejected`, and durable
+  `ExternalWaitOutcome` plus application execution claim/receipt
+- uses one shared approval provider for static permission and policy demands;
+  narrows multi-tool input by `toolId` and propagates callback signal/deadline
+- uses immutable execution claims, stable idempotency keys and receipts for a
+  long human review; rejects a read-approved-then-execute or consumed flag recipe
 
 Validation:
 - output/tool checks do not replace tenant authorization or final domain
@@ -209,3 +215,12 @@ Validation:
   token or cost metrics
 - tests use deterministic Harness/detector fakes and include allow, transform,
   block, and detector-failure paths
+- tests show raw tool JSON transformed before one schema parse and the same
+  frozen parsed input reaching governance, approval, and handler
+- tests cover final-only output rails, malformed callback results, finite
+  timeout/cancellation, no late approval side effect, and safe error evidence
+- `model.completed` accounts for a blocked candidate without releasing
+  `model.object`; direct-call/opaque-reasoning and post-admission revocation
+  limits are explicit
+- durable-review tests cover changed action/revision, concurrent resume and
+  crashes before/after the effect and receipt, reusing the same execution claim

@@ -77,16 +77,6 @@ export const getAgentBuilderFileContent = (input: {
 	})
 	writer.writeLine(')').blankLine()
 
-	writer.writeLine(`const ${harnessAgentName} = {`)
-	writer.indent(() => {
-		writer.writeLine("model: 'primary',")
-		writer.writeLine(`input: ${payloadSchemaName},`)
-		writer.writeLine(`output: ${outputSchemaName},`)
-		writer.writeLine("instructions: 'You are a helpful assistant for this service domain.',")
-		writer.writeLine('builtinTools: false,')
-	})
-	writer.writeLine('} as const').blankLine()
-
 	writer.writeLine(`export const ${agentIdentifier}Builder = ${serviceBuilderName}`)
 	writer.indent(() => {
 		writer.writeLine(`.getAgentQueueBuilder('${agentIdentifier}', '${input.agentDescription}')`)
@@ -95,12 +85,19 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(`.addOutputSchema(${outputSchemaName})`)
 		writer.writeLine(".addModel('primary', {")
 		writer.indent(() => {
-			writer.writeLine("model: 'gpt-4.1-mini',")
 			writer.writeLine("capabilities: ['object'],")
 			writer.writeLine('defaults: { temperature: 0.2 },')
 		})
 		writer.writeLine('})')
-		writer.writeLine(`.setHarnessAgent(${harnessAgentName})`)
+		writer.writeLine('.setHarnessAgent({')
+		writer.indent(() => {
+			writer.writeLine("model: 'primary',")
+			writer.writeLine(`input: ${payloadSchemaName},`)
+			writer.writeLine(`output: ${outputSchemaName},`)
+			writer.writeLine("instructions: 'You are a helpful assistant for this service domain.',")
+			writer.writeLine('builtinTools: false,')
+		})
+		writer.writeLine('})')
 		if (successEventName) {
 			writer.writeLine(`.setSuccessEventName('${successEventName}')`)
 		}

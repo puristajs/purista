@@ -107,7 +107,7 @@ Access stores from command and subscription handlers:
 
 | Mistake | Why it hurts | Fix |
 |---|---|---|
-| Storing secrets in config store | Configs may be logged or exposed | Use secret store for credentials |
+| Storing runtime-managed secrets in config store | Configs may be logged or exposed | Use a secret store for sensitive values the service manages while it runs |
 | Direct SDK imports in commands | Couples business logic to vendor | Access through `context.secrets` / `context.states` |
 | In-memory state in production | Lost on restart, not shared across instances | Use Redis or NATS state store |
 | No schema validation on state | Corrupted data, type mismatches | Validate critical reads/writes |
@@ -118,6 +118,6 @@ Access stores from command and subscription handlers:
 - [ ] Getter/setter/remove capabilities configured intentionally
 - [ ] Read/write values validated where critical
 - [ ] Integration tests cover the concrete provider behavior
-- [ ] Secret store used for all credentials (never in config or code)
+- [ ] Bootstrap credentials use approved platform secret delivery or workload identity; runtime-managed sensitive values use a secret store
 
 Next: [Config Stores](./config-stores.md), [Secret Stores](./secret-stores.md), or [State Stores](./state-stores.md) for implementation details.

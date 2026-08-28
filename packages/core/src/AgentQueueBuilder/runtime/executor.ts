@@ -1,15 +1,17 @@
 import {
 	type DurableWorkspace,
 	defineHarness,
-	type GovernanceConfig,
 	type Harness,
 	type AgentDefinition as HarnessAgentDefinition,
+	type HarnessIdentity,
+	type HarnessStorage,
 	type WorkflowDefinition as HarnessWorkflowDefinition,
 	type ModelAlias,
 	type RunEvent,
+	type Sandbox,
+	type SandboxBindingOptions,
 	type Session,
-	type HarnessStorage,
-	type HarnessIdentity,
+	type SessionOptions,
 	type TelemetryOptions,
 } from '@purista/harness'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
@@ -17,15 +19,19 @@ import type { Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import type {
 	AgentDefinition,
-	AgentSuspendedNotice,
 	AgentManifest,
 	AgentModelBinding,
 	AgentRuntimeInvocationInput,
 	AgentRuntimeModelBindings,
+	AgentRuntimeOptions,
+	AgentSandboxPolicy,
 	AgentRuntimeStreamInvocationInput,
 	AgentSkillRuntimeResolved,
+	AgentSuspendedNotice,
+	AgentDurableWorkspacePolicy,
 } from '../types.js'
 import { createAgentHandlerContext } from './context.js'
+import { createAgentValidationError, toAgentRuntimeError } from './errors.js'
 import { createAgentRunEvent } from './events.js'
 import { deriveAgentRunIdentity } from './identity.js'
 import { createPuristaHarnessLogger } from './logger.js'
@@ -42,9 +48,32 @@ export type CreateAgentExecutorInput<Models extends Record<string, AgentModelBin
 	workspace?: DurableWorkspace
 	skillRuntime?: AgentSkillRuntimeResolved
 	logger?: PuristaLogger
-	sandbox?: unknown
+	sandbox?: Sandbox
+	sandboxOptions?: SandboxBindingOptions<string>
+	sandboxPolicy?: AgentSandboxPolicy
 	telemetry?: TelemetryOptions
-	governance?: GovernanceConfig<any>
+	governance?: AgentRuntimeOptions<Models>['governance']
+}
+
+type RuntimeInvocationOptions = {
+	readonly signal: AbortSignal
+	readonly idempotencyKey: string
+	readonly durable?: { readonly runId: string; readonly workspacePolicy?: AgentDurableWorkspacePolicy }
+}
+
+/** The runtime has a data-driven agent name after the typed builder has emitted its definition. */
+type RuntimeInvoker = {
+	prompt(input: unknown, options: RuntimeInvocationOptions): Promise<unknown>
+	stream(input: unknown, options: RuntimeInvocationOptions): AsyncIterable<RunEvent>
+}
+
+type RuntimeSession = {
+	readonly agents: Readonly<Record<string, RuntimeInvoker>>
+	readonly workflows: Readonly<Record<string, RuntimeInvoker>>
+}
+
+function runtimeSession(session: Session<any>): RuntimeSession {
+	return session as unknown as RuntimeSession
 }
 
 export function createAgentExecutor<Models extends Record<string, AgentModelBinding>>(
@@ -65,8 +94,12 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 	}
 
 	async executeAggregate(input: AgentRuntimeInvocationInput) {
-		const result = await this.execute(input, false)
-		return result.output
+		try {
+			const result = await this.execute(input, false)
+			return result.output
+		} catch (error) {
+			throw toAgentRuntimeError(error)
+		}
 	}
 
 	async executeStream(input: AgentRuntimeStreamInvocationInput) {
@@ -84,7 +117,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			})
 			await input.writer.close(result.output)
 		} catch (error) {
-			await input.writer.fail(error)
+			await input.writer.fail(toAgentRuntimeError(error))
 		}
 	}
 
@@ -98,7 +131,7 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		}
 
 		let builder: any = defineHarness({
-			name: `${this.input.manifest.serviceName}.${this.input.manifest.agentName}`,
+			name: `${this.input.manifest.serviceName}.${this.input.manifest.serviceVersion}.${this.input.manifest.agentName}`,
 		})
 			.logger(createPuristaHarnessLogger(this.input.logger))
 			.models(this.resolvedModels)
@@ -121,8 +154,10 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 			builder = builder.defaults({ runTimeoutMs: this.input.manifest.execution.timeoutMs })
 		}
 
-		if (this.input.sandbox) {
-			builder = builder.sandbox(this.input.sandbox as never)
+		if (this.input.sandbox || this.input.sandboxOptions) {
+			builder = this.input.sandbox
+				? builder.sandbox(this.input.sandbox, this.input.sandboxOptions)
+				: builder.sandbox(undefined, this.input.sandboxOptions!)
 		}
 
 		if (this.input.workspace) {
@@ -159,17 +194,18 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 				)
 			}
 			const workflowDefinition = this.input.definition.execution.definition as HarnessWorkflowDefinition<any>
+			const registeredWorkflow =
+				agentNames.length > 0 && !workflowDefinition.delegation
+					? {
+							...workflowDefinition,
+							delegation: {
+								agents: agentNames,
+								modelAliases: Object.keys(this.resolvedModels),
+							},
+						}
+					: workflowDefinition
 			builder = builder.workflows({
-				[this.input.manifest.agentName]:
-					agentNames.length > 0 && !workflowDefinition.delegation
-						? {
-								...workflowDefinition,
-								delegation: {
-									agents: agentNames,
-									modelAliases: Object.keys(this.resolvedModels),
-								},
-							}
-						: workflowDefinition,
+				[this.input.manifest.agentName]: this.withSandboxPolicy(registeredWorkflow),
 			})
 		}
 
@@ -192,84 +228,142 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		emit?: (event: ReturnType<typeof createAgentRunEvent>) => Promise<void>,
 	) {
 		const signal = input.signal ?? new AbortController().signal
-		const identity = deriveAgentRunIdentity({
-			manifest: this.input.manifest,
-			message: input.message,
-			payload: input.payload,
-		})
-		const sessionIdentity = identity.tenantId || identity.principalId
-			? {
-					...(identity.tenantId ? { tenantId: identity.tenantId } : {}),
-					...(identity.principalId ? { principalId: identity.principalId } : {}),
-				}
+		let identity: ReturnType<typeof deriveAgentRunIdentity>
+		try {
+			identity = deriveAgentRunIdentity({
+				manifest: this.input.manifest,
+				message: input.message,
+				payload: input.payload,
+			})
+		} catch {
+			throw createAgentValidationError()
+		}
+		const sessionIdentity =
+			identity.tenantId || identity.principalId
+				? {
+						...(identity.tenantId ? { tenantId: identity.tenantId } : {}),
+						...(identity.principalId ? { principalId: identity.principalId } : {}),
+					}
+				: undefined
+		const validatedInput = await validateInput(this.input.definition.payloadSchema, input.payload)
+		const sandboxOwner = this.input.sandboxPolicy?.owner
+			? await this.input.sandboxPolicy.owner({ identity, input: validatedInput as import('@purista/harness').JsonValue })
 			: undefined
-		const session = await this.getSession(identity.harnessSessionId, sessionIdentity)
+		const session = await this.getSession(identity.harnessSessionId, {
+			...(sessionIdentity ? { identity: sessionIdentity } : {}),
+			...(sandboxOwner ? { sandboxOwner } : {}),
+		})
 		const emitWrapped = async (event: RunEvent) => {
 			await emit?.(createAgentRunEvent(identity, event))
 		}
 
-		let output: unknown
+		let validated: unknown
+		let suspended = false
 		try {
-		if (this.input.definition.execution.kind === 'runFunction') {
-			const handlerModels = createHandlerModelBindings(this.resolvedModels, {
-				runId: identity.runId,
-				agentId: this.input.manifest.agentName,
-				emit: emitWrapped,
-			})
-			const context = createAgentHandlerContext({
-				payload: input.payload,
-				parameter: input.parameter,
-				identity,
-				appContext: input.appContext,
-				metrics: input.appContext.metrics as never,
-				session,
-				models: handlerModels,
-				skills: this.input.skillRuntime
-					? createAgentSkillContext(this.input.skillRuntime.catalog)
-					: createAgentSkillContext([]),
-				commandTools: this.input.manifest.allowedCommands,
-				agentTools: this.input.manifest.allowedAgents,
-				serviceName: this.input.manifest.serviceName,
-				emitEvent: emitWrapped,
-				logger: this.resolvePuristaLogger(input.appContext),
-				signal,
-			})
-			output = await this.input.definition.execution.handler(context)
-		} else if (this.input.definition.execution.kind === 'harnessAgent') {
-			const sessionAny = session as any
-			const agentName = this.input.manifest.agentName
-			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'agent', signal)
-				: await sessionAny.agents[agentName].prompt(input.payload, { signal })
-		} else {
-			const sessionAny = session as any
-			const agentName = this.input.manifest.agentName
-			const durable = this.input.manifest.durability
-				? { runId: identity.runId }
-				: undefined
-			output = streaming
-				? await this.streamHarnessCall(session, input.payload, emitWrapped, 'workflow', signal, durable)
-				: await sessionAny.workflows[agentName].prompt(input.payload, { signal, ...(durable ? { durable } : {}) })
-		}
-		} catch (error) {
-			if (!isExternalWaitPending(error) || !this.input.onSuspended) throw error
-			output = await this.input.onSuspended({
-				runId: identity.runId,
-				serviceName: this.input.manifest.serviceName,
-				serviceVersion: this.input.manifest.serviceVersion,
-				agentName: this.input.manifest.agentName,
-				wait: error.snapshot,
-			})
-		}
+			let output: unknown
+			try {
+				if (this.input.definition.execution.kind === 'runFunction') {
+					const handlerModels = createHandlerModelBindings(this.resolvedModels, {
+						runId: identity.runId,
+						agentId: this.input.manifest.agentName,
+						emit: emitWrapped,
+					})
+					const context = createAgentHandlerContext({
+						payload: validatedInput,
+						parameter: input.parameter,
+						identity,
+						appContext: input.appContext,
+						metrics: input.appContext.metrics as never,
+						session,
+						models: handlerModels,
+						skills: this.input.skillRuntime
+							? createAgentSkillContext(this.input.skillRuntime.catalog)
+							: createAgentSkillContext([]),
+						commandTools: this.input.manifest.allowedCommands,
+						agentTools: this.input.manifest.allowedAgents,
+						serviceName: this.input.manifest.serviceName,
+						emitEvent: emitWrapped,
+						logger: this.resolvePuristaLogger(input.appContext),
+						signal,
+					})
+					output = await this.input.definition.execution.handler(context)
+				} else if (this.input.definition.execution.kind === 'harnessAgent') {
+					const runtime = runtimeSession(session)
+					const agentName = this.input.manifest.agentName
+					output = streaming
+						? await this.streamHarnessCall(session, validatedInput, emitWrapped, 'agent', signal, identity.transportMessageId)
+						: await runtime.agents[agentName].prompt(validatedInput, { signal, idempotencyKey: identity.transportMessageId })
+				} else {
+					const runtime = runtimeSession(session)
+					const agentName = this.input.manifest.agentName
+					const durable = this.input.manifest.durability
+						? {
+							runId: identity.runId,
+							...(this.input.manifest.workspacePolicy?.policy
+								? { workspacePolicy: this.input.manifest.workspacePolicy.policy }
+								: {}),
+						}
+						: undefined
+					output = streaming
+						? await this.streamHarnessCall(session, validatedInput, emitWrapped, 'workflow', signal, identity.transportMessageId, durable)
+						: await runtime.workflows[agentName].prompt(validatedInput, { signal, idempotencyKey: identity.transportMessageId, ...(durable ? { durable } : {}) })
+				}
+			} catch (error) {
+				if (!isExternalWaitPending(error) || !this.input.onSuspended) throw error
+				suspended = true
+				output = await this.input.onSuspended({
+					runId: identity.runId,
+					serviceName: this.input.manifest.serviceName,
+					serviceVersion: this.input.manifest.serviceVersion,
+					agentName: this.input.manifest.agentName,
+					wait: error.snapshot,
+				})
+			}
 
-		const validated = await validateOutput(this.input.definition.outputSchema, output)
-		await emitSuccessEvent(this.input.manifest, input.appContext, validated)
+			if (!suspended && this.input.definition.execution.kind !== 'runFunction') {
+				await this.disposeTerminalSandbox(session)
+			}
+			validated = await validateOutput(this.input.definition.outputSchema, output)
+			await emitSuccessEvent(this.input.manifest, input.appContext, validated)
+			if (!suspended && this.input.definition.execution.kind === 'runFunction') {
+				await this.disposeTerminalSandbox(session)
+			}
+		} catch (error) {
+			if (this.isTerminalHarnessFailure(error)) {
+				await this.disposeTerminalSandbox(session)
+			}
+			try {
+				await session.release()
+			} catch {
+				// Cleanup must not replace the execution failure used by queue retry
+				// handling. Do not log adapter errors that may contain private data.
+				this.logger?.warn('Failed to release the Harness session after an agent invocation failed.')
+			}
+			throw error
+		}
+		await session.release()
 		return { identity, output: validated }
 	}
 
-	private async getSession(sessionId: string, identity?: HarnessIdentity): Promise<Session<any>> {
+	private async disposeTerminalSandbox(session: Session<any>): Promise<void> {
+		if (this.input.manifest.session.mode !== 'ephemeral' || !this.harness) return
+		try {
+			await session.disposeSandbox()
+		} catch {
+			// A terminal result is already persisted by Harness. Cleanup remains
+			// retryable and must never replace that result or its original error.
+			this.logger?.warn('Sandbox cleanup is pending after an attached agent terminal outcome.')
+		}
+	}
+
+	private isTerminalHarnessFailure(error: unknown): boolean {
+		if (this.input.definition.execution.kind === 'runFunction') return false
+		return Boolean(error && typeof error === 'object' && 'retriable' in error && (error as { retriable?: unknown }).retriable === false)
+	}
+
+	private async getSession(sessionId: string, options?: SessionOptions): Promise<Session<any>> {
 		if (this.harness) {
-			return this.harness.getSession(sessionId, identity)
+			return this.harness.getSession(sessionId, options)
 		}
 		if (this.input.manifest.session.mode === 'conversation') {
 			this.logger?.warn(
@@ -281,12 +375,18 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 
 	private withDeclaredSkills(definition: HarnessAgentDefinition<any>) {
 		const skillNames = Object.keys(this.input.skillRuntime?.harnessSkills ?? {})
-		if (skillNames.length === 0) return definition
+		if (skillNames.length === 0) return this.withSandboxPolicy(definition)
 		return {
 			...definition,
 			skills: skillNames,
 			...(this.input.manifest.builtInTools !== true ? { builtinTools: this.input.manifest.builtInTools } : {}),
+			...(this.input.sandboxPolicy?.sharing !== undefined ? { sandbox: this.input.sandboxPolicy.sharing } : {}),
 		}
+	}
+
+	private withSandboxPolicy<T extends { sandbox?: unknown }>(definition: T): T {
+		if (this.input.sandboxPolicy?.sharing === undefined) return definition
+		return { ...definition, sandbox: this.input.sandboxPolicy.sharing }
 	}
 
 	private async streamHarnessCall(
@@ -295,16 +395,17 @@ class HarnessBackedAgentExecutor<Models extends Record<string, AgentModelBinding
 		emitWrapped: (event: RunEvent) => Promise<void>,
 		kind: 'agent' | 'workflow',
 		signal: AbortSignal,
-		durable?: { runId: string },
+		idempotencyKey: string,
+		durable?: { runId: string; workspacePolicy?: AgentDurableWorkspacePolicy },
 	) {
 		let output: unknown
 		let finished = false
-		const sessionAny = session as any
+		const runtime = runtimeSession(session)
 		const agentName = this.input.manifest.agentName
 		const stream =
 			kind === 'agent'
-				? sessionAny.agents[agentName].stream(payload, { signal })
-				: sessionAny.workflows[agentName].stream(payload, { signal, ...(durable ? { durable } : {}) })
+				? runtime.agents[agentName].stream(payload, { signal, idempotencyKey })
+				: runtime.workflows[agentName].stream(payload, { signal, idempotencyKey, ...(durable ? { durable } : {}) })
 
 		for await (const event of stream as AsyncIterable<RunEvent>) {
 			await emitWrapped(event)
@@ -350,6 +451,7 @@ function createLocalSession(id: string): Session<any> {
 		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
+		disposeSandbox: async () => undefined,
 		release: async () => undefined,
 		close: async () => undefined,
 	}
@@ -394,7 +496,16 @@ async function validateOutput(schema: Schema | undefined, output: unknown) {
 	}
 	const result = await validate(schema, output)
 	if (!result.success) {
-		throw new Error(`Agent output validation failed: ${JSON.stringify(result.issues)}`)
+		throw createAgentValidationError()
+	}
+	return result.data
+}
+
+async function validateInput(schema: Schema | undefined, input: unknown) {
+	if (!schema) return input
+	const result = await validate(schema, input)
+	if (!result.success) {
+		throw createAgentValidationError()
 	}
 	return result.data
 }
@@ -419,10 +530,15 @@ function createNoopPuristaLogger(): PuristaLogger {
 	} as PuristaLogger
 }
 
-function isExternalWaitPending(error: unknown): error is { name: string; snapshot: { waitId: string; kind: string; status: 'waiting' } } {
-	return Boolean(error && typeof error === 'object'
-		&& (error as { name?: unknown }).name === 'ExternalWaitPendingError'
-		&& typeof (error as { snapshot?: { waitId?: unknown } }).snapshot?.waitId === 'string'
-		&& typeof (error as { snapshot?: { kind?: unknown } }).snapshot?.kind === 'string'
-		&& (error as { snapshot?: { status?: unknown } }).snapshot?.status === 'waiting')
+function isExternalWaitPending(
+	error: unknown,
+): error is { name: string; snapshot: { waitId: string; kind: string; status: 'waiting' } } {
+	return Boolean(
+		error &&
+			typeof error === 'object' &&
+			(error as { name?: unknown }).name === 'ExternalWaitPendingError' &&
+			typeof (error as { snapshot?: { waitId?: unknown } }).snapshot?.waitId === 'string' &&
+			typeof (error as { snapshot?: { kind?: unknown } }).snapshot?.kind === 'string' &&
+			(error as { snapshot?: { status?: unknown } }).snapshot?.status === 'waiting',
+	)
 }

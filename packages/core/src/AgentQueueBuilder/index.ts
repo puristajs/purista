@@ -23,6 +23,7 @@ export type {
 	AgentExecutionPolicy,
 	AgentHandler,
 	AgentHandlerContext,
+	AgentHarnessDefinition,
 	AgentHandlerModelBindings,
 	AgentHarnessWorkflowOptions,
 	AgentHttpExposure,

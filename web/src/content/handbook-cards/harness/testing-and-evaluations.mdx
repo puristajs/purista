@@ -80,6 +80,9 @@ that an HTTP route, worker, or operator can observe:
 | Skills | Mount a temporary `SKILL.md`; script a `read` call then final object; assert the catalog is present but the skill body was not injected into the initial request. |
 | MCP | Use a local fake server; assert stdio rejects a file-only sandbox, and HTTP covers auth, protocol, schema, cancellation, and safe failure. |
 | Guardrails/privacy | Script allow, transform, block, and detector failure; assert a block prevents the model/tool side effect and contains no inspected content in logs or events. |
+| Shared approval | Combine static permission and policy demands; assert one provider call with the same frozen parsed input, bounded signal/deadline, and no late side effect on timeout or cancellation. |
+| Output/accounting | Intermediate tool calls skip output rails; blocked final candidates emit `model.completed` but no released `model.object`. Count usage once. |
+| Durable review | Concurrent resumes and crashes before/after execution and receipt reuse one immutable claim and idempotency key; changed action/revision fails closed. |
 | Adapter setup | Assert `.requires(...)` rejects missing capabilities before accepting work; run each port's public contract suite. |
 
 `RecordingTelemetry` lets an integration test verify span names and safe
@@ -92,7 +95,7 @@ import { RecordingTelemetry } from '@purista/harness/testing'
 const telemetry = new RecordingTelemetry()
 // Build the Harness with the recorder, run the synthetic case, then inspect
 // only content-free attributes emitted by the expected span.
-expect(telemetry.spans.some(span => span.name === 'harness.guardrail')).toBe(true)
+expect(telemetry.spans.some(span => span.name.startsWith('evaluate_guardrail '))).toBe(true)
 ```
 
 For a regression fixture, record an approved synthetic interaction with

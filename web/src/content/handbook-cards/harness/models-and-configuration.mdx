@@ -133,7 +133,7 @@ const harness = defineHarness({ name: 'claims-review' })
     historyRetention: { maxTurns: 50, maxBytes: 256_000 }
   })
   .models({ /* aliases */ })
-  .tools({ /* typed capabilities */ })
+  .tools(({ tool }) => ({ /* tool(...) registrations */ }))
   .skills({ /* mounted directories */ })
   .agents(({ agent }) => ({ /* model loops */ }))
   .workflows(({ workflow }) => ({ /* orchestration */ }))

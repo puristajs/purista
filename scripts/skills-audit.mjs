@@ -6,6 +6,7 @@ import { join, relative, resolve } from 'node:path'
 const root = process.cwd()
 const skillsRoot = resolve(root, 'skills')
 const issues = []
+const internalMaintainerSkills = new Set(['purista-skill-maintainer', 'purista-docs-maintainer'])
 
 const readText = path => readFileSync(path, 'utf8')
 
@@ -74,7 +75,7 @@ for (const skillDir of skillDirs) {
 		addIssue(skillFile, 'SKILL.md should stay under 500 lines and move depth into references')
 	}
 
-	if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(skillText)) {
+	if (!internalMaintainerSkills.has(skillName) && /\bspecs?\b|specs\//i.test(skillText)) {
 		addIssue(skillFile, 'user-facing skills must not reference internal specs')
 	}
 
@@ -95,7 +96,7 @@ for (const skillDir of skillDirs) {
 		}
 
 		const referenceText = readText(reference)
-		if (skillName !== 'purista-skill-maintainer' && /\bspecs?\b|specs\//i.test(referenceText)) {
+		if (!internalMaintainerSkills.has(skillName) && /\bspecs?\b|specs\//i.test(referenceText)) {
 			addIssue(reference, 'user-facing skill references must not reference internal specs')
 		}
 
@@ -110,6 +111,11 @@ for (const skillDir of skillDirs) {
 const puristaEvalScenarios = join(skillsRoot, 'purista', 'references', '11-evaluation-scenarios.md')
 if (!existsSync(puristaEvalScenarios)) {
 	addIssue(puristaEvalScenarios, 'canonical purista skill should include concrete evaluation scenarios')
+}
+
+const docsEvalScenarios = join(skillsRoot, 'purista-docs-maintainer', 'references', 'evaluation-scenarios.md')
+if (!existsSync(docsEvalScenarios)) {
+	addIssue(docsEvalScenarios, 'PURISTA docs maintainer should include concrete evaluation scenarios')
 }
 
 if (issues.length) {

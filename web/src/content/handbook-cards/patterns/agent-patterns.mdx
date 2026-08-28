@@ -34,7 +34,6 @@ const triageAgent = supportV1ServiceBuilder
     reason: z.string(),
   }))
   .addModel('primary', {
-    model: 'support-triage',
     capabilities: ['object'],
     defaults: { temperature: 0 },
   })
@@ -71,7 +70,6 @@ const refundAgent = billingV1ServiceBuilder
     outputSchema: z.object({ amount: z.number(), status: z.string() }),
   })
   .addModel('primary', {
-    model: 'refund-review',
     capabilities: ['object'],
     defaults: { temperature: 0 },
   })
@@ -140,10 +138,11 @@ const deployAgent = opsV1ServiceBuilder
 
 ## Pattern 4: Sandboxed execution
 
-Enable sandboxing for file access, code execution, or MCP tools.
+Choose the agent's sharing policy; select the one service-owned sandbox adapter
+at runtime. `private` is the safe per-agent default.
 
 ```typescript [sandbox.ts]
-.setSandboxPolicy({ enabled: true })
+.setSandboxPolicy({ sharing: 'private' })
 .useBuiltInTools(['read', 'list', 'grep'])
 .setRunFunction(async context => {
   // Agent can read files in the sandbox
@@ -162,11 +161,16 @@ At runtime:
 const supportService = await supportV1Service.getInstance(eventBridge, {
   queueBridge,
   ai: {
-    sandbox: new DockerSandbox({ image: 'sandbox-image' }),
+    sandbox: inMemorySandbox(),
     models: { primary: { provider, model: 'gpt-4.1', capabilities: ['text'] } },
   },
 })
 ```
+
+Use `ai.sandboxOptions` to declare allowed named groups and to authorize an
+explicit shared owner. An agent cannot choose another adapter. A terminal
+ephemeral result keeps its idempotent receipt but releases owned compute;
+durable workspace files, not a live sandbox process, are the recovery source.
 
 ## Pattern 5: Long-running with async response
 

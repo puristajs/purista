@@ -14,7 +14,6 @@ export const assessRollbackRiskAgentBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(supportV1RollbackRiskInputPayloadSchema)
 	.addOutputSchema(supportV1RollbackRiskOutputPayloadSchema)
 	.addModel('primary', {
-		model: 'gpt-4.1-mini',
 		capabilities: ['object'] as const,
 		defaults: { temperature: 0.1 },
 	})
@@ -28,8 +27,7 @@ export const assessRollbackRiskAgentBuilder = supportV1ServiceBuilder
 	})
 	.useSkills(['rollback-safety-review', 'change-impact-analysis'], 'incident-response-skills')
 	.setSandboxPolicy({
-		enabled: true,
-		adapter: { kind: 'example-readonly-sandbox', network: false, filesystem: 'ephemeral' },
+		sharing: 'private',
 	})
 	.useBuiltInTools(false)
 	.setRunFunction(async context => {
@@ -43,7 +41,7 @@ export const assessRollbackRiskAgentBuilder = supportV1ServiceBuilder
 					{
 						role: 'system',
 						content:
-							'You are the rollback risk specialist. Treat the sandbox policy as the only place where proposed scripts may be evaluated.',
+							'You are the rollback risk specialist. Review the supplied data; this agent does not execute proposed scripts.',
 					},
 					{
 						role: 'user',

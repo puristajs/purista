@@ -12,7 +12,6 @@ export const analyzeSignalsAgentBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(supportV1SignalAnalysisInputPayloadSchema)
 	.addOutputSchema(supportV1SignalAnalysisOutputPayloadSchema)
 	.addModel('primary', {
-		model: 'gpt-4.1-mini',
 		capabilities: ['object'] as const,
 		defaults: { temperature: 0.1 },
 	})

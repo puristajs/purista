@@ -2,10 +2,10 @@ import type {
 	AgentModelBinding,
 	AgentRuntimeOptions,
 	AgentRuntimeRef,
-	AgentSandboxPolicy,
 	AttachedAgentDefinition,
 } from '../types.js'
 import { createAgentExecutor } from './executor.js'
+import { createAgentConfigurationError } from './errors.js'
 import { resolveAgentRuntimeSkills } from './skills.js'
 
 export type AgentRuntimeExecutor<Output = unknown> = NonNullable<AgentRuntimeRef<Output>['current']>
@@ -40,7 +40,7 @@ export async function initializeAttachedAgentRuntimes(
 	}
 
 	if (!aiOptions?.models) {
-		throw new Error('AI attached agents require runtime ai.models in service.getInstance(...) options')
+		throw createAgentConfigurationError('AI attached agents require runtime ai.models in service.getInstance(...) options')
 	}
 
 	validateWorkspacePolicies(definitions, aiOptions)
@@ -57,7 +57,9 @@ export async function initializeAttachedAgentRuntimes(
 				workspace: aiOptions.workspace,
 				skillRuntime,
 				logger: aiOptions.logger,
-				sandbox: resolveAttachedAgentSandbox(definition.manifest.sandbox, aiOptions.sandbox),
+				sandbox: aiOptions.sandbox,
+				sandboxOptions: aiOptions.sandboxOptions,
+				sandboxPolicy: definition.sandboxPolicy,
 				telemetry: aiOptions.telemetry,
 				governance: aiOptions.governance,
 			})
@@ -82,24 +84,6 @@ export async function initializeAttachedAgentRuntimes(
 	}
 }
 
-/**
- * Resolve the sandbox an attached agent should run with.
- *
- * Sandboxing is opt-in per agent: an explicit `enabled: false` disables it even
- * when a shared `ai.sandbox` is configured, a policy-provided adapter takes
- * precedence over the shared sandbox, and agents without a sandbox policy fall
- * back to the shared `ai.sandbox`.
- */
-export function resolveAttachedAgentSandbox(policy: AgentSandboxPolicy | undefined, runtimeSandbox: unknown): unknown {
-	if (!policy) {
-		return runtimeSandbox
-	}
-	if (policy.enabled === false) {
-		return undefined
-	}
-	return policy.adapter ?? runtimeSandbox
-}
-
 function validateWorkspacePolicies(
 	definitions: readonly AttachedAgentDefinition<any>[],
 	aiOptions: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
@@ -107,10 +91,14 @@ function validateWorkspacePolicies(
 	for (const definition of definitions) {
 		if (definition.manifest.durability) {
 			if (!aiOptions.storage) {
-				throw new Error(`Attached agent "${definition.manifest.agentName}" requires persistent ai.storage in service.getInstance(...) options`)
+				throw createAgentConfigurationError(
+					`Attached agent "${definition.manifest.agentName}" requires persistent ai.storage in service.getInstance(...) options`,
+				)
 			}
 			if (!aiOptions.storage.capabilities.includes('storage.persistent')) {
-				throw new Error(`Attached agent "${definition.manifest.agentName}" requires ai.storage with storage.persistent capability`)
+				throw createAgentConfigurationError(
+					`Attached agent "${definition.manifest.agentName}" requires ai.storage with storage.persistent capability`,
+				)
 			}
 		}
 		const policy = definition.manifest.workspacePolicy
@@ -119,10 +107,14 @@ function validateWorkspacePolicies(
 		}
 
 		if (!definition.manifest.durability) {
-			throw new Error(`Attached agent "${definition.manifest.agentName}" has a durable workspace without a durability policy`)
+			throw createAgentConfigurationError(
+				`Attached agent "${definition.manifest.agentName}" has a durable workspace without a durability policy`,
+			)
 		}
 		if (!aiOptions.storage || !aiOptions.workspace) {
-			throw new Error(`Attached agent "${definition.manifest.agentName}" requires ai.storage and ai.workspace in service.getInstance(...) options`)
+			throw createAgentConfigurationError(
+				`Attached agent "${definition.manifest.agentName}" requires ai.storage and ai.workspace in service.getInstance(...) options`,
+			)
 		}
 
 		const available = new Set<string>([
@@ -131,7 +123,7 @@ function validateWorkspacePolicies(
 		])
 		const missing = (policy.capabilities ?? []).filter(capability => !available.has(capability))
 		if (missing.length > 0) {
-			throw new Error(
+			throw createAgentConfigurationError(
 				`Attached agent "${definition.manifest.agentName}" requires unavailable durable workspace capabilities: ${missing.join(', ')}`,
 			)
 		}
@@ -144,7 +136,7 @@ export function getScopedAgentRuntime<Output>(
 ): AgentRuntimeExecutor<Output> {
 	const runtime = scope.runtimes.get(definition.runtime) ?? definition.runtime.current
 	if (!runtime) {
-		throw new Error(
+		throw createAgentConfigurationError(
 			'Attached agent runtime is not initialized. Call service.getInstance(...) before executing the agent.',
 		)
 	}

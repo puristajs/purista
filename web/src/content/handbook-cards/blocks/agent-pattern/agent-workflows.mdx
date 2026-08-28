@@ -22,7 +22,6 @@ export const reviewCoordinatorAgentBuilder = projectV1ServiceBuilder
   .addPayloadSchema(reviewInputSchema)
   .addOutputSchema(reviewOutputSchema)
   .addModel('primary', {
-    model: 'gpt-4.1-mini',
     capabilities: ['object'],
   })
   .canInvokeAgent('requirementsReview', '1', {
@@ -60,7 +59,6 @@ export const incidentWorkflowAgentBuilder = incidentV1ServiceBuilder
   .addPayloadSchema(incidentReviewWorkflow.input)
   .addOutputSchema(incidentReviewWorkflow.output)
   .addModel('primary', {
-    model: 'gpt-4.1-mini',
     capabilities: ['object', 'tool_use'],
   })
   .setHarnessWorkflow(incidentReviewWorkflow, {

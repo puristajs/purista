@@ -1,0 +1,28 @@
+---
+title: CLI and project structure
+description: Use the project-local CLI to create consistent services, commands, subscriptions, streams, workers, and agents.
+order: 1210
+---
+
+Generated projects include `@purista/cli` as a development dependency and provide local `npm run add:*` scripts. Prefer those scripts to a globally installed command: the local CLI is versioned with the project and writes into its configured project structure.
+
+```bash title="Generate service"
+npm run add:service -- incident --description "Manage incidents"
+npm run add:command -- create-incident --service incident --service-version 1
+```
+
+The project root `purista.json` controls generation conventions and structure. Commit generated source and tests with the business change; do not edit generated contracts without first understanding how the local command will reproduce them.
+
+`add:service` creates version `1` by default. Child generators require both
+`--service` and `--service-version`, so the command example targets the newly
+created `incident` v1 service. Run `npm run add:command -- --help` from the
+project to inspect the exact options pinned by its installed CLI version.
+
+| Generate | Typical result |
+| --- | --- |
+| Service | A versioned business boundary |
+| Command or subscription | Typed definition, implementation, and test seam |
+| Stream or worker | An incremental response or background-work boundary |
+| Agent | Harness-enabled artifact; provider wiring remains optional and explicit |
+
+See [the generated project](/handbook/framework/start/understand-the-generated-project/), [build services](/handbook/framework/build-services/), and the existing [CLI reference](/handbook/cli/).

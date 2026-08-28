@@ -23,17 +23,17 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	 * @param config - Store name, logger and Dapr sidecar client settings.
 	 */
 	constructor(config?: StoreBaseConfig<DaprStateStoreConfig>) {
-		super(config?.stateStoreName ?? 'DaprStateStore', { ...config })
-		const logger = this.logger
 		const conf = {
 			stateStoreName: 'stateStore',
-			logger,
 			...config,
 			clientConfig: {
 				...getDefaultClientConfig(),
 				...config?.clientConfig,
 			},
 		}
+
+		super(conf.stateStoreName, conf)
+		const logger = this.logger
 
 		let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
 		if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {

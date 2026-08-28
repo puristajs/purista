@@ -45,7 +45,13 @@ export function resolveRuntimeModelBindings<Models extends Record<string, AgentM
 			throw new Error(`Missing runtime model binding for agent model alias "${alias}"`)
 		}
 
-		const model = runtime.model ?? declared.model
+		if (!runtime.model) {
+			throw new Error(
+				`Missing concrete runtime model for agent model alias "${alias}". Set ai.models[${JSON.stringify(alias)}].model in service.getInstance(...) options`,
+			)
+		}
+
+		const model = runtime.model
 		const detectedCapabilities = runtime.provider.info?.models?.[model]?.capabilities
 		const capabilities = runtime.capabilities ?? detectedCapabilities ?? declared.capabilities
 		assertCapabilities(alias, declared.capabilities, capabilities)

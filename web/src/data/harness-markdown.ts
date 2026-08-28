@@ -1,9 +1,25 @@
+import {
+	guardrailsBuildGuarantee,
+	guardrailsInlineConfigurationGuarantee,
+	guardrailsOutputRailGuarantee,
+	guardrailsPhases,
+	guardrailsStageGuarantees,
+} from './guardrails-content.ts'
+
 export type HarnessMarkdownPage = {
 	id: string
 	title: string
 	description: string
 	body: string
 }
+
+const guardrailsPhaseMarkdown = guardrailsPhases
+	.map(phase => `- \`${phase.id}\`: ${phase.value}. ${phase.timing}. Transform target: \`${phase.transformTarget}\`.`)
+	.join('\n')
+
+const guardrailsStageGuaranteeMarkdown = guardrailsStageGuarantees
+	.map(guarantee => `| ${guarantee.stage} | ${guarantee.guarantees} | ${guarantee.doesNotGuarantee} |`)
+	.join('\n')
 
 export const harnessMarkdownPages: HarnessMarkdownPage[] = [
 	{
@@ -42,6 +58,7 @@ Use it when an application needs typed tool boundaries, model capability routing
 \`\`\`typescript
 import { defineHarness } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
+import { z } from 'zod'
 
 const harness = defineHarness({ name: 'support' })
   .models({
@@ -52,21 +69,21 @@ const harness = defineHarness({ name: 'support' })
       retry: true,
     },
   })
-  .tools({
-    searchDocs: {
+  .tools(({ tool }) => ({
+    searchDocs: tool({
       description: 'Search approved internal documentation.',
       input: z.object({ query: z.string() }),
       output: z.object({ results: z.array(z.string()) }),
-      run: async ({ query }) => searchDocs(query),
-    },
-  })
-  .agents({
-    supportAgent: {
+      handler: async (_ctx, { query }) => ({ results: await searchDocs(query) }),
+    }),
+  }))
+  .agents(({ agent }) => ({
+    supportAgent: agent({
       model: 'fast',
       tools: ['searchDocs'],
       instructions: 'Answer only from approved documentation.',
-    },
-  })
+    }),
+  }))
 \`\`\`
 
 Prefer a narrow first agent over a generic assistant. The harness should make the allowed behavior obvious in code review.`,
@@ -94,11 +111,11 @@ Keep every boundary explicit. A model should not decide which private system it 
 		id: 'guardrails',
 		title: 'Guardrails | AI Harness',
 		description: 'Add typed, observable input, output, retrieval, tool, and sensitive-data guardrails to Harness default-loop agents.',
-		body: `@purista/harness-guardrails is an optional addon for the Harness default agent loop. It uses a portable NVIDIA NeMo-shaped configuration vocabulary while keeping providers, credentials, vector stores, authorization, and business rules application-owned.
+		body: `@purista/harness-guardrails is an optional addon for the Harness default agent loop. ${guardrailsInlineConfigurationGuarantee} It keeps providers, credentials, vector stores, authorization, and business rules application-owned.
 
 ## Sensitive data
 
-Use \`rails.config.sensitive_data_detection\` for exact entity, mask-token, and score-threshold policy, then bind an injected \`SensitiveDataDetector\` through \`createSensitiveDataActions({ detector })\`. YAML never contains detector endpoints, credentials, recognizers, cloud settings, or fallbacks.
+Use inline \`sensitiveData\` with exact \`entities\`, \`maskToken\`, and \`scoreThreshold\` values, then bind an injected \`SensitiveDataDetector\` through \`createSensitiveDataActions({ detector })\`.
 
 - \`@purista/harness-guardrails-presidio\` calls original Presidio \`POST /analyze\` only through an application-owned authenticated internal HTTP(S) gateway. It supports Presidio deployment-side recognizers and converts Python code-point offsets to JavaScript UTF-16 indexes.
 - \`@purista/harness-guardrails-native-privacy\` is local Rust/Node-API recognition for \`EMAIL_ADDRESS\`, \`PHONE_NUMBER\`, \`CREDIT_CARD\`, \`IP_ADDRESS\` (IPv4/IPv6 syntax), \`IBAN_CODE\`, \`US_SSN\`, and \`URL\`. Its prebuilds are tested under Node.js and Bun on macOS, Linux glibc, and Windows; unsupported platforms fail without a fallback.
@@ -133,44 +150,39 @@ Use \`FakeSensitiveDataDetector\` from \`@purista/harness-guardrails/testing\` t
 
 ## What it protects
 
-- Input before instructions, history, or a model call.
-- Output before validation, persistence, or tool dispatch.
-- TypeScript, MCP, and built-in tool input before permission, governance, validation, and side effects.
-- Tool output before it returns to the model.
-- Application-owned retrieval through an explicit filter call.
+${guardrailsPhaseMarkdown}
+
+${guardrailsOutputRailGuarantee}
+
+## Composition guarantees
+
+${guardrailsBuildGuarantee}
+
+| Stage | Guarantees | Does not guarantee |
+| --- | --- | --- |
+${guardrailsStageGuaranteeMarkdown}
 
 ## Default setup
 
-\`\`\`yaml
-models:
-  - type: main
-    engine: harness
-    model: assistant
-rails:
-  input:
-    flows: [remove-secret-marker]
-  tool_input:
-    flows: [approve-transfer]
-\`\`\`
+\`\`\`typescript title="src/guardrails.ts: content-only action"
+import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
+import { z } from 'zod'
 
-\`\`\`typescript
 const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  modelAliases: { main: 'assistant' },
+  config: { rails: { input: { flows: ['remove-secret-marker'] } } },
   actions: {
-    'remove-secret-marker': {
-      evaluate: ({ value }) => ({
-        decision: 'transform',
-        target: 'user_message',
-        value: redact(value),
-        reasonCode: 'secret_redacted',
-      }),
-    },
-    'approve-transfer': {
-      evaluate: ({ value }) => isApproved(value)
-        ? { decision: 'allow' }
-        : { decision: 'block', reasonCode: 'approval_required' },
-    },
+    'remove-secret-marker': defineGuardrailAction({
+      phase: 'input',
+      valueSchema: z.string(),
+      evaluate: ({ value }) => typeof value === 'string'
+        ? {
+            decision: 'transform',
+            target: 'user_message',
+            value: value.replaceAll('[internal]', ''),
+            reasonCode: 'internal_marker_removed',
+          }
+        : { decision: 'block', reasonCode: 'invalid_input' },
+    }),
   },
 })
 
@@ -181,11 +193,39 @@ const guardedSupport = rails.attach({
 })
 \`\`\`
 
+Each action declares its exact phase. A narrower value type supplies a
+\`valueSchema\` that validates without transforming JSON. The executable
+[composed Guardrails example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
+adds input/tool/final-output rails and one shared immediate approval provider.
+
+## Choose the decision boundary
+
+| Boundary | Result |
+| --- | --- |
+| Content rail | \`allow\`, \`block\`, phase-specific \`transform\` |
+| Permission or policy | \`allow\`, \`deny\`, \`require_approval\`; policy also \`audit\` |
+| Immediate approval | \`approved\`, \`rejected\` |
+| Durable review | \`ExternalWaitOutcome\`, then an application execution claim/receipt |
+
+A content block never requests approval or suspends a workflow. Permission and
+policy demands for one tool call share one \`GovernanceApprovalProvider\`.
+The provider receives the request plus a second execution-context argument;
+honour its finite \`signal\`/\`deadline\`. A late approval cannot start a tool.
+Narrow multi-tool policy input by \`toolId\`, and keep authorization in the
+application.
+
+For a review that outlives a worker, use
+[durable human review](/handbook/harness/orchestrate-work/human-review/).
+Bind the approved action, atomically claim its immutable execution, execute
+with the claim's stable idempotency key, and persist/reuse its receipt.
+Do not read approval and then execute separately, or mark consumed before
+success. An admitted execution is not revoked after the side effect starts.
+
 ## Workflow, tool, and skill boundary
 
 A workflow gets automatic protection whenever it delegates to an attached default-loop agent. Retrieval remains application-owned, so filter chunks explicitly before giving them to an agent. Skills are mounted files; when an agent opens a skill through the built-in \`read\` tool, normal tool rails apply. The addon intentionally rejects custom-handler agents and does not intercept direct model calls, because those callers own their own model and tool lifecycle.
 
-\`\`\`typescript
+\`\`\`typescript title="Workflow handler: filter retrieved chunks"
 const chunks = await searchApprovedKnowledge(ctx.input.question)
 const safeChunks = await rails.filterRetrievedChunks(chunks, {
   workflowId: ctx.workflowId,
@@ -202,6 +242,18 @@ return ctx.agents.support({ question: ctx.input.question, context: safeChunks })
 ## Observable by default
 
 Each evaluation creates an \`evaluate_guardrail {id}\` OpenInference \`GUARDRAIL\` span plus a decision counter and duration histogram. Block is a successful control decision; an invalid action or timeout is an error. A model-backed check creates a nested standard LLM span containing provider, model, and reported input/output/total token usage. This makes safety-model spend attributable without recording content or inventing token counts or prices.
+
+Use core \`DecisionBlockedError\` and \`DecisionEvaluationError\` and the canonical
+\`DecisionEvidence\`. Keep \`reasonCode\` and \`failureKind\` stable and
+content-free; never copy prompts, matched text, callback errors, or arbitrary
+metadata into operational evidence. Policy, approval, audit, and rail failures,
+timeouts, and malformed results fail closed.
+
+\`model.completed\` contains validated accounting for completed calls, including
+tool-call responses and blocked final candidates. \`model.object\` releases only
+the final guarded, validated value. Never count token totals from both.
+Direct calls own their release boundary; rails do not inspect opaque provider
+reasoning or retract content already released by custom code.
 
 Use guardrails alongside Zod schemas, agent tool allowlists, permissions, governance, and business authorization. They control content and execution flow; they do not replace identity or deterministic business rules.`,
 	},

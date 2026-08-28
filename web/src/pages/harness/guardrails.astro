@@ -1,6 +1,12 @@
 ---
 import CTASection from '../../components/sections/CTASection.astro'
 import GuardrailsArchitecture from '../../components/harness/GuardrailsArchitecture.astro'
+import {
+  guardrailsBuildGuarantee,
+  guardrailsInlineConfigurationGuarantee,
+  guardrailsOutputRailGuarantee,
+  guardrailsStageGuarantees,
+} from '../../data/guardrails-content.ts'
 import HarnessHero from '../../components/harness/HarnessHero.astro'
 import HarnessLayout from '../../layouts/HarnessLayout.astro'
 ---
@@ -14,10 +20,10 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       { text: 'Safety controls' },
       { text: 'with evidence.', color: 'con' },
     ]}
-    lede="Guardrails add typed, fail-closed decisions around a Harness default-loop agent: before a model call, around every tool handoff, and before a completed result leaves the loop. They complement schemas, permissions, governance, and application authorization."
+    lede={`Guardrails add typed, fail-closed decisions around a Harness default-loop agent: before a model call, around every tool handoff, and before a final answer leaves the loop. ${guardrailsOutputRailGuarantee} They complement schemas, permissions, governance, and application authorization.`}
     ctas={[
-      { label: 'Read the implementation guide', href: '/handbook/harness/guardrails-governance/', variant: 'primary' },
-      { label: 'Compare privacy detectors', href: '/handbook/harness/privacy-detectors/', variant: 'ghost' },
+      { label: 'Read the implementation guide', href: '/handbook/harness/secure-and-govern/guardrails/', variant: 'primary' },
+      { label: 'Compare privacy detectors', href: '/handbook/harness/secure-and-govern/privacy-detectors/', variant: 'ghost' },
     ]}
   />
 
@@ -42,7 +48,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
       <div class="guardrail-boundaries">
         <div class="guardrail-boundaries__row">
           <strong>Automatic on an attached default-loop agent</strong>
-          <p>Parsed input, each completed model result, tool input before permissions/governance/schema validation, and tool output before it returns to the model.</p>
+          <p>Parsed input, final-answer candidates before output validation and delivery, tool input before permissions/governance/schema validation, and tool output before it returns to the model. {guardrailsOutputRailGuarantee}</p>
         </div>
         <div class="guardrail-boundaries__row">
           <strong>Explicit application call</strong>
@@ -63,9 +69,35 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
   <section class="section-pad border-y border-[var(--color-line)]">
     <div class="wrap">
       <div class="section-head mb-8">
+        <div class="eyebrow">Composition guarantees</div>
+        <h2 class="display display-lg">Author once. Validate before requests.</h2>
+        <p class="lede">{guardrailsInlineConfigurationGuarantee} {guardrailsBuildGuarantee}</p>
+      </div>
+      <div class="overflow-x-auto border border-[var(--color-line)]">
+        <table class="guardrail-package-table">
+          <thead>
+            <tr><th>Stage</th><th>Guarantees</th><th>Does not guarantee</th></tr>
+          </thead>
+          <tbody>
+            {guardrailsStageGuarantees.map(guarantee => (
+              <tr>
+                <td>{guarantee.stage}</td>
+                <td>{guarantee.guarantees}</td>
+                <td>{guarantee.doesNotGuarantee}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-pad border-y border-[var(--color-line)]">
+    <div class="wrap">
+      <div class="section-head mb-8">
         <div class="eyebrow">Package ecosystem</div>
         <h2 class="display display-lg">One policy layer, replaceable detectors.</h2>
-        <p class="lede">The core addon enforces policy. Optional privacy adapters implement one shared detector contract and are chosen at the composition root — never through YAML, a browser, or provider-specific guardrail configuration.</p>
+        <p class="lede">The core addon enforces policy. Optional privacy adapters implement one shared detector contract and are chosen with the typed inline guardrail configuration at the composition root — never by a browser or provider-specific guardrail configuration.</p>
       </div>
       <div class="overflow-x-auto border border-[var(--color-line)]">
         <table class="guardrail-package-table">
@@ -77,25 +109,25 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
               <td><code>@purista/harness-guardrails</code></td>
               <td>Typed input, output, tool, retrieval, and model-check controls</td>
               <td>In-process interceptor on a default-loop agent; TypeScript actions stay application-owned</td>
-              <td><a href="/handbook/harness/guardrails-governance/">Guardrails &amp; Governance</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/guardrails/">Guardrails &amp; Governance</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-presidio</code></td>
               <td>Existing Microsoft Presidio Analyzer deployment, custom recognizers, or deployment-selected languages</td>
               <td>Application-injected authenticated internal <code>POST /analyze</code> call; masking remains in Guardrails</td>
-              <td><a href="/handbook/harness/privacy-detectors/#presidio-keep-the-sidecar-application-owned">Presidio sidecar</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#use-presidio-when-it-is-already-your-governed-detector-service">Presidio sidecar</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-native-privacy</code></td>
               <td>Local common identifiers: email, phone, card, IPv4/IPv6, IBAN, US SSN, and URL</td>
               <td>Rust Node-API prebuild in process for Node.js and Bun; no network, model, or fallback implementation</td>
-              <td><a href="/handbook/harness/privacy-detectors/#native-privacy-smallest-local-setup">Native privacy</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#bind-the-native-detector-for-the-smallest-local-setup">Native privacy</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-local-ner</code></td>
               <td>Locally provisioned model labels such as person, organization, or location</td>
               <td>Optional Transformers.js peer with a pinned local model, asset manifest, label map, and startup warmup</td>
-              <td><a href="/handbook/harness/privacy-detectors/#local-ner-install-only-where-it-is-needed">Local NER</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#use-local-ner-only-with-provisioned-verified-model-assets">Local NER</a></td>
             </tr>
           </tbody>
         </table>
@@ -120,10 +152,10 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
 
   <CTASection
     headline={[{ text: 'Implement the ' }, { text: 'right boundary', color: 'con' }, { text: '.' }]}
-    lede="The handbook contains the exact portable NeMo-shaped configuration subset, working TypeScript actions, full coverage matrix, detector feature comparison, workflow/tool/skill behavior, and deterministic test patterns."
+    lede="The handbook contains the typed inline configuration, opaque action tokens, coverage matrix, detector feature comparison, workflow/tool/skill behavior, and deterministic test patterns."
     ctas={[
-      { label: 'Guardrails implementation guide', href: '/handbook/harness/guardrails-governance/', variant: 'primary' },
-      { label: 'Privacy detector guide', href: '/handbook/harness/privacy-detectors/', variant: 'ghost' },
+      { label: 'Guardrails implementation guide', href: '/handbook/harness/secure-and-govern/guardrails/', variant: 'primary' },
+      { label: 'Privacy detector guide', href: '/handbook/harness/secure-and-govern/privacy-detectors/', variant: 'ghost' },
     ]}
   />
 </HarnessLayout>

@@ -4,7 +4,6 @@ import path from 'node:path'
 import type {
 	EmbeddingRequest,
 	EmbeddingResponse,
-	GovernanceConfig,
 	JsonValue,
 	ModelProvider,
 	ObjectRequest,
@@ -12,6 +11,7 @@ import type {
 	ObjectStreamChunk,
 	RerankRequest,
 	RerankResponse,
+	Sandbox,
 	TextRequest,
 	TextResponse,
 	TextStreamChunk,
@@ -26,6 +26,7 @@ import type {
 	AgentModelBinding,
 	AgentRunIdentity,
 	AgentRuntimeModelBindings,
+	AgentRuntimeOptions,
 	AgentSkillContext,
 	AgentSkillRuntimeBinding,
 	AgentSkillRuntimeOptions,
@@ -229,9 +230,12 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	 */
 	skills?: AgentSkillRuntimeOptions
 	logger?: PuristaLogger
-	governance?: GovernanceConfig<any>
+	governance?: AgentRuntimeOptions<Models>['governance']
 	storage?: import('@purista/harness').HarnessStorage
 	workspace?: import('@purista/harness').DurableWorkspace
+	/** Service-level Harness sandbox binding used by the tested agent runtime. */
+	sandbox?: Sandbox
+	sandboxOptions?: import('@purista/harness').SandboxBindingOptions<string>
 	onSuspended?: import('../types.js').AgentRuntimeOptions<Models>['onSuspended']
 }
 
@@ -250,6 +254,9 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		governance: options.governance,
 		storage: options.storage,
 		workspace: options.workspace,
+		sandbox: options.sandbox,
+		sandboxOptions: options.sandboxOptions,
+		sandboxPolicy: definition.sandboxPolicy,
 		onSuspended: options.onSuspended,
 	})
 	definition.runtime.current = executor
@@ -311,6 +318,7 @@ function createSessionMock(id: string) {
 		getRunSummary: async () => undefined,
 		clearHistory: async () => undefined,
 		replaceHistory: async () => undefined,
+		disposeSandbox: async () => undefined,
 		release: async () => undefined,
 		close: async () => undefined,
 	}

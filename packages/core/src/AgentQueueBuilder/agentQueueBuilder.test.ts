@@ -1,3 +1,5 @@
+import { inMemoryDurableWorkspace, inMemoryHarnessStorage, inMemorySandbox, type SandboxScope } from '@purista/harness'
+import { vi } from 'vitest'
 import { z } from 'zod'
 
 import {
@@ -13,6 +15,23 @@ import {
 	getScopedAgentRuntime,
 	initializeAttachedAgentRuntimes,
 } from './runtime/scopedRuntime.js'
+import { agentSseEventSchema } from './runtime/sseEvents.js'
+
+function trackedSandbox() {
+	const adapter = inMemorySandbox()
+	const releasedScopes: SandboxScope[] = []
+	const originalOpen = adapter.open.bind(adapter)
+	const open = vi.spyOn(adapter, 'open').mockImplementation(async options => {
+		const opened = await originalOpen(options)
+		const close = opened.session.close.bind(opened.session)
+		vi.spyOn(opened.session, 'close').mockImplementation(async () => {
+			await close()
+			releasedScopes.push(options.scope)
+		})
+		return opened
+	})
+	return { adapter, open, releasedScopes, terminate: vi.spyOn(adapter, 'terminate') }
+}
 
 describe('AgentQueueBuilder', () => {
 	const serviceInfo: ServiceInfoType = {
@@ -40,6 +59,150 @@ describe('AgentQueueBuilder', () => {
 		expect(resolved.queueWorkers[0].queueName).toBe(resolved.queues[0].queueName)
 		expect(resolved.commands[0].commandName).toBe('triageTicket')
 		expect(resolved.streams[0].streamName).toBe('triageTicketStream')
+	})
+
+	it('requires a Harness agent to use a model alias declared earlier in the fluent chain', () => {
+		if (false) {
+			const modelRequirementBuilder = new ServiceBuilder(serviceInfo).getAgentQueueBuilder(
+				'typedModelRequirementInvalid',
+				'Checks model requirements',
+			)
+			modelRequirementBuilder.addModel('primary', {
+				// @ts-expect-error concrete model identifiers are supplied by ai.models at service composition
+				model: 'gpt-5-mini',
+				capabilities: ['object'],
+			})
+
+			const undeclaredModelBuilder = new ServiceBuilder(serviceInfo).getAgentQueueBuilder(
+				'typedTriageInvalid',
+				'Checks model aliases',
+			)
+			// @ts-expect-error the model alias must be declared with addModel before setHarnessAgent
+			undeclaredModelBuilder.setHarnessAgent({ model: 'primary', instructions: 'Classify the input.' })
+		}
+
+		new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('typedTriage', 'Checks model aliases')
+			.addModel('primary', { capabilities: ['object'] as const })
+			.setHarnessAgent({ model: 'primary', instructions: 'Classify the input.' })
+	})
+
+	it('requires each declared model alias to state at least one capability', () => {
+		expect(() =>
+			new ServiceBuilder(serviceInfo)
+				.getAgentQueueBuilder('emptyModelRequirement', 'Rejects an empty capability contract')
+				.addModel('primary', { capabilities: [] }),
+		).toThrow('model capabilities must contain at least one capability')
+	})
+
+	it('injects the deployment-selected model through the runtime binding', async () => {
+		const provider = createScriptedHarnessModel()
+		provider.enqueueObject({
+			object: { priority: 'high' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('runtimeSelectedModel', 'Uses the deployment-selected model')
+			.addPayloadSchema(z.object({ ticket: z.string() }))
+			.addOutputSchema(z.object({ priority: z.literal('high') }))
+			.addModel('primary', { capabilities: ['object'] as const })
+			.setHarnessAgent({
+				model: 'primary',
+				instructions: 'Classify the ticket.',
+				input: z.object({ ticket: z.string() }),
+				output: z.object({ priority: z.literal('high') }),
+				builtinTools: false,
+			})
+			.getDefinition()
+
+		const harness = await createAgentTestHarness(definition, {
+			models: {
+				primary: {
+					provider,
+					model: 'deployment-selected-model',
+					capabilities: ['object'],
+				},
+			},
+		})
+
+		await expect(harness.run({ payload: { ticket: 'SUP-123' } })).resolves.toEqual({ priority: 'high' })
+		expect(provider.requests).toEqual([expect.objectContaining({ model: 'deployment-selected-model' })])
+	})
+
+	it('rejects response-mode options that do not apply to the selected delivery contract', () => {
+		const builder = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('responseModeValidation', 'Validates response modes')
+
+		expect(() => builder.setResponseMode('event', { statusUrl: '/jobs/{jobId}' })).toThrow(
+			'statusUrl is supported only by accepted and status response modes',
+		)
+		expect(() => builder.setResponseMode('accepted', { streamUrl: '/jobs/{jobId}/events' })).toThrow(
+			'streamUrl is supported only by the stream response mode',
+		)
+		expect(() => builder.setResponseMode('accepted', { successEventName: 'support.ticket.completed' })).toThrow(
+			'Result event names require an event or state-and-event result policy',
+		)
+		expect(() => builder.setResponseMode('accepted', { delivery: 'required' })).toThrow(
+			'Result retention and delivery require a result policy',
+		)
+		expect(() => builder.setResponseMode('accepted', { statusUrl: '/jobs/{jobId}' })).not.toThrow()
+	})
+
+	it('rejects invalid attached-agent capability declarations before runtime initialization', () => {
+		const builder = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('capabilityValidation', 'Validates capability declarations')
+
+		expect(() => builder.useSkills([])).toThrow('at least one skill name is required')
+		expect(() => builder.useSkills([''])).toThrow('skill name must be a non-empty string')
+		expect(() => builder.useSkills(['incident-response'], '')).toThrow('skill resource name must be a non-empty string')
+		expect(() => builder.useBuiltInTools('read' as never)).toThrow('built-in tools must be false or an array of tool names')
+		expect(() => builder.canInvoke('', '1', 'getTicket')).toThrow('command tool service name must be a non-empty string')
+		expect(() => builder.canInvoke('support', '', 'getTicket')).toThrow('command tool service version must be a non-empty string')
+		expect(() => builder.canInvoke('support', '1', '')).toThrow('command tool name must be a non-empty string')
+		expect(() => builder.canInvokeAgent('', '1')).toThrow('agent tool name must be a non-empty string')
+		expect(() => builder.canInvokeAgent('summarize', '')).toThrow('agent tool service version must be a non-empty string')
+	})
+
+	it('validates session and workspace policies before definition generation', () => {
+		const builder = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('persistenceValidation', 'Validates persistence policies')
+
+		expect(() => builder.setSessionPolicy({ mode: 'conversation', payloadPath: [] })).toThrow(
+			'Agent conversation sessions require a non-empty payloadPath',
+		)
+		expect(() => builder.setSessionPolicy({ mode: 'conversation', payloadPath: [''] })).toThrow(
+			'conversation payloadPath segment must be a non-empty string',
+		)
+		expect(() => builder.setSessionPolicy({ mode: 'unknown' } as never)).toThrow('unsupported agent session mode "unknown"')
+		expect(() => builder.setWorkspacePolicy({ mode: 'temporary' } as never)).toThrow(
+			'unsupported agent workspace mode "temporary"',
+		)
+		expect(() => builder.setWorkspacePolicy({ mode: 'durable', capabilities: [''] })).toThrow(
+			'workspace capability must be a non-empty string',
+		)
+		expect(() => builder.setSessionPolicy({ mode: 'conversation', payloadPath: ['conversationId'] })).not.toThrow()
+		expect(() => builder.setWorkspacePolicy({ mode: 'durable' })).not.toThrow()
+	})
+
+	it('keeps HTTP exposure explicit when public metadata is selected first', async () => {
+		const privateDefinition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('notExposed', 'Does not create an endpoint implicitly')
+			.makeEndpointPublic()
+			.setRunFunction(async () => ({ status: 'ok' }))
+			.getDefinition()
+		const privateCommand = privateDefinition.command as unknown as { metadata: { expose: unknown } }
+		const privateStream = privateDefinition.stream as unknown as { metadata: { expose: unknown } }
+		expect(privateCommand.metadata.expose).not.toHaveProperty('http')
+		expect(privateStream.metadata.expose).not.toHaveProperty('http')
+
+		const exposedDefinition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('publicEndpoint', 'Keeps explicit endpoint metadata public')
+			.makeEndpointPublic()
+			.exposeAsHttpEndpoint('POST', 'support/public-endpoint', { streamingMode: 'aggregate' })
+			.setRunFunction(async () => ({ status: 'ok' }))
+			.getDefinition()
+		const exposedCommand = exposedDefinition.command as unknown as { metadata: { expose: unknown } }
+		expect(exposedCommand.metadata.expose).toMatchObject({
+			http: { method: 'POST', path: 'support/public-endpoint', openApi: { isSecure: false } },
+		})
 	})
 
 	it('cascades resources, schemas, models, command tools and child agents into handler types', async () => {
@@ -71,7 +234,7 @@ describe('AgentQueueBuilder', () => {
 				unit: '{run}',
 				description: 'Support agent runs',
 			})
-			.addModel('primary', { model: 'test-model', capabilities: ['object'] as const })
+			.addModel('primary', { capabilities: ['object'] as const })
 			.canInvoke('ticket', '1', 'getTicket', {
 				outputSchema: commandOutputSchema,
 				payloadSchema: commandPayloadSchema,
@@ -107,7 +270,7 @@ describe('AgentQueueBuilder', () => {
 			})
 			.getDefinition()
 
-		expect(definition.manifest.models.primary.model).toBe('test-model')
+		expect(definition.manifest.models.primary).toEqual({ capabilities: ['object'] })
 		expect(definition.manifest.allowedCommands).toHaveLength(1)
 		expect(definition.manifest.allowedAgents).toHaveLength(1)
 	})
@@ -169,7 +332,7 @@ describe('AgentQueueBuilder', () => {
 		})
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('streamTriage', 'Streaming triage agent')
-			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
 			.addOutputSchema(z.object({ status: z.literal('ok') }))
 			.setHarnessAgent({
 				model: 'primary',
@@ -184,7 +347,104 @@ describe('AgentQueueBuilder', () => {
 
 		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
 		expect(final).toEqual({ status: 'ok' })
-		expect(chunks.length).toBeGreaterThan(0)
+		expect(chunks).toContainEqual(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					type: 'response.output_json.delta',
+					delta: expect.objectContaining({
+						type: 'model.completed',
+						modelAlias: 'primary',
+						operation: 'object',
+						usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+					}),
+				}),
+			}),
+		)
+	})
+
+	it('forwards one approval and safe governance evidence through the attached runtime and SSE', async () => {
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: { internal: 'PRIVATE_INTERMEDIATE_CONTENT' },
+			toolCalls: [
+				{ id: 'write-1', name: 'write', arguments: { path: '/workspace/result.txt', content: 'PRIVATE_TOOL_CONTENT' } },
+			],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('approvalTriage', 'Triage with immediate approval')
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Write the approved result.',
+				output: z.object({ status: z.literal('ok') }),
+				permissions: { write: 'require_approval' },
+			})
+			.getDefinition()
+		const request = vi.fn(async () => ({ decision: 'approved' as const, reasonCode: 'operator_approved' }))
+		const audit = vi.fn(async () => undefined)
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			sandbox: inMemorySandbox(),
+			governance: {
+				policies: [
+					{
+						kind: 'native',
+						id: 'write-policy',
+						rules: [{ id: 'review-write', tools: ['write'], effect: 'require_approval', reasonCode: 'write_review' }],
+					},
+				],
+				approval: { request },
+				audit: { record: audit },
+			},
+		})
+		const { final, chunks } = await harness.stream({ payload: {}, parameter: {} })
+		expect(final).toEqual({ status: 'ok' })
+		expect(request).toHaveBeenCalledTimes(1)
+		expect(request).toHaveBeenCalledWith(
+			expect.objectContaining({
+				subject: expect.objectContaining({
+					toolId: 'write',
+					input: { path: '/workspace/result.txt', content: 'PRIVATE_TOOL_CONTENT' },
+				}),
+				demands: [expect.objectContaining({ phase: 'permission' }), expect.objectContaining({ phase: 'policy' })],
+			}),
+			expect.objectContaining({ signal: expect.any(AbortSignal), deadline: expect.any(Number) }),
+		)
+		const decisionChunks = chunks
+			.map(chunk => agentSseEventSchema.parse(chunk))
+			.filter(
+				chunk =>
+					chunk.data.type === 'response.output_json.delta' &&
+					typeof chunk.data.delta === 'object' &&
+					chunk.data.delta !== null &&
+					'type' in chunk.data.delta &&
+					['policy.evaluated', 'approval.requested', 'approval.finished', 'model.completed'].includes(
+						String(chunk.data.delta.type),
+					),
+			)
+		expect(decisionChunks).toHaveLength(5)
+		expect(JSON.stringify(decisionChunks)).not.toContain('PRIVATE_')
+		expect(JSON.stringify(audit.mock.calls)).not.toContain('PRIVATE_')
+		expect(decisionChunks).toContainEqual(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					delta: expect.objectContaining({
+						type: 'approval.finished',
+						outcome: 'approved',
+						reasonCode: 'operator_approved',
+					}),
+				}),
+			}),
+		)
 	})
 
 	it('mirrors opted-in run-function model stream chunks with deterministic source metadata', async () => {
@@ -196,7 +456,7 @@ describe('AgentQueueBuilder', () => {
 		])
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('streamText', 'Stream text from a run function')
-			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
+			.addModel('primary', { capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
 			.setRunFunction(async context => {
 				let text = ''
@@ -256,7 +516,7 @@ describe('AgentQueueBuilder', () => {
 		])
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('privateText', 'Consume text privately')
-			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
+			.addModel('primary', { capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
 			.setRunFunction(async context => {
 				let text = ''
@@ -291,7 +551,7 @@ describe('AgentQueueBuilder', () => {
 		])
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('parallelText', 'Stream text from parallel run-function calls')
-			.addModel('primary', { model: 'fake', capabilities: ['text_stream'] as const })
+			.addModel('primary', { capabilities: ['text_stream'] as const })
 			.addOutputSchema(z.string())
 			.setRunFunction(async context => {
 				const consume = async (content: string) => {
@@ -332,7 +592,7 @@ describe('AgentQueueBuilder', () => {
 		// No stream response queued: the provider throws, so the run must finish with an error.
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('streamFail', 'Streaming agent that fails')
-			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
 			.addOutputSchema(z.object({ status: z.literal('ok') }))
 			.setHarnessAgent({
 				model: 'primary',
@@ -387,13 +647,45 @@ describe('AgentQueueBuilder', () => {
 				'workspace.resume',
 				'workspace.cleanup',
 			],
-			cleanup: 'on_terminal',
 			policy: {
 				retention: { cleanupMode: 'manual_only' },
 			},
 		})
 		expect(manifest.durability).toEqual({ mode: 'required', runIdPath: ['runId'] })
 		expect(manifest.runtimeRevision).toMatch(/^rev-/)
+	})
+
+	it('forwards durable workspace policy through the public Harness invocation boundary', async () => {
+		const input = z.object({ runId: z.string() })
+		const output = z.object({ status: z.literal('ok') })
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('durableRuntimePolicy', 'Forwards workspace constraints to Harness')
+			.addPayloadSchema(input)
+			.addOutputSchema(output)
+			.addModel('primary', { capabilities: ['object'] as const })
+			.setDurability({ mode: 'required', runIdPath: ['runId'] })
+			.setWorkspacePolicy({
+				mode: 'durable',
+				policy: { retention: { cleanupMode: 'manual_only' } },
+			})
+			.setHarnessWorkflow({ input, output, handler: async () => ({ status: 'ok' as const }) })
+			.getDefinition()
+		const workspace = inMemoryDurableWorkspace()
+		const startWorkspace = vi.spyOn(workspace, 'startWorkspace')
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: createScriptedHarnessModel(), model: 'fake', capabilities: ['object'] } },
+			storage: inMemoryHarnessStorage(),
+			workspace,
+		})
+
+		try {
+			await expect(harness.run({ payload: { runId: 'case-42' }, parameter: {} })).resolves.toEqual({ status: 'ok' })
+			expect(startWorkspace).toHaveBeenCalledWith(
+				expect.objectContaining({ policy: { retention: { cleanupMode: 'manual_only' } } }),
+			)
+		} finally {
+			await definition.runtime.current?.shutdown()
+		}
 	})
 
 	it('binds declared skills into a harness agent runtime', async () => {
@@ -419,7 +711,7 @@ describe('AgentQueueBuilder', () => {
 		const service = new ServiceBuilder(serviceInfo)
 		const definition = await service
 			.getAgentQueueBuilder('skillTriage', 'Triage with a runtime skill')
-			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
 			.addOutputSchema(z.object({ status: z.literal('ok') }))
 			.useSkills(['incident-skill'])
 			.setHarnessAgent({
@@ -481,7 +773,7 @@ describe('AgentQueueBuilder', () => {
 		const auditedDecisions: string[] = []
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('governedSkillTriage', 'Triage with governed skill access')
-			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
 			.addOutputSchema(z.object({ status: z.literal('ok') }))
 			.useSkills(['incident-skill'])
 			.setHarnessAgent({
@@ -511,7 +803,7 @@ describe('AgentQueueBuilder', () => {
 				],
 				audit: {
 					record: async decision => {
-						auditedDecisions.push(`${decision.policyId}:${decision.ruleId}`)
+						auditedDecisions.push(`${decision.evidence.source.id}:${decision.evidence.source.ruleId}`)
 					},
 				},
 			},
@@ -537,6 +829,185 @@ describe('AgentQueueBuilder', () => {
 		await skillRuntime.cleanup()
 	})
 
+	it('passes scoped sandbox opens and attachment release through createAgentTestHarness', async () => {
+		const sandbox = trackedSandbox()
+		const model = createScriptedHarnessModel()
+		for (const id of ['first', 'second']) {
+			model.enqueue({
+				object: {},
+				toolCalls: [{ id: `write-${id}`, name: 'write', arguments: { path: `/workspace/${id}.txt`, content: id } }],
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+				finishReason: 'tool_calls',
+			})
+			model.enqueue({
+				object: { status: 'ok' },
+				usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+				finishReason: 'stop',
+			})
+		}
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('sandboxTriage', 'Triage with a configured sandbox')
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({}),
+				instructions: 'Write the supplied result.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			sandbox: sandbox.adapter,
+		})
+		const input = {
+			payload: {},
+			parameter: {},
+			message: { id: 'sandbox-message', tenantId: 'tenant', principalId: 'principal' },
+		}
+		try {
+			await expect(harness.run(input)).resolves.toEqual({ status: 'ok' })
+			await expect(harness.run(input)).resolves.toEqual({ status: 'ok' })
+			expect(sandbox.open).toHaveBeenCalledTimes(1)
+			expect(model.requests).toHaveLength(2)
+			const firstOpen = sandbox.open.mock.calls[0][0]
+			expect(firstOpen).toMatchObject({
+				mode: 'create',
+					scope: {
+						owner: {
+							namespace: 'support.1.sandboxTriage',
+							id: expect.stringMatching(/^agent-session:[0-9a-f]{64}$/),
+						instanceId: expect.any(String),
+						identity: { tenantId: 'tenant', principalId: 'principal' },
+					},
+					partition: { kind: 'shared' },
+					lifetime: 'session',
+				},
+			})
+			expect(firstOpen.scope).not.toHaveProperty('runId')
+			expect(sandbox.releasedScopes).toEqual([firstOpen.scope])
+			expect(sandbox.terminate).not.toHaveBeenCalled()
+		} finally {
+			await definition.runtime.current?.shutdown()
+		}
+	})
+
+	it.each(['inherit', 'private'] as const)(
+		'uses the service sandbox for the %s sharing policy in the test helper',
+		async selection => {
+			const runtime = trackedSandbox()
+			const model = createScriptedHarnessModel()
+			model.enqueue({
+					object: {},
+					toolCalls: [{ id: 'write-selection', name: 'write', arguments: { path: '/workspace/selection.txt', content: selection } }],
+					usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+					finishReason: 'tool_calls',
+				})
+				model.enqueue({
+					object: { status: 'ok' },
+					usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+					finishReason: 'stop',
+			})
+			const builder = new ServiceBuilder(serviceInfo)
+				.getAgentQueueBuilder('policyTriage', 'Triage with sandbox selection')
+				.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
+				.addOutputSchema(z.object({ status: z.literal('ok') }))
+				.setHarnessAgent({
+					model: 'primary',
+					input: z.object({}),
+					instructions: 'Write the selected sandbox result when a sandbox is configured.',
+					output: z.object({ status: z.literal('ok') }),
+				})
+			if (selection === 'private') {
+				builder.setSandboxPolicy({
+					sharing: 'private',
+				})
+			}
+			const definition = await builder.getDefinition()
+			const harness = await createAgentTestHarness(definition, {
+				models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+				sandbox: runtime.adapter,
+			})
+			try {
+				await expect(harness.run({ payload: {}, parameter: {} })).resolves.toEqual({ status: 'ok' })
+				expect(runtime.open).toHaveBeenCalledTimes(selection === 'private' ? 2 : 1)
+				expect(runtime.releasedScopes).toHaveLength(selection === 'private' ? 2 : 1)
+				expect(runtime.terminate).not.toHaveBeenCalled()
+			} finally {
+				await definition.runtime.current?.shutdown()
+			}
+		},
+	)
+
+	it('keeps explicit owner resolution executable-only and authorizes it through the service binding', async () => {
+		const runtime = trackedSandbox()
+		const model = createScriptedHarnessModel()
+		model.enqueue({
+			object: {},
+			toolCalls: [{ id: 'write-owner', name: 'write', arguments: { path: '/workspace/owner.txt', content: 'owner' } }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		model.enqueue({
+			object: { status: 'ok' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const owner = {
+			namespace: 'support.shared',
+			id: 'case-42',
+			instanceId: '01M11AXWWA8T83R8CMSK1B3J8N',
+			identity: { tenantId: 'tenant-a', principalId: 'principal-a' },
+		} as const
+		await runtime.adapter.registerOwner({ owner, mode: 'create' })
+		const resolveOwner = vi.fn(() => owner)
+		const authorizeOwner = vi.fn(() => true)
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('ownerTriage', 'Triage in an explicitly authorized sandbox')
+			.addPayloadSchema(z.object({ requestId: z.string() }))
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
+			.addOutputSchema(z.object({ status: z.literal('ok') }))
+			.setSandboxPolicy({ owner: resolveOwner })
+			.setHarnessAgent({
+				model: 'primary',
+				input: z.object({ requestId: z.string() }),
+				instructions: 'Write the owner result.',
+				output: z.object({ status: z.literal('ok') }),
+			})
+			.getDefinition()
+		expect(definition.manifest.sandbox).toEqual({ usesExplicitOwner: true })
+		expect(JSON.stringify(definition.manifest)).not.toContain('support.shared')
+		const harness = await createAgentTestHarness(definition, {
+			models: { primary: { provider: model, model: 'fake', capabilities: ['object', 'tool_use'] } },
+			sandbox: runtime.adapter,
+			sandboxOptions: { authorizeOwner },
+		})
+		try {
+			await expect(
+				harness.run({
+					payload: { requestId: 'request-42', ignored: 'not validated' },
+					parameter: {},
+					message: { id: 'owner-message', tenantId: 'tenant-a', principalId: 'principal-a' },
+				}),
+			).resolves.toEqual({ status: 'ok' })
+			expect(resolveOwner).toHaveBeenCalledWith(
+				expect.objectContaining({
+					input: { requestId: 'request-42' },
+					identity: expect.objectContaining({ tenantId: 'tenant-a', principalId: 'principal-a' }),
+				}),
+			)
+			expect(authorizeOwner).toHaveBeenCalled()
+		} finally {
+			await definition.runtime.current?.shutdown()
+		}
+	})
+
+	it('rejects removed per-agent adapter and enabled settings at the builder boundary', () => {
+		const builder = new ServiceBuilder(serviceInfo).getAgentQueueBuilder('policyValidation', 'Validate sandbox policy')
+		expect(() => builder.setSandboxPolicy({ enabled: false } as never)).toThrow(/only support sharing and owner/)
+		expect(() => builder.setSandboxPolicy({ adapter: inMemorySandbox() } as never)).toThrow(/only support sharing and owner/)
+	})
+
 	it('passes runtime skill bindings through createAgentTestHarness', async () => {
 		const skillRuntime = await createAgentSkillTestRuntime([
 			{
@@ -559,7 +1030,7 @@ describe('AgentQueueBuilder', () => {
 		})
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('skillTriage', 'Triage with a runtime skill')
-			.addModel('primary', { model: 'fake', capabilities: ['object', 'tool_use'] as const })
+			.addModel('primary', { capabilities: ['object', 'tool_use'] as const })
 			.addOutputSchema(z.object({ status: z.literal('ok') }))
 			.useSkills(['incident-skill'])
 			.setHarnessAgent({
@@ -599,7 +1070,7 @@ describe('AgentQueueBuilder', () => {
 		}
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('incidentReview', 'Reviews an incident with a harness workflow')
-			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.addModel('primary', { capabilities: ['object'] as const })
 			.addPayloadSchema(input)
 			.addOutputSchema(output)
 			.setHarnessWorkflow(
@@ -627,7 +1098,7 @@ describe('AgentQueueBuilder', () => {
 		const output = z.object({ status: z.literal('waiting') })
 		const definition = await new ServiceBuilder(serviceInfo)
 			.getAgentQueueBuilder('paymentReview', 'Durable payment review')
-			.addModel('primary', { model: 'fake', capabilities: ['object'] as const })
+			.addModel('primary', { capabilities: ['object'] as const })
 			.addPayloadSchema(input)
 			.addOutputSchema(output)
 			.setDurability({ mode: 'required', runIdPath: ['paymentId'] })
@@ -635,7 +1106,9 @@ describe('AgentQueueBuilder', () => {
 				input,
 				output,
 				handler: async () => {
-					const error = new Error('waiting') as Error & { snapshot: { waitId: string; kind: string; status: 'waiting' } }
+					const error = new Error('waiting') as Error & {
+						snapshot: { waitId: string; kind: string; status: 'waiting' }
+					}
 					error.name = 'ExternalWaitPendingError'
 					error.snapshot = { waitId: 'review:payment-1', kind: 'human_review', status: 'waiting' }
 					throw error
@@ -651,7 +1124,9 @@ describe('AgentQueueBuilder', () => {
 			},
 		})
 
-		await expect(harness.run({ payload: { paymentId: 'payment-1' }, parameter: {} })).resolves.toEqual({ status: 'waiting' })
+		await expect(harness.run({ payload: { paymentId: 'payment-1' }, parameter: {} })).resolves.toEqual({
+			status: 'waiting',
+		})
 		expect(notices[0]).toMatch(/^agent-run:[0-9a-f]{64}:review:payment-1$/)
 	})
 

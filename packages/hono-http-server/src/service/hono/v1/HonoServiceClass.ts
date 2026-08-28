@@ -259,7 +259,7 @@ export class HonoServiceClass<
 					}
 
 					try {
-						await this.config.healthFunction()
+						await this.config.healthFunction.call(this)
 						span.setStatus({
 							code: SpanStatusCode.OK,
 							message: 'OK',
@@ -663,7 +663,7 @@ export class HonoServiceClass<
 
 		if (method === 'get' || method === 'delete') {
 			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-				const protectHandler = safeBind(this.config.protectHandler, this.app)
+				const protectHandler = safeBind(this.config.protectHandler, this)
 				this.app[method](path, protectHandler, handler)
 			} else {
 				this.app[method](path, handler)
@@ -680,7 +680,7 @@ export class HonoServiceClass<
 			})
 
 			if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-				const protectHandler = safeBind(this.config.protectHandler, this.app)
+				const protectHandler = safeBind(this.config.protectHandler, this)
 				this.app[method](path, protectHandler, limitRequestBody, handler)
 			} else {
 				this.app[method](path, limitRequestBody, handler)
@@ -769,7 +769,7 @@ export class HonoServiceClass<
 	prepareDestroy() {
 		return {
 			name: `${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} prepare shutdown`,
-			destroy: this.setServiceUnavailable,
+			destroy: this.setServiceUnavailable.bind(this),
 		}
 	}
 

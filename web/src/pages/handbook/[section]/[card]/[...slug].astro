@@ -1,65 +1,54 @@
 ---
 import { getCollection, render } from 'astro:content'
-import { getCardBySlug, getSidebarItems, handbookSections } from '../../../../data/handbook'
+import { getCardBySlug, getCardChildTopics, getSectionById, getSidebarItems } from '../../../../data/handbook'
 import HandbookLayout from '../../../../layouts/HandbookLayout.astro'
-import type { SidebarItem } from '../../../../lib/sidebar'
 
 export async function getStaticPaths() {
-	const paths: {
-		params: { section: string; card: string; slug: string }
-		props: { sectionId: string; cardId: string; slug: string; item: SidebarItem }
-	}[] = []
-
-	for (const section of handbookSections) {
-		for (const card of section.cards) {
-			if (card.items) {
-				for (const item of card.items) {
-					// An explicit href has its own canonical route. Do not also
-					// generate the card-derived nested route from its trailing id.
-					if (item.href) continue
-					// Item id is like "blocks/command-pattern/what-is-command"
-					// Extract slug from the end
-					const parts = item.id.split('/')
-					const slug = parts[parts.length - 1]
-					paths.push({
-						params: { section: section.id, card: card.id, slug },
-						props: { sectionId: section.id, cardId: card.id, slug, item },
-					})
-				}
+	const paths: { params: { section: string; card: string; slug: string }; props: { sectionId: string; cardId: string; topicId: string } }[] = []
+	for (const section of ['learn', 'harness', 'mental-model', 'service', 'blocks', 'stores', 'expose', 'bridges', 'patterns', 'ops']) {
+		for (const card of getSectionById(section)?.cards ?? []) {
+			for (const topic of getCardChildTopics(section, card.id)) {
+				if (topic.source?.collection !== 'handbookCards') continue
+				paths.push({
+					params: { section, card: card.id, slug: topic.canonicalRoute.split('/').filter(Boolean).at(-1)! },
+					props: { sectionId: section, cardId: card.id, topicId: topic.topicId },
+				})
 			}
 		}
 	}
 	return paths
 }
 
-const { sectionId, cardId, slug, item } = Astro.props
+const { sectionId, cardId, topicId } = Astro.props
 const result = getCardBySlug(sectionId, cardId)
 if (!result) {
 	throw new Error(`Card not found: ${sectionId}/${cardId}`)
 }
-const { section, card } = result
+const { section, card, product } = result
 const sidebar = getSidebarItems()
+const topic = getCardChildTopics(sectionId, cardId).find(candidate => candidate.topicId === topicId)
+if (!topic?.source || topic.source.collection !== 'handbookCards') {
+	throw new Error(`Missing canonical handbook sub-page manifest entry for ${sectionId}/${cardId}/${topicId}`)
+}
 
 // Load MDX content for this sub-page
-const contentId = `${sectionId}/${cardId}/${slug}`
-const cardEntries = await getCollection('handbookCards', entry => entry.id === contentId)
+const cardEntries = await getCollection('handbookCards', entry => entry.id === topic.source!.id)
 const cardEntry = cardEntries[0]
-
-let CardContent = null
-let cardHeadings: { depth: number; slug: string; text: string }[] = []
-if (cardEntry) {
-	const rendered = await render(cardEntry)
-	CardContent = rendered.Content
-	cardHeadings = rendered.headings
+if (!cardEntry) {
+	throw new Error(`Missing canonical handbook content for ${topic.source.id}`)
 }
+const rendered = await render(cardEntry)
+const CardContent = rendered.Content
+const cardHeadings = rendered.headings
 ---
 
 <HandbookLayout
-  title={cardEntry?.data.title || item.title}
-  description={cardEntry?.data.description || card.description}
+  title={cardEntry.data.title}
+  description={cardEntry.data.description || card.description}
   sidebar={sidebar}
-  currentId={item.id}
+  currentId={topic.topicId}
   headings={cardHeadings}
+  product={product}
 >
   <nav class="flex items-center gap-2 text-sm text-[var(--color-fg-subtle)] mb-8">
     <a href="/handbook/" class="hover:text-[var(--color-fg)] transition-colors">Handbook</a>
@@ -68,59 +57,21 @@ if (cardEntry) {
     <span class="text-[var(--color-line-strong)]">/</span>
     <a href={`/handbook/${section.id}/${card.id}/`} class="hover:text-[var(--color-fg)] transition-colors">{card.title}</a>
     <span class="text-[var(--color-line-strong)]">/</span>
-    <span class="text-[var(--color-fg)]">{cardEntry?.data.title || item.title}</span>
+    <span class="text-[var(--color-fg)]">{cardEntry.data.title}</span>
   </nav>
 
-  {CardContent ? (
-    <>
-      <div class="mb-10">
-        <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${section.color}-hi)`}>
-          {section.title} / {card.title}
-        </p>
-        <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
-          {cardEntry?.data.title || item.title}
-        </h1>
-        {cardEntry?.data.description && (
-          <p class="lede max-w-[70ch]">
-            {cardEntry.data.description}
-          </p>
-        )}
-      </div>
-      <CardContent />
-    </>
-  ) : (
-    <>
-      <div class="mb-12">
-        <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${section.color}-hi)`}>
-          {section.title} / {card.title}
-        </p>
-        <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
-          {item.title}
-        </h1>
-        <p class="lede max-w-[70ch]">
-          {card.description}
-        </p>
-      </div>
-
-      <div class="space-y-12">
-        <section>
-          <h2 class="font-display font-semibold text-[1.35rem] tracking-tight text-[var(--color-fg)] mb-3">Overview</h2>
-          <p class="text-[var(--color-fg-muted)] leading-relaxed">
-            This page covers <strong class="text-[var(--color-fg)]">{item.title}</strong> in depth.
-            Content will include conceptual explanations, code examples, and best practices.
-          </p>
-        </section>
-
-        <section>
-          <h2 class="font-display font-semibold text-[1.35rem] tracking-tight text-[var(--color-fg)] mb-3">Key Concepts</h2>
-          <ul class="bullet-list space-y-2">
-            <li>Core principle and purpose</li>
-            <li>When and why to use this pattern</li>
-            <li>Integration with other PURISTA concepts</li>
-            <li>Common pitfalls and how to avoid them</li>
-          </ul>
-        </section>
-      </div>
-    </>
-  )}
+  <div class="mb-10">
+    <p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2" style={`color: var(--color-${section.color}-hi)`}>
+      {section.title} / {card.title}
+    </p>
+    <h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3" style="color: var(--color-fg-strong); line-height: 1.15">
+      {cardEntry.data.title}
+    </h1>
+    {cardEntry.data.description && (
+      <p class="lede max-w-[70ch]">
+        {cardEntry.data.description}
+      </p>
+    )}
+  </div>
+  <CardContent />
 </HandbookLayout>

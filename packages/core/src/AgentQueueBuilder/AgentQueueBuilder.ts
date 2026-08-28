@@ -7,8 +7,10 @@ import type {
 } from '@purista/harness'
 import { z } from 'zod'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
+import { HandledError } from '../core/Error/HandledError.impl.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import type { PuristaMetricDefinition } from '../core/types/PuristaMetrics.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/index.js'
 import { QueueWorkerBuilder } from '../QueueWorkerBuilder/index.js'
 import { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/index.js'
@@ -22,8 +24,10 @@ import type {
 	AgentExecutionKind,
 	AgentExecutionPolicy,
 	AgentHandler,
+	AgentHarnessDefinition,
 	AgentHarnessWorkflowOptions,
 	AgentHttpExposure,
+	AgentModelCapability,
 	AgentManifest,
 	AgentModelBinding,
 	AgentQueueBuilderTypes,
@@ -87,7 +91,7 @@ type QueueBuilderWithEnterprisePolicy = QueueDefinitionBuilder & {
  * ```ts
  * const triage = service
  *   .getAgentQueueBuilder('supportTriage', 'Classifies tickets')
- *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+ *   .addModel('primary', { capabilities: ['object'] })
  *   .setRunFunction(async context => ({ priority: 'high' }))
  * ```
  */
@@ -106,6 +110,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private workspacePolicy?: AgentWorkspacePolicy
 	private durability?: AgentDurabilityPolicy
 	private httpExposure?: AgentHttpExposure
+	private endpointPublic = false
 	private streamingMode: 'stream' | 'aggregate' = 'stream'
 	private successEventName?: string
 	private executionProfile?: AgentQueueLongRunningExecutionProfile
@@ -213,13 +218,18 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * @example
 	 * ```ts
 	 * agent.addModel('primary', {
-	 *   model: 'gpt-4.1-mini',
 	 *   capabilities: ['object'],
 	 * })
 	 * ```
 	 */
-	addModel<const Alias extends string, const Binding extends AgentModelBinding>(alias: Alias, binding: Binding) {
+	addModel<const Alias extends string, const Capabilities extends readonly AgentModelCapability[]>(
+		alias: Alias,
+		binding: AgentModelBinding<Capabilities>,
+	) {
 		assertNonEmpty(alias, 'model alias')
+		if (!Array.isArray(binding.capabilities) || binding.capabilities.length === 0) {
+			throw new Error('model capabilities must contain at least one capability')
+		}
 		this.models[alias] = binding
 		return this as unknown as AgentQueueBuilder<
 			AgentQueueBuilderTypes<
@@ -227,7 +237,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['ParameterSchema'],
 				S['OutputSchema'],
 				S['Resources'],
-				S['Models'] & Record<Alias, Binding>,
+				S['Models'] & Record<Alias, AgentModelBinding<Capabilities>>,
 				S['CommandTools'],
 				S['AgentTools'],
 				S['Execution'],
@@ -238,12 +248,24 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 	/** Declare named skill references the runtime can load for this agent. */
 	useSkills(names: readonly string[], resourceName?: string) {
+		if (!Array.isArray(names) || names.length === 0) {
+			throw new Error('at least one skill name is required')
+		}
+		for (const name of names) {
+			assertNonEmpty(name, 'skill name')
+		}
+		if (resourceName !== undefined) {
+			assertNonEmpty(resourceName, 'skill resource name')
+		}
 		this.skills.push({ names, resourceName })
 		return this
 	}
 
 	/** Restrict or disable harness built-in tools for this agent. */
 	useBuiltInTools(namesOrFalse: readonly BuiltinToolName[] | false) {
+		if (namesOrFalse !== false && !Array.isArray(namesOrFalse)) {
+			throw new Error('built-in tools must be false or an array of tool names')
+		}
 		this.builtInTools = namesOrFalse
 		return this
 	}
@@ -272,6 +294,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		commandName: CommandName,
 		schemas?: { outputSchema?: Output; payloadSchema?: Payload; parameterSchema?: Parameter },
 	) {
+		assertNonEmpty(serviceName, 'command tool service name')
+		assertNonEmpty(serviceVersion, 'command tool service version')
+		assertNonEmpty(commandName, 'command tool name')
 		this.commandTools.push({
 			serviceName,
 			serviceVersion,
@@ -318,6 +343,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		serviceVersion: Version,
 		schemas?: { outputSchema?: Output; payloadSchema?: Payload; parameterSchema?: Parameter },
 	) {
+		assertNonEmpty(agentName, 'agent tool name')
+		assertNonEmpty(serviceVersion, 'agent tool service version')
 		this.agentInvokes.push({
 			agentName,
 			serviceVersion,
@@ -340,7 +367,17 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		>
 	}
 
-	/** Use a provider-neutral `@purista/harness` agent definition as this agent's execution. */
+	/**
+	 * Use one provider-neutral `@purista/harness` agent definition as this
+	 * attached agent's execution.
+	 *
+	 * Pass the inline definition object—the same shape supplied to Harness
+	 * `agent({ ... })`—rather than a Harness instance created with
+	 * `defineHarness(...).build()`. When the owning service is instantiated,
+	 * PURISTA creates and configures the Harness runtime, registers this
+	 * definition under the attached agent name, and exposes its generated
+	 * command, stream, queue, and worker projections.
+	 */
 	setHarnessAgent(
 		this: AgentQueueBuilder<
 			AgentQueueBuilderTypes<
@@ -355,7 +392,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 				S['Metrics']
 			>
 		>,
-		definition: HarnessAgentDefinition<any>,
+		definition: AgentHarnessDefinition<S['Models']>,
 	) {
 		this.assertNoExecutionDefinition()
 		this.executionDefinitions.push({ kind: 'harnessAgent', definition })
@@ -386,7 +423,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * ```ts
 	 * service
 	 *   .getAgentQueueBuilder('incidentReview', 'Reviews one incident')
-	 *   .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+	 *   .addModel('primary', { capabilities: ['object'] })
 	 *   .setHarnessWorkflow(reviewWorkflow, {
 	 *     agents: { summarize: summarizeAgent },
 	 *   })
@@ -530,27 +567,51 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * ```
 	 */
 	setResponseMode(mode: AgentResponseMode, options?: AgentResponseModeOptions) {
+		validateResponseMode(mode, options)
 		this.responseMode = { mode, options }
 		return this
 	}
 
 	/** Configure harness session behavior for this attached agent. */
 	setSessionPolicy(policy: AgentSessionPolicy) {
+		if (policy.mode === 'conversation') {
+			if (!Array.isArray(policy.payloadPath) || policy.payloadPath.length === 0) {
+				throw new Error('Agent conversation sessions require a non-empty payloadPath')
+			}
+			for (const segment of policy.payloadPath) {
+				assertNonEmpty(segment, 'conversation payloadPath segment')
+			}
+		} else if (policy.mode !== 'ephemeral') {
+			throw new Error(`unsupported agent session mode "${String((policy as { mode?: unknown }).mode)}"`)
+		}
 		this.sessionPolicy = policy
 		return this
 	}
 
-	/** Attach sandbox configuration consumed by compatible agent runtimes. */
-	setSandboxPolicy(policy: AgentSandboxPolicy) {
+	/**
+	 * Declare how this agent uses the service-owned Harness sandbox.
+	 *
+	 * The adapter and owner authorization remain service configuration; an agent
+	 * can only request private, inherited, or configured named-group sharing.
+	 */
+	setSandboxPolicy<const Group extends string = never>(policy: AgentSandboxPolicy<Group>) {
+		validateSandboxPolicy(policy)
 		this.sandboxPolicy = policy
 		return this
 	}
 
 	/** Require a durable harness workspace for this attached agent. */
 	setWorkspacePolicy(policy: AgentWorkspacePolicy) {
+		if (policy.mode !== 'durable') {
+			throw new Error(`unsupported agent workspace mode "${String((policy as { mode?: unknown }).mode)}"`)
+		}
+		if (policy.capabilities) {
+			for (const capability of policy.capabilities) {
+				assertNonEmpty(capability, 'workspace capability')
+			}
+		}
 		const { capabilities, ...rest } = policy
 		this.workspacePolicy = {
-			cleanup: 'on_terminal',
 			...rest,
 			capabilities: capabilities ?? defaultWorkspaceCapabilities,
 		}
@@ -589,9 +650,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		path: string,
 		options?: Omit<AgentHttpExposure, 'method' | 'path'>,
 	) {
-		// Merge over any previously-set exposure (e.g. an earlier makeEndpointPublic())
-		// so call order does not drop the public flag or streaming mode.
-		this.httpExposure = { ...this.httpExposure, method, path, ...options }
+		const isPublic = options?.public ?? this.httpExposure?.public ?? this.endpointPublic
+		this.httpExposure = { ...this.httpExposure, method, path, ...options, ...(isPublic ? { public: true } : {}) }
+		this.endpointPublic = isPublic
 		if (options?.streamingMode) {
 			this.streamingMode = options.streamingMode
 		}
@@ -606,9 +667,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 
 	/** Mark the generated HTTP endpoint public in OpenAPI/security metadata. */
 	makeEndpointPublic() {
-		this.httpExposure = {
-			...(this.httpExposure ?? { method: 'POST', path: `/${this.agentName}` }),
-			public: true,
+		this.endpointPublic = true
+		if (this.httpExposure) {
+			this.httpExposure = { ...this.httpExposure, public: true }
 		}
 		return this
 	}
@@ -632,6 +693,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		const runtime: AgentRuntimeRef<Infer<S['OutputSchema']>> = {}
 		const agentDefinition: AgentDefinition<S> = {
 			manifest,
+			...(this.sandboxPolicy ? { sandboxPolicy: this.sandboxPolicy } : {}),
 			metricDefinitions: { ...this.metricDefinitions },
 			payloadSchema: this.payloadSchema as S['PayloadSchema'],
 			parameterSchema: this.parameterSchema as S['ParameterSchema'],
@@ -848,7 +910,12 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			models: this.models,
 			session: this.sessionPolicy,
 			execution,
-			sandbox: this.sandboxPolicy,
+			sandbox: this.sandboxPolicy
+				? {
+					...(this.sandboxPolicy.sharing ? { sharing: this.sandboxPolicy.sharing } : {}),
+					usesExplicitOwner: this.sandboxPolicy.owner !== undefined,
+				}
+				: undefined,
 			workspacePolicy: this.workspacePolicy?.mode === 'durable' ? this.workspacePolicy : undefined,
 			durability: this.durability,
 			http: this.httpExposure,
@@ -914,6 +981,60 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			delivery: options?.delivery,
 			...basePolicy,
 		}
+	}
+}
+
+function validateSandboxPolicy(policy: AgentSandboxPolicy): void {
+	const rawPolicy = policy as Record<string, unknown>
+	if ('enabled' in rawPolicy || 'adapter' in rawPolicy) {
+		throw new HandledError(
+			StatusCode.BadRequest,
+			'Agent sandbox policies only support sharing and owner; adapter selection belongs in service ai options',
+		)
+	}
+}
+
+function validateResponseMode(mode: AgentResponseMode, options?: AgentResponseModeOptions): void {
+	if (!['accepted', 'status', 'stream', 'event'].includes(mode)) {
+		throw new HandledError(StatusCode.BadRequest, `Unsupported agent response mode "${String(mode)}"`)
+	}
+	if (!options) {
+		return
+	}
+	if (options.statusUrl !== undefined) {
+		assertNonEmpty(options.statusUrl, 'status URL')
+		if (mode !== 'accepted' && mode !== 'status') {
+			throw new HandledError(StatusCode.BadRequest, 'statusUrl is supported only by accepted and status response modes')
+		}
+	}
+	if (options.streamUrl !== undefined) {
+		assertNonEmpty(options.streamUrl, 'stream URL')
+		if (mode !== 'stream') {
+			throw new HandledError(StatusCode.BadRequest, 'streamUrl is supported only by the stream response mode')
+		}
+	}
+
+	const resultPolicy = options.resultPolicy
+	const resultPolicyMode =
+		typeof resultPolicy === 'object'
+			? resultPolicy.mode
+			: resultPolicy ?? (mode === 'status' ? 'state' : mode === 'event' ? 'event' : mode === 'stream' ? 'state-and-event' : undefined)
+	const eventOptions = [options.successEventName, options.failureEventName, options.progressEventName]
+	if (eventOptions.some(value => value !== undefined)) {
+		for (const eventName of eventOptions) {
+			if (eventName !== undefined) {
+				assertNonEmpty(eventName, 'result event name')
+			}
+		}
+		if (resultPolicyMode !== 'event' && resultPolicyMode !== 'state-and-event') {
+			throw new HandledError(
+				StatusCode.BadRequest,
+				'Result event names require an event or state-and-event result policy',
+			)
+		}
+	}
+	if ((options.ttlMs !== undefined || options.delivery !== undefined) && (!resultPolicyMode || resultPolicyMode === 'none')) {
+		throw new HandledError(StatusCode.BadRequest, 'Result retention and delivery require a result policy')
 	}
 }
 

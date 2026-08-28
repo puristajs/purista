@@ -19,16 +19,16 @@ re-export it.
 ```ts
 import { z } from 'zod'
 
-.tools({
-  lookup_order: {
+.tools(({ tool }) => ({
+  lookup_order: tool({
     description: 'Look up an order that the current caller may view.',
     input: z.object({ orderId: z.string().min(1) }),
     output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
     handler: async (ctx, { orderId }) => {
       return orderService.lookupVisibleOrder({ sessionId: ctx.sessionId, orderId })
     }
-  }
-})
+  })
+}))
 .agents(({ agent }) => ({
   support: agent({
     model: 'assistant',
@@ -53,8 +53,8 @@ short-lived authorization facade available to the tool composition root:
 ```ts
 function createSupportHarness(authorize: (orderId: string) => Promise<void>) {
   return defineHarness({ name: 'support' })
-    .tools({
-      lookup_order: {
+    .tools(({ tool }) => ({
+      lookup_order: tool({
         description: 'Return the current status for an order visible to the caller.',
         input: z.object({ orderId: z.string().min(1) }),
         output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
@@ -62,8 +62,8 @@ function createSupportHarness(authorize: (orderId: string) => Promise<void>) {
           await authorize(orderId)
           return orderService.getPublicStatus(orderId)
         }
-      }
-    })
+      })
+    }))
     // Compose models and agents as shown in the previous guides.
 }
 ```
@@ -161,7 +161,7 @@ The TypeScript handler remains the final authorization and domain boundary.
 Governance gives the Harness an additional typed exposure, policy, and approval
 layer for tool use. Keep approval decisions authenticated and application-owned.
 
-```ts
+```ts title="Harness composition: sensitive-tool governance"
 .governance(({ native, rule, exposureRule }) => ({
   defaultEffect: 'allow',
   exposure: {
@@ -171,9 +171,7 @@ layer for tool use. Keep approval decisions authenticated and application-owned.
       when: ({ metadata }) => metadata.plan === 'readonly'
     })]
   },
-  approval: {
-    request: async ({ approvalId }) => applicationApprovals.waitForDecision(approvalId)
-  },
+  approval: applicationApprovalProvider,
   policies: [native({
     id: 'settlement-policy',
     rules: [rule({
@@ -183,6 +181,20 @@ layer for tool use. Keep approval decisions authenticated and application-owned.
   })]
 }))
 ```
+
+Supply the application-owned `GovernanceApprovalProvider` at composition.
+Its `request(request, execution)` callback receives the tool subject and
+collected permission/policy demands, with `signal` and `deadline` in the second
+argument. Return `approved` or `rejected` and an optional stable `reasonCode`;
+do not return `require_approval` or keep the callback open for a long human
+review. Static `require_approval` permissions and policy demands share this
+same provider. Timeout, cancellation, malformed results, and thrown callbacks
+fail closed; a late approval cannot start the handler.
+
+The [composed example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
+contains the executable provider and permission/policy wiring. For rules
+selecting multiple tools, narrow on `toolId` before reading the correlated
+parsed `input`; tool-input rails run on raw JSON before the schema parses once.
 
 Exposure rules run before the model call and see safe scalar metadata; native
 tool rules receive the parsed tool input. Do not put a bearer token, customer

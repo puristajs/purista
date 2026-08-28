@@ -66,16 +66,16 @@ import { z } from 'zod'
 
 const harness = defineHarness({ name: 'claims-review' })
   .sandbox(inMemorySandbox())
-  .tools({
-    read_claim_evidence: {
+  .tools(({ tool }) => ({
+    read_claim_evidence: tool({
       description: 'Read one reviewed evidence file already staged for this claim.',
       input: z.object({ filename: z.string().regex(/^[a-z0-9._-]+$/i) }),
       output: z.object({ text: z.string().max(20_000) }),
       handler: async (ctx, { filename }) => ({
         text: await ctx.sandbox.readText(`/workspace/evidence/${filename}`),
       }),
-    },
-  })
+    }),
+  }))
   .build()
 ```
 

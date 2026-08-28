@@ -25,8 +25,8 @@ function paragraphs(text: string): string[] {
 	return text.split(/\n{2,}/).map(part => part.trim()).filter(Boolean)
 }
 
-function memberId(member: { name: string; id: number }): string {
-	return `${member.name}-${member.id}`.replace(/[^a-zA-Z0-9_.-]+/g, '-')
+function memberId(member: { name: string }): string {
+	return member.name.replace(/[^a-zA-Z0-9_.-]+/g, '-').toLowerCase()
 }
 ---
 
@@ -37,6 +37,7 @@ function memberId(member: { name: string; id: number }): string {
   currentId="api"
   headings={headings}
   prose={false}
+  product="framework"
 >
   <nav class="api-breadcrumb" aria-label="Breadcrumb">
     <a href="/handbook/">Handbook</a>

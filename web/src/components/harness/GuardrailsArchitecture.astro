@@ -1,5 +1,12 @@
 ---
 /** A high-level, provider-neutral default-loop guardrail lifecycle. */
+import {
+  guardrailsBuildGuarantee,
+  guardrailsOutputRailGuarantee,
+  guardrailsPhasesById,
+} from '../../data/guardrails-content.ts'
+
+const { input, output, retrieval, tool_input: toolInput, tool_output: toolOutput } = guardrailsPhasesById
 ---
 
 <figure class="guardrails-architecture" aria-labelledby="guardrails-architecture-title">
@@ -14,29 +21,29 @@
       <span>Schema and application authentication</span>
     </li>
     <li class="guardrails-architecture__stage guardrails-architecture__stage--control">
-      <span class="guardrails-architecture__timing">Automatic</span>
-      <strong>Input rails</strong>
-      <span>Allow, block, or transform</span>
+      <span class="guardrails-architecture__timing">{input.diagramTiming}</span>
+      <strong>{input.label}</strong>
+      <span>{input.diagramDescription}</span>
     </li>
     <li class="guardrails-architecture__stage guardrails-architecture__stage--parallel">
-      <span class="guardrails-architecture__timing">Application-owned</span>
-      <strong>Retrieval</strong>
-      <span>Explicit filter before context joins</span>
+      <span class="guardrails-architecture__timing">{retrieval.diagramTiming}</span>
+      <strong>{retrieval.label}</strong>
+      <span>{retrieval.diagramDescription}</span>
     </li>
     <li class="guardrails-architecture__stage guardrails-architecture__stage--model">
       <span class="guardrails-architecture__timing">Provider boundary</span>
       <strong>Model call</strong>
       <span>Provider adapter and normal model span</span>
     </li>
-    <li class="guardrails-architecture__stage guardrails-architecture__stage--control">
-      <span class="guardrails-architecture__timing">After each model result</span>
-      <strong>Output rails</strong>
-      <span>Before a tool or final delivery</span>
-    </li>
     <li class="guardrails-architecture__stage guardrails-architecture__stage--tool">
       <span class="guardrails-architecture__timing">Only when requested</span>
       <strong>Tool rails</strong>
-      <span>Before input and after result</span>
+      <span>{toolInput.label} before execution; {toolOutput.label} before the model loop resumes</span>
+    </li>
+    <li class="guardrails-architecture__stage guardrails-architecture__stage--control">
+      <span class="guardrails-architecture__timing">{output.diagramTiming}</span>
+      <strong>{output.label}</strong>
+      <span>{output.diagramDescription}</span>
     </li>
     <li class="guardrails-architecture__stage guardrails-architecture__stage--after">
       <span class="guardrails-architecture__timing">After the final result</span>
@@ -48,7 +55,7 @@
   <div class="guardrails-architecture__evidence" aria-label="Evidence emitted at every guardrail boundary">
     <span>Every rail decision</span>
     <strong>Content-free GUARDRAIL span · metric · structured log</strong>
-    <span>Model checks retain their nested model span for provider, model, tokens, and cost analysis when reported.</span>
+    <span>{guardrailsOutputRailGuarantee} {guardrailsBuildGuarantee}</span>
   </div>
 </figure>
 

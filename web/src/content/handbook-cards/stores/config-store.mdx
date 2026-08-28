@@ -3,7 +3,7 @@ title: Config Store
 description: Non-sensitive configuration that varies by environment — externalized, testable, and swappable without touching business logic.
 ---
 
-The **config store** holds non-sensitive configuration that may change during runtime. API URLs, feature flags, timeout settings, and third-party provider endpoints all belong here — not in code, not in environment variables, and never alongside secrets.
+The **config store** holds non-sensitive configuration that may change during runtime. API URLs, feature flags, timeout settings, and third-party provider endpoints belong here. It is distinct from deployment configuration (including startup credentials) and from secret-store values managed by the application at runtime.
 
 ## Config store vs. secret store vs. state store
 
@@ -17,7 +17,9 @@ PURISTA ships three distinct store abstractions. Choose based on what the data _
 | **Changed by handlers** | Yes | Rarely | Yes |
 | **Validated automatically** | No (validate yourself) | No | No |
 
-If the data is a credential → use a [secret store](/handbook/stores/secret-store/).  
+If the data is a sensitive credential managed while the service runs → use a [secret store](/handbook/stores/secret-store/).
+
+If it is a fixed technical credential required to start an adapter or resource → use approved deployment secret delivery or workload identity.
 If the data is business state your handlers read and write → use a [state store](/handbook/stores/state-store/).  
 If the data is non-sensitive configuration that operators tune → use a config store.
 
@@ -32,7 +34,7 @@ PURISTA offers two ways to provide configuration. Choose based on mutability and
 | Changes during runtime | Yes | No |
 | Distributed / shared | Yes | No |
 
-**Use service config** for values needed at startup that never change: database connection strings, service name, port numbers.
+**Use service config and composition-root wiring** for values needed at startup that never change: service name, port numbers, and fixed technical credentials supplied through the deployment platform. Keep raw credentials inside the resource or adapter that needs them.
 
 **Use config store** for values that might change without a restart: third-party API URLs, feature flags, rate limits.
 

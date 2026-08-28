@@ -24,17 +24,17 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 	 * @param config - Store name, namespace metadata and Dapr sidecar client settings.
 	 */
 	constructor(config?: StoreBaseConfig<DaprSecretStoreConfig>) {
-		super(config?.secretStoreName ?? 'DaprSecretStore', { ...config })
-		const logger = this.logger
 		const conf = {
 			secretStoreName: 'secretStore',
-			logger,
 			...config,
 			clientConfig: {
 				...getDefaultClientConfig(),
 				...config?.clientConfig,
 			},
 		}
+
+		super(conf.secretStoreName, conf)
+		const logger = this.logger
 
 		let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
 		if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {

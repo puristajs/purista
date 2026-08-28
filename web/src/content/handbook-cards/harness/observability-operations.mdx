@@ -15,7 +15,7 @@ the exporter, resource attributes, sampling, trace propagation, and backend.
 
 Start production with content capture disabled and structured logs enabled:
 
-```ts
+```ts title="src/harness.ts: disable content capture"
 const harness = defineHarness({ name: 'claims-review' })
   .logger(new JsonLogger({ level: 'info' }))
   .telemetry({
@@ -53,6 +53,19 @@ outcome. A model-backed rail contains a nested LLM span, which is the
 authoritative cost and token record for that check. Native PII and local NER
 detectors are not LLM calls, so they emit no model, token, or cost attributes.
 
+Use `model.completed` for run-event call counts and provider-reported usage.
+It contains only validated accounting metadata, including for intermediate
+tool-call responses and final candidates later blocked by an output rail.
+`model.object` releases the guarded, schema-validated final answer and must not
+be counted again. PURISTA forwards completion events in
+`response.output_json.delta`; it does not emit a second set of token metrics.
+
+Governance and rails reuse `DecisionEvidence`: `decisionId`, `source`, `phase`,
+and optional `reasonCode`. Occurrence, source, phase, and ordinal derive the ID;
+enclosing events/audit records carry effect, enforcement, and correlation.
+An evaluation error carries its stable `failureKind` beside evidence, not
+inside it. A callback's input or exception message is never safe evidence.
+
 ## Continue the caller trace and inspect a completed run
 
 Pass W3C Trace Context from the inbound transport as invocation options. Keep
@@ -60,7 +73,7 @@ metadata to safe scalar routing context only; it is exposed to handlers and
 telemetry sanitizers, so it must never contain a prompt, evidence, token,
 email address, or secret.
 
-```ts
+```ts title="Transport boundary: propagate trace context"
 let runId: string | undefined
 for await (const event of session.agents.claims_support.stream(
   { question },
@@ -87,17 +100,20 @@ prices or require an OpenTelemetry backend.
 Handlers can record a domain metric through the scoped helper; use stable,
 low-cardinality attributes only:
 
-```ts
+```ts title="Workflow handler: measure bounded application work"
 await ctx.metrics.duration(
-  'claims.review.approval_wait_seconds',
+  'claims.review.task_create_seconds',
   { workflow_id: ctx.workflowId, outcome: 'referred' },
-  () => applicationApprovals.wait(ctx.input.claimId, ctx.signal)
+  () => applicationReviewTasks.create(ctx.input.claimId, ctx.signal)
 )
 ```
 
 The Harness meter attaches active Harness/session/run correlation. Do not use
 customer IDs, claim IDs, prompts, URLs with secrets, or raw error messages as
 metric attributes.
+Do not measure human waiting by keeping a callback or span open. Persist an
+application review task and suspend via the external-wait primitive; use
+committed task timestamps for application-owned review latency.
 
 ## Operational runbook
 
@@ -126,8 +142,8 @@ and remains fail closed.
 | `OperationTimeoutError` | Run, model, tool, or skill exceeded its budget. | Inspect the relevant child span; adjust the narrowest budget or move work to a worker. |
 | `OperationCancelledError` | Client, parent run, or shutdown aborted the signal. | Verify request-disconnect and cancellation propagation before retrying. |
 | `ModelError` | Provider, network, rate limit, or malformed response. | Inspect safe normalized status/retry metadata and the model span; never log raw provider content. |
-| `GuardrailBlockedError` | Content matched a blocking policy. | Return the approved safe user response; do not retry automatically. |
-| Guardrail evaluation error | Detector, codec, action, or optional dependency failed. | Keep the fail-closed result; fix deployment/configuration and retest with the selected fake. |
+| `DecisionBlockedError` | A content or authority decision blocked the boundary. | Inspect safe evidence; return the approved safe response and do not retry automatically. |
+| `DecisionEvaluationError` | Policy, approval, audit, rail, detector, codec, or bounded callback failed. | Inspect stable `failureKind`; preserve fail-closed behavior and test the repaired dependency. |
 | `SandboxNoExecutorError` | A command-backed tool ran in a files-only sandbox. | Supply an isolating executor or remove that capability. |
 | `McpProtocolError` or `McpAuthError` | MCP transport, schema, or authentication failed. | Validate endpoint/command, secret rotation, timeout, and safe protocol logs. |
 

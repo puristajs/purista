@@ -10,7 +10,6 @@ export const triageTicketAgentBuilder = supportV1ServiceBuilder
 	.addPayloadSchema(supportV1TriageTicketInputPayloadSchema)
 	.addOutputSchema(supportV1TriageTicketOutputPayloadSchema)
 	.addModel('primary', {
-		model: 'support-triage',
 		capabilities: ['object'] as const,
 		defaults: { temperature: 0 },
 	})

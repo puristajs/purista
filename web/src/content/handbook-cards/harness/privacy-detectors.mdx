@@ -1,337 +1,69 @@
 ---
 title: Privacy Detectors
-description: Select, configure, operate, and test local or sidecar sensitive-data detectors without binding Guardrails to an AI provider.
+description: Bind one explicit detector and inline sensitive-data policy to the exact guardrail fields that need inspection.
 ---
 
-Guardrails owns the portable sensitive-data policy and applies the decision at
-an agent boundary. A **detector** only inspects text and returns validated,
-content-free locations. That separation lets the same `config.yml` run with a
-local native detector, an application-owned Presidio sidecar, or a reviewed
-local NER model.
+Sensitive-data detection is optional, provider-neutral, and fail-closed. A
+detector sees only the selected text supplied by a guardrail action. It never
+creates a provider, scans arbitrary prompts/files/JSON, or records inspected
+content in operational evidence.
 
-This page extends the claims-support example in
-[Guardrails & Governance](/handbook/harness/guardrails-governance/).
+| Detector | Select it for | Boundary |
+| --- | --- | --- |
+| Native privacy | Common local syntax: email, phone, card, IP, IBAN, US SSN, URL | Native prebuild; no remote, WASM, or model fallback |
+| Presidio | An existing private Analyzer with governed recognizers or languages | Application-owned authenticated `POST /analyze` endpoint |
+| Local NER | Provisioned local model labels such as person, organization, location | Pinned files, explicit label map, startup `warmup()` |
 
-## Choose a detector by the protection you need
+## Bind the policy in TypeScript
 
-| Option | Choose it when | Runtime boundary | Do not choose it when |
-| --- | --- | --- | --- |
-| `@purista/harness-guardrails-native-privacy` | Common identifier detection must stay local and deterministic. | In-process Rust Node-API prebuild; no network, model, filesystem, JavaScript, or WASM fallback. | You need names, locations, custom recognizers, or language-aware NER. |
-| `@purista/harness-guardrails-presidio` | You already operate Presidio Analyzer, need its recognizers, or require an application-owned custom recognizer. | An authenticated internal HTTP(S) Presidio Analyzer gateway. The adapter itself reports `local` execution because the sidecar is application-owned. | You want an entirely in-process detector or do not own the network/security boundary. |
-| `@purista/harness-guardrails-local-ner` | A reviewed local token-classification model is required for selected NER labels such as person, organization, or location. | In-process local model loaded from an absolute, integrity-verified directory. | You need general-purpose PII coverage without evaluating a model and its labels. |
+The policy belongs in the same typed composition as the selected detector and
+action map. Every policy has a nonempty, unique uppercase `entities` list,
+`maskToken`, and `scoreThreshold` from `0` to `1`.
 
-All detectors implement the same `SensitiveDataDetector` contract. The policy
-never selects a detector, endpoint, cloud provider, recognizer, language, or
-fallback. Make that choice once at the application composition root and use
-the same detector for input, output, retrieval, and any explicitly coded tool
-field.
-
-## Compatibility matrix
-
-“Presidio deployment dependent” means your application-owned Analyzer
-deployment must already expose the recognizer or model. The adapter does not
-install, configure, or emulate it. “Model/label dependent” means the selected
-local model must produce a mapped label above your configured threshold.
-
-| End-user capability | Presidio sidecar | Native privacy | Local NER |
-| --- | --- | --- | --- |
-| Block protected text at agent input, output, retrieval, or an explicitly selected tool field | Yes | Yes | Yes |
-| Replace each whole detected value with one fixed policy token | Yes | Yes | Yes |
-| Remove each whole detected value with `mask_token: ''` | Yes | Yes | Yes |
-| Detect email address | Presidio deployment dependent | Built in, regex-based | Model/label dependent |
-| Detect phone number | Presidio deployment dependent | Built in, format-based | Model/label dependent |
-| Detect payment-card number | Presidio deployment dependent | Built in, Luhn-checked | Model/label dependent |
-| Detect IPv4 or IPv6 syntax | Presidio deployment dependent | Built in | Model/label dependent |
-| Detect IBAN-shaped values | Presidio deployment dependent | Built in | Model/label dependent |
-| Detect US Social Security number-shaped values | Presidio deployment dependent | Built in | Model/label dependent |
-| Detect HTTP(S) URLs | Presidio deployment dependent | Built in | Model/label dependent |
-| Detect names, organizations, locations, medical entities, or selected NER labels | Presidio recognizer/model dependent | No | Selected local model labels only |
-| Detect application-specific identifiers | Custom recognizer dependent | Inject another detector | Inject another detector |
-| Select a detection language | Fixed composition-root `language` per detector | No NLP language model | Selected local model and label mapping |
-| No detector network hop | No | Yes | Yes |
-| Deterministic test double | `FakePresidioSidecar` | `FakeSensitiveDataDetector` | `FakeLocalNerRuntime` |
-
-None of these packages generates realistic replacement data, chooses a
-different replacement for each entity, partially masks a match, hashes or
-encrypts text, scans arbitrary CSV/JSON datasets, performs OCR, or redacts
-images/PDFs. Those are distinct capabilities and must be designed as explicit
-application adapters.
-
-## Native privacy: smallest local setup
-
-Use the native package for the supported identifier set:
-`EMAIL_ADDRESS`, `PHONE_NUMBER`, `CREDIT_CARD`, `IP_ADDRESS`, `IBAN_CODE`,
-`US_SSN`, and `URL`.
-
-```sh
-npm install @purista/harness-guardrails-native-privacy
-```
-
-```ts
-import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
+```ts title="src/guardrails/privacy.ts"
+import { createSensitiveDataActions, defineGuardrails } from '@purista/harness-guardrails'
 import { createNativePrivacyDetector } from '@purista/harness-guardrails-native-privacy'
 
-const detector = createNativePrivacyDetector({ id: 'claims-local-pii' })
+const detector = createNativePrivacyDetector({ id: 'support-privacy-v1' })
+const actions = createSensitiveDataActions({ detector })
 
-const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  actions: createSensitiveDataActions({ detector }),
-})
-```
-
-The package chooses a matching prebuilt Rust Node-API binary for supported
-macOS, Linux glibc, or Windows targets. It is tested on Node.js and Bun. An
-unsupported platform or missing binary fails during construction; it does not
-quietly use a JavaScript, model, remote, or WASM fallback. Because it declares
-its supported entities, `defineGuardrails()` rejects a policy that asks it to
-inspect an unsupported category.
-
-## Presidio: keep the sidecar application-owned
-
-Use Presidio Analyzer only through an internal gateway you operate. The
-adapter calls `POST /analyze`, passes the policy's entities and threshold,
-forces `return_decision_process: false`, validates the response, and converts
-Presidio code-point offsets to JavaScript UTF-16 offsets. It does not call
-Presidio Anonymizer: provider-neutral masking happens in Guardrails after a
-validated finding.
-
-```sh
-npm install @purista/harness-guardrails-presidio
-```
-
-```ts
-import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
-import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
-
-const detector = createPresidioDetector({
-  id: 'claims-presidio',
-  endpoint: 'https://presidio.internal/',
-  language: 'en',
-  headers: {
-    authorization: `Bearer ${process.env.PRESIDIO_GATEWAY_TOKEN!}`,
-  },
-})
-
-const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  actions: createSensitiveDataActions({ detector }),
-})
-```
-
-Keep the endpoint, authentication, static headers, TLS/mTLS posture,
-availability policy, and Presidio recognizers outside YAML. The adapter accepts
-only a credential-free absolute HTTP(S) base URL and static headers that cannot
-override `content-type`. It does not discover credentials, retry, or fall back
-to another service. Transport, HTTP, malformed response, and cancellation
-failures are fail-closed when the detector is used by a rail.
-
-## Local NER: install only where it is needed
-
-The local NER adapter is intentionally separate because Transformers.js and
-model assets are substantial optional dependencies. It never bundles a model,
-downloads model files, accepts a repository ID, or talks to a model registry.
-
-```sh
-npm install @purista/harness-guardrails-local-ner @huggingface/transformers
-```
-
-Provision the selected model through your normal artifact process, produce an
-application-owned SHA-256 manifest for every required file, map only labels you
-have evaluated, and warm it before accepting traffic.
-
-```ts
-import { createSensitiveDataActions, defineGuardrails, loadGuardrailsConfig } from '@purista/harness-guardrails'
-import {
-  createLocalNerDetector,
-  LocalNerDetectorError,
-} from '@purista/harness-guardrails-local-ner'
-import { NER_EN_V1_ASSETS } from './models/ner-en-v1.integrity.js'
-
-const detector = createLocalNerDetector({
-  id: 'claims-ner-en',
-  modelId: 'claims-ner-en-v1',
-  modelPath: '/srv/purista-models/claims-ner-en-v1',
-  modelFiles: NER_EN_V1_ASSETS,
-  labels: {
-    PER: 'PERSON',
-    ORG: 'ORGANIZATION',
-    LOC: 'LOCATION',
-  },
-})
-
-try {
-  await detector.warmup()
-} catch (error) {
-  if (error instanceof LocalNerDetectorError) {
-    console.error({ local_ner_failure_kind: error.kind, message: error.message })
-  }
-  throw error
-}
-
-const rails = defineGuardrails({
-  config: await loadGuardrailsConfig('./guardrails'),
-  actions: createSensitiveDataActions({ detector }),
-})
-```
-
-`modelPath` must be an absolute directory. Warmup validates every declared
-relative asset stays inside it, resolves no symlink escape, has the expected
-lower-case SHA-256 digest, and then loads a Transformers.js token-classification
-pipeline with local files only and simple aggregation. Only labels explicitly
-mapped to portable categories are returned; a category that is missing from the
-mapping is not detected.
-
-### Fail safely at startup and at runtime
-
-`LocalNerDetectorError.kind` is deliberately safe to expose to operators. It
-can be one of `missing_optional_dependency`, `invalid_configuration`,
-`model_integrity_failed`, `model_load_failed`, `invalid_request`,
-`invalid_result`, or `aborted`.
-
-If `@huggingface/transformers` is absent, warmup and inspection report
-`missing_optional_dependency` with the exact installation command. Do not hide
-that error and start a service with a disabled privacy rail. Fail startup, fix
-the deployment, and warm up again. During a guarded inspection, the same
-failure becomes a fail-closed rail error with
-`harness.sensitive_data.failure_kind=missing_optional_dependency` and a
-content-free structured error log. The trace does not contain inspected text,
-local paths, model output, model files, or credentials.
-
-Local NER input is limited to 65,536 UTF-16 code units. Split or reject larger
-application inputs before passing them to a rail; do not silently truncate a
-claim narrative because doing so can skip sensitive material.
-
-## Protect a structured settlement memo explicitly
-
-String input, output, and retrieval rails are intentionally narrow. Guardrails
-does not recursively scan arbitrary tool JSON because the application must
-decide exactly which fields can be inspected and changed. Bind a reviewed codec
-to the selected tool flow, preserve all other fields, and keep the normal Zod,
-permissions, governance, and business checks in place.
-
-```ts
-import { z } from 'zod'
-
-const sensitiveDataActions = createSensitiveDataActions({
-  detector,
-  toolInput: {
-    policy: 'input',
-    detectFlow: 'detect sensitive data in settlement memo',
-    codec: {
-      id: 'settlement-memo-v1',
-      extract: (value) => {
-        const input = z.object({ memo: z.string() }).parse(value)
-        return [{ id: 'memo', text: input.memo }]
-      },
-      replace: (value) => value,
+export const privacyRails = defineGuardrails({
+  config: {
+    rails: {
+      input: { flows: ['mask sensitive data on input'] },
+      output: { flows: ['mask sensitive data on output'] },
+    },
+    sensitiveData: {
+      input: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
+      output: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
     },
   },
+  actions,
 })
 ```
 
-Then include `detect sensitive data in settlement memo` under
-`rails.tool_input.flows`. It uses the `input` sensitive-data policy selected by
-the codec binding. A finding blocks before the settlement tool input schema,
-governance, and side effect. For masking instead, use `maskFlow` and implement
-`replace()` with a reverse-order replacement that changes only the reviewed
-memo field.
+Use the `detect sensitive data …` actions to block on findings and the `mask`
+actions to replace detected spans before the next boundary. A configured entity
+must be supported by the selected detector or composition fails before any
+request is sent.
 
-## Test detectors without a model or network
+## Choose deployment-safe construction
 
-Use the package test doubles for application unit tests and adapter-contract
-tests. They script outcomes; they do not recognize PII, run a model, or call a
-network. Test fixture text must be synthetic and must never be copied into
-snapshots, logs, traces, or telemetry.
+Presidio is injected with the application-owned endpoint, authentication, and
+language. Use HTTPS or protected internal networking and alert only on its
+stable failure kind. Local NER accepts an absolute model path, SHA-256 asset
+manifest, and explicit label map; it never downloads at runtime. A missing peer,
+asset, manifest, or warmup failure stops readiness.
 
-### Native / injected detector behavior
+For structured tool data, use `sensitiveDataToolRail(...)` with a nonempty tool
+selector, exact `valueSchema`, and a reviewed `SensitiveDataValueCodec`. The
+codec extracts and replaces only approved text fields. Guardrails never recurse
+through arbitrary tool JSON.
 
-```ts
-import { SensitiveDataDetectorError } from '@purista/harness-guardrails'
-import { FakeSensitiveDataDetector } from '@purista/harness-guardrails/testing'
+## Verify the failure boundary
 
-const detector = new FakeSensitiveDataDetector({
-  id: 'privacy-test',
-  supportedEntities: ['EMAIL_ADDRESS'],
-})
-detector.enqueue([{ category: 'EMAIL_ADDRESS', start: 8, end: 25, score: 0.99 }])
-
-// The next configured sensitive-data action observes one deterministic finding.
-// An unscripted later inspection returns { findings: [] }.
-```
-
-Use `enqueueError(new SensitiveDataDetectorError('test_failure', 'Synthetic detector failure.'))`
-to prove the fail-closed error path and assert the normalized
-`GUARDRAIL_EVALUATION_ERROR`, not the synthetic text.
-
-### Presidio sidecar protocol
-
-```ts
-import { createPresidioDetector } from '@purista/harness-guardrails-presidio'
-import { FakePresidioSidecar } from '@purista/harness-guardrails-presidio/testing'
-
-const sidecar = new FakePresidioSidecar()
-sidecar.enqueueAnalyzeResponse([
-  { entity_type: 'EMAIL_ADDRESS', start: 8, end: 25, score: 0.99 },
-])
-
-const detector = createPresidioDetector({
-  id: 'presidio-test',
-  endpoint: 'https://presidio.test/',
-  fetch: sidecar.fetch,
-})
-
-// Assert sidecar.requests[0] in the test to verify POST /analyze.
-// enqueueTransportError() scripts the fail-closed transport case.
-```
-
-`sidecar.requests` is test-only in-memory request data. Do not write it to a
-snapshot or telemetry exporter.
-
-### Local NER mapping and failures
-
-```ts
-import {
-  createLocalNerDetectorWithRuntime,
-  FakeLocalNerRuntime,
-} from '@purista/harness-guardrails-local-ner/testing'
-
-const runtime = new FakeLocalNerRuntime()
-runtime.enqueue([{ entity_group: 'PER', score: 0.99, start: 0, end: 5 }])
-
-const detector = createLocalNerDetectorWithRuntime(localNerOptions, async () => runtime)
-
-await expect(detector.inspect({
-  text: 'Alice',
-  entities: ['PERSON'],
-  scoreThreshold: 0.8,
-  signal: new AbortController().signal,
-})).resolves.toEqual({
-  findings: [{ category: 'PERSON', start: 0, end: 5, score: 0.99 }],
-})
-```
-
-Use `runtime.enqueueError()` to test a `model_load_failed` path. Test missing
-optional dependency behavior through the public detector, not by attempting to
-remove packages from a running test process. In each case assert the stable
-failure kind and that the guardrail blocks; do not assert or record inspected
-text.
-
-## Operational checks
-
-Before releasing the claims assistant:
-
-1. Verify every portable entity in `config.yml` is supported by the selected
-   detector or mapped local NER label.
-2. Exercise allowed, blocked, transformed, detector-failure, and tool-side
-   effect-free paths with deterministic tests.
-3. For Presidio, confirm gateway authentication, TLS/mTLS, network policy,
-   recognizer inventory, and safe failure alerts are application-owned.
-4. For local NER, verify artifact provenance, hash manifest, label evaluation,
-   memory capacity, startup warmup, and failure alerting.
-5. Alert on `harness.sensitive_data.inspections` by outcome and failure kind;
-   never alert from captured customer content.
-
-Continue with [Testing & Evaluations](/handbook/harness/testing-and-evaluations/)
-for Harness-level deterministic tests, and
-[Observability & Operations](/handbook/harness/observability-operations/)
-for exporter and operational setup.
+Use `FakeSensitiveDataDetector`, `FakePresidioSidecar`, or
+`FakeLocalNerRuntime` from the related testing export. Script allow, finding,
+and failure outcomes. Assert that a blocked path never calls the model or tool
+and that logs/traces contain only stable decision/failure fields. These tests
+prove wiring; they do not establish detector recall or model quality.

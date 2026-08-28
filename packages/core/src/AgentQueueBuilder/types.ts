@@ -1,9 +1,12 @@
 import type {
 	BuiltinToolName,
+	BuilderState as HarnessBuilderState,
 	DurableWorkspace,
+	DurableWorkspacePolicy,
 	GovernanceConfig,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
+	HarnessStorage,
 	WorkflowDefinition as HarnessWorkflowDefinition,
 	ModelAlias,
 	ModelCapability,
@@ -11,8 +14,11 @@ import type {
 	ModelHandle,
 	ModelProvider,
 	RunEvent,
+	Sandbox,
+	SandboxBindingOptions,
+	SandboxOwner,
+	SandboxPolicy,
 	Session,
-	HarnessStorage,
 	TelemetryOptions,
 } from '@purista/harness'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
@@ -30,43 +36,57 @@ export type AgentExecutionKind = 'harnessAgent' | 'harnessWorkflow' | 'runFuncti
 /**
  * Declares a model alias required by an attached PURISTA agent.
  *
- * The provider is supplied at service instantiation time; this declaration is
- * the compile-time and startup contract for handlers and harness setup.
+ * This declaration is the compile-time and startup capability contract for
+ * handlers and Harness setup. The concrete provider and model identifier are
+ * supplied when the owning service is instantiated.
  *
  * @example
  * ```ts
  * builder.addModel('primary', {
- *   model: 'gpt-4.1-mini',
  *   capabilities: ['object', 'tool_use'],
  *   defaults: { temperature: 0.2 },
  * })
  * ```
  */
-export type AgentModelBinding<
-	Capabilities extends readonly AgentModelCapability[] = readonly AgentModelCapability[],
-	Model extends string = string,
-> = {
-	model: Model
+export type AgentModelBinding<Capabilities extends readonly AgentModelCapability[] = readonly AgentModelCapability[]> = {
 	capabilities: Capabilities
 	defaults?: ModelDefaults
 }
 
-export type AgentRuntimeModelBinding<Binding extends AgentModelBinding = AgentModelBinding> = {
+/**
+ * Inline Harness agent definition accepted by `AgentQueueBuilder.setHarnessAgent`.
+ *
+ * Its `model` field is limited to aliases already declared through
+ * `AgentQueueBuilder.addModel(...)`. Define the model requirement before
+ * attaching the Harness agent.
+ */
+export type AgentHarnessDefinition<Models extends Record<string, AgentModelBinding>> = HarnessAgentDefinition<
+	Omit<HarnessBuilderState, 'models'> & {
+		models: { [Alias in keyof Models & string]: ModelAlias }
+	}
+>
+
+export type AgentRuntimeModelBinding = {
 	/** Provider instance used by the attached agent runtime for this model alias. */
 	provider: ModelProvider
-	/** Optional runtime model override for the statically declared model id. */
-	model?: string
-	/** Optional runtime capability override for the statically declared capabilities. */
+	/**
+	 * Deployment-selected concrete model identifier injected for this alias.
+	 *
+	 * This is runtime wiring, not part of the provider-neutral
+	 * `AgentQueueBuilder.addModel(...)` requirement.
+	 */
+	model: string
+	/** Optional runtime capability evidence; it must cover the builder's declared requirements when supplied. */
 	capabilities?: readonly AgentModelCapability[]
 	/** Default model options applied by the harness provider. */
 	defaults?: ModelDefaults
 	/** Provider-specific runtime options. */
 	providerOptions?: Record<string, unknown>
-} & Partial<Pick<Binding, 'model'>>
+}
 
 /** Runtime model bindings keyed by every model alias declared on an agent builder. */
 export type AgentRuntimeModelBindings<Models extends Record<string, AgentModelBinding>> = {
-	[K in keyof Models]: AgentRuntimeModelBinding<Models[K]>
+	[K in keyof Models]: AgentRuntimeModelBinding
 }
 
 /** Typed model handles exposed to an agent run function. */
@@ -182,17 +202,22 @@ export type AgentResponseModeOptions = {
 export type AgentSessionPolicy = { mode: 'ephemeral' } | { mode: 'conversation'; payloadPath: readonly string[] }
 
 /** Optional sandbox adapter configuration passed through to the agent runtime. */
-export type AgentSandboxPolicy = {
-	/**
-	 * Opt this agent in or out of sandboxing.
-	 *
-	 * `false` disables the sandbox for this agent even when a shared
-	 * `ai.sandbox` is configured. When omitted or `true`, the agent uses
-	 * `adapter` if provided, otherwise the shared `ai.sandbox`.
-	 */
-	enabled?: boolean
-	/** Runtime-specific sandbox adapter. Takes precedence over the shared `ai.sandbox`. */
-	adapter?: unknown
+/** Resolves an explicitly shared Harness owner from validated invocation data. */
+export type AgentSandboxOwnerResolver = (context: {
+	identity: AgentRunIdentity
+	input: import('@purista/harness').JsonValue
+}) => SandboxOwner | undefined | Promise<SandboxOwner | undefined>
+
+/** Executable PURISTA mapping; adapter selection remains at service composition. */
+export type AgentSandboxPolicy<Group extends string = string> = {
+	sharing?: SandboxPolicy<NoInfer<Group>>
+	owner?: AgentSandboxOwnerResolver
+}
+
+/** Data-only sandbox declaration safe to include in a public agent manifest. */
+export type AgentSandboxManifest = {
+	sharing?: SandboxPolicy<string>
+	usesExplicitOwner: boolean
 }
 
 /** Resolves a declared agent skill name to a runtime skill directory. */
@@ -276,12 +301,12 @@ export type AgentSkillRuntimeResolved = {
 /** Capability required by a durable attached-agent workspace policy. */
 export type AgentWorkspaceCapabilityRequirement = string
 
-/** Adapter-neutral durable workspace policy mirrored from `@purista/harness`. */
-export type AgentDurableWorkspacePolicy = {
-	retention?: Record<string, unknown>
-	encryption?: Record<string, unknown>
-	quota?: Record<string, unknown>
-}
+/**
+ * Per-run durable workspace constraints forwarded to `@purista/harness` when
+ * the workflow creates its workspace. The adapter remains responsible for
+ * rejecting constraints it cannot enforce.
+ */
+export type AgentDurableWorkspacePolicy = Partial<DurableWorkspacePolicy>
 
 /** Safe suspension information supplied to an application-owned review/outbox handoff. */
 export type AgentSuspendedNotice = {
@@ -306,8 +331,6 @@ export type AgentWorkspacePolicy = {
 	capabilities?: readonly AgentWorkspaceCapabilityRequirement[]
 	/** Adapter-neutral durable workspace policy forwarded to compatible runtimes. */
 	policy?: AgentDurableWorkspacePolicy
-	/** Cleanup timing requested by the generated agent runtime. */
-	cleanup?: 'on_success' | 'on_terminal' | 'manual'
 }
 
 /** HTTP projection metadata for the generated agent command or stream. */
@@ -505,7 +528,7 @@ export type AgentManifest<Models extends Record<string, AgentModelBinding> = Rec
 	session: AgentSessionPolicy
 	execution: Required<Pick<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>> &
 		Omit<AgentExecutionPolicy, 'maxAttempts' | 'maxParallelHandlers'>
-	sandbox?: AgentSandboxPolicy
+	sandbox?: AgentSandboxManifest
 	workspacePolicy?: AgentWorkspacePolicy
 	durability?: AgentDurabilityPolicy
 	http?: AgentHttpExposure
@@ -554,6 +577,8 @@ export type AgentRuntimeStreamInvocationInput = AgentRuntimeInvocationInput & {
 /** Attached agent definition before expansion into service definitions. */
 export type AgentDefinition<S extends AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes> = {
 	manifest: AgentManifest<S['Models']>
+	/** Process-local executable sandbox mapping; never serialized in the manifest. */
+	sandboxPolicy?: AgentSandboxPolicy
 	/** Agent-local metric definitions registered on the owning service at `addAgentDefinition(...)`. */
 	metricDefinitions: PuristaMetricDefinitions
 	payloadSchema?: S['PayloadSchema']
@@ -636,8 +661,11 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	onSuspended?: (notice: AgentSuspendedNotice) => Promise<unknown> | unknown
 	skills?: AgentSkillRuntimeOptions
 	logger?: PuristaLogger
-	sandbox?: unknown
+	sandbox?: Sandbox
+	/** Harness sandbox binding options owned by service composition. */
+	sandboxOptions?: SandboxBindingOptions<string>
 	telemetry?: TelemetryOptions
+	/** Harness-owned policies and immediate approval. Audit records expose safe decision evidence, not tool inputs. */
 	governance?: GovernanceConfig<any>
 }
 

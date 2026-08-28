@@ -57,7 +57,7 @@ const triageAgent = supportService
   .getAgentQueueBuilder('triage', 'Classifies incoming support tickets')
   .addPayloadSchema(payloadSchema)
   .addOutputSchema(outputSchema)
-  .addModel('primary', { model: 'gpt-4.1-mini', capabilities: ['object'] })
+  .addModel('primary', { capabilities: ['object'] })
   .setRunFunction(async context => {
     return await classify(context)
   })
@@ -173,12 +173,39 @@ filesystem built-ins, MCP stdio tools, or code execution. Sandbox capabilities
 such as `sandbox.snapshot`, `sandbox.resume`, and `sandbox.hibernate` describe
 low-level sandbox session behavior.
 
+There is one topology-transparent Harness `Sandbox` contract. Service
+composition selects the adapter once through `ai.sandbox`; an agent policy only
+selects `inherit`, `private`, or an already-configured named sharing group. It
+must not branch on local versus multi-instance deployment, expose provider
+references, or create a second business API. Use `ai.sandboxOptions` for the
+closed group vocabulary, default policy, and explicit-owner authorization.
+An optional policy `owner` resolver receives validated input and trusted run
+identity, but authorization remains the Harness binding callback. No callback,
+adapter, or resolved owner is serialized into an agent manifest.
+
+For background child tasks, the default is a fresh task-run shared partition;
+history remains private. Explicit sharing is selected in Harness workflow
+policy, not by inspecting adapter topology. The service authenticates and
+authorizes direct owner registration and `SandboxAdministration` cleanup.
+Principal offboarding fences that principal but must not delete tenant-owned
+state another authorized principal can still use.
+
+Harness hashes tenant/principal-aware session and durable keys, so raw identity
+does not appear in IDs. `attach` never creates missing state; `restore` is only
+valid after a compatible committed durable workspace is bound. Missing state is
+a `SandboxStateLostError`, never an empty replacement. Ephemeral terminal
+results retain their receipt for idempotent prompt/stream replay but dispose
+owned compute; retryable and suspended runs only release attachments. Borrowed
+owners are detached, never deleted. `session.release()` detaches the client,
+while `session.close()` terminates logical compute before the Harness session
+record is deleted.
+
 ## Enterprise Sandbox Boundary
 
-`setSandboxPolicy(...)` only selects or overrides the Harness adapter supplied
-in `getInstance(..., { ai: { sandbox } })`; it does not create a container,
-authorize a caller, or impose network and resource limits. Treat the adapter as
-an explicit deployment boundary.
+`setSandboxPolicy(...)` cannot select or override the Harness adapter supplied
+in `getInstance(..., { ai: { sandbox, sandboxOptions } })`; it does not create
+a container, authorize a caller, or impose network and resource limits. Treat
+the adapter as an explicit deployment boundary.
 
 - Use the Harness `inMemorySandbox()` for files-only agent paths. It has no
   executor and is the safest default.
@@ -186,6 +213,11 @@ an explicit deployment boundary.
   cannot host `mcp_stdio` because it has no long-lived-process `spawn` support.
 - Treat local host-directory execution as a trusted-worker/durability option,
   not isolation for untrusted model-directed commands or tenant boundaries.
+- `@purista/harness-sandbox-docker` is an optional local Docker/OrbStack
+  adapter. Configure it only in the application composition root with a
+  caller-prepared digest-pinned image and trusted local Docker access. It
+  defaults to no network and does not yet provide durable-workspace recovery;
+  a retained volume is not a workflow checkpoint.
 - For code execution or stdio MCP in production, wire a custom container,
   microVM, or remote sandbox adapter that enforces mounts, egress, unprivileged
   process identity, CPU/memory/PID/time limits, per-run/tenant workspace
@@ -198,7 +230,7 @@ Keep domain authorization in PURISTA guards/resources and stage only
 tenant-authorized files. A schema and a tenant-looking session ID validate a
 shape or identify a run; neither grants access. For the implementation matrix,
 MCP lifecycle, and negative-test baseline, use the public Handbook page
-`/handbook/harness/sandboxing-and-mcp/`.
+`/handbook/harness/secure-and-govern/sandbox-and-mcp/`.
 
 Use `setWorkspacePolicy(...)` only when an attached agent must resume from
 committed workspace state after queue retry, process restart, pause, or
@@ -210,7 +242,6 @@ const agent = service
   .setDurability({ mode: 'required', runIdPath: ['requestId'] })
   .setWorkspacePolicy({
     mode: 'durable',
-    cleanup: 'on_terminal',
   })
 ```
 
@@ -248,7 +279,9 @@ Keep ownership clear:
   quotas, cleanup scheduling, UI, billing, and product records
 
 Durability is fail-closed: omit `.setDurability(...)` for an intentionally
-ephemeral workflow. Never treat a sandbox snapshot as durable workspace replay.
+ephemeral workflow. Durable workspace files are the recovery guarantee; never
+treat a sandbox snapshot, retained process, or Docker volume as durable
+workspace replay.
 
 ## Handler Context
 Agent handlers use:
@@ -269,7 +302,7 @@ leaves harness behavior unchanged.
 Use governance for controls that are specifically about agent/tool behavior:
 - deny a model-requested tool call before the tool runs
 - require approval before a sensitive tool call
-- audit tool decisions in a central, content-redacted shape
+- audit tool decisions using the canonical content-free `DecisionEvidence`
 - reuse policy packs from OPA/Rego, Microsoft AGT, Eve-policy, or other
   governance ecosystems through optional harness policy adapters
 
@@ -281,16 +314,44 @@ Do not use governance to replace:
 
 PURISTA runtime wiring should pass tenant, principal, trace, correlation, and
 conversation metadata to the harness explicitly and only as safe scalar
-metadata. If an attached agent configures `require_approval` rules, provide a
-harness `approval` adapter in `ai.governance`. Agents without governance must
+metadata. Keep that metadata separate from decision evidence; do not copy it
+into evidence, reason codes, logs, or metrics. If an attached agent configures
+`require_approval` permissions or policies, provide one Harness `approval`
+provider in `ai.governance`. Agents without governance must
 not pay an approval, policy-engine, or audit-sink setup cost.
 
-`require_approval` is a synchronous decision for one tool call. It is not a
-durable human-review workflow: application services own review records,
-reviewer identity, expiry, decision persistence, guarded decision commands,
-and restart-safe queue continuation. Do not suspend a worker on an in-process
-Promise. Recheck tenant authorization and the canonical action before an
-approved decision reaches an idempotent domain command.
+| Boundary | Result | Owner |
+| --- | --- | --- |
+| Content | `allow`, `block`, phase-specific `transform` | Guardrails addon |
+| Tool permission/policy | `allow`, `deny`, `require_approval`; policy also `audit` | Harness governance |
+| Immediate approval | `approved`, `rejected` | Shared `GovernanceApprovalProvider` |
+| Durable review | `ExternalWaitOutcome`, immutable execution claim/receipt | Harness wait; application review/execution |
+
+For each tool call, static permission and policy approval demands are collected
+into one request to the same provider. `require_approval` is a demand, not the
+provider's return type. The provider returns `approved` or `rejected` with an
+optional stable content-free `reasonCode`. Policy callbacks selecting multiple
+tools narrow correlated parsed input by `toolId`; never cast one input shape
+across tools. Policy, approval, audit, and rail callbacks have finite budgets;
+propagate their effective `signal` and `deadline` to dependencies (approval and
+audit receive execution context as their second argument). Cancellation,
+timeouts, thrown callbacks, and malformed results fail closed. Late approval
+does not run the handler.
+
+Reason codes match `^[a-z][a-z0-9_]{0,63}$` and never derive from user content.
+Configure the callback budget with Harness `defaults.decisionTimeoutMs`;
+remaining invocation/tool deadlines and rail action caps may shorten it.
+
+Application services own durable review records, reviewer identity, expiry,
+guarded revision-CAS decisions, and restart-safe queue continuation. Do not
+suspend a worker on an in-process Promise. Bind changed invocation data outside
+replay-skipped steps. Before a new claim, reauthorize and verify approved
+revision, action digest, target revision, definition version, and expiry;
+atomically claim the immutable action under a stable execution ID. Execute that
+claim and persist its receipt. Concurrent resumes and crashes reuse the same
+claim/idempotency key/receipt. Never implement “read approved, then execute”,
+mark consumed before success, or put review CRUD in Core. Admission is not
+revocation after the side effect has been admitted.
 
 ## Guardrails And Sensitive Data
 
@@ -304,11 +365,23 @@ identity, guards, command/queue contracts, and the final mutation.
 - Input, output, tool-input, and tool-output rails run automatically for the
   attached default-loop agent. Retrieval is application-owned and requires an
   explicit `filterRetrievedChunks(...)` call before chunks enter agent input.
-- Keep NeMo-shaped YAML portable and declarative: it selects ordered flow IDs
-  and narrow sensitive-data policy only. Register TypeScript actions, model
-  aliases, and detector implementations at the composition root. Never put
-  endpoints, credentials, local model paths, recognizer setup, or fallback
-  behavior in YAML.
+- Actions declare their exact `phase`; a narrower value requires a
+  non-transforming `valueSchema`. Input rails see parsed agent input. Tool-input
+  rails transform raw JSON arguments before the tool schema parses once;
+  permission, governance, approval, and handler share that frozen parsed value.
+  Tool-output rails see validated results and produce a model-facing JSON
+  projection without reparsing. Output rails run only on final answer candidates;
+  intermediate tool-call responses skip output rails. Final candidates run before
+  the output schema parses once and before content events/persistence.
+- A content block never requests approval or durable suspension. Direct model
+  calls/custom handlers own their release boundary; automatic rails cannot
+  inspect opaque provider reasoning or retract already released custom content.
+- Author one typed inline `defineGuardrails({ config, actions })` declaration
+  at the composition root. `config.rails` defaults to `{}` and binds ordered
+  action IDs to their declared phases; `config.sensitiveData` carries only
+  explicit `entities`, `maskToken`, and `scoreThreshold` policies. Register
+  opaque action tokens, model aliases, and detector implementations in the
+  same composition.
 - Use exactly one injected `SensitiveDataDetector`: deterministic local native
   privacy for its documented subset, an authenticated private Presidio Analyzer
   sidecar for deployment-provided recognizers, local NER only with an explicitly
@@ -322,14 +395,20 @@ identity, guards, command/queue contracts, and the final mutation.
 
 Guardrail decisions are content-free Harness `GUARDRAIL` spans, metrics, and
 structured logs. Blocks are expected enforcement decisions; action failures
-are errors. A model-backed rail creates its normal nested model span, which is
+are `DecisionEvaluationError`; expected blocks use `DecisionBlockedError`, both
+from `@purista/harness`. Reuse safe evidence plus stable `reasonCode` or
+`failureKind`, never exception text or input in an operational record.
+A model-backed rail creates its normal nested model span, which is
 the only source for provider/model and reported token/cost attribution. PURISTA
 must not recreate those GenAI metrics.
 
-For complete standalone setup, YAML vocabulary, detector capability matrix,
-and production tests, route users to the public Handbook pages
-`/handbook/harness/guardrails-governance/` and
-`/handbook/harness/privacy-detectors/`.
+For complete standalone setup, inline configuration/action patterns, detector
+capability matrix, and production tests, route users to the public Handbook pages
+`/handbook/harness/secure-and-govern/guardrails/` and
+`/handbook/harness/secure-and-govern/privacy-detectors/`. The runnable Harness
+`examples/guardrails`, `examples/bank-governance`, and
+`examples/durable-human-review` are the composition, immediate approval, and
+durable claim/receipt references; reuse them instead of inventing a second API.
 
 ## AI Security And Privacy
 Treat every agent as a service-owned data processor:
@@ -342,10 +421,11 @@ Treat every agent as a service-owned data processor:
 - preserve `tenantId`, `principalId`, `traceId`, `correlationId`, and agent `runId` across queued runs, tool calls, child agents, streams, and audit logs
 - never use `correlationId`, message id, queue job id, or trace id as the logical AI conversation id
 - keep prompt/completion content out of non-debug logs, metrics attributes, traces, queue metadata, and emitted events
-- when governance is enabled, audit policy names, rule ids, effects, status,
-  risk tags, and correlation metadata only; do not audit raw tool input/output
-  unless an explicit product/legal retention policy owns encrypted storage,
-  access control, and deletion
+- when governance is enabled, reuse `DecisionEvidence` exactly: `decisionId`,
+  `source`, `phase`, optional `reasonCode`. Occurrence/source/phase/ordinal derive
+  the ID; effect/enforcement/correlation belong to enclosing events/audit
+  records and `failureKind` to the error. Never add tool values or metadata to
+  the evidence shape
 
 Agent-local metrics are declared with `AgentQueueBuilder.defineMetric(...)`:
 
@@ -380,6 +460,11 @@ Harness governance emits `policy.evaluated`, `policy.exposure`,
 `approval.requested`, and `approval.finished` run events. PURISTA forwards
 those as `response.output_json.delta` chunks with the original harness event in
 `data.delta` so UIs and audit consumers can branch on the harness `type`.
+The same projection forwards content-free `model.completed` accounting and
+external-wait events. Count completed model calls from `model.completed`, not
+`model.object`; the latter releases a final validated, guarded value and must
+not duplicate token totals. A blocked final candidate still has completion
+accounting but no released object. Provider spans remain the metric owner.
 
 Text and structured model deltas include `stream_id` when they originate from an
 opted-in harness model stream. Use `stream_id` to aggregate chunks from one
@@ -399,6 +484,10 @@ Use core testing helpers:
 - `createAgentContextMock(...)`
 
 Tests should verify output validation, model capability behavior, stream chunks, and declared invoke bridges.
+For sandbox-backed agents, pass `sandbox` to `createAgentTestHarness(...)` to
+exercise the same per-agent policy selection and public Harness lifecycle as
+production. Assert scoped identity, attachment release, and state-loss behavior;
+do not mock a second Framework-specific sandbox contract.
 For skill-backed agents, use `createAgentSkillTestRuntime(...)` to create temporary `SKILL.md` fixtures and pass `skillRuntime.skills` to `createAgentTestHarness(...)`; do not hand-roll ad hoc skill directories in generated examples. The helper is a deterministic test binding, not a production sandbox, workspace, or provider adapter.
 Security-sensitive agent tests should also verify denied tools, missing tenant/principal metadata, redacted model input, sanitized errors, and no prompt/PII leakage in logs or telemetry fixtures.
 Durable workspace tests should also verify missing capability startup failures,
