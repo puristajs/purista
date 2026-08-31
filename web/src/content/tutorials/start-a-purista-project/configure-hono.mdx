@@ -1,0 +1,55 @@
+---
+title: Configure a local HTTP server
+description: Choose the listening address, health route, API prefix, and OpenAPI metadata explicitly.
+order: 9
+---
+
+The packages are installed. Now give the server an address and decide which
+supporting routes to enable.
+
+Create the directory `src/config`, then create `src/config/http.ts`:
+
+```ts title="src/config/http.ts"
+import type { HonoServiceV1ConfigPartial } from '@purista/hono-http-server'
+
+/** HTTP settings for the local-only teaching application. */
+export const httpConfig = {
+	hostname: '127.0.0.1',
+	port: 3000,
+	serviceConfig: {
+		enableHealth: true,
+		healthPath: '/health',
+		apiMountPath: '/api',
+		openApi: {
+			enabled: true,
+			info: { title: 'Example Bank API', version: '1.0.0' },
+		},
+	} satisfies HonoServiceV1ConfigPartial,
+}
+```
+
+The outer settings belong to the Node listener. `127.0.0.1` accepts connections
+only from this computer. `3000` is the port. We have no login or business
+permissions yet; do not change the address to expose the server to other
+machines.
+
+The inner `serviceConfig` belongs to PURISTA's Hono service:
+
+| Setting | What it changes |
+| --- | --- |
+| `enableHealth: true` and `healthPath: '/health'` | Add a health request we can test before implementing banking. |
+| `apiMountPath: '/api'` | Put generated API routes below this prefix. |
+| `openApi.enabled: true` | Publish the API description at `/api/openapi.json`. |
+| `openApi.info` | Name and version that API description. |
+
+OpenAPI is a machine-readable description of endpoints, inputs, and outputs.
+PURISTA builds it from the command definitions we will add later.
+
+`satisfies HonoServiceV1ConfigPartial` checks that these fields are valid
+configuration. It does not create a server. Save the file and run:
+
+```bash title="Check the HTTP configuration types"
+npm run build
+```
+
+There is still no listener. Next, [write the startup code](/tutorials/start-a-purista-project/start-hono/).

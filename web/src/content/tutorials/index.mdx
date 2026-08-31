@@ -1,90 +1,85 @@
 ---
-title: PURISTA banking tutorials
-description: Build one runnable banking application from a new PURISTA project through guarded services, events, streams, queues, and operations.
+title: Learn PURISTA by building a banking application
+description: Create a project and build services, commands, guards, subscriptions, streams, queues, and attached AI agents one change at a time.
 order: 0
 ---
 
-These tutorials build one small, synthetic banking application in steps. Start
-with a new project created by the PURISTA CLI. Every time a chapter introduces
-a service, command, subscription, stream, queue, worker, or agent, it first
-shows the project-local `npm run add:*` command that creates the files. The
-following step explains the generated code and the edit that gives it banking
-meaning.
+Build the backend of **Example Bank**, a fictional bank. Begin with an empty
+directory. Create a PURISTA project, install and configure its HTTP server, and
+implement a command. Then give that application transaction history, account
+permissions, background work, and AI-assisted support.
 
-Each root topic is useful on its own. It names the problem, its independent
-starting checkpoint, the files to change, and a check that proves the result.
-The complete application is a reference after you have built a checkpoint, not
-the starting point of the lesson.
+These are implementation lessons: each change has a reason, a destination file,
+and a result you can check. You will use the project-local PURISTA CLI to create
+services and operations, then replace their placeholders with business logic.
 
-The source lives in
-[`examples/banking`](https://github.com/puristajs/purista/tree/master/examples/banking).
-It uses synthetic accounts, money amounts, and review cases. It is a learning
-application, not a payment, identity, compliance, or financial-advice system.
+The frontend is optional. You can build and test the backend with your editor,
+terminal, and HTTP requests. Early chapters require no database, broker, or model.
 
-```mermaid title="The first published learning path"
+```mermaid title="The backend learning path"
 flowchart LR
-  Project[1. Create a PURISTA project] --> UI[2. Serve the UI]
-  UI --> API[3. REST commands]
-  API --> Access[4. Trusted identity and business guards]
-  Access --> Formats[5. Import and export transforms]
-  Formats --> Events[6. Monitoring events]
-  Events --> Streams[7. Progress streams]
-  Streams --> Jobs[8. Background statements]
+  Project["Create project"] --> HTTP["Install and configure Hono"]
+  HTTP --> Command["First service and command"]
+  Command --> API["Store transactions"]
+  API --> Guards["Authorize account actions"]
+  Guards --> Transform["Translate external formats"]
+  Transform --> Events["React with subscriptions"]
+  Events --> Jobs["Streams and background work"]
+  Jobs --> AI["Service-attached AI"]
 ```
 
-## Start the application
+## Begin building
 
-Start a new application anywhere on your development machine:
+[Build your first PURISTA HTTP service](/tutorials/start-a-purista-project/)
+takes you from project generation to `GET /api/v1/bank`. It shows package
+installation, configuration, every startup file, CLI generation, the handler,
+and an HTTP integration test.
 
-```bash title="Create an Example Bank project"
-npm create purista@latest example-bank
-cd example-bank
-```
+Keep your project between chapters. When entering a chapter independently, use
+its stated starting checkpoint; you do not need another chapter's process or
+database running. Each chapter then explains the new work from that starting
+point.
 
-Choose Node.js, the default EventBridge, Hono support, and npm. The first
-tutorial gives every choice and explains the generated project. The early
-checkpoints use in-memory fixtures, so a restart resets their data.
+## Choose the problem to solve
 
-## Choose a topic
+| Chapter | What you build |
+| --- | --- |
+| [First HTTP service](/tutorials/start-a-purista-project/) | Generate the project and service; install Hono; implement and test a command. |
+| [Transaction REST API](/tutorials/transaction-api/) | Define transaction schemas, inject a repository, record transactions, and read history. |
+| [Account access](/tutorials/authenticated-banking-ui/) | Derive trusted identity and guard account actions for different valid users. |
+| [Import and export](/tutorials/banking-integrations/) | Translate an external format and produce an authorized statement with transforms. |
+| [Transaction monitoring](/tutorials/transaction-monitoring/) | Publish business events and handle them in a separate subscription. |
+| [Progress streams](/tutorials/streaming-analysis/) | Return incremental transaction-analysis progress. |
+| [Background statements](/tutorials/background-statements/) | Enqueue work, implement a worker, and retrieve its result. |
+| [Daily reconciliation](/tutorials/daily-reconciliation/) | Connect an external time trigger to a repeat-safe reconciliation job. |
+| [Business observability](/tutorials/business-observability/) | Measure business outcomes without exposing transaction data. |
+| [Request classification](/tutorials/request-triage/) | Attach an agent to a service and classify support requests into a typed result. |
+| [Document ingestion](/tutorials/document-ingestion/) | Validate, prepare, and index approved knowledge. |
+| [Grounded answers](/tutorials/grounded-rag/) | Retrieve approved sources and answer questions with citations. |
+| [Assistant guardrails](/tutorials/assistant-guardrails/) | Check assistant input, tool content, and output at the relevant boundaries. |
+| [Support memory](/tutorials/support-memory/) | Remember and delete a caller-owned preference. |
+| [Agent tools and Skills](/tutorials/agent-integrations/) | Give an attached agent scoped operations and reviewed instructions. |
+| [Human review](/tutorials/human-review/) | Require a permitted reviewer before applying an account change. |
+| [Parallel investigation](/tutorials/parallel-investigation/) | Combine scoped specialist results inside a Framework workflow. |
+| [Decision memos](/tutorials/decision-memos/) | Produce and review a source-backed proposal. |
+| [Policy wiki](/tutorials/living-policy-wiki/) | Review a revision before publishing and indexing it. |
+| [AI evaluations](/tutorials/ai-evaluations/) | Test candidate quality without letting scores override access rules. |
+| [Sandboxed analysis](/tutorials/sandboxed-analysis/) | Run bounded analysis in a local Docker sandbox. |
+| [Distributed dependencies](/tutorials/distributed-banking/) | Wire brokers and stores explicitly for separate processes. |
+| [Optional banking UI](/tutorials/banking-ui/) | Add a browser interface after the backend works. |
 
-| Topic | Problem you solve | PURISTA capability |
-| --- | --- | --- |
-| [Start an Example Bank project](/tutorials/start-a-purista-project/) | Create a project and generate the first service and command. | PURISTA CLI, services, commands |
-| [Serve the banking UI](/tutorials/banking-ui/) | Put a small React UI behind the Hono composition root. | HTTP composition and static assets |
-| [Build a transaction REST API](/tutorials/transaction-api/) | Read and record synthetic account transactions. | Resources, commands, schemas, HTTP endpoints |
-| [Control access to accounts and actions](/tutorials/authenticated-banking-ui/) | Separate trusted identity from account-level business permissions. | Hono protection, command guards, output guards |
-| [Import and export transaction data](/tutorials/banking-integrations/) | Normalize a legacy transaction and produce safe CSV. | Input and output transforms |
-| [Monitor transactions](/tutorials/transaction-monitoring/) | React to a recorded transaction without delaying it. | Events and subscriptions |
-| [Stream transaction analysis](/tutorials/streaming-analysis/) | Show bounded progress for an authorized review. | Streams |
-| [Generate statements in background work](/tutorials/background-statements/) | Queue a statement and retrieve scoped metadata. | Queues and workers |
-| [Automate daily reconciliation](/tutorials/daily-reconciliation/) | Define a repeat-safe reconciliation trigger and worker. | Schedule declaration and event-to-queue binding |
-| [Remember a safe support preference](/tutorials/support-memory/) | Retain and delete one caller-owned language preference. | Attached workflows, Harness memory, business guards |
-| [Protect an assistant with content boundaries](/tutorials/assistant-guardrails/) | Stop unsafe synthetic input, tool content, and output at the right runtime boundary. | Attached agents and native Harness interceptors |
-| [Use agents with bank tools and Skills](/tutorials/agent-integrations/) | Add one guarded command lookup and a reviewed local support procedure. | Attached agents, command tools, Skills |
-| [Investigate a case with parallel specialists](/tutorials/parallel-investigation/) | Combine three separately-scoped evidence questions into an honest review brief. | Attached workflows, local agents, bounded parallel fan-out |
-| [Produce a source-backed decision memo](/tutorials/decision-memos/) | Create a reviewable policy proposal with citations and a fixed correction budget. | Queues, workers, schemas, idempotent artifacts |
-| [Keep a policy wiki up to date](/tutorials/living-policy-wiki/) | Review and publish only an exact, source-backed wiki revision. | Commands, business guards, conflict handling, separate indexing |
-| [Measure AI quality safely](/tutorials/ai-evaluations/) | Gate saved synthetic candidates without letting quality scores override access rules. | Typed fixtures, deterministic scoring, test gates |
-| [Analyze a statement in a sandbox](/tutorials/sandboxed-analysis/) | Queue a synthetic CSV for a bounded local Docker analysis. | Commands, guards, queues, real sandbox lifecycle |
-| [Prepare distributed banking dependencies](/tutorials/distributed-banking/) | Start local NATS, Redis, and PostgreSQL services and create the matching PURISTA bridges. | NATS and Redis bridges, Compose, explicit ownership |
+All AI examples belong to PURISTA services. Harness supplies their attached
+runtime; there is no separate standalone Harness application in this series.
 
-The next roots extend the same application with business observability,
-service-attached classification, ingestion, grounded answers, guardrails,
-memory, human review, decision memos, evaluations, and distributed operation.
-A later topic appears here only after its runnable checkpoint and source proof
-exist.
+## Source and boundaries
 
-## How the series stays trustworthy
+The [tutorial source](https://github.com/puristajs/purista/tree/master/examples/banking/tutorial)
+contains the build checkpoints and replay instructions. Its README states
+which chapters the replay currently covers. The combined demo under
+`examples/banking/src` is a separate reference; running it does not replace
+building the application in these lessons.
 
-Every security-looking example makes its business decision visible. A known
-actor does not automatically gain access: account readers, transaction
-posters, reviewers, queue workers, and result downloads each apply their own
-business rule. Transforms change a representation; they never replace a
-business guard. The automated tests include both an allowed case and a denied
-case that checks no protected side effect was released.
-
-The published source is checked in at
-[`examples/banking`](https://github.com/puristajs/purista/tree/master/examples/banking).
-It is the complete reference implementation and the test target for the
-series. Tutorial steps build toward the same composition with small, explained
-changes.
+Use synthetic data only. Recording a transaction does not move money.
+Monitoring rules create review signals, not findings of financial crime.
+An authenticated identity does not grant permission to every account or action:
+business guards make those decisions explicit.

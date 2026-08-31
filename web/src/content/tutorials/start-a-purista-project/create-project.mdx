@@ -1,48 +1,106 @@
 ---
-title: Create the project
-description: Use the PURISTA CLI to create the local application that will become Example Bank.
+title: Create a PURISTA project
+description: Generate an application without HTTP support, configure TypeScript, and run the generated tests.
 order: 6
 ---
 
-You need Node.js 24.15 or newer and npm. Open a terminal in a folder where you
-create development projects. The following command creates a new directory;
-do not run it inside an existing application.
+This page creates the project we will change throughout the tutorial. It starts
+without an HTTP server so you can see exactly how to add one.
 
-```bash title="Create Example Bank with the PURISTA CLI"
-npm create purista@latest example-bank
+Open a terminal in the directory where you keep your projects. Check the tools:
+
+```bash title="Check Node and npm"
+node --version
+npm --version
+```
+
+Use Node.js 24.15 or newer and npm. Node runs the application; npm installs its
+packages and runs the scripts in `package.json`. No global PURISTA installation
+is needed.
+
+## Generate the application
+
+```bash title="Create example-bank from its parent directory"
+npx --package=@purista/cli@3.2.4 --package=@purista/core@3.2.4 purista init example-bank \
+  --runtime node --event-bridge default --package-manager npm \
+  --no-webserver --no-install --defaults --non-interactive
 cd example-bank
 ```
 
-Choose **Node.js**, the **default EventBridge**, **Hono webserver support**, and
-**npm** when the generator asks. It installs the dependencies and creates a
-working starter application.
+`npx` runs a package's command without a global installation. The pinned CLI
+version makes the file layout repeatable. The published CLI also needs core
+while it starts; the second `--package` supplies it in npx's temporary
+installation. This avoids relying on an existing PURISTA checkout.
+`init example-bank` creates the
+directory and application files. The other options choose:
 
-The default EventBridge sends events inside this one Node process. It is the
-right first choice because the early steps do not need a broker, Docker, or an
-account with a cloud provider.
+| Option | Why we use it |
+| --- | --- |
+| `--runtime node` | Generate startup code for Node.js. |
+| `--event-bridge default` | Deliver messages within this process; no broker needed. |
+| `--package-manager npm` | Use npm scripts and an npm lockfile. |
+| `--no-webserver` | Leave HTTP out until we add it ourselves. |
+| `--no-install` | Let us configure the project before installing. |
+| `--defaults --non-interactive` | Use default file naming without asking questions. |
 
-For a repeatable script or CI job, give the generator every choice:
+Choose an empty destination. If `example-bank` already contains another
+project, use a different name; do not overwrite your work.
 
-```bash title="Create the same project without prompts"
-npx @purista/cli init example-bank \
-  --runtime node \
-  --event-bridge default \
-  --package-manager npm \
-  --webserver \
-  --defaults \
-  --non-interactive
-cd example-bank
+## Set the compiler options
+
+The published generator's older compiler settings can fail with current
+TypeScript. Replace the generated `tsconfig.json` with this complete file:
+
+```json title="tsconfig.json"
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"rootDir": "src",
+		"outDir": "dist",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node"]
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}
 ```
 
-Run the generated application before changing it:
+TypeScript checks your code and turns it into JavaScript. `strict` catches
+missing values and incorrect types. `NodeNext` makes import resolution
+follow Node's module rules. `rootDir` identifies the source folder;
+`outDir` keeps compiled files in `dist`. The generated `package.json`
+declares an ES module project with `"type": "module"`.
 
-```bash title="Start the generated project"
-npm run dev
+You will see imports ending in `.js` inside `.ts` files. This is intentional:
+the generated JavaScript must import JavaScript files when Node runs it.
+
+## Install and check
+
+```bash title="Install the tested CLI and compiler, then check the project"
+npm install --save-dev --save-exact @purista/cli@3.2.4 typescript@7.0.2
+npm install --save-exact @purista/core@3.2.4 zod@4.4.3
+npm pkg set 'scripts.test=tsc --noEmit && vitest run src'
+npm test
+npm run build
 ```
 
-Leave this process open. In a second terminal, open the local URL printed by
-the application or stop it with `Ctrl+C`. A port-in-use error means another
-local process owns that port; stop that process or set a different `PORT` value
-for this development run.
+The install also resolves the dependencies already declared by the generator,
+including `@purista/core`, Zod, and the test runner. Keep the resulting
+`package-lock.json` with your project. On another machine, `npm ci`
+installs the versions recorded there.
 
-Next: [read the generated project](/tutorials/start-a-purista-project/read-generated-project/).
+`npm pkg set` updates the test script so Vitest only reads source tests. This
+prevents a later build from running the compiled copies in `dist` a second time.
+`npm test` checks types and runs the generated service and command tests.
+Expect two passing tests. `npm run build` creates JavaScript below `dist`.
+There is no HTTP listener yet, so there is no website to open.
+
+If TypeScript reports `moduleResolution=node10` or asks for `rootDir`,
+check that you saved the replacement `tsconfig.json` beside `package.json`.
+
+Next, [find the application startup](/tutorials/start-a-purista-project/read-generated-project/).

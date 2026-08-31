@@ -1,40 +1,50 @@
 ---
-title: Start an Example Bank project
-description: Create a PURISTA application with the CLI, inspect the generated code, and add the first banking service and command.
+title: Build your first PURISTA HTTP service
+description: Create a project, add Hono, generate a service, and implement a command you can call over HTTP.
 order: 5
 ---
 
-Before the browser UI or REST API, create the application that will own them.
-This chapter starts from an empty directory. It uses the real PURISTA CLI, so
-the files on your machine have the same structure as the files used by the
-later tutorials.
+Start with an empty directory and build a small backend for **Example Bank**.
+By the end, a request to `GET /api/v1/bank` returns the bank's name and
+currency. You will write the code that makes that happen, including startup
+and shutdown. You do not need React, Docker, a database, or an AI account.
 
-The result is small on purpose: a Node application with Hono support, the
-default in-process EventBridge, and a generated `banking` version 1 service.
-The service then receives a generated `recordTransaction` command. Its handler
-does nothing useful yet; the next chapters turn that safe placeholder into a
-visible banking application.
+You need basic TypeScript knowledge and a terminal. We explain PURISTA concepts
+as they appear. The bank and all later transactions are fictional; this series
+does not build a payment processor.
 
-```mermaid title="The first build steps"
+```mermaid title="The request path we will build"
 flowchart LR
-  Empty[Empty directory] --> Init[PURISTA project]
-  Init --> Service[banking v1 service]
-  Service --> Command[recordTransaction command]
-  Command --> Build[Add business behavior]
+  Request["HTTP request"] --> Hono["Hono HTTP service"]
+  Hono --> Bridge["Default EventBridge"]
+  Bridge --> Command["Banking v1: getBankInfo"]
+  Command --> Response["Bank name and currency"]
 ```
 
-This is a fictional bank. Use only the synthetic accounts and amounts supplied
-by the tutorial. Nothing here processes a payment or implements real banking
-security.
+Hono accepts web requests. The EventBridge carries a request to a PURISTA
+command. A command is a named operation with an input, an output, and the
+function that performs the work. The Banking service groups our bank's
+operations. First we connect these parts; then we give them behavior.
 
-```bash title="Create the tutorial project"
-npm create purista@latest example-bank
-```
+Follow these pages in order:
 
-1. [Create the project](/tutorials/start-a-purista-project/create-project/)
-2. [Read the generated project](/tutorials/start-a-purista-project/read-generated-project/)
-3. [Generate the banking service](/tutorials/start-a-purista-project/generate-banking-service/)
-4. [Generate the first command](/tutorials/start-a-purista-project/generate-first-command/)
-5. [Check the generated checkpoint](/tutorials/start-a-purista-project/check-generated-checkpoint/)
+1. [Create a project and check the compiler](/tutorials/start-a-purista-project/create-project/).
+2. [Find the generated startup and service files](/tutorials/start-a-purista-project/read-generated-project/).
+3. [Install the HTTP packages](/tutorials/start-a-purista-project/install-hono/).
+4. [Configure the local server](/tutorials/start-a-purista-project/configure-hono/).
+5. [Connect and start Hono](/tutorials/start-a-purista-project/start-hono/).
+6. [Generate and start the Banking service](/tutorials/start-a-purista-project/generate-banking-service/).
+7. [Generate and implement the bank information command](/tutorials/start-a-purista-project/generate-first-command/).
+8. [Test the complete request](/tutorials/start-a-purista-project/check-generated-checkpoint/).
 
-Next: [create the project](/tutorials/start-a-purista-project/create-project/).
+Every file block states its destination. “Create” means add a new file;
+“replace” means replace that file's entire contents. Run terminal commands
+from the generated `example-bank` directory unless the page says otherwise.
+Keep the same project between pages.
+
+The [source checkpoints](https://github.com/puristajs/purista/tree/master/examples/banking/tutorial)
+contain these exact edits and a replay script. They are a recovery aid, not a
+prerequisite for following the lessons. The combined banking demo is separate
+from this step-by-step source.
+
+Begin with [create the project](/tutorials/start-a-purista-project/create-project/).

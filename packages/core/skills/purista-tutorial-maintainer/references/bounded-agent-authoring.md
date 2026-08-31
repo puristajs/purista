@@ -40,7 +40,7 @@ and capability evidence before handing an implementation packet to a smaller
 model. A missing API must not become invented code or a standalone Harness app.
 
 Establish the minimum shared foundations first: chapter/checkpoint runner,
-consumer install, fixtures, UI shell, local dependencies, source-region checking
+consumer install, fixtures, optional UI shell, local dependencies, source-region checking
 and website manifest. Each can be a bounded assignment. Do not require every
 advanced foundation to finish before a simple HTTP chapter can proceed.
 
@@ -49,6 +49,21 @@ can reuse shared infrastructure, but cannot require an earlier chapter's running
 database or service. Shared utilities must not hide the lesson's business logic.
 
 ## Assign one observable change
+
+For the banking series, extend `examples/banking/tutorial/steps.json` and its
+`steps/<checkpoint>/` file snapshots. The replay runs published-package CLI
+generation, applies the documented complete files, and tests each checkpoint.
+Use `node examples/banking/tutorial/replay.mjs --check-docs` for file/prose drift;
+then replay into a new directory with `--verify-http` for runtime evidence.
+Do not substitute `examples/banking/src` demo tests for that replay. The two
+layouts differ, and passing the finished demo does not prove a learner can
+construct the application.
+
+Before drafting a page, identify the prior file contents, the exact CLI output,
+the complete replacement or located edit, and every registration/resource
+change needed to make it run. When a contract change invalidates a generated
+placeholder test, include its replacement in the same completed checkpoint.
+Never stop at adding generation commands to an introduction.
 
 Each packet states objective, assigned chapter/page, exact input checkpoint,
 verified API/source paths, fixtures/policies, owned paths, expected behavior,

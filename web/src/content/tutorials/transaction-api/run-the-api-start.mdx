@@ -1,31 +1,46 @@
 ---
-title: Generate the API checkpoint
-description: Generate the two commands that define the transaction API before writing their schemas or handlers.
+title: Prepare the transaction project
+description: Continue from the first HTTP service or recreate its independently runnable checkpoint.
 order: 21
 ---
 
-From your `example-bank` project, create the two API operations. You may have
-already generated `recordTransaction` in the project-start chapter; the CLI
-will tell you if it exists, which is safer than replacing it by hand.
+This chapter adds behavior to a running PURISTA application. Its starting point
+has `src/config/http.ts`, `src/http.ts`, a Banking version 1 service, and the
+`getBankInfo` command. It has no transaction storage yet.
 
-```bash title="Generate transaction commands"
-npm run add:command -- record-transaction \
-  --service banking --service-version 1 \
-  --description "Record an already-posted synthetic transaction"
+If you built the first chapter, keep your `example-bank` directory. Do not
+generate another Banking service or another `getBankInfo` command.
 
-npm run add:command -- list-transactions \
-  --service banking --service-version 1 \
-  --description "List synthetic transactions for one account"
+If you arrived here independently, recreate the starting checkpoint:
+
+```bash title="Create an independent project for this chapter"
+git clone https://github.com/puristajs/purista.git
+cd purista
+node examples/banking/tutorial/replay.mjs --to first-command --out ../example-bank-api
+cd ../example-bank-api
 ```
 
-The generator adds each definition to `bankingV1Service.ts` and creates a
-`types.ts`, `schema.ts`, builder, and builder test under
-`src/service/banking/v1/command/<commandName>/`. Use the generated folders as
-the API boundary. Do not put HTTP route parsing or database calls in React.
+The replay runs the PURISTA CLI and applies the first chapter's source edits;
+it does not require installing the framework monorepo. Use a new destination.
+Node 24.15 or newer, npm, and access to npm's registry are required.
 
-```bash title="Check the CLI output before editing it"
-npm run build
-npm test
+## Confirm the starting point
+
+Run `npm test`; expect four passing tests. Then start the application:
+
+```bash title="Start the existing Banking service"
+npm run dev
 ```
 
-Next: [define the transaction contract](/tutorials/transaction-api/define-transactions/).
+In a second terminal:
+
+```bash title="Check the starting command"
+curl -i http://127.0.0.1:3000/api/v1/bank
+```
+
+Expect `200` and `{"name":"Example Bank","currency":"EUR"}`. Stop the
+development server with Ctrl+C before generating or replacing files.
+
+All following terminal commands run in this generated application directory,
+not in the framework repository. Keep the files you already built.
+Next, [define the transaction contract](/tutorials/transaction-api/define-transactions/).

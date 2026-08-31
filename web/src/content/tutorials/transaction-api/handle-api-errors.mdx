@@ -1,28 +1,59 @@
 ---
-title: Return safe API errors
-description: Distinguish malformed data from an idempotency conflict without exposing unrelated records.
-order: 25
+title: Check invalid input and business conflicts
+description: Observe schema validation and a repository conflict through the same HTTP boundary, then check that no extra record was stored.
+order: 28
 ---
 
-Test three failure paths while the API is still small:
+Continue with the running application from the previous page. It contains
+one posted fixture transaction. Now check what happens when an operation
+cannot proceed.
 
-| Request | Expected result | Why |
-| --- | --- | --- |
-| `amountMinor: 12.5` | `400` | The schema rejects fractional minor units. |
-| Missing `currency` | `400` | The public command contract is incomplete. |
-| Reused source ID with a changed amount | `409` | The retry describes a different transaction. |
+## Reject an invalid amount
 
-Use `HandledError(StatusCode.Conflict, ...)` for the changed duplicate. Keep
-the message about the caller's submitted source ID; never include an unrelated
-account, transaction, or a stack trace.
-
-```bash title="Send malformed input"
-curl -i -X POST http://127.0.0.1:3000/api/v1/transactions \
+```bash title="Send an invalid fractional-cent amount"
+curl -i http://127.0.0.1:3000/api/v1/transactions \
   -H 'content-type: application/json' \
-  --data '{"accountId":"account-a","sourceTransactionId":"bad-amount","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12.5,"currency":"EUR","direction":"debit"}'
+  --data '{"accountId":"account-a","sourceTransactionId":"bad-amount","bookedAt":"2026-01-20T10:00:00.000Z","amountMinor":12.5,"currency":"EUR","direction":"debit"}'
 ```
 
-The response should be `400`. The test in the next step proves that this input
-does not reach the repository.
+Expect HTTP `400` with content type `application/problem+json`.
+The transaction schema rejects `12.5` because cents must be an integer.
+The command handler does not save this request.
 
-Next: [test the API](/tutorials/transaction-api/test-the-api/).
+The response describes the failure in a standard problem object. Its
+`status` identifies the HTTP error; other fields describe the problem and
+may include validation details. Do not depend on an exact wording or generated
+trace identifier in your client.
+
+## Reject a duplicate source reference
+
+```bash title="Send the already-recorded source transaction again"
+curl -i http://127.0.0.1:3000/api/v1/transactions \
+  -H 'content-type: application/json' \
+  --data-binary @fixtures/transaction.json
+```
+
+Expect `409`. This input passes the schema: it is a well-formed transaction.
+The repository rejects it because that account/source reference already
+exists. Our `HandledError(StatusCode.Conflict, ...)` communicates this known
+business conflict without turning it into a generic server failure.
+
+Validation and business rules answer different questions. A schema checks
+whether the request has the required shape and values. The repository checks
+a condition that depends on existing state. The next chapter introduces
+**guards** for whether a caller may perform the action on the account.
+
+## Check that rejection had no effect
+
+```bash title="Read history after both rejected requests"
+curl -i http://127.0.0.1:3000/api/v1/accounts/account-a/transactions
+```
+
+There should still be one transaction. The automated history test makes this
+same assertion. If you restarted the process, post the fixture once before
+repeating these checks; in-memory storage starts empty after each restart.
+
+Do not catch every exception and return a successful empty result. That
+would hide both business rejections and programming errors from callers.
+
+Next, [check the completed chapter](/tutorials/transaction-api/test-the-api/).

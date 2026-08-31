@@ -16,7 +16,8 @@ catalog. It may use internal specs and plans as evidence; public tutorials and
 consumer examples must work without them. It does not define another runtime
 skill or authorize implementing an entire series when asked for one chapter.
 
-All examples use PURISTA Framework. Start with its HTTP server and visible UI;
+All examples use PURISTA Framework. Start by creating a project, then install,
+configure, and start its HTTP server. A browser UI is an optional extension;
 business behavior then enters services through commands, streams, queues, or events.
 Agents and workflows attach to versioned services. Harness is the attached
 runtime, never a separate tutorial application. Vercel AI SDK
@@ -60,15 +61,18 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
    Begin a new series with the real `npm create purista@latest` or verified
    `purista init` command. When a chapter introduces a Framework artifact,
    show the project-local `npm run add:*` command that creates it before
-   showing the focused edit that turns the generated placeholder into business
+   showing the complete, located edit that turns the generated placeholder into business
    behavior. Give each step an entry checkpoint, one learning outcome, exact
    files, expected evidence, and the next action. Outline focused step pages
-   before prose.
+   before prose. CLI commands in introductions are not sufficient: replay the
+   consecutive pages from an empty directory, using only the shown commands
+   and file edits. Verify package installation, generated filenames, resource
+   injection, service registration, startup, and the first real request.
    For autonomous authoring, fix business contracts and page jobs in a chapter
    brief, then assign one bounded checkpoint or page with verified inputs.
 4. Build the smallest complete Framework example and local dependency setup.
    Give each chapter an independent runtime and data set. Wire the corresponding
-   demo screen to real service calls; keep scripted models and external mocks
+   optional demo screen to real service calls; keep scripted models and external mocks
    explicitly labeled.
 5. Write in easy English from the verified changes. Explain the purpose of each
    newly introduced concept, dependency, builder call, and non-obvious option.
@@ -95,7 +99,7 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
 - A reader can explain what changed and why, as well as reproduce the result.
 - Dependencies and mocked external services have a reproducible local setup,
   usually Docker Compose, with health checks, fixtures, and scoped cleanup.
-- The demo offers the chapter's real behavior with React, default-theme
+- When a demo UI is included, it offers the chapter's real behavior with React, default-theme
   shadcn/ui, and AI SDK UI/AI Elements for applicable chat surfaces.
 - Authentication derives trusted identity on the server. User-supplied IDs,
   model output, session IDs, and frontend selectors do not grant authority.

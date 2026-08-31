@@ -1,0 +1,8 @@
+{
+	"accountId": "account-a",
+	"sourceTransactionId": "source-001",
+	"bookedAt": "2026-01-20T10:00:00.000Z",
+	"amountMinor": 1250,
+	"currency": "EUR",
+	"direction": "debit"
+}

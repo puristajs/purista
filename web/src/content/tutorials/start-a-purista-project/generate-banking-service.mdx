@@ -1,34 +1,84 @@
 ---
-title: Generate the banking service
-description: Create the versioned service boundary that will own Example Bank transaction operations.
-order: 8
+title: Generate and start the Banking service
+description: Use the local CLI to add a versioned service, then replace Ping in the application startup.
+order: 11
 ---
 
-A PURISTA service groups one business area and versions its public contracts.
-The `banking` service will own transaction commands, events, subscriptions,
-queues, and later attached AI capabilities. Start by generating its version 1
-shape:
+We have a working HTTP listener. Now create the service that will own the
+bank's operations. A service groups related behavior and gives its contracts a
+name and version.
 
-```bash title="Generate banking version 1"
-npm run add:service -- banking --description "Manage synthetic banking transactions"
+Stop the development server if it is running. In `example-bank`, run:
+
+```bash title="Generate version 1 of Banking"
+npm run add:service -- banking \
+  --description "Manage synthetic banking transactions" --non-interactive
 ```
 
-The command creates these files under `src/service/banking/v1/`:
+The default naming convention produces the directory `src/service/banking`.
+Use this lowercase `banking` key in later CLI commands. The generated metadata
+uses `Banking` as the runtime service name. Version `1` is the default.
 
-| File | What you change later |
+The generator creates these files:
+
+| Path below `src/service/banking/` | Purpose |
 | --- | --- |
-| `bankingV1ServiceBuilder.ts` | Service metadata and declared resources. |
-| `bankingV1Service.ts` | The service definition that collects commands, subscriptions, and streams. |
-| `bankingV1Service.test.ts` | A focused seam for testing the service composition. |
-| `bankingServiceConfig.ts` | Validated service configuration, when this service needs it. |
+| `generalBankingServiceInfo.ts` | The runtime name and description shared by versions. |
+| `v1/bankingServiceConfig.ts` | The schema for this version's configuration. |
+| `v1/bankingV1ServiceBuilder.ts` | The builder from which we create banking operations. |
+| `v1/bankingV1Service.ts` | Collect this version's operation definitions. |
+| `v1/bankingV1Service.test.ts` | Check that the service configuration is valid. |
 
-The generator also creates `src/service/banking/generalBankingServiceInfo.ts`.
-Leave its name and version intact for now. A service version is part of a
-public contract: version 1 lets future work add a version 2 without silently
-changing existing clients.
+Leave these files unchanged for now. Versioning lets a future version coexist
+with version 1 instead of silently changing its contract.
 
-The generated service has no banking behavior yet. That is expected. It gives
-you one safe location for the next artifact instead of asking you to invent a
-folder layout.
+## Add the service to startup
 
-Next: [generate the first command](/tutorials/start-a-purista-project/generate-first-command/).
+Generating files does not start the service. Replace `src/index.ts` with:
+
+```ts title="src/index.ts"
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+import { startHttpServer } from './http.js'
+import { bankingV1Service } from './service/banking/v1/bankingV1Service.js'
+
+async function main() {
+	const logger = initLogger()
+	const eventBridge = await getEventBridge(logger)
+	const banking = await bankingV1Service.getInstance(eventBridge, { logger })
+	await banking.start()
+
+	const { honoService, closeSocket } = await startHttpServer({
+		eventBridge,
+		logger,
+		services: [banking],
+	})
+
+	gracefulShutdown(logger, [honoService.prepareDestroy(), eventBridge, banking, closeSocket, honoService])
+	logger.info('Example Bank is listening on http://127.0.0.1:3000')
+}
+
+main().catch(error => {
+	process.stderr.write(`${error}\n`)
+	process.exit(1)
+})
+```
+
+Compared with the preceding page, we changed the import, created and started a
+Banking instance instead of Ping, passed it to HTTP registration, and included
+it in shutdown. The Ping files can remain on disk; they are no longer part of
+the running application.
+
+```bash title="Check and start the new service"
+npm test
+npm run dev
+```
+
+The tests now include the Banking setup test. Look for the startup log
+`service Banking 1 started`. In a second terminal, `curl -i
+http://127.0.0.1:3000/health` must still return `200`.
+
+The service has no banking command yet, so `/api/v1/bank` still returns
+`404`. That is the next change, not a server failure.
+
+Stop the server with Ctrl+C. Next, [generate the first command](/tutorials/start-a-purista-project/generate-first-command/).

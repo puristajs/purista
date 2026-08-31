@@ -6,9 +6,10 @@
 - [Chat and identity](#2-rag-with-a-react-interface)
 - [Infrastructure](#4-missing-infrastructure)
 - [Maintenance and routing](#5-upgrade-a-shared-example)
-- [Simple-to-advanced order](#8-put-the-visible-application-first)
+- [Simple-to-advanced order](#8-build-the-backend-before-an-optional-ui)
 - [Business guards and transforms](#9-business-permission-and-representation)
 - [Bounded authoring](#10-an-outline-for-a-smaller-model)
+- [Reject a run guide](#11-replace-a-run-guide-with-a-build-sequence)
 
 Use these bounded scenarios to review the skill's decisions. They are
 behavioral acceptance cases, not claims that an evaluation has already run.
@@ -94,17 +95,17 @@ work to the canonical Framework skill. The tutorial skill does not override
 a separate explicit standalone-product request, but it must not put that
 request's result into the Framework-only tutorial series.
 
-## 8. Put the visible application first
+## 8. Build the backend before an optional UI
 
-Request: “Move the UI chapter first and make the series easy to advanced.”
+Request: “Show how to create the project and add Hono. The frontend is not relevant.”
 
-Expected: split initial Hono/UI serving from authentication; connect REST next;
-teach identity at existing boundaries and add downstream hops when introduced.
-Keep the first page runnable without a model, broker, database, or login.
+Expected: generate the project, install the HTTP packages, write configuration,
+connect startup/shutdown, generate a service and command, and verify the HTTP
+request. Keep the UI optional and teach identity and business guards next.
 
-Check: first success is a page from PURISTA, fixtures are labeled, and later
-chapters teach simple primitives before workflows that combine them. Moving
-the old full authentication/queue/agent graph to chapter one does not pass.
+Check: replay from an empty directory with published dependencies, without a
+prebuilt demo, frontend, model, broker, or database. Each imported file must
+already exist from generation or a preceding visible edit.
 
 ## 9. Business permission and representation
 
@@ -130,3 +131,18 @@ business decisions; bounded packets and compatibility evidence before readiness.
 Check: assigned page requires no invented permission/delivery/API choice; unseen
 chapters and paid providers are not required; source gaps are reported instead
 of bypassed. Static outline checks are not claimed as a successful model trial.
+
+## 11. Replace a run guide with a build sequence
+
+Request: “The tutorial tells me how to run the demo, not how to build it.”
+
+Expected: inspect consecutive pages and actual generated output. Replace
+disconnected snippets with explained edits, including imports, contracts,
+resource injection, definition registration, instance startup, and meaningful
+tests. Keep a finished-demo shortcut separate from the main lesson.
+
+Check: replay the printed commands and file edits outside the monorepo. Fail
+the review if only CLI commands were added to chapter introductions, if the
+reference source has an unexplained different layout, or if verification only
+runs the already-complete demo. Test outcomes must come from the learner's
+constructed checkpoint.

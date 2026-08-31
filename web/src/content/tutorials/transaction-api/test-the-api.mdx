@@ -1,31 +1,63 @@
 ---
-title: Test the API
-description: Prove the generated commands, repository rule, and Hono boundary with focused tests.
-order: 26
+title: Verify the API you built
+description: Run the tests, inspect the real endpoints, and recover the completed transaction checkpoint.
+order: 29
 ---
 
-Keep two test levels. A command test calls the generated definition with a fake
-repository. An HTTP test starts the local Hono composition and calls
-`hono.app.fetch`. The final reference uses this second shape in
-`examples/banking/src/banking.integration.test.ts`.
+You have added transaction contracts, an injected repository, a record command,
+and a history command to the project from chapter one. Hono exposes the
+commands from their definitions; there are no parallel HTTP implementations
+of their business logic.
 
-Test these cases before adding authentication:
+Stop the development server and run:
 
-| Case | Evidence |
-| --- | --- |
-| Valid synthetic EUR transaction | A record with a generated ID is returned. |
-| Identical retry | The same logical record is returned. |
-| Changed duplicate | `409` and no second record. |
-| Fractional amount | `400` and the repository records nothing. |
-| List request | It returns only the requested synthetic account's records. |
-
-```bash title="Run the project tests"
+```bash title="Check all implemented behavior"
 npm test
+npm run build
 ```
 
-The API works structurally, but it still needs an answer to “may this valid
-person read or post to this account?” The next chapter adds server-trusted
-identity and business guards; it does not treat a route as secure merely
-because the browser hides a button.
+Expect six passing tests. The transaction tests use a real PURISTA bridge,
+service, and Hono route. They prove these outcomes:
 
-Next: [control access to accounts and actions](/tutorials/authenticated-banking-ui/).
+| Request or condition | Evidence |
+| --- | --- |
+| Valid POST | `200`, validated fields, and a generated transaction identifier. |
+| History after POST | The same saved record appears in the account's history. |
+| Duplicate source reference | `409`, with no second row. |
+| Invalid amount | `400`, with no stored row. |
+| Different known account | An empty array, not another account's records. |
+| Unknown account identifier | `400` from parameter validation. |
+
+The account filtering test proves data selection, **not** user authorization.
+There is no trusted caller identity in this checkpoint.
+
+## Check the listening application
+
+Start `npm run dev` in one terminal. In another, from your project directory:
+
+```bash title="Record and read through the real Node socket"
+curl -i http://127.0.0.1:3000/api/v1/transactions \
+  -H 'content-type: application/json' \
+  --data-binary @fixtures/transaction.json
+curl -i http://127.0.0.1:3000/api/v1/accounts/account-a/transactions
+curl http://127.0.0.1:3000/api/openapi.json
+```
+
+The first two calls return `200`. The OpenAPI document lists the POST and
+GET operations with their input and output schemas. Stop with Ctrl+C.
+Starting again clears the repository; no Docker cleanup or database reset is
+needed.
+
+## Recover the completed source
+
+From a clone of the PURISTA repository, this recreates the chapter in a new
+directory using the CLI and the same documented edits:
+
+```bash title="Replay the completed transaction chapter"
+node examples/banking/tutorial/replay.mjs --to list-transactions --out ../example-bank-transactions
+```
+
+Continue building in your existing project if you followed the pages yourself.
+Next, [control access to accounts and actions](/tutorials/authenticated-banking-ui/):
+we will establish who is calling, then use business guards to decide which
+accounts and operations that caller may use.

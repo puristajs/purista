@@ -1,35 +1,114 @@
 ---
-title: Generate the first command
-description: Generate a typed command placeholder before implementing the transaction operation.
-order: 9
+title: Implement the first banking command
+description: Generate getBankInfo, define its contract, implement its handler, and expose GET /api/v1/bank.
+order: 12
 ---
 
-A command represents one request that changes or reads business state. Generate
-the transaction command before writing its schema or repository code:
+Our Banking service is running but does no work. Give it one operation:
+return the bank's name and currency. This is a **command**: a request that
+returns a result. It does not have to change stored data.
 
-```bash title="Generate recordTransaction"
-npm run add:command -- record-transaction \
-  --service banking \
-  --service-version 1 \
-  --description "Record an already-posted synthetic transaction"
+Stop the server, then generate the command:
+
+```bash title="Generate the bank information command"
+npm run add:command -- get-bank-info \
+  --service banking --service-version 1 \
+  --description "Describe the fictional bank" --non-interactive
 ```
 
-The CLI adds the command to `bankingV1Service.ts` and creates this folder:
+The CLI creates `src/service/banking/v1/command/getBankInfo/` with
+`schema.ts`, `types.ts`, a builder, and a test. It also updates
+`bankingV1Service.ts` to import the builder and collect its definition.
+You do **not** register the command a second time.
 
-```text title="Generated command files"
-src/service/banking/v1/command/recordTransaction/
-├── types.ts
-├── schema.ts
-├── recordTransactionCommandBuilder.ts
-└── recordTransactionCommandBuilder.test.ts
+## Define the contract
+
+A schema describes allowed values and checks them at runtime. Replace the
+generated `schema.ts`:
+
+```ts title="src/service/banking/v1/command/getBankInfo/schema.ts"
+import { z } from 'zod'
+
+export const bankingV1GetBankInfoInputPayloadSchema = z.undefined()
+export const bankingV1GetBankInfoInputParameterSchema = z.object({})
+export const bankingV1GetBankInfoOutputPayloadSchema = z.object({
+	name: z.string(),
+	currency: z.literal('EUR'),
+})
 ```
 
-Open `recordTransactionCommandBuilder.ts`. Its generated handler contains a
-placeholder comment. Keep it until the transaction REST API chapter. The
-placeholder prevents an unfinished command from accidentally changing data.
+The payload is the request body; this GET command has none, so its schema is
+`z.undefined()`. Parameters hold path or query values; this route has none,
+so we use an empty object. The output must contain a string name and the
+literal currency `EUR`.
 
-The name you pass to the CLI is kebab case (`record-transaction`). Generated
-TypeScript uses camel case (`recordTransaction`) because the project chose the
-`camel` file convention in `purista.json`.
+Leave `types.ts` as generated. It derives TypeScript types from these schemas.
+Keeping the exported names means its imports keep working.
 
-Next: [check the generated checkpoint](/tutorials/start-a-purista-project/check-generated-checkpoint/).
+## Implement and expose the operation
+
+Replace the generated command builder:
+
+```ts title="src/service/banking/v1/command/getBankInfo/getBankInfoCommandBuilder.ts"
+import { bankingV1ServiceBuilder } from '../../bankingV1ServiceBuilder.js'
+import {
+	bankingV1GetBankInfoInputParameterSchema,
+	bankingV1GetBankInfoInputPayloadSchema,
+	bankingV1GetBankInfoOutputPayloadSchema,
+} from './schema.js'
+
+export const getBankInfoCommandBuilder = bankingV1ServiceBuilder
+	.getCommandBuilder('getBankInfo', 'Describe the fictional bank')
+	.addPayloadSchema(bankingV1GetBankInfoInputPayloadSchema)
+	.addParameterSchema(bankingV1GetBankInfoInputParameterSchema)
+	.addOutputSchema(bankingV1GetBankInfoOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'bank')
+	.setCommandFunction(async function () {
+		return { name: 'Example Bank', currency: 'EUR' as const }
+	})
+```
+
+The chain builds one command definition:
+
+| Call | Purpose |
+| --- | --- |
+| `getCommandBuilder` | Name and describe the operation within Banking version 1. |
+| `addPayloadSchema`, `addParameterSchema` | Validate the body and parameters. |
+| `addOutputSchema` | Check the returned value before sending it to the caller. |
+| `exposeAsHttpEndpoint` | Describe the HTTP method and route for Hono. |
+| `setCommandFunction` | Supply the function that performs the operation. |
+
+The route is `bank`, without a prefix or version. Hono combines `/api`,
+service version `v1`, and `bank` into `/api/v1/bank`. `as const`
+preserves the literal `'EUR'` type rather than widening it to any string.
+
+An `async function` returns a promise. PURISTA supplies the service as its
+`this` value; keep a regular function when using that service context.
+This first operation needs no input, state, or resources.
+
+## Call your code
+
+```bash title="Compile and start the command"
+npm run build
+npm run dev
+```
+
+In the second terminal:
+
+```bash title="Invoke getBankInfo over HTTP"
+curl -i http://127.0.0.1:3000/api/v1/bank
+```
+
+Expect HTTP `200` with:
+
+```json title="Bank information response"
+{"name":"Example Bank","currency":"EUR"}
+```
+
+You built the complete path: HTTP request → Hono → EventBridge → registered
+command → validated response. For a `404`, check that
+`bankingV1Service.ts` contains `getBankInfoCommandBuilder.getDefinition()`
+and that `src/index.ts` passes Banking to `startHttpServer`.
+
+The generated test still expects the placeholder result. Stop the development
+server and [replace that test](/tutorials/start-a-purista-project/check-generated-checkpoint/).

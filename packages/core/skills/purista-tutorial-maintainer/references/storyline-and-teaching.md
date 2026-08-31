@@ -25,12 +25,13 @@ add one behavior at a time, handle its main failure, and test the complete
 flow. Cross-cutting lookups must not interrupt the first result.
 
 Order the series by the knowledge and dependencies each outcome introduces.
-For the banking series, first boot PURISTA/Hono and serve a small React page;
-then connect a REST API, teach account/action permissions at that boundary,
+For the banking series, first generate a PURISTA project without HTTP support,
+install Hono and its PURISTA integration, configure and start the server, then
+generate a service and implement its first command. Connect a REST API, teach account/action permissions at that boundary,
 normalize an external format, and add events, streams, jobs and workflows. Introduce one attached
 agent before RAG or multi-agent orchestration; leave distributed operation late.
-The initial UI is a visible server result with labeled display fixtures, not a
-fake working bank. Do not require authentication, brokers, or AI to serve it.
+The frontend is optional. Every core lesson has a terminal/request path and
+must remain understandable without React. Do not require brokers or AI for the first server.
 Separate UI serving from security teaching rather than moving a large chapter
 unchanged to the front. Keep safe local defaults in every starting point and
 teach identity propagation when each receiving primitive is introduced.

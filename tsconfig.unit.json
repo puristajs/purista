@@ -7,6 +7,7 @@
 		}
 	},
 	"exclude": [
+		"examples/banking/tutorial/steps",
 		"node_modules",
 		"dist",
 		"web",

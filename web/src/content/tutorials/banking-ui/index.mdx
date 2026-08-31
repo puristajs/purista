@@ -1,38 +1,23 @@
 ---
-title: Serve the banking UI with PURISTA
-description: Build a first React screen in a CLI-created PURISTA project and serve it through the generated Hono server.
-order: 10
+title: Add an optional banking UI
+description: Extend a working PURISTA backend with a browser interface served by Hono.
+order: 220
 ---
 
-The first result is deliberately small: a browser receives a built React page
-from the PURISTA application you created with the CLI. The page names itself
-**Example Bank** and labels its data as synthetic. It has no login, REST
-command, database, broker, or model yet.
+A browser interface gives you another way to try the bank's operations. It is
+an optional extension after the backend works; no earlier chapter requires React.
 
-```mermaid title="The first visible application"
-flowchart LR
-  Browser -->|GET /| Hono[Generated Hono server]
-  Hono -->|built files| React[React screen]
-  Hono -. later .-> Banking[banking v1 service]
-```
+Start with [the first HTTP service](/tutorials/start-a-purista-project/) and
+its verified `first-command` checkpoint. You already have `src/config/http.ts`,
+`src/http.ts`, and a Banking service registered with Hono. Do not generate a
+second application or replace that startup with the combined demo.
 
-Start from [the CLI-created project](/tutorials/start-a-purista-project/). If
-you arrived here directly, create it first with `npm create purista@latest
-example-bank`, choosing Node.js, the default EventBridge, Hono support, and
-npm. The generator gives you `src/http.ts`; this chapter adds a browser build
-to that server. The final reference files live in `examples/banking/ui`.
+The pages below add browser build tools and static files to that application.
+The bank's business behavior remains in its PURISTA services. Serving a page
+does not grant access to any account.
 
-Use Node 24.15 or newer. Work in the `example-bank` project directory. No
-Docker service, database, credentials, or model is needed.
-
-1. [Prepare the browser project](/tutorials/banking-ui/run-the-project/)
-2. [Read the generated Hono HTTP server](/tutorials/banking-ui/start-hono/)
-3. [Serve the browser page](/tutorials/banking-ui/serve-react/)
-4. [Make your first visible change](/tutorials/banking-ui/change-the-page/)
-5. [Build, run, and stop the application](/tutorials/banking-ui/build-and-stop/)
-
-Hono will serve the built React assets from `ui/dist`. The UI uses local,
-default shadcn-compatible design tokens. The later chapters add a local fixture
-login and generated HTTP commands; neither belongs in this first browser step.
-
-Next: [prepare the browser project](/tutorials/banking-ui/run-the-project/).
+1. [Prepare the browser project](/tutorials/banking-ui/run-the-project/).
+2. [Locate the existing Hono server](/tutorials/banking-ui/start-hono/).
+3. [Serve the browser page](/tutorials/banking-ui/serve-react/).
+4. [Make a visible change](/tutorials/banking-ui/change-the-page/).
+5. [Build and stop the application](/tutorials/banking-ui/build-and-stop/).

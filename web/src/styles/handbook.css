@@ -156,6 +156,10 @@
 		font-weight: 600;
 	}
 
+	.prose :not(pre) > code {
+		overflow-wrap: anywhere;
+	}
+
 	.prose code {
 		font-family: var(--font-mono);
 		font-size: 0.875em;

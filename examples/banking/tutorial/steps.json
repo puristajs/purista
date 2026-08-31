@@ -1,0 +1,194 @@
+[
+	{
+		"id": "project",
+		"commands": [
+			["npm", "install", "--save-dev", "--save-exact", "@purista/cli@3.2.4", "typescript@7.0.2"],
+			["npm", "install", "--save-exact", "@purista/core@3.2.4", "zod@4.4.3"],
+			["npm", "pkg", "set", "scripts.test=tsc --noEmit && vitest run src"]
+		],
+		"files": [
+			{
+				"path": "tsconfig.json",
+				"page": "start-a-purista-project/create-project"
+			}
+		]
+	},
+	{
+		"id": "http",
+		"commands": [["npm", "install", "--save-exact", "@purista/hono-http-server@3.2.4", "@hono/node-server@2.1.0"]],
+		"files": [
+			{
+				"path": "src/config/http.ts",
+				"page": "start-a-purista-project/configure-hono"
+			},
+			{
+				"path": "src/http.ts",
+				"page": "start-a-purista-project/start-hono"
+			},
+			{
+				"path": "src/index.ts",
+				"page": "start-a-purista-project/start-hono"
+			}
+		],
+		"probe": "/health"
+	},
+	{
+		"id": "service",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:service",
+				"--",
+				"banking",
+				"--description",
+				"Manage synthetic banking transactions",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "src/index.ts",
+				"page": "start-a-purista-project/generate-banking-service"
+			}
+		],
+		"probe": "/health"
+	},
+	{
+		"id": "first-command",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"get-bank-info",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Describe the fictional bank",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "src/service/banking/v1/command/getBankInfo/schema.ts",
+				"page": "start-a-purista-project/generate-first-command"
+			},
+			{
+				"path": "src/service/banking/v1/command/getBankInfo/getBankInfoCommandBuilder.ts",
+				"page": "start-a-purista-project/generate-first-command"
+			},
+			{
+				"path": "src/service/banking/v1/command/getBankInfo/getBankInfoCommandBuilder.test.ts",
+				"page": "start-a-purista-project/check-generated-checkpoint"
+			}
+		],
+		"probe": "/api/v1/bank"
+	},
+	{
+		"id": "repository",
+		"commands": [],
+		"files": [
+			{
+				"path": "src/transactionRepository.ts",
+				"page": "transaction-api/add-repository"
+			},
+			{
+				"path": "src/transaction.ts",
+				"page": "transaction-api/define-transactions"
+			},
+			{
+				"path": "src/index.ts",
+				"page": "transaction-api/wire-repository"
+			},
+			{
+				"path": "src/testing/createTestBank.ts",
+				"page": "transaction-api/test-resource-wiring"
+			},
+			{
+				"path": "src/service/banking/v1/bankingV1ServiceBuilder.ts",
+				"page": "transaction-api/wire-repository"
+			},
+			{
+				"path": "src/service/banking/v1/command/getBankInfo/getBankInfoCommandBuilder.test.ts",
+				"page": "transaction-api/test-resource-wiring"
+			}
+		],
+		"probe": "/api/v1/bank"
+	},
+	{
+		"id": "record-transaction",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"record-transaction",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Record an already-posted synthetic transaction",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "fixtures/transaction.json",
+				"page": "transaction-api/record-a-transaction"
+			},
+			{
+				"path": "src/service/banking/v1/command/recordTransaction/schema.ts",
+				"page": "transaction-api/record-a-transaction"
+			},
+			{
+				"path": "src/service/banking/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts",
+				"page": "transaction-api/record-a-transaction"
+			},
+			{
+				"path": "src/service/banking/v1/command/recordTransaction/recordTransactionCommandBuilder.ts",
+				"page": "transaction-api/record-a-transaction"
+			}
+		],
+		"probe": "/api/v1/bank"
+	},
+	{
+		"id": "list-transactions",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"list-transactions",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Read one account transaction history",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "src/service/banking/v1/command/listTransactions/schema.ts",
+				"page": "transaction-api/connect-rest"
+			},
+			{
+				"path": "src/service/banking/v1/command/listTransactions/listTransactionsCommandBuilder.test.ts",
+				"page": "transaction-api/connect-rest"
+			},
+			{
+				"path": "src/service/banking/v1/command/listTransactions/listTransactionsCommandBuilder.ts",
+				"page": "transaction-api/connect-rest"
+			}
+		],
+		"probe": "/api/v1/accounts/account-a/transactions"
+	}
+]

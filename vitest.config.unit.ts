@@ -25,6 +25,7 @@ export default defineConfig({
 		},
 		include: ['**/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
 		exclude: [
+			'**/tutorial/steps/**',
 			...configDefaults.exclude,
 			'**/test/**',
 			'**/node_modules/**',

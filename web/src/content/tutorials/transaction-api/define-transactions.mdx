@@ -1,36 +1,65 @@
 ---
-title: Define the transaction contract
-description: Replace the generated unknown schemas with a small checked transaction contract.
+title: Define a transaction contract
+description: Describe transaction input, recorded output, and synthetic account identifiers before implementing commands.
 order: 22
 ---
 
-Open generated `command/recordTransaction/schema.ts`. A schema is a checked
-description of data. Replace its placeholder payload schema with the public
-transaction shape:
+Before recording anything, decide what a transaction means in this example.
+We store an account, an identifier from the source system, a booking time,
+an amount, a currency, and a direction. We add our own identifier when saving it.
 
-```ts title="src/service/banking/v1/command/recordTransaction/schema.ts"
+Create `src/transaction.ts`:
+
+```ts title="src/transaction.ts"
 import { z } from 'zod'
 
-export const recordTransactionInputPayloadSchema = z.object({
-  accountId: z.enum(['account-a', 'account-c']),
-  sourceTransactionId: z.string().min(1).max(80),
-  bookedAt: z.string().datetime(),
-  amountMinor: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
-  currency: z.literal('EUR'),
-  direction: z.enum(['debit', 'credit']),
+/** Synthetic account identifiers used by the learning application. */
+export const accountIdSchema = z.enum(['account-a', 'account-c'])
+
+/** A record of a transaction that has already happened; it does not move money. */
+export const transactionInputSchema = z.object({
+	accountId: accountIdSchema,
+	sourceTransactionId: z.string().min(1).max(80),
+	bookedAt: z.iso.datetime(),
+	amountMinor: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+	currency: z.literal('EUR'),
+	direction: z.enum(['debit', 'credit']),
 })
+
+export const recordedTransactionSchema = transactionInputSchema.extend({
+	transactionId: z.string().uuid(),
+})
+
+export type TransactionInput = z.infer<typeof transactionInputSchema>
+export type RecordedTransaction = z.infer<typeof recordedTransactionSchema>
 ```
 
-Use the same transaction data for the output, plus a generated `transactionId`.
-For `listTransactions`, make the parameter schema contain `accountId` and make
-the output `{ accountId, transactions }`.
+These schemas belong to the Banking business area. Its two commands will use
+them, so defining them once avoids disagreement between recording and reading.
 
-`amountMinor` stores EUR cents as a whole number: `4250` means EUR 42.50. This
-avoids binary floating-point rounding at the public command boundary. The
-example supports only EUR and two synthetic account IDs; it does not teach
-currency conversion or settlement.
+| Field | Meaning |
+| --- | --- |
+| `accountId` | One of the two synthetic accounts supported by this tutorial. |
+| `sourceTransactionId` | The reference from the system that booked the transaction. |
+| `bookedAt` | An ISO date/time string, such as `2026-01-20T10:00:00.000Z`. |
+| `amountMinor` | A positive integer number of cents: `1250` means EUR 12.50. |
+| `currency` | Always `EUR`; this example performs no currency conversion. |
+| `direction` | Whether the recorded transaction was a debit or credit. |
+| `transactionId` | The UUID our application adds when storing a record. |
 
-Add a schema test for a fractional amount and expect it to fail. Invalid input
-must stop before any handler or repository operation.
+Keeping the sign in `direction` means amounts are always positive.
+`Number.MAX_SAFE_INTEGER` prevents values outside JavaScript's exact integer
+range. There is no rounding rule hidden in this contract.
 
-Next: [implement the record command](/tutorials/transaction-api/record-a-transaction/).
+`extend` adds the generated identifier to the input shape for the output.
+`z.infer` derives TypeScript types from schemas, so compile-time types and
+runtime validation describe the same values.
+
+Check the new file:
+
+```bash title="Compile the transaction schemas"
+npm run build
+```
+
+This adds definitions, not an HTTP endpoint or stored data. Next, [implement
+the repository](/tutorials/transaction-api/add-repository/).

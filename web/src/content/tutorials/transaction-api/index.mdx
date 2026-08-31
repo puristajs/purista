@@ -1,47 +1,42 @@
 ---
 title: Build a transaction REST API
-description: Generate commands with the PURISTA CLI, define transaction contracts, and expose them through the Hono server.
+description: Add a repository resource to Banking, generate two commands, and implement recording and reading transaction history.
 order: 20
 ---
 
-This chapter turns the generated `banking` service into a small HTTP API. An
-operations actor records an already-posted synthetic transaction; an account
-reader retrieves that account's history. Recording does not move money and a
-customer cannot create a credit.
+A bank operations system needs to record transactions that have already
+happened and read their history. In this chapter you will build both operations
+inside a PURISTA service, expose them over HTTP, and prove they share the same
+storage.
 
-```mermaid title="The transaction build"
+Recording here does **not** transfer money or change a balance. All accounts
+and transactions are synthetic.
+
+```mermaid title="Two commands using one resource"
 flowchart LR
-  CLI[PURISTA CLI] --> Files[Generated command files]
-  Files --> Contract[Schema and handler]
-  Contract --> Hono[HTTP endpoint]
-  Hono --> UI[React screen]
+  POST["POST /transactions"] --> Record["recordTransaction"]
+  GET["GET /accounts/:accountId/transactions"] --> List["listTransactions"]
+  Record --> Repository["TransactionRepository resource"]
+  List --> Repository
 ```
 
-Start from [Start an Example Bank project](/tutorials/start-a-purista-project/).
-Every page restates its generator command, so you can also create the same
-`banking` version 1 checkpoint in a fresh PURISTA project. The final runnable
-reference is `examples/banking/src/service.ts`; its browser integration is in
-`examples/banking/ui`.
+Begin with the first chapter's `first-command` checkpoint: a Banking service,
+Hono server, and working `GET /api/v1/bank`. You can continue in your own
+project or [recreate that starting point](/tutorials/transaction-api/run-the-api-start/).
+No frontend or external service is required.
 
-```bash title="Generate the two API command boundaries"
-npm run add:command -- record-transaction \
-  --service banking --service-version 1 \
-  --description "Record an already-posted synthetic transaction"
-npm run add:command -- list-transactions \
-  --service banking --service-version 1 \
-  --description "Return one account transaction history"
-```
+You will make these changes:
 
-This first API uses an in-memory repository. Restarting the Node process resets
-its synthetic data. Authentication and account-level business permissions are
-added in the next root topic; do not treat a temporary local API as a payment
-or public banking interface.
+1. [Prepare the existing project](/tutorials/transaction-api/run-the-api-start/).
+2. [Describe a transaction with schemas](/tutorials/transaction-api/define-transactions/).
+3. [Implement in-memory storage](/tutorials/transaction-api/add-repository/).
+4. [Declare and inject the repository resource](/tutorials/transaction-api/wire-repository/).
+5. [Update the HTTP test setup](/tutorials/transaction-api/test-resource-wiring/).
+6. [Generate and implement the record command](/tutorials/transaction-api/record-a-transaction/).
+7. [Generate and implement the history command](/tutorials/transaction-api/connect-rest/).
+8. [Inspect invalid input and conflicts](/tutorials/transaction-api/handle-api-errors/).
+9. [Check the complete application](/tutorials/transaction-api/test-the-api/).
 
-1. [Generate the API checkpoint](/tutorials/transaction-api/run-the-api-start/)
-2. [Define the transaction contract](/tutorials/transaction-api/define-transactions/)
-3. [Implement the record command](/tutorials/transaction-api/record-a-transaction/)
-4. [Expose commands through REST](/tutorials/transaction-api/connect-rest/)
-5. [Return safe API errors](/tutorials/transaction-api/handle-api-errors/)
-6. [Test the API](/tutorials/transaction-api/test-the-api/)
-
-Next: [generate the API checkpoint](/tutorials/transaction-api/run-the-api-start/).
+The repository is process-local: restarting the application clears it. Keep
+the server bound to `127.0.0.1`. The following chapter adds trusted identity
+and business authorization before we treat any caller as an account user.

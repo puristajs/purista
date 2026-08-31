@@ -1,39 +1,36 @@
 ---
-title: Read the generated Hono HTTP server
-description: Extend the generated Hono composition so it can serve browser files and later register PURISTA services.
-order: 12
+title: Locate the existing Hono server
+description: Find the HTTP configuration and startup from the backend chapter before adding static assets.
+order: 222
 ---
 
-Hono receives HTTP requests. PURISTA owns the services that perform business
-work. The generator already put both responsibilities in one composition root,
-using the in-process `DefaultEventBridge`.
+This extension uses the server you built in
+[Connect and start Hono](/tutorials/start-a-purista-project/start-hono/).
+If you have not built it yet, that lesson shows the package installation,
+configuration, complete startup files, and health request.
 
-Open generated `src/http.ts`. Its order matters:
+Open `src/http.ts`. Its `startHttpServer` function creates the Hono service,
+registers the supplied PURISTA services, starts Hono, and opens the local Node
+socket. `src/index.ts` supplies the Banking instance and arranges shutdown.
 
-```ts title="src/http.ts"
-const honoService = await honoV1Service.getInstance(input.eventBridge, {
-  logger: input.logger,
-  serviceConfig: { ...httpConfig.serviceConfig, services: input.services },
-})
-await honoService.start()
-const serverInstance = serve({ fetch: honoService.app.fetch, port: httpConfig.port })
-```
+The settings are in `src/config/http.ts`: localhost port 3000, the
+`/health` route, and the `/api` prefix. Confirm the backend still works
+before changing how it serves files:
 
-`src/index.ts` starts the EventBridge first, creates generated services, and
-passes them as `input.services`. Hono then registers the endpoints those
-services declare. This is local registration, not remote service discovery.
-
-`@hono/node-server` supplies the Node listener. The generated configuration
-uses port 3000 and enables the Hono health endpoint. A listener accepting
-connections is still not a full production readiness claim.
-
-```bash title="Request the generated Hono health endpoint"
+```bash title="Start the existing backend"
 npm run dev
-# In another terminal:
-curl -i http://127.0.0.1:3000/health
 ```
 
-Expect `200`. A connection refusal means the foreground process is not running
-or the selected port differs.
+In another terminal:
 
-Next: [serve the browser page](/tutorials/banking-ui/serve-react/).
+```bash title="Check the backend before adding a UI"
+curl -i http://127.0.0.1:3000/health
+curl -i http://127.0.0.1:3000/api/v1/bank
+```
+
+Expect `200` for both. The second response is
+`{"name":"Example Bank","currency":"EUR"}`. Leave business commands in their
+service files; static serving belongs in the HTTP setup.
+
+Stop the server with Ctrl+C before continuing to
+[serve the browser page](/tutorials/banking-ui/serve-react/).
