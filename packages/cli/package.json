@@ -36,6 +36,7 @@
 		"type-fest": "^5.8.0"
 	},
 	"dependencies": {
+		"@purista/core": "^3.2.4",
 		"@inquirer/confirm": "^6.1.1",
 		"@inquirer/input": "^5.1.2",
 		"@inquirer/select": "^5.2.1",

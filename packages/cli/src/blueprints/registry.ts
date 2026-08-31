@@ -22,14 +22,14 @@ import type { ProjectBlueprint } from './types.js'
 const baseTsConfig: TsConfigJson = {
 	compilerOptions: {
 		outDir: 'dist',
+		rootDir: 'src',
 		strict: true,
-		ignoreDeprecations: '6.0',
-		module: 'es2022',
+		module: 'NodeNext',
 		declaration: false,
 		removeComments: false,
 		emitDecoratorMetadata: true,
 		experimentalDecorators: true,
-		moduleResolution: 'Node',
+		moduleResolution: 'NodeNext',
 		allowSyntheticDefaultImports: true,
 		target: 'es2022',
 		sourceMap: true,
@@ -82,7 +82,7 @@ const runtimeNodePackage: PKG = {
 		start: 'tsx src/index.ts',
 		build: 'tsc',
 		dev: 'tsx watch src/index.ts',
-		test: 'tsc --noEmit && vitest run',
+		test: 'tsc --noEmit && vitest run src',
 		'export:runtime': 'purista export runtime-capabilities --out purista-runtime.json',
 	},
 	devDependencies: {
