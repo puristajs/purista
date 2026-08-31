@@ -1,0 +1,16 @@
+---
+title: Keep the tool read-only and bounded
+description: Show why a declared command tool is narrower than an agent that can choose arbitrary service actions.
+order: 152
+status: published
+---
+
+The classifier has exactly one allowed command: `banking.1.listTransactions`.
+It has no posting command, queue action, or agent delegation. Application code
+uses the tool only for a high-confidence `account-access` result.
+
+Three checks apply: P1 before classification, the typed routing decision before
+the lookup, and P1 again in the target command. The scripted test verifies the
+manifest and the resulting Account A transaction count. An Account C request
+returns `403` before any model request. A prompt is never treated as write
+protection.

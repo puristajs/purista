@@ -1,0 +1,19 @@
+---
+title: Test access and missing dependencies
+description: Run the real HTTP tests for the command tool, Skill loading, and denied account scope.
+order: 154
+status: published
+---
+
+Run the focused tests:
+
+```bash
+npx vitest run examples/banking/src/ai/customer-support-classification.test.ts
+npx vitest run examples/banking/src/ai/support-playbook.test.ts
+```
+
+The first starts support and banking services through Hono and proves the
+P1-guarded read tool works only for Account A. The second proves that the model
+reads the reviewed Skill, that Bob receives `403` for Account C before a model
+request, and that service startup names a missing Skill binding. These tests
+prove control flow, not live-model answer quality.

@@ -1,0 +1,22 @@
+---
+title: Declare one guarded command tool
+description: Allow the classifier to invoke the existing PURISTA transaction-list command with typed schemas.
+order: 151
+status: published
+---
+
+`canInvoke` adds a named command to an attached agent's allowed tool list. It
+does not duplicate the command handler or bypass its business guard.
+
+```ts title="examples/banking/src/ai/customer-support-classification.ts"
+.canInvoke('banking', '1', 'listTransactions', {
+  outputSchema: accountStatementSchema,
+  payloadSchema: z.undefined(),
+  parameterSchema: z.object({ accountId: accountIdSchema }),
+})
+```
+
+The handler calls `banking.1.listTransactions` only after an eligible
+`account-access` classification. Its account comes from the protected request,
+not a model tool-call argument. The target command repeats P1 with the original
+principal and tenant, so Bob may read Account A but not Account C.

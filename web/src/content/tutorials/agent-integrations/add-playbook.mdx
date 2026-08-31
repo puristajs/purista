@@ -1,0 +1,21 @@
+---
+title: Add a reviewed support Skill
+description: Bind a local SKILL.md through service composition and let the default-loop agent read it with the restricted read tool.
+order: 153
+status: published
+---
+
+The playbook is a normal local file in
+`examples/banking/src/ai/skills/banking-support-playbook/SKILL.md`. It tells
+the agent to keep the flow read-only and never ask for passwords, card numbers,
+or a different account ID.
+
+```ts title="examples/banking/src/ai/support-playbook.ts"
+.useSkills(['banking-support-playbook'])
+.useBuiltInTools(['read'])
+```
+
+At service composition, `ai.skills.bindings` maps the name to the local
+directory. The model sees a catalog entry, not the full body, then uses `read`
+to load the reviewed instructions. P1 runs before it can load the Skill.
+Reading a Skill does not grant account access or a new tool.
