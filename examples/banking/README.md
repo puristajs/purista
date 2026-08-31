@@ -15,7 +15,16 @@ npm run dev -w @purista/banking-tutorials
 The application listens on `http://127.0.0.1:3010`. The generated PURISTA HTTP
 API is mounted under `/api/v1`.
 
-The local-only `x-example-actor` header selects a synthetic authenticated actor:
+Open `http://127.0.0.1:3010/` to use the small React login screen. It asks
+which synthetic tutorial person you want to use, then calls the local login
+route. The server creates an opaque, HttpOnly cookie named
+`example_bank_session`. Generated PURISTA API routes use the server-side
+session record to obtain the principal and tenant; a browser request cannot
+choose them through an API header or payload.
+
+For command-line requests, create the same local fixture session and save its
+cookie in a local file. The documented local people have these business
+permissions:
 
 - `alice` owns `account-a` and may read it.
 - `bob` has a read/export mandate for `account-a`, but cannot record postings.
@@ -23,17 +32,24 @@ The local-only `x-example-actor` header selects a synthetic authenticated actor:
 - `dana` is assigned to record already-posted synthetic transactions for
   `account-a`.
 
-For example, retrieve Alice's account history:
+```sh
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+```
+
+Then send the saved cookie with a protected API request:
 
 ```sh
-curl -H 'x-example-actor: alice' \
+curl --fail -b .tutorial-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
 ```
 
-The local header is an intentionally visible fixture. It is not an
-authentication mechanism. The authentication and business-permission tutorial
-replaces it with a server-validated local session while retaining the same
-business guard rules.
+This is a local learning fixture, not a production identity provider. It does
+not verify passwords, external tokens, tenant membership, CSRF controls, or
+production session storage. The business guards still make the separate
+decision about whether the signed-in person may read an account or record a
+transaction.
 
 ## Verify the checkpoint
 

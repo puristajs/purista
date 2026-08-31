@@ -8,7 +8,7 @@ import {
 } from '@purista/core'
 import { z } from 'zod'
 
-import type { BankingRepository, RecordedTransaction } from '../repository.js'
+import type { BankActor, BankingRepository, RecordedTransaction } from '../repository.js'
 import {
 	accountIdSchema,
 	BankingTutorialEvent,
@@ -19,8 +19,15 @@ import type { BankingOperationsStore } from './repository.js'
 
 const emptyParameterSchema = z.object({})
 const tenantParameterSchema = z.object({ tenantId: z.literal('tenant-north') })
-const statementJobPayloadSchema = z.object({ accountId: accountIdSchema })
+const statementRequestPayloadSchema = z.object({ accountId: accountIdSchema })
+const statementJobPayloadSchema = statementRequestPayloadSchema.extend({
+	/** Server-owned record of the requester; clients cannot submit this field. */
+	initiatorPrincipalId: z.enum(['alice', 'bob', 'carol', 'dana', 'erin']),
+})
 const reconciliationJobPayloadSchema = reconciliationDueEventSchema
+
+const isExampleActor = (actor: string): actor is BankActor =>
+	['alice', 'bob', 'carol', 'dana', 'erin'].includes(actor as BankActor)
 
 const serviceInfo = {
 	serviceName: 'bankingOperations',
@@ -41,6 +48,15 @@ const requireReadableAccount = async function (
 	}
 }
 
+const requireReviewCaseAccess = async function (
+	context: { message: { principalId?: string }; resources: { bankingRepository: BankingRepository } },
+	accountId: RecordedTransaction['accountId'],
+) {
+	if (!context.resources.bankingRepository.canReviewCase(context.message.principalId, accountId)) {
+		throw new HandledError(StatusCode.Forbidden, 'You are not assigned to review cases for this account')
+	}
+}
+
 /**
  * A bounded business-event reaction. It records a training signal for later
  * review; it does not claim to make an anti-money-laundering decision.
@@ -57,6 +73,30 @@ export const monitorRecordedTransaction = builder
 			kind: 'review-required',
 			reason: 'amount-at-or-above-training-threshold',
 		})
+	})
+
+export const listReviewCases = builder
+	.getCommandBuilder('listReviewCases', 'Lists review signals only for an assigned investigation account')
+	.addPayloadSchema(z.undefined())
+	.addParameterSchema(z.object({ accountId: accountIdSchema }))
+	.addOutputSchema(
+		z.array(
+			z.object({
+				transactionId: z.string(),
+				accountId: accountIdSchema,
+				kind: z.literal('review-required'),
+				reason: z.literal('amount-at-or-above-training-threshold'),
+			}),
+		),
+	)
+	.exposeAsHttpEndpoint('GET', 'review-cases/:accountId')
+	.setBeforeGuardHooks({
+		caseAssignment: async function (context, _payload, parameter) {
+			await requireReviewCaseAccess(context, parameter.accountId)
+		},
+	})
+	.setCommandFunction(async function (context, _payload, parameter) {
+		return context.resources.operationsStore.listFindings().filter(finding => finding.accountId === parameter.accountId)
 	})
 
 /** Three explicit progress frames keep the stream finite and easy to inspect in the UI. */
@@ -95,13 +135,17 @@ export const generateStatementWorker = new QueueWorkerBuilder<
 >('banking.generateStatement', 'generateStatement')
 	.setMode('continuous')
 	.setBeforeGuardHooks({
-		currentAccountRead: async function (context, message) {
-			const workerContext = context as unknown as {
-				message: { principalId?: string }
-				resources: { bankingRepository: BankingRepository }
-			}
+		currentInitiatorAccountRead: async function (context, message) {
 			const workerMessage = message as { payload: z.infer<typeof statementJobPayloadSchema> }
-			await requireReadableAccount(workerContext, workerMessage.payload.accountId)
+			const resources = context.resources as unknown as { bankingRepository: BankingRepository }
+			if (
+				!resources.bankingRepository.canRead(
+					workerMessage.payload.initiatorPrincipalId,
+					workerMessage.payload.accountId,
+				)
+			) {
+				throw new HandledError(StatusCode.Forbidden, 'The statement requester may no longer read this account')
+			}
 		},
 	})
 	.setHandler(async function (context) {
@@ -119,7 +163,7 @@ export const generateStatementWorker = new QueueWorkerBuilder<
 
 export const requestStatementGeneration = builder
 	.getCommandBuilder('requestStatementGeneration', 'Queue an account statement for the currently authorized reader')
-	.addPayloadSchema(statementJobPayloadSchema)
+	.addPayloadSchema(statementRequestPayloadSchema)
 	.addParameterSchema(emptyParameterSchema)
 	.addOutputSchema(z.object({ jobId: z.string(), queueName: z.literal('banking.generateStatement') }))
 	.canEnqueue('banking.generateStatement', statementJobPayloadSchema, tenantParameterSchema)
@@ -130,8 +174,12 @@ export const requestStatementGeneration = builder
 		},
 	})
 	.setCommandFunction(async function (context, payload) {
+		const initiatorPrincipalId = context.message.principalId
+		if (!initiatorPrincipalId || !isExampleActor(initiatorPrincipalId)) {
+			throw new HandledError(StatusCode.Unauthorized, 'A verified statement requester is required')
+		}
 		const job = await context.queue.enqueue['banking.generateStatement'](
-			payload,
+			{ ...payload, initiatorPrincipalId },
 			{ tenantId: 'tenant-north' },
 			{
 				idempotencyKey: `statement:${context.message.principalId ?? 'unknown'}:${payload.accountId}`,
@@ -226,6 +274,7 @@ export const bankingOperationsService = builder
 	.addQueueDefinition(statementQueue.getDefinition(), reconciliationQueue.getDefinition())
 	.addQueueWorkerDefinition(generateStatementWorker.getDefinition(), reconcileWorker.getDefinition())
 	.addCommandDefinition(
+		listReviewCases.getDefinition(),
 		requestStatementGeneration.getDefinition(),
 		getGeneratedStatement.getDefinition(),
 		runReconciliation.getDefinition(),

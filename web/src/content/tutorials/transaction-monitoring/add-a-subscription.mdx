@@ -1,0 +1,43 @@
+---
+title: Add a monitoring subscription
+description: Receive the recorded-transaction event in a handler that has its own responsibility.
+order: 53
+---
+
+A subscription is a handler that runs when an event with a chosen name arrives.
+The monitoring subscription does not call the transaction command and the
+transaction command does not call the monitoring subscription.
+
+```ts title="examples/banking/src/advanced/service.ts"
+export const monitorRecordedTransaction = builder
+  .getSubscriptionBuilder('monitorRecordedTransaction', 'Record a review signal for selected transaction events')
+  .subscribeToEvent(BankingTutorialEvent.transactionRecorded)
+  .addPayloadSchema(transactionRecordedEventSchema)
+  .setSubscriptionFunction(async function (context, payload) {
+    if (payload.amountMinor < 100_000) return
+    context.resources.operationsStore.recordFinding({
+      transactionId: payload.transactionId,
+      accountId: payload.accountId,
+      kind: 'review-required',
+      reason: 'amount-at-or-above-training-threshold',
+    })
+  })
+```
+
+`subscribeToEvent` selects the event. `addPayloadSchema` validates the small
+event contract at the consumer boundary. `operationsStore` is a resource owned
+by this service, so the consumer’s projection stays separate from the banking
+transaction repository.
+
+The callback has no browser identity. Its decision uses the event it received.
+The separate `listReviewCases` command applies the reviewer-assignment guard
+when Erin reads account A's findings; Bob receives `403`. This is still a
+training projection, not a compliance workflow or an automatic account action.
+
+```bash title="Run the subscription test"
+npm run test -w @purista/banking-tutorials
+```
+
+The test named `records a bounded monitoring finding from a transaction event`
+is the direct proof of this callback. Next, examine the rule that decides when
+it writes a finding.

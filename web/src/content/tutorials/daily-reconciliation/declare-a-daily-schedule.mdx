@@ -1,0 +1,42 @@
+---
+title: Declare a daily schedule
+description: Declare a named daily event and bind that event to the reconciliation queue without claiming that a timer is running.
+order: 85
+---
+
+The service contains a daily schedule declaration:
+
+```ts title="examples/banking/src/advanced/service.ts"
+const dailyReconciliationSchedule = builder
+  .getScheduleBuilder('dailyReconciliation', 'Emit a daily reconciliation trigger')
+  .emitEvent(BankingTutorialEvent.reconciliationDue, {
+    expression: { kind: 'cron', value: '5 2 * * *', timezone: 'Europe/Berlin' },
+    missedRunPolicy: 'runOnce',
+    payloadSchema: reconciliationDueEventSchema,
+  })
+
+export const bankingOperationsService = builder
+  .addScheduleDefinition(dailyReconciliationSchedule)
+  .bindEventToQueue(BankingTutorialEvent.reconciliationDue, 'banking.runReconciliation', {
+    idempotencyMode: 'advisory',
+    idempotencyKey: event => `reconciliation:${String(event.day)}`,
+    mapPayload: event => ({ day: String(event.day) }),
+    mapParameter: () => ({ tenantId: 'tenant-north' }),
+  })
+```
+
+The declaration names a cron expression for 02:05 in `Europe/Berlin` and says
+how its event would enqueue the worker. It is not a running timer by itself.
+`examples/banking/src/index.ts` starts no scheduler host, and the current tests
+do not wait for or simulate an occurrence. Do not tell a reader to wait until
+02:05 or expect a queued job from this checkpoint.
+
+`missedRunPolicy: 'runOnce'` is configuration on the schedule definition. Its
+real recovery behavior depends on a scheduler runtime and adapter that have not
+been wired here.
+
+```bash title="Check the schedule declaration compiles"
+npm run typecheck -w @purista/banking-tutorials
+```
+
+Next, test the definitions and record their current scope.

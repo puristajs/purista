@@ -1,0 +1,36 @@
+---
+title: Define the reconciliation contract
+description: Use one bounded ISO-day payload for manual runs and scheduled occurrences.
+order: 82
+---
+
+The local reconciliation payload is deliberately small:
+
+```ts title="examples/banking/src/advanced/contracts.ts"
+export const reconciliationDueEventSchema = z.object({
+  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+})
+```
+
+Both the manual command and the schedule use this schema. A value such as
+`2026-01-20` identifies one logical occurrence. The schema verifies its text
+shape; it does not validate whether the day exists in a calendar, select a
+timezone, or describe an upstream settlement source.
+
+```ts title="examples/banking/src/advanced/service.ts"
+export const runReconciliation = builder
+  .getCommandBuilder('runReconciliation', 'Queue a manual reconciliation run for one banking day')
+  .addPayloadSchema(reconciliationDueEventSchema)
+  .addParameterSchema(emptyParameterSchema)
+  .canEnqueue('banking.runReconciliation', reconciliationJobPayloadSchema, tenantParameterSchema)
+```
+
+The command is a producer. `canEnqueue` declares the queue contract that it
+may use. The queue parameter carries the fixed local tenant; it does not make
+the day or the queue reference confidential.
+
+```bash title="Typecheck the shared occurrence schema"
+npm run typecheck -w @purista/banking-tutorials
+```
+
+Next, consume that occurrence in the queue worker.

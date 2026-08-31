@@ -19,10 +19,17 @@ create the CSV string.
 .exposeAsHttpEndpoint('GET', 'accounts/:accountId/statement')
 ```
 
-Request account A's statement as Alice or Bob:
+Create an Alice or Bob local fixture session first. Then request account A's
+statement with its cookie jar:
+
+```bash title="Create Alice's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+```
 
 ```bash title="Download the account A statement"
-curl --fail -H 'x-example-actor: alice' \
+curl --fail -b .tutorial-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-a/statement
 ```
 

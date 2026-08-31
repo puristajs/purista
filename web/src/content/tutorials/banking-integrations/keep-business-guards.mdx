@@ -19,8 +19,8 @@ They must stay separate.
 The guard receives `payload.accountId`, not the legacy `account_ref` field.
 That is useful because the native and legacy endpoints use the same business
 meaning. Dana may record the normalized transaction for account A. Bob is
-still denied, even though Bob is a valid fixture actor and the legacy JSON is
-well formed.
+still denied, even though Bob has a valid local fixture session and the legacy
+JSON is well formed.
 
 The transform has no side effect. The command handler calls the repository only
 after input validation and the posting guard succeed. The repository still owns

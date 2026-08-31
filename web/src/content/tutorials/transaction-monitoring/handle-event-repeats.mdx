@@ -1,0 +1,39 @@
+---
+title: Handle repeated events
+description: Store one logical monitoring finding when a matching event is delivered more than once.
+order: 55
+---
+
+Event consumers must decide what a repeated delivery means. This local store
+uses the transaction ID and finding kind as its duplicate key.
+
+```ts title="examples/banking/src/advanced/repository.ts"
+recordFinding(finding: TransactionMonitoringFinding) {
+  if (
+    !this.findings.some(
+      existing => existing.transactionId === finding.transactionId && existing.kind === finding.kind,
+    )
+  ) {
+    this.findings.push(finding)
+  }
+}
+```
+
+Calling `recordFinding` twice with the same transaction and kind leaves one
+logical item. This is an in-memory example of an idempotent projection. It
+does not establish duplicate delivery semantics for a broker, a database
+uniqueness constraint, or a process restart.
+
+Do not put the transaction record and the monitoring write in the same handler
+only to avoid this question. The separate ownership is useful, but it means a
+consumer failure cannot undo a transaction that was already recorded.
+
+```bash title="Run the advanced definition tests"
+npm run test -w @purista/banking-tutorials
+```
+
+The current test checks a single successful event. Add a second identical
+delivery assertion when you change this duplicate key or move the store to a
+durable adapter.
+
+Next, review exactly what the existing tests prove.

@@ -1,0 +1,30 @@
+---
+title: Run the stream checkpoint
+description: Start the local service and identify the bounded analysis definition that later clients can call.
+order: 61
+---
+
+Start the full example from the `purista` repository root:
+
+```bash title="Start the local banking service"
+npm run dev -w @purista/banking-tutorials
+```
+
+The process registers `bankingOperations v1`, including the
+`analyzeTransaction` stream. Its declaration exposes `POST
+/api/v1/transactions/analysis` through the Hono server.
+
+The current public checkpoint stops before a browser client. Do not infer the
+wire framing from an ordinary `curl` request: a stream is a sequence of frames,
+and its consumer must use the transport supported by the chosen HTTP server.
+Instead, use the focused test to see the exact chunk values the handler writes.
+
+```bash title="Run the analysis handler test"
+npm run test -w @purista/banking-tutorials
+```
+
+The test uses the seeded `transaction-seed-a-1` in `account-a`. A future UI or
+HTTP integration test must prove its own transport behavior before the docs
+claim live progress in a browser.
+
+Next, define the two message shapes that make a finite stream understandable.

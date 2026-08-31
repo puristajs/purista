@@ -9,10 +9,18 @@ operation, and returns a typed result. The command is exposed at
 `POST /api/v1/transactions` by the definition in
 `examples/banking/src/service.ts`.
 
+First create Dana's local fixture session:
+
+```bash title="Create Dana's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"dana"}'
+```
+
 ```bash title="Record a synthetic debit as Dana"
 curl --fail -X POST http://127.0.0.1:3010/api/v1/transactions \
   -H 'content-type: application/json' \
-  -H 'x-example-actor: dana' \
+  -b .tutorial-cookie \
   --data '{"accountId":"account-a","sourceTransactionId":"ops-demo-1","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12540,"currency":"EUR","direction":"debit"}'
 ```
 

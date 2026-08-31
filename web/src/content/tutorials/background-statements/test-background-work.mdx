@@ -1,0 +1,27 @@
+---
+title: Test background work
+description: Verify the declared queue boundary and worker projection without overstating local queue guarantees.
+order: 76
+---
+
+Run the current checks:
+
+```bash title="Typecheck and test statement generation"
+npm run typecheck -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+`examples/banking/src/advanced/service.test.ts` covers two focused boundaries.
+One test supplies a queue-worker context to `generateStatementWorker` and
+asserts that the worker completes once and writes statement metadata. Another
+uses a command context with a stubbed enqueue function and asserts the queue
+reference returned by `requestStatementGeneration`.
+
+The first test in that file also starts the advanced service with
+`DefaultQueueBridge`. This verifies that the declared definitions can start
+together in the local profile. It does not prove that an HTTP request is
+processed by a worker, that a retry succeeds, or that data survives a restart.
+
+For a durable extension, add a real queue adapter, an owned persisted store,
+health checks, and tests covering enqueue-to-worker execution, duplicate jobs,
+access denial, retry, and restart recovery.

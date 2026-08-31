@@ -1,0 +1,49 @@
+---
+title: Write statement metadata
+description: Let the worker recheck account scope, create a small projection, and complete its queue job.
+order: 74
+---
+
+The worker does not receive a browser token. It receives the queue payload and
+uses its execution context to read the local resource.
+
+The following focused fragment omits the worker’s generic resource type, but
+keeps the registered handler body unchanged:
+
+```ts title="examples/banking/src/advanced/service.ts"
+.setBeforeGuardHooks({
+  currentAccountRead: async function (context, message) {
+    const workerContext = context as unknown as {
+      message: { principalId?: string }
+      resources: { bankingRepository: BankingRepository }
+    }
+    const workerMessage = message as { payload: z.infer<typeof statementJobPayloadSchema> }
+    await requireReadableAccount(workerContext, workerMessage.payload.accountId)
+  },
+})
+.setHandler(async function (context) {
+  const payload = context.message.payload as z.infer<typeof statementJobPayloadSchema>
+  const transactionCount = context.resources.bankingRepository.list(payload.accountId).length
+  const statement = context.resources.operationsStore.saveStatement({
+    statementId: `statement-${payload.accountId}`,
+    accountId: payload.accountId,
+    transactionCount,
+    generatedAt: new Date().toISOString(),
+  })
+  await context.job.complete({ statementId: statement.statementId, accountId: statement.accountId, transactionCount })
+  return { status: 'success' as const }
+})
+```
+
+The operation saves only metadata: a stable local ID, account ID, count, and
+time. It does not create a file or a download endpoint. `context.job.complete`
+reports the worker’s typed result to the queue bridge.
+
+```bash title="Run the worker projection test"
+npm run test -w @purista/banking-tutorials
+```
+
+The current test invokes the registered worker with a queue-worker context mock
+and checks that one completion call and one metadata record occur.
+
+Next, review the in-memory projection’s duplicate and recovery limits.

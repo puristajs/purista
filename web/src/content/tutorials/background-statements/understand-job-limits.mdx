@@ -1,0 +1,36 @@
+---
+title: Understand idempotency and limits
+description: Separate the local example’s repeat-safe shapes from durability, revocation, and download guarantees it does not yet implement.
+order: 75
+---
+
+The command supplies a stable idempotency key. The projection store also keeps
+one current statement record per account:
+
+```ts title="examples/banking/src/advanced/repository.ts"
+saveStatement(statement: GeneratedStatement) {
+  const existing = this.statements.find(entry => entry.accountId === statement.accountId)
+  if (existing) {
+    Object.assign(existing, statement)
+    return existing
+  }
+  this.statements.push(statement)
+  return statement
+}
+```
+
+This prevents an in-memory list from accumulating a new metadata item on each
+successful generation for the same account. It is not an atomic claim across a
+database and queue. Restarting the application clears the queue and the store.
+
+The source also does not model a revoked mandate after enqueue, job ownership,
+artifact bytes, a download guard, a failed job status, or retry recovery. Do
+not make those guarantees in a UI or operational runbook until the example has
+a durable adapter, explicit policy, and integration tests.
+
+```bash title="Run the local queue definition checks"
+npm run typecheck -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+Next, run the tests and record the boundary they actually cover.

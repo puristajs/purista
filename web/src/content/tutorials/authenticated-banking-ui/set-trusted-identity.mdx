@@ -1,6 +1,6 @@
 ---
 title: Inspect trusted identity handling
-description: Follow the local actor from Hono middleware into the PURISTA command context and understand its development-only limit.
+description: Follow the server-validated local session from Hono middleware into the PURISTA command context and understand its learning-only limit.
 order: 33
 ---
 
@@ -9,12 +9,12 @@ The Hono protection middleware is configured in
 
 ```ts title="examples/banking/src/index.ts"
 hono.setProtectMiddleware(async function (context, next) {
-  const actor = context.req.header('x-example-actor') ?? 'alice'
-  if (!['alice', 'bob', 'carol', 'dana'].includes(actor)) {
-    return context.json({ title: 'Unknown example actor' }, 401)
+  const session = findSession(context.req.header('cookie'))
+  if (!session) {
+    return context.json({ title: 'A local session is required' }, 401)
   }
-  context.set('principalId', actor)
-  context.set('tenantId', 'tenant-north')
+  context.set('principalId', session.principalId)
+  context.set('tenantId', session.tenantId)
   return next()
 })
 ```
@@ -25,17 +25,18 @@ command definitions use the default protected status. The middleware then puts
 receives.
 
 The important boundary is where the values come from. In this local example,
-they come from a visible test header and are only safe because the entire
-environment is a synthetic fixture. A production middleware must derive them
-from a verified credential and must never copy them from a JSON payload or an
-unverified client header.
+they come from a server-side session record addressed by an opaque HttpOnly
+cookie. The fixture login still accepts a synthetic name without a credential,
+so it is not production authentication. A production middleware must derive
+these values from a verified credential and must never copy them from a JSON
+payload or an unverified client value.
 
 ## Test a forged payload cannot choose the actor
 
 The transaction schema has no `principalId` or `tenantId` fields. Even if a
-transport ignores an unknown JSON field, the guard reads Bob from middleware,
-not an identity value in the payload. The safe rule is: domain payloads
-describe a transaction, not the caller.
+transport ignores an unknown JSON field, the guard reads the person from the
+session-aware middleware, not an identity value in the payload. The safe rule
+is: domain payloads describe a transaction, not the caller.
 
 Read [authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/)
 for the supported Hono protection model.

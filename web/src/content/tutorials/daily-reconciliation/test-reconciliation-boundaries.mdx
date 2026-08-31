@@ -1,0 +1,30 @@
+---
+title: Test reconciliation boundaries
+description: Verify manual enqueueing and repeated worker projections while recording the scheduler and business-policy work that remains.
+order: 86
+---
+
+Run the local checks:
+
+```bash title="Typecheck and test reconciliation definitions"
+npm run typecheck -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+`examples/banking/src/advanced/service.test.ts` verifies that the manual
+command asks its queue context to enqueue `banking.runReconciliation`. It then
+invokes the registered worker twice for `2026-01-20` and asserts one stored run
+with the seeded transaction count. The advanced-service startup test also
+starts its definitions with the local event and queue bridges.
+
+This does not prove a scheduler emits the event, a queue dispatches an HTTP
+request to the worker, a reconciliation sees a settlement mismatch, an
+unauthorized operator is denied, or a restart retains a run. The source has no
+settlement fixture, scheduler host, durable adapter, or operator guard for
+those claims.
+
+Before extending this tutorial into a production-oriented reconciliation flow,
+add explicit source and tenant authorization, complete-file validation,
+persisted occurrence claims, a real scheduler/queue profile with health checks,
+and integration tests for duplicate occurrences, failure recovery, timezone
+boundaries, and the exact mismatch result.

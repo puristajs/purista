@@ -1,0 +1,30 @@
+---
+title: Compare a stream and a job
+description: Choose a queue worker when the caller needs a job reference rather than request-owned progress.
+order: 71
+---
+
+The earlier stream definition writes progress while one request remains open.
+A queue job is different: the command enqueues work and returns a job ID. A
+worker later consumes that job.
+
+```ts title="examples/banking/src/advanced/service.ts"
+.addOutputSchema(z.object({ jobId: z.string(), queueName: z.literal('banking.generateStatement') }))
+.canEnqueue('banking.generateStatement', statementJobPayloadSchema, tenantParameterSchema)
+.exposeAsHttpEndpoint('POST', 'statements/generate')
+```
+
+A job ID is a reference used by the queue. It is not a permission token and the
+current example has no HTTP job-status route. The command first checks the
+caller’s account-read permission; a worker has its own guard before it reads
+the account to build the statement metadata.
+
+```bash title="Run the background-work tests"
+npm run test -w @purista/banking-tutorials
+```
+
+Use a stream for a short response that belongs to one connected caller. Use a
+job when the work has a separate worker lifecycle. This local bridge is useful
+for learning the API shape, but it is not a durable job system.
+
+Next, declare the queue and the worker that handles its messages.

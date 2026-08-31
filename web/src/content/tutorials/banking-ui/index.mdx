@@ -4,22 +4,27 @@ description: Start the local Example Bank, understand its Hono composition, and 
 order: 10
 ---
 
-The first result is deliberately small: a browser receives a page from a
-PURISTA application. There is no transaction form, database, login, broker, or
-model in this checkpoint. The page names itself **Example Bank** and reminds
-you that its data is synthetic.
+The first result is deliberately small: a browser receives a built React page
+from a PURISTA application. The page names itself **Example Bank**, reminds you
+that its data is synthetic, and starts a local fixture session before it calls
+the transaction API. There is no database, broker, or model in this checkpoint.
 
 ```mermaid title="The current local application"
 flowchart LR
   Browser -->|GET /| Hono[Hono HTTP application]
-  Hono -->|registered service definitions| Banking[banking v1 service]
+  Browser -->|POST /auth/login| Hono
+  Hono -->|opaque local cookie| Browser
+  Browser -->|cookie on API request| Banking[banking v1 service]
   Banking --> Repository[in-memory repository]
 ```
 
 The browser page is served by the Hono application in
-`examples/banking/src/index.ts`. The banking service and repository start in
-the same Node process. The repository is present so later API chapters have
-deterministic data; this first page does not read it.
+`examples/banking/src/index.ts`. Choose a synthetic tutorial person in the
+React login form, then select **Start local session**. Hono stores that fixture
+identity in an in-memory server session and sends an opaque HttpOnly cookie.
+The browser later sends the cookie with protected API requests. The banking
+service and repository start in the same Node process, with deterministic data
+for the pages that follow.
 
 ## Before you start
 
@@ -42,9 +47,11 @@ you finish. Restarting the process creates fresh in-memory fixtures.
 4. [Make your first visible change](/tutorials/banking-ui/change-the-page/)
 5. [Build, run, and stop the application](/tutorials/banking-ui/build-and-stop/)
 
-The current checkpoint serves one small HTML response from Hono. It does not
-yet contain React assets or shadcn components, so this chapter does not pretend
-that it does. The later API chapters use the same running application rather
-than a hidden second service.
+Hono serves the built React assets from `examples/banking/ui/dist`. The UI uses
+local, default shadcn-compatible design tokens and calls the same generated
+HTTP API used by the command-line examples. Its login is a local fixture: it
+creates an opaque in-memory session for synthetic people, not a production
+identity provider. The later API chapters use this same running application
+rather than a hidden second service.
 
 Next: [create and run the project](/tutorials/banking-ui/run-the-project/).

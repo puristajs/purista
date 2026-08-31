@@ -1,35 +1,51 @@
 ---
 title: Run the account access example
-description: Compare allowed and denied actions while keeping the local fixture identity valid.
+description: Compare allowed and denied actions while keeping the local fixture session valid.
 order: 31
 ---
 
-Start the service, then use the same account with two valid actors. This is the
-important authorization test: change one business fact while leaving the
-caller recognized.
+Start the service, then use the same account with two valid local sessions.
+This is the important authorization test: change one business fact while
+leaving both callers successfully signed in.
 
 ```bash title="Start the banking example"
 npm run dev -w @purista/banking-tutorials
 ```
 
+Create a local session for Alice and save it in a cookie jar. A cookie jar is a
+small file that `curl` uses to keep the opaque session cookie between requests.
+
+```bash title="Create Alice's local tutorial session"
+curl --fail -c .alice-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+```
+
 Alice may read account A:
 
 ```bash title="Read account A as Alice"
-curl -i -H 'x-example-actor: alice' \
+curl -i -b .alice-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
 ```
 
-Bob may also read A, but Bob may not read Carol's account:
+Create a separate local session for Bob. Bob may also read A, but Bob may not
+read Carol's account:
+
+```bash title="Create Bob's local tutorial session"
+curl --fail -c .bob-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"bob"}'
+```
 
 ```bash title="Attempt to read Carol's account as Bob"
-curl -i -H 'x-example-actor: bob' \
+curl -i -b .bob-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-c/transactions
 ```
 
 The first response is `200`; the second is `403`. In this example, a mandate
-is the fixture rule that connects an actor to an account and an allowed action.
-The name helps us avoid a common mistake: a valid identity or a broad role is
-not, by itself, permission to use every account.
+is the fixture rule that connects a signed-in person to an account and an
+allowed action. The name helps us avoid a common mistake: a valid session or a
+broad role is not, by itself, permission to use every account.
 
 ## Test the paired decision
 

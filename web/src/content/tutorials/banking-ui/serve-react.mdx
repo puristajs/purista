@@ -1,28 +1,30 @@
 ---
-title: Serve the browser page
-description: Inspect the current page route and understand the boundary between a server response and a future React application.
+title: Serve the built React UI
+description: Inspect the Hono static routes that serve the built React application.
 order: 13
 ---
 
-The route for the current visible result is intentionally direct. It is a Hono
-route that returns HTML from `examples/banking/src/index.ts`:
+The visible result is a small React application built with Vite. Hono serves
+the finished files from `examples/banking/ui/dist`; it does not run a separate
+frontend server in production mode:
 
 ```ts title="examples/banking/src/index.ts"
-hono.app.get('/', context =>
-  context.html(
-    '<!doctype html><title>Example Bank</title><main><h1>Example Bank</h1><p>Use the tutorial UI checkpoint to explore this service.</p></main>',
-  ),
-)
+hono.app.get('/assets/*', serveStatic({ root: tutorialUiDirectory }))
+hono.app.get('/', serveStatic({ root: tutorialUiDirectory, path: 'index.html' }))
 ```
 
-The browser receives this text as the response body. There is no React build,
-asset manifest, development proxy, or shadcn component in the current banking
-checkpoint. That distinction is useful: a browser page can be served before a
-frontend application is introduced.
+`npm run dev -w @purista/banking-tutorials` starts the Node server. Build the
+UI separately with `npm run build:ui -w @purista/banking-tutorials` whenever
+you change a React source file. The checked-in UI uses the default
+shadcn-compatible tokens in `ui/src/styles.css`; shadcn components are source
+files, so no component library needs to run at request time.
 
-Do not add a client-side button that claims to record a transaction at this
-stage. The only honest result is the page itself. The REST API introduced in
-the next chapter is the first business interaction.
+The UI already makes real requests to the local protected API. Before showing
+account data, it posts the chosen synthetic tutorial person to `/auth/login`.
+The server stores that fixture identity in an in-memory session and returns an
+opaque HttpOnly cookie. The browser sends the cookie on later API requests. The
+fixture is useful for learning, but it does not verify a real person's
+credential or provide a production identity provider.
 
 ## Test the response
 

@@ -1,0 +1,27 @@
+---
+title: Test the stream lifecycle
+description: Verify the registered stream handler’s ordered chunks and record the integration evidence still missing.
+order: 66
+---
+
+Run the focused check:
+
+```bash title="Typecheck and test the analysis stream"
+npm run typecheck -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+In `examples/banking/src/advanced/service.test.ts`,
+`createStreamContextMock` supplies the seeded transaction, a writer, and the
+required resources. The test calls the registered stream function and asserts
+the stages `received`, `checking`, and `complete` in that order.
+
+This proves the handler’s domain logic and writer calls. It does not prove an
+HTTP client receives the same frames, cancellation stops work, a disconnect
+cleans up resources, or a bridge supports distributed streams. Treat those as
+separate requirements for a later implementation rather than properties of the
+current test.
+
+When expanding coverage, assert one final frame, no chunks after close, a
+forbidden account produces no data frame, and a missing transaction produces a
+safe error before any chunk.

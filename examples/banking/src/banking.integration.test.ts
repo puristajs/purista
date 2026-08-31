@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { createBankingApplication } from './index.js'
-import { BankingRepository, type RecordedTransaction } from './repository.js'
+import { type BankActor, BankingRepository, type RecordedTransaction } from './repository.js'
 
 let destroy: (() => Promise<void>) | undefined
+type BankingFetch = (request: Request) => Response | Promise<Response>
 
 afterEach(async () => {
 	await destroy?.()
@@ -16,13 +17,43 @@ const start = async (bankingRepository?: BankingRepository) => {
 	return application.fetch
 }
 
+const waitFor = async (predicate: () => Promise<boolean>, timeoutMs = 1_500) => {
+	const deadline = Date.now() + timeoutMs
+	while (Date.now() < deadline) {
+		if (await predicate()) return
+		await new Promise(resolve => setTimeout(resolve, 25))
+	}
+	throw new Error(`Timed out after ${timeoutMs}ms`)
+}
+
+const signIn = async (fetch: BankingFetch, actor: BankActor) => {
+	const response = await fetch(
+		new Request('http://example.test/auth/login', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ actor }),
+		}),
+	)
+	expect(response.status).toBe(200)
+	const cookie = response.headers.get('set-cookie')?.split(';', 1)[0]
+	expect(cookie).toBeDefined()
+	return cookie as string
+}
+
+const asSession = (fetch: BankingFetch, cookie: string, request: Request) => {
+	const headers = new Headers(request.headers)
+	headers.set('cookie', cookie)
+	return fetch(new Request(request, { headers }))
+}
+
 describe('Example Bank transaction HTTP boundary', () => {
 	it('returns only the account history that a valid mandate allows', async () => {
 		const fetch = await start()
-		const response = await fetch(
-			new Request('http://example.test/api/v1/accounts/account-a/transactions', {
-				headers: { 'x-example-actor': 'bob' },
-			}),
+		const bob = await signIn(fetch, 'bob')
+		const response = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/accounts/account-a/transactions'),
 		)
 		expect(response.status).toBe(200)
 		expect(await response.json()).toMatchObject({
@@ -30,16 +61,19 @@ describe('Example Bank transaction HTTP boundary', () => {
 			transactions: [{ transactionId: 'transaction-seed-a-1' }],
 		})
 
-		const denied = await fetch(
-			new Request('http://example.test/api/v1/accounts/account-c/transactions', {
-				headers: { 'x-example-actor': 'bob' },
-			}),
+		const denied = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/accounts/account-c/transactions'),
 		)
 		expect(denied.status).toBe(403)
 	})
 
 	it('normalizes an authorized legacy record and rejects a logged-in bookkeeper posting', async () => {
 		const fetch = await start()
+		const dana = await signIn(fetch, 'dana')
+		const bob = await signIn(fetch, 'bob')
+		const alice = await signIn(fetch, 'alice')
 		const legacyBody = JSON.stringify({
 			source_id: 'legacy-test-1',
 			account_ref: 'account-a',
@@ -48,20 +82,24 @@ describe('Example Bank transaction HTTP boundary', () => {
 			currency: 'EUR',
 			dc: 'D',
 		})
-		const imported = await fetch(
+		const imported = await asSession(
+			fetch,
+			dana,
 			new Request('http://example.test/api/v1/legacy/transactions', {
 				method: 'POST',
-				headers: { 'content-type': 'application/json', 'x-example-actor': 'dana' },
+				headers: { 'content-type': 'application/json' },
 				body: legacyBody,
 			}),
 		)
 		expect(imported.status).toBe(200)
 		expect(await imported.json()).toMatchObject({ amountMinor: 12540, direction: 'debit', accountId: 'account-a' })
 
-		const denied = await fetch(
+		const denied = await asSession(
+			fetch,
+			bob,
 			new Request('http://example.test/api/v1/transactions', {
 				method: 'POST',
-				headers: { 'content-type': 'application/json', 'x-example-actor': 'bob' },
+				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					accountId: 'account-a',
 					sourceTransactionId: 'bookkeeper-write',
@@ -74,10 +112,10 @@ describe('Example Bank transaction HTTP boundary', () => {
 		)
 		expect(denied.status).toBe(403)
 
-		const history = await fetch(
-			new Request('http://example.test/api/v1/accounts/account-a/transactions', {
-				headers: { 'x-example-actor': 'alice' },
-			}),
+		const history = await asSession(
+			fetch,
+			alice,
+			new Request('http://example.test/api/v1/accounts/account-a/transactions'),
 		)
 		expect(await history.json()).not.toMatchObject({
 			transactions: [expect.objectContaining({ sourceTransactionId: 'bookkeeper-write' })],
@@ -86,17 +124,14 @@ describe('Example Bank transaction HTTP boundary', () => {
 
 	it('serializes an authorized statement only after it passes the result-scope guard', async () => {
 		const fetch = await start()
-		const response = await fetch(
-			new Request('http://example.test/api/v1/accounts/account-a/statement', { headers: { 'x-example-actor': 'bob' } }),
-		)
+		const bob = await signIn(fetch, 'bob')
+		const response = await asSession(fetch, bob, new Request('http://example.test/api/v1/accounts/account-a/statement'))
 
 		expect(response.status).toBe(200)
 		expect(response.headers.get('content-type')).toContain('text/csv')
 		expect(await response.text()).toContain('transactionId,bookedAt,amountMinor,currency,direction')
 
-		const denied = await fetch(
-			new Request('http://example.test/api/v1/accounts/account-c/statement', { headers: { 'x-example-actor': 'bob' } }),
-		)
+		const denied = await asSession(fetch, bob, new Request('http://example.test/api/v1/accounts/account-c/statement'))
 		expect(denied.status).toBe(403)
 	})
 
@@ -122,14 +157,142 @@ describe('Example Bank transaction HTTP boundary', () => {
 		}
 
 		const fetch = await start(new FaultyStatementRepository())
-		const response = await fetch(
-			new Request('http://example.test/api/v1/accounts/account-a/statement', {
-				headers: { 'x-example-actor': 'alice' },
-			}),
+		const alice = await signIn(fetch, 'alice')
+		const response = await asSession(
+			fetch,
+			alice,
+			new Request('http://example.test/api/v1/accounts/account-a/statement'),
 		)
 
 		expect(response.status).toBe(403)
 		expect(response.headers.get('content-type')).not.toContain('text/csv')
 		expect(await response.text()).not.toContain('transaction-faulty-c-1')
+	})
+
+	it('publishes an authorized high-value transaction to the assigned monitoring case projection', async () => {
+		const fetch = await start()
+		const dana = await signIn(fetch, 'dana')
+		const erin = await signIn(fetch, 'erin')
+		const bob = await signIn(fetch, 'bob')
+		const recorded = await asSession(
+			fetch,
+			dana,
+			new Request('http://example.test/api/v1/transactions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					accountId: 'account-a',
+					sourceTransactionId: 'ops-high-value-1',
+					bookedAt: '2026-01-15T12:00:00.000Z',
+					amountMinor: 100_000,
+					currency: 'EUR',
+					direction: 'credit',
+				}),
+			}),
+		)
+		expect(recorded.status).toBe(200)
+
+		const assigned = await asSession(fetch, erin, new Request('http://example.test/api/v1/review-cases/account-a'))
+		expect(assigned.status).toBe(200)
+		expect(await assigned.json()).toEqual([
+			expect.objectContaining({ transactionId: 'transaction-2', accountId: 'account-a' }),
+		])
+
+		const unassigned = await asSession(fetch, bob, new Request('http://example.test/api/v1/review-cases/account-a'))
+		expect(unassigned.status).toBe(403)
+	})
+
+	it('queues a statement for an authorized reader and exposes only the generated scoped result', async () => {
+		const fetch = await start()
+		const bob = await signIn(fetch, 'bob')
+		const rejected = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/statements/generate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ accountId: 'account-c' }),
+			}),
+		)
+		expect(rejected.status).toBe(403)
+
+		const queued = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/statements/generate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ accountId: 'account-a' }),
+			}),
+		)
+		expect(queued.status).toBe(200)
+		expect(await queued.json()).toMatchObject({ queueName: 'banking.generateStatement' })
+
+		await waitFor(async () => {
+			const generated = await asSession(
+				fetch,
+				bob,
+				new Request('http://example.test/api/v1/accounts/account-a/generated-statement'),
+			)
+			return generated.status === 200
+		})
+
+		const generated = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/accounts/account-a/generated-statement'),
+		)
+		expect(await generated.json()).toMatchObject({ accountId: 'account-a', transactionCount: 1 })
+	})
+
+	it('uses only the opaque local session for identity and invalidates it on logout', async () => {
+		const fetch = await start()
+		const bob = await signIn(fetch, 'bob')
+
+		const whoami = await asSession(fetch, bob, new Request('http://example.test/auth/whoami'))
+		expect(await whoami.json()).toEqual({ principalId: 'bob', tenantId: 'tenant-north' })
+
+		const forgedHeader = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/transactions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json', 'x-example-actor': 'dana' },
+				body: JSON.stringify({
+					accountId: 'account-a',
+					sourceTransactionId: 'forged-dana-write',
+					bookedAt: '2026-01-15T12:00:00.000Z',
+					amountMinor: 100,
+					currency: 'EUR',
+					direction: 'debit',
+				}),
+			}),
+		)
+		expect(forgedHeader.status).toBe(403)
+
+		const forgedOnly = await fetch(
+			new Request('http://example.test/api/v1/accounts/account-a/transactions', {
+				headers: { 'x-example-actor': 'alice' },
+			}),
+		)
+		expect(forgedOnly.status).toBe(401)
+
+		const unknownSession = await fetch(
+			new Request('http://example.test/api/v1/accounts/account-a/transactions', {
+				headers: { cookie: 'example_bank_session=not-a-session' },
+			}),
+		)
+		expect(unknownSession.status).toBe(401)
+
+		const logout = await asSession(fetch, bob, new Request('http://example.test/auth/logout', { method: 'POST' }))
+		expect(logout.status).toBe(204)
+		expect(logout.headers.get('set-cookie')).toContain('Max-Age=0')
+
+		const afterLogout = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/accounts/account-a/transactions'),
+		)
+		expect(afterLogout.status).toBe(401)
 	})
 })

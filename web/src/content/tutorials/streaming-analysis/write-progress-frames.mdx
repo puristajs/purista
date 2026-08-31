@@ -1,0 +1,30 @@
+---
+title: Write progress frames
+description: Send small ordered updates and close the stream once with its typed final result.
+order: 64
+---
+
+The writer is the stream handler’s output boundary. The local review writes
+three chunks in order, then closes exactly once.
+
+```ts title="examples/banking/src/advanced/service.ts"
+await writer.write({ stage: 'received', message: 'Transaction received for review.' })
+await writer.write({ stage: 'checking', message: 'The example threshold and account scope were checked.' })
+await writer.write({ stage: 'complete', message: 'The short review is complete.' })
+await writer.close({ status: 'complete', checkedSteps: 3 })
+```
+
+`writer.write` validates a progress value against the chunk schema. `writer.close`
+finishes the sequence with the final schema. The code does not use a queue,
+persist a job, or continue after the HTTP request ends.
+
+```bash title="Verify chunk order"
+npm run test -w @purista/banking-tutorials
+```
+
+The test named `writes exactly three progress chunks for an authorized
+transaction review` asserts the stage order. If you add a client, render
+`received` and `checking` as ongoing work and render the final result only
+after the close frame arrives.
+
+Next, distinguish a missing transaction from a completed review.

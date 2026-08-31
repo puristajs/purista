@@ -23,8 +23,13 @@ Open the root path in a browser:
 
 ```text title="Expected browser text"
 Example Bank
-Use the tutorial UI checkpoint to explore this service.
+Start a local fixture session to try protected PURISTA commands.
 ```
+
+Choose a synthetic tutorial person and select **Start local session**. The
+server returns an opaque HttpOnly cookie and the UI sends it on later API
+requests. This is a visible local learning setup; it does not verify a real
+user credential.
 
 `examples/banking/package.json` owns the `dev`, `start`, `typecheck`, `test`,
 and `build` commands. The app does not need a database, Docker, credentials,

@@ -1,6 +1,6 @@
 import { HandledError, StatusCode } from '@purista/core'
 
-export type BankActor = 'alice' | 'bob' | 'carol' | 'dana'
+export type BankActor = 'alice' | 'bob' | 'carol' | 'dana' | 'erin'
 export type TransactionDirection = 'debit' | 'credit'
 
 export type RecordedTransaction = {
@@ -19,6 +19,15 @@ const readMandates: Record<BankActor, readonly RecordedTransaction['accountId'][
 	bob: ['account-a'],
 	carol: ['account-c'],
 	dana: [],
+	erin: [],
+}
+
+const reviewAssignments: Record<BankActor, readonly RecordedTransaction['accountId'][]> = {
+	alice: [],
+	bob: [],
+	carol: [],
+	dana: [],
+	erin: ['account-a'],
 }
 
 /** In-memory teaching repository. Each application restart restores the same synthetic fixtures. */
@@ -45,13 +54,20 @@ export class BankingRepository {
 		return actor === 'dana' && accountId === 'account-a'
 	}
 
+	/** Case access is a separate assignment from customer account access. */
+	canReviewCase(actor: string | undefined, accountId: RecordedTransaction['accountId']) {
+		if (!actor || !(actor in reviewAssignments)) return false
+		return reviewAssignments[actor as BankActor].includes(accountId)
+	}
+
 	list(accountId: RecordedTransaction['accountId']) {
 		return this.transactions.filter(transaction => transaction.accountId === accountId)
 	}
 
 	record(input: Omit<RecordedTransaction, 'transactionId' | 'tenantId'>) {
 		const existing = this.transactions.find(
-			transaction => transaction.sourceTransactionId === input.sourceTransactionId && transaction.accountId === input.accountId,
+			transaction =>
+				transaction.sourceTransactionId === input.sourceTransactionId && transaction.accountId === input.accountId,
 		)
 		if (existing) {
 			if (

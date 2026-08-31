@@ -1,26 +1,30 @@
 ---
 title: Control access to accounts and actions
-description: See how the banking service distinguishes a valid local actor from permission to read or post to a specific account.
+description: See how the banking service separates a local fixture session from permission to read or post to a specific account.
 order: 30
 ---
 
-Everyone in this example can be selected as a local fixture actor. That does
-not mean everyone may perform every action. Alice and Bob may read account A;
-Carol may read account C; Dana may record an already-posted transaction for
-account A. Bob may not post, even though Bob is a known actor.
+The local login can create a fixture session for several named tutorial
+people. That does not mean each person may perform every action. Alice and Bob
+may read account A; Carol may read account C; Dana may record an already-posted
+transaction for account A. Bob may not post even after a valid local login.
 
 ```mermaid title="Identity fixture and business decision"
 flowchart LR
-  Header[x-example-actor fixture] --> Hono[Hono middleware]
+  Login[local login route] --> Session[server session record]
+  Session --> Hono[Hono middleware]
   Hono -->|principalId and tenantId| Guard[command before guard]
   Guard -->|account and action allowed| Handler[repository operation]
   Guard -->|not allowed| Denied[403 and no write]
 ```
 
-The current source implements **business guards**, not production
-authentication. `examples/banking/src/index.ts` uses the header as an explicit
-local test switch. It has no cookie, session, OAuth/OIDC integration, login
-screen, or logout route. Keep that limit visible whenever you run the example.
+The current source implements a local fixture login and **business guards**.
+`examples/banking/src/index.ts` stores a randomly generated opaque session ID
+in an HttpOnly cookie and looks up its principal and tenant on the server. The
+React UI provides a matching login and logout screen. This remains a learning
+fixture: it has no password verification, OAuth/OIDC integration, durable
+session store, or production tenant-membership check. Keep that limit visible
+whenever you run the example.
 
 The service guards are in `examples/banking/src/service.ts`; their fixture
 permissions live in `examples/banking/src/repository.ts`.

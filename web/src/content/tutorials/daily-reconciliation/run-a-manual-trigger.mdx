@@ -1,0 +1,41 @@
+---
+title: Run a manual trigger
+description: Use the protected local command to enqueue a reconciliation occurrence for one ISO day.
+order: 81
+---
+
+Start the example from the `purista` repository root:
+
+```bash title="Start the local banking application"
+npm run dev -w @purista/banking-tutorials
+```
+
+The command is exposed as `POST /api/v1/reconciliation/run`. Its request
+payload is a single ISO calendar day.
+
+Create Alice's local fixture session before sending the protected command:
+
+```bash title="Create Alice's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+```
+
+```bash title="Queue a manual reconciliation occurrence"
+curl --fail -X POST http://127.0.0.1:3010/api/v1/reconciliation/run \
+  -H 'content-type: application/json' \
+  -b .tutorial-cookie \
+  --data '{"day":"2026-01-20"}'
+```
+
+The expected response names `banking.runReconciliation` and includes a job ID.
+That response says the command enqueued a job; it is not a completed
+reconciliation report. The current source has no HTTP endpoint for reading a
+completed run, so verify the worker through its focused test.
+
+The current command has no business guard. This is a known teaching boundary,
+not an authorization pattern for a real operations action. A future manual
+entry point must check a current operator-to-tenant/source permission and test
+the denial before enqueueing.
+
+Next, see the narrow occurrence contract that the command and schedule share.

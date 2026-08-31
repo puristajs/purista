@@ -1,0 +1,32 @@
+---
+title: Handle missing transactions
+description: Reject a requested transaction that is not inside the authorized account instead of sending a misleading completed result.
+order: 65
+---
+
+The account guard allows the stream to inspect one account. The handler still
+must check that the requested transaction exists in that account.
+
+```ts title="examples/banking/src/advanced/service.ts"
+const transaction = context.resources.bankingRepository
+  .list(payload.accountId)
+  .find(entry => entry.transactionId === payload.transactionId)
+if (!transaction) {
+  throw new HandledError(StatusCode.NotFound, 'The transaction does not exist in this account')
+}
+```
+
+This `404` is different from a `403`: the caller is allowed to read the account,
+but the requested record is not in it. The check happens before `writer.write`,
+so this handler does not emit partial progress and then describe the review as
+complete.
+
+The current source has no injected mid-stream failure or cancellation path.
+Do not add a cancel button, retry claim, or timeout guarantee until a supported
+transport and an integration test establish those semantics.
+
+```bash title="Run the stream checkpoint tests"
+npm run test -w @purista/banking-tutorials
+```
+
+Next, review the direct evidence available for this bounded stream.

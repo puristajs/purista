@@ -39,9 +39,9 @@ is one of the example's two account IDs. This is intentionally narrow.
 
 ## Test the comparison
 
-Run the local service and submit the legacy JSON as Dana. The response includes
-`amountMinor: 12540` and `direction: "debit"`. Repeat the request with
-`x-example-actor: bob`; the normalized format is valid but the business action
-is denied.
+Run the local service and create a Dana session before submitting the legacy
+JSON. The response includes `amountMinor: 12540` and `direction: "debit"`.
+Then replace the cookie jar with a Bob session and repeat the request. The
+normalized format is valid but the business action is denied.
 
 Next: [transform legacy input](/tutorials/banking-integrations/transform-input/).

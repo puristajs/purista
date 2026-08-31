@@ -1,39 +1,59 @@
 ---
 title: Understand the local login boundary
-description: Separate the current actor fixture from a real login before relying on account permissions.
+description: Establish, inspect, and end the local fixture session before relying on account permissions.
 order: 32
 ---
 
-The current banking checkpoint does not implement login. The
-`x-example-actor` request header selects one of four documented fixture actors.
-It exists so the tests can prove business permissions without credentials or an
-identity provider.
+The banking example implements a local fixture login. Send one documented
+synthetic person to `POST /auth/login`; the server creates a random session
+record and returns an opaque HttpOnly cookie named `example_bank_session`.
+Generated PURISTA API routes use that server-side record, not a principal sent
+by the browser.
 
-That makes it unsuitable for a real browser application. Anyone who can send a
-request can select `alice`, `bob`, `carol`, or `dana`. The allowed-list check
-only rejects unknown fixture names; it does not authenticate the person sending
-the header.
+For a terminal, use `-c` to save the cookie in a cookie jar, then use `-b` to
+send the same cookie to a protected route:
 
-Do not copy this header pattern into a production application. A production
-edge would verify a credential, establish a server-controlled principal and
-tenant, and then set normalized values for the PURISTA request context. A
-server session or an identity provider is an application decision; neither is
-present in `examples/banking` today.
+```bash title="Create and inspect Alice's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+
+curl --fail -b .tutorial-cookie \
+  http://127.0.0.1:3010/auth/whoami
+```
+
+The second response contains Alice's synthetic `principalId` and the fixed
+`tenantId`. The cookie holds only the opaque session ID; the server keeps the
+identity mapping in memory.
+
+Do not copy this fixture login into a production application. It accepts a
+known name without a credential and stores sessions only in memory. A
+production edge would verify a credential, establish a server-controlled
+principal and tenant, use suitable session storage and CSRF/origin controls,
+then set normalized values for the PURISTA request context.
 
 The business guards remain valuable after real login is added. They answer
 whether the authenticated person may read this account or record this posting.
 Authentication answers a different question: who sent the request?
 
-## Test the present boundary
+## Test the local fixture boundary
 
-An unknown fixture actor receives a controlled `401`:
+An unknown local person is rejected by the login route with `400`:
 
-```bash title="Reject an unknown local actor"
-curl -i -H 'x-example-actor: nobody' \
-  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
+```bash title="Reject an unknown local tutorial person"
+curl -i -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"nobody"}'
 ```
 
-This test proves the fixture's input validation only. It is not evidence of
-password, cookie, token, session-expiry, or logout behavior.
+End the local session when you are done:
+
+```bash title="Log out and clear the local tutorial session"
+curl -i -b .tutorial-cookie -X POST http://127.0.0.1:3010/auth/logout
+```
+
+This test proves only the fixture login, cookie lookup, and logout behavior.
+It is not evidence of password verification, external-token validation,
+production session expiry, or production access control.
 
 Next: [inspect trusted identity handling](/tutorials/authenticated-banking-ui/set-trusted-identity/).

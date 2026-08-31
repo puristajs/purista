@@ -1,0 +1,40 @@
+---
+title: Define the queue and worker
+description: Declare a typed queue contract and attach a continuous worker that owns statement generation.
+order: 72
+---
+
+The queue contract says what a producer may enqueue. The worker name says which
+handler consumes that contract.
+
+```ts title="examples/banking/src/advanced/service.ts"
+const statementQueue = builder
+  .getQueueBuilder('banking.generateStatement', 'Generate an account statement in background work')
+  .addPayloadSchema(statementJobPayloadSchema)
+  .addParameterSchema(tenantParameterSchema)
+  .setLifecycleConfig({ maxAttempts: 3, visibilityTimeoutMs: 30_000 })
+
+export const generateStatementWorker = new QueueWorkerBuilder(
+  'banking.generateStatement',
+  'generateStatement',
+)
+  .setMode('continuous')
+```
+
+The public request contains only `accountId`. The protected command adds the
+verified requester as the server-owned `initiatorPrincipalId` before it
+enqueues the job. The worker repeats that account-read decision with this
+trusted value, because a queue worker must not assume the original HTTP guard
+is still current. The parameter fixes this example to `tenant-north`.
+`maxAttempts` and `visibilityTimeoutMs` are queue lifecycle configuration, not
+a promise that the local in-memory bridge will survive a restart or redeliver a
+crashed process’s job.
+
+The worker runs continuously when the service starts. It is a separate service
+actor, so it repeats the account-read rule before accessing the repository.
+
+```bash title="Typecheck the queue definition"
+npm run typecheck -w @purista/banking-tutorials
+```
+
+Next, enqueue this contract from the protected command.

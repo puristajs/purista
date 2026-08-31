@@ -88,7 +88,7 @@ describe('advanced banking tutorial definitions', () => {
 		const resources = createResources()
 		const mock = createQueueWorkerContextMock(generateStatementWorker, {
 			queueName: 'banking.generateStatement',
-			payload: { accountId: 'account-a' },
+			payload: { accountId: 'account-a', initiatorPrincipalId: 'alice' },
 			parameter: { tenantId: 'tenant-north' },
 			resources,
 		})
@@ -143,10 +143,14 @@ describe('advanced banking tutorial definitions', () => {
 			resources,
 		})
 		command.stubs.enqueue.resolves({ jobId: 'job-statement-1', queueName: 'banking.generateStatement' })
+		const context = {
+			...command.context,
+			message: { ...command.context.message, principalId: 'alice' },
+		}
 
 		const queued = await requestStatementGeneration
 			.getCommandFunction()
-			.call({} as never, command.context, { accountId: 'account-a' }, {})
+			.call({} as never, context as never, { accountId: 'account-a' }, {})
 		expect(queued).toEqual({ jobId: 'job-statement-1', queueName: 'banking.generateStatement' })
 	})
 })

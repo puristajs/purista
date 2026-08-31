@@ -1,0 +1,43 @@
+---
+title: Publish a transaction event
+description: See why the command emits a compact business fact after recording a transaction.
+order: 52
+---
+
+An event says that something already happened. A command asks the application
+to do work. Here, `recordTransaction` records its data first and then emits the
+fact that it recorded a transaction.
+
+```ts title="examples/banking/src/service.ts"
+.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
+.setCommandFunction(async function (context, payload) {
+  const transaction = context.resources.bankingRepository.record(payload)
+  await context.emit(BankingTutorialEvent.transactionRecorded, {
+    transactionId: transaction.transactionId,
+    accountId: transaction.accountId,
+    amountMinor: transaction.amountMinor,
+    currency: transaction.currency,
+    direction: transaction.direction,
+    bookedAt: transaction.bookedAt,
+  })
+  return transaction
+})
+```
+
+`canEmit` declares the event that this command is allowed to publish and ties
+it to a schema. The event contains the business fields the consumer needs. It
+does not copy the caller’s header, browser session, or a formatted CSV result.
+
+The local bridge delivers this event inside one running process. The example
+does not implement an outbox or prove an atomic database-write-and-publish
+operation. A crash between those two application operations remains a future
+production design decision.
+
+Run the test suite after changing the payload shape:
+
+```bash title="Check the event definitions"
+npm run typecheck -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+Next, receive the declared event in a subscription.

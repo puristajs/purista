@@ -20,8 +20,8 @@ for the payload's account.
 The guard runs after the command's parameter and payload schemas validate, and
 before the handler calls the repository. It receives the trusted principal from
 the command context and the validated account ID. That is why Bob can read A
-but cannot read C, and why Bob cannot post to A despite being a valid fixture
-actor.
+but cannot read C, and why Bob cannot post to A despite holding a valid local
+fixture session.
 
 Named guards in one stage run concurrently. Do not use two hook names as an
 ordered pipeline or let one mutate state for the other. If a permission or
@@ -30,8 +30,9 @@ atomic recheck as well; a before guard is not a transaction lock.
 
 ## Test that denial has no effect
 
-Send the posting request from the previous chapter using `x-example-actor:
-bob`, then list account A as Alice. The `sourceTransactionId` must not be in
-the list. This proves both the `403` response and the missing repository write.
+Send the posting request from the previous chapter with Bob's cookie jar, then
+list account A with Alice's cookie jar. The `sourceTransactionId` must not be
+in the list. This proves both the `403` response and the missing repository
+write.
 
 Next: [protect returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/).

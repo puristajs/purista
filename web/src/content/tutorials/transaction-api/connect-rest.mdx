@@ -8,12 +8,21 @@ order: 24
 request, invokes the registered PURISTA command, and returns the command's
 validated result. The browser and command-line client share the same boundary.
 
-The current example has a small HTML root page only; it does not yet provide a
-React form. Use the HTTP API directly to prove the integration:
+The current example has a React login page and transaction screen. Use the HTTP
+API directly as well, so you can see the same generated boundary from a script.
+First create Alice's local fixture session:
+
+```bash title="Create Alice's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+```
+
+Then use the HTTP API:
 
 ```bash title="Read the history after recording"
 curl --fail \
-  -H 'x-example-actor: alice' \
+  -b .tutorial-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
 ```
 

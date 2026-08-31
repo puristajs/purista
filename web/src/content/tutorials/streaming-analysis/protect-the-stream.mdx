@@ -1,0 +1,38 @@
+---
+title: Protect the stream
+description: Reuse the business account-read decision before a stream reads or sends any transaction information.
+order: 63
+---
+
+Streaming does not bypass business permissions. The stream performs an account
+read guard before it looks up the transaction or writes the first chunk.
+
+```ts title="examples/banking/src/advanced/service.ts"
+.setBeforeGuardHooks({
+  accountRead: async function (context, payload) {
+    await requireReadableAccount(context, payload.accountId)
+  },
+})
+.setStreamFunction(async function (context, payload, _parameter, writer) {
+  const transaction = context.resources.bankingRepository
+    .list(payload.accountId)
+    .find(entry => entry.transactionId === payload.transactionId)
+  // stream output follows only after this guarded lookup
+})
+```
+
+`requireReadableAccount` asks the repository whether the server-provided
+principal may read that particular account. Alice and Bob may read account A;
+Bob may not read account C. This is a business scope decision, not a check that
+the request supplied a non-empty header.
+
+The focused stream test currently covers an authorized seed transaction. When
+adding HTTP stream coverage, include a valid Bob request for account A and a
+same-tenant Bob request for account C that produces no chunk and no final
+result.
+
+```bash title="Run the current stream tests"
+npm run test -w @purista/banking-tutorials
+```
+
+Next, see how the handler writes its finite sequence.

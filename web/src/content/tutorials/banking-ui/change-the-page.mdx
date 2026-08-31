@@ -1,21 +1,25 @@
 ---
 title: Make your first visible change
-description: Change the visible server response, restart the local process, and verify the exact result in a browser.
+description: Change the visible React page, rebuild its assets, and verify the exact result in a browser.
 order: 14
 ---
 
 Make a small change in one place so you can see the complete edit-to-browser
-loop. In `examples/banking/src/index.ts`, change only the heading text inside
-the root route. For example, change `Example Bank` to `Example Bank — local`.
+loop. In `examples/banking/ui/src/App.tsx`, change the `Example Bank` heading
+to `Example Bank — local`.
 
-The development command watches `src/index.ts`. Reload
-`http://127.0.0.1:3010/` after it restarts. You should see the new heading.
-Return the wording to `Example Bank` before continuing, so the tutorial tests
-and screenshots have one stable expectation.
+Build the new browser assets, then reload `http://127.0.0.1:3010/`:
 
-This is server-rendered HTML. A code change updates the response because the
-Node process reloads the module; there is no React component state or browser
-build cache to debug in this checkpoint.
+```bash title="Build the React UI"
+npm run build:ui -w @purista/banking-tutorials
+```
+
+You should see the new heading. Return the wording to `Example Bank` before
+continuing, so the tutorial tests and screenshots have one stable expectation.
+
+The page is a built browser asset. A React source change needs a Vite build;
+the Hono server simply serves the newly built files. If the browser still shows
+the old text after a successful build, perform a hard refresh.
 
 ## Test the edit
 

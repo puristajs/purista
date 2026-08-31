@@ -1,0 +1,42 @@
+---
+title: Request statement generation
+description: Guard the request and return the queue reference without pretending that the statement is already ready.
+order: 73
+---
+
+The command exposes `POST /api/v1/statements/generate`. It lets an authorized
+reader request generation for their account.
+
+```ts title="examples/banking/src/advanced/service.ts"
+.setBeforeGuardHooks({
+  accountRead: async function (context, payload) {
+    await requireReadableAccount(context, payload.accountId)
+  },
+})
+.setCommandFunction(async function (context, payload) {
+  const job = await context.queue.enqueue['banking.generateStatement'](
+    { ...payload, initiatorPrincipalId },
+    { tenantId: 'tenant-north' },
+    { idempotencyKey: `statement:${context.message.principalId ?? 'unknown'}:${payload.accountId}` },
+  )
+  return { jobId: job.jobId, queueName: 'banking.generateStatement' }
+})
+```
+
+The before guard is a business decision: it checks the principal’s current
+right to read this account. The command then writes the verified principal into
+the internal job payload; a caller cannot provide or replace it. The worker
+checks that same business rule again before it reads account data. The
+idempotency key makes repeat requests from the same principal for the same
+account use the same logical queue key in the declared contract. It does not
+provide a durable artifact policy.
+
+```bash title="Run the command boundary test"
+npm run test -w @purista/banking-tutorials
+```
+
+The existing test stubs the queue boundary and proves the command returns its
+job reference. Add a real HTTP and queue integration test before teaching a
+specific response timing or duplicate-delivery guarantee.
+
+Next, inspect the work that the worker performs after it receives a job.

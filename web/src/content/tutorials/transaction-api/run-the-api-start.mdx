@@ -1,6 +1,6 @@
 ---
 title: Run the API
-description: Start the local service and inspect its seeded transaction history with a fixture actor.
+description: Start the local service, create a local fixture session, and inspect its seeded transaction history.
 order: 21
 ---
 
@@ -10,12 +10,21 @@ Start the application from the `purista` repository root:
 npm run dev -w @purista/banking-tutorials
 ```
 
-The seed data contains one credit transaction on `account-a`. Ask for the
-history as Alice:
+The seed data contains one credit transaction on `account-a`. First create a
+local fixture session as Alice. `-c` writes the opaque cookie to the named
+cookie jar:
+
+```bash title="Create Alice's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"alice"}'
+```
+
+Then send that cookie with the protected request:
 
 ```bash title="Read Alice's synthetic account history"
 curl --fail \
-  -H 'x-example-actor: alice' \
+  -b .tutorial-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
 ```
 
@@ -24,17 +33,24 @@ The response contains `accountId: "account-a"` and
 means EUR 42.50. Storing a whole number avoids binary floating-point rounding
 in the command contract.
 
-The header selects a local fixture actor. `alice` and `bob` may read account A,
-`carol` may read account C, and `dana` is the operations actor for posting to
-account A. The server checks the header; it does not accept an actor in the
-JSON payload.
+The local login accepts a documented synthetic person. `alice` and `bob` may
+read account A, `carol` may read account C, and `dana` is the operations person
+for posting to account A. The protected API takes identity from the
+server-side session, not from the URL or JSON payload.
 
 ## Test the starting result
 
-Try Bob against Carol's account:
+Replace the cookie jar with a Bob session, then try Bob against Carol's
+account:
 
-```bash title="Prove that a valid actor still has limited access"
-curl -i -H 'x-example-actor: bob' \
+```bash title="Create Bob's local tutorial session"
+curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+  -H 'content-type: application/json' \
+  --data '{"actor":"bob"}'
+```
+
+```bash title="Prove that a signed-in person still has limited access"
+curl -i -b .tutorial-cookie \
   http://127.0.0.1:3010/api/v1/accounts/account-c/transactions
 ```
 

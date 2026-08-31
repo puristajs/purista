@@ -12,7 +12,7 @@ money and a customer cannot create a credit.
 ```mermaid title="Transaction request flow"
 flowchart LR
   Client -->|HTTP request| Hono[Hono]
-  Hono -->|trusted fixture identity| Command[PURISTA command]
+  Hono -->|server-validated local session| Command[PURISTA command]
   Command --> Guard[access guard]
   Guard --> Repository[in-memory transaction repository]
   Repository --> Command
@@ -20,9 +20,11 @@ flowchart LR
 ```
 
 The current runnable source is in `examples/banking/src/service.ts`; its HTTP
-composition is in `examples/banking/src/index.ts`. The `x-example-actor`
-header is a visible local fixture, not production authentication. The next
-chapter explains the business permission rules that it already exercises.
+composition is in `examples/banking/src/index.ts`. Start a local fixture
+session through `/auth/login`; protected routes derive the principal and tenant
+from its server-side record. This is not a production identity provider. The
+next chapter explains the business permission rules that the API already
+exercises.
 
 ## Start here
 

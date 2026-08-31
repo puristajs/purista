@@ -1,0 +1,32 @@
+---
+title: Define chunks and a final result
+description: Give progress updates and the terminal result different schemas so callers can handle them safely.
+order: 62
+---
+
+The stream has two kinds of output. A chunk tells the caller that work is
+continuing. The final result closes the stream with the result of the review.
+
+```ts title="examples/banking/src/advanced/service.ts"
+export const analyzeTransactionStream = builder
+  .getStreamBuilder('analyzeTransaction', 'Streams a short, bounded transaction review')
+  .addPayloadSchema(z.object({ accountId: accountIdSchema, transactionId: z.string().min(1) }))
+  .addParameterSchema(emptyParameterSchema)
+  .addChunkSchema(z.object({ stage: z.enum(['received', 'checking', 'complete']), message: z.string() }))
+  .addFinalSchema(z.object({ status: z.literal('complete'), checkedSteps: z.literal(3) }))
+  .exposeAsHttpStreamEndpoint('POST', 'transactions/analysis')
+```
+
+The payload identifies a transaction within an account. Each chunk has a
+named stage and a reader-friendly message. The final result always says
+`complete` and `3`, which keeps this teaching example bounded and repeatable.
+
+The empty parameter schema means this definition currently takes no additional
+route or query values. It does not make the stream public: the guard on the
+next page still decides whether the caller may read the requested account.
+
+```bash title="Check stream schema types"
+npm run typecheck -w @purista/banking-tutorials
+```
+
+Next, protect the account selection before the stream reads any transaction.
