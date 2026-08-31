@@ -2,13 +2,13 @@
 title: Test review boundaries
 description: Verify that only the assigned distinct reviewer can approve and that stale, expired, rejected, and replayed actions change no fee.
 order: 166
-status: draft
+status: published
 ---
 
 Run the integration test:
 
 ```bash title="Verify the human-review checkpoint"
-npx vitest run examples/banking/src/review/service.integration.test.ts
+npm run test -w @purista/banking-tutorials
 ```
 
 The test starts the real PURISTA service and Hono routes. It proves that:
@@ -22,10 +22,10 @@ The test starts the real PURISTA service and Hono routes. It proves that:
 - expiry returns `410` without changing the fee; and
 - the first valid apply changes the fee once while a replay returns `409`.
 
-This proof does not include the main banking browser server, local-session
-integration, durable review state, scheduled expiry processing, a model, or a
-real payment system. Treat `x-test-actor` as test wiring only; it is never a
-client authentication mechanism.
+This proof includes main-app local-session integration but not a browser
+fee-review screen, durable review state, scheduled expiry processing, a
+model, or a real payment system. Treat `x-test-actor` in the focused service
+test as test wiring only; it is never a client authentication mechanism.
 
 Next, extend the application only after adding real session composition and
 the corresponding end-to-end tests.

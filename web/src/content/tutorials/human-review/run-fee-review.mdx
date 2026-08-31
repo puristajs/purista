@@ -1,24 +1,23 @@
 ---
-title: Run the isolated review service
-description: Start the real service and generated Hono routes through its focused integration test.
+title: Run the review service
+description: Exercise the main-app session path and generated Hono routes through the banking integration test.
 order: 161
-status: draft
+status: published
 ---
 
-The review checkpoint is exercised through one test:
+The main banking application registers the review service. Exercise its
+session-backed path with the complete banking test:
 
 ```bash title="Run the fee-change review integration test"
-npx vitest run examples/banking/src/review/service.integration.test.ts
+npm run test -w @purista/banking-tutorials
 ```
 
-The test creates `bankingFeeChangeReview v1`, a `BankingRepository`, and a
-`FeeChangeReviewStore`. It starts a local `DefaultEventBridge` and mounts
-the generated REST endpoints under `/api/v1/`.
+The banking integration test signs in Dana and Erin through the local opaque
+session flow, then uses the generated endpoints under `/api/v1/`.
 
-Its protection middleware reads `x-test-actor` and creates a synthetic
-`tenant-north` identity. That header is deliberately test-only. It is not an
-authentication design, and sending it to the banking browser server does not
-add this review service or grant a user a role.
+The focused service test still uses `x-test-actor` as isolated test wiring.
+That header is never an authentication design and has no effect on the
+banking browser server.
 
 The first proposal is pending. No fee changes when a proposal is created.
 Next, define the information that a reviewer needs to decide.

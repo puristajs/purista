@@ -2,18 +2,18 @@
 title: Require review before changing an account fee
 description: Store a typed fee-change proposal and apply it only after the assigned reviewer approves the current, unexpired revision.
 order: 160
-status: draft
+status: published
 ---
 
 Some actions need a second person to decide. This checkpoint proposes a
 synthetic fee change for `account-a`, assigns Erin as reviewer, and changes
 the fee only after Erin approves the exact proposal version.
 
-It is an isolated PURISTA service proof. The test hosts the generated Hono
-endpoints and uses an `x-test-actor` header only inside its test middleware.
-The main banking application does not register this service, its local-session
-middleware is not wired here, and the browser UI has no fee-review screen.
-This chapter therefore stays a draft.
+The main banking application registers this PURISTA service beside the other
+banking services. Its generated endpoints use the same opaque local-session
+middleware as the transaction API. There is not yet a browser fee-review
+screen, so this chapter uses exact HTTP calls and integration tests to make
+the business checkpoint visible.
 
 ```mermaid title="The isolated fee-change review checkpoint"
 flowchart LR
@@ -39,7 +39,7 @@ proposals and fees reset when the test process ends.
 npx vitest run examples/banking/src/review/service.integration.test.ts
 ```
 
-1. [Run the isolated review service](/tutorials/human-review/run-fee-review/)
+1. [Run the review service](/tutorials/human-review/run-fee-review/)
 2. [Propose a typed fee change](/tutorials/human-review/propose-fee-change/)
 3. [Guard each review action](/tutorials/human-review/guard-review-actions/)
 4. [Record a reviewer decision](/tutorials/human-review/record-decision/)

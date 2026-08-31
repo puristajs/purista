@@ -320,6 +320,51 @@ describe('Example Bank transaction HTTP boundary', () => {
 		expect(denied.status).toBe(403)
 	})
 
+	it('uses the local session for a distinct human fee-change review before applying a fee', async () => {
+		const fetch = await start()
+		const dana = await signIn(fetch, 'dana')
+		const erin = await signIn(fetch, 'erin')
+		const proposalResponse = await asSession(
+			fetch,
+			dana,
+			new Request('http://example.test/api/v1/fee-changes', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					accountId: 'account-a',
+					proposedFeeMinor: 55,
+					reviewerId: 'erin',
+					expiresAt: '2027-01-01T00:00:00.000Z',
+				}),
+			}),
+		)
+		expect(proposalResponse.status).toBe(200)
+		const proposal = (await proposalResponse.json()) as { proposalId: string; version: number }
+
+		const approved = await asSession(
+			fetch,
+			erin,
+			new Request(`http://example.test/api/v1/fee-changes/${proposal.proposalId}/decisions`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ expectedVersion: proposal.version, decision: 'approved' }),
+			}),
+		)
+		expect(approved.status).toBe(200)
+
+		const applied = await asSession(
+			fetch,
+			dana,
+			new Request(`http://example.test/api/v1/fee-changes/${proposal.proposalId}/apply`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ expectedVersion: proposal.version }),
+			}),
+		)
+		expect(applied.status).toBe(200)
+		expect(await applied.json()).toMatchObject({ status: 'applied', proposedFeeMinor: 55 })
+	})
+
 	it('uses only the opaque local session for identity and invalidates it on logout', async () => {
 		const fetch = await start()
 		const bob = await signIn(fetch, 'bob')

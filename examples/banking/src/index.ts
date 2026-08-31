@@ -21,6 +21,8 @@ import { BankingKnowledgeRepository, knowledgeCollectionIds } from './knowledge/
 import { bankingKnowledgeService } from './knowledge/service.js'
 import type { BankActor } from './repository.js'
 import { BankingRepository } from './repository.js'
+import { FeeChangeReviewStore } from './review/repository.js'
+import { bankingFeeChangeReviewService } from './review/service.js'
 import { bankingService } from './service.js'
 
 const tutorialUiDirectory = fileURLToPath(new URL('../ui/dist', import.meta.url))
@@ -92,6 +94,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const bankingRepository = options.bankingRepository ?? new BankingRepository()
 	const operationsStore = new BankingOperationsStore()
 	const knowledgeRepository = new BankingKnowledgeRepository()
+	const feeChangeReviewStore = new FeeChangeReviewStore()
 	const sessions = new Map<string, LocalSession>()
 	await eventBridge.start()
 	await queueBridge.start()
@@ -109,12 +112,19 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		resources: { knowledgeRepository },
 		ai: { models: {} },
 	})
+	const bankingFeeChangeReview = await bankingFeeChangeReviewService.getInstance(eventBridge, {
+		resources: { bankingRepository, feeChangeReviewStore },
+	})
 	await banking.start()
 	await bankingOperations.start()
 	await bankingKnowledge.start()
+	await bankingFeeChangeReview.start()
 
 	const hono = await honoV1Service.getInstance(eventBridge, {
-		serviceConfig: { services: [banking, bankingOperations, bankingKnowledge], autoRegisterServicesFromConfig: true },
+		serviceConfig: {
+			services: [banking, bankingOperations, bankingKnowledge, bankingFeeChangeReview],
+			autoRegisterServicesFromConfig: true,
+		},
 	})
 	const findSession = (cookieHeader: string | undefined) => {
 		const sessionId = readCookie(cookieHeader, sessionCookieName)
@@ -201,6 +211,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		fetch: hono.app.fetch,
 		destroy: async () => {
 			await hono.destroy()
+			await bankingFeeChangeReview.destroy()
 			await bankingKnowledge.destroy()
 			await bankingOperations.destroy()
 			await banking.destroy()
