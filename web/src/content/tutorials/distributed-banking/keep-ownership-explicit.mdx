@@ -1,0 +1,22 @@
+---
+title: Keep runtime ownership explicit
+description: Know which boundaries the prepared bridges can change and which remain local.
+order: 215
+status: published
+---
+
+Changing a bridge does not turn every runtime feature into a distributed
+feature. The HTTP server still owns request admission and trusted identity.
+Business guards still run where a command, subscription, or queue worker makes
+its business decision. The current stream implementation remains owned by the
+HTTP process that serves it.
+
+The supplied helper is intentionally not a hidden profile switch. There are no
+separate HTTP, service, worker, or scheduler entry points in this checkpoint,
+and no scheduler has been moved to a broker-backed deployment. That makes the
+remaining work visible instead of suggesting that changing two URLs gives
+safe distributed operation.
+
+Before adding a real split, decide which process owns each HTTP endpoint,
+stream, queue worker, and schedule. Give every internal process a distinct
+identity and the least broker permissions it needs.

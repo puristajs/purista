@@ -1,0 +1,21 @@
+---
+title: Test the prepared profile and its limits
+description: Verify the bridge choices in isolation, then record the missing distributed acceptance evidence.
+order: 216
+status: published
+---
+
+The focused test constructs the factory with explicit URLs and confirms that it
+returns the NATS and Redis PURISTA bridge implementations.
+
+```bash
+npx vitest run examples/banking/src/distributed/dependencies.test.ts
+npm run typecheck -w @purista/banking-tutorials
+```
+
+This test does not open network connections. The Compose file lets you start
+the local dependencies, but the current source does **not** yet prove a real
+cross-process command or event, Redis-backed worker delivery, PostgreSQL
+persistence, restart recovery, readiness behaviour, permission parity, or
+bounded shutdown. Those are required acceptance checks when a future chapter
+wires this profile into separate processes.
