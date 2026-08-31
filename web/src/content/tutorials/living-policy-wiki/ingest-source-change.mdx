@@ -1,0 +1,16 @@
+---
+title: Ingest a source change
+description: Let only the synthetic curator record a new policy-source revision.
+order: 182
+status: published
+---
+
+Dana is the curator in this training fixture. The PURISTA command checks her
+trusted identity before incrementing the source revision. A browser-provided
+role or a model instruction cannot replace this business guard.
+
+```ts title="examples/banking/src/wiki/service.ts"
+.setBeforeGuardHooks({ curator: async function (context) {
+  requireActor(context, 'dana')
+} })
+```

@@ -1,0 +1,12 @@
+---
+title: Find stale guidance
+description: Treat a newer source revision as a signal to propose review, never as an automatic replacement.
+order: 183
+status: published
+---
+
+The changed source makes the old wiki revision stale. This small deterministic
+checkpoint does not use a model to rewrite the canonical page. It records the
+new source revision, then creates a reviewable proposal with that exact number.
+In a later AI extension, retrieval and analysis must remain scoped before a
+proposal is created.
