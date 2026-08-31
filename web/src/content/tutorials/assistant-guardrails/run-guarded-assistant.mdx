@@ -1,14 +1,18 @@
 ---
-title: Run the guarded service
-description: Start the focused Hono proof and name the four controls used by the assistant.
+title: Build the guarded service
+description: Turn the generated attached-agent scaffold into a guarded Hono endpoint before adding content checks.
 order: 131
 status: published
 ---
 
-Run this command from the PURISTA repository root:
+The CLI has created the agent folder and added its definition to the service.
+Open the generated builder, replace its starter schemas with a small scoped
+support request, and expose the aggregate endpoint:
 
-```bash
-npx vitest run examples/banking/src/ai/guarded-assistant.test.ts
+```ts title="Generated agent builder after its first edit"
+.addPayloadSchema(z.object({ accountId: accountIdSchema, text: z.string().min(1).max(2_000) }))
+.addOutputSchema(z.object({ answer: z.string().min(1).max(500) }))
+.exposeAsHttpEndpoint('POST', 'customer-support/guarded-answer', { streamingMode: 'aggregate' })
 ```
 
 The test starts `bankingGuardedAssistant`, a normal PURISTA service. Its
@@ -27,3 +31,7 @@ Four controls answer four different questions:
 
 Keeping these questions separate matters. A helpful model prompt is not a
 business guard, and an input check is not a substitute for an account scope.
+
+```bash title="Run the generated and completed boundary test"
+npx vitest run examples/banking/src/ai/guarded-assistant.test.ts
+```

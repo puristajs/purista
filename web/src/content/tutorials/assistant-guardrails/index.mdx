@@ -24,6 +24,25 @@ The account guard is still the first control. It decides whether Bob may ask
 about Account A. Content checks do not grant access and cannot repair a
 document that was retrieved outside the caller's scope.
 
+## Create the attached agent first
+
+Start with a CLI-created service and agent. This keeps the content checks in
+the same PURISTA service boundary as the account guard, HTTP endpoint, and
+tests.
+
+```bash title="Generate the guarded assistant scaffold"
+npm run add:service -- banking-guarded-assistant \
+  --description "Scoped banking assistant with content boundaries"
+npm run add:agent -- answer-with-content-boundaries \
+  --service banking-guarded-assistant --service-version 1 \
+  --description "Answer a scoped support question through content checks"
+```
+
+The generated agent builder and test are the starting point. Replace their
+starter schemas, add the account business guard, then add the native Harness
+interceptors in the following pages. The runnable checkpoint is
+`examples/banking/src/ai/guarded-assistant.ts`.
+
 The example uses native Harness `interceptors` through a PURISTA attached
 agent. Its markers such as `BANK_DEMO_SECRET` are deliberately synthetic. They
 prove the runtime order; they are **not** a production content-moderation or
