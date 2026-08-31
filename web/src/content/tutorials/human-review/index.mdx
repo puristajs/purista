@@ -35,6 +35,24 @@ revised, or already-applied proposal cannot change the fee.
 No Docker service is required. The review store is in memory, so pending
 proposals and fees reset when the test process ends.
 
+Generate the review service and one command for each state transition. Keeping
+these commands separate makes their business guards and tests explicit.
+
+```bash title="Generate the human-review service and commands"
+npm run add:service -- banking-fee-change-review \
+  --description "Review synthetic account fee changes"
+npm run add:command -- propose-fee-change --service banking-fee-change-review --service-version 1 \
+  --description "Propose a fee change for a human reviewer"
+npm run add:command -- decide-fee-change --service banking-fee-change-review --service-version 1 \
+  --description "Record an assigned reviewer decision"
+npm run add:command -- apply-approved-fee-change --service banking-fee-change-review --service-version 1 \
+  --description "Apply one current approved fee change"
+```
+
+The CLI creates the builders and tests. Add the proposal-ID route parameter,
+versioned contracts, and P8 guard hooks while following the next pages. The
+runnable checkpoint is `examples/banking/src/review/service.ts`.
+
 ```bash title="Run the main-app human-review proof from the PURISTA repository root"
 npm run test -w @purista/banking-tutorials
 ```

@@ -5,10 +5,12 @@ order: 161
 status: published
 ---
 
-The main banking application registers the review service. Exercise its
-session-backed path with the complete banking test:
+Run each generated command test as you replace its starter schemas, then
+exercise the main application's session-backed path with the focused test:
 
 ```bash title="Run the fee-change review integration test"
+npm test -- --run src/service/bankingFeeChangeReview/v1/command
+npx vitest run examples/banking/src/review/service.integration.test.ts
 npm run test -w @purista/banking-tutorials
 ```
 
