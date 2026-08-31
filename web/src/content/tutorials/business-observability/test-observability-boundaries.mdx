@@ -1,0 +1,33 @@
+---
+title: Test metric boundaries
+description: Capture the emitted records and prove their declared labels exclude banking identifiers.
+order: 96
+---
+
+Run the test suite from the PURISTA repository root:
+
+```bash title="Verify bounded banking metrics"
+npm run test -w @purista/banking-tutorials
+```
+
+`examples/banking/src/banking.integration.test.ts` injects
+`createMemoryMetricsRecorder()` into `createBankingApplication`. It records a
+high-value transaction, waits until the statement-request metric arrives, and
+asserts these records:
+
+```ts title="examples/banking/src/banking.integration.test.ts"
+expect.objectContaining({
+  name: 'example.bank.review.signals',
+  attributes: { rule_version: 'training-v1', outcome: 'recorded' },
+})
+expect.objectContaining({
+  name: 'example.bank.background.jobs',
+  attributes: { job: 'statement-request', outcome: 'queued' },
+})
+```
+
+The same test rejects `accountId`, `principalId`, `transactionId`, and
+`tenantId` as attribute keys on every captured record. This proves the
+implemented metric boundary. It does not prove redaction for logs or remote
+exporters, failure behavior, or shutdown flushing because the example has none
+of those paths.

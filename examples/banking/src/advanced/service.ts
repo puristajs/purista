@@ -25,6 +25,14 @@ const statementJobPayloadSchema = statementRequestPayloadSchema.extend({
 	initiatorPrincipalId: z.enum(['alice', 'bob', 'carol', 'dana', 'erin']),
 })
 const reconciliationJobPayloadSchema = reconciliationDueEventSchema
+const reviewSignalMetricAttributesSchema = z.object({
+	rule_version: z.literal('training-v1'),
+	outcome: z.enum(['recorded', 'below-threshold']),
+})
+const backgroundJobMetricAttributesSchema = z.object({
+	job: z.enum(['statement-request', 'reconciliation-request']),
+	outcome: z.literal('queued'),
+})
 
 const isExampleActor = (actor: string): actor is BankActor =>
 	['alice', 'bob', 'carol', 'dana', 'erin'].includes(actor as BankActor)
@@ -38,6 +46,18 @@ const serviceInfo = {
 const builder = new ServiceBuilder(serviceInfo)
 	.defineResource<'bankingRepository', BankingRepository>()
 	.defineResource<'operationsStore', BankingOperationsStore>()
+	.defineMetric('example.bank.review.signals', {
+		kind: 'counter',
+		unit: '{signal}',
+		description: 'Training review signals grouped by a bounded rule outcome',
+		attributes: reviewSignalMetricAttributesSchema,
+	})
+	.defineMetric('example.bank.background.jobs', {
+		kind: 'counter',
+		unit: '{job}',
+		description: 'Queued tutorial background requests grouped by job kind',
+		attributes: backgroundJobMetricAttributesSchema,
+	})
 
 const requireReadableAccount = async function (
 	context: { message: { principalId?: string }; resources: { bankingRepository: BankingRepository } },
@@ -66,13 +86,17 @@ export const monitorRecordedTransaction = builder
 	.subscribeToEvent(BankingTutorialEvent.transactionRecorded)
 	.addPayloadSchema(transactionRecordedEventSchema)
 	.setSubscriptionFunction(async function (context, payload) {
-		if (payload.amountMinor < 100_000) return
+		if (payload.amountMinor < 100_000) {
+			context.metrics['example.bank.review.signals'].add(1, { rule_version: 'training-v1', outcome: 'below-threshold' })
+			return
+		}
 		context.resources.operationsStore.recordFinding({
 			transactionId: payload.transactionId,
 			accountId: payload.accountId,
 			kind: 'review-required',
 			reason: 'amount-at-or-above-training-threshold',
 		})
+		context.metrics['example.bank.review.signals'].add(1, { rule_version: 'training-v1', outcome: 'recorded' })
 	})
 
 export const listReviewCases = builder
@@ -185,6 +209,7 @@ export const requestStatementGeneration = builder
 				idempotencyKey: `statement:${context.message.principalId ?? 'unknown'}:${payload.accountId}`,
 			},
 		)
+		context.metrics['example.bank.background.jobs'].add(1, { job: 'statement-request', outcome: 'queued' })
 		return { jobId: job.jobId, queueName: 'banking.generateStatement' }
 	})
 
@@ -257,6 +282,7 @@ export const runReconciliation = builder
 				idempotencyKey: `reconciliation:${payload.day}`,
 			},
 		)
+		context.metrics['example.bank.background.jobs'].add(1, { job: 'reconciliation-request', outcome: 'queued' })
 		return { jobId: job.jobId, queueName: 'banking.runReconciliation' }
 	})
 

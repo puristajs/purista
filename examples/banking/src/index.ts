@@ -3,7 +3,13 @@ import { fileURLToPath } from 'node:url'
 
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { DefaultEventBridge, DefaultQueueBridge, gracefulShutdown, initLogger } from '@purista/core'
+import {
+	DefaultEventBridge,
+	DefaultQueueBridge,
+	gracefulShutdown,
+	initLogger,
+	type PuristaMetricsRecorderInterface,
+} from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
 import { BankingOperationsStore } from './advanced/repository.js'
@@ -42,6 +48,8 @@ const expiredSessionCookie = `${sessionCookieName}=; HttpOnly; Path=/; SameSite=
 export type BankingApplicationOptions = {
 	/** Injects a deterministic repository for a focused runtime test. */
 	bankingRepository?: BankingRepository
+	/** Captures safe framework and application metrics in a focused runtime test. */
+	metricsRecorder?: PuristaMetricsRecorderInterface
 }
 
 export const createBankingApplication = async (options: BankingApplicationOptions = {}) => {
@@ -52,10 +60,14 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const sessions = new Map<string, LocalSession>()
 	await eventBridge.start()
 	await queueBridge.start()
-	const banking = await bankingService.getInstance(eventBridge, { resources: { bankingRepository } })
+	const banking = await bankingService.getInstance(eventBridge, {
+		resources: { bankingRepository },
+		metricsRecorder: options.metricsRecorder,
+	})
 	const bankingOperations = await bankingOperationsService.getInstance(eventBridge, {
 		queueBridge,
 		resources: { bankingRepository, operationsStore },
+		metricsRecorder: options.metricsRecorder,
 	})
 	await banking.start()
 	await bankingOperations.start()

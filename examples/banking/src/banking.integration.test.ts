@@ -1,3 +1,4 @@
+import { createMemoryMetricsRecorder } from '@purista/core'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { createBankingApplication } from './index.js'
@@ -11,8 +12,11 @@ afterEach(async () => {
 	destroy = undefined
 })
 
-const start = async (bankingRepository?: BankingRepository) => {
-	const application = await createBankingApplication({ bankingRepository })
+const start = async (
+	bankingRepository?: BankingRepository,
+	metricsRecorder?: ReturnType<typeof createMemoryMetricsRecorder>,
+) => {
+	const application = await createBankingApplication({ bankingRepository, metricsRecorder })
 	destroy = application.destroy
 	return application.fetch
 }
@@ -294,5 +298,61 @@ describe('Example Bank transaction HTTP boundary', () => {
 			new Request('http://example.test/api/v1/accounts/account-a/transactions'),
 		)
 		expect(afterLogout.status).toBe(401)
+	})
+
+	it('records bounded business metrics without account, person, or transaction identifiers', async () => {
+		const metricsRecorder = createMemoryMetricsRecorder()
+		const fetch = await start(undefined, metricsRecorder)
+		const dana = await signIn(fetch, 'dana')
+		const bob = await signIn(fetch, 'bob')
+
+		const recorded = await asSession(
+			fetch,
+			dana,
+			new Request('http://example.test/api/v1/transactions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					accountId: 'account-a',
+					sourceTransactionId: 'metric-high-value-1',
+					bookedAt: '2026-01-15T12:00:00.000Z',
+					amountMinor: 100_000,
+					currency: 'EUR',
+					direction: 'credit',
+				}),
+			}),
+		)
+		expect(recorded.status).toBe(200)
+
+		const statement = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/statements/generate', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ accountId: 'account-a' }),
+			}),
+		)
+		expect(statement.status).toBe(200)
+
+		await waitFor(async () => metricsRecorder.records.some(record => record.name === 'example.bank.background.jobs'))
+
+		expect(metricsRecorder.records).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: 'example.bank.review.signals',
+					attributes: { rule_version: 'training-v1', outcome: 'recorded' },
+				}),
+				expect.objectContaining({
+					name: 'example.bank.background.jobs',
+					attributes: { job: 'statement-request', outcome: 'queued' },
+				}),
+			]),
+		)
+		for (const record of metricsRecorder.records) {
+			expect(Object.keys(record.attributes)).not.toEqual(
+				expect.arrayContaining(['accountId', 'principalId', 'transactionId', 'tenantId']),
+			)
+		}
 	})
 })

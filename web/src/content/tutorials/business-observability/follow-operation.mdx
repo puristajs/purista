@@ -1,0 +1,36 @@
+---
+title: See where the counters are updated
+description: Update a review-signal counter in a subscription and a job counter after a queue request is accepted.
+order: 93
+---
+
+The monitoring subscription records a counter for both outcomes. It writes a
+review finding only for the threshold match, but it records a metric for either
+decision.
+
+```ts title="examples/banking/src/advanced/service.ts"
+if (payload.amountMinor < 100_000) {
+  context.metrics['example.bank.review.signals'].add(1, {
+    rule_version: 'training-v1', outcome: 'below-threshold',
+  })
+  return
+}
+
+context.resources.operationsStore.recordFinding({ /* synthetic review signal */ })
+context.metrics['example.bank.review.signals'].add(1, {
+  rule_version: 'training-v1', outcome: 'recorded',
+})
+```
+
+The statement and reconciliation commands add their background-job counter
+after the local queue accepts the request. The metric therefore records a
+bounded request outcome, not worker completion. The queue-worker builder does
+not receive this service metric contract in the current framework type surface,
+so this example does not pretend to report completed worker outcomes.
+
+This source does not propagate a trace or correlation reference. It also does
+not give a worker the initiating browser identity as a telemetry label. The
+queue's business guard and the result-download guard remain separate security
+decisions.
+
+Next, look at the attribute values emitted by the implemented callbacks.

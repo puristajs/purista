@@ -1,0 +1,26 @@
+---
+title: Run the isolated support proof
+description: Start the deterministic test that hosts the service-attached classification agent.
+order: 101
+---
+
+This checkpoint is a focused test, not a browser feature. It creates a
+`DefaultEventBridge`, starts the `bankingCustomerSupport` service, mounts its
+generated Hono endpoint, and gives the request a synthetic server identity.
+The model is scripted, so no API key or paid provider account is needed.
+
+```bash title="Run the focused test from the PURISTA repository root"
+npx vitest run examples/banking/src/ai/customer-support-classification.test.ts
+```
+
+The test posts to
+`/api/v1/customer-support/classifications`. It supplies an account ID, request
+ID, and customer text. In this isolated test setup, Bob may read `account-a`.
+The scripted model responds with a card-payment category and a low confidence,
+so the response says `no-action`.
+
+The main banking server does not import this service. Do not expect this route
+or a support screen from `npm run dev -w @purista/banking-tutorials`.
+
+Next, inspect the builder that keeps the agent inside a versioned PURISTA
+service.

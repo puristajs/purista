@@ -1,0 +1,24 @@
+---
+title: Add bounded business metrics
+description: Use the two counters for operational outcomes without turning banking identifiers into metric labels.
+order: 94
+---
+
+The current metrics answer two narrow questions:
+
+| Counter | Allowed attributes | Meaning |
+| --- | --- | --- |
+| `example.bank.review.signals` | `rule_version`, `outcome` | A training threshold was recorded or was below the threshold. |
+| `example.bank.background.jobs` | `job`, `outcome` | A statement or reconciliation request entered its local queue. |
+
+This is intentionally less detail than a business audit record. Account IDs,
+principal IDs, transaction IDs, tenant IDs, request IDs, and customer text are
+not permitted labels. Such values can create thousands of distinct series and
+may reveal data that a metric system should not carry.
+
+Metrics do not make a repeated event idempotent. The monitoring code and its
+store still own the business effect. Metrics only observe the result of that
+work.
+
+Next, review the limits that prevent this local proof from being mistaken for a
+full observability system.

@@ -1,0 +1,42 @@
+---
+title: Measure safe business outcomes
+description: Count bounded monitoring and background queue-request outcomes with PURISTA metrics, without putting banking identifiers in metric labels.
+order: 90
+---
+
+Operations teams need a short answer to questions such as “did the monitoring
+rule record a signal?” and “did a statement request enter its queue?”. A counter metric
+answers those questions over many runs. This chapter adds two bounded counters
+to the existing banking operations service.
+
+The metric labels deliberately use small fixed sets. They contain an outcome,
+the training rule version, or the job kind. They do not contain an account,
+person, transaction, tenant, request ID, or customer text.
+
+```mermaid title="The current metrics checkpoint"
+flowchart LR
+  Transaction[Record a transaction] --> Subscription[Monitoring subscription]
+  Subscription --> ReviewMetric[review signals counter]
+  Statement[Request a statement] --> JobMetric[background jobs counter]
+```
+
+This is a local runtime proof. The test injects an in-memory metrics recorder
+and asserts the emitted records. It does not configure a telemetry exporter,
+trace backend, log redaction policy, diagnostic UI, Docker Compose profile,
+or an exporter-failure/shutdown path. A metric is not a durable business audit
+record and it never grants access to a review case.
+
+## Start here
+
+Run the banking tests from the PURISTA repository root:
+
+```bash title="Run the bounded metrics checkpoint"
+npm run test -w @purista/banking-tutorials
+```
+
+1. [Run the metrics scenario](/tutorials/business-observability/run-traced-scenario/)
+2. [Define safe metric contracts](/tutorials/business-observability/configure-safe-telemetry/)
+3. [See where the counters are updated](/tutorials/business-observability/follow-operation/)
+4. [Add bounded business metrics](/tutorials/business-observability/add-business-metrics/)
+5. [Understand current limits](/tutorials/business-observability/diagnose-a-failure/)
+6. [Test metric boundaries](/tutorials/business-observability/test-observability-boundaries/)

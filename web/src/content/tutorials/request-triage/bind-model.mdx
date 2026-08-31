@@ -1,0 +1,34 @@
+---
+title: Bind the scripted model
+description: Give the attached agent a typed object-model alias and a deterministic response in its test.
+order: 103
+---
+
+The agent declares a model alias named `primary`. The test supplies that alias
+when it creates the service instance. This separates the agent contract from
+the concrete model provider.
+
+```ts title="examples/banking/src/ai/customer-support-classification.test.ts"
+const model = createScriptedHarnessModel()
+
+const service = await bankingCustomerSupportService.getInstance(eventBridge, {
+  resources: { bankingRepository: new BankingRepository() },
+  ai: {
+    models: {
+      primary: {
+        provider: model,
+        model: 'scripted-customer-support-classifier',
+        capabilities: ['object'],
+      },
+    },
+  },
+})
+```
+
+`createScriptedHarnessModel()` records each request and returns only responses
+the test enqueues. It is useful for a deterministic guard and schema test. It
+does not measure a real model's quality, latency, cost, retries, or timeout
+behavior. This source contains no optional live-provider setup.
+
+Next, see how application code decides whether a category is eligible for a
+future routing step.

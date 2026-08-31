@@ -1,0 +1,33 @@
+---
+title: Route the structured result
+description: Let application code map a validated category to a limited destination instead of letting model text choose an action.
+order: 104
+---
+
+The model returns classification data. The application decides whether that
+data is useful for later routing. This is an important boundary: the model does
+not select an arbitrary command, queue, tool, account, or permission.
+
+```ts title="examples/banking/src/ai/customer-support-classification.ts"
+export const customerSupportRoutingMap = {
+  'account-access': 'account-access-team',
+  'card-payment': 'card-payment-team',
+} as const
+
+export const decideCustomerSupportRouting = (candidate) => {
+  if (candidate.needsReview) return { status: 'no-action' as const, reason: 'needs-review' as const }
+  if (candidate.confidence < classificationConfidenceThreshold) {
+    return { status: 'no-action' as const, reason: 'low-confidence' as const }
+  }
+  const destination = customerSupportRoutingMap[candidate.category]
+  if (!destination) return { status: 'no-action' as const, reason: 'unsupported-category' as const }
+  return { status: 'eligible-for-application-routing' as const, destination }
+}
+```
+
+Only `account-access` and `card-payment` have a destination. `other` receives
+`no-action`. The current source stops there: it does not call that destination
+or persist a support request. This page describes a validated decision, not an
+implemented support workflow.
+
+Next, apply the cases that deliberately avoid automatic routing.
