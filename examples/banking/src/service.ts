@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { BankingTutorialEvent, transactionRecordedEventSchema } from './advanced/contracts.js'
 import type { BankingRepository, RecordedTransaction, TransactionDirection } from './repository.js'
 
-const accountIdSchema = z.enum(['account-a', 'account-c'])
+export const accountIdSchema = z.enum(['account-a', 'account-c'])
 const transactionSchema = z.object({
 	accountId: accountIdSchema,
 	sourceTransactionId: z.string().min(1).max(80),
@@ -13,7 +13,7 @@ const transactionSchema = z.object({
 	currency: z.literal('EUR'),
 	direction: z.enum(['debit', 'credit']),
 })
-const statementSchema = z.object({
+export const accountStatementSchema = z.object({
 	accountId: accountIdSchema,
 	transactions: z.array(transactionSchema.extend({ transactionId: z.string() })),
 })
@@ -57,7 +57,7 @@ const listTransactions = builder
 	.getCommandBuilder('listTransactions', 'Returns the caller-authorized transaction history for one account')
 	.addPayloadSchema(z.undefined())
 	.addParameterSchema(z.object({ accountId: accountIdSchema }))
-	.addOutputSchema(statementSchema)
+	.addOutputSchema(accountStatementSchema)
 	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/transactions')
 	.setBeforeGuardHooks({
 		accountRead: async function (context, _payload, parameter) {
@@ -135,7 +135,7 @@ const exportStatement = builder
 	.getCommandBuilder('exportStatement', 'Exports an authorized account statement as CSV')
 	.addPayloadSchema(z.undefined())
 	.addParameterSchema(z.object({ accountId: accountIdSchema }))
-	.addOutputSchema(statementSchema)
+	.addOutputSchema(accountStatementSchema)
 	.setAfterGuardHooks({
 		statementScope: async function (_context, result, _payload, parameter) {
 			if (

@@ -3,8 +3,8 @@ import { HandledError, ServiceBuilder, type ServiceInfoType, StatusCode } from '
 import { z } from 'zod'
 
 import type { BankingRepository, RecordedTransaction } from '../repository.js'
+import { accountIdSchema, accountStatementSchema } from '../service.js'
 
-const accountIdSchema = z.enum(['account-a', 'account-c'])
 const supportCategorySchema = z.enum(['account-access', 'card-payment', 'other'])
 
 /** The only categories for which a later, application-owned workflow may be considered. */
@@ -39,6 +39,12 @@ export const customerSupportClassificationInputSchema = z.object({
 
 export const customerSupportClassificationOutputSchema = classificationCandidateSchema.extend({
 	routing: routingDecisionSchema,
+	accountSummary: z
+		.object({
+			accountId: accountIdSchema,
+			transactionCount: z.number().int().nonnegative(),
+		})
+		.nullable(),
 })
 
 export const customerSupportClassificationJsonSchema = {
@@ -57,8 +63,9 @@ const classificationConfidenceThreshold = 0.8
 
 /**
  * The model only classifies. This map is the application boundary that decides
- * whether a later workflow may act; no command, queue job, or tool is invoked
- * from this attached agent.
+ * whether a later workflow may act. The only tool is a deterministic,
+ * read-only account summary. It always uses the already-authorized payload
+ * account and the original Framework identity; the model cannot select either.
  */
 export const decideCustomerSupportRouting = (candidate: z.infer<typeof classificationCandidateSchema>) => {
 	if (candidate.needsReview) return { status: 'no-action' as const, reason: 'needs-review' as const }
@@ -103,6 +110,11 @@ export const classifyCustomerSupportAgentBuilder = builder
 		capabilities: ['object'] as const,
 		defaults: { temperature: 0 },
 	})
+	.canInvoke('banking', '1', 'listTransactions', {
+		outputSchema: accountStatementSchema,
+		payloadSchema: z.undefined(),
+		parameterSchema: z.object({ accountId: accountIdSchema }),
+	})
 	.useBuiltInTools(false)
 	.exposeAsHttpEndpoint('POST', 'customer-support/classifications', { streamingMode: 'aggregate' })
 	.setBeforeGuardHooks({
@@ -130,9 +142,19 @@ export const classifyCustomerSupportAgentBuilder = builder
 		)
 
 		const candidate = classificationCandidateSchema.parse(result.object)
+		const routing = decideCustomerSupportRouting(candidate)
+		const statement =
+			routing.status === 'eligible-for-application-routing' && candidate.category === 'account-access'
+				? await context.invoke.tools['banking.1.listTransactions'].call(undefined, {
+						accountId: context.payload.accountId,
+					})
+				: undefined
 		return customerSupportClassificationOutputSchema.parse({
 			...candidate,
-			routing: decideCustomerSupportRouting(candidate),
+			routing,
+			accountSummary: statement
+				? { accountId: statement.accountId, transactionCount: statement.transactions.length }
+				: null,
 		})
 	})
 
