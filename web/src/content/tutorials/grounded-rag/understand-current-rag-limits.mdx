@@ -1,0 +1,29 @@
+---
+title: Understand the current RAG limits
+description: Know exactly what the deterministic tutorial proves and what a production RAG design still needs.
+order: 125
+status: published
+---
+
+The checkpoint proves an important boundary: content outside a caller's
+collection is rejected before it can become retrieval context or a streamed
+answer. It also proves that documents move through a normal PURISTA command,
+attached queue worker, repository, command, and UI transport.
+
+It does not prove:
+
+- semantic embeddings, a live model, or answer quality;
+- durable document storage, a vector database, retries after restart, or
+  distributed queue delivery;
+- document upload, PDF parsing, OCR, metadata filters beyond the collection,
+  citations in the chat UI, or chat-history persistence;
+- model guardrails, prompt-injection defence, source trust scoring, or
+  production privacy controls.
+
+The process uses `DefaultQueueBridge`, `DefaultEventBridge`, and JavaScript
+memory. No Docker Compose file is needed because no external dependency is
+required. When a later chapter introduces a durable bridge or external model,
+it must include a separate runnable dependency profile rather than silently
+changing this simple checkpoint.
+
+Next, run the test that checks the allowed and denied RAG paths.

@@ -1,0 +1,49 @@
+---
+title: Retrieve only authorized excerpts
+description: Keep collection access in the repository and use the same P6 business rule before search and before answering a question.
+order: 122
+status: published
+---
+
+Grounding is useful only if the selected sources are allowed sources. This
+example does not treat a collection ID from a form, API body, or chat transport
+as proof of access. The repository owns the collection-to-account mapping and
+the allowed readers.
+
+The reusable answer helper begins with the same P6 collection check used by
+ingestion and search:
+
+```ts title="examples/banking/src/knowledge/answer.ts"
+if (!repository.canAccessCollection({ ...identity, collectionId: input.collectionId })) {
+  throw new HandledError(StatusCode.Forbidden, 'You may not ask questions about this banking document collection')
+}
+
+const sources = repository.search(input.collectionId, input.question).slice(0, 2)
+```
+
+The search works as follows:
+
+| Step | Owner | Result |
+| --- | --- | --- |
+| Check P6 | `BankingKnowledgeRepository` | Rejects a collection outside the session’s tenant and account mandate. |
+| Make a query vector | Repository | Creates the same small deterministic vector used for document chunks. |
+| Score chunks | Repository | Keeps chunks with a positive score and orders them by score. |
+| Limit context | Answer helper | Uses at most the first two stored chunks. |
+
+The generated PURISTA search command is also available at
+`POST /api/v1/knowledge/search`. It is protected by the normal Hono middleware
+and has its own `collectionScope` before guard. The answer command calls the
+same repository check itself, so a future caller cannot accidentally rely only
+on the search route’s guard.
+
+For example, a signed-in Bob may request `account-a-documents`, but a request
+for `account-c-documents` returns `403`. The integration test exercises this
+denial on the chat route as well. Valid identity is therefore not enough; the
+business object, the collection, must also be in that person’s mandate.
+
+The ranking function is intentionally small and local. It does not use a live
+embedding provider, metadata filtering beyond P6, hybrid search, reranking,
+or a remote vector database. Its job is to make the retrieval boundary visible
+and repeatable for this tutorial.
+
+Next, turn these server-selected excerpts into a safe deterministic answer.

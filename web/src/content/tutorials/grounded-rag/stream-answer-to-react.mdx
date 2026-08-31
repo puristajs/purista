@@ -1,0 +1,42 @@
+---
+title: Stream the answer to React
+description: Use a thin Hono transport and the Vercel AI SDK UI protocol while keeping retrieval and authority in the PURISTA service.
+order: 124
+status: published
+---
+
+The chat panel uses `useChat()` from `@ai-sdk/react`. It needs an HTTP
+endpoint that returns the AI SDK UI message stream format. The endpoint is a
+presentation adapter: it does not decide whether the caller may access a
+collection and it does not become a second RAG implementation.
+
+```ts title="examples/banking/src/index.ts"
+const answer = answerGroundedQuestion(knowledgeRepository, { collectionId, question }, {
+  tenantId: session.tenantId,
+  principalId: session.principalId,
+})
+
+const stream = createUIMessageStream<UIMessage>({
+  execute: ({ writer }) => {
+    writer.write({ type: 'start' })
+    writer.write({ type: 'text-start', id: 'grounded-answer' })
+    // Each fragment comes from answer.answer, never from client identity fields.
+    writer.write({ type: 'text-delta', id: 'grounded-answer', delta: fragment })
+    writer.write({ type: 'text-end', id: 'grounded-answer' })
+    writer.write({ type: 'finish', finishReason: 'stop' })
+  },
+})
+return createUIMessageStreamResponse({ stream })
+```
+
+The server reads the opaque session cookie itself. It extracts only the latest
+user text part and the chosen collection, then calls the same guarded helper
+as the PURISTA command. A forged principal, tenant, or previous assistant
+message cannot change the collection rule.
+
+In React, `DefaultChatTransport` sends the selected collection and
+`useChat()` renders text parts as they arrive. This is the Vercel AI SDK UI
+layer requested for the example. It is not a PURISTA agent loop, a provider
+adapter, or evidence of token streaming from a live model.
+
+Next, review the limits before extending this checkpoint.

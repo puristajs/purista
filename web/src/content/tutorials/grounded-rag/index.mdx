@@ -1,0 +1,66 @@
+---
+title: Answer banking questions from approved documents
+description: Build a small grounded-answer path that retrieves only authorized account-guide excerpts and displays a deterministic streamed reply in the banking UI.
+order: 120
+status: published
+---
+
+Someone asks a useful question: “What does my monthly statement explain?” The
+application must first find the right account guide and check whether that
+person may read it. Only then may it prepare an answer.
+
+This chapter adds that path to the runnable Example Bank. A protected PURISTA
+ingestion command puts a document on an attached agent queue. Its worker makes
+repeatable tutorial vectors and stores chunks in the local repository. A
+second PURISTA command retrieves the best permitted chunks and builds an
+answer from their text. A small Hono route turns that answer into an AI SDK UI
+message stream for the React chat panel.
+
+```mermaid title="The grounded-answer path"
+flowchart LR
+  UI[React chat] --> Hono[Hono AI SDK transport]
+  Hono --> Scope[P6 collection scope]
+  Scope --> Retrieve[Retrieve top local chunks]
+  Retrieve --> Answer[Deterministic answer]
+  Ingest[Protected ingestion command] --> Queue[Attached embedding worker]
+  Queue --> Store[Local chunks and vectors]
+  Store --> Retrieve
+```
+
+P6 is the business rule in this chapter. A signed-in person may operate only
+on the document collection for an account they are allowed to read. For the
+synthetic fixtures, Alice and Bob may use `account-a-documents`; Carol may use
+`account-c-documents`. Selecting a collection in the browser does not grant
+permission to it.
+
+## Run it locally
+
+From the `purista` repository root, build the static React files once, then
+start the application in a second terminal:
+
+```bash title="Build the UI and start the banking example"
+npm run build:ui -w @purista/banking-tutorials
+npm run dev -w @purista/banking-tutorials
+```
+
+Open `http://127.0.0.1:3010/`, sign in as Alice or Bob, select Account A,
+then choose **Ingest sample guide**. Wait for the confirmation message and ask
+“What does a monthly statement explain?” The reply repeats text from the
+stored guide.
+
+No database, vector store, container, model provider, account, or credential
+is needed. The example uses local in-memory bridges and a JavaScript `Map`.
+Stopping the process removes documents, queue work, and sessions.
+
+This is a working retrieval-and-answer flow, but it is deliberately not a live
+AI system. It has no embedding model, no model-generated answer, no durable
+external dependency, and no source-citation display beyond the returned answer
+text. The deterministic vectors prove the plumbing, not semantic search
+quality.
+
+1. [Run the chat checkpoint](/tutorials/grounded-rag/run-grounded-chat/)
+2. [Retrieve authorized excerpts](/tutorials/grounded-rag/retrieve-authorized-excerpts/)
+3. [Build a deterministic grounded answer](/tutorials/grounded-rag/build-deterministic-grounded-answer/)
+4. [Stream the answer to React](/tutorials/grounded-rag/stream-answer-to-react/)
+5. [Understand the current RAG limits](/tutorials/grounded-rag/understand-current-rag-limits/)
+6. [Test the full boundary](/tutorials/grounded-rag/test-grounded-answer-boundary/)
