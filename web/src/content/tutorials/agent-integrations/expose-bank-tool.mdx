@@ -1,22 +1,34 @@
 ---
 title: Declare one guarded command tool
-description: Allow the classifier to invoke the existing PURISTA transaction-list command with typed schemas.
+description: Add one typed, read-only PURISTA command tool to the generated agent.
 order: 151
 status: published
 ---
 
-`canInvoke` adds a named command to an attached agent's allowed tool list. It
-does not duplicate the command handler or bypass its business guard.
+Open the generated agent builder. Add payload and output schemas first, then
+declare the one command it may invoke. `canInvoke` names a real PURISTA command;
+it does not copy the handler or bypass its business guard.
 
-```ts title="examples/banking/src/ai/customer-support-classification.ts"
+```ts title="classifyCustomerSupport agent builder"
 .canInvoke('banking', '1', 'listTransactions', {
   outputSchema: accountStatementSchema,
   payloadSchema: z.undefined(),
   parameterSchema: z.object({ accountId: accountIdSchema }),
 })
+.useBuiltInTools(false)
 ```
 
-The handler calls `banking.1.listTransactions` only after an eligible
-`account-access` classification. Its account comes from the protected request,
-not a model tool-call argument. The target command repeats P1 with the original
-principal and tenant, so Bob may read Account A but not Account C.
+In the run function, never take the account from a model tool call. Use the
+already validated request payload:
+
+```ts title="Call only after the typed routing decision"
+const statement = routing.status === 'eligible-for-application-routing'
+  ? await context.invoke.tools['banking.1.listTransactions'].call(undefined, {
+      accountId: context.payload.accountId,
+    })
+  : undefined
+```
+
+The target command repeats the normal account guard with the original PURISTA
+principal and tenant. This protects the service even if a future agent change
+is incorrect.

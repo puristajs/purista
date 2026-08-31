@@ -1,21 +1,32 @@
 ---
 title: Add a reviewed support Skill
-description: Bind a local SKILL.md through service composition and let the default-loop agent read it with the restricted read tool.
+description: Generate a second attached agent and bind a local SKILL.md through service composition.
 order: 153
 status: published
 ---
 
-The playbook is a normal local file in
-`examples/banking/src/ai/skills/banking-support-playbook/SKILL.md`. It tells
-the agent to keep the flow read-only and never ask for passwords, card numbers,
-or a different account ID.
+Generate a separate support-guide agent. Keep classification and free-form
+guidance separate so each agent has a small, understandable responsibility.
 
-```ts title="examples/banking/src/ai/support-playbook.ts"
-.useSkills(['banking-support-playbook'])
-.useBuiltInTools(['read'])
+```bash title="Generate the support guide agent"
+npm run add:agent -- guide-account-support \
+  --service banking-support --service-version 1 \
+  --description "Guide an authorized read-only account support request"
 ```
 
-At service composition, `ai.skills.bindings` maps the name to the local
-directory. The model sees a catalog entry, not the full body, then uses `read`
-to load the reviewed instructions. P1 runs before it can load the Skill.
-Reading a Skill does not grant account access or a new tool.
+Create `src/ai/skills/banking-support-playbook/SKILL.md` with reviewed,
+read-only instructions. Bind it by name in the application composition and then
+configure the generated builder:
+
+```ts title="support guide builder"
+.useSkills(['banking-support-playbook'])
+.useBuiltInTools(['read'])
+.setHarnessAgent({
+  model: 'primary', input: supportPlaybookInputSchema, output: supportPlaybookOutputSchema,
+  instructions: 'Provide read-only bank support. Read the banking-support-playbook Skill before answering. Follow it exactly.',
+})
+```
+
+The model sees a Skill catalog entry and uses the restricted `read` tool to load
+the reviewed file. Reading instructions grants neither an account permission nor
+a new banking command.

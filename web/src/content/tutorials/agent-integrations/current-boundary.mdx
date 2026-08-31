@@ -1,17 +1,20 @@
 ---
 title: Understand the current MCP and Plugin boundary
-description: Keep the tutorial honest about integrations that are not yet service-owned by the PURISTA attached runtime.
+description: Keep the tutorial honest about integrations that are not service-owned by the PURISTA attached runtime today.
 order: 155
 status: published
 ---
 
 Harness supports MCP tools and Agent Plugins in its own integration surface.
-The current PURISTA `AgentQueueBuilder` service runtime does not expose a
-service-owned MCP or Plugin registry and no banking example binds one. This
-chapter therefore does not claim an MCP round trip or a plugin review.
+The current PURISTA `AgentQueueBuilder` runtime does not expose a typed,
+service-owned MCP or Plugin registry, so this chapter deliberately stops at
+generated attached agents, declared PURISTA command tools, and local Skills.
 
-Do not work around the gap by starting a separate Harness application,
+Do not work around that boundary by starting a second Harness application,
 installing an unreviewed plugin at runtime, or adding an unrestricted HTTP
-client. When PURISTA adds a typed attached-service binding, this page needs a
-local fixture, allowlist, fault test, and proof that P1 still protects the
-underlying bank command.
+client. Each would bypass the generated service composition and the business
+guarding pattern built in the previous pages.
+
+When a typed binding becomes available, extend this series with a local fixture,
+an allowlist, a failed-dependency test, and proof that the target bank command
+still receives the original PURISTA identity.
