@@ -5,9 +5,12 @@ order: 146
 status: published
 ---
 
-Run the banking test suite from the repository root:
+Run each generated workflow test while you build it, then run the focused
+integration proof from the repository root:
 
 ```bash title="Verify the support-memory boundary"
+npm test -- --run src/service/bankingSupportMemory/v1/agent
+npx vitest run examples/banking/src/memory/service.integration.test.ts
 npm run test -w @purista/banking-tutorials
 ```
 
