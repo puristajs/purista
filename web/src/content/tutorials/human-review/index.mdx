@@ -1,0 +1,47 @@
+---
+title: Require review before changing an account fee
+description: Store a typed fee-change proposal and apply it only after the assigned reviewer approves the current, unexpired revision.
+order: 160
+status: draft
+---
+
+Some actions need a second person to decide. This checkpoint proposes a
+synthetic fee change for `account-a`, assigns Erin as reviewer, and changes
+the fee only after Erin approves the exact proposal version.
+
+It is an isolated PURISTA service proof. The test hosts the generated Hono
+endpoints and uses an `x-test-actor` header only inside its test middleware.
+The main banking application does not register this service, its local-session
+middleware is not wired here, and the browser UI has no fee-review screen.
+This chapter therefore stays a draft.
+
+```mermaid title="The isolated fee-change review checkpoint"
+flowchart LR
+  Dana[Proposer: Dana] --> Propose[Propose fee change]
+  Propose --> Pending[Pending versioned proposal]
+  Pending --> Erin[Assigned reviewer: Erin]
+  Erin --> Decision[Approve or reject]
+  Decision --> Apply[Proposer applies current approval]
+  Apply --> Fee[In-memory account fee]
+```
+
+P8 is the business rule. Dana may propose only an `account-a` change. The
+reviewer must be assigned to that account and cannot be the proposer. A
+decision and apply call must name the current version; an expired, rejected,
+revised, or already-applied proposal cannot change the fee.
+
+## Start here
+
+No Docker service is required. The review store is in memory, so pending
+proposals and fees reset when the test process ends.
+
+```bash title="Run the focused human-review proof from the PURISTA repository root"
+npx vitest run examples/banking/src/review/service.integration.test.ts
+```
+
+1. [Run the isolated review service](/tutorials/human-review/run-fee-review/)
+2. [Propose a typed fee change](/tutorials/human-review/propose-fee-change/)
+3. [Guard each review action](/tutorials/human-review/guard-review-actions/)
+4. [Record a reviewer decision](/tutorials/human-review/record-decision/)
+5. [Apply the current approval once](/tutorials/human-review/apply-approved-change/)
+6. [Test review boundaries](/tutorials/human-review/test-review-boundaries/)

@@ -249,6 +249,77 @@ describe('Example Bank transaction HTTP boundary', () => {
 		expect(await generated.json()).toMatchObject({ accountId: 'account-a', transactionCount: 1 })
 	})
 
+	it('streams an AI SDK UI response only from the caller-authorized retrieved guide', async () => {
+		const fetch = await start()
+		const alice = await signIn(fetch, 'alice')
+		const bob = await signIn(fetch, 'bob')
+		const ingested = await asSession(
+			fetch,
+			alice,
+			new Request('http://example.test/api/v1/knowledge/documents', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					collectionId: 'account-a-documents',
+					documentId: 'chat-guide',
+					title: 'Statement guide',
+					text: 'Monthly statements explain booked transactions and balances.',
+					revision: 1,
+				}),
+			}),
+		)
+		expect(ingested.status).toBe(200)
+
+		await waitFor(async () => {
+			const results = await asSession(
+				fetch,
+				bob,
+				new Request('http://example.test/api/v1/knowledge/search', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ collectionId: 'account-a-documents', query: 'monthly statements' }),
+				}),
+			)
+			return results.status === 200 && ((await results.json()) as unknown[]).length > 0
+		})
+
+		const streamed = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/chat/knowledge', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					collectionId: 'account-a-documents',
+					messages: [
+						{
+							id: 'question-1',
+							role: 'user',
+							parts: [{ type: 'text', text: 'What does a statement explain?' }],
+						},
+					],
+				}),
+			}),
+		)
+		expect(streamed.status).toBe(200)
+		expect(streamed.headers.get('content-type')).toContain('text/event-stream')
+		expect(await streamed.text()).toContain('Monthly statements explain booked transactions and balances.')
+
+		const denied = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/chat/knowledge', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					collectionId: 'account-c-documents',
+					messages: [{ id: 'question-2', role: 'user', parts: [{ type: 'text', text: 'Show account C.' }] }],
+				}),
+			}),
+		)
+		expect(denied.status).toBe(403)
+	})
+
 	it('uses only the opaque local session for identity and invalidates it on logout', async () => {
 		const fetch = await start()
 		const bob = await signIn(fetch, 'bob')

@@ -1,0 +1,35 @@
+---
+title: Split text into searchable chunks
+description: Store short source sentences with stable chunk IDs before calculating the tutorial vectors.
+order: 113
+status: published
+---
+
+Search works on chunks, not a whole document string. The repository splits
+text on sentence boundaries, trims whitespace, and numbers the resulting
+chunks `chunk-1`, `chunk-2`, and so on. If the input has no matching
+sentence boundary, it stores the trimmed text as one chunk.
+
+```ts title="examples/banking/src/knowledge/repository.ts"
+const sentences = text
+  .split(/(?<=[.!?])\s+/)
+  .map(sentence => sentence.trim())
+  .filter(Boolean)
+
+return (sentences.length > 0 ? sentences : [text.trim()]).map((chunk, index) => ({
+  chunkId: `chunk-${index + 1}`,
+  text: chunk,
+  vector: createDeterministicEmbedding(chunk),
+}))
+```
+
+The chunk result keeps the original document ID, title, revision, and chunk
+ID. A search result can therefore point to a source fragment instead of
+returning an unexplained score.
+
+This example does not normalize files, parse PDFs, preserve page offsets, or
+summarize text. Those are separate ingestion decisions with their own failure
+and provenance rules. The current input is bounded plain text.
+
+Next, look at the deterministic vector function used by this teaching
+checkpoint.

@@ -1,0 +1,43 @@
+---
+title: Store deterministic vectors
+description: Keep the attached agent inside the PURISTA service while making the local embedding behavior explicit.
+order: 114
+status: published
+---
+
+The `embedDocument` agent queue belongs to the `bankingKnowledge` service.
+It has no configured model. Its run function calls the repository, which
+tokenizes text and creates an eight-number deterministic vector. The vector is
+only a repeatable test fixture. It is not an embedding model and it does not
+demonstrate semantic retrieval quality.
+
+```ts title="examples/banking/src/knowledge/service.ts"
+export const embedDocumentAgentBuilder = builder
+  .getAgentQueueBuilder('embedDocument', 'Creates deterministic vectors for one authorized banking document')
+  .addPayloadSchema(documentPayloadSchema)
+  .addParameterSchema(embeddingParameterSchema)
+  .useBuiltInTools(false)
+  .setRunFunction(async context => {
+    requireCollectionAccess(context.resources.knowledgeRepository, context.payload.collectionId, {
+      tenantId: context.parameter.tenantId,
+      principalId: context.parameter.initiatorPrincipalId,
+    })
+    const result = context.resources.knowledgeRepository.storeEmbeddedDocument(context.payload)
+    return {
+      documentId: result.document.documentId,
+      collectionId: result.document.collectionId,
+      revision: result.document.revision,
+      outcome: result.outcome,
+    }
+  })
+```
+
+The P6 check appears twice: before enqueue and again in the worker. The second
+check protects delayed work if a mandate changes and prevents a direct queue
+delivery from bypassing the command.
+
+The guarded `POST /api/v1/knowledge/search` endpoint creates the same
+deterministic vector for a query and returns positive-score chunks in the
+caller-authorized collection. It does not send a prompt to a model.
+
+Next, handle the normal ways a document can change or disappear.

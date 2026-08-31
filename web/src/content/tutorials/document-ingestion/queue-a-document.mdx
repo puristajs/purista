@@ -1,0 +1,46 @@
+---
+title: Queue an authorized document
+description: Use a business guard before enqueueing document text and copy only verified identity into the queue parameter.
+order: 112
+status: published
+---
+
+The public operation is `POST /api/v1/knowledge/documents`. Its payload has
+a collection ID, document ID, title, text, and positive revision number.
+Before PURISTA runs the command handler, the `collectionScope` guard checks
+the caller's current tenant and collection permission.
+
+```ts title="examples/banking/src/knowledge/service.ts"
+.setBeforeGuardHooks({
+  collectionScope: async function (context, payload) {
+    requireCollectionAccess(context.resources.knowledgeRepository, payload.collectionId, {
+      tenantId: context.message.tenantId,
+      principalId: context.message.principalId,
+    })
+  },
+})
+.setCommandFunction(async function (context, payload) {
+  const job = await context.queue.enqueue[queueName](payload, {
+    tenantId: context.message.tenantId,
+    initiatorPrincipalId: context.message.principalId,
+  })
+  return { jobId: job.jobId, queueName }
+})
+```
+
+The collection ID comes from the request, but it does not grant access. The
+repository owns the mapping from collection to tenant, account, and readers.
+The command copies the verified tenant and principal into the queue parameter;
+it does not accept either value in the request body.
+
+In the browser, **Ingest sample guide** builds the collection ID from the
+selected account and sends this same request. The React UI never sends a
+principal or tenant ID. The main Hono protection middleware reads the opaque
+local session cookie and writes those values into the server-side message.
+
+This is important because the document text is the value that later reaches
+the embedding run function. Bob requesting `account-c-documents`, or Alice
+from `tenant-south`, receives `403`. The test asserts that neither request
+creates an embedding request or stored document.
+
+Next, see what the worker stores after the queue accepts the request.

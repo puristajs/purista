@@ -1,0 +1,24 @@
+---
+title: Run the isolated review service
+description: Start the real service and generated Hono routes through its focused integration test.
+order: 161
+status: draft
+---
+
+The review checkpoint is exercised through one test:
+
+```bash title="Run the fee-change review integration test"
+npx vitest run examples/banking/src/review/service.integration.test.ts
+```
+
+The test creates `bankingFeeChangeReview v1`, a `BankingRepository`, and a
+`FeeChangeReviewStore`. It starts a local `DefaultEventBridge` and mounts
+the generated REST endpoints under `/api/v1/`.
+
+Its protection middleware reads `x-test-actor` and creates a synthetic
+`tenant-north` identity. That header is deliberately test-only. It is not an
+authentication design, and sending it to the banking browser server does not
+add this review service or grant a user a role.
+
+The first proposal is pending. No fee changes when a proposal is created.
+Next, define the information that a reviewer needs to decide.

@@ -1,0 +1,30 @@
+---
+title: Revise or remove a document
+description: Make duplicate deliveries safe, replace a document only with a newer revision, and remove it from the local repository.
+order: 115
+status: published
+---
+
+The repository compares a SHA-256 checksum with the existing document.
+Repeating the same document ID, revision, title, and text returns
+`unchanged`. Reusing a revision with different content returns `409`.
+An older revision also returns `409`; a higher revision replaces the stored
+document and its chunks.
+
+The delete operation is:
+
+```text title="Generated local route"
+DELETE /api/v1/knowledge/collections/:collectionId/documents/:documentId
+```
+
+It runs the same collection-scope guard before removing the document. The
+focused test queues revision 1, repeats it, queues revision 2, then deletes
+the document and confirms the collection is empty.
+
+The repository also records a forced worker failure when text contains the
+test marker `[[force-embedding-failure]]`. That marker is a test hook, not a
+user-facing failure protocol. This in-memory example does not cover
+transactional replacement, a late-worker deletion race, retry, or persistence
+across restart.
+
+Next, run the full focused proof, including allowed and denied cases.

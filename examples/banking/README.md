@@ -31,6 +31,7 @@ permissions:
 - `carol` owns `account-c`.
 - `dana` is assigned to record already-posted synthetic transactions for
   `account-a`.
+- `erin` is assigned to investigate synthetic review cases for `account-a`.
 
 ```sh
 curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
@@ -62,6 +63,21 @@ The HTTP integration tests prove the business decision and transform lifecycle:
 a valid mandate can read only its account; a valid logged-in bookkeeper cannot
 post; an authorized operations actor can import a legacy transaction where
 `"125.40"` becomes `12540` minor units.
+
+## Try the document and chat checkpoint
+
+Sign in as Alice, keep **Account A** selected, and use **Ingest sample guide**.
+That calls the protected PURISTA document command, which queues deterministic
+local chunking and vector storage. Then ask a question in **Ask the account
+guide**. The React chat uses the Vercel AI SDK UI transport, but the answer is
+deterministic text built only from retrieved, authorized excerpts. It does not
+call a live model or need an API key.
+
+The example keeps its AI SDK dependencies in
+`examples/banking/package-lock.json`. The broader repository workspace still
+has an unrelated `@purista/harness@^3.0.0` registry-resolution issue, so use
+the existing workspace installation for the repository verification commands
+above until that root dependency is repaired.
 
 ## Reset
 

@@ -18,9 +18,11 @@
 		"reset": "tsx src/reset.ts"
 	},
 	"dependencies": {
+		"@ai-sdk/react": "^4.0.88",
 		"@hono/node-server": "^2.1.0",
 		"@purista/core": "*",
 		"@purista/hono-http-server": "*",
+		"ai": "^7.0.85",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"zod": "^4.4.3"
@@ -29,8 +31,8 @@
 		"@types/node": "^26.2.0",
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.4",
-		"@vitejs/plugin-react": "^5.2.0",
 		"@typescript/native": "npm:typescript@^7.0.2",
+		"@vitejs/plugin-react": "^5.2.0",
 		"tsx": "^4.23.12",
 		"typescript": "npm:@typescript/typescript6@^6.0.2",
 		"vite": "^8.2.1",

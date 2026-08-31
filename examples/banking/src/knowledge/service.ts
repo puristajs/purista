@@ -2,6 +2,7 @@
 import { HandledError, ServiceBuilder, type ServiceInfoType, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
+import { answerGroundedQuestion, groundedAnswerSchema, knowledgeQuestionSchema } from './answer.js'
 import { type BankingKnowledgeRepository, type KnowledgeCollectionId, knowledgeCollectionIds } from './repository.js'
 
 const collectionIdSchema = z.enum(knowledgeCollectionIds)
@@ -145,6 +146,27 @@ const searchDocuments = builder
 		return context.resources.knowledgeRepository.search(payload.collectionId, payload.query)
 	})
 
+const answerKnowledgeQuestion = builder
+	.getCommandBuilder('answerKnowledgeQuestion', 'Answers from authorized stored excerpts without inventing a source')
+	.addPayloadSchema(knowledgeQuestionSchema)
+	.addParameterSchema(emptyParameterSchema)
+	.addOutputSchema(groundedAnswerSchema)
+	.exposeAsHttpEndpoint('POST', 'knowledge/answers')
+	.setBeforeGuardHooks({
+		collectionScope: async function (context, payload) {
+			requireCollectionAccess(context.resources.knowledgeRepository, payload.collectionId, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		return answerGroundedQuestion(context.resources.knowledgeRepository, payload, {
+			tenantId: context.message.tenantId,
+			principalId: context.message.principalId,
+		})
+	})
+
 const deleteDocument = builder
 	.getCommandBuilder('deleteDocument', 'Deletes one document from the caller-authorized banking collection')
 	.addPayloadSchema(z.undefined())
@@ -170,6 +192,7 @@ export const bankingKnowledgeService = builder
 	.addCommandDefinition(
 		requestDocumentIngestion.getDefinition(),
 		searchDocuments.getDefinition(),
+		answerKnowledgeQuestion.getDefinition(),
 		deleteDocument.getDefinition(),
 	)
 

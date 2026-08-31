@@ -1,6 +1,8 @@
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 
-type Actor = 'alice' | 'bob' | 'carol' | 'dana'
+type Actor = 'alice' | 'bob' | 'carol' | 'dana' | 'erin'
 type AccountId = 'account-a' | 'account-c'
 type LocalSession = { principalId: Actor; tenantId: 'tenant-north' }
 type Transaction = {
@@ -19,6 +21,7 @@ const actorOptions: Array<{ value: Actor; label: string; detail: string }> = [
 	{ value: 'bob', label: 'Bob', detail: 'Read and export mandate for A' },
 	{ value: 'carol', label: 'Carol', detail: 'Account C owner' },
 	{ value: 'dana', label: 'Dana', detail: 'Operations posting role for A' },
+	{ value: 'erin', label: 'Erin', detail: 'Investigation reviewer for A' },
 ]
 
 const money = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR' })
@@ -36,6 +39,7 @@ const request = async <T,>(path: string, init?: RequestInit): Promise<T> => {
 }
 
 const apiError = (error: unknown) => (error instanceof Error ? error.message : 'The request could not be completed.')
+const documentCollection = (accountId: AccountId) => `${accountId}-documents`
 
 export const App = () => {
 	const [selectedActor, setSelectedActor] = useState<Actor>('alice')
@@ -47,6 +51,19 @@ export const App = () => {
 	const [error, setError] = useState<string>()
 	const [notice, setNotice] = useState<string>()
 	const [importing, setImporting] = useState(false)
+	const [ingestingGuide, setIngestingGuide] = useState(false)
+	const [question, setQuestion] = useState('')
+	const chat = useChat({
+		transport: useMemo(
+			() =>
+				new DefaultChatTransport({
+					api: '/api/chat/knowledge',
+					credentials: 'same-origin',
+					body: () => ({ collectionId: documentCollection(accountId) }),
+				}),
+			[accountId],
+		),
+	})
 
 	const activeActor = useMemo(
 		() =>
@@ -159,6 +176,45 @@ export const App = () => {
 			setError(apiError(caught))
 		} finally {
 			setImporting(false)
+		}
+	}
+
+	const ingestGuide = async () => {
+		setIngestingGuide(true)
+		setError(undefined)
+		setNotice(undefined)
+		try {
+			await request('knowledge/documents', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					collectionId: documentCollection(accountId),
+					documentId: 'ui-account-guide',
+					title: `Account ${accountId} guide`,
+					text: `Monthly statements explain booked transactions and balances for ${accountId}. Contact support for an account question.`,
+					revision: 1,
+				}),
+			})
+			setNotice(
+				'The ingestion command accepted the guide. The local worker may need a moment before chat can retrieve it.',
+			)
+		} catch (caught) {
+			setError(apiError(caught))
+		} finally {
+			setIngestingGuide(false)
+		}
+	}
+
+	const askKnowledge = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		const submittedQuestion = question.trim()
+		if (!submittedQuestion || chat.status !== 'ready') return
+		setQuestion('')
+		setError(undefined)
+		try {
+			await chat.sendMessage({ text: submittedQuestion })
+		} catch (caught) {
+			setError(apiError(caught))
 		}
 	}
 
@@ -297,6 +353,58 @@ export const App = () => {
 						</button>
 					</form>
 				</article>
+			</section>
+
+			<section className="panel knowledge-panel" aria-labelledby="knowledge-title">
+				<div className="panel-heading">
+					<div>
+						<p className="eyebrow">PURISTA retrieval plus AI SDK UI</p>
+						<h2 id="knowledge-title">Ask the account guide</h2>
+					</div>
+					<button
+						type="button"
+						className="button button-outline"
+						onClick={() => void ingestGuide()}
+						disabled={ingestingGuide}
+					>
+						{ingestingGuide ? 'Queueing guide…' : 'Ingest sample guide'}
+					</button>
+				</div>
+				<p className="muted">
+					The button uses the protected PURISTA ingestion command. The chat sends the selected collection and the
+					server-validated session to a small AI SDK streaming transport. It only returns stored authorized excerpts; it
+					does not call a live model.
+				</p>
+				<div className="chat-log" aria-live="polite">
+					{chat.messages.length === 0 ? (
+						<p className="muted">Ingest the sample guide, then ask “What does a monthly statement explain?”</p>
+					) : (
+						chat.messages.map(message => (
+							<div className={`chat-message ${message.role}`} key={message.id}>
+								<strong>{message.role === 'user' ? 'You' : 'Grounded answer'}</strong>
+								{message.parts
+									.filter(part => part.type === 'text')
+									.map(part => (
+										<p key={`${message.id}-${part.text}`}>{part.text}</p>
+									))}
+							</div>
+						))
+					)}
+				</div>
+				<form className="chat-form" onSubmit={askKnowledge}>
+					<label>
+						<span>Question about {accountId}</span>
+						<textarea
+							value={question}
+							onChange={event => setQuestion(event.target.value)}
+							placeholder="What does a monthly statement explain?"
+							rows={2}
+						/>
+					</label>
+					<button className="button" type="submit" disabled={!question.trim() || chat.status !== 'ready'}>
+						{chat.status === 'streaming' || chat.status === 'submitted' ? 'Answering…' : 'Ask account guide'}
+					</button>
+				</form>
 			</section>
 			<p className="footnote">
 				This local session is a learning fixture. It uses an opaque server-side session and does not model a production

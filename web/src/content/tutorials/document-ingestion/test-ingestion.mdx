@@ -1,0 +1,33 @@
+---
+title: Test ingestion boundaries
+description: Verify the real HTTP, queue, attached-agent, and repository path while checking that forbidden text never reaches the worker.
+order: 116
+status: published
+---
+
+Run the deterministic test:
+
+```bash title="Verify document ingestion"
+npx vitest run examples/banking/src/knowledge/service.test.ts
+```
+
+The test proves these behaviors:
+
+- the service publishes the attached agent queue and worker definitions without
+  a live model;
+- Alice can enqueue and search an `account-a-documents` document through the
+  generated Hono endpoints;
+- cross-account and cross-tenant attempts return `403` before any embedding
+  request or stored document exists;
+- repeating an identical revision keeps one document, a newer revision
+  replaces it, and deletion removes it; and
+- a forced deterministic worker failure records failure evidence and stores no
+  document.
+
+The browser can submit its built-in sample guide through the local-session
+path, but this focused test does not automate that browser interaction. It
+also does not prove durable queue delivery, a production vector database, real
+embeddings, PDF ingestion, or retrieval quality. Add each dependency and its
+integration test before making those claims.
+
+Next, use the stored source chunks in a grounded-answer checkpoint.

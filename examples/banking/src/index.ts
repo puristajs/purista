@@ -7,13 +7,18 @@ import {
 	DefaultEventBridge,
 	DefaultQueueBridge,
 	gracefulShutdown,
+	HandledError,
 	initLogger,
 	type PuristaMetricsRecorderInterface,
 } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
+import { createUIMessageStream, createUIMessageStreamResponse, type UIMessage } from 'ai'
 
 import { BankingOperationsStore } from './advanced/repository.js'
 import { bankingOperationsService } from './advanced/service.js'
+import { answerGroundedQuestion } from './knowledge/answer.js'
+import { BankingKnowledgeRepository, knowledgeCollectionIds } from './knowledge/repository.js'
+import { bankingKnowledgeService } from './knowledge/service.js'
 import type { BankActor } from './repository.js'
 import { BankingRepository } from './repository.js'
 import { bankingService } from './service.js'
@@ -28,8 +33,37 @@ type LocalSession = {
 	tenantId: typeof localTenantId
 }
 
+type TutorialChatRequest = {
+	collectionId?: unknown
+	messages?: unknown
+}
+
+const extractLatestUserQuestion = (messages: unknown) => {
+	if (!Array.isArray(messages)) return undefined
+	for (const message of [...messages].reverse()) {
+		if (
+			typeof message !== 'object' ||
+			message === null ||
+			(message as { role?: unknown }).role !== 'user' ||
+			!Array.isArray((message as { parts?: unknown }).parts)
+		) {
+			continue
+		}
+		const question = (message as { parts: Array<{ type?: unknown; text?: unknown }> }).parts
+			.filter(part => part.type === 'text' && typeof part.text === 'string')
+			.map(part => part.text)
+			.join('')
+			.trim()
+		if (question) return question
+	}
+	return undefined
+}
+
 const isFixtureActor = (value: unknown): value is BankActor =>
 	typeof value === 'string' && fixtureActors.includes(value as BankActor)
+
+const isKnowledgeCollectionId = (value: unknown): value is (typeof knowledgeCollectionIds)[number] =>
+	typeof value === 'string' && knowledgeCollectionIds.includes(value as (typeof knowledgeCollectionIds)[number])
 
 const readCookie = (cookieHeader: string | undefined, name: string) => {
 	if (!cookieHeader) return undefined
@@ -57,6 +91,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const queueBridge = new DefaultQueueBridge()
 	const bankingRepository = options.bankingRepository ?? new BankingRepository()
 	const operationsStore = new BankingOperationsStore()
+	const knowledgeRepository = new BankingKnowledgeRepository()
 	const sessions = new Map<string, LocalSession>()
 	await eventBridge.start()
 	await queueBridge.start()
@@ -69,11 +104,17 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		resources: { bankingRepository, operationsStore },
 		metricsRecorder: options.metricsRecorder,
 	})
+	const bankingKnowledge = await bankingKnowledgeService.getInstance(eventBridge, {
+		queueBridge,
+		resources: { knowledgeRepository },
+		ai: { models: {} },
+	})
 	await banking.start()
 	await bankingOperations.start()
+	await bankingKnowledge.start()
 
 	const hono = await honoV1Service.getInstance(eventBridge, {
-		serviceConfig: { services: [banking, bankingOperations], autoRegisterServicesFromConfig: true },
+		serviceConfig: { services: [banking, bankingOperations, bankingKnowledge], autoRegisterServicesFromConfig: true },
 	})
 	const findSession = (cookieHeader: string | undefined) => {
 		const sessionId = readCookie(cookieHeader, sessionCookieName)
@@ -113,6 +154,43 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		context.set('tenantId', session.tenantId)
 		return next()
 	})
+	/**
+	 * AI SDK UI transport only. It uses the same server-owned retrieval helper as
+	 * the PURISTA HTTP command, then streams the deterministic grounded text for
+	 * the React chat component. The browser never chooses another person's scope.
+	 */
+	hono.app.post('/api/chat/knowledge', async context => {
+		const session = findSession(context.req.header('cookie'))
+		if (!session) return context.json({ title: 'A local session is required' }, 401)
+		const body = await context.req.json<TutorialChatRequest>().catch(() => undefined)
+		const collectionId = isKnowledgeCollectionId(body?.collectionId) ? body.collectionId : undefined
+		const question = extractLatestUserQuestion(body?.messages)
+		if (!collectionId || !question) {
+			return context.json({ title: 'Choose a collection and ask a question' }, 400)
+		}
+		try {
+			const answer = answerGroundedQuestion(
+				knowledgeRepository,
+				{ collectionId, question },
+				{ tenantId: session.tenantId, principalId: session.principalId },
+			)
+			const stream = createUIMessageStream<UIMessage>({
+				execute: ({ writer }) => {
+					writer.write({ type: 'start' })
+					writer.write({ type: 'text-start', id: 'grounded-answer' })
+					for (const fragment of answer.answer.split(/(?<=\\s)/)) {
+						writer.write({ type: 'text-delta', id: 'grounded-answer', delta: fragment })
+					}
+					writer.write({ type: 'text-end', id: 'grounded-answer' })
+					writer.write({ type: 'finish', finishReason: 'stop' })
+				},
+			})
+			return createUIMessageStreamResponse({ stream })
+		} catch (error) {
+			if (error instanceof HandledError) return context.json({ title: error.message }, 403)
+			return context.json({ title: 'The grounded answer could not be prepared' }, 500)
+		}
+	})
 	// The tutorial UI is intentionally public. Generated PURISTA endpoints are
 	// protected by the server-validated local session middleware above.
 	hono.app.get('/assets/*', serveStatic({ root: tutorialUiDirectory }))
@@ -123,6 +201,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		fetch: hono.app.fetch,
 		destroy: async () => {
 			await hono.destroy()
+			await bankingKnowledge.destroy()
 			await bankingOperations.destroy()
 			await banking.destroy()
 			await queueBridge.destroy()
