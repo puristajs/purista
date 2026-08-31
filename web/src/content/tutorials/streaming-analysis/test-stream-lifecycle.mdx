@@ -1,27 +1,54 @@
 ---
 title: Test the stream lifecycle
-description: Verify the registered stream handler’s ordered chunks and record the integration evidence still missing.
+description: Keep the generated harness test, add decision-path tests, and state exactly what the tests prove.
 order: 66
 ---
 
-Run the focused check:
+Generate or confirm the stream before running its lifecycle tests:
 
-```bash title="Typecheck and test the analysis stream"
-npm run typecheck -w @purista/banking-tutorials
-npm run test -w @purista/banking-tutorials
+```bash title="Generate analyzeTransaction"
+npm run add:stream -- analyze-transaction --description "Stream a short, bounded transaction review" --service banking-operations --service-version 1
 ```
 
-In `examples/banking/src/advanced/service.test.ts`,
-`createStreamContextMock` supplies the seeded transaction, a writer, and the
-required resources. The test calls the registered stream function and asserts
-the stages `received`, `checking`, and `complete` in that order.
+The CLI generated a test with `createStreamTestHarness`. Replace its
+placeholder payload with a seeded, authorized transaction and assert the
+ordered chunks and final value.
 
-This proves the handler’s domain logic and writer calls. It does not prove an
-HTTP client receives the same frames, cancellation stops work, a disconnect
-cleans up resources, or a bridge supports distributed streams. Treat those as
-separate requirements for a later implementation rather than properties of the
-current test.
+```ts title="analyzeTransactionStreamBuilder.test.ts"
+import { createStreamTestHarness } from '@purista/core'
 
-When expanding coverage, assert one final frame, no chunks after close, a
-forbidden account produces no data frame, and a missing transaction produces a
-safe error before any chunk.
+test('emits three progress chunks for an authorized transaction', async () => {
+  const harness = await createStreamTestHarness(
+    bankingOperationsV1ServiceBuilder,
+    analyzeTransactionStreamBuilder,
+  )
+  try {
+    const result = await harness.run({
+      payload: { accountId: 'account-a', transactionId: 'transaction-seed-a-1' },
+      parameter: {},
+    })
+
+    expect(result.chunks.map(chunk => chunk.stage)).toEqual(['received', 'checking', 'complete'])
+    expect(result.final).toEqual({ status: 'complete', checkedSteps: 3 })
+  } finally {
+    await harness.destroy()
+  }
+})
+```
+
+Also keep focused direct tests for the two business decisions: an unassigned
+principal must fail the account-read guard, and an authorized account with an
+unknown transaction must fail before the writer records a chunk. The final
+repository checkpoint uses `createStreamContextMock` for direct progress
+coverage in `examples/banking/src/advanced/service.test.ts`.
+
+```bash title="Typecheck and run the stream tests"
+npm run typecheck
+npm test -- --run src/service/bankingOperations/v1/stream/analyzeTransaction/analyzeTransactionStreamBuilder.test.ts
+```
+
+These tests prove builder registration, stream runtime execution, typed writer
+values, and local business decisions. They do **not** prove a browser receives
+frames, a disconnect cancels repository work, or progress survives a restart.
+Add an HTTP integration test only after choosing and implementing that
+transport; use a queue and a stored result for durable, retryable work.

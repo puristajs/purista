@@ -1,30 +1,50 @@
 ---
 title: Write progress frames
-description: Send small ordered updates and close the stream once with its typed final result.
+description: Implement the generated stream handler with three typed progress chunks and one explicit final result.
 order: 64
 ---
 
-The writer is the stream handler’s output boundary. The local review writes
-three chunks in order, then closes exactly once.
+Generate or confirm the stream before implementing its handler:
 
-```ts title="examples/banking/src/advanced/service.ts"
-await writer.write({ stage: 'received', message: 'Transaction received for review.' })
-await writer.write({ stage: 'checking', message: 'The example threshold and account scope were checked.' })
-await writer.write({ stage: 'complete', message: 'The short review is complete.' })
-await writer.close({ status: 'complete', checkedSteps: 3 })
+```bash title="Generate analyzeTransaction"
+npm run add:stream -- analyze-transaction --description "Stream a short, bounded transaction review" --service banking-operations --service-version 1
 ```
 
-`writer.write` validates a progress value against the chunk schema. `writer.close`
-finishes the sequence with the final schema. The code does not use a queue,
-persist a job, or continue after the HTTP request ends.
+Replace the generated `writer.close()` placeholder with a small bounded review.
+The repository lookup comes after the account guard from the previous page.
 
-```bash title="Verify chunk order"
-npm run test -w @purista/banking-tutorials
+```ts title="analyzeTransactionStreamBuilder.ts"
+.setStreamFunction(async function (context, payload, _parameter, writer) {
+  const transaction = context.resources.bankingRepository
+    .list(payload.accountId)
+    .find(entry => entry.transactionId === payload.transactionId)
+
+  if (!transaction) {
+    throw new HandledError(StatusCode.NotFound, 'The transaction does not exist in this account')
+  }
+
+  await writer.write({ stage: 'received', message: 'Transaction received for review.' })
+  await writer.write({ stage: 'checking', message: 'The example threshold and account scope were checked.' })
+  await writer.write({ stage: 'complete', message: 'The short review is complete.' })
+  await writer.close({ status: 'complete', checkedSteps: 3 })
+})
 ```
 
-The test named `writes exactly three progress chunks for an authorized
-transaction review` asserts the stage order. If you add a client, render
-`received` and `checking` as ongoing work and render the final result only
-after the close frame arrives.
+`writer.write` accepts only the chunk schema. `writer.close` accepts only the
+final schema. Call `close` once, then return; do not emit more chunks after it.
+The review is deliberately finite, so it does not need a background queue.
 
-Next, distinguish a missing transaction from a completed review.
+Add this assertion to the generated harness test after the starter assertion:
+
+```ts title="analyzeTransactionStreamBuilder.test.ts"
+expect(result.chunks.map(chunk => chunk.stage)).toEqual(['received', 'checking', 'complete'])
+expect(result.final).toEqual({ status: 'complete', checkedSteps: 3 })
+```
+
+```bash title="Run the ordered-progress test"
+npm test -- --run src/service/bankingOperations/v1/stream/analyzeTransaction/analyzeTransactionStreamBuilder.test.ts
+```
+
+The repository checkpoint writes these values in
+`examples/banking/src/advanced/service.ts`. Next, make the missing-record path
+safe before any chunk is sent.

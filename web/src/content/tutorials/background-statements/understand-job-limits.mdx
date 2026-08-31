@@ -1,36 +1,59 @@
 ---
-title: Understand idempotency and limits
-description: Separate the local example’s repeat-safe shapes from durability, revocation, and download guarantees it does not yet implement.
+title: Add a worker only when it has a distinct job
+description: Learn the CLI command for an additional queue worker and the limits of the local statement example.
 order: 75
 ---
 
-The command supplies a stable idempotency key. The projection store also keeps
-one current statement record per account:
+`add:queue` already created the first statement worker. Use `add:queue-worker`
+only when another consumer has a clear, separately testable responsibility.
+Adding a second worker merely because the command exists makes delivery and
+ownership harder to explain.
 
-```ts title="examples/banking/src/advanced/repository.ts"
-saveStatement(statement: GeneratedStatement) {
-  const existing = this.statements.find(entry => entry.accountId === statement.accountId)
-  if (existing) {
-    Object.assign(existing, statement)
-    return existing
-  }
-  this.statements.push(statement)
-  return statement
-}
+For example, a future export service could consume a different
+`publish-statement` queue after this chapter's worker has produced a durable
+artifact. Generate that worker with the same local CLI:
+
+```bash title="Generate an additional worker for an existing queue"
+npm run add:queue-worker -- publish-statement-worker \
+  --description "Publish a completed statement artifact" \
+  --service banking-operations \
+  --service-version 1 \
+  --queue publish-statement \
+  --worker-mode continuous \
+  --max-parallel-handlers 1
 ```
 
-This prevents an in-memory list from accumulating a new metadata item on each
-successful generation for the same account. It is not an atomic claim across a
-database and queue. Restarting the application clears the queue and the store.
+The command requires an existing queue. It creates a builder and a test under
+the configured service path, then registers its definition in the service
+composition. It does not create the queue for you.
 
-The source also does not model a revoked mandate after enqueue, job ownership,
-artifact bytes, a download guard, a failed job status, or retry recovery. Do
-not make those guarantees in a UI or operational runbook until the example has
-a durable adapter, explicit policy, and integration tests.
-
-```bash title="Run the local queue definition checks"
-npm run typecheck -w @purista/banking-tutorials
-npm run test -w @purista/banking-tutorials
+```text title="Files created by add:queue-worker"
+src/service/bankingOperations/v1/queue-worker/publishStatementWorker/publishStatementWorkerQueueWorkerBuilder.ts
+src/service/bankingOperations/v1/queue-worker/publishStatementWorker/publishStatementWorkerQueueWorkerBuilder.test.ts
 ```
 
-Next, run the tests and record the boundary they actually cover.
+Do **not** run that command in this checkpoint: this chapter has no durable
+statement artifact and no `publishStatement` queue. The one generated
+`generateStatementWorker` owns all statement work. The command is here so you
+can use the same CLI-first pattern when your application really needs another
+queue consumer.
+
+## Keep the local guarantees honest
+
+The producer's stable idempotency key and the in-memory projection's one record
+per account are useful shapes. They do not make enqueue and storage atomic.
+Restarting the reference application clears `DefaultQueueBridge` and
+`BankingOperationsStore` state.
+
+The current example also does not model a revoked mandate after a worker has
+read data, job-status history, artifact bytes, download authorization, dead
+letter inspection, or restart recovery. Add a durable queue adapter, a
+persisted store, explicit policies, and integration tests before making those
+promises.
+
+```bash title="Recheck the current local checkpoint"
+npm run typecheck
+npm test
+```
+
+Finish by testing the exact two boundaries this chapter does implement.

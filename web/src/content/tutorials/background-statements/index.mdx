@@ -1,39 +1,51 @@
 ---
-title: Generate statement metadata in background work
-description: Enqueue a protected statement-generation job and let a PURISTA queue worker write a small in-memory projection.
+title: Build background statement generation
+description: Generate a typed PURISTA queue and worker, then turn an authorized statement request into a small background projection.
 order: 70
 ---
 
-Some work should return a reference quickly and finish in a worker. This
-checkpoint queues statement generation for an account reader. The worker counts
-the account’s synthetic transactions and stores generated statement metadata.
+A statement can take longer than the browser should wait. In this chapter, a
+reader asks for a statement and immediately receives a job reference. A
+PURISTA queue worker later counts the account's transactions and stores small
+statement metadata.
 
-```mermaid title="Statement generation in the local example"
+This is a **build** chapter. You create the queue and worker with the local
+PURISTA CLI, replace its safe starter contracts, connect the existing banking
+command, and write tests before moving on. The finished reference is in
+`examples/banking/src/advanced/service.ts`; its focused tests are in
+`examples/banking/src/advanced/service.test.ts`.
+
+```mermaid title="The result we build"
 flowchart LR
-  Reader -->|requestStatementGeneration| Command[command]
-  Command -->|enqueue| Queue[DefaultQueueBridge]
-  Queue --> Worker[generateStatement worker]
-  Worker --> Store[statement metadata store]
+  Reader -->|POST statement request| Command[authorized command]
+  Command -->|enqueue job| Queue[statement queue]
+  Queue --> Worker[queue worker]
+  Worker --> Projection[statement metadata]
 ```
 
-The command and worker live in `examples/banking/src/advanced/service.ts`.
-They use `DefaultQueueBridge`, an in-process and in-memory bridge. This
-checkpoint does not generate a PDF, store bytes, expose a download, retain a
-job after restart, or prove durable retry behavior.
+## Starting point
 
-## Start here
+Use the project from the earlier banking chapters. It must already have a
+`banking-operations` service at version `1`, a banking repository resource,
+and a command that can identify the authenticated principal. If you are using
+this chapter on its own, create the service once before the first step:
 
-No Docker dependency is required. Start the full application if you want to
-inspect the declared HTTP command, then run the focused tests for existing
-behavior.
-
-```bash title="Start the local banking application"
-npm run dev -w @purista/banking-tutorials
+```bash title="Create the service when it does not exist yet"
+npm run add:service -- banking-operations \
+  --description "Banking operations and background work"
 ```
 
-1. [Compare a stream and a job](/tutorials/background-statements/compare-streams-and-jobs/)
-2. [Define the queue and worker](/tutorials/background-statements/define-the-queue-worker/)
-3. [Request statement generation](/tutorials/background-statements/request-statement-generation/)
-4. [Write statement metadata](/tutorials/background-statements/write-statement-metadata/)
-5. [Understand idempotency and limits](/tutorials/background-statements/understand-job-limits/)
-6. [Test background work](/tutorials/background-statements/test-background-work/)
+The generated project installs `@purista/cli` locally. Run the `npm run
+add:*` scripts from the project root; do not copy a globally installed CLI
+version into the tutorial.
+
+The local `DefaultQueueBridge` used by the reference app is intentionally
+in-memory. It proves the application shape, but does not retain jobs after a
+restart or make a production retry guarantee.
+
+1. [Choose a queue and generate its first worker](/tutorials/background-statements/compare-streams-and-jobs/)
+2. [Replace the generated queue contract](/tutorials/background-statements/define-the-queue-worker/)
+3. [Enqueue a statement from an authorized command](/tutorials/background-statements/request-statement-generation/)
+4. [Implement the worker and its business guard](/tutorials/background-statements/write-statement-metadata/)
+5. [Add a worker only when it has a distinct job](/tutorials/background-statements/understand-job-limits/)
+6. [Test the queue boundary and worker](/tutorials/background-statements/test-background-work/)

@@ -1,32 +1,50 @@
 ---
-title: Handle missing transactions
-description: Reject a requested transaction that is not inside the authorized account instead of sending a misleading completed result.
+title: Reject a missing transaction safely
+description: Make a not-found request fail before the stream writes a misleading completed result.
 order: 65
 ---
 
-The account guard allows the stream to inspect one account. The handler still
-must check that the requested transaction exists in that account.
+Generate or confirm the stream before adding its missing-record case:
 
-```ts title="examples/banking/src/advanced/service.ts"
+```bash title="Generate analyzeTransaction"
+npm run add:stream -- analyze-transaction --description "Stream a short, bounded transaction review" --service banking-operations --service-version 1
+```
+
+The account guard allows a caller to inspect one account. It does not prove that
+the requested transaction is in that account. Keep this second check at the
+start of the generated stream handler, before the first `writer.write`.
+
+```ts title="analyzeTransactionStreamBuilder.ts"
 const transaction = context.resources.bankingRepository
   .list(payload.accountId)
   .find(entry => entry.transactionId === payload.transactionId)
+
 if (!transaction) {
   throw new HandledError(StatusCode.NotFound, 'The transaction does not exist in this account')
 }
 ```
 
-This `404` is different from a `403`: the caller is allowed to read the account,
-but the requested record is not in it. The check happens before `writer.write`,
-so this handler does not emit partial progress and then describe the review as
-complete.
+`404` and `403` communicate different facts. A `403` means the verified
+caller is not allowed to read the account. A `404` means an allowed caller
+asked for a record that is not present in that account. In both cases, the
+handler must not send a successful progress chunk first.
 
-The current source has no injected mid-stream failure or cancellation path.
-Do not add a cancel button, retry claim, or timeout guarantee until a supported
-transport and an integration test establish those semantics.
+Add a focused direct-handler test. `createStreamContextMock` makes the writer
+and recorded chunks visible without claiming to test HTTP transport:
 
-```bash title="Run the stream checkpoint tests"
-npm run test -w @purista/banking-tutorials
+```ts title="analyzeTransactionStreamBuilder.test.ts"
+await expect(runMissingTransaction()).rejects.toMatchObject({ statusCode: StatusCode.NotFound })
+expect(chunks).toEqual([])
 ```
 
-Next, review the direct evidence available for this bounded stream.
+Name `runMissingTransaction` after your test helper; it should call the
+registered `getStreamFunction()` with an authorized account and an unknown
+transaction ID. The repository reference has the same handler check in
+`examples/banking/src/advanced/service.ts`.
+
+```bash title="Run the missing-record test"
+npm test -- --run src/service/bankingOperations/v1/stream/analyzeTransaction/analyzeTransactionStreamBuilder.test.ts
+```
+
+Next, finish the chapter by testing the whole stream lifecycle at the correct
+boundaries.

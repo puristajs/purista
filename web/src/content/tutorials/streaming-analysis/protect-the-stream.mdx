@@ -1,38 +1,56 @@
 ---
 title: Protect the stream
-description: Reuse the business account-read decision before a stream reads or sends any transaction information.
+description: Add an account-level guard before the stream looks up or sends any transaction information.
 order: 63
 ---
 
-Streaming does not bypass business permissions. The stream performs an account
-read guard before it looks up the transaction or writes the first chunk.
+Generate or confirm the stream before adding its guard:
 
-```ts title="examples/banking/src/advanced/service.ts"
+```bash title="Generate analyzeTransaction"
+npm run add:stream -- analyze-transaction --description "Stream a short, bounded transaction review" --service banking-operations --service-version 1
+```
+
+Authentication answers who sent the request. This guard answers a different
+business question: **may this verified person read this account?** Put that
+decision before the handler, so an unauthorized caller receives no progress
+chunk and the handler never looks up the transaction.
+
+First make the repository a declared service resource. The final bank example
+uses `BankingRepository.canRead(principalId, accountId)`; your project can use
+the same small interface:
+
+```ts title="bankingOperationsV1ServiceBuilder.ts"
+export const bankingOperationsV1ServiceBuilder = new ServiceBuilder(serviceInfo)
+  .defineResource<'bankingRepository', BankingRepository>()
+```
+
+Then add a named before guard to the generated stream builder. Use `function`,
+not an arrow function, because PURISTA binds the builder callback to its service
+instance.
+
+```ts title="analyzeTransactionStreamBuilder.ts"
 .setBeforeGuardHooks({
   accountRead: async function (context, payload) {
-    await requireReadableAccount(context, payload.accountId)
+    const allowed = context.resources.bankingRepository.canRead(
+      context.message.principalId,
+      payload.accountId,
+    )
+    if (!allowed) {
+      throw new HandledError(StatusCode.Forbidden, 'You may not read this account')
+    }
   },
 })
-.setStreamFunction(async function (context, payload, _parameter, writer) {
-  const transaction = context.resources.bankingRepository
-    .list(payload.accountId)
-    .find(entry => entry.transactionId === payload.transactionId)
-  // stream output follows only after this guarded lookup
-})
 ```
 
-`requireReadableAccount` asks the repository whether the server-provided
-principal may read that particular account. Alice and Bob may read account A;
-Bob may not read account C. This is a business scope decision, not a check that
-the request supplied a non-empty header.
+Import `HandledError` and `StatusCode` from `@purista/core`. Do not accept a
+principal or tenant ID from the stream payload. The server creates trusted
+message identity, and the guard uses that identity with the requested business
+object.
 
-The focused stream test currently covers an authorized seed transaction. When
-adding HTTP stream coverage, include a valid Bob request for account A and a
-same-tenant Bob request for account C that produces no chunk and no final
-result.
-
-```bash title="Run the current stream tests"
-npm run test -w @purista/banking-tutorials
+```bash title="Test the authorized starting path"
+npm test -- --run src/service/bankingOperations/v1/stream/analyzeTransaction/analyzeTransactionStreamBuilder.test.ts
 ```
 
-Next, see how the handler writes its finite sequence.
+The reference implementation keeps this guard in
+`examples/banking/src/advanced/service.ts`. Next, make its writer produce the
+three visible progress updates.
