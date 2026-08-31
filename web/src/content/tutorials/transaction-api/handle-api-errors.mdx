@@ -1,41 +1,28 @@
 ---
-title: Handle API errors
-description: Tell malformed input, a forbidden action, and a conflicting duplicate apart without exposing another account's data.
+title: Return safe API errors
+description: Distinguish malformed data from an idempotency conflict without exposing unrelated records.
 order: 25
 ---
 
-The API has different failure meanings. Keep them separate because the safe
-next action differs.
+Test three failure paths while the API is still small:
 
-| Situation | Expected result | What to do |
+| Request | Expected result | Why |
 | --- | --- | --- |
-| Invalid JSON shape, timestamp, currency, or amount | `400` | Correct the client request. |
-| Signed-in tutorial person cannot record for the account | `403` | Do not retry; use an authorized operations process. |
-| Same source ID has different data | `409` | Reconcile the source record. |
-| Missing, expired, or logged-out local session | `401` | Create a new local session through `/auth/login`. |
+| `amountMinor: 12.5` | `400` | The schema rejects fractional minor units. |
+| Missing `currency` | `400` | The public command contract is incomplete. |
+| Reused source ID with a changed amount | `409` | The retry describes a different transaction. |
 
-Create a Bob session. Bob is signed in, but may not post transactions:
+Use `HandledError(StatusCode.Conflict, ...)` for the changed duplicate. Keep
+the message about the caller's submitted source ID; never include an unrelated
+account, transaction, or a stack trace.
 
-```bash title="Create Bob's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
+```bash title="Send malformed input"
+curl -i -X POST http://127.0.0.1:3000/api/v1/transactions \
   -H 'content-type: application/json' \
-  --data '{"actor":"bob"}'
+  --data '{"accountId":"account-a","sourceTransactionId":"bad-amount","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12.5,"currency":"EUR","direction":"debit"}'
 ```
 
-```bash title="Prove that a bookkeeper cannot post"
-curl -i -X POST http://127.0.0.1:3010/api/v1/transactions \
-  -H 'content-type: application/json' \
-  -b .tutorial-cookie \
-  --data '{"accountId":"account-a","sourceTransactionId":"bob-write","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":100,"currency":"EUR","direction":"debit"}'
-```
-
-Expect `403`. Follow it with Alice's list request. `bob-write` must not appear.
-The absence of the write is as important as the response status.
-
-## Test error behavior
-
-The current integration test proves a denied posting and an allowed legacy
-import. Extend the runtime test before changing error mapping; a handler-only
-test would not prove the Hono protection and command guard stages ran.
+The response should be `400`. The test in the next step proves that this input
+does not reach the repository.
 
 Next: [test the API](/tutorials/transaction-api/test-the-api/).

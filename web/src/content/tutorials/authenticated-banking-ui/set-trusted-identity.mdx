@@ -1,44 +1,29 @@
 ---
-title: Inspect trusted identity handling
-description: Follow the server-validated local session from Hono middleware into the PURISTA command context and understand its learning-only limit.
+title: Pass trusted identity to PURISTA
+description: Set the server-validated principal and tenant in Hono protection middleware before generated endpoints run.
 order: 33
 ---
 
-The Hono protection middleware is configured in
-`examples/banking/src/index.ts`:
+Generated command endpoints are protected by Hono middleware. Look up the
+session cookie first, then set the identity only from that server record:
 
-```ts title="examples/banking/src/index.ts"
-hono.setProtectMiddleware(async function (context, next) {
+```ts title="src/http.ts"
+honoService.setProtectMiddleware(async (context, next) => {
   const session = findSession(context.req.header('cookie'))
-  if (!session) {
-    return context.json({ title: 'A local session is required' }, 401)
-  }
+  if (!session) return context.json({ title: 'A local session is required' }, 401)
   context.set('principalId', session.principalId)
   context.set('tenantId', session.tenantId)
   return next()
 })
 ```
 
-Hono runs this middleware for endpoints whose HTTP security is enabled. The
-command definitions use the default protected status. The middleware then puts
-`principalId` and `tenantId` in the request context that the command guard
-receives.
+Hono runs this middleware for protected generated HTTP endpoints. The command
+context now receives trusted `principalId` and `tenantId`. A payload such as
+`{ "principalId": "dana" }` must have no effect because caller identity is not
+part of the transaction contract.
 
-The important boundary is where the values come from. In this local example,
-they come from a server-side session record addressed by an opaque HttpOnly
-cookie. The fixture login still accepts a synthetic name without a credential,
-so it is not production authentication. A production middleware must derive
-these values from a verified credential and must never copy them from a JSON
-payload or an unverified client value.
+Test both cases: no cookie gives `401`; a signed-in Bob still reaches the next
+business decision. Login only tells the application who sent a request. It
+does not grant every account action.
 
-## Test a forged payload cannot choose the actor
-
-The transaction schema has no `principalId` or `tenantId` fields. Even if a
-transport ignores an unknown JSON field, the guard reads the person from the
-session-aware middleware, not an identity value in the payload. The safe rule
-is: domain payloads describe a transaction, not the caller.
-
-Read [authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/)
-for the supported Hono protection model.
-
-Next: [check account permissions with guards](/tutorials/authenticated-banking-ui/guard-business-actions/).
+Next: [guard business actions](/tutorials/authenticated-banking-ui/guard-business-actions/).

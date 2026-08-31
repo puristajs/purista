@@ -1,0 +1,48 @@
+---
+title: Create the project
+description: Use the PURISTA CLI to create the local application that will become Example Bank.
+order: 6
+---
+
+You need Node.js 24.15 or newer and npm. Open a terminal in a folder where you
+create development projects. The following command creates a new directory;
+do not run it inside an existing application.
+
+```bash title="Create Example Bank with the PURISTA CLI"
+npm create purista@latest example-bank
+cd example-bank
+```
+
+Choose **Node.js**, the **default EventBridge**, **Hono webserver support**, and
+**npm** when the generator asks. It installs the dependencies and creates a
+working starter application.
+
+The default EventBridge sends events inside this one Node process. It is the
+right first choice because the early steps do not need a broker, Docker, or an
+account with a cloud provider.
+
+For a repeatable script or CI job, give the generator every choice:
+
+```bash title="Create the same project without prompts"
+npx @purista/cli init example-bank \
+  --runtime node \
+  --event-bridge default \
+  --package-manager npm \
+  --webserver \
+  --defaults \
+  --non-interactive
+cd example-bank
+```
+
+Run the generated application before changing it:
+
+```bash title="Start the generated project"
+npm run dev
+```
+
+Leave this process open. In a second terminal, open the local URL printed by
+the application or stop it with `Ctrl+C`. A port-in-use error means another
+local process owns that port; stop that process or set a different `PORT` value
+for this development run.
+
+Next: [read the generated project](/tutorials/start-a-purista-project/read-generated-project/).

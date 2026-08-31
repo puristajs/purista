@@ -1,0 +1,27 @@
+---
+title: Check the generated checkpoint
+description: Verify that the CLI-created service and command are registered before adding business code.
+order: 10
+---
+
+Run the project checks after every generated artifact. This catches a missing
+service/version argument or an accidental edit before the next step adds more
+code.
+
+```bash title="Type-check and test the generated banking boundary"
+npm run build
+npm test
+```
+
+The generated command has no useful implementation, so do not call it from a
+browser or an HTTP client yet. At this checkpoint the useful evidence is that
+the CLI registered the command in `bankingV1Service.ts` and the project still
+type-checks.
+
+The complete, runnable reference application is kept in
+[`examples/banking`](https://github.com/puristajs/purista/tree/master/examples/banking).
+Use it to compare a finished checkpoint after you have made the edits in a
+step. Do not start by copying it: the next chapter explains how to serve your
+own first React screen through the generated Hono application.
+
+Next: [serve the banking UI with PURISTA](/tutorials/banking-ui/).

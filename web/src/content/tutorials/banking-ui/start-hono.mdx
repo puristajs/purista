@@ -1,52 +1,39 @@
 ---
-title: Start the Hono HTTP server
-description: See how the local EventBridge, banking service, Hono service, and Node listener start in one process.
+title: Read the generated Hono HTTP server
+description: Extend the generated Hono composition so it can serve browser files and later register PURISTA services.
 order: 12
 ---
 
-Hono receives HTTP requests. PURISTA owns the banking service that performs
-business work. In this local example, both use the same in-process
-`DefaultEventBridge`.
+Hono receives HTTP requests. PURISTA owns the services that perform business
+work. The generator already put both responsibilities in one composition root,
+using the in-process `DefaultEventBridge`.
 
-The composition lives in `examples/banking/src/index.ts`. Its order matters:
+Open generated `src/http.ts`. Its order matters:
 
-```ts title="examples/banking/src/index.ts"
-const eventBridge = new DefaultEventBridge()
-await eventBridge.start()
-
-const banking = await bankingService.getInstance(eventBridge, {
-  resources: { bankingRepository: new BankingRepository() },
+```ts title="src/http.ts"
+const honoService = await honoV1Service.getInstance(input.eventBridge, {
+  logger: input.logger,
+  serviceConfig: { ...httpConfig.serviceConfig, services: input.services },
 })
-await banking.start()
-
-const hono = await honoV1Service.getInstance(eventBridge, {
-  serviceConfig: { services: [banking], autoRegisterServicesFromConfig: true },
-})
-await hono.start()
+await honoService.start()
+const serverInstance = serve({ fetch: honoService.app.fetch, port: httpConfig.port })
 ```
 
-The EventBridge starts first because both services use it. The repository is a
-resource supplied by the composition root. `services: [banking]` lets Hono
-register the HTTP endpoints defined by that local service; it is not remote
-service discovery.
+`src/index.ts` starts the EventBridge first, creates generated services, and
+passes them as `input.services`. Hono then registers the endpoints those
+services declare. This is local registration, not remote service discovery.
 
-`@hono/node-server` supplies the final Node listener. It calls `hono.app.fetch`
-on port 3010 by default. A listener accepting connections is not a full
-application readiness claim. The current checkpoint has no separate health
-endpoint, so do not configure a platform probe from this page.
+`@hono/node-server` supplies the Node listener. The generated configuration
+uses port 3000 and enables the Hono health endpoint. A listener accepting
+connections is still not a full production readiness claim.
 
-## Test the HTTP boundary
-
-With the process running, request the root document:
-
-```bash title="Request the Hono root route"
-curl -i http://127.0.0.1:3010/
+```bash title="Request the generated Hono health endpoint"
+npm run dev
+# In another terminal:
+curl -i http://127.0.0.1:3000/health
 ```
 
-Expect `200` and HTML containing `Example Bank`. A connection refusal means
-the foreground process is not running or the selected port differs.
-
-Read [Hono HTTP server](/handbook/framework/expose-and-consume-services/http-and-rest/hono/)
-for the verified startup and protection options used by a larger application.
+Expect `200`. A connection refusal means the foreground process is not running
+or the selected port differs.
 
 Next: [serve the browser page](/tutorials/banking-ui/serve-react/).

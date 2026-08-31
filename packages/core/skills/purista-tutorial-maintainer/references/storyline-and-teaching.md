@@ -8,9 +8,10 @@ the chapter's title outcome-based: “Generate account statements in the
 background” tells a beginner more than “QueueWorkerBuilder”.
 
 A chapter landing explains the problem, finished behavior, a small system
-diagram, prerequisites, starting command, and suggested steps. Do not put the
-entire implementation there. A short chapter may use fewer steps; do not
-manufacture pages just to fill a fixed template.
+diagram, prerequisites, the command that creates its starting project or
+checkpoint, and suggested steps. Do not put the entire implementation there.
+A short chapter may use fewer steps; do not manufacture pages just to fill a
+fixed template.
 
 Keep the steps as ordered siblings below that chapter. Their order follows
 what a learner must understand and build. Start with a working result, then
@@ -39,7 +40,11 @@ Use a page-job table before authoring:
 For this example the next steps could be: add the subscription, create and
 inspect a review case, handle duplicate delivery, and test the monitoring flow.
 Each page states the checkpoint to run when arriving directly from search.
-Do not require the reader to find an old commit or reconstruct earlier edits.
+When it introduces a PURISTA artifact, it also gives the exact local CLI
+command that generates the artifact, identifies the generated files, and
+shows the edit that gives the placeholder its business meaning. Do not require
+the reader to find an old commit, copy a finished application blindly, or
+reconstruct earlier edits.
 
 ## Easy English without missing explanations
 

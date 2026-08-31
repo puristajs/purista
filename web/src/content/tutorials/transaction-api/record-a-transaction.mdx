@@ -1,47 +1,33 @@
 ---
-title: Record a transaction
-description: Call the command that records one already-posted synthetic transaction and see how duplicate source IDs behave.
+title: Implement the record command
+description: Turn the generated command placeholder into an idempotent in-memory transaction operation.
 order: 23
 ---
 
-`recordTransaction` is a command: it receives a request, applies one business
-operation, and returns a typed result. The command is exposed at
-`POST /api/v1/transactions` by the definition in
-`examples/banking/src/service.ts`.
+The generated `recordTransactionCommandBuilder.ts` has a handler placeholder.
+Add a small repository at `src/service/banking/v1/bankingRepository.ts` and
+inject it from the composition root. The final reference implementation is
+`examples/banking/src/repository.ts`.
 
-First create Dana's local fixture session:
+Give the repository one business rule: the pair `accountId` and
+`sourceTransactionId` identifies a logical imported transaction. An identical
+retry returns the existing record. The same source ID with changed data returns
+`409 Conflict`.
 
-```bash title="Create Dana's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"dana"}'
+Replace the generated handler with a call to that resource:
+
+```ts title="recordTransactionCommandBuilder.ts"
+.setCommandFunction(async function (context, payload) {
+  return context.resources.bankingRepository.record(payload)
+})
 ```
 
-```bash title="Record a synthetic debit as Dana"
-curl --fail -X POST http://127.0.0.1:3010/api/v1/transactions \
-  -H 'content-type: application/json' \
-  -b .tutorial-cookie \
-  --data '{"accountId":"account-a","sourceTransactionId":"ops-demo-1","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12540,"currency":"EUR","direction":"debit"}'
-```
+Declare the resource on `bankingV1ServiceBuilder.ts`, then pass a new repository
+when `bankingV1Service.getInstance(...)` runs in `src/index.ts`. A resource is
+an explicit dependency supplied by the composition root. It keeps storage
+ownership out of the command definition.
 
-The repository stores a generated `transactionId` and returns the record. It
-uses `accountId` plus `sourceTransactionId` as its local duplicate key. Send
-the same request again: the repository returns the existing logical record.
-This makes an accidental retry safe for this in-memory example.
+At this point, use a local development actor only while building. The next
+chapter replaces that shortcut with server-owned identity and business guards.
 
-Change the amount while keeping `ops-demo-1`. The repository returns `409`
-because the same source ID now describes different data. Do not treat that as
-a retryable success; find the upstream data error.
-
-## Test the two duplicate cases
-
-The HTTP integration test in
-`examples/banking/src/banking.integration.test.ts` covers a command invocation
-through the real composition. Add or inspect a focused test for both an
-identical retry and a conflicting retry before changing the duplicate rule.
-
-```bash title="Run the banking HTTP tests"
-npm run test -w @purista/banking-tutorials
-```
-
-Next: [call the REST API](/tutorials/transaction-api/connect-rest/).
+Next: [expose commands through REST](/tutorials/transaction-api/connect-rest/).

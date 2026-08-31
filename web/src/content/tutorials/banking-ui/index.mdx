@@ -1,57 +1,38 @@
 ---
 title: Serve the banking UI with PURISTA
-description: Start the local Example Bank, understand its Hono composition, and serve its first browser page.
+description: Build a first React screen in a CLI-created PURISTA project and serve it through the generated Hono server.
 order: 10
 ---
 
 The first result is deliberately small: a browser receives a built React page
-from a PURISTA application. The page names itself **Example Bank**, reminds you
-that its data is synthetic, and starts a local fixture session before it calls
-the transaction API. There is no database, broker, or model in this checkpoint.
+from the PURISTA application you created with the CLI. The page names itself
+**Example Bank** and labels its data as synthetic. It has no login, REST
+command, database, broker, or model yet.
 
-```mermaid title="The current local application"
+```mermaid title="The first visible application"
 flowchart LR
-  Browser -->|GET /| Hono[Hono HTTP application]
-  Browser -->|POST /auth/login| Hono
-  Hono -->|opaque local cookie| Browser
-  Browser -->|cookie on API request| Banking[banking v1 service]
-  Banking --> Repository[in-memory repository]
+  Browser -->|GET /| Hono[Generated Hono server]
+  Hono -->|built files| React[React screen]
+  Hono -. later .-> Banking[banking v1 service]
 ```
 
-The browser page is served by the Hono application in
-`examples/banking/src/index.ts`. Choose a synthetic tutorial person in the
-React login form, then select **Start local session**. Hono stores that fixture
-identity in an in-memory server session and sends an opaque HttpOnly cookie.
-The browser later sends the cookie with protected API requests. The banking
-service and repository start in the same Node process, with deterministic data
-for the pages that follow.
+Start from [the CLI-created project](/tutorials/start-a-purista-project/). If
+you arrived here directly, create it first with `npm create purista@latest
+example-bank`, choosing Node.js, the default EventBridge, Hono support, and
+npm. The generator gives you `src/http.ts`; this chapter adds a browser build
+to that server. The final reference files live in `examples/banking/ui`.
 
-## Before you start
+Use Node 24.15 or newer. Work in the `example-bank` project directory. No
+Docker service, database, credentials, or model is needed.
 
-Use Node 24.15 or newer. Work from the `purista` repository root. The example
-declares all of its own scripts and dependencies in
-`examples/banking/package.json`.
-
-```bash title="Start the Example Bank"
-npm run dev -w @purista/banking-tutorials
-```
-
-Open `http://127.0.0.1:3010/`. Stop the foreground process with `Ctrl+C` when
-you finish. Restarting the process creates fresh in-memory fixtures.
-
-## Follow the current checkpoint
-
-1. [Create and run the project](/tutorials/banking-ui/run-the-project/)
-2. [Start the Hono HTTP server](/tutorials/banking-ui/start-hono/)
+1. [Prepare the browser project](/tutorials/banking-ui/run-the-project/)
+2. [Read the generated Hono HTTP server](/tutorials/banking-ui/start-hono/)
 3. [Serve the browser page](/tutorials/banking-ui/serve-react/)
 4. [Make your first visible change](/tutorials/banking-ui/change-the-page/)
 5. [Build, run, and stop the application](/tutorials/banking-ui/build-and-stop/)
 
-Hono serves the built React assets from `examples/banking/ui/dist`. The UI uses
-local, default shadcn-compatible design tokens and calls the same generated
-HTTP API used by the command-line examples. Its login is a local fixture: it
-creates an opaque in-memory session for synthetic people, not a production
-identity provider. The later API chapters use this same running application
-rather than a hidden second service.
+Hono will serve the built React assets from `ui/dist`. The UI uses local,
+default shadcn-compatible design tokens. The later chapters add a local fixture
+login and generated HTTP commands; neither belongs in this first browser step.
 
-Next: [create and run the project](/tutorials/banking-ui/run-the-project/).
+Next: [prepare the browser project](/tutorials/banking-ui/run-the-project/).

@@ -1,45 +1,38 @@
 ---
 title: Build a transaction REST API
-description: Record synthetic transactions as an operations actor and read an account history through a PURISTA command.
+description: Generate commands with the PURISTA CLI, define transaction contracts, and expose them through the Hono server.
 order: 20
 ---
 
-This chapter turns the local banking service into a small HTTP API. Dana records
-an already-posted synthetic transaction for account A. Alice and Bob can read
-account A; Carol can read account C. Recording a transaction here does not move
-money and a customer cannot create a credit.
+This chapter turns the generated `banking` service into a small HTTP API. An
+operations actor records an already-posted synthetic transaction; an account
+reader retrieves that account's history. Recording does not move money and a
+customer cannot create a credit.
 
-```mermaid title="Transaction request flow"
+```mermaid title="The transaction build"
 flowchart LR
-  Client -->|HTTP request| Hono[Hono]
-  Hono -->|server-validated local session| Command[PURISTA command]
-  Command --> Guard[access guard]
-  Guard --> Repository[in-memory transaction repository]
-  Repository --> Command
-  Command -->|JSON response| Client
+  CLI[PURISTA CLI] --> Files[Generated command files]
+  Files --> Contract[Schema and handler]
+  Contract --> Hono[HTTP endpoint]
+  Hono --> UI[React screen]
 ```
 
-The current runnable source is in `examples/banking/src/service.ts`; its HTTP
-composition is in `examples/banking/src/index.ts`. Start a local fixture
-session through `/auth/login`; protected routes derive the principal and tenant
-from its server-side record. This is not a production identity provider. The
-next chapter explains the business permission rules that the API already
-exercises.
+Start from [Start an Example Bank project](/tutorials/start-a-purista-project/).
+Every page restates its generator command, so you can also create the same
+`banking` version 1 checkpoint in a fresh PURISTA project. The final runnable
+reference is `examples/banking/src/service.ts`; its browser integration is in
+`examples/banking/ui`.
 
-## Start here
+This first API uses an in-memory repository. Restarting the Node process resets
+its synthetic data. Authentication and account-level business permissions are
+added in the next root topic; do not treat a temporary local API as a payment
+or public banking interface.
 
-```bash title="Run the transaction API"
-npm run dev -w @purista/banking-tutorials
-```
-
-Then follow the pages in order, or start any page with this command and the
-example's deterministic fixtures.
-
-1. [Run the API](/tutorials/transaction-api/run-the-api-start/)
-2. [Define transactions](/tutorials/transaction-api/define-transactions/)
-3. [Record a transaction](/tutorials/transaction-api/record-a-transaction/)
-4. [Call the REST API](/tutorials/transaction-api/connect-rest/)
-5. [Handle API errors](/tutorials/transaction-api/handle-api-errors/)
+1. [Generate the API checkpoint](/tutorials/transaction-api/run-the-api-start/)
+2. [Define the transaction contract](/tutorials/transaction-api/define-transactions/)
+3. [Implement the record command](/tutorials/transaction-api/record-a-transaction/)
+4. [Expose commands through REST](/tutorials/transaction-api/connect-rest/)
+5. [Return safe API errors](/tutorials/transaction-api/handle-api-errors/)
 6. [Test the API](/tutorials/transaction-api/test-the-api/)
 
-Next: [run the API](/tutorials/transaction-api/run-the-api-start/).
+Next: [generate the API checkpoint](/tutorials/transaction-api/run-the-api-start/).

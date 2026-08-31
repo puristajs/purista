@@ -57,8 +57,13 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
    service owner, and trust boundaries. Check source, tests, CLI output, and
    current Handbook/API evidence before choosing the implementation shape.
 3. Order chapters from simple local results to composed and distributed work.
-   Give each step an entry checkpoint, one learning outcome, exact files,
-   expected evidence, and the next action. Outline focused step pages before prose.
+   Begin a new series with the real `npm create purista@latest` or verified
+   `purista init` command. When a chapter introduces a Framework artifact,
+   show the project-local `npm run add:*` command that creates it before
+   showing the focused edit that turns the generated placeholder into business
+   behavior. Give each step an entry checkpoint, one learning outcome, exact
+   files, expected evidence, and the next action. Outline focused step pages
+   before prose.
    For autonomous authoring, fix business contracts and page jobs in a chapter
    brief, then assign one bounded checkpoint or page with verified inputs.
 4. Build the smallest complete Framework example and local dependency setup.
@@ -79,6 +84,12 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
 
 - A chapter stands alone without having completed another chapter. Shared
   tooling is allowed; hidden service/database prerequisites are not.
+- A tutorial teaches construction. "Run the finished example" may be a quick
+  reference or an entry checkpoint, but it cannot be the main lesson. The
+  first page names the command that creates the project or checkpoint; every
+  command, subscription, stream, queue, worker, and agent page starts with
+  the verified project-local CLI generation command and then explains the
+  generated files and the learner's edit.
 - Long chapters use step pages. A landing page or step must teach something,
   not merely list links or repeat the previous page.
 - A reader can explain what changed and why, as well as reproduce the result.

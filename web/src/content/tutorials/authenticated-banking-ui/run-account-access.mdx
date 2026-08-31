@@ -1,61 +1,24 @@
 ---
-title: Run the account access example
-description: Compare allowed and denied actions while keeping the local fixture session valid.
+title: Generate the protected read command
+description: Generate an account statement command before adding the authentication and authorization rules that protect it.
 order: 31
 ---
 
-Start the service, then use the same account with two valid local sessions.
-This is the important authorization test: change one business fact while
-leaving both callers successfully signed in.
+Create the read operation that needs its own account-level permission:
 
-```bash title="Start the banking example"
-npm run dev -w @purista/banking-tutorials
+```bash title="Generate getStatement"
+npm run add:command -- get-statement \
+  --service banking --service-version 1 \
+  --description "Return an account statement for an authorized reader"
 ```
 
-Create a local session for Alice and save it in a cookie jar. A cookie jar is a
-small file that `curl` uses to keep the opaque session cookie between requests.
+The command generator adds a builder, schema, types, and test to the banking
+service. Give its parameter schema an `accountId`, and make its output contain
+that same account ID plus the transaction rows. Do not add `principalId` or
+`tenantId` to the JSON request: those describe the caller and must be supplied
+by the server.
 
-```bash title="Create Alice's local tutorial session"
-curl --fail -c .alice-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"alice"}'
-```
+The next pages add two facts separately: Hono establishes who the caller is;
+the command guard decides whether that caller may read this account.
 
-Alice may read account A:
-
-```bash title="Read account A as Alice"
-curl -i -b .alice-cookie \
-  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
-```
-
-Create a separate local session for Bob. Bob may also read A, but Bob may not
-read Carol's account:
-
-```bash title="Create Bob's local tutorial session"
-curl --fail -c .bob-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"bob"}'
-```
-
-```bash title="Attempt to read Carol's account as Bob"
-curl -i -b .bob-cookie \
-  http://127.0.0.1:3010/api/v1/accounts/account-c/transactions
-```
-
-The first response is `200`; the second is `403`. In this example, a mandate
-is the fixture rule that connects a signed-in person to an account and an
-allowed action. The name helps us avoid a common mistake: a valid session or a
-broad role is not, by itself, permission to use every account.
-
-## Test the paired decision
-
-Run the integration test after both requests:
-
-```bash title="Run business access tests"
-npm run test -w @purista/banking-tutorials
-```
-
-The test checks Bob's allowed read of A and denied read of C through the HTTP
-boundary. It uses fresh in-memory fixtures for each case.
-
-Next: [understand the local login boundary](/tutorials/authenticated-banking-ui/add-local-login/).
+Next: [add the local fixture login](/tutorials/authenticated-banking-ui/add-local-login/).

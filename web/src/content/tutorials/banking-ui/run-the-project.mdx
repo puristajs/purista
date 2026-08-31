@@ -1,54 +1,34 @@
 ---
-title: Create and run the project
-description: Install the banking example and prove that its local process starts before changing code.
+title: Prepare the browser project
+description: Add the browser build dependencies to the CLI-created PURISTA project before writing its first screen.
 order: 11
 ---
 
-Start by running the example unchanged. This gives you a known-good point for
-later changes and shows where the server process is running.
+Start in the `example-bank` directory created by the PURISTA CLI. The generator
+gave you a backend and a `public` directory. Add React and Vite as the browser
+build tools; PURISTA still owns the HTTP server and business services.
 
-From the `purista` repository root, install the workspace dependencies if they
-are not already installed, then start the example:
-
-```bash title="Install and run the banking example"
-npm install
-npm run dev -w @purista/banking-tutorials
+```bash title="Install the browser build dependencies"
+npm install react react-dom
+npm install --save-dev vite @vitejs/plugin-react @types/react @types/react-dom
+mkdir -p ui/src
 ```
 
-The second command stays in the foreground. Leave it open and use a second
-terminal for browser or `curl` requests. The default listener address is
-`http://127.0.0.1:3010`; `PORT` can change only the port number.
+Vite watches and builds the browser files. It does not become a second
+production server. Create these files in the new directory:
 
-Open the root path in a browser:
-
-```text title="Expected browser text"
-Example Bank
-Start a local fixture session to try protected PURISTA commands.
+```text title="Browser files added in this chapter"
+ui/
+├── index.html
+├── vite.config.ts
+└── src/
+    ├── App.tsx
+    ├── main.tsx
+    └── styles.css
 ```
 
-Choose a synthetic tutorial person and select **Start local session**. The
-server returns an opaque HttpOnly cookie and the UI sends it on later API
-requests. This is a visible local learning setup; it does not verify a real
-user credential.
+The full runnable reference has the same layout in
+`examples/banking/ui`. Use it after a step to compare your result, not as code
+to copy before you understand the changes.
 
-`examples/banking/package.json` owns the `dev`, `start`, `typecheck`, `test`,
-and `build` commands. The app does not need a database, Docker, credentials,
-or an external service for this checkpoint.
-
-If Node reports that the required version is unavailable, install Node 24.15 or
-newer. If the port is busy, stop the other local process or run
-`PORT=3011 npm run dev -w @purista/banking-tutorials` and open that port.
-
-## Test what you started
-
-In another terminal, run the deterministic checks:
-
-```bash title="Check the banking example"
-npm run typecheck -w @purista/banking-tutorials
-npm run test -w @purista/banking-tutorials
-```
-
-These tests exercise the application through its HTTP fetch boundary. They do
-not start a browser and they do not prove a production deployment.
-
-Next: [start the Hono HTTP server](/tutorials/banking-ui/start-hono/).
+Next: [read the generated Hono HTTP server](/tutorials/banking-ui/start-hono/).

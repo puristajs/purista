@@ -1,0 +1,34 @@
+---
+title: Generate the banking service
+description: Create the versioned service boundary that will own Example Bank transaction operations.
+order: 8
+---
+
+A PURISTA service groups one business area and versions its public contracts.
+The `banking` service will own transaction commands, events, subscriptions,
+queues, and later attached AI capabilities. Start by generating its version 1
+shape:
+
+```bash title="Generate banking version 1"
+npm run add:service -- banking --description "Manage synthetic banking transactions"
+```
+
+The command creates these files under `src/service/banking/v1/`:
+
+| File | What you change later |
+| --- | --- |
+| `bankingV1ServiceBuilder.ts` | Service metadata and declared resources. |
+| `bankingV1Service.ts` | The service definition that collects commands, subscriptions, and streams. |
+| `bankingV1Service.test.ts` | A focused seam for testing the service composition. |
+| `bankingServiceConfig.ts` | Validated service configuration, when this service needs it. |
+
+The generator also creates `src/service/banking/generalBankingServiceInfo.ts`.
+Leave its name and version intact for now. A service version is part of a
+public contract: version 1 lets future work add a version 2 without silently
+changing existing clients.
+
+The generated service has no banking behavior yet. That is expected. It gives
+you one safe location for the next artifact instead of asking you to invent a
+folder layout.
+
+Next: [generate the first command](/tutorials/start-a-purista-project/generate-first-command/).

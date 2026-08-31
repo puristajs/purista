@@ -1,60 +1,31 @@
 ---
-title: Run the API
-description: Start the local service, create a local fixture session, and inspect its seeded transaction history.
+title: Generate the API checkpoint
+description: Generate the two commands that define the transaction API before writing their schemas or handlers.
 order: 21
 ---
 
-Start the application from the `purista` repository root:
+From your `example-bank` project, create the two API operations. You may have
+already generated `recordTransaction` in the project-start chapter; the CLI
+will tell you if it exists, which is safer than replacing it by hand.
 
-```bash title="Start the banking API"
-npm run dev -w @purista/banking-tutorials
+```bash title="Generate transaction commands"
+npm run add:command -- record-transaction \
+  --service banking --service-version 1 \
+  --description "Record an already-posted synthetic transaction"
+
+npm run add:command -- list-transactions \
+  --service banking --service-version 1 \
+  --description "List synthetic transactions for one account"
 ```
 
-The seed data contains one credit transaction on `account-a`. First create a
-local fixture session as Alice. `-c` writes the opaque cookie to the named
-cookie jar:
+The generator adds each definition to `bankingV1Service.ts` and creates a
+`types.ts`, `schema.ts`, builder, and builder test under
+`src/service/banking/v1/command/<commandName>/`. Use the generated folders as
+the API boundary. Do not put HTTP route parsing or database calls in React.
 
-```bash title="Create Alice's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"alice"}'
+```bash title="Check the CLI output before editing it"
+npm run build
+npm test
 ```
 
-Then send that cookie with the protected request:
-
-```bash title="Read Alice's synthetic account history"
-curl --fail \
-  -b .tutorial-cookie \
-  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
-```
-
-The response contains `accountId: "account-a"` and
-`transaction-seed-a-1`. Amounts are stored as integer minor units: `4250`
-means EUR 42.50. Storing a whole number avoids binary floating-point rounding
-in the command contract.
-
-The local login accepts a documented synthetic person. `alice` and `bob` may
-read account A, `carol` may read account C, and `dana` is the operations person
-for posting to account A. The protected API takes identity from the
-server-side session, not from the URL or JSON payload.
-
-## Test the starting result
-
-Replace the cookie jar with a Bob session, then try Bob against Carol's
-account:
-
-```bash title="Create Bob's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"bob"}'
-```
-
-```bash title="Prove that a signed-in person still has limited access"
-curl -i -b .tutorial-cookie \
-  http://127.0.0.1:3010/api/v1/accounts/account-c/transactions
-```
-
-Expect `403`. This is a business permission denial, not a failed login. Stop
-and restart the process whenever you need the seed state again.
-
-Next: [define transactions](/tutorials/transaction-api/define-transactions/).
+Next: [define the transaction contract](/tutorials/transaction-api/define-transactions/).

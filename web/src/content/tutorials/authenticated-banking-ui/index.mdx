@@ -1,39 +1,39 @@
 ---
 title: Control access to accounts and actions
-description: See how the banking service separates a local fixture session from permission to read or post to a specific account.
+description: Build a local Hono identity boundary and meaningful PURISTA business guards for account reads and transaction posting.
 order: 30
 ---
 
-The local login can create a fixture session for several named tutorial
-people. That does not mean each person may perform every action. Alice and Bob
-may read account A; Carol may read account C; Dana may record an already-posted
-transaction for account A. Bob may not post even after a valid local login.
+The API chapter proved that a command can accept and return transaction data.
+This chapter answers a separate question: may this valid person use this
+specific account for this specific action? Alice and Bob may read account A;
+Dana may record a transaction for A; Bob may not post even after a valid local
+login.
 
-```mermaid title="Identity fixture and business decision"
+```mermaid title="Two decisions, two boundaries"
 flowchart LR
-  Login[local login route] --> Session[server session record]
-  Session --> Hono[Hono middleware]
-  Hono -->|principalId and tenantId| Guard[command before guard]
-  Guard -->|account and action allowed| Handler[repository operation]
-  Guard -->|not allowed| Denied[403 and no write]
+  Login[Hono fixture login] --> Session[Server session]
+  Session --> Identity[Trusted principal and tenant]
+  Identity --> Guard[Command before guard]
+  Guard -->|allowed action + account| Handler[Repository operation]
+  Guard -->|denied| NoWrite[403, no write]
 ```
 
-The current source implements a local fixture login and **business guards**.
-`examples/banking/src/index.ts` stores a randomly generated opaque session ID
-in an HttpOnly cookie and looks up its principal and tenant on the server. The
-React UI provides a matching login and logout screen. This remains a learning
-fixture: it has no password verification, OAuth/OIDC integration, durable
-session store, or production tenant-membership check. Keep that limit visible
-whenever you run the example.
+This is a learning-only local login. It accepts documented fixture names, keeps
+an opaque session ID in an HttpOnly cookie, and looks up identity on the server.
+It does not verify passwords, OAuth/OIDC tokens, session expiry, or production
+tenant membership. Its purpose is to make the boundary before the business
+guards visible.
 
-The service guards are in `examples/banking/src/service.ts`; their fixture
-permissions live in `examples/banking/src/repository.ts`.
+The finished reference is in `examples/banking/src/index.ts`,
+`examples/banking/src/service.ts`, and `examples/banking/src/repository.ts`.
+Each page builds the same shape in the CLI-created application.
 
-1. [Run the account access example](/tutorials/authenticated-banking-ui/run-account-access/)
-2. [Understand the local login boundary](/tutorials/authenticated-banking-ui/add-local-login/)
-3. [Inspect trusted identity handling](/tutorials/authenticated-banking-ui/set-trusted-identity/)
-4. [Check account permissions with guards](/tutorials/authenticated-banking-ui/guard-business-actions/)
-5. [Protect returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/)
+1. [Generate the protected read command](/tutorials/authenticated-banking-ui/run-account-access/)
+2. [Add the local fixture login](/tutorials/authenticated-banking-ui/add-local-login/)
+3. [Pass trusted identity to PURISTA](/tutorials/authenticated-banking-ui/set-trusted-identity/)
+4. [Guard business actions](/tutorials/authenticated-banking-ui/guard-business-actions/)
+5. [Check returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/)
 6. [Test access decisions](/tutorials/authenticated-banking-ui/test-business-permissions/)
 
-Next: [run the account access example](/tutorials/authenticated-banking-ui/run-account-access/).
+Next: [generate the protected read command](/tutorials/authenticated-banking-ui/run-account-access/).

@@ -1,38 +1,28 @@
 ---
-title: Protect returned data
-description: Inspect the statement command's read guard and after guard, and keep output checks separate from authorization.
+title: Check returned data
+description: Use an after guard to stop a read-only result that accidentally contains another account's rows.
 order: 35
 ---
 
-`exportStatement` adds two checks in `examples/banking/src/service.ts`. A
-before guard checks that the actor may read the requested account. After the
-handler returns, an after guard checks that the result contains only that
-account's rows before the command turns it into CSV.
+The statement handler queries one account. Add an after guard as a release
+check: it verifies the result account ID and every row before Hono returns it.
 
-```ts title="examples/banking/src/service.ts"
+```ts title="getStatementCommandBuilder.ts"
 .setAfterGuardHooks({
   statementScope: async function (_context, result, _payload, parameter) {
-    if (result.accountId !== parameter.accountId || result.transactions.some(transaction => transaction.accountId !== parameter.accountId)) {
+    if (result.accountId !== parameter.accountId || result.transactions.some(row => row.accountId !== parameter.accountId)) {
       throw new HandledError(StatusCode.Forbidden, 'The statement contains data outside the authorized account')
     }
   },
 })
 ```
 
-The after guard is a release check for a read-only result. It does not replace a
-scoped repository query, and it cannot undo a write that a handler already
-performed. The current repository's `list(accountId)` already filters by
-account; the after guard protects against an accidental mixed result.
+An after guard protects a read-only response. It does not replace a scoped
+repository query and it cannot undo a write that a handler already completed.
+Keep business access checks before the handler and keep the repository query
+scoped as well.
 
-The current source does not have an overview command or one command calling
-another. Do not infer an internal-invocation authorization pattern from this
-example. When such a path is added, it must carry trusted identity and reach
-the same guarded operation.
-
-## Test the protected result
-
-Download the statement as Bob for account A and expect `200`. Request account
-C as Bob and expect `403`. A future regression test should inject a
-wrong-account result and assert that no CSV body is released.
+The following transforms chapter changes external and CSV representations. A
+transform changes data shape; it does not replace this business decision.
 
 Next: [test access decisions](/tutorials/authenticated-banking-ui/test-business-permissions/).

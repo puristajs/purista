@@ -1,59 +1,29 @@
 ---
-title: Understand the local login boundary
-description: Establish, inspect, and end the local fixture session before relying on account permissions.
+title: Add the local fixture login
+description: Build a deliberately limited server-side session fixture for the browser and terminal examples.
 order: 32
 ---
 
-The banking example implements a local fixture login. Send one documented
-synthetic person to `POST /auth/login`; the server creates a random session
-record and returns an opaque HttpOnly cookie named `example_bank_session`.
-Generated PURISTA API routes use that server-side record, not a principal sent
-by the browser.
+Add three custom Hono routes in `src/http.ts`: `POST /auth/login`,
+`POST /auth/logout`, and `GET /auth/whoami`. Keep a `Map` from a random session
+ID to `{ principalId, tenantId }` in the server process. On login, accept only
+the documented synthetic actors, set an opaque HttpOnly cookie, and return the
+server-held identity.
 
-For a terminal, use `-c` to save the cookie in a cookie jar, then use `-b` to
-send the same cookie to a protected route:
+The key rule is where identity comes from. The browser chooses a fixture name
+only for this tutorial route. Protected commands later receive the server's
+session record, never an identity taken from a command body or browser header.
 
-```bash title="Create and inspect Alice's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"alice"}'
+Use `curl -c` to save the cookie and `curl -b` to send it:
 
-curl --fail -b .tutorial-cookie \
-  http://127.0.0.1:3010/auth/whoami
+```bash title="Create and inspect Alice's fixture session"
+curl --fail -c .alice-cookie -X POST http://127.0.0.1:3000/auth/login \
+  -H 'content-type: application/json' --data '{"actor":"alice"}'
+curl --fail -b .alice-cookie http://127.0.0.1:3000/auth/whoami
 ```
 
-The second response contains Alice's synthetic `principalId` and the fixed
-`tenantId`. The cookie holds only the opaque session ID; the server keeps the
-identity mapping in memory.
+An unknown fixture name must return `400`. In a production application this
+route would instead validate a real credential; business guards remain needed
+after that change.
 
-Do not copy this fixture login into a production application. It accepts a
-known name without a credential and stores sessions only in memory. A
-production edge would verify a credential, establish a server-controlled
-principal and tenant, use suitable session storage and CSRF/origin controls,
-then set normalized values for the PURISTA request context.
-
-The business guards remain valuable after real login is added. They answer
-whether the authenticated person may read this account or record this posting.
-Authentication answers a different question: who sent the request?
-
-## Test the local fixture boundary
-
-An unknown local person is rejected by the login route with `400`:
-
-```bash title="Reject an unknown local tutorial person"
-curl -i -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"nobody"}'
-```
-
-End the local session when you are done:
-
-```bash title="Log out and clear the local tutorial session"
-curl -i -b .tutorial-cookie -X POST http://127.0.0.1:3010/auth/logout
-```
-
-This test proves only the fixture login, cookie lookup, and logout behavior.
-It is not evidence of password verification, external-token validation,
-production session expiry, or production access control.
-
-Next: [inspect trusted identity handling](/tutorials/authenticated-banking-ui/set-trusted-identity/).
+Next: [pass trusted identity to PURISTA](/tutorials/authenticated-banking-ui/set-trusted-identity/).

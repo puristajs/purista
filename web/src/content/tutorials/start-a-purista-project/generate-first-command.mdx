@@ -1,0 +1,35 @@
+---
+title: Generate the first command
+description: Generate a typed command placeholder before implementing the transaction operation.
+order: 9
+---
+
+A command represents one request that changes or reads business state. Generate
+the transaction command before writing its schema or repository code:
+
+```bash title="Generate recordTransaction"
+npm run add:command -- record-transaction \
+  --service banking \
+  --service-version 1 \
+  --description "Record an already-posted synthetic transaction"
+```
+
+The CLI adds the command to `bankingV1Service.ts` and creates this folder:
+
+```text title="Generated command files"
+src/service/banking/v1/command/recordTransaction/
+├── types.ts
+├── schema.ts
+├── recordTransactionCommandBuilder.ts
+└── recordTransactionCommandBuilder.test.ts
+```
+
+Open `recordTransactionCommandBuilder.ts`. Its generated handler contains a
+placeholder comment. Keep it until the transaction REST API chapter. The
+placeholder prevents an unfinished command from accidentally changing data.
+
+The name you pass to the CLI is kebab case (`record-transaction`). Generated
+TypeScript uses camel case (`recordTransaction`) because the project chose the
+`camel` file convention in `purista.json`.
+
+Next: [check the generated checkpoint](/tutorials/start-a-purista-project/check-generated-checkpoint/).

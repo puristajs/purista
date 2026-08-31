@@ -1,14 +1,17 @@
 ---
-title: Define transactions
-description: Read the service contract that validates a transaction before any guard or repository code runs.
+title: Define the transaction contract
+description: Replace the generated unknown schemas with a small checked transaction contract.
 order: 22
 ---
 
-The `banking` service owns transaction operations. Its service information and
-schemas are in `examples/banking/src/service.ts`.
+Open generated `command/recordTransaction/schema.ts`. A schema is a checked
+description of data. Replace its placeholder payload schema with the public
+transaction shape:
 
-```ts title="examples/banking/src/service.ts"
-const transactionSchema = z.object({
+```ts title="src/service/banking/v1/command/recordTransaction/schema.ts"
+import { z } from 'zod'
+
+export const recordTransactionInputPayloadSchema = z.object({
   accountId: z.enum(['account-a', 'account-c']),
   sourceTransactionId: z.string().min(1).max(80),
   bookedAt: z.string().datetime(),
@@ -18,35 +21,16 @@ const transactionSchema = z.object({
 })
 ```
 
-A schema is a checked description of data. Here it makes the public boundary
-clear: only two synthetic accounts and EUR are supported, money must be a
-positive safe integer, and the date must be an ISO timestamp. The tutorial
-does not implement currency conversion or payment settlement.
+Use the same transaction data for the output, plus a generated `transactionId`.
+For `listTransactions`, make the parameter schema contain `accountId` and make
+the output `{ accountId, transactions }`.
 
-`ServiceBuilder` declares `banking` version `1` and declares the
-`bankingRepository` resource. The composition root supplies the resource when
-it creates the service. That keeps storage ownership outside individual
-commands.
+`amountMinor` stores EUR cents as a whole number: `4250` means EUR 42.50. This
+avoids binary floating-point rounding at the public command boundary. The
+example supports only EUR and two synthetic account IDs; it does not teach
+currency conversion or settlement.
 
-## Test invalid input at the HTTP boundary
+Add a schema test for a fractional amount and expect it to fail. Invalid input
+must stop before any handler or repository operation.
 
-Create a Dana session, then send a fractional minor-unit value:
-
-```bash title="Create Dana's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"dana"}'
-```
-
-```bash title="Send invalid transaction input"
-curl -i -X POST http://127.0.0.1:3010/api/v1/transactions \
-  -H 'content-type: application/json' \
-  -b .tutorial-cookie \
-  --data '{"accountId":"account-a","sourceTransactionId":"bad-amount","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12.5,"currency":"EUR","direction":"debit"}'
-```
-
-Expect a `400` response. Invalid data does not reach the access guard or
-repository. Read [commands](/handbook/framework/build-services/commands/) for
-the full command contract.
-
-Next: [record a transaction](/tutorials/transaction-api/record-a-transaction/).
+Next: [implement the record command](/tutorials/transaction-api/record-a-transaction/).

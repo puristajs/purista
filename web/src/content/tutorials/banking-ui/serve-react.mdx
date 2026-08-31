@@ -1,41 +1,45 @@
 ---
-title: Serve the built React UI
-description: Inspect the Hono static routes that serve the built React application.
+title: Serve the browser page
+description: Build a small React screen and add Hono static routes that serve it from the PURISTA application.
 order: 13
 ---
 
-The visible result is a small React application built with Vite. Hono serves
-the finished files from `examples/banking/ui/dist`; it does not run a separate
-frontend server in production mode:
+Create `ui/src/App.tsx` with a visible, honest first screen:
 
-```ts title="examples/banking/src/index.ts"
-hono.app.get('/assets/*', serveStatic({ root: tutorialUiDirectory }))
-hono.app.get('/', serveStatic({ root: tutorialUiDirectory, path: 'index.html' }))
+```tsx title="ui/src/App.tsx"
+export const App = () => (
+  <main>
+    <p>Example Bank tutorial</p>
+    <h1>Example Bank</h1>
+    <p>Synthetic display data. Transaction features arrive in the next chapter.</p>
+  </main>
+)
 ```
 
-`npm run dev -w @purista/banking-tutorials` starts the Node server. Build the
-UI separately with `npm run build:ui -w @purista/banking-tutorials` whenever
-you change a React source file. The checked-in UI uses the default
-shadcn-compatible tokens in `ui/src/styles.css`; shadcn components are source
-files, so no component library needs to run at request time.
+Create `ui/src/main.tsx` to mount `App`, then create a Vite config whose root
+is `ui` and whose build output is `ui/dist`. The checked-in reference
+equivalents are in `examples/banking/ui`.
 
-The UI already makes real requests to the local protected API. Before showing
-account data, it posts the chosen synthetic tutorial person to `/auth/login`.
-The server stores that fixture identity in an in-memory session and returns an
-opaque HttpOnly cookie. The browser sends the cookie on later API requests. The
-fixture is useful for learning, but it does not verify a real person's
-credential or provide a production identity provider.
+Add static routes to generated `src/http.ts` before `await honoService.start()`:
 
-## Test the response
-
-Use either the browser or this request:
-
-```bash title="Inspect the served document"
-curl --fail http://127.0.0.1:3010/
+```ts title="src/http.ts"
+honoService.app.get('/assets/*', serveStatic({ root: './ui/dist' }))
+honoService.app.get('/', serveStatic({ root: './ui/dist', path: 'index.html' }))
 ```
 
-The response must contain the heading `Example Bank`. If it is not present,
-check that you started `@purista/banking-tutorials`, rather than another local
-server on the same port.
+Add the build script to `package.json`:
+
+```json title="package.json"
+{ "scripts": { "build:ui": "vite build --config ui/vite.config.ts" } }
+```
+
+```bash title="Build the browser files and start PURISTA"
+npm run build:ui
+npm run dev
+curl --fail http://127.0.0.1:3000/
+```
+
+The response must contain `Example Bank`. If it is not present, rebuild the UI
+and check that `src/http.ts` points to `ui/dist`.
 
 Next: [make your first visible change](/tutorials/banking-ui/change-the-page/).

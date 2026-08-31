@@ -1,14 +1,20 @@
 ---
 title: PURISTA banking tutorials
-description: Build one runnable banking application from a visible UI through guarded services, events, streams, queues, and operations.
+description: Build one runnable banking application from a new PURISTA project through guarded services, events, streams, queues, and operations.
 order: 0
 ---
 
-These tutorials build one small, synthetic banking application in steps. Each
-root topic is useful on its own: it states the problem, gives one command to
-start from, explains the code in plain English, and finishes with a check you
-can run. Taken in order, the topics form one application rather than a set of
-unrelated snippets.
+These tutorials build one small, synthetic banking application in steps. Start
+with a new project created by the PURISTA CLI. Every time a chapter introduces
+a service, command, subscription, stream, queue, worker, or agent, it first
+shows the project-local `npm run add:*` command that creates the files. The
+following step explains the generated code and the edit that gives it banking
+meaning.
+
+Each root topic is useful on its own. It names the problem, its independent
+starting checkpoint, the files to change, and a check that proves the result.
+The complete application is a reference after you have built a checkpoint, not
+the starting point of the lesson.
 
 The source lives in
 [`examples/banking`](https://github.com/puristajs/purista/tree/master/examples/banking).
@@ -17,32 +23,33 @@ application, not a payment, identity, compliance, or financial-advice system.
 
 ```mermaid title="The first published learning path"
 flowchart LR
-  UI[1. Serve the UI] --> API[2. REST commands]
-  API --> Access[3. Trusted identity and business guards]
-  Access --> Formats[4. Import and export transforms]
-  Formats --> Events[5. Monitoring events]
-  Events --> Streams[6. Progress streams]
-  Streams --> Jobs[7. Background statements]
-  Jobs --> Reconcile[8. Reconciliation shape]
+  Project[1. Create a PURISTA project] --> UI[2. Serve the UI]
+  UI --> API[3. REST commands]
+  API --> Access[4. Trusted identity and business guards]
+  Access --> Formats[5. Import and export transforms]
+  Formats --> Events[6. Monitoring events]
+  Events --> Streams[7. Progress streams]
+  Streams --> Jobs[8. Background statements]
 ```
 
 ## Start the application
 
-From the PURISTA repository root, build the browser UI and start the local
-server:
+Start a new application anywhere on your development machine:
 
-```bash title="Build and start Example Bank"
-npm run build:ui -w @purista/banking-tutorials
-npm run dev -w @purista/banking-tutorials
+```bash title="Create an Example Bank project"
+npm create purista@latest example-bank
+cd example-bank
 ```
 
-Open `http://127.0.0.1:3010/`. Stop the process with `Ctrl+C` when you finish.
-The first checkpoints use in-memory fixtures, so a restart resets their data.
+Choose Node.js, the default EventBridge, Hono support, and npm. The first
+tutorial gives every choice and explains the generated project. The early
+checkpoints use in-memory fixtures, so a restart resets their data.
 
 ## Choose a topic
 
 | Topic | Problem you solve | PURISTA capability |
 | --- | --- | --- |
+| [Start an Example Bank project](/tutorials/start-a-purista-project/) | Create a project and generate the first service and command. | PURISTA CLI, services, commands |
 | [Serve the banking UI](/tutorials/banking-ui/) | Put a small React UI behind the Hono composition root. | HTTP composition and static assets |
 | [Build a transaction REST API](/tutorials/transaction-api/) | Read and record synthetic account transactions. | Resources, commands, schemas, HTTP endpoints |
 | [Control access to accounts and actions](/tutorials/authenticated-banking-ui/) | Separate trusted identity from account-level business permissions. | Hono protection, command guards, output guards |
@@ -75,3 +82,9 @@ posters, reviewers, queue workers, and result downloads each apply their own
 business rule. Transforms change a representation; they never replace a
 business guard. The automated tests include both an allowed case and a denied
 case that checks no protected side effect was released.
+
+The published source is checked in at
+[`examples/banking`](https://github.com/puristajs/purista/tree/master/examples/banking).
+It is the complete reference implementation and the test target for the
+series. Tutorial steps build toward the same composition with small, explained
+changes.

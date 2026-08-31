@@ -1,38 +1,32 @@
 ---
-title: Check account permissions with guards
-description: "Use before guards for the concrete decision: may this actor perform this action on this account?"
+title: Guard business actions
+description: Add before guards that decide the concrete principal, account, and action permission before a handler can read or write.
 order: 34
 ---
 
-The two guards in `examples/banking/src/service.ts` have different jobs.
-`requireReadableAccount` checks the requested account against the actor's read
-mandate. `requirePostingAccess` checks whether the actor may record a posting
-for the payload's account.
+Add `canRead(principalId, accountId)` and `canRecord(principalId, accountId)`
+to the injected banking repository. These fixture rules are called mandates:
+they connect a valid person, an account, and an allowed action.
 
-```ts title="examples/banking/src/service.ts"
+Use a before guard on both generated commands:
+
+```ts title="recordTransactionCommandBuilder.ts"
 .setBeforeGuardHooks({
-  accountRead: async function (context, _payload, parameter) {
-    await requireReadableAccount(context, { accountId: parameter.accountId })
+  postingAccess: async function (context, payload) {
+    if (!context.resources.bankingRepository.canRecord(context.message.principalId, payload.accountId)) {
+      throw new HandledError(StatusCode.Forbidden, 'You may not record transactions for this account')
+    }
   },
 })
 ```
 
-The guard runs after the command's parameter and payload schemas validate, and
-before the handler calls the repository. It receives the trusted principal from
-the command context and the validated account ID. That is why Bob can read A
-but cannot read C, and why Bob cannot post to A despite holding a valid local
-fixture session.
+The list and statement commands use `canRead` with their validated
+`parameter.accountId`. The guard runs after schemas validate and before the
+handler calls the repository. Bob can read A but cannot read C or post to A,
+even though all three requests have valid sessions.
 
-Named guards in one stage run concurrently. Do not use two hook names as an
-ordered pipeline or let one mutate state for the other. If a permission or
-account state can change during a write, the handler and repository need an
-atomic recheck as well; a before guard is not a transaction lock.
+Named guards in the same stage may run concurrently. Do not use two hook names
+as an ordered pipeline. The repository must still make an atomic recheck when
+a permission or account state can change during a write.
 
-## Test that denial has no effect
-
-Send the posting request from the previous chapter with Bob's cookie jar, then
-list account A with Alice's cookie jar. The `sourceTransactionId` must not be
-in the list. This proves both the `403` response and the missing repository
-write.
-
-Next: [protect returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/).
+Next: [check returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/).

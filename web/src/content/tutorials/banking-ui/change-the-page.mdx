@@ -1,37 +1,26 @@
 ---
 title: Make your first visible change
-description: Change the visible React page, rebuild its assets, and verify the exact result in a browser.
+description: Change the first React screen, rebuild its assets, and verify the exact browser result.
 order: 14
 ---
 
 Make a small change in one place so you can see the complete edit-to-browser
-loop. In `examples/banking/ui/src/App.tsx`, change the `Example Bank` heading
-to `Example Bank — local`.
-
-Build the new browser assets, then reload `http://127.0.0.1:3010/`:
+loop. In your `ui/src/App.tsx`, change the heading to `Example Bank — local`.
 
 ```bash title="Build the React UI"
-npm run build:ui -w @purista/banking-tutorials
+npm run build:ui
 ```
 
-You should see the new heading. Return the wording to `Example Bank` before
-continuing, so the tutorial tests and screenshots have one stable expectation.
+Reload `http://127.0.0.1:3000/`. You should see the new heading. Return it to
+`Example Bank` before continuing, so later tests and screens have one stable
+expectation.
 
 The page is a built browser asset. A React source change needs a Vite build;
-the Hono server simply serves the newly built files. If the browser still shows
-the old text after a successful build, perform a hard refresh.
-
-## Test the edit
-
-Run a request after restoring the original title:
+the Hono server serves the newly built files. If the browser still shows the
+old text after a successful build, perform a hard refresh.
 
 ```bash title="Verify the restored page"
-curl --fail http://127.0.0.1:3010/ | grep 'Example Bank'
+curl --fail http://127.0.0.1:3000/ | grep 'Example Bank'
 ```
-
-If the old text remains, stop the process with `Ctrl+C`, start it again with
-`npm run dev -w @purista/banking-tutorials`, and reload the page. If the
-process reports a TypeScript error, restore the route syntax before changing
-anything else.
 
 Next: [build, run, and stop the application](/tutorials/banking-ui/build-and-stop/).
