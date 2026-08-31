@@ -1,0 +1,10 @@
+---
+title: Inspect individual scores
+description: Read per-case failures before trusting an aggregate score.
+order: 194
+status: published
+---
+
+The scorer returns one row per fixture. A denied case passes only when the
+candidate recorded `denied`; its category is intentionally not scored. Missing
+or incomplete results fail the row.

@@ -1,0 +1,15 @@
+---
+title: Gate changes
+description: Fail a bounded offline gate when any reviewed case is incomplete, unsafe, or wrong.
+order: 196
+status: published
+---
+
+Run the scorer in CI with the existing PURISTA service tests. A candidate must
+pass every saved case, while P1, P6, and P7 tests remain separate non-negotiable
+checks. Live evaluation needs a separate approved budget and provider setup.
+
+```bash
+npx vitest run examples/banking/src/evaluations/scoring.test.ts
+npx vitest run examples/banking/src/ai/customer-support-classification.test.ts
+```
