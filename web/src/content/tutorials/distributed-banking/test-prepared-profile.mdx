@@ -11,11 +11,16 @@ returns the NATS and Redis PURISTA bridge implementations.
 ```bash
 npx vitest run examples/banking/src/distributed/dependencies.test.ts
 npm run typecheck -w @purista/banking-tutorials
+
+# After Compose is healthy, run the real NATS and Redis bridge check.
+PURISTA_BANKING_DISTRIBUTED_TEST=1 \
+  npx vitest run examples/banking/src/distributed/dependencies.test.ts
 ```
 
-This test does not open network connections. The Compose file lets you start
-the local dependencies, but the current source does **not** yet prove a real
-cross-process command or event, Redis-backed worker delivery, PostgreSQL
-persistence, restart recovery, readiness behaviour, permission parity, or
-bounded shutdown. Those are required acceptance checks when a future chapter
-wires this profile into separate processes.
+The first test does not open network connections. The opt-in second test starts
+both real PURISTA bridges, requires JetStream, and proves Redis idempotent
+enqueue. It still does **not** prove a real cross-process command or event,
+Redis-backed worker delivery, PostgreSQL persistence, restart recovery,
+readiness behaviour, permission parity, or bounded shutdown. Those remain
+required acceptance checks when a future chapter wires this profile into
+separate processes.
