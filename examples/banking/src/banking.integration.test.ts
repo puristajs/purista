@@ -365,6 +365,46 @@ describe('Example Bank transaction HTTP boundary', () => {
 		expect(await applied.json()).toMatchObject({ status: 'applied', proposedFeeMinor: 55 })
 	})
 
+	it('keeps a support preference in the opaque-session caller scope and lets the caller forget it', async () => {
+		const fetch = await start()
+		const alice = await signIn(fetch, 'alice')
+		const bob = await signIn(fetch, 'bob')
+		const input = { accountId: 'account-a', conversationId: '33333333-3333-4333-8333-333333333333' }
+
+		const saved = await asSession(
+			fetch,
+			alice,
+			new Request('http://example.test/api/v1/support/preferences', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ ...input, language: 'de' }),
+			}),
+		)
+		expect(saved.status).toBe(200)
+
+		const copiedReference = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/support/preferences/read', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(input),
+			}),
+		)
+		expect(await copiedReference.json()).toMatchObject({ language: null })
+
+		const forgotten = await asSession(
+			fetch,
+			alice,
+			new Request('http://example.test/api/v1/support/preferences/forget', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(input),
+			}),
+		)
+		expect(await forgotten.json()).toMatchObject({ language: null })
+	})
+
 	it('uses only the opaque local session for identity and invalidates it on logout', async () => {
 		const fetch = await start()
 		const bob = await signIn(fetch, 'bob')

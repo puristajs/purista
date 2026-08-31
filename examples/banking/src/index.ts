@@ -9,6 +9,7 @@ import {
 	gracefulShutdown,
 	HandledError,
 	initLogger,
+	inMemoryMemoryEngine,
 	type PuristaMetricsRecorderInterface,
 } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
@@ -19,6 +20,7 @@ import { bankingOperationsService } from './advanced/service.js'
 import { answerGroundedQuestion } from './knowledge/answer.js'
 import { BankingKnowledgeRepository, knowledgeCollectionIds } from './knowledge/repository.js'
 import { bankingKnowledgeService } from './knowledge/service.js'
+import { bankingSupportMemoryService } from './memory/service.js'
 import type { BankActor } from './repository.js'
 import { BankingRepository } from './repository.js'
 import { FeeChangeReviewStore } from './review/repository.js'
@@ -95,6 +97,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const operationsStore = new BankingOperationsStore()
 	const knowledgeRepository = new BankingKnowledgeRepository()
 	const feeChangeReviewStore = new FeeChangeReviewStore()
+	const supportMemoryEngine = inMemoryMemoryEngine()
 	const sessions = new Map<string, LocalSession>()
 	await eventBridge.start()
 	await queueBridge.start()
@@ -115,14 +118,29 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const bankingFeeChangeReview = await bankingFeeChangeReviewService.getInstance(eventBridge, {
 		resources: { bankingRepository, feeChangeReviewStore },
 	})
+	const bankingSupportMemory = await bankingSupportMemoryService.getInstance(eventBridge, {
+		resources: { bankingRepository },
+		ai: {
+			models: {
+				// The deterministic preference workflows never invoke this catalog entry.
+				'memory-runtime': {
+					provider: { id: 'banking-no-model', genAiSystem: 'tutorial' },
+					model: 'not-invoked',
+					capabilities: ['object'],
+				},
+			},
+			memory: supportMemoryEngine,
+		},
+	})
 	await banking.start()
 	await bankingOperations.start()
 	await bankingKnowledge.start()
 	await bankingFeeChangeReview.start()
+	await bankingSupportMemory.start()
 
 	const hono = await honoV1Service.getInstance(eventBridge, {
 		serviceConfig: {
-			services: [banking, bankingOperations, bankingKnowledge, bankingFeeChangeReview],
+			services: [banking, bankingOperations, bankingKnowledge, bankingFeeChangeReview, bankingSupportMemory],
 			autoRegisterServicesFromConfig: true,
 		},
 	})
@@ -211,6 +229,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		fetch: hono.app.fetch,
 		destroy: async () => {
 			await hono.destroy()
+			await bankingSupportMemory.destroy()
 			await bankingFeeChangeReview.destroy()
 			await bankingKnowledge.destroy()
 			await bankingOperations.destroy()

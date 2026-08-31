@@ -105,10 +105,12 @@ export const classifyCustomerSupportAgentBuilder = builder
 	})
 	.useBuiltInTools(false)
 	.exposeAsHttpEndpoint('POST', 'customer-support/classifications', { streamingMode: 'aggregate' })
+	.setBeforeGuardHooks({
+		customerSupportScope: async function (context, payload) {
+			requireCustomerSupportScope(context, payload.accountId)
+		},
+	})
 	.setRunFunction(async context => {
-		// Scope is checked before the request text is added to the model request.
-		requireCustomerSupportScope(context, context.payload.accountId)
-
 		const result = await context.harness.models.primary.object(
 			{
 				messages: [

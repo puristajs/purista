@@ -15,7 +15,7 @@ middleware as the transaction API. There is not yet a browser fee-review
 screen, so this chapter uses exact HTTP calls and integration tests to make
 the business checkpoint visible.
 
-```mermaid title="The isolated fee-change review checkpoint"
+```mermaid title="The fee-change review checkpoint"
 flowchart LR
   Dana[Proposer: Dana] --> Propose[Propose fee change]
   Propose --> Pending[Pending versioned proposal]
@@ -35,8 +35,8 @@ revised, or already-applied proposal cannot change the fee.
 No Docker service is required. The review store is in memory, so pending
 proposals and fees reset when the test process ends.
 
-```bash title="Run the focused human-review proof from the PURISTA repository root"
-npx vitest run examples/banking/src/review/service.integration.test.ts
+```bash title="Run the main-app human-review proof from the PURISTA repository root"
+npm run test -w @purista/banking-tutorials
 ```
 
 1. [Run the review service](/tutorials/human-review/run-fee-review/)

@@ -1,0 +1,14 @@
+---
+title: Restore the preference
+description: Read the caller-owned language through the same guarded generated HTTP boundary.
+order: 144
+status: published
+---
+
+**Restore preference** posts to the generated
+`/api/v1/support/preferences/read` endpoint. It first applies P7, then the
+attached workflow reads the principal-scoped key. A missing or expired value
+returns `language: null`; it does not guess a preference.
+
+The UI intentionally shows only the selected language and retention label. It
+never dumps raw memory keys or all conversation data.

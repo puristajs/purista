@@ -9,6 +9,8 @@ import { z } from 'zod'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
+import { mergeNamedHooks } from '../core/helper/builderRegistry.impl.js'
+import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
 import type { PuristaMetricDefinition } from '../core/types/PuristaMetrics.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/index.js'
@@ -115,6 +117,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	private successEventName?: string
 	private executionProfile?: AgentQueueLongRunningExecutionProfile
 	private responseMode?: { mode: AgentResponseMode; options?: AgentResponseModeOptions }
+	private beforeGuards: Record<string, CommandBeforeGuardHook<any, any, any, any, any, any, any, any, any, any>> = {}
 	private executionDefinitions: Array<AgentExecutionDefinition<any, any, any, any, any, any, any>> = []
 	private metricDefinitions: Record<string, PuristaMetricDefinition<any>> = {}
 
@@ -267,6 +270,39 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			throw new Error('built-in tools must be false or an array of tool names')
 		}
 		this.builtInTools = namesOrFalse
+		return this
+	}
+
+	/**
+	 * Set business guards for the generated agent command.
+	 *
+	 * Guards run after payload validation and before an invocation reaches the
+	 * attached Harness runtime. Use them for domain authorization and scope
+	 * checks; HTTP authentication only establishes the trusted identity consumed
+	 * by these guards.
+	 */
+	setBeforeGuardHooks(
+		beforeGuards: Record<
+			string,
+			CommandBeforeGuardHook<
+				any,
+				InferIn<S['PayloadSchema']>,
+				InferIn<S['ParameterSchema']>,
+				InferIn<S['PayloadSchema']>,
+				InferIn<S['ParameterSchema']>,
+				S['Resources'],
+				any,
+				any,
+				any,
+				any
+			>
+		>,
+	) {
+		this.beforeGuards = mergeNamedHooks(
+			this.beforeGuards,
+			beforeGuards as typeof this.beforeGuards,
+			'setBeforeGuardHooks',
+		)
 		return this
 	}
 
@@ -759,6 +795,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 		}
 		if (this.outputSchema) {
 			commandBuilder.addOutputSchema(this.outputSchema)
+		}
+		if (Object.keys(this.beforeGuards).length > 0) {
+			commandBuilder.setBeforeGuardHooks(this.beforeGuards)
 		}
 		if (this.responseMode) {
 			commandBuilder.canEnqueue(queueName, this.payloadSchema, this.parameterSchema)

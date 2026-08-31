@@ -1,0 +1,40 @@
+---
+title: Remember a safe support preference
+description: Store, read, and delete one language preference through a guarded PURISTA Harness workflow without treating memory as authorization.
+order: 140
+status: published
+---
+
+A returning customer wants their support language remembered. That sounds
+small, but a copied browser conversation id must never reveal another
+customer's data. This chapter stores only `en` or `de`; it never stores an
+account balance, a permission, or a fact used to make a banking action.
+
+```mermaid title="Guarded preference memory"
+flowchart LR
+  UI[React preference panel] --> Guard[P7 account mandate guard]
+  Guard --> Workflow[PURISTA attached workflow]
+  Workflow --> Memory[Harness principal-scoped memory]
+  Memory --> Result[Only caller's preference]
+```
+
+P7 is the business rule: the signed-in person must be allowed to read the
+selected account before the workflow reaches memory. Harness then scopes the
+record by tenant and principal. The conversation id is only a label inside
+that caller-owned scope.
+
+The runnable UI is at `http://127.0.0.1:3010/`. Sign in as Alice, select
+Account A, and use **Remember a support preference**. Choose **Restore
+preference** after a page reload, then use **Forget preference** to delete it.
+
+The local engine is in memory. Its 24-hour retention is part of the record,
+but stopping the Node process removes it immediately. This chapter does not
+claim durable restart behavior, chat-history retention, model calls, or
+long-term profiling.
+
+1. [Protect the conversation reference](/tutorials/support-memory/own-a-conversation/)
+2. [Keep chat history out of this checkpoint](/tutorials/support-memory/limit-history/)
+3. [Store a bounded preference](/tutorials/support-memory/remember-preferences/)
+4. [Restore the preference](/tutorials/support-memory/resume-support/)
+5. [Delete retained data](/tutorials/support-memory/forget-data/)
+6. [Test memory scope](/tutorials/support-memory/test-memory-scope/)

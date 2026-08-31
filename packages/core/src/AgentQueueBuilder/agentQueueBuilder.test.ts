@@ -2,6 +2,7 @@ import {
 	agentGuardrailsBinding,
 	inMemoryDurableWorkspace,
 	inMemoryHarnessStorage,
+	inMemoryMemoryEngine,
 	inMemorySandbox,
 	type ObjectRequest,
 	type SandboxScope,
@@ -136,6 +137,46 @@ describe('AgentQueueBuilder', () => {
 
 		await expect(harness.run({ payload: { ticket: 'SUP-123' } })).resolves.toEqual({ priority: 'high' })
 		expect(provider.requests).toEqual([expect.objectContaining({ model: 'deployment-selected-model' })])
+	})
+
+	it('binds a service-owned memory engine into an attached Harness agent', async () => {
+		const memory = inMemoryMemoryEngine()
+		const input = z.object({ preference: z.string() })
+		const output = z.object({ preference: z.string() })
+		const definition = await new ServiceBuilder(serviceInfo)
+			.getAgentQueueBuilder('rememberTicket', 'Stores an approved support preference for the current session')
+			.addPayloadSchema(input)
+			.addOutputSchema(output)
+			.addModel('primary', { capabilities: ['object'] as const })
+			.setHarnessAgent({
+				model: 'primary',
+				input,
+				output,
+				instructions: 'Store the approved preference.',
+				handler: async context => {
+					await context.memory.session.write('preference', context.input.preference)
+					return { preference: await context.memory.session.read<string>('preference') }
+				},
+			})
+			.getDefinition()
+		const harness = await createAgentTestHarness(definition, {
+			models: {
+				primary: {
+					provider: createScriptedHarnessModel(),
+					model: 'deployment-selected-model',
+					capabilities: ['object'],
+				},
+			},
+			memory,
+		})
+
+		try {
+			await expect(harness.run({ payload: { preference: 'email-notifications' } })).resolves.toEqual({
+				preference: 'email-notifications',
+			})
+		} finally {
+			await harness.shutdown()
+		}
 	})
 
 	it('forwards direct Guardrails bindings after application interceptors', async () => {

@@ -96,11 +96,12 @@ export function createServiceHarnessRuntime(
 
 	let builder: any = defineHarness({
 		name: `${first.definition.manifest.serviceName}.${first.definition.manifest.serviceVersion}`,
-	})
-		.logger(createPuristaHarnessLogger(options.logger))
-		.models(models)
+	}).logger(createPuristaHarnessLogger(options.logger))
+
+	if (Object.keys(models).length > 0) builder = builder.models(models)
 
 	if (options.storage) builder = builder.storage(options.storage)
+	if (options.memory) builder = builder.memory(options.memory)
 	if (options.telemetry) {
 		builder = builder.telemetry({ contentCaptureMode: 'NO_CONTENT', ...options.telemetry })
 	}

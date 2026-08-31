@@ -238,6 +238,8 @@ export type CreateAgentTestHarnessOptions<Models extends Record<string, AgentMod
 	logger?: PuristaLogger
 	governance?: AgentRuntimeOptions<Models>['governance']
 	storage?: import('@purista/harness').HarnessStorage
+	/** Service-owned Harness memory engine available to the tested attached agent. */
+	memory?: import('@purista/harness').MemoryEngine
 	workspace?: import('@purista/harness').DurableWorkspace
 	/** Service-level Harness sandbox binding used by the tested agent runtime. */
 	sandbox?: Sandbox
@@ -260,6 +262,7 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 			logger: options.logger,
 			governance: options.governance,
 			storage: options.storage,
+			memory: options.memory,
 			workspace: options.workspace,
 			sandbox: options.sandbox,
 			sandboxOptions: options.sandboxOptions,

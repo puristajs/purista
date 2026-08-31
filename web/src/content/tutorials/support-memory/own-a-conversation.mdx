@@ -1,0 +1,18 @@
+---
+title: Protect the conversation reference
+description: Treat a browser conversation id as a label, while trusted tenant and principal identity determine ownership.
+order: 141
+status: published
+---
+
+The React page keeps a UUID in browser local storage so a refresh can name the
+same support conversation. That UUID is not a credential. The protected Hono
+middleware supplies the tenant and principal from the opaque server session.
+
+The generated agent command runs the P7 guard first. It checks the account
+mandate with `BankingRepository.canRead()`. Harness builds the principal memory
+scope from the trusted identity, so Bob can submit Alice's UUID but can only
+read Bob's empty namespace.
+
+This is business authorization. A valid login by itself does not give Bob a
+right to use Account C or to see Alice's preference.

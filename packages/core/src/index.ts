@@ -18,11 +18,13 @@
 
 export type {
 	ContentPart,
+	MemoryEngine,
 	ModelCapability,
 	ModelProvider,
 	RunEvent,
 	Session,
 } from '@purista/harness'
+export { inMemoryMemoryEngine } from '@purista/harness'
 export * from './AgentQueueBuilder/index.js'
 export * from './ClientBuilder/index.js'
 export * from './CommandDefinitionBuilder/index.js'

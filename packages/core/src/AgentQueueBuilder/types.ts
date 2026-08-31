@@ -8,6 +8,7 @@ import type {
 	BuilderState as HarnessBuilderState,
 	HarnessStorage,
 	WorkflowDefinition as HarnessWorkflowDefinition,
+	MemoryEngine,
 	ModelAlias,
 	ModelCapability,
 	ModelDefaults,
@@ -665,6 +666,14 @@ export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>
 	models: AgentRuntimeModelBindings<Models>
 	/** Harness-owned conversation and recoverable execution persistence. */
 	storage?: HarnessStorage
+	/**
+	 * Service-owned Harness memory engine shared by attached agents and workflows.
+	 *
+	 * The engine receives Harness-generated tenant, principal, session, run, and
+	 * agent scopes. Keep an engine instance per service unless its adapter
+	 * explicitly documents safe multi-service sharing.
+	 */
+	memory?: MemoryEngine
 	/** Optional durable file/snapshot lifecycle. */
 	workspace?: DurableWorkspace
 	/** Handles a durable suspension as an application-owned successful delivery. */

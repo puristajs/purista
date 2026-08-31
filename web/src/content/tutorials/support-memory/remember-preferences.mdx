@@ -1,0 +1,21 @@
+---
+title: Store a bounded preference
+description: Write an allowlisted language value with explicit retention through a PURISTA attached workflow.
+order: 143
+status: published
+---
+
+The input schema accepts only `en` and `de`. The workflow writes one key,
+`support-preference:<conversation-id>:language`, to `context.memory.principal()`
+with a 24-hour TTL and a `support-preference` tag.
+
+```ts title="examples/banking/src/memory/service.ts"
+await context.memory.principal().write(memoryKey(context.input.conversationId), context.input.language, {
+  ttlMs: 24 * 60 * 60 * 1_000,
+  tags: ['support-preference'],
+})
+```
+
+The workflow does not call a model. Harness currently needs a non-empty model
+catalogue to build a workflow, so the example registers an explicitly
+`not-invoked` local entry. It is never called and needs no key or provider.

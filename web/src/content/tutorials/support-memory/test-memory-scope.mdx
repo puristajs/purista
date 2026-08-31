@@ -1,0 +1,22 @@
+---
+title: Test memory scope
+description: Prove the allowed path, cross-user isolation, mandate denial, and deletion through real HTTP routes.
+order: 146
+status: published
+---
+
+Run the banking test suite from the repository root:
+
+```bash title="Verify the support-memory boundary"
+npm run test -w @purista/banking-tutorials
+```
+
+The focused memory test saves, reads, and deletes Alice's preference. It then
+reuses one memory engine with Bob and proves that the copied conversation id
+returns no value. It also proves Bob is denied before an Account C request can
+enter memory. The main banking integration test repeats the scope check using
+the opaque local-session path.
+
+This proves in-process isolation and deletion. It does not prove persistence
+across an application restart because the configured engine is intentionally
+in memory.

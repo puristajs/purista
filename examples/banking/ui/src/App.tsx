@@ -15,6 +15,12 @@ type Transaction = {
 	direction: 'debit' | 'credit'
 }
 type Statement = { accountId: AccountId; transactions: Transaction[] }
+type SupportPreference = {
+	accountId: AccountId
+	conversationId: string
+	language: 'en' | 'de' | null
+	retention: '24-hours'
+}
 
 const actorOptions: Array<{ value: Actor; label: string; detail: string }> = [
 	{ value: 'alice', label: 'Alice', detail: 'Account A owner' },
@@ -40,6 +46,15 @@ const request = async <T,>(path: string, init?: RequestInit): Promise<T> => {
 
 const apiError = (error: unknown) => (error instanceof Error ? error.message : 'The request could not be completed.')
 const documentCollection = (accountId: AccountId) => `${accountId}-documents`
+const supportConversationStorageKey = 'purista-banking-support-conversation'
+
+const restoreSupportConversationId = () => {
+	const existing = window.localStorage.getItem(supportConversationStorageKey)
+	if (existing) return existing
+	const conversationId = window.crypto.randomUUID()
+	window.localStorage.setItem(supportConversationStorageKey, conversationId)
+	return conversationId
+}
 
 export const App = () => {
 	const [selectedActor, setSelectedActor] = useState<Actor>('alice')
@@ -53,6 +68,10 @@ export const App = () => {
 	const [importing, setImporting] = useState(false)
 	const [ingestingGuide, setIngestingGuide] = useState(false)
 	const [question, setQuestion] = useState('')
+	const [supportConversationId] = useState(restoreSupportConversationId)
+	const [supportLanguage, setSupportLanguage] = useState<'en' | 'de'>('en')
+	const [supportPreference, setSupportPreference] = useState<SupportPreference>()
+	const [savingPreference, setSavingPreference] = useState(false)
 	const chat = useChat({
 		transport: useMemo(
 			() =>
@@ -215,6 +234,67 @@ export const App = () => {
 			await chat.sendMessage({ text: submittedQuestion })
 		} catch (caught) {
 			setError(apiError(caught))
+		}
+	}
+
+	const supportPreferenceInput = { accountId, conversationId: supportConversationId }
+
+	const loadSupportPreference = async () => {
+		setSavingPreference(true)
+		setError(undefined)
+		try {
+			const preference = await request<SupportPreference>('support/preferences/read', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(supportPreferenceInput),
+			})
+			setSupportPreference(preference)
+			if (preference.language) setSupportLanguage(preference.language)
+			setNotice(
+				preference.language
+					? `Restored your ${preference.language} support preference.`
+					: 'No support preference is stored.',
+			)
+		} catch (caught) {
+			setError(apiError(caught))
+		} finally {
+			setSavingPreference(false)
+		}
+	}
+
+	const saveSupportPreference = async () => {
+		setSavingPreference(true)
+		setError(undefined)
+		try {
+			const preference = await request<SupportPreference>('support/preferences', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ ...supportPreferenceInput, language: supportLanguage }),
+			})
+			setSupportPreference(preference)
+			setNotice(`Saved your ${supportLanguage} support preference for 24 hours.`)
+		} catch (caught) {
+			setError(apiError(caught))
+		} finally {
+			setSavingPreference(false)
+		}
+	}
+
+	const forgetSupportPreference = async () => {
+		setSavingPreference(true)
+		setError(undefined)
+		try {
+			const preference = await request<SupportPreference>('support/preferences/forget', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(supportPreferenceInput),
+			})
+			setSupportPreference(preference)
+			setNotice('Deleted your support preference.')
+		} catch (caught) {
+			setError(apiError(caught))
+		} finally {
+			setSavingPreference(false)
 		}
 	}
 
@@ -405,6 +485,59 @@ export const App = () => {
 						{chat.status === 'streaming' || chat.status === 'submitted' ? 'Answering…' : 'Ask account guide'}
 					</button>
 				</form>
+			</section>
+
+			<section className="panel knowledge-panel" aria-labelledby="support-memory-title">
+				<div className="panel-heading">
+					<div>
+						<p className="eyebrow">Guarded Harness memory workflow</p>
+						<h2 id="support-memory-title">Remember a support preference</h2>
+					</div>
+					<button
+						type="button"
+						className="button button-outline"
+						onClick={() => void loadSupportPreference()}
+						disabled={savingPreference}
+					>
+						Restore preference
+					</button>
+				</div>
+				<p className="muted">
+					The server checks your account mandate before a PURISTA agent workflow reaches Harness memory. This browser
+					stores only a conversation reference; Harness also scopes the value to the trusted tenant and signed-in
+					person.
+				</p>
+				<div className="memory-controls">
+					<label>
+						<span>Preferred support language</span>
+						<select value={supportLanguage} onChange={event => setSupportLanguage(event.target.value as 'en' | 'de')}>
+							<option value="en">English</option>
+							<option value="de">Deutsch</option>
+						</select>
+					</label>
+					<button
+						type="button"
+						className="button"
+						onClick={() => void saveSupportPreference()}
+						disabled={savingPreference}
+					>
+						Save for 24 hours
+					</button>
+					<button
+						type="button"
+						className="button button-secondary"
+						onClick={() => void forgetSupportPreference()}
+						disabled={savingPreference}
+					>
+						Forget preference
+					</button>
+				</div>
+				{supportPreference && (
+					<p className="muted memory-status">
+						Stored language: <strong>{supportPreference.language ?? 'none'}</strong> · retention:{' '}
+						{supportPreference.retention}
+					</p>
+				)}
 			</section>
 			<p className="footnote">
 				This local session is a learning fixture. It uses an opaque server-side session and does not model a production

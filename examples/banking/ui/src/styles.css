@@ -177,6 +177,20 @@ select:focus-visible,
 .knowledge-panel {
 	margin-top: 1.25rem;
 }
+.memory-controls {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	gap: 0.75rem;
+	align-items: end;
+	margin-top: 1rem;
+}
+.memory-controls .button-secondary {
+	width: auto;
+	margin-top: 0;
+}
+.memory-status {
+	margin: 1rem 0 0;
+}
 .chat-log {
 	display: grid;
 	gap: 0.75rem;
@@ -289,6 +303,9 @@ th {
 		gap: 0.55rem;
 	}
 	.chat-form {
+		grid-template-columns: 1fr;
+	}
+	.memory-controls {
 		grid-template-columns: 1fr;
 	}
 	.panel {
