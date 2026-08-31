@@ -1,0 +1,25 @@
+---
+title: Attach the coordinating workflow
+description: Keep the case orchestration inside a service-owned PURISTA attached workflow.
+order: 163
+status: published
+---
+
+`setHarnessWorkflow` binds the workflow to the `bankingCaseInvestigation`
+service. PURISTA owns the HTTP projection, queue definitions, identity passed
+to the guard, and lifecycle. This is not a second standalone Harness app.
+
+```ts title="examples/banking/src/investigation/service.ts"
+.setHarnessWorkflow(
+  {
+    input: z.object({ caseId: caseIdSchema }),
+    output: caseBriefSchema,
+    handler: async context => { /* combine the typed findings */ },
+  },
+  { agents: { transactionSpecialist, policySpecialist, supportSpecialist } },
+)
+```
+
+The workflow may call only those three local agents, only through `primary`,
+and only three times in one run. A child cannot add an account, tool, or
+specialist to the parent’s authority.

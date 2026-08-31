@@ -1,0 +1,18 @@
+---
+title: Run an assigned investigation
+description: Start Case A as the assigned analyst and see why Case C is refused.
+order: 161
+status: published
+---
+
+A case id is not permission. The application first maps the case to its
+account and checks the review assignment. That is P5: only an assigned analyst
+may investigate that review case. Customer account readers cannot use this
+endpoint merely because they can view an account.
+
+```ts title="examples/banking/src/investigation/service.ts"
+.setBeforeGuardHooks({ caseAssignment: requireCaseAssignment })
+```
+
+Erin is assigned to `case-account-a`. `case-account-c` belongs to Account C
+and is denied before a workflow starts. The focused test checks both outcomes.

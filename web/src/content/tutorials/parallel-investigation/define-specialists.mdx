@@ -1,0 +1,31 @@
+---
+title: Define narrow specialists
+description: Give each workflow-local specialist one question and one typed evidence excerpt.
+order: 162
+status: published
+---
+
+Each specialist accepts `branch`, `accountId`, `question`, and a short list of
+evidence. There is no shared conversation containing every case record. The
+transaction specialist does not receive support context, and the support
+specialist cannot select another account.
+
+```ts title="examples/banking/src/investigation/service.ts"
+const specialist = (instructions: string) => ({
+  model: 'primary' as const,
+  input: specialistInputSchema,
+  output: findingSchema,
+  instructions,
+  builtinTools: false as const,
+  handler: async context => findingSchema.parse({
+    branch: context.input.branch,
+    status: 'complete',
+    conclusion: `The ${context.input.branch} specialist answered its assigned question.`,
+    evidence: context.input.evidence,
+  }),
+})
+```
+
+The declared model alias keeps the local-agent contract ready for a later
+model-backed version. This first version uses a custom deterministic handler;
+it does not send fixture evidence to a model.
