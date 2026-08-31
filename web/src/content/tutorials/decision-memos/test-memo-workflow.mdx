@@ -8,6 +8,8 @@ status: published
 The focused test covers the complete path and the unsafe path:
 
 ```bash
+npm test -- --run src/service/bankingDecisionMemos/v1/command/requestDecisionMemo
+npm test -- --run src/service/bankingDecisionMemos/v1/queue-worker/createDecisionMemoWorker
 npx vitest run examples/banking/src/memos/service.test.ts
 npm run typecheck -w @purista/banking-tutorials
 ```
