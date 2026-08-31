@@ -1,47 +1,32 @@
 ---
-title: Monitor recorded transactions with business events
-description: Publish a transaction fact and react to it in a separate PURISTA subscription without blocking the transaction command.
+title: Monitor transactions with business events
+description: Generate a monitoring service and subscription that reacts to a transaction fact without delaying the transaction command.
 order: 50
 ---
 
-A transaction service should record a transaction. A monitoring concern should
-decide separately whether that fact needs attention. This chapter shows that
-split with one PURISTA event and one subscription.
+The banking service records a transaction. A separate monitoring service decides
+whether that fact needs a review signal. The transaction command never calls the
+monitoring repository directly.
 
-The example uses a training threshold: a recorded EUR transaction of at least
-`100000` minor units creates an in-memory `review-required` finding. It is not
-money-laundering detection and it does not take action against an account.
-
-```mermaid title="Transaction monitoring in the local example"
+```mermaid title="Generated producer and consumer"
 flowchart LR
-  Command[recordTransaction command] -->|banking.transaction.recorded| EventBridge[DefaultEventBridge]
-  EventBridge -->|matching event| Subscription[monitorRecordedTransaction]
-  Subscription --> Findings[BankingOperationsStore finding]
+  Record[recordTransaction command] -->|banking.transaction.recorded| Bridge[EventBridge]
+  Bridge --> Subscription[monitorRecordedTransaction]
+  Subscription --> Cases[Review-case projection]
 ```
 
-The producer is in `examples/banking/src/service.ts`. The event contract and
-subscription are in `examples/banking/src/advanced/`. Both start in the same
-local process through `examples/banking/src/index.ts`.
+The rule is deliberately small: a EUR transaction of at least `100000` minor
+units opens an in-memory `review-required` case. It is a training signal, not
+money-laundering detection and it never takes adverse action against an account.
 
-## Start here
-
-No Docker service is required for this checkpoint. `DefaultEventBridge` keeps
-the example local and in memory, so it does not prove durable publication,
-replay, or recovery after a process restart.
-
-```bash title="Run the focused banking tests"
-npm run test -w @purista/banking-tutorials
-```
-
-The test suite checks the subscription function with a high-value synthetic
-event. A focused HTTP integration test also proves that Erin, the assigned
-reviewer for account A, can read its review case while Bob receives `403`.
-There is no monitoring screen in the browser UI yet; use the test or the
-guarded `GET /api/v1/review-cases/account-a` endpoint to inspect this result.
-
-1. [Run the local producer](/tutorials/transaction-monitoring/run-the-producer/)
-2. [Publish a transaction event](/tutorials/transaction-monitoring/publish-an-event/)
-3. [Add a monitoring subscription](/tutorials/transaction-monitoring/add-a-subscription/)
+1. [Generate the monitoring boundary](/tutorials/transaction-monitoring/run-the-producer/)
+2. [Publish the transaction fact](/tutorials/transaction-monitoring/publish-an-event/)
+3. [Generate and wire the subscription](/tutorials/transaction-monitoring/add-a-subscription/)
 4. [Apply the training rule](/tutorials/transaction-monitoring/apply-the-training-rule/)
-5. [Handle repeated events](/tutorials/transaction-monitoring/handle-event-repeats/)
-6. [Test transaction monitoring](/tutorials/transaction-monitoring/test-monitoring/)
+5. [Make repeated delivery safe](/tutorials/transaction-monitoring/handle-event-repeats/)
+6. [Test monitoring](/tutorials/transaction-monitoring/test-monitoring/)
+
+The runnable reference is `examples/banking/src/service.ts` and
+`examples/banking/src/advanced/service.ts`.
+
+Next: [generate the monitoring boundary](/tutorials/transaction-monitoring/run-the-producer/).

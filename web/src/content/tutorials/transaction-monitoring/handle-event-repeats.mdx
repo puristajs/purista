@@ -1,39 +1,18 @@
 ---
-title: Handle repeated events
-description: Store one logical monitoring finding when a matching event is delivered more than once.
+title: Make repeated delivery safe
+description: Keep one review case when the same transaction event is delivered more than once.
 order: 55
 ---
 
-Event consumers must decide what a repeated delivery means. This local store
-uses the transaction ID and finding kind as its duplicate key.
+Events can be delivered more than once. Give the review-case repository a
+unique key of transaction ID and rule version. A repeated event returns the
+existing logical case; it does not create another case.
 
-```ts title="examples/banking/src/advanced/repository.ts"
-recordFinding(finding: TransactionMonitoringFinding) {
-  if (
-    !this.findings.some(
-      existing => existing.transactionId === finding.transactionId && existing.kind === finding.kind,
-    )
-  ) {
-    this.findings.push(finding)
-  }
-}
-```
+This protects the monitoring projection. It does not make the original
+transaction write and event publication atomic. A failure in the consumer
+cannot undo a transaction that the producer already recorded.
 
-Calling `recordFinding` twice with the same transaction and kind leaves one
-logical item. This is an in-memory example of an idempotent projection. It
-does not establish duplicate delivery semantics for a broker, a database
-uniqueness constraint, or a process restart.
+Test a duplicate event directly through the registered EventBridge and assert
+that the projection still contains one case.
 
-Do not put the transaction record and the monitoring write in the same handler
-only to avoid this question. The separate ownership is useful, but it means a
-consumer failure cannot undo a transaction that was already recorded.
-
-```bash title="Run the advanced definition tests"
-npm run test -w @purista/banking-tutorials
-```
-
-The current test checks a single successful event. Add a second identical
-delivery assertion when you change this duplicate key or move the store to a
-durable adapter.
-
-Next, review exactly what the existing tests prove.
+Next: [test monitoring](/tutorials/transaction-monitoring/test-monitoring/).

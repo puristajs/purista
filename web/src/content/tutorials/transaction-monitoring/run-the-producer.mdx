@@ -1,40 +1,27 @@
 ---
-title: Run the local transaction producer
-description: Start the complete local application and record a synthetic transaction that the service can publish as a business fact.
+title: Generate the monitoring boundary
+description: Generate a separate monitoring service and its subscription before writing the event contract or rule.
 order: 51
 ---
 
-Start the example from the `purista` repository root:
+Create a versioned service for the independent responsibility, then generate
+its event handler:
 
-```bash title="Start the Example Bank"
-npm run dev -w @purista/banking-tutorials
+```bash title="Generate monitoring service and subscription"
+npm run add:service -- monitoring --description "Create synthetic transaction review signals"
+npm run add:subscription -- monitor-recorded-transaction \
+  --service monitoring --service-version 1 \
+  --event banking.transaction.recorded \
+  --description "Create one review signal for a recorded transaction"
 ```
 
-Keep this terminal open. In a second terminal, create a Dana local fixture
-session. Dana may record transactions for account A.
+The CLI adds `src/service/monitoring/v1/` and the subscription folder beneath
+it. The generated subscription has schemas, a builder, and a test. Its handler
+is intentionally empty until the event contract and idempotency rule exist.
 
-```bash title="Create Dana's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"dana"}'
+```bash title="Check the generated consumer"
+npm run build
+npm test
 ```
 
-```bash title="Record a high-value synthetic transaction"
-curl --fail -X POST http://127.0.0.1:3010/api/v1/transactions \
-  -H 'content-type: application/json' \
-  -b .tutorial-cookie \
-  --data '{"accountId":"account-a","sourceTransactionId":"monitor-demo-1","bookedAt":"2026-01-20T10:00:00.000Z","amountMinor":100000,"currency":"EUR","direction":"credit"}'
-```
-
-The command returns the recorded transaction. Its HTTP result does not include
-the monitoring finding: a producer reports what happened, while a subscription
-owns its separate projection. Sign in as Erin and call
-`GET /api/v1/review-cases/account-a` to inspect the guarded review case, or use
-the test page to prove the reaction.
-
-If this request returns `403`, check that the local session is Dana's and the
-account is `account-a`. A signed-in reader such as Bob still may not record a
-transaction. A denied command does not reach its handler and therefore cannot
-emit the event.
-
-Next, look at the small event contract the command publishes.
+Next: [publish the transaction fact](/tutorials/transaction-monitoring/publish-an-event/).

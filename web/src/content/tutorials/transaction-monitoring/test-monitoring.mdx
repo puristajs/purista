@@ -1,27 +1,22 @@
 ---
-title: Test transaction monitoring
-description: Run the current focused tests and separate their evidence from guarantees the local example does not make.
+title: Test monitoring
+description: Prove the producer, subscription, threshold, and duplicate rule through the running PURISTA composition.
 order: 56
 ---
 
-Run the example checks from the `purista` repository root:
+Write one runtime test that starts both services with `DefaultEventBridge`.
+Record a normal transaction and assert no case exists. Record a transaction at
+the threshold and assert one case exists. Deliver the matching event again and
+assert there is still one case.
 
-```bash title="Typecheck and test transaction monitoring"
-npm run typecheck -w @purista/banking-tutorials
-npm run test -w @purista/banking-tutorials
+Also keep the business denial test: a blocked transaction post returns `403`,
+does not write a transaction, and emits no event. Run the whole checkpoint:
+
+```bash title="Run the event and subscription tests"
+npm test
 ```
 
-`examples/banking/src/advanced/service.test.ts` creates a real subscription
-context with `createSubscriptionContextMock`, calls the registered subscription
-function, and asserts that a `100000`-minor-unit event creates a finding. The
-same file starts the full advanced service definition with both local bridges.
+The local test proves in-process delivery and consumer behavior. Durable
+publication, replay, and recovery belong to the distributed operations chapter.
 
-This proves the schema-shaped handler and its in-memory projection. It does
-not prove HTTP access to findings, investigator assignment, durable delivery,
-replay, transactional publication, or a process-restart recovery path. Those
-features need source, infrastructure, and integration tests before a tutorial
-can claim them.
-
-When you extend this checkpoint, test all three outcomes: an allowed posting
-emits the expected fact, a denied posting writes no transaction and emits no
-event, and a repeated matching event creates one logical finding.
+Next: [stream transaction analysis](/tutorials/streaming-analysis/).

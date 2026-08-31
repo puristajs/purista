@@ -1,43 +1,28 @@
 ---
-title: Publish a transaction event
-description: See why the command emits a compact business fact after recording a transaction.
+title: Publish the transaction fact
+description: Declare a small event payload and emit it only after a successful transaction write.
 order: 52
 ---
 
-An event says that something already happened. A command asks the application
-to do work. Here, `recordTransaction` records its data first and then emits the
-fact that it recorded a transaction.
+An event is a fact that happened. It is not a request to the monitoring service.
+Add a narrow `transactionRecorded` event schema: transaction ID, account ID,
+amount in minor units, currency, direction, and booking time. Do not copy every
+HTTP field into the event.
 
-```ts title="examples/banking/src/service.ts"
-.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
+In `recordTransactionCommandBuilder.ts`, declare that the command may emit the
+event and publish it after the repository accepts the transaction:
+
+```ts title="recordTransactionCommandBuilder.ts"
+.canEmit('banking.transaction.recorded', transactionRecordedEventSchema)
 .setCommandFunction(async function (context, payload) {
   const transaction = context.resources.bankingRepository.record(payload)
-  await context.emit(BankingTutorialEvent.transactionRecorded, {
-    transactionId: transaction.transactionId,
-    accountId: transaction.accountId,
-    amountMinor: transaction.amountMinor,
-    currency: transaction.currency,
-    direction: transaction.direction,
-    bookedAt: transaction.bookedAt,
-  })
+  await context.emit('banking.transaction.recorded', toRecordedEvent(transaction))
   return transaction
 })
 ```
 
-`canEmit` declares the event that this command is allowed to publish and ties
-it to a schema. The event contains the business fields the consumer needs. It
-does not copy the caller’s header, browser session, or a formatted CSV result.
+The command emits no event when its posting guard denies the request or the
+repository rejects conflicting data. The default local EventBridge is in memory:
+it proves the interaction in one process, not durable publication or replay.
 
-The local bridge delivers this event inside one running process. The example
-does not implement an outbox or prove an atomic database-write-and-publish
-operation. A crash between those two application operations remains a future
-production design decision.
-
-Run the test suite after changing the payload shape:
-
-```bash title="Check the event definitions"
-npm run typecheck -w @purista/banking-tutorials
-npm run test -w @purista/banking-tutorials
-```
-
-Next, receive the declared event in a subscription.
+Next: [generate and wire the subscription](/tutorials/transaction-monitoring/add-a-subscription/).

@@ -1,38 +1,16 @@
 ---
 title: Apply the training rule
-description: Keep a transparent threshold rule in the monitoring consumer and understand what it does not decide.
+description: Store one review signal for a high-value synthetic transaction without taking action against an account.
 order: 54
 ---
 
-The monitoring rule is deliberately easy to inspect:
+Inject a `reviewCaseRepository` into the monitoring service. In the
+subscription handler, return for amounts below `100000`. For other amounts,
+save a case with the transaction ID, account ID, `review-required`, and the
+fixed reason `amount-at-or-above-training-threshold`.
 
-```ts title="examples/banking/src/advanced/service.ts"
-if (payload.amountMinor < 100_000) return
-context.resources.operationsStore.recordFinding({
-  transactionId: payload.transactionId,
-  accountId: payload.accountId,
-  kind: 'review-required',
-  reason: 'amount-at-or-above-training-threshold',
-})
-```
+This deterministic rule is a training signal. It does not classify a customer,
+freeze an account, or claim regulatory detection. Expose a guarded
+`listReviewCases` command only for the assigned synthetic reviewer.
 
-Amounts are integer minor units. `100000` means EUR 1,000.00 in this fixed EUR
-example. A transaction below that value produces no finding. A transaction at
-or above it produces the one `review-required` signal.
-
-The rule is owned by monitoring, not by access control. Dana still needs the
-transaction command’s posting permission before an event can exist. The rule
-does not block a posting, change a balance, or declare a customer suspicious.
-
-Try both boundaries by changing only `amountMinor` in the request from the
-first page. Then run the tests:
-
-```bash title="Verify the threshold fixture"
-npm run test -w @purista/banking-tutorials
-```
-
-The current focused test covers the `100000` value. Add a below-threshold test
-when changing the rule so that a non-matching event leaves the finding store
-empty.
-
-Next, make the projection safe when the same event arrives more than once.
+Next: [make repeated delivery safe](/tutorials/transaction-monitoring/handle-event-repeats/).
