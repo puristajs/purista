@@ -23,6 +23,8 @@
 		"@purista/core": "*",
 		"@purista/harness-sandbox-docker": "^3.0.0",
 		"@purista/hono-http-server": "*",
+		"@purista/natsbridge": "*",
+		"@purista/redis-queue-bridge": "*",
 		"ai": "^7.0.85",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
