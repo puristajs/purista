@@ -8,6 +8,7 @@ Use this checklist when creating or updating a skill.
 - Public handbook/API docs checked when behavior is documented for users
 - Neighboring skills reviewed for overlap
 - Documentation work routed to `purista-docs-maintainer` instead of expanding the user-facing framework skill
+- Worked Framework tutorials and their examples routed to `purista-tutorial-maintainer`, reusing docs-maintainer formatting and verification conventions
 - Downstream repos checked when capability changes affect generated or default behavior
 - The framework knowledge required by an otherwise untrained model has been identified explicitly
 - Older planning notes checked for stale assumptions before copying package names, protocols, or API shapes into skills

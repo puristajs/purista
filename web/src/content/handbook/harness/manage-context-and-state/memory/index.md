@@ -20,6 +20,7 @@ Choose a backend based on query needs and operating model.
 | [PostgreSQL](/handbook/harness/manage-context-and-state/memory/postgres/) | `@purista/harness-memory-postgres` | Shared relational operations | Text, vector, hybrid |
 | [Redis](/handbook/harness/manage-context-and-state/memory/redis/) | `@purista/harness-memory-redis` | Redis Search operations | Text; vector opt-in |
 | [NATS](/handbook/harness/manage-context-and-state/memory/nats/) | `@purista/harness-memory-nats` | JetStream KV coordination | No |
+| [Custom engine](/handbook/harness/manage-context-and-state/memory/custom-memory-engine/) | Application-owned package | Existing database or platform contract | Capabilities implemented and verified by the application |
 
 The selected adapter creates an engine value, then the complete Harness
 definition passes it to `.memory(memory)`. For a runnable local path, start
@@ -31,16 +32,20 @@ session rather than calling a database client directly:
 import { claimsReviewHarness } from '../harness/claimsReview.js'
 
 const session = await claimsReviewHarness.getSession('claim:example', {
-  identity: {
-    tenantId: 'demo',
-    principalId: 'claims-handler',
-  },
+	identity: {
+		tenantId: 'demo',
+		principalId: 'claims-handler',
+	},
 })
 
-await session.memory.write('claim-status', { status: 'documents-requested' }, {
-  tags: ['claim'],
-  ttlMs: 3_600_000,
-})
+await session.memory.write(
+	'claim-status',
+	{ status: 'documents-requested' },
+	{
+		tags: ['claim'],
+		ttlMs: 3_600_000,
+	},
+)
 
 const claimStatus = await session.memory.read('claim-status')
 ```
@@ -48,7 +53,7 @@ const claimStatus = await session.memory.read('claim-status')
 | Call or field | What it does | Boundary |
 | --- | --- | --- |
 | [`harness.getSession(id, options)`](/handbook/api/interfaces/_purista_harness.Harness/#getsession) | Opens/binds a Harness session. `identity` is part of the existing session binding, not arbitrary request metadata. | Authenticate and authorize the tenant/principal before this call. A mismatched or omitted bound identity fails before memory I/O; it does not prove the caller may access that tenant. |
-| [`session.memory.write(key, value, options)`](/handbook/api/interfaces/_purista_harness.SessionMemory/#write) | Writes one JSON-compatible record in the session scope. Optional `tags`, `metadata`, `indexText`, vector data, and `ttlMs` select indexed/searchable data where the installed engine supports them. | Keep values small and application-approved. `ttlMs` controls expiry visibility, not immediate physical deletion; persistent adapters must still have a deletion/backup policy. |
+| [`session.memory.write(key, value, options)`](/handbook/api/interfaces/_purista_harness.SessionMemory/#write) | Writes one JSON-compatible record in the session scope. Optional `tags`, `metadata`, `index: { text }`, and `ttlMs` select indexed/searchable data where the installed engine supports them. A configured embedding model derives vectors from the indexed text. | Keep values small and application-approved. `ttlMs` controls expiry visibility, not immediate physical deletion; persistent adapters must still have a deletion/backup policy. |
 | [`session.memory.read(key)`](/handbook/api/interfaces/_purista_harness.SessionMemory/#read) | Reads a record from the same derived scope, returning `undefined` when it is absent or expired. | Use explicit application fallback behaviour for a missing record. Do not infer a record's authorization from its existence. |
 
 Select namespace, tenant scope, TTL, and access policy before storing data.
@@ -68,10 +73,10 @@ resources are opened.
 
 ```ts title="src/claims/openClaimSession.ts"
 const session = await harness.getSession('claim:example', {
-  identity: {
-    tenantId: 'demo',
-    principalId: 'claims-handler',
-  },
+	identity: {
+		tenantId: 'demo',
+		principalId: 'claims-handler',
+	},
 })
 ```
 
@@ -79,3 +84,6 @@ Within a run, `ctx.memory.application`, `.session`, `.run`, `.agent`,
 `.tenant()`, and `.principal()` select a lifetime/scope. Missing tenant or
 principal identity fails before engine I/O. This prevents accidental namespace
 mixing; application authorization remains a separate responsibility.
+
+If an existing data platform must provide these operations, follow
+[build a custom memory engine](./custom-memory-engine/).

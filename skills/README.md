@@ -6,9 +6,10 @@ This repository ships one shared framework skill catalog in `skills/`.
 - `skills/purista/` is the single shared framework skill for PURISTA.
 - `skills/purista-skill-maintainer/` is the meta skill for maintaining that catalog.
 - `skills/purista-docs-maintainer/` is the internal workflow for maintaining the public website, handbook, API documentation, navigation, and coverage.
+- `skills/purista-tutorial-maintainer/` is the internal workflow for Framework tutorial storylines, beginner-friendly step pages, runnable source, local dependencies, and authenticated demo UIs.
 - Applications may add overlay skills, but core framework knowledge should stay in the shared `purista` skill references.
 - Repo-local `skills/` is the source of truth. Installed copies in `$CODEX_HOME/skills` are mirrors and should be refreshed from here when drift appears.
-- The user-facing `purista` skill must not require internal spec access. The two internal maintainer skills may use specs because they develop and align PURISTA itself.
+- The user-facing `purista` skill must not require internal spec access. Internal maintainer skills may use specs because they develop and align PURISTA itself.
 
 ## Filesystem Layout
 - Each skill uses `skills/<skill-name>/SKILL.md`.
@@ -24,6 +25,7 @@ This repository ships one shared framework skill catalog in `skills/`.
 - Add `## Contents` to reference files over 100 lines.
 - Keep concrete evaluation scenarios for the canonical `purista` skill so drift repairs can be tested against realistic tasks.
 - Keep concrete evaluation scenarios for `purista-docs-maintainer` so page structure, coverage, adapter guidance, and proportional-change behavior can be forward-tested.
+- Keep concrete evaluation scenarios for `purista-tutorial-maintainer` covering direct entry, easy English, Framework-only AI, reproducible dependencies, UI protocol compatibility, and trusted identity across boundaries.
 - Keep active specs, implementation, public docs, and skills aligned in that order: specs define intended behavior, implementation realizes it, public docs explain it, and user-facing skills teach the implemented behavior.
 - Keep current platform decisions visible: Hono as active HTTP runtime, EventBridge/QueueBridge separation, core-owned harness-backed agents, and provider packages as app-level dependencies.
 - Keep current enterprise decisions visible: schedules are contracts, Kubernetes CronJob export is manifest generation, Redis/NATS strict idempotency returns the original job id, and no `@purista/contracts` package is used.

@@ -1,68 +1,92 @@
 ---
-title: Test Harness applications
-description: Use fake providers and adapter contracts to make agent behavior repeatable.
+title: Test Harness applications deterministically
+description: Prove schemas, control flow, permissions, failures, and adapter contracts without relying on a live model response.
 order: 810
 ---
 
-Use `FakeModelProvider` from `@purista/harness/testing` or a small scripted
-provider; do not require credentials or network access for unit tests.
+Deterministic tests prove the implementation around AI: typed contracts,
+selected capabilities, tool calls, workflow order, cancellation, retries,
+persistence, and failure handling. Replace nondeterministic or external
+boundaries with scripted providers and adapters, then run the real Harness code
+that coordinates them.
 
-```ts title="src/case-harness.test.ts"
-import { describe, expect, it } from 'vitest'
-import { FakeModelProvider } from '@purista/harness/testing'
-import { createCaseHarness } from './case-harness.js'
+They do not prove that a live agent is factually correct, helpful, grounded, or
+safe for representative input. Measure those properties with reviewed datasets
+and [evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/).
 
-describe('case classifier', () => {
-  it('handles the scripted high-priority case', async () => {
-    const provider = new FakeModelProvider()
-    provider.enqueueObject({
-      object: { priority: 'high' },
-      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-      finishReason: 'stop',
-    })
-    const harness = createCaseHarness(provider)
+## Test the closest useful boundary
 
-    try {
-      const session = await harness.getSession('case-test')
-      await expect(session.agents.classify_case.prompt({ summary: 'Sign-in outage' }))
-        .resolves.toEqual({ priority: 'high' })
-    } finally {
-      await harness.shutdown()
-    }
-  })
-})
+```mermaid title="Deterministic Harness test boundaries"
+flowchart LR
+  Test["Vitest case"] --> Harness["Real Harness composition"]
+  Harness --> Provider["Strict scripted model provider"]
+  Harness --> Capability["Fake tool, MCP, guardrail, or review port"]
+  Harness --> State["In-memory or fake state adapters"]
+  Adapter["Custom adapter implementation"] --> Contract["Shared contract suite"]
+  Contract --> Platform["Provider integration and isolation tests"]
 ```
 
-### What makes this test deterministic
-
-| Call or boundary | What it does | Use it this way |
+| What you need to prove | Test boundary | Continue with |
 | --- | --- | --- |
-| [`new FakeModelProvider()`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/) | Creates an in-process [`ModelProvider`](/handbook/api/interfaces/_purista_harness.ModelProvider/) with empty deterministic fallback responses and a public `requests` array. It makes no network call and needs no credential. | Construct a fresh provider for every test. It proves how the Harness asks a provider and how your agent handles a scripted response; it cannot prove provider behavior or answer quality. |
-| [`provider.enqueueObject(...)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueueobject) | Adds the next object response to the fake's FIFO queue. The response needs `object`, token `usage`, and `finishReason`; use `enqueueText`, `enqueueTextStream`, `enqueueObjectStream`, `enqueueEmbedding`, or `enqueueRerank` for the matching declared capability. | Queue every expected model interaction in order, then assert `provider.requests` if the test needs to prove a prompt projection, model mode, or tool schema. An unqueued object request returns the fake's empty object fallback, so do not mistake it for a valid model result. |
-| `createCaseHarness(provider)` | Application code that must build a Harness with this injected provider and the agent's declared model capability before the test opens a session. The fake is structurally a normal provider, so no cast is needed. | Keep this composition helper production-shaped: models before agents, then `.build()`. Inject the fake only at the provider boundary rather than branching the agent implementation for tests. |
-| [`harness.getSession(id)`](/handbook/api/interfaces/_purista_harness.Harness/#getsession) | Opens or resumes the named Harness session and exposes the declared agents. | Use a new session ID for isolated test state. Reuse an ID only when the test intentionally proves retained history, durable execution, or workspace behavior. |
-| `session.agents.classify_case.prompt(input)` | Executes the agent's declared non-streaming output mode and validates the input/output contract. | Assert the declared output, expected error, or selected provider request. Use the event stream API for cancellation/streaming tests rather than flattening event behavior into a `prompt` assertion. |
-| [`harness.shutdown()`](/handbook/api/interfaces/_purista_harness.Harness/#shutdown) | Releases Harness-owned sessions and adapter resources. | Always call it in `finally`, even for in-memory tests. This keeps later tests from inheriting listeners, timers, or retained adapter state. |
+| One input, model request, and validated output | Strict `FakeModelProvider` through a real session | [Test a basic agent](/handbook/harness/build-agents/test-a-basic-agent/) |
+| Tool arguments, tool results, loop order, permission, and failures | Scripted provider plus injected tool dependency | [Test agent tools](/handbook/harness/test-and-evaluate/test-agent-tools/) |
+| Fan-out, steps, child tasks, review, retries, cancellation, and events | Real workflow with deterministic agents/adapters | [Test workflows](/handbook/harness/test-and-evaluate/test-workflows/) |
+| A custom storage, memory, workspace, sandbox, logger, or provider port | Matching shared contract suite plus provider integration tests | [Test adapters](/handbook/harness/test-and-evaluate/test-adapters/) |
+| Prompt quality or live-agent correctness | Reviewed cases, versioned scorers, repeated trials | [Run your first evaluation](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/) |
 
-The test has three distinct boundaries:
+## Use strict scripted model responses
 
-| Test level | It proves | It does not prove |
-| --- | --- | --- |
-| Fake provider + Harness | Agent configuration, schema handling, tool/workflow flow, events, and deterministic failure handling | A real provider's output quality, rate limits, pricing, or safety behavior |
-| Adapter contract suite | A custom port implementation meets the shared memory, storage, workspace, sandbox, or provider contract | The external service's production topology, credentials, or recovery policy |
-| Selected real-adapter test | The configured external dependency can satisfy the chosen integration path | Broad model correctness or every production failure mode |
+[`FakeModelProvider`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/)
+implements the normal provider port without credentials or network access.
+Construct a new instance for each test.
 
-These tests prove our implementation, not model truth: test tool schemas and
-authorization separately, then agent success/failure, workflow fan-out,
-cancellation, streaming events, idempotency, durable resume, and review
-signals. For skills, assert frontmatter failure, explicit binding, and that
-`SKILL.md` is read from the mount rather than inlined into a prompt.
+| Method | Scripts the next |
+| --- | --- |
+| [`enqueueText(response)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueuetext) | Text result |
+| [`enqueueObject(response)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueueobject) | Structured result or tool-call round |
+| [`enqueueTextStream(chunks)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueuetextstream) | Text stream |
+| [`enqueueObjectStream(chunks)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueueobjectstream) | Structured stream |
+| [`enqueueEmbedding(response)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueueembedding) | Embedding request |
+| [`enqueueRerank(response)`](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#enqueuererank) | Reranking request |
 
-Run `memoryEngineContract`, `harnessStorageContract`, and
-`durableWorkspaceContract` for custom adapters. Use fake MCP servers for stdio
-executor, cancellation, protocol, and schema cases; use package test fakes for
-Presidio/local NER. A live-provider smoke test belongs in a separately labeled
-environment with budget, credential, and redaction controls. For factual,
-helpfulness, policy, or grounded-answer quality, use
-[evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/),
-not a fake-provider assertion.
+For application tests, enable `{ strict: true }`. An unqueued request or a
+response queued for a different operation fails immediately. After the
+interaction, inspect `provider.requests` only for details relevant to the
+behavior and call `provider.assertExhausted()` to detect unused fixtures.
+See the exact [`assertExhausted()` contract](/handbook/api/classes/_purista_harness_testing.FakeModelProvider/#assertexhausted).
+
+Do not assert the complete provider request object by default. Exact snapshots
+of prompts, generated schemas, headers, or tool payloads are noisy, may contain
+sensitive content, and couple a test to unrelated formatting. Prefer narrow
+assertions such as the request count, selected operation, tool name, or one
+required projected message.
+
+## Cover the unhappy path deliberately
+
+For each capability, start with one successful test and add only the failures
+that change application behavior:
+
+- invalid caller input and invalid provider output;
+- denied, malformed, timed-out, cancelled, or failed tool calls;
+- model loop and workflow budgets;
+- retry exhaustion and non-retriable errors;
+- concurrent session use and idempotency conflict;
+- missing retained sandbox or workspace state;
+- malformed review decisions and expired waits; and
+- storage, event persistence, or cleanup failure.
+
+Use normalized error codes or public error classes as assertions. Never place
+raw prompts, credentials, personal data, tool payloads, or provider diagnostics
+in test names, snapshots, error messages, or CI artifacts.
+
+## Keep real integrations explicit
+
+An optional live-provider smoke test can prove credentials, network routing,
+the selected provider adapter, and one bounded model operation. Run it in a
+separately labeled environment with budget, timeout, redaction, and secret
+controls. Do not make it the only test for application logic, and do not treat
+one successful response as a quality threshold.
+
+Adapter contract suites are likewise necessary but not sufficient. A generic
+sandbox contract can prove lifecycle and file/exec behavior; only platform
+tests can prove container, VM, network, quota, and tenant-isolation claims.

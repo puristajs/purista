@@ -23,11 +23,11 @@ import { postgresMemoryEngine } from '@purista/harness-memory-postgres'
 
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
-  throw new Error('DATABASE_URL is required to configure PostgreSQL memory.')
+	throw new Error('DATABASE_URL is required to configure PostgreSQL memory.')
 }
 
 export const claimsMemory = postgresMemoryEngine({
-  connectionString,
+	connectionString,
 })
 ```
 

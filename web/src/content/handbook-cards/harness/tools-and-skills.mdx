@@ -16,27 +16,21 @@ input and output, then expose only that tool to the agent. Install and import
 Zod explicitly; the application owns that dependency and the Harness does not
 re-export it.
 
-```ts
+```ts title="Register the order lookup tool"
 import { z } from 'zod'
 
-.tools(({ tool }) => ({
-  lookup_order: tool({
+.tool('lookup_order', {
     description: 'Look up an order that the current caller may view.',
     input: z.object({ orderId: z.string().min(1) }),
     output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
-    handler: async (ctx, { orderId }) => {
-      return orderService.lookupVisibleOrder({ sessionId: ctx.sessionId, orderId })
-    }
-  })
-}))
-.agents(({ agent }) => ({
-  support: agent({
+    handler: async (ctx, { orderId }) =>
+      orderService.lookupVisibleOrder({ sessionId: ctx.sessionId, orderId }),
+})
+  .agent('support', {
     model: 'assistant',
     tools: ['lookup_order'],
-    builtinTools: false,
-    instructions: 'Use lookup_order only after the customer provides an order id.'
+    instructions: 'Use lookup_order only after the customer provides an order id.',
   })
-}))
 ```
 
 Schemas validate shape. The handler still enforces authorization, idempotency,
@@ -52,19 +46,16 @@ short-lived authorization facade available to the tool composition root:
 
 ```ts
 function createSupportHarness(authorize: (orderId: string) => Promise<void>) {
-  return defineHarness({ name: 'support' })
-    .tools(({ tool }) => ({
-      lookup_order: tool({
-        description: 'Return the current status for an order visible to the caller.',
-        input: z.object({ orderId: z.string().min(1) }),
-        output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
-        handler: async (_ctx, { orderId }) => {
-          await authorize(orderId)
-          return orderService.getPublicStatus(orderId)
-        }
-      })
-    }))
-    // Compose models and agents as shown in the previous guides.
+	return defineHarness({ name: 'support' }).tool('lookup_order', {
+			description: 'Return the current status for an order visible to the caller.',
+			input: z.object({ orderId: z.string().min(1) }),
+			output: z.object({ status: z.enum(['pending', 'shipped', 'delivered']) }),
+			handler: async (_ctx, { orderId }) => {
+				await authorize(orderId)
+				return orderService.getPublicStatus(orderId)
+			},
+	})
+	// Compose models and agents as shown in the previous guides.
 }
 ```
 
@@ -113,23 +104,21 @@ description: Check return eligibility before offering a return action.
 
 Register the directory with explicit provenance and permit the `read` builtin:
 
-```ts
+```ts title="Register the return-policy skill"
 .skills({
   return_policy: {
     directory: './src/skills/return-policy',
     trust: 'trusted',
-    source: 'application'
-  }
+    source: 'application',
+  },
 })
-.agents(({ agent }) => ({
-  support: agent({
+  .agent('support', {
     model: 'fast',
     skills: ['return_policy'],
     builtinTools: ['read'],
     tools: ['lookup_order'],
-    instructions: 'Use the return-policy skill before answering return questions.'
+    instructions: 'Use the return-policy skill before answering return questions.',
   })
-}))
 ```
 
 The catalog describes the skill in the model context; the body is mounted and

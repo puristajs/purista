@@ -25,28 +25,29 @@ import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardr
 import { z } from 'zod'
 
 const blockOverride = defineGuardrailAction({
-  phase: 'input',
-  valueSchema: z.string(),
-  mayTransform: false,
-  evaluate: ({ value }) => value.includes('ignore previous instructions')
-    ? { decision: 'block', reasonCode: 'instruction_override' }
-    : { decision: 'allow' },
+	phase: 'input',
+	valueSchema: z.string(),
+	mayTransform: false,
+	evaluate: ({ value }) =>
+		value.includes('ignore previous instructions')
+			? { decision: 'block', reasonCode: 'instruction_override' }
+			: { decision: 'allow' },
 })
 
 const redactOutput = defineGuardrailAction({
-  phase: 'output',
-  valueSchema: z.string(),
-  evaluate: ({ value }) => ({
-    decision: 'transform',
-    target: 'bot_message',
-    value: value.replaceAll('[internal]', ''),
-    reasonCode: 'internal_note_removed',
-  }),
+	phase: 'output',
+	valueSchema: z.string(),
+	evaluate: ({ value }) => ({
+		decision: 'transform',
+		target: 'bot_message',
+		value: value.replaceAll('[internal]', ''),
+		reasonCode: 'internal_note_removed',
+	}),
 })
 
 export const rails = defineGuardrails({
-  config: { rails: { input: { flows: ['block override'] }, output: { flows: ['redact output'] } } },
-  actions: { 'block override': blockOverride, 'redact output': redactOutput },
+	config: { rails: { input: { flows: ['block override'] }, output: { flows: ['redact output'] } } },
+	actions: { 'block override': blockOverride, 'redact output': redactOutput },
 })
 ```
 
@@ -57,22 +58,24 @@ the protected value without coercing, defaulting, stripping, or transforming
 it. Keep `reasonCode` stable and content-free; never use request text, matched
 content, or an exception message as a code.
 
-## Attach and preflight
+## Bind and preflight
 
 ```ts title="src/harness.ts"
 const harness = defineHarness({ name: 'support' })
-  .models({ assistant: { provider, model: 'selected-in-composition', capabilities: ['object'] } })
-  .agents(({ agent }) => ({
-    answer: rails.attach(agent({
-      model: 'assistant', input: z.string(), output: z.string(),
-      instructions: 'Answer concisely.', builtinTools: false, tools: [],
-    })),
-  }))
-  .build()
+	.models({ assistant: { provider, model: 'selected-in-composition', capabilities: ['object'] } })
+	.agent('answer', {
+		model: 'assistant',
+		input: z.string(),
+		output: z.string(),
+		instructions: 'Answer concisely.',
+		guardrails: rails,
+	})
+	.build()
 ```
 
-`attach()` applies input, final-output, tool-input, and tool-output rails only
-to a default-loop agent; it rejects a custom handler. Retrieval remains
+The `guardrails` field applies input, final-output, tool-input, and tool-output
+rails only to a default-loop agent; a custom handler rejects the field.
+Retrieval remains
 application-owned and uses `filterRetrievedChunks(...)` before selected chunks
 enter model context. The [Guardrails overview](/harness/guardrails/) is the
 canonical website projection for the shared inline-authoring and build-preflight

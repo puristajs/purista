@@ -1,190 +1,130 @@
 ---
-title: Add guardrails
-description: Configure ordered, fail-closed input, output, tool, and retrieval checks around a default-loop agent.
-order: 710
+title: Protect content with Guardrails
+description: Inspect or transform exact model, tool, and retrieval values with ordered, fail-closed controls.
+order: 750
 ---
 
-Guardrails are an opt-in `@purista/harness-guardrails` addon. They attach one
-ordered interceptor to a default-loop agent; they do not create a model
-provider, authorize a caller, deploy a policy server, or retrieve knowledge.
-Author the complete policy as one typed TypeScript object in the application
-composition root.
+Guardrails place explicit checks around content that enters or leaves an agent,
+a selected tool, or an application-owned retrieval step. Use them to block a
+known unsafe value, normalize a value, remove sensitive material, or apply a
+semantic content check before release.
 
-| Boundary | Result | Owner |
+The feature is optional. `@purista/harness` supplies the interception boundary;
+the separate `@purista/harness-guardrails` package supplies typed actions,
+ordered flows, sensitive-data integration, and model-backed checks.
+
+Start with [the first guarded agent](./build-the-first-guarded-agent/). It is a
+complete local program with an allowed request, a blocked request, an expected
+result, and a deterministic assertion that the blocked request never reached
+the model provider.
+
+## Know what Guardrails do
+
+```mermaid title="Guardrail boundaries in a default agent loop"
+flowchart LR
+  input[Agent input] --> inputRail[Input rails]
+  inputRail --> model[Model step]
+  model --> toolInput[Tool-input rails]
+  toolInput --> decision[Permission and governance]
+  decision --> tool[Tool handler]
+  tool --> toolOutput[Tool-output rails]
+  toolOutput --> model
+  model --> final[Final candidate]
+  final --> outputRail[Output rails]
+  outputRail --> caller[Caller]
+
+  retrieval[Application retrieval] --> retrievalRail[Retrieval rails]
+  retrievalRail --> model
+```
+
+Every rail returns `allow`, `block`, or a transform valid for its phase. A
+block stops that path. An invalid configuration, thrown evaluator, invalid
+result, timeout, or cancellation fails closed instead of silently allowing the
+content.
+
+The [Guardrails overview](/harness/guardrails/) shows the same
+phase model and package boundary for technical evaluators; this handbook graph
+owns the implementation steps and exact configuration.
+
+Guardrails are not interchangeable with the other control layers:
+
+| Question | Canonical control |
+| --- | --- |
+| Is this caller allowed to perform the business action? | Application authentication and authorization |
+| May this prepared tool call run or require approval? | [Govern agent actions](/handbook/harness/secure-and-govern/) |
+| May this exact content cross the selected phase? | Guardrails |
+| May the tool access this file, process, network, or tenant boundary? | [Isolate agent execution](/handbook/harness/secure-and-govern/sandbox-and-mcp/) |
+
+A later rail cannot undo a tool side effect that already ran. Put a check before
+the side effect when its outcome must determine admission.
+
+## Choose the phase from the value you protect
+
+| Phase | Protected value | Runs | Transform target | Typical use |
+| --- | --- | --- | --- | --- |
+| `input` | Validated agent input | Before instructions and the first model request | `user_message` | Block an instruction override; normalize a question |
+| `tool_input` | One selected tool's wire arguments | Before tool schema preparation, permissions, governance, approval, and handler execution | `tool_input` | Remove a secret from one exact tool field |
+| `tool_output` | Schema-validated tool result | Before the result returns to the model loop | `tool_output` | Reduce an internal result to a public projection |
+| `output` | Final candidate result | Before the caller receives it | `bot_message` | Remove internal markers from the final answer |
+| `retrieval` | Application-supplied retrieved chunks | When application retrieval calls `filterRetrievedChunks(...)` | No content rewrite; allow or block chunks | Exclude documents that fail a release rule |
+
+Tool actions must name a non-empty `tools` selector. Guardrails do not recurse
+through arbitrary JSON or guess which field is sensitive. Validate the exact
+value and bind a reviewed codec when a structured tool value needs text
+inspection.
+
+## Follow one implementation path
+
+1. [Build the first guarded agent](./build-the-first-guarded-agent/) with one
+   deterministic input action and verify the provider was not called on block.
+2. [Configure actions and phase flows](./configure-actions-and-phase-flows/)
+   to add ordered allow, block, and transform decisions and understand every
+   action and flow option.
+3. [Protect tool input and output](./protect-tool-input-and-output/)
+   when one selected tool's wire arguments or validated result needs a content
+   boundary.
+4. [Use a model-backed Guardrail](../model-backed-guardrails/) only when a
+   deterministic check cannot express the content decision. Register its model
+   alias before the protected agent and evaluate its quality separately.
+5. [Select a privacy detector](../privacy-detectors/) when the task is
+   sensitive-data detection. Install exactly the adapter and external runtime
+   the selected detector requires.
+6. [Test Guardrail enforcement](../test-guardrails/) at direct-action,
+   deterministic Harness, selected-adapter, and live-evaluation boundaries.
+
+## Availability and enablement
+
+| Capability | Default after installing `@purista/harness` | Additional requirement |
 | --- | --- | --- |
-| Content rail | `allow`, `block`, phase-specific `transform` | Guardrails addon |
-| Tool permission or policy | `allow`, `deny`, `require_approval`; policies also support `audit` | Harness governance |
-| Immediate approval request | `approved`, `rejected` | Application-supplied `GovernanceApprovalProvider` |
-| Durable human review | `ExternalWaitOutcome`, then an immutable execution claim and receipt | Application review workflow |
+| Guardrail binding and actions | Unavailable | Install `@purista/harness-guardrails`, define actions/flows, and set `guardrails` on each protected default-loop agent |
+| Deterministic custom action | Available after addon installation | Application-owned TypeScript evaluator |
+| Model-backed action | Available after addon installation | A separately registered Harness model alias with the capability required by the check |
+| Sensitive-data actions | Available after addon installation | One application-selected `SensitiveDataDetector` implementation |
+| Native privacy detector | Unavailable | Install `@purista/harness-guardrails-native-privacy`; verify platform binary support |
+| Presidio detector | Unavailable | Install `@purista/harness-guardrails-presidio`; provision and secure an application-owned Presidio sidecar |
+| Local NER detector | Unavailable | Install `@purista/harness-guardrails-local-ner` and its optional Transformers peer; provision model files before startup |
 
-A content `block` never requests approval or suspends a durable workflow.
+Installation never protects an agent automatically. Set `guardrails: rails`
+inside each protected default-loop agent definition. The Harness resolves that
+binding during agent registration and `.build()` validates every referenced
+tool and model alias before the runtime can start.
 
-## 1. Define actions and inline configuration
+## Observe decisions without retaining content
 
-```sh title="Install the Guardrails addon"
-npm install @purista/harness-guardrails
-```
+Each evaluation emits a content-free `GUARDRAIL` span, an outcome counter, and
+a duration metric. A normal `block` is an enforcement decision, not a tracing
+error. Evaluation failure is an operational error and remains fail-closed.
 
-`defineGuardrailAction(...)` produces an opaque action token. Its phase,
-selector, schema, callback, timeout, and transform permission stay together in
-one reviewed declaration. `defineGuardrails(...)` receives the typed action map
-and the inline flow order.
+Keep `telemetry({ contentCaptureMode: 'NO_CONTENT' })` for production unless the
+application has a reviewed retention and access policy. Record stable
+`reasonCode` and failure categories—not prompts, matched text, tool values,
+retrieved documents, model output, detector offsets, or callback exceptions.
 
-```ts title="src/guardrails/supportRails.ts"
-import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardrails'
-import { z } from 'zod'
+Direct model calls and custom-handler agents are outside automatic enforcement;
+their application code owns its own release checks. Guardrails do not inspect
+opaque provider reasoning.
 
-const normalizeQuestion = defineGuardrailAction({
-  phase: 'input',
-  valueSchema: z.string(),
-  evaluate: ({ value }) => ({
-    decision: 'transform',
-    target: 'user_message',
-    value: value.trim(),
-    reasonCode: 'question_normalized',
-  }),
-})
-
-const blockInstructionOverride = defineGuardrailAction({
-  phase: 'input',
-  valueSchema: z.string(),
-  mayTransform: false,
-  evaluate: ({ value }) =>
-    /ignore (all )?previous instructions/i.test(value)
-      ? { decision: 'block', reasonCode: 'instruction_override' }
-      : { decision: 'allow' },
-})
-
-const removeInternalMarker = defineGuardrailAction({
-  phase: 'output',
-  valueSchema: z.string(),
-  evaluate: ({ value }) => ({
-    decision: 'transform',
-    target: 'bot_message',
-    value: value.replaceAll(/\[internal:[^\]]*\]/gi, ''),
-    reasonCode: 'internal_marker_removed',
-  }),
-})
-
-export const supportRails = defineGuardrails({
-  config: {
-    rails: {
-      input: { flows: ['normalize question', 'block instruction override'] },
-      output: { flows: ['remove internal marker'] },
-    },
-  },
-  actions: {
-    'normalize question': normalizeQuestion,
-    'block instruction override': blockInstructionOverride,
-    'remove internal marker': removeInternalMarker,
-  },
-  actionTimeoutMs: 2_000,
-})
-```
-
-An action returns `allow`, `block`, or a phase-specific `transform`. Keep a
-`reasonCode` stable and content-free; it is suitable for a metric, trace, or
-log, unlike a prompt, matched text, or exception. Codes must match
-`^[a-z][a-z0-9_]{0,63}$`.
-
-`config.rails` defaults to `{}`. Each configured phase contains an ordered,
-distinct `flows` list. The compiler checks every ID against the action map and
-the action's declared phase. Invalid configuration, a missing action, invalid
-outcome, thrown action, cancellation, or timeout fails closed.
-
-## 2. Attach rails to the agent
-
-`attach()` retains the normal agent definition and appends the Guardrails
-interceptor. It rejects custom-handler agents because their handler owns the
-model and tool lifecycle.
-
-```ts title="src/createSupportHarness.ts"
-import { defineHarness, type ModelProvider } from '@purista/harness'
-import { z } from 'zod'
-import { supportRails } from './guardrails/supportRails.js'
-
-export function createSupportHarness(provider: ModelProvider) {
-  return defineHarness({ name: 'support' })
-    .telemetry({ contentCaptureMode: 'NO_CONTENT' })
-    .models({
-      support: { provider, model: 'selected-in-composition', capabilities: ['object'] },
-    })
-    .agents(({ agent }) => ({
-      answer: supportRails.attach(agent({
-        model: 'support',
-        input: z.string().min(1).max(2_000),
-        output: z.string(),
-        builtinTools: false,
-        instructions: 'Answer the support question concisely.',
-      })),
-    }))
-    .build()
-}
-```
-
-The [Guardrails overview](/harness/guardrails/) is the canonical website
-projection for the shared inline-authoring and build-preflight guarantees.
-
-| Call or field | What it controls | Important constraint |
-| --- | --- | --- |
-| [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Creates the named application composition root that will own this agent. | The name is diagnostic only. It does not make the guardrail a caller-authorization policy. |
-| [`defineGuardrailAction(...)`](/handbook/api/functions/_purista_harness-guardrails.defineGuardrailAction/) | One typed phase-specific check. | `valueSchema` must match the protected value. `mayTransform: false` forbids transforms even if a callback returns one. |
-| [`defineGuardrails(...)`](/handbook/api/functions/_purista_harness-guardrails.defineGuardrails/) | Ordered flows and action map. | Every flow ID must exist once in the action map and match its phase; invalid composition fails closed. |
-| [`actionTimeoutMs`](/handbook/api/interfaces/_purista_harness-guardrails.DefineGuardrailsOptions/#actiontimeoutms) | Default budget for an action evaluation. | Use a finite value below the run deadline; timeout is a failed control, not an allow. |
-| [`supportRails.attach(...)`](/handbook/api/classes/_purista_harness-guardrails.Guardrails/#attach) | Adds the ordered interceptor to a default-loop agent. | It cannot attach to a custom `handler` agent, because that handler owns the loop. |
-| [`.telemetry(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#telemetry) | Content capture policy for the Harness. | Keep `NO_CONTENT` when policy evidence must not retain prompts or completions. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) and [`.agents(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agents) | Register the alias before the default-loop agent and retain the attached agent definition for build-time checks. | `object` fits the declared schema. Declare only capabilities and tools the selected model and reviewed agent actually need. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates cross-registry references before returning the runnable Harness. | A missing alias or invalid agent definition fails before content can reach a provider; policy callbacks still need their own bounded execution tests. |
-
-## Phase coverage
-
-The [Guardrails overview](/harness/guardrails/) owns the shared five-phase
-matrix, timing, transform targets, and composition guarantees. This guide
-focuses on authoring actions and attaching the resulting interceptor.
-
-Tool-input and tool-output actions must declare a nonempty `tools` selector.
-Use `valueSchema` for the exact protected value. The schema validates without
-coercing, defaulting, stripping fields, or transforming JSON. Guardrails do not
-recursively inspect arbitrary tool JSON: bind a reviewed codec to the exact
-string field when a tool input or output needs inspection.
-
-The standard sensitive-data actions come from
-`createSensitiveDataActions({ detector })`. Configure their selected policies
-inline under `config.sensitiveData` with camelCase `maskToken` and
-`scoreThreshold`; see [Select a privacy detector](/handbook/harness/secure-and-govern/privacy-detectors/).
-
-## Compose content checks and approval
-
-The executable [Guardrails example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
-combines input, tool, and final-output rails with governance on one agent.
-The focused [bank governance example](https://github.com/puristajs/harness/tree/main/examples/bank-governance)
-shows immediate approval. Static `require_approval` permissions and policy
-approval demands use the same provider, invoked once for the collected demands.
-
-Policy predicates, approval, audit, and rail callbacks have finite budgets and
-receive an effective `signal` and `deadline`. Honour both. Set the Harness
-callback budget with `.defaults({ decisionTimeoutMs: 2_000 })`; rails retain
-the `actionTimeoutMs` default and per-action `timeoutMs` cap. A late approval
-cannot start the handler, and a later rail cannot revoke an admitted effect.
-For a human response that may take minutes or days, use
-[durable human review](/handbook/harness/orchestrate-work/human-review/).
-
-## Errors, evidence, and tests
-
-Import `DecisionBlockedError` and `DecisionEvaluationError` from
-`@purista/harness`. A block is an expected decision; an evaluation failure
-means the control could not complete safely. Use canonical `DecisionEvidence`
-and stable `reasonCode` or `failureKind`, never exception text, prompt, matched
-text, tool input, or reviewer comment.
-
-Direct model calls and custom-handler agents own their own release boundary;
-`attach()` does not cover them. Rails do not inspect opaque provider reasoning
-and cannot retract content already released by custom code.
-
-Use deterministic actions and a fake provider to prove the flow: an allowed
-input reaches the provider, a transformed input reaches it in transformed form,
-and a blocked input reaches neither model nor tool. Also test a missing action,
-an invalid action result, an action timeout, detector failure, and build
-preflight for a missing selected model or tool. These tests prove enforcement
-and composition; use [evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/)
-to measure model quality.
+API reference: [`defineGuardrailAction(...)`](/handbook/api/functions/_purista_harness-guardrails.defineGuardrailAction/),
+[`defineGuardrails(...)`](/handbook/api/functions/_purista_harness-guardrails.defineGuardrails/),
+[`AgentDefinition.guardrails`](/handbook/api/types/_purista_harness.AgentDefinition/#signature), and
+[`Guardrails.filterRetrievedChunks(...)`](/handbook/api/classes/_purista_harness-guardrails.Guardrails/#filterretrievedchunks).

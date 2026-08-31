@@ -28,17 +28,17 @@ const detector = createNativePrivacyDetector({ id: 'support-privacy-v1' })
 const actions = createSensitiveDataActions({ detector })
 
 export const privacyRails = defineGuardrails({
-  config: {
-    rails: {
-      input: { flows: ['mask sensitive data on input'] },
-      output: { flows: ['mask sensitive data on output'] },
-    },
-    sensitiveData: {
-      input: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
-      output: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
-    },
-  },
-  actions,
+	config: {
+		rails: {
+			input: { flows: ['mask sensitive data on input'] },
+			output: { flows: ['mask sensitive data on output'] },
+		},
+		sensitiveData: {
+			input: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
+			output: { entities: ['EMAIL_ADDRESS', 'PHONE_NUMBER'], maskToken: '<REDACTED>', scoreThreshold: 0.8 },
+		},
+	},
+	actions,
 })
 ```
 

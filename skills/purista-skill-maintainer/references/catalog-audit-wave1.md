@@ -8,6 +8,8 @@
   - internal meta skill for the shared skill catalog
 - `purista-docs-maintainer`
   - internal meta skill for the public website, handbook, API documentation, and coverage
+- `purista-tutorial-maintainer`
+  - internal authoring workflow for beginner-friendly Framework tutorials and independently runnable examples with dependency setup and demo UIs
 
 ## Consolidation inputs
 The old fragmented framework skill set is folded into `purista`:

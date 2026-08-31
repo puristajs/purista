@@ -114,20 +114,18 @@ const harness = defineHarness({ name: 'test' })
       capabilities: ['object'],
     },
   })
-  .agents(({ agent }) => ({
-    answerer: agent({
-      model: 'fast',
-      input: z.object({ question: z.string() }),
-      output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
-      instructions: 'Answer concisely.',
-    }),
-  }))
+  .agent('answerer', {
+    model: 'fast',
+    input: z.object({ question: z.string() }),
+    output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
+    instructions: 'Answer concisely.',
+  })
   .build()
 
 const session = await harness.getSession('test-user')
 
 await expect(
-  session.agents.answerer.prompt({ question: 'hello?' })
+  session.agents.answerer.run({ question: 'hello?' })
 ).resolves.toMatchObject({ answer: 'Fake answer from test fixture.' })`}
             label="Fake provider test"
             language="typescript"
@@ -393,7 +391,7 @@ it('contains scorer fails gracefully on missing pointer', async () => {
 
 // 1. command runs through sandbox executor
 it('runs command through sandbox exec', async () => {
-  const result = await session.agents.diagrammer.prompt(input)
+  const result = await session.agents.diagrammer.run(input)
   expect(result.diagramXml).toBeDefined()
 })
 
@@ -405,14 +403,14 @@ it('throws SandboxNoExecutorError without executor', async () => {
     .build()
 
   const s = await noExecHarness.getSession('t')
-  await expect(s.agents.diagrammer.prompt(input))
+  await expect(s.agents.diagrammer.run(input))
     .rejects.toThrow('SandboxNoExecutorError')
 })
 
 // 3. validates input schema before calling server
 it('rejects invalid tool input', async () => {
   await expect(
-    session.agents.diagrammer.prompt({ badInput: true })
+    session.agents.diagrammer.run({ badInput: true })
   ).rejects.toThrow('ValidationError')
 })`}
             label="Stdio MCP contract tests"
@@ -429,26 +427,26 @@ it('throws McpAuthError on 401', async () => {
   const harness = buildHarnessWithHttpMcp({
     url: 'http://fake-mcp/bad-auth',
   })
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('McpAuthError')
 })
 
 // 2. protocol failures map to McpProtocolError
 it('throws McpProtocolError on bad response', async () => {
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('McpProtocolError')
 })
 
 // 3. output schema validation
 it('rejects invalid MCP server output', async () => {
   // fake server returns wrong shape
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('ValidationError')
 })
 
 // 4. tool returns isError: true
 it('throws ToolError when MCP signals isError', async () => {
-  await expect(session.agents.search.prompt(input))
+  await expect(session.agents.search.run(input))
     .rejects.toThrow('ToolError')
 })`}
             label="HTTP MCP contract tests"

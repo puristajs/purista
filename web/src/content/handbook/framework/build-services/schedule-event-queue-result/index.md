@@ -4,31 +4,47 @@ description: Export a provider-neutral schedule contract, then keep time, delive
 order: 360
 ---
 
-Use a schedule when an external platform must start work at a known time.
-PURISTA defines the schedule contract; it does not run a production scheduler.
-The platform owns timing, the QueueBridge owns durable delivery, and a worker
-owns the idempotent business effect.
+Use a schedule when time should start a business flow. PURISTA Core provides a
+trigger-only `SchedulerRuntime` that runs in a separate host and publishes a
+declared event. The receiving subscription or queue worker owns business work;
+the scheduler host never boots business services or invokes their handlers.
+
+`DefaultSchedulerProvider` is included for local development and deterministic
+tests. Production requires an explicitly selected provider and a distributed
+EventBridge when the scheduler and business application run in different
+processes.
+
+| Contract question | Schedule answer |
+| --- | --- |
+| Who initiates it? | A separate scheduler host observes time through its configured provider. |
+| What is selected? | The Core runtime accepts an event target and publishes that named event. |
+| Who waits? | No business caller waits; downstream subscription/queue processing is independent. |
+| What is the normal result? | An at-least-once event carrying schedule occurrence metadata. |
+| What stays decoupled? | The scheduler does not run business handlers, own worker retries, or guarantee exactly-once business effects. |
 
 ```mermaid title="Scheduled service flow"
 flowchart LR
-  S[External scheduler] -->|event, job, or command trigger| T[Declared target]
-  T -->|event path| E[Custom event]
-  E --> Q[QueueBridge job]
-  T -->|queue path| Q
+  S[SchedulerRuntime and provider] -->|publish declared event| E[EventBridge]
+  E --> B[Event-to-queue binding]
+  E --> U[Bounded subscription]
+  B --> Q[QueueBridge job]
   Q --> W[Idempotent worker]
+  U --> R
   W --> R[Durable result or result event]
 ```
 
-There is no included scheduling provider, exporter, or in-process production
-runner. A definition is useful only after your chosen platform has a deployment
-artifact/process that reads it or implements the equivalent trigger. Do not
-mistake metadata or a generated artifact for an enabled schedule.
+The local provider does not make a production schedule durable or distributed.
+A definition becomes active only after the separate scheduler host loads it,
+starts with a suitable provider/EventBridge, and reports the expected runtime
+status. External platform exports remain available, but generated metadata is
+not itself an enabled schedule.
 
 ## Start with the right target
 
-Choose an event when the scheduled tick is a business fact or more than one
-component may react. Choose a queue when a single durable job fits. Choose a
-command only for short, idempotent trigger logic.
+The Core runtime uses an event target. Bind that event to a queue when one
+durable job fits, or consume it with a bounded subscription. Queue and command
+targets remain useful for external-provider exports but the Core runtime rejects
+them; do not build a Core scheduler host that invokes handlers directly.
 
 | You need to | Read |
 | --- | --- |

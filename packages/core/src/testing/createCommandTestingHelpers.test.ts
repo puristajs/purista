@@ -91,4 +91,52 @@ describe('command testing helpers', () => {
 			await harness.destroy()
 		}
 	})
+
+	it('types and executes the received and returned transform representations', async () => {
+		const serviceBuilder = new ServiceBuilder({
+			serviceName: 'TransformHarnessService',
+			serviceVersion: '1',
+			serviceDescription: 'runtime transform harness',
+		})
+
+		const commandBuilder = serviceBuilder
+			.getCommandBuilder('greetLegacy', 'greet a user from a legacy request')
+			.addPayloadSchema(z.object({ name: z.string() }))
+			.addParameterSchema(z.object({ enthusiastic: z.boolean() }))
+			.addOutputSchema(z.object({ greeting: z.string() }))
+			.setTransformInput(
+				z.string(),
+				z.object({ enthusiastic: z.stringbool() }),
+				async function (_context, name, parameter) {
+					return {
+						payload: { name },
+						parameter,
+					}
+				},
+			)
+			.setTransformOutput(z.string(), async function (_context, result) {
+				return result.greeting
+			})
+			.setCommandFunction(async function (_context, payload, parameter) {
+				return { greeting: `${parameter.enthusiastic ? 'Hello' : 'Hi'} ${payload.name}` }
+			})
+
+		serviceBuilder.addCommandDefinition(commandBuilder.getDefinition())
+
+		const harness = await createCommandTestHarness(serviceBuilder, commandBuilder)
+
+		try {
+			const received = {
+				payload: 'Ada',
+				parameter: { enthusiastic: 'true' },
+			}
+			const response = await harness.run(received)
+
+			expectTypeOf(received).toMatchTypeOf<Parameters<typeof harness.run>[0]>()
+			expectTypeOf(response.result).toEqualTypeOf<string | undefined>()
+			expect(response.result).toBe('Hello Ada')
+		} finally {
+			await harness.destroy()
+		}
+	})
 })

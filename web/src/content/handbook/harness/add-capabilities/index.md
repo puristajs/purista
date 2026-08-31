@@ -20,7 +20,7 @@ only application code decides whether the principal may perform it.
 
 ## Before enabling a capability
 
-- Disable built-ins with `builtinTools: false` and re-add only what is needed.
+- Keep built-ins omitted by default and enable only the exact names the agent needs.
 - Pass a principal or tenant context to the handler; never rely on an instruction
   to enforce authorization.
 - Define small input and output schemas and return safe domain errors.

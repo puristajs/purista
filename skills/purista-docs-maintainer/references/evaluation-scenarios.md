@@ -24,6 +24,20 @@ Use these scenarios to forward-test whether the skill produces focused, accurate
 - [Scenario 18: Semantic method lookup](#scenario-18-semantic-method-lookup)
 - [Scenario 19: Partial custom-adapter example](#scenario-19-partial-custom-adapter-example)
 - [Scenario 20: API-generation coverage for a first-party package](#scenario-20-api-generation-coverage-for-a-first-party-package)
+- [Scenario 21: Primitive semantics, failure asymmetry, and continuing example](#scenario-21-primitive-semantics-failure-asymmetry-and-continuing-example)
+- [Scenario 22: Dense lifecycle, schema metadata, and shared-page overlap](#scenario-22-dense-lifecycle-schema-metadata-and-shared-page-overlap)
+- [Scenario 23: Service boundary, hook tests, and HTTP parameters](#scenario-23-service-boundary-hook-tests-and-http-parameters)
+- [Scenario 24: Cross-cutting pages interrupt the learning path](#scenario-24-cross-cutting-pages-interrupt-the-learning-path)
+- [Scenario 25: Harness sandbox, deterministic tests, and evaluation CI](#scenario-25-harness-sandbox-deterministic-tests-and-evaluation-ci)
+- [Scenario 26: Agent governance, model Guardrails, and Framework ownership](#scenario-26-agent-governance-model-guardrails-and-framework-ownership)
+- [Scenario 27: Published-version migration without implementation-history leakage](#scenario-27-published-version-migration-without-implementation-history-leakage)
+- [Scenario 28: EventBridge and deployment topology coverage](#scenario-28-eventbridge-and-deployment-topology-coverage)
+- [Scenario 29: Recipes and cross-cutting tests duplicate focused owners](#scenario-29-recipes-and-cross-cutting-tests-duplicate-focused-owners)
+- [Scenario 30: Secure built-in defaults and skill execution boundaries](#scenario-30-secure-built-in-defaults-and-skill-execution-boundaries)
+- [Scenario 31: Beginner governance and external policy engines](#scenario-31-beginner-governance-and-external-policy-engines)
+- [Scenario 32: Consumer-style runnable example](#scenario-32-consumer-style-runnable-example)
+- [Scenario 33: Flatten a linear task graph](#scenario-33-flatten-a-linear-task-graph)
+- [Scenario 34: Declarative agent and workflow registration](#scenario-34-declarative-agent-and-workflow-registration)
 
 ## Scenario 1: New store adapter
 
@@ -318,7 +332,8 @@ Expected behavior:
 
 - traces and tests the real input-transform, domain-validation, guard, handler,
   output-validation/transform, response, event, and error order;
-- puts one readable lifecycle diagram on the Commands hub;
+- uses one readable lifecycle diagram or two/three focused diagrams when the
+  complete flow would be too dense, while retaining one exact order table;
 - orders focused pages from first command through success event, invocation,
   enqueue, stream/event composition, resources/stores/context, exposure,
   failure, and tests;
@@ -564,3 +579,501 @@ Near miss to reject:
 - replacing the missing member link with a package root link; or
 - declaring the guide complete because the source export exists while the
   generated website cannot present it.
+
+## Scenario 21: Primitive semantics, failure asymmetry, and continuing example
+
+Prompt:
+
+```text
+Rewrite Commands so a newcomer understands request-response, can run one
+update command, then add invocation, events, transforms, HTTP exposure, errors,
+and tests without losing the original example.
+```
+
+Expected behavior:
+
+- defines who selects the command, who waits, what response exists, which
+  caller identity metadata remains available, and how the command stays
+  contractually independent of named callers/subscribers;
+- verifies the complete lifecycle and records every stage's input, output,
+  ordering, side-effect boundary, failure classification, public response, and
+  skipped later stages;
+- distinguishes raw representation schemas from domain schemas around input
+  and output transforms, and derives guard placement from runtime execution
+  rather than the visual order of fluent builder calls;
+- explains beside the first working handler that invalid caller input returns
+  actionable handled validation details, an intentional business rejection
+  exposes only safe `HandledError` data, and unexpected or invalid-output
+  failures become an opaque internal response;
+- carries one small real-world operation through sibling pages, showing only
+  each new declaration/handler delta and keeping names, schemas, results, and
+  errors consistent;
+- uses a consumer-local dependency response schema and states stripping versus
+  rejection only for the verified schema library; and
+- makes invocation, success events, custom events, queues, streams, exposure,
+  and tests directly discoverable without a duplicate composition wrapper.
+
+Near miss to reject:
+
+- saying a command “does not know the caller” while omitting principal, tenant,
+  sender, trace, and correlation metadata available in context;
+- describing input and output validation as the same public `400` response;
+- catching a database/provider exception and returning its message in a handled
+  error;
+- changing domains and identifiers on every child page so readers must rebuild
+  the mental model; or
+- claiming every Standard Schema implementation strips unknown response fields
+  because the shown Zod object does.
+
+## Scenario 22: Dense lifecycle, schema metadata, and shared-page overlap
+
+Prompt:
+
+```text
+The Commands lifecycle diagram is hard to read, the first command schemas do
+not help generated OpenAPI clients, and resources/stores/context/errors are
+explained repeatedly across shared and command pages. Improve the flow without
+losing lookup coverage.
+```
+
+Expected behavior:
+
+- re-verifies raw input, domain validation, guards, handler, domain output,
+  output transform, response, and event order from implementation and tests;
+- splits the visual at semantic handoffs when that produces clearer input,
+  execution, and output diagrams, while preserving one numbered order table;
+- verifies the current schema-to-JSON-Schema/OpenAPI converter before adding
+  business descriptions and optional safe, schema-valid examples;
+- makes the service resource page own declaration, composition-root injection,
+  lifecycle, and test replacement; the store page own selection/wiring/shared
+  operations; the shared context/error pages own fundamentals; and the command
+  pages own only exact callback capabilities and command failure mapping; and
+- preserves useful routes and direct lookup links while removing repeated
+  examples, builder tours, and option tables that add no local delta.
+
+Near miss to reject:
+
+- changing only the Mermaid layout while retaining an incorrect stage order;
+- claiming every Standard Schema library preserves Zod metadata;
+- adding real tenant, user, invoice, or credential data as an OpenAPI example;
+- deleting a shared or primitive page solely because both mention `context` or
+  `HandledError`; or
+- keeping the same full resource/store/error tutorial on every primitive page.
+
+## Scenario 23: Service boundary, hook tests, and HTTP parameters
+
+Prompt:
+
+```text
+The first command constructs dependencies in the handler, hook tests call raw
+callbacks without the right context, and its HTTP route does not explain how
+path and query values become typed command parameters. Correct the guide.
+```
+
+Expected behavior:
+
+- presents the service as the logical container that declares shared resource,
+  configuration, metric, and runtime requirements for its definitions;
+- distinguishes application interfaces from concrete resources, stores,
+  bridges, logging, and telemetry supplied through `getInstance(...)`, and
+  states the exact service-instance or context member where each appears;
+- uses string service-version keys inferred from literal `canInvoke(...)` or
+  `canConsumeStream(...)` declarations;
+- documents direct transform and guard accessors with the correct context mock,
+  service binding, lifecycle-stage arguments, result validation, and excluded
+  stages, then uses the service runtime harness for complete-order evidence;
+- maps every `:path` and documented query name to the parameter schema and
+  handler, including raw string parsing and matching required/optional states
+  in OpenAPI metadata and runtime validation.
+
+Near miss to reject:
+
+- describing `context` as a global dependency container or saying validated
+  service configuration is copied onto it when implementation keeps it on the
+  bound service instance;
+- using numeric service-version property access in recommended TypeScript;
+- treating a directly invoked transform as proof that its surrounding schemas
+  ran; or
+- marking a query optional only in OpenAPI while leaving its runtime schema
+  required, or vice versa.
+
+## Scenario 24: Cross-cutting pages interrupt the learning path
+
+Prompt:
+
+```text
+Build services starts with handler context, stores, and shared error handling
+before Services and Commands. Reorder it without losing useful information.
+```
+
+Expected behavior:
+
+- identifies the executable newcomer path independently from cross-cutting
+  lookup material;
+- retains handler-context and shared-error pages when they own unique
+  cross-primitive contracts, but places them after the primitive sequence and
+  links them locally from implementation pages;
+- migrates store selection, wiring, and shared operations to the stores and
+  configuration chapter, preserving a focused handler-use task;
+- records a per-page retain, migrate, merge, or retire disposition before
+  editing and preserves a redirect when canonical ownership changes; and
+- verifies direct-child order, previous/next behavior, old routes, inbound
+  links, and both newcomer and exact-lookup journeys.
+
+Near miss to reject:
+
+- deleting shared pages because primitive pages mention the same nouns;
+- requiring a newcomer to read a context reference before creating a service;
+- leaving a full store tutorial under Build services and another under store
+  configuration; or
+- moving a source file without redirecting the old public route.
+
+## Scenario 25: Harness sandbox, deterministic tests, and evaluation CI
+
+Prompt:
+
+```text
+The Harness sandbox page duplicates MCP setup, model fakes silently return
+fallback responses, and the evaluation chapter describes datasets and CI
+without a runnable gate. Refactor and correct the product at the root.
+```
+
+Expected behavior:
+
+- verifies sandbox capabilities, optional dependencies, lifecycle, adapter
+  contracts, MCP transports, fake-provider behavior, and evaluation APIs from
+  source and tests before editing;
+- keeps built-in sandbox selection/configuration and production enforcement in
+  the sandbox chapter, MCP HTTP/stdio setup in the MCP chapter, and
+  adapter-specific provisioning on focused adapter pages;
+- uses strict scripted interactions and unused-fixture detection when the
+  public test helper supports them, or fixes the helper additively with tests,
+  TSDoc, public exports/specs, and compatibility preserved;
+- separates primitive-local first tests from cross-cutting tool, workflow,
+  replay, state, and adapter testing, and states exactly what each proves;
+- provides a versioned reviewed dataset, candidate/task/scorer wiring,
+  per-case/coverage-first interpretation, application release assertion,
+  package command, and bounded protected CI job; and
+- distinguishes fake-driven implementation evidence, real-adapter conformance,
+  and nondeterministic live-agent quality without using one as proof of another.
+
+Near miss to reject:
+
+- teaching the same complete MCP example under both sandboxing and MCP;
+- calling a fallback-returning fake reliable without detecting unexpected or
+  unused interactions;
+- claiming a generic sandbox contract proves tenant or process isolation;
+- presenting an evaluation loop with no executable release decision or CI
+  command; or
+- retrying a low score until the candidate passes.
+
+## Scenario 26: Agent governance, model Guardrails, and Framework ownership
+
+Prompt:
+
+```text
+Secure and govern agents lists guardrails and policies but does not show how to
+define a policy, require approval, use a separate guardrail model, or attach the
+controls to a PURISTA service. Make it implementable.
+```
+
+Expected behavior:
+
+- separates application authorization, tool selection/permissions, governance,
+  Guardrails, approval, sandbox, and MCP/platform isolation;
+- documents typed policy selectors/effects, defaults/precedence, shadow and
+  enforce modes, bounded approval, content-safe audit, failure behavior, and
+  deterministic handler-suppression tests;
+- defines Guardrail phases and ordered actions, registers a separate
+  object-capable model alias before the protected agent, keeps deterministic
+  rails first, and injects concrete provider/model bindings at composition;
+- keeps full standalone semantics in Harness while Framework pages show the
+  agent-definition, `getInstance(..., { ai })`, authorization, and sandbox-owner
+  integration points; and
+- sends real guardrail-model accuracy and agent correctness to versioned
+  evaluations rather than deterministic flow tests.
+
+Near miss to reject:
+
+- calling prompt instructions a policy or guardrail;
+- using model output as caller authorization;
+- putting the concrete provider/model in the Framework builder requirement;
+- treating immediate approval as a durable human-review workflow; or
+- claiming one fake model response proves guardrail quality.
+
+## Scenario 27: Published-version migration without implementation-history leakage
+
+Prompt:
+
+```text
+Write the current PURISTA major migration guide. Several APIs changed names
+more than once while the new major was developed.
+```
+
+Expected behavior:
+
+- identifies the latest published source tag and intended final release target,
+  then diffs exported APIs, runtime behavior, dependencies, generated output,
+  tests, and maintained examples;
+- excludes names that existed only between unpublished target commits;
+- begins with an affected-usage matrix and gives old/new code, reason, ordered
+  edits, missing-step failure, data compatibility, verification, and rollback
+  for every developer-relevant change;
+- distinguishes package alignment, application source migration, durable-data
+  migration, adapter/topology migration, and contract coexistence; and
+- blocks or labels unresolved target behavior instead of presenting it as a
+  released historical fact.
+
+Near miss to reject:
+
+- turning the git commit history into a user migration sequence;
+- listing only package-manager commands;
+- saying “run the tests” without per-boundary evidence;
+- copying legacy durable tables into an incompatible store; or
+- documenting an internal package that was never published.
+
+## Scenario 28: EventBridge and deployment topology coverage
+
+Prompt:
+
+```text
+Document EventBridge choices and show how to compile, run, and deploy the same
+application as a monolith or independent services with an HTTP gateway.
+```
+
+Expected behavior:
+
+- defines EventBridge ownership, registration, invocation/event/stream flow,
+  capabilities, bridge-before-service startup, readiness, health, drain, and
+  shutdown before comparing adapters;
+- gives each supported adapter exact optional installation, provisioning,
+  configuration/defaults, supported/unsupported capabilities, security,
+  failure/reconnect, verification, and migration guidance;
+- distinguishes TypeScript compilation from bundling and identifies concrete
+  entry points, assets, config/secrets, probes, signals, and external runtime
+  dependencies;
+- distinguishes direct monolith definition registration from the independent
+  HTTP process that learns endpoints over EventBridge, including startup-order
+  and missing/late-registration consequences; and
+- requires every custom adapter capability claim to have implementation and
+  real-provider evidence.
+
+Near miss to reject:
+
+- saying all bridges have the same guarantees because they implement one
+  interface;
+- starting services before the bridge without verified adapter-specific reason;
+- describing `tsc` output as a bundled executable;
+- implying a container image provisions brokers, sidecars, stores, or IAM; or
+- hiding deployment below a generic security/operations page.
+
+## Scenario 29: Recipes and cross-cutting tests duplicate focused owners
+
+Prompt:
+
+```text
+Apply patterns and recipes contains monolith and microservices pages, while Test
+applications repeats the complete command and queue test tutorials. Make both
+topics useful and concise.
+```
+
+Expected behavior:
+
+- moves topology setup to the dedicated deployment graph and preserves public
+  redirects;
+- retains a recipe only when it owns a real cross-capability outcome, decision,
+  end-to-end implementation delta, and verification;
+- leaves primitive handler/helper/lifecycle tests beside commands,
+  subscriptions, streams, queues, and attached agents;
+- makes the cross-cutting test chapter own service composition, cross-message
+  flows, real adapters, topology, and focused release evidence; and
+- links to focused owners instead of copying full builder chains, method tables,
+  or error cases.
+
+Near miss to reject:
+
+- retaining empty pages for navigation symmetry;
+- renaming a deployment page “recipe” without changing its reader job;
+- duplicating a primitive test and calling the copy “integration”; or
+- deleting old routes without redirects and content-retention evidence.
+
+## Scenario 30: Secure built-in defaults and skill execution boundaries
+
+Prompt:
+
+```text
+Built-in Harness tools should be opt-in, but every example sets
+builtinTools: false. Check whether skills collide with that default and explain
+the security limits of skill scripts and instructions.
+```
+
+Expected behavior:
+
+- traces the canonical built-in resolver, agent registration, skill mounting,
+  model tool exposure, sandbox capabilities, and tests before changing claims;
+- makes omission enable no built-ins, removes redundant opt-out fields from the
+  normal path, and keeps explicit named allowlists where capabilities are used;
+- requires a default-loop skill agent to name `read` and fails during
+  configuration before model or sandbox I/O when it is missing;
+- states that skills never grant tools, `allowed-tools` is unenforced metadata
+  unless source proves otherwise, and registration/mounting never executes a
+  bundled script;
+- explains that harmful instructions can still steer separately allowed tools,
+  and covers source pinning/review, discovery trust, domain authorization,
+  credentials/egress, execution isolation, deterministic tests, and change
+  re-review; and
+- updates Framework attachment behavior and guidance when a Framework
+  allowlist is not consistently projected into Harness.
+
+Near miss to reject:
+
+- auto-enabling every built-in because a skill is present;
+- claiming `allowed-tools` enforces permissions because the frontmatter field
+  exists;
+- saying skill scripts are safe merely because mounting does not execute them;
+- retaining `builtinTools: false` in every recommended snippet after omission
+  becomes the verified secure default; or
+- discovering the missing `read` only after a provider request starts.
+
+## Scenario 31: Beginner governance and external policy engines
+
+Prompt:
+
+```text
+Explain Harness governance to a new developer and show how to use OPA or Cedar
+through adapter(...).
+```
+
+Expected behavior:
+
+- starts with the prepared-tool decision path and separates tool selection,
+  permissions, governance, approval, content Guardrails, handler authorization,
+  and sandbox enforcement;
+- builds one working native deny rule first, then explains selector typing,
+  unmatched default, precedence, approval, audit, exposure, shadow rollout,
+  failures, and deterministic verification in dependency order;
+- verifies the package/export inventory before claiming an OPA, Cedar, or
+  generic external-policy adapter exists;
+- when the first-party OPA package ships, teaches its exact install, fixed
+  client, typed `opaPolicy(helpers, ...)` mapping, Standard Schema result,
+  undefined decision, bounds/errors, strict fake, and real-OPA verification;
+- for engines without a package, states that fact and gives a focused
+  application-owned `GovernancePolicyEvaluator` guide while explaining that
+  `adapter(...)` only preserves evaluator types;
+- distinguishes OPA's reusable Data API transport from embedded Cedar and AWS
+  Verified Permissions, which are different execution topologies, and rejects
+  a generic arbitrary-endpoint adapter that widens credential or SSRF risk; and
+- requires both fake-evaluator control-flow tests and selected-engine
+  integration tests before enforcement.
+
+Near miss to reject:
+
+- opening with one large composition containing unexplained approval, audit,
+  native rules, and a placeholder external client;
+- saying “use the OPA/Cedar adapter” instead of verifying and naming the
+  focused OPA package while keeping Cedar topologies separate;
+- implying `adapter(...)` performs network I/O, provisions a client, loads a
+  bundle, or understands vendor policy syntax;
+- documenting a generic “Cedar URL” or treating an embedded runtime and AWS
+  Verified Permissions as configurations of the same adapter;
+- returning unchecked vendor JSON or allowing on evaluator failure; or
+- treating model/tool input as authenticated principal or tenant identity.
+
+## Scenario 32: Consumer-style runnable example
+
+Prompt:
+
+```text
+The Guardrails quickstart tells readers to build Harness workspaces before they
+can run it. Make it look and behave like a normal Node/TypeScript application.
+```
+
+Expected behavior:
+
+- removes dependency-workspace build commands from the public run path;
+- gives the example its own runtime dependencies and package-local install,
+  typecheck, test, build, and start commands;
+- uses the supported Node runtime's native environment-file flag and provides
+  a safe `.env.example` when provider credentials are needed;
+- uses a real provider in the executable application while injecting a fake
+  provider into deterministic tests; and
+- verifies the application package without requiring a live provider call in
+  automated tests.
+
+Near miss to reject:
+
+- exposing monorepo bootstrap commands as application prerequisites;
+- using a fake provider in the only runnable application path;
+- adding `dotenv` or a custom parser when the declared Node engine already
+  provides the required loader;
+- making tests require an API key or network access; or
+- committing a populated `.env` file.
+
+## Scenario 33: Flatten a linear task graph
+
+Prompt:
+
+```text
+Govern agent actions contains a governance-policy overview whose implementation
+steps appear as sub-sub-pages. Keep the routes, but make the topic easier to scan.
+```
+
+Expected behavior:
+
+- confirms that the pages form one ordered governance implementation path, not
+  separate capability families;
+- keeps Govern agent actions as the owning topic and makes the overview, native
+  policy, choices, rollout, approval, audit, external adapter, and tests direct
+  siblings in that order;
+- preserves every canonical route and source file because the reader jobs did
+  not change;
+- updates the approved information architecture and canonical manifest
+  together; and
+- verifies desktop/mobile indentation, breadcrumbs, previous/next order, and
+  internal links from the manifest-derived navigation.
+
+Near miss to reject:
+
+- moving files or changing URLs only to make folder depth match navigation;
+- retaining a nested wrapper because the source directory is nested;
+- flattening a real adapter or provider family whose overview owns a distinct
+  selection decision; or
+- maintaining a second hard-coded sidebar tree.
+
+## Scenario 34: Declarative agent and workflow registration
+
+Prompt:
+
+```text
+Update Harness and Framework documentation after adding singular and plural
+agent/workflow registration plus a direct Guardrails field.
+```
+
+Expected behavior:
+
+- traces the exported builder types, runtime merge path, duplicate validation,
+  Guardrails binding, PURISTA forwarding, type tests, and generated API before
+  changing examples;
+- teaches `.agent(id, definition)` and `.workflow(id, definition)` as the normal
+  repeatable inline path with model-before-agent and agent-before-workflow order;
+- explains `.agents(record)` and `.workflows(record)` as cohesive pre-typed
+  batch registration, and states that all four methods accumulate while
+  duplicate ids fail;
+- shows schema-derived instruction/handler context and workflow `ctx.agents`
+  inference without broad casts or extracted definition constants;
+- binds configured Guardrails with `guardrails: rails` on a default-loop agent,
+  removes redundant `builtinTools: false`, and states the custom-handler
+  incompatibility; and
+- proves the same provider-neutral definition passes through
+  `setHarnessAgent(...)` while Core remains independent of the optional addon.
+
+Near miss to reject:
+
+- reintroducing `.agents(({ agent }) => ...)`, `.workflows(({ workflow }) => ...)`,
+  `defineAgent(...)`, or a Guardrails decorator/attach helper;
+- presenting plural registration as a replacement registry instead of an
+  additive batch;
+- defining a workflow before the agents it calls or using casts to hide lost
+  inference;
+- documenting Guardrails on a custom-handler agent; or
+- linking to removed helper interfaces or generated API anchors.

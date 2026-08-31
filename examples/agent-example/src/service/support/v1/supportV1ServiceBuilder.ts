@@ -2,6 +2,8 @@ import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
 
 import type { IncidentRepository } from '../../../resource/incidentRepository.js'
+import type { RollbackReviewRepository } from '../../../resource/rollbackReviewRepository.js'
+import type { HarnessStorage } from '@purista/harness'
 import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
 import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
 
@@ -13,3 +15,5 @@ export const supportServiceInfo = {
 export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
 	.setConfigSchema(supportServiceV1ConfigSchema)
 	.defineResource<'incidentRepository', IncidentRepository>()
+	.defineResource<'rollbackReviewRepository', RollbackReviewRepository>()
+	.defineResource<'harnessStorage', HarnessStorage>()

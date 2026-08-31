@@ -44,16 +44,14 @@ const harness = defineHarness({ name: 'research' })
   .storage(local.storage)
   .sandbox(local.sandbox)
   .workspace(local.workspace)
-  .workflows(({ workflow }) => ({
-    report: workflow({
-      input,
-      output,
-      handler: async ctx => {
-        const facts = await ctx.step('collect-facts-v1', () => collectFacts(ctx))
-        return writeReport(facts)
-      },
-    }),
-  }))
+  .workflow('report', {
+    input,
+    output,
+    handler: async ctx => {
+      const facts = await ctx.step('collect-facts-v1', () => collectFacts(ctx))
+      return writeReport(facts)
+    },
+  })
   .build()
 
 process.on('SIGTERM', () => local.close())`}

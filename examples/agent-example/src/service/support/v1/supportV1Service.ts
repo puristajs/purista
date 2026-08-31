@@ -2,9 +2,13 @@ import { analyzeSignalsAgentBuilder } from './agent/analyzeSignals/analyzeSignal
 import { assessRollbackRiskAgentBuilder } from './agent/assessRollbackRisk/assessRollbackRiskAgentBuilder.js'
 import { coordinateIncidentResponseAgentBuilder } from './agent/coordinateIncidentResponse/coordinateIncidentResponseAgentBuilder.js'
 import { triageTicketAgentBuilder } from './agent/triageTicket/triageTicketAgentBuilder.js'
+import { reviewRollbackAgentBuilder } from './agent/reviewRollback/reviewRollbackAgentBuilder.js'
 import { createIncidentBriefCommandBuilder } from './command/createIncidentBrief/createIncidentBriefCommandBuilder.js'
 import { getIncidentSnapshotCommandBuilder } from './command/getIncidentSnapshot/getIncidentSnapshotCommandBuilder.js'
 import { getRunbookCommandBuilder } from './command/getRunbook/getRunbookCommandBuilder.js'
+import { decideRollbackReviewCommandBuilder } from './command/decideRollbackReview/decideRollbackReviewCommandBuilder.js'
+import { executeApprovedRollbackCommandBuilder } from './command/executeApprovedRollback/executeApprovedRollbackCommandBuilder.js'
+import { requestRollbackReviewCommandBuilder } from './command/requestRollbackReview/requestRollbackReviewCommandBuilder.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 type AgentDefinition = Parameters<typeof supportV1ServiceBuilder.addAgentDefinition>[number]
@@ -14,6 +18,9 @@ const commandDefinitions: CommandDefinition[] = [
 	getIncidentSnapshotCommandBuilder.getDefinition(),
 	getRunbookCommandBuilder.getDefinition(),
 	createIncidentBriefCommandBuilder.getDefinition(),
+	requestRollbackReviewCommandBuilder.getDefinition(),
+	decideRollbackReviewCommandBuilder.getDefinition(),
+	executeApprovedRollbackCommandBuilder.getDefinition(),
 ]
 
 const agentDefinitions: AgentDefinition[] = [
@@ -21,6 +28,7 @@ const agentDefinitions: AgentDefinition[] = [
 	await analyzeSignalsAgentBuilder.getDefinition(),
 	await assessRollbackRiskAgentBuilder.getDefinition(),
 	await coordinateIncidentResponseAgentBuilder.getDefinition(),
+	await reviewRollbackAgentBuilder.getDefinition(),
 ]
 
 export const supportV1Service = supportV1ServiceBuilder

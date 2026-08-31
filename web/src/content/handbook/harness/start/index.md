@@ -25,11 +25,28 @@ Install core + one provider → define a typed agent → open a session → invo
 | One model provider and safe configuration | [Configure the first model](/handbook/harness/start/configure-the-first-model/) |
 | One safe application capability | [Add the first tool](/handbook/harness/start/add-the-first-tool/) |
 | Sessions, streams, timeouts, or structured output | [Build agents](/handbook/harness/build-agents/) |
-| Multi-step orchestration or human approval | The Harness orchestration chapter |
+| Multi-step orchestration or human approval | [Orchestrate work](/handbook/harness/orchestrate-work/) |
 
 Do not add a sandbox, MCP client, memory engine, or guardrail package until its
 boundary is required. Each is enabled separately and has different security and
 operational consequences.
+
+## Grow through three useful outcomes
+
+You do not need to configure every Harness boundary before the first run. Add
+the next layer only when the application needs its guarantee:
+
+| Outcome | Smallest useful setup | Replace or add before production |
+| --- | --- | --- |
+| Typed agent | Core, one model provider, one agent, and the default in-memory storage and memory | Application authentication, stable session identity, secret management, provider budgets, and an explicit retention policy |
+| Safe tool-using agent | Add one typed application tool with handler authorization; add named built-ins only when required | Explicit tool permissions, idempotent side effects, and a sandbox whose process, filesystem, network, and tenant isolation match the workload |
+| Durable reviewed workflow | Add durable steps and external waits; use `localDurableExecution()` only for a trusted single-host proof | A distributed `HarnessStorage`, compatible durable workspace, worker/resume queue, application review store, reviewer authorization, and a production sandbox when execution needs isolation |
+
+The third row is an integration architecture, not a bundled hosted service.
+Harness supplies the contracts and recovery semantics; the application supplies
+the distributed adapters, reviewer experience, identity, queue, and deployment.
+See [packages and feature availability](/handbook/harness/reference/packages-and-feature-availability/)
+before selecting production infrastructure.
 
 ## What success looks like
 

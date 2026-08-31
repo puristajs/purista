@@ -27,7 +27,7 @@ export const composedGenerateReportWorkerBuilder = generateReportWorkerBuilder
   .canInvokeAgent('summarizeReport', '1', { outputSchema: summarySchema })
   .setHandler(async function (context, message) {
     const report = archivePayloadSchema.parse(message.payload)
-    const stored = await context.service.Archive[1].storeReport(report, {})
+    const stored = await context.service.Archive['1'].storeReport(report, {})
     await context.queue.enqueue.notifyReport({ reportId: stored.reportId })
     await context.emit('report.archived', { reportId: stored.reportId })
     const summary = await context.agent['summarizeReport.1'].run({ reportId: stored.reportId })

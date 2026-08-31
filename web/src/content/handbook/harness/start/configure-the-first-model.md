@@ -14,19 +14,19 @@ import { openai } from '@purista/harness-openai'
 
 const apiKey = process.env.OPENAI_API_KEY
 if (!apiKey) {
-  throw new Error('OPENAI_API_KEY is required to start the support Harness.')
+	throw new Error('OPENAI_API_KEY is required to start the support Harness.')
 }
 
 export const harness = defineHarness({ name: 'support' })
-  .models({
-    assistant: {
-      provider: openai({ apiKey }),
-      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-      capabilities: ['object'],
-    },
-  })
-  // Agents are added next.
-  .build()
+	.models({
+		assistant: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			capabilities: ['object'],
+		},
+	})
+	// Agents are added next.
+	.build()
 ```
 
 `object` permits structured object generation. Declare only operations that the
@@ -37,7 +37,7 @@ failure until the relevant operation is used.
 | Call or field | Purpose | Choose it when |
 | --- | --- | --- |
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Creates this named composition root. | The name is useful in diagnostics; it is not a provider or model selector. |
-| [`.models(aliases)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers provider-backed aliases for later definitions. | Register it before `.agents(...)`; the alias key becomes the typed `model` value an agent may select. |
+| [`.models(aliases)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers provider-backed aliases for later definitions. | Register it before agent definitions; the alias key becomes the typed `model` value an agent may select. |
 | [`provider`](/handbook/api/interfaces/_purista_harness.ModelAlias/#provider) | Supplies the adapter that makes calls. | Install and configure the adapter before this import; missing credentials should stop startup. |
 | [`model`](/handbook/api/interfaces/_purista_harness.ModelAlias/#model) | Names the provider model for this standalone Harness runtime. | Keep it in composition, so agents remain independent of provider SDK names. |
 | [`capabilities`](/handbook/api/interfaces/_purista_harness.ModelAlias/#capabilities) | Declares operations Harness may request. | Add only the operations this model and adapter implement. `object` fits the next schema-validated agent. |

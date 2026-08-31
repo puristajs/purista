@@ -143,6 +143,19 @@ also require their lease/job controls and cancellation signal. Explain message
 immutability, trusted principal/tenant propagation, and `function` versus arrow
 function binding where relevant.
 
+Record the service-container boundary separately: what the service builder
+declares, what `getInstance(...)` receives from the composition root, what the
+service instance owns, and what the runtime projects onto each callback
+context. Verify the exact access path for validated service configuration,
+resources, stores, logger, metrics, tracing, bridges, and declared downstream
+clients instead of grouping them under a vague “dependency injection” claim.
+
+For each HTTP-exposed primitive, add a parameter mapping row for every path and
+query field. Record route/query metadata, the exact parameter-schema key, raw
+HTTP type, runtime parsing/coercion, required/optional state in both OpenAPI and
+the schema, handler access, and collision precedence. Query metadata alone is
+not runtime validation.
+
 ## Adapter contract inheritance
 
 For every adapter, inspect the public constructor and every implementation it

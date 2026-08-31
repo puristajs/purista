@@ -10,16 +10,22 @@ Schemas make a command, event, stream frame, or queue job a contract instead of 
 import { z } from 'zod'
 
 const createIncidentPayloadSchema = z.object({
-  title: z.string().min(1).max(160),
-  severity: z.enum(['low', 'high']),
-})
+  title: z.string().min(1).max(160).describe('Short incident summary'),
+  severity: z.enum(['low', 'high']).describe('Operational incident severity'),
+}).describe('Information required to create an incident')
 
 const createIncidentOutputSchema = z.object({
-  incidentId: z.string(),
-})
+  incidentId: z.string().describe('Created incident identifier'),
+}).describe('Result returned after the incident is created')
 ```
 
 Use the schema in the generated builder with `addPayloadSchema(...)` and `addOutputSchema(...)`. The CLI creates a schema file beside each generated handler; retain that placement so types and tests stay close to the public contract. Define schemas before transforms, guards, and the handler because those later builder steps infer their types from the contract.
+
+That is fluent-builder authoring order, not execution order. At runtime a
+command validates raw representation schemas before an input transform,
+validates domain input before the before-guard stage and handler, and validates
+the domain result before after guards and an optional output transform. See the
+[complete command lifecycle](/handbook/framework/build-services/commands/#follow-the-complete-command-lifecycle).
 
 For an incident request, `title` and `severity` are the command input; the
 generated `incidentId` is the response. Do not expose repository columns,
@@ -38,15 +44,14 @@ business contract, not an internal object graph.
 
 PURISTA validates any [Standard Schema](https://standardschema.dev/)-compatible
 validator at service boundaries. Generated PURISTA projects add `zod` as a
-direct application dependency and import `extendApi(...)` from
-`@purista/core`, so the normal generated path needs no additional schema
-package beyond those project dependencies.
+direct application dependency, so the normal generated path needs no
+additional schema package.
 
 | Need | Use | Important boundary |
 | --- | --- | --- |
 | Runtime validation and typed handler input/output | Any Standard Schema-compatible validator | The validator must implement Standard Schema validation. |
 | Generated HTTP/OpenAPI/definition schema | A validator that also exposes Standard Schema JSON Schema support | Validation alone is insufficient for a transport definition. |
-| Rich OpenAPI title, description, or example metadata | Zod plus `extendApi(...)` from `@purista/core` | `extendApi` adds metadata to a Zod schema; it is not a generic validator decorator. |
+| Rich OpenAPI descriptions and examples | Zod `.describe(...)` and `.meta({ examples: [...] })` | PURISTA preserves this metadata during Zod-to-JSON-Schema conversion. Keep examples synthetic, schema-valid, and safe to publish. |
 
 When JSON Schema conversion is absent or fails, PURISTA can still validate the
 message but cannot describe that contract for generated transport or service

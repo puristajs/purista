@@ -68,6 +68,35 @@ Execution definitions are mutually exclusive:
 - `setHarnessWorkflow(...)`
 - `setRunFunction(...)`
 
+When authoring the standalone Harness graph used by an attached agent, use the
+same singular/plural vocabulary for every registry:
+`.model/.models`, `.tool/.tools`, `.skill/.skills`, `.agent/.agents`, and
+`.workflow/.workflows`. Singular calls are the normal inline path; in
+particular, `.tool(id, definition)` derives the handler types from its schemas.
+Plural calls accept cohesive pre-typed records. Calls accumulate and duplicate
+ids fail instead of overwriting an earlier definition. Native tools are plain
+definition objects; no identity helper or registration brand exists.
+
+## Harness schema boundaries
+
+In the standalone Harness definition, Zod is the default example library but
+any Standard Schema validator is valid at agent, workflow, tool, and guardrail
+validation boundaries. Preserve the schema object directly: do not add a
+PURISTA wrapper or a provider-specific converter.
+
+Only a TypeScript tool input and a default-loop Harness-agent output must also
+implement Standard JSON Schema (`ModelSchema`). Harness projects those schema
+inputs once during `.build()` to frozen Draft 2020-12 JSON Schema and passes the
+owned JSON value unchanged to the model adapter. ArkType supports this directly;
+Valibot needs `toStandardJsonSchema(...)` from `@valibot/to-json-schema` only
+at those model-facing boundaries. Agent input, workflow input/output,
+custom-handler output, tool output, and guardrail values need Standard Schema
+validation only.
+
+When a PURISTA service declares its own command/event schemas, continue to use
+the Framework's Standard Schema guidance. The Harness requirement applies to
+the embedded Harness runtime definition, not to unrelated service contracts.
+
 Use `setHarnessWorkflow(workflow, { agents })` when a wrapped
 `@purista/harness` workflow calls harness-local agents through `ctx.agents`.
 Core registers those harness-local agents before registering the workflow, so
@@ -97,6 +126,20 @@ await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(
 ```
 
 Startup fails fast when aliases or capabilities are missing.
+
+Core constructs one shared Harness runtime per PURISTA service instance and
+registers all attached Harness agents, workflows, and workflow-local agents in
+it. The `ai` storage, workspace, sandbox, skills, governance, telemetry, and
+model-provider instances are bound once and the Harness is shut down once when
+the service is destroyed. Public model aliases remain definition-local: two
+attached agents may both declare `primary` with different defaults, while Core
+uses private service-runtime registry ids internally and preserves `primary`
+inside callbacks and Framework events.
+
+Treat the concrete adapter instances in `ai` as owned by that service instance.
+Services may use the same remote backend, but should receive separate closable
+client/adapter instances unless an adapter explicitly supports shared lifecycle
+or reference counting.
 
 For an application-owned durable human review, provide a Harness
 `HarnessStorage` through `ai.storage` and declare `.setDurability(...)` on the
@@ -194,11 +237,13 @@ Harness hashes tenant/principal-aware session and durable keys, so raw identity
 does not appear in IDs. `attach` never creates missing state; `restore` is only
 valid after a compatible committed durable workspace is bound. Missing state is
 a `SandboxStateLostError`, never an empty replacement. Ephemeral terminal
-results retain their receipt for idempotent prompt/stream replay but dispose
+results retain their receipt for idempotent run/stream replay but dispose
 owned compute; retryable and suspended runs only release attachments. Borrowed
-owners are detached, never deleted. `session.release()` detaches the client,
-while `session.close()` terminates logical compute before the Harness session
-record is deleted.
+owners are detached, never deleted. `session.release()` detaches live Harness
+resources while preserving stored state; `session.destroy()` explicitly
+terminates owned compute and deletes the Harness session record. Do not confuse
+these methods with `SandboxSession.close()`, which detaches one sandbox client
+attachment.
 
 ## Enterprise Sandbox Boundary
 
@@ -207,8 +252,13 @@ in `getInstance(..., { ai: { sandbox, sandboxOptions } })`; it does not create
 a container, authorize a caller, or impose network and resource limits. Treat
 the adapter as an explicit deployment boundary.
 
-- Use the Harness `inMemorySandbox()` for files-only agent paths. It has no
-  executor and is the safest default.
+- Use the Harness `inMemorySandbox()` for files and bounded text search. It has
+  no executor and is the safest zero-configuration default.
+- Built-in `grep` requires `sandbox.text_search`, not command execution. Both
+  default sandboxes provide it. A custom Docker, Kubernetes, microVM, or remote
+  adapter executes `searchText(...)` where its files live, returns explicit
+  completeness, and passes `sandboxTextSearchContract`; Harness does not use a
+  core-side read, JavaScript regex, or shell fallback.
 - Treat `bashSandbox()` as a trusted in-process helper, not a VM/container. It
   cannot host `mcp_stdio` because it has no long-lived-process `spawn` support.
 - Treat local host-directory execution as a trusted-worker/durability option,
@@ -216,12 +266,16 @@ the adapter as an explicit deployment boundary.
 - `@purista/harness-sandbox-docker` is an optional local Docker/OrbStack
   adapter. Configure it only in the application composition root with a
   caller-prepared digest-pinned image and trusted local Docker access. It
-  defaults to no network and does not yet provide durable-workspace recovery;
+  defaults to no network, executes bounded text search inside the guest, and
+  does not yet provide durable-workspace recovery;
   a retained volume is not a workflow checkpoint.
-- For code execution or stdio MCP in production, wire a custom container,
-  microVM, or remote sandbox adapter that enforces mounts, egress, unprivileged
-  process identity, CPU/memory/PID/time limits, per-run/tenant workspace
-  lifecycle, cancellation and cleanup.
+- For self-hosted production execution, use
+  `@purista/harness-sandbox-kubernetes` or another reviewed isolating adapter.
+  The first-party runtime creates restricted non-root Pods, executes bounded
+  search where files live, and optionally coordinates PVC generations with
+  `VolumeSnapshot` checkpoints. The cluster still owns namespaced RBAC, Pod
+  Security admission, egress, quotas/limits, CSI, image provenance, secrets,
+  retention, and cleanup policy.
 - A trusted Agent Plugin stdio server needs both spawn support and an immutable
   reviewed package mount. Neither the in-memory nor local host-directory
   sandbox provides this `mountReadOnly(...)` guarantee.
@@ -259,16 +313,49 @@ await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventB
 })
 ```
 
+For replicated PURISTA services, use PostgreSQL for Harness control state and
+the matched Kubernetes sandbox/workspace runtime for file-bearing recovery:
+
+```ts
+const storage = postgresHarnessStorage({
+  connectionString: process.env.DATABASE_URL!,
+})
+const execution = kubernetesSandboxRuntime({
+  namespace: process.env.PURISTA_SANDBOX_NAMESPACE!,
+  image: process.env.PURISTA_SANDBOX_IMAGE!,
+  runtimeId: 'research-v1',
+  workspace: { snapshotClassName: process.env.PURISTA_VOLUME_SNAPSHOT_CLASS },
+})
+
+const serviceInstance = await service.getInstance(eventBridge, {
+  ai: {
+    models,
+    storage,
+    sandbox: execution.sandbox,
+    workspace: execution.workspace,
+  },
+})
+```
+
+Each service instance receives its own adapter/client instances and constructs
+one shared Harness internally for every attached agent and workflow on that
+service. Replicas use the same stable Kubernetes `runtimeId` and PostgreSQL
+backend so they coordinate the same logical scopes. Agent definitions never
+branch on topology. Call `serviceInstance.destroy()` first, then close any
+separately returned adapter runtime such as `execution.close()`. No S3 service
+is required for the PVC/VolumeSnapshot path.
+
 Required capabilities are validated at service startup. Common durable replay
 requirements are `storage.workspace_checkpoint`, `workspace.durable`,
 `workspace.checkpoint`, `workspace.resume`, and `workspace.cleanup`. Add
 `workspace.retention`, `workspace.encrypted_storage`, and `workspace.quota`
 when production policy requires those guarantees.
 
-Use `inMemoryDurableWorkspace()` from `@purista/harness` for local
-development and tests. Do not describe it as production persistence; production
-services need a durable store that survives process restart and declares the
-required `workspace.*` capabilities.
+Use `localDurableExecution({ root, exec: false })` for low-effort, trusted
+single-host development and recovery tests. Use `inMemoryDurableWorkspace()`
+for unit tests. Do not describe either as distributed production persistence;
+production services need adapters that survive process restart and declare the
+required `storage.*` and `workspace.*` capabilities.
 
 Keep ownership clear:
 - `@purista/harness` owns workspace lifecycle, checkpoint references, workspace
@@ -303,8 +390,20 @@ Use governance for controls that are specifically about agent/tool behavior:
 - deny a model-requested tool call before the tool runs
 - require approval before a sensitive tool call
 - audit tool decisions using the canonical content-free `DecisionEvidence`
-- reuse policy packs from OPA/Rego, Microsoft AGT, Eve-policy, or other
-  governance ecosystems through optional harness policy adapters
+- reuse OPA through `@purista/harness-policy-opa`, or another external engine
+  through an application-owned `GovernancePolicyEvaluator`
+
+Harness ships `@purista/harness-policy-opa` as a focused OPA Data API transport
+and typed governance mapper. Use `createOpaClient(...)` plus
+`opaPolicy(helpers, ...)`; explicitly minimize the correlated tool context,
+validate the OPA result, and map it to a closed Harness decision. The package
+owns safe URL/path handling, one request, cancellation/deadline forwarding,
+bounded response parsing, undefined-document semantics, and content-free
+errors. The builder's `adapter(...)` helper alone still preserves types only.
+Embedded Cedar and AWS Verified Permissions remain different application-owned
+evaluator topologies. In every case, the application owns authenticated
+principal/resource resolution, credentials, policy distribution, rollout,
+decision-log controls, and selected-engine integration tests.
 
 Do not use governance to replace:
 - service `setBeforeGuardHooks(...)`
@@ -313,8 +412,9 @@ Do not use governance to replace:
 - deterministic validation before canonical state mutation
 
 PURISTA runtime wiring should pass tenant, principal, trace, correlation, and
-conversation metadata to the harness explicitly and only as safe scalar
-metadata. Keep that metadata separate from decision evidence; do not copy it
+conversation metadata to the harness explicitly as validated, minimal JSON.
+Metadata is application-supplied context, not proof of authentication. Keep it
+separate from decision evidence; do not copy it
 into evidence, reason codes, logs, or metrics. If an attached agent configures
 `require_approval` permissions or policies, provide one Harness `approval`
 provider in `ai.governance`. Agents without governance must
@@ -357,13 +457,13 @@ revocation after the side effect has been admitted.
 
 Use `@purista/harness-guardrails` only for a Harness **default-loop** agent.
 Keep it in the application composition root; `@purista/core` deliberately has
-no dependency on the optional addon. Attach the rail interceptor when defining
-the Harness agent passed to `setHarnessAgent(...)` or
+no dependency on the optional addon. Set `guardrails` directly on the
+default-loop Harness agent passed to `setHarnessAgent(...)` or
 `setHarnessWorkflow(...)`; the normal PURISTA service boundary still owns
 identity, guards, command/queue contracts, and the final mutation.
 
 - Input, output, tool-input, and tool-output rails run automatically for the
-  attached default-loop agent. Retrieval is application-owned and requires an
+  guarded default-loop agent. Retrieval is application-owned and requires an
   explicit `filterRetrievedChunks(...)` call before chunks enter agent input.
 - Actions declare their exact `phase`; a narrower value requires a
   non-transforming `valueSchema`. Input rails see parsed agent input. Tool-input

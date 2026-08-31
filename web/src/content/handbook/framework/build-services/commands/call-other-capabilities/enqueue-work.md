@@ -1,33 +1,38 @@
 ---
 title: Enqueue background work
 description: Declare a queue, enqueue or schedule accepted work from a command, and keep acceptance separate from worker completion.
-order: 327
+order: 325
 ---
 
 Use a queue when the command should accept durable work rather than wait for it to finish. Typical cases are report generation, notifications, imports, and calls with a long or unreliable external dependency.
 
 ## Declare and enqueue work
 
-```ts title="src/service/invoice/v1/command/createInvoice/createInvoiceCommandBuilder.ts"
-export const createInvoiceCommandBuilder = invoiceV1ServiceBuilder
-  .getCommandBuilder('createInvoice', 'Create an invoice')
-  .canEnqueue('invoiceNotification', notificationPayloadSchema, notificationParameterSchema)
-  .addPayloadSchema(createInvoicePayloadSchema)
-  .addParameterSchema(createInvoiceParameterSchema)
-  .addOutputSchema(createInvoiceOutputSchema)
-  .setCommandFunction(async function (context, payload) {
-    const invoice = await context.resources.invoices.create(payload)
-    const accepted = await context.queue.enqueue.invoiceNotification(
-      { invoiceId: invoice.id },
-      {},
-      { idempotencyKey: `invoice-notification:${invoice.id}` },
-    )
-    return { invoiceId: invoice.id, jobId: accepted.jobId }
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.ts"
+export const updateInvoiceCommandBuilder = invoiceV1ServiceBuilder
+  .getCommandBuilder('updateInvoice', 'Update an invoice')
+  .canEnqueue('invoiceNotification', invoiceNotificationPayloadSchema)
+  .addPayloadSchema(updateInvoicePayloadSchema)
+  .addParameterSchema(updateInvoiceParameterSchema)
+  .addOutputSchema(updateInvoiceOutputSchema)
+  .setCommandFunction(async function (context, payload, parameter) {
+    const invoice = await context.resources.invoices.update(parameter.invoiceId, payload)
+    if (!invoice) throw new HandledError(StatusCode.NotFound, 'Invoice does not exist')
+
+    if (parameter.notify) {
+      await context.queue.enqueue.invoiceNotification(
+        { invoiceId: invoice.invoiceId },
+        {},
+        { idempotencyKey: `invoice-updated:${invoice.invoiceId}:${invoice.updatedAt}` },
+      )
+    }
+
+    return invoice
   })
 ```
 
 `getCommandBuilder(...)` creates the local request boundary; the
-[`add…Schema(...)` methods](/handbook/framework/build-services/commands/create-and-validate/#know-what-each-definition-method-does)
+[`add…Schema(...)` methods](/handbook/framework/build-services/commands/create-and-validate/#understand-the-builder-methods)
 remain the command's own validated contract; and
 [`setCommandFunction(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction)
 installs the service-bound handler. `canEnqueue(...)` is the additional
@@ -52,7 +57,11 @@ The local command calls are [`getCommandBuilder(name, description, eventName?)`]
 
 You can schedule accepted work with `context.queue.scheduleAt.invoiceNotification(runAt, payload, parameter?, options?)`. Validate the time and use a stable idempotency key when duplicate scheduling would be harmful.
 
-The returned `QueueEnqueueResult` proves acceptance only. It is not worker completion, and the command success event does not make the resource write and queue acceptance atomic. See [Queues and workers](/handbook/framework/build-services/queues-and-workers/) for worker lifecycle, retries, and dead letters.
+The awaited `QueueEnqueueResult` proves acceptance only. This command discards
+the receipt because its caller needs the invoice result; an async HTTP producer
+can return the receipt unchanged when the caller needs a job ID. Queue
+acceptance is not worker completion, and the resource write plus enqueue is not
+atomic. See [Queues and workers](/handbook/framework/build-services/queues-and-workers/) for worker lifecycle, retries, and dead letters.
 
 Next: [Expose a command](/handbook/framework/build-services/commands/expose-a-command/) if an HTTP caller should receive job acceptance.
 

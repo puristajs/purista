@@ -34,4 +34,57 @@ do not manufacture one from a run identifier.
 Use timeouts, bounded concurrency, cancellation, and explicit continue or
 fail-fast policy to control evaluation work. A timeout stops cooperative waiting
 but cannot undo a remote side effect. Keep irreversible actions out of an
-evaluation task unless its fixture owns cleanup. Next: [extend and integrate evaluations](/handbook/harness/test-and-evaluate/integrate-evaluations/).
+evaluation task unless its fixture owns cleanup.
+
+Apply those limits at the evaluation boundary rather than relying only on the
+CI runner timeout:
+
+```ts title="src/evaluation/runProtectedIncidentEvaluation.ts"
+import { HarnessError, runEvaluation } from '@purista/harness'
+import { candidates } from './incidentRoutingCandidates.js'
+import { incidentRoutingDataset } from './incidentRoutingDataset.js'
+import { correctLabel } from './incidentRoutingScorers.js'
+import { routeIncidentTask } from './routeIncidentTask.js'
+
+const shutdown = new AbortController()
+process.once('SIGTERM', () => shutdown.abort())
+
+export async function runProtectedIncidentEvaluation() {
+	return runEvaluation({
+		runId: `incident-routing-${process.env.GITHUB_RUN_ID ?? 'local'}`,
+		dataset: incidentRoutingDataset,
+		candidates,
+		task: routeIncidentTask,
+		scorers: [correctLabel],
+		aggregateBy: ['kind', 'language'],
+		maxConcurrency: 4,
+		failurePolicy: 'continue',
+		retry: {
+			task: {
+				maxAttempts: 2,
+				delayMs: 500,
+				shouldRetry: error => error instanceof HarnessError && error.retriable,
+			},
+		},
+		timeouts: {
+			runMs: 8 * 60_000,
+			taskMs: 45_000,
+			scorerMs: 30_000,
+		},
+		signal: shutdown.signal,
+	})
+}
+```
+
+Use retry only for a callback failure classified as retriable. It keeps the
+same trial identity and must not repeat an irreversible effect. A low score,
+`not_applicable`, or `inconclusive` result is measurement evidence, not a retry
+condition. `continue` is useful for a diagnostic suite because later cases
+remain visible; choose `fail_fast` when further external work would be unsafe
+or unnecessarily expensive.
+
+The environment run ID is operational correlation, not a tenant, user, case,
+or trace identity. Do not put sensitive identifiers into `runId`, dataset IDs,
+candidate IDs, segments, logs, or artifact names.
+
+Next: [extend and integrate evaluations](/handbook/harness/test-and-evaluate/integrate-evaluations/).

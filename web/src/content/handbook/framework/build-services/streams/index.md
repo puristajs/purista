@@ -10,10 +10,18 @@ work. If an operation must finish after a disconnect, use a
 [queue and worker](/handbook/framework/build-services/queues-and-workers/) and
 let the caller retrieve the committed result.
 
+| Contract question | Stream answer |
+| --- | --- |
+| Who initiates it? | One caller opens one named service stream with payload and parameters. |
+| What is selected? | One registered stream handler and one transport session. |
+| Who waits? | The caller remains connected while frames arrive, until completion, failure, or cancellation. |
+| What is the normal result? | Ordered chunk frames, an optional final value, and a terminal completion frame. |
+| What stays decoupled? | The stream definition does not own the HTTP projection, and it does not guarantee completion after the caller disconnects. |
+
 Before adding a stream, verify the selected EventBridge. `DefaultEventBridge`
 supports local incremental streams; the current AMQP, NATS, MQTT, and Dapr
 EventBridges do not, and service startup rejects a registered stream on those
-adapters. See [EventBridge stream support](/handbook/framework/connect-distributed-infrastructure/event-delivery/#decide-stream-support-before-designing-a-public-stream)
+adapters. See [EventBridge stream support](/handbook/framework/connect-distributed-infrastructure/event-delivery/#decide-stream-support-before-designing-a-distributed-stream)
 before choosing a distributed topology.
 
 ## Check availability before design

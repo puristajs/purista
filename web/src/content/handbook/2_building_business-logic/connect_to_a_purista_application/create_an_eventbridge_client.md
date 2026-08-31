@@ -29,7 +29,7 @@ For command invocations from inside a handler, use `context.service`:
 ```typescript
 .setCommandFunction(async function (context, payload) {
   // Call another service command directly (typed, no HTTP)
-  const user = await context.service.UserService[1].getUser({ userId: payload.userId }, {})
+  const user = await context.service.UserService['1'].getUser({ userId: payload.userId }, {})
   return user
 })
 ```

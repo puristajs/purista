@@ -15,23 +15,23 @@ import { expect, it } from 'vitest'
 import { triageTicketAgentBuilder } from './triageTicketAgentBuilder.js'
 
 it('returns the validated result from a scripted provider', async () => {
-  const model = createScriptedHarnessModel()
-  model.enqueueObject({
-    object: { priority: 'high', reason: 'Customer cannot sign in' },
-    usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-    finishReason: 'stop',
-  })
+	const model = createScriptedHarnessModel()
+	model.enqueueObject({
+		object: { priority: 'high', reason: 'Customer cannot sign in' },
+		usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+		finishReason: 'stop',
+	})
 
-  const harness = await createAgentTestHarness(await triageTicketAgentBuilder.getDefinition(), {
-    models: {
-      primary: { provider: model, model: 'scripted-object-model', capabilities: ['object'] },
-    },
-  })
+	const harness = await createAgentTestHarness(await triageTicketAgentBuilder.getDefinition(), {
+		models: {
+			primary: { provider: model, model: 'scripted-object-model', capabilities: ['object'] },
+		},
+	})
 
-  await expect(harness.run({ payload: { ticketId: 'SUP-123', text: 'Cannot sign in' } })).resolves.toEqual({
-    priority: 'high',
-    reason: 'Customer cannot sign in',
-  })
+	await expect(harness.run({ payload: { ticketId: 'SUP-123', text: 'Cannot sign in' } })).resolves.toEqual({
+		priority: 'high',
+		reason: 'Customer cannot sign in',
+	})
 })
 ```
 
@@ -53,7 +53,7 @@ the wording of a probabilistic response.
 
 Pass `storage` and `workspace` only to exercise durable-workspace behavior;
 pass `sandbox` only for a tool path that needs it. A normal classification with
-`builtinTools: false` needs neither. For a skill case, create an isolated
+no built-in tools needs neither. For a skill case, create an isolated
 runtime with [`createAgentSkillTestRuntime(...)`](/handbook/api/functions/_purista_core.createAgentSkillTestRuntime/)
 and pass its returned `skills` option.
 

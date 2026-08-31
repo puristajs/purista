@@ -68,7 +68,7 @@ Before taking traffic, make the operating decisions visible to the team that own
 - Use [Security](/handbook/framework/secure-and-operate/security/) to enforce authentication, authorization, tenant boundaries, secret handling, and infrastructure permissions.
 - Use [Observability](/handbook/framework/secure-and-operate/observability/) to verify logs, metrics, and traces without exporting secrets or sensitive payloads.
 - Use [Reliability](/handbook/framework/secure-and-operate/reliability/) to define retries, idempotency, shutdown, recovery, and replay ownership.
-- Use [Deployment](/handbook/framework/secure-and-operate/deployment/) to validate the selected runtime, health behavior, identity, and infrastructure topology.
+- Use [Deploy applications](/handbook/framework/deploy-applications/) to compile, package, run, and validate the selected topology.
 
 **Production exit criteria:** the release has an owner for each external dependency; authenticated health and public-path checks pass; the selected delivery/store adapters have been tested under their intended failure conditions; and operators can find the trace, recovery action, and rollback decision without inspecting business code.
 

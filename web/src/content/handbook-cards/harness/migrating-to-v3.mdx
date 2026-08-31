@@ -1,74 +1,18 @@
 ---
 title: Migrating to Harness 3
-description: Replace overlapping state, runtime, wait, and checkpoint adapters with one HarnessStorage boundary.
+description: Migrate Harness 2.1.1 source, adapters and data with explicit verification and rollback boundaries.
 ---
 
-Harness 3 is a deliberate clean break. It keeps one run record and one storage
-contract for conversations and recoverable execution.
+Use the current migration guides in order:
 
-## Replace the public APIs
+1. [Adopt the Harness 3 clean-break API](/handbook/harness/upgrade-and-migrate/migrate-to-v3/)
+   for registration, invocation, session cleanup, schemas and optional controls.
+2. [Migrate adapters and data](/handbook/harness/upgrade-and-migrate/adapter-and-data-compatibility/)
+   for the storage, memory, sandbox and durable-record boundaries.
+3. [Verify rollout and rollback](/handbook/harness/upgrade-and-migrate/verification-and-rollback/)
+   before changing production traffic or retained data.
 
-| Harness 2 | Harness 3 |
-| --- | --- |
-| `.state(store)` | `.storage(storage)` |
-| `.runtime(runtime)` | Removed; `HarnessStorage` owns leases and checkpoints. |
-| `.externalWait(adapter)` | Removed; `HarnessStorage` owns opaque waits. |
-| `.checkpoints(store)` / `ctx.checkpoints` | Removed; use `ctx.step(...)` output or application storage. |
-| `.workspaceStore(store)` | `.workspace(workspace)` |
-| `StateStore` / `DurableStateStore` | `HarnessStorage` |
-| `InMemoryStateStore` | `InMemoryHarnessStorage` |
-| `SqliteDurableStateStore` | `SqliteHarnessStorage` |
-| `stateStoreContract` | `harnessStorageContract` |
-| `sandboxMemory()` / `MemoryAdapter` | Omit `.memory()` for the built-in engine, or configure a `MemoryEngine`. |
-| `user` memory scope / `userId` | `principal` scope / `principalId` on `getSession(id, identity)`. |
-
-```ts
-const local = localDurableExecution({ root: './.harness' })
-
-const harness = defineHarness()
-  .storage(local.storage)
-  .workspace(local.workspace)
-  .sandbox(local.sandbox)
-  .build()
-```
-
-## Replace the SQLite database
-
-Harness 3 rejects legacy `harness_durable_runs`, `harness_context_checkpoints`,
-and session tables without `identity_json` with `sqlite_schema_incompatible`. Stop all
-old workers, create a new database, and import only reviewed conversation data
-through an application migration. Direct table copying can recreate the split
-run state that this release removes.
-
-## PURISTA wiring
-
-PURISTA's top-level `stateStore` remains the standard general-purpose framework
-component for AI and non-AI services. It is not a Harness adapter.
-
-```ts
-await service.getInstance(eventBridge, {
-  stateStore, // general PURISTA application KV state
-  ai: {
-    models,
-    storage: harnessStorage, // AI conversations, runs, checkpoints, waits
-    workspace,
-    onSuspended,
-  },
-})
-```
-
-Attached Harness workflows opt into recovery with
-`.setDurability({ mode: 'required', runIdPath: ['requestId'] })`. Add
-`.setWorkspacePolicy(...)` only when files must replay with the run.
-
-## Verify before rollout
-
-1. Run `harnessStorageContract` against the production adapter.
-2. Test lease contention with two workers.
-3. Test restart after every committed `ctx.step(...)`.
-4. Test wait registration, duplicate signal, terminal signal, and resume.
-5. Confirm traces contain `harness.storage.*` operations but no checkpoint
-   output, wait IDs, prompts, tool arguments, or credentials.
-6. For memory, reopen representative sessions with the same optional identity,
-   verify a changed or omitted bound dimension fails before resource access, and
-   run `memoryEngineContract` for every non-default engine.
+The baseline is the [published 2.1.1 source](https://github.com/puristajs/harness/tree/v2.1.1).
+PURISTA's general-purpose `stateStore` remains separate from
+Harness storage; follow the [Framework integration guide](/handbook/framework/build-ai-powered-services/)
+for application runtime wiring.

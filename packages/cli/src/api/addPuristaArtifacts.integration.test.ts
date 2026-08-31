@@ -260,6 +260,7 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(agentBuilder).toContain(".setSessionPolicy({ mode: 'ephemeral' })")
 		expect(agentBuilder).toContain('.setExecutionPolicy({')
 		expect(agentBuilder).toContain("instructions: 'You are a helpful assistant for this service domain.'")
+		expect(agentBuilder).not.toContain('builtinTools: false')
 		for (const term of forbiddenAgentTerms) {
 			expect(agentBuilder).not.toContain(term)
 		}

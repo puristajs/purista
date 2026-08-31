@@ -54,22 +54,21 @@ startup](/handbook/framework/expose-and-consume-services/http-and-rest/runtime-a
 
 ```ts title="src/service/support/v1/agent/triageTicket/triageTicketAgentBuilder.ts"
 export const triageTicketAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
-  .addPayloadSchema(triageTicketInput)
-  .addOutputSchema(triageTicketOutput)
-  .addModel('primary', { capabilities: ['object'] })
-  .setHarnessAgent({
-    model: 'primary',
-    input: triageTicketInput,
-    output: triageTicketOutput,
-    instructions: 'Classify the ticket urgency and return the declared object.',
-    builtinTools: false,
-  })
-  .exposeAsHttpEndpoint('POST', 'support/triage', {
-    streamingMode: 'aggregate',
-    requestContentType: 'application/json',
-    responseContentType: 'application/json',
-  })
+	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
+	.addPayloadSchema(triageTicketInput)
+	.addOutputSchema(triageTicketOutput)
+	.addModel('primary', { capabilities: ['object'] })
+	.setHarnessAgent({
+		model: 'primary',
+		input: triageTicketInput,
+		output: triageTicketOutput,
+		instructions: 'Classify the ticket urgency and return the declared object.',
+	})
+	.exposeAsHttpEndpoint('POST', 'support/triage', {
+		streamingMode: 'aggregate',
+		requestContentType: 'application/json',
+		responseContentType: 'application/json',
+	})
 ```
 
 [`getAgentQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getagentqueuebuilder)
@@ -88,18 +87,17 @@ then projects the generated command because this route uses `aggregate`.
 
 ```ts title="src/service/support/v1/agent/answerTicket/answerTicketAgentBuilder.ts"
 export const answerTicketAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('answerTicket', 'Drafts a support answer')
-  .addPayloadSchema(answerTicketInput)
-  .addOutputSchema(answerTicketOutput)
-  .addModel('primary', { capabilities: ['text_stream'] })
-  .setHarnessAgent({
-    model: 'primary',
-    input: answerTicketInput,
-    output: answerTicketOutput,
-    instructions: 'Draft a concise support response.',
-    builtinTools: false,
-  })
-  .exposeAsHttpEndpoint('POST', 'support/answer', { streamingMode: 'stream' })
+	.getAgentQueueBuilder('answerTicket', 'Drafts a support answer')
+	.addPayloadSchema(answerTicketInput)
+	.addOutputSchema(answerTicketOutput)
+	.addModel('primary', { capabilities: ['text_stream'] })
+	.setHarnessAgent({
+		model: 'primary',
+		input: answerTicketInput,
+		output: answerTicketOutput,
+		instructions: 'Draft a concise support response.',
+	})
+	.exposeAsHttpEndpoint('POST', 'support/answer', { streamingMode: 'stream' })
 ```
 
 [`getAgentQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getagentqueuebuilder)

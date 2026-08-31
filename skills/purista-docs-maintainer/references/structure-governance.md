@@ -117,6 +117,14 @@ routes.
 - Every canonical page has a meaningful inbound path and focused next step.
 - A chapter landing page or capability hub contains orientation and decision
   guidance; it is not an empty wrapper or card index.
+- Direct children follow the reader's executable sequence before shared lookup
+  material. Cross-cutting context, error, and reference pages appear after the
+  task/capability sequence or under the chapter that owns the action; they do
+  not become artificial prerequisites at the top of a chapter.
+- A linear implementation sequence stays one level of direct children beneath
+  its owning topic, even when stable routes or source folders are deeper. Add a
+  sub-subtree only when its intermediate page owns a distinct capability family
+  or decision that readers intentionally browse independently.
 - A visible chapter has a distinct reader job and sufficient verified material
   for a first useful path, decisions or configuration, and a next step. Merge
   or redirect pointer-only, duplicate, or empty chapters instead of retaining
@@ -193,3 +201,8 @@ An intentional structural change updates, in order:
 Preserve stable routes when the reader job is unchanged. When the job or
 ownership changes, merge unique value into the new canonical page and add a
 redirect in the same change.
+
+For every page that looks misplaced, record one of these dispositions before
+editing navigation: retain and reorder, migrate and redirect, merge into an
+existing owner, or retire with explicit approval. Similar titles are not
+evidence that the content is redundant.

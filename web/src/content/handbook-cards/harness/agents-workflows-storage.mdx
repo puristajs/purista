@@ -35,7 +35,7 @@ application API still needs its own idempotency boundary.
 ```ts
 const session = await harness.getSession(`claims:${claimId}:${conversationId}`)
 try {
-  const answer = await session.agents.claims_support.prompt(
+  const answer = await session.agents.claims_support.run(
     { question },
     { timeoutMs: 30_000, idempotencyKey: requestId, signal: request.signal }
   )
@@ -46,7 +46,7 @@ try {
 }
 ```
 
-Use `session.close()` only for a deliberate deletion or retention workflow: it
+Use `session.destroy()` only for a deliberate deletion or retention workflow: it
 removes persisted session data. Call `harness.shutdown()` once during
 application shutdown, not after every request.
 
@@ -60,8 +60,8 @@ with `{ emitRunEvents: true }`.
 
 ```ts
 for await (const event of session.agents.claims_support.stream({ question })) {
-  if (event.type === 'tool.started') auditToolStart(event.toolId)
-  if (event.type === 'run.finished') sendToClient({ type: 'answer', value: event.output })
+	if (event.type === 'tool.started') auditToolStart(event.toolId)
+	if (event.type === 'run.finished') sendToClient({ type: 'answer', value: event.output })
 }
 ```
 
@@ -72,40 +72,35 @@ an application-owned decision. Keep each model responsibility narrow and make
 the allowed delegation visible with the workflow:
 
 ```ts
-.agents(({ agent }) => ({
-  facts: agent({
-    model: 'fast',
-    input: z.object({ report: z.string().min(1) }),
-    output: z.object({ facts: z.array(z.string()) }),
-    builtinTools: false,
-    instructions: 'Extract only concrete, testable facts.'
-  }),
-  risk: agent({
-    model: 'fast',
-    input: z.object({ facts: z.array(z.string()) }),
-    output: z.object({ level: z.enum(['low', 'medium', 'high']) }),
-    builtinTools: false,
-    instructions: 'Classify operational risk from the supplied facts only.'
+.agent('facts', {
+  model: 'fast',
+  input: z.object({ report: z.string().min(1) }),
+  output: z.object({ facts: z.array(z.string()) }),
+  instructions: 'Extract only concrete, testable facts.'
+})
+.agent('risk', {
+  model: 'fast',
+  input: z.object({ facts: z.array(z.string()) }),
+  output: z.object({ level: z.enum(['low', 'medium', 'high']) }),
+  instructions: 'Classify operational risk from the supplied facts only.'
+})
+.workflow('review_incident', {
+  input: z.object({ report: z.string().min(1) }),
+  output: z.object({ facts: z.array(z.string()), level: z.enum(['low', 'medium', 'high']) }),
+  delegation: { agents: ['facts', 'risk'], maxChildAgentCalls: 2 },
+  handler: async (ctx) => {
+    const facts = await ctx.agents.facts({ report: ctx.input.report })
+    const risk = await ctx.agents.risk({ facts: facts.facts })
+    return { ...facts, ...risk }
+  }
+})
   })
-}))
-.workflows(({ workflow }) => ({
-  review_incident: workflow({
-    input: z.object({ report: z.string().min(1) }),
-    output: z.object({ facts: z.array(z.string()), level: z.enum(['low', 'medium', 'high']) }),
-    delegation: { agents: ['facts', 'risk'], maxChildAgentCalls: 2 },
-    handler: async (ctx) => {
-      const facts = await ctx.agents.facts({ report: ctx.input.report })
-      const risk = await ctx.agents.risk({ facts: facts.facts })
-      return { ...facts, ...risk }
-    }
-  })
-}))
 ```
 
 Call it through the session, exactly as you call a direct agent:
 
 ```ts
-const result = await session.workflows.review_incident.prompt({ report })
+const result = await session.workflows.review_incident.run({ report })
 if (result.level === 'high') await incidentService.requestHumanReview(result)
 ```
 
@@ -125,22 +120,22 @@ and leaves each child call's input/output types intact.
 
 ```ts
 workflow({
-  input: z.object({ documents: z.array(z.string()).min(1) }),
-  output: z.object({ reviews: z.array(z.object({ recommendation: z.string() })) }),
-  delegation: {
-    agents: ['reviewer'],
-    maxChildAgentCalls: 10,
-    maxParallelChildAgentCalls: 2,
-    agentModelAliases: { reviewer: ['deep_review'] }
-  },
-  handler: async (ctx) => {
-    const reviews = await ctx.fanOut(
-      ctx.input.documents,
-      document => ctx.agents.reviewer({ document }, { model: 'deep_review' }),
-      { concurrency: 2 }
-    )
-    return { reviews }
-  }
+	input: z.object({ documents: z.array(z.string()).min(1) }),
+	output: z.object({ reviews: z.array(z.object({ recommendation: z.string() })) }),
+	delegation: {
+		agents: ['reviewer'],
+		maxChildAgentCalls: 10,
+		maxParallelChildAgentCalls: 2,
+		agentModelAliases: { reviewer: ['deep_review'] },
+	},
+	handler: async ctx => {
+		const reviews = await ctx.fanOut(
+			ctx.input.documents,
+			document => ctx.agents.reviewer({ document }, { model: 'deep_review' }),
+			{ concurrency: 2 },
+		)
+		return { reviews }
+	},
 })
 ```
 
@@ -158,10 +153,14 @@ It has its own sandbox and does not inherit parent history; later application
 code can inspect status and obtain its typed result.
 
 ```ts
-const task = await ctx.childTasks.start('reviewer', { documentId: ctx.input.documentId }, {
-  timeoutMs: 60_000,
-  model: 'deep_review'
-})
+const task = await ctx.childTasks.start(
+	'reviewer',
+	{ documentId: ctx.input.documentId },
+	{
+		timeoutMs: 60_000,
+		model: 'deep_review',
+	},
+)
 
 // In a later request, with the same session:
 const liveTask = await session.childTasks.get(task.id)
@@ -202,7 +201,7 @@ choose the durable workflow path for restart recovery.
 | Need | API or adapter choice | Operational rule |
 | --- | --- | --- |
 | Finish request resources, retain stored history | `session.release()` | Always call in `finally`. |
-| Remove session record and history | `session.close()` | Use only for an explicit deletion/retention flow. |
+| Remove session record and history | `session.destroy()` | Use only for an explicit deletion/retention flow. |
 | Keep a long workflow after restart | Persistent `HarnessStorage` plus optional durable workspace | Invoke a workflow with a stable durable run ID. |
 | Continue an in-process child-agent conversation | `ctx.childTasks.start(..., { mode: 'continuable' })` | It is not restart-safe. |
 | Deliver work after an outage | Application queue or worker | Own retry, idempotency, and delivery outside the Harness. |

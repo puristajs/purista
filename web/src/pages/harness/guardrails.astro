@@ -115,19 +115,19 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
               <td><code>@purista/harness-guardrails-presidio</code></td>
               <td>Existing Microsoft Presidio Analyzer deployment, custom recognizers, or deployment-selected languages</td>
               <td>Application-injected authenticated internal <code>POST /analyze</code> call; masking remains in Guardrails</td>
-              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#use-presidio-when-it-is-already-your-governed-detector-service">Presidio sidecar</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#4-use-presidio-when-it-is-already-your-governed-detector-service">Presidio sidecar</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-native-privacy</code></td>
               <td>Local common identifiers: email, phone, card, IPv4/IPv6, IBAN, US SSN, and URL</td>
               <td>Rust Node-API prebuild in process for Node.js and Bun; no network, model, or fallback implementation</td>
-              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#bind-the-native-detector-for-the-smallest-local-setup">Native privacy</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#2-bind-the-native-detector-for-the-smallest-local-setup">Native privacy</a></td>
             </tr>
             <tr>
               <td><code>@purista/harness-guardrails-local-ner</code></td>
               <td>Locally provisioned model labels such as person, organization, or location</td>
               <td>Optional Transformers.js peer with a pinned local model, asset manifest, label map, and startup warmup</td>
-              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#use-local-ner-only-with-provisioned-verified-model-assets">Local NER</a></td>
+              <td><a href="/handbook/harness/secure-and-govern/privacy-detectors/#5-use-local-ner-only-with-provisioned-verified-model-assets">Local NER</a></td>
             </tr>
           </tbody>
         </table>

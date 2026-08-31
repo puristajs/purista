@@ -16,7 +16,7 @@ flowchart LR
   Caller[Caller] --> App[Application\nauthentication · authorization · secret delivery]
   App --> Harness[Harness\nschemas · tool selection · lifecycle]
   Harness --> Model[Model provider]
-  Harness --> Sandbox[Sandbox adapter\nfiles · optional exec/spawn]
+  Harness --> Sandbox[Sandbox adapter\nfiles · bounded search · optional exec/spawn]
   Sandbox --> Stdio[Reviewed stdio MCP process]
   Harness --> Http[Remote Streamable HTTP MCP]
   App --> Domain[Domain service\ntransaction · audit · side effect]
@@ -37,16 +37,22 @@ isolation claim.
 
 | Option | Files and lifetime | Commands / long-lived processes | Isolation it actually provides | Use for | Do not use for |
 | --- | --- | --- | --- | --- | --- |
-| `inMemorySandbox()` | Per-session in-memory filesystem; released with the session | No executor, no `spawn` | A Harness filesystem boundary only | Reviewed files, mounted skills, regular TypeScript or HTTP tools | Commands, stdio MCP, persisted workspaces, untrusted-code isolation |
-| `bashSandbox()` | Per-session in-memory filesystem | `exec` through optional `just-bash`; no `spawn` | In-process execution helper, **not** a container or VM | Trusted development or narrowly controlled transformations | Untrusted documents/commands, stdio MCP, tenant/process isolation |
-| `localDurableExecution({ exec })` | Host-directory workspace; durable when configured | Files-only by default; `exec` starts a host child process when enabled | Realpath and symlink escape protections; **not** a hardened host boundary | Single-host trusted workers and local durability | Untrusted model-directed commands, tenant isolation, trusted Agent Plugin stdio |
+| `inMemorySandbox()` | Per-session in-memory filesystem with bounded search; released with the session | No executor, no `spawn` | A Harness filesystem/search boundary only | Reviewed files, mounted skills, regular TypeScript or HTTP tools | Commands, stdio MCP, persisted workspaces, untrusted-code isolation |
+| `bashSandbox()` | Per-session in-memory filesystem with the same bounded search | `exec` through optional `just-bash`; no `spawn` | In-process execution helper, **not** a container or VM | Trusted development or narrowly controlled transformations | Untrusted documents/commands, stdio MCP, tenant/process isolation |
+| `localDurableExecution({ exec })` | Host-directory workspace and bounded search; durable when configured | Non-executable by default; `exec` starts a host child process when enabled | Realpath and symlink escape protections; **not** a hardened host boundary | Single-host trusted workers and local durability | Untrusted model-directed commands, tenant isolation, trusted Agent Plugin stdio |
 | Custom isolating adapter | Adapter- and platform-owned | Declare only capabilities actually enforced, including `spawn` when needed | Whatever the container, microVM, remote runner, filesystem, network and identity policy enforce | Production command execution and stdio MCP | Any control the adapter does not explicitly enforce |
 
 `inMemorySandbox()` is the default for a text-and-tool claims review. It is
 the safest built-in choice because it has no executor. `bashSandbox()` supports
 `network` and `executionLimits` options passed to `just-bash`, but those are
 not a replacement for an operating-system or tenant isolation boundary.
-`localDurableExecution({ exec: false })` remains files-only by default.
+`localDurableExecution({ exec: false })` remains files-and-search only by default.
+
+Built-in `grep` uses the separate `sandbox.text_search` capability, so the
+default sandbox needs no shell. The adapter executes the bounded operation
+where its files live and returns explicit completeness. Custom adapters must
+pass the text-search contract; there is no core-side file-download or shell
+fallback.
 
 For a production executor, make isolation visible in the adapter contract and
 deployment design: root filesystem/mount policy, network egress, process user,
@@ -65,18 +71,16 @@ import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { z } from 'zod'
 
 const harness = defineHarness({ name: 'claims-review' })
-  .sandbox(inMemorySandbox())
-  .tools(({ tool }) => ({
-    read_claim_evidence: tool({
-      description: 'Read one reviewed evidence file already staged for this claim.',
-      input: z.object({ filename: z.string().regex(/^[a-z0-9._-]+$/i) }),
-      output: z.object({ text: z.string().max(20_000) }),
-      handler: async (ctx, { filename }) => ({
-        text: await ctx.sandbox.readText(`/workspace/evidence/${filename}`),
-      }),
-    }),
-  }))
-  .build()
+	.sandbox(inMemorySandbox())
+	.tool('read_claim_evidence', {
+			description: 'Read one reviewed evidence file already staged for this claim.',
+			input: z.object({ filename: z.string().regex(/^[a-z0-9._-]+$/i) }),
+			output: z.object({ text: z.string().max(20_000) }),
+			handler: async (ctx, { filename }) => ({
+				text: await ctx.sandbox.readText(`/workspace/evidence/${filename}`),
+			}),
+	})
+	.build()
 ```
 
 The tool schema and filename check are still necessary: path normalization is
@@ -115,18 +119,18 @@ the scoped request itself.
 import { defineHarness, inMemorySandbox } from '@purista/harness'
 
 const harness = defineHarness({ name: 'claims-review' })
-  .sandbox(inMemorySandbox())
-  .tools({
-    claim_policy: {
-      kind: 'mcp_http',
-      description: 'Look up an insurance-policy clause by policy and topic.',
-      url: process.env.CLAIMS_POLICY_MCP_URL!,
-      auth: { kind: 'bearer', token: process.env.CLAIMS_POLICY_MCP_TOKEN! },
-      redirect: 'error',
-      tool: 'policy.lookup',
-    },
-  })
-  .build()
+	.sandbox(inMemorySandbox())
+	.tools({
+		claim_policy: {
+			kind: 'mcp_http',
+			description: 'Look up an insurance-policy clause by policy and topic.',
+			url: process.env.CLAIMS_POLICY_MCP_URL!,
+			auth: { kind: 'bearer', token: process.env.CLAIMS_POLICY_MCP_TOKEN! },
+			redirect: 'error',
+			tool: 'policy.lookup',
+		},
+	})
+	.build()
 ```
 
 Use HTTPS, short-lived scoped credentials, and `redirect: 'error'` for a

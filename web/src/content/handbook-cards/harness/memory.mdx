@@ -39,13 +39,11 @@ No memory setup is required. Harness creates an in-memory engine when
 import { defineHarness, inMemorySandbox } from '@purista/harness'
 
 const harness = defineHarness({ name: 'claims-review' })
-  .sandbox(inMemorySandbox())
-  .models({
-    reviewer: { provider, model: 'reviewer-v1', capabilities: ['object'] }
-  })
-  .agents({})
-  .workflows({})
-  .build()
+	.sandbox(inMemorySandbox())
+		.models({
+			reviewer: { provider, model: 'reviewer-v1', capabilities: ['object'] },
+		})
+		.build()
 
 const session = await harness.getSession('claim:42')
 await session.memory.write('locale', 'de-DE', { ttlMs: 60 * 60 * 1_000 })
@@ -65,8 +63,8 @@ same shape before it opens a sandbox, model, memory engine, or run.
 
 ```ts
 const session = await harness.getSession('claim:42', {
-  tenantId: 'acme-insurance',
-  principalId: 'adjuster:ada'
+	tenantId: 'acme-insurance',
+	principalId: 'adjuster:ada',
 })
 ```
 
@@ -107,10 +105,10 @@ silently falling back to process-local behavior.
 
 ```ts
 const harness = defineHarness({ name: 'claims-review' })
-  .memory(memoryEngine)
-  .requires(['memory.persistent', 'memory.multi_instance'])
-  // models, tools, agents, workflows
-  .build()
+	.memory(memoryEngine)
+	.requires(['memory.persistent', 'memory.multi_instance'])
+	// models, tools, agents, workflows
+	.build()
 ```
 
 Install one first-party engine when durable or shared memory is required. Do
@@ -138,9 +136,9 @@ npm install @purista/harness-memory-sqlite
 import { sqliteMemoryEngine } from '@purista/harness-memory-sqlite'
 
 const harness = defineHarness({ name: 'claims-review' })
-  .memory(sqliteMemoryEngine({ file: '.purista/memory.sqlite' }))
-  // models, tools, agents, workflows
-  .build()
+	.memory(sqliteMemoryEngine({ file: '.purista/memory.sqlite' }))
+	// models, tools, agents, workflows
+	.build()
 ```
 
 SQLite needs no third-party runtime dependency for KV, TTL, lists, and FTS5.
@@ -173,18 +171,16 @@ string alias from drifting at runtime.
 
 ```ts
 const harness = defineHarness({ name: 'knowledge-assistant' })
-  .models({
-    memoryEmbedding: { provider, model: 'embed-v1', capabilities: ['embeddings'] },
-    memorySummary: { provider, model: 'summary-v1', capabilities: ['object'] }
-  })
-  .memory((model) => ({
-    engine: vectorMemoryEngine,
-    embedding: model.memoryEmbedding,
-    summary: model.memorySummary
-  }))
-  .agents({})
-  .workflows({})
-  .build()
+	.models({
+		memoryEmbedding: { provider, model: 'embed-v1', capabilities: ['embeddings'] },
+		memorySummary: { provider, model: 'summary-v1', capabilities: ['object'] },
+	})
+		.memory(model => ({
+			engine: vectorMemoryEngine,
+			embedding: model.memoryEmbedding,
+			summary: model.memorySummary,
+		}))
+		.build()
 ```
 
 TypeScript rejects an embedding configuration for an engine that does not
@@ -202,15 +198,15 @@ scope, result count, duration, and normalized error only.
 
 ```ts
 await ctx.memory.principal().write('claim-summary', claim, {
-  index: { text: claim.description },
-  tags: ['claim', 'open']
+	index: { text: claim.description },
+	tags: ['claim', 'open'],
 })
 
 const matches = await ctx.memory.principal().search({
-  text: 'water damage',
-  mode: 'text',
-  limit: 10,
-  tags: ['claim']
+	text: 'water damage',
+	mode: 'text',
+	limit: 10,
+	tags: ['claim'],
 })
 ```
 

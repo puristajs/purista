@@ -42,6 +42,6 @@ surface cannot validate.
 Use `signal` for I/O cancellation and store a business-keyed durable result
 before returning success. Lease extension and cancellation are not substitutes
 for an idempotent effect. For the capability declarations, read [compose a
-worker](/handbook/framework/build-services/queues-and-workers/invoke-enqueue-emit-stream-and-call-agents/); for store wiring, read [use stores in a service](/handbook/framework/build-services/use-stores-in-a-service/).
+worker](/handbook/framework/build-services/queues-and-workers/invoke-enqueue-emit-stream-and-call-agents/); for store wiring and handler operations, read [use stores from handlers](/handbook/framework/configure-applications/use-stores-from-handlers/).
 
 For the full handler type, see [QueueJobContext](/handbook/api/types/_purista_core.QueueJobContext/).

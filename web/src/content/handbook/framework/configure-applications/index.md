@@ -40,7 +40,7 @@ business behavior.
 The in-memory defaults in `@purista/core` make generated projects runnable
 locally. They are not a production security or durability boundary. Replace
 them deliberately, wire them at service creation, and verify the external
-service before deploying. Use [handler inputs and context](/handbook/framework/build-services/handler-context/)
+service before deploying. Use the [handler context reference](/handbook/framework/build-services/handler-context/)
 to see exactly how `context.configs`, `context.secrets`, and `context.states`
 are exposed to a command, subscription, stream, or worker.
 
@@ -50,8 +50,8 @@ are exposed to a command, subscription, stream, or worker.
 | --- | --- |
 | Construct adapters once and make every service use the intended boundary | [Wire stores at the composition root](/handbook/framework/configure-applications/wire-stores-at-the-composition-root/) |
 | Restrict store operations or make an explicit secret-cache decision | [Configure store operations and secret caching](/handbook/framework/configure-applications/configure-store-operations-and-secret-cache/) |
+| Read or update a store inside a command, subscription, stream, or worker | [Use stores from handlers](/handbook/framework/configure-applications/use-stores-from-handlers/) |
 | Validate a stable service setting or choose an environment-owned value | [Configuration defaults, validation, and precedence](/handbook/framework/configure-applications/configuration-model-defaults-validation-and-precedence/) |
 | Choose a runtime configuration adapter | [Configuration stores](/handbook/framework/configure-applications/configuration-stores/) |
 | Choose a runtime secret adapter | [Secret stores](/handbook/framework/configure-applications/secret-stores/) |
 | Persist a service-owned record safely | [State stores](/handbook/framework/persist-application-state/) |
-| Read or write a store from a primitive handler | [Use stores in a service](/handbook/framework/build-services/use-stores-in-a-service/) |

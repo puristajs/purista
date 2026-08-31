@@ -1,11 +1,11 @@
 import type {
 	BuiltinToolName,
-	BuilderState as HarnessBuilderState,
 	DurableWorkspace,
 	DurableWorkspacePolicy,
 	GovernanceConfig,
 	Harness,
 	AgentDefinition as HarnessAgentDefinition,
+	BuilderState as HarnessBuilderState,
 	HarnessStorage,
 	WorkflowDefinition as HarnessWorkflowDefinition,
 	ModelAlias,
@@ -20,6 +20,7 @@ import type {
 	SandboxPolicy,
 	Session,
 	TelemetryOptions,
+	TelemetryShim,
 } from '@purista/harness'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
@@ -48,10 +49,11 @@ export type AgentExecutionKind = 'harnessAgent' | 'harnessWorkflow' | 'runFuncti
  * })
  * ```
  */
-export type AgentModelBinding<Capabilities extends readonly AgentModelCapability[] = readonly AgentModelCapability[]> = {
-	capabilities: Capabilities
-	defaults?: ModelDefaults
-}
+export type AgentModelBinding<Capabilities extends readonly AgentModelCapability[] = readonly AgentModelCapability[]> =
+	{
+		capabilities: Capabilities
+		defaults?: ModelDefaults
+	}
 
 /**
  * Inline Harness agent definition accepted by `AgentQueueBuilder.setHarnessAgent`.
@@ -450,6 +452,8 @@ export type AgentHandlerContext<
 	resources: Resources
 	/** typed custom metrics declared on the service and this agent builder */
 	metrics: PuristaMetricContext<Metrics>
+	/** OpenTelemetry-backed instrumentation helper for agent-specific spans and measurements. */
+	telemetry: TelemetryShim
 	/** Provider-neutral harness session, model handles, and event bridge. */
 	harness: {
 		session: Session<any>
@@ -650,7 +654,13 @@ export type AnyAgentQueueBuilderTypes = AgentQueueBuilderTypes<
 /** Extracts the statically declared model alias map from an attached agent definition. */
 export type ExtractAgentModels<T> = T extends AttachedAgentDefinition<infer S> ? S['Models'] : Record<never, never>
 
-/** Runtime options required to initialize attached agents for a service instance. */
+/**
+ * Runtime options used to build the one shared Harness owned by a PURISTA
+ * service instance. All attached agents and workflows use these adapters; the
+ * service shuts the Harness down once during service destruction. Treat
+ * closable adapter instances as service-owned unless the adapter explicitly
+ * documents a shared lifecycle.
+ */
 export type AgentRuntimeOptions<Models extends Record<string, AgentModelBinding>> = {
 	models: AgentRuntimeModelBindings<Models>
 	/** Harness-owned conversation and recoverable execution persistence. */

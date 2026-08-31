@@ -12,13 +12,45 @@ the selected provider and native dependencies in your deployment.
 ## Install the smallest runtime
 
 ```sh title="Install the first runnable Harness"
-npm install @purista/harness @purista/harness-openai zod
+npm install @purista/harness @purista/harness-openai
 ```
 
 `@purista/harness` is the core runtime. It does not include a live model
 provider. `@purista/harness-openai` is a separately installed provider adapter.
-`zod` is an application dependency: Harness uses it internally but does not
-re-export it as your public schema library.
+
+The first agent uses Zod, so add it for the default guide path:
+
+```sh title="Install the default Zod schema library"
+npm install zod
+```
+
+## Choose the schema library your application owns
+
+Zod is an application dependency, not a Harness public re-export. Harness
+accepts any [Standard Schema](https://standardschema.dev/schema) validator at
+every application validation boundary. The one additional requirement appears
+only when a model must produce the value: the schema must also implement
+[Standard JSON Schema](https://standardschema.dev/json-schema), so Harness can
+give the provider a Draft 2020-12 description during `.build()`.
+
+| Library | Install in the application | Validation-only boundaries | Model-facing boundaries |
+| --- | --- | --- | --- |
+| Zod | `npm install zod` | Use the schema directly. | Use the schema directly. |
+| ArkType | `npm install arktype` | Use the schema directly. | Use the schema directly. |
+| Valibot | `npm install valibot` | Use the schema directly. | Also install `@valibot/to-json-schema` and wrap only this schema with `toStandardJsonSchema(...)`. |
+| Another Standard Schema validator | Install the validator selected by your application. | Use it directly when it implements Standard Schema. | Use it directly only when it also implements Standard JSON Schema; otherwise use that library's official Standard JSON Schema adapter. |
+
+Validation-only means the application or Harness callback supplies the value:
+agent input, custom-handler agent output, TypeScript-tool output, workflow
+input/output, and Guardrail `valueSchema`. Model-facing means a provider creates
+the value: default-loop agent output and TypeScript-tool input. Do not add a
+provider-specific converter or a Harness wrapper. The original validator still
+performs runtime validation; the JSON Schema projection is provider input only.
+
+[Inputs and structured outputs](/handbook/harness/build-agents/inputs-and-structured-outputs/)
+maps every boundary and shows Zod, ArkType, and Valibot declarations. The
+official Standard Schema compatibility lists are the authority for additional
+libraries and their supported versions.
 
 Create an application-owned environment file or configure your secret store:
 

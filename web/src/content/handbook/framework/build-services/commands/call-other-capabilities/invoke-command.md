@@ -1,62 +1,129 @@
 ---
 title: Invoke another command
-description: Declare a synchronous command dependency, validate its narrow contract, and await its result only when the current outcome needs it.
-order: 326
+description: Add one typed synchronous dependency to updateInvoice, validate only the data it needs, and understand the resulting coupling.
+order: 322
 ---
 
-Invoke another command only when this command cannot decide its own outcome without the downstream answer. A success event or queue is usually a better boundary when the current caller does not need that answer now.
+Invoke another command when the current command cannot decide its response
+without a downstream result. `updateInvoice`, for example, can ask a policy
+service whether the requested due-date change is allowed before writing it.
 
-## Declare and await the dependency
+This creates synchronous latency and availability coupling: if the policy
+command fails, times out, or returns an invalid result, `updateInvoice` fails as
+well. Use an event or queue when the current response does not need that answer.
 
-```ts title="src/service/invoice/v1/command/createInvoice/createInvoiceCommandBuilder.ts"
-export const createInvoiceCommandBuilder = invoiceV1ServiceBuilder
-  .getCommandBuilder('createInvoice', 'Create an invoice')
+## 1. Define the consumer-local contract
+
+The policy service may return a larger object. This command needs only the
+decision and the maximum allowed date, so it owns a smaller response schema.
+
+```ts title="src/service/invoice/v1/command/updateInvoice/updatePolicySchemas.ts"
+import { z } from 'zod'
+
+export const updatePolicyPayloadSchema = z.object({
+  invoiceId: z.string().min(1),
+  requestedDueDate: z.iso.date(),
+})
+
+export const updatePolicyParameterSchema = z.object({})
+
+export const updatePolicyOutputSchema = z.object({
+  allowed: z.boolean(),
+  maximumDueDate: z.iso.date().optional(),
+})
+```
+
+The response schema is intentionally consumer-local. The runtime validates the
+downstream response and returns the schema result to this handler. With the Zod
+object shown here, unrecognized response fields are stripped by default. That
+reduces data propagation and coupling: an unrelated producer field is neither
+retained nor made part of this command’s contract. Use the behavior of your
+chosen Standard Schema library deliberately.
+
+## 2. Declare the dependency before the handler
+
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.ts"
+export const updateInvoiceCommandBuilder = invoiceV1ServiceBuilder
+  .getCommandBuilder('updateInvoice', 'Update an invoice')
   .canInvoke(
-    'Customer',
+    'InvoicePolicy',
     '1',
-    'getCreditStatus',
-    creditStatusOutputSchema,
-    creditStatusPayloadSchema,
-    creditStatusParameterSchema,
+    'checkDueDateChange',
+    updatePolicyOutputSchema,
+    updatePolicyPayloadSchema,
+    updatePolicyParameterSchema,
   )
-  .addPayloadSchema(createInvoicePayloadSchema)
-  .addParameterSchema(createInvoiceParameterSchema)
-  .addOutputSchema(createInvoiceOutputSchema)
-  .setCommandFunction(async function (context, payload) {
-    const credit = await context.service.Customer[1].getCreditStatus(
-      { customerId: payload.customerId },
+  .addPayloadSchema(updateInvoicePayloadSchema)
+  .addParameterSchema(updateInvoiceParameterSchema)
+  .addOutputSchema(updateInvoiceOutputSchema)
+  .setCommandFunction(async function (context, payload, parameter) {
+    const policy = await context.service.InvoicePolicy['1'].checkDueDateChange(
+      { invoiceId: parameter.invoiceId, requestedDueDate: payload.dueDate },
       {},
     )
-    if (!credit.allowed) throw new HandledError(StatusCode.Conflict, 'Credit is not available')
-    return context.resources.invoices.create(payload)
+
+    if (!policy.allowed) {
+      throw new HandledError(StatusCode.Conflict, 'The requested due date is not allowed', {
+        maximumDueDate: policy.maximumDueDate,
+      })
+    }
+
+    const invoice = await context.resources.invoices.update(parameter.invoiceId, payload)
+    if (!invoice) throw new HandledError(StatusCode.NotFound, 'Invoice does not exist')
+    return invoice
   })
 ```
 
-`getCommandBuilder(...)` names the local operation; the three
-[`add…Schema(...)` calls](/handbook/framework/build-services/commands/create-and-validate/#know-what-each-definition-method-does)
-define its own input and result independently of the downstream contract; and
+[`canInvoke(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvoke) adds exactly one typed function at
+`context.service.InvoicePolicy['1'].checkDueDateChange`. Service versions are
+string keys: the literal passed to `canInvoke(...)` becomes the inferred key on
+`context.service`. The declaration records
+the dependency in the command definition; it does not start, discover, or make
+the target service available.
+
+The surrounding chain retains the command contract defined by
+[`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder),
+[`addPayloadSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema),
+[`addParameterSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addparameterschema),
+and
+[`addOutputSchema(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema).
 [`setCommandFunction(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction)
-installs the service-bound handler. This page adds only the declared
-cross-service dependency. Use [Create and validate a command](/handbook/framework/build-services/commands/create-and-validate/)
-when those local schemas or handler semantics need changing.
+installs the handler that can use the declared dependency.
 
-The exact local calls are [`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder), [`addPayloadSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema), [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addparameterschema), and [`addOutputSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema). They validate the caller-facing contract; they do not validate the remote operation. [`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction) is required before the definition can be registered and must be a non-arrow function so PURISTA can bind the service receiver.
+## Understand every `canInvoke` argument
 
-## Understand [`canInvoke(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvoke)
-
-| Argument | Required | Meaning |
+| Argument | Required | Runtime effect |
 | --- | --- | --- |
-| `serviceName` | Yes | Downstream service name. |
-| `serviceVersion` | Yes | Downstream service version. |
-| `serviceTarget` | Yes | Downstream command name. |
-| `outputSchema` | No | Validates and types the downstream response. |
-| `payloadSchema` | No | Validates and types the downstream request payload. |
-| `parameterSchema` | No | Validates and types the downstream request parameter. |
+| `serviceName` | Yes | Selects the downstream service. Empty names fail while building the definition. |
+| `serviceVersion` | Yes | Selects an explicit versioned contract. Empty versions fail while building. |
+| `serviceTarget` | Yes | Selects the downstream command. Empty targets fail while building. |
+| `outputSchema` | No | Validates/types the returned value and supplies its parsed result to this handler. A mismatch is an internal failure. |
+| `payloadSchema` | No | Validates/types the outgoing payload before the EventBridge invocation. A local mismatch is an internal command failure. |
+| `parameterSchema` | No | Validates/types the outgoing parameter before invocation. A local mismatch is an internal command failure. |
 
-All three address parts must be non-empty. The runtime propagates trace, principal, and tenant data. A target failure, timeout, or unavailable transport fails this command too; decide timeout and retry behavior at the client or bridge boundary.
+Omitting a schema leaves that part of the declared dependency unconstrained; it
+does not make the capability undeclared. For service-to-service boundaries,
+provide all three schemas unless there is a deliberate reason not to.
 
-Use the smallest downstream output schema that lets this command decide. Do not expose a repository-shaped response merely because the other service has one.
+Trace, principal, and tenant metadata propagate to the downstream command. The
+downstream service must still enforce its own authorization and tenant scope.
 
-Next: [Enqueue background work](/handbook/framework/build-services/commands/call-other-capabilities/enqueue-work/) when the answer is not needed now.
+## Keep the contract and failure surface small
+
+Do:
+
+- declare only commands whose results are required for the current response;
+- define the smallest request and response schemas this handler needs;
+- keep policy errors caller-safe and let unexpected transport/provider failures remain internal;
+- give the complete chain a timeout budget at the EventBridge/client boundary.
+
+Do not:
+
+- import the producer’s repository/entity type as this command’s public contract;
+- turn several remote calls into an assumed distributed transaction;
+- retry a non-idempotent downstream side effect blindly;
+- catch an unavailable service and report a misleading business conflict.
+
+Next, [publish the command success event](/handbook/framework/build-services/commands/publish-success-event/) so independent subscribers can react after the update completes.
 
 For the exact signature, see [`canInvoke`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvoke).

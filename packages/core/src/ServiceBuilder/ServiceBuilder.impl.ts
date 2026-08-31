@@ -424,18 +424,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	/** Create a runnable service instance with runtime bridges, stores, resources, and agent bindings. */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
-		const agentRuntimeScope = createAgentRuntimeScope()
-		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
-			agentRuntimeScope,
-			this.agentDefinitionList,
-			options?.ai
-				? {
-						...options.ai,
-						logger: options.ai.logger ?? logger,
-					}
-				: undefined,
-		)
-
 		const cfg: S['ConfigInputType'] = {
 			...this.defaultConfig,
 			...options?.serviceConfig,
@@ -489,30 +477,47 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			await this.resolveDefinitions()
 
 		const C = this.getCustomClass()
+		const agentRuntimeScope = createAgentRuntimeScope()
+		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
+			agentRuntimeScope,
+			this.agentDefinitionList,
+			options?.ai
+				? {
+						...options.ai,
+						logger: options.ai.logger ?? logger,
+					}
+				: undefined,
+		)
 
-		const service = new C({
-			logger,
-			eventBridge,
-			info: this.info,
-			commandDefinitionList: commands,
-			subscriptionDefinitionList: subscriptions,
-			streamDefinitionList: streams,
-			queueDefinitionList: queues,
-			queueWorkerDefinitionList: queueWorkers,
-			config,
-			spanProcessor: options?.spanProcessor,
-			secretStore,
-			configStore,
-			stateStore,
-			queueBridge,
-			queueJobStore: options?.queueJobStore,
-			eventToQueueBindingList: eventToQueueBindings,
-			configSchema: this.configSchema,
-			metrics: options?.metrics,
-			metricsRecorder: options?.metricsRecorder,
-			metricDefinitionList: this.customMetricDefinitions,
-			resources: options?.resources,
-		})
+		let service: InstanceType<typeof C>
+		try {
+			service = new C({
+				logger,
+				eventBridge,
+				info: this.info,
+				commandDefinitionList: commands,
+				subscriptionDefinitionList: subscriptions,
+				streamDefinitionList: streams,
+				queueDefinitionList: queues,
+				queueWorkerDefinitionList: queueWorkers,
+				config,
+				spanProcessor: options?.spanProcessor,
+				secretStore,
+				configStore,
+				stateStore,
+				queueBridge,
+				queueJobStore: options?.queueJobStore,
+				eventToQueueBindingList: eventToQueueBindings,
+				configSchema: this.configSchema,
+				metrics: options?.metrics,
+				metricsRecorder: options?.metricsRecorder,
+				metricDefinitionList: this.customMetricDefinitions,
+				resources: options?.resources,
+			})
+		} catch (error) {
+			await agentRuntimeShutdown.shutdown()
+			throw error
+		}
 		bindAgentRuntimeScope(service, agentRuntimeScope)
 
 		if (this.agentDefinitionList.length > 0) {

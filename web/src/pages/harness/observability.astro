@@ -67,7 +67,7 @@ import HarnessLayout from '../../layouts/HarnessLayout.astro'
     headline={[{ text: 'Every operation ' }, { text: 'is visible', color: 'found' }]}
     lede="The Harness emits OpenTelemetry traces aligned with the official GenAI semantic conventions. Every model call, tool execution, and agent decision is a span — so your observability platform understands AI operations natively."
     items={[
-      'harness.session.prompt — the entry point',
+      'harness.session.run — the entry point',
       'invoke_agent {name} — agent reasoning loop',
 		'evaluate_guardrail {id} — content-free allow, block, transform, or error decision',
       'chat gpt-4o-mini — model call with token usage',
@@ -351,16 +351,14 @@ const ctx = propagation.setBaggage(
           <div class="obs-runbook-label site-mono" style="color:var(--color-con-hi)">Workflow-Level Context</div>
           <p class="obs-runbook-sub">Pass business context through workflow handlers. The Harness propagates the active OTel context through every agent and tool call.</p>
           <CodeBlock
-            code={`.workflows(({ workflow }) => ({
-  analyze: workflow({
-    handler: async (ctx) => {
-      // All agent and tool spans inside
-      // this workflow inherit the context
-      const result = await ctx.agents.analyzer(ctx.input)
-      return result
-    },
-  }),
-}))`}
+            code={`.workflow('analyze', {
+  delegation: { agents: ['analyzer'] },
+  handler: async (ctx) => {
+    // All agent and tool spans inside
+    // this workflow inherit the context
+    return ctx.agents.analyzer(ctx.input)
+  },
+})`}
             language="typescript"
           />
         </div>

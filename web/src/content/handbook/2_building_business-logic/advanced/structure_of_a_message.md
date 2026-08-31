@@ -74,7 +74,7 @@ Inside every command and subscription handler the `context` object exposes the m
   await context.emit('OrderProcessed', { orderId: payload.id })
 
   // Call another service command
-  const user = await context.service.UserService[1].getUser({ userId: caller }, {})
+  const user = await context.service.UserService['1'].getUser({ userId: caller }, {})
 })
 ```
 

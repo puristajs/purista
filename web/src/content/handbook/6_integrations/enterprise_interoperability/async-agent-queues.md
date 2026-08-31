@@ -88,7 +88,7 @@ const triageAgentQueue = supportServiceV1ServiceBuilder
     runId: job.id,
   })
 
-  const result = await session.agents.triage.prompt({
+  const result = await session.agents.triage.run({
     ticketId: payload.ticketId,
     content: payload.content,
   })

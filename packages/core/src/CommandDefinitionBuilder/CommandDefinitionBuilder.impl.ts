@@ -519,8 +519,11 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * Define query parameters if you expose the function as http endpoint.
-	 * Query parameters are add to openApi definition.
-	 * Query parameters are add to input parameters.
+	 *
+	 * This method adds OpenAPI metadata only. The HTTP adapter reads query values
+	 * independently and places them in the command parameter object. Declare a
+	 * matching field with `addParameterSchema(...)` for runtime validation and
+	 * keep schema optionality aligned with `required`.
 	 *
 	 * @example
 	 * ```ts
@@ -581,7 +584,9 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * Set a transform input hook which will encode or transform the input payload and parameters.
-	 * Will be executed as first step before input validation, before guard and the function itself.
+	 * The raw parameter and payload schemas are validated before this hook. The
+	 * returned domain values are then validated by the command parameter and
+	 * payload schemas before before-guards and the command function run.
 	 * This will change the type of input message payload and input message parameter.
 	 * @param transformInputSchema Input payload validation schema
 	 * @param transformParameterSchema Input parameter validation schema
@@ -824,16 +829,19 @@ export class CommandDefinitionBuilder<
 	/**
 	 * Mark the function to be exposed as http endpoint.
 	 *
-	 * Api url prefix and service version are prepended automatically
+	 * The HTTP server's API mount path and `v${serviceVersion}` are prepended
+	 * automatically. Use Hono path syntax such as `invoices/:invoiceId`; every
+	 * path or query value must have a matching field in the command parameter
+	 * schema to be validated and available as a typed handler parameter.
 	 *
-	 * For exposing a url like: `/api/V1/user/login` simply provide `user/login`as path
+	 * For `/api/v1/user/login`, provide `user/login` as the relative path.
 	 *
 	 * @param method Http method POST, PUT, PATCH, GET, DELETE
 	 * @param path The url path
 	 * @param contentTypeRequest input content type defaults to application/json
 	 * @param contentEncodingRequest input content encoding defaults to utf-8
-	 * @param contentTypeResponse input content type defaults to application/json
-	 * @param contentEncodingResponse input content encoding defaults to utf-8
+	 * @param contentTypeResponse response content type defaults to application/json
+	 * @param contentEncodingResponse response content encoding defaults to utf-8
 	 * @returns CommandDefinitionBuilder
 	 *
 	 * @example

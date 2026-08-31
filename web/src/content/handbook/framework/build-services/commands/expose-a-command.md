@@ -1,28 +1,98 @@
 ---
 title: Expose a command
 description: Add HTTP projection and OpenAPI metadata to a command while leaving service ownership, startup, and transport behavior in the HTTP runtime.
-order: 331
+order: 329
 ---
 
 HTTP exposure is metadata on a command definition. It does not start a listener, register an HTTP server, or move business logic into the handler. First choose the Hono deployment mode and startup order in [HTTP runtime architecture](/handbook/framework/expose-and-consume-services/http-and-rest/runtime-architecture/).
 
 ## Project one command to HTTP
 
-```ts title="src/service/invoice/v1/command/createInvoice/createInvoiceCommandBuilder.ts"
-export const createInvoiceCommandBuilder = invoiceV1ServiceBuilder
-  .getCommandBuilder('createInvoice', 'Create an invoice')
-  .addPayloadSchema(createInvoicePayloadSchema)
-  .addParameterSchema(createInvoiceParameterSchema)
-  .addOutputSchema(createInvoiceOutputSchema)
-  .exposeAsHttpEndpoint('POST', 'invoices')
-  .setOpenApiSummary('Create an invoice')
-  .setOpenApiOperationId('createInvoice')
-  .setCommandFunction(async function (context, payload) {
-    return context.resources.invoices.create(payload)
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceCommandBuilder.ts"
+export const updateInvoiceCommandBuilder = invoiceV1ServiceBuilder
+  .getCommandBuilder('updateInvoice', 'Update an invoice')
+  .addPayloadSchema(updateInvoicePayloadSchema)
+  .addParameterSchema(updateInvoiceParameterSchema)
+  .addOutputSchema(updateInvoiceOutputSchema)
+  .exposeAsHttpEndpoint('PATCH', 'invoices/:invoiceId')
+  .addQueryParameters({ name: 'notify', required: false })
+  .setOpenApiSummary('Update an invoice')
+  .setOpenApiOperationId('updateInvoice')
+  .setCommandFunction(async function (context, payload, parameter) {
+    const invoice = await context.resources.invoices.update(parameter.invoiceId, payload)
+    if (!invoice) throw new HandledError(StatusCode.NotFound, 'Invoice does not exist')
+    return invoice
   })
 ```
 
-The path is relative to the server’s configured mount and service-version route. Keep route parsing, server startup, and transport authentication in the HTTP runtime; keep business authorization near the service/command boundary.
+[`exposeAsHttpEndpoint(method, path, ...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#exposeashttpendpoint)
+adds an HTTP projection to the existing command definition. It does not create
+a second handler or bypass the command schemas and lifecycle.
+
+## Map path and query values into `parameter`
+
+HTTP path and query values do not become command payload fields. Hono combines
+query values, path values, and protection-middleware parameters into the one
+command `parameter` object. Path and query values arrive as strings; the
+command parameter schema parses, validates, and types the combined object
+before guards or the handler run.
+
+The schema used by this endpoint explicitly contains both HTTP inputs:
+
+```ts title="src/service/invoice/v1/command/updateInvoice/updateInvoiceSchemas.ts"
+export const updateInvoiceParameterSchema = z.object({
+  invoiceId: z.string().min(1).describe('Invoice identifier from the URL path'),
+  notify: z.union([z.boolean(), z.stringbool()]).optional().default(false)
+    .describe('Whether the caller requests a notification'),
+}).strict()
+```
+
+### Define URL path parameters
+
+Write a Hono path parameter as `:name` in the relative endpoint path. The name
+must exactly match a field in the command parameter schema:
+
+| HTTP contract | Definition | Handler value |
+| --- | --- | --- |
+| Required invoice identifier | `.exposeAsHttpEndpoint('PATCH', 'invoices/:invoiceId')` | `parameter.invoiceId` after `updateInvoiceParameterSchema` validates it. |
+
+Use `:invoiceId`, not `{invoiceId}` and not a literal `invoiceId` segment. A
+normal path parameter is required by the route, so keep its schema field
+required too. The path is relative to the server’s configured mount and
+service-version route. With Hono's default `/api` mount and service version
+`1`, the example produces `PATCH /api/v1/invoices/:invoiceId`.
+
+### Define required and optional query parameters
+
+Declare each documented query field with
+[`addQueryParameters(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addqueryparameters)
+after `addParameterSchema(...)`. The schema makes `name` an inferred key, while
+the query definition controls whether OpenAPI tells clients that the value is
+required.
+
+| Query behavior | Query definition | Matching parameter schema |
+| --- | --- | --- |
+| Required | `{ name: 'locale', required: true }` | `locale: z.string().min(2)` |
+| Optional | `{ name: 'notify', required: false }` | `notify: z.stringbool().optional()` |
+| Optional with a parsed default | `{ name: 'notify', required: false }` | `notify: z.stringbool().optional().default(false)` |
+
+The two declarations must agree. `required` is OpenAPI metadata; it does not
+perform runtime validation. A non-optional schema field rejects a missing query
+value even when OpenAPI marks it optional, while an optional schema field
+accepts absence even when OpenAPI marks it required. Use a string parser such
+as `z.stringbool()` or a deliberate numeric coercion because Hono supplies raw
+query strings. Avoid `z.coerce.boolean()`: the non-empty string `"false"` is
+truthy and becomes `true`.
+
+For the shown endpoint, `PATCH /api/v1/invoices/invoice-42?notify=true`
+produces the validated command parameter
+`{ invoiceId: 'invoice-42', notify: true }`. The strict object schema rejects
+undeclared query fields. Avoid giving a query and path field the same name;
+Hono merges query values first and path values afterward.
+
+The request body becomes `payload` for `PATCH`, `POST`, and `PUT` requests.
+Keep route parsing, server startup, and transport authentication in the HTTP
+runtime; keep business authorization near the service/command boundary.
 
 The projection keeps the command’s local contract intact: [`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder) names the operation; [`addPayloadSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema) and [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addparameterschema) validate public request data; [`addOutputSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema) validates its successful result; and [`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction) remains the non-arrow, service-bound business implementation. HTTP metadata does not create a second handler or a different response schema.
 
@@ -38,7 +108,7 @@ contract need a name that must remain stable across internal refactors.
 | [`exposeAsHttpEndpoint` argument](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#exposeashttpendpoint) | Default | Meaning |
 | --- | --- | --- |
 | `method` | Required | Supported method: `GET`, `POST`, `PUT`, `PATCH`, or `DELETE`. |
-| `path` | Required | Relative command route, such as `invoices/:invoiceId`. |
+| `path` | Required | Relative Hono route, such as `invoices/:invoiceId`; the server prepends `apiMountPath` and `v${serviceVersion}`. |
 | `contentTypeRequest` / `contentEncodingRequest` | Schema/transform metadata, then `application/json` / `utf-8` | Expected request representation. |
 | `contentTypeResponse` / `contentEncodingResponse` | Schema/transform metadata, then `application/json` / `utf-8` | Declared response representation. |
 | `options.mode` | `sync` | `sync` returns the command result. `async` makes Hono return `202 Accepted` only when the command returns a queue-enqueue result; it does not enqueue work itself. |
@@ -98,7 +168,7 @@ In the asynchronous form, [`getCommandBuilder(name, description, eventName?)`](/
 | [`addOpenApiErrorStatusCodes(...codes)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addopenapierrorstatuscodes) | Adds documented response codes; async exposure adds `Accepted`. | Describe expected error outcomes without changing runtime behavior. |
 | [`addQueryParameters(...definitions)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addqueryparameters) | OpenAPI metadata only. | Document query values; pair with a parameter schema for runtime validation. |
 
-[`addQueryParameters(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addqueryparameters) does not validate or inject values by itself. Declare a parameter schema for every public path/query value, then verify the complete adapter behavior in [Configure Hono](/handbook/framework/expose-and-consume-services/http-and-rest/hono/) and [HTTP runtime architecture](/handbook/framework/expose-and-consume-services/http-and-rest/runtime-architecture/).
+[`addQueryParameters(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addqueryparameters) does not validate values. Hono collects query/path values even without OpenAPI query metadata; declare a parameter schema for every value the command accepts, use coercion where the HTTP representation is a string, and verify the complete adapter behavior in [Configure Hono](/handbook/framework/expose-and-consume-services/http-and-rest/hono/) and [HTTP runtime architecture](/handbook/framework/expose-and-consume-services/http-and-rest/runtime-architecture/).
 
 The secure setting selects Hono's `protectHandler`; its default handler passes
 requests through. Configure a real

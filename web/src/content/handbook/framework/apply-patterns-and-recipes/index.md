@@ -4,7 +4,11 @@ description: Combine established PURISTA primitives for common enterprise workfl
 order: 800
 ---
 
-Use a recipe after you understand its primitives. A recipe explains the boundary and trade-offs of a real workflow; it does not redefine commands, queues, adapters, or security controls.
+Use a recipe when one business outcome genuinely combines several established
+PURISTA primitives. Primitive setup stays in Build services, adapter setup in
+distributed infrastructure, and process topology in Deploy applications. This
+chapter owns only the cross-capability decision, end-to-end flow, and failure
+boundary.
 
 | Situation | Recipe | Compose |
 | --- | --- | --- |
@@ -13,9 +17,19 @@ Use a recipe after you understand its primitives. A recipe explains the boundary
 | A write model and independently shaped read model evolve at different rates | [CQRS and projections](/handbook/framework/apply-patterns-and-recipes/cqrs-and-projections/) | Command, success event, subscription, read-model resource |
 | The business event log is deliberately the source of truth | [Event sourcing](/handbook/framework/apply-patterns-and-recipes/event-sourcing/) | Durable event log, projections, replay, explicit application ownership |
 | Several independent services need a shared message contract | [Enterprise interoperability](/handbook/framework/apply-patterns-and-recipes/enterprise-interoperability/) | EventBridge, schemas, client/export |
-| Services need separate lifecycle but one deployable | [Modular monolith](/handbook/framework/apply-patterns-and-recipes/modular-monolith/) | Direct calls, in-process bridge |
-| Services scale/deploy independently | [Distributed microservices](/handbook/framework/apply-patterns-and-recipes/distributed-microservices/) | Durable bridge, discovery, operations |
 
-PURISTA records schedule contracts and can export schedule/Kubernetes CronJob artifacts, but it does not ship an in-process production scheduler provider. Temporal-specific orchestration remains outside the canonical Framework path until a maintained public integration is available. PURISTA also supports the command/event/subscription pieces of CQRS and event-driven projections; it does not silently supply an event-sourcing event log, projection database, or replay policy.
+PURISTA records schedule contracts and can export schedule/Kubernetes CronJob
+artifacts, but it does not ship an in-process production scheduler provider.
+Temporal-specific orchestration remains outside the canonical Framework path
+until a maintained public integration is available. PURISTA supports the
+command/event/subscription pieces of CQRS and projections; it does not silently
+supply an event-sourcing log, projection database, replay policy, or exactly-once
+business execution.
 
-Next: [schedule work](/handbook/framework/build-services/schedule-event-queue-result/), [queues and workers](/handbook/framework/build-services/queues-and-workers/), and [distributed infrastructure](/handbook/framework/connect-distributed-infrastructure/).
+For process shape, use the dedicated [deployment selection guide](/handbook/framework/deploy-applications/).
+Keeping service boundaries in one process is a deployment task, not an
+application pattern recipe. Extracting distributed services starts from the
+same guide and then uses the EventBridge and QueueBridge adapter chapters.
+
+Next: [asynchronous request processing](/handbook/framework/apply-patterns-and-recipes/asynchronous-request-processing/)
+or [choose a deployment topology](/handbook/framework/deploy-applications/).

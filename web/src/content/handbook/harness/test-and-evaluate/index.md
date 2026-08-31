@@ -33,7 +33,10 @@ of reliability or a universal release threshold.
 
 | Need | Start here |
 | --- | --- |
-| Prove code and runtime behavior without a model | [Test Harness applications](/handbook/harness/test-and-evaluate/test-harness-applications/) |
+| Choose the correct deterministic test boundary | [Test Harness applications deterministically](/handbook/harness/test-and-evaluate/test-harness-applications/) |
+| Prove tool calls and multi-round agent behavior | [Test agent tools](/handbook/harness/test-and-evaluate/test-agent-tools/) |
+| Prove workflow coordination, events, and recovery | [Test workflows](/handbook/harness/test-and-evaluate/test-workflows/) |
+| Verify a custom storage, sandbox, workspace, or provider adapter | [Test adapters](/handbook/harness/test-and-evaluate/test-adapters/) |
 | Build one baseline, inspect a failure, and rerun it | [Run your first evaluation](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/) |
 | Design reviewed data and make CI policy explicit | [Build evaluation datasets and run them in CI](/handbook/harness/test-and-evaluate/evaluation-datasets-and-ci/) |
 | Decide how a result is judged | [Choose and calibrate scorers](/handbook/harness/test-and-evaluate/choose-and-calibrate-scorers/) |

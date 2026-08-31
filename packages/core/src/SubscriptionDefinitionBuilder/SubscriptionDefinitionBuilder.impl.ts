@@ -592,7 +592,9 @@ export class SubscriptionDefinitionBuilder<
 
 	/**
 	 * Set a transform input hook which will encode or transform the input payload and parameters.
-	 * Will be executed as first step before input validation, before guard and the function itself.
+	 * The raw parameter and payload schemas are validated before this hook. The
+	 * returned domain values are then validated by the subscription parameter
+	 * and payload schemas before before-guards and the subscription function run.
 	 * This will change the type of input message payload and input message parameter.
 	 * @param transformInputSchema Input payload validation schema
 	 * @param transformParameterSchema Input parameter validation schema

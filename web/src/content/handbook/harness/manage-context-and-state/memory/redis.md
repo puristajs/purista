@@ -23,13 +23,13 @@ import { redisMemoryEngine } from '@purista/harness-memory-redis'
 
 const url = process.env.REDIS_URL
 if (!url) {
-  throw new Error('REDIS_URL is required to configure Redis memory.')
+	throw new Error('REDIS_URL is required to configure Redis memory.')
 }
 
 export const claimsMemory = redisMemoryEngine({
-  url,
-  namespace: 'support:memory:v1',
-  vector: { dimensions: 1536 },
+	url,
+	namespace: 'support:memory:v1',
+	vector: { dimensions: 1536 },
 })
 ```
 

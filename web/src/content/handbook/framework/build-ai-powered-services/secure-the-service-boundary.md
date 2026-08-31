@@ -23,19 +23,19 @@ content-specific policy in Harness where it belongs.
 
 ```ts title="src/service/support/v1/agent/triageTicket/triageTicketAgentBuilder.ts"
 export const triageTicketAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
-  .addPayloadSchema(triageTicketInput)
-  .addOutputSchema(triageTicketOutput)
-  .canInvoke('Support', '1', 'getTicket', {
-    payloadSchema: ticketLookupInput,
-    outputSchema: ticketSchema,
-  })
-  .setRunFunction(async context => {
-    const ticket = await context.invoke.tools['Support.1.getTicket'].call({
-      ticketId: context.payload.ticketId,
-    })
-    return classifyTicket(ticket, context.identity.tenantId)
-  })
+	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
+	.addPayloadSchema(triageTicketInput)
+	.addOutputSchema(triageTicketOutput)
+	.canInvoke('Support', '1', 'getTicket', {
+		payloadSchema: ticketLookupInput,
+		outputSchema: ticketSchema,
+	})
+	.setRunFunction(async context => {
+		const ticket = await context.invoke.tools['Support.1.getTicket'].call({
+			ticketId: context.payload.ticketId,
+		})
+		return classifyTicket(ticket, context.identity.tenantId)
+	})
 ```
 
 [`getAgentQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getagentqueuebuilder)
@@ -59,9 +59,12 @@ authorization remain in `getInstance(..., { ai: { sandbox, sandboxOptions } })`.
 The owner resolver receives validated input and trusted identity, but it does
 not itself authorize access.
 
-For model/tool content guardrails, sensitive-data detectors, governance policy,
-and approval decisions, continue with [Secure and govern agents](/handbook/harness/secure-and-govern/).
-Those capabilities are optional and must be installed, bound, and verified as
-described there; no Framework attachment silently enables them.
+Continue with [configure governance and Guardrails](/handbook/framework/build-ai-powered-services/configure-governance-and-guardrails/)
+for the exact attached-agent and service-instance wiring. Use [configure
+sandbox ownership and sharing](/handbook/framework/build-ai-powered-services/configure-sandbox-ownership-and-sharing/)
+before granting file or process capabilities. The Harness handbook remains the
+canonical owner for rail authoring, policy semantics, detector and sandbox
+adapter selection, and evaluation; no Framework attachment silently enables
+those optional capabilities.
 
 Next: [test an AI-powered service deterministically](/handbook/framework/build-ai-powered-services/test-an-ai-powered-service-deterministically/).

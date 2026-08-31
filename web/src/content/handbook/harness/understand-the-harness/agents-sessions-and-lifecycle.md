@@ -15,7 +15,7 @@ sequenceDiagram
   participant Session
   participant Agent
   participant Model
-  App->>Session: agents.answerer.prompt(input)
+  App->>Session: agents.answerer.run(input)
   Session->>Agent: start typed run
   Agent->>Model: request
   Model-->>Agent: object or tool call
@@ -28,6 +28,6 @@ session is rejected; a session is not a queue. Use an application queue/worker
 when work must wait or survive process restart.
 
 `session.release()` closes live sandbox/MCP resources while retaining persisted
-history and runs. `session.close()` destructively closes the session and removes
+history and runs. `session.destroy()` destructively closes the session and removes
 persisted session data. Choose deliberately; neither substitutes for a business
 retention policy.

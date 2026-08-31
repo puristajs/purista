@@ -10,6 +10,14 @@ A queue is not a faster command. The producer accepts a job; a QueueBridge
 holds it; a worker leases and performs it. The application must tolerate an
 attempt being repeated.
 
+| Contract question | Queue/worker answer |
+| --- | --- |
+| Who initiates it? | A declared producer enqueues or schedules a named job. |
+| What is selected? | The QueueBridge stores/routes the job; an eligible worker leases an attempt. |
+| Who waits? | The producer waits for acceptance only. Worker completion, retries, and results happen independently. |
+| What is the normal result? | A queue receipt for the producer, then worker acknowledgement and any configured result state/event. |
+| What stays decoupled? | The producer does not select a worker instance or assume when/how many attempts execute. |
+
 `@purista/core` includes `DefaultQueueBridge` for local development and
 deterministic tests. It is process-local, so durable work needs a selected and
 wired QueueBridge. Installing an optional bridge package alone does not move

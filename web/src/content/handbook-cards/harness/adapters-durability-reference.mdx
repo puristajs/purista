@@ -15,9 +15,9 @@ production behavior.
 | Need | Harness boundary | Start local | Production decision |
 | --- | --- | --- | --- |
 | Provider-neutral inference | Model provider addon | One provider adapter and a truthful model alias | Select a provider adapter per deployment; keep aliases stable. |
-| Persisted history and runs | `HarnessStorage` | In-memory state | Own retention, deletion, tenant isolation, encryption, and migrations. |
+| Persisted history and runs | `HarnessStorage` | In-memory state | Use first-party PostgreSQL for multi-instance leases/checkpoints/waits; own retention, deletion, tenant isolation, encryption, and migrations. |
 | Scoped memory | `MemoryEngine` | Built-in in-memory engine | Select persistence, search, TTL, and data residency deliberately. |
-| File access or commands | `Sandbox` | In-memory/files-only sandbox | Isolate process, filesystem, network, mounts, timeouts, and cleanup. |
+| File access or commands | `Sandbox` | In-memory/files-only sandbox | Use first-party Kubernetes or another reviewed adapter; isolate process, filesystem, network, mounts, timeouts, and cleanup. |
 | Restart-safe workflow state | `HarnessStorage` plus optional `DurableWorkspace` | In-memory storage/workspace | Provision distributed storage, leases, quotas, cleanup, and recovery. |
 | External tool server | MCP through sandbox or HTTP boundary | Local test fake | Own authentication, endpoint policy, schema validation, and availability. |
 | Privacy inspection | `SensitiveDataDetector` adapter | Native privacy fake/detector | Choose native, a private Presidio sidecar, local NER, or an injected implementation. |
@@ -35,13 +35,13 @@ between steps. They solve different problems.
 ```ts
 const session = await harness.getSession(`claims:${claimId}`)
 try {
-  const result = await session.workflows.review_claim.prompt(
-    { claimId },
-    { durable: { runId: `claim-review:${claimId}` } }
-  )
-  await claimsRepository.recordDecision(result)
+	const result = await session.workflows.review_claim.run(
+		{ claimId },
+		{ durable: { runId: `claim-review:${claimId}` } },
+	)
+	await claimsRepository.recordDecision(result)
 } finally {
-  await session.release()
+	await session.release()
 }
 ```
 
@@ -104,6 +104,8 @@ organized by responsibility:
 | `@purista/harness-guardrails-presidio` | Private-sidecar adapter for the original Presidio Analyzer. |
 | `@purista/harness-guardrails-native-privacy` | Deterministic in-process local detection for the documented identifier subset. |
 | `@purista/harness-guardrails-local-ner` | Separately installed local model-based NER detector. |
+| `@purista/harness-storage-postgres` | Distributed sessions, leases, checkpoints, events, and external waits. |
+| `@purista/harness-sandbox-kubernetes` | Restricted Kubernetes execution and optional PVC/VolumeSnapshot workspace recovery. |
 
 Use these first-party references while implementing:
 

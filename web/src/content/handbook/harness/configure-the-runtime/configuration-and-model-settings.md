@@ -1,6 +1,6 @@
 ---
 title: Configuration and model settings
-description: Declare model capabilities truthfully and use bounded defaults that match the execution path.
+description: Declare model capabilities truthfully, bound output, and configure generation settings without assuming every provider or model accepts them.
 order: 210
 ---
 
@@ -15,32 +15,36 @@ import { openai } from '@purista/harness-openai'
 
 const apiKey = process.env.OPENAI_API_KEY
 if (!apiKey) {
-  throw new Error('OPENAI_API_KEY is required to start the support Harness.')
+	throw new Error('OPENAI_API_KEY is required to start the support Harness.')
 }
 
 export const harness = defineHarness({ name: 'support' })
-  .models({
-    assistant: {
-      provider: openai({ apiKey }),
-      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-      capabilities: ['object', 'tool_use'],
-      retry: {
-        maxAttempts: 3,
-        maxActiveElapsedMs: 60_000,
-        maxActiveDelayMs: 20_000,
-        respectRetryAfter: true,
-        longRetry: 'error',
-      },
-    },
-  })
-  .defaults({
-    runTimeoutMs: 600_000,
-    modelTimeoutMs: 300_000,
-    toolTimeoutMs: 120_000,
-    agentMaxIterations: 16,
-    maxParallelToolCalls: 8,
-  })
-  .build()
+	.models({
+		assistant: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-4.1-mini',
+			capabilities: ['object', 'tool_use'],
+			defaults: {
+				maxTokens: 600,
+				temperature: 0.2,
+			},
+			retry: {
+				maxAttempts: 3,
+				maxActiveElapsedMs: 60_000,
+				maxActiveDelayMs: 20_000,
+				respectRetryAfter: true,
+				longRetry: 'error',
+			},
+		},
+	})
+	.defaults({
+		runTimeoutMs: 600_000,
+		modelTimeoutMs: 300_000,
+		toolTimeoutMs: 120_000,
+		agentMaxIterations: 16,
+		maxParallelToolCalls: 8,
+	})
+	.build()
 ```
 
 | Call or field | What it controls | Decision and failure boundary |
@@ -62,6 +66,72 @@ workflows that may call those agents. Each later registry is checked against
 the earlier registrations. See the
 [full builder surface](/handbook/api/interfaces/_purista_harness.HarnessBuilder/)
 for the less common composition calls.
+
+## Configure generation without pretending it is portable
+
+[`ModelDefaults`](/handbook/api/interfaces/_purista_harness.ModelDefaults/) use
+provider-neutral names at the model alias. Omit a field to preserve the selected
+model and endpoint default. The Harness forwards a configured field; it cannot
+make an unsupported provider, endpoint, or model accept it.
+
+| Harness setting | First-party request mapping | Important limit |
+| --- | --- | --- |
+| `maxTokens` | OpenAI Chat Completions: `max_tokens` or configured `max_completion_tokens`; OpenAI Responses: `max_output_tokens`; Gemini: `maxOutputTokens`; Anthropic: `max_tokens`; Bedrock: `inferenceConfig.maxTokens`; Azure Foundry: `max_tokens`. | This is a ceiling, not a promise of exactly that many visible words. OpenAI Responses includes reasoning tokens in its limit. Anthropic receives `1024` when no value is configured. |
+| `temperature` | Sent by all five adapters using their native field. | It is not a determinism guarantee. Several current reasoning/model APIs reject or discourage it; leave it unset unless the exact model documents support. |
+| `topP` | Sent as `top_p` or `topP` by all five adapters. | Change this *or* `temperature`, not both, unless the selected provider explicitly documents the combination. Current Claude models can reject a non-default value. |
+| `stopSequences` | Chat Completions, Gemini, Anthropic, Bedrock, and Azure Foundry expose a native stop field. | OpenAI Responses has no stop-sequence field. The adapter rejects this setting in Responses mode rather than silently dropping it. Models can also impose count/length limits. |
+| `parallelToolCalls` | OpenAI and Azure Foundry send `parallel_tool_calls`; Anthropic uses `disable_parallel_tool_use` when `false`; Gemini applies function-calling configuration when `false`. | Bedrock Converse has no matching setting in this adapter. This is separate from Harness `maxParallelToolCalls`, which limits application tool execution. |
+
+The table names the adapter mapping, not a universal capability matrix. A model
+or hosted endpoint can reject a field even where its API has that field. Check
+the focused provider page and its linked vendor reference before making a
+setting part of a production contract.
+
+### Choose the scope deliberately
+
+Put a setting on the alias when it should govern every invocation of that
+model. A default-loop agent can use `prepareStep` to apply a smaller temporary
+budget; custom agent handlers and workflows pass the same `call` object to a
+direct model operation.
+
+```ts title="src/agents/summarizeTicket.ts"
+export const summarizeTicket = {
+	model: 'assistant',
+	input: ticketInput,
+	output: ticketSummary,
+	instructions: 'Summarize the customer ticket.',
+	prepareStep: ({ step }) => step === 0
+		? { call: { maxTokens: 240, temperature: 0.2 } }
+		: undefined,
+}
+```
+
+`prepareStep` runs before each default-loop model request. Its `call` is a
+one-request `ModelCallOptions` override: its named values replace alias
+defaults for that request. Keep a per-step override tied to a real reason—such
+as a concise first-pass classification—not as a hidden second provider
+configuration. See the `AgentDefinition` and `ModelCallOptions` API reference
+for exact signatures.
+
+## Use provider options only for a documented provider escape hatch
+
+`providerOptions` carries an API-specific request-body field that the common
+Harness settings do not represent. It is intentionally `Record<string,
+unknown>` because those fields vary by provider, API surface, and model.
+
+| Adapter | `providerOptions` destination | Typical use |
+| --- | --- | --- |
+| OpenAI | Request body; `requestOptions` is passed to the OpenAI SDK request. | Responses `reasoning_effort` is translated to `reasoning.effort`; request-specific headers belong in `requestOptions`. |
+| Google Gemini | Root `generateContent` arguments, except `config`, whose members are placed in the SDK `config` object. | `config: { topK: ... }` only for a Gemini model that exposes `topK`. |
+| Anthropic | Messages request body; `requestOptions` goes to the SDK request. | A documented Messages API field such as `service_tier`. |
+| Amazon Bedrock | Converse request body; `requestOptions` goes to `client.send`. | `additionalModelRequestFields` for a documented, model-specific Converse parameter. |
+| Azure AI Foundry | Chat/embedding request body; `requestOptions` goes to the Azure SDK operation. | A Foundry model-specific body field with an explicitly documented pass-through header. |
+
+`providerOptions` merge shallowly from alias-level `providerOptions`, then
+`defaults.providerOptions`, then a per-call `call.providerOptions`. Do not put
+`temperature`, `maxTokens`, `topP`, `stopSequences`, or `parallelToolCalls` in
+that record: use their typed Harness fields. An overlapping raw field can have
+different precedence in different provider SDK payloads.
 
 ## Set only the limits the workload needs
 

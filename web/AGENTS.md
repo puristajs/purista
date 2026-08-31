@@ -12,6 +12,12 @@ navigation changes, adapter documentation, or public coverage work, also use
 `../skills/purista-docs-maintainer/SKILL.md` and load only its references that
 match the task.
 
+For the Tutorials section and its runnable Framework examples, use
+`../skills/purista-tutorial-maintainer/SKILL.md`. Keep ordered step pages in
+easy English, independent example setup, and real UI-to-service verification.
+Tutorial pages follow this website's design; the example React app uses the
+default shadcn theme with AI SDK UI/AI Elements for applicable chat surfaces.
+
 For handbook restructuring or route migration, the approved target is defined
 in `../../specs/50-handbook/00-information-architecture.md` and, for the
 Framework task flow, `../../specs/50-handbook/01-framework-task-flow.md`.

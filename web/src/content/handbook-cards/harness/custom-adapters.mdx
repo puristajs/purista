@@ -36,15 +36,15 @@ import { defineHarness } from '@purista/harness'
 import { postgresClaimsMemoryEngine } from '@acme/harness-memory-postgres'
 
 const memory = postgresClaimsMemoryEngine({
-  connectionString: process.env.CLAIMS_MEMORY_DATABASE_URL!,
-  table: 'claim_memory'
+	connectionString: process.env.CLAIMS_MEMORY_DATABASE_URL!,
+	table: 'claim_memory',
 })
 
 const harness = defineHarness({ name: 'claims-review' })
-  .memory(memory)
-  .requires(['memory.kv', 'memory.persistent', 'memory.multi_instance'])
-  // models, tools, agents, and workflows
-  .build()
+	.memory(memory)
+	.requires(['memory.kv', 'memory.persistent', 'memory.multi_instance'])
+	// models, tools, agents, and workflows
+	.build()
 ```
 
 Use `.requires(...)` for capabilities the application cannot operate without.
@@ -61,48 +61,41 @@ metrics. The adapter maps only the provider SDK request/response and returns
 the provider-neutral response.
 
 ```ts
-import {
-  BaseModelProvider,
-  type JsonValue,
-  type ObjectRequest,
-  type ObjectResponse
-} from '@purista/harness'
+import { BaseModelProvider, type JsonValue, type ObjectRequest, type ObjectResponse } from '@purista/harness'
 
 type ClaimsSdk = {
-  generateObject(input: {
-    model: string
-    messages: unknown
-    schema: JsonValue
-    signal: AbortSignal
-  }): Promise<{ object: JsonValue; inputTokens: number; outputTokens: number; stopReason?: string }>
+	generateObject(input: {
+		model: string
+		messages: unknown
+		schema: JsonValue
+		signal: AbortSignal
+	}): Promise<{ object: JsonValue; inputTokens: number; outputTokens: number; stopReason?: string }>
 }
 
 export class ClaimsModelProvider extends BaseModelProvider {
-  public constructor(private readonly client: ClaimsSdk) {
-    super({ id: 'acme_claims', genAiSystem: 'acme' })
-  }
+	public constructor(private readonly client: ClaimsSdk) {
+		super({ id: 'acme_claims', genAiSystem: 'acme' })
+	}
 
-  protected async doObject<T extends JsonValue = JsonValue>(
-    request: ObjectRequest<T>
-  ): Promise<ObjectResponse<T>> {
-    const response = await this.client.generateObject({
-      model: request.model,
-      messages: request.messages,
-      schema: request.schema,
-      signal: request.signal
-    })
+	protected async doObject<T extends JsonValue = JsonValue>(request: ObjectRequest<T>): Promise<ObjectResponse<T>> {
+		const response = await this.client.generateObject({
+			model: request.model,
+			messages: request.messages,
+			schema: request.schema,
+			signal: request.signal,
+		})
 
-    return {
-      object: response.object as T,
-      usage: {
-        inputTokens: response.inputTokens,
-        outputTokens: response.outputTokens,
-        totalTokens: response.inputTokens + response.outputTokens
-      },
-      finishReason: 'stop',
-      outcome: { finishReason: 'stop', providerFinishReason: response.stopReason }
-    }
-  }
+		return {
+			object: response.object as T,
+			usage: {
+				inputTokens: response.inputTokens,
+				outputTokens: response.outputTokens,
+				totalTokens: response.inputTokens + response.outputTokens,
+			},
+			finishReason: 'stop',
+			outcome: { finishReason: 'stop', providerFinishReason: response.stopReason },
+		}
+	}
 }
 ```
 
@@ -116,10 +109,7 @@ shape around the `doObject` call.
 ```ts
 import { modelProviderContract } from '@purista/harness/testing'
 
-modelProviderContract(
-  () => new ClaimsModelProvider(createScriptedClaimsSdk()),
-  { capabilities: ['object'] }
-)
+modelProviderContract(() => new ClaimsModelProvider(createScriptedClaimsSdk()), { capabilities: ['object'] })
 ```
 
 Use a scripted offline SDK in this contract suite. Add integration tests for
@@ -146,9 +136,11 @@ identity binding, model routing, and error wrapping.
 import { memoryEngineContract } from '@purista/harness/testing'
 import { postgresClaimsMemoryEngine } from '@acme/harness-memory-postgres'
 
-memoryEngineContract(() => postgresClaimsMemoryEngine({
-  connectionString: process.env.TEST_DATABASE_URL!
-}))
+memoryEngineContract(() =>
+	postgresClaimsMemoryEngine({
+		connectionString: process.env.TEST_DATABASE_URL!,
+	}),
+)
 ```
 
 Add application tests around the port contract: tenant isolation, TTL expiry,
@@ -169,7 +161,7 @@ import { harnessStorageContract } from '@purista/harness/testing'
 import { PostgresHarnessStorage } from '@acme/harness-storage-postgres'
 
 const createStorage = (): HarnessStorage =>
-  new PostgresHarnessStorage({ connectionString: process.env.TEST_DATABASE_URL! })
+	new PostgresHarnessStorage({ connectionString: process.env.TEST_DATABASE_URL! })
 
 harnessStorageContract(createStorage)
 ```
@@ -196,18 +188,23 @@ captured test records contain raw prompts, evidence, tool values, or secrets.
 
 ## Build a sandbox or durable adapter deliberately
 
-A `Sandbox` opens one session-owned filesystem/execution boundary. It must
-declare whether an executor is available; a file-only adapter returns
+A `Sandbox` opens one session-owned filesystem/search/execution boundary. It must
+declare whether an executor is available; a non-executable adapter returns
 `executor: 'unavailable'`. Implement `spawn(...)` only when the runtime can
 own a long-lived MCP process safely. Snapshot, resume, and hibernate are
 optional capabilities, not assumptions.
 
 ```ts
-import { sandboxContract, sandboxSnapshotContract } from '@purista/harness/testing'
+import { sandboxContract, sandboxSnapshotContract, sandboxTextSearchContract } from '@purista/harness/testing'
 
 sandboxContract(() => createClaimsContainerSandbox(), { executor: 'available' })
+sandboxTextSearchContract(() => createClaimsContainerSandbox())
 sandboxSnapshotContract(() => createClaimsSnapshotSandbox())
 ```
+
+Advertise `sandbox.text_search` only when the session executes bounded literal
+and case-sensitive ASCII-pattern `safe_regex_v1` matching where its files live and reports incomplete
+results truthfully. It is independent of arbitrary command execution.
 
 Test that the sandbox enforces mounts, network policy, process limits,
 cancellation, cleanup, and tenant isolation—not merely that a command runs.
@@ -223,9 +220,11 @@ snapshot alone does not make a workflow replayable after a restart.
 import { durableWorkspaceContract } from '@purista/harness/testing'
 import { claimsWorkspaceStore } from '@acme/harness-workspace-postgres'
 
-durableWorkspaceContract(() => claimsWorkspaceStore({
-  connectionString: process.env.TEST_WORKSPACE_DATABASE_URL!
-}))
+durableWorkspaceContract(() =>
+	claimsWorkspaceStore({
+		connectionString: process.env.TEST_WORKSPACE_DATABASE_URL!,
+	}),
+)
 ```
 
 For a production adapter, test a process restart after every durable step,

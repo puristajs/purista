@@ -1,7 +1,7 @@
 ---
 title: Consume a stream
 description: Declare a progressive upstream dependency, validate its frames, and cancel the session deliberately when the command no longer needs it.
-order: 329
+order: 326
 ---
 
 Use a stream from a command only when the command must stay connected while progressive chunks arrive. If the caller can receive a final answer later, enqueue work instead; that avoids holding the command open for the stream session.
@@ -24,7 +24,7 @@ export const summarizeReportCommandBuilder = reportV1ServiceBuilder
   .addParameterSchema(summarizeReportParameterSchema)
   .addOutputSchema(summarizeReportOutputSchema)
   .setCommandFunction(async function (context, payload) {
-    const report = await context.stream.Report[1].generateReport({ reportId: payload.reportId }, {})
+    const report = await context.stream.Report['1'].generateReport({ reportId: payload.reportId }, {})
     const chunks: string[] = []
     for await (const frame of report) {
       if (frame.payload.chunk) chunks.push(frame.payload.chunk.text)
@@ -34,7 +34,7 @@ export const summarizeReportCommandBuilder = reportV1ServiceBuilder
 ```
 
 `getCommandBuilder(...)`, the
-[`add…Schema(...)` contract methods](/handbook/framework/build-services/commands/create-and-validate/#know-what-each-definition-method-does),
+[`add…Schema(...)` contract methods](/handbook/framework/build-services/commands/create-and-validate/#understand-the-builder-methods),
 and [`setCommandFunction(...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction)
 define the local command exactly as they do for a non-streaming operation.
 `canConsumeStream(...)` adds the upstream stream client to that handler; it

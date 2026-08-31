@@ -109,15 +109,12 @@ const harness = defineHarness({ name: 'hello-world' })
       retry: true,
     },
   })
-  .agents(({ agent }) => ({
-    answerer: agent({
-      model: 'fast',
-      input: z.object({ question: z.string() }),
-      output: z.object({ answer: z.string() }),
-      builtinTools: false,
-      instructions: 'Answer concisely.',
-    }),
-  }))
+  .agent('answerer', {
+    model: 'fast',
+    input: z.object({ question: z.string() }),
+    output: z.object({ answer: z.string() }),
+    instructions: 'Answer concisely.',
+  })
   .build()`}
             label="defineHarness"
             language="typescript"
@@ -127,14 +124,14 @@ const harness = defineHarness({ name: 'hello-world' })
           <CodeBlock
             code={`const session = await harness.getSession('user-1')
 
-const result = await session.agents.answerer.prompt({
+const result = await session.agents.answerer.run({
   question: 'How do tools work?',
 })
 
 console.log(result.answer)
 // -> "Tools are typed functions..."
 
-await session.close()
+await session.destroy()
 await harness.shutdown()`}
             label="Run It"
             language="typescript"
@@ -189,8 +186,8 @@ await harness.shutdown()`}
           <h3 class="h3 mb-4">Add a TypeScript tool</h3>
           <div class="card p-5">
             <CodeBlock
-              code={`.tools({
-  search_docs: {
+              code={`.tools(({ tool }) => ({
+  search_docs: tool({
     description: 'Search internal docs.',
     input: z.object({ query: z.string() }),
     output: z.object({
@@ -199,17 +196,15 @@ await harness.shutdown()`}
     handler: async (_ctx, input) => ({
       hits: [{ id: 'intro', text: \`Result for \${input.query}\` }],
     }),
-  },
-})
-.agents(({ agent }) => ({
-  answerer: agent({
-    model: 'fast',
-    input: z.object({ question: z.string() }),
-    output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
-    tools: ['search_docs'],
-    instructions: 'Search docs before answering. Cite sources.',
   }),
-}))`}
+}))
+.agent('answerer', {
+  model: 'fast',
+  input: z.object({ question: z.string() }),
+  output: z.object({ answer: z.string(), citations: z.array(z.string()) }),
+  tools: ['search_docs'],
+  instructions: 'Search docs before answering. Cite sources.',
+})`}
               language="typescript"
             />
           </div>
@@ -265,27 +260,25 @@ await harness.shutdown()`}
 
       <div class="card p-5 mb-8">
         <CodeBlock
-          code={`.agents(({ agent }) => ({
-  researcher: agent({
-    model: 'fast',
-    input: z.object({ topic: z.string() }),
-    output: z.object({ facts: z.array(z.string()) }),
-    tools: ['search_docs'],
-    instructions: 'Find 3-5 relevant facts.',
-  }),
-  writer: agent({
-    model: 'fast',
-    input: z.object({ facts: z.array(z.string()), topic: z.string() }),
-    output: z.object({ draft: z.string() }),
-    instructions: 'Write a concise paragraph.',
-  }),
-  critic: agent({
-    model: 'fast',
-    input: z.object({ draft: z.string(), facts: z.array(z.string()) }),
-    output: z.object({ accurate: z.boolean(), issues: z.array(z.string()) }),
-    instructions: 'Check for unsupported claims.',
-  }),
-}))`}
+          code={`.agent('researcher', {
+  model: 'fast',
+  input: z.object({ topic: z.string() }),
+  output: z.object({ facts: z.array(z.string()) }),
+  tools: ['search_docs'],
+  instructions: 'Find 3-5 relevant facts.',
+})
+.agent('writer', {
+  model: 'fast',
+  input: z.object({ facts: z.array(z.string()), topic: z.string() }),
+  output: z.object({ draft: z.string() }),
+  instructions: 'Write a concise paragraph.',
+})
+.agent('critic', {
+  model: 'fast',
+  input: z.object({ draft: z.string(), facts: z.array(z.string()) }),
+  output: z.object({ accurate: z.boolean(), issues: z.array(z.string()) }),
+  instructions: 'Check for unsupported claims.',
+})`}
           label="Multi-agent harness"
           language="typescript"
         />
@@ -330,23 +323,22 @@ await harness.shutdown()`}
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="card p-5">
           <CodeBlock
-            code={`.workflows(({ workflow }) => ({
-  research_and_write: workflow({
-    input: z.object({ topic: z.string() }),
-    output: z.object({ draft: z.string(), approved: z.boolean() }),
-    handler: async (ctx) => {
-      const research = await ctx.agents.researcher(ctx.input)
-      const draft = await ctx.agents.writer(research)
-      const review = await ctx.agents.critic(draft)
+            code={`.workflow('research_and_write', {
+  input: z.object({ topic: z.string() }),
+  output: z.object({ draft: z.string(), approved: z.boolean() }),
+  delegation: { agents: ['researcher', 'writer', 'critic'] },
+  handler: async (ctx) => {
+    const research = await ctx.agents.researcher(ctx.input)
+    const draft = await ctx.agents.writer(research)
+    const review = await ctx.agents.critic(draft)
 
-      if (!review.accurate) {
-        return { ...draft, approved: false }
-      }
+    if (!review.accurate) {
+      return { ...draft, approved: false }
+    }
 
-      return { ...draft, approved: true }
-    },
-  }),
-}))`}
+    return { ...draft, approved: true }
+  },
+})`}
             label="Define a workflow"
             language="typescript"
           />
@@ -354,7 +346,7 @@ await harness.shutdown()`}
         <div class="card p-5">
           <CodeBlock
             code={`const result = await
-  session.workflows.research_and_write.prompt({
+  session.workflows.research_and_write.run({
     topic: 'Vector databases',
   })
 
@@ -454,12 +446,11 @@ impact, timeline, and next action.`}
     directory: './skills/incident-responder',
   },
 })
-.agents(({ agent }) => ({
-  writer: agent({
-    skills: ['incident-responder'],
-    // ...
-  }),
-}))`}
+.agent('writer', {
+  skills: ['incident-responder'],
+  builtinTools: ['read'],
+  // ...
+})`}
               language="typescript"
             />
           </div>

@@ -20,8 +20,8 @@ npm install @purista/harness-memory-nats
 import { natsMemoryEngine } from '@purista/harness-memory-nats'
 
 export const claimsMemory = natsMemoryEngine({
-  servers: ['nats://nats-a:4222', 'nats://nats-b:4222'],
-  replicas: 3,
+	servers: ['nats://nats-a:4222', 'nats://nats-b:4222'],
+	replicas: 3,
 })
 ```
 

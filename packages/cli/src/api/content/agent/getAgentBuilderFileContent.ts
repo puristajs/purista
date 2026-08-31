@@ -31,7 +31,6 @@ export const getAgentBuilderFileContent = (input: {
 	const payloadSchemaName = `${agentIdentifier}PayloadSchema`
 	const parameterSchemaName = `${agentIdentifier}ParameterSchema`
 	const outputSchemaName = `${agentIdentifier}OutputSchema`
-	const harnessAgentName = `${agentIdentifier}HarnessAgent`
 	const serviceBuilderTemplate = `${input.serviceName} v${input.serviceVersion} service builder`
 	const serviceBuilderName = camelCase(serviceBuilderTemplate)
 	const serviceBuilderFileName = convertToProjectFileCasing(serviceBuilderTemplate, input.puristaConfig)
@@ -95,7 +94,6 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine(`input: ${payloadSchemaName},`)
 			writer.writeLine(`output: ${outputSchemaName},`)
 			writer.writeLine("instructions: 'You are a helpful assistant for this service domain.',")
-			writer.writeLine('builtinTools: false,')
 		})
 		writer.writeLine('})')
 		if (successEventName) {

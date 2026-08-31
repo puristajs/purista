@@ -19,29 +19,24 @@ const input = z.object({ question: z.string().min(1) })
 const output = z.object({ answer: z.string() })
 
 export const policyAnalysisHarness = defineHarness({ name: 'policy-analysis' })
-  .sandbox(inMemorySandbox())
-  .models({
-    local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
-  })
-  .agents(({ agent }) => ({
-    summarize: agent({
-      model: 'local',
-      input,
-      output,
-      builtinTools: false,
-      instructions: 'Summarize the policy question.',
-      handler: async ({ input }) => ({ answer: `Policy analysis: ${input.question}` }),
-    }),
-  }))
-  .workflows(({ workflow }) => ({
-    answer_with_policy: workflow({
-      input,
-      output,
-      delegation: { agents: ['summarize'] },
-      handler: async (ctx) => ctx.agents.summarize(ctx.input),
-    }),
-  }))
-  .build()
+	.sandbox(inMemorySandbox())
+	.models({
+		local: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object'] },
+	})
+	.agent('summarize', {
+		model: 'local',
+		input,
+		output,
+		instructions: 'Summarize the policy question.',
+		handler: async ({ input }) => ({ answer: `Policy analysis: ${input.question}` }),
+	})
+	.workflow('answer_with_policy', {
+		input,
+		output,
+		delegation: { agents: ['summarize'] },
+		handler: async ctx => ctx.agents.summarize(ctx.input),
+	})
+	.build()
 ```
 
 Workflow delegation is disabled by default. Declare the agents a workflow may
@@ -49,23 +44,37 @@ call, then set bounded limits when the workflow design needs more than the
 default. A background task or external queue is still application-owned
 delivery; Harness does not turn a session into a durable broker.
 
+## Keep workflow validation library-neutral
+
+Both `workflow({ input, output })` fields accept any
+[Standard Schema](https://standardschema.dev/schema) validator. Workflows are
+application orchestration: callers supply `input` and the handler supplies
+`output`, so neither field needs Standard JSON Schema or a provider converter.
+Zod, ArkType, and ordinary Valibot schemas work directly, including their
+defaults and transforms. Use the model-facing wrapper only when the same
+schema is also a default-loop agent output or TypeScript-tool input; see
+[inputs and structured outputs](/handbook/harness/build-agents/inputs-and-structured-outputs/).
+
 The fluent order is intentional:
 [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/)
 starts the composition with a diagnostic name (default `agent-harness`), then
 [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox)
-explicitly supplies the local files-only sandbox before later agent definitions
+explicitly supplies the local files-and-search sandbox before later agent definitions
 can request sandbox capabilities. `inMemorySandbox()` has no options and grants
-`sandbox.fs` only: it neither executes or spawns processes nor persists files
+`sandbox.fs` and `sandbox.text_search`: it neither executes or spawns processes nor persists files
 or isolates tenants. This handler-only example does not need those stronger
 boundaries; bind a suitable application-owned adapter when a workflow actually
 does. Then
 [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models)
-creates the aliases used by [`.agents(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agents).
-[`.workflows(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflows)
-then exposes only registered agent IDs through `ctx.agents`; its callback helper
-preserves those IDs and the input/output schemas. The inline `agent(...)` and
-`workflow(...)` helpers are preferable to a separately cast configuration
-object. The [`delegation`](/handbook/api/interfaces/_purista_harness.WorkflowDefinition/#delegation)
+creates the aliases used by
+[`.agent(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent).
+After the required agents exist,
+[`.workflow(id, definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#workflow)
+exposes only registered agent IDs through `ctx.agents` and preserves the
+workflow's input and output schemas. Use the plural `.agents(record)` and
+`.workflows(record)` forms only for cohesive, non-empty definition records; all
+four methods accumulate and reject duplicate IDs. The
+[`delegation`](/handbook/api/interfaces/_purista_harness.WorkflowDefinition/#delegation)
 allowlist is the important opt-in. [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build)
 requires a model registry and rejects invalid agent/model references and
 delegation policies before a session runs; it does not make workflow execution

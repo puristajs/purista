@@ -27,17 +27,21 @@ flowchart LR
 | Background processing, retry, or independent capacity | [Queues and workers](/handbook/framework/build-services/queues-and-workers/) |
 | A platform scheduler must start a durable business flow | [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/) |
 | Model-assisted behavior integrated with normal service contracts | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |
-| Read or write state, configuration, or credentials from a handler | [Use stores in a service](/handbook/framework/build-services/use-stores-in-a-service/) |
-| Decide whether to return a business rejection, fail, retry, or dead-letter | [Handle service errors](/handbook/framework/build-services/handle-service-errors/) |
 
 Start with a command before adding a queue or agent. Commands establish schemas, service ownership, and error behavior that the more advanced flows reuse.
 
-State, configuration, and secret stores are runtime building blocks, not a
-late-stage configuration detail. [Use stores in a service](/handbook/framework/build-services/use-stores-in-a-service/)
-to choose and wire the right boundary before implementing a handler; it then
-links to the focused store and adapter guides.
+## Use the shared references when you need them
 
-Before adding a retry or turning an exception into a caller response, read
-[Handle service errors](/handbook/framework/build-services/handle-service-errors/).
-That page establishes the shared classification; each primitive guide owns its
-actual response, stream, redelivery, queue, or agent-recovery behavior.
+The primitive chapters provide the local implementation flow. Use these
+cross-primitive references for exact concepts that apply to several handler
+types:
+
+| You need to | Reference |
+| --- | --- |
+| Look up positional inputs, typed clients, resources, stores, logging, tracing, and metrics | [Handler context reference](/handbook/framework/build-services/handler-context/) |
+| Decide whether to return a safe business rejection, fail, retry, or dead-letter | [Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/) |
+| Choose, wire, and use state, configuration, or secret stores | [Use stores and configuration](/handbook/framework/configure-applications/) |
+
+These references follow the service primitives in the navigation so a newcomer
+can move directly from the service boundary to a first command. Primitive task
+pages link back to the relevant reference at the point where it becomes useful.

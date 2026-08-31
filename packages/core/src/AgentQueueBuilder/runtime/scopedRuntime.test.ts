@@ -2,16 +2,13 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { createSandbox } from 'sinon'
+import { z } from 'zod'
 
 import type { LogFnParamType, Logger, LoggerOptions } from '../../core/types/Logger.js'
 import { getEventBridgeMock } from '../../mocks/index.js'
 import { ServiceBuilder } from '../../ServiceBuilder/ServiceBuilder.impl.js'
 import type { AgentRuntimeOptions, AttachedAgentDefinition } from '../types.js'
-import {
-	createAgentRuntimeScope,
-	getScopedAgentRuntime,
-	initializeAttachedAgentRuntimes,
-} from './scopedRuntime.js'
+import { createAgentRuntimeScope, getScopedAgentRuntime, initializeAttachedAgentRuntimes } from './scopedRuntime.js'
 
 describe('attached agent scoped runtime', () => {
 	const sandbox = createSandbox()
@@ -19,7 +16,6 @@ describe('attached agent scoped runtime', () => {
 	afterEach(() => {
 		sandbox.restore()
 	})
-
 
 	it('does not require ai.models when no attached agents exist', async () => {
 		const scope = createAgentRuntimeScope()
@@ -73,6 +69,131 @@ describe('attached agent scoped runtime', () => {
 		const secondRuntime = getScopedAgentRuntime(secondScope, definition)
 
 		expect(firstRuntime).not.toBe(secondRuntime)
+	})
+
+	it('constructs one shared Harness per service and shuts shared model providers down once', async () => {
+		const close = vi.fn(async () => undefined)
+		const provider = { id: 'shared-provider', genAiSystem: 'test', close }
+		const service = new ServiceBuilder({
+			serviceName: 'support',
+			serviceVersion: '1',
+			serviceDescription: 'Support service',
+		})
+		const first = await service
+			.getAgentQueueBuilder('firstAgent', 'First attached agent')
+			.addModel('primary', { capabilities: ['text'] as const, defaults: { temperature: 0.1 } })
+			.setHarnessAgent({
+				model: 'primary',
+				instructions: 'Return the first result.',
+				handler: async context => {
+					expect(context.models.primary).toBeDefined()
+					return 'first'
+				},
+			})
+			.getDefinition()
+		const second = await service
+			.getAgentQueueBuilder('secondAgent', 'Second attached agent')
+			.addModel('primary', { capabilities: ['text'] as const, defaults: { temperature: 0.8 } })
+			.setHarnessAgent({
+				model: 'primary',
+				instructions: 'Return the second result.',
+				handler: async context => {
+					expect(context.models.primary).toBeDefined()
+					return 'second'
+				},
+			})
+			.getDefinition()
+		const scope = createAgentRuntimeScope()
+		const lifecycle = await initializeAttachedAgentRuntimes(scope, [first, second], {
+			models: { primary: { provider, model: 'test-model', capabilities: ['text'] } },
+		})
+
+		await expect(
+			getScopedAgentRuntime(scope, first).executeAggregate({
+				appContext: createCommandContext('first-delivery'),
+				message: { id: 'first-delivery' },
+				payload: 'input',
+				parameter: {},
+			}),
+		).resolves.toBe('first')
+		await expect(
+			getScopedAgentRuntime(scope, second).executeAggregate({
+				appContext: createCommandContext('second-delivery'),
+				message: { id: 'second-delivery' },
+				payload: 'input',
+				parameter: {},
+			}),
+		).resolves.toBe('second')
+
+		await lifecycle.shutdown()
+		await lifecycle.shutdown()
+		expect(close).toHaveBeenCalledTimes(1)
+	})
+
+	it('isolates same-named workflow-local agents and model aliases in the shared Harness', async () => {
+		const provider = { id: 'shared-provider', genAiSystem: 'test' }
+		const service = new ServiceBuilder({
+			serviceName: 'support',
+			serviceVersion: '1',
+			serviceDescription: 'Support service',
+		})
+		const createWorkflow = async (
+			name: 'firstWorkflow' | 'secondWorkflow',
+			prefix: 'first' | 'second',
+			temperature: number,
+		) => {
+			const helper = {
+				model: 'primary',
+				input: z.string(),
+				output: z.string(),
+				instructions: `Return the ${prefix} result.`,
+				handler: async (context: { input: string; models: Record<string, unknown> }) => {
+					expect(context.models.primary).toBeDefined()
+					return `${prefix}:${context.input}`
+				},
+			} as const
+			return service
+				.getAgentQueueBuilder(name, `${prefix} workflow`)
+				.addPayloadSchema(z.string())
+				.addOutputSchema(z.string())
+				.addModel('primary', { capabilities: ['text'] as const, defaults: { temperature } })
+				.setHarnessWorkflow<{ helper: typeof helper }>(
+					{
+						input: z.string(),
+						output: z.string(),
+						handler: async context => context.agents.helper(context.input),
+					},
+					{ agents: { helper } },
+				)
+				.getDefinition()
+		}
+		const first = await createWorkflow('firstWorkflow', 'first', 0.1)
+		const second = await createWorkflow('secondWorkflow', 'second', 0.8)
+		const scope = createAgentRuntimeScope()
+		const lifecycle = await initializeAttachedAgentRuntimes(scope, [first, second], {
+			models: { primary: { provider, model: 'test-model', capabilities: ['text'] } },
+		})
+
+		try {
+			await expect(
+				getScopedAgentRuntime(scope, first).executeAggregate({
+					appContext: createCommandContext('first-workflow-delivery'),
+					message: { id: 'first-workflow-delivery' },
+					payload: 'input',
+					parameter: {},
+				}),
+			).resolves.toBe('first:input')
+			await expect(
+				getScopedAgentRuntime(scope, second).executeAggregate({
+					appContext: createCommandContext('second-workflow-delivery'),
+					message: { id: 'second-workflow-delivery' },
+					payload: 'input',
+					parameter: {},
+				}),
+			).resolves.toBe('second:input')
+		} finally {
+			await lifecycle.shutdown()
+		}
 	})
 
 	it.each([true, false])(
@@ -284,6 +405,34 @@ SECRET_BODY`,
 			}),
 		).resolves.toBe('ok')
 		expect(recorded).toEqual([{ value: 3 }])
+	})
+
+	it('exposes Harness telemetry to run-function handlers', async () => {
+		const spans: string[] = []
+		const definition = createAttachedAgentDefinition()
+		definition.execution = {
+			kind: 'runFunction',
+			handler: async context => {
+				await context.telemetry.span('purista.agent.handler', {}, async () => {
+					spans.push('handler')
+					return undefined
+				})
+				return 'ok'
+			},
+		}
+		const scope = createAgentRuntimeScope()
+		await initializeAttachedAgentRuntimes(scope, [definition], { models: {} })
+		const runtime = getScopedAgentRuntime(scope, definition)
+
+		await expect(
+			runtime.executeAggregate({
+				appContext: createCommandContext('telemetry-message'),
+				message: { id: 'telemetry-message' },
+				payload: {},
+				parameter: {},
+			}),
+		).resolves.toBe('ok')
+		expect(spans).toEqual(['handler'])
 	})
 
 	it('accepts durable workspace agents when runtime and workspace capabilities match', async () => {

@@ -8,11 +8,11 @@ phases: [spec, architecture, implementation, review]
 # PURISTA Skill Maintainer
 
 ## When to use this skill
-Use this skill when creating, refactoring, consolidating, or reviewing the shared `purista` framework skill, the `purista-skill-maintainer` or `purista-docs-maintainer` meta skills, or any overlay that depends on them.
+Use this skill when creating, refactoring, consolidating, or reviewing the shared `purista` framework skill, its internal catalog/docs/tutorial maintainer skills, or any overlay that depends on them.
 
 ## What this skill is for
 This skill defines the maintenance workflow for the shared PURISTA skill catalog in `purista/skills`.
-The catalog has one canonical framework skill, `purista`, plus two internal workflows: `purista-skill-maintainer` for catalog work and `purista-docs-maintainer` for the public website and handbook.
+The catalog has one canonical framework skill, `purista`, plus internal workflows: `purista-skill-maintainer` for catalog work, `purista-docs-maintainer` for the public website and handbook, and `purista-tutorial-maintainer` for worked Framework tutorials and runnable learning examples.
 The maintainer skill keeps that model coherent, readable, spec-grounded, implementation-verified, and aligned across `purista`, `starter`, `create-purista`, public docs, and `voyage`.
 
 ## Source-of-truth order
@@ -27,7 +27,7 @@ Specs are the source of truth for framework development. If implementation and s
 
 ## Hard rules
 - Treat `purista` as the canonical shared framework skill path unless the change is explicitly about skill-catalog or public-documentation maintenance.
-- Keep user-facing framework skills independent from internal spec access. The two internal maintainer skills may reference specs because they maintain PURISTA itself.
+- Keep user-facing framework skills independent from internal spec access. Internal maintainer skills may reference specs because they maintain PURISTA itself.
 - Keep `SKILL.md` compact and navigational; move depth into `references/`.
 - Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
 - Use the filesystem as part of the reasoning surface: good reference taxonomy matters.
@@ -45,6 +45,7 @@ Specs are the source of truth for framework development. If implementation and s
 - Keep one framework skill and split depth into references instead of adding more framework skill folders.
 - Keep `purista-skill-maintainer` separate because it is a catalog-authoring workflow, not runtime framework knowledge.
 - Keep `purista-docs-maintainer` separate because public information architecture, coverage, writing, navigation, and publishing verification are distinct from framework runtime guidance.
+- Keep `purista-tutorial-maintainer` separate because beginner learning sequences, runnable checkpoints, local dependency fixtures, and demo UI verification form a distinct authoring workflow. Reuse docs-maintainer conventions rather than duplicating them.
 - Put only the routing model, core mental model, and highest-signal rules into `SKILL.md`.
 - Put examples, nuanced decisions, and topic-specific teaching into `references/`.
 - Add code snippets only when they materially teach a PURISTA concept.

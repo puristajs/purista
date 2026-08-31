@@ -1,10 +1,12 @@
 ---
 title: Prepare a Framework or adapter upgrade
 description: Inventory the application boundary, align official packages, and test the target runtime before rollout.
-order: 1110
+order: 1120
 ---
 
 Keep official `@purista/*` packages on compatible versions; mixed major versions can create TypeScript and runtime mismatches. Record the current lockfile, generated artifacts, configured adapters, and external platform versions before changing dependencies.
+
+For the current major transition, start with [Migrate PURISTA 3 to PURISTA 4](/handbook/framework/upgrade-and-migrate/migrate-v3-to-v4/). A version guide owns exact source changes; this page owns the reusable preparation process.
 
 ## Build an upgrade inventory
 

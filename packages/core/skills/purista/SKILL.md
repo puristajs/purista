@@ -32,6 +32,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
 - Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
+- Standalone Harness composition uses additive singular/plural registries; prefer `.tool(id, definition)` for inline native tools, invoke with `.run/.stream`, release idle sessions with `release`, and reserve `destroy` for deletion.
 - For attached agents, `addModel(alias, { capabilities, defaults? })` declares a provider-neutral requirement only. Never put a concrete provider or provider model identifier in that builder call; bind both under `ai.models[alias]` when the service is instantiated.
 - Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.

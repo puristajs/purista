@@ -25,12 +25,11 @@ spans, never through inspected content. The Harness owns GenAI/model/tool and
 guardrail telemetry; PURISTA records its service and agent-wrapper telemetry
 around that work without duplicating token metrics.
 
-## Attach a guarded agent to a service
+## Bind Guardrails to a service agent
 
 The optional package remains in the application composition root. Core does not
 need an addon dependency or a second configuration surface: give
-`setHarnessAgent(...)` the normal Harness definition returned by
-`rails.attach(...)`.
+`setHarnessAgent(...)` the normal Harness definition with `guardrails: rails`.
 
 ```ts title="claimsAnswerAgentBuilder.ts"
 import { z } from 'zod'
@@ -94,15 +93,13 @@ export const claimsAnswerAgentBuilder = claimsV1ServiceBuilder
   .addPayloadSchema(z.string().min(1))
   .addOutputSchema(z.string())
   .addModel('assistant', { capabilities: ['object'] as const })
-  .setHarnessAgent(
-    rails.attach({
-      model: 'assistant',
-      input: z.string().min(1),
-      output: z.string(),
-      instructions: 'Answer only with approved claims information.',
-      builtinTools: false,
-    }),
-  )
+  .setHarnessAgent({
+    model: 'assistant',
+    input: z.string().min(1),
+    output: z.string(),
+    instructions: 'Answer only with approved claims information.',
+    guardrails: rails,
+  })
 ```
 
 Bind only the normal Harness model at service startup. The rail configuration

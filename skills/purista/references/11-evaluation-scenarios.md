@@ -12,6 +12,7 @@ Use these scenarios to test whether the `purista` skill gives an otherwise untra
 - [Scenario 7: Durable Agent Workspace Replay](#scenario-7-durable-agent-workspace-replay)
 - [Scenario 8: Command-Capable Agent Boundary](#scenario-8-command-capable-agent-boundary)
 - [Scenario 9: Guarded Claims Agent](#scenario-9-guarded-claims-agent)
+- [Scenario 10: Clean Harness Composition](#scenario-10-clean-harness-composition)
 
 ## Scenario 1: Greenfield Project Setup
 Prompt:
@@ -224,3 +225,29 @@ Validation:
   limits are explicit
 - durable-review tests cover changed action/revision, concurrent resume and
   crashes before/after the effect and receipt, reusing the same execution claim
+
+## Scenario 10: Clean Harness Composition
+
+Prompt:
+
+```text
+Add an inline transfer tool and a workflow-backed attached agent. Keep the
+Harness composition type-safe and show the request lifecycle.
+```
+
+Expected behavior:
+- registers the inline native definition with `.tool('transfer_funds', {...})`
+  so schema-derived handler input remains exact
+- uses `.tools(record)` only when a reusable native/MCP record is already typed
+- invokes agents and workflows with `.run(...)` or `.stream(...)`, never
+  `.prompt(...)`
+- calls `session.release()` for normal idle cleanup and reserves
+  `session.destroy()` for deliberate data deletion
+- uses `ctx.logger` and `ctx.telemetry` in Harness agent/workflow handlers
+
+Validation:
+- no tool callback helper, registration brand, legacy invoker, Harness
+  `session.close()`, or workflow `ctx.log` appears
+- duplicate and invalid definition ids fail during configuration
+- the example keeps authorization in the application/tool boundary rather than
+  treating schemas or model instructions as authority

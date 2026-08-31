@@ -4,13 +4,15 @@ description: Find first-party packages, optional peers, and the public API bound
 order: 1400
 ---
 
-Install `@purista/harness` plus `zod` for every typed Harness application.
-Provider, memory, Guardrails, MCP, and plugin packages are explicit additions;
-the core package does not activate them by default.
+Install `@purista/harness` plus the schema validator selected by your
+application. Zod is the default guide path, but Harness accepts any Standard
+Schema validator; only model-facing schema positions also need Standard JSON
+Schema. Provider, memory, Guardrails, MCP, and plugin packages are explicit
+additions; the core package does not activate them by default.
 
 | Package | Purpose | Extra requirement |
 | --- | --- | --- |
-| `@purista/harness` | Core builder/runtime | `zod` in the application. |
+| `@purista/harness` | Core builder/runtime | An application-owned Standard Schema validator; see [schema-library compatibility](/handbook/harness/start/requirements-and-installation/#choose-the-schema-library-your-application-owns). |
 | `@purista/harness-openai`, `-anthropic`, `-bedrock`, `-azure-foundry` | First-party model providers | Provider credentials and service access. |
 | `@purista/harness-memory-sqlite`, `-postgres`, `-redis`, `-nats` | Persistent memory | See the [memory selection guide](/handbook/harness/manage-context-and-state/memory/). |
 | `@purista/harness-guardrails` | Typed policy rails | Optional privacy detector package as required. |
@@ -24,6 +26,15 @@ types; treat `defineHarness`, `Harness`, `ModelProvider`, `HarnessStorage`,
 `MemoryEngine`, `Sandbox`, and `DurableWorkspace` as the primary stable port
 names. Capability declarations are compatibility contracts, not marketing
 labels.
+
+For the complete included/default/optional matrix, exact peer ranges, external
+prerequisites, missing-dependency behavior, and focused enablement links, use
+[Packages and feature availability](./packages-and-feature-availability/).
+
+Use the [error catalog](./error-catalog/) to look up stable runtime codes,
+categories, retry signals, and the first safe response. The accompanying
+[application boundary guide](/handbook/harness/build-agents/errors-and-failure-behavior/)
+shows how to map them without exposing provider or application details.
 
 | API surface | Use it for | Do not use it for |
 | --- | --- | --- |

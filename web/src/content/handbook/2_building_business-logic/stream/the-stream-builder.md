@@ -46,7 +46,7 @@ export const generateTextStream = serviceBuilder
   )
   .exposeAsHttpStreamEndpoint('POST', 'text/generate')
   .setStreamFunction(async function (context, payload, parameter, writer) {
-    const upstream = await context.stream.AiService[1].providerStream(payload, parameter)
+    const upstream = await context.stream.AiService['1'].providerStream(payload, parameter)
     for await (const frame of upstream) {
       if (frame.payload.frameType === 'chunk' && frame.payload.chunk) {
         await writer.write(frame.payload.chunk)
@@ -122,7 +122,7 @@ Commands and subscriptions can declare stream consumption contracts:
 Then consume them via:
 
 ```ts
-const handle = await context.stream.SearchService[1].searchUsers(payload, parameter)
+const handle = await context.stream.SearchService['1'].searchUsers(payload, parameter)
 for await (const frame of handle) {
 // handle frame.payload
 }

@@ -1,11 +1,8 @@
-import type {
-	AgentModelBinding,
-	AgentRuntimeOptions,
-	AgentRuntimeRef,
-	AttachedAgentDefinition,
-} from '../types.js'
-import { createAgentExecutor } from './executor.js'
+import type { AgentModelBinding, AgentRuntimeOptions, AgentRuntimeRef, AttachedAgentDefinition } from '../types.js'
 import { createAgentConfigurationError } from './errors.js'
+import { createAgentExecutor } from './executor.js'
+import { resolveRuntimeModelBindings } from './modelBindings.js'
+import { createServiceHarnessRuntime, prepareAttachedAgentRuntime } from './serviceHarness.js'
 import { resolveAgentRuntimeSkills } from './skills.js'
 
 export type AgentRuntimeExecutor<Output = unknown> = NonNullable<AgentRuntimeRef<Output>['current']>
@@ -34,52 +31,50 @@ export async function initializeAttachedAgentRuntimes(
 	scope: AgentRuntimeScope,
 	definitions: readonly AttachedAgentDefinition<any>[],
 	aiOptions?: AgentRuntimeOptions<Record<string, AgentModelBinding>>,
+	options: { validateRuntimeCapabilities?: boolean } = {},
 ): Promise<AttachedAgentRuntimeShutdown> {
 	if (definitions.length === 0) {
 		return { shutdown: async () => undefined }
 	}
 
 	if (!aiOptions?.models) {
-		throw createAgentConfigurationError('AI attached agents require runtime ai.models in service.getInstance(...) options')
+		throw createAgentConfigurationError(
+			'AI attached agents require runtime ai.models in service.getInstance(...) options',
+		)
 	}
 
-	validateWorkspacePolicies(definitions, aiOptions)
+	if (options.validateRuntimeCapabilities !== false) {
+		validateWorkspacePolicies(definitions, aiOptions)
+	}
 
-	const executors = await Promise.all(
+	const prepared = await Promise.all(
 		definitions.map(async definition => {
 			const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, aiOptions.skills)
-			const executor = createAgentExecutor({
-				definition,
-				manifest: definition.manifest,
-				models: aiOptions.models as never,
-				storage: aiOptions.storage,
-				onSuspended: aiOptions.onSuspended,
-				workspace: aiOptions.workspace,
-				skillRuntime,
-				logger: aiOptions.logger,
-				sandbox: aiOptions.sandbox,
-				sandboxOptions: aiOptions.sandboxOptions,
-				sandboxPolicy: definition.sandboxPolicy,
-				telemetry: aiOptions.telemetry,
-				governance: aiOptions.governance,
-			})
-			scope.runtimes.set(definition.runtime, executor)
-			return executor
+			const resolvedModels = resolveRuntimeModelBindings(definition.manifest, aiOptions.models as never)
+			return prepareAttachedAgentRuntime(definition, skillRuntime, resolvedModels)
 		}),
 	)
+	const serviceHarness = createServiceHarnessRuntime(prepared, aiOptions)
+
+	for (const item of prepared) {
+		const definition = item.definition
+		const executor = createAgentExecutor({
+			definition,
+			manifest: definition.manifest,
+			harness: serviceHarness.harness,
+			registration: item.registration,
+			resolvedModels: item.resolvedModels as never,
+			onSuspended: aiOptions.onSuspended,
+			skillRuntime: item.skillRuntime,
+			logger: aiOptions.logger,
+			sandboxPolicy: definition.sandboxPolicy,
+		})
+		scope.runtimes.set(definition.runtime, executor)
+	}
 
 	return {
 		async shutdown() {
-			const results = await Promise.allSettled(executors.map(executor => executor.shutdown()))
-			const reasons = results
-				.filter((result): result is PromiseRejectedResult => result.status === 'rejected')
-				.map(result => result.reason)
-			if (reasons.length === 1) {
-				throw reasons[0]
-			}
-			if (reasons.length > 1) {
-				throw new AggregateError(reasons, `${reasons.length} attached agent runtimes failed to shut down`)
-			}
+			await serviceHarness.shutdown()
 		},
 	}
 }

@@ -1,7 +1,7 @@
 ---
 title: Preserve message and service contracts
 description: Evolve versioned services without breaking callers, subscribers, or messages waiting in a broker.
-order: 1130
+order: 1140
 ---
 
 Messages can be processed after the producer has deployed, so a compiled monorepo is not proof of compatibility. Prefer additive schema changes. For a removal, rename, or changed meaning, publish a new service version and keep the previous contract available for the consumers and retained messages that still need it.

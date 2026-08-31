@@ -115,7 +115,7 @@ const scores = await evaluatePromptCandidates({
 
   runCandidate: async (candidate, item, signal) => {
     signal.throwIfAborted()
-    return session.agents.answerer.prompt({
+    return session.agents.answerer.run({
       question: item.input.question,
     }, { signal })
   },
@@ -302,7 +302,7 @@ const scores = await evaluatePromptCandidates({
   signal.throwIfAborted()
 
   // Call a judge agent for semantic quality
-  const judgment = await session.agents.judge.prompt({
+  const judgment = await session.agents.judge.run({
     response: target.output,
     question: target.input,
   }, { signal })
@@ -347,7 +347,7 @@ const scores = await evaluatePromptCandidates({
   signal: abort.signal,
   runCandidate: async (candidate, item, signal) => {
     signal.throwIfAborted()   // check early
-    return session.agents.answerer.prompt(
+    return session.agents.answerer.run(
       item.input,
       { signal }              // forward to model call
     )
@@ -432,7 +432,7 @@ describe('prompt eval — change policy', () => {
       ],
       signal: new AbortController().signal,
       runCandidate: async (candidate, item) =>
-        session.agents.answerer.prompt(item.input),
+        session.agents.answerer.run(item.input),
       scorer: async (target) =>
         evaluateDeterministicScorer({
           type: 'contains', path: '/answer',

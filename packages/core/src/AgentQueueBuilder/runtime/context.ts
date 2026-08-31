@@ -1,4 +1,4 @@
-import type { RunEvent, Session } from '@purista/harness'
+import type { RunEvent, Session, TelemetryShim } from '@purista/harness'
 import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
@@ -34,6 +34,7 @@ export type CreateAgentHandlerContextInput<
 	serviceName: string
 	emitEvent: (event: RunEvent) => Promise<void>
 	logger: PuristaLogger
+	telemetry: TelemetryShim
 	signal: AbortSignal
 }
 
@@ -73,6 +74,7 @@ export function createAgentHandlerContext<
 				emit: input.emitEvent,
 			},
 		},
+		telemetry: input.telemetry,
 		invoke: {
 			tools: createCommandToolInvokeMap(input.appContext.service, input.commandTools ?? []),
 			agents: createAgentInvokeMap(input.appContext.service, input.serviceName, input.agentTools ?? []),

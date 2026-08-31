@@ -15,6 +15,14 @@ caller needs a bounded reply, a queue when work acceptance and later completion
 must be operated separately, and a stream when one caller needs incremental
 output.
 
+| Contract question | Subscription answer |
+| --- | --- |
+| Who initiates it? | A publisher emits a message or named command result; the EventBridge performs matching. |
+| What is selected? | Zero, one, or multiple matching subscription registrations. |
+| Who waits? | The publisher does not wait for subscription completion. Delivery acknowledgement/recovery remains between the subscriber and EventBridge. |
+| What is the normal result? | Successful acknowledgement, optional delivery control, and optionally a separately named result/custom event. |
+| What stays decoupled? | The publisher does not declare subscribers or know whether, when, or how many complete. |
+
 ## Register before an event can be delivered
 
 `service.start()` first checks EventBridge health, publishes service-init

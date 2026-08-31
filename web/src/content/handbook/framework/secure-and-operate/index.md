@@ -28,7 +28,7 @@ attached agent.
 | Identity, authorization, tenant isolation, sensitive data | [Security](/handbook/framework/secure-and-operate/security/) |
 | Logs, metrics, traces, and OpenTelemetry | [Observability](/handbook/framework/secure-and-operate/observability/) |
 | Retries, timeouts, shutdown, queue recovery | [Reliability](/handbook/framework/secure-and-operate/reliability/) |
-| Modular, distributed, Kubernetes, Dapr, serverless, edge choices | [Deployment](/handbook/framework/secure-and-operate/deployment/) |
+| Compile, package, and run a modular or distributed topology | [Deploy applications](/handbook/framework/deploy-applications/) |
 | Capacity and latency | [Performance and scaling](/handbook/framework/secure-and-operate/performance-and-scaling/) |
 | Symptoms and operator actions | [Troubleshooting and runbooks](/handbook/framework/secure-and-operate/troubleshooting-and-runbooks/) |
 
@@ -38,7 +38,7 @@ attached agent.
 | --- | --- | --- |
 | Identity is trusted | An invalid credential is rejected at the transport and a valid identity reaches the service context. | [Authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/) |
 | Data stays within its scope | A tenant/principal cannot read or change a neighboring record, queue item, or secret. | [Tenant isolation](/handbook/framework/secure-and-operate/security/tenant-isolation/) |
-| A failure has a controlled outcome | Expected business errors are safe; retryable work is idempotent; repair paths are defined. | [Reliability](/handbook/framework/secure-and-operate/reliability/) and [Handle service errors](/handbook/framework/build-services/handle-service-errors/) |
+| A failure has a controlled outcome | Expected business errors are safe; retryable work is idempotent; repair paths are defined. | [Reliability](/handbook/framework/secure-and-operate/reliability/) and [Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/) |
 | An operator can see the path | A controlled request produces safe logs, a trace, and the intended low-cardinality metric. | [Observability](/handbook/framework/secure-and-operate/observability/) |
 | Shutdown does not silently abandon work | Intake stops first, services drain within a bounded policy, and unfinished durable work has a recovery path. | [Graceful shutdown](/handbook/framework/secure-and-operate/reliability/graceful-shutdown/) |
 

@@ -1,10 +1,15 @@
 ---
 title: Handle command errors
 description: Keep invalid input, expected business rejection, and unexpected failure distinct so callers and operators receive the right signal.
-order: 323
+order: 330
 ---
 
 Command error handling starts with the contract. Let schema validation reject malformed input before the handler runs. Throw `HandledError` only for an expected business result that is safe to share. Let bugs and unavailable dependencies remain unexpected so the runtime, logs, and traces can show the real failure.
+
+[Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/)
+owns the shared error classification and `HandledError` contract. This page
+owns the command-specific lifecycle exits, caller response, acknowledgement
+advice, and recovery choice.
 
 ## Classify the outcome
 
@@ -15,30 +20,34 @@ Command error handling starts with the contract. Let schema validation reject ma
 | A dependency is unavailable or an invariant is broken | Let the error propagate. | Convert it into a caller-facing domain message. |
 | The handler returns an invalid result | Fix the implementation/output contract. | Continue to after guards or publish success. |
 
-## Return a safe business rejection
+## Keep business errors deliberate
 
-`HandledError` has the positional form `new HandledError(statusCode, message?, data?, traceId?)`. The message and data cross the command boundary, so keep them stable and safe for callers. A trace ID helps correlate the controlled result with logs and tracing.
+The first command task shows the reviewed `404` branch beside the handler in
+[Create and validate a command](/handbook/framework/build-services/commands/create-and-validate/#3-implement-the-handler-and-expected-business-error).
+Keep that mapping close to the domain decision. Do not catch a database or
+provider exception only to expose its message through `HandledError`.
 
-```ts title="src/service/invoice/v1/command/cancelInvoice/cancelInvoiceCommandBuilder.ts"
-import { HandledError, StatusCode } from '@purista/core'
+## Know what the caller receives
 
-export const cancelInvoiceCommandBuilder = invoiceV1ServiceBuilder
-  .getCommandBuilder('cancelInvoice', 'Cancel an invoice')
-  .addPayloadSchema(cancelInvoicePayloadSchema)
-  .addParameterSchema(cancelInvoiceParameterSchema)
-  .addOutputSchema(cancelInvoiceOutputSchema)
-  .setCommandFunction(async function (context, payload) {
-    const invoice = await context.resources.invoices.find(payload.invoiceId)
-    if (invoice.status === 'paid') {
-      throw new HandledError(StatusCode.Conflict, 'A paid invoice cannot be cancelled')
-    }
-    return context.resources.invoices.cancel(invoice.id)
-  })
-```
+| Failure stage | Command error payload | Later stages skipped |
+| --- | --- | --- |
+| Raw parameter or payload schema | Handled `400`, validation issues in `data`, and the trace ID. | Input transform, domain validation, guards, handler, and every output stage. |
+| Input transform | A deliberate `HandledError` is public; every other failure becomes generic `500`. | Domain validation, guards, handler, and every output stage. |
+| Domain payload or parameter schema | Handled `400`, validation issues in `data`, and the trace ID. | Guards, handler, and every output stage. |
+| Before guard | A deliberate `HandledError` is public; every other failure becomes generic `500`. | Handler and every output stage. |
+| Handler or resource | A deliberate `HandledError` is public; every other failure becomes generic `500`. | Domain output validation and every later success stage. |
+| Domain output schema | Generic `500`; schema issues remain internal. | After guards, output transform, response creation, and named success-event matching. |
+| After guard | A deliberate `HandledError` is public; every other failure becomes generic `500`. | Output transform, response creation, and named success-event matching. Handler side effects may already exist. |
+| Output transform | A deliberate `HandledError` is public; every other failure becomes generic `500`. | Transformed-output validation, response creation, and named success-event matching. Handler side effects may already exist. |
+| Transformed-output schema | Generic `500`; schema issues remain internal. | Response creation and named success-event matching. Handler side effects may already exist. |
 
-Never put a database error, upstream response, credential, raw request body, or stack trace in `message` or `data`.
+The transport may project this payload into another representation, such as
+Hono problem details. The visibility rule remains the same: handled details
+are public by application choice; unhandled details stay internal.
 
-The local command remains [`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder) plus [`addPayloadSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema), [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addparameterschema), [`addOutputSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema), and [`setCommandFunction(handler)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#setcommandfunction). Input schema failures bypass the handler; an output-schema failure is unexpected and bypasses success response creation. The definition guide explains representation defaults and the service-bound handler contract.
+The [complete command lifecycle](/handbook/framework/build-services/commands/#follow-the-complete-command-lifecycle)
+shows these stages in execution order. The builder chain records the
+configuration; it does not change that order.
 
 ## Keep recovery at the owning boundary
 

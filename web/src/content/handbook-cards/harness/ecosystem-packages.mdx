@@ -46,7 +46,7 @@ send data anywhere by itself.
 | [`@purista/harness-anthropic`](#model-providers) | You use Anthropic models. | Provider SDK request from your application process. | Call `anthropic({ apiKey })`, then register it under a Harness model alias. |
 | [`@purista/harness-bedrock`](#model-providers) | You use Amazon Bedrock with the AWS credential chain. | AWS SDK request from your application process. | Call `bedrock({ region })`, then register it under a Harness model alias. |
 | [`@purista/harness-azure-foundry`](#model-providers) | You use Azure AI Foundry inference endpoints. | Azure SDK request from your application process. | Call `azureFoundry({ endpoint, apiKey or credential })`, then register it under a Harness model alias. |
-| [`@purista/harness-guardrails`](#guardrails) | You need fail-closed input, output, tool, retrieval, or model-check controls. | In-process interceptor on a default-loop agent; actions remain application TypeScript. | Define opaque action tokens and one typed inline configuration, then call `rails.attach(...)`. |
+| [`@purista/harness-guardrails`](#guardrails) | You need fail-closed input, output, tool, retrieval, or model-check controls. | In-process interceptor on a default-loop agent; actions remain application TypeScript. | Define opaque action tokens and one typed inline configuration, then set `guardrails: rails`. |
 | [`@purista/harness-guardrails-presidio`](#privacy-detectors) | You already operate Microsoft Presidio Analyzer and need its recognizers or languages. | Calls an application-owned, authenticated internal Presidio `POST /analyze` endpoint. | Inject `createPresidioDetector({ endpoint, ... })`; masking remains in the core Guardrails addon. |
 | [`@purista/harness-guardrails-native-privacy`](#privacy-detectors) | You need deterministic local detection for common identifiers without a detector network hop. | Rust Node-API prebuild, in process; no model, WASM, or network fallback. | Construct `createNativePrivacyDetector({ id })`. |
 | [`@purista/harness-guardrails-local-ner`](#privacy-detectors) | You need local model-based people, organization, location, or other mapped NER labels. | In-process Transformers.js model loaded from your reviewed local files. | Install the optional peer, provide a SHA-256 manifest and label map, then call `warmup()`. |
@@ -76,14 +76,14 @@ for capabilities, retries, model aliases, and credentials.
 import { defineHarness, inMemorySandbox } from '@purista/harness'
 
 const harness = defineHarness({ name: 'support' })
-  .sandbox(inMemorySandbox())
-  .models({
-    // Register one configured provider under a stable application alias.
-  })
-  .agents(({ agent }) => ({
-    // Agents refer to aliases, not provider SDKs.
-  }))
-  .build()
+	.sandbox(inMemorySandbox())
+	.models({
+		// Register one configured provider under a stable application alias.
+	})
+	.agents({
+		// Agents refer to aliases, not provider SDKs.
+	})
+	.build()
 ```
 
 ### Optional core peers
@@ -116,14 +116,13 @@ provider-neutral.
 import { defineHarness } from '@purista/harness'
 import { openai } from '@purista/harness-openai'
 
-const harness = defineHarness()
-  .models({
-    assistant: {
-      provider: openai({ apiKey: process.env.OPENAI_API_KEY!, api: 'responses' }),
-      model: 'gpt-5-mini',
-      capabilities: ['object', 'tool_use'],
-    },
-  })
+const harness = defineHarness().models({
+	assistant: {
+		provider: openai({ apiKey: process.env.OPENAI_API_KEY!, api: 'responses' }),
+		model: 'gpt-5-mini',
+		capabilities: ['object', 'tool_use'],
+	},
+})
 ```
 
 Declare only capabilities that the selected model and adapter actually support.
@@ -147,24 +146,26 @@ import { defineGuardrailAction, defineGuardrails } from '@purista/harness-guardr
 import { z } from 'zod'
 
 const rails = defineGuardrails({
-  config: { rails: { input: { flows: ['block secrets'] } } },
-  actions: {
-    'block secrets': defineGuardrailAction({
-      phase: 'input',
-      valueSchema: z.string(),
-      mayTransform: false,
-      evaluate: ({ value }) => containsSecret(value)
-        ? { decision: 'block', reasonCode: 'secret_detected' }
-        : { decision: 'allow' },
-    }),
-  },
+	config: { rails: { input: { flows: ['block secrets'] } } },
+	actions: {
+		'block secrets': defineGuardrailAction({
+			phase: 'input',
+			valueSchema: z.string(),
+			mayTransform: false,
+			evaluate: ({ value }) =>
+				containsSecret(value) ? { decision: 'block', reasonCode: 'secret_detected' } : { decision: 'allow' },
+		}),
+	},
 })
 
-const guardedAgent = rails.attach({
-  model: 'assistant',
-  instructions: 'Answer only from approved information.',
-  builtinTools: false,
-})
+const harness = defineHarness()
+	.models({ assistant: runtimeModel })
+	.agent('answer', {
+		model: 'assistant',
+		instructions: 'Answer only from approved information.',
+		guardrails: rails,
+	})
+	.build()
 ```
 
 Read [Guardrails & governance](/handbook/harness/guardrails-governance/)
@@ -215,12 +216,12 @@ const inspection = await inspectAgentPlugin(source)
 if (!inspection.valid || !inspection.digest) throw new Error('Invalid plugin')
 
 const [plugin] = await loadAgentPlugins({
-  plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest }],
+	plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest }],
 })
 
 const bindings = plugin?.bindings({
-  skills: { research_playbook: 'research-playbook' },
-  tools: {},
+	skills: { research_playbook: 'research-playbook' },
+	tools: {},
 })
 ```
 
@@ -263,8 +264,8 @@ npm install sqlite-vec@0.1.9
 
 ```ts
 const memory = sqliteMemoryEngine({
-  file: '.purista/memory.sqlite',
-  vector: true,
+	file: '.purista/memory.sqlite',
+	vector: true,
 })
 ```
 
@@ -280,9 +281,9 @@ import { natsMemoryEngine } from '@purista/harness-memory-nats'
 
 const postgres = postgresMemoryEngine({ connectionString: process.env.DATABASE_URL! })
 const redis = redisMemoryEngine({
-  url: process.env.REDIS_URL!,
-  namespace: 'claims:memory:v1',
-  vector: { dimensions: 1536 },
+	url: process.env.REDIS_URL!,
+	namespace: 'claims:memory:v1',
+	vector: { dimensions: 1536 },
 })
 const nats = natsMemoryEngine({ servers: process.env.NATS_URL! })
 ```

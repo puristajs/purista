@@ -1,7 +1,7 @@
 ---
 title: Migrate Framework and infrastructure adapters
 description: Move a service between local and distributed runtime adapters without assuming equal delivery guarantees.
-order: 1120
+order: 1130
 ---
 
 Moving from default in-process adapters to Redis, NATS, AMQP, MQTT, or Dapr is an infrastructure migration. The application must be configured and deployed with the new package, external service, credentials, network policy, and recovery procedure.

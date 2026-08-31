@@ -6,7 +6,11 @@ import { join, relative, resolve } from 'node:path'
 const root = process.cwd()
 const skillsRoot = resolve(root, 'skills')
 const issues = []
-const internalMaintainerSkills = new Set(['purista-skill-maintainer', 'purista-docs-maintainer'])
+const internalMaintainerSkills = new Set([
+	'purista-skill-maintainer',
+	'purista-docs-maintainer',
+	'purista-tutorial-maintainer',
+])
 
 const readText = path => readFileSync(path, 'utf8')
 
@@ -116,6 +120,11 @@ if (!existsSync(puristaEvalScenarios)) {
 const docsEvalScenarios = join(skillsRoot, 'purista-docs-maintainer', 'references', 'evaluation-scenarios.md')
 if (!existsSync(docsEvalScenarios)) {
 	addIssue(docsEvalScenarios, 'PURISTA docs maintainer should include concrete evaluation scenarios')
+}
+
+const tutorialEvalScenarios = join(skillsRoot, 'purista-tutorial-maintainer', 'references', 'evaluation-scenarios.md')
+if (!existsSync(tutorialEvalScenarios)) {
+	addIssue(tutorialEvalScenarios, 'PURISTA tutorial maintainer should include concrete evaluation scenarios')
 }
 
 if (issues.length) {

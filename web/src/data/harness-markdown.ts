@@ -77,13 +77,11 @@ const harness = defineHarness({ name: 'support' })
       handler: async (_ctx, { query }) => ({ results: await searchDocs(query) }),
     }),
   }))
-  .agents(({ agent }) => ({
-    supportAgent: agent({
-      model: 'fast',
-      tools: ['searchDocs'],
-      instructions: 'Answer only from approved documentation.',
-    }),
-  }))
+  .agent('supportAgent', {
+    model: 'fast',
+    tools: ['searchDocs'],
+    instructions: 'Answer only from approved documentation.',
+  })
 \`\`\`
 
 Prefer a narrow first agent over a generic assistant. The harness should make the allowed behavior obvious in code review.`,
@@ -186,11 +184,15 @@ const rails = defineGuardrails({
   },
 })
 
-const guardedSupport = rails.attach({
-  model: 'assistant',
-  instructions: 'Help safely.',
-  tools: ['transfer_money'],
-})
+const harness = defineHarness()
+  .models({ assistant: runtimeModel })
+  .agent('guardedSupport', {
+    model: 'assistant',
+    instructions: 'Help safely.',
+    tools: ['transfer_money'],
+    guardrails: rails,
+  })
+  .build()
 \`\`\`
 
 Each action declares its exact phase. A narrower value type supplies a
@@ -233,7 +235,7 @@ const safeChunks = await rails.filterRetrievedChunks(chunks, {
   sessionId: ctx.sessionId,
   models: ctx.models,
   signal: ctx.signal,
-  logger: ctx.log,
+  logger: ctx.logger,
 })
 
 return ctx.agents.support({ question: ctx.input.question, context: safeChunks })

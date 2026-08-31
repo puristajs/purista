@@ -27,9 +27,9 @@ import type {
 	AgentHarnessDefinition,
 	AgentHarnessWorkflowOptions,
 	AgentHttpExposure,
-	AgentModelCapability,
 	AgentManifest,
 	AgentModelBinding,
+	AgentModelCapability,
 	AgentQueueBuilderTypes,
 	AgentQueueResultPolicy,
 	AgentResponseMode,
@@ -371,8 +371,8 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * Use one provider-neutral `@purista/harness` agent definition as this
 	 * attached agent's execution.
 	 *
-	 * Pass the inline definition object—the same shape supplied to Harness
-	 * `agent({ ... })`—rather than a Harness instance created with
+	 * Pass the inline definition object—the same shape supplied as the second
+	 * argument to Harness `agent(id, definition)`—rather than a Harness instance created with
 	 * `defineHarness(...).build()`. When the owning service is instantiated,
 	 * PURISTA creates and configures the Harness runtime, registers this
 	 * definition under the attached agent name, and exposes its generated
@@ -624,7 +624,11 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 	 * same value resume the same logical run.
 	 */
 	setDurability(policy: AgentDurabilityPolicy) {
-		if (policy.mode !== 'required' || policy.runIdPath.length === 0 || policy.runIdPath.some(segment => segment.trim() === '')) {
+		if (
+			policy.mode !== 'required' ||
+			policy.runIdPath.length === 0 ||
+			policy.runIdPath.some(segment => segment.trim() === '')
+		) {
 			throw new Error('Agent durability requires a non-empty runIdPath')
 		}
 		this.durability = { mode: 'required', runIdPath: [...policy.runIdPath] }
@@ -895,7 +899,7 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			throw new Error('Agent durability is supported only for Harness workflow execution')
 		}
 		if (this.workspacePolicy?.mode === 'durable' && !this.durability) {
-			throw new Error('A durable agent workspace requires setDurability({ mode: \'required\', runIdPath })')
+			throw new Error("A durable agent workspace requires setDurability({ mode: 'required', runIdPath })")
 		}
 		const execution = {
 			...this.executionPolicy,
@@ -912,9 +916,9 @@ export class AgentQueueBuilder<S extends AnyAgentQueueBuilderTypes = AgentQueueB
 			execution,
 			sandbox: this.sandboxPolicy
 				? {
-					...(this.sandboxPolicy.sharing ? { sharing: this.sandboxPolicy.sharing } : {}),
-					usesExplicitOwner: this.sandboxPolicy.owner !== undefined,
-				}
+						...(this.sandboxPolicy.sharing ? { sharing: this.sandboxPolicy.sharing } : {}),
+						usesExplicitOwner: this.sandboxPolicy.owner !== undefined,
+					}
 				: undefined,
 			workspacePolicy: this.workspacePolicy?.mode === 'durable' ? this.workspacePolicy : undefined,
 			durability: this.durability,
@@ -1018,7 +1022,8 @@ function validateResponseMode(mode: AgentResponseMode, options?: AgentResponseMo
 	const resultPolicyMode =
 		typeof resultPolicy === 'object'
 			? resultPolicy.mode
-			: resultPolicy ?? (mode === 'status' ? 'state' : mode === 'event' ? 'event' : mode === 'stream' ? 'state-and-event' : undefined)
+			: (resultPolicy ??
+				(mode === 'status' ? 'state' : mode === 'event' ? 'event' : mode === 'stream' ? 'state-and-event' : undefined))
 	const eventOptions = [options.successEventName, options.failureEventName, options.progressEventName]
 	if (eventOptions.some(value => value !== undefined)) {
 		for (const eventName of eventOptions) {
@@ -1033,7 +1038,10 @@ function validateResponseMode(mode: AgentResponseMode, options?: AgentResponseMo
 			)
 		}
 	}
-	if ((options.ttlMs !== undefined || options.delivery !== undefined) && (!resultPolicyMode || resultPolicyMode === 'none')) {
+	if (
+		(options.ttlMs !== undefined || options.delivery !== undefined) &&
+		(!resultPolicyMode || resultPolicyMode === 'none')
+	) {
 		throw new HandledError(StatusCode.BadRequest, 'Result retention and delivery require a result policy')
 	}
 }

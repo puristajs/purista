@@ -1,7 +1,7 @@
 ---
 title: Verify and roll back a migration
 description: Define acceptance evidence and a safe exit before changing a production Framework boundary.
-order: 1140
+order: 1150
 ---
 
 Write the rollback condition before rollout. A safe condition names an observable failure, such as a sustained authorization error, rising duplicate side effects, failed readiness, or unexpected retry/DLQ growth—not a vague sense that the release is unhealthy.

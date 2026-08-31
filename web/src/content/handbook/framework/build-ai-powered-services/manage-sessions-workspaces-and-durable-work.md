@@ -31,12 +31,12 @@ not by itself resume a logical workflow or preserve files.
 
 ```ts title="src/service/support/v1/agent/reviewCase/reviewCaseAgentBuilder.ts"
 export const reviewCaseAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('reviewCase', 'Reviews one support case')
-  .addPayloadSchema(reviewCaseInput)
-  .addOutputSchema(reviewCaseOutput)
-  .setHarnessWorkflow(reviewCaseWorkflow)
-  .setDurability({ mode: 'required', runIdPath: ['caseId'] })
-  .setWorkspacePolicy({ mode: 'durable' })
+	.getAgentQueueBuilder('reviewCase', 'Reviews one support case')
+	.addPayloadSchema(reviewCaseInput)
+	.addOutputSchema(reviewCaseOutput)
+	.setHarnessWorkflow(reviewCaseWorkflow)
+	.setDurability({ mode: 'required', runIdPath: ['caseId'] })
+	.setWorkspacePolicy({ mode: 'durable' })
 ```
 
 [`getAgentQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getagentqueuebuilder)

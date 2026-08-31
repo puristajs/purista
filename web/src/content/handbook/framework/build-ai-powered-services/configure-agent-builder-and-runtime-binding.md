@@ -63,18 +63,18 @@ import { openai } from '@purista/harness-openai'
 
 const apiKey = process.env.OPENAI_API_KEY
 if (!apiKey) {
-  throw new Error('OPENAI_API_KEY is required to start the support service.')
+	throw new Error('OPENAI_API_KEY is required to start the support service.')
 }
 
 const service = await supportV1Service.getInstance(eventBridge, {
-  ai: {
-    models: {
-      primary: {
-        provider: openai({ apiKey }),
-        model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-      },
-    },
-  },
+	ai: {
+		models: {
+			primary: {
+				provider: openai({ apiKey }),
+				model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			},
+		},
+	},
 })
 ```
 

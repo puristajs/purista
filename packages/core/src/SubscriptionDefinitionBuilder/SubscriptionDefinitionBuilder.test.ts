@@ -158,7 +158,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 		)
 		.canEmit('some', z.object({ example: z.string() }))
 		.setSubscriptionFunction(async function (context, payload, parameter) {
-			const result = await context.service.OtherService[2].testSubscription(payload, parameter)
+			const result = await context.service.OtherService['2'].testSubscription(payload, parameter)
 
 			context.emit('some', { example: 'test' })
 

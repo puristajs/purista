@@ -55,7 +55,7 @@ Inside any command or subscription handler you can call sibling services directl
 ```typescript
 .setCommandFunction(async function (context, payload) {
   // Calls UserService v1 command 'getUser' — in-process via the bridge
-  const user = await context.service.UserService[1].getUser(
+  const user = await context.service.UserService['1'].getUser(
     { userId: payload.userId },
     {},
   )

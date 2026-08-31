@@ -16,7 +16,7 @@ Treat a message schema as a public contract at its intended boundary, even when 
 Avoid logging complete request bodies, secrets, or tenant data merely to debug a failed schema. Record the correlation/context information and a safe error classification, then restrict detailed diagnostic data to its authorized sink.
 
 This page is a boundary lookup, not the error-behavior owner. Use
-[Handle service errors](/handbook/framework/build-services/handle-service-errors/)
+[Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/)
 to classify schema rejection, `HandledError`, unexpected failure, retry, and
 safe observability. Then follow the primitive-specific command, subscription,
 stream, worker, or attached-agent guide for its actual response and recovery

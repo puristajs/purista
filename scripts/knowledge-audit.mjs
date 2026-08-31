@@ -53,6 +53,7 @@ for (const file of skillMarkdown) {
 		rel !== 'skills/README.md' &&
 		!rel.startsWith('skills/purista-skill-maintainer/') &&
 		!rel.startsWith('skills/purista-docs-maintainer/') &&
+		!rel.startsWith('skills/purista-tutorial-maintainer/') &&
 		/\bspecs?\b|specs\//i.test(text)
 	) {
 		addIssue(file, 'user-facing skills must not reference internal specs')

@@ -6,7 +6,7 @@ import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import { getEventBridgeMock } from '../mocks/getEventBridge.mock.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import type { InstanceConfigType, ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
-import type { Infer, InferIn } from '../schema/index.js'
+import type { Infer, InferIn, Schema } from '../schema/index.js'
 
 /**
  * Infer the instance config type from a service builder.
@@ -21,6 +21,24 @@ export type InferCommandHarnessServiceBuilderConfig<T> = T extends ServiceBuilde
  * @group Unit test helper
  */
 export type InferCommandBuilderConfig<T> = T extends CommandDefinitionBuilder<any, infer C> ? C : never
+
+/** Received command payload type, before an optional input transform. */
+export type CommandTestHarnessPayload<T extends CommandDefinitionBuilder<any, any>> =
+	Schema extends InferCommandBuilderConfig<T>['TransformInputPayloadSchema']
+		? InferIn<InferCommandBuilderConfig<T>['PayloadSchema']>
+		: InferIn<InferCommandBuilderConfig<T>['TransformInputPayloadSchema']>
+
+/** Received command parameter type, before an optional input transform. */
+export type CommandTestHarnessParameter<T extends CommandDefinitionBuilder<any, any>> =
+	Schema extends InferCommandBuilderConfig<T>['TransformInputParamsSchema']
+		? InferIn<InferCommandBuilderConfig<T>['ParamsSchema']>
+		: InferIn<InferCommandBuilderConfig<T>['TransformInputParamsSchema']>
+
+/** Successful command response type, after an optional output transform. */
+export type CommandTestHarnessResult<T extends CommandDefinitionBuilder<any, any>> =
+	Schema extends InferCommandBuilderConfig<T>['TransformOutputSchema']
+		? Infer<InferCommandBuilderConfig<T>['OutputSchema']>
+		: Infer<InferCommandBuilderConfig<T>['TransformOutputSchema']>
 
 export type CreateCommandTestHarnessOptions<TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>> =
 	InstanceConfigType<InferCommandHarnessServiceBuilderConfig<TServiceBuilder>> & {
@@ -61,11 +79,11 @@ export const createCommandTestHarness = async <
 			eventBridge: eventBridgeMock?.stubs,
 		},
 		run: async (input: {
-			payload: InferIn<InferCommandBuilderConfig<TCommandBuilder>['PayloadSchema']>
-			parameter: InferIn<InferCommandBuilderConfig<TCommandBuilder>['ParamsSchema']>
+			payload: CommandTestHarnessPayload<TCommandBuilder>
+			parameter: CommandTestHarnessParameter<TCommandBuilder>
 		}): Promise<{
 			message: Awaited<ReturnType<typeof service.executeCommand>>
-			result: Infer<InferCommandBuilderConfig<TCommandBuilder>['OutputSchema']> | undefined
+			result: CommandTestHarnessResult<TCommandBuilder> | undefined
 		}> => {
 			const info = (service as unknown as { info?: { serviceName: string; serviceVersion: string } }).info
 			const message = getCommandMessageMock({
@@ -83,7 +101,7 @@ export const createCommandTestHarness = async <
 			return {
 				message: response,
 				result: isCommandSuccessResponse(response)
-					? (response.payload as Infer<InferCommandBuilderConfig<TCommandBuilder>['OutputSchema']>)
+					? (response.payload as CommandTestHarnessResult<TCommandBuilder>)
 					: undefined,
 			}
 		},

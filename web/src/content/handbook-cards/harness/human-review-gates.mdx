@@ -49,10 +49,10 @@ for replicated PURISTA services.
 const storage: HarnessStorage = createProductionHarnessStorage()
 
 const harness = defineHarness({ name: 'payment-review' })
-  .storage(storage)
-  .requires(['storage.persistent', 'storage.external_wait'])
-  // models, agents, and workflow definitions
-  .build()
+	.storage(storage)
+	.requires(['storage.persistent', 'storage.external_wait'])
+	// models, agents, and workflow definitions
+	.build()
 ```
 
 Inside the workflow, create the **application review task first** using a
@@ -91,9 +91,9 @@ set decision, deliver exactly one terminal signal:
 
 ```ts title="Review decision outbox: signal the committed outcome"
 const result = await storage.signalWait({
-  waitId: task.waitId,
-  eventId: decision.outboxEventId,
-  outcome: decision.outcome // approved | rejected | expired | cancelled
+	waitId: task.waitId,
+	eventId: decision.outboxEventId,
+	outcome: decision.outcome, // approved | rejected | expired | cancelled
 })
 // applied, duplicate, already_terminal, or not_found: all are deterministic.
 ```

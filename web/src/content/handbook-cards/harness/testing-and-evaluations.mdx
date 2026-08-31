@@ -31,36 +31,34 @@ import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 
 test('returns a validated support answer without a provider call', async () => {
-  const provider = new FakeModelProvider()
-  provider.enqueueObject({
-    object: { answer: 'Update the delivery address before dispatch.' },
-    usage: { inputTokens: 4, outputTokens: 8, totalTokens: 12 },
-    finishReason: 'stop'
-  })
+	const provider = new FakeModelProvider()
+	provider.enqueueObject({
+		object: { answer: 'Update the delivery address before dispatch.' },
+		usage: { inputTokens: 4, outputTokens: 8, totalTokens: 12 },
+		finishReason: 'stop',
+	})
 
-  const harness = defineHarness({ name: 'support-test' })
-    .sandbox(inMemorySandbox())
-    .models({ fake: { provider, model: 'fake', capabilities: ['object'] } })
-    .agents(({ agent }) => ({
-      support: agent({
-        model: 'fake',
-        input: z.object({ question: z.string() }),
-        output: z.object({ answer: z.string() }),
-        builtinTools: false,
-        instructions: 'Answer concisely.'
-      })
-    }))
-    .build()
+	const harness = defineHarness({ name: 'support-test' })
+		.sandbox(inMemorySandbox())
+		.models({ fake: { provider, model: 'fake', capabilities: ['object'] } })
+		.agent('support', {
+			model: 'fake',
+			input: z.object({ question: z.string() }),
+			output: z.object({ answer: z.string() }),
+			instructions: 'Answer concisely.',
+		})
+		.build()
 
-  const session = await harness.getSession('test:customer-42')
-  try {
-    await expect(session.agents.support.prompt({ question: 'Can I update my address?' }))
-      .resolves.toEqual({ answer: 'Update the delivery address before dispatch.' })
-    expect(provider.requests).toHaveLength(1)
-  } finally {
-    await session.release()
-    await harness.shutdown()
-  }
+	const session = await harness.getSession('test:customer-42')
+	try {
+		await expect(session.agents.support.run({ question: 'Can I update my address?' })).resolves.toEqual({
+			answer: 'Update the delivery address before dispatch.',
+		})
+		expect(provider.requests).toHaveLength(1)
+	} finally {
+		await session.release()
+		await harness.shutdown()
+	}
 })
 ```
 
@@ -137,19 +135,26 @@ aggregate evidence and do not persist prompt or output content by default.
 import { evaluateDeterministicScorer, evaluatePromptCandidates } from '@purista/harness'
 
 const scores = await evaluatePromptCandidates({
-  candidates: [
-    { id: 'brief', prompt: 'Answer in one paragraph.' },
-    { id: 'cited', prompt: 'Answer concisely and cite the policy.' }
-  ],
-  items: [{ id: 'returns-1', input: { question: 'Can I return this?' }, expected: 'policy' }],
-  signal: new AbortController().signal,
-  runCandidate: async (candidate, item, signal) => {
-    signal.throwIfAborted()
-    return runSupportCandidate(candidate.prompt, item.input)
-  },
-  scorer: target => evaluateDeterministicScorer({
-    type: 'contains', path: '/answer', value: String(target.expected), caseInsensitive: true
-  }, target)
+	candidates: [
+		{ id: 'brief', prompt: 'Answer in one paragraph.' },
+		{ id: 'cited', prompt: 'Answer concisely and cite the policy.' },
+	],
+	items: [{ id: 'returns-1', input: { question: 'Can I return this?' }, expected: 'policy' }],
+	signal: new AbortController().signal,
+	runCandidate: async (candidate, item, signal) => {
+		signal.throwIfAborted()
+		return runSupportCandidate(candidate.prompt, item.input)
+	},
+	scorer: target =>
+		evaluateDeterministicScorer(
+			{
+				type: 'contains',
+				path: '/answer',
+				value: String(target.expected),
+				caseInsensitive: true,
+			},
+			target,
+		),
 })
 ```
 

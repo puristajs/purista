@@ -28,18 +28,18 @@ import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { sqliteMemoryEngine } from '@purista/harness-memory-sqlite'
 
 export const claimsReviewHarness = defineHarness({ name: 'claims-review' })
-  .sandbox(inMemorySandbox())
-  .memory(sqliteMemoryEngine({ file: '.purista/claims-memory.sqlite' }))
-  .models({
-    noop: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: [] },
-  })
-  .build()
+	.sandbox(inMemorySandbox())
+	.memory(sqliteMemoryEngine({ file: '.purista/claims-memory.sqlite' }))
+	.models({
+		noop: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: [] },
+	})
+	.build()
 ```
 
 | Call or field | What it configures | Choice and failure boundary |
 | --- | --- | --- |
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Starts the named application composition that owns its sessions and memory facade. | The name defaults to `agent-harness`; it is diagnostic identity, not a memory namespace or tenant boundary. |
-| [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Explicitly selects the files-only adapter returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/). | The factory has no options and provides only `sandbox.fs`; it is not where this SQLite file is persisted. The memory engine owns the SQLite path, while this sandbox remains ephemeral and cannot execute commands or provide tenant isolation. |
+| [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Explicitly selects the files-and-bounded-search adapter returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/). | The factory has no options and provides `sandbox.fs` plus `sandbox.text_search`; it is not where this SQLite file is persisted. The memory engine owns the SQLite path, while this sandbox remains ephemeral and cannot execute commands or provide tenant isolation. |
 | [`sqliteMemoryEngine(options)`](/handbook/api/functions/_purista_harness-memory-sqlite.sqliteMemoryEngine/) | Opens one SQLite-backed memory engine. [`file`](/handbook/api/interfaces/_purista_harness-memory-sqlite.SqliteMemoryEngineOptions/#file) is required; its parent directory is created when the engine opens. | Use one durable, deployment-controlled file for a single-host process. An empty path, unavailable built-in SQLite driver, missing FTS5, or incompatible existing schema fails construction; the engine never falls back to in-memory memory. |
 | [`.memory(engine)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#memory) | Registers the one engine used by every session memory facade. | The direct engine form has no model dependency. A second `.memory(...)` call is invalid. Choose it before `.build()`; changing it while sessions are running is not a migration mechanism. |
 | [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Supplies the non-empty registry that every built Harness requires. | `noop` has no capabilities and no agent consumes it, so this persistence check makes no provider call. Add a real alias only when an agent or embedding configuration needs it. |
@@ -72,16 +72,20 @@ calls cannot accidentally reopen it with a different identity.
 import { claimsReviewHarness } from '../harness/claimsReview.js'
 
 const session = await claimsReviewHarness.getSession('claim:example', {
-  identity: {
-    tenantId: 'demo',
-    principalId: 'claims-handler',
-  },
+	identity: {
+		tenantId: 'demo',
+		principalId: 'claims-handler',
+	},
 })
 
-await session.memory.write('claim-status', { status: 'documents-requested' }, {
-  tags: ['claim'],
-  ttlMs: 3_600_000,
-})
+await session.memory.write(
+	'claim-status',
+	{ status: 'documents-requested' },
+	{
+		tags: ['claim'],
+		ttlMs: 3_600_000,
+	},
+)
 
 console.log(await session.memory.read('claim-status'))
 await claimsReviewHarness.shutdown()
@@ -108,8 +112,8 @@ npm install sqlite-vec@0.1.9
 
 ```ts title="src/harness/claimsReview.ts"
 const memory = sqliteMemoryEngine({
-  file: '.purista/claims-memory.sqlite',
-  vector: true,
+	file: '.purista/claims-memory.sqlite',
+	vector: true,
 })
 ```
 

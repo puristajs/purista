@@ -1,85 +1,110 @@
 ---
 title: Test a basic agent
-description: Inject a deterministic provider to test schemas, session wiring, and error behavior without a live model.
+description: Replace the live provider with a strict scripted adapter and verify one typed agent interaction end to end.
 order: 370
 ---
 
-Build the Harness in a function that accepts a `ModelProvider`. Production passes
-a real adapter; the test passes a deterministic adapter that returns a controlled
-response. That tests the implementation around the model, rather than pretending
-that a live model will produce identical wording twice.
+Test the agent boundary without credentials or network access. The test injects
+the same `ModelProvider` port used in production, scripts one structured result,
+and runs the real Harness session and schema validation path.
 
-```ts title="src/case-harness.ts"
+This proves that the application selects the agent, sends the expected request,
+validates the result, and closes its resources. It does not prove that a live
+model will classify representative cases correctly; that belongs in an
+[evaluation](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/).
+
+## Keep provider selection injectable
+
+```ts title="src/harness/createCaseHarness.ts"
 import { defineHarness, inMemorySandbox, type ModelProvider } from '@purista/harness'
 import { z } from 'zod'
 
-const input = z.object({ summary: z.string().min(1) })
-const output = z.object({ priority: z.enum(['low', 'high']) })
+const caseInput = z.object({ summary: z.string().min(1) })
+const caseOutput = z.object({ priority: z.enum(['low', 'high']) })
 
 export function createCaseHarness(provider: ModelProvider) {
-  return defineHarness({ name: 'case-test' })
-    .sandbox(inMemorySandbox())
-    .models({ test: { provider, model: 'test', capabilities: ['object'] } })
-    .agents(({ agent }) => ({
-      classify_case: agent({
-        model: 'test',
-        input,
-        output,
-        builtinTools: false,
-        instructions: 'Classify the case priority.',
-      }),
-    }))
-    .build()
+	return defineHarness({ name: 'case-management' })
+		.sandbox(inMemorySandbox())
+		.models({
+			classifier: { provider, model: 'classifier', capabilities: ['object'] },
+		})
+		.agent('classify_case', {
+			model: 'classifier',
+			input: caseInput,
+			output: caseOutput,
+			instructions: 'Classify the support case priority.',
+		})
+		.build()
 }
 ```
 
-```ts title="src/case-harness.test.ts"
+The production composition passes its selected provider adapter. The test
+passes a fake at that same boundary; there is no test-only branch inside the
+agent. An explicit `inMemorySandbox()` keeps the test independent of optional
+packages installed on the machine.
+
+The chain uses [`defineHarness(...)`](/handbook/api/functions/_purista_harness.defineHarness/),
+[`.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox),
+[`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models),
+[`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent),
+and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build)
+in the same order as production. See [Define an agent](/handbook/harness/build-agents/agent-definition/)
+for the full agent option contract; this page owns only the testing seam.
+
+## Script and run one interaction
+
+```ts title="src/harness/createCaseHarness.test.ts"
 import { describe, expect, it } from 'vitest'
-import type { JsonValue, ModelProvider, ObjectRequest, ObjectResponse } from '@purista/harness'
-import { createCaseHarness } from './case-harness.js'
-
-class FakeProvider implements ModelProvider {
-  readonly id = 'fake'
-  readonly genAiSystem = 'fake'
-
-  async object<T extends JsonValue = JsonValue>(_request: ObjectRequest<T>): Promise<ObjectResponse<T>> {
-    return {
-      object: { priority: 'high' } as T,
-      usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
-      finishReason: 'stop',
-    }
-  }
-}
+import { FakeModelProvider } from '@purista/harness/testing'
+import { createCaseHarness } from './createCaseHarness.js'
 
 describe('case classifier', () => {
-  it('returns the scripted object through the agent boundary', async () => {
-    const harness = createCaseHarness(new FakeProvider())
-    const session = await harness.getSession('case-test')
+	it('returns the validated priority', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueObject({
+			object: { priority: 'high' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const harness = createCaseHarness(provider)
 
-    await expect(session.agents.classify_case.prompt({ summary: 'A sign-in outage' }))
-      .resolves.toEqual({ priority: 'high' })
+		try {
+			const session = await harness.getSession('high-priority-case')
 
-    await harness.shutdown()
-  })
+			await expect(session.agents.classify_case.run({ summary: 'Customers cannot sign in.' })).resolves.toEqual({
+				priority: 'high',
+			})
+
+			expect(provider.requests).toHaveLength(1)
+			provider.assertExhausted()
+		} finally {
+			await harness.shutdown()
+		}
+	})
 })
 ```
 
-| Composition call | What it verifies here | Boundary to keep in mind |
+`strict: true` rejects an unqueued request and a response queued for the wrong
+operation. This catches an accidental extra model round instead of returning a
+legacy empty fallback. `assertExhausted()` catches the opposite mistake: a
+scripted response the implementation never consumed.
+
+Use a fresh provider and session ID for each independent test. Always shut down
+the Harness in `finally`, including after a failed assertion.
+
+## Add the first failure cases
+
+Keep each test focused on one boundary:
+
+| Case | Setup | Expected evidence |
 | --- | --- | --- |
-| [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Creates the named test composition; a stable name makes failing session/trace diagnostics recognizable. | `name` defaults to `agent-harness` and is not a test isolation or authorization mechanism. Use distinct session IDs for independent cases. |
-| [`.sandbox(inMemorySandbox())`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Pins the test to the files-only adapter returned by [`inMemorySandbox()`](/handbook/api/functions/_purista_harness.inMemorySandbox/) instead of host-dependent auto-detection. | It accepts no options, exposes only `sandbox.fs`, and has no command executor or durable filesystem. Keep it for deterministic composition; use a dedicated adapter contract test when the application relies on sandbox persistence, execution, or isolation. |
-| [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Binds the fake provider to the only alias the agent can select. | The non-empty model registry is required by `.build()`. Declare only `object`, because the test neither streams nor uses tools; a missing capability is a deterministic failure. |
-| [`.agents(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agents) | Registers the typed `classify_case` session API and preserves its schemas. | The callback helper restricts its `model` to `test`. Keep the definition inline so the test retains input/output inference. |
-| [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Runs configuration validation before the test opens a session. | It catches a missing model or invalid cross-registry reference; it does not prove the factual quality of a live model response. |
+| Invalid caller input | Invoke with data outside `caseInput` | Validation fails before provider I/O; `provider.requests` stays empty |
+| Invalid model output | Queue an object outside `caseOutput` | The agent fails output validation without returning the raw invalid value |
+| Missing model call fixture | Use strict mode without `enqueueObject` | The fake reports an unexpected `object` request |
+| Extra application model round | Queue only the expected response | Strict mode rejects the second request |
+| Unused fixture | Queue two results but execute once | `provider.assertExhausted()` fails |
+| Cancellation or timeout | Pass an aborted signal or bounded invocation timeout | The normalized cancellation/timeout error reaches the caller |
 
-The maintained `ai-harness/examples/quickstart/src/index.test.ts` uses this
-pattern. Add separate tests for invalid input, invalid model output, tool
-failures, timeout/cancellation, and session-concurrency behavior before relying
-on a live-provider smoke test.
-
-This verifies our code and wiring deterministically: schemas, session behavior,
-tool/workflow control flow, retries, cancellation, and configured persistence.
-It does **not** prove that a nondeterministic model response is factually
-correct, helpful, or safe for representative user input. Measure that agent
-quality with [evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/)
-using a reviewed dataset, scorers, and release threshold.
+Continue with [Test Harness applications](/handbook/harness/test-and-evaluate/test-harness-applications/)
+for tools, workflows, storage, sandbox adapters, replay, and the boundary between
+deterministic tests and live-provider evaluations.

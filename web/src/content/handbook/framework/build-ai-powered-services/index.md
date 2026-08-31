@@ -14,6 +14,14 @@ contracted, observable, testable, and safe to run in a service. Use the
 [AI Harness handbook](/handbook/harness/start/) to create model providers,
 tools, skills, MCP connections, workflows, memory, guardrails, and evaluations.
 
+| Contract question | Attached-agent answer |
+| --- | --- |
+| Who initiates it? | A caller invokes the generated command, stream, or queued execution surface. |
+| What is selected? | One service-owned attached-agent definition and one runtime model alias/capability binding. |
+| Who waits? | Command callers wait for a bounded result, stream callers for frames, and queued callers for acceptance only. |
+| What is the normal result? | Schema-validated output or stream/result events according to the selected execution shape. |
+| What stays decoupled? | The service contract stays provider/model agnostic; the composition root injects concrete model adapters and runtime storage. |
+
 ```mermaid title="One attached agent expands into normal PURISTA boundaries"
 flowchart LR
   Caller[Caller] --> C[Generated command]
@@ -46,8 +54,9 @@ flowchart LR
    requirements, allowed reach, and exactly one execution implementation.
 2. `getDefinition()` creates one command, stream, queue, and worker around that
    contract. `addAgentDefinition(...)` registers all four with the service.
-3. `getInstance(eventBridge, { ai: { models: … } })` builds a process-local
-   attached runtime. Every declared model alias must have a compatible binding.
+3. `getInstance(eventBridge, { ai: { models: … } })` builds one shared Harness
+   runtime for all attached agents and workflows on that service instance.
+   Every declared model alias must have a compatible binding.
 4. A command, stream, or worker invokes the runtime with validated input and
    trusted PURISTA context. The runtime validates the final output.
 5. A response/result policy may turn the command into queue acceptance and
@@ -67,7 +76,11 @@ steps—not effects of declaring an agent.
 | Look up every builder option and runtime binding | [Configure AgentBuilder and runtime binding](/handbook/framework/build-ai-powered-services/configure-agent-builder-and-runtime-binding/) |
 | Use resources, stores, tools, skills, metrics, identity, or cancellation | [Use tools, skills, resources, stores, and context](/handbook/framework/build-ai-powered-services/use-tools-skills-resources-stores-and-context/) |
 | Expose or call the generated capability | [Expose and invoke an attached agent](/handbook/framework/build-ai-powered-services/expose-and-invoke-an-attached-agent/) |
-| Protect and test the boundary | [Secure the service boundary](/handbook/framework/build-ai-powered-services/secure-the-service-boundary/) and [test it deterministically](/handbook/framework/build-ai-powered-services/test-an-ai-powered-service-deterministically/) |
+| Protect identity and business actions | [Secure the service boundary](/handbook/framework/build-ai-powered-services/secure-the-service-boundary/) |
+| Add content rails, tool policy, approval, or audit | [Configure governance and Guardrails](/handbook/framework/build-ai-powered-services/configure-governance-and-guardrails/) |
+| Isolate files and processes | [Configure sandbox ownership and sharing](/handbook/framework/build-ai-powered-services/configure-sandbox-ownership-and-sharing/) |
+| Prove deterministic service flow | [Test an AI-powered service deterministically](/handbook/framework/build-ai-powered-services/test-an-ai-powered-service-deterministically/) |
+| Deploy replicated services with PostgreSQL/Kubernetes and safe telemetry | [Deploy and observe AI-powered services](/handbook/framework/build-ai-powered-services/deploy-and-observe-ai-powered-services/) |
 
 The next page builds the smallest working attached agent and explains exactly
 which Framework and Harness pieces must be available.

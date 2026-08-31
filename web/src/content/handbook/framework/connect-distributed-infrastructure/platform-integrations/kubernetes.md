@@ -50,4 +50,4 @@ root, not once per service or route.
 
 The helper returns a Hono app; it does not start a listener. Add the listener package appropriate to the runtime (for Node, `@hono/node-server`) and pass `app.fetch` to it.
 
-Next: [Kubernetes and Dapr deployment](/handbook/framework/secure-and-operate/deployment/kubernetes-and-dapr/) and [Expose services with Hono](/handbook/framework/expose-and-consume-services/http-and-rest/hono/).
+Next: [Kubernetes and Dapr deployment](/handbook/framework/deploy-applications/kubernetes-and-dapr/) and [Expose services with Hono](/handbook/framework/expose-and-consume-services/http-and-rest/hono/).

@@ -291,7 +291,7 @@ Luckily, we can do it in one big step, by using docker's [multi-stage builds](ht
 Place a `Dockerfile` into the root of your repository.
 The file looks something like this.
 
-```Dockerfile
+```dockerfile
 FROM node:18-alpine as builder
 
 RUN mkdir -p /app

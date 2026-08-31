@@ -42,21 +42,21 @@ validation.
 
 ```ts title="src/service/support/v1/agent/triageTicket/triageTicketAgentBuilder.ts"
 export const triageTicketAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
-  .addPayloadSchema(triageTicketInput)
-  .addOutputSchema(triageTicketOutput)
-  .canInvoke('Support', '1', 'getTicket', {
-    payloadSchema: ticketLookupInput,
-    outputSchema: ticketSchema,
-  })
-  .setRunFunction(async context => {
-    const ticket = await context.invoke.tools['Support.1.getTicket'].call({
-      ticketId: context.payload.ticketId,
-    })
+	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
+	.addPayloadSchema(triageTicketInput)
+	.addOutputSchema(triageTicketOutput)
+	.canInvoke('Support', '1', 'getTicket', {
+		payloadSchema: ticketLookupInput,
+		outputSchema: ticketSchema,
+	})
+	.setRunFunction(async context => {
+		const ticket = await context.invoke.tools['Support.1.getTicket'].call({
+			ticketId: context.payload.ticketId,
+		})
 
-    context.metrics['app.support.triage.started'].add(1)
-    return { priority: ticket.customerImpact === 'high' ? 'high' : 'normal', reason: 'Domain policy applied' }
-  })
+		context.metrics['app.support.triage.started'].add(1)
+		return { priority: ticket.customerImpact === 'high' ? 'high' : 'normal', reason: 'Domain policy applied' }
+	})
 ```
 
 [`getAgentQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getagentqueuebuilder)
@@ -81,7 +81,7 @@ delegation boundary is useful; for internal Harness workflow delegation, configu
 | Need | Declare here | Enable at composition | Important boundary |
 | --- | --- | --- | --- |
 | A named skill directory | [`useSkills(names, resourceName?)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#useskills) | `ai.skills.bindings` or `ai.skills.namespaces` resolves named directories. | `names` is a non-empty skill-name array. An optional non-empty `resourceName` chooses a configured namespace. A missing binding fails attached runtime initialization; skill bodies are mounted files, not prompt text. |
-| Built-in Harness tools | Inline `setHarnessAgent({ builtinTools })` plus a compatible Harness sandbox/tool setup. | A compatible Harness sandbox/tool setup. | Put `builtinTools: false` or a narrow allow-list on the inline Harness agent definition. The builder's `useBuiltInTools(...)` setting is not consistently applied when no runtime skill resolves, so do not treat it as an enforced boundary until that Framework defect is repaired. |
+| Built-in Harness tools | [`useBuiltInTools(names)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#usebuiltintools) or inline `setHarnessAgent({ builtinTools })`. | A compatible Harness sandbox/tool setup. | Omission enables none. Use one narrow allowlist; the Framework applies `useBuiltInTools(...)` whether or not a skill runtime resolves. |
 | Application repository/gateway | `defineResource` | `getInstance({ resources })` | Resource methods must authorize their own effects. |
 | Framework state/config/secret store | Use normal service/handler store context | Wire the selected store at composition. | See [Use stores and configuration](/handbook/framework/configure-applications/); do not store prompts or secrets indiscriminately. |
 

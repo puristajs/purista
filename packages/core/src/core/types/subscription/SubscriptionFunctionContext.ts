@@ -41,7 +41,7 @@ export type SubscriptionFunctionContextEnhancements<
 	 * .setCommandFunction(async function (context, payload, _parameter) {
 	 *    const inputPayload = { my: 'input' }
 	 *    const inputParameter = { search: 'for_me' }
-	 *    const result = await context.service.ServiceA[1].test(inputPayload,inputParameter)
+	 *    const result = await context.service.ServiceA['1'].test(inputPayload,inputParameter)
 	 * })
 	 * ```
 	 */

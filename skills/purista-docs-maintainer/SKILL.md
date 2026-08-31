@@ -1,6 +1,6 @@
 ---
 name: purista-docs-maintainer
-description: Maintains PURISTA website, handbook, API docs, navigation, and coverage. Use when changing documentation structure, learning paths, examples, feature coverage, or drift; not for runtime implementation.
+description: Maintains PURISTA website, handbook, API docs, navigation, and coverage. Use for documentation structure, feature coverage, and drift; use purista-tutorial-maintainer for worked tutorial series and purista for runtime implementation.
 ---
 
 # PURISTA Docs Maintainer
@@ -12,7 +12,7 @@ and a handbook that helps developers reach a working result, choose the right
 option, configure it exactly, and operate it safely.
 
 Use a coherent reading flow without announcing the narrative technique. Keep
-every page useful on its own and give it an obvious entry and next step.
+every page useful on its own and give it an obvious entry and next step. For the Tutorials section and runnable learning examples, use the adjacent `purista-tutorial-maintainer` workflow, which reuses these presentation conventions.
 
 ## Audience
 
@@ -68,13 +68,16 @@ never require internal specs, plans, or skills.
 1. Classify the request: audit, website page, concept, tutorial, task guide,
    capability hub, adapter, operations, migration, or reference.
 2. State the audience, exact question, outcome, prerequisites, observable
-   evidence, and next decision.
+   evidence, and next decision. For an executable primitive, also state its
+   semantic contract: who initiates it, who is selected, who waits, what normal
+   result exists, and what it does or does not know about callers/consumers.
 3. Inventory current routes/content and build the relevant coverage ledgers
    before changing API-shaped or structural material.
 4. For a restructure, record each useful legacy content unit and target before
    merging, reducing, or redirecting its route.
-5. For executable topics, verify the runtime lifecycle and failure branches,
-   then map child pages to reader outcomes in implementation order.
+5. For executable topics, verify the runtime lifecycle and every stage's
+   failure classification/serialization, then map child pages to reader
+   outcomes in implementation order.
 6. Give each page one useful job. Use a provider-neutral hub plus focused
    adapter pages when implementations differ materially.
 7. Write the smallest safe path and expected result first. Add choices,
@@ -106,11 +109,37 @@ does not prove content retention.
 ### Lifecycle and findability
 
 Every substantial executable hub shows the source-verified lifecycle, normal
-result, and failure branches. Child order follows first result → normal
-output/event → advanced composition → resources/stores/context → exposure →
-failure/recovery → testing, omitting unsupported stages. Use reader-facing
-titles; do not hide enqueue, event emission, stream consumption, success
-events, or exposure under an unrelated method family.
+result, and failure branches. Before the diagram, define the primitive through
+its initiator, selected recipient, waiting/completion behavior, returned or
+published result, and coupling. Child order follows first result → required
+synchronous dependencies → normal output/event → additional event/durable/
+stream composition → transforms/guards → resources/stores/context → exposure →
+advanced failure/recovery → testing, omitting unsupported stages. Put default
+error behavior beside the first implementation even when a later page owns
+advanced recovery. Use reader-facing titles; do not hide invocation, enqueue,
+event emission, stream consumption, success events, or exposure under an
+unrelated method family or duplicate wrapper hub.
+
+For every lifecycle stage, record the values it receives, purpose, ordering,
+side-effect boundary, failure class, caller-visible serialization, later stages
+that are skipped, and internal observability. Input/output validation are not
+assumed symmetric: verify whether caller-owned invalid input exposes actionable
+issues and whether invalid application output becomes a safe internal error.
+Do not infer execution order from a fluent builder chain. Trace the assembled
+definition and runtime dispatcher. When transforms exist, distinguish received-
+representation schemas from domain schemas: raw validation → input transform →
+domain input validation → before guards → handler → domain output validation →
+after guards → output transform → transformed-output validation. Omit only the
+optional stages the implementation actually skips.
+
+Keep one dominant question per lifecycle diagram. When a complete lifecycle
+becomes dense at the handbook's default or mobile width, split it into two or
+three parts at real semantic boundaries—typically input preparation, business
+execution, and output/result—and keep one
+numbered order table as the exact source of sequence truth. Branches in the
+diagrams and rows in the table must use the same stage names. Do not compress
+several ordered callbacks into one opaque “boundary” node merely to retain a
+single picture.
 
 ### Public surface coverage
 
@@ -126,6 +155,49 @@ stores, typed clients, emitters, telemetry, cancellation/job controls, and the
 builder declarations that make them available. Verify callback receiver
 binding for lifecycle helpers.
 
+Present the service as the logical dependency and runtime boundary for its
+commands, subscriptions, streams, workers, and attached agents. Distinguish
+service-builder declarations from composition-root implementations and from
+the context projection used during execution. State exactly where each value
+appears: resources and runtime facilities on typed context members, validated
+service configuration on the bound service instance, and declared outbound
+clients only after the owning primitive's `can*` call. Do not describe the
+context as a global service locator or imply that a declaration constructs an
+adapter.
+
+For HTTP projections, trace every path and query value from route/query
+metadata into the command or stream parameter schema and handler argument.
+Document the route syntax, exact matching schema key, raw HTTP representation,
+required/optional agreement between OpenAPI metadata and the runtime schema,
+and collision/merge behavior when it affects correctness. Never imply that
+query metadata validates a value or that an undeclared path key is created in
+the typed parameter contract.
+
+Assign shared and primitive-local ownership before writing context, resource,
+store, or error guidance. The service-resource task owns declaration,
+composition-root injection, lifecycle ownership, and fakes. The store task
+owns store selection, wiring, shared operations, and adapter links. The shared
+handler-context page owns common positional/context concepts. The shared error
+page owns classification and disclosure rules. A primitive page keeps only its
+exact callback shape, additional controls/clients, lifecycle mapping, recovery,
+and a link to those shared owners. Remove repeated builder tours and examples
+that teach no primitive-specific delta.
+
+Treat public contract metadata as part of documentation coverage. Verify the
+actual Standard Schema → JSON Schema → OpenAPI/definition pipeline before
+recommending a library-specific API. For the supported Zod path, require useful
+business descriptions on public object and field schemas when they feed
+generated contracts; add examples only when the converter preserves them and
+the values are small, schema-valid, synthetic, and safe to publish. Do not
+repeat validation syntax in descriptions or put secrets, PII, tenant IDs, or
+production identifiers in examples.
+
+When one handler consumes another contract, prefer a consumer-local schema that
+contains only the fields needed for the decision. Verify whether the chosen
+schema implementation strips or rejects unknown fields before claiming data
+minimization; do not generalize one library's behavior to every Standard Schema
+implementation.
+
 ### Topology and adapters
 
 For multi-runtime features, explain process ownership, registration/discovery,
@@ -136,6 +208,100 @@ For every adapter/provider, trace its constructor, shared base classes,
 defaults, capability matrix, operation guards, lifecycle, and tests. Do not
 copy one adapter's guarantees to another. Separate transport/enqueue guarantees
 from exactly-once business execution.
+
+An EventBridge chapter must define the transport boundary before listing
+providers: construction and ownership, bridge-before-service startup,
+registration, readiness, health, invocation/event/stream flow, capability
+rejection, drain, and shutdown. Its selection table must compare included or
+optional availability, process topology, durability/acknowledgement/recovery,
+stream support, and operational dependency. Each adapter page then owns exact
+installation, provisioning, constructor/defaults, supported and unsupported
+capabilities, startup, failure/reconnect behavior, production security,
+verification, and migration impact. A custom-adapter page must map every public
+interface family and every capability set to `true` to a real implementation
+and provider test.
+
+### Security, governance, Guardrails, and sandboxing
+
+Do not collapse these controls into one “security” checklist. Keep their
+owners and runtime order explicit:
+
+1. the application authenticates the caller and authorizes the business
+   action;
+2. agent tool selection and built-in permissions constrain available actions;
+3. governance exposure and execution policies decide typed allow, deny, audit,
+   or immediate approval outcomes;
+4. content Guardrails inspect or transform exact input, output, tool, or
+   retrieval phases; and
+5. the selected sandbox/MCP/platform adapter enforces files, processes,
+   credentials, network, and isolation guarantees it actually implements.
+
+Reflect these owners in the hierarchy and follow `references/page-patterns.md`.
+A governance task is incomplete without policy registration order, typed
+context/input, rule selectors and effects, defaults and precedence, shadow
+versus enforce behavior, approval and audit callbacks, timeout/cancellation,
+fail-closed behavior, content-safe evidence, and deterministic tests proving
+the handler did not run. Distinguish bounded immediate approval from durable
+human review. Teach governance progressively from one complete native deny-rule
+tutorial through effects, rollout, approval, audit, external evaluators, and
+tests. Verify shipped adapters and use the custom-evaluator requirements in
+`references/page-patterns.md`; never call a typed registration helper a vendor adapter.
+
+A Guardrails task is incomplete without optional-package enablement, phase and
+flow order, exact protected value/selector, transform limits, binding point,
+failure behavior, telemetry/evidence, and deterministic enforcement tests.
+For a model-backed rail, register its model alias before the protected agent,
+declare the exact capability, keep deterministic checks first, inject the
+provider/model at composition, and send live false-accept/false-reject quality
+measurement to evaluations. Never present a guardrail model as deterministic
+or as business authorization.
+
+Framework AI pages explain where these Harness controls attach to a versioned
+service: provider-neutral model requirements on the builder, content rails on
+the inline agent definition, governance/approval/audit and concrete providers
+on `getInstance(..., { ai })`, service/command authorization around the
+business effect, and sandbox adapter/owner authorization at composition. Link
+to the Harness owner for full control semantics instead of copying it.
+
+Verify capability defaults from the runtime resolver. Omit redundant opt-out
+fields when omission is the secure default; show only the minimal explicit
+allowlist that changes behavior. Skills never grant tools: document required
+activation tools, earliest failure, and whether author metadata is enforced.
+Treat every skill file as reviewed supply-chain input. Distinguish inert
+mounting from separately enabled execution, and cover source trust, business
+authorization, credentials/egress, sandbox isolation, and change re-review.
+
+### Deployment, migrations, recipes, and test ownership
+
+Deployment is a first-class task graph, not a security/operations footnote.
+Separate compile/bundle output, runtime entry points and assets, process
+startup/shutdown, health/readiness, configuration/secrets, and observability.
+Document monolith direct definition registration separately from independent
+gateway/services that discover definitions over EventBridge. For distributed
+topologies, show startup-order consequences, late/missing registration,
+workers/schedulers, and graceful drain. Do not call `tsc` a bundler or imply a
+container image creates brokers, sidecars, stores, or credentials.
+
+For a major-version migration, compare the latest actually published source
+version with the intended release target. Build a source-backed change ledger;
+exclude intermediate APIs that were never published. Every developer-relevant
+change owns: affected usage, old and new contract, why it changed, exact code/
+config/data steps, failure/compatibility boundary, verification after the
+step, and rollback. Separate reusable migration process, contract evolution,
+adapter/topology migration, and one exact version-to-version guide. Do not
+publish an incomplete target as historical fact; mark unresolved release
+contracts as blocked.
+
+Keep a patterns/recipes chapter only for genuine cross-capability outcomes
+whose complete implementation spans several canonical chapters. A recipe must
+add a concrete end-to-end decision and implementation path; deployment shapes,
+primitive tutorials, and pointer-only pages belong to their focused owners.
+
+Primitive pages own their implementation tests. A cross-cutting test chapter
+owns only service composition, cross-message flows, selected real adapters,
+deployment topology, and release evidence. Its hub must route back to the
+primitive owner instead of repeating helper signatures, full builder examples,
+or error branches.
 
 ### Availability
 
@@ -157,6 +323,34 @@ not prove nondeterministic model correctness. Put live-model behavior, prompt
 quality, and agent correctness measurements in evaluations and link the two
 boundaries explicitly.
 
+For Harness test documentation, keep four reader jobs distinct:
+
+1. the implementation page shows the smallest successful deterministic test
+   for that agent, tool, workflow, or state capability;
+2. the cross-cutting deterministic-test chapter owns scripted model rounds,
+   capability failures, cancellation, replay, and test-fixture hygiene;
+3. adapter pages link to the matching shared contract and name the
+   provider-specific isolation, recovery, topology, and cleanup tests the
+   generic contract cannot prove; and
+4. evaluation pages own reviewed datasets, candidate execution, scorer
+   calibration, release policy, repeated trials, accounting, and CI.
+
+When the testing API supports strict fixtures, use the mode that rejects
+unqueued or mismatched interactions and show how to detect unused fixtures.
+If it does not, record and fix that product gap rather than describing a silent
+fallback as reliable test behavior. Never use a fake model response to claim
+agent correctness, and never use a passing generic adapter contract to claim
+container, VM, network, tenant, or durability guarantees.
+
+An evaluation path is incomplete unless the reader can define or load a
+versioned dataset, run a named candidate/task, select and calibrate scorers,
+inspect per-case status and coverage before aggregates, encode a release
+decision, and execute the same bounded gate in CI. Include real code for the
+dataset, runner or maintained-example handoff, policy assertion, command, and
+CI job when that is the page's reader job. State credential, budget, timeout,
+concurrency, sensitive-observation, artifact, retry-versus-trial, and holdout
+ownership explicitly.
+
 For every executable primitive, state the exact test boundary of each helper.
 A direct builder wrapper may validate input and run only selected hooks; it does
 not automatically prove transforms, later hooks, result/event construction,
@@ -165,12 +359,26 @@ three-column boundary table—direct logic, deterministic service runtime, and
 selected real adapter—unless source evidence proves a smaller set is complete.
 Name which lifecycle stages each level does and does not exercise.
 
+When a builder exposes direct transform or guard accessors, document how to
+test them with the matching typed context mock, service receiver binding,
+positional values for that lifecycle stage, and explicit validation of returned
+values. State which surrounding schemas, sibling hooks, response construction,
+and delivery stages the direct call skips; use the deterministic service
+runtime test for the complete order.
+
 ## Hard Rules
 
 - One canonical explanation per reader job; link instead of copying.
-- One page must stand alone with minimal context, prerequisites, action,
-  evidence, important risk, and next step.
-- Nest when it improves findability; never add empty wrapper levels.
+- Shared pages own common setup and semantics; primitive pages own only the
+  executable delta. Keep a concise local consequence and direct link rather
+  than copying the canonical example or options table.
+- Keep the chapter's executable learning path ahead of cross-cutting lookup
+  pages. A shared context, error, or reference page must not interrupt the
+  service-to-first-result sequence merely because several later pages link to
+  it. Place it after the executable sibling hubs or in the chapter that owns
+  the task, then link to it at the point of use.
+- One page must stand alone with context, prerequisites, action, evidence, risk, and next step.
+- Keep linear task paths as siblings even when routes are deeper; nest only a distinct browsable capability family, and never add empty wrappers.
 - Keep Framework and Harness as independent navigation/previous-next graphs.
 - Derive landing, sidebar, breadcrumbs, search, canonical routes, redirects,
   and previous/next from one manifest.
@@ -188,10 +396,21 @@ Name which lifecycle stages each level does and does not exercise.
   rehoming exact procedures or reducing concept pages.
 - Put primitive tests beside implementation; cross-cutting test chapters own
   strategy, integration, and end-to-end boundaries.
+- Keep sandbox capability selection, built-in adapter configuration, shared
+  lifecycle, and production enforcement requirements in the sandbox chapter.
+  Keep HTTP/stdio transport fields, authentication, protocol behavior, and MCP
+  failures in the MCP chapter. Adapter-specific install, provisioning,
+  compatibility, cleanup, and verification remain on the adapter page. Link
+  these owners; do not teach the same MCP setup in the sandbox chapter.
 - For autonomous work, require exact write/evidence scopes, dependencies,
   retention/public-surface IDs, exclusions, halt conditions, acceptance, and
   verification. One integrator owns manifest/routes/shared navigation.
 - Use real-world examples with safe synthetic data and explicit outcomes.
+- Carry one small real-world scenario through a capability page graph where it
+  remains natural. Each child shows only its new delta and keeps names, schemas,
+  identifiers, expected results, and failure semantics consistent. Change the
+  scenario when another problem genuinely fits better; do not contort one
+  example for superficial uniformity.
 - Write handbook prose as product and framework documentation. Do not expose
   authoring reasoning, review/debug notes, prompt feedback, or editorial
   directions such as “keep this inline.” State the runtime behavior,
@@ -207,6 +426,18 @@ Name which lifecycle stages each level does and does not exercise.
   generated path truly needs a dependent type, expose a deliberately named
   alias from the owning public package instead of reaching into an
   implementation package.
+- For standalone Harness definitions, use repeatable
+  `.agent(id, definition)` and `.workflow(id, definition)` as the normal inline
+  path. Use `.agents(record)` and `.workflows(record)` only for cohesive
+  pre-typed batches, and explain that singular/plural calls accumulate while
+  duplicate ids fail. Never reintroduce callback identity wrappers or
+  standalone definition helpers. Register models before agents and agents
+  before workflows so schema-derived callback and `ctx.agents` types cascade.
+- Bind optional Harness Guardrails through the default-loop agent definition's
+  direct `guardrails` field. Do not document decorator or attach helpers.
+  State that custom-handler agents reject Guardrails, interceptors, and other
+  default-loop controls, and verify that PURISTA `setHarnessAgent(...)` forwards
+  the same provider-neutral definition without a Core dependency on the addon.
 - Every documented fluent builder/configuration call must have a nearby
   source-verified explanation of its intent, reader-relevant parameters,
   defaults/options, runtime effect, and important invalid/failure interaction;
@@ -241,26 +472,20 @@ Name which lifecycle stages each level does and does not exercise.
   decisions or fewer.
 - Never expose secrets, credentials, PII, prompts/completions, raw payloads,
   headers, attachments, or tenant/user identifiers in examples or telemetry.
+- Treat caller-visible application errors as an explicit disclosure boundary.
+  Document exactly which status/message/data becomes public and keep provider,
+  database, stack, credential, PII, and invalid-output details internal. Never
+  recommend catching an unexpected dependency failure merely to expose its
+  message as a handled business error. Apply the error, streaming, cancellation,
+  and cleanup boundaries in `references/topic-lifecycle-and-task-flow.md`.
 - Treat authorization, tenant isolation, data minimization, reliability,
   observability, and operations as normal production guidance.
 - Do not hand-edit generated API/site output or leak internal specs/plans/agent
   workflows into public pages.
 
-## Repository Routing
-
-- `web/src/pages/` — website/routes
-- `web/src/content/handbook/` — canonical and legacy detailed content
-- `web/src/content/handbook-cards/` — legacy/current cards; evidence, not IA
-- `web/src/data/handbook*` — canonical runtime structure/manifest
-- `web/src/content.config.ts` — public content schemas
-- `web/src/lib/api-docs.ts`, `web/src/generated/purista-api.json` — generated API presentation/evidence
-- `packages/*/src`, package tests/READMEs — public implementation evidence
-- `examples/`, `packages/cli`, `starter`, `create-purista` — executable/generated paths
-
 ## Stop Conditions
 
-Stop and record a concrete blocker when specs, implementation, tests, API data,
-or examples disagree; a public surface/default cannot be verified; a page
+Stop and record a concrete blocker when specs, implementation, tests, API data, or examples disagree; a public surface/default cannot be verified; a page
 fails usefulness; route retention is incomplete; a snippet cannot be proven;
 or another ticket owns the required file/canonical answer. Do not invent,
 broaden scope, publish a placeholder, or edit another owner's shared files.
@@ -268,8 +493,6 @@ broaden scope, publish a placeholder, or edit another owner's shared files.
 ## Completion
 
 A change is complete only when the audience can find and complete its outcome;
-the first result and feature enablement are explicit; methods/context/adapters
-have exact canonical ownership; both reader journeys pass; snippets and claims
-match implementation/API evidence; links and rendered pages pass; old routes
+the first result and feature enablement are explicit; methods/context/adapters have exact canonical ownership; both reader journeys pass; snippets and claims match implementation/API evidence; links and rendered pages pass; old routes
 have retained content and valid redirects; no duplicate/empty canonical page
 remains; and structural plus skill/knowledge audits pass.

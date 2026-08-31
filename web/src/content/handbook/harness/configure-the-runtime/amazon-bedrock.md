@@ -11,7 +11,7 @@ the Harness does not create IAM permissions or enable a model for an account.
 ## Enable the adapter
 
 ```sh title="Install the Bedrock provider"
-npm install @purista/harness @purista/harness-bedrock zod
+npm install @purista/harness @purista/harness-bedrock
 ```
 
 ```ts title="Configure a Bedrock model alias"
@@ -20,18 +20,18 @@ import { bedrock } from '@purista/harness-bedrock'
 
 const model = process.env.BEDROCK_MODEL_ID
 if (!model) {
-  throw new Error('BEDROCK_MODEL_ID is required to start the Bedrock Harness.')
+	throw new Error('BEDROCK_MODEL_ID is required to start the Bedrock Harness.')
 }
 
 export const harness = defineHarness()
-  .models({
-    assistant: {
-      provider: bedrock({ region: process.env.AWS_REGION ?? 'us-east-1' }),
-      model,
-      capabilities: ['object'],
-    },
-  })
-  .build()
+	.models({
+		assistant: {
+			provider: bedrock({ region: process.env.AWS_REGION ?? 'us-east-1' }),
+			model,
+			capabilities: ['object'],
+		},
+	})
+	.build()
 ```
 
 | Call or field | What it configures | Choice and failure boundary |
@@ -49,6 +49,60 @@ export const harness = defineHarness()
 3. Grant least-privilege permission for the model operation and verify account
    model access.
 4. Set `BEDROCK_MODEL_ID` from deployment configuration, not agent code.
+
+## Configure the Converse inference request
+
+The adapter uses Bedrock Converse. Its typed Harness generation fields become
+`inferenceConfig`; that API is shared, but individual foundation models can
+support a smaller set or different valid ranges.
+
+```ts title="src/createBedrockHarness.ts"
+export const harness = defineHarness({ name: 'support' })
+	.models({
+		assistant: {
+			provider: bedrock({ region: process.env.AWS_REGION ?? 'us-east-1' }),
+			model,
+			capabilities: ['object', 'tool_use'],
+			defaults: {
+				maxTokens: 700,
+				temperature: 0.2,
+			},
+		},
+	})
+	.build()
+```
+
+| Harness field | Bedrock Converse field | Compatibility guidance |
+| --- | --- | --- |
+| `maxTokens` | `inferenceConfig.maxTokens` | Model-specific output limits apply. This setting does not authorize an output beyond the model’s available context. |
+| `temperature` | `inferenceConfig.temperature` | Valid ranges and support are model-specific. Prefer one sampling control at a time. |
+| `topP` | `inferenceConfig.topP` | A model can omit support even though Converse exposes the field. |
+| `stopSequences` | `inferenceConfig.stopSequences` | Use it only for a documented text-format boundary; do not treat it as an enforcement mechanism. |
+| `parallelToolCalls` | Not mapped by the Converse adapter. | Use Harness `maxParallelToolCalls` to bound application execution; do not rely on this alias setting for Bedrock. |
+
+For an AWS model-specific setting that Converse does not normalize, pass the
+field using `providerOptions`. For example, Bedrock documents
+`additionalModelRequestFields` for a parameter that a particular model
+supports:
+
+```ts title="src/createBedrockHarness.ts"
+const assistantModelOptions = {
+	defaults: {
+		maxTokens: 700,
+		providerOptions: {
+			additionalModelRequestFields: {
+				top_k: 50,
+			},
+		},
+	},
+}
+```
+
+This is not portable between model families. Keep per-request AWS SDK transport
+settings in `providerOptions.requestOptions`, not in the Converse body. Consult
+the [Bedrock Converse API reference](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html)
+and its linked model inference-parameter documentation for the exact model and
+region before deploying an additional field.
 
 ## Verify and operate
 

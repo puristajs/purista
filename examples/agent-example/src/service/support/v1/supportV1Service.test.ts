@@ -17,6 +17,10 @@ describe('supportV1Service', () => {
 				'analyzeSignals',
 				'assessRollbackRisk',
 				'coordinateIncidentResponse',
+				'reviewRollback',
+				'requestRollbackReview',
+				'decideRollbackReview',
+				'executeApprovedRollback',
 			]),
 		)
 		expect(queueNames).toEqual(
@@ -25,15 +29,17 @@ describe('supportV1Service', () => {
 				'agent:Support:1:analyzeSignals',
 				'agent:Support:1:assessRollbackRisk',
 				'agent:Support:1:coordinateIncidentResponse',
+				'agent:Support:1:reviewRollback',
 			]),
 		)
-		expect(definitions.queueWorkers).toHaveLength(4)
+		expect(definitions.queueWorkers).toHaveLength(5)
 		expect(definitions.streams.map(stream => stream.streamName)).toEqual(
 			expect.arrayContaining([
 				'triageTicketStream',
 				'analyzeSignalsStream',
 				'assessRollbackRiskStream',
 				'coordinateIncidentResponseStream',
+				'reviewRollbackStream',
 			]),
 		)
 	})

@@ -11,7 +11,7 @@ API key or credential unless an application injects a client for tests.
 ## Enable the adapter
 
 ```sh title="Install the Azure AI Foundry provider"
-npm install @purista/harness @purista/harness-azure-foundry zod
+npm install @purista/harness @purista/harness-azure-foundry
 ```
 
 The adapter can use an API key without another application package. For a
@@ -29,21 +29,21 @@ const endpoint = process.env.AZURE_AI_ENDPOINT
 const apiKey = process.env.AZURE_AI_API_KEY
 const model = process.env.AZURE_AI_MODEL
 if (!endpoint || !apiKey || !model) {
-  throw new Error('AZURE_AI_ENDPOINT, AZURE_AI_API_KEY, and AZURE_AI_MODEL are required.')
+	throw new Error('AZURE_AI_ENDPOINT, AZURE_AI_API_KEY, and AZURE_AI_MODEL are required.')
 }
 
 export const harness = defineHarness()
-  .models({
-    assistant: {
-      provider: azureFoundry({
-        endpoint,
-        apiKey,
-      }),
-      model,
-      capabilities: ['object'],
-    },
-  })
-  .build()
+	.models({
+		assistant: {
+			provider: azureFoundry({
+				endpoint,
+				apiKey,
+			}),
+			model,
+			capabilities: ['object'],
+		},
+	})
+	.build()
 ```
 
 For a managed Azure identity, pass an Azure `credential` instead of `apiKey`:
@@ -54,12 +54,12 @@ import { azureFoundry } from '@purista/harness-azure-foundry'
 
 const endpoint = process.env.AZURE_AI_ENDPOINT
 if (!endpoint) {
-  throw new Error('AZURE_AI_ENDPOINT is required to create the Azure AI provider.')
+	throw new Error('AZURE_AI_ENDPOINT is required to create the Azure AI provider.')
 }
 
 export const provider = azureFoundry({
-  endpoint,
-  credential: new DefaultAzureCredential(),
+	endpoint,
+	credential: new DefaultAzureCredential(),
 })
 ```
 
@@ -71,6 +71,61 @@ export const provider = azureFoundry({
 | `harnessTimeoutMs` | Optional model-call timeout for this provider; otherwise the adapter inherits the Harness model timeout. | Keep it below the overall run timeout. A timeout stops the waiting operation but does not reverse an already-started remote effect. |
 | [`.models({ assistant: ... })`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers the alias, deployment/model identifier, and capabilities for later agents. | `object` is sufficient for the illustrated structured response. Add tools, text, streaming, or embeddings only when the exact endpoint and deployment support them. An empty alias map is rejected. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates completed registries and produces the runnable Harness. | Build after the selected agent/tool/workflow registries. Missing aliases and capability/reference mismatches fail before a provider call. |
+
+## Configure the deployed model’s chat request
+
+The adapter uses the Azure AI Foundry Chat Completions endpoint. The endpoint
+defines common fields, but deployed models subscribe to different subsets, so
+omit a setting until the model deployment documentation confirms it.
+
+```ts title="src/createAzureFoundryHarness.ts"
+export const harness = defineHarness({ name: 'support' })
+	.models({
+		assistant: {
+			provider: azureFoundry({ endpoint, apiKey }),
+			model,
+			capabilities: ['object', 'tool_use'],
+			defaults: {
+				maxTokens: 700,
+				stopSequences: ['\n--- end ---'],
+			},
+		},
+	})
+	.build()
+```
+
+| Harness field | Foundry chat-completions field | Compatibility guidance |
+| --- | --- | --- |
+| `maxTokens` | `max_tokens` | This is an output cap for the deployment, not a context-window override. |
+| `temperature` | `temperature` | Foundry documents a common range of 0–1, but a model can reject or constrain it. Do not tune it together with `topP` by default. |
+| `topP` | `top_p` | Use it as an alternative sampling control only when the deployment documents support. |
+| `stopSequences` | `stop` | The endpoint exposes a string collection; the deployed model remains the final authority. |
+| `parallelToolCalls` | `parallel_tool_calls` when tools are present. | This applies to provider function-call selection, not Harness tool-execution concurrency. |
+
+Some hosted models expose a documented parameter that is not part of the
+common Foundry schema. Use the raw body escape hatch only with the matching
+Foundry `extra-parameters: pass-through` request header and a deployment test:
+
+```ts title="src/createAzureFoundryHarness.ts"
+const assistantModelOptions = {
+	defaults: {
+		providerOptions: {
+			safe_prompt: true,
+			requestOptions: {
+				headers: {
+					'extra-parameters': 'pass-through',
+				},
+			},
+		},
+	},
+}
+```
+
+The header does not make an arbitrary value valid: Foundry forwards it to the
+underlying model, which can reject it. Never use pass-through to smuggle a
+second value for a typed Harness field. Microsoft documents this boundary and
+model-specific extra fields in the
+[Azure AI Model Inference REST API reference](https://learn.microsoft.com/en-us/rest/api/aifoundry/modelinference/).
 
 The adapter rejects construction without an endpoint and either key or
 credential when no client is injected. Keep exactly one identity strategy per

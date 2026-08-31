@@ -86,6 +86,55 @@ export const supportV1CoordinateIncidentOutputPayloadSchema = supportV1CreateInc
 	briefId: z.string().min(1),
 })
 
+export const supportV1RollbackReviewActionSchema = z.object({
+	reviewId: z.string().min(1).max(120).regex(/^[A-Za-z0-9_.:-]+$/),
+	incidentId: z.string().min(1),
+	changeId: z.string().min(1),
+	targetRevision: z.number().int().nonnegative(),
+	requestedBy: z.string().min(1).max(200),
+	expiresAt: z.string().datetime(),
+})
+
+export const supportV1RollbackReviewWorkflowOutputSchema = z.discriminatedUnion('status', [
+	z.object({ status: z.literal('waiting'), reviewId: z.string().min(1) }),
+	z.object({ status: z.literal('approved'), reviewId: z.string().min(1) }),
+	z.object({ status: z.literal('rejected'), reviewId: z.string().min(1) }),
+	z.object({ status: z.literal('expired'), reviewId: z.string().min(1) }),
+	z.object({ status: z.literal('cancelled'), reviewId: z.string().min(1) }),
+])
+
+export const supportV1RollbackReviewDecisionSchema = z.object({
+	reviewId: z.string().min(1).max(120),
+	decisionId: z.string().min(1).max(200),
+	reviewerId: z.string().min(1).max(200),
+	decision: z.enum(['approved', 'rejected']),
+})
+
+export const supportV1RollbackReviewRequestOutputSchema = z.object({
+	reviewId: z.string().min(1),
+	actionDigest: z.string().length(64).regex(/^[a-f0-9]+$/),
+	status: z.literal('pending'),
+})
+
+export const supportV1RollbackReviewDecisionOutputSchema = z.object({
+	reviewId: z.string().min(1),
+	status: z.enum(['approved', 'rejected']),
+	signal: z.enum(['applied', 'duplicate', 'already_terminal']),
+})
+
+export const supportV1ExecuteRollbackSchema = z.object({
+	reviewId: z.string().min(1).max(120),
+	actionDigest: z.string().length(64).regex(/^[a-f0-9]+$/),
+	targetRevision: z.number().int().nonnegative(),
+})
+
+export const supportV1RollbackReceiptSchema = z.object({
+	reviewId: z.string().min(1),
+	executionId: z.string().min(1),
+	receiptId: z.string().min(1),
+	status: z.literal('executed'),
+})
+
 export const supportV1SignalAnalysisJsonSchema = {
 	type: 'object',
 	properties: {
@@ -144,3 +193,7 @@ export type SupportV1RollbackRiskOutputPayload = z.output<typeof supportV1Rollba
 export type SupportV1CoordinateIncidentInputPayload = z.input<typeof supportV1CoordinateIncidentInputPayloadSchema>
 export type SupportV1CoordinateIncidentOutputPayload = z.output<typeof supportV1CoordinateIncidentOutputPayloadSchema>
 export type SupportV1CreateIncidentBriefInputPayload = z.input<typeof supportV1CreateIncidentBriefInputPayloadSchema>
+export type SupportV1RollbackReviewAction = z.output<typeof supportV1RollbackReviewActionSchema>
+export type SupportV1RollbackReviewWorkflowOutput = z.output<typeof supportV1RollbackReviewWorkflowOutputSchema>
+export type SupportV1RollbackReviewDecision = z.output<typeof supportV1RollbackReviewDecisionSchema>
+export type SupportV1RollbackReceipt = z.output<typeof supportV1RollbackReceiptSchema>

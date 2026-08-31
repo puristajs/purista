@@ -1,88 +1,39 @@
 ---
 title: Test applications
-description: Test contracts and failure behavior at the smallest boundary that can prove the claim.
+description: Combine focused primitive tests with service, adapter, topology, and release evidence without testing the same behavior twice.
 order: 900
 ---
 
-Use deterministic tests for Framework behavior, focused adapter integration
-tests for infrastructure guarantees, and a small number of end-to-end tests
-for the deployed path. Do not rely on an end-to-end test alone to diagnose a
-command, subscription, queue, or schema failure.
+The command, subscription, stream, queue-worker, and AI chapters own the detailed tests for those implementations. This chapter starts where one primitive ends: it helps you assemble evidence across a service, asynchronous flow, infrastructure adapter, or deployed application.
 
-```mermaid title="Choose the smallest test boundary that proves the claim"
+```mermaid title="Add only the next boundary needed by the claim"
 flowchart LR
-  A[Business or contract claim] --> B{Needs a real provider?}
-  B -->|No| C[Direct logic or deterministic Framework runtime]
-  B -->|Yes| D{Needs the complete public deployment path?}
-  D -->|No| E[Selected adapter integration test]
-  D -->|Yes| F[Focused end-to-end release test]
-  C --> G[Fast behavior evidence]
-  E --> H[Provider capability evidence]
-  F --> I[Deployment promise evidence]
+  A[Primitive behavior] --> B[Service composition]
+  B --> C[Cross-message flow]
+  C --> D[Selected real adapters]
+  D --> E[Deployed public path]
 ```
 
-The boundaries build on one another; they are not substitutes. A deterministic
-queue-worker test can prove a handler's idempotency branch and Framework
-settlement behavior. It cannot prove a Redis lease expiry or an IAM policy. A
-successful end-to-end request can prove the public route but does not make
-every error branch easy to diagnose.
+Each boundary answers a different question. Passing a larger test does not make the smaller, more diagnostic test unnecessary; repeating every primitive case through the deployment only creates slow and brittle coverage.
 
-## Select the deterministic runtime helper
+## Start with the implementation owner
 
-All three helpers create a real service instance, but none calls
-`service.start()`. Command and stream helpers materialize and register the one
-definition they execute. The queue-worker helper directly runs the supplied
-worker definition. Add the matching queue definition to the service builder
-when its transforms, lifecycle, or result policy should participate.
-
-| Helper | Required arguments and `run` input | Options and default infrastructure | Result, lifecycle, and boundary |
-| --- | --- | --- | --- |
-| [`createCommandTestHarness(serviceBuilder, commandBuilder, options?)`](/handbook/api/functions/_purista_core.createCommandTestHarness/) | Service builder, command builder; `run({ payload, parameter })` | Service instance configuration plus optional `eventBridge` and `queueBridge`. Without `eventBridge`, the helper owns an EventBridge mock. | Registers one command, calls `service.executeCommand`, and returns `{ message, result }`; `result` is defined only for a successful command response. `destroy()` destroys the service and only bridges it created. It does not prove HTTP projection or a supplied bridge. |
-| [`createStreamTestHarness(serviceBuilder, streamBuilder, options?)`](/handbook/api/functions/_purista_core.createStreamTestHarness/) | Service builder, stream builder; `run({ payload, parameter })` | Service instance configuration plus optional `eventBridge`. Without it, the helper owns an EventBridge mock. | Registers one stream and returns `{ frames, chunks, final }`. Frame capture is available only with the owned mock; with a supplied EventBridge, test transport output separately. `destroy()` leaves a supplied bridge owned by the test. |
-| [`createQueueWorkerTestHarness(serviceBuilder, workerBuilder, options?)`](/handbook/api/functions/_purista_core.createQueueWorkerTestHarness/) | Service builder, worker builder; `run(queueMessage)` | Service instance configuration plus optional `eventBridge` and `queueBridge`. Without either, the helper owns deterministic mocks. | With both owned mocks, injects one lease and returns `ackCalls`, `nackCalls`, `deadLetterCalls`, and `extendLeaseCalls`. A supplied QueueBridge owns leasing, so `run()` cannot inject the supplied message or collect mock calls. `destroy()` leaves supplied bridges owned by the test. |
-
-The helpers reject if they cannot resolve the required bridge. Treat a supplied
-real bridge as an adapter integration boundary, not a way to turn a unit test
-into a complete deployment test.
-
-## Keep the three levels distinct
-
-| Level | Best entry point | What it proves | What it intentionally leaves to the next level |
-| --- | --- | --- | --- |
-| Direct logic | The primitive's typed context mock and direct builder function | Business branches and declared context calls with controllable inputs. | Registration, Framework orchestration, adapters, and process startup. |
-| Deterministic Framework runtime | The command, stream, or queue-worker helper above | One primitive through the relevant deterministic Framework lifecycle. | `service.start()`, remote transport, credentials, and provider guarantees. |
-| Selected real adapter | A protected integration environment | The exact provider capability, such as a broker round trip, lease recovery, or store authorization. | Broad release readiness and every business permutation. |
-
-| Question | Start with | Then add | Evidence |
+| What changed | Test it first here | Return to this chapter when |
 | --- | --- | --- |
-| Does a handler validate and return the contract? | Its primitive's direct/helper test | Deterministic service-runtime test if transforms, guards, result events, or registration matter | Schema-valid result and expected side effects |
-| Does a worker retry or complete safely? | Queue-worker harness | Selected QueueBridge integration test | Job outcome, idempotency, DLQ/recovery behavior |
-| Does a broker/store adapter work with credentials? | Adapter's maintained test/example | Protected integration test environment | Real connection and denied neighboring resource |
-| Does the release path serve the intended API? | Focused HTTP/command/worker guide | One end-to-end deployment flow | Authenticated request, health, trace, and recovery signal |
+| Service definitions, resources, or lifecycle | [Test a service](/handbook/framework/build-services/services/test-a-service/) | Several definitions form one contract or deployment unit. |
+| Command schemas, guards, transforms, handler, events, or HTTP metadata | [Test a command](/handbook/framework/build-services/commands/test-a-command/) | A caller/subscriber flow or public topology must be proven. |
+| Event handling, fan-out, or acknowledgement | [Test a subscription](/handbook/framework/build-services/subscriptions/test-subscriptions/) | The flow crosses a real EventBridge. |
+| Stream frames, cancellation, or final output | [Test a stream](/handbook/framework/build-services/streams/test-a-stream/) | The HTTP/server transport must carry the stream. |
+| Lease, retry, idempotency, results, or dead letters | [Test queued work](/handbook/framework/build-services/queues-and-workers/test-queued-work/) | A production QueueBridge must prove its guarantees. |
+| Attached-agent flow, authorization, sandbox, or policy wiring | [Test an AI-powered service deterministically](/handbook/framework/build-ai-powered-services/test-an-ai-powered-service-deterministically/) | Live model quality must be evaluated separately. |
 
-Use synthetic data. Never add production tokens, customer records, or raw model prompts/completions to fixtures.
+## Choose the next test by its claim
 
-## Pick the owner that matches the implementation
-
-| You are changing | Canonical implementation test guide | What the cross-cutting chapter adds |
+| Claim | Smallest useful boundary | Chapter |
 | --- | --- | --- |
-| Service definitions, resources, startup, or lifecycle | [Test a service](/handbook/framework/build-services/services/test-a-service/) | How service tests fit alongside adapter and release checks. |
-| Command validation, guards, results, events, or HTTP projection | [Test a command](/handbook/framework/build-services/commands/test-a-command/) | Contract and deployment-boundary selection. |
-| Event routing, acknowledgement, redelivery, or fan-out | [Test a subscription](/handbook/framework/build-services/subscriptions/test-subscriptions/) | Real EventBridge capability verification. |
-| Streaming frames, cancellation, or HTTP streaming | [Test a stream](/handbook/framework/build-services/streams/test-a-stream/) | Server and transport integration scope. |
-| Queued work, lease controls, result events, or dead letters | [Test queued work](/handbook/framework/build-services/queues-and-workers/test-queued-work/) | Provider recovery and protected test-environment guidance. |
-| Attached-agent Framework flow | [Test an AI-powered service deterministically](/handbook/framework/build-ai-powered-services/test-an-ai-powered-service-deterministically/) | Separation from live model evaluations. |
+| The assembled service has no duplicate or invalid definitions | Service aggregate | [Design service and contract coverage](/handbook/framework/test-applications/business-logic-and-service-contracts/) |
+| A response event reaches a subscription or queue result drives the next action | Cross-message deterministic flow, then selected bridge | [Test message flows, queues, and retries](/handbook/framework/test-applications/message-flows-queues-and-retries/) |
+| NATS reconnects, Redis leases expire, or a cloud identity is denied correctly | Protected real-adapter integration | [Test local infrastructure and production adapters](/handbook/framework/test-applications/local-infrastructure-and-production-adapters/) |
+| The authenticated public route works in the deployed topology | Focused end-to-end flow | [End-to-end testing](/handbook/framework/test-applications/end-to-end/) |
 
-## Keep model quality separate from deterministic flow
-
-For an AI-powered service, deterministic Framework and Harness adapters prove
-your command, queue, tool binding, authorization, and output-handling flow.
-They do not prove a live model's answer is factual, useful, or safe across
-prompt variation. Measure that separately with synthetic, reviewed cases in
-the Harness [evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/)
-path.
-
-Next, start with [business logic and service contracts](/handbook/framework/test-applications/business-logic-and-service-contracts/),
-then add [message flows, queues, and retries](/handbook/framework/test-applications/message-flows-queues-and-retries/),
-[local infrastructure and production adapters](/handbook/framework/test-applications/local-infrastructure-and-production-adapters/),
-or an [end-to-end test](/handbook/framework/test-applications/end-to-end/) only when that boundary proves the needed claim.
+Use synthetic data and unique run identifiers. Keep model output quality in Harness [evaluations](/handbook/harness/test-and-evaluate/evaluate-prompts-and-outputs/): deterministic adapters prove the implementation and flow, not whether a nondeterministic model answer is correct.

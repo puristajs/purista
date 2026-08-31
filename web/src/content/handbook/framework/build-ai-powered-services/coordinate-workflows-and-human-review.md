@@ -11,14 +11,14 @@ identity, and composition; Harness owns workflow graph and execution semantics.
 
 ```ts title="src/service/support/v1/agent/reviewCase/reviewCaseAgentBuilder.ts"
 export const reviewCaseAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('reviewCase', 'Reviews a high-risk support case')
-  .addPayloadSchema(reviewCaseInput)
-  .addOutputSchema(reviewCaseOutput)
-  .addModel('primary', { capabilities: ['object', 'tool_use'] })
-  .setHarnessWorkflow(reviewCaseWorkflow, {
-    agents: { summarizeCase: summarizeCaseAgent },
-  })
-  .setDurability({ mode: 'required', runIdPath: ['caseId'] })
+	.getAgentQueueBuilder('reviewCase', 'Reviews a high-risk support case')
+	.addPayloadSchema(reviewCaseInput)
+	.addOutputSchema(reviewCaseOutput)
+	.addModel('primary', { capabilities: ['object', 'tool_use'] })
+	.setHarnessWorkflow(reviewCaseWorkflow, {
+		agents: { summarizeCase: summarizeCaseAgent },
+	})
+	.setDurability({ mode: 'required', runIdPath: ['caseId'] })
 ```
 
 The optional `agents` map supplies Harness-local definitions to the wrapped

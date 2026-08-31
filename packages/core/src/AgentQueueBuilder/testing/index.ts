@@ -16,11 +16,15 @@ import type {
 	TextResponse,
 	TextStreamChunk,
 } from '@purista/harness'
+import { createTelemetryShim, type TelemetryShim } from '@purista/harness'
 import type { EmptyObject } from '../../core/types/EmptyObject.js'
 import type { Logger as PuristaLogger } from '../../core/types/Logger.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../../core/types/PuristaMetrics.js'
-import { createAgentExecutor } from '../runtime/executor.js'
-import { resolveAgentRuntimeSkills } from '../runtime/skills.js'
+import {
+	createAgentRuntimeScope,
+	getScopedAgentRuntime,
+	initializeAttachedAgentRuntimes,
+} from '../runtime/scopedRuntime.js'
 import type {
 	AgentHandlerContext,
 	AgentModelBinding,
@@ -48,6 +52,7 @@ export type CreateAgentContextMockInput<
 	metrics?: PuristaMetricContext<Metrics>
 	identity?: Partial<AgentRunIdentity>
 	logger?: PuristaLogger
+	telemetry?: TelemetryShim
 }
 
 export function createAgentContextMock<
@@ -87,6 +92,7 @@ export function createAgentContextMock<
 		queue,
 		resources,
 		metrics: (input.metrics ?? {}) as PuristaMetricContext<Metrics>,
+		telemetry: input.telemetry ?? createTelemetryShim(),
 		harness: {
 			session: createSessionMock(identity.harnessSessionId),
 			models: (input.models ?? {}) as AgentHandlerContext<Payload, Parameter, Resources, Models>['harness']['models'],
@@ -244,26 +250,34 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 	definition: Definition,
 	options: CreateAgentTestHarnessOptions<Definition['manifest']['models']>,
 ) {
-	const skillRuntime = await resolveAgentRuntimeSkills(definition.manifest, options.skills)
-	const executor = createAgentExecutor({
-		definition,
-		manifest: definition.manifest,
-		models: options.models,
-		skillRuntime,
-		logger: options.logger,
-		governance: options.governance,
-		storage: options.storage,
-		workspace: options.workspace,
-		sandbox: options.sandbox,
-		sandboxOptions: options.sandboxOptions,
-		sandboxPolicy: definition.sandboxPolicy,
-		onSuspended: options.onSuspended,
-	})
-	definition.runtime.current = executor
+	const scope = createAgentRuntimeScope()
+	const lifecycle = await initializeAttachedAgentRuntimes(
+		scope,
+		[definition],
+		{
+			models: options.models,
+			skills: options.skills,
+			logger: options.logger,
+			governance: options.governance,
+			storage: options.storage,
+			workspace: options.workspace,
+			sandbox: options.sandbox,
+			sandboxOptions: options.sandboxOptions,
+			onSuspended: options.onSuspended,
+		},
+		{ validateRuntimeCapabilities: false },
+	)
+	const executor = getScopedAgentRuntime(scope, definition)
+	const runtime = {
+		executeAggregate: (input: import('../types.js').AgentRuntimeInvocationInput) => executor.executeAggregate(input),
+		executeStream: (input: import('../types.js').AgentRuntimeStreamInvocationInput) => executor.executeStream(input),
+		shutdown: () => lifecycle.shutdown(),
+	}
+	definition.runtime.current = runtime
 
 	return {
 		async run(input: { payload?: unknown; parameter?: unknown; message?: Record<string, unknown> }) {
-			return executor.executeAggregate({
+			return runtime.executeAggregate({
 				appContext: createAppContext(options.logger),
 				message: input.message ?? { id: 'test-message' },
 				payload: input.payload,
@@ -273,7 +287,7 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 		async stream(input: { payload?: unknown; parameter?: unknown; message?: Record<string, unknown> }) {
 			const chunks: unknown[] = []
 			let final: unknown
-			await executor.executeStream({
+			await runtime.executeStream({
 				appContext: createAppContext(options.logger),
 				message: input.message ?? { id: 'test-message' },
 				payload: input.payload,
@@ -293,6 +307,7 @@ export async function createAgentTestHarness<Definition extends AttachedAgentDef
 			})
 			return { chunks, final }
 		},
+		shutdown: () => lifecycle.shutdown(),
 	}
 }
 
@@ -320,7 +335,7 @@ function createSessionMock(id: string) {
 		replaceHistory: async () => undefined,
 		disposeSandbox: async () => undefined,
 		release: async () => undefined,
-		close: async () => undefined,
+		destroy: async () => undefined,
 	}
 }
 

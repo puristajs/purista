@@ -35,23 +35,23 @@ import { defineHarness, localDurableExecution } from '@purista/harness'
 import { z } from 'zod'
 
 const durable = localDurableExecution({
-  root: '.purista/claims-review',
-  exec: false
+	root: '.purista/claims-review',
+	exec: false,
 })
 
 const harness = defineHarness({ name: 'claims-review-worker' })
-  .storage(durable.storage)
-  .sandbox(durable.sandbox)
-  .workspace(durable.workspace)
-  .requires([
-    'storage.persistent',
-    'storage.workspace_checkpoint',
-    'workspace.persistent',
-    'workspace.checkpoint',
-    'workspace.resume'
-  ])
-  // models, agents, and workflows are declared next
-  .build()
+	.storage(durable.storage)
+	.sandbox(durable.sandbox)
+	.workspace(durable.workspace)
+	.requires([
+		'storage.persistent',
+		'storage.workspace_checkpoint',
+		'workspace.persistent',
+		'workspace.checkpoint',
+		'workspace.resume',
+	])
+	// models, agents, and workflows are declared next
+	.build()
 ```
 
 `.requires(...)` is a startup contract, not documentation. It fails before a
@@ -72,48 +72,42 @@ when rerunning it is explicitly safe.
 import { z } from 'zod'
 
 const ClaimReview = z.object({
-  recommendation: z.enum(['approve', 'refer']),
-  reasons: z.array(z.string())
+	recommendation: z.enum(['approve', 'refer']),
+	reasons: z.array(z.string()),
 })
 
 const claimsHarness = defineHarness({ name: 'claims-review-worker' })
-  // storage, sandbox, workspace, and models are configured above
-  .agents(({ agent }) => ({
-    assessor: agent({
-      model: 'reviewer',
-      input: z.object({ claimId: z.string(), evidence: z.array(z.string()) }),
-      output: ClaimReview,
-      builtinTools: false,
-      instructions: 'Recommend approve only when the supplied evidence is sufficient; otherwise refer.'
-    })
-  }))
-  .workflows(({ workflow }) => ({
-    review_claim: workflow({
-      input: z.object({ claimId: z.string(), workflowVersion: z.literal('v1') }),
-      output: ClaimReview,
-      delegation: { agents: ['assessor'], maxChildAgentCalls: 1 },
-      handler: async (ctx) => {
-        const evidence = await ctx.step('load-evidence-v1', () =>
-          claimsRepository.listReviewableEvidence(ctx.input.claimId)
-        )
+	.agent('assessor', {
+		model: 'reviewer',
+		input: z.object({ claimId: z.string(), evidence: z.array(z.string()) }),
+		output: ClaimReview,
+		instructions: 'Recommend approve only when the supplied evidence is sufficient; otherwise refer.',
+	})
+	.workflow('review_claim', {
+		input: z.object({ claimId: z.string(), workflowVersion: z.literal('v1') }),
+		output: ClaimReview,
+		delegation: { agents: ['assessor'], maxChildAgentCalls: 1 },
+		handler: async ctx => {
+			const evidence = await ctx.step('load-evidence-v1', () =>
+				claimsRepository.listReviewableEvidence(ctx.input.claimId),
+			)
 
-        const review = await ctx.step('assess-evidence-v1', () =>
-          ctx.agents.assessor({ claimId: ctx.input.claimId, evidence })
-        )
+			const review = await ctx.step('assess-evidence-v1', () =>
+				ctx.agents.assessor({ claimId: ctx.input.claimId, evidence }),
+			)
 
-        await ctx.step('record-recommendation-v1', () =>
-          claimsRepository.recordRecommendation({
-            claimId: ctx.input.claimId,
-            recommendation: review,
-            idempotencyKey: ctx.runId
-          })
-        )
+			await ctx.step('record-recommendation-v1', () =>
+				claimsRepository.recordRecommendation({
+					claimId: ctx.input.claimId,
+					recommendation: review,
+					idempotencyKey: ctx.runId,
+				}),
+			)
 
-        return review
-      }
-    })
-  }))
-  .build()
+			return review
+		},
+	})
+	.build()
 ```
 
 The repository's `recordRecommendation` operation needs its own idempotency
@@ -134,30 +128,26 @@ different purposes. Derive each from a durable business identity, never from
 the prompt text.
 
 ```ts
-async function handleClaimReview(message: {
-  id: string
-  claimId: string
-  workflowVersion: 'v1'
-}): Promise<void> {
-  const session = await claimsHarness.getSession(`claim:${message.claimId}`)
+async function handleClaimReview(message: { id: string; claimId: string; workflowVersion: 'v1' }): Promise<void> {
+	const session = await claimsHarness.getSession(`claim:${message.claimId}`)
 
-  try {
-    const review = await session.workflows.review_claim.prompt(
-      { claimId: message.claimId, workflowVersion: message.workflowVersion },
-      { durable: { runId: `claim-review:${message.claimId}:${message.workflowVersion}` } }
-    )
+	try {
+		const review = await session.workflows.review_claim.run(
+			{ claimId: message.claimId, workflowVersion: message.workflowVersion },
+			{ durable: { runId: `claim-review:${message.claimId}:${message.workflowVersion}` } },
+		)
 
-    if (review.recommendation === 'refer') {
-      await claimsRepository.requestHumanReview({
-        claimId: message.claimId,
-        idempotencyKey: `review-request:${message.id}`
-      })
-    }
+		if (review.recommendation === 'refer') {
+			await claimsRepository.requestHumanReview({
+				claimId: message.claimId,
+				idempotencyKey: `review-request:${message.id}`,
+			})
+		}
 
-    await queue.ack(message.id)
-  } finally {
-    await session.release()
-  }
+		await queue.ack(message.id)
+	} finally {
+		await session.release()
+	}
 }
 ```
 
@@ -171,8 +161,8 @@ For an at-least-once **direct agent** consumer with no workflow, use the
 delivery ID as `idempotencyKey` instead:
 
 ```ts
-const result = await session.agents.assessor.prompt(input, {
-  idempotencyKey: message.id
+const result = await session.agents.assessor.run(input, {
+	idempotencyKey: message.id,
 })
 ```
 

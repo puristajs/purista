@@ -20,32 +20,31 @@ const planQuestion = z.object({ code: z.string().min(1) })
 const planAnswer = z.object({ name: z.string(), responseHours: z.number().int() })
 
 export const harness = defineHarness({ name: 'support' })
-  .sandbox(inMemorySandbox())
-  .models({
-    assistant: { provider: { id: 'local', genAiSystem: 'local' }, model: 'not-called', capabilities: ['object', 'tool_use'] },
-  })
-  .tools(({ tool }) => ({
-    lookup_plan: tool({
-      description: 'Look up a public support plan by its code.',
-      input: planQuestion,
-      output: planAnswer,
-      handler: async (_ctx, { code }) => {
-        if (code !== 'standard') throw new Error('Unknown plan code')
-        return { name: 'Standard', responseHours: 24 }
-      },
-    }),
-  }))
-  .agents(({ agent }) => ({
-    summarize: agent({
-      model: 'assistant',
-      input: planQuestion,
-      output: z.object({ answer: z.string() }),
-      tools: ['lookup_plan'],
-      builtinTools: false,
-      instructions: 'Use lookup_plan only when the question asks about a plan.',
-    }),
-  }))
-  .build()
+	.sandbox(inMemorySandbox())
+	.models({
+		assistant: {
+			provider: { id: 'local', genAiSystem: 'local' },
+			model: 'not-called',
+			capabilities: ['object', 'tool_use'],
+		},
+	})
+	.tool('lookup_plan', {
+			description: 'Look up a public support plan by its code.',
+			input: planQuestion,
+			output: planAnswer,
+			handler: async (_ctx, { code }) => {
+				if (code !== 'standard') throw new Error('Unknown plan code')
+				return { name: 'Standard', responseHours: 24 }
+			},
+	})
+	.agent('summarize', {
+		model: 'assistant',
+		input: planQuestion,
+		output: z.object({ answer: z.string() }),
+		tools: ['lookup_plan'],
+		instructions: 'Use lookup_plan only when the question asks about a plan.',
+	})
+	.build()
 ```
 
 The input and output schemas make the tool contract inspectable and testable.
@@ -59,11 +58,11 @@ the runtime](/handbook/harness/configure-the-runtime/).
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Creates the named composition that later owns sessions, tools, and agents. | The optional name defaults to `agent-harness` and identifies diagnostics; it is not a tenant, user, or authorization boundary. |
 | [`.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | Registers the sandbox whose declared capabilities type tool context. | `inMemorySandbox()` gives this tool no exec/process authority. Choose a stronger adapter only for a verified need. |
 | [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | Registers the non-empty alias registry required when the Harness is built. | `assistant` is the only alias this agent can select; `object` and `tool_use` declare the operations needed by its output contract and custom tool loop. Duplicate aliases fail definition registration. |
-| [`.tools(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tools) | Registers model-visible tool IDs. | Use the callback form for TypeScript handlers: its `tool(...)` helper preserves schema and sandbox-context types. |
-| [`tool({ input, output, handler })`](/handbook/api/interfaces/_purista_harness.ToolDefinitionHelpers/#tool) | Validates model-facing arguments and returned data before the next model step. | `description` helps model selection; it is not authorization. Keep the handler narrow and authorize its domain read or write. |
-| [`tools: ['lookup_plan']`](/handbook/api/interfaces/_purista_harness.AgentDefinition/#tools) | Allows this agent to call one registered custom tool. | Omitting it denies all custom tools. The alias must declare `tool_use` for a live model call. |
-| [`builtinTools: false`](/handbook/api/interfaces/_purista_harness.AgentDefinition/#builtintools) | Denies the built-in file and command tools. | Keep it until a sandbox and use case justify an explicit built-in allowlist. |
-| [`.agents(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agents) | Registers the `summarize` session API after its model and tool IDs are known. | Use `agent(...)` in the callback so TypeScript restricts `model` and `tools` to those earlier registries. Unknown tool/skill references are rejected during configuration. |
+| [`.tool('lookup_plan', definition)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tool) | Registers the inline, model-visible native tool. | It validates model-facing arguments and returned data before the next model step. `description` helps model selection; it is not authorization. |
+| [`.tools(record)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tools) | Registers a reusable, pre-typed native or MCP tool catalog. | Keep this inline TypeScript handler on `.tool(...)`; use a catalog only when it is the reusable composition boundary. |
+| [`tools: ['lookup_plan']`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Allows this agent to call one registered custom tool. | Omitting it denies all custom tools. The alias must declare `tool_use` for a live model call. |
+| omitted [`builtinTools`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Enables no built-in file or command tools. | Add only the names justified by a sandboxed use case; custom `tools` do not enable built-ins. |
+| [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Registers the `summarize` session API after its model and tool IDs are known. | The inline definition restricts `model` and `tools` to those earlier registries. Unknown tool/skill references are rejected during configuration. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the complete composition and returns the Harness instance. | It requires at least one model alias and rejects invalid cross-registry references or namespace collisions before a session can run. |
 
 For tool selection, timeouts, parallel calls, testing, skills, MCP, and plugins,

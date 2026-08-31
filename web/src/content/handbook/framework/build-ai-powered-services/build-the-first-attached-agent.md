@@ -86,17 +86,16 @@ const input = z.object({ ticketId: z.string(), text: z.string().min(1).max(4_000
 const output = z.object({ priority: z.enum(['low', 'normal', 'high']), reason: z.string() })
 
 export const triageTicketAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('triageTicket', 'Classifies support tickets by urgency')
-  .addPayloadSchema(input)
-  .addOutputSchema(output)
-  .addModel('primary', { capabilities: ['object'] })
-  .setHarnessAgent({
-    model: 'primary',
-    input,
-    output,
-    instructions: 'Classify the ticket urgency and return the declared object.',
-    builtinTools: false,
-  })
+	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets by urgency')
+	.addPayloadSchema(input)
+	.addOutputSchema(output)
+	.addModel('primary', { capabilities: ['object'] })
+	.setHarnessAgent({
+		model: 'primary',
+		input,
+		output,
+		instructions: 'Classify the ticket urgency and return the declared object.',
+	})
 ```
 
 `setHarnessAgent` accepts an agent definition, not a built Harness runtime.
@@ -132,8 +131,7 @@ import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 const triageTicketAgent = await triageTicketAgentBuilder.getDefinition()
 
-export const supportV1Service = supportV1ServiceBuilder
-  .addAgentDefinition(triageTicketAgent)
+export const supportV1Service = supportV1ServiceBuilder.addAgentDefinition(triageTicketAgent)
 ```
 
 ## 4. Bind the runtime at composition time
@@ -149,27 +147,27 @@ import { supportV1Service } from './service/support/v1/supportV1Service.js'
 
 const apiKey = process.env.OPENAI_API_KEY
 if (!apiKey) {
-  throw new Error('OPENAI_API_KEY is required to start the support service.')
+	throw new Error('OPENAI_API_KEY is required to start the support service.')
 }
 
 const eventBridge = new DefaultEventBridge()
 await eventBridge.start()
 
 const service = await supportV1Service.getInstance(eventBridge, {
-  ai: {
-    models: {
-      primary: {
-        provider: openai({ apiKey }),
-        model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-      },
-    },
-  },
+	ai: {
+		models: {
+			primary: {
+				provider: openai({ apiKey }),
+				model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			},
+		},
+	},
 })
 await service.start()
 ```
 
-This agent declares `builtinTools: false`, so it does not need a sandbox for
-the first result. Add an application-owned sandbox only when a later agent uses
+This agent omits `builtinTools`, so no built-in file or command tool is
+enabled for the first result. Add an application-owned sandbox only when a later agent uses
 tools that need one. The builder still remains provider-neutral: another
 deployment can bind a compatible provider and concrete model under `primary`
 without changing the service contract. See [configure OpenAI](/handbook/harness/configure-the-runtime/openai/)

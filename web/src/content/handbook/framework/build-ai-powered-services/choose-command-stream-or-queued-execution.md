@@ -39,18 +39,17 @@ const answerTicketInput = z.object({ ticketId: z.string(), question: z.string().
 const answerTicketOutput = z.object({ answer: z.string() })
 
 export const answerTicketAgentBuilder = supportV1ServiceBuilder
-  .getAgentQueueBuilder('answerTicket', 'Drafts a support answer')
-  .addPayloadSchema(answerTicketInput)
-  .addOutputSchema(answerTicketOutput)
-  .addModel('primary', { capabilities: ['text_stream'] })
-  .setHarnessAgent({
-    model: 'primary',
-    input: answerTicketInput,
-    output: answerTicketOutput,
-    instructions: 'Draft a concise support response.',
-    builtinTools: false,
-  })
-  .exposeAsHttpEndpoint('POST', 'support/answer', { streamingMode: 'stream' })
+	.getAgentQueueBuilder('answerTicket', 'Drafts a support answer')
+	.addPayloadSchema(answerTicketInput)
+	.addOutputSchema(answerTicketOutput)
+	.addModel('primary', { capabilities: ['text_stream'] })
+	.setHarnessAgent({
+		model: 'primary',
+		input: answerTicketInput,
+		output: answerTicketOutput,
+		instructions: 'Draft a concise support response.',
+	})
+	.exposeAsHttpEndpoint('POST', 'support/answer', { streamingMode: 'stream' })
 ```
 
 The fluent builder carries the model alias and both schemas into the generated
@@ -62,7 +61,7 @@ connection and its final result.
 | [`getAgentQueueBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getagentqueuebuilder) | A service-owned attached agent and its generated command, stream, queue, and worker projections. | Keep `name` stable because it contributes to generated contract names. `description` describes the operation; it is not prompt instructions. |
 | [`addPayloadSchema(schema)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#addpayloadschema) and [`addOutputSchema(schema)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#addoutputschema) | The caller input and validated final result shared by generated projections. | The stream may carry intermediate run events, but it closes with the declared output. Do not use the output schema for caller identity or trusted state. |
 | [`addModel(alias, options)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#addmodel) | The provider-neutral `primary` requirement. | `text_stream` permits the live text path. The composition root must bind a provider/model with that capability before startup. |
-| [`setHarnessAgent(definition)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#setharnessagent) | The attached Harness execution. | `model` must be an alias declared earlier in the chain. `builtinTools: false` prevents undeclared built-in tools; add only reviewed tools on the dedicated [context guide](/handbook/framework/build-ai-powered-services/use-tools-skills-resources-stores-and-context/). |
+| [`setHarnessAgent(definition)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#setharnessagent) | The attached Harness execution. | `model` must be an alias declared earlier in the chain. Built-ins are disabled when omitted; add only reviewed names on the dedicated [context guide](/handbook/framework/build-ai-powered-services/use-tools-skills-resources-stores-and-context/). |
 | [`exposeAsHttpEndpoint(method, path, options)`](/handbook/api/classes/_purista_core.AgentQueueBuilder/#exposeashttpendpoint) | The HTTP metadata for a generated projection. | `streamingMode: 'stream'` exposes the generated stream; use `aggregate` for the generated command instead. The endpoint remains secure by default and is not served until the HTTP service is configured. |
 
 The stream’s HTTP server and its availability depend on the normal

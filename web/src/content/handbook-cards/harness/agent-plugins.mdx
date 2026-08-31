@@ -60,7 +60,7 @@ const source = { root: './plugins/claims-knowledge' } as const
 const inspection = await inspectAgentPlugin(source)
 
 if (!inspection.valid || !inspection.digest) {
-  throw new Error('Agent Plugin inspection failed; review its safe diagnostics before proceeding.')
+	throw new Error('Agent Plugin inspection failed; review its safe diagnostics before proceeding.')
 }
 
 // Put this value in an application-owned reviewed lockfile. Do not accept a
@@ -82,48 +82,47 @@ import { defineHarness, inMemorySandbox } from '@purista/harness'
 import { loadAgentPlugins } from '@purista/harness-agent-plugins'
 
 const [plugin] = await loadAgentPlugins({
-  plugins: [{
-    root: './plugins/claims-knowledge',
-    trust: 'trusted',
-    expectedDigest: reviewedDigest,
-  }],
+	plugins: [
+		{
+			root: './plugins/claims-knowledge',
+			trust: 'trusted',
+			expectedDigest: reviewedDigest,
+		},
+	],
 })
 
 if (!plugin) {
-  throw new Error('The reviewed Agent Plugin is unavailable, changed, or not trusted.')
+	throw new Error('The reviewed Agent Plugin is unavailable, changed, or not trusted.')
 }
 
 const bindings = plugin.bindings({
-  skills: { claims_playbook: 'claims-playbook' },
-  tools: {
-    search_claims_knowledge: {
-      server: 'knowledge',
-      tool: 'search',
-      description: 'Search the reviewed claims knowledge service.',
-      headers: { 'x-application': 'claims' },
-    },
-  },
+	skills: { claims_playbook: 'claims-playbook' },
+	tools: {
+		search_claims_knowledge: {
+			server: 'knowledge',
+			tool: 'search',
+			description: 'Search the reviewed claims knowledge service.',
+			headers: { 'x-application': 'claims' },
+		},
+	},
 })
 
-if (bindings.diagnostics.some((item) => item.level === 'error')) {
-  throw new Error('The selected Agent Plugin components cannot be bound safely.')
+if (bindings.diagnostics.some(item => item.level === 'error')) {
+	throw new Error('The selected Agent Plugin components cannot be bound safely.')
 }
 
 const harness = defineHarness({ name: 'claims' })
-  .sandbox(inMemorySandbox())
-  .skills(bindings.skills)
-  .tools(bindings.tools)
-  // Register models before agents.
-  .agents(({ agent }) => ({
-    reviewer: agent({
-      model: 'assistant',
-      skills: ['claims_playbook'],
-      tools: ['search_claims_knowledge'],
-      builtinTools: ['read'],
-      instructions: 'Use the claims playbook and the selected search tool when needed.',
-    }),
-  }))
-  .build()
+	.sandbox(inMemorySandbox())
+	.skills(bindings.skills)
+	.tools(bindings.tools)
+	.agent('reviewer', {
+		model: 'assistant',
+		skills: ['claims_playbook'],
+		tools: ['search_claims_knowledge'],
+		builtinTools: ['read'],
+		instructions: 'Use the claims playbook and the selected search tool when needed.',
+	})
+	.build()
 ```
 
 The package-declared HTTP headers are never forwarded automatically. The
@@ -147,12 +146,14 @@ adapter in production.
 
 ```ts
 const [plugin] = await loadAgentPlugins({
-  plugins: [{
-    root: './plugins/claims-knowledge',
-    trust: 'trusted',
-    expectedDigest: reviewedDigest,
-    dataDirectory: '/srv/claims-plugin-data',
-  }],
+	plugins: [
+		{
+			root: './plugins/claims-knowledge',
+			trust: 'trusted',
+			expectedDigest: reviewedDigest,
+			dataDirectory: '/srv/claims-plugin-data',
+		},
+	],
 })
 ```
 
@@ -181,17 +182,17 @@ import { expect, it } from 'vitest'
 import { inspectAgentPlugin, loadAgentPlugins } from '@purista/harness-agent-plugins'
 
 it('loads only a reviewed digest and selected aliases', async () => {
-  const source = { root: './test/fixtures/knowledge-plugin' } as const
-  const inspection = await inspectAgentPlugin(source)
-  expect(inspection.valid).toBe(true)
+	const source = { root: './test/fixtures/knowledge-plugin' } as const
+	const inspection = await inspectAgentPlugin(source)
+	expect(inspection.valid).toBe(true)
 
-  const [plugin] = await loadAgentPlugins({
-    plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest! }],
-  })
-  const bindings = plugin!.bindings({ skills: { playbook: 'playbook' }, tools: {} })
+	const [plugin] = await loadAgentPlugins({
+		plugins: [{ ...source, trust: 'trusted', expectedDigest: inspection.digest! }],
+	})
+	const bindings = plugin!.bindings({ skills: { playbook: 'playbook' }, tools: {} })
 
-  expect(bindings.diagnostics).toEqual([])
-  expect(Object.keys(bindings.skills)).toEqual(['playbook'])
+	expect(bindings.diagnostics).toEqual([])
+	expect(Object.keys(bindings.skills)).toEqual(['playbook'])
 })
 ```
 

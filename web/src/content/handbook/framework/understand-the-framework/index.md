@@ -28,6 +28,6 @@ The service owns business behavior. The application composition root owns bridge
 | Where do adapters and services start? | [Runtime composition and lifecycle](/handbook/framework/understand-the-framework/runtime-composition-and-lifecycle/) |
 | Can the same service run locally and remotely? | [Distribution and deployment models](/handbook/framework/understand-the-framework/distribution-and-deployment-models/) |
 | What delivery behavior can I rely on? | [Reliability and delivery guarantees](/handbook/framework/understand-the-framework/reliability-and-delivery-guarantees/) |
-| How should I classify an expected rejection or inspect failures? | [Handle service errors](/handbook/framework/build-services/handle-service-errors/) and [observability](/handbook/framework/secure-and-operate/observability/) |
+| How should I classify an expected rejection or inspect failures? | [Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/) and [observability](/handbook/framework/secure-and-operate/observability/) |
 
 Next: [services and boundaries](/handbook/framework/understand-the-framework/services-and-boundaries/).

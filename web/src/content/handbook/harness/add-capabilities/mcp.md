@@ -28,38 +28,35 @@ const apiKey = process.env.OPENAI_API_KEY
 const knowledgeUrl = process.env.KNOWLEDGE_MCP_URL
 const knowledgeToken = process.env.KNOWLEDGE_MCP_TOKEN
 if (!apiKey || !knowledgeUrl || !knowledgeToken) {
-  throw new Error('OPENAI_API_KEY, KNOWLEDGE_MCP_URL, and KNOWLEDGE_MCP_TOKEN are required.')
+	throw new Error('OPENAI_API_KEY, KNOWLEDGE_MCP_URL, and KNOWLEDGE_MCP_TOKEN are required.')
 }
 
 export const supportKnowledgeHarness = defineHarness({ name: 'support-knowledge' })
-  .sandbox(inMemorySandbox())
-  .models({
-    assistant: {
-      provider: openai({ apiKey }),
-      model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
-      capabilities: ['object', 'tool_use'],
-    },
-  })
-  .tools({
-    knowledge: {
-      kind: 'mcp_http',
-      description: 'Search approved support knowledge.',
-      url: knowledgeUrl,
-      auth: { kind: 'bearer', token: knowledgeToken },
-      tool: 'knowledge.search',
-    },
-  })
-  .agents(({ agent }) => ({
-    support: agent({
-      model: 'assistant',
-      input: z.object({ question: z.string() }),
-      output: z.object({ answer: z.string() }),
-      builtinTools: false,
-      tools: ['knowledge'],
-      instructions: 'Use knowledge only for approved support information.',
-    }),
-  }))
-  .build()
+	.sandbox(inMemorySandbox())
+	.models({
+		assistant: {
+			provider: openai({ apiKey }),
+			model: process.env.OPENAI_MODEL ?? 'gpt-5-mini',
+			capabilities: ['object', 'tool_use'],
+		},
+	})
+	.tools({
+		knowledge: {
+			kind: 'mcp_http',
+			description: 'Search approved support knowledge.',
+			url: knowledgeUrl,
+			auth: { kind: 'bearer', token: knowledgeToken },
+			tool: 'knowledge.search',
+		},
+	})
+	.agent('support', {
+		model: 'assistant',
+		input: z.object({ question: z.string() }),
+		output: z.object({ answer: z.string() }),
+		tools: ['knowledge'],
+		instructions: 'Use knowledge only for approved support information.',
+	})
+	.build()
 ```
 
 Set `OPENAI_API_KEY`, `KNOWLEDGE_MCP_URL`, and `KNOWLEDGE_MCP_TOKEN` through
@@ -74,11 +71,11 @@ server's responsibility.
 | [`defineHarness({ name })`](/handbook/api/functions/_purista_harness.defineHarness/) | Starts the named composition responsible for the agent's registry and diagnostics. | The name defaults to `agent-harness`; it does not become an MCP credential, tenant, or authorization scope. |
 | [`.sandbox(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#sandbox) | The local filesystem/process boundary. | `mcp_http` does not need process execution; `mcp_stdio` requires a sandbox whose declared capabilities include `sandbox.spawn`. |
 | [`.models(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#models) | The provider alias used by the agent. | `tool_use` is required before the default agent loop can call `knowledge`. Other model capabilities should remain absent unless the agent needs them. |
-| [`.tools({...})`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tools) | Registers the MCP tool under `knowledge`. | Use object registration for `mcp_http` or `mcp_stdio`; use the callback `tool(...)` form only for in-process TypeScript handlers. |
+| [`.tools(record)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#tools) | Registers the reusable MCP catalog under `knowledge`. | Use it for `mcp_http` or `mcp_stdio`; register an inline TypeScript handler separately with `.tool(id, definition)`. |
 | [`kind: 'mcp_http'`](/handbook/api/interfaces/_purista_harness.McpHttpToolDefinition/) | Connects to one Streamable HTTP MCP server. | Prefer it when the remote service owns authentication and authorization. Network, authentication, protocol, and schema failures fail the call. |
 | [`auth`](/handbook/api/interfaces/_purista_harness.McpHttpToolDefinition/#auth) | Sends declared HTTP authentication for the MCP connection. | Use a short-lived, task-scoped credential from secret configuration; never put it in instructions or tool input. |
-| [`tools: ['knowledge']`](/handbook/api/interfaces/_purista_harness.AgentDefinition/#tools) | Grants only this agent access to the registered MCP tool. | Omit it to deny the remote call. The remote service must still reauthorize each request. |
-| [`.agents(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agents) | Registers `support` after the model and MCP tool ID are available to the callback helper. | This order makes `assistant` and `knowledge` checked literal references. A missing tool or model alias is rejected before a session can execute. |
+| [`tools: ['knowledge']`](/handbook/api/types/_purista_harness.AgentDefinition/#signature) | Grants only this agent access to the registered MCP tool. | Omit it to deny the remote call. The remote service must still reauthorize each request. |
+| [`.agent(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#agent) | Registers `support` after the model and MCP tool ID exist. | This order makes `assistant` and `knowledge` checked literal references in the inline definition. A missing tool or model alias is rejected before a session can execute. |
 | [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build) | Validates the full composition and produces the session-facing Harness. | It checks registry references and capability requirements, but it does not contact the MCP server; connection, server authentication, and protocol failures occur when the tool is used. |
 
 ## Select a transport deliberately
@@ -93,6 +90,10 @@ the server, credentials, or upstream authorization. Keep tokens in secret
 configuration, allowlist each MCP tool per agent, and test unavailable server,
 bad schema, auth failure, cancellation, and timeout. `mcp_stdio` must never
 spawn directly on the host; use an isolating sandbox for untrusted code.
+
+Continue with [secure MCP and isolate data](/handbook/harness/secure-and-govern/mcp-security-and-data-isolation/)
+for the complete remote-versus-stdio trust model, credential scope, server-side
+authorization, data minimization, sandbox requirements, and negative tests.
 
 For a signed, reviewed package of skills and MCP declarations, see
 [agent plugins](/handbook/harness/add-capabilities/agent-plugins/).

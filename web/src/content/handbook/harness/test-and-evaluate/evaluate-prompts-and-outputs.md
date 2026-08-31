@@ -16,46 +16,57 @@ separate observation that can include the reviewed answer. This prevents a
 reference label from accidentally becoming prompt context for the candidate.
 
 ```ts title="src/evaluation/incidentRouting.ts"
-import {
-  createDeterministicEvaluationScorer,
-  runEvaluation,
-} from '@purista/harness'
+import { createDeterministicEvaluationScorer, runEvaluation } from '@purista/harness'
 
 type Incident = { summary: string }
 type ReviewedLabel = { expected: 'urgent' | 'normal' }
 type Candidate = { classify: (incident: Incident) => 'urgent' | 'normal' }
 
 const correctLabel = createDeterministicEvaluationScorer<ReviewedLabel, { label: 'urgent' | 'normal' }>({
-  id: 'reviewed-label',
-  version: '1',
-  dimension: { id: 'correct', kind: 'boolean' },
-  evaluate: (observation) => {
-    const passed = observation.output.label === observation.assessment?.expected
-    return { outcome: 'scored', dimensionId: 'correct', kind: 'boolean', value: passed, passed }
-  },
+	id: 'reviewed-label',
+	version: '1',
+	dimension: { id: 'correct', kind: 'boolean' },
+	evaluate: observation => {
+		const passed = observation.output.label === observation.assessment?.expected
+		return { outcome: 'scored', dimensionId: 'correct', kind: 'boolean', value: passed, passed }
+	},
 })
 
 const result = await runEvaluation<Incident, ReviewedLabel, Candidate, { label: 'urgent' | 'normal' }>({
-  runId: 'incident-routing-baseline',
-  dataset: {
-    id: 'incident-routing',
-    version: '2026-08-28',
-    cases: [
-      { id: 'security-minority', input: { summary: 'Credentials appeared in a public log.' }, assessment: { expected: 'urgent' }, segments: { kind: 'security' } },
-      { id: 'ordinary-delay', input: { summary: 'A report is delayed by ten minutes.' }, assessment: { expected: 'normal' }, segments: { kind: 'operations' } },
-    ],
-  },
-  candidates: [
-    { id: 'baseline', version: '1', config: { classify: () => 'normal' } },
-    { id: 'security-aware', version: '2', config: { classify: (incident) => incident.summary.includes('Credentials') ? 'urgent' : 'normal' } },
-  ],
-  task: {
-    id: 'route-incident',
-    version: '1',
-    run: async (target) => ({ output: { label: target.candidate.classify(target.input) } }),
-  },
-  scorers: [correctLabel],
-  aggregateBy: ['kind'],
+	runId: 'incident-routing-baseline',
+	dataset: {
+		id: 'incident-routing',
+		version: '2026-08-28',
+		cases: [
+			{
+				id: 'security-minority',
+				input: { summary: 'Credentials appeared in a public log.' },
+				assessment: { expected: 'urgent' },
+				segments: { kind: 'security' },
+			},
+			{
+				id: 'ordinary-delay',
+				input: { summary: 'A report is delayed by ten minutes.' },
+				assessment: { expected: 'normal' },
+				segments: { kind: 'operations' },
+			},
+		],
+	},
+	candidates: [
+		{ id: 'baseline', version: '1', config: { classify: () => 'normal' } },
+		{
+			id: 'security-aware',
+			version: '2',
+			config: { classify: incident => (incident.summary.includes('Credentials') ? 'urgent' : 'normal') },
+		},
+	],
+	task: {
+		id: 'route-incident',
+		version: '1',
+		run: async target => ({ output: { label: target.candidate.classify(target.input) } }),
+	},
+	scorers: [correctLabel],
+	aggregateBy: ['kind'],
 })
 
 console.log(result.dimensionAggregates)

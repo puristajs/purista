@@ -17,13 +17,13 @@ Start production with content capture disabled and structured logs enabled:
 
 ```ts title="src/harness.ts: disable content capture"
 const harness = defineHarness({ name: 'claims-review' })
-  .logger(new JsonLogger({ level: 'info' }))
-  .telemetry({
-    flavor: 'dual',
-    contentCaptureMode: 'NO_CONTENT'
-  })
-  // adapters, models, agents, and workflows
-  .build()
+	.logger(new JsonLogger({ level: 'info' }))
+	.telemetry({
+		flavor: 'dual',
+		contentCaptureMode: 'NO_CONTENT',
+	})
+	// adapters, models, agents, and workflows
+	.build()
 ```
 
 The Harness emits OpenTelemetry spans and metrics for session, workflow, agent,
@@ -76,14 +76,14 @@ email address, or secret.
 ```ts title="Transport boundary: propagate trace context"
 let runId: string | undefined
 for await (const event of session.agents.claims_support.stream(
-  { question },
-  {
-    traceparent: request.headers.get('traceparent') ?? undefined,
-    tracestate: request.headers.get('tracestate') ?? undefined,
-    metadata: { tenantId: trustedTenantId, requestClass: 'interactive' }
-  }
+	{ question },
+	{
+		traceparent: request.headers.get('traceparent') ?? undefined,
+		tracestate: request.headers.get('tracestate') ?? undefined,
+		metadata: { tenantId: trustedTenantId, requestClass: 'interactive' },
+	},
 )) {
-  if (event.type === 'run.started') runId = event.runId
+	if (event.type === 'run.started') runId = event.runId
 }
 
 const summary = runId ? await session.getRunSummary(runId) : undefined
@@ -102,9 +102,9 @@ low-cardinality attributes only:
 
 ```ts title="Workflow handler: measure bounded application work"
 await ctx.metrics.duration(
-  'claims.review.task_create_seconds',
-  { workflow_id: ctx.workflowId, outcome: 'referred' },
-  () => applicationReviewTasks.create(ctx.input.claimId, ctx.signal)
+	'claims.review.task_create_seconds',
+	{ workflow_id: ctx.workflowId, outcome: 'referred' },
+	() => applicationReviewTasks.create(ctx.input.claimId, ctx.signal),
 )
 ```
 

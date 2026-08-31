@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: purista-agent-example
+  namespace: purista-agent-example
+data:
+  PURISTA_AI_EXECUTION: kubernetes
+  PURISTA_SANDBOX_NAMESPACE: purista-sandboxes
+  PURISTA_HARNESS_RUNTIME_ID: support-v1
+  PURISTA_SANDBOX_SERVICE_ACCOUNT: purista-sandbox
+  PURISTA_SANDBOX_STORAGE_CLASS: encrypted-rwo
+  PURISTA_VOLUME_SNAPSHOT_CLASS: encrypted-rwo-snapshots
+  OPENAI_MODEL: gpt-4.1-mini
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: purista-agent-example
+  namespace: purista-agent-example
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: purista-agent-example
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: purista-agent-example
+    spec:
+      serviceAccountName: purista-agent-example
+      terminationGracePeriodSeconds: 45
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: application
+          # Replace with the reviewed application image digest.
+          image: ghcr.io/puristajs/agent-example@sha256:replace-me
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: purista-agent-example
+            - secretRef:
+                # Pre-create with DATABASE_URL, OPENAI_API_KEY,
+                # PURISTA_SANDBOX_IMAGE and any provider credentials.
+                name: purista-agent-example-secrets
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: purista-agent-example
+  namespace: purista-agent-example
+spec:
+  selector:
+    app.kubernetes.io/name: purista-agent-example
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: application-boundary
+  namespace: purista-agent-example
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: purista-agent-example
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Narrow these destinations to the database, model endpoint, and Kubernetes
+    # API addresses used by the target cluster before production rollout.
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 5432
+

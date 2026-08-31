@@ -15,7 +15,9 @@ defaults, and wires optional infrastructure.
 | Defaults, validation, timeouts, retries, and model settings | [Configuration and model settings](/handbook/harness/configure-the-runtime/configuration-and-model-settings/) |
 | Environment values and secret ownership | [Environment variables and secrets](/handbook/harness/configure-the-runtime/environment-variables-and-secrets/) |
 | Select a provider | [Provider selection](/handbook/harness/configure-the-runtime/provider-selection/) |
-| Configure OpenAI, Anthropic, Bedrock, or Azure | The focused provider guides below |
+| Configure OpenAI, Google Gemini, Anthropic, Bedrock, or Azure | The focused provider guides below |
+| Connect an application-owned model gateway | [Build a custom model provider](/handbook/harness/configure-the-runtime/custom-model-provider/) |
+| Configure logs, traces, and metrics | [Observe the runtime](/handbook/harness/configure-the-runtime/observability/) |
 
 ## What the base install provides
 
@@ -26,10 +28,12 @@ model-backed agent.
 
 | Provider | Focused guide |
 | --- | --- |
-| OpenAI | [OpenAI](/handbook/harness/configure-the-runtime/openai/) |
+| OpenAI and compatible Chat Completions endpoints | [OpenAI](/handbook/harness/configure-the-runtime/openai/) |
+| Google Gemini | [Google Gemini](/handbook/harness/configure-the-runtime/google-gemini/) |
 | Anthropic | [Anthropic](/handbook/harness/configure-the-runtime/anthropic/) |
 | Amazon Bedrock | [Amazon Bedrock](/handbook/harness/configure-the-runtime/amazon-bedrock/) |
 | Azure AI Foundry | [Azure AI Foundry](/handbook/harness/configure-the-runtime/azure-ai-foundry/) |
+| Application-owned provider | [Custom model provider](/handbook/harness/configure-the-runtime/custom-model-provider/) |
 
 For application-owned retrieval and grounded answers, see
 [Build grounded retrieval](/handbook/harness/configure-the-runtime/grounded-retrieval/).

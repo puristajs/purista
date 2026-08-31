@@ -1,7 +1,7 @@
 ---
-title: Handle service errors
-description: Classify safe business rejections, unexpected failures, and primitive-specific recovery without leaking internal details or claiming delivery guarantees the runtime does not own.
-order: 307
+title: Handle errors across service primitives
+description: Look up the shared classification of safe business rejections, unexpected failures, and primitive-specific recovery without leaking internal details.
+order: 371
 ---
 
 An error is part of the contract only when a caller or consumer can act on it

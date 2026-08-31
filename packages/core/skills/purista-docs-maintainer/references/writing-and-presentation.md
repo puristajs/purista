@@ -41,6 +41,13 @@ Choose a small domain scenario that naturally demonstrates the concept:
 
 State the finish line and expected evidence before the code. Use safe synthetic values. Keep one domain per page unless comparison is the page's job.
 
+For a multi-page capability, prefer one continuing scenario. The overview names
+the business operation; the first task makes it work; later tasks show only the
+dependency, event, queue, transform, exposure, or test delta. Keep filenames,
+schemas, IDs, response shapes, and error semantics aligned across those pages.
+Switch scenarios only when the original domain cannot demonstrate the next
+capability honestly or concisely.
+
 Examples should explain:
 
 - what the application owns;
@@ -66,6 +73,19 @@ Examples should explain:
 - Split a snippet when it introduces more than one new concept or requires scrolling to compare related lines.
 - Link to a maintained full example instead of expanding the page into an application dump.
 - Verify snippets against implementation, tests, generated output, or a compile/run check. Never reconstruct public API shapes from memory.
+- Present maintained examples as consumer applications. Their public run path
+  installs declared dependencies and uses package-local `typecheck`, `test`,
+  `build`, and `start` scripts; it must not require readers to build PURISTA or
+  Harness dependency workspaces first. Keep monorepo-maintainer bootstrap
+  commands out of end-user instructions.
+- When the supported Node engine provides native environment-file loading,
+  prefer a package script such as `node --env-file-if-exists=.env dist/index.js`
+  over a `dotenv` dependency or hand-written parser. Commit a safe
+  `.env.example`, never `.env`, and keep deterministic tests independent of
+  credentials and network access.
+- Do not copy a redundant opt-out field into every example when the verified
+  runtime default already denies the capability. State the default once near
+  the decision, and show explicit configuration only when it changes behavior.
 - A snippet that declares `implements SomePublicInterface` must implement every
   required member and be usable at the shown wiring boundary. For a partial
   adapter teaching only shared configuration, use an explicitly abstract base
@@ -97,6 +117,18 @@ Use fictitious identifiers such as `invoice-123` or `tenant-demo`, but do not lo
 - Link the task guide to stable generated API member anchors for exact
   signatures. Do not link an unstable reflection ID, an unrelated class, or a
   generic “methods” section when a member-level link exists.
+
+For public schemas that are exported into service definitions or OpenAPI:
+
+- describe the business meaning of the object and non-obvious fields, not the
+  validation syntax already visible in the schema;
+- verify that the current schema converter preserves the chosen metadata API;
+- add only a few schema-valid, synthetic examples when they improve client
+  understanding;
+- keep operation summaries, transport behavior, and HTTP-specific prose in the
+  exposure metadata rather than overloading field descriptions; and
+- never use a production identifier, tenant, credential, personal value, or
+  secret as an example.
 
 ## Decision guidance
 
@@ -136,6 +168,10 @@ Nest lists only when the parent-child relationship matters. If a nested list bec
 Every diagram must answer a question that prose alone would answer less clearly.
 
 - Keep one dominant idea per diagram.
+- Split a dense lifecycle into two or three focused diagrams at semantic
+  handoffs rather than shrinking labels or grouping ordered callbacks into an
+  opaque node. Keep one exact ordered table when readers also need sequence
+  lookup.
 - Label edges with commands, events, data, or decisions rather than generic arrows.
 - Show ownership and trust boundaries when they affect the design.
 - Keep Mermaid node text short and use surrounding prose for detail.

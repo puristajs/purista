@@ -60,21 +60,20 @@ The following alias names represent workload intent, not a vendor. An agent
 that uses `fast` remains unchanged if you switch the adapter behind it.
 
 ```ts
-const harness = defineHarness({ name: 'claims' })
-  .models({
-    fast: {
-      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
-      model: process.env.OPENAI_FAST_MODEL ?? 'gpt-5-mini',
-      capabilities: ['object', 'tool_use'],
-      defaults: { maxTokens: 1_200 },
-      retry: { maxAttempts: 3, longRetry: 'defer' }
-    },
-    retrieval: {
-      provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
-      model: process.env.OPENAI_EMBEDDING_MODEL ?? 'text-embedding-3-small',
-      capabilities: ['embeddings']
-    }
-  })
+const harness = defineHarness({ name: 'claims' }).models({
+	fast: {
+		provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+		model: process.env.OPENAI_FAST_MODEL ?? 'gpt-5-mini',
+		capabilities: ['object', 'tool_use'],
+		defaults: { maxTokens: 1_200 },
+		retry: { maxAttempts: 3, longRetry: 'defer' },
+	},
+	retrieval: {
+		provider: openai({ apiKey: process.env.OPENAI_API_KEY! }),
+		model: process.env.OPENAI_EMBEDDING_MODEL ?? 'text-embedding-3-small',
+		capabilities: ['embeddings'],
+	},
+})
 ```
 
 `longRetry: 'defer'` gives application workers a normalized retry result rather
@@ -121,23 +120,33 @@ verify declared delegation.
 
 ```ts
 const harness = defineHarness({ name: 'claims-review' })
-  .logger(new JsonLogger({ level: process.env.LOG_LEVEL === 'debug' ? 'debug' : 'info' }))
-  .telemetry({ contentCaptureMode: 'NO_CONTENT' })
-  .sandbox(inMemorySandbox()) // Replace explicitly if tools must execute commands.
-  .defaults({
-    runTimeoutMs: 60_000,
-    modelTimeoutMs: 30_000,
-    toolTimeoutMs: 10_000,
-    agentMaxIterations: 8,
-    maxParallelToolCalls: 4,
-    historyRetention: { maxTurns: 50, maxBytes: 256_000 }
-  })
-  .models({ /* aliases */ })
-  .tools(({ tool }) => ({ /* tool(...) registrations */ }))
-  .skills({ /* mounted directories */ })
-  .agents(({ agent }) => ({ /* model loops */ }))
-  .workflows(({ workflow }) => ({ /* orchestration */ }))
-  .build()
+	.logger(new JsonLogger({ level: process.env.LOG_LEVEL === 'debug' ? 'debug' : 'info' }))
+	.telemetry({ contentCaptureMode: 'NO_CONTENT' })
+	.sandbox(inMemorySandbox()) // Replace explicitly if tools must execute commands.
+	.defaults({
+		runTimeoutMs: 60_000,
+		modelTimeoutMs: 30_000,
+		toolTimeoutMs: 10_000,
+		agentMaxIterations: 8,
+		maxParallelToolCalls: 4,
+		historyRetention: { maxTurns: 50, maxBytes: 256_000 },
+	})
+	.models({
+		/* aliases */
+	})
+	.tool('tool_id', {
+		/* typed native tool definition */
+	})
+	.skills({
+		/* mounted directories */
+	})
+	.agents({
+		/* model loops */
+	})
+	.workflows({
+		/* orchestration */
+	})
+	.build()
 ```
 
 Use the in-memory sandbox only when command execution is not required. The

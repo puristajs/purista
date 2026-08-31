@@ -9,6 +9,70 @@ Report unmatched, skipped, cancelled, timed-out, and errored rows before any
 quality conclusion. Comparing only the cases that completed or scored can make
 a regression look like an improvement.
 
+Prefer one `runEvaluation(...)` call containing both candidate versions. The
+Harness creates the same case × trial matrix for each candidate, which makes a
+missing or failed row visible in one result.
+
+```ts title="src/evaluation/compareRoutingCandidates.ts"
+import type { EvaluationRunResult } from '@purista/harness'
+
+export function compareRoutingCandidates(result: EvaluationRunResult) {
+	const candidateIds = ['baseline', 'security-aware'] as const
+	const identities = new Map<string, Set<string>>()
+
+	for (const candidateId of candidateIds) {
+		identities.set(
+			candidateId,
+			new Set(
+				result.cases.filter(item => item.candidateId === candidateId).map(item => `${item.caseId}:${item.trialId}`),
+			),
+		)
+	}
+
+	const baselineIds = identities.get('baseline')!
+	const nextIds = identities.get('security-aware')!
+	if (baselineIds.size !== nextIds.size || [...baselineIds].some(id => !nextIds.has(id))) {
+		throw new Error('Candidate results are not matched by case and trial')
+	}
+
+	const aggregate = (candidateId: string) =>
+		result.dimensionAggregates.find(
+			item => item.candidateId === candidateId && item.dimensionId === 'correct' && item.scope.kind === 'all',
+		)
+	const baseline = aggregate('baseline')
+	const next = aggregate('security-aware')
+	if (!baseline?.passCounts || !next?.passCounts) {
+		throw new Error('Correct-label aggregate is incomplete')
+	}
+
+	const incompleteRows = result.cases.filter(item => item.status !== 'completed')
+	const failedCaseIds = result.cases
+		.filter(item => item.candidateId === 'security-aware')
+		.filter(item =>
+			item.scorers.some(scorer =>
+				scorer.dimensions.some(
+					dimension =>
+						dimension.dimensionId === 'correct' && dimension.outcome === 'scored' && dimension.passed === false,
+				),
+			),
+		)
+		.map(item => item.caseId)
+
+	return {
+		baselineRate: baseline.passCounts.rate,
+		nextRate: next.passCounts.rate,
+		incompleteRows: incompleteRows.length,
+		failedCaseIds,
+	}
+}
+```
+
+This report keeps only stable synthetic case IDs, not candidate outputs. Treat
+`incompleteRows > 0` as an operational finding before interpreting the rate.
+Then open the authorized observation or trace reference for each failed case in
+the application-owned store; the generic result deliberately does not retain
+raw prompts or outputs.
+
 Start with per-case differences and then inspect segments. An aggregate can
 show that a candidate improved overall while regressing for a critical language,
 rare class, unanswerable question, or authorization boundary. The generic

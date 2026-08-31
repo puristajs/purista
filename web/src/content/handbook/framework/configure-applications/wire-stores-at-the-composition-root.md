@@ -40,7 +40,7 @@ export const createBillingApplication = async (eventBridge: EventBridge) => {
   const configStore = new DefaultConfigStore()
   const secretStore = new DefaultSecretStore()
 
-const service = await billingV1ServiceBuilder.getInstance(eventBridge, {
+  const service = await billingV1ServiceBuilder.getInstance(eventBridge, {
     stateStore,
     configStore,
     secretStore,
@@ -102,4 +102,4 @@ The exact handler methods and operation flags remain on the owning guides:
 [secret stores](/handbook/framework/configure-applications/secret-stores/), and
 [state stores](/handbook/framework/persist-application-state/). For handler
 context and safe value use, continue with
-[Use stores in a service](/handbook/framework/build-services/use-stores-in-a-service/).
+[Use stores from handlers](/handbook/framework/configure-applications/use-stores-from-handlers/).
