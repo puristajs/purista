@@ -70,7 +70,8 @@ async function probe(project, path) {
 		// Let socket errors (for example, an occupied port) reach the child first.
 		await new Promise(resolve => setTimeout(resolve, 100))
 		assert(child.exitCode === null, 'Server could not bind its port: ' + logs)
-		const response = await fetch('http://127.0.0.1:3000' + path, { signal: AbortSignal.timeout(3000) })
+		const route = path.startsWith('/') ? path : '/api/v1/bank'
+		const response = await fetch('http://127.0.0.1:3000' + route, { signal: AbortSignal.timeout(3000) })
 		assert.equal(response.status, 200, path + ' did not return 200')
 		const body = await response.json()
 		if (path === '/health') assert.deepEqual(body, { status: 200, message: 'OK' })
@@ -93,6 +94,66 @@ async function probe(project, path) {
 			const history = await fetch('http://127.0.0.1:3000' + path, { signal: AbortSignal.timeout(3000) })
 			assert.deepEqual(await history.json(), { accountId: 'account-a', transactions: [saved] })
 		}
+		if (path === 'account-access' || path === 'account-overview') {
+			const request = (route, init = {}) =>
+				fetch('http://127.0.0.1:3000' + route, { ...init, signal: AbortSignal.timeout(3000) })
+			const login = async actor => {
+				const response = await request('/auth/login', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ actor }),
+				})
+				assert.equal(response.status, 200)
+				const cookie = response.headers.get('set-cookie')?.split(';', 1)[0]
+				assert(cookie, 'Login did not provide a cookie')
+				return (route, init = {}) => request(route, { ...init, headers: { ...init.headers, cookie } })
+			}
+			const history = '/api/v1/accounts/account-a/transactions'
+			assert.equal((await request(history)).status, 401)
+			const bob = await login('bob')
+			const dana = await login('dana')
+			const south = await login('danaSouth')
+			assert.equal((await bob(history)).status, 200)
+			assert.equal((await bob('/api/v1/accounts/account-c/transactions')).status, 403)
+			const fixture = JSON.parse(await readFile(resolve(project, 'fixtures/transaction.json'), 'utf8'))
+			const post = client =>
+				client('/api/v1/transactions', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(fixture),
+				})
+			assert.equal((await post(bob)).status, 403)
+			assert.equal((await post(dana)).status, 200)
+			assert.equal((await post(dana)).status, 409)
+			const northHistory = await (await bob(history)).json()
+			assert.equal(northHistory.tenantId, 'tenant-north')
+			assert.equal(northHistory.transactions.length, 1)
+			assert.deepEqual(await (await south(history)).json(), {
+				tenantId: 'tenant-south',
+				accountId: 'account-a',
+				transactions: [],
+			})
+			if (path === 'account-overview') {
+				const overview = '/api/v1/accounts/account-a/overview'
+				const northResult = await bob(overview)
+				assert.equal(northResult.status, 200)
+				assert.deepEqual(await northResult.json(), {
+					tenantId: 'tenant-north',
+					accountId: 'account-a',
+					transactionCount: 1,
+				})
+				const southResult = await south(overview)
+				assert.equal(southResult.status, 200)
+				assert.deepEqual(await southResult.json(), {
+					tenantId: 'tenant-south',
+					accountId: 'account-a',
+					transactionCount: 0,
+				})
+				assert.equal((await bob('/api/v1/accounts/account-c/overview')).status, 403)
+			}
+			assert.equal((await bob('/auth/logout', { method: 'POST' })).status, 200)
+			assert.equal((await bob(history)).status, 401)
+		}
 		report(`HTTP checkpoint passed: ${path}`)
 	} finally {
 		child.kill('SIGTERM')
@@ -104,6 +165,11 @@ async function probe(project, path) {
 
 await checkDocs()
 if (args.includes('--check-docs')) process.exit(0)
+const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(Number)
+assert(
+	nodeMajor > 24 || (nodeMajor === 24 && nodeMinor >= 15),
+	'Replay requires Node >=24.15; found ' + process.versions.node,
+)
 assert(option('--out'), 'Supply --out with a NEW directory outside the repository.')
 const target = resolve(option('--out'))
 assert(!existsSync(target), 'Refusing to overwrite an existing directory: ' + target)

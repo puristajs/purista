@@ -1,0 +1,125 @@
+---
+title: "Verify downstream identity and try the API"
+description: "Test a composed command through Hono, then exercise allowed and denied actions with curl."
+order: 460
+---
+
+Replace the CLI's generated placeholder test:
+
+```ts title="src/service/banking/v1/command/getAccountOverview/getAccountOverviewCommandBuilder.test.ts"
+import { expect, test } from 'vitest'
+import { AccountAccess, type AccountAction } from '../../../../../accountAccess.js'
+import { fixtureIdentities, type Identity } from '../../../../../identity.js'
+import { createTestBank } from '../../../../../testing/createTestBank.js'
+import type { TransactionInput } from '../../../../../transaction.js'
+
+test('nested commands keep tenant and principal identity and enforce their own guards', async () => {
+	const bank = await createTestBank()
+	try {
+		bank.transactions.record(fixtureIdentities.dana, {
+			accountId: 'account-a',
+			sourceTransactionId: 'source-001',
+			bookedAt: '2026-01-20T10:00:00.000Z',
+			amountMinor: 1250,
+			currency: 'EUR',
+			direction: 'debit',
+		})
+		const bob = await bank.login('bob')
+		const south = await bank.login('danaSouth')
+		const northResult = await bob.request('/api/v1/accounts/account-a/overview')
+		expect(northResult.status).toBe(200)
+		expect(await northResult.json()).toEqual({ tenantId: 'tenant-north', accountId: 'account-a', transactionCount: 1 })
+		const southResult = await south.request('/api/v1/accounts/account-a/overview')
+		expect(southResult.status).toBe(200)
+		expect(await southResult.json()).toEqual({ tenantId: 'tenant-south', accountId: 'account-a', transactionCount: 0 })
+		expect((await bob.request('/api/v1/accounts/account-c/overview')).status).toBe(403)
+	} finally {
+		await bank.destroy()
+	}
+})
+
+test('a successful outer guard cannot bypass a denied downstream command', async () => {
+	class RevokeAfterFirstRead extends AccountAccess {
+		checks = 0
+		override assertAllowed(identity: Identity, accountId: TransactionInput['accountId'], action: AccountAction) {
+			this.checks++
+			super.assertAllowed(identity, accountId, action)
+			if (this.checks === 1) this.revoke(identity, accountId, action)
+		}
+	}
+	const access = new RevokeAfterFirstRead()
+	const bank = await createTestBank({ access })
+	try {
+		const bob = await bank.login('bob')
+		const response = await bob.request('/api/v1/accounts/account-a/overview')
+		expect(response.status).toBe(403)
+		expect(access.checks).toBe(2)
+		expect(await response.text()).not.toContain('transactionCount')
+	} finally {
+		await bank.destroy()
+	}
+})
+```
+
+Bob's request succeeds only if his identity reaches the guarded downstream
+history command. The south-tenant request must return a different count.
+The second test revokes permission after the outer guard succeeds. The inner
+guard must then reject the call; returning a summary would be a failure.
+
+```bash title="Verify the composed command"
+npm test
+npm run build
+npm run dev
+```
+
+Expect nineteen passing tests. Leave the development server running in this
+terminal. The following requests run in a second terminal from the application
+directory, where `fixtures/transaction.json` already exists.
+
+## Try the two different permissions
+
+Log in as Bob and retain his cookie:
+
+```bash title="Log in as the read-only bookkeeper"
+curl -i -c bob.cookies \
+  -H 'content-type: application/json' \
+  -d '{"actor":"bob"}' http://127.0.0.1:3000/auth/login
+curl -i -b bob.cookies http://127.0.0.1:3000/api/v1/accounts/account-a/overview
+curl -i -b bob.cookies http://127.0.0.1:3000/api/v1/accounts/account-c/overview
+curl -i -b bob.cookies -H 'content-type: application/json' \
+  --data-binary @fixtures/transaction.json http://127.0.0.1:3000/api/v1/transactions
+```
+
+Expect 200 for login and the account-A overview, then 403 for account C and
+posting. Bob is authenticated for all three API requests.
+
+Log in as Dana to record the fixture:
+
+```bash title="Record with the assigned posting operator"
+curl -i -c dana.cookies \
+  -H 'content-type: application/json' \
+  -d '{"actor":"dana"}' http://127.0.0.1:3000/auth/login
+curl -i -b dana.cookies -H 'content-type: application/json' \
+  --data-binary @fixtures/transaction.json http://127.0.0.1:3000/api/v1/transactions
+curl -i -b bob.cookies http://127.0.0.1:3000/api/v1/accounts/account-a/overview
+```
+
+Expect a recorded transaction and an overview with `transactionCount: 1`.
+Posting the same fixture again returns 409. Logout invalidates the old cookie:
+
+```bash title="Invalidate the saved Bob session"
+curl -i -b bob.cookies -X POST http://127.0.0.1:3000/auth/logout
+curl -i -b bob.cookies http://127.0.0.1:3000/api/v1/accounts/account-a/overview
+```
+
+The final request returns 401. Stop the server with Ctrl+C and remove only
+the two local cookie files you created. Do not commit session cookies.
+
+You have constructed the `account-overview` checkpoint. To recreate it in a
+new directory, use the chapter setup replay with `--to account-overview`.
+The code still uses process-local sessions, permissions, and transaction
+storage. Restarting clears them; production persistence, identity verification,
+and database transactions need their own implementation.
+
+Next, [adapt an external banking format](/tutorials/banking-integrations/)
+while keeping these business permissions.

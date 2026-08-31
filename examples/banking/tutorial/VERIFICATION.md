@@ -1,9 +1,9 @@
 # Tutorial reconstruction evidence
 
 Verified on 2026-08-31 with Node 26.5 and published PURISTA 3.2.4 packages.
-This record covers the rebuilt opening and transaction chapters only. It is
-not evidence that the remaining tutorial roots are complete implementation
-guides.
+This record covers the rebuilt opening, transaction, and account-access
+chapters. It is not evidence that the remaining tutorial roots are complete
+implementation guides.
 
 ## Replayed checkpoints
 
@@ -16,28 +16,39 @@ guides.
 | `repository` | Transaction schema, storage resource, application/test injection | 4 | Existing bank command still works |
 | `record-transaction` | Generated POST command and validation/conflict checks | 5 | Existing bank command still works; POST runtime covered by HTTP integration test |
 | `list-transactions` | Generated history command sharing repository state | 6 | Real TCP POST/list round trip, 400, 409, no rejected extra rows |
+| `account-foundation` | Session expiry and separate current account permissions | 8 | Previous anonymous API still works before wiring |
+| `account-access` | Trusted Hono metadata, resource wiring, tenant-scoped repository, before/after guards | 17 | Cookie login, authorized read/post, 401/403/409, tenant isolation, logout |
+| `account-overview` | CLI-generated command composes guarded history via `canInvoke` | 19 | Nested command retains caller scope; north/south return different counts |
 
 Executed from the repository root into a previously nonexistent directory:
 
 ```bash
-node examples/banking/tutorial/replay.mjs --to list-transactions --out /private/tmp/example-bank-replay-api --verify-http
+node examples/banking/tutorial/replay.mjs --to account-overview --out /private/tmp/example-bank-access-proof-02 --verify-http
 ```
 
 Every checkpoint passed `npm test` and `npm run build`. The runner installed
 published dependencies outside the monorepo and used the generated project's
-local CLI scripts. The printed file bodies match 21 checked-in snapshots.
+local CLI scripts. The printed file bodies match 45 checked-in snapshots.
 
 The Node listener was verified separately from Hono's in-process `app.request`
 tests. Processes started by the replay were stopped after each probe. Storage
 was fresh for every probe and every test.
 
+The access tests also exercise valid callers with different permissions,
+revocation after login, frozen posting, revocation between before guard and
+repository write, safe permission-dependency failure, schema-valid foreign rows
+rejected by the after guard, direct event-bridge denial, forged metadata, session
+expiry, and a revoked downstream call after the outer guard succeeds.
+
 The rewritten pages rendered in Astro's dev server at desktop width 1280 and
 mobile width 390. The mobile chapter menu followed the backend-first order.
 Long inline file paths initially clipped; the shared prose style now wraps
-them. No browser console error was observed on the checked resource page.
+them. The account policy table fits within the mobile content column, and the
+account-access diagram renders through the shared Handbook enhancement. No
+browser console error was observed on the checked pages.
 
 Repository checks also passed: the full website build (including API docs),
-the generated-link audit (2338 HTML files), knowledge and skill audits, and
+the generated-link audit (2348 HTML files), knowledge and skill audits, and
 the CLI build plus focused generator/artifact tests (5 tests). The full build
 retains existing TypeDoc and large-chunk warnings. These checks supplement,
 but do not replace, the consumer replay above.
@@ -58,18 +69,22 @@ but do not replace, the consumer replay above.
 - The old Astro dev process referenced `web/node_modules/astro` after Astro was
   hoisted to the root installation. Restarting that process restored page
   rendering; no tutorial content file needed a template workaround.
+- A non-login verification shell selected Node 24.3, below the documented
+  dependency minimum. Replaying with Node 26.5 passed. The runner now reports
+  unsupported Node versions before creating an output directory.
+- An authentication-only fixture could shut down the published local event
+  bridge before its registration messages had been processed, producing a
+  `write after end` error. The shared fixture now performs a real bank-info
+  readiness request before returning. This is not a claim that the published
+  bridge's general shutdown behavior has been fixed.
 
 ## Next reconstruction work
 
 The remaining chapters still contain reference-demo instructions and partial
 snippets. Do not count them as completed because their existing demo tests pass.
-Next, rebuild `authenticated-banking-ui` from `list-transactions`: server-derived
-tenant/principal identity, account/action/state guards for valid callers,
-tenant-scoped storage, and denied requests with no protected effects. Preserve
-the route but keep the frontend optional.
-
-Then continue with import/export transforms, business events/subscriptions,
-streams, queues/workers, schedules, business observability, and attached AI.
+Continue from `account-overview` with import/export transforms, business
+events/subscriptions, streams, queues/workers, schedules, business observability,
+and attached AI.
 Each new root must have its own reproducible entry checkpoint and be taught
 through exact CLI generation, file edits, runtime wiring, and end-to-end tests.
 The combined source in `examples/banking/src` may inform behavior, but its

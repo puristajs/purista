@@ -1,0 +1,118 @@
+---
+title: "Update and run the API tests"
+description: "Keep the existing transaction behavior covered while requiring real sessions and tenant-scoped responses."
+order: 410
+---
+
+The existing posting and history tests describe the earlier anonymous API.
+Update them to use `bank.login` and expect the server's tenant field. The
+bank-info test can stay unchanged because that endpoint is public.
+
+Replace the posting test:
+
+```ts title="src/service/banking/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+import { expect, test } from 'vitest'
+import { createTestBank } from '../../../../../testing/createTestBank.js'
+
+const transaction = {
+	accountId: 'account-a',
+	sourceTransactionId: 'source-001',
+	bookedAt: '2026-01-20T10:00:00.000Z',
+	amountMinor: 1250,
+	currency: 'EUR',
+	direction: 'debit',
+}
+
+test('an authorized caller records a transaction; duplicates and invalid amounts are rejected', async () => {
+	const bank = await createTestBank()
+	try {
+		const dana = await bank.login('dana')
+		const post = (body: unknown) =>
+			dana.request('/api/v1/transactions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(body),
+			})
+		const recorded = await post(transaction)
+		expect(recorded.status).toBe(200)
+		expect(await recorded.json()).toEqual({
+			...transaction,
+			tenantId: 'tenant-north',
+			transactionId: expect.any(String),
+		})
+		expect((await post(transaction)).status).toBe(409)
+		const invalid = await post({ ...transaction, sourceTransactionId: 'source-002', amountMinor: 12.5 })
+		expect(invalid.status).toBe(400)
+		expect(invalid.headers.get('content-type')).toContain('application/problem+json')
+	} finally {
+		await bank.destroy()
+	}
+})
+```
+
+Dana logs in through Hono before recording. The success response must include
+`tenant-north`; the client does not supply that trusted value.
+Duplicate and invalid-amount checks still prove the earlier behavior.
+
+Replace the history test:
+
+```ts title="src/service/banking/v1/command/listTransactions/listTransactionsCommandBuilder.test.ts"
+import { expect, test } from 'vitest'
+import { createTestBank } from '../../../../../testing/createTestBank.js'
+
+test('authorized commands share storage and rejected records stay out of history', async () => {
+	const bank = await createTestBank()
+	try {
+		const dana = await bank.login('dana')
+		const transaction = {
+			accountId: 'account-a',
+			sourceTransactionId: 'source-001',
+			bookedAt: '2026-01-20T10:00:00.000Z',
+			amountMinor: 1250,
+			currency: 'EUR',
+			direction: 'debit',
+		}
+		const post = (body: unknown) =>
+			dana.request('/api/v1/transactions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(body),
+			})
+		const empty = await dana.request('/api/v1/accounts/account-a/transactions')
+		expect(await empty.json()).toEqual({ tenantId: 'tenant-north', accountId: 'account-a', transactions: [] })
+		const recorded = await post(transaction)
+		expect(recorded.status).toBe(200)
+		const saved = await recorded.json()
+		expect((await post(transaction)).status).toBe(409)
+		expect((await post({ ...transaction, sourceTransactionId: 'bad', amountMinor: -1 })).status).toBe(400)
+		const history = await dana.request('/api/v1/accounts/account-a/transactions')
+		expect(await history.json()).toEqual({ tenantId: 'tenant-north', accountId: 'account-a', transactions: [saved] })
+		const carol = await bank.login('carol')
+		const other = await carol.request('/api/v1/accounts/account-c/transactions')
+		expect(await other.json()).toEqual({ tenantId: 'tenant-north', accountId: 'account-c', transactions: [] })
+		expect((await dana.request('/api/v1/accounts/unknown/transactions')).status).toBe(400)
+	} finally {
+		await bank.destroy()
+	}
+})
+```
+
+Carol reads her own account C rather than letting Dana read an unassigned
+account to test an empty result. That difference makes the test follow the
+business rule we actually implemented.
+
+```bash title="Verify the connected account API"
+npm test
+npm run build
+```
+
+At this point, expect eight passing tests. TypeScript also checks every new
+constructor, resource, handler argument, and schema import. If you see a
+missing resource or an old method signature, compare the replacement files
+on the preceding wiring pages before continuing.
+
+The application can now run with `npm run dev`. Anonymous account requests
+return 401; the public bank-info request still returns 200. The remaining test
+pages add evidence for the permission and session failures we care about.
+
+Next, [test valid callers with different permissions](/tutorials/authenticated-banking-ui/test-business-permissions/).

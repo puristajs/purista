@@ -190,5 +190,137 @@
 			}
 		],
 		"probe": "/api/v1/accounts/account-a/transactions"
+	},
+	{
+		"id": "account-foundation",
+		"commands": [],
+		"files": [
+			{
+				"path": "src/identity.ts",
+				"page": "authenticated-banking-ui/add-local-login"
+			},
+			{
+				"path": "src/localSessions.ts",
+				"page": "authenticated-banking-ui/add-local-login"
+			},
+			{
+				"path": "src/accountAccess.ts",
+				"page": "authenticated-banking-ui/model-account-permissions"
+			},
+			{
+				"path": "src/accountFoundation.test.ts",
+				"page": "authenticated-banking-ui/test-access-foundation"
+			}
+		],
+		"probe": "/api/v1/accounts/account-a/transactions"
+	},
+	{
+		"id": "account-access",
+		"commands": [],
+		"files": [
+			{
+				"path": "src/httpApp.ts",
+				"page": "authenticated-banking-ui/set-trusted-identity"
+			},
+			{
+				"path": "src/transaction.ts",
+				"page": "authenticated-banking-ui/scope-transaction-storage"
+			},
+			{
+				"path": "src/transactionRepository.ts",
+				"page": "authenticated-banking-ui/scope-transaction-storage"
+			},
+			{
+				"path": "src/service/banking/v1/bankingV1ServiceBuilder.ts",
+				"page": "authenticated-banking-ui/wire-permission-resources"
+			},
+			{
+				"path": "src/index.ts",
+				"page": "authenticated-banking-ui/wire-permission-resources"
+			},
+			{
+				"path": "src/http.ts",
+				"page": "authenticated-banking-ui/wire-permission-resources"
+			},
+			{
+				"path": "src/accountGuards.ts",
+				"page": "authenticated-banking-ui/guard-business-actions"
+			},
+			{
+				"path": "src/service/banking/v1/command/recordTransaction/recordTransactionCommandBuilder.ts",
+				"page": "authenticated-banking-ui/guard-business-actions"
+			},
+			{
+				"path": "src/service/banking/v1/command/listTransactions/schema.ts",
+				"page": "authenticated-banking-ui/check-results-and-calls"
+			},
+			{
+				"path": "src/service/banking/v1/command/listTransactions/listTransactionsCommandBuilder.ts",
+				"page": "authenticated-banking-ui/check-results-and-calls"
+			},
+			{
+				"path": "src/service/banking/v1/command/getBankInfo/getBankInfoCommandBuilder.ts",
+				"page": "authenticated-banking-ui/check-results-and-calls"
+			},
+			{
+				"path": "src/testing/createTestBank.ts",
+				"page": "authenticated-banking-ui/create-http-test-client"
+			},
+			{
+				"path": "src/service/banking/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts",
+				"page": "authenticated-banking-ui/update-api-tests"
+			},
+			{
+				"path": "src/service/banking/v1/command/listTransactions/listTransactionsCommandBuilder.test.ts",
+				"page": "authenticated-banking-ui/update-api-tests"
+			},
+			{
+				"path": "src/businessPermissions.test.ts",
+				"page": "authenticated-banking-ui/test-business-permissions"
+			},
+			{
+				"path": "src/authentication.test.ts",
+				"page": "authenticated-banking-ui/test-session-boundary"
+			},
+			{
+				"path": "src/guardBoundaries.test.ts",
+				"page": "authenticated-banking-ui/test-guard-boundaries"
+			}
+		],
+		"probe": "account-access"
+	},
+	{
+		"id": "account-overview",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"get-account-overview",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Read an account summary through a guarded command",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "src/service/banking/v1/command/getAccountOverview/schema.ts",
+				"page": "authenticated-banking-ui/generate-account-overview"
+			},
+			{
+				"path": "src/service/banking/v1/command/getAccountOverview/getAccountOverviewCommandBuilder.ts",
+				"page": "authenticated-banking-ui/generate-account-overview"
+			},
+			{
+				"path": "src/service/banking/v1/command/getAccountOverview/getAccountOverviewCommandBuilder.test.ts",
+				"page": "authenticated-banking-ui/test-downstream-identity"
+			}
+		],
+		"probe": "account-overview"
 	}
 ]

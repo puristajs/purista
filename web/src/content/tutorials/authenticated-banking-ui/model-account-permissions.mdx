@@ -1,0 +1,96 @@
+---
+title: "Define account and action permissions"
+description: "Model current account ownership, delegated reading, assigned posting rights, and frozen posting state."
+order: 330
+---
+
+Continue after [creating identities](/tutorials/authenticated-banking-ui/add-local-login/). A session
+says that the caller is Bob. It must not say that Bob can always use every
+account. That decision belongs to the application.
+
+Use this small business policy:
+
+| Fixture | May read | May record |
+| --- | --- | --- |
+| Alice | Own A | Nothing |
+| Bob | Delegated A | Nothing |
+| Carol | Own C | Nothing |
+| Dana | Assigned A | A while open |
+| danaSouth | Assigned A | A while open |
+
+All fixtures use `tenant-north` except `danaSouth`, who uses `tenant-south`.
+The two tenants have separate accounts named `account-a`. “Delegated” means
+the server holds a read permission; “open” means posting is not frozen.
+
+Here, “record” means recording an already-posted synthetic transaction, as in
+the API chapter. It does not move money.
+
+Create `src/accountAccess.ts`:
+
+```ts title="src/accountAccess.ts"
+import { HandledError, StatusCode } from '@purista/core'
+import type { Identity } from './identity.js'
+import type { TransactionInput } from './transaction.js'
+
+export type AccountAction = 'read' | 'record'
+type AccountId = TransactionInput['accountId']
+type Account = { ownerId: string; postingEnabled: boolean }
+const accountKey = (tenantId: string, accountId: AccountId) => JSON.stringify([tenantId, accountId])
+const grantKey = (identity: Identity, accountId: AccountId) =>
+	JSON.stringify([identity.tenantId, identity.principalId, accountId])
+
+/** Current account permissions. Stored separately from session identity. */
+export class AccountAccess {
+	private readonly accounts = new Map<string, Account>([
+		[accountKey('tenant-north', 'account-a'), { ownerId: 'alice', postingEnabled: true }],
+		[accountKey('tenant-north', 'account-c'), { ownerId: 'carol', postingEnabled: true }],
+		[accountKey('tenant-south', 'account-a'), { ownerId: 'south-owner', postingEnabled: true }],
+	])
+	private readonly grants = new Map<string, Set<AccountAction>>([
+		[grantKey({ tenantId: 'tenant-north', principalId: 'bob' }, 'account-a'), new Set(['read'])],
+		[grantKey({ tenantId: 'tenant-north', principalId: 'dana' }, 'account-a'), new Set(['read', 'record'])],
+		[grantKey({ tenantId: 'tenant-south', principalId: 'dana' }, 'account-a'), new Set(['read', 'record'])],
+	])
+
+	assertAllowed(identity: Identity, accountId: AccountId, action: AccountAction): void {
+		const account = this.accounts.get(accountKey(identity.tenantId, accountId))
+		const ownerRead = action === 'read' && account?.ownerId === identity.principalId
+		const granted = this.grants.get(grantKey(identity, accountId))?.has(action)
+		const stateAllows = action === 'read' || account?.postingEnabled
+		if (!account || !stateAllows || (!ownerRead && !granted)) {
+			throw new HandledError(StatusCode.Forbidden, 'You may not perform this action on this account')
+		}
+	}
+
+	/** Application-owned control used to demonstrate a changed permission in tests. */
+	revoke(identity: Identity, accountId: AccountId, action: AccountAction): void {
+		this.grants.get(grantKey(identity, accountId))?.delete(action)
+	}
+
+	/** Freeze posting while keeping authorized history reads available. */
+	freeze(tenantId: string, accountId: AccountId): void {
+		const account = this.accounts.get(accountKey(tenantId, accountId))
+		if (account) account.postingEnabled = false
+	}
+}
+```
+
+The account key includes the tenant. The grant key includes tenant, principal,
+and account. Using `JSON.stringify` on an array avoids ambiguous keys if an
+identifier later contains a separator character.
+
+`assertAllowed` checks three things: the account exists in this tenant, the
+caller owns the account or has the requested permission, and the account's
+current state allows the action. Ownership grants reading only. Posting needs
+an explicit grant and an unfrozen account.
+
+`revoke` and `freeze` let application code and tests change current policy.
+They are **not HTTP endpoints**. We do not let a client grant itself access.
+The generic 403 error avoids telling an unauthorized caller whether another
+tenant's account exists.
+
+Keep permission data separate from `LocalSessions`. The command will consult
+this resource for each action, so a still-valid session cannot preserve a
+permission that has been removed.
+
+Next, [test this foundation before connecting HTTP](/tutorials/authenticated-banking-ui/test-access-foundation/).

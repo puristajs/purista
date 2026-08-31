@@ -1,18 +1,3 @@
----
-title: "Configure Hono authentication"
-description: "Resolve identity from a server session and pass trusted tenantId and principalId through the Hono adapter."
-order: 350
----
-
-Continue from the [account foundation](/tutorials/authenticated-banking-ui/test-access-foundation/).
-We already installed the PURISTA Hono integration in the first chapter.
-Now give it a session-aware authentication handler.
-
-Create `src/httpApp.ts`. This function configures Hono without opening a
-network socket. The application and its tests will use the same function,
-so tests cannot accidentally bypass authentication.
-
-```ts title="src/httpApp.ts"
 import type { EventBridge, Logger, Service } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 import { httpConfig } from './config/http.js'
@@ -67,36 +52,3 @@ export async function createHttpService(input: {
 	await http.start()
 	return http
 }
-```
-
-## Follow one request
-
-A client sends `POST /auth/login` with `{"actor":"bob"}`. The server checks
-that this is a known local fixture, creates a session, and returns its opaque
-ID in a cookie. The fixture selector is only for local learning: a production
-login must verify credentials and tenant membership before creating a session.
-
-For protected command routes, `setProtectMiddleware` runs before command
-invocation. It resolves the cookie, returns 401 if there is no live session,
-then writes `tenantId` and `principalId` into Hono's request context.
-The PURISTA Hono integration copies these values into command message metadata.
-We never take them from request JSON or `x-tenant-id` headers.
-
-`registerService` makes the Banking service's exposed commands available.
-Configure protection before registering and starting the HTTP service.
-The existing configuration still provides the `/api/v1` route prefix.
-
-## Understand the local cookie settings
-
-`HttpOnly` prevents browser JavaScript from reading the cookie. `Path=/`
-makes it available to login, logout, and API routes. `SameSite=Strict` limits
-cross-site cookie sending. The server also rejects an unexpected browser
-`Origin`; requests without that header remain usable from curl.
-
-This example uses local HTTP, so the cookie does not set `Secure`.
-An HTTPS deployment needs secure cookies and a reviewed authentication/CSRF
-policy. Do not treat this fixture login as production authentication.
-
-We have only added the configuration function. Next,
-[make transaction storage tenant-aware](/tutorials/authenticated-banking-ui/scope-transaction-storage/)
-before wiring the protected application.

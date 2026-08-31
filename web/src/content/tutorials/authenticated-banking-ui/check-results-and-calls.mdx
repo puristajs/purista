@@ -1,28 +1,93 @@
 ---
-title: Check returned data
-description: Use an after guard to stop a read-only result that accidentally contains another account's rows.
-order: 35
+title: "Check account history before returning it"
+description: "Scope reads by permission and reject a complete statement if any returned row belongs elsewhere."
+order: 390
 ---
 
-The statement handler queries one account. Add an after guard as a release
-check: it verifies the result account ID and every row before Hono returns it.
+Continue after [adding the account guards](/tutorials/authenticated-banking-ui/guard-business-actions/).
+A valid response shape does not prove that its records belong to this caller.
+We will check both the requested account before reading and the returned rows
+after reading.
 
-```ts title="getStatementCommandBuilder.ts"
-.setAfterGuardHooks({
-  statementScope: async function (_context, result, _payload, parameter) {
-    if (result.accountId !== parameter.accountId || result.transactions.some(row => row.accountId !== parameter.accountId)) {
-      throw new HandledError(StatusCode.Forbidden, 'The statement contains data outside the authorized account')
-    }
-  },
-})
+Replace the history schema:
+
+```ts title="src/service/banking/v1/command/listTransactions/schema.ts"
+import { z } from 'zod'
+import { accountIdSchema, accountStatementSchema } from '../../../../../transaction.js'
+
+export const bankingV1ListTransactionsInputPayloadSchema = z.undefined()
+export const bankingV1ListTransactionsInputParameterSchema = z.object({ accountId: accountIdSchema })
+export const bankingV1ListTransactionsOutputPayloadSchema = accountStatementSchema
 ```
 
-An after guard protects a read-only response. It does not replace a scoped
-repository query and it cannot undo a write that a handler already completed.
-Keep business access checks before the handler and keep the repository query
-scoped as well.
+Replace its command builder:
 
-The following transforms chapter changes external and CSV representations. A
-transform changes data shape; it does not replace this business decision.
+```ts title="src/service/banking/v1/command/listTransactions/listTransactionsCommandBuilder.ts"
+import { requireReadableAccount, requireStatementScope } from '../../../../../accountGuards.js'
+import { requireIdentity } from '../../../../../identity.js'
+import { bankingV1ServiceBuilder } from '../../bankingV1ServiceBuilder.js'
+import {
+	bankingV1ListTransactionsInputParameterSchema,
+	bankingV1ListTransactionsInputPayloadSchema,
+	bankingV1ListTransactionsOutputPayloadSchema,
+} from './schema.js'
 
-Next: [test access decisions](/tutorials/authenticated-banking-ui/test-business-permissions/).
+export const listTransactionsCommandBuilder = bankingV1ServiceBuilder
+	.getCommandBuilder('listTransactions', 'Read permitted account history')
+	.addPayloadSchema(bankingV1ListTransactionsInputPayloadSchema)
+	.addParameterSchema(bankingV1ListTransactionsInputParameterSchema)
+	.addOutputSchema(bankingV1ListTransactionsOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/transactions')
+	.setBeforeGuardHooks({ accountRead: requireReadableAccount })
+	.setAfterGuardHooks({ statementScope: requireStatementScope })
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const identity = requireIdentity(context.message)
+		return {
+			tenantId: identity.tenantId,
+			accountId: parameter.accountId,
+			transactions: context.resources.transactions.list(identity, parameter.accountId),
+		}
+	})
+```
+
+The before guard checks current read permission. The repository also scopes
+the query. The after guard runs after the handler and domain output validation;
+it rejects the whole response if the statement or any row has the wrong
+tenant or account.
+
+This after guard is useful for catching an accidental repository scope bug.
+It is not our only access control, and it cannot undo a write that a handler
+already made. That is why we teach it on this read-only command.
+
+## Keep general bank information public
+
+The bank name and supported currency are not private account data. Replace
+the existing bank-info builder to mark this one endpoint public:
+
+```ts title="src/service/banking/v1/command/getBankInfo/getBankInfoCommandBuilder.ts"
+import { bankingV1ServiceBuilder } from '../../bankingV1ServiceBuilder.js'
+import {
+	bankingV1GetBankInfoInputParameterSchema,
+	bankingV1GetBankInfoInputPayloadSchema,
+	bankingV1GetBankInfoOutputPayloadSchema,
+} from './schema.js'
+
+export const getBankInfoCommandBuilder = bankingV1ServiceBuilder
+	.getCommandBuilder('getBankInfo', 'Describe the fictional bank')
+	.addPayloadSchema(bankingV1GetBankInfoInputPayloadSchema)
+	.addParameterSchema(bankingV1GetBankInfoInputParameterSchema)
+	.addOutputSchema(bankingV1GetBankInfoOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'bank')
+	.makeEndpointPublic()
+	.setCommandFunction(async function () {
+		return { name: 'Example Bank', currency: 'EUR' as const }
+	})
+```
+
+`makeEndpointPublic` exempts this route from Hono's protection middleware.
+Do not add it to the history or posting commands. Their default protected
+endpoints use the session handler you configured.
+
+The application files are connected. The old tests still send anonymous
+requests and expect the earlier response shape. Next,
+[give the tests a real login client](/tutorials/authenticated-banking-ui/create-http-test-client/).

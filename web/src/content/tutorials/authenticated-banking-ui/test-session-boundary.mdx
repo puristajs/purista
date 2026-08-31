@@ -1,0 +1,80 @@
+---
+title: "Test session expiry and logout"
+description: "Verify server-side expiry, retained cookies after logout, forged headers, and cross-site login rejection."
+order: 430
+---
+
+The permission tests assume the caller has a valid session. Now verify how
+that session is obtained and when it stops working.
+
+Create `src/authentication.test.ts`:
+
+```ts title="src/authentication.test.ts"
+import { expect, test } from 'vitest'
+import { LocalSessions, sessionLifetimeSeconds } from './localSessions.js'
+import { createTestBank } from './testing/createTestBank.js'
+
+test('protected routes require a live server session, not identity headers', async () => {
+	let now = 0
+	const bank = await createTestBank({ sessions: new LocalSessions(() => now) })
+	try {
+		const path = '/api/v1/accounts/account-a/transactions'
+		expect((await bank.request('/api/v1/bank')).status).toBe(200)
+		expect((await bank.request(path)).status).toBe(401)
+		expect(
+			(
+				await bank.request(path, {
+					headers: {
+						'x-principal-id': 'dana',
+						'x-tenant-id': 'tenant-north',
+					},
+				})
+			).status,
+		).toBe(401)
+		const bob = await bank.login('bob')
+		expect((await bob.request(path)).status).toBe(200)
+		now = sessionLifetimeSeconds * 1000
+		expect((await bob.request(path)).status).toBe(401)
+		const renewed = await bank.login('bob')
+		expect((await renewed.request('/auth/logout', { method: 'POST' })).status).toBe(200)
+		// Reuse the old cookie deliberately: deleting it on the server must be enough.
+		expect((await renewed.request(path)).status).toBe(401)
+	} finally {
+		await bank.destroy()
+	}
+})
+
+test('fixture login rejects unknown actors and cross-site requests', async () => {
+	const bank = await createTestBank()
+	try {
+		const login = (actor: string, origin?: string) =>
+			bank.request('/auth/login', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json', ...(origin ? { origin } : {}) },
+				body: JSON.stringify({ actor }),
+			})
+		expect((await login('unknown')).status).toBe(400)
+		expect((await login('dana', 'https://unrelated.example')).status).toBe(403)
+		const response = await login('bob')
+		expect(response.headers.get('set-cookie')).toContain('HttpOnly')
+		expect(response.headers.get('set-cookie')).toContain('SameSite=Strict')
+	} finally {
+		await bank.destroy()
+	}
+})
+```
+
+The first test deliberately retains a cookie after expiry and after logout.
+The server must reject it even though the test client still sends it. An
+`x-principal-id` header without a session also stays unauthorized.
+
+The second test rejects an unknown fixture actor and an unexpected browser
+origin, then checks the local cookie attributes. These checks cover our
+documented local login; they do not prove a production identity integration.
+
+```bash title="Verify the HTTP identity boundary"
+npm test
+```
+
+Expect twelve passing tests. Next,
+[test changes and failures inside the guard lifecycle](/tutorials/authenticated-banking-ui/test-guard-boundaries/).

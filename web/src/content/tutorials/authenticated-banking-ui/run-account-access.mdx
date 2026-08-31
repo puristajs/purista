@@ -1,24 +1,46 @@
 ---
-title: Generate the protected read command
-description: Generate an account statement command before adding the authentication and authorization rules that protect it.
-order: 31
+title: "Prepare the account-access project"
+description: "Continue with the transaction API or recreate that checkpoint in a new application directory."
+order: 310
 ---
 
-Create the read operation that needs its own account-level permission:
+Start with the transaction API: Banking version 1 has `getBankInfo`,
+`recordTransaction`, and `listTransactions`. Its repository stores synthetic
+records in memory. It does not yet know which tenant or person owns a request.
 
-```bash title="Generate getStatement"
-npm run add:command -- get-statement \
-  --service banking --service-version 1 \
-  --description "Return an account statement for an authorized reader"
+If you completed the previous chapter, keep that application. Do not regenerate
+its service or commands. If you arrived independently, use a terminal directory
+that does not already contain these folders:
+
+```bash title="Recreate the chapter's starting application"
+git clone https://github.com/puristajs/purista.git
+cd purista
+node examples/banking/tutorial/replay.mjs --to list-transactions --out ../example-bank-access
+cd ../example-bank-access
 ```
 
-The command generator adds a builder, schema, types, and test to the banking
-service. Give its parameter schema an `accountId`, and make its output contain
-that same account ID plus the transaction rows. Do not add `principalId` or
-`tenantId` to the JSON request: those describe the caller and must be supplied
-by the server.
+Use Node 24.15 or newer and npm. The replay installs published packages, runs
+the PURISTA CLI, applies the preceding lessons' edits, and checks them. You do
+not need to install the framework monorepo itself. If you already cloned it,
+run the replay from that checkout with a new output directory.
 
-The next pages add two facts separately: Hono establishes who the caller is;
-the command guard decides whether that caller may read this account.
+## Check what you already have
 
-Next: [add the local fixture login](/tutorials/authenticated-banking-ui/add-local-login/).
+Run the application's checks:
+
+```bash title="Verify the starting transaction API"
+npm test
+npm run build
+```
+
+Expect six passing tests. Start `npm run dev`, then request
+`http://127.0.0.1:3000/api/v1/bank` in another terminal with curl. It returns
+the bank name and currency. Stop the server with Ctrl+C before continuing.
+
+All commands below run inside your generated application, not the PURISTA
+repository. The next pages create ordinary TypeScript modules with the exact
+paths above their code blocks. The existing CLI-generated commands stay in
+place; you will edit their builders. Near the end, you will use the CLI to add
+a new `getAccountOverview` command.
+
+Next, [create the identities and session store](/tutorials/authenticated-banking-ui/add-local-login/).

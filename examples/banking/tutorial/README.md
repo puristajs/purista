@@ -48,7 +48,11 @@ main failure. A successful prose/source comparison alone does not establish
 runtime correctness.
 
 Current replay coverage: project creation, Hono setup, Banking service, first
-HTTP command, repository resource wiring, transaction recording, and account
-history. Use `--to list-transactions` for the completed transaction chapter.
-Later chapters must be migrated and verified before they can be claimed as
-replayable.
+HTTP command, repository resource wiring, transaction recording, account
+history, server-owned sessions, current account/action permissions, before and
+after guards, tenant isolation, and guarded command-to-command calls.
+Use `--to list-transactions` for the transaction chapter, `--to account-access`
+for its protected API, or `--to account-overview` for the composed command.
+The small `account-foundation` checkpoint tests identity and permissions before
+they are wired into HTTP. Later chapters must still be migrated and verified
+before they can be claimed as replayable.

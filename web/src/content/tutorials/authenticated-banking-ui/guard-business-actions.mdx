@@ -1,32 +1,102 @@
 ---
-title: Guard business actions
-description: Add before guards that decide the concrete principal, account, and action permission before a handler can read or write.
-order: 34
+title: "Guard business actions"
+description: "Add before guards that check account permissions and use trusted message identity in the posting handler."
+order: 380
 ---
 
-Add `canRead(principalId, accountId)` and `canRecord(principalId, accountId)`
-to the injected banking repository. These fixture rules are called mandates:
-they connect a valid person, an account, and an allowed action.
+The HTTP middleware can identify a caller. A PURISTA business guard now needs
+to answer: may this caller perform this action on this account **now**?
 
-Use a before guard on both generated commands:
+Create `src/accountGuards.ts`:
 
-```ts title="recordTransactionCommandBuilder.ts"
-.setBeforeGuardHooks({
-  postingAccess: async function (context, payload) {
-    if (!context.resources.bankingRepository.canRecord(context.message.principalId, payload.accountId)) {
-      throw new HandledError(StatusCode.Forbidden, 'You may not record transactions for this account')
-    }
-  },
-})
+```ts title="src/accountGuards.ts"
+import { HandledError, StatusCode } from '@purista/core'
+import type { AccountAccess } from './accountAccess.js'
+import { requireIdentity } from './identity.js'
+import type { AccountStatement, TransactionInput } from './transaction.js'
+
+type GuardContext = {
+	message: { tenantId?: string; principalId?: string }
+	resources: { accountAccess: AccountAccess }
+}
+
+export async function requirePostingAccess(context: GuardContext, payload: TransactionInput) {
+	context.resources.accountAccess.assertAllowed(requireIdentity(context.message), payload.accountId, 'record')
+}
+
+export async function requireReadableAccount(
+	context: GuardContext,
+	_payload: undefined,
+	parameter: { accountId: TransactionInput['accountId'] },
+) {
+	context.resources.accountAccess.assertAllowed(requireIdentity(context.message), parameter.accountId, 'read')
+}
+
+/** An extra read-result check; it cannot undo a handler's mutations. */
+export async function requireStatementScope(
+	context: GuardContext,
+	result: AccountStatement,
+	_payload: undefined,
+	parameter: { accountId: TransactionInput['accountId'] },
+) {
+	const identity = requireIdentity(context.message)
+	if (
+		result.tenantId !== identity.tenantId ||
+		result.accountId !== parameter.accountId ||
+		result.transactions.some(
+			transaction => transaction.tenantId !== identity.tenantId || transaction.accountId !== parameter.accountId,
+		)
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'The statement contains data outside the permitted scope')
+	}
+}
 ```
 
-The list and statement commands use `canRead` with their validated
-`parameter.accountId`. The guard runs after schemas validate and before the
-handler calls the repository. Bob can read A but cannot read C or post to A,
-even though all three requests have valid sessions.
+`requirePostingAccess` checks the account in a posting payload.
+`requireReadableAccount` checks the account in a URL parameter. Both use
+message metadata, not identity fields supplied in the payload.
 
-Named guards in the same stage may run concurrently. Do not use two hook names
-as an ordered pipeline. The repository must still make an atomic recheck when
-a permission or account state can change during a write.
+The last function, `requireStatementScope`, is a read-result check. We define
+it here because it shares the same context, then attach it to the history
+command on the next page.
 
-Next: [check returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/).
+## Attach the posting guard
+
+Replace the existing CLI-generated posting builder:
+
+```ts title="src/service/banking/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+import { requirePostingAccess } from '../../../../../accountGuards.js'
+import { requireIdentity } from '../../../../../identity.js'
+import { bankingV1ServiceBuilder } from '../../bankingV1ServiceBuilder.js'
+import {
+	bankingV1RecordTransactionInputParameterSchema,
+	bankingV1RecordTransactionInputPayloadSchema,
+	bankingV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = bankingV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record an already-posted synthetic transaction')
+	.addPayloadSchema(bankingV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(bankingV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(bankingV1RecordTransactionOutputPayloadSchema)
+	.exposeAsHttpEndpoint('POST', 'transactions')
+	.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
+	.setCommandFunction(async function (context, payload) {
+		return context.resources.transactions.record(requireIdentity(context.message), payload)
+	})
+```
+
+`setBeforeGuardHooks` installs the named `postingAccess` check before the
+handler. A denied request stops there. The handler still calls
+`requireIdentity` and passes the result to the repository, which rechecks
+permission at the write.
+
+A hook name helps identify the check; it does not define execution order among
+multiple guards. Guards within a stage may run concurrently. Keep them free
+of business writes and do not use one guard to prepare state for another.
+
+Keep the generated `types.ts` and the existing posting `schema.ts`.
+That schema already imports `recordedTransactionSchema`, which you extended
+with the server-owned tenant field.
+
+Next, [protect account history and its returned rows](/tutorials/authenticated-banking-ui/check-results-and-calls/).

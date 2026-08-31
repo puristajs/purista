@@ -1,0 +1,104 @@
+---
+title: "Connect permissions, storage, and HTTP"
+description: "Declare the account-access resource, inject one shared policy instance, and start the configured Hono application."
+order: 370
+---
+
+The repository now needs `AccountAccess`. PURISTA must also make that same
+object available to command guards. Replace the Banking service builder:
+
+```ts title="src/service/banking/v1/bankingV1ServiceBuilder.ts"
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import type { AccountAccess } from '../../../accountAccess.js'
+import type { TransactionRepository } from '../../../transactionRepository.js'
+import { generalBankingServiceInfo } from '../generalBankingServiceInfo.js'
+import { bankingServiceV1ConfigSchema } from './bankingServiceConfig.js'
+
+export const bankingServiceInfo = {
+	serviceVersion: '1',
+	...generalBankingServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const bankingV1ServiceBuilder = new ServiceBuilder(bankingServiceInfo)
+	.setConfigSchema(bankingServiceV1ConfigSchema)
+	.defineResource<'transactions', TransactionRepository>()
+	.defineResource<'accountAccess', AccountAccess>()
+```
+
+`defineResource` declares a typed dependency. It does not create one.
+Replace `src/index.ts` to create and inject the instances:
+
+```ts title="src/index.ts"
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { AccountAccess } from './accountAccess.js'
+import { getEventBridge } from './eventbridge.js'
+import { startHttpServer } from './http.js'
+import { bankingV1Service } from './service/banking/v1/bankingV1Service.js'
+import { TransactionRepository } from './transactionRepository.js'
+
+async function main() {
+	const logger = initLogger()
+	const eventBridge = await getEventBridge(logger)
+	const accountAccess = new AccountAccess()
+	const banking = await bankingV1Service.getInstance(eventBridge, {
+		logger,
+		resources: {
+			accountAccess,
+			transactions: new TransactionRepository(accountAccess),
+		},
+	})
+	await banking.start()
+	const { honoService, closeSocket } = await startHttpServer({
+		eventBridge,
+		logger,
+		services: [banking],
+	})
+	gracefulShutdown(logger, [honoService.prepareDestroy(), eventBridge, banking, closeSocket, honoService])
+	logger.info('Example Bank is listening on http://127.0.0.1:3000')
+}
+
+main().catch(error => {
+	process.stderr.write(`${error}\n`)
+	process.exit(1)
+})
+```
+
+The service and repository receive the **same** `accountAccess` instance.
+Otherwise, a guard could check one set of permissions while the repository
+uses another. The event bridge and service startup stay as in the first chapter.
+
+Now replace `src/http.ts`:
+
+```ts title="src/http.ts"
+import { serve } from '@hono/node-server'
+import type { EventBridge, Logger, Service } from '@purista/core'
+import { httpConfig } from './config/http.js'
+import { createHttpService } from './httpApp.js'
+
+/** Open the Node listener only after authentication and service routes are ready. */
+export async function startHttpServer(input: { eventBridge: EventBridge; logger: Logger; services: Service[] }) {
+	const honoService = await createHttpService(input)
+	const server = serve({
+		fetch: honoService.app.fetch,
+		hostname: httpConfig.hostname,
+		port: httpConfig.port,
+	})
+	const closeSocket = {
+		name: 'Example Bank HTTP socket',
+		destroy: () =>
+			new Promise<void>((resolve, reject) => {
+				server.close(error => (error ? reject(error) : resolve()))
+			}),
+	}
+	return { honoService, closeSocket }
+}
+```
+
+`createHttpService` installs the login routes and protection middleware from
+the preceding page. Only then does `serve` open the Node socket. Keeping the
+socket separate also lets our integration tests use Hono directly without
+claiming that they tested Node's network listener.
+
+The resource declarations are now connected. Next,
+[update the command guards and posting handler](/tutorials/authenticated-banking-ui/guard-business-actions/)
+to use the new repository arguments.

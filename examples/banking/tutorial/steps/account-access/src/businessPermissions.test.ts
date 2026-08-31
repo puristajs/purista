@@ -1,15 +1,3 @@
----
-title: "Test business permissions and tenant isolation"
-description: "Prove that valid sessions cannot expand permissions and that repeated identifiers remain separated by tenant."
-order: 420
----
-
-A 401 test only proves that authentication runs. We also need to keep a session
-valid and change an account, action, or permission.
-
-Create `src/businessPermissions.test.ts`:
-
-```ts title="src/businessPermissions.test.ts"
 import { expect, test } from 'vitest'
 import { fixtureIdentities } from './identity.js'
 import { createTestBank } from './testing/createTestBank.js'
@@ -85,25 +73,3 @@ test('the same account, principal and source identifiers remain isolated by tena
 		await bank.destroy()
 	}
 })
-```
-
-The first test distinguishes authentication from business authorization. Bob
-can read A, but cannot read C or record. Alice owns A and still cannot record.
-Forged identity fields in JSON do not make Bob a posting operator or move
-Dana's write into another tenant.
-
-The test then changes server-owned state while the sessions remain valid.
-Revoking Bob's permission blocks the next read. Freezing posting blocks Dana's
-next write. The saved history proves that rejected requests did not create
-extra records.
-
-The second test uses the same principal, account, and source transaction IDs
-in two tenants. It gives them different amounts, so accidentally returning
-the other tenant's record cannot pass unnoticed.
-
-```bash title="Verify current business permissions"
-npm test
-```
-
-Expect ten passing tests after this page. Next,
-[test the session boundary itself](/tutorials/authenticated-banking-ui/test-session-boundary/).

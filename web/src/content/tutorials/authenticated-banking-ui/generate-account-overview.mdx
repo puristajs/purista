@@ -1,0 +1,97 @@
+---
+title: "Generate an account-overview command"
+description: "Use the PURISTA CLI and canInvoke to compose a new HTTP command from an existing guarded command."
+order: 450
+---
+
+The account-access checkpoint is working. Add an endpoint that returns a
+transaction count. It should use the existing history command so that history
+permissions and result checks remain in one place.
+
+Generate a command inside your application:
+
+```bash title="Generate getAccountOverview with the project-local CLI"
+npm run add:command -- get-account-overview \
+  --service banking --service-version 1 \
+  --description "Read an account summary through a guarded command" \
+  --non-interactive
+```
+
+The CLI creates `command/getAccountOverview/` below
+`src/service/banking/v1/`. It also updates `bankingV1Service.ts` to register
+the new definition. Keep that generated registration and `types.ts`; replace
+the placeholder schema and builder below.
+
+```ts title="src/service/banking/v1/command/getAccountOverview/schema.ts"
+import { z } from 'zod'
+import { accountIdSchema } from '../../../../../transaction.js'
+
+export const bankingV1GetAccountOverviewInputPayloadSchema = z.undefined()
+export const bankingV1GetAccountOverviewInputParameterSchema = z.object({ accountId: accountIdSchema })
+export const bankingV1GetAccountOverviewOutputPayloadSchema = z.object({
+	tenantId: z.string().min(1),
+	accountId: accountIdSchema,
+	transactionCount: z.number().int().nonnegative(),
+})
+```
+
+The output is a count, not a balance. Counting recorded transactions does not
+calculate how much money an account contains.
+
+```ts title="src/service/banking/v1/command/getAccountOverview/getAccountOverviewCommandBuilder.ts"
+import { requireReadableAccount } from '../../../../../accountGuards.js'
+import { bankingV1ServiceBuilder } from '../../bankingV1ServiceBuilder.js'
+import {
+	bankingV1ListTransactionsInputParameterSchema,
+	bankingV1ListTransactionsInputPayloadSchema,
+	bankingV1ListTransactionsOutputPayloadSchema,
+} from '../listTransactions/schema.js'
+import {
+	bankingV1GetAccountOverviewInputParameterSchema,
+	bankingV1GetAccountOverviewInputPayloadSchema,
+	bankingV1GetAccountOverviewOutputPayloadSchema,
+} from './schema.js'
+
+export const getAccountOverviewCommandBuilder = bankingV1ServiceBuilder
+	.getCommandBuilder('getAccountOverview', 'Read an account summary through a guarded command')
+	.addPayloadSchema(bankingV1GetAccountOverviewInputPayloadSchema)
+	.addParameterSchema(bankingV1GetAccountOverviewInputParameterSchema)
+	.addOutputSchema(bankingV1GetAccountOverviewOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/overview')
+	.canInvoke(
+		'Banking',
+		'1',
+		'listTransactions',
+		bankingV1ListTransactionsOutputPayloadSchema,
+		bankingV1ListTransactionsInputPayloadSchema,
+		bankingV1ListTransactionsInputParameterSchema,
+	)
+	.setBeforeGuardHooks({ accountRead: requireReadableAccount })
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const statement = await context.service.Banking['1'].listTransactions(undefined, parameter)
+		return {
+			tenantId: statement.tenantId,
+			accountId: statement.accountId,
+			transactionCount: statement.transactions.length,
+		}
+	})
+```
+
+## Follow the downstream call
+
+`canInvoke` declares which command this handler may call and adds the typed
+`context.service` function. Its first three arguments identify the runtime
+service, version, and command. The following schemas describe the callee's
+output, payload, and parameters—in that order.
+
+The CLI selector was lowercase `banking`, its project key. The runtime
+service name in `canInvoke` is `Banking`, matching the generated service
+metadata. These names serve different purposes.
+
+The handler calls `listTransactions(undefined, parameter)`: there is no
+payload for this read, only an account parameter. PURISTA carries the current
+tenant and principal into this nested command invocation. The callee still
+runs its own guards. A `canInvoke` declaration is not permission for the
+person to use every account.
+
+Next, [replace the generated test and verify that propagation](/tutorials/authenticated-banking-ui/test-downstream-identity/).

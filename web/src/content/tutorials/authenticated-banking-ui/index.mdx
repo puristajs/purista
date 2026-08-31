@@ -1,52 +1,66 @@
 ---
-title: Control access to accounts and actions
-description: Build a local Hono identity boundary and meaningful PURISTA business guards for account reads and transaction posting.
+title: "Control access to accounts and actions"
+description: "Build trusted HTTP identity, current account permissions, and PURISTA guards that also protect downstream command calls."
 order: 30
 ---
 
-The API chapter proved that a command can accept and return transaction data.
-This chapter answers a separate question: may this valid person use this
-specific account for this specific action? Alice and Bob may read account A;
-Dana may record a transaction for A; Bob may not post even after a valid local
-login.
+Bob helps Alice with her accounts. He may read account A, but he may not record
+transactions or read Carol's account C. Logging in as Bob must not change those
+rules. Dana is a posting operator: she may record transactions for her assigned
+account while posting is enabled.
 
-```mermaid title="Two decisions, two boundaries"
-flowchart LR
-  Login[Hono fixture login] --> Session[Server session]
-  Session --> Identity[Trusted principal and tenant]
-  Identity --> Guard[Command before guard]
-  Guard -->|allowed action + account| Handler[Repository operation]
-  Guard -->|denied| NoWrite[403, no write]
+You will add these rules to the transaction API you built. First create a local
+session store and an account permission resource. Then connect them to Hono,
+add before and after guards, and generate a command that calls another guarded
+command.
+
+A **session** tells the server who is calling. A **business permission** says
+what that person may do now. Keep these decisions separate: removing Bob's
+permission must take effect while his session is still valid.
+
+```mermaid title="Identity and business access"
+flowchart TD
+  HTTP[HTTP request with session cookie] --> Hono[Hono resolves tenant and principal]
+  Hono --> Before[Before guard checks account and action]
+  Before --> Handler[Handler reads or records transactions]
+  Handler --> After[After guard checks a read result]
+  After --> Reply[Authorized result]
+  Handler --> Nested[Another PURISTA command]
+  Nested --> Before
 ```
 
-This is a learning-only local login. It accepts documented fixture names, keeps
-an opaque session ID in an HttpOnly cookie, and looks up identity on the server.
-It does not verify passwords, OAuth/OIDC tokens, session expiry, or production
-tenant membership. Its purpose is to make the boundary before the business
-guards visible.
+## Start here
 
-## Start from generated commands
+Continue with the project from the transaction API chapter. If you arrived
+directly, create that starting point with the
+[independent setup instructions](/tutorials/authenticated-banking-ui/run-account-access/). No browser UI,
+Docker service, or identity-provider account is required.
 
-Create the banking service and the read command when you enter this chapter
-directly. The next pages add the Hono identity adapter and the business guard;
-they do not replace the generated command boundary.
+The local login accepts fictional actor names. **Anyone who can reach it can
+choose any fixture actor.** Keep the server on its existing loopback address;
+do not deploy this login or use it with real data. Session expiry and logout
+are implemented, but password verification, production membership checks,
+and a shared persistent session store are outside this local example.
 
-```bash title="Generate the protected account-read command"
-npm run add:service -- banking --description "Banking transaction operations"
-npm run add:command -- list-transactions \
-  --service banking --service-version 1 \
-  --description "Return a caller-authorized transaction history"
-```
+## Build the chapter
 
-The finished reference is in `examples/banking/src/index.ts`,
-`examples/banking/src/service.ts`, and `examples/banking/src/repository.ts`.
-Each page builds the same shape in the CLI-created application.
+1. [Prepare the existing transaction API](/tutorials/authenticated-banking-ui/run-account-access/).
+2. [Create server-owned identities and sessions](/tutorials/authenticated-banking-ui/add-local-login/).
+3. [Define account and action permissions](/tutorials/authenticated-banking-ui/model-account-permissions/).
+4. [Test identity and permissions separately](/tutorials/authenticated-banking-ui/test-access-foundation/).
+5. [Configure Hono authentication](/tutorials/authenticated-banking-ui/set-trusted-identity/).
+6. [Separate transaction storage by tenant](/tutorials/authenticated-banking-ui/scope-transaction-storage/).
+7. [Connect the resources and HTTP server](/tutorials/authenticated-banking-ui/wire-permission-resources/).
+8. [Add guards for account actions](/tutorials/authenticated-banking-ui/guard-business-actions/).
+9. [Protect returned history and keep bank information public](/tutorials/authenticated-banking-ui/check-results-and-calls/).
+10. [Build an authenticated test client](/tutorials/authenticated-banking-ui/create-http-test-client/).
+11. [Update and run the API tests](/tutorials/authenticated-banking-ui/update-api-tests/).
+12. [Verify permissions and tenant isolation](/tutorials/authenticated-banking-ui/test-business-permissions/).
+13. [Verify session expiry and logout](/tutorials/authenticated-banking-ui/test-session-boundary/).
+14. [Test failures at the guard boundaries](/tutorials/authenticated-banking-ui/test-guard-boundaries/).
+15. [Generate a command that calls another command](/tutorials/authenticated-banking-ui/generate-account-overview/).
+16. [Verify downstream identity and try the API](/tutorials/authenticated-banking-ui/test-downstream-identity/).
 
-1. [Generate the protected read command](/tutorials/authenticated-banking-ui/run-account-access/)
-2. [Add the local fixture login](/tutorials/authenticated-banking-ui/add-local-login/)
-3. [Pass trusted identity to PURISTA](/tutorials/authenticated-banking-ui/set-trusted-identity/)
-4. [Guard business actions](/tutorials/authenticated-banking-ui/guard-business-actions/)
-5. [Check returned data](/tutorials/authenticated-banking-ui/check-results-and-calls/)
-6. [Test access decisions](/tutorials/authenticated-banking-ui/test-business-permissions/)
-
-Next: [generate the protected read command](/tutorials/authenticated-banking-ui/run-account-access/).
+The first four pages form a small, testable foundation. The following wiring
+pages change connected files; keep the development server stopped until the
+updated API tests pass. The final command is a separate runnable checkpoint.
