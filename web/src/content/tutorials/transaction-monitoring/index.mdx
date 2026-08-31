@@ -19,6 +19,19 @@ The rule is deliberately small: a EUR transaction of at least `100000` minor
 units opens an in-memory `review-required` case. It is a training signal, not
 money-laundering detection and it never takes adverse action against an account.
 
+## Generate the producer and subscriber
+
+Start from the generated banking command, then create the independent monitoring
+service and subscription. The event is the only connection between them.
+
+```bash title="Generate the monitoring subscriber"
+npm run add:service -- banking-operations --description "Banking monitoring and operations"
+npm run add:subscription -- monitor-recorded-transaction \
+  --service banking-operations --service-version 1 \
+  --event banking.transaction.recorded \
+  --description "Record a synthetic transaction review signal"
+```
+
 1. [Generate the monitoring boundary](/tutorials/transaction-monitoring/run-the-producer/)
 2. [Publish the transaction fact](/tutorials/transaction-monitoring/publish-an-event/)
 3. [Generate and wire the subscription](/tutorials/transaction-monitoring/add-a-subscription/)

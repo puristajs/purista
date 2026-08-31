@@ -23,6 +23,15 @@ Every page restates its generator command, so you can also create the same
 reference is `examples/banking/src/service.ts`; its browser integration is in
 `examples/banking/ui`.
 
+```bash title="Generate the two API command boundaries"
+npm run add:command -- record-transaction \
+  --service banking --service-version 1 \
+  --description "Record an already-posted synthetic transaction"
+npm run add:command -- list-transactions \
+  --service banking --service-version 1 \
+  --description "Return one account transaction history"
+```
+
 This first API uses an in-memory repository. Restarting the Node process resets
 its synthetic data. Authentication and account-level business permissions are
 added in the next root topic; do not treat a temporary local API as a payment

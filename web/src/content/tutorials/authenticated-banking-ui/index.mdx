@@ -25,6 +25,19 @@ It does not verify passwords, OAuth/OIDC tokens, session expiry, or production
 tenant membership. Its purpose is to make the boundary before the business
 guards visible.
 
+## Start from generated commands
+
+Create the banking service and the read command when you enter this chapter
+directly. The next pages add the Hono identity adapter and the business guard;
+they do not replace the generated command boundary.
+
+```bash title="Generate the protected account-read command"
+npm run add:service -- banking --description "Banking transaction operations"
+npm run add:command -- list-transactions \
+  --service banking --service-version 1 \
+  --description "Return a caller-authorized transaction history"
+```
+
 The finished reference is in `examples/banking/src/index.ts`,
 `examples/banking/src/service.ts`, and `examples/banking/src/repository.ts`.
 Each page builds the same shape in the CLI-created application.
