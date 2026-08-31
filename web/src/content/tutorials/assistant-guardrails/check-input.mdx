@@ -1,0 +1,28 @@
+---
+title: Block unsafe input before a model call
+description: Add a native Harness before-input interceptor that fails closed before any provider request.
+order: 132
+status: published
+---
+
+The first interceptor checks the validated agent input. If it finds the
+synthetic `BANK_DEMO_SECRET` marker, it returns the supported Harness block
+decision. Harness ends the run before it creates a provider request.
+
+```ts title="examples/banking/src/ai/guarded-assistant.ts"
+{
+  id: 'block-demo-secret-input',
+  beforeInput: ({ input }) =>
+    containsDemoMarker(input, bankingDemoSecretMarker)
+      ? { decision: 'block' }
+      : undefined,
+}
+```
+
+`undefined` means this check has no objection. `{ decision: 'block' }` is a
+fail-closed decision; it does not rewrite or echo the unsafe text.
+
+The focused test sends a marker and verifies both a failed HTTP response and
+an empty scripted-model request list. It also sends Bob's request for Account
+C. That request is denied by the earlier P1 business guard, before the
+interceptor or model runs.

@@ -1,0 +1,29 @@
+---
+title: Run the guarded service
+description: Start the focused Hono proof and name the four controls used by the assistant.
+order: 131
+status: published
+---
+
+Run this command from the PURISTA repository root:
+
+```bash
+npx vitest run examples/banking/src/ai/guarded-assistant.test.ts
+```
+
+The test starts `bankingGuardedAssistant`, a normal PURISTA service. Its
+generated endpoint is `POST /api/v1/customer-support/guarded-answer`. The
+test uses an opaque server-side identity like the other banking checkpoints;
+the browser does not supply a principal or tenant header.
+
+Four controls answer four different questions:
+
+| Control | Question | Example |
+| --- | --- | --- |
+| Hono protection | Who made this request? | The local session identifies Bob. |
+| Business guard | May that person read this account? | Bob may read A, not C. |
+| Agent capability | Which tool may the agent use? | It may use only `read`. |
+| Content interceptor | May this text cross this boundary? | A synthetic marker stops the run. |
+
+Keeping these questions separate matters. A helpful model prompt is not a
+business guard, and an input check is not a substitute for an account scope.

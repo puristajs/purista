@@ -1,0 +1,30 @@
+---
+title: Treat tool content as untrusted
+description: Stop unsafe content returned by a permitted read tool before it can become another model message.
+order: 133
+status: published
+---
+
+A tool may be permitted and still return text that should not influence an
+assistant. The fixture Skill contains a deliberately unsafe instruction. The
+agent may read the file, but the after-tool interceptor examines the result
+before Harness can send a second request to the model.
+
+```ts title="examples/banking/src/ai/guarded-assistant.ts"
+{
+  id: 'block-untrusted-tool-content',
+  afterTool: ({ output }) =>
+    containsDemoMarker(output, untrustedBankInstructionMarker)
+      ? { decision: 'block' }
+      : undefined,
+}
+```
+
+The Skill is a local fixture in
+`examples/banking/src/ai/skills/untrusted-bank-content/SKILL.md`. The test
+scripts a `read` call and asserts that only one model request happened. The
+unsafe file result never becomes the next model input.
+
+This is a content boundary, not a data-access rule. In a RAG feature, filter
+documents by P6 before retrieval, then use a check like this for the selected
+content as an additional defence.
