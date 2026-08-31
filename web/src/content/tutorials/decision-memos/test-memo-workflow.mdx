@@ -1,0 +1,18 @@
+---
+title: Test the queue and review boundary
+description: Prove idempotent delivery, evidence validation, bounded failure, and staff-only access.
+order: 176
+status: published
+---
+
+The focused test covers the complete path and the unsafe path:
+
+```bash
+npx vitest run examples/banking/src/memos/service.test.ts
+npm run typecheck -w @purista/banking-tutorials
+```
+
+It verifies a stable queue request, duplicate-worker safety, a review-ready
+memo with approved citations, an unresolved memo after its budget, and an
+authorization denial for a customer. Add the memo to a publishing flow only
+after a separate reviewer command has been designed and tested.

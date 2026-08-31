@@ -1,0 +1,22 @@
+---
+title: Check claims and citations
+description: Treat an unsupported claim as a named issue, never as permission to publish.
+order: 174
+status: published
+---
+
+The `unsupported-training-claim` fixture references `invented-source`, which
+is outside the approved citations. The application stores an
+`unsupported-claim` issue and leaves the memo unresolved. This check is
+deterministic and reproducible.
+
+```ts title="examples/banking/src/memos/service.ts"
+issues: [{
+  code: 'unsupported-claim',
+  message: 'The draft cites a source that is not in the approved evidence set.',
+}],
+status: 'unresolved',
+```
+
+A model judge can suggest concerns in a later extension, but it must remain a
+fallible signal. The application and the assigned reviewer own the decision.

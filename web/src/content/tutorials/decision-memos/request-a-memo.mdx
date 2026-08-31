@@ -1,0 +1,22 @@
+---
+title: Request a memo
+description: Protect the internal source set and queue the work with one stable request key.
+order: 171
+status: published
+---
+
+The memo service is for synthetic policy operations, not customers. Dana must
+be in `tenant-north`, and the request must name the approved
+`fee-policy-training` source set. The command turns the request key into the
+queue idempotency key, so retries do not create a second logical memo.
+
+```ts title="examples/banking/src/memos/service.ts"
+const job = await context.queue.enqueue[queueName](
+  payload,
+  { initiatorPrincipalId: 'dana' },
+  { idempotencyKey: payload.requestKey },
+)
+```
+
+The worker checks that source and author scope again. A protected HTTP request
+and an internal queue delivery need their own business boundary.

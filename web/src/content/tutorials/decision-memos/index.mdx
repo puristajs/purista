@@ -1,0 +1,36 @@
+---
+title: Produce a source-backed decision memo
+description: Queue a small policy memo, validate its claims, and send only a review-ready artifact to a person.
+order: 170
+status: published
+---
+
+Dana prepares a synthetic fee-notice proposal. The service records a short
+plan, approved citations, claims, named issues, and a review status. It does
+not publish a policy change. A model, rubric, or passing test cannot grant
+publication permission.
+
+```mermaid title="A memo is an artifact for human review"
+flowchart LR
+  Request[Authorized memo request] --> Queue[PURISTA queue]
+  Queue --> Worker[Memo worker]
+  Worker --> Checks[Citation and completeness checks]
+  Checks --> Artifact[Ready or unresolved memo]
+  Artifact --> Human[Separate human review]
+```
+
+This local checkpoint uses deterministic application code and synthetic source
+fixtures, so it has no provider key or model cost. It focuses on the durable
+lesson: make the work artifact reviewable, keep evidence visible, bound retry
+work, and leave a failed check unresolved.
+
+```bash
+npx vitest run examples/banking/src/memos/service.test.ts
+```
+
+1. [Request a memo](/tutorials/decision-memos/request-a-memo/)
+2. [Make the plan and evidence visible](/tutorials/decision-memos/plan-and-retrieve/)
+3. [Draft a typed memo](/tutorials/decision-memos/draft-memo/)
+4. [Check claims and citations](/tutorials/decision-memos/review-draft/)
+5. [Stop after a fixed revision budget](/tutorials/decision-memos/revise-with-budget/)
+6. [Test the queue and review boundary](/tutorials/decision-memos/test-memo-workflow/)
