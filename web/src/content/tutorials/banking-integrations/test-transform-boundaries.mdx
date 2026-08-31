@@ -1,34 +1,30 @@
 ---
 title: Test transform boundaries
-description: Use the real command runtime to prove that normalization, authorization, and idempotency remain separate.
+description: Verify conversion, business denial, mock-adapter behavior, and CSV result scope.
 order: 46
 ---
 
-Run the current HTTP integration tests:
+Keep boundary tests small and observable. The runnable example confirms that
+Dana imports the fixed legacy debit, Bob receives `403`, and the account history
+contains the normalized source ID.
 
-```bash title="Run the banking transform tests"
-npm run test -w @purista/banking-tutorials
+```ts title="src/banking.integration.test.ts"
+expect(imported.status).toBe(200)
+expect(denied.status).toBe(403)
+expect(statement.transactions).toContainEqual(
+  expect.objectContaining({ sourceTransactionId: 'legacy-bank-debit-a-1' }),
+)
 ```
 
-`examples/banking/src/banking.integration.test.ts` submits a legacy body through
-`hono.app.fetch` as Dana. It verifies that `"125.40"` becomes `12540`, `D`
-becomes `debit`, and the command returns account A. The same test submits a
-native transaction as Bob and expects `403`.
+Add a unit test for invalid monetary strings, an HTTP test for the complete
+command, and a CSV test that proves `text/csv` is returned only after the
+result-scope guard passes.
 
-That pair proves that the guard receives the normalized domain account and that
-a valid input format does not grant posting authority. It does not prove every
-input rejection. Add cases for extra decimal precision, a comma, unsupported
-currency, unknown direction, overflow, identical duplicate, and conflicting
-duplicate when you change the mapping or repository rule.
+```bash title="Verify the complete local example"
+npm run typecheck
+npm test
+```
 
-Use the registered service and HTTP boundary for transform and after-guard
-checks. A unit test of a standalone string-to-number helper cannot prove the
-runtime order or show that a denied request created no transaction.
-
-The command's canonical business result remains JSON-shaped inside the
-application. CSV is only its HTTP response representation; do not reuse CSV as
-a business event payload.
-
-The next planned subject is transaction monitoring with business events. It is
-not linked here because its public tutorial checkpoint is not part of this
-published content set yet.
+The mock stays in process. Add Docker Compose only when a tutorial needs a real
+protocol, persistence, or multi-process behaviour. This first adapter remains
+fast to run and safe to repeat.

@@ -21,6 +21,7 @@ import { bankingOperationsService } from './advanced/service.js'
 import { answerGroundedQuestion } from './knowledge/answer.js'
 import { BankingKnowledgeRepository, knowledgeCollectionIds } from './knowledge/repository.js'
 import { bankingKnowledgeService } from './knowledge/service.js'
+import { LocalLegacyBankMock, type LegacyBankClient } from './legacy-bank.js'
 import { bankingSupportMemoryService } from './memory/service.js'
 import type { BankActor } from './repository.js'
 import { BankingRepository } from './repository.js'
@@ -89,6 +90,8 @@ const expiredSessionCookie = `${sessionCookieName}=; HttpOnly; Path=/; SameSite=
 export type BankingApplicationOptions = {
 	/** Injects a deterministic repository for a focused runtime test. */
 	bankingRepository?: BankingRepository
+	/** Replaces the local legacy-bank adapter in a focused runtime test. */
+	legacyBankClient?: LegacyBankClient
 	/** Captures safe framework and application metrics in a focused runtime test. */
 	metricsRecorder?: PuristaMetricsRecorderInterface
 	/** Optional real sandbox composition for the statement-analysis tutorial checkpoint. */
@@ -99,6 +102,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const eventBridge = new DefaultEventBridge()
 	const queueBridge = new DefaultQueueBridge()
 	const bankingRepository = options.bankingRepository ?? new BankingRepository()
+	const legacyBankClient = options.legacyBankClient ?? new LocalLegacyBankMock()
 	const operationsStore = new BankingOperationsStore()
 	const knowledgeRepository = new BankingKnowledgeRepository()
 	const feeChangeReviewStore = new FeeChangeReviewStore()
@@ -108,7 +112,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	await eventBridge.start()
 	await queueBridge.start()
 	const banking = await bankingService.getInstance(eventBridge, {
-		resources: { bankingRepository },
+		resources: { bankingRepository, legacyBankClient },
 		metricsRecorder: options.metricsRecorder,
 	})
 	const bankingOperations = await bankingOperationsService.getInstance(eventBridge, {
@@ -199,6 +203,19 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		if (!session) return context.json({ title: 'A local session is required' }, 401)
 		return context.json(session)
 	})
+	/**
+	 * Local mock of the external legacy-bank API. It is intentionally separate
+	 * from generated PURISTA routes and needs no authentication because it only
+	 * returns synthetic, fixed fixtures for the tutorial.
+	 */
+	hono.app.get('/tutorial/legacy-bank/transactions/:sourceId', async context => {
+		try {
+			return context.json(await legacyBankClient.getBookedTransaction(context.req.param('sourceId')))
+		} catch (error) {
+			if (error instanceof HandledError) return context.json({ title: error.message }, 404)
+			return context.json({ title: 'The local legacy-bank mock is unavailable' }, 503)
+		}
+	})
 	hono.setProtectMiddleware(async function (context, next) {
 		const session = findSession(context.req.header('cookie'))
 		if (!session) return context.json({ title: 'A local session is required' }, 401)
@@ -251,6 +268,8 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	await hono.start()
 	return {
 		fetch: hono.app.fetch,
+		/** Exposed for integration tests that verify a denied request has no projection side effect. */
+		operationsStore,
 		destroy: async () => {
 			await hono.destroy()
 			await bankingStatementAnalysis?.destroy()

@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { ReconciliationSource } from '../repository.js'
+
 /** Business events shared by the later banking tutorial chapters. */
 export const BankingTutorialEvent = {
 	transactionRecorded: 'banking.transaction.recorded',
@@ -21,7 +23,12 @@ export const transactionRecordedEventSchema = z.object({
 	bookedAt: z.string().datetime(),
 })
 
-/** Schedule triggers carry an occurrence identifier so queue work is idempotent per run. */
+/**
+ * Schedule triggers carry an occurrence and a source. Together they identify
+ * one local reconciliation run and let the command guard check the exact
+ * operations assignment before it enqueues work.
+ */
 export const reconciliationDueEventSchema = z.object({
 	day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+	source: z.literal('banking-projections') satisfies z.ZodType<ReconciliationSource>,
 })

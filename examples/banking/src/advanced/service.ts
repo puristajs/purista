@@ -77,6 +77,15 @@ const requireReviewCaseAccess = async function (
 	}
 }
 
+const requireReconciliationAssignment = async function (
+	context: { message: { principalId?: string; tenantId?: string }; resources: { bankingRepository: BankingRepository } },
+	source: z.infer<typeof reconciliationDueEventSchema>['source'],
+) {
+	if (!context.resources.bankingRepository.canRunReconciliation(context.message.principalId, context.message.tenantId, source)) {
+		throw new HandledError(StatusCode.Forbidden, 'You are not assigned to reconcile this source')
+	}
+}
+
 /**
  * A bounded business-event reaction. It records a training signal for later
  * review; it does not claim to make an anti-money-laundering decision.
@@ -274,6 +283,11 @@ export const runReconciliation = builder
 	.addOutputSchema(z.object({ jobId: z.string(), queueName: z.literal('banking.runReconciliation') }))
 	.canEnqueue('banking.runReconciliation', reconciliationJobPayloadSchema, tenantParameterSchema)
 	.exposeAsHttpEndpoint('POST', 'reconciliation/run')
+	.setBeforeGuardHooks({
+		reconciliationAssignment: async function (context, payload) {
+			await requireReconciliationAssignment(context, payload.source)
+		},
+	})
 	.setCommandFunction(async function (context, payload) {
 		const job = await context.queue.enqueue['banking.runReconciliation'](
 			payload,
@@ -308,8 +322,8 @@ export const bankingOperationsService = builder
 	.addScheduleDefinition(dailyReconciliationSchedule)
 	.bindEventToQueue(BankingTutorialEvent.reconciliationDue, 'banking.runReconciliation', {
 		idempotencyMode: 'advisory',
-		idempotencyKey: event => `reconciliation:${String(event.day)}`,
-		mapPayload: event => ({ day: String(event.day) }),
+		idempotencyKey: event => `reconciliation:${String(event.source)}:${String(event.day)}`,
+		mapPayload: event => ({ day: String(event.day), source: 'banking-projections' as const }),
 		mapParameter: () => ({ tenantId: 'tenant-north' }),
 	})
 

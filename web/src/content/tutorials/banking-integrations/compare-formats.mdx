@@ -1,47 +1,41 @@
 ---
 title: Compare the two formats
-description: See the supported legacy record next to the domain transaction it represents.
+description: Keep the legacy wire contract separate from the banking transaction contract.
 order: 41
 ---
 
-The local service understands two representations of one synthetic debit.
+Generate the command before writing its contract. This gives you a named,
+tested service boundary instead of an unowned HTTP route.
 
-```json title="Legacy request body for POST /api/v1/legacy/transactions"
-{
-  "source_id": "legacy-demo-1",
-  "account_ref": "account-a",
-  "booked_at": "2026-01-15T12:00:00.000Z",
-  "amount": "125.40",
-  "currency": "EUR",
-  "dc": "D"
-}
+```bash title="Generate the legacy import command"
+npm run add:command -- import-legacy-transaction \
+  --service banking --service-version 1 \
+  --description "Normalize a documented legacy transaction"
 ```
 
-```json title="Domain transaction after normalization"
-{
-  "accountId": "account-a",
-  "sourceTransactionId": "legacy-demo-1",
-  "bookedAt": "2026-01-15T12:00:00.000Z",
-  "amountMinor": 12540,
-  "currency": "EUR",
-  "direction": "debit"
-}
+The CLI creates `src/service/banking/v1/command/importLegacyTransaction/` and
+wires its definition into the service. Keep its generated test: it proves the
+command loads before you replace its starter contract.
+
+The domain payload has no legacy names:
+
+```ts title="The banking payload"
+const transactionSchema = z.object({
+  accountId: z.enum(['account-a', 'account-c']), sourceTransactionId: z.string().min(1),
+  bookedAt: z.string().datetime(), amountMinor: z.number().int().positive(),
+  currency: z.literal('EUR'), direction: z.enum(['debit', 'credit']),
+})
 ```
 
-A **wire format** is the data shape an HTTP client sends. A **domain format**
-is the shape the banking command uses to make its business decision. The input
-transform maps one to the other. It does not look up a private account, grant
-access, move money, or call another service.
+Put the external wire schema beside the adapter, not in the domain command:
 
-The legacy raw schema is declared alongside the domain schema in
-`examples/banking/src/service.ts`. It allows an account reference only when it
-is one of the example's two account IDs. This is intentionally narrow.
+```ts title="src/legacy-bank.ts"
+export const legacyBankTransactionSchema = z.object({
+  source_id: z.string().min(1), account_ref: z.enum(['account-a', 'account-c']),
+  booked_at: z.string().datetime(), amount: z.string().regex(/^\d+\.\d{2}$/),
+  currency: z.literal('EUR'), dc: z.enum(['D', 'C']),
+})
+```
 
-## Test the comparison
-
-Run the local service and create a Dana session before submitting the legacy
-JSON. The response includes `amountMinor: 12540` and `direction: "debit"`.
-Then replace the cookie jar with a Bob session and repeat the request. The
-normalized format is valid but the business action is denied.
-
-Next: [transform legacy input](/tutorials/banking-integrations/transform-input/).
+The two schemas make the change point clear: a new legacy field cannot silently
+become part of every banking command.

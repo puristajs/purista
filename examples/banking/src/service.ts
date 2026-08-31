@@ -2,6 +2,11 @@ import { HandledError, ServiceBuilder, type ServiceInfoType, StatusCode } from '
 import { z } from 'zod'
 
 import { BankingTutorialEvent, transactionRecordedEventSchema } from './advanced/contracts.js'
+import {
+	legacyBankImportRequestSchema,
+	legacyBankTransactionSchema,
+	type LegacyBankClient,
+} from './legacy-bank.js'
 import type { BankingRepository, RecordedTransaction, TransactionDirection } from './repository.js'
 
 export const accountIdSchema = z.enum(['account-a', 'account-c'])
@@ -17,14 +22,6 @@ export const accountStatementSchema = z.object({
 	accountId: accountIdSchema,
 	transactions: z.array(transactionSchema.extend({ transactionId: z.string() })),
 })
-const legacyTransactionSchema = z.object({
-	source_id: z.string().min(1).max(80),
-	account_ref: accountIdSchema,
-	booked_at: z.string().datetime(),
-	amount: z.string().regex(/^\d+\.\d{2}$/),
-	currency: z.literal('EUR'),
-	dc: z.enum(['D', 'C']),
-})
 const emptyParameterSchema = z.object({})
 
 const serviceInfo = {
@@ -33,7 +30,9 @@ const serviceInfo = {
 	serviceDescription: 'Example Bank transaction operations',
 } as const satisfies ServiceInfoType
 
-const builder = new ServiceBuilder(serviceInfo).defineResource<'bankingRepository', BankingRepository>()
+const builder = new ServiceBuilder(serviceInfo)
+	.defineResource<'bankingRepository', BankingRepository>()
+	.defineResource<'legacyBankClient', LegacyBankClient>()
 
 const requireReadableAccount = async function (
 	context: { message: { principalId?: string }; resources: { bankingRepository: BankingRepository } },
@@ -97,7 +96,7 @@ const importLegacyTransaction = builder
 	.addPayloadSchema(transactionSchema)
 	.addParameterSchema(emptyParameterSchema)
 	.addOutputSchema(transactionSchema.extend({ transactionId: z.string() }))
-	.setTransformInput(legacyTransactionSchema, emptyParameterSchema, async function (_context, payload, parameter) {
+	.setTransformInput(legacyBankTransactionSchema, emptyParameterSchema, async function (_context, payload, parameter) {
 		const [whole, fraction] = payload.amount.split('.')
 		const amountMinor = Number(whole) * 100 + Number(fraction)
 		if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
@@ -117,6 +116,46 @@ const importLegacyTransaction = builder
 	})
 	.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'legacy/transactions')
+	.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
+	.setCommandFunction(async function (context, payload) {
+		const transaction = context.resources.bankingRepository.record(payload)
+		await context.emit(BankingTutorialEvent.transactionRecorded, {
+			transactionId: transaction.transactionId,
+			accountId: transaction.accountId,
+			amountMinor: transaction.amountMinor,
+			currency: transaction.currency,
+			direction: transaction.direction,
+			bookedAt: transaction.bookedAt,
+		})
+		return transaction
+	})
+
+const importLegacyBankTransaction = builder
+	.getCommandBuilder('importLegacyBankTransaction', 'Imports one booked transaction through the injected legacy-bank adapter')
+	.addPayloadSchema(transactionSchema)
+	.addParameterSchema(emptyParameterSchema)
+	.addOutputSchema(transactionSchema.extend({ transactionId: z.string() }))
+	.setTransformInput(legacyBankImportRequestSchema, emptyParameterSchema, async function (context, payload, parameter) {
+		const legacyTransaction = await context.resources.legacyBankClient.getBookedTransaction(payload.sourceId)
+		const [whole, fraction] = legacyTransaction.amount.split('.')
+		const amountMinor = Number(whole) * 100 + Number(fraction)
+		if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
+			throw new HandledError(StatusCode.BadRequest, 'The legacy amount is outside the supported range')
+		}
+		return {
+			payload: {
+				accountId: legacyTransaction.account_ref,
+				sourceTransactionId: legacyTransaction.source_id,
+				bookedAt: legacyTransaction.booked_at,
+				amountMinor,
+				currency: legacyTransaction.currency,
+				direction: (legacyTransaction.dc === 'D' ? 'debit' : 'credit') satisfies TransactionDirection,
+			},
+			parameter,
+		}
+	})
+	.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
+	.exposeAsHttpEndpoint('POST', 'legacy-bank/imports')
 	.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
 	.setCommandFunction(async function (context, payload) {
 		const transaction = context.resources.bankingRepository.record(payload)
@@ -179,5 +218,6 @@ export const bankingService = builder.addCommandDefinition(
 	listTransactions.getDefinition(),
 	recordTransaction.getDefinition(),
 	importLegacyTransaction.getDefinition(),
+	importLegacyBankTransaction.getDefinition(),
 	exportStatement.getDefinition(),
 )

@@ -1,36 +1,33 @@
 ---
-title: Define the reconciliation contract
-description: Use one bounded ISO-day payload for manual runs and scheduled occurrences.
+title: Define the source-scoped contract
+description: Make the occurrence and business-owned reconciliation source explicit in command, event, and queue data.
 order: 82
 ---
 
-The local reconciliation payload is deliberately small:
+The day alone is not enough. A reconciliation run is for a particular source;
+without that source, neither a guard nor an idempotency key can state what it
+protects.
 
-```ts title="examples/banking/src/advanced/contracts.ts"
+```ts title="advanced/contracts.ts"
 export const reconciliationDueEventSchema = z.object({
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  source: z.literal('banking-projections'),
 })
 ```
 
-Both the manual command and the schedule use this schema. A value such as
-`2026-01-20` identifies one logical occurrence. The schema verifies its text
-shape; it does not validate whether the day exists in a calendar, select a
-timezone, or describe an upstream settlement source.
+Generate the queue and first worker from the project root:
 
-```ts title="examples/banking/src/advanced/service.ts"
-export const runReconciliation = builder
-  .getCommandBuilder('runReconciliation', 'Queue a manual reconciliation run for one banking day')
-  .addPayloadSchema(reconciliationDueEventSchema)
-  .addParameterSchema(emptyParameterSchema)
-  .canEnqueue('banking.runReconciliation', reconciliationJobPayloadSchema, tenantParameterSchema)
+```bash title="Generate the reconciliation queue and worker"
+npm run add:queue -- reconcile-banking-projections \
+  --service banking-operations --service-version 1 \
+  --worker-name reconcile-worker --worker-mode continuous \
+  --description "Reconcile one local banking projection"
 ```
 
-The command is a producer. `canEnqueue` declares the queue contract that it
-may use. The queue parameter carries the fixed local tenant; it does not make
-the day or the queue reference confidential.
+Use the same schema for the generated command payload, the event payload, and
+the queue payload. That stops the scheduler and manual request from drifting
+into separate representations.
 
-```bash title="Typecheck the shared occurrence schema"
-npm run typecheck -w @purista/banking-tutorials
-```
-
-Next, consume that occurrence in the queue worker.
+The example's `canRunReconciliation` check is deliberately separate from
+account-read and review-case permissions. Dana is assigned to the named
+operations source for `tenant-north`; a normal account reader is not.

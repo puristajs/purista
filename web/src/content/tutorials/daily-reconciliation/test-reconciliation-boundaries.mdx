@@ -1,30 +1,27 @@
 ---
-title: Test reconciliation boundaries
-description: Verify manual enqueueing and repeated worker projections while recording the scheduler and business-policy work that remains.
+title: Test the reconciliation boundaries
+description: Test the operations assignment, occurrence contract, and worker projection independently.
 order: 86
 ---
 
-Run the local checks:
+Test the business boundary before testing time. The reference calls the command
+as Dana, the only fixture user assigned to `banking-projections` in
+`tenant-north`, and then verifies that an unassigned caller receives `403`.
 
-```bash title="Typecheck and test reconciliation definitions"
-npm run typecheck -w @purista/banking-tutorials
-npm run test -w @purista/banking-tutorials
+```ts title="advanced/service.test.ts"
+expect(queued.queueName).toBe('banking.runReconciliation')
+await expect(runReconciliation.getCommandFunction().call({}, unassignedContext, payload, {}))
+  .rejects.toMatchObject({ statusCode: 403 })
 ```
 
-`examples/banking/src/advanced/service.test.ts` verifies that the manual
-command asks its queue context to enqueue `banking.runReconciliation`. It then
-invokes the registered worker twice for `2026-01-20` and asserts one stored run
-with the seeded transaction count. The advanced-service startup test also
-starts its definitions with the local event and queue bridges.
+Also test an invalid date, an unknown source (once your schema permits more
+sources), a repeated occurrence, and the worker's stored count. These tests are
+independent of a real clock and should stay fast.
 
-This does not prove a scheduler emits the event, a queue dispatches an HTTP
-request to the worker, a reconciliation sees a settlement mismatch, an
-unauthorized operator is denied, or a restart retains a run. The source has no
-settlement fixture, scheduler host, durable adapter, or operator guard for
-those claims.
+```bash title="Verify the full runnable example"
+npm run typecheck
+npm test
+```
 
-Before extending this tutorial into a production-oriented reconciliation flow,
-add explicit source and tenant authorization, complete-file validation,
-persisted occurrence claims, a real scheduler/queue profile with health checks,
-and integration tests for duplicate occurrences, failure recovery, timezone
-boundaries, and the exact mismatch result.
+For a production scheduler, add a separate integration suite with the selected
+adapter. Keep it opt-in when it requires Docker or cloud credentials.

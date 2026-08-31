@@ -1,33 +1,38 @@
 ---
-title: Understand the external API boundary
-description: Keep the implemented inbound legacy endpoint distinct from an outbound call to a bank API that this checkpoint does not yet provide.
+title: Inject and inspect a local legacy-bank adapter
+description: Add an application resource for a mocked external dependency without making the tutorial depend on a network service.
 order: 45
 ---
 
-The current example accepts a legacy request at
-`POST /api/v1/legacy/transactions`. That is an **inbound** HTTP boundary: a
-client calls the banking service.
+Generate a distinct command for importing a booked item by external ID.
 
-It does not call a legacy bank API. There is no `legacyBank` resource, HTTP
-client, Docker Compose file, mock server, timeout setting, or malformed-response
-fixture in `examples/banking` today. Do not add a `fetch` call to a command and
-then claim it has a verified integration contract.
-
-An outbound integration needs its own resource at the composition root, a
-specific request and response schema, timeout and error handling, and a mock
-that can exercise success, malformed data, duplicate delivery, and timeout.
-It must pass the normalized result to the same guarded domain operation. That
-work is intentionally outside this current local checkpoint.
-
-## Test the available boundary
-
-Use the inbound endpoint with the documented JSON body and run:
-
-```bash title="Run the implemented transform integration test"
-npm run test -w @purista/banking-tutorials
+```bash title="Generate the adapter-backed import command"
+npm run add:command -- import-legacy-bank-transaction \
+  --service banking --service-version 1 \
+  --description "Import one booked transaction through the legacy-bank adapter"
 ```
 
-This proves the local Hono-to-command transform path. It does not prove an
-external network round trip or retry behavior.
+Define an interface and deterministic local implementation. The service depends
+on `LegacyBankClient`, so production can later supply an HTTP client without
+changing the command or its posting guard.
 
-Next: [test transform boundaries](/tutorials/banking-integrations/test-transform-boundaries/).
+```ts title="src/legacy-bank.ts"
+export type LegacyBankClient = { getBookedTransaction(sourceId: string): Promise<LegacyBankTransaction> }
+export class LocalLegacyBankMock implements LegacyBankClient {
+  async getBookedTransaction(sourceId: string) { /* return fixed fixture or 404 */ }
+}
+```
+
+Register the resource when building the service and provide the mock in the
+application composition:
+
+```ts title="Service and application composition"
+const builder = new ServiceBuilder(serviceInfo).defineResource<'legacyBankClient', LegacyBankClient>()
+const legacyBankClient = new LocalLegacyBankMock()
+await bankingService.getInstance({ resources: { bankingRepository, legacyBankClient } })
+```
+
+The reference app exposes a clearly labelled read-only fixture route at
+`GET /tutorial/legacy-bank/transactions/legacy-bank-debit-a-1`. It lets readers
+inspect the wire shape; the command uses the injected resource and still guards
+the transaction write.

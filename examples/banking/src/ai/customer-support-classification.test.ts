@@ -3,6 +3,7 @@ import { honoV1Service } from '@purista/hono-http-server'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { BankingRepository } from '../repository.js'
+import { LocalLegacyBankMock } from '../legacy-bank.js'
 import { bankingService } from '../service.js'
 import {
 	bankingCustomerSupportService,
@@ -30,7 +31,7 @@ const start = async (actor: string): Promise<StartedCustomerSupportApplication> 
 
 	const bankingRepository = new BankingRepository()
 	const banking = await bankingService.getInstance(eventBridge, {
-		resources: { bankingRepository },
+		resources: { bankingRepository, legacyBankClient: new LocalLegacyBankMock() },
 	})
 	const service = await bankingCustomerSupportService.getInstance(eventBridge, {
 		resources: { bankingRepository },

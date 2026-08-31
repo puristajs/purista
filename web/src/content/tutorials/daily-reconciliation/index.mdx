@@ -1,39 +1,35 @@
 ---
 title: Queue a daily reconciliation trigger
-description: Define a manual reconciliation command, worker, event binding, and daily schedule declaration with PURISTA.
+description: Build a guarded manual trigger, typed queue worker, event binding, and daily schedule with PURISTA.
 order: 80
 ---
 
 Reconciliation compares records and reports differences in a complete banking
-application. The current local checkpoint establishes the orchestration shape
-only: it queues a manual run, counts local transactions and monitoring
-findings, then stores an in-memory run projection.
+application. This chapter builds the orchestration shape: a permitted operations
+user queues a run, a worker counts local facts, and a schedule declares the
+daily occurrence.
 
-```mermaid title="Current reconciliation declaration"
+```mermaid title="The reconciliation path"
 flowchart LR
-  Manual[manual runReconciliation command] --> Queue[banking.runReconciliation queue]
-  Schedule[dailyReconciliation declaration] -->|banking.reconciliation.due| Queue
-  Queue --> Worker[reconcileWorker]
-  Worker --> Projection[reconciliation run metadata]
+  Manual[guarded command] --> Queue[reconciliation queue] --> Worker[worker]
+  Schedule[daily schedule] --> Event[reconciliation due] --> Queue
+  Worker --> Projection[run metadata]
 ```
 
-`examples/banking/src/advanced/service.ts` contains the command, queue worker,
-schedule declaration, and event-to-queue binding. The schedule is metadata in
-the running service. This example does not start a scheduler host, import a
-settlement file, calculate a mismatch, or perform a financial correction.
+Use the earlier `banking-operations` service. If it does not exist, create it:
 
-## Start here
-
-No Docker dependency is required. The local queue and event bridges are
-in-memory teaching tools and do not prove durable occurrence handling.
-
-```bash title="Run the reconciliation definition tests"
-npm run test -w @purista/banking-tutorials
+```bash title="Generate the operations service"
+npm run add:service -- banking-operations \
+  --description "Banking operations and background work"
 ```
 
-1. [Run a manual trigger](/tutorials/daily-reconciliation/run-a-manual-trigger/)
-2. [Define the reconciliation contract](/tutorials/daily-reconciliation/define-the-reconciliation-contract/)
-3. [Run the reconciliation worker](/tutorials/daily-reconciliation/run-the-reconciliation-worker/)
-4. [Store one run per day](/tutorials/daily-reconciliation/store-one-run-per-day/)
-5. [Declare a daily schedule](/tutorials/daily-reconciliation/declare-a-daily-schedule/)
-6. [Test reconciliation boundaries](/tutorials/daily-reconciliation/test-reconciliation-boundaries/)
+The local queue and event bridges are in-memory teaching tools. They do not
+prove durable scheduling or restart recovery. The checkpoint implementation is
+`examples/banking/src/advanced/service.ts`.
+
+1. [Generate the manual trigger](/tutorials/daily-reconciliation/run-a-manual-trigger/)
+2. [Define the source-scoped contract](/tutorials/daily-reconciliation/define-the-reconciliation-contract/)
+3. [Generate and implement the worker](/tutorials/daily-reconciliation/run-the-reconciliation-worker/)
+4. [Make one run per source and day](/tutorials/daily-reconciliation/store-one-run-per-day/)
+5. [Declare the daily schedule](/tutorials/daily-reconciliation/declare-a-daily-schedule/)
+6. [Test the boundaries](/tutorials/daily-reconciliation/test-reconciliation-boundaries/)

@@ -1,49 +1,34 @@
 ---
-title: Export a statement
-description: Validate an authorized domain statement before transforming its fixed fields into a CSV response.
+title: Export a statement safely
+description: Generate a statement command and transform its already-authorized domain result into CSV.
 order: 44
 ---
 
-`exportStatement` first returns a typed domain object with `accountId` and
-transactions. Its before guard checks read access. Its after guard rejects a
-result that contains another account. Only then does the output transform
-create the CSV string.
+Create a second command for the export boundary.
 
-```ts title="examples/banking/src/service.ts"
-.setTransformOutput(z.string(), async function (_context, result) {
-  const rows = result.transactions.map(transaction =>
-    [transaction.transactionId, transaction.bookedAt, transaction.amountMinor, transaction.currency, transaction.direction].join(','),
-  )
+```bash title="Generate the statement export command"
+npm run add:command -- export-statement \
+  --service banking --service-version 1 \
+  --description "Export an authorized account statement as CSV"
+```
+
+The command returns the usual typed statement. Check the requested account in a
+before guard. Check the returned result in an after guard, before CSV is
+created. That makes an accidental cross-account repository result fail closed.
+
+```ts title="Protect result scope before serialization"
+.setAfterGuardHooks({
+  statementScope: async (_context, result, _payload, parameter) => {
+    if (result.accountId !== parameter.accountId || result.transactions.some(t => t.accountId !== parameter.accountId)) {
+      throw new HandledError(StatusCode.Forbidden, 'The statement contains data outside the authorized account')
+    }
+  },
+})
+.setTransformOutput(z.string(), async (_context, result) => {
+  const rows = result.transactions.map(t => [t.transactionId, t.bookedAt, t.amountMinor, t.currency, t.direction].join(','))
   return ['transactionId,bookedAt,amountMinor,currency,direction', ...rows].join('\n')
 }, 'text/csv')
-.exposeAsHttpEndpoint('GET', 'accounts/:accountId/statement')
 ```
 
-Create an Alice or Bob local fixture session first. Then request account A's
-statement with its cookie jar:
-
-```bash title="Create Alice's local tutorial session"
-curl --fail -c .tutorial-cookie -X POST http://127.0.0.1:3010/auth/login \
-  -H 'content-type: application/json' \
-  --data '{"actor":"alice"}'
-```
-
-```bash title="Download the account A statement"
-curl --fail -b .tutorial-cookie \
-  http://127.0.0.1:3010/api/v1/accounts/account-a/statement
-```
-
-The response is a CSV representation of the command's domain result. The
-current rows contain generated IDs, ISO timestamps, integer amounts, the fixed
-currency `EUR`, and a fixed direction enum. They do not include free text, so
-the small formatter has no text quoting or spreadsheet-formula defense. Do not
-reuse it for arbitrary CSV fields without a tested serializer and formula-safe
-cell policy.
-
-## Test output scope
-
-Bob receives `200` for account A and `403` for account C. To test the after
-guard itself, a runtime test must deliberately return a mixed-account result;
-the present repository does not create that fault by default.
-
-Next: [understand the external API boundary](/tutorials/banking-integrations/call-the-legacy-api/).
+`setTransformOutput` changes only the HTTP representation. The command logic
+still works with the typed banking statement.

@@ -1,42 +1,26 @@
 ---
-title: Declare a daily schedule
-description: Declare a named daily event and bind that event to the reconciliation queue without claiming that a timer is running.
+title: Declare the daily schedule
+description: Generate a schedule declaration that emits the same typed event used by the manual command.
 order: 85
 ---
 
-The service contains a daily schedule declaration:
+The CLI currently generates services, commands, subscriptions, streams, queues,
+workers, and agents; it does not yet generate schedules. Add the declaration to
+the existing CLI-created `banking-operations` service rather than creating a
+second timer outside PURISTA. Reuse the event contract from this chapter:
 
-```ts title="examples/banking/src/advanced/service.ts"
-const dailyReconciliationSchedule = builder
-  .getScheduleBuilder('dailyReconciliation', 'Emit a daily reconciliation trigger')
-  .emitEvent(BankingTutorialEvent.reconciliationDue, {
-    expression: { kind: 'cron', value: '5 2 * * *', timezone: 'Europe/Berlin' },
-    missedRunPolicy: 'runOnce',
-    payloadSchema: reconciliationDueEventSchema,
-  })
-
-export const bankingOperationsService = builder
-  .addScheduleDefinition(dailyReconciliationSchedule)
-  .bindEventToQueue(BankingTutorialEvent.reconciliationDue, 'banking.runReconciliation', {
-    idempotencyMode: 'advisory',
-    idempotencyKey: event => `reconciliation:${String(event.day)}`,
-    mapPayload: event => ({ day: String(event.day) }),
-    mapParameter: () => ({ tenantId: 'tenant-north' }),
-  })
+```ts title="dailyReconciliation schedule"
+.emitEvent(BankingTutorialEvent.reconciliationDue, {
+  expression: { kind: 'cron', value: '5 2 * * *', timezone: 'Europe/Berlin' },
+  missedRunPolicy: 'runOnce',
+  payloadSchema: reconciliationDueEventSchema,
+})
 ```
 
-The declaration names a cron expression for 02:05 in `Europe/Berlin` and says
-how its event would enqueue the worker. It is not a running timer by itself.
-`examples/banking/src/index.ts` starts no scheduler host, and the current tests
-do not wait for or simulate an occurrence. Do not tell a reader to wait until
-02:05 or expect a queued job from this checkpoint.
+The declaration says *what* should happen and how a missed occurrence is
+treated. It does not start a scheduler host by itself. Select a production
+scheduler and queue bridge before depending on time-based financial operations.
 
-`missedRunPolicy: 'runOnce'` is configuration on the schedule definition. Its
-real recovery behavior depends on a scheduler runtime and adapter that have not
-been wired here.
-
-```bash title="Check the schedule declaration compiles"
-npm run typecheck -w @purista/banking-tutorials
+```bash title="Verify the service still composes"
+npm run typecheck
 ```
-
-Next, test the definitions and record their current scope.

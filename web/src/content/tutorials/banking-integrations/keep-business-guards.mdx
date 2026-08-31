@@ -1,36 +1,30 @@
 ---
-title: Keep business guards
-description: Run the same posting decision after legacy data has become a normal transaction payload.
+title: Keep a business guard around the write
+description: Check the caller's posting assignment after normalization and before recording a transaction.
 order: 43
 ---
 
-The transform answers, “What does this supported external record mean?” The
-posting guard answers, “May this actor record a transaction on this account?”
-They must stay separate.
+Authentication tells Hono who called. It does not decide whether that person
+may post to an account. Add the same business guard used by the normal
+transaction command to the generated import command.
 
-```ts title="examples/banking/src/service.ts"
+```ts title="importLegacyTransaction command builder"
+.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
 .exposeAsHttpEndpoint('POST', 'legacy/transactions')
-.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
-.setCommandFunction(async function (context, payload) {
-  return context.resources.bankingRepository.record(payload)
+.setBeforeGuardHooks({
+  postingAccess: async (context, payload) => {
+    if (!context.resources.bankingRepository.canRecord(context.message.principalId, payload.accountId)) {
+      throw new HandledError(StatusCode.Forbidden, 'You may not record transactions for this account')
+    }
+  },
 })
+.setCommandFunction(recordAndPublish)
 ```
 
-The guard receives `payload.accountId`, not the legacy `account_ref` field.
-That is useful because the native and legacy endpoints use the same business
-meaning. Dana may record the normalized transaction for account A. Bob is
-still denied, even though Bob has a valid local fixture session and the legacy
-JSON is well formed.
+The transform produces a domain `accountId`; the guard checks a business
+assignment; only then does the handler write and emit an event. The reference
+fixture gives Dana the `account-a` posting assignment and denies Bob.
 
-The transform has no side effect. The command handler calls the repository only
-after input validation and the posting guard succeed. The repository still owns
-duplicate handling. A transform must not silently skip a row or make a private
-permission lookup to avoid a rejection.
-
-## Test the denied import
-
-Submit the same valid legacy JSON once as Dana and once as Bob with a different
-`source_id`. Dana receives `200`; Bob receives `403`. List account A afterward
-and assert that only Dana's source ID exists.
-
-Next: [export a statement](/tutorials/banking-integrations/transform-output/).
+```bash title="Exercise the guarded HTTP command"
+npm test -- --run src/banking.integration.test.ts
+```

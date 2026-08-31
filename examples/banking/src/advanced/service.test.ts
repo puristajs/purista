@@ -106,20 +106,24 @@ describe('advanced banking tutorial definitions', () => {
 	it('enqueues a manual reconciliation job and writes an idempotent run projection', async () => {
 		const resources = createResources()
 		const command = createCommandContextMock(runReconciliation, {
-			payload: { day: '2026-01-20' },
+			payload: { day: '2026-01-20', source: 'banking-projections' },
 			parameter: {},
 			resources,
 		})
 		command.stubs.enqueue.resolves({ jobId: 'job-reconciliation-1', queueName: 'banking.runReconciliation' })
+		const reconciliationContext = {
+			...command.context,
+			message: { ...command.context.message, principalId: 'dana', tenantId: 'tenant-north' },
+		}
 
 		const queued = await runReconciliation
 			.getCommandFunction()
-			.call({} as never, command.context, { day: '2026-01-20' }, {})
+			.call({} as never, reconciliationContext, { day: '2026-01-20', source: 'banking-projections' }, {})
 		expect(queued).toEqual({ jobId: 'job-reconciliation-1', queueName: 'banking.runReconciliation' })
 
 		const worker = createQueueWorkerContextMock(reconcileWorker, {
 			queueName: 'banking.runReconciliation',
-			payload: { day: '2026-01-20' },
+			payload: { day: '2026-01-20', source: 'banking-projections' },
 			parameter: { tenantId: 'tenant-north' },
 			resources,
 		})

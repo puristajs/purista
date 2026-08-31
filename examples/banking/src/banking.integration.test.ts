@@ -73,6 +73,25 @@ describe('Example Bank transaction HTTP boundary', () => {
 		expect(denied.status).toBe(403)
 	})
 
+	it('denies a valid user without a reconciliation-source assignment before any run is stored', async () => {
+		const application = await createBankingApplication()
+		destroy = application.destroy
+		const bob = await signIn(application.fetch, 'bob')
+
+		const denied = await asSession(
+			application.fetch,
+			bob,
+			new Request('http://example.test/api/v1/reconciliation/run', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ day: '2026-01-20', source: 'banking-projections' }),
+			}),
+		)
+
+		expect(denied.status).toBe(403)
+		expect(application.operationsStore.listReconciliationRuns()).toEqual([])
+	})
+
 	it('normalizes an authorized legacy record and rejects a logged-in bookkeeper posting', async () => {
 		const fetch = await start()
 		const dana = await signIn(fetch, 'dana')
@@ -124,6 +143,55 @@ describe('Example Bank transaction HTTP boundary', () => {
 		expect(await history.json()).not.toMatchObject({
 			transactions: [expect.objectContaining({ sourceTransactionId: 'bookkeeper-write' })],
 		})
+	})
+
+	it('imports a mocked legacy-bank record through a transformed and guarded command', async () => {
+		const fetch = await start()
+		const dana = await signIn(fetch, 'dana')
+		const bob = await signIn(fetch, 'bob')
+		const alice = await signIn(fetch, 'alice')
+
+		const mockResponse = await fetch(
+			new Request('http://example.test/tutorial/legacy-bank/transactions/legacy-bank-debit-a-1'),
+		)
+		expect(mockResponse.status).toBe(200)
+		expect(await mockResponse.json()).toMatchObject({ amount: '125.40', dc: 'D', account_ref: 'account-a' })
+
+		const imported = await asSession(
+			fetch,
+			dana,
+			new Request('http://example.test/api/v1/legacy-bank/imports', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ sourceId: 'legacy-bank-debit-a-1' }),
+			}),
+		)
+		expect(imported.status).toBe(200)
+		expect(await imported.json()).toMatchObject({
+			accountId: 'account-a',
+			sourceTransactionId: 'legacy-bank-debit-a-1',
+			amountMinor: 12540,
+			direction: 'debit',
+		})
+
+		const denied = await asSession(
+			fetch,
+			bob,
+			new Request('http://example.test/api/v1/legacy-bank/imports', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ sourceId: 'legacy-bank-debit-a-1' }),
+			}),
+		)
+		expect(denied.status).toBe(403)
+
+		const history = await asSession(
+			fetch,
+			alice,
+			new Request('http://example.test/api/v1/accounts/account-a/transactions'),
+		)
+		const statement = (await history.json()) as { transactions: Array<{ sourceTransactionId: string }> }
+		expect(statement.transactions).toContainEqual(expect.objectContaining({ sourceTransactionId: 'legacy-bank-debit-a-1' }))
 	})
 
 	it('serializes an authorized statement only after it passes the result-scope guard', async () => {

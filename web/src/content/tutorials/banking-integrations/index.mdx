@@ -1,36 +1,35 @@
 ---
 title: Import and export transaction data
-description: Normalize one supported legacy transaction format and return an authorized account statement as CSV.
+description: Build an integration boundary with generated PURISTA commands, format transforms, a local mock dependency, and business guards.
 order: 40
 ---
 
-An external representation is not automatically the banking domain model. This
-chapter keeps one domain transaction contract and accepts one documented legacy
-shape at a separate HTTP endpoint. It also returns an authorized statement as
-CSV without making CSV the command's business result.
+Your banking service owns one transaction language: minor currency units,
+`accountId`, and `debit` or `credit`. A legacy bank uses another. In this
+chapter you build a boundary that translates one supported legacy record into
+the banking language, then exports an approved statement as CSV.
 
-```mermaid title="Representation and business boundary"
+```mermaid title="The boundary we build"
 flowchart LR
-  Legacy[legacy JSON] --> Raw[raw schema]
-  Raw --> Transform[input transform]
-  Transform --> Domain[domain transaction schema]
-  Domain --> Guard[posting guard]
-  Guard --> Record[repository record]
-  Statement[domain statement] --> ResultGuard[after guard]
-  ResultGuard --> Csv[CSV output transform]
+  Wire[legacy wire data] --> Transform[input transform] --> Domain[banking command]
+  Domain --> Guard[posting assignment] --> Record[transaction repository]
+  Statement[domain result] --> Scope[after guard] --> Csv[CSV]
 ```
 
-The implemented source is `examples/banking/src/service.ts`. It supports only
-EUR values with exactly two decimal digits and legacy debit/credit codes `D`
-and `C`. It has no external HTTP client, mock bank server, Docker Compose
-profile, account lookup, currency conversion, or row-by-row file import. This
-chapter documents the real, local transform boundary that is available today.
+Start with the CLI-created banking service. If you are using this chapter on
+its own, generate it first:
+
+```bash title="Create the service"
+npm run add:service -- banking --description "Banking transaction operations"
+```
+
+The runnable checkpoint is `examples/banking/src/service.ts`. Its
+`LocalLegacyBankMock` is an in-process dependency, so this first integration
+does not require Docker or an external account.
 
 1. [Compare the two formats](/tutorials/banking-integrations/compare-formats/)
-2. [Transform legacy input](/tutorials/banking-integrations/transform-input/)
-3. [Keep business guards](/tutorials/banking-integrations/keep-business-guards/)
-4. [Export a statement](/tutorials/banking-integrations/transform-output/)
-5. [Understand the external API boundary](/tutorials/banking-integrations/call-the-legacy-api/)
-6. [Test transform boundaries](/tutorials/banking-integrations/test-transform-boundaries/)
-
-Next: [compare the two formats](/tutorials/banking-integrations/compare-formats/).
+2. [Generate and transform legacy input](/tutorials/banking-integrations/transform-input/)
+3. [Keep a business guard around the write](/tutorials/banking-integrations/keep-business-guards/)
+4. [Export a statement safely](/tutorials/banking-integrations/transform-output/)
+5. [Inject and inspect a local legacy-bank adapter](/tutorials/banking-integrations/call-the-legacy-api/)
+6. [Test the boundary](/tutorials/banking-integrations/test-transform-boundaries/)

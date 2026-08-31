@@ -1,33 +1,30 @@
 ---
-title: Store one run per day
-description: Use the occurrence day as the local projection key so repeated worker calls return one logical run.
+title: Make one run per source and day
+description: Use the business occurrence as the queue idempotency key and keep the projection repeat-safe.
 order: 84
 ---
 
-The projection store treats a day as the identity of a reconciliation run:
+Schedules and queues may deliver again. The business occurrence is the pair of
+`source` and `day`, so use it for the generated command's enqueue key:
 
-```ts title="examples/banking/src/advanced/repository.ts"
-recordReconciliation(run: ReconciliationRun) {
-  const existing = this.reconciliationRuns.find(entry => entry.day === run.day)
-  if (existing) return existing
-  this.reconciliationRuns.push(run)
-  return run
-}
+```ts title="runReconciliation command"
+const job = await context.queue.enqueue['banking.runReconciliation'](
+  payload,
+  { tenantId: 'tenant-north' },
+  { idempotencyKey: `reconciliation:${payload.source}:${payload.day}` },
+)
 ```
 
-The service also uses the same day in its queue idempotency keys. The command
-uses `reconciliation:${payload.day}`, and the event-to-queue binding maps an
-event to `reconciliation:${String(event.day)}`. These shapes communicate the
-intent that one day has one logical run.
+Use the same key in the event-to-queue binding:
 
-This is not a durable uniqueness guarantee. The store and queue are both lost
-when the process stops, and the source does not model partial work, a retryable
-upstream error, or an occurrence revision. A durable implementation needs an
-atomic occurrence claim and tests that restart the relevant processes.
-
-```bash title="Run the repeated-worker test"
-npm run test -w @purista/banking-tutorials
+```ts title="Service composition"
+.bindEventToQueue(BankingTutorialEvent.reconciliationDue, 'banking.runReconciliation', {
+  idempotencyMode: 'advisory',
+  idempotencyKey: event => `reconciliation:${String(event.source)}:${String(event.day)}`,
+})
 ```
 
-The existing test calls the worker twice with the same day and asserts one run
-record. Next, inspect what the schedule declaration actually does.
+The local projection also records `reconciliation-${day}` deterministically.
+In production, make that a unique database constraint including the source.
+Idempotency configuration is useful protection, not a substitute for durable
+storage or a tested recovery policy.

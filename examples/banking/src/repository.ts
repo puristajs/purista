@@ -2,6 +2,8 @@ import { HandledError, StatusCode } from '@purista/core'
 
 export type BankActor = 'alice' | 'bob' | 'carol' | 'dana' | 'erin'
 export type TransactionDirection = 'debit' | 'credit'
+/** The one local projection source that this tutorial can reconcile. */
+export type ReconciliationSource = 'banking-projections'
 
 export type RecordedTransaction = {
 	transactionId: string
@@ -28,6 +30,19 @@ const reviewAssignments: Record<BankActor, readonly RecordedTransaction['account
 	carol: [],
 	dana: [],
 	erin: ['account-a'],
+}
+
+/**
+ * Reconciliation is an operations action over a named source, not a customer
+ * account-read permission. The fixture gives Dana that assignment only for
+ * the local teaching projection.
+ */
+const reconciliationAssignments: Record<BankActor, readonly ReconciliationSource[]> = {
+	alice: [],
+	bob: [],
+	carol: [],
+	dana: ['banking-projections'],
+	erin: [],
 }
 
 /** In-memory teaching repository. Each application restart restores the same synthetic fixtures. */
@@ -58,6 +73,16 @@ export class BankingRepository {
 	canReviewCase(actor: string | undefined, accountId: RecordedTransaction['accountId']) {
 		if (!actor || !(actor in reviewAssignments)) return false
 		return reviewAssignments[actor as BankActor].includes(accountId)
+	}
+
+	/**
+	 * Answers whether a current operations assignment covers this tenant and
+	 * named reconciliation source. It intentionally does not reuse account-read
+	 * or review-case access.
+	 */
+	canRunReconciliation(actor: string | undefined, tenantId: string | undefined, source: ReconciliationSource) {
+		if (tenantId !== 'tenant-north' || !actor || !(actor in reconciliationAssignments)) return false
+		return reconciliationAssignments[actor as BankActor].includes(source)
 	}
 
 	list(accountId: RecordedTransaction['accountId']) {

@@ -1,43 +1,33 @@
 ---
-title: Run the reconciliation worker
-description: Count the two local projections in a worker and complete the queue job with typed metadata.
+title: Generate and implement the worker
+description: Replace the queue worker scaffold with a small, observable reconciliation operation.
 order: 83
 ---
 
-The worker consumes `banking.runReconciliation` messages continuously. Its
-current task is to count two in-memory projections: transactions and monitoring
-findings.
+The `add:queue` command created the queue worker and its generated test. Open
+the worker builder and use the typed queue payload. For this teaching example,
+the worker counts transaction and monitoring projections and stores metadata.
+It does not claim to calculate a settlement difference.
 
-```ts title="examples/banking/src/advanced/service.ts"
-export const reconcileWorker = new QueueWorkerBuilder(
-  'banking.runReconciliation',
-  'reconcileBankingProjections',
-)
-  .setMode('continuous')
-  .setHandler(async function (context) {
-    const payload = context.message.payload as z.infer<typeof reconciliationJobPayloadSchema>
-    const transactionCount = (['account-a', 'account-c'] as const).flatMap(accountId =>
-      context.resources.bankingRepository.list(accountId),
-    ).length
-    const findingCount = context.resources.operationsStore.listFindings().length
-    const run = context.resources.operationsStore.recordReconciliation({
-      runId: `reconciliation-${payload.day}`,
-      day: payload.day,
-      transactionCount,
-      findingCount,
-      completedAt: new Date().toISOString(),
-    })
-    await context.job.complete(run)
-    return { status: 'success' as const }
+```ts title="reconcileWorker queue-worker builder"
+.setHandler(async context => {
+  const payload = context.message.payload as { day: string; source: 'banking-projections' }
+  const transactionCount = ['account-a', 'account-c'].flatMap(id =>
+    context.resources.bankingRepository.list(id),
+  ).length
+  const run = context.resources.operationsStore.recordReconciliation({
+    runId: `reconciliation-${payload.day}`, day: payload.day, transactionCount,
+    findingCount: context.resources.operationsStore.listFindings().length,
+    completedAt: new Date().toISOString(),
   })
+  await context.job.complete(run)
+  return { status: 'success' as const }
+})
 ```
 
-This does not compare a ledger to a settlement file. It calculates no mismatch
-and changes no balance. Keeping that limit clear matters: a completed job in
-this checkpoint proves an orchestration path, not financial correctness.
+The worker receives a server-created job, not browser data. Keep its work
+small, deterministic, and visible in the stored projection.
 
-```bash title="Run the worker definition test"
-npm run test -w @purista/banking-tutorials
+```bash title="Run the worker test"
+npm test -- --run src/service/bankingOperations/v1/queue-worker/reconcileWorker
 ```
-
-Next, make repeated occurrences map to one in-memory run record.
