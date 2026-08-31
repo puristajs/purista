@@ -1,0 +1,73 @@
+---
+title: "Try the integration and stop its dependency"
+description: "Exercise the built application against the Compose mock, download CSV, test a failure, and clean up only the tutorial resources."
+order: 540
+---
+
+Keep the mock from [the dependency setup](/tutorials/banking-integrations/call-the-legacy-api/) running.
+Start the banking application from its own directory:
+
+```bash title="Start the constructed Banking API"
+npm run dev
+```
+
+In another terminal, log in as Dana. This chooses the local operator fixture;
+it does not send a password or a production credential.
+
+```bash title="Fetch and record a legacy transaction"
+curl -i -c dana.cookies -H 'content-type: application/json' \
+  -d '{"actor":"dana"}' http://127.0.0.1:3000/auth/login
+curl -i -b dana.cookies -H 'content-type: application/json' -d '{}' \
+  http://127.0.0.1:3000/api/v1/accounts/account-a/legacy-imports/legacy-001
+```
+
+Expect 200 and a domain record with `amountMinor: 12540`,
+`direction: "debit"`, and `tenantId: "tenant-north"`. The command fetched
+legacy JSON, validated it, transformed it, and reached the existing posting
+operation. Repeating it returns 409. If you previously imported the same fixture
+in this process, that 409 is expected; restarting this in-memory example gives
+you a fresh data set.
+
+Log in as Bob and download his permitted statement:
+
+```bash title="Download authorized account history"
+curl -i -c bob.cookies -H 'content-type: application/json' \
+  -d '{"actor":"bob"}' http://127.0.0.1:3000/auth/login
+curl --fail -b bob.cookies --output statement.csv \
+  http://127.0.0.1:3000/api/v1/accounts/account-a/statement.csv
+cat statement.csv
+```
+
+The file begins with the fixed column names, followed by the imported record.
+It contains CSV bytes, not a JSON string containing CSV.
+
+Try the permission and dependency failures:
+
+```bash title="Verify denied import and malformed upstream data"
+curl -i -b bob.cookies -H 'content-type: application/json' -d '{}' \
+  http://127.0.0.1:3000/api/v1/accounts/account-a/legacy-imports/legacy-001
+curl -i -b dana.cookies -H 'content-type: application/json' -d '{}' \
+  http://127.0.0.1:3000/api/v1/accounts/account-a/legacy-imports/malformed
+```
+
+Expect 403 for Bob and 502 for the malformed mock response. Neither adds a
+record. Changing the source-ID suffix to `slow` demonstrates a 504 timeout.
+Logging in as `danaSouth` fetches 99.00 EUR into a separate tenant's account A.
+
+## Stop what you started
+
+Stop `npm run dev` with Ctrl+C. If you used Docker, run:
+
+```bash title="Stop only this tutorial's mock dependency"
+docker compose -p example-bank-legacy down
+```
+
+For the direct Node mock, use Ctrl+C in its terminal instead. Remove the two
+cookie files and `statement.csv` if you no longer need them; do not commit
+session cookies.
+
+You have constructed the `legacy-http` checkpoint. Input transforms now
+change representations, guards enforce business access, handlers own I/O and
+effects, and the output transform produces an authorized export.
+
+Next, [publish transaction events and add monitoring subscriptions](/tutorials/transaction-monitoring/).

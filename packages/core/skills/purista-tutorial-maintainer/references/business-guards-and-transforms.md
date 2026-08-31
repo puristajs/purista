@@ -57,6 +57,15 @@ validation → before guards → handler → domain output validation → after 
 → output transform → transformed-output validation → success response.
 Optional stages run only when configured. Verify other primitives separately.
 
+Use normal `async function` expressions for command transform hooks: the
+builder binds them to the service and rejects arrow functions. Configure an
+output transform's MIME type before `exposeAsHttpEndpoint`, or set the exposure
+type explicitly; exposure captures its metadata when called. Verify response
+bytes as well as headers through the pinned published Hono package. A JSON
+string containing CSV is not a CSV file, and changing only the response header
+does not repair that serialization error. Check a denied export too, so a
+download wrapper never relabels an error as successful file content.
+
 Guards in each stage run concurrently. Do not use named guards as a sequential
 pipeline or depend on another guard's mutation of shared context. A failed
 guard does not undo effects placed in another concurrent guard. Dependency

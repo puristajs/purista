@@ -1,13 +1,3 @@
----
-title: "Verify conversion and posting permissions"
-description: "Invoke the registered import command to prove exact conversion, domain validation, account permission checks, and shared duplicate handling."
-order: 440
----
-
-The useful behavior is the complete command, not the conversion helper alone.
-Replace the generated import test:
-
-```ts title="src/service/banking/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts"
 import { expect, test } from 'vitest'
 import { createTestBank } from '../../../../../testing/createTestBank.js'
 
@@ -112,34 +102,3 @@ test('wire errors, domain errors and forbidden accounts create no records', asyn
 		await bank.destroy()
 	}
 })
-```
-
-The first test sends legacy JSON through Hono. It checks the resulting domain
-record, then attempts to submit the same source transaction through the native
-endpoint. A 409 proves that both paths share duplicate handling.
-
-The second test covers different failure stages. Invalid decimal grammar
-fails wire validation. An oversized integer fails conversion. Zero passes
-the legacy grammar but fails domain validation. Bob's valid session reaches
-the business guard and is denied. Dana cannot import into an unassigned
-account C either. None of these failures creates a record.
-
-The order is:
-
-```text title="Import command lifecycle"
-Legacy schema -> input transform -> domain schema
--> before guard -> handler -> guarded recordTransaction command
--> domain output schema -> response
-```
-
-```bash title="Check the legacy-import checkpoint"
-npm test
-npm run build
-```
-
-Expect twenty-one passing tests. You have now built the `legacy-import`
-checkpoint. With `npm run dev` running, a logged-in Dana can POST
-`fixtures/legacy-transaction.json` to `/api/v1/legacy-transactions`.
-
-There is no external dependency yet: this endpoint accepts a record the
-operator supplies. Next, [build an export representation for permitted history](/tutorials/banking-integrations/serialize-csv/).

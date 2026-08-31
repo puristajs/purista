@@ -1,34 +1,86 @@
 ---
-title: Export a statement safely
-description: Generate a statement command and transform its already-authorized domain result into CSV.
-order: 44
+title: "Generate the CSV export command"
+description: "Build a read-only command with account guards, a domain result, and a final CSV output transform."
+order: 460
 ---
 
-Create a second command for the export boundary.
+Generate a new read command:
 
-```bash title="Generate the statement export command"
+```bash title="Generate exportStatement"
 npm run add:command -- export-statement \
   --service banking --service-version 1 \
-  --description "Export an authorized account statement as CSV"
+  --description "Export authorized account history as CSV" \
+  --non-interactive
 ```
 
-The command returns the usual typed statement. Check the requested account in a
-before guard. Check the returned result in an after guard, before CSV is
-created. That makes an accidental cross-account repository result fail closed.
+Keep the CLI's service registration and generated `types.ts`. Replace
+the command schema:
 
-```ts title="Protect result scope before serialization"
-.setAfterGuardHooks({
-  statementScope: async (_context, result, _payload, parameter) => {
-    if (result.accountId !== parameter.accountId || result.transactions.some(t => t.accountId !== parameter.accountId)) {
-      throw new HandledError(StatusCode.Forbidden, 'The statement contains data outside the authorized account')
-    }
-  },
-})
-.setTransformOutput(z.string(), async (_context, result) => {
-  const rows = result.transactions.map(t => [t.transactionId, t.bookedAt, t.amountMinor, t.currency, t.direction].join(','))
-  return ['transactionId,bookedAt,amountMinor,currency,direction', ...rows].join('\n')
-}, 'text/csv')
+```ts title="src/service/banking/v1/command/exportStatement/schema.ts"
+import { z } from 'zod'
+import { accountIdSchema, accountStatementSchema } from '../../../../../transaction.js'
+
+export const bankingV1ExportStatementInputPayloadSchema = z.undefined()
+export const bankingV1ExportStatementInputParameterSchema = z.object({ accountId: accountIdSchema })
+export const bankingV1ExportStatementOutputPayloadSchema = accountStatementSchema
 ```
 
-`setTransformOutput` changes only the HTTP representation. The command logic
-still works with the typed banking statement.
+The handler returns a typed `AccountStatement`. Its final wire response
+will be a string, described by the transform's separate schema. Replace
+the builder:
+
+```ts title="src/service/banking/v1/command/exportStatement/exportStatementCommandBuilder.ts"
+import { requireReadableAccount, requireStatementScope } from '../../../../../accountGuards.js'
+import { requireIdentity } from '../../../../../identity.js'
+import { statementCsvSchema, toStatementCsv } from '../../../../../statementCsv.js'
+import { bankingV1ServiceBuilder } from '../../bankingV1ServiceBuilder.js'
+import {
+	bankingV1ExportStatementInputParameterSchema,
+	bankingV1ExportStatementInputPayloadSchema,
+	bankingV1ExportStatementOutputPayloadSchema,
+} from './schema.js'
+
+export const exportStatementCommandBuilder = bankingV1ServiceBuilder
+	.getCommandBuilder('exportStatement', 'Export authorized account history as CSV')
+	.addPayloadSchema(bankingV1ExportStatementInputPayloadSchema)
+	.addParameterSchema(bankingV1ExportStatementInputParameterSchema)
+	.addOutputSchema(bankingV1ExportStatementOutputPayloadSchema)
+	.setBeforeGuardHooks({ accountRead: requireReadableAccount })
+	.setAfterGuardHooks({ statementScope: requireStatementScope })
+	.setTransformOutput(
+		statementCsvSchema,
+		async function (_context, statement) {
+			return toStatementCsv(statement)
+		},
+		'text/csv',
+		'utf-8',
+	)
+	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/statement.csv')
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const identity = requireIdentity(context.message)
+		return {
+			tenantId: identity.tenantId,
+			accountId: parameter.accountId,
+			transactions: context.resources.transactions.list(identity, parameter.accountId),
+		}
+	})
+```
+
+The before guard checks read permission. The repository scopes the query.
+The after guard checks every returned row before the output transform runs.
+A wrong-tenant row must prevent the whole CSV response.
+
+`setTransformOutput` receives the final schema, a normal async function,
+and the content type and encoding. Call it **before**
+`exposeAsHttpEndpoint`, so HTTP exposure captures `text/csv` rather than
+the earlier JSON default.
+
+An output transform changes the command's final result for every caller,
+not only HTTP. A command that invokes this export would receive CSV text.
+Keep the domain history command available for callers that need typed rows.
+
+We do not give the export a transaction success-event name. A presentation
+format should not become the business event that announces a recorded
+transaction.
+
+Next, [connect the browser download headers](/tutorials/banking-integrations/download-statement/).

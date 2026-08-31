@@ -1,41 +1,61 @@
 ---
-title: Compare the two formats
-description: Keep the legacy wire contract separate from the banking transaction contract.
-order: 41
+title: "Prepare the integration project"
+description: "Start from the protected API and compare one legacy record with the domain transaction it represents."
+order: 410
 ---
 
-Generate the command before writing its contract. This gives you a named,
-tested service boundary instead of an unowned HTTP route.
+If you completed account access, keep that application directory. It already
+has the Banking service, transaction commands, local login, and business
+guards. Do not generate another copy of them.
 
-```bash title="Generate the legacy import command"
-npm run add:command -- import-legacy-transaction \
-  --service banking --service-version 1 \
-  --description "Normalize a documented legacy transaction"
+For an independent start, run this from a directory that does not already
+contain the named folders:
+
+```bash title="Create the integration chapter's starting project"
+git clone https://github.com/puristajs/purista.git
+cd purista
+node examples/banking/tutorial/replay.mjs --to account-overview --out ../example-bank-integrations
+cd ../example-bank-integrations
+npm test
 ```
 
-The CLI creates `src/service/banking/v1/command/importLegacyTransaction/` and
-wires its definition into the service. Keep its generated test: it proves the
-command loads before you replace its starter contract.
+The replay uses published packages and the PURISTA CLI. It does not require
+installing the framework monorepo. You need Node 24.15 or newer, npm, and
+registry access. If you already have the framework checkout, run the replay
+there with a new output directory. Expect nineteen passing tests.
 
-The domain payload has no legacy names:
+All following edits and terminal commands run in the generated application.
+Stop its development server before changing connected files.
 
-```ts title="The banking payload"
-const transactionSchema = z.object({
-  accountId: z.enum(['account-a', 'account-c']), sourceTransactionId: z.string().min(1),
-  bookedAt: z.string().datetime(), amountMinor: z.number().int().positive(),
-  currency: z.literal('EUR'), direction: z.enum(['debit', 'credit']),
-})
+## Describe the incoming record
+
+Create this fixture:
+
+```json title="fixtures/legacy-transaction.json"
+{
+	"source_id": "legacy-001",
+	"account_ref": "account-a",
+	"booked_at": "2026-01-15T12:00:00.000Z",
+	"amount": "125.40",
+	"currency": "EUR",
+	"dc": "D"
+}
 ```
 
-Put the external wire schema beside the adapter, not in the domain command:
+This is the **wire format**: the shape another system sends. Our **domain
+format** is the shape the banking commands already understand.
 
-```ts title="src/legacy-bank.ts"
-export const legacyBankTransactionSchema = z.object({
-  source_id: z.string().min(1), account_ref: z.enum(['account-a', 'account-c']),
-  booked_at: z.string().datetime(), amount: z.string().regex(/^\d+\.\d{2}$/),
-  currency: z.literal('EUR'), dc: z.enum(['D', 'C']),
-})
-```
+| Legacy field | Domain field | Meaning |
+| --- | --- | --- |
+| `source_id` | `sourceTransactionId` | Preserve the record ID for duplicate detection |
+| `account_ref` | `accountId` | This example shares the account-ID namespace |
+| `booked_at` | `bookedAt` | Keep the UTC timestamp |
+| `amount: "125.40"` | `amountMinor: 12540` | Represent EUR cents as an integer |
+| `dc: "D"` | `direction: "debit"` | Translate the direction code |
+| `currency: "EUR"` | `currency: "EUR"` | No currency conversion |
 
-The two schemas make the change point clear: a new legacy field cannot silently
-become part of every banking command.
+The record does not contain trusted tenant or principal identity. Hono still
+resolves those from the session. A source transaction ID names a record; it
+does not select a more privileged caller or upstream source.
+
+Next, [define which legacy values we accept](/tutorials/banking-integrations/define-legacy-format/).

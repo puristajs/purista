@@ -1,8 +1,8 @@
 # Tutorial reconstruction evidence
 
 Verified on 2026-08-31 with Node 26.5 and published PURISTA 3.2.4 packages.
-This record covers the rebuilt opening, transaction, and account-access
-chapters. It is not evidence that the remaining tutorial roots are complete
+This record covers the rebuilt opening, transaction, account-access, and
+integration chapters. It is not evidence that the remaining tutorial roots are complete
 implementation guides.
 
 ## Replayed checkpoints
@@ -19,16 +19,19 @@ implementation guides.
 | `account-foundation` | Session expiry and separate current account permissions | 8 | Previous anonymous API still works before wiring |
 | `account-access` | Trusted Hono metadata, resource wiring, tenant-scoped repository, before/after guards | 17 | Cookie login, authorized read/post, 401/403/409, tenant isolation, logout |
 | `account-overview` | CLI-generated command composes guarded history via `canInvoke` | 19 | Nested command retains caller scope; north/south return different counts |
+| `legacy-import` | CLI-generated input transform invokes the same native posting command | 21 | Exact decimal conversion, permitted import, 400/403/409, unchanged rejected history |
+| `csv-export` | CLI-generated output transform follows account and result-scope guards | 24 | Actual CSV bytes and MIME/download headers; denied export retains problem details |
+| `legacy-http` | HTTP resource and CLI-generated fetch command call the transform command | 25 | Real temporary mock server covers tenant credentials, no fetch for Bob, malformed/mismatched/oversized responses and timeout; Compose round trip verified separately |
 
 Executed from the repository root into a previously nonexistent directory:
 
 ```bash
-node examples/banking/tutorial/replay.mjs --to account-overview --out /private/tmp/example-bank-access-proof-02 --verify-http
+node examples/banking/tutorial/replay.mjs --to legacy-http --out /private/tmp/example-bank-integrations-proof --verify-http
 ```
 
 Every checkpoint passed `npm test` and `npm run build`. The runner installed
 published dependencies outside the monorepo and used the generated project's
-local CLI scripts. The printed file bodies match 45 checked-in snapshots.
+local CLI scripts. The printed file bodies match 64 checked-in snapshots.
 
 The Node listener was verified separately from Hono's in-process `app.request`
 tests. Processes started by the replay were stopped after each probe. Storage
@@ -40,15 +43,31 @@ repository write, safe permission-dependency failure, schema-valid foreign rows
 rejected by the after guard, direct event-bridge denial, forged metadata, session
 expiry, and a revoked downstream call after the outer guard succeeds.
 
+The integration tests verify exact conversion at `Number.MAX_SAFE_INTEGER`,
+one-cent overflow, raw-format errors, domain rejection of zero, native/legacy
+duplicate handling, CSV escaping and formula-prefix handling on real source
+IDs, revoked export permission, wrong-tenant read output, and the row limit.
+The outbound client test opens an actual local socket, checks that Bob triggers
+no upstream request, and verifies tenant credentials and safe failures before
+any additional record is written.
+
+The committed Compose setup also started successfully with Docker 29.4 and
+the pinned Node 24.19 image. Health, north/south fixture responses, and the
+constructed application's actual TCP fetch/import/CSV flow passed. The test
+used Compose project `purista-tutorial-legacy-proof`, then removed only that
+project's container and network. The API child was also stopped.
+
 The rewritten pages rendered in Astro's dev server at desktop width 1280 and
 mobile width 390. The mobile chapter menu followed the backend-first order.
 Long inline file paths initially clipped; the shared prose style now wraps
 them. The account policy table fits within the mobile content column, and the
-account-access diagram renders through the shared Handbook enhancement. No
-browser console error was observed on the checked pages.
+account-access diagram renders through the shared Handbook enhancement. The
+integration setup and format table fit the mobile content column; the command
+and Compose pages render their complete file and CLI blocks. No browser console
+error was observed on the checked pages.
 
 Repository checks also passed: the full website build (including API docs),
-the generated-link audit (2348 HTML files), knowledge and skill audits, and
+the generated-link audit (2356 HTML files), knowledge and skill audits, and
 the CLI build plus focused generator/artifact tests (5 tests). The full build
 retains existing TypeDoc and large-chunk warnings. These checks supplement,
 but do not replace, the consumer replay above.
@@ -77,13 +96,20 @@ but do not replace, the consumer replay above.
   `write after end` error. The shared fixture now performs a real bank-info
   readiness request before returning. This is not a claim that the published
   bridge's general shutdown behavior has been fixed.
+- Transform hooks require normal functions; the old arrow-function snippet
+  was rejected by the builder. The rebuilt chapter executes the real hooks.
+- HTTP exposure captures its content type when configured. Setting the CSV
+  transform before exposure prevents a JSON-encoded string response.
+- The published Hono 3.2.4 adapter still resets non-JSON content types to
+  `text/plain`. The application supplies a route-specific success-only CSV
+  header wrapper; failures retain their status and problem-details format.
 
 ## Next reconstruction work
 
 The remaining chapters still contain reference-demo instructions and partial
 snippets. Do not count them as completed because their existing demo tests pass.
-Continue from `account-overview` with import/export transforms, business
-events/subscriptions, streams, queues/workers, schedules, business observability,
+Continue from `legacy-http` with business events/subscriptions, streams,
+queues/workers, schedules, business observability,
 and attached AI.
 Each new root must have its own reproducible entry checkpoint and be taught
 through exact CLI generation, file edits, runtime wiring, and end-to-end tests.

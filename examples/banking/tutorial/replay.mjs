@@ -94,7 +94,8 @@ async function probe(project, path) {
 			const history = await fetch('http://127.0.0.1:3000' + path, { signal: AbortSignal.timeout(3000) })
 			assert.deepEqual(await history.json(), { accountId: 'account-a', transactions: [saved] })
 		}
-		if (path === 'account-access' || path === 'account-overview') {
+		const hasTransforms = ['legacy-import', 'csv-export', 'legacy-http'].includes(path)
+		if (path === 'account-access' || path === 'account-overview' || hasTransforms) {
 			const request = (route, init = {}) =>
 				fetch('http://127.0.0.1:3000' + route, { ...init, signal: AbortSignal.timeout(3000) })
 			const login = async actor => {
@@ -133,7 +134,7 @@ async function probe(project, path) {
 				accountId: 'account-a',
 				transactions: [],
 			})
-			if (path === 'account-overview') {
+			if (path === 'account-overview' || hasTransforms) {
 				const overview = '/api/v1/accounts/account-a/overview'
 				const northResult = await bob(overview)
 				assert.equal(northResult.status, 200)
@@ -150,6 +151,33 @@ async function probe(project, path) {
 					transactionCount: 0,
 				})
 				assert.equal((await bob('/api/v1/accounts/account-c/overview')).status, 403)
+			}
+			if (hasTransforms) {
+				const legacy = JSON.parse(await readFile(resolve(project, 'fixtures/legacy-transaction.json'), 'utf8'))
+				const importLegacy = (client, payload = legacy) =>
+					client('/api/v1/legacy-transactions', {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					})
+				assert.equal((await importLegacy(bob)).status, 403)
+				const imported = await importLegacy(dana)
+				assert.equal(imported.status, 200)
+				assert.equal((await imported.json()).amountMinor, 12540)
+				assert.equal((await importLegacy(dana)).status, 409)
+				assert.equal((await importLegacy(dana, { ...legacy, amount: '125.401' })).status, 400)
+				assert.equal((await (await bob(history)).json()).transactions.length, 2)
+				if (path === 'csv-export' || path === 'legacy-http') {
+					const csv = await bob('/api/v1/accounts/account-a/statement.csv')
+					assert.equal(csv.status, 200)
+					assert.equal(csv.headers.get('content-type'), 'text/csv; charset=utf-8')
+					assert.equal(csv.headers.get('content-disposition'), 'attachment; filename="statement.csv"')
+					const body = await csv.text()
+					assert(body.startsWith('transactionId,sourceTransactionId,bookedAt,amountMinor,currency,direction\r\n'))
+					assert(body.includes('12540'))
+					assert(!body.includes('tenant-north'))
+					assert.equal((await bob('/api/v1/accounts/account-c/statement.csv')).status, 403)
+				}
 			}
 			assert.equal((await bob('/auth/logout', { method: 'POST' })).status, 200)
 			assert.equal((await bob(history)).status, 401)

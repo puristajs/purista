@@ -1,0 +1,8 @@
+{
+	"source_id": "legacy-001",
+	"account_ref": "account-a",
+	"booked_at": "2026-01-15T12:00:00.000Z",
+	"amount": "125.40",
+	"currency": "EUR",
+	"dc": "D"
+}

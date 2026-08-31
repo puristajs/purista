@@ -50,9 +50,15 @@ runtime correctness.
 Current replay coverage: project creation, Hono setup, Banking service, first
 HTTP command, repository resource wiring, transaction recording, account
 history, server-owned sessions, current account/action permissions, before and
-after guards, tenant isolation, and guarded command-to-command calls.
+after guards, tenant isolation, guarded command-to-command calls, exact legacy
+input transformation, CSV output transformation, and an outbound mock-bank client.
 Use `--to list-transactions` for the transaction chapter, `--to account-access`
 for its protected API, or `--to account-overview` for the composed command.
 The small `account-foundation` checkpoint tests identity and permissions before
-they are wired into HTTP. Later chapters must still be migrated and verified
-before they can be claimed as replayable.
+they are wired into HTTP. The integration chapter builds `legacy-import`,
+`csv-export`, and `legacy-http`; the last includes a working Compose dependency
+and a test that starts the same HTTP mock on a temporary port. Run that
+checkpoint's `docker compose -p example-bank-legacy up -d --wait` before trying
+the outbound import manually, then use the matching `down` command to stop it.
+Later chapters must still be migrated and verified before they can be claimed
+as replayable.

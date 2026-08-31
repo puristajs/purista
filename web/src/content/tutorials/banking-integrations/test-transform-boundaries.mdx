@@ -1,30 +1,163 @@
 ---
-title: Test transform boundaries
-description: Verify conversion, business denial, mock-adapter behavior, and CSV result scope.
-order: 46
+title: "Test the complete HTTP integration"
+description: "Construct the same resource wiring in tests and exercise a real temporary HTTP server without depending on a running container."
+order: 530
 ---
 
-Keep boundary tests small and observable. The runnable example confirms that
-Dana imports the fixed legacy debit, Bob receives `403`, and the account history
-contains the normalized source ID.
+First replace the shared test fixture so it provides the new required
+resource:
 
-```ts title="src/banking.integration.test.ts"
-expect(imported.status).toBe(200)
-expect(denied.status).toBe(403)
-expect(statement.transactions).toContainEqual(
-  expect.objectContaining({ sourceTransactionId: 'legacy-bank-debit-a-1' }),
-)
+```ts title="src/testing/createTestBank.ts"
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { AccountAccess } from '../accountAccess.js'
+import { createHttpService } from '../httpApp.js'
+import type { FixtureActor } from '../identity.js'
+import { type LegacyBankClient, LegacyBankHttpClient } from '../legacyBank.js'
+import type { LocalSessions } from '../localSessions.js'
+import { bankingV1Service } from '../service/banking/v1/bankingV1Service.js'
+import { TransactionRepository } from '../transactionRepository.js'
+
+/** Inject only the boundary a test needs to change; keep the real Framework runtime. */
+export async function createTestBank(
+	options: {
+		access?: AccountAccess
+		transactions?: TransactionRepository
+		sessions?: LocalSessions
+		legacyBank?: LegacyBankClient
+	} = {},
+) {
+	const logger = initLogger('error', { enabled: false })
+	const eventBridge = new DefaultEventBridge({ logger })
+	await eventBridge.start()
+	const access = options.access ?? new AccountAccess()
+	const transactions = options.transactions ?? new TransactionRepository(access)
+	const banking = await bankingV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { accountAccess: access, transactions, legacyBank: options.legacyBank ?? new LegacyBankHttpClient() },
+	})
+	await banking.start()
+	const http = await createHttpService({
+		eventBridge,
+		logger,
+		services: [banking],
+		sessions: options.sessions,
+	})
+	const request = (path: string, init?: RequestInit) => http.app.request(path, init)
+	// Exercise the service runtime before returning an authentication-only fixture.
+	const ready = await request('/api/v1/bank')
+	if (ready.status !== 200) throw new Error('Banking service is not ready')
+
+	return {
+		request,
+		access,
+		transactions,
+		eventBridge,
+		async login(actor: FixtureActor) {
+			const response = await request('/auth/login', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ actor }),
+			})
+			const cookie = response.headers.get('set-cookie')?.split(';', 1)[0]
+			if (response.status !== 200 || !cookie) throw new Error('Fixture login failed')
+			return {
+				cookie,
+				request(path: string, init?: RequestInit) {
+					const headers = new Headers(init?.headers)
+					headers.set('cookie', cookie)
+					return request(path, { ...init, headers })
+				},
+			}
+		},
+		async destroy() {
+			await http.destroy()
+			await banking.destroy()
+			await eventBridge.destroy()
+		},
+	}
+}
 ```
 
-Add a unit test for invalid monetary strings, an HTTP test for the complete
-command, and a CSV test that proves `text/csv` is returned only after the
-result-scope guard passes.
+The default client makes no request until a command uses it, so all previous
+tests can keep constructing the fixture unchanged. The new test will inject
+a client aimed at its own temporary mock server.
 
-```bash title="Verify the complete local example"
-npm run typecheck
+Replace the CLI-generated fetch-command test:
+
+```ts title="src/service/banking/v1/command/fetchLegacyTransaction/fetchLegacyTransactionCommandBuilder.test.ts"
+import type { AddressInfo } from 'node:net'
+import { expect, test } from 'vitest'
+import { LegacyBankHttpClient } from '../../../../../legacyBank.js'
+import { createLegacyBankMock } from '../../../../../mockLegacyBank.js'
+import { createTestBank } from '../../../../../testing/createTestBank.js'
+
+test('the HTTP dependency respects tenant scope, failures and permission before fetching', async () => {
+	const mock = createLegacyBankMock()
+	await new Promise<void>((resolve, reject) => {
+		mock.server.once('error', reject)
+		mock.server.listen(0, '127.0.0.1', resolve)
+	})
+	const baseUrl = 'http://127.0.0.1:' + (mock.server.address() as AddressInfo).port
+	const legacyBank = new LegacyBankHttpClient(baseUrl, 250)
+	const bank = await createTestBank({ legacyBank })
+	try {
+		const bob = await bank.login('bob')
+		const dana = await bank.login('dana')
+		const south = await bank.login('danaSouth')
+		const post = { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }
+		const path = (sourceId: string) => '/api/v1/accounts/account-a/legacy-imports/' + sourceId
+		expect((await bob.request(path('legacy-001'), post)).status).toBe(403)
+		expect(mock.requests).toEqual([])
+		const northResult = await dana.request(path('legacy-001'), post)
+		expect(northResult.status).toBe(200)
+		expect(await northResult.json()).toMatchObject({ tenantId: 'tenant-north', amountMinor: 12540 })
+		const southResult = await south.request(path('legacy-001'), post)
+		expect(southResult.status).toBe(200)
+		expect(await southResult.json()).toMatchObject({ tenantId: 'tenant-south', amountMinor: 9900 })
+		expect(mock.requests.map(request => [request.tenantId, request.principalId])).toEqual([
+			['tenant-north', 'dana'],
+			['tenant-south', 'dana'],
+		])
+		expect((await dana.request(path('legacy-001'), post)).status).toBe(409)
+		for (const [sourceId, status] of [
+			['missing', 404],
+			['malformed', 502],
+			['wrong-account', 502],
+			['wrong-id', 502],
+			['oversized', 502],
+			['slow', 504],
+		] as const) {
+			const response = await dana.request(path(sourceId), post)
+			expect(response.status, sourceId).toBe(status)
+			expect(await response.text()).not.toContain('mock-north')
+		}
+		const history = await dana.request('/api/v1/accounts/account-a/transactions')
+		expect((await history.json()).transactions).toHaveLength(1)
+	} finally {
+		await bank.destroy()
+		mock.server.closeAllConnections()
+		await new Promise<void>((resolve, reject) => mock.server.close(error => (error ? reject(error) : resolve())))
+	}
+})
+```
+
+The mock listens on port `0`, which asks the operating system to allocate a
+free port. The test obtains that address and injects it into the HTTP client.
+It exercises a real network request without depending on port 4010 or a
+container someone forgot to start.
+
+The assertion on `mock.requests` proves that Bob's denied action made no
+outbound request. North and south imports prove credential selection. Failure
+fixtures prove that invalid or late responses create no additional history.
+The `finally` block closes the service fixture and temporary server.
+
+```bash title="Verify the legacy-http checkpoint"
 npm test
+npm run build
 ```
 
-The mock stays in process. Add Docker Compose only when a tutorial needs a real
-protocol, persistence, or multi-process behaviour. This first adapter remains
-fast to run and safe to repeat.
+Expect twenty-five passing tests. The tests do not need Docker, but they do
+need permission to open a local socket. The separate Compose check verifies
+the dependency packaging and documented manual run path.
+
+Next, [try both HTTP servers together](/tutorials/banking-integrations/try-the-integration/).

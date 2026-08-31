@@ -322,5 +322,147 @@
 			}
 		],
 		"probe": "account-overview"
+	},
+	{
+		"id": "legacy-import",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"import-legacy-transaction",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Import a supported legacy transaction through the posting command",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "fixtures/legacy-transaction.json",
+				"page": "banking-integrations/compare-formats"
+			},
+			{
+				"path": "src/legacyTransaction.ts",
+				"page": "banking-integrations/define-legacy-format"
+			},
+			{
+				"path": "src/service/banking/v1/command/importLegacyTransaction/schema.ts",
+				"page": "banking-integrations/transform-input"
+			},
+			{
+				"path": "src/service/banking/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.ts",
+				"page": "banking-integrations/transform-input"
+			},
+			{
+				"path": "src/service/banking/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts",
+				"page": "banking-integrations/keep-business-guards"
+			}
+		],
+		"probe": "legacy-import"
+	},
+	{
+		"id": "csv-export",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"export-statement",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Export authorized account history as CSV",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "src/statementCsv.ts",
+				"page": "banking-integrations/serialize-csv"
+			},
+			{
+				"path": "src/service/banking/v1/command/exportStatement/schema.ts",
+				"page": "banking-integrations/transform-output"
+			},
+			{
+				"path": "src/service/banking/v1/command/exportStatement/exportStatementCommandBuilder.ts",
+				"page": "banking-integrations/transform-output"
+			},
+			{
+				"path": "src/httpApp.ts",
+				"page": "banking-integrations/download-statement"
+			},
+			{
+				"path": "src/service/banking/v1/command/exportStatement/exportStatementCommandBuilder.test.ts",
+				"page": "banking-integrations/test-csv-export"
+			}
+		],
+		"probe": "csv-export"
+	},
+	{
+		"id": "legacy-http",
+		"commands": [
+			[
+				"npm",
+				"run",
+				"add:command",
+				"--",
+				"fetch-legacy-transaction",
+				"--service",
+				"banking",
+				"--service-version",
+				"1",
+				"--description",
+				"Fetch an authorized legacy record and import it through the transform command",
+				"--non-interactive"
+			]
+		],
+		"files": [
+			{
+				"path": "src/mockLegacyBank.ts",
+				"page": "banking-integrations/call-the-legacy-api"
+			},
+			{
+				"path": "compose.yaml",
+				"page": "banking-integrations/call-the-legacy-api"
+			},
+			{
+				"path": "src/legacyBank.ts",
+				"page": "banking-integrations/add-legacy-client"
+			},
+			{
+				"path": "src/service/banking/v1/bankingV1ServiceBuilder.ts",
+				"page": "banking-integrations/wire-legacy-client"
+			},
+			{
+				"path": "src/index.ts",
+				"page": "banking-integrations/wire-legacy-client"
+			},
+			{
+				"path": "src/service/banking/v1/command/fetchLegacyTransaction/schema.ts",
+				"page": "banking-integrations/fetch-legacy-transaction"
+			},
+			{
+				"path": "src/service/banking/v1/command/fetchLegacyTransaction/fetchLegacyTransactionCommandBuilder.ts",
+				"page": "banking-integrations/fetch-legacy-transaction"
+			},
+			{
+				"path": "src/testing/createTestBank.ts",
+				"page": "banking-integrations/test-transform-boundaries"
+			},
+			{
+				"path": "src/service/banking/v1/command/fetchLegacyTransaction/fetchLegacyTransactionCommandBuilder.test.ts",
+				"page": "banking-integrations/test-transform-boundaries"
+			}
+		],
+		"probe": "legacy-http"
 	}
 ]

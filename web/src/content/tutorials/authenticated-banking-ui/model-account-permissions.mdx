@@ -25,6 +25,9 @@ the server holds a read permission; “open” means posting is not frozen.
 Here, “record” means recording an already-posted synthetic transaction, as in
 the API chapter. It does not move money.
 
+The freeze control in this example pauses the recording interface. It is not
+a debit freeze or a rule about recording settled transactions in a real bank.
+
 Create `src/accountAccess.ts`:
 
 ```ts title="src/accountAccess.ts"

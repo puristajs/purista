@@ -1,35 +1,58 @@
 ---
-title: Import and export transaction data
-description: Build an integration boundary with generated PURISTA commands, format transforms, a local mock dependency, and business guards.
+title: "Import and export transaction data"
+description: "Build PURISTA commands that transform a legacy format, export guarded CSV, and call a local mock bank over HTTP."
 order: 40
 ---
 
-Your banking service owns one transaction language: minor currency units,
-`accountId`, and `debit` or `credit`. A legacy bank uses another. In this
-chapter you build a boundary that translates one supported legacy record into
-the banking language, then exports an approved statement as CSV.
+Your banking API accepts integer minor units and a direction such as
+`debit`. A legacy bank sends a decimal string such as `"125.40"` and the
+letter `D`. Both describe the same synthetic transaction. You will teach
+PURISTA how to translate that representation without changing who may record it.
 
-```mermaid title="The boundary we build"
-flowchart LR
-  Wire[legacy wire data] --> Transform[input transform] --> Domain[banking command]
-  Domain --> Guard[posting assignment] --> Record[transaction repository]
-  Statement[domain result] --> Scope[after guard] --> Csv[CSV]
+Then you will build a CSV export of permitted account history. Finally, you
+will connect a separate mock bank over HTTP. That outbound request belongs in
+a command handler, where account permissions can be checked before it runs.
+
+```mermaid title="Three responsibilities in the integration"
+flowchart TD
+  Legacy[Legacy JSON] --> Transform[Input transform]
+  Transform --> Guard[Posting permission]
+  Guard --> Record[Existing recordTransaction command]
+  History[Scoped account history] --> Check[After guard checks every row]
+  Check --> CSV[Output transform produces CSV]
+  Fetch[Authorized fetch command] --> Mock[Local mock bank over HTTP]
+  Mock --> Legacy
 ```
 
-Start with the CLI-created banking service. If you are using this chapter on
-its own, generate it first:
+## Where to begin
 
-```bash title="Create the service"
-npm run add:service -- banking --description "Banking transaction operations"
-```
+Continue from the `account-overview` checkpoint. If you arrived independently,
+[recreate the starting project](/tutorials/banking-integrations/compare-formats/) before editing.
+You need no UI, model provider, or external bank account. The first import and
+CSV export use only the local application. Docker Compose appears when you
+build the separate mock dependency.
 
-The runnable checkpoint is `examples/banking/src/service.ts`. Its
-`LocalLegacyBankMock` is an in-process dependency, so this first integration
-does not require Docker or an external account.
+The application already has trusted Hono identity, account/action permissions,
+and tenant-scoped transaction storage. We will keep using them. A different
+input format must not let Bob gain Dana's posting permission.
 
-1. [Compare the two formats](/tutorials/banking-integrations/compare-formats/)
-2. [Generate and transform legacy input](/tutorials/banking-integrations/transform-input/)
-3. [Keep a business guard around the write](/tutorials/banking-integrations/keep-business-guards/)
-4. [Export a statement safely](/tutorials/banking-integrations/transform-output/)
-5. [Inject and inspect a local legacy-bank adapter](/tutorials/banking-integrations/call-the-legacy-api/)
-6. [Test the boundary](/tutorials/banking-integrations/test-transform-boundaries/)
+## Build the integration
+
+1. [Prepare the project and compare the formats](/tutorials/banking-integrations/compare-formats/).
+2. [Define the legacy contract and exact conversion](/tutorials/banking-integrations/define-legacy-format/).
+3. [Generate and implement the import command](/tutorials/banking-integrations/transform-input/).
+4. [Test conversion through the guarded runtime](/tutorials/banking-integrations/keep-business-guards/).
+5. [Write a bounded CSV formatter](/tutorials/banking-integrations/serialize-csv/).
+6. [Generate the statement export command](/tutorials/banking-integrations/transform-output/).
+7. [Configure the HTTP download response](/tutorials/banking-integrations/download-statement/).
+8. [Test CSV data and denied exports](/tutorials/banking-integrations/test-csv-export/).
+9. [Build and start the mock bank](/tutorials/banking-integrations/call-the-legacy-api/).
+10. [Write the outbound HTTP client](/tutorials/banking-integrations/add-legacy-client/).
+11. [Inject the client as a service resource](/tutorials/banking-integrations/wire-legacy-client/).
+12. [Generate the fetch-and-import command](/tutorials/banking-integrations/fetch-legacy-transaction/).
+13. [Connect and test the complete HTTP flow](/tutorials/banking-integrations/test-transform-boundaries/).
+14. [Try the integration and stop its dependency](/tutorials/banking-integrations/try-the-integration/).
+
+The three runnable checkpoints are `legacy-import`, `csv-export`, and
+`legacy-http`. Each is constructed by the preceding pages; they are also
+available through the repository's replay script.

@@ -1,0 +1,66 @@
+---
+title: "Define the legacy format and conversion"
+description: "Validate the supported wire grammar and convert decimal digits without floating-point rounding."
+order: 420
+---
+
+Create `src/legacyTransaction.ts` after
+[preparing the project and fixture](/tutorials/banking-integrations/compare-formats/):
+
+```ts title="src/legacyTransaction.ts"
+import { HandledError, StatusCode } from '@purista/core'
+import { z } from 'zod'
+import { accountIdSchema, type TransactionInput } from './transaction.js'
+
+export const legacyTransactionSchema = z.object({
+	source_id: z.string().min(1).max(80),
+	account_ref: accountIdSchema,
+	booked_at: z.iso.datetime(),
+	amount: z
+		.string()
+		.max(32)
+		.regex(/^[0-9]+\.[0-9]{2}$/),
+	currency: z.literal('EUR'),
+	dc: z.enum(['D', 'C']),
+})
+export type LegacyTransaction = z.infer<typeof legacyTransactionSchema>
+
+/** Convert one validated wire record without I/O or permission decisions. */
+export function fromLegacyTransaction(input: LegacyTransaction): TransactionInput {
+	const minor = BigInt(input.amount.replace('.', ''))
+	if (minor > BigInt(Number.MAX_SAFE_INTEGER)) {
+		throw new HandledError(StatusCode.BadRequest, 'The legacy amount is outside the supported range')
+	}
+	return {
+		sourceTransactionId: input.source_id,
+		accountId: input.account_ref,
+		bookedAt: input.booked_at,
+		amountMinor: Number(minor),
+		currency: input.currency,
+		direction: input.dc === 'D' ? 'debit' : 'credit',
+	}
+}
+```
+
+The schema accepts ASCII digits, a dot, and exactly two fractional digits.
+It rejects comma decimals, extra precision, unsupported currencies, and
+unknown direction codes. The timestamp must be a valid ISO timestamp in UTC.
+The length limits bound how much input the conversion needs to inspect.
+
+`fromLegacyTransaction` removes the decimal point and reads the remaining
+digits with `BigInt`, JavaScript's integer type for exact arithmetic. It checks
+the safe integer limit **before** converting to `Number`. We never multiply
+a floating-point amount and round away an unsupported precision.
+
+`"90071992547409.91"` converts to the largest safe integer. Increasing the
+last digit to `2` must fail. `"0.00"` converts to zero; the existing domain
+schema then rejects it because recorded amounts must be positive. The raw
+format and the business value are separate validation steps.
+
+This function performs no HTTP requests, permission lookups, or writes.
+The same account references are used on both sides deliberately. A real
+external account-number lookup would need its own authorized handler/resource
+operation; it must not be hidden inside a transform that runs before guards.
+
+This new file compiles without changing the running API. Next,
+[generate the PURISTA command that uses it](/tutorials/banking-integrations/transform-input/).
