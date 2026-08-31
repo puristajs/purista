@@ -28,6 +28,25 @@ record and it never grants access to a review case.
 
 ## Start here
 
+Metrics extend generated work; they are not an independent service. Complete
+the transaction-monitoring and background-statements chapters first, or create
+the same operations artifacts in a fresh project:
+
+```bash title="Generate the metric-producing PURISTA artifacts"
+npm run add:service -- banking-operations --description "Monitoring and banking operations"
+npm run add:subscription -- monitor-recorded-transaction \
+  --service banking-operations --service-version 1 \
+  --event banking.transaction.recorded \
+  --description "Record a synthetic transaction review signal"
+npm run add:queue -- generate-statement \
+  --service banking-operations --service-version 1 \
+  --worker-name generate-statement-worker --worker-mode continuous \
+  --description "Generate statement metadata"
+```
+
+Add the metric declarations to that generated service builder, then update the
+generated subscription and command tests to assert only finite labels.
+
 Run the banking tests from the PURISTA repository root:
 
 ```bash title="Run the bounded metrics checkpoint"
