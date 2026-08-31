@@ -28,6 +28,23 @@ are deterministic so the lesson runs without a provider key or model spend.
 Later chapters can replace a specialist with a model-backed agent without
 changing the P5 guard or the brief contract.
 
+## Generate the attached investigation agent
+
+The coordinator is a service-owned PURISTA agent. Generate it before adding
+the bounded specialists and workflow definition:
+
+```bash title="Generate the investigation service and agent"
+npm run add:service -- banking-case-investigation \
+  --description "Investigate assigned synthetic banking review cases"
+npm run add:agent -- investigate-case \
+  --service banking-case-investigation --service-version 1 \
+  --description "Collect bounded evidence for one assigned review case"
+```
+
+Replace the generated input and output schemas with a case ID and typed case
+brief. Add P5 before the workflow starts, and keep each specialist's evidence
+input narrow. The runnable checkpoint is `examples/banking/src/investigation/service.ts`.
+
 Run the proof from the repository root:
 
 ```bash
