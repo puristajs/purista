@@ -33,6 +33,23 @@ synthetic fixtures, Alice and Bob may use `account-a-documents`; Carol may use
 `account-c-documents`. Selecting a collection in the browser does not grant
 permission to it.
 
+## Build on the generated ingestion service
+
+Complete the document-ingestion chapter first. It creates the `bankingKnowledge`
+service, its guarded ingestion command, and the attached `embedDocument` agent.
+Generate the answer command in that same service:
+
+```bash title="Generate the grounded-answer command"
+npm run add:command -- answer-knowledge-question \
+  --service banking-knowledge --service-version 1 \
+  --description "Answer from authorized stored excerpts"
+```
+
+Replace the command's starter schemas with `collectionId` and bounded
+`question` fields, then reuse the collection business guard before calling the
+retrieval helper. The React chat route remains a presentation adapter; the
+PURISTA command owns authorization and answering.
+
 ## Run it locally
 
 From the `purista` repository root, build the static React files once, then

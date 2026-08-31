@@ -31,7 +31,27 @@ collection they are allowed to read. In the fixture, Alice and Bob may use
 `account-a-documents`; Carol may use `account-c-documents`. A valid
 identity alone is not enough.
 
-## Start here
+## Generate the ingestion boundary
+
+Create the service and its two PURISTA artifacts before adding the knowledge
+schemas and repository:
+
+```bash title="Generate the knowledge service, command, and agent"
+npm run add:service -- banking-knowledge \
+  --description "Ingest and search authorized banking documents"
+npm run add:command -- request-document-ingestion \
+  --service banking-knowledge --service-version 1 \
+  --description "Queue an authorized banking document for ingestion"
+npm run add:agent -- embed-document \
+  --service banking-knowledge --service-version 1 \
+  --description "Create deterministic vectors for one authorized document"
+```
+
+The CLI creates separate builder and test files, then wires both definitions
+into the generated service. Replace their starter contracts with the bounded
+document schema and collection-scoped parameter shown in the next pages.
+
+## Run it locally
 
 No Docker service, database, vector store, or model provider is required. The
 application uses `DefaultEventBridge`, `DefaultQueueBridge`, and an in-memory

@@ -1,13 +1,16 @@
 ---
-title: Run the knowledge service
-description: Start Example Bank, sign in, and queue a sample guide through the browser-backed knowledge service.
+title: Build and run the knowledge service
+description: Verify the generated command and attached embedding agent, then run the browser-backed knowledge service.
 order: 111
 status: published
 ---
 
-Start the complete example:
+Run the CLI-generated builder tests before editing their contracts, then start
+the complete example:
 
 ```bash title="Build and start Example Bank"
+npm test -- --run src/service/bankingKnowledge/v1/command/requestDocumentIngestion
+npm test -- --run src/service/bankingKnowledge/v1/agent/embedDocument
 npm run build:ui -w @purista/banking-tutorials
 npm run dev -w @purista/banking-tutorials
 ```
