@@ -1,0 +1,31 @@
+---
+title: Analyze a statement in a sandbox
+description: Queue a validated synthetic CSV and calculate an approved report in a real, local Docker sandbox.
+order: 200
+status: published
+---
+
+This checkpoint adds an isolated worker to Example Bank. Alice can submit a
+small synthetic CSV only for an account she may read. A PURISTA command guards
+that business rule, then a queue worker writes the file into a private Docker
+workspace, runs one reviewed `awk` calculation, and retains only a typed
+summary in application state.
+
+The Docker adapter is local-development infrastructure. It uses a digest-pinned
+image, non-root user, no guest network, resource limits, and no host mounts,
+Docker socket, credentials, or repository files. It is not a claim of a
+multi-tenant production sandbox or durable workflow recovery.
+
+```mermaid title="The bank owns authorization and the job; Docker owns the isolated execution"
+flowchart LR
+  UI[Authenticated UI] --> Command[PURISTA command + business guard]
+  Command --> Queue[PURISTA queue]
+  Queue --> Worker[Queue worker]
+  Worker --> Docker[Private Docker workspace]
+  Docker --> Report[Approved typed report]
+```
+
+1. [Accept a synthetic statement](/tutorials/sandboxed-analysis/accept-statement/)
+2. [Configure the Docker boundary](/tutorials/sandboxed-analysis/configure-docker/)
+3. [Run the queued analysis](/tutorials/sandboxed-analysis/run-analysis-job/)
+4. [Test the real adapter](/tutorials/sandboxed-analysis/test-isolation/)

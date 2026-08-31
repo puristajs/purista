@@ -12,6 +12,7 @@ import {
 	inMemoryMemoryEngine,
 	type PuristaMetricsRecorderInterface,
 } from '@purista/core'
+import type { Sandbox } from '@purista/harness'
 import { honoV1Service } from '@purista/hono-http-server'
 import { createUIMessageStream, createUIMessageStreamResponse, type UIMessage } from 'ai'
 
@@ -25,6 +26,8 @@ import type { BankActor } from './repository.js'
 import { BankingRepository } from './repository.js'
 import { FeeChangeReviewStore } from './review/repository.js'
 import { bankingFeeChangeReviewService } from './review/service.js'
+import { StatementAnalysisStore } from './sandbox/repository.js'
+import { bankingStatementAnalysisService } from './sandbox/service.js'
 import { bankingService } from './service.js'
 
 const tutorialUiDirectory = fileURLToPath(new URL('../ui/dist', import.meta.url))
@@ -88,6 +91,8 @@ export type BankingApplicationOptions = {
 	bankingRepository?: BankingRepository
 	/** Captures safe framework and application metrics in a focused runtime test. */
 	metricsRecorder?: PuristaMetricsRecorderInterface
+	/** Optional real sandbox composition for the statement-analysis tutorial checkpoint. */
+	statementSandbox?: Sandbox
 }
 
 export const createBankingApplication = async (options: BankingApplicationOptions = {}) => {
@@ -97,6 +102,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 	const operationsStore = new BankingOperationsStore()
 	const knowledgeRepository = new BankingKnowledgeRepository()
 	const feeChangeReviewStore = new FeeChangeReviewStore()
+	const statementAnalysisStore = new StatementAnalysisStore()
 	const supportMemoryEngine = inMemoryMemoryEngine()
 	const sessions = new Map<string, LocalSession>()
 	await eventBridge.start()
@@ -132,15 +138,33 @@ export const createBankingApplication = async (options: BankingApplicationOption
 			memory: supportMemoryEngine,
 		},
 	})
+	const bankingStatementAnalysis = options.statementSandbox
+		? await bankingStatementAnalysisService.getInstance(eventBridge, {
+				queueBridge,
+				resources: {
+					bankingRepository,
+					statementAnalysisStore,
+					statementSandbox: options.statementSandbox,
+				},
+			})
+		: undefined
 	await banking.start()
 	await bankingOperations.start()
 	await bankingKnowledge.start()
 	await bankingFeeChangeReview.start()
 	await bankingSupportMemory.start()
+	await bankingStatementAnalysis?.start()
 
 	const hono = await honoV1Service.getInstance(eventBridge, {
 		serviceConfig: {
-			services: [banking, bankingOperations, bankingKnowledge, bankingFeeChangeReview, bankingSupportMemory],
+			services: [
+				banking,
+				bankingOperations,
+				bankingKnowledge,
+				bankingFeeChangeReview,
+				bankingSupportMemory,
+				...(bankingStatementAnalysis ? [bankingStatementAnalysis] : []),
+			],
 			autoRegisterServicesFromConfig: true,
 		},
 	})
@@ -229,6 +253,7 @@ export const createBankingApplication = async (options: BankingApplicationOption
 		fetch: hono.app.fetch,
 		destroy: async () => {
 			await hono.destroy()
+			await bankingStatementAnalysis?.destroy()
 			await bankingSupportMemory.destroy()
 			await bankingFeeChangeReview.destroy()
 			await bankingKnowledge.destroy()
@@ -242,7 +267,22 @@ export const createBankingApplication = async (options: BankingApplicationOption
 
 export const main = async () => {
 	const logger = initLogger('info')
-	const application = await createBankingApplication()
+	const image = process.env.PURISTA_BANKING_SANDBOX_IMAGE
+	const statementSandbox = image
+		? await (async () => {
+				const packageName = '@purista/harness-sandbox-docker'
+				const adapter = (await import(packageName)) as {
+					dockerSandbox?: (options: { root: string; image: string; network: 'none' }) => Sandbox
+				}
+				if (!adapter.dockerSandbox) throw new Error('The Docker sandbox adapter is unavailable')
+				return adapter.dockerSandbox({
+					root: process.env.PURISTA_BANKING_SANDBOX_ROOT ?? '/tmp/purista-banking-sandboxes',
+					image,
+					network: 'none',
+				})
+			})()
+		: undefined
+	const application = await createBankingApplication({ statementSandbox })
 	const listener = serve({ fetch: application.fetch, port: Number(process.env.PORT ?? 3010) })
 
 	gracefulShutdown(logger, [

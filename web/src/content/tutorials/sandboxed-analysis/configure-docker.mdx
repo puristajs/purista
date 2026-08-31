@@ -1,0 +1,22 @@
+---
+title: Configure the Docker boundary
+description: Use the supported adapter with a pinned image, no network, and declared limits.
+order: 202
+status: published
+---
+
+Compose the adapter once in the application worker. The adapter rejects mutable
+image tags and does not pull images. The prepared image must already be local.
+
+```ts
+dockerSandbox({
+  root: '/absolute/private/sandbox-metadata',
+  image: 'sha256:…',
+  network: 'none',
+  resources: { cpus: 0.25, memoryMb: 128, pids: 32, tmpfsMb: 16 },
+})
+```
+
+The current Harness 3.0 packages are linked in this development workspace
+while publication is pending. Do not represent this as a registry install. The
+example's live test uses the linked adapter and an existing local image.

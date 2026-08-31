@@ -1,0 +1,20 @@
+---
+title: Accept a synthetic statement
+description: Validate the CSV before creating a job, then enforce account access as a business rule.
+order: 201
+status: published
+---
+
+`submitStatementAnalysis` accepts only a short `.csv` filename, a bounded body,
+and the one-column `amountMinor` training format. Validation does not authorize
+the request. The command's before guard separately checks that the current
+principal can read the selected account. The server, never the browser, adds
+the requester to the queued payload.
+
+```ts
+requireRead(resources, requireActor(context.message.principalId), payload.accountId)
+parseStatement(payload.content)
+```
+
+The idempotency key belongs to the requester and request key. Retrying the same
+request returns the original job rather than creating a second analysis.

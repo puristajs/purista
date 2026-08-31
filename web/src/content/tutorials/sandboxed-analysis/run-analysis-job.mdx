@@ -1,0 +1,15 @@
+---
+title: Run the queued analysis
+description: Run one reviewed calculation inside a job-owned sandbox and publish only its typed result.
+order: 203
+status: published
+---
+
+The worker rechecks the original requester's account access before it opens a
+sandbox. It then registers an application-owned logical owner, stages the CSV
+at `/workspace/statement.csv`, runs a fixed command with a five-second timeout,
+and validates the result before storing it. It closes and terminates the exact
+job scope in `finally`, including when the calculation fails.
+
+The input never becomes a command. The worker selects the executable command;
+the CSV is only a file inside the guest workspace.

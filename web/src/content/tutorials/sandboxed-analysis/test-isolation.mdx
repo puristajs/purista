@@ -1,0 +1,19 @@
+---
+title: Test the real adapter
+description: Run a Docker-backed proof separately from ordinary unit tests.
+order: 204
+status: published
+---
+
+Most tests should use normal framework fixtures. The Docker check is deliberately
+opt-in because it creates disposable local Docker resources. It writes a CSV,
+runs the fixed calculation in the guest, asserts the result, and terminates the
+exact run scope.
+
+```bash
+PURISTA_BANKING_DOCKER_TEST=1 \
+  npx vitest run examples/banking/src/sandbox/docker.integration.test.ts
+```
+
+Run it only against an engine you control. This confirms the adapter's local
+engine behavior; it does not prove production platform controls.
