@@ -17,6 +17,27 @@ processes, write domain records to PostgreSQL, or prove restart recovery. A
 running Compose stack alone is not proof that messages, jobs, or business
 state survive a restart.
 
+## Build on the generated local application
+
+Create the local banking service, commands, subscription, and queue first.
+This chapter does not add a new CLI artifact because it prepares an alternate
+composition of those already-generated artifacts with external bridge
+resources.
+
+```bash title="Create the local PURISTA artifacts before adding dependencies"
+npm run add:service -- banking --description "Banking transaction operations"
+npm run add:command -- record-transaction --service banking --service-version 1 \
+  --description "Record an already-posted synthetic transaction"
+npm run add:subscription -- monitor-recorded-transaction \
+  --service banking-operations --service-version 1 \
+  --event banking.transaction.recorded \
+  --description "Record a synthetic transaction review signal"
+```
+
+The provided Compose profile and bridge factory then replace only transport
+resources. They do not silently split the application into processes or make
+the in-memory repository durable.
+
 ```mermaid title="The prepared dependencies have separate responsibilities"
 flowchart LR
   App[Future PURISTA composition root] --> NATS[NATS JetStream\nevents and commands]

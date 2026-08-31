@@ -10,6 +10,23 @@ checkpoint keeps the dataset, candidate result, and score separate. It never
 calls a live provider, sends customer data, or lets a quality average override
 an access-control failure.
 
+## Start from a generated agent, then add a test gate
+
+This chapter intentionally does not generate another PURISTA service. It tests
+the behavior of an attached agent built in the earlier chapters. Generate that
+agent first, then keep the evaluation dataset and scorer beside its tests:
+
+```bash title="Create the agent checkpoint that the evaluation will gate"
+npm run add:agent -- classify-customer-support \
+  --service banking-customer-support --service-version 1 \
+  --description "Classify one authorized customer support request"
+npx vitest run examples/banking/src/evaluations/scoring.test.ts
+```
+
+The scorer is deterministic TypeScript, not a second runtime or a new
+permission path. Access-control tests remain hard gates for the generated
+PURISTA service.
+
 ```mermaid title="Offline evaluation is a gate, not an authorization system"
 flowchart LR
   Cases[Reviewed synthetic cases] --> Results[Saved candidate results]
