@@ -1,0 +1,31 @@
+---
+title: Test the API
+description: Run the real HTTP test and identify the behavior it proves and the behavior it does not yet cover.
+order: 26
+---
+
+The current API test creates the full local application, sends `Request`
+objects to `hono.app.fetch`, and destroys the application after each case. It
+lives in `examples/banking/src/banking.integration.test.ts`.
+
+```bash title="Run the transaction HTTP test"
+npm run test -w @purista/banking-tutorials
+```
+
+The test currently proves two useful boundaries:
+
+- Bob can read account A but receives `403` for account C.
+- Dana can import a supported legacy debit, while Bob receives `403` when
+  attempting a native posting.
+
+This is stronger than testing a repository method alone because it runs Hono,
+the command definition, guard, handler, and repository together. It still does
+not cover a browser, persistent database, real identity provider, or money
+movement.
+
+When adding a test, reset state by creating a new application in the test
+rather than sharing a repository across cases. Add assertions for the returned
+response and for the forbidden side effect: a denied write must not later show
+up in a list request.
+
+Next: [control access to accounts and actions](/tutorials/authenticated-banking-ui/).

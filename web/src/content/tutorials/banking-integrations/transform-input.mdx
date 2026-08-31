@@ -1,0 +1,44 @@
+---
+title: Transform legacy input
+description: Validate the received legacy shape, convert it to the domain contract, and reject unsupported representations.
+order: 42
+---
+
+`importLegacyTransaction` has both raw and domain schemas. PURISTA validates
+the raw parameter, then raw payload, calls the transform, and then validates
+the returned domain payload and parameter before a guard runs.
+
+```ts title="examples/banking/src/service.ts"
+.setTransformInput(legacyTransactionSchema, emptyParameterSchema, async function (_context, payload, parameter) {
+  const [whole, fraction] = payload.amount.split('.')
+  const amountMinor = Number(whole) * 100 + Number(fraction)
+  if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
+    throw new HandledError(StatusCode.BadRequest, 'The legacy amount is outside the supported range')
+  }
+  return {
+    payload: {
+      accountId: payload.account_ref,
+      sourceTransactionId: payload.source_id,
+      bookedAt: payload.booked_at,
+      amountMinor,
+      currency: payload.currency,
+      direction: payload.dc === 'D' ? 'debit' : 'credit',
+    },
+    parameter,
+  }
+})
+```
+
+The raw schema requires decimal digits with exactly two fraction digits. It
+rejects `125`, `125.4`, `125.400`, comma decimals, unsupported currency, and
+unknown direction before the handler can record anything. The explicit safe
+integer check rejects values outside the supported number range.
+
+## Test malformed wire input
+
+Send `"amount":"125.400"` to `POST /api/v1/legacy/transactions` as Dana.
+Expect `400`, then list account A as Alice. No new transaction may appear.
+Also test `"dc":"X"` and `"currency":"USD"`; these are unsupported
+representations, not values the transform should guess or convert.
+
+Next: [keep business guards](/tutorials/banking-integrations/keep-business-guards/).

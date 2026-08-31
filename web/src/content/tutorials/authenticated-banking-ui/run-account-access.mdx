@@ -1,0 +1,45 @@
+---
+title: Run the account access example
+description: Compare allowed and denied actions while keeping the local fixture identity valid.
+order: 31
+---
+
+Start the service, then use the same account with two valid actors. This is the
+important authorization test: change one business fact while leaving the
+caller recognized.
+
+```bash title="Start the banking example"
+npm run dev -w @purista/banking-tutorials
+```
+
+Alice may read account A:
+
+```bash title="Read account A as Alice"
+curl -i -H 'x-example-actor: alice' \
+  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
+```
+
+Bob may also read A, but Bob may not read Carol's account:
+
+```bash title="Attempt to read Carol's account as Bob"
+curl -i -H 'x-example-actor: bob' \
+  http://127.0.0.1:3010/api/v1/accounts/account-c/transactions
+```
+
+The first response is `200`; the second is `403`. In this example, a mandate
+is the fixture rule that connects an actor to an account and an allowed action.
+The name helps us avoid a common mistake: a valid identity or a broad role is
+not, by itself, permission to use every account.
+
+## Test the paired decision
+
+Run the integration test after both requests:
+
+```bash title="Run business access tests"
+npm run test -w @purista/banking-tutorials
+```
+
+The test checks Bob's allowed read of A and denied read of C through the HTTP
+boundary. It uses fresh in-memory fixtures for each case.
+
+Next: [understand the local login boundary](/tutorials/authenticated-banking-ui/add-local-login/).

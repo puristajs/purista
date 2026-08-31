@@ -1,0 +1,39 @@
+---
+title: Record a transaction
+description: Call the command that records one already-posted synthetic transaction and see how duplicate source IDs behave.
+order: 23
+---
+
+`recordTransaction` is a command: it receives a request, applies one business
+operation, and returns a typed result. The command is exposed at
+`POST /api/v1/transactions` by the definition in
+`examples/banking/src/service.ts`.
+
+```bash title="Record a synthetic debit as Dana"
+curl --fail -X POST http://127.0.0.1:3010/api/v1/transactions \
+  -H 'content-type: application/json' \
+  -H 'x-example-actor: dana' \
+  --data '{"accountId":"account-a","sourceTransactionId":"ops-demo-1","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12540,"currency":"EUR","direction":"debit"}'
+```
+
+The repository stores a generated `transactionId` and returns the record. It
+uses `accountId` plus `sourceTransactionId` as its local duplicate key. Send
+the same request again: the repository returns the existing logical record.
+This makes an accidental retry safe for this in-memory example.
+
+Change the amount while keeping `ops-demo-1`. The repository returns `409`
+because the same source ID now describes different data. Do not treat that as
+a retryable success; find the upstream data error.
+
+## Test the two duplicate cases
+
+The HTTP integration test in
+`examples/banking/src/banking.integration.test.ts` covers a command invocation
+through the real composition. Add or inspect a focused test for both an
+identical retry and a conflicting retry before changing the duplicate rule.
+
+```bash title="Run the banking HTTP tests"
+npm run test -w @purista/banking-tutorials
+```
+
+Next: [call the REST API](/tutorials/transaction-api/connect-rest/).

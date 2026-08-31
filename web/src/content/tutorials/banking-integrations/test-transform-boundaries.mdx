@@ -1,0 +1,34 @@
+---
+title: Test transform boundaries
+description: Use the real command runtime to prove that normalization, authorization, and idempotency remain separate.
+order: 46
+---
+
+Run the current HTTP integration tests:
+
+```bash title="Run the banking transform tests"
+npm run test -w @purista/banking-tutorials
+```
+
+`examples/banking/src/banking.integration.test.ts` submits a legacy body through
+`hono.app.fetch` as Dana. It verifies that `"125.40"` becomes `12540`, `D`
+becomes `debit`, and the command returns account A. The same test submits a
+native transaction as Bob and expects `403`.
+
+That pair proves that the guard receives the normalized domain account and that
+a valid input format does not grant posting authority. It does not prove every
+input rejection. Add cases for extra decimal precision, a comma, unsupported
+currency, unknown direction, overflow, identical duplicate, and conflicting
+duplicate when you change the mapping or repository rule.
+
+Use the registered service and HTTP boundary for transform and after-guard
+checks. A unit test of a standalone string-to-number helper cannot prove the
+runtime order or show that a denied request created no transaction.
+
+The command's canonical business result remains JSON-shaped inside the
+application. CSV is only its HTTP response representation; do not reuse CSV as
+a business event payload.
+
+The next planned subject is transaction monitoring with business events. It is
+not linked here because its public tutorial checkpoint is not part of this
+published content set yet.

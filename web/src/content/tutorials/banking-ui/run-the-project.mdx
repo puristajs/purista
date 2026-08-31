@@ -1,0 +1,49 @@
+---
+title: Create and run the project
+description: Install the banking example and prove that its local process starts before changing code.
+order: 11
+---
+
+Start by running the example unchanged. This gives you a known-good point for
+later changes and shows where the server process is running.
+
+From the `purista` repository root, install the workspace dependencies if they
+are not already installed, then start the example:
+
+```bash title="Install and run the banking example"
+npm install
+npm run dev -w @purista/banking-tutorials
+```
+
+The second command stays in the foreground. Leave it open and use a second
+terminal for browser or `curl` requests. The default listener address is
+`http://127.0.0.1:3010`; `PORT` can change only the port number.
+
+Open the root path in a browser:
+
+```text title="Expected browser text"
+Example Bank
+Use the tutorial UI checkpoint to explore this service.
+```
+
+`examples/banking/package.json` owns the `dev`, `start`, `typecheck`, `test`,
+and `build` commands. The app does not need a database, Docker, credentials,
+or an external service for this checkpoint.
+
+If Node reports that the required version is unavailable, install Node 24.15 or
+newer. If the port is busy, stop the other local process or run
+`PORT=3011 npm run dev -w @purista/banking-tutorials` and open that port.
+
+## Test what you started
+
+In another terminal, run the deterministic checks:
+
+```bash title="Check the banking example"
+npm run typecheck -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+These tests exercise the application through its HTTP fetch boundary. They do
+not start a browser and they do not prove a production deployment.
+
+Next: [start the Hono HTTP server](/tutorials/banking-ui/start-hono/).

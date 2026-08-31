@@ -1,0 +1,44 @@
+---
+title: Run the API
+description: Start the local service and inspect its seeded transaction history with a fixture actor.
+order: 21
+---
+
+Start the application from the `purista` repository root:
+
+```bash title="Start the banking API"
+npm run dev -w @purista/banking-tutorials
+```
+
+The seed data contains one credit transaction on `account-a`. Ask for the
+history as Alice:
+
+```bash title="Read Alice's synthetic account history"
+curl --fail \
+  -H 'x-example-actor: alice' \
+  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
+```
+
+The response contains `accountId: "account-a"` and
+`transaction-seed-a-1`. Amounts are stored as integer minor units: `4250`
+means EUR 42.50. Storing a whole number avoids binary floating-point rounding
+in the command contract.
+
+The header selects a local fixture actor. `alice` and `bob` may read account A,
+`carol` may read account C, and `dana` is the operations actor for posting to
+account A. The server checks the header; it does not accept an actor in the
+JSON payload.
+
+## Test the starting result
+
+Try Bob against Carol's account:
+
+```bash title="Prove that a valid actor still has limited access"
+curl -i -H 'x-example-actor: bob' \
+  http://127.0.0.1:3010/api/v1/accounts/account-c/transactions
+```
+
+Expect `403`. This is a business permission denial, not a failed login. Stop
+and restart the process whenever you need the seed state again.
+
+Next: [define transactions](/tutorials/transaction-api/define-transactions/).

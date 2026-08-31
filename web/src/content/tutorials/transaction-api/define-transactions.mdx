@@ -1,0 +1,46 @@
+---
+title: Define transactions
+description: Read the service contract that validates a transaction before any guard or repository code runs.
+order: 22
+---
+
+The `banking` service owns transaction operations. Its service information and
+schemas are in `examples/banking/src/service.ts`.
+
+```ts title="examples/banking/src/service.ts"
+const transactionSchema = z.object({
+  accountId: z.enum(['account-a', 'account-c']),
+  sourceTransactionId: z.string().min(1).max(80),
+  bookedAt: z.string().datetime(),
+  amountMinor: z.number().int().positive().max(Number.MAX_SAFE_INTEGER),
+  currency: z.literal('EUR'),
+  direction: z.enum(['debit', 'credit']),
+})
+```
+
+A schema is a checked description of data. Here it makes the public boundary
+clear: only two synthetic accounts and EUR are supported, money must be a
+positive safe integer, and the date must be an ISO timestamp. The tutorial
+does not implement currency conversion or payment settlement.
+
+`ServiceBuilder` declares `banking` version `1` and declares the
+`bankingRepository` resource. The composition root supplies the resource when
+it creates the service. That keeps storage ownership outside individual
+commands.
+
+## Test invalid input at the HTTP boundary
+
+Send a fractional minor-unit value as Dana:
+
+```bash title="Send invalid transaction input"
+curl -i -X POST http://127.0.0.1:3010/api/v1/transactions \
+  -H 'content-type: application/json' \
+  -H 'x-example-actor: dana' \
+  --data '{"accountId":"account-a","sourceTransactionId":"bad-amount","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":12.5,"currency":"EUR","direction":"debit"}'
+```
+
+Expect a `400` response. Invalid data does not reach the access guard or
+repository. Read [commands](/handbook/framework/build-services/commands/) for
+the full command contract.
+
+Next: [record a transaction](/tutorials/transaction-api/record-a-transaction/).

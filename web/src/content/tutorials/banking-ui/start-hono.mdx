@@ -1,0 +1,52 @@
+---
+title: Start the Hono HTTP server
+description: See how the local EventBridge, banking service, Hono service, and Node listener start in one process.
+order: 12
+---
+
+Hono receives HTTP requests. PURISTA owns the banking service that performs
+business work. In this local example, both use the same in-process
+`DefaultEventBridge`.
+
+The composition lives in `examples/banking/src/index.ts`. Its order matters:
+
+```ts title="examples/banking/src/index.ts"
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+
+const banking = await bankingService.getInstance(eventBridge, {
+  resources: { bankingRepository: new BankingRepository() },
+})
+await banking.start()
+
+const hono = await honoV1Service.getInstance(eventBridge, {
+  serviceConfig: { services: [banking], autoRegisterServicesFromConfig: true },
+})
+await hono.start()
+```
+
+The EventBridge starts first because both services use it. The repository is a
+resource supplied by the composition root. `services: [banking]` lets Hono
+register the HTTP endpoints defined by that local service; it is not remote
+service discovery.
+
+`@hono/node-server` supplies the final Node listener. It calls `hono.app.fetch`
+on port 3010 by default. A listener accepting connections is not a full
+application readiness claim. The current checkpoint has no separate health
+endpoint, so do not configure a platform probe from this page.
+
+## Test the HTTP boundary
+
+With the process running, request the root document:
+
+```bash title="Request the Hono root route"
+curl -i http://127.0.0.1:3010/
+```
+
+Expect `200` and HTML containing `Example Bank`. A connection refusal means
+the foreground process is not running or the selected port differs.
+
+Read [Hono HTTP server](/handbook/framework/expose-and-consume-services/http-and-rest/hono/)
+for the verified startup and protection options used by a larger application.
+
+Next: [serve the browser page](/tutorials/banking-ui/serve-react/).

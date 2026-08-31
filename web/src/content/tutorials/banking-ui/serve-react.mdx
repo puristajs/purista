@@ -1,0 +1,39 @@
+---
+title: Serve the browser page
+description: Inspect the current page route and understand the boundary between a server response and a future React application.
+order: 13
+---
+
+The route for the current visible result is intentionally direct. It is a Hono
+route that returns HTML from `examples/banking/src/index.ts`:
+
+```ts title="examples/banking/src/index.ts"
+hono.app.get('/', context =>
+  context.html(
+    '<!doctype html><title>Example Bank</title><main><h1>Example Bank</h1><p>Use the tutorial UI checkpoint to explore this service.</p></main>',
+  ),
+)
+```
+
+The browser receives this text as the response body. There is no React build,
+asset manifest, development proxy, or shadcn component in the current banking
+checkpoint. That distinction is useful: a browser page can be served before a
+frontend application is introduced.
+
+Do not add a client-side button that claims to record a transaction at this
+stage. The only honest result is the page itself. The REST API introduced in
+the next chapter is the first business interaction.
+
+## Test the response
+
+Use either the browser or this request:
+
+```bash title="Inspect the served document"
+curl --fail http://127.0.0.1:3010/
+```
+
+The response must contain the heading `Example Bank`. If it is not present,
+check that you started `@purista/banking-tutorials`, rather than another local
+server on the same port.
+
+Next: [make your first visible change](/tutorials/banking-ui/change-the-page/).

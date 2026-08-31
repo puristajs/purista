@@ -18,6 +18,24 @@ const handbookCards = defineCollection({
 	}),
 })
 
+/**
+ * Problem-oriented, runnable tutorial chapters.
+ *
+ * A chapter owns `<chapter>/index.md`; its ordered child pages live below the
+ * same directory. This keeps the public route, sidebar nesting, and source
+ * checkpoint together without duplicating chapter metadata in every page.
+ */
+const tutorials = defineCollection({
+	loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/tutorials' }),
+	schema: z.object({
+		title: z.string(),
+		description: z.string().optional(),
+		order: z.number().int().nonnegative().default(999999),
+		status: z.enum(['draft', 'published']).default('published'),
+		sidebarLabel: z.string().optional(),
+	}),
+})
+
 const legacyPageSchema = z
 	.object({
 		title: z.string(),
@@ -43,4 +61,4 @@ const pages = defineCollection({
 	schema: legacyPageSchema,
 })
 
-export const collections = { handbook, handbookCards, articles, resources, pages }
+export const collections = { handbook, handbookCards, tutorials, articles, resources, pages }

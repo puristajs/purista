@@ -1,0 +1,35 @@
+---
+title: Handle API errors
+description: Tell malformed input, a forbidden action, and a conflicting duplicate apart without exposing another account's data.
+order: 25
+---
+
+The API has different failure meanings. Keep them separate because the safe
+next action differs.
+
+| Situation | Expected result | What to do |
+| --- | --- | --- |
+| Invalid JSON shape, timestamp, currency, or amount | `400` | Correct the client request. |
+| Known fixture actor cannot record for the account | `403` | Do not retry; use an authorized operations process. |
+| Same source ID has different data | `409` | Reconcile the source record. |
+| Unknown example actor | `401` | Use one of the documented local fixtures. |
+
+For example, Bob is a valid local actor but may not post transactions:
+
+```bash title="Prove that a bookkeeper cannot post"
+curl -i -X POST http://127.0.0.1:3010/api/v1/transactions \
+  -H 'content-type: application/json' \
+  -H 'x-example-actor: bob' \
+  --data '{"accountId":"account-a","sourceTransactionId":"bob-write","bookedAt":"2026-01-15T12:00:00.000Z","amountMinor":100,"currency":"EUR","direction":"debit"}'
+```
+
+Expect `403`. Follow it with Alice's list request. `bob-write` must not appear.
+The absence of the write is as important as the response status.
+
+## Test error behavior
+
+The current integration test proves a denied posting and an allowed legacy
+import. Extend the runtime test before changing error mapping; a handler-only
+test would not prove the Hono protection and command guard stages ran.
+
+Next: [test the API](/tutorials/transaction-api/test-the-api/).

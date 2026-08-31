@@ -1,0 +1,47 @@
+---
+title: Compare the two formats
+description: See the supported legacy record next to the domain transaction it represents.
+order: 41
+---
+
+The local service understands two representations of one synthetic debit.
+
+```json title="Legacy request body for POST /api/v1/legacy/transactions"
+{
+  "source_id": "legacy-demo-1",
+  "account_ref": "account-a",
+  "booked_at": "2026-01-15T12:00:00.000Z",
+  "amount": "125.40",
+  "currency": "EUR",
+  "dc": "D"
+}
+```
+
+```json title="Domain transaction after normalization"
+{
+  "accountId": "account-a",
+  "sourceTransactionId": "legacy-demo-1",
+  "bookedAt": "2026-01-15T12:00:00.000Z",
+  "amountMinor": 12540,
+  "currency": "EUR",
+  "direction": "debit"
+}
+```
+
+A **wire format** is the data shape an HTTP client sends. A **domain format**
+is the shape the banking command uses to make its business decision. The input
+transform maps one to the other. It does not look up a private account, grant
+access, move money, or call another service.
+
+The legacy raw schema is declared alongside the domain schema in
+`examples/banking/src/service.ts`. It allows an account reference only when it
+is one of the example's two account IDs. This is intentionally narrow.
+
+## Test the comparison
+
+Run the local service and submit the legacy JSON as Dana. The response includes
+`amountMinor: 12540` and `direction: "debit"`. Repeat the request with
+`x-example-actor: bob`; the normalized format is valid but the business action
+is denied.
+
+Next: [transform legacy input](/tutorials/banking-integrations/transform-input/).

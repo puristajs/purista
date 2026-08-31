@@ -1,0 +1,68 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content'
+import {
+	getPublishedTutorialEntries,
+	getTutorialChapter,
+	getTutorialPageNavigation,
+	getTutorialSidebar,
+	tutorialRoute,
+	tutorialRouteSlug,
+} from '../../data/tutorials'
+import TutorialLayout from '../../layouts/TutorialLayout.astro'
+
+export async function getStaticPaths() {
+	const entries = getPublishedTutorialEntries(await getCollection('tutorials'))
+	return entries.map(entry => ({
+		params: { slug: tutorialRouteSlug(entry.id) || undefined },
+		props: { entry },
+	}))
+}
+
+type Props = {
+	entry: CollectionEntry<'tutorials'>
+}
+
+const { entry } = Astro.props
+const entries = getPublishedTutorialEntries(await getCollection('tutorials'))
+const { Content, headings } = await render(entry)
+const sidebar = getTutorialSidebar(entries)
+const chapter = getTutorialChapter(entries, entry.id)
+const { previous, next } = getTutorialPageNavigation(entries, entry.id)
+const eyebrow = chapter ? `Tutorials / ${chapter.data.title}` : 'Tutorials'
+---
+
+<TutorialLayout
+	title={entry.data.title}
+	description={entry.data.description}
+	sidebar={sidebar}
+	currentId={entry.id}
+	headings={headings}
+>
+	<header class="mb-10">
+		<p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2 text-[var(--color-found)]">
+			{eyebrow}
+		</p>
+		<h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3 text-[var(--color-fg-strong)] leading-[1.15]">
+			{entry.data.title}
+		</h1>
+		{entry.data.description && <p class="lede max-w-[70ch]">{entry.data.description}</p>}
+	</header>
+	<Content />
+
+	{(previous || next) && (
+		<nav class="mt-12 pt-8 border-t border-[var(--color-line)] flex items-start justify-between gap-6 flex-wrap" aria-label="Tutorial page navigation">
+			{previous ? (
+				<a href={tutorialRoute(previous.id)} class="group inline-flex items-center gap-2 text-sm">
+					<span class="text-[var(--color-fg-subtle)]">←</span>
+					<span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{previous.data.title}</span>
+				</a>
+			) : <span />}
+			{next && (
+				<a href={tutorialRoute(next.id)} class="group inline-flex items-center gap-2 text-sm ml-auto">
+					<span class="font-display font-semibold text-[var(--color-fg)] group-hover:text-[var(--color-found)] transition-colors">{next.data.title}</span>
+					<span class="text-[var(--color-fg-subtle)]">→</span>
+				</a>
+			)}
+		</nav>
+	)}
+</TutorialLayout>

@@ -1,7 +1,8 @@
 import { HandledError, ServiceBuilder, type ServiceInfoType, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
-import { type RecordedTransaction, type TransactionDirection, BankingRepository } from './repository.js'
+import { BankingTutorialEvent, transactionRecordedEventSchema } from './advanced/contracts.js'
+import type { BankingRepository, RecordedTransaction, TransactionDirection } from './repository.js'
 
 const accountIdSchema = z.enum(['account-a', 'account-c'])
 const transactionSchema = z.object({
@@ -12,7 +13,10 @@ const transactionSchema = z.object({
 	currency: z.literal('EUR'),
 	direction: z.enum(['debit', 'credit']),
 })
-const statementSchema = z.object({ accountId: accountIdSchema, transactions: z.array(transactionSchema.extend({ transactionId: z.string() })) })
+const statementSchema = z.object({
+	accountId: accountIdSchema,
+	transactions: z.array(transactionSchema.extend({ transactionId: z.string() })),
+})
 const legacyTransactionSchema = z.object({
 	source_id: z.string().min(1).max(80),
 	account_ref: accountIdSchema,
@@ -61,7 +65,10 @@ const listTransactions = builder
 		},
 	})
 	.setCommandFunction(async function (context, _payload, parameter) {
-		return { accountId: parameter.accountId, transactions: context.resources.bankingRepository.list(parameter.accountId) }
+		return {
+			accountId: parameter.accountId,
+			transactions: context.resources.bankingRepository.list(parameter.accountId),
+		}
 	})
 
 const recordTransaction = builder
@@ -69,10 +76,20 @@ const recordTransaction = builder
 	.addPayloadSchema(transactionSchema)
 	.addParameterSchema(emptyParameterSchema)
 	.addOutputSchema(transactionSchema.extend({ transactionId: z.string() }))
+	.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'transactions')
 	.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
 	.setCommandFunction(async function (context, payload) {
-		return context.resources.bankingRepository.record(payload)
+		const transaction = context.resources.bankingRepository.record(payload)
+		await context.emit(BankingTutorialEvent.transactionRecorded, {
+			transactionId: transaction.transactionId,
+			accountId: transaction.accountId,
+			amountMinor: transaction.amountMinor,
+			currency: transaction.currency,
+			direction: transaction.direction,
+			bookedAt: transaction.bookedAt,
+		})
+		return transaction
 	})
 
 const importLegacyTransaction = builder
@@ -98,10 +115,20 @@ const importLegacyTransaction = builder
 			parameter,
 		}
 	})
+	.canEmit(BankingTutorialEvent.transactionRecorded, transactionRecordedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'legacy/transactions')
 	.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
 	.setCommandFunction(async function (context, payload) {
-		return context.resources.bankingRepository.record(payload)
+		const transaction = context.resources.bankingRepository.record(payload)
+		await context.emit(BankingTutorialEvent.transactionRecorded, {
+			transactionId: transaction.transactionId,
+			accountId: transaction.accountId,
+			amountMinor: transaction.amountMinor,
+			currency: transaction.currency,
+			direction: transaction.direction,
+			bookedAt: transaction.bookedAt,
+		})
+		return transaction
 	})
 
 const exportStatement = builder
@@ -111,17 +138,30 @@ const exportStatement = builder
 	.addOutputSchema(statementSchema)
 	.setAfterGuardHooks({
 		statementScope: async function (_context, result, _payload, parameter) {
-			if (result.accountId !== parameter.accountId || result.transactions.some(transaction => transaction.accountId !== parameter.accountId)) {
+			if (
+				result.accountId !== parameter.accountId ||
+				result.transactions.some(transaction => transaction.accountId !== parameter.accountId)
+			) {
 				throw new HandledError(StatusCode.Forbidden, 'The statement contains data outside the authorized account')
 			}
 		},
 	})
-	.setTransformOutput(z.string(), async function (_context, result) {
-		const rows = result.transactions.map(transaction =>
-			[transaction.transactionId, transaction.bookedAt, transaction.amountMinor, transaction.currency, transaction.direction].join(','),
-		)
-		return ['transactionId,bookedAt,amountMinor,currency,direction', ...rows].join('\n')
-	}, 'text/csv')
+	.setTransformOutput(
+		z.string(),
+		async function (_context, result) {
+			const rows = result.transactions.map(transaction =>
+				[
+					transaction.transactionId,
+					transaction.bookedAt,
+					transaction.amountMinor,
+					transaction.currency,
+					transaction.direction,
+				].join(','),
+			)
+			return ['transactionId,bookedAt,amountMinor,currency,direction', ...rows].join('\n')
+		},
+		'text/csv',
+	)
 	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/statement')
 	.setBeforeGuardHooks({
 		accountRead: async function (context, _payload, parameter) {
@@ -129,7 +169,10 @@ const exportStatement = builder
 		},
 	})
 	.setCommandFunction(async function (context, _payload, parameter) {
-		return { accountId: parameter.accountId, transactions: context.resources.bankingRepository.list(parameter.accountId) }
+		return {
+			accountId: parameter.accountId,
+			transactions: context.resources.bankingRepository.list(parameter.accountId),
+		}
 	})
 
 export const bankingService = builder.addCommandDefinition(

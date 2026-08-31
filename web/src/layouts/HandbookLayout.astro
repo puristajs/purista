@@ -1,5 +1,6 @@
 ---
 import Nav from '../components/landing/Nav.astro'
+import type { PrimaryNavKey } from '../data/navigation'
 import type { SidebarItem } from '../lib/sidebar'
 import BaseLayout from './BaseLayout.astro'
 import '../styles/site.css'
@@ -11,12 +12,28 @@ interface Props {
 	currentId?: string
 	headings?: { depth: number; slug: string; text: string }[]
 	prose?: boolean
+	/** Name shown in browser titles and the responsive navigation control. */
+	sectionTitle?: string
+	/** Root route for the current documentation section, without a trailing slash. */
+	sectionRoot?: string
+	active?: PrimaryNavKey
 }
 
-const { title, description, sidebar = [], currentId = '', headings = [], prose = true } = Astro.props
-const pageTitle = title === 'PURISTA Handbook' ? title : `${title} | PURISTA Handbook`
-const handbookPath = Astro.url.pathname.replace(/\/$/, '')
-const markdownUrl = handbookPath === '/handbook' ? '/handbook.md' : `${handbookPath}.md`
+const {
+	title,
+	description,
+	sidebar = [],
+	currentId = '',
+	headings = [],
+	prose = true,
+	sectionTitle = 'Handbook',
+	sectionRoot = '/handbook',
+	active = 'handbook',
+} = Astro.props
+const sectionHomeTitle = `PURISTA ${sectionTitle}`
+const pageTitle = title === sectionHomeTitle ? title : `${title} | ${sectionHomeTitle}`
+const sectionPath = Astro.url.pathname.replace(/\/$/, '')
+const markdownUrl = sectionPath === sectionRoot ? `${sectionRoot}.md` : `${sectionPath}.md`
 function isActive(item: SidebarItem, id: string): boolean {
 	const itemBase = item.id.replace(/\/index$/, '')
 	const currentBase = id.replace(/\/index$/, '')
@@ -41,13 +58,13 @@ function isParentActive(item: SidebarItem, id: string): boolean {
 function getItemHref(item: SidebarItem): string {
 	if (item.href) return item.href
 	const base = item.id.replace(/\/index$/, '')
-	if (base === '') return '/handbook/'
-	return `/handbook/${base}`
+	if (base === '') return `${sectionRoot}/`
+	return `${sectionRoot}/${base}`
 }
 ---
 
 <BaseLayout title={pageTitle} description={description} siteShell markdownUrl={markdownUrl}>
-  <Nav active="handbook" />
+  <Nav active={active} />
 
   <div class="h-screen flex flex-col overflow-hidden pt-[72px]">
   {/* The desktop tree is intentionally hidden below `lg`; keep its first
@@ -55,9 +72,9 @@ function getItemHref(item: SidebarItem): string {
       of stranding readers at the Handbook landing page on a narrow screen. */}
   <details class="lg:hidden shrink-0 border-b border-[var(--color-line)] bg-[var(--color-bg)]">
     <summary class="cursor-pointer px-6 py-3 font-display text-sm font-semibold text-[var(--color-fg-strong)]">
-      Browse handbook topics
+      Browse {sectionTitle.toLowerCase()} topics
     </summary>
-    <nav aria-label="Handbook navigation" class="max-h-[55vh] overflow-y-auto border-t border-[var(--color-line)] px-5 py-4">
+    <nav aria-label={`${sectionTitle} navigation`} class="max-h-[55vh] overflow-y-auto border-t border-[var(--color-line)] px-5 py-4">
       {sidebar.map((item) => (
         item.kind === 'sectionHeader' ? (
           <a href={getItemHref(item)} class={`block px-1 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-fg-strong)] ${item.sectionStart ? 'border-t border-[var(--color-line)]' : 'pt-0'}`}>

@@ -1,0 +1,39 @@
+---
+title: Understand the local login boundary
+description: Separate the current actor fixture from a real login before relying on account permissions.
+order: 32
+---
+
+The current banking checkpoint does not implement login. The
+`x-example-actor` request header selects one of four documented fixture actors.
+It exists so the tests can prove business permissions without credentials or an
+identity provider.
+
+That makes it unsuitable for a real browser application. Anyone who can send a
+request can select `alice`, `bob`, `carol`, or `dana`. The allowed-list check
+only rejects unknown fixture names; it does not authenticate the person sending
+the header.
+
+Do not copy this header pattern into a production application. A production
+edge would verify a credential, establish a server-controlled principal and
+tenant, and then set normalized values for the PURISTA request context. A
+server session or an identity provider is an application decision; neither is
+present in `examples/banking` today.
+
+The business guards remain valuable after real login is added. They answer
+whether the authenticated person may read this account or record this posting.
+Authentication answers a different question: who sent the request?
+
+## Test the present boundary
+
+An unknown fixture actor receives a controlled `401`:
+
+```bash title="Reject an unknown local actor"
+curl -i -H 'x-example-actor: nobody' \
+  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
+```
+
+This test proves the fixture's input validation only. It is not evidence of
+password, cookie, token, session-expiry, or logout behavior.
+
+Next: [inspect trusted identity handling](/tutorials/authenticated-banking-ui/set-trusted-identity/).

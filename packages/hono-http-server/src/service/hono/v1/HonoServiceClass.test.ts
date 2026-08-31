@@ -163,6 +163,7 @@ describe('HonoServiceClass', () => {
 		try {
 			const response = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
 			expect(response.status).toBe(200)
+			expect(response.headers.get('content-type')).toContain('text/plain')
 			expect(await response.text()).toBe('plain-text')
 		} finally {
 			invokeMock.mockRestore()

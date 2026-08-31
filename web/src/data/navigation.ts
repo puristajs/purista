@@ -1,4 +1,4 @@
-export const primaryNavLinks = [
+const corePrimaryNavLinks = [
 	{ href: '/', label: 'Explore', key: 'home' },
 	{ href: '/enterprise/', label: 'Enterprise', key: 'enterprise' },
 	{ href: '/framework/', label: 'Framework', key: 'framework' },
@@ -6,7 +6,21 @@ export const primaryNavLinks = [
 	{ href: '/handbook/', label: 'Handbook', key: 'handbook' },
 ] as const
 
-export type PrimaryNavKey = (typeof primaryNavLinks)[number]['key']
+const tutorialsPrimaryNavLink = { href: '/tutorials/', label: 'Tutorials', key: 'tutorials' } as const
+
+/**
+ * The Tutorials link is content-driven: the shell never advertises an empty
+ * section before a published Tutorials index page creates its public route.
+ */
+export function getPrimaryNavLinks(tutorialsAvailable: boolean) {
+	return tutorialsAvailable
+		? [...corePrimaryNavLinks, tutorialsPrimaryNavLink]
+		: corePrimaryNavLinks
+}
+
+export type PrimaryNavKey =
+	| (typeof corePrimaryNavLinks)[number]['key']
+	| typeof tutorialsPrimaryNavLink.key
 
 export const harnessNavLinks = [
 	{ href: '/harness/', label: 'Overview' },

@@ -1,0 +1,38 @@
+---
+title: Call the REST API
+description: Use the Hono projection instead of calling a repository from a browser or script.
+order: 24
+---
+
+`exposeAsHttpEndpoint(...)` gives Hono route metadata. Hono parses an HTTP
+request, invokes the registered PURISTA command, and returns the command's
+validated result. The browser and command-line client share the same boundary.
+
+The current example has a small HTML root page only; it does not yet provide a
+React form. Use the HTTP API directly to prove the integration:
+
+```bash title="Read the history after recording"
+curl --fail \
+  -H 'x-example-actor: alice' \
+  http://127.0.0.1:3010/api/v1/accounts/account-a/transactions
+```
+
+The request path supplies `accountId`. The `listTransactions` command declares
+that value in its parameter schema and returns the matching account plus an
+array of transactions. It does not take a caller identity in the URL or JSON.
+
+Hono also exposes the generated contract at `/api/openapi.json` in the current
+server package. Inspect it while the app runs:
+
+```bash title="Inspect the generated OpenAPI document"
+curl --fail http://127.0.0.1:3010/api/openapi.json
+```
+
+## Test persistence within one process
+
+Record `ops-demo-1` as Dana, then list account A as Alice. The new row appears
+until the process stops. Restart the app and it disappears because the
+repository is in memory. This check proves the command and repository were
+connected; it does not prove durable storage.
+
+Next: [handle API errors](/tutorials/transaction-api/handle-api-errors/).

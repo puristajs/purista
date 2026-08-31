@@ -1,0 +1,33 @@
+---
+title: Make your first visible change
+description: Change the visible server response, restart the local process, and verify the exact result in a browser.
+order: 14
+---
+
+Make a small change in one place so you can see the complete edit-to-browser
+loop. In `examples/banking/src/index.ts`, change only the heading text inside
+the root route. For example, change `Example Bank` to `Example Bank — local`.
+
+The development command watches `src/index.ts`. Reload
+`http://127.0.0.1:3010/` after it restarts. You should see the new heading.
+Return the wording to `Example Bank` before continuing, so the tutorial tests
+and screenshots have one stable expectation.
+
+This is server-rendered HTML. A code change updates the response because the
+Node process reloads the module; there is no React component state or browser
+build cache to debug in this checkpoint.
+
+## Test the edit
+
+Run a request after restoring the original title:
+
+```bash title="Verify the restored page"
+curl --fail http://127.0.0.1:3010/ | grep 'Example Bank'
+```
+
+If the old text remains, stop the process with `Ctrl+C`, start it again with
+`npm run dev -w @purista/banking-tutorials`, and reload the page. If the
+process reports a TypeScript error, restore the route syntax before changing
+anything else.
+
+Next: [build, run, and stop the application](/tutorials/banking-ui/build-and-stop/).

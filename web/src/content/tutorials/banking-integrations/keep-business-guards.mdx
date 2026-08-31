@@ -1,0 +1,36 @@
+---
+title: Keep business guards
+description: Run the same posting decision after legacy data has become a normal transaction payload.
+order: 43
+---
+
+The transform answers, “What does this supported external record mean?” The
+posting guard answers, “May this actor record a transaction on this account?”
+They must stay separate.
+
+```ts title="examples/banking/src/service.ts"
+.exposeAsHttpEndpoint('POST', 'legacy/transactions')
+.setBeforeGuardHooks({ postingAccess: requirePostingAccess })
+.setCommandFunction(async function (context, payload) {
+  return context.resources.bankingRepository.record(payload)
+})
+```
+
+The guard receives `payload.accountId`, not the legacy `account_ref` field.
+That is useful because the native and legacy endpoints use the same business
+meaning. Dana may record the normalized transaction for account A. Bob is
+still denied, even though Bob is a valid fixture actor and the legacy JSON is
+well formed.
+
+The transform has no side effect. The command handler calls the repository only
+after input validation and the posting guard succeed. The repository still owns
+duplicate handling. A transform must not silently skip a row or make a private
+permission lookup to avoid a rejection.
+
+## Test the denied import
+
+Submit the same valid legacy JSON once as Dana and once as Bob with a different
+`source_id`. Dana receives `200`; Bob receives `403`. List account A afterward
+and assert that only Dana's source ID exists.
+
+Next: [export a statement](/tutorials/banking-integrations/transform-output/).

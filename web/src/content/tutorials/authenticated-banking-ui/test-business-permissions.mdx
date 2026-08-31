@@ -1,0 +1,32 @@
+---
+title: Test access decisions
+description: Exercise allowed and denied business actions through the real HTTP and command runtime.
+order: 36
+---
+
+Run the existing integration suite:
+
+```bash title="Run business-permission tests"
+npm run test -w @purista/banking-tutorials
+```
+
+The current test in `examples/banking/src/banking.integration.test.ts` proves
+two paired business decisions through `hono.app.fetch`:
+
+| Valid local actor | Action | Expected result |
+| --- | --- | --- |
+| Bob | Read account A | `200` |
+| Bob | Read account C | `403` |
+| Dana | Import a legacy transaction for account A | `200` |
+| Bob | Record a transaction for account A | `403` and no write |
+
+Add a row to this table before adding a new permission rule. Keep the actor
+valid and change the account, action, assignment, or state. That catches the
+mistake of testing only a missing identity.
+
+The current test suite does not cover sessions, logout, expiry, mandate
+revocation, concurrent permission changes, or a wrong-account statement row.
+Those behaviors are not implemented in this checkpoint and must gain a real
+runtime test when they are introduced.
+
+Next: [import and export transaction data](/tutorials/banking-integrations/).

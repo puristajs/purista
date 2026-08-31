@@ -1,0 +1,30 @@
+---
+title: Build, run, and stop the application
+description: Run the same local checks a maintainer uses and close the listener cleanly.
+order: 15
+---
+
+Before moving to business behavior, check that the example type-checks and its
+HTTP tests still pass:
+
+```bash title="Build and test the current banking checkpoint"
+npm run build -w @purista/banking-tutorials
+npm run test -w @purista/banking-tutorials
+```
+
+In this package, `build` currently runs TypeScript without emitting a separate
+production bundle. `start` runs the same TypeScript entry point once:
+
+```bash title="Run the non-watch entry point"
+npm run start -w @purista/banking-tutorials
+```
+
+Open the root page, then press `Ctrl+C`. The `gracefulShutdown` registration in
+`examples/banking/src/index.ts` closes the Node listener, Hono service,
+banking service, and local EventBridge. Confirm that the port is free by
+requesting it again; `curl` should fail to connect.
+
+Stopping and restarting also resets the in-memory transaction fixture. This is
+helpful for tests, but it is not persistence or a deployment strategy.
+
+Next: [build a transaction REST API](/tutorials/transaction-api/).

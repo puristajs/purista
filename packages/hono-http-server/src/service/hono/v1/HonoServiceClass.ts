@@ -633,7 +633,11 @@ export class HonoServiceClass<
 					}
 
 					if (responseContentType.toLowerCase() !== 'application/json') {
-						return c.text(String(responsePayload ?? ''), statusCode as ContentfulStatusCode)
+						// `c.text()` sets `text/plain` and would overwrite the content type
+						// declared by the command exposure (for example `text/csv`). The
+						// response header was set above from that contract, so return the
+						// string body without asking Hono to replace it.
+						return c.body(String(responsePayload ?? ''), statusCode as ContentfulStatusCode)
 					}
 
 					return c.json(responsePayload, statusCode as ContentfulStatusCode)

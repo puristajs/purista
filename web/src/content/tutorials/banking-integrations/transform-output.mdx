@@ -1,0 +1,42 @@
+---
+title: Export a statement
+description: Validate an authorized domain statement before transforming its fixed fields into a CSV response.
+order: 44
+---
+
+`exportStatement` first returns a typed domain object with `accountId` and
+transactions. Its before guard checks read access. Its after guard rejects a
+result that contains another account. Only then does the output transform
+create the CSV string.
+
+```ts title="examples/banking/src/service.ts"
+.setTransformOutput(z.string(), async function (_context, result) {
+  const rows = result.transactions.map(transaction =>
+    [transaction.transactionId, transaction.bookedAt, transaction.amountMinor, transaction.currency, transaction.direction].join(','),
+  )
+  return ['transactionId,bookedAt,amountMinor,currency,direction', ...rows].join('\n')
+}, 'text/csv')
+.exposeAsHttpEndpoint('GET', 'accounts/:accountId/statement')
+```
+
+Request account A's statement as Alice or Bob:
+
+```bash title="Download the account A statement"
+curl --fail -H 'x-example-actor: alice' \
+  http://127.0.0.1:3010/api/v1/accounts/account-a/statement
+```
+
+The response is a CSV representation of the command's domain result. The
+current rows contain generated IDs, ISO timestamps, integer amounts, the fixed
+currency `EUR`, and a fixed direction enum. They do not include free text, so
+the small formatter has no text quoting or spreadsheet-formula defense. Do not
+reuse it for arbitrary CSV fields without a tested serializer and formula-safe
+cell policy.
+
+## Test output scope
+
+Bob receives `200` for account A and `403` for account C. To test the after
+guard itself, a runtime test must deliberately return a mixed-account result;
+the present repository does not create that fault by default.
+
+Next: [understand the external API boundary](/tutorials/banking-integrations/call-the-legacy-api/).

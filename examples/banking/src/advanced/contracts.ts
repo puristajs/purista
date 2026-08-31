@@ -1,0 +1,27 @@
+import { z } from 'zod'
+
+/** Business events shared by the later banking tutorial chapters. */
+export const BankingTutorialEvent = {
+	transactionRecorded: 'banking.transaction.recorded',
+	reconciliationDue: 'banking.reconciliation.due',
+} as const
+
+export const accountIdSchema = z.enum(['account-a', 'account-c'])
+
+/**
+ * A deliberately small event contract. Consumers receive the fact they need,
+ * rather than a copy of every field returned by the transaction HTTP API.
+ */
+export const transactionRecordedEventSchema = z.object({
+	transactionId: z.string().min(1),
+	accountId: accountIdSchema,
+	amountMinor: z.number().int().positive(),
+	currency: z.literal('EUR'),
+	direction: z.enum(['debit', 'credit']),
+	bookedAt: z.string().datetime(),
+})
+
+/** Schedule triggers carry an occurrence identifier so queue work is idempotent per run. */
+export const reconciliationDueEventSchema = z.object({
+	day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+})
