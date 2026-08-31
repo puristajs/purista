@@ -4,10 +4,11 @@ description: Define a narrow, service-owned agent queue instead of creating a st
 order: 102
 ---
 
-The classification agent belongs to `bankingCustomerSupport` version `1`. A
-service is the owner of its resource, agent definition, generated HTTP command,
-and identity context. This keeps the public entry point in PURISTA rather than
-starting a separate Harness application.
+The CLI-generated classifier belongs to `bankingCustomerSupport` version `1`.
+A service owns its resource, agent definition, generated HTTP command, and
+identity context. This keeps the public entry point in PURISTA rather than
+starting a separate Harness application. Open the generated builder and replace
+its default contracts with the narrow request and response schemas.
 
 ```ts title="examples/banking/src/ai/customer-support-classification.ts"
 export const classifyCustomerSupportAgentBuilder = builder

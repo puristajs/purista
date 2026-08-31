@@ -27,9 +27,24 @@ or `other`. The application then returns either a permitted future-routing
 destination or `no-action`. No command, queue job, tool, or account mutation is
 started from model output.
 
-## Start here
+## Generate the triage agent
 
-Run the focused proof from the PURISTA repository root:
+Create the service-owned scaffold before writing the classification policy:
+
+```bash title="Generate the support service and classifier"
+npm run add:service -- banking-customer-support \
+  --description "Classify authorized banking customer support requests"
+npm run add:agent -- classify-customer-support \
+  --service banking-customer-support --service-version 1 \
+  --description "Classify one authorized customer support request"
+```
+
+The CLI generates the agent queue builder, a test, and the service composition
+entry. Replace its starter schemas with the account, request ID, and bounded
+text contract in the next page. The runnable checkpoint is
+`examples/banking/src/ai/customer-support-classification.ts`.
+
+Run the focused proof after each change:
 
 ```bash title="Run the attached agent test"
 npx vitest run examples/banking/src/ai/customer-support-classification.test.ts

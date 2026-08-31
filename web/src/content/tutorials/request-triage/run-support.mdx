@@ -1,15 +1,17 @@
 ---
-title: Run the isolated support proof
-description: Start the deterministic test that hosts the service-attached classification agent.
+title: Run the generated support proof
+description: Verify the CLI-generated service-attached classification agent before and after binding the deterministic model.
 order: 101
 ---
 
-This checkpoint is a focused test, not a browser feature. It creates a
+Run the generated agent test before editing it, then run the focused completed
+proof. This checkpoint is a focused test, not a browser feature. It creates a
 `DefaultEventBridge`, starts the `bankingCustomerSupport` service, mounts its
 generated Hono endpoint, and gives the request a synthetic server identity.
 The model is scripted, so no API key or paid provider account is needed.
 
 ```bash title="Run the focused test from the PURISTA repository root"
+npm test -- --run src/service/bankingCustomerSupport/v1/agent/classifyCustomerSupport
 npx vitest run examples/banking/src/ai/customer-support-classification.test.ts
 ```
 
