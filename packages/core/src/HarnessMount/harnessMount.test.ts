@@ -473,7 +473,7 @@ describe('ServiceBuilder.mountHarness', () => {
 			})
 			.define()
 
-		const identities: unknown[] = []
+		const commandCalls: unknown[] = []
 		const accountBuilder = new ServiceBuilder({
 			serviceName: 'Account',
 			serviceVersion: '1',
@@ -482,9 +482,15 @@ describe('ServiceBuilder.mountHarness', () => {
 		const lookupCommand = accountBuilder
 			.getCommandBuilder('lookupAccount', 'Look up an account')
 			.addPayloadSchema(z.object({ accountId: z.string() }))
+			.addParameterSchema(z.object({ idempotencyKey: z.string() }))
 			.addOutputSchema(z.object({ owner: z.string() }))
 			.setCommandFunction(async function (context) {
-				identities.push({ tenantId: context.message.tenantId, principalId: context.message.principalId })
+				const parameter = context.message.payload.parameter as { idempotencyKey: string }
+				commandCalls.push({
+					tenantId: context.message.tenantId,
+					principalId: context.message.principalId,
+					idempotencyKey: parameter.idempotencyKey,
+				})
 				return { owner: 'Ada' }
 			})
 		accountBuilder.addCommandDefinition(lookupCommand.getDefinition())
@@ -496,7 +502,12 @@ describe('ServiceBuilder.mountHarness', () => {
 		}).mountHarness(reviewHarness, {
 			publish: { agents: ['review'] },
 			hostTools: {
-				lookup_account: commandAsHarnessTool('Account', '1', 'lookupAccount'),
+				lookup_account: commandAsHarnessTool('Account', '1', 'lookupAccount', {
+					mapInput: (input, context) => ({
+						payload: input,
+						parameter: { idempotencyKey: context.idempotencyKey },
+					}),
+				}),
 			},
 		})
 
@@ -527,7 +538,13 @@ describe('ServiceBuilder.mountHarness', () => {
 			status: 'completed',
 			output: { decision: 'approved' },
 		})
-		expect(identities).toEqual([{ tenantId: 'tenant-a', principalId: 'principal-a' }])
+		expect(commandCalls).toEqual([
+			{
+				tenantId: 'tenant-a',
+				principalId: 'principal-a',
+				idempotencyKey: expect.stringMatching(/^tool_[a-f0-9]{64}$/),
+			},
+		])
 
 		await knowledgeService.destroy()
 		await accountService.destroy()

@@ -6,6 +6,7 @@ import type {
 	HarnessHostToolBindings,
 	HarnessInstanceConfig,
 	HarnessTargetContract,
+	HostToolHandlerContext,
 	InferTypes,
 	RunOutcome,
 	WorkflowInput,
@@ -22,13 +23,31 @@ export type HarnessHostContext = Readonly<{
 	logger: Logger
 }>
 
+/** Tool-call context available while mapping a Harness tool into a command. */
+export type HarnessCommandToolContext = Readonly<
+	Pick<
+		HostToolHandlerContext<HarnessHostContext>,
+		'runId' | 'sessionId' | 'agentId' | 'toolId' | 'callId' | 'idempotencyKey'
+	> & {
+		host: HarnessHostContext
+	}
+>
+
 /** Address-first adapter that exposes a PURISTA command as a Harness host tool. */
 export type HarnessCommandToolAdapter = Readonly<{
 	kind: 'purista-command'
 	serviceName: string
 	serviceVersion: string
 	serviceTarget: string
-	mapInput?: (input: unknown) => Readonly<{ payload: unknown; parameter?: unknown }>
+	/**
+	 * Map model input into the command contract. Side-effecting commands should
+	 * include `context.idempotencyKey` in a typed command parameter and enforce
+	 * it at the resource or downstream boundary.
+	 */
+	mapInput?: (
+		input: unknown,
+		context: HarnessCommandToolContext,
+	) => Readonly<{ payload: unknown; parameter?: unknown }>
 	mapOutput?: (output: unknown) => unknown
 }>
 

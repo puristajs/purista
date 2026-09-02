@@ -164,7 +164,7 @@ export class HarnessMountRuntime {
 
 	private commandToolBinding(adapter: HarnessCommandToolAdapter): HostToolBinding<any, any, HarnessHostContext> {
 		return async (context, input) => {
-			const mapped = adapter.mapInput?.(input) ?? { payload: input, parameter: {} }
+			const mapped = adapter.mapInput?.(input, context) ?? { payload: input, parameter: {} }
 			const output = await this.eventBridge.invoke({
 				contentType: 'application/json',
 				contentEncoding: 'utf-8',
