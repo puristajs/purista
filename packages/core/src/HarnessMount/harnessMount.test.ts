@@ -1,4 +1,4 @@
-import type { RunOutcome, ToolApprovalInterrupt } from '@purista/harness'
+import type { ModelProvider, RunOutcome, ToolApprovalInterrupt } from '@purista/harness'
 import { defineHarness, ModelAdmissionRejectedError } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { z } from 'zod'
@@ -49,6 +49,28 @@ const hostToolHarness = defineHarness({ name: 'host-tool' })
 		output: z.object({ decision: z.string() }),
 		instructions: 'Use lookup_account before deciding.',
 		tools: ['lookup_account'],
+	})
+	.define()
+
+const artifactReferenceSchema = z.object({
+	id: z.string(),
+	url: z.string(),
+	mediaType: z.string(),
+})
+
+const mediaHarness = defineHarness({ name: 'media' })
+	.requireModel('image', { capabilities: ['image_generation'] })
+	.agent('create_image', {
+		input: z.object({ prompt: z.string() }),
+		output: artifactReferenceSchema,
+		handler: async ({ input, models, signal }) => {
+			const response = await models.image.image(
+				{ prompt: input.prompt },
+				signal,
+				{ emitRunEvents: true, artifactIdempotencyKey: input.prompt },
+			)
+			return response.artifacts[0]!
+		},
 	})
 	.define()
 
@@ -253,6 +275,71 @@ describe('ServiceBuilder.mountHarness', () => {
 			}),
 		])
 
+		await service.destroy()
+	})
+
+	it('publishes generated media through the configured artifact store and streams a safe file reference', async () => {
+		const provider: ModelProvider = {
+			id: 'image-provider',
+			genAiSystem: 'test',
+			image: async () => ({
+				artifacts: [{ body: new Uint8Array([1, 2, 3]), mediaType: 'image/png', filename: 'result.png' }],
+			}),
+		}
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const builder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Mounted media Harness test service',
+		}).mountHarness(mediaHarness, { publish: { agents: ['create_image'] } })
+		const service = await builder.getInstance(eventBridge, {
+			ai: {
+				models: { image: { provider, model: 'image-model' } },
+				artifacts: {
+					publish: async request => ({
+						id: 'artifact-1',
+						url: '/artifacts/artifact-1',
+						mediaType: request.mediaType,
+					}),
+				},
+			},
+		})
+		await service.start()
+
+		const seed = getCommandMessageMock()
+		const stream = await eventBridge.openStream({
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: seed.traceId,
+			principalId: 'principal-a',
+			tenantId: 'tenant-a',
+			sender: seed.sender,
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'create_image' },
+			payload: {
+				frameType: 'open',
+				payload: { prompt: 'A red square' },
+				parameter: { sessionId: 'media-session' },
+			},
+		})
+		const events = []
+		for await (const event of stream) events.push(event)
+
+		expect(events).toContainEqual(expect.objectContaining({
+			payload: expect.objectContaining({
+				frameType: 'chunk',
+				chunk: expect.objectContaining({
+					type: 'output.file',
+					artifact: { id: 'artifact-1', url: '/artifacts/artifact-1', mediaType: 'image/png' },
+				}),
+			}),
+		}))
+		expect(events.at(-1)).toMatchObject({
+			payload: {
+				frameType: 'complete',
+				final: { status: 'completed', output: { id: 'artifact-1', url: '/artifacts/artifact-1', mediaType: 'image/png' } },
+			},
+		})
 		await service.destroy()
 	})
 
