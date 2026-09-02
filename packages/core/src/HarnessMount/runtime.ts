@@ -40,6 +40,8 @@ export type HarnessInvokeParameter = Readonly<{
 	timeoutMs?: number
 	metadata?: Record<string, string | number | boolean | null>
 	durable?: InvokeOptions['durable']
+	/** Resume one durable Harness interruption, such as a human tool approval. */
+	resume?: InvokeOptions['resume']
 }>
 
 type MountedRuntime = {
@@ -242,6 +244,7 @@ export class HarnessMountRuntime {
 				...(parameter.timeoutMs !== undefined ? { timeoutMs: parameter.timeoutMs } : {}),
 				...(parameter.metadata ? { metadata: parameter.metadata } : {}),
 				...(parameter.durable ? { durable: parameter.durable } : {}),
+				...(parameter.resume ? { resume: parameter.resume } : {}),
 			}
 			const invoker = (kind === 'agent' ? session.agents[target] : session.workflows[target]) as
 				| { run(input: unknown, options?: InvokeOptions): Promise<unknown> }
@@ -297,6 +300,7 @@ export class HarnessMountRuntime {
 				...(parameter.timeoutMs !== undefined ? { timeoutMs: parameter.timeoutMs } : {}),
 				...(parameter.metadata ? { metadata: parameter.metadata } : {}),
 				...(parameter.durable ? { durable: parameter.durable } : {}),
+				...(parameter.resume ? { resume: parameter.resume } : {}),
 			}
 			const invoker = (kind === 'agent' ? session.agents[target] : session.workflows[target]) as
 				| { stream(input: unknown, options?: InvokeOptions): AsyncIterable<ExecutionEvent<unknown>> }

@@ -1,3 +1,4 @@
+import type { RunOutcome, ToolApprovalInterrupt } from '@purista/harness'
 import { defineHarness } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { z } from 'zod'
@@ -179,6 +180,129 @@ describe('ServiceBuilder.mountHarness', () => {
 			}),
 		])
 
+		await service.destroy()
+	})
+
+	it('resumes a tool approval over the same address-first EventBridge stream', async () => {
+		const provider = new FakeModelProvider()
+		provider.enqueue({
+			object: {},
+			toolCalls: [{ id: 'transfer-1', name: 'transfer', arguments: { amount: 250 } }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		let transfers = 0
+		const approvalHarness = defineHarness({ name: 'approval' })
+			.requireModel('primary', { capabilities: ['object', 'tool_use'] as const })
+			.tool('transfer', {
+				description: 'Transfer money.',
+				input: z.object({ amount: z.number() }),
+				output: z.object({ transferred: z.number() }),
+				handler: async (_context, input) => {
+					transfers += 1
+					return { transferred: input.amount }
+				},
+			})
+			.agent('approve_transfer', {
+				model: 'primary',
+				input: z.string(),
+				output: z.string(),
+				instructions: 'Use the transfer tool.',
+				tools: ['transfer'],
+				builtinTools: false,
+			})
+			.governance(({ native, rule }) => ({
+				defaultEffect: 'allow',
+				policies: [
+					native({
+						id: 'transfer-approval',
+						rules: [rule({ id: 'review-transfer', effect: 'require_approval', tools: ['transfer'] })],
+					}),
+				],
+			}))
+			.define()
+
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const builder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Mounted approval Harness test service',
+		}).mountHarness(approvalHarness, { publish: { agents: ['approve_transfer'] } })
+		const service = await builder.getInstance(eventBridge, {
+			ai: { models: { primary: { provider, model: 'fake' } } },
+		})
+		await service.start()
+
+		const command = getCommandMessageMock({
+			tenantId: 'tenant-a',
+			principalId: 'principal-a',
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'approve_transfer' },
+			payload: { payload: 'transfer', parameter: { sessionId: 'approval-session' } },
+		})
+		const {
+			id: _id,
+			messageType: _messageType,
+			timestamp: _timestamp,
+			correlationId: _correlationId,
+			...request
+		} = command
+		const first = (await eventBridge.invoke(request)) as RunOutcome<string, ToolApprovalInterrupt>
+		expect(first).toMatchObject({ status: 'interrupted', interrupt: { type: 'tool-approval' } })
+		if (first.status !== 'interrupted') {
+			throw new Error('Expected a tool approval interruption.')
+		}
+		const approval = first.interrupt.requests[0]
+		if (!approval) throw new Error('Expected one approval request.')
+		expect(transfers).toBe(0)
+
+		provider.enqueue({
+			object: 'done',
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+		const seed = getCommandMessageMock()
+		const stream = await eventBridge.openStream({
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: seed.traceId,
+			principalId: 'principal-a',
+			tenantId: 'tenant-a',
+			sender: seed.sender,
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'approve_transfer' },
+			payload: {
+				frameType: 'open',
+				payload: 'transfer',
+				parameter: {
+					sessionId: 'approval-session',
+					resume: {
+						type: 'tool-approval',
+						runId: first.runId,
+						interruptId: first.interrupt.id,
+						revision: first.interrupt.revision,
+						eventId: 'approval-decision-1',
+						decisions: [{ approvalId: approval.approvalId, approved: true }],
+					},
+				},
+			},
+		})
+		const frames = []
+		for await (const frame of stream) frames.push(frame.payload)
+
+		expect(frames).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					frameType: 'chunk',
+					chunk: expect.objectContaining({ type: 'approval.responded', approved: true }),
+				}),
+				expect.objectContaining({
+					frameType: 'complete',
+					final: expect.objectContaining({ status: 'completed', output: 'done' }),
+				}),
+			]),
+		)
+		expect(transfers).toBe(1)
+		expect(provider.requests).toHaveLength(2)
 		await service.destroy()
 	})
 
