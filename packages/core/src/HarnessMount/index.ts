@@ -1,3 +1,4 @@
 export * from './invocation.js'
+export type { HarnessModelClients, HarnessModelDeclaration } from './model.js'
 export * from './runtime.js'
 export * from './types.js'

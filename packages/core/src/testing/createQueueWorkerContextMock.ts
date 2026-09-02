@@ -18,6 +18,7 @@ import type { Schema } from '../schema/index.js'
 import {
 	createBaseContextStubs,
 	createHarnessInvocationMockProxy,
+	createHarnessModelMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -99,6 +100,7 @@ export type QueueWorkerContextMockResult<
 		stream: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
 		agent: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
 		workflow: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
+		model: Record<string, Record<string, SinonStub>>
 		enqueue: SinonStub
 		scheduleAt: SinonStub
 	}
@@ -157,6 +159,9 @@ export const createQueueWorkerContextMock = <
 	const workflowProxy = createHarnessInvocationMockProxy<
 		QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
 	>(input.sandbox)
+	const modelProxy = createHarnessModelMockProxy<
+		QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['model']
+	>(internalBuilder.invokes, input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 	const message = createQueueMessageMock(input)
 
@@ -190,6 +195,7 @@ export const createQueueWorkerContextMock = <
 		stream: streamProxy.api,
 		agent: agentProxy.api,
 		workflow: workflowProxy.api,
+		model: modelProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -257,6 +263,7 @@ export const createQueueWorkerContextMock = <
 				>(),
 			agent: agentProxy.api,
 			workflow: workflowProxy.api,
+			model: modelProxy.api as Record<string, Record<string, SinonStub>>,
 			enqueue: base.stubs.enqueue,
 			scheduleAt: base.stubs.scheduleAt,
 		},

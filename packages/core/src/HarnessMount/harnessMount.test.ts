@@ -20,6 +20,10 @@ const echoHarness = defineHarness({ name: 'echo' })
 	})
 	.define()
 
+const embeddingHarness = defineHarness({ name: 'embedding' })
+	.requireModel('embedding', { capabilities: ['embeddings'] })
+	.define()
+
 describe('ServiceBuilder.mountHarness', () => {
 	it('publishes an explicitly selected agent at its versioned EventBridge address', async () => {
 		const eventBridge = new DefaultEventBridge()
@@ -85,6 +89,49 @@ describe('ServiceBuilder.mountHarness', () => {
 		} = command
 
 		await expect(eventBridge.invoke(request)).rejects.toMatchObject({ errorCode: 502 })
+		await service.destroy()
+	})
+
+	it('exposes only explicitly declared mounted model handles to native handlers', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueueEmbedding({
+			embeddings: [{ index: 0, vector: [0.1, 0.2] }],
+			usage: { inputTokens: 1, outputTokens: 0, totalTokens: 1 },
+		})
+		const builder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Mounted model test service',
+		}).mountHarness(embeddingHarness, { publish: {} })
+		const command = builder
+			.getCommandBuilder('embedText', 'Embed text')
+			.addPayloadSchema(z.object({ text: z.string() }))
+			.addOutputSchema(z.object({ vector: z.array(z.number()) }))
+			.canUseHarnessModel(embeddingHarness, 'embedding')
+			.setCommandFunction(async function ({ model }, payload) {
+				const result = await model.embedding.embed({ input: payload.text }, new AbortController().signal)
+				// @ts-expect-error the alias declares embeddings, not text generation
+				void model.embedding.text
+				const embedding = result.embeddings[0]
+				if (!embedding) throw new Error('The model returned no embedding.')
+				return { vector: [...embedding.vector] }
+			})
+		builder.addCommandDefinition(command.getDefinition())
+
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await builder.getInstance(eventBridge, {
+			ai: { models: { embedding: { provider, model: 'fake-embedding' } } },
+		})
+		await service.start()
+
+		const request = getCommandMessageMock({
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'embedText' },
+			payload: { payload: { text: 'hello' }, parameter: {} },
+		})
+		const { id: _id, messageType: _type, timestamp: _timestamp, correlationId: _correlation, ...message } = request
+		await expect(eventBridge.invoke(message)).resolves.toEqual({ vector: [0.1, 0.2] })
+		provider.assertExhausted()
 		await service.destroy()
 	})
 

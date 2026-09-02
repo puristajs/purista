@@ -5,6 +5,7 @@ import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { PuristaMetricContext, PuristaMetricDefinitions } from '../core/types/PuristaMetrics.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import { harnessModelDeclarations } from '../HarnessMount/model.js'
 import { getLoggerMock } from '../mocks/getLogger.mock.js'
 import type { Schema } from '../schema/index.js'
 
@@ -156,6 +157,34 @@ export const createHarnessInvocationMockProxy = <TApi>(sandbox?: SinonSandbox) =
 		)
 
 	return { api: getProxy() as TApi, stubs: targetMocks }
+}
+
+/** Creates lazy Sinon stubs for model aliases declared with `canUseHarnessModel`. */
+export const createHarnessModelMockProxy = <TApi>(invokes: InvokeList, sandbox?: SinonSandbox) => {
+	const references = (invokes as InvokeList & { [harnessModelDeclarations]?: Readonly<Record<string, unknown>> })[
+		harnessModelDeclarations
+	]
+	const modelMocks: Record<string, Record<string, SinonStub>> = {}
+	const api = Object.fromEntries(
+		Object.keys(references ?? {}).map(alias => {
+			modelMocks[alias] = {}
+			return [
+				alias,
+				new Proxy(modelMocks[alias], {
+					get(target, property) {
+						if (typeof property !== 'string' || property === 'then' || property === 'catch' || property === 'finally') {
+							return undefined
+						}
+						target[property] ??= (sandbox?.stub() ?? stub()).rejects(
+							new Error(`Harness model ${alias}.${property} is not stubbed`),
+						)
+						return target[property]
+					},
+				}),
+			]
+		}),
+	) as TApi
+	return { api, stubs: modelMocks }
 }
 
 export const createEmitStubMap = <EmitList extends Record<string, Schema>>(

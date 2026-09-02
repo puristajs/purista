@@ -1,10 +1,12 @@
 import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
+import type { BuilderState, HarnessDefinition, ModelHandle } from '@purista/harness'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
 import { createHarnessInvocationProxy } from '../../HarnessMount/invocation.js'
+import { createHarnessModelClients } from '../../HarnessMount/model.js'
 import type { Infer, Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import { puristaVersion } from '../../version.js'
@@ -185,6 +187,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	private readonly eventToQueueBindingList: EventToQueueBindingDefinition[]
 	private readonly queueJobStore?: QueueJobStore
 	private readonly activeQueueRuntimeCancellations = new Set<QueueRuntimeCancellation>()
+	private harnessModelResolver?: (definition: HarnessDefinition<BuilderState>, alias: string) => ModelHandle
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -231,6 +234,13 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 
 	get name() {
 		return `${this.info.serviceName}V${this.info.serviceVersion}`
+	}
+
+	/** @internal Bind mounted Harness models before the service begins handling messages. */
+	public bindHarnessModelResolver(
+		resolver: (definition: HarnessDefinition<BuilderState>, alias: string) => ModelHandle,
+	): void {
+		this.harnessModelResolver = resolver
 	}
 
 	private getServiceMetricAttributes(serviceTarget?: string): PuristaMetricAttributes {
@@ -1584,6 +1594,12 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		return {
 			agent: createHarnessInvocationProxy(invoke, openStream),
 			workflow: createHarnessInvocationProxy(invoke, openStream),
+			model: createHarnessModelClients(invokes, (definition, alias) => {
+				if (!this.harnessModelResolver) {
+					throw new Error('Harness models are unavailable before the mounted Harness runtime starts.')
+				}
+				return this.harnessModelResolver(definition, alias)
+			}),
 		}
 	}
 

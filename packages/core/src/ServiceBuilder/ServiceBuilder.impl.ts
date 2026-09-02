@@ -464,11 +464,29 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			...(mount.policy.publish.workflows ?? []),
 		])
 		const commandTargets = new Set(commands.map(command => command.commandName))
-		const collision = mountedTargets.find(target => commandTargets.has(target))
-		if (collision) {
+		const streamTargets = new Set(streams.map(stream => stream.streamName))
+		const occupiedMountedTargets = new Set<string>()
+		for (const target of mountedTargets) {
+			if (occupiedMountedTargets.has(target)) {
+				throw new UnhandledError(
+					StatusCode.InternalServerError,
+					`Harness target address "${target}" is published more than once.`,
+				)
+			}
+			occupiedMountedTargets.add(target)
+		}
+		const commandCollision = mountedTargets.find(target => commandTargets.has(target))
+		if (commandCollision) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
-				`Harness target address "${collision}" conflicts with a command address.`,
+				`Harness target address "${commandCollision}" conflicts with a command address.`,
+			)
+		}
+		const streamCollision = mountedTargets.find(target => streamTargets.has(target))
+		if (streamCollision) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				`Harness target address "${streamCollision}" conflicts with a stream address.`,
 			)
 		}
 
@@ -517,6 +535,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				(options.resources ?? {}) as Record<string, unknown>,
 			)
 			const runtime = harnessMountRuntime
+			service.bindHarnessModelResolver((definition: HarnessDefinition<any>, alias: string) =>
+				runtime.getModel(definition, alias),
+			)
 			const start = service.start.bind(service)
 			service.start = async () => {
 				try {

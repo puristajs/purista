@@ -17,6 +17,7 @@ import type { Schema } from '../schema/index.js'
 import {
 	createBaseContextStubs,
 	createHarnessInvocationMockProxy,
+	createHarnessModelMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -108,6 +109,7 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		service: Record<string, any>
 		agent: Record<string, any>
 		workflow: Record<string, any>
+		model: Record<string, Record<string, SinonStub>>
 		resources: Partial<CommandContextMockBuilderTypes<TBuilder>['Resources']>
 	}
 }
@@ -155,6 +157,10 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		input.sandbox,
 	)
 	const workflowProxy = createHarnessInvocationMockProxy<CommandContextMockResult<TBuilder>['context']['workflow']>(
+		input.sandbox,
+	)
+	const modelProxy = createHarnessModelMockProxy<CommandContextMockResult<TBuilder>['context']['model']>(
+		internalBuilder.invokes,
 		input.sandbox,
 	)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
@@ -209,6 +215,7 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		stream: streamProxy.api,
 		agent: agentProxy.api,
 		workflow: workflowProxy.api,
+		model: modelProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -247,6 +254,7 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 			service: invokeProxy.createApi<Record<string, any>>(),
 			agent: agentProxy.api,
 			workflow: workflowProxy.api,
+			model: modelProxy.api as Record<string, Record<string, SinonStub>>,
 		},
 	}
 }

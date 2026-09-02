@@ -1,4 +1,4 @@
-import type { HarnessTargetContract } from '@purista/harness'
+import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import {
 	getNamedHook,
 	mergeNamedHooks,
@@ -20,6 +20,7 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
+import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import type { QueueWorkerBuilderTypes } from './QueueWorkerBuilderTypes.js'
 
@@ -146,6 +147,25 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 							Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
 						>
 					>,
+				S['StreamInvokes'],
+				S['EmitList'],
+				S['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare a capability-projected model from a Harness mounted on this service. */
+	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
+		definition: D,
+		alias: Alias,
+	) {
+		this.invokes = registerHarnessModel(this.invokes, definition, alias) as S['Invokes']
+		return this as unknown as QueueWorkerBuilder<
+			QueueWorkerBuilderTypes<
+				S['PayloadSchema'],
+				S['ParamsSchema'],
+				S['Resources'],
+				S['Invokes'] & HarnessModelDeclaration<D, Alias>,
 				S['StreamInvokes'],
 				S['EmitList'],
 				S['QueueInvokes']

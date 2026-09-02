@@ -9,6 +9,46 @@ import { createCommandContextMock } from './createCommandContextMock.js'
 import { createCommandTestHarness } from './createCommandTestHarness.js'
 
 describe('command testing helpers', () => {
+	it('stubs a declared deterministic Harness model without starting a runtime', async () => {
+		const sandbox = createSandbox()
+		try {
+			const definition = defineHarness({ name: 'embedding-test' })
+				.requireModel('embedding', { capabilities: ['embeddings'] })
+				.define()
+			const serviceBuilder = new ServiceBuilder({
+				serviceName: 'Knowledge',
+				serviceVersion: '1',
+				serviceDescription: 'model caller test',
+			})
+			const commandBuilder = serviceBuilder
+				.getCommandBuilder('embed', 'embed text')
+				.addPayloadSchema(z.object({ text: z.string() }))
+				.canUseHarnessModel(definition, 'embedding')
+				.setCommandFunction(async function ({ model }, payload) {
+					return model.embedding.embed({ input: payload.text }, new AbortController().signal)
+				})
+			const { context, stubs } = createCommandContextMock(commandBuilder, {
+				payload: { text: 'PURISTA' },
+				parameter: {},
+				sandbox,
+			})
+			const expected = {
+				embeddings: [{ index: 0, vector: [0.1, 0.2] }],
+				usage: { inputTokens: 1, outputTokens: 0, totalTokens: 1 },
+			}
+			const embed = stubs.model.embedding?.embed
+			if (!embed) throw new Error('The embedding model stub was not created.')
+			embed.resolves(expected)
+
+			await expect(
+				commandBuilder.getCommandFunction().call({} as never, context, { text: 'PURISTA' }, {}),
+			).resolves.toEqual(expected)
+			expect(embed.calledOnce).toBe(true)
+		} finally {
+			sandbox.restore()
+		}
+	})
+
 	it('stubs a declared address-first Harness agent without starting a runtime', async () => {
 		const sandbox = createSandbox()
 		try {

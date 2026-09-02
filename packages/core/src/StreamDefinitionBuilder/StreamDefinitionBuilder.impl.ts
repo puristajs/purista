@@ -1,4 +1,4 @@
-import type { HarnessTargetContract } from '@purista/harness'
+import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
@@ -27,6 +27,7 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
+import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -210,6 +211,28 @@ export class StreamDefinitionBuilder<
 							Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
 						>
 					>,
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare a capability-projected model from a Harness mounted on this service. */
+	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
+		definition: D,
+		alias: Alias,
+	) {
+		this.invokes = registerHarnessModel(this.invokes, definition, alias) as C['Invokes']
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'] & HarnessModelDeclaration<D, Alias>,
 				C['StreamInvokes'],
 				C['EmitList'],
 				C['QueueInvokes']

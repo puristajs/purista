@@ -3,9 +3,11 @@ import { createHash } from 'node:crypto'
 import type {
 	ExecutionEvent,
 	Harness,
+	HarnessDefinition,
 	HarnessInstanceConfig,
 	HostToolBinding,
 	InvokeOptions,
+	ModelHandle,
 	RunOutcome,
 } from '@purista/harness'
 import { isHarnessError } from '@purista/harness'
@@ -41,8 +43,9 @@ export type HarnessInvokeParameter = Readonly<{
 }>
 
 type MountedRuntime = {
+	definition: HarnessDefinition<any>
 	harness: Harness<any>
-	addresses: string[]
+	registrations: Array<{ target: string; command: boolean; stream: boolean }>
 }
 
 type RuntimeTargetPolicy = Readonly<{
@@ -78,7 +81,7 @@ export class HarnessMountRuntime {
 		try {
 			for (const mount of this.mounts) {
 				const harness = await mount.definition.getInstance(this.configFor(mount))
-				const runtime: MountedRuntime = { harness, addresses: [] }
+				const runtime: MountedRuntime = { definition: mount.definition, harness, registrations: [] }
 				this.runtimes.push(runtime)
 				for (const agentId of (mount.policy.publish.agents ?? []) as readonly string[]) {
 					this.assertFreeAddress(agentId, occupied)
@@ -96,21 +99,38 @@ export class HarnessMountRuntime {
 		}
 	}
 
+	/** Resolve one model from the runtime created for the exact mounted definition. */
+	getModel(definition: HarnessDefinition<any>, alias: string): ModelHandle {
+		const runtime = this.runtimes.find(candidate => candidate.definition === definition)
+		if (!runtime) throw new Error(`Harness definition "${definition.name}" is not mounted on this service instance.`)
+		const model = (runtime.harness.models as Record<string, ModelHandle | undefined>)[alias]
+		if (!model) throw new Error(`Harness model "${alias}" is not available on "${definition.name}".`)
+		return model
+	}
+
 	/** Unregister published addresses, then close each Harness runtime. */
 	async shutdown() {
 		const failures: unknown[] = []
 		for (const runtime of [...this.runtimes].reverse()) {
-			for (const target of [...runtime.addresses].reverse()) {
-				try {
-					const address = {
-						serviceName: this.serviceName,
-						serviceVersion: this.serviceVersion,
-						serviceTarget: target,
+			for (const registration of [...runtime.registrations].reverse()) {
+				const address = {
+					serviceName: this.serviceName,
+					serviceVersion: this.serviceVersion,
+					serviceTarget: registration.target,
+				}
+				if (registration.command) {
+					try {
+						await this.eventBridge.unregisterCommand(address)
+					} catch (error) {
+						failures.push(error)
 					}
-					await this.eventBridge.unregisterCommand(address)
-					await this.eventBridge.unregisterStream(address)
-				} catch (error) {
-					failures.push(error)
+				}
+				if (registration.stream) {
+					try {
+						await this.eventBridge.unregisterStream(address)
+					} catch (error) {
+						failures.push(error)
+					}
 				}
 			}
 			const result = await runtime.harness.shutdown()
@@ -180,6 +200,8 @@ export class HarnessMountRuntime {
 		const policy = (
 			kind === 'agent' ? mount.policy.targets?.agents?.[target] : mount.policy.targets?.workflows?.[target]
 		) as RuntimeTargetPolicy | undefined
+		const registration = { target, command: false, stream: false }
+		runtime.registrations.push(registration)
 
 		await this.eventBridge.registerCommand(
 			{ serviceName: this.serviceName, serviceVersion: this.serviceVersion, serviceTarget: target },
@@ -187,13 +209,14 @@ export class HarnessMountRuntime {
 			{ expose: {} },
 			{ durable: false, autoacknowledge: true, shared: true },
 		)
+		registration.command = true
 		await this.eventBridge.registerStream(
 			{ serviceName: this.serviceName, serviceVersion: this.serviceVersion, serviceTarget: target },
 			async message => this.executeStream(runtime.harness, kind, target, message, policy),
 			{ expose: {} },
 			{ durable: false, autoacknowledge: true, shared: true },
 		)
-		runtime.addresses.push(target)
+		registration.stream = true
 	}
 
 	private async execute(

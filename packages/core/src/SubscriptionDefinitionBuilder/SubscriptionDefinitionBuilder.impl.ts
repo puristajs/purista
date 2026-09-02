@@ -1,4 +1,4 @@
-import type { HarnessTargetContract } from '@purista/harness'
+import type { HarnessDefinition, HarnessTargetContract } from '@purista/harness'
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
@@ -32,6 +32,7 @@ import {
 	type HarnessStreamDeclaration,
 	registerHarnessInvocation,
 } from '../HarnessMount/invocation.js'
+import { type HarnessModelDeclaration, registerHarnessModel } from '../HarnessMount/model.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -197,6 +198,30 @@ export class SubscriptionDefinitionBuilder<
 					>,
 				C['StreamInvokes'],
 				C['EmitList']
+			>
+		>
+	}
+
+	/** Declare a capability-projected model from a Harness mounted on this service. */
+	canUseHarnessModel<const D extends HarnessDefinition<any>, Alias extends keyof D['catalog']['models'] & string>(
+		definition: D,
+		alias: Alias,
+	) {
+		this.invokes = registerHarnessModel(this.invokes, definition, alias) as C['Invokes']
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] & HarnessModelDeclaration<D, Alias>,
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}

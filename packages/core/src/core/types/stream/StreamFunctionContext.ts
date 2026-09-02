@@ -1,4 +1,5 @@
 import type { HarnessInvocationClients } from '../../../HarnessMount/invocation.js'
+import type { HarnessModelClients } from '../../../HarnessMount/model.js'
 import type { Schema } from '../../../schema/index.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
@@ -26,6 +27,8 @@ export type StreamFunctionContextEnhancements<
 	stream: StreamInvokes
 	agent: HarnessInvocationClients<Invokes, 'agent'>
 	workflow: HarnessInvocationClients<Invokes, 'workflow'>
+	/** Deterministic model handles explicitly declared with `canUseHarnessModel`. */
+	model: HarnessModelClients<Invokes>
 	queue: QueueContext<QueueInvokes>
 	resources: Resources
 }
