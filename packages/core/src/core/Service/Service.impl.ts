@@ -1,6 +1,5 @@
 import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import type { AgentInvokeMap, AllowedAgentDefinition } from '../../AgentQueueBuilder/types.js'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
@@ -2394,29 +2393,8 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			stream: createOpenStreamFunctionProxy(
 				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, worker.streamInvokes),
 			),
-			agent: this.createQueueWorkerAgentInvokeMap(serviceProxy, worker.agentInvokes),
 			resources: this.resources,
 		} as QueueJobContext
-	}
-
-	private createQueueWorkerAgentInvokeMap<Agents extends Record<string, AllowedAgentDefinition>>(
-		serviceProxy: unknown,
-		agents: readonly AllowedAgentDefinition[],
-	): AgentInvokeMap<Agents> {
-		const result: Record<string, { run(payload: unknown, parameter?: unknown): Promise<unknown> }> = {}
-		for (const agent of agents) {
-			const key = `${agent.agentName}.${agent.serviceVersion}`
-			result[key] = {
-				run: async (payload, parameter) => {
-					const serviceMap = serviceProxy as Record<
-						string,
-						Record<string, Record<string, (payload: unknown, parameter?: unknown) => Promise<unknown>>>
-					>
-					return serviceMap[this.info.serviceName][agent.serviceVersion][agent.agentName](payload, parameter)
-				},
-			}
-		}
-		return result as AgentInvokeMap<Agents>
 	}
 
 	private async handleQueueResult(

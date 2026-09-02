@@ -16,7 +16,6 @@ import type { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilde
 import type { QueueWorkerBuilderTypes } from '../QueueWorkerBuilder/QueueWorkerBuilderTypes.js'
 import type { Schema } from '../schema/index.js'
 import {
-	createAgentInvokeProxy,
 	createBaseContextStubs,
 	createInvokeProxy,
 	createMetricContextMock,
@@ -70,8 +69,7 @@ export type QueueWorkerContextMockResult<
 		QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes'],
 		QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList'],
 		QueueWorkerContextMockBuilderTypes<TBuilder>['QueueInvokes'],
-		EmptyObject,
-		QueueWorkerContextMockBuilderTypes<TBuilder>['AgentInvokes']
+		EmptyObject
 	>
 	message: QueueMessage<Payload, Parameter>
 	stubs: {
@@ -98,7 +96,6 @@ export type QueueWorkerContextMockResult<
 		}
 		service: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['service']
 		stream: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
-		agent: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
 		enqueue: SinonStub
 		scheduleAt: SinonStub
 	}
@@ -144,7 +141,6 @@ export const createQueueWorkerContextMock = <
 		streamInvokes: QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes']
 		emitList: QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList']
 		queueInvokes: QueueInvokeList
-		agentInvokes: readonly unknown[]
 	}
 	const base = createBaseContextStubs<Resources, QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList']>(
 		internalBuilder.emitList as FromEmitToOtherType<QueueWorkerContextMockBuilderTypes<TBuilder>['EmitList'], Schema>,
@@ -152,7 +148,6 @@ export const createQueueWorkerContextMock = <
 	)
 	const serviceProxy = createInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
-	const agentProxy = createAgentInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['AgentInvokes']>(input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 	const message = createQueueMessageMock(input)
 
@@ -211,7 +206,6 @@ export const createQueueWorkerContextMock = <
 				internalBuilder.queueInvokes,
 			),
 		},
-		agent: agentProxy.api,
 		job: {
 			complete: async output => job.complete(output),
 			retry: async (request?: QueueRetryRequest) => job.retry(request),
@@ -250,7 +244,6 @@ export const createQueueWorkerContextMock = <
 				streamProxy.createApi<
 					QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
 				>(),
-			agent: agentProxy.api,
 			enqueue: base.stubs.enqueue,
 			scheduleAt: base.stubs.scheduleAt,
 		},

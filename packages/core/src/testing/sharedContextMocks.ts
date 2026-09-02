@@ -117,35 +117,6 @@ export const createInvokeProxy = <Invokes extends InvokeList | StreamInvokeList 
 	}
 }
 
-export const createAgentInvokeProxy = <AgentInvokes extends Record<string, unknown>>(sandbox?: SinonSandbox) => {
-	const agentMocks: Record<string, { run: SinonStub }> = {}
-
-	const api = new Proxy(
-		{},
-		{
-			get(_target: object, name) {
-				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
-					return undefined
-				}
-
-				if (!agentMocks[name]) {
-					agentMocks[name] = {
-						run: sandbox?.stub() ?? stub(),
-					}
-					agentMocks[name].run.rejects(new Error(`agent invocation ${name} is not stubbed`))
-				}
-
-				return agentMocks[name]
-			},
-		},
-	) as AgentInvokes
-
-	return {
-		api,
-		stubs: agentMocks,
-	}
-}
-
 export const createEmitStubMap = <EmitList extends Record<string, Schema>>(
 	emitList: FromEmitToOtherType<EmitList, Schema>,
 	sandbox?: SinonSandbox,

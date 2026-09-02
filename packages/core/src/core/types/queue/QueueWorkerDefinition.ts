@@ -1,4 +1,3 @@
-import type { AllowedAgentDefinition } from '../../../AgentQueueBuilder/types.js'
 import type { InferIn, Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
@@ -36,7 +35,6 @@ export type QueueWorkerHandler<
 	EmitList extends Record<string, Schema> = Record<string, never>,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
-	AgentInvokes extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 > = (
 	context: QueueJobContext<
 		MessagePayloadType,
@@ -46,8 +44,7 @@ export type QueueWorkerHandler<
 		StreamInvokes,
 		EmitList,
 		QueueInvokes,
-		Metrics,
-		AgentInvokes
+		Metrics
 	>,
 	message: QueueMessage<MessagePayloadType, MessageParamsType>,
 ) => Promise<QueueHandlerResult | undefined>
@@ -66,7 +63,6 @@ export type QueueWorkerDefinition<
 	EmitList extends Record<string, Schema> = Record<string, never>,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	Metrics extends PuristaMetricDefinitions = EmptyObject,
-	AgentInvokes extends Record<string, AllowedAgentDefinition> = Record<never, never>,
 > = {
 	/** Worker name used in diagnostics and metrics. */
 	name: string
@@ -87,8 +83,7 @@ export type QueueWorkerDefinition<
 		StreamInvokes,
 		EmitList,
 		QueueInvokes,
-		Metrics,
-		AgentInvokes
+		Metrics
 	>
 	/** Commands this worker may invoke through the typed service proxy. */
 	invokes: Invokes
@@ -98,8 +93,6 @@ export type QueueWorkerDefinition<
 	emitList: EmitList
 	/** Queues this worker may enqueue. */
 	queueInvokes: QueueInvokes
-	/** Same-service agents this worker may invoke through the typed agent proxy. */
-	agentInvokes: readonly AllowedAgentDefinition[]
 	/** Guards that run before the worker handler. */
 	beforeGuards?: Record<
 		string,

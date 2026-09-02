@@ -1,4 +1,3 @@
-import type { AllowedAgentDefinition } from '../AgentQueueBuilder/types.js'
 import {
 	getNamedHook,
 	mergeNamedHooks,
@@ -45,8 +44,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 		S['StreamInvokes'],
 		S['EmitList'],
 		S['QueueInvokes'],
-		EmptyObject,
-		S['AgentInvokes']
+		EmptyObject
 	>
 	private beforeGuards: Record<string, QueueWorkerBeforeGuardHook> = {}
 	private afterGuards: Record<string, QueueWorkerAfterGuardHook> = {}
@@ -54,7 +52,6 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 	private streamInvokes: S['StreamInvokes'] = {}
 	private emitList: S['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
-	private agentInvokes: AllowedAgentDefinition[] = []
 
 	constructor(
 		private readonly queueName: string,
@@ -89,8 +86,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 			S['StreamInvokes'],
 			S['EmitList'],
 			S['QueueInvokes'],
-			EmptyObject,
-			S['AgentInvokes']
+			EmptyObject
 		>,
 	) {
 		this.handler = handler
@@ -146,8 +142,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 					>,
 				S['StreamInvokes'],
 				S['EmitList'],
-				S['QueueInvokes'],
-				S['AgentInvokes']
+				S['QueueInvokes']
 			>
 		>
 	}
@@ -222,8 +217,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 						>
 					>,
 				S['EmitList'],
-				S['QueueInvokes'],
-				S['AgentInvokes']
+				S['QueueInvokes']
 			>
 		>
 	}
@@ -253,8 +247,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['Invokes'],
 				S['StreamInvokes'],
 				S['EmitList'],
-				S['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>,
-				S['AgentInvokes']
+				S['QueueInvokes'] & Record<QueueName, { payloadSchema: Payload; parameterSchema: Parameter }>
 			>
 		>
 	}
@@ -273,44 +266,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 				S['Invokes'],
 				S['StreamInvokes'],
 				S['EmitList'] & Record<EventName, InferIn<T>>,
-				S['QueueInvokes'],
-				S['AgentInvokes']
-			>
-		>
-	}
-
-	/**
-	 * Declare a same-service agent this worker handler may invoke through `context.agent`.
-	 */
-	canInvokeAgent<
-		Output extends Schema,
-		Payload extends Schema,
-		Parameter extends Schema,
-		AgentName extends string,
-		Version extends string,
-	>(
-		agentName: AgentName,
-		serviceVersion: Version,
-		schemas?: { outputSchema?: Output; payloadSchema?: Payload; parameterSchema?: Parameter },
-	) {
-		this.agentInvokes.push({
-			agentName,
-			serviceVersion,
-			outputSchema: schemas?.outputSchema,
-			payloadSchema: schemas?.payloadSchema,
-			parameterSchema: schemas?.parameterSchema,
-		})
-
-		return this as unknown as QueueWorkerBuilder<
-			QueueWorkerBuilderTypes<
-				S['PayloadSchema'],
-				S['ParamsSchema'],
-				S['Resources'],
-				S['Invokes'],
-				S['StreamInvokes'],
-				S['EmitList'],
-				S['QueueInvokes'],
-				S['AgentInvokes'] & Record<`${AgentName}.${Version}`, AllowedAgentDefinition<Output, Payload, Parameter>>
+				S['QueueInvokes']
 			>
 		>
 	}
@@ -351,8 +307,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 			S['StreamInvokes'],
 			S['EmitList'],
 			S['QueueInvokes'],
-			EmptyObject,
-			S['AgentInvokes']
+			EmptyObject
 		>
 	> {
 		if (!this.handler) {
@@ -372,7 +327,6 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
-			agentInvokes: this.agentInvokes,
 		}
 	}
 }

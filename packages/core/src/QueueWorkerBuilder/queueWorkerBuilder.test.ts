@@ -43,11 +43,6 @@ describe('QueueWorkerBuilder', () => {
 			.canConsumeStream('ReportService', '1', 'streamReport', chunkSchema, payloadSchema, parameterSchema, finalSchema)
 			.canEnqueue('auditQueue', payloadSchema, parameterSchema)
 			.canEmit('worker.done', eventSchema)
-			.canInvokeAgent('triageTicket', '1', {
-				outputSchema,
-				payloadSchema,
-				parameterSchema,
-			})
 			.setHandler(async function handler() {
 				return { status: 'success' as const }
 			})
@@ -71,14 +66,5 @@ describe('QueueWorkerBuilder', () => {
 			parameterSchema,
 		})
 		expect(definition.emitList['worker.done']).toBe(eventSchema)
-		expect(definition.agentInvokes).toStrictEqual([
-			{
-				agentName: 'triageTicket',
-				serviceVersion: '1',
-				outputSchema,
-				payloadSchema,
-				parameterSchema,
-			},
-		])
 	})
 })
