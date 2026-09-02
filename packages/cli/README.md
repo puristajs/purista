@@ -28,7 +28,7 @@ purista add queue process-jobs --service user --service-version 1 --description 
 purista add agent triage --service user --service-version 1 --description "Review tickets"
 ```
 
-Generated agents use the core-native PURISTA agent builders from `@purista/core`. Live model providers stay app-level dependencies; add provider packages such as `@purista/harness-openai` only when the generated application binds real models at runtime. If you add `.useSkills(...)` to a generated agent, bind the skill directories in application startup through `ai.skills.bindings`, `ai.skills.namespaces`, or explicitly trusted discovery; tests should create deterministic skill bindings with `createAgentSkillTestRuntime(...)` and pass its `skills` option to `createAgentTestHarness(...)`.
+Generated agents are native, provider-neutral `@purista/harness` definitions under `src/harness`. The CLI adds a small service mount that explicitly publishes the agent through PURISTA. Live providers, storage, Skills, sandbox, admission, queues, and artifact stores remain application runtime bindings. Generated tests run the same definition standalone with `FakeModelProvider`.
 
 Non-interactive mode fails fast when a required value has no declared default:
 
@@ -71,13 +71,13 @@ const plan = planProjectGeneration({
 await materializeProjectGeneration(plan)
 ```
 
-Generated tests import the public testing helpers from `@purista/core`:
+Generated tests use the public testing helpers for the boundary they test:
 
 - `createCommandContextMock(...)` for command handler tests
 - `createSubscriptionContextMock(...)` for subscription handler tests
 - `createStreamTestHarness(...)` for runtime stream tests
 - `createQueueWorkerTestHarness(...)` for runtime queue worker tests
-- `createAgentTestHarness(...)`, `createScriptedHarnessModel(...)`, and `createAgentSkillTestRuntime(...)` for agent runtime tests, including skill-backed agents via the `skills` runtime option
+- `FakeModelProvider` from `@purista/harness/testing` for standalone agent and workflow tests
 
 **Visit [purista.dev](https://purista.dev)**
 

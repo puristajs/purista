@@ -204,7 +204,6 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('streamDefinitions')
 		expect(serviceFileContent).toContain('queueDefinitions')
 		expect(serviceFileContent).toContain('queueWorkerDefinitions')
-		expect(serviceFileContent).toContain('agentDefinitions')
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] =")
@@ -218,10 +217,9 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('searchUsersStreamBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('enqueueJobCommandBuilder.getDefinition()')
-		expect(serviceFileContent).toContain('triageAgentBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('.addQueueDefinition(...queueDefinitions)')
 		expect(serviceFileContent).toContain('.addQueueWorkerDefinition(...queueWorkerDefinitions)')
-		expect(serviceFileContent).toContain('.addAgentDefinition(...agentDefinitions)')
+		expect(serviceFileContent).toContain('.mountHarness(triageHarness, triageHarnessPolicy)')
 		expect(serviceFileContent).not.toMatch(/^ +\t/m)
 		expect(serviceFileContent).toContain('processJobsQueueBuilder.getDefinition()')
 
@@ -242,59 +240,40 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(queueBuilderContent).toContain('.getQueueBuilder("processJobs"')
 		expect(queueBuilderContent).toContain('.addPayloadSchema(userV1ProcessJobsQueuePayloadSchema)')
 
-		const agentDirPath = join(TEST_DIR, 'src', 'service', 'user', 'v1', 'agent', 'triage')
-		const agentBuilder = readFileSync(join(agentDirPath, 'triageAgent.ts'), 'utf-8')
-		expect(agentBuilder).toContain("import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'")
-		expect(agentBuilder).toContain("import { extendApi } from '@purista/core'")
-		expect(agentBuilder).not.toContain('@purista/ai')
-		expect(agentBuilder).not.toContain('@purista/harness')
-		expect(agentBuilder).toContain(".getAgentQueueBuilder('triageAgent', 'Review tickets')")
-		expect(agentBuilder).toContain('.setHarnessAgent({')
-		expect(agentBuilder).toContain('.addPayloadSchema(triageAgentPayloadSchema)')
-		expect(agentBuilder).toContain('.addParameterSchema(triageAgentParameterSchema)')
-		expect(agentBuilder).toContain('.addOutputSchema(triageAgentOutputSchema)')
-		expect(agentBuilder).toContain(".addModel('primary', {")
-		expect(agentBuilder).not.toContain("model: 'gpt-4.1-mini'")
-		expect(agentBuilder).toContain('.setHarnessAgent({')
-		expect(agentBuilder).toContain("capabilities: ['object']")
-		expect(agentBuilder).toContain(".setSuccessEventName('user.triage.completed')")
-		expect(agentBuilder).toContain(".setSessionPolicy({ mode: 'ephemeral' })")
-		expect(agentBuilder).toContain('.setExecutionPolicy({')
-		expect(agentBuilder).toContain("instructions: 'You are a helpful assistant for this service domain.'")
-		expect(agentBuilder).not.toContain('builtinTools: false')
+		const harnessDirPath = join(TEST_DIR, 'src', 'harness', 'triage')
+		const harnessDefinition = readFileSync(join(harnessDirPath, 'triageHarness.ts'), 'utf-8')
+		expect(harnessDefinition).toContain("import { defineHarness } from '@purista/harness'")
+		expect(harnessDefinition).not.toContain('@purista/ai')
+		expect(harnessDefinition).toContain("defineHarness({ name: 'triage' })")
+		expect(harnessDefinition).toContain(".requireModel('primary', { capabilities: ['object'] })")
+		expect(harnessDefinition).toContain(".agent('triageAgent', {")
+		expect(harnessDefinition).toContain("updates: 'object-snapshot'")
+		expect(harnessDefinition).toContain('instructions: "Review tickets"')
+		expect(harnessDefinition).toContain('.define()')
+		const mountContent = readFileSync(join(serviceDir, 'harness', 'triageMount.ts'), 'utf-8')
+		expect(mountContent).toContain("publish: { agents: ['triageAgent'] }")
+		expect(mountContent).toContain("triageAgent: { successEvent: 'user.triage.completed' }")
 		for (const term of forbiddenAgentTerms) {
-			expect(agentBuilder).not.toContain(term)
+			expect(harnessDefinition).not.toContain(term)
 		}
-		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
-		expect(agentTestContent).toContain(
-			"import { createAgentTestHarness, createScriptedHarnessModel } from '@purista/core'",
-		)
+		const agentTestContent = readFileSync(join(harnessDirPath, 'triageHarness.test.ts'), 'utf-8')
+		expect(agentTestContent).toContain("import { FakeModelProvider } from '@purista/harness/testing'")
 		expect(agentTestContent).not.toContain('@purista/ai')
-		expect(agentTestContent).not.toContain('@purista/harness')
-		expect(agentTestContent).toContain('runs with the attached-agent harness runtime')
-		expect(agentTestContent).toContain('const model = createScriptedHarnessModel()')
+		expect(agentTestContent).toContain('runs as a standalone Harness definition')
+		expect(agentTestContent).toContain('const provider = new FakeModelProvider({ strict: true })')
 		expect(agentTestContent).toContain("object: { message: 'hello' }")
-		expect(agentTestContent).toContain('provider: model')
-		expect(agentTestContent).toContain("model: 'gpt-4.1-mini'")
-		expect(agentTestContent).toContain("capabilities: ['object']")
-		expect(agentTestContent).toContain(
-			'const harness = await createAgentTestHarness(await triageAgentBuilder.getDefinition(), {',
-		)
-		expect(agentTestContent).toContain(
-			'create test bindings with createAgentSkillTestRuntime(...) and pass skills to this options object',
-		)
-		expect(agentTestContent).toContain("expect(result).toEqual({ message: 'hello' })")
-		expect(agentTestContent).not.toContain('ai: {')
-		expect(agentTestContent).not.toContain('await harness.destroy()')
+		expect(agentTestContent).toContain("primary: { provider, model: 'fake' }")
+		expect(agentTestContent).toContain('session.agents.triageAgent.run')
+		expect(agentTestContent).toContain("expect(outcome.output).toEqual({ message: 'hello' })")
+		expect(agentTestContent).toContain('await runtime.shutdown()')
 		for (const term of forbiddenAgentTerms) {
 			expect(agentTestContent).not.toContain(term)
 		}
-		expect(agentTestContent).not.toContain('getAgentQueueBuilder: () => null as any')
 		const packageJsonContent = JSON.parse(readFileSync(join(TEST_DIR, 'package.json'), 'utf-8')) as {
 			dependencies?: Record<string, string>
 		}
 		expect(packageJsonContent.dependencies?.['@purista/ai']).toBeUndefined()
-		expect(packageJsonContent.dependencies?.['@purista/harness']).toBeUndefined()
+		expect(packageJsonContent.dependencies?.['@purista/harness']).toBe('^3.0.0')
 
 		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')
 		expect(readFileSync(join(queueWorkerDir, 'processJobsWorkerQueueWorkerBuilder.ts'), 'utf-8')).toContain(

@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { z } from 'zod'
 import { addPuristaAgent } from '../api/addPuristaAgent.js'
 import { ensureServiceEvent } from '../api/content/manipulation/ensureServiceEvent.js'
@@ -73,12 +73,18 @@ export const addAgentCommand: PuristaExecutableCommand<AddAgentInput, z.infer<ty
 		const mutationSnapshot = captureMutationSnapshot([
 			join(
 				context.cwd,
+				dirname(puristaConfig.servicePath ?? 'src/service'),
+				'harness',
+				resolvedInput.name,
+			),
+			join(
+				context.cwd,
 				puristaConfig.servicePath ?? 'src/service',
 				resolvedInput.serviceName,
 				`v${resolvedInput.serviceVersion}`,
-				'agent',
-				resolvedInput.name,
+				'harness',
 			),
+			join(context.cwd, 'package.json'),
 		])
 		await addPuristaAgent({
 			projectRootPath: context.cwd,
