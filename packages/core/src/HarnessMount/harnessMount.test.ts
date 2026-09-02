@@ -522,6 +522,7 @@ describe('ServiceBuilder.mountHarness', () => {
 			.define()
 
 		const commandCalls: unknown[] = []
+		const resourceCurrencies: string[] = []
 		const accountBuilder = new ServiceBuilder({
 			serviceName: 'Account',
 			serviceVersion: '1',
@@ -547,23 +548,34 @@ describe('ServiceBuilder.mountHarness', () => {
 			serviceName: 'Knowledge',
 			serviceVersion: '1',
 			serviceDescription: 'Mounted Harness test service',
-		}).mountHarness(reviewHarness, {
-			publish: { agents: ['review'] },
-			hostTools: {
-				lookup_account: commandAsHarnessTool('Account', '1', 'lookupAccount', {
-					mapInput: (input, context) => ({
-						payload: input,
-						parameter: { idempotencyKey: context.idempotencyKey },
-					}),
-				}),
-			},
 		})
+			.defineResource<'accountPolicy', { currency: string }>()
+			.mountHarness(reviewHarness, {
+				publish: { agents: ['review'] },
+				hostTools: {
+					lookup_account: commandAsHarnessTool<{ accountPolicy: { currency: string } }>(
+						'Account',
+						'1',
+						'lookupAccount',
+						{
+							mapInput: (input, context) => {
+								resourceCurrencies.push(context.host.resources.accountPolicy.currency)
+								return {
+									payload: input,
+									parameter: { idempotencyKey: context.idempotencyKey },
+								}
+							},
+						},
+					),
+				},
+			})
 
 		const eventBridge = new DefaultEventBridge()
 		await eventBridge.start()
 		const accountService = await accountBuilder.getInstance(eventBridge)
 		const knowledgeService = await knowledgeBuilder.getInstance(eventBridge, {
 			ai: { models: { primary: { provider, model: 'fake' } } },
+			resources: { accountPolicy: { currency: 'EUR' } },
 		})
 		await accountService.start()
 		await knowledgeService.start()
@@ -593,6 +605,7 @@ describe('ServiceBuilder.mountHarness', () => {
 				idempotencyKey: expect.stringMatching(/^tool_[a-f0-9]{64}$/),
 			},
 		])
+		expect(resourceCurrencies).toEqual(['EUR'])
 
 		await knowledgeService.destroy()
 		await accountService.destroy()

@@ -17,24 +17,26 @@ import type { Logger } from '../core/types/Logger.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 
 /** Trusted PURISTA values available to a bound host tool for one run. */
-export type HarnessHostContext = Readonly<{
+export type HarnessHostContext<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<{
 	identity: Readonly<{ tenantId?: string; principalId?: string }>
 	request: Readonly<{ traceId?: string; correlationId: string }>
+	/** Service-owned dependencies supplied through `ServiceBuilder.getInstance(...)`. */
+	resources: Resources
 	logger: Logger
 }>
 
 /** Tool-call context available while mapping a Harness tool into a command. */
-export type HarnessCommandToolContext = Readonly<
+export type HarnessCommandToolContext<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<
 	Pick<
-		HostToolHandlerContext<HarnessHostContext>,
+		HostToolHandlerContext<HarnessHostContext<Resources>>,
 		'runId' | 'sessionId' | 'agentId' | 'toolId' | 'callId' | 'idempotencyKey'
 	> & {
-		host: HarnessHostContext
+		host: HarnessHostContext<Resources>
 	}
 >
 
 /** Address-first adapter that exposes a PURISTA command as a Harness host tool. */
-export type HarnessCommandToolAdapter = Readonly<{
+export type HarnessCommandToolAdapter<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<{
 	kind: 'purista-command'
 	serviceName: string
 	serviceVersion: string
@@ -46,15 +48,15 @@ export type HarnessCommandToolAdapter = Readonly<{
 	 */
 	mapInput?: (
 		input: unknown,
-		context: HarnessCommandToolContext,
+		context: HarnessCommandToolContext<Resources>,
 	) => Readonly<{ payload: unknown; parameter?: unknown }>
 	mapOutput?: (output: unknown) => unknown
 }>
 
-type MountHostToolBindings<S extends BuilderState> = {
-	[K in keyof HarnessHostToolBindings<S, HarnessHostContext>]:
-		| HarnessHostToolBindings<S, HarnessHostContext>[K]
-		| HarnessCommandToolAdapter
+type MountHostToolBindings<S extends BuilderState, Resources extends Record<string, unknown>> = {
+	[K in keyof HarnessHostToolBindings<S, HarnessHostContext<Resources>>]:
+		| HarnessHostToolBindings<S, HarnessHostContext<Resources>>[K]
+		| HarnessCommandToolAdapter<Resources>
 }
 
 /** Trusted execution context passed to mounted-target business guards. */
@@ -124,9 +126,9 @@ export type HarnessPublishPolicy<
 		workflows?: HarnessTargetPolicies<S, 'workflows', Resources>
 	}>
 }> &
-	(keyof MountHostToolBindings<S> extends never
+	(keyof MountHostToolBindings<S, Resources> extends never
 		? { readonly hostTools?: never }
-		: { readonly hostTools: MountHostToolBindings<S> })
+		: { readonly hostTools: MountHostToolBindings<S, Resources> })
 
 /** One immutable Harness definition mounted by a service builder. */
 export type HarnessMount<D extends HarnessDefinition<any> = HarnessDefinition<any>> = Readonly<{
@@ -156,11 +158,11 @@ export type MountedHarnessRuntimeConfig<H extends readonly HarnessDefinition<any
 >
 
 /** Create an address-first command adapter for a Harness host tool. */
-export function commandAsHarnessTool(
+export function commandAsHarnessTool<Resources extends Record<string, unknown> = Record<string, unknown>>(
 	serviceName: string,
 	serviceVersion: string,
 	serviceTarget: string,
-	options: Pick<HarnessCommandToolAdapter, 'mapInput' | 'mapOutput'> = {},
-): HarnessCommandToolAdapter {
+	options: Pick<HarnessCommandToolAdapter<Resources>, 'mapInput' | 'mapOutput'> = {},
+): HarnessCommandToolAdapter<Resources> {
 	return Object.freeze({ kind: 'purista-command', serviceName, serviceVersion, serviceTarget, ...options })
 }

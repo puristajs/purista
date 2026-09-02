@@ -239,7 +239,7 @@ export class HarnessMountRuntime {
 				},
 			})
 			const options: InvokeOptions = {
-				hostContext: hostContext(message, this.logger),
+				hostContext: hostContext(message, this.logger, this.resources),
 				...(parameter.idempotencyKey ? { idempotencyKey: parameter.idempotencyKey } : {}),
 				...(parameter.timeoutMs !== undefined ? { timeoutMs: parameter.timeoutMs } : {}),
 				...(parameter.metadata ? { metadata: parameter.metadata } : {}),
@@ -295,7 +295,7 @@ export class HarnessMountRuntime {
 			})
 			const options: InvokeOptions = {
 				signal: controller.signal,
-				hostContext: hostContext(message, this.logger),
+				hostContext: hostContext(message, this.logger, this.resources),
 				...(parameter.idempotencyKey ? { idempotencyKey: parameter.idempotencyKey } : {}),
 				...(parameter.timeoutMs !== undefined ? { timeoutMs: parameter.timeoutMs } : {}),
 				...(parameter.metadata ? { metadata: parameter.metadata } : {}),
@@ -429,7 +429,11 @@ function sessionKey(message: Command | StreamOpenRequest, requested: string | un
 		.digest('hex')
 }
 
-function hostContext(message: Command | StreamOpenRequest, logger: Logger): HarnessHostContext {
+function hostContext(
+	message: Command | StreamOpenRequest,
+	logger: Logger,
+	resources: Record<string, unknown>,
+): HarnessHostContext {
 	return Object.freeze({
 		identity: Object.freeze({
 			...(message.tenantId ? { tenantId: message.tenantId } : {}),
@@ -439,6 +443,7 @@ function hostContext(message: Command | StreamOpenRequest, logger: Logger): Harn
 			...(message.traceId ? { traceId: message.traceId } : {}),
 			correlationId: message.correlationId,
 		}),
+		resources,
 		logger,
 	})
 }
