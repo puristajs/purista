@@ -1,11 +1,19 @@
 import type {
+	AgentInput,
+	AgentOutput,
 	BuilderState,
 	HarnessDefinition,
 	HarnessHostToolBindings,
 	HarnessInstanceConfig,
+	HarnessTargetContract,
 	InferTypes,
+	RunOutcome,
+	WorkflowInput,
+	WorkflowOutput,
 } from '@purista/harness'
+import type { Command } from '../core/types/commandType/Command.js'
 import type { Logger } from '../core/types/Logger.js'
+import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 
 /** Trusted PURISTA values available to a bound host tool for one run. */
 export type HarnessHostContext = Readonly<{
@@ -30,11 +38,71 @@ type MountHostToolBindings<S extends BuilderState> = {
 		| HarnessCommandToolAdapter
 }
 
+/** Trusted execution context passed to mounted-target business guards. */
+export type HarnessBusinessGuardContext<Resources extends Record<string, unknown>> = Readonly<{
+	kind: 'agent' | 'workflow'
+	target: string
+	message: Readonly<Command | StreamOpenRequest>
+	identity: Readonly<{ tenantId?: string; principalId?: string }>
+	resources: Resources
+	logger: Logger
+}>
+
+type TargetContract<
+	S extends BuilderState,
+	Kind extends 'agents' | 'workflows',
+	K extends string,
+> = Kind extends 'agents'
+	? K extends keyof NonNullable<S['agents']>
+		? HarnessTargetContract<'agent', any, any, AgentInput<S, K>, AgentOutput<S, K>>
+		: never
+	: K extends keyof NonNullable<S['workflows']>
+		? HarnessTargetContract<'workflow', any, any, WorkflowInput<S, K>, WorkflowOutput<S, K>>
+		: never
+
+type HarnessTargetPolicy<
+	C extends HarnessTargetContract<any, any, any, any, any>,
+	Resources extends Record<string, unknown>,
+> = Readonly<{
+	beforeGuards?: Readonly<
+		Record<
+			string,
+			(context: HarnessBusinessGuardContext<Resources>, input: C['$infer']['input']) => void | Promise<void>
+		>
+	>
+	afterGuards?: Readonly<
+		Record<
+			string,
+			(
+				context: HarnessBusinessGuardContext<Resources>,
+				outcome: RunOutcome<C['$infer']['output']>,
+			) => void | Promise<void>
+		>
+	>
+	/** Publish the completed terminal outcome as a business fact. */
+	successEvent?: string
+}>
+
+type HarnessTargetPolicies<
+	S extends BuilderState,
+	Kind extends 'agents' | 'workflows',
+	Resources extends Record<string, unknown>,
+> = Partial<{
+	[K in keyof NonNullable<S[Kind]> & string]: HarnessTargetPolicy<TargetContract<S, Kind, K>, Resources>
+}>
+
 /** Agent or workflow names explicitly published at a PURISTA service address. */
-export type HarnessPublishPolicy<S extends BuilderState> = Readonly<{
+export type HarnessPublishPolicy<
+	S extends BuilderState,
+	Resources extends Record<string, unknown> = Record<string, unknown>,
+> = Readonly<{
 	publish: Readonly<{
 		agents?: readonly (keyof NonNullable<S['agents']> & string)[]
 		workflows?: readonly (keyof NonNullable<S['workflows']> & string)[]
+	}>
+	targets?: Readonly<{
+		agents?: HarnessTargetPolicies<S, 'agents', Resources>
+		workflows?: HarnessTargetPolicies<S, 'workflows', Resources>
 	}>
 }> &
 	(keyof MountHostToolBindings<S> extends never

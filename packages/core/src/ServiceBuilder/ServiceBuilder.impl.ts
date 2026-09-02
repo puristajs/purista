@@ -243,7 +243,10 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 * Only targets listed in `publish` receive versioned PURISTA addresses. The
 	 * same definition remains directly runnable with `definition.getInstance`.
 	 */
-	mountHarness<const D extends HarnessDefinition<any>>(definition: D, policy: HarnessPublishPolicy<HarnessState<D>>) {
+	mountHarness<const D extends HarnessDefinition<any>>(
+		definition: D,
+		policy: HarnessPublishPolicy<HarnessState<D>, S['Resources']>,
+	) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
@@ -511,6 +514,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				logger,
 				this.harnessMountList,
 				options.ai as unknown as HarnessInstanceConfig<any>,
+				(options.resources ?? {}) as Record<string, unknown>,
 			)
 			const runtime = harnessMountRuntime
 			const start = service.start.bind(service)

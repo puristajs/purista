@@ -184,6 +184,86 @@ describe('ServiceBuilder.mountHarness', () => {
 		await knowledge.destroy()
 	})
 
+	it('runs resource-backed business guards and publishes a completed outcome as a fact', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const guardCalls: string[] = []
+		const receivedFacts: unknown[] = []
+		await eventBridge.registerSubscription(
+			{
+				sender: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'echo' },
+				eventName: 'knowledge.answerCompleted',
+				subscriber: { serviceName: 'Audit', serviceVersion: '1', serviceTarget: 'recordAnswer' },
+				eventBridgeConfig: { durable: false, autoacknowledge: true, shared: true },
+			},
+			async message => {
+				receivedFacts.push(message.payload)
+				return undefined
+			},
+		)
+
+		const builder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Guarded mounted Harness service',
+		})
+			.defineResource<'accountAccess', { canUseAccount(principalId: string, accountId: string): boolean }>()
+			.mountHarness(echoHarness, {
+				publish: { agents: ['echo'] },
+				targets: {
+					agents: {
+						echo: {
+							beforeGuards: {
+								accountAccess: async (context, input) => {
+									if (
+										!context.identity.principalId ||
+										!context.resources.accountAccess.canUseAccount(context.identity.principalId, input.value)
+									) {
+										throw new Error('Account access denied')
+									}
+									guardCalls.push(`before:${input.value}`)
+								},
+							},
+							afterGuards: {
+								completed: async (_context, outcome) => {
+									guardCalls.push(`after:${outcome.status}`)
+								},
+							},
+							successEvent: 'knowledge.answerCompleted',
+						},
+					},
+				},
+			})
+		const service = await builder.getInstance(eventBridge, {
+			ai: { models: {} },
+			resources: {
+				accountAccess: {
+					canUseAccount: (principalId, accountId) => principalId === 'principal-a' && accountId === 'allowed',
+				},
+			},
+		})
+		await service.start()
+
+		const command = getCommandMessageMock({
+			principalId: 'principal-a',
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'echo' },
+			payload: { payload: { value: 'allowed' }, parameter: {} },
+		})
+		const {
+			id: _id,
+			messageType: _messageType,
+			timestamp: _timestamp,
+			correlationId: _correlationId,
+			...request
+		} = command
+		await eventBridge.invoke(request)
+		await new Promise(resolve => process.nextTick(resolve))
+
+		expect(guardCalls).toEqual(['before:allowed', 'after:completed'])
+		expect(receivedFacts).toEqual([expect.objectContaining({ status: 'completed', output: { value: 'allowed' } })])
+		await service.destroy()
+	})
+
 	it('adapts a declared host tool to an address-first PURISTA command with trusted identity', async () => {
 		const provider = new FakeModelProvider()
 		provider.enqueue({

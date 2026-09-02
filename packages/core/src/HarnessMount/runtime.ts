@@ -3,7 +3,6 @@ import { createHash } from 'node:crypto'
 import type {
 	ExecutionEvent,
 	Harness,
-	HarnessDefinition,
 	HarnessInstanceConfig,
 	HostToolBinding,
 	InvokeOptions,
@@ -25,7 +24,12 @@ import { isStreamOpenRequest } from '../core/types/stream/isStreamOpenRequest.im
 import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
 import type { StreamMessage } from '../core/types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
-import type { HarnessCommandToolAdapter, HarnessHostContext, HarnessMount } from './types.js'
+import type {
+	HarnessBusinessGuardContext,
+	HarnessCommandToolAdapter,
+	HarnessHostContext,
+	HarnessMount,
+} from './types.js'
 
 /** Consumer-controlled run options accepted by a mounted Harness target. */
 export type HarnessInvokeParameter = Readonly<{
@@ -41,6 +45,16 @@ type MountedRuntime = {
 	addresses: string[]
 }
 
+type RuntimeTargetPolicy = Readonly<{
+	beforeGuards?: Readonly<
+		Record<string, (context: HarnessBusinessGuardContext<any>, input: unknown) => void | Promise<void>>
+	>
+	afterGuards?: Readonly<
+		Record<string, (context: HarnessBusinessGuardContext<any>, outcome: RunOutcome<unknown>) => void | Promise<void>>
+	>
+	successEvent?: string
+}>
+
 /** Service-owned lifecycle for one or more mounted portable Harness definitions. */
 export class HarnessMountRuntime {
 	private readonly runtimes: MountedRuntime[] = []
@@ -54,6 +68,7 @@ export class HarnessMountRuntime {
 		private readonly logger: Logger,
 		private readonly mounts: readonly HarnessMount[],
 		private readonly config: Omit<HarnessInstanceConfig<any, HarnessHostContext>, 'hostTools'>,
+		private readonly resources: Record<string, unknown>,
 	) {}
 
 	/** Instantiate every Harness and register its explicitly published aggregate targets. */
@@ -67,11 +82,11 @@ export class HarnessMountRuntime {
 				this.runtimes.push(runtime)
 				for (const agentId of (mount.policy.publish.agents ?? []) as readonly string[]) {
 					this.assertFreeAddress(agentId, occupied)
-					await this.register(runtime, mount.definition, 'agent', agentId)
+					await this.register(runtime, mount, 'agent', agentId)
 				}
 				for (const workflowId of (mount.policy.publish.workflows ?? []) as readonly string[]) {
 					this.assertFreeAddress(workflowId, occupied)
-					await this.register(runtime, mount.definition, 'workflow', workflowId)
+					await this.register(runtime, mount, 'workflow', workflowId)
 				}
 			}
 			this.started = true
@@ -158,33 +173,40 @@ export class HarnessMountRuntime {
 		occupied.add(target)
 	}
 
-	private async register(
-		runtime: MountedRuntime,
-		definition: HarnessDefinition<any>,
-		kind: 'agent' | 'workflow',
-		target: string,
-	) {
+	private async register(runtime: MountedRuntime, mount: HarnessMount, kind: 'agent' | 'workflow', target: string) {
+		const definition = mount.definition
 		const catalog = kind === 'agent' ? definition.catalog.agents : definition.catalog.workflows
 		if (!(target in catalog)) throw new Error(`Harness ${kind} "${target}" does not exist in "${definition.name}".`)
+		const policy = (
+			kind === 'agent' ? mount.policy.targets?.agents?.[target] : mount.policy.targets?.workflows?.[target]
+		) as RuntimeTargetPolicy | undefined
 
 		await this.eventBridge.registerCommand(
 			{ serviceName: this.serviceName, serviceVersion: this.serviceVersion, serviceTarget: target },
-			async message => this.execute(runtime.harness, kind, target, message),
+			async message => this.execute(runtime.harness, kind, target, message, policy),
 			{ expose: {} },
 			{ durable: false, autoacknowledge: true, shared: true },
 		)
 		await this.eventBridge.registerStream(
 			{ serviceName: this.serviceName, serviceVersion: this.serviceVersion, serviceTarget: target },
-			async message => this.executeStream(runtime.harness, kind, target, message),
+			async message => this.executeStream(runtime.harness, kind, target, message, policy),
 			{ expose: {} },
 			{ durable: false, autoacknowledge: true, shared: true },
 		)
 		runtime.addresses.push(target)
 	}
 
-	private async execute(harness: Harness<any>, kind: 'agent' | 'workflow', target: string, message: Command) {
+	private async execute(
+		harness: Harness<any>,
+		kind: 'agent' | 'workflow',
+		target: string,
+		message: Command,
+		policy?: RuntimeTargetPolicy,
+	) {
 		try {
 			const parameter = parseParameter(message.payload.parameter)
+			const context = this.guardContext(kind, target, message)
+			await runBeforeGuards(policy, context, message.payload.payload)
 			const session = await harness.getSession(sessionKey(message, parameter.sessionId), {
 				identity: {
 					...(message.tenantId ? { tenantId: message.tenantId } : {}),
@@ -202,8 +224,14 @@ export class HarnessMountRuntime {
 				| { run(input: unknown, options?: InvokeOptions): Promise<unknown> }
 				| undefined
 			if (!invoker) throw new Error(`Mounted Harness ${kind} "${target}" is unavailable.`)
-			const outcome = await invoker.run(message.payload.payload, options)
-			return createSuccessResponse(this.eventBridge.instanceId, message, outcome)
+			const outcome = (await invoker.run(message.payload.payload, options)) as RunOutcome<unknown>
+			await runAfterGuards(policy, context, outcome)
+			return createSuccessResponse(
+				this.eventBridge.instanceId,
+				message,
+				outcome,
+				outcome.status === 'completed' ? policy?.successEvent : undefined,
+			)
 		} catch (error) {
 			const handled = toHandledError(error)
 			if (handled.errorCode >= 500) this.logger.error({ err: handled }, handled.message)
@@ -217,6 +245,7 @@ export class HarnessMountRuntime {
 		kind: 'agent' | 'workflow',
 		target: string,
 		message: StreamMessage,
+		policy?: RuntimeTargetPolicy,
 	) {
 		if (isStreamControl(message)) {
 			this.activeStreams.get(message.correlationId)?.abort(new Error(message.payload.reason ?? 'consumer_cancelled'))
@@ -230,6 +259,8 @@ export class HarnessMountRuntime {
 		try {
 			await this.publishStreamFrame(message, target, { frameType: 'start', sequence: sequence++ })
 			const parameter = parseParameter(message.payload.parameter)
+			const context = this.guardContext(kind, target, message)
+			await runBeforeGuards(policy, context, message.payload.payload)
 			const session = await harness.getSession(sessionKey(message, parameter.sessionId), {
 				identity: {
 					...(message.tenantId ? { tenantId: message.tenantId } : {}),
@@ -255,6 +286,10 @@ export class HarnessMountRuntime {
 				else await this.publishStreamFrame(message, target, { frameType: 'chunk', sequence: sequence++, chunk: event })
 			}
 			if (!outcome) throw new Error(`Mounted Harness ${kind} "${target}" ended without a terminal outcome.`)
+			await runAfterGuards(policy, context, outcome)
+			if (outcome.status === 'completed' && policy?.successEvent) {
+				await this.publishSuccessEvent(message, kind, target, policy.successEvent, outcome)
+			}
 			await this.publishStreamFrame(message, target, { frameType: 'complete', sequence: sequence++, final: outcome })
 		} catch (error) {
 			if (controller.signal.aborted) {
@@ -280,6 +315,50 @@ export class HarnessMountRuntime {
 		} finally {
 			this.activeStreams.delete(message.correlationId)
 		}
+	}
+
+	private guardContext(
+		kind: 'agent' | 'workflow',
+		target: string,
+		message: Command | StreamOpenRequest,
+	): HarnessBusinessGuardContext<Record<string, unknown>> {
+		return Object.freeze({
+			kind,
+			target,
+			message,
+			identity: Object.freeze({
+				...(message.tenantId ? { tenantId: message.tenantId } : {}),
+				...(message.principalId ? { principalId: message.principalId } : {}),
+			}),
+			resources: this.resources,
+			logger: this.logger,
+		})
+	}
+
+	private async publishSuccessEvent(
+		message: StreamOpenRequest,
+		kind: 'agent' | 'workflow',
+		target: string,
+		eventName: string,
+		outcome: RunOutcome<unknown>,
+	) {
+		await this.eventBridge.emitMessage({
+			messageType: EBMessageType.CustomMessage,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: message.traceId,
+			principalId: message.principalId,
+			tenantId: message.tenantId,
+			sender: {
+				serviceName: this.serviceName,
+				serviceVersion: this.serviceVersion,
+				serviceTarget: target,
+				instanceId: this.eventBridge.instanceId,
+			},
+			eventName,
+			payload: outcome,
+		} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+		this.logger.debug({ kind, target, eventName }, 'published mounted Harness success event')
 	}
 
 	private async publishStreamFrame(message: StreamOpenRequest, target: string, payload: StreamFrame['payload']) {
@@ -335,6 +414,22 @@ function hostContext(message: Command | StreamOpenRequest, logger: Logger): Harn
 		}),
 		logger,
 	})
+}
+
+async function runBeforeGuards(
+	policy: RuntimeTargetPolicy | undefined,
+	context: HarnessBusinessGuardContext<any>,
+	input: unknown,
+) {
+	await Promise.all(Object.values(policy?.beforeGuards ?? {}).map(guard => guard(context, input)))
+}
+
+async function runAfterGuards(
+	policy: RuntimeTargetPolicy | undefined,
+	context: HarnessBusinessGuardContext<any>,
+	outcome: RunOutcome<unknown>,
+) {
+	await Promise.all(Object.values(policy?.afterGuards ?? {}).map(guard => guard(context, outcome)))
 }
 
 function isCommandToolAdapter(value: unknown): value is HarnessCommandToolAdapter {
