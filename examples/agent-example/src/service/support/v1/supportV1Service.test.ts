@@ -3,10 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { supportV1Service } from './supportV1Service.js'
 
 describe('supportV1Service', () => {
-	it('contains deterministic command tools and multi-agent definitions', async () => {
+	it('contains native commands without generated agent transports', async () => {
 		const definitions = await supportV1Service.resolveDefinitions()
 		const commandNames = definitions.commands.map(command => command.commandName)
-		const queueNames = definitions.queues.map(queue => queue.queueName)
 
 		expect(commandNames).toEqual(
 			expect.arrayContaining([
@@ -14,33 +13,13 @@ describe('supportV1Service', () => {
 				'getRunbook',
 				'createIncidentBrief',
 				'triageTicket',
-				'analyzeSignals',
-				'assessRollbackRisk',
-				'coordinateIncidentResponse',
-				'reviewRollback',
 				'requestRollbackReview',
 				'decideRollbackReview',
 				'executeApprovedRollback',
 			]),
 		)
-		expect(queueNames).toEqual(
-			expect.arrayContaining([
-				'agent:Support:1:triageTicket',
-				'agent:Support:1:analyzeSignals',
-				'agent:Support:1:assessRollbackRisk',
-				'agent:Support:1:coordinateIncidentResponse',
-				'agent:Support:1:reviewRollback',
-			]),
-		)
-		expect(definitions.queueWorkers).toHaveLength(5)
-		expect(definitions.streams.map(stream => stream.streamName)).toEqual(
-			expect.arrayContaining([
-				'triageTicketStream',
-				'analyzeSignalsStream',
-				'assessRollbackRiskStream',
-				'coordinateIncidentResponseStream',
-				'reviewRollbackStream',
-			]),
-		)
+		expect(definitions.queues).toEqual([])
+		expect(definitions.queueWorkers).toEqual([])
+		expect(definitions.streams).toEqual([])
 	})
 })

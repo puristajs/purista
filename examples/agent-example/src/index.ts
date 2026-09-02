@@ -35,12 +35,6 @@ export const main = async () => {
 					},
 				},
 				telemetry: { contentCaptureMode: 'NO_CONTENT' },
-				onSuspended: async notice => {
-					const reviewId = notice.wait.waitId.replace(/^rollback-review:/, '')
-					const review = await execution.reviewRepository.get(reviewId)
-					if (!review) throw new Error('application_review_record_not_found')
-					return { status: 'waiting' as const, reviewId }
-				},
 			},
 		})
 	} catch (error) {
@@ -82,7 +76,7 @@ export const main = async () => {
 	logger.info(
 		{
 			service: supportV1Service.info.serviceName,
-			agents: definitions.queues.map(queue => queue.queueName),
+			harnessTargets: ['triage_ticket', 'analyze_signals', 'review_rollback'],
 			commands: definitions.commands.map(command => command.commandName),
 			openApi: 'http://localhost:3000/api',
 			executionMode: execution.mode,

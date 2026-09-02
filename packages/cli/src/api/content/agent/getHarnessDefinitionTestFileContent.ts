@@ -1,6 +1,6 @@
 import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
-import { camelCase } from '../../change-case.js'
+import { camelCase, snakeCase } from '../../change-case.js'
 
 const toAgentIdentifier = (name: string) => {
 	const normalized = camelCase(name)
@@ -15,6 +15,7 @@ export const getHarnessDefinitionTestFileContent = (input: {
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
+	const agentId = snakeCase(`${input.agentName} agent`)
 	const harnessName = `${camelCase(input.agentName)}Harness`
 
 	writer.writeLine("import { FakeModelProvider } from '@purista/harness/testing'")
@@ -43,7 +44,7 @@ export const getHarnessDefinitionTestFileContent = (input: {
 			writer.writeLine('try {')
 			writer.indent(() => {
 				writer.writeLine("const session = await runtime.getSession('test-session')")
-				writer.writeLine(`const outcome = await session.agents.${agentIdentifier}.run({ prompt: 'hello' })`)
+				writer.writeLine(`const outcome = await session.agents.${agentId}.run({ prompt: 'hello' })`)
 				writer.writeLine("expect(outcome.status).toBe('completed')")
 				writer.writeLine("if (outcome.status !== 'completed') throw new Error('Expected a completed agent run.')")
 				writer.writeLine("expect(outcome.output).toEqual({ message: 'hello' })")

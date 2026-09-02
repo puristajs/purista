@@ -246,13 +246,13 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(harnessDefinition).not.toContain('@purista/ai')
 		expect(harnessDefinition).toContain("defineHarness({ name: 'triage' })")
 		expect(harnessDefinition).toContain(".requireModel('primary', { capabilities: ['object'] })")
-		expect(harnessDefinition).toContain(".agent('triageAgent', {")
+		expect(harnessDefinition).toContain(".agent('triage_agent', {")
 		expect(harnessDefinition).toContain("updates: 'object-snapshot'")
 		expect(harnessDefinition).toContain('instructions: "Review tickets"')
 		expect(harnessDefinition).toContain('.define()')
 		const mountContent = readFileSync(join(serviceDir, 'harness', 'triageMount.ts'), 'utf-8')
-		expect(mountContent).toContain("publish: { agents: ['triageAgent'] }")
-		expect(mountContent).toContain("triageAgent: { successEvent: 'user.triage.completed' }")
+		expect(mountContent).toContain("publish: { agents: ['triage_agent'] }")
+		expect(mountContent).toContain("triage_agent: { successEvent: 'user.triage.completed' }")
 		for (const term of forbiddenAgentTerms) {
 			expect(harnessDefinition).not.toContain(term)
 		}
@@ -263,7 +263,7 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(agentTestContent).toContain('const provider = new FakeModelProvider({ strict: true })')
 		expect(agentTestContent).toContain("object: { message: 'hello' }")
 		expect(agentTestContent).toContain("primary: { provider, model: 'fake' }")
-		expect(agentTestContent).toContain('session.agents.triageAgent.run')
+		expect(agentTestContent).toContain('session.agents.triage_agent.run')
 		expect(agentTestContent).toContain("expect(outcome.output).toEqual({ message: 'hello' })")
 		expect(agentTestContent).toContain('await runtime.shutdown()')
 		for (const term of forbiddenAgentTerms) {

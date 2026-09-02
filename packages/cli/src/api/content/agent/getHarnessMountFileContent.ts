@@ -1,13 +1,8 @@
 import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
-import { camelCase } from '../../change-case.js'
+import { camelCase, snakeCase } from '../../change-case.js'
 import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
-
-const toAgentIdentifier = (name: string) => {
-	const normalized = camelCase(name)
-	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
-}
 
 /** Generate the service-owned publication policy for a Harness definition. */
 export const getHarnessMountFileContent = (input: {
@@ -18,7 +13,7 @@ export const getHarnessMountFileContent = (input: {
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const agentIdentifier = toAgentIdentifier(input.agentName)
+	const agentId = snakeCase(`${input.agentName} agent`)
 	const harnessName = `${camelCase(input.agentName)}Harness`
 	const policyName = `${camelCase(input.agentName)}HarnessPolicy`
 	const successEventName = input.responseEventName?.trim()
@@ -29,12 +24,12 @@ export const getHarnessMountFileContent = (input: {
 	writer.writeLine(`export { ${harnessName} }`).blankLine()
 	writer.writeLine(`export const ${policyName} = {`)
 	writer.indent(() => {
-		writer.writeLine(`publish: { agents: ['${agentIdentifier}'] },`)
+		writer.writeLine(`publish: { agents: ['${agentId}'] },`)
 		if (successEventName) {
 			writer.writeLine('targets: {')
 			writer.indent(() => {
 				writer.writeLine('agents: {')
-				writer.indent(() => writer.writeLine(`${agentIdentifier}: { successEvent: '${successEventName}' },`))
+				writer.indent(() => writer.writeLine(`${agentId}: { successEvent: '${successEventName}' },`))
 				writer.writeLine('},')
 			})
 			writer.writeLine('},')

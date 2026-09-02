@@ -1,6 +1,6 @@
 import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
-import { camelCase } from '../../change-case.js'
+import { camelCase, snakeCase } from '../../change-case.js'
 
 const toAgentIdentifier = (name: string) => {
 	const normalized = camelCase(name)
@@ -15,6 +15,7 @@ export const getHarnessDefinitionFileContent = (input: {
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
+	const agentId = snakeCase(`${input.agentName} agent`)
 	const harnessName = `${camelCase(input.agentName)}Harness`
 	const inputSchemaName = `${agentIdentifier}InputSchema`
 	const outputSchemaName = `${agentIdentifier}OutputSchema`
@@ -36,7 +37,7 @@ export const getHarnessDefinitionFileContent = (input: {
 	writer.writeLine(`export const ${harnessName} = defineHarness({ name: '${camelCase(input.agentName)}' })`)
 	writer.indent(() => {
 		writer.writeLine(".requireModel('primary', { capabilities: ['object'] })")
-		writer.writeLine(`.agent('${agentIdentifier}', {`)
+		writer.writeLine(`.agent('${agentId}', {`)
 		writer.indent(() => {
 			writer.writeLine("model: 'primary',")
 			writer.writeLine(`input: ${inputSchemaName},`)
