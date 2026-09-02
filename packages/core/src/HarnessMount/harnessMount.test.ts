@@ -35,6 +35,23 @@ const admittedHarness = defineHarness({ name: 'admitted' })
 	})
 	.define()
 
+const hostToolHarness = defineHarness({ name: 'host-tool' })
+	.requireModel('primary', { capabilities: ['object', 'tool_use'] as const })
+	.hostTool('lookup_account', {
+		kind: 'host',
+		description: 'Look up an account.',
+		input: z.object({ accountId: z.string() }),
+		output: z.object({ owner: z.string() }),
+	})
+	.agent('review', {
+		model: 'primary',
+		input: z.object({ accountId: z.string() }),
+		output: z.object({ decision: z.string() }),
+		instructions: 'Use lookup_account before deciding.',
+		tools: ['lookup_account'],
+	})
+	.define()
+
 describe('ServiceBuilder.mountHarness', () => {
 	it('publishes an explicitly selected agent at its versioned EventBridge address', async () => {
 		const eventBridge = new DefaultEventBridge()
@@ -606,6 +623,141 @@ describe('ServiceBuilder.mountHarness', () => {
 			},
 		])
 		expect(resourceCurrencies).toEqual(['EUR'])
+
+		await knowledgeService.destroy()
+		await accountService.destroy()
+	})
+
+	it('runs function host tools with declared command, event, identity, and resource capabilities', async () => {
+		const provider = new FakeModelProvider({ strict: true })
+		provider.enqueue({
+			object: {},
+			toolCalls: [{ id: 'call-1', name: 'lookup_account', arguments: { accountId: 'account-1' } }],
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'tool_calls',
+		})
+		provider.enqueue({
+			object: { decision: 'approved' },
+			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+			finishReason: 'stop',
+		})
+
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const commandCalls: unknown[] = []
+		const emitted: unknown[] = []
+		await eventBridge.registerSubscription(
+			{
+				sender: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'lookup_account' },
+				eventName: 'account.lookedUp',
+				subscriber: { serviceName: 'Audit', serviceVersion: '1', serviceTarget: 'recordLookup' },
+				eventBridgeConfig: { durable: false, autoacknowledge: true, shared: true },
+			},
+			async message => {
+				emitted.push({
+					payload: message.payload,
+					tenantId: message.tenantId,
+					principalId: message.principalId,
+				})
+				return undefined
+			},
+		)
+
+		const accountBuilder = new ServiceBuilder({
+			serviceName: 'Account',
+			serviceVersion: '1',
+			serviceDescription: 'Account lookup service',
+		})
+		const lookupCommand = accountBuilder
+			.getCommandBuilder('lookupAccount', 'Look up an account')
+			.addPayloadSchema(z.object({ accountId: z.string() }))
+			.addParameterSchema(z.object({ idempotencyKey: z.string() }))
+			.addOutputSchema(z.object({ owner: z.string() }))
+			.setCommandFunction(async function (context, payload, parameter) {
+				commandCalls.push({
+					payload,
+					parameter,
+					tenantId: context.message.tenantId,
+					principalId: context.message.principalId,
+				})
+				return { owner: 'Ada' }
+			})
+		accountBuilder.addCommandDefinition(lookupCommand.getDefinition())
+
+		const knowledgeBase = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Function host-tool service',
+		}).defineResource<'accountPolicy', { currency: string }>()
+		const lookupTool = knowledgeBase
+			.getHarnessHostToolBuilder(hostToolHarness.catalog.hostTools.lookup_account)
+			.canInvoke(
+				'Account',
+				'1',
+				'lookupAccount',
+				z.object({ owner: z.string() }),
+				z.object({ accountId: z.string() }),
+				z.object({ idempotencyKey: z.string() }),
+			)
+			.canEmit('account.lookedUp', z.object({ accountId: z.string(), currency: z.string() }))
+			.setHandler(async (context, input) => {
+				const account = await context.service.Account['1'].lookupAccount(input, {
+					idempotencyKey: context.idempotencyKey,
+				})
+				await context.emit('account.lookedUp', {
+					accountId: input.accountId,
+					currency: context.resources.accountPolicy.currency,
+				})
+				return account
+			})
+			.getDefinition()
+		const knowledgeBuilder = knowledgeBase.mountHarness(hostToolHarness, {
+			publish: { agents: ['review'] },
+			hostTools: { lookup_account: lookupTool },
+		})
+
+		const accountService = await accountBuilder.getInstance(eventBridge)
+		const knowledgeService = await knowledgeBuilder.getInstance(eventBridge, {
+			ai: { models: { primary: { provider, model: 'fake' } } },
+			resources: { accountPolicy: { currency: 'EUR' } },
+		})
+		await accountService.start()
+		await knowledgeService.start()
+
+		const command = getCommandMessageMock({
+			tenantId: 'tenant-a',
+			principalId: 'principal-a',
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'review' },
+			payload: { payload: { accountId: 'account-1' }, parameter: {} },
+		})
+		const {
+			id: _id,
+			messageType: _messageType,
+			timestamp: _timestamp,
+			correlationId: _correlationId,
+			...request
+		} = command
+
+		await expect(eventBridge.invoke(request)).resolves.toMatchObject({
+			status: 'completed',
+			output: { decision: 'approved' },
+		})
+		await new Promise(resolve => process.nextTick(resolve))
+		expect(commandCalls).toEqual([
+			{
+				payload: { accountId: 'account-1' },
+				parameter: { idempotencyKey: expect.stringMatching(/^tool_[a-f0-9]{64}$/) },
+				tenantId: 'tenant-a',
+				principalId: 'principal-a',
+			},
+		])
+		expect(emitted).toEqual([
+			{
+				payload: { accountId: 'account-1', currency: 'EUR' },
+				tenantId: 'tenant-a',
+				principalId: 'principal-a',
+			},
+		])
 
 		await knowledgeService.destroy()
 		await accountService.destroy()

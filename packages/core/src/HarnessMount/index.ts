@@ -1,3 +1,4 @@
+export * from './hostToolBuilder.js'
 export * from './invocation.js'
 export type { HarnessModelClients, HarnessModelDeclaration } from './model.js'
 export * from './queue.js'

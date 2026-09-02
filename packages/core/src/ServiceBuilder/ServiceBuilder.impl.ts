@@ -54,6 +54,7 @@ import { initLogger } from '../DefaultLogger/initLogger.impl.js'
 import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
+import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
 import { HarnessMountRuntime } from '../HarnessMount/runtime.js'
 import type {
 	HarnessMount,
@@ -255,6 +256,24 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		}
 		this.harnessMountList.push(Object.freeze({ definition, policy }) as HarnessMount)
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [...S['Harnesses'], D]>>
+	}
+
+	/**
+	 * Create a typed function binding for one native Harness host-tool contract.
+	 *
+	 * @example
+	 * ```ts
+	 * const lookup = serviceBuilder
+	 *   .getHarnessHostToolBuilder(supportAi.catalog.hostTools.lookupAccount)
+	 *   .canInvoke('Account', '1', 'lookup', outputSchema, payloadSchema, parameterSchema)
+	 *   .setHandler(async (context, input) =>
+	 *     context.service.Account['1'].lookup(input, { idempotencyKey: context.idempotencyKey }))
+	 *   .getDefinition()
+	 * ```
+	 */
+	getHarnessHostToolBuilder<Contract extends Readonly<{ input: Schema; output: Schema }>>(contract: Contract) {
+		void contract
+		return new HarnessHostToolBuilder<Infer<Contract['input']>, InferIn<Contract['output']>, S['Resources']>()
 	}
 
 	/** Add one or more schedule contracts to this service. */
@@ -533,6 +552,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				this.harnessMountList,
 				options.ai as unknown as HarnessInstanceConfig<any>,
 				(options.resources ?? {}) as Record<string, unknown>,
+				(definition, context) => service.createHarnessHostToolContext(definition, context),
 			)
 			const runtime = harnessMountRuntime
 			service.bindHarnessModelResolver((definition: HarnessDefinition<any>, alias: string) =>

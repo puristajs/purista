@@ -13,8 +13,16 @@ import type {
 	WorkflowOutput,
 } from '@purista/harness'
 import type { Command } from '../core/types/commandType/Command.js'
+import type { EmitCustomMessageFunction } from '../core/types/EmitCustomMessageFunction.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { InvokeList } from '../core/types/InvokeList.js'
 import type { Logger } from '../core/types/Logger.js'
+import type { QueueContext } from '../core/types/queue/QueueContext.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
+import type { Schema } from '../schema/index.js'
+import type { HarnessInvocationClients } from './invocation.js'
 
 /** Trusted PURISTA values available to a bound host tool for one run. */
 export type HarnessHostContext<Resources extends Record<string, unknown> = Record<string, unknown>> = Readonly<{
@@ -53,10 +61,57 @@ export type HarnessCommandToolAdapter<Resources extends Record<string, unknown> 
 	mapOutput?: (output: unknown) => unknown
 }>
 
+/** Typed context supplied to a PURISTA-implemented native Harness host tool. */
+export type HarnessHostToolFunctionContext<
+	Resources extends Record<string, unknown> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
+	QueueInvokes extends QueueInvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
+> = HarnessCommandToolContext<Resources> &
+	Readonly<{
+		resources: Resources
+		service: Invokes
+		stream: StreamInvokes
+		agent: HarnessInvocationClients<Invokes, 'agent'>
+		workflow: HarnessInvocationClients<Invokes, 'workflow'>
+		queue: QueueContext<QueueInvokes>
+		emit: EmitCustomMessageFunction<EmitList>
+	}>
+
+/** Immutable PURISTA binding for a provider-neutral Harness host-tool contract. */
+export type HarnessHostToolFunctionDefinition<
+	Input = unknown,
+	Output = unknown,
+	Resources extends Record<string, unknown> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
+	QueueInvokes extends QueueInvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
+> = Readonly<{
+	kind: 'purista-host-tool'
+	invokes: Invokes
+	streamInvokes: StreamInvokes
+	queueInvokes: QueueInvokes
+	emitList: EmitList
+	handler: (
+		context: HarnessHostToolFunctionContext<Resources, Invokes, StreamInvokes, QueueInvokes, EmitList>,
+		input: Input,
+	) => Promise<Output>
+}>
+
+type HostToolFunctionDefinition<Binding, Resources extends Record<string, unknown>> = Binding extends (
+	context: unknown,
+	input: infer Input,
+) => Promise<infer Output>
+	? HarnessHostToolFunctionDefinition<Input, Output, Resources, any, any, any, any>
+	: never
+
 type MountHostToolBindings<S extends BuilderState, Resources extends Record<string, unknown>> = {
 	[K in keyof HarnessHostToolBindings<S, HarnessHostContext<Resources>>]:
 		| HarnessHostToolBindings<S, HarnessHostContext<Resources>>[K]
 		| HarnessCommandToolAdapter<Resources>
+		| HostToolFunctionDefinition<HarnessHostToolBindings<S, HarnessHostContext<Resources>>[K], Resources>
 }
 
 /** Trusted execution context passed to mounted-target business guards. */

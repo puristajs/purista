@@ -7,6 +7,11 @@ import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
 import { createHarnessInvocationProxy } from '../../HarnessMount/invocation.js'
 import { createHarnessModelClients } from '../../HarnessMount/model.js'
+import type {
+	HarnessCommandToolContext,
+	HarnessHostToolFunctionContext,
+	HarnessHostToolFunctionDefinition,
+} from '../../HarnessMount/types.js'
 import type { Infer, Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import { puristaVersion } from '../../version.js'
@@ -1601,6 +1606,34 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				return this.harnessModelResolver(definition, alias)
 			}),
 		}
+	}
+
+	/** @internal Builds the allowlisted PURISTA context for one mounted Harness host-tool call. */
+	public createHarnessHostToolContext(
+		definition: HarnessHostToolFunctionDefinition,
+		context: HarnessCommandToolContext,
+	): HarnessHostToolFunctionContext {
+		const traceId = context.host.request.traceId
+		const principalId = context.host.identity.principalId
+		const tenantId = context.host.identity.tenantId
+		const invoke = this.getInvokeFunction(context.toolId, traceId, principalId, tenantId, definition.invokes)
+		const openStream = this.getConsumeStreamFunction(
+			context.toolId,
+			traceId,
+			principalId,
+			tenantId,
+			definition.streamInvokes,
+		)
+		return {
+			...context,
+			resources: this.resources,
+			service: createInvokeFunctionProxy(invoke),
+			stream: createOpenStreamFunctionProxy(openStream),
+			agent: createHarnessInvocationProxy(invoke, openStream),
+			workflow: createHarnessInvocationProxy(invoke, openStream),
+			queue: this.getQueueNamespace(definition.queueInvokes, traceId, principalId, tenantId),
+			emit: this.getEmitFunction(context.toolId, traceId, principalId, tenantId, definition.emitList),
+		} as HarnessHostToolFunctionContext
 	}
 
 	protected getEmitFunction<EmitList extends Record<string, Schema> = EmptyObject>(

@@ -6,6 +6,7 @@ import type {
 	HarnessDefinition,
 	HarnessInstanceConfig,
 	HostToolBinding,
+	HostToolHandlerContext,
 	InvokeOptions,
 	ModelHandle,
 	RunOutcome,
@@ -30,6 +31,8 @@ import type {
 	HarnessBusinessGuardContext,
 	HarnessCommandToolAdapter,
 	HarnessHostContext,
+	HarnessHostToolFunctionContext,
+	HarnessHostToolFunctionDefinition,
 	HarnessMount,
 } from './types.js'
 
@@ -74,6 +77,10 @@ export class HarnessMountRuntime {
 		private readonly mounts: readonly HarnessMount[],
 		private readonly config: Omit<HarnessInstanceConfig<any, HarnessHostContext>, 'hostTools'>,
 		private readonly resources: Record<string, unknown>,
+		private readonly createHostToolContext: (
+			definition: HarnessHostToolFunctionDefinition,
+			context: HostToolHandlerContext<HarnessHostContext>,
+		) => HarnessHostToolFunctionContext,
 	) {}
 
 	/** Instantiate every Harness and register its explicitly published aggregate targets. */
@@ -152,7 +159,11 @@ export class HarnessMountRuntime {
 		const hostTools = Object.fromEntries(
 			Object.entries(mount.policy.hostTools ?? {}).map(([id, binding]) => [
 				id,
-				isCommandToolAdapter(binding) ? this.commandToolBinding(binding) : binding,
+				isCommandToolAdapter(binding)
+					? this.commandToolBinding(binding)
+					: isHostToolFunctionDefinition(binding)
+						? this.hostToolFunctionBinding(binding)
+						: binding,
 			]),
 		)
 		return {
@@ -186,6 +197,12 @@ export class HarnessMountRuntime {
 			})
 			return adapter.mapOutput ? adapter.mapOutput(output) : output
 		}
+	}
+
+	private hostToolFunctionBinding(
+		definition: HarnessHostToolFunctionDefinition,
+	): HostToolBinding<any, any, HarnessHostContext> {
+		return async (context, input) => definition.handler(this.createHostToolContext(definition, context), input)
 	}
 
 	private assertFreeAddress(target: string, occupied: Set<string>) {
@@ -466,6 +483,10 @@ async function runAfterGuards(
 
 function isCommandToolAdapter(value: unknown): value is HarnessCommandToolAdapter {
 	return Boolean(value && typeof value === 'object' && (value as { kind?: unknown }).kind === 'purista-command')
+}
+
+function isHostToolFunctionDefinition(value: unknown): value is HarnessHostToolFunctionDefinition {
+	return Boolean(value && typeof value === 'object' && (value as { kind?: unknown }).kind === 'purista-host-tool')
 }
 
 function toHandledError(error: unknown) {
