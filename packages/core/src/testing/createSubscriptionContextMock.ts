@@ -9,6 +9,7 @@ import type { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBui
 import type { Schema } from '../schema/index.js'
 import {
 	createBaseContextStubs,
+	createHarnessInvocationMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -65,6 +66,8 @@ export type SubscriptionContextMockResult<TBuilder extends SubscriptionDefinitio
 		enqueue: SinonStub
 		scheduleAt: SinonStub
 		service: Record<string, any>
+		agent: Record<string, any>
+		workflow: Record<string, any>
 		resources: Partial<SubscriptionContextMockBuilderTypes<TBuilder>['Resources']>
 	}
 }
@@ -96,6 +99,12 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 	)
 	const invokeProxy = createInvokeProxy<SubscriptionContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<SubscriptionContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
+	const agentProxy = createHarnessInvocationMockProxy<SubscriptionContextMockResult<TBuilder>['context']['agent']>(
+		input.sandbox,
+	)
+	const workflowProxy = createHarnessInvocationMockProxy<
+		SubscriptionContextMockResult<TBuilder>['context']['workflow']
+	>(input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 
 	const context: SubscriptionFunctionContext<
@@ -123,6 +132,8 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 		}),
 		service: invokeProxy.api,
 		stream: streamProxy.api,
+		agent: agentProxy.api,
+		workflow: workflowProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -151,6 +162,8 @@ export const createSubscriptionContextMock = <TBuilder extends SubscriptionDefin
 		stubs: {
 			...base.stubs,
 			service: invokeProxy.createApi<Record<string, any>>(),
+			agent: agentProxy.api,
+			workflow: workflowProxy.api,
 		},
 	}
 }

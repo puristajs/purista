@@ -1,3 +1,4 @@
+import { defineHarness } from '@purista/harness'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 import { safeBind } from '../helper/safeBind.impl.js'
@@ -8,6 +9,45 @@ import { createCommandContextMock } from './createCommandContextMock.js'
 import { createCommandTestHarness } from './createCommandTestHarness.js'
 
 describe('command testing helpers', () => {
+	it('stubs a declared address-first Harness agent without starting a runtime', async () => {
+		const sandbox = createSandbox()
+		try {
+			const definition = defineHarness({ name: 'test-agent' })
+				.agent('answer', {
+					input: z.object({ question: z.string() }),
+					output: z.object({ answer: z.string() }),
+					handler: async ({ input }) => ({ answer: input.question }),
+				})
+				.define()
+			const serviceBuilder = new ServiceBuilder({
+				serviceName: 'Api',
+				serviceVersion: '1',
+				serviceDescription: 'agent caller test',
+			})
+			const commandBuilder = serviceBuilder
+				.getCommandBuilder('ask', 'ask an agent')
+				.addPayloadSchema(z.object({ question: z.string() }))
+				.canInvokeAgent('Knowledge', '1', 'answer', definition.contracts.agents.answer)
+				.setCommandFunction(async function ({ agent }, payload) {
+					return agent.Knowledge['1'].answer.run(payload)
+				})
+			const { context, stubs } = createCommandContextMock(commandBuilder, {
+				payload: { question: 'What is PURISTA?' },
+				parameter: {},
+				sandbox,
+			})
+			const expected = { status: 'completed' as const, runId: 'run-1', output: { answer: 'A framework' } }
+			;(stubs.agent as any).Knowledge['1'].answer.run.resolves(expected)
+
+			await expect(
+				commandBuilder.getCommandFunction().call({} as never, context, { question: 'What is PURISTA?' }, {}),
+			).resolves.toEqual(expected)
+			expect((stubs.agent as any).Knowledge['1'].answer.run.calledOnce).toBe(true)
+		} finally {
+			sandbox.restore()
+		}
+	})
+
 	it('creates a typed command context mock for handler-level tests', async () => {
 		const sandbox = createSandbox()
 

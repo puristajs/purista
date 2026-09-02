@@ -4,6 +4,7 @@ import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
+import { createHarnessInvocationProxy } from '../../HarnessMount/invocation.js'
 import type { Infer, Schema } from '../../schema/index.js'
 import { validate } from '../../schema/index.js'
 import { puristaVersion } from '../../version.js'
@@ -1570,6 +1571,22 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		return consumeStream.bind(this) as OpenStreamFunction
 	}
 
+	private getHarnessInvocationClients(
+		serviceTarget: string,
+		traceId: TraceId | undefined,
+		principalId: PrincipalId | undefined,
+		tenantId: TenantId | undefined,
+		invokes: InvokeList,
+		streamInvokes: StreamInvokeList,
+	) {
+		const invoke = this.getInvokeFunction(serviceTarget, traceId, principalId, tenantId, invokes)
+		const openStream = this.getConsumeStreamFunction(serviceTarget, traceId, principalId, tenantId, streamInvokes)
+		return {
+			agent: createHarnessInvocationProxy(invoke, openStream),
+			workflow: createHarnessInvocationProxy(invoke, openStream),
+		}
+	}
+
 	protected getEmitFunction<EmitList extends Record<string, Schema> = EmptyObject>(
 		serviceTarget: string,
 		traceId?: TraceId,
@@ -1964,6 +1981,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 									command.streamInvokes,
 								),
 							),
+							...this.getHarnessInvocationClients(
+								command.commandName,
+								traceId,
+								message.principalId,
+								message.tenantId,
+								command.invokes,
+								command.streamInvokes,
+							),
 							resources: this.resources,
 						} as unknown as CommandFunctionContext
 						const call = command.call.bind(this, context)
@@ -2006,6 +2031,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 										message.tenantId,
 										command.streamInvokes,
 									),
+								),
+								...this.getHarnessInvocationClients(
+									command.commandName,
+									traceId,
+									message.principalId,
+									message.tenantId,
+									command.invokes,
+									command.streamInvokes,
 								),
 								resources: this.resources,
 							} as unknown as CommandFunctionContext
@@ -2392,6 +2425,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			service: serviceProxy,
 			stream: createOpenStreamFunctionProxy(
 				this.getConsumeStreamFunction(worker.name, traceId, principalId, tenantId, worker.streamInvokes),
+			),
+			...this.getHarnessInvocationClients(
+				worker.name,
+				traceId,
+				principalId,
+				tenantId,
+				worker.invokes,
+				worker.streamInvokes,
 			),
 			resources: this.resources,
 		} as QueueJobContext
@@ -2942,6 +2983,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 							stream.streamInvokes,
 						),
 					),
+					...this.getHarnessInvocationClients(
+						stream.streamName,
+						traceId,
+						message.principalId,
+						message.tenantId,
+						stream.invokes,
+						stream.streamInvokes,
+					),
 					resources: this.resources,
 				}
 
@@ -3135,6 +3184,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 										subscription.streamInvokes,
 									),
 								),
+								...this.getHarnessInvocationClients(
+									subscriptionName,
+									traceId,
+									message.principalId,
+									message.tenantId,
+									subscription.invokes,
+									subscription.streamInvokes,
+								),
 								resources: this.resources,
 							} as unknown as SubscriptionFunctionContext
 							const call2 = subscription.call.bind(this, context)
@@ -3236,6 +3293,14 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 											message.tenantId,
 											subscription.streamInvokes,
 										),
+									),
+									...this.getHarnessInvocationClients(
+										subscription.subscriptionName,
+										traceId,
+										message.principalId,
+										message.tenantId,
+										subscription.invokes,
+										subscription.streamInvokes,
 									),
 									resources: this.resources,
 								} as unknown as SubscriptionFunctionContext

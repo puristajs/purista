@@ -1,3 +1,4 @@
+import type { HarnessTargetContract } from '@purista/harness'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
@@ -21,6 +22,11 @@ import type { StreamBeforeGuardHook } from '../core/types/stream/StreamBeforeGua
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
+import {
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -205,6 +211,72 @@ export class StreamDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness agent invocation with aggregate and stream access. */
+	canInvokeAgent<
+		Contract extends HarnessTargetContract<'agent', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness workflow invocation with aggregate and stream access. */
+	canInvokeWorkflow<
+		Contract extends HarnessTargetContract<'workflow', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
 				C['EmitList'],
 				C['QueueInvokes']
 			>

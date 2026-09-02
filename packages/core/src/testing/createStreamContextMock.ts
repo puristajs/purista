@@ -17,6 +17,7 @@ import type { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/StreamD
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import {
 	createBaseContextStubs,
+	createHarnessInvocationMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -86,6 +87,8 @@ export type StreamContextMockResult<TBuilder extends StreamDefinitionBuilder<any
 			StreamContextMockBuilderTypes<TBuilder>['QueueInvokes'],
 			ServiceClassMetrics<StreamContextMockServiceClass<TBuilder>>
 		>['service']
+		agent: StreamContextMockResult<TBuilder>['context']['agent']
+		workflow: StreamContextMockResult<TBuilder>['context']['workflow']
 		resources: Partial<StreamContextMockBuilderTypes<TBuilder>['Resources']>
 		writer: {
 			write: SinonStub
@@ -157,6 +160,12 @@ export const createStreamContextMock = <TBuilder extends StreamDefinitionBuilder
 	)
 	const invokeProxy = createInvokeProxy<StreamContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<StreamContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
+	const agentProxy = createHarnessInvocationMockProxy<StreamContextMockResult<TBuilder>['context']['agent']>(
+		input.sandbox,
+	)
+	const workflowProxy = createHarnessInvocationMockProxy<StreamContextMockResult<TBuilder>['context']['workflow']>(
+		input.sandbox,
+	)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 
 	const chunks: InferIn<StreamContextMockBuilderTypes<TBuilder>['ChunkSchema']>[] = []
@@ -234,6 +243,8 @@ export const createStreamContextMock = <TBuilder extends StreamDefinitionBuilder
 		}),
 		service: invokeProxy.api,
 		stream: streamProxy.api,
+		agent: agentProxy.api,
+		workflow: workflowProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -273,6 +284,8 @@ export const createStreamContextMock = <TBuilder extends StreamDefinitionBuilder
 						StreamContextMockBuilderTypes<TBuilder>['QueueInvokes']
 					>['service']
 				>(),
+			agent: agentProxy.api,
+			workflow: workflowProxy.api,
 			writer: writerStubs,
 		},
 		chunks,

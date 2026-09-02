@@ -117,6 +117,47 @@ export const createInvokeProxy = <Invokes extends InvokeList | StreamInvokeList 
 	}
 }
 
+/** Creates address-first Harness target clients whose `run` and `stream` methods are Sinon stubs. */
+export const createHarnessInvocationMockProxy = <TApi>(sandbox?: SinonSandbox) => {
+	const targetMocks: Record<string, Record<string, Record<string, { run: SinonStub; stream: SinonStub }>>> = {}
+
+	const getProxy = (
+		address: EBMessageAddress = { serviceName: '', serviceVersion: '', serviceTarget: '' },
+		level = 0,
+	) =>
+		new Proxy(
+			{},
+			{
+				get(_target, property) {
+					if (typeof property !== 'string' || property === 'then' || property === 'catch' || property === 'finally') {
+						return undefined
+					}
+					if (level === 0) {
+						targetMocks[property] ??= {}
+						return getProxy({ ...address, serviceName: property }, level + 1)
+					}
+					if (level === 1) {
+						targetMocks[address.serviceName][property] ??= {}
+						return getProxy({ ...address, serviceVersion: property }, level + 1)
+					}
+					if (level === 2) {
+						const targets = targetMocks[address.serviceName][address.serviceVersion]
+						targets[property] ??= {
+							run: (sandbox?.stub() ?? stub()).rejects(new Error(`Harness target ${property}.run is not stubbed`)),
+							stream: (sandbox?.stub() ?? stub()).rejects(
+								new Error(`Harness target ${property}.stream is not stubbed`),
+							),
+						}
+						return targets[property]
+					}
+					return undefined
+				},
+			},
+		)
+
+	return { api: getProxy() as TApi, stubs: targetMocks }
+}
+
 export const createEmitStubMap = <EmitList extends Record<string, Schema>>(
 	emitList: FromEmitToOtherType<EmitList, Schema>,
 	sandbox?: SinonSandbox,

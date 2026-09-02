@@ -17,6 +17,7 @@ import type { QueueWorkerBuilderTypes } from '../QueueWorkerBuilder/QueueWorkerB
 import type { Schema } from '../schema/index.js'
 import {
 	createBaseContextStubs,
+	createHarnessInvocationMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -96,6 +97,8 @@ export type QueueWorkerContextMockResult<
 		}
 		service: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['service']
 		stream: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
+		agent: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
+		workflow: QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
 		enqueue: SinonStub
 		scheduleAt: SinonStub
 	}
@@ -148,6 +151,12 @@ export const createQueueWorkerContextMock = <
 	)
 	const serviceProxy = createInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<QueueWorkerContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
+	const agentProxy = createHarnessInvocationMockProxy<
+		QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['agent']
+	>(input.sandbox)
+	const workflowProxy = createHarnessInvocationMockProxy<
+		QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['workflow']
+	>(input.sandbox)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 	const message = createQueueMessageMock(input)
 
@@ -179,6 +188,8 @@ export const createQueueWorkerContextMock = <
 		}),
 		service: serviceProxy.api,
 		stream: streamProxy.api,
+		agent: agentProxy.api,
+		workflow: workflowProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -244,6 +255,8 @@ export const createQueueWorkerContextMock = <
 				streamProxy.createApi<
 					QueueWorkerContextMockResult<Payload, Parameter, Resources, TBuilder>['context']['stream']
 				>(),
+			agent: agentProxy.api,
+			workflow: workflowProxy.api,
 			enqueue: base.stubs.enqueue,
 			scheduleAt: base.stubs.scheduleAt,
 		},

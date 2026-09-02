@@ -16,6 +16,7 @@ import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.
 import type { Schema } from '../schema/index.js'
 import {
 	createBaseContextStubs,
+	createHarnessInvocationMockProxy,
 	createInvokeProxy,
 	createMetricContextMock,
 	createMockSpan,
@@ -105,6 +106,8 @@ export type CommandContextMockResult<TBuilder extends CommandDefinitionBuilder<a
 		enqueue: SinonStub
 		scheduleAt: SinonStub
 		service: Record<string, any>
+		agent: Record<string, any>
+		workflow: Record<string, any>
 		resources: Partial<CommandContextMockBuilderTypes<TBuilder>['Resources']>
 	}
 }
@@ -148,6 +151,12 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 	)
 	const invokeProxy = createInvokeProxy<CommandContextMockBuilderTypes<TBuilder>['Invokes']>(input.sandbox)
 	const streamProxy = createInvokeProxy<CommandContextMockBuilderTypes<TBuilder>['StreamInvokes']>(input.sandbox)
+	const agentProxy = createHarnessInvocationMockProxy<CommandContextMockResult<TBuilder>['context']['agent']>(
+		input.sandbox,
+	)
+	const workflowProxy = createHarnessInvocationMockProxy<CommandContextMockResult<TBuilder>['context']['workflow']>(
+		input.sandbox,
+	)
 	const resourcesProxy = createResourceProxy(input.resources, base.stubs.resources)
 
 	const message = getCommandMessageMock({
@@ -198,6 +207,8 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		}),
 		service: invokeProxy.api,
 		stream: streamProxy.api,
+		agent: agentProxy.api,
+		workflow: workflowProxy.api,
 		secrets: {
 			getSecret: base.stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: base.stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -234,6 +245,8 @@ export const createCommandContextMock = <TBuilder extends CommandDefinitionBuild
 		stubs: {
 			...base.stubs,
 			service: invokeProxy.createApi<Record<string, any>>(),
+			agent: agentProxy.api,
+			workflow: workflowProxy.api,
 		},
 	}
 }

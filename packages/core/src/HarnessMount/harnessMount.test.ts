@@ -135,6 +135,55 @@ describe('ServiceBuilder.mountHarness', () => {
 		await service.destroy()
 	})
 
+	it('invokes a mounted agent from a command through the typed address-first client', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const knowledgeBuilder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Mounted Harness test service',
+		}).mountHarness(echoHarness, { publish: { agents: ['echo'] } })
+
+		const apiBuilder = new ServiceBuilder({
+			serviceName: 'Api',
+			serviceVersion: '1',
+			serviceDescription: 'Typed Harness caller',
+		})
+		const ask = apiBuilder
+			.getCommandBuilder('ask', 'Invoke the echo agent')
+			.addPayloadSchema(z.object({ value: z.string() }))
+			.canInvokeAgent('Knowledge', '1', 'echo', echoHarness.contracts.agents.echo)
+			.setCommandFunction(async function ({ agent }, payload) {
+				return agent.Knowledge['1'].echo.run(payload, { sessionId: 'conversation-3' })
+			})
+		apiBuilder.addCommandDefinition(ask.getDefinition())
+
+		const knowledge = await knowledgeBuilder.getInstance(eventBridge, { ai: { models: {} } })
+		const api = await apiBuilder.getInstance(eventBridge)
+		await knowledge.start()
+		await api.start()
+
+		const command = getCommandMessageMock({
+			receiver: { serviceName: 'Api', serviceVersion: '1', serviceTarget: 'ask' },
+			payload: { payload: { value: 'typed-address' }, parameter: {} },
+		})
+		const {
+			id: _id,
+			messageType: _messageType,
+			timestamp: _timestamp,
+			correlationId: _correlationId,
+			...request
+		} = command
+
+		await expect(eventBridge.invoke(request)).resolves.toMatchObject({
+			status: 'completed',
+			output: { value: 'typed-address' },
+		})
+
+		await api.destroy()
+		await knowledge.destroy()
+	})
+
 	it('adapts a declared host tool to an address-first PURISTA command with trusted identity', async () => {
 		const provider = new FakeModelProvider()
 		provider.enqueue({

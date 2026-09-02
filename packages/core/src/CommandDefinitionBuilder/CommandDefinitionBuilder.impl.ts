@@ -1,3 +1,4 @@
+import type { HarnessTargetContract } from '@purista/harness'
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
@@ -30,6 +31,11 @@ import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { ScheduleDefinition, ScheduleOptions } from '../core/types/schedule/index.js'
+import {
+	type HarnessInvokeDeclaration,
+	type HarnessStreamDeclaration,
+	registerHarnessInvocation,
+} from '../HarnessMount/invocation.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
@@ -269,6 +275,83 @@ export class CommandDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/**
+	 * Declare an address-first Harness agent invocation.
+	 *
+	 * The returned handler context exposes the target under both
+	 * `context.agent.<service>.<version>.<target>.run(...)` and `.stream(...)`.
+	 */
+	canInvokeAgent<
+		Contract extends HarnessTargetContract<'agent', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
+				C['EmitList'],
+				C['QueueInvokes']
+			>
+		>
+	}
+
+	/** Declare an address-first Harness workflow invocation. */
+	canInvokeWorkflow<
+		Contract extends HarnessTargetContract<'workflow', any, any>,
+		SName extends string,
+		Version extends string,
+		Target extends string,
+	>(serviceName: SName, serviceVersion: Version, serviceTarget: Target, contract: Contract) {
+		const registered = registerHarnessInvocation(
+			this.invokes,
+			this.streamInvokes,
+			serviceName,
+			serviceVersion,
+			serviceTarget,
+			contract,
+		)
+		this.invokes = registered.invokes as C['Invokes']
+		this.streamInvokes = registered.streamInvokes as C['StreamInvokes']
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] & Record<SName, Record<Version, Record<Target, HarnessInvokeDeclaration<Contract>>>>,
+				C['StreamInvokes'] & Record<SName, Record<Version, Record<Target, HarnessStreamDeclaration<Contract>>>>,
 				C['EmitList'],
 				C['QueueInvokes']
 			>
