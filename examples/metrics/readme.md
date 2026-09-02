@@ -10,7 +10,9 @@ This example shows the final metrics API shape:
 The example uses `ConsoleMetricExporter` so it starts without Prometheus, a collector, Jaeger, SigNoz, or any external service.
 
 ```bash
-npm run start -w @purista/metrics-example
+npm install
+npm test
+npm start
 ```
 
 Prometheus should be configured outside PURISTA core through an OpenTelemetry Collector or an application-owned OTel Prometheus exporter.

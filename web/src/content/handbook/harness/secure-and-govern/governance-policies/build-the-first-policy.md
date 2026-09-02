@@ -188,8 +188,10 @@ try {
 Run the deterministic tests:
 
 ```bash title="Verify the first policy"
-npm run typecheck --workspace @purista/bank-governance-example
-npm test --workspace @purista/bank-governance-example
+cd examples/bank-governance
+npm install
+npm run typecheck
+npm test
 ```
 
 The expected evidence is:

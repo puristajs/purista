@@ -199,10 +199,12 @@ The bank example uses a scripted local model and synthetic balances. It needs
 no provider credentials:
 
 ```bash title="Run the governance example"
-npm run typecheck --workspace @purista/bank-governance-example
-npm test --workspace @purista/bank-governance-example
-npm run build --workspace @purista/bank-governance-example
-npm start --workspace @purista/bank-governance-example
+cd examples/bank-governance
+npm install
+npm run typecheck
+npm test
+npm run build
+npm start
 ```
 
 The tests prove ordinary, approval, hard-limit, and insufficient-funds paths,

@@ -348,9 +348,11 @@ Rego. Keep two test layers:
 Run the complete credential-free example:
 
 ```bash title="Verify the maintained example"
-npm run typecheck --workspace @purista/opa-governance-example
-npm test --workspace @purista/opa-governance-example
-npm run build --workspace @purista/opa-governance-example
+cd examples/opa-governance
+npm install
+npm run typecheck
+npm test
+npm run build
 ```
 
 ## Keep Cedar and custom engines separate

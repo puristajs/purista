@@ -179,10 +179,12 @@ The maintained example uses an in-process client so it is runnable without a
 provider account:
 
 ```bash title="Run the custom provider example"
-npm run typecheck --workspace @purista/custom-model-provider-example
-npm run test --workspace @purista/custom-model-provider-example
-npm run build --workspace @purista/custom-model-provider-example
-npm run start --workspace @purista/custom-model-provider-example
+cd examples/custom-model-provider
+npm install
+npm run typecheck
+npm test
+npm run build
+npm start
 ```
 
 Expected output:

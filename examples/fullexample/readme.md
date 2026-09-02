@@ -8,6 +8,13 @@ This is a full example of PURISTA.
 - [Zipkin](#zipkin)
 - [Jaeger](#jaeger)
 
+Install the released PURISTA dependencies from this example directory before
+starting any profile:
+
+```bash
+npm install
+```
+
 ## Grafana
 
 You will find in the folder `grafana`, a ready to go `docker-compose` for [grafana](https://grafana.com).  
@@ -29,7 +36,7 @@ Visit Grafana ui in browser: [http://localhost:3000](http://localhost:3000)
 Start the example project:
 
 ```bash
-npm run start:grafana
+npm run grafana:start
 ```
 
 Open in your browser [http://localhost:8080](http://localhost:8080).  
@@ -57,7 +64,7 @@ Visit the Uptrace ui in browser: [http://localhost:14318](http://localhost:14318
 Start the example project:
 
 ```bash
-npm run start:uptrace
+npm run uptrace:start
 ```
 
 Visit example swagger ui in browser: [http://localhost:8080/api](http://localhost:8080/api).  
@@ -85,7 +92,7 @@ Visit the Teletrace UI in browser: [http://localhost:8081](http://localhost:8081
 Start the example project:
 
 ```bash
-npm run start:teletrace
+npm run teletrace:start
 ```
 
 Visit the example swagger UI in browser: [http://localhost:8080/api](http://localhost:8080/api).  

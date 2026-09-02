@@ -76,6 +76,9 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
    consecutive pages from an empty directory, using only the shown commands
    and file edits. Verify package installation, generated filenames, resource
    injection, service registration, startup, and the first real request.
+   Install PURISTA packages from npm with the released version used by the
+   lesson. Never teach or retain a workspace link, local package archive,
+   package source import, or checkout-specific copy step.
    For autonomous authoring, fix business contracts and page jobs in a chapter
    brief, then assign one bounded checkpoint or page with verified inputs.
 4. Write the teaching steps, commands and located edits before implementing

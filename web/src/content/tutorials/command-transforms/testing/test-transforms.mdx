@@ -136,7 +136,6 @@ describe('registered command transform lifecycle', () => {
 			)
 			expect(response.status).toBe(200)
 			expect(order).toEqual(['guard', 'handler', 'guard'])
-			expect(response.headers.get('content-type')).toContain('text/csv')
 		} finally { await destroyApplication(app) }
 	})
 

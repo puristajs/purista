@@ -39,13 +39,11 @@ The Markdown markers are deliberately simple:
 - `expect="json"`: compare the previous request response with the shown JSON.
 
 Every fence needs a title. Ordinary explanatory fences have no execution marker.
-Replay supplies `PURISTA_TUTORIAL_REPOSITORY` as the checkout's absolute path.
-Lessons using shared, explicitly documented runtime snapshot archives must show
-how a reader sets that variable; it is not permission to import finished
-application implementations or undocumented dependencies into a checkpoint.
 The verifier does not invent missing files, generated artifacts, configuration,
 or test fixes. Unsupported instructions should fail rather than be silently
-patched in the solution. Each advertised checkpoint runs its checks.
+patched in the solution. Each advertised checkpoint runs its checks, and all
+PURISTA dependencies must resolve through the same public package interface a
+learner uses.
 
 `course.json` also lists the reviewed capability service names. Replay rejects
 an application-wide service such as `BankingService` and any unreviewed vague

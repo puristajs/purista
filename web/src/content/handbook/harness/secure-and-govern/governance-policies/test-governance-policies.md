@@ -149,7 +149,9 @@ for the fake and maintained real-policy path.
 ## Run and clean up
 
 ```bash title="Run the deterministic suite"
-npm run test --workspace @purista/bank-governance-example
+cd examples/bank-governance
+npm install
+npm test
 ```
 
 Each test or scenario must release its session and call `harness.shutdown()` in

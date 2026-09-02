@@ -16,22 +16,6 @@ This order matters. CSV formatting must not hide a transaction from the
 returned-account guard. The guard sees the full domain result first; only an
 authorized result reaches the CSV transform.
 
-This website tracks the current Framework source. For this chapter, install
-the checked Hono source snapshot that is stored with the tutorial examples.
-The retained application keeps the archive in `vendor/`, so a later
-`npm ci` does not depend on a workspace link. When you follow the tutorial from
-a PURISTA checkout, point this variable at that checkout:
-
-```bash title="Point to the PURISTA tutorial checkout"
-export PURISTA_TUTORIAL_REPOSITORY=/absolute/path/to/purista
-```
-
-```bash title="Install the current Hono source snapshot" replay="project"
-mkdir -p vendor
-cp "$PURISTA_TUTORIAL_REPOSITORY/examples/banking/runtime/current/purista-hono-http-server-3.2.4.tgz" vendor/
-npm install ./vendor/purista-hono-http-server-3.2.4.tgz
-```
-
 Generate a second command.
 
 ```bash title="Generate the export command" replay="project"

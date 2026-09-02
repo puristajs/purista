@@ -71,7 +71,9 @@ The maintained custom adapter example contains both the application test and
 the portable contract:
 
 ```bash title="Run deterministic sandbox tests"
-npm run test --workspace @purista/custom-sandbox-adapter-example
+cd examples/custom-sandbox-adapter
+npm install
+npm test
 ```
 
 Use the [Docker sandbox guide](../local-docker-sandbox/) for the first-party

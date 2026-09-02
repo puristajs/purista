@@ -35,9 +35,9 @@
     "business-guards/build/add-output-guard": "772dfe6425d251aefa1a4b8c1ab6e38c00c5faee2b568b4d7473146ced6b5e78",
     "business-guards/testing/test-guards": "5ca0a2cfa1028866ca3ef97f869f327cf492ddc655b7640b8f69fed4b630bdec",
     "command-transforms/build/input": "f07e577e05bfb7cd60b72da7fc3809b8c2581c5099c74d7aa2266ffb5d4e4b82",
-    "command-transforms/build/output": "b5fba57d29ef22fdd7f44ef86656f6da0c090c3b155043626e7da9f4e01eaf2e",
-    "command-transforms/build/connect-http": "00951c20f6e5cb731c566727a6bfaeed8393f1973042385f3b2e22b4a2023444",
-    "command-transforms/testing/test-transforms": "1318e3ad9f77a62d6046639606c35771086848a3d1c0f1d95cb1ca53c66d06cf"
+    "command-transforms/build/output": "c6120debdf7e8037e184b24191c6fd6c4a68453569d01eaf0346c03ce4e840c5",
+    "command-transforms/build/connect-http": "757ef59128c143b1740a6cadb8e8b68c8d7e4d31e3c0610a8b64006cb0e7e6a8",
+    "command-transforms/testing/test-transforms": "d4c46ec5b0690a9df6ef15036ade7b0e8e3af618b8c183929c240eab01592875"
   },
   "files": {
     ".agents/IMPLEMENTATION.md": "e74c259e1aba782768754d77a35b9f9cc1be5872332795e26588d1491ef7b13c",
@@ -48,13 +48,13 @@
     "CLAUDE.md": "8f5a6b2e44997085f3a15d46ed0df70b2ef034898a2b6a44e3d3efa8743d27ff",
     "README.md": "67700792592fdde1d8bbc57c2d6ccf46e4f28427927953ffd8d6fc98b9de0cad",
     "biome.json": "be8db280fb3f4151addc9ddb2e729182d9ba4c88065be6b7e1b6eadf01019d67",
-    "package-lock.json": "95f63090852063d264a6a339657bf19d73f09a9202b994461d8e65c1154cf17e",
-    "package.json": "3499351f77728975bb0bc2f68ce864e8749c4bbd39d00cf88e7e68bddff2688a",
+    "package-lock.json": "794e4f87ae2dfec58890b25b3f7a4bb2670194545cd13c4e78ba57aa9a8c52fe",
+    "package.json": "30f3a5a920638f49f0cd31d1feff8dc43db7117a09682eb4bf25feed5a4993b3",
     "purista.json": "dc2cc6b95a7541fffb3b89739040f392789cce1548b44dad82fefd1511b4a9f4",
     "src/application.test.ts": "7bc06db98d259f9912ac824df0073b415ea1cae4fe582573ce0945c58454930c",
     "src/application.ts": "bef789924aa1c83be4762b075f598631849da269d0cfa6073736188ca6b3204b",
     "src/businessGuards.test.ts": "6dac64eacbe3f3d44fa41877cb646be419098cb521700a3af2ee903ca1d241f9",
-    "src/commandTransforms.test.ts": "4b0128eb1185b1eadec8f487905e1187f7c1f8dedc8481176f3c3e91e0b689b5",
+    "src/commandTransforms.test.ts": "585d0a05e9275155a7a1792e89373d17a0d9940bfc07910b6873135b04f8d887",
     "src/endpointSecurity.test.ts": "3431f55388b69953e199933f6f79d123e41932a46fddc083685de3f4f46cc409",
     "src/eventbridge.ts": "26ff7cfd68da9c058b8c225f00e2a3744ef212bf31f1ec6330c8950f0534f9af",
     "src/index.ts": "1ae8616ec65cc6d851767aadf734ad94211c4703997355efe5146822ee7803e2",
@@ -135,7 +135,7 @@
     "src/sessionEndpoints.test.ts": "019db34358f8bda00487f2ee45e94f597c42b89f17040acf48b4fcb5385523ec",
     "src/sessionProtectMiddleware.ts": "9c5c753086f09ce70cfd20c477d1415fc65232c3f9691f7b1fb703b99903baf2",
     "src/staticWebsite.ts": "865010f0335916aa142299cdcb02f7c6022c41c6cb1d0be9fa5a45168567a67d",
-    "src/transformHttp.test.ts": "09db8b028cb9b0e2cd64129c8135792543e936e3c77cd9172119588085669b26",
+    "src/transformHttp.test.ts": "03bfe5c324859c8a24c9e1db525d5ee350185cb9362e981d465d927f9a55b46c",
     "tsconfig.json": "932445a47e9065e3098d86b6e66496eca4977a24a8e047f6ead9a6166707b4a5",
     "ui/components.json": "230fb44cf5439103cb5675f0d7ebd0b46137d800f8fe82ddaaccff6235aa1f8a",
     "ui/index.html": "bf0f51308ee6db86418b40906b4973bcf85b5d008fae5af2abc439c308c95a34",
@@ -152,7 +152,6 @@
     "ui/tsconfig.json": "78439e2904b33b4f6948d256b97285d2cb336b6ceafc6bc49f65c8e1f8bbb8ff",
     "ui/vite.config.ts": "1743d75e7b05fb82c962b852353baeeef07baef34dfada4a6104c586f10c97ea",
     "ui/vitest.config.ts": "7a542b711bd856ce9ef45c56656ef5fe9b94bef84d55ab7fd35dcaa9593138d9",
-    "vendor/purista-hono-http-server-3.2.4.tgz": "cb00157a79f2a79c3d2dc9f7ac81855317ae230fd8dee80aca24eab44c45f3c5",
     "vitest.server.config.ts": "31e60a962e8acd075292c913c386be69de46501564a96194f1652e2c1b1421e6"
   },
   "actions": [
@@ -843,10 +842,6 @@
     {
       "page": "command-transforms/build/input",
       "command": "npx vitest run src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts\n"
-    },
-    {
-      "page": "command-transforms/build/output",
-      "command": "mkdir -p vendor\ncp \"$PURISTA_TUTORIAL_REPOSITORY/examples/banking/runtime/current/purista-hono-http-server-3.2.4.tgz\" vendor/\nnpm install ./vendor/purista-hono-http-server-3.2.4.tgz\n"
     },
     {
       "page": "command-transforms/build/output",

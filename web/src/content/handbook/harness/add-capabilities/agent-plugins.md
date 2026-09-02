@@ -210,9 +210,11 @@ boundary.
 Run the maintained data-only fixture without a model or MCP connection:
 
 ```bash title="Verify Agent Plugin inspection and binding"
-npm run typecheck --workspace @purista/agent-plugins-example
-npm run build --workspace @purista/agent-plugins-example
-npm run start --workspace @purista/agent-plugins-example -- ./fixtures/knowledge-plugin
+cd examples/agent-plugins
+npm install
+npm run typecheck
+npm run build
+npm run start -- ./fixtures/knowledge-plugin
 ```
 
 The output contains only diagnostics and content-free provenance. Read the

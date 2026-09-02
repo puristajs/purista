@@ -78,6 +78,11 @@ Examples should explain:
   `build`, and `start` scripts; it must not require readers to build PURISTA or
   Harness dependency workspaces first. Keep monorepo-maintainer bootstrap
   commands out of end-user instructions.
+- Declare first-party dependencies with the published release range and let the
+  package manager resolve them from the npm registry. Do not use `file:`,
+  `link:`, or `workspace:` dependencies, vendored package archives, package
+  source imports, or checkout-specific environment variables in public docs or
+  maintained examples.
 - When the supported Node engine provides native environment-file loading,
   prefer a package script such as `node --env-file-if-exists=.env dist/index.js`
   over a `dotenv` dependency or hand-written parser. Commit a safe

@@ -21,13 +21,13 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.1.0",
-		"@purista/core": "*",
-		"@purista/hono-http-server": "*",
+		"@purista/core": "^4.0.0",
+		"@purista/hono-http-server": "^4.0.0",
 		"@scalar/hono-api-reference": "^0.11.13"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.8",
-		"@purista/cli": "*",
+		"@purista/cli": "^4.0.0",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^26.2.0",
 		"@types/sinon": "^22.0.0",

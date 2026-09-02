@@ -27,11 +27,14 @@ handler.
 
 ## Run
 
+From this example directory:
+
 ```bash
-cp examples/agent-example/.env.example examples/agent-example/.env
+npm install
+cp .env.example .env
 # Set OPENAI_API_KEY in the copied file.
-npm test -w @purista/agent-example
-npm start -w @purista/agent-example
+npm test
+npm start
 ```
 
 Open <http://localhost:3000/api> and use the public `triageTicket` operation:

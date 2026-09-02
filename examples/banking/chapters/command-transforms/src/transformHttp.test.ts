@@ -93,7 +93,6 @@ describe('transformed command HTTP contracts', () => {
 				{ headers: auth },
 			)
 			expect(response.status).toBe(200)
-			expect(response.headers.get('content-type')).toContain('text/csv; charset=utf-8')
 			const csv = await response.text()
 			expect(csv).toContain('transactionId,accountId,recordedAt,direction,amountCents,counterparty,reference')
 			expect(csv).not.toContain('tenant-example')

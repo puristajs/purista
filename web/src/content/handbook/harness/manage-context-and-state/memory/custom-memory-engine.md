@@ -187,10 +187,12 @@ not authorization by itself.
 ## 5. Run and test the adapter
 
 ```bash title="Run the custom memory example"
-npm run typecheck --workspace @purista/custom-memory-engine-example
-npm run test --workspace @purista/custom-memory-engine-example
-npm run build --workspace @purista/custom-memory-engine-example
-npm run start --workspace @purista/custom-memory-engine-example
+cd examples/custom-memory-engine
+npm install
+npm run typecheck
+npm test
+npm run build
+npm start
 ```
 
 Expected output is `open`.

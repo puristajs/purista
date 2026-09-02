@@ -21,9 +21,8 @@ It never reads `chapters/` to fill missing implementation steps.
 Each completed chapter directory contains its full consumer source and npm
 lockfile. Its own README explains installation, tests, startup and limitations.
 No monorepo build or paid model is required for the published introductory
-chapters. A chapter that teaches behavior from the current Framework source
-includes the documented source archive in its own `vendor/` directory, so its
-lockfile remains portable.
+chapters. Every retained chapter installs released PURISTA packages from the
+npm registry and keeps a portable npm lockfile.
 
 See [construction and maintenance](tutorial/README.md) for replay commands and
 [verified scope](tutorial/VERIFICATION.md) for the completed lessons and limits.

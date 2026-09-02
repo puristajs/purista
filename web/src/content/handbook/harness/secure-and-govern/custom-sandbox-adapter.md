@@ -213,10 +213,12 @@ and [`.build()`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#build
 ## 5. Run the complete example
 
 ```bash title="Run the custom sandbox example"
-npm run typecheck --workspace @purista/custom-sandbox-adapter-example
-npm run test --workspace @purista/custom-sandbox-adapter-example
-npm run build --workspace @purista/custom-sandbox-adapter-example
-npm run start --workspace @purista/custom-sandbox-adapter-example
+cd examples/custom-sandbox-adapter
+npm install
+npm run typecheck
+npm test
+npm run build
+npm start
 ```
 
 Expected output:

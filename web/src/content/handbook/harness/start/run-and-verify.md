@@ -22,10 +22,11 @@ do not copy prompts, completions, tool values, or credentials into logs.
 
 The maintained Harness quickstart injects an `ExampleProvider` that implements
 `ModelProvider` and returns a fixed object. Run its focused test from the
-Harness repository:
+downloaded example directory:
 
 ```sh title="Run the deterministic quickstart test"
-npm test --workspace @purista/quickstart
+npm install
+npm test
 ```
 
 This verifies agent/session/workflow wiring without a network call or API key.

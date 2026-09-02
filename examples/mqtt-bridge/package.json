@@ -33,9 +33,9 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^2.1.0",
-		"@purista/core": "*",
-		"@purista/hono-http-server": "*",
-		"@purista/mqttbridge": "*",
+		"@purista/core": "^4.0.0",
+		"@purista/hono-http-server": "^4.0.0",
+		"@purista/mqttbridge": "^4.0.0",
 		"zod": "^4.4.3"
 	}
 }

@@ -197,7 +197,7 @@ function run(body, cwd) {
 		const child = spawn('bash', ['-e', '-o', 'pipefail', '-c', body], {
 			cwd,
 			detached: true,
-			env: { ...process.env, CI: '1', PURISTA_TUTORIAL_REPOSITORY: repo },
+			env: { ...process.env, CI: '1' },
 			stdio: ['ignore', 'pipe', 'pipe'],
 		})
 		let stdout = ''
