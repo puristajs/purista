@@ -5,7 +5,7 @@ order: 701
 ---
 
 Governance adds an application-controlled decision before an agent tool handler
-runs. A policy can allow or deny the prepared call, require a bounded approval,
+runs. A policy can allow or deny the prepared call, require durable approval,
 record audit evidence, or keep a tool out of the model's tool list.
 
 Start here when a rule must apply consistently across agents or tools. For
@@ -62,16 +62,17 @@ flowchart LR
   permissions --> policies[Evaluate governance policies]
   policies --> decision{Strongest effect}
   decision -->|allow or audit| handler[Authorize and run handler]
-  decision -->|require approval| approval[Ask approval provider]
-  approval -->|approved| handler
-  approval -->|rejected or failed| blocked[Do not run handler]
+  decision -->|require approval| interrupt[Return ToolApprovalInterrupt]
+  interrupt --> review[Application records and authorizes review]
+  review -->|approved resume| handler
+  review -->|rejected resume| blocked[Return denied tool result]
   decision -->|deny| blocked
 ```
 
 Governance receives the parsed, potentially Guardrail-transformed tool input.
-A denied permission, denied policy, missing approval provider, invalid callback
-result, timeout, or configured audit failure prevents the handler from
-starting. Governance cannot roll back another side effect that already ran.
+A denied permission or policy, an approval interruption, or a configured audit
+failure prevents the handler from starting. Governance cannot roll back another
+side effect that already ran.
 
 ## Register governance after the tools and agents
 
@@ -112,8 +113,8 @@ policy, invocation, and deterministic verification around this rule.
 | The agent must never see a tool | Omit it from `tools` or `builtinTools` |
 | `bash`, `write`, or `edit` needs a local command/path rule | [Built-in tool permissions](/handbook/harness/secure-and-govern/tool-permissions/) |
 | Parsed business input needs an in-process rule | Native governance policy |
-| A prepared call needs a decision within the active run | `require_approval` and an immediate approval provider |
-| A person may answer after the current run ends | [Durable human review](/handbook/harness/orchestrate-work/human-review/) |
+| A prepared call needs a human decision | `require_approval`, persist its interrupt, and resume the same run |
+| A workflow pauses for a business event beyond tool approval | [Durable human review](/handbook/harness/orchestrate-work/human-review/) |
 | A central policy platform owns the decision | Application-owned policy evaluator |
 | Content needs inspection or transformation | [Guardrails](/handbook/harness/secure-and-govern/guardrails/) |
 
@@ -127,7 +128,7 @@ policy ownership or deployment is genuinely separate.
 | --- | --- |
 | `allow` | The call may continue unless a stronger matching effect stops it |
 | `audit` | The call may continue and the configured audit sink receives evidence |
-| `require_approval` | Harness asks the configured immediate approval provider before execution |
+| `require_approval` | Harness returns a durable interruption before execution; the application later resumes it with authenticated decisions |
 | `deny` | Harness returns a safe tool denial and does not run the handler |
 
 If several rules match, `deny` wins over `require_approval`, which wins over
@@ -145,17 +146,16 @@ Use only the fields required by the control you are adding:
 
 | Option | Default | Use it for |
 | --- | --- | --- |
-| `enabled` | `true` once governance is configured | Temporarily disable policy and exposure evaluation with `false`. An approval provider can still serve built-in permission approval. |
+| `enabled` | `true` once governance is configured | Temporarily disable policy and exposure evaluation with `false`. Built-in permissions remain active. |
 | `mode` | `enforce` | Select `shadow` to evaluate and observe policy/exposure decisions without enforcing them. Built-in permissions remain enforced. |
-| `defaultEffect` | `deny` | Decide an unmatched execution occurrence when at least one execution policy exists. It has no effect on an approval-only or exposure-only configuration. |
+| `defaultEffect` | `deny` | Decide an unmatched execution occurrence when at least one execution policy exists. It has no effect on an exposure-only configuration. |
 | `policies` | none | Register native policies and application-owned external evaluators. |
 | `exposure` | none | Filter the model-facing tool list before each model step. |
-| `approval` | none | Answer a bounded `require_approval` demand during the active run. |
 | `audit` | none | Persist content-free evidence for evaluated execution-policy decisions. A configured write failure fails closed. |
 
-`.governance(...)` may be called once. At least one execution policy, exposure
-rule, or approval provider must be present. A native `require_approval` rule in
-enforced mode must have an approval provider when the Harness is built.
+`.governance(...)` may be called once. At least one execution policy or exposure
+rule must be present. A `require_approval` rule needs no callback provider: the
+run returns a `ToolApprovalInterrupt` when that rule matches.
 
 ## Build up the policy in small steps
 
@@ -165,8 +165,8 @@ enforced mode must have an approval provider when the Harness is built.
    before adding approval or several policies.
 3. [Hide tools and roll out policies safely](/handbook/harness/secure-and-govern/governance-policies/hide-tools-and-roll-out-safely/)
    with exposure rules and shadow mode.
-4. [Request immediate approval](/handbook/harness/secure-and-govern/approval-and-audit/) only for a bounded
-   decision that completes during the current run.
+4. [Request and resume tool approval](/handbook/harness/secure-and-govern/approval-and-audit/)
+   with an application-owned review record and authenticated decision.
 5. [Record governance audit evidence](/handbook/harness/secure-and-govern/record-audit-evidence/) in an
    application-owned store.
 6. [Connect Open Policy Agent](/handbook/harness/secure-and-govern/governance-policies/connect-external-policy-engine/)
@@ -181,7 +181,7 @@ enforced mode must have an approval provider when the Harness is built.
 | Capability | Availability | Enablement |
 | --- | --- | --- |
 | Native TypeScript rules | Included, disabled by default | Add `.governance(...)` |
-| Exposure rules, shadow mode, approval, and audit contracts | Included, opt-in | Configure the corresponding governance field |
+| Exposure rules, shadow mode, approval interruptions, and audit contracts | Included, opt-in | Configure the corresponding governance rule or field |
 | OPA adapter | Separate `@purista/harness-policy-opa` package | Create the fixed Data API client, explicitly map typed input, validate the result, and operate OPA |
 | Cedar adapter | Not shipped | Implement the Harness evaluator contract and Cedar client in the application |
 | Generic HTTP policy client | Not shipped | Own the HTTP client, authentication, mapping, and operations in the application |

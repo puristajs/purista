@@ -13,34 +13,25 @@ Use this as the default shared framework skill whenever an agent designs, implem
 ## Operating Model
 PURISTA is builder-driven and runtime-explicit. Keep four layers separate:
 - architecture: business capabilities, ownership, invariants, sync/async boundaries
-- definition: builders declare services, commands, subscriptions, streams, queues, workers, agents, resources, and schemas
+- definition: Framework builders declare services, commands, subscriptions, streams, queues, workers, resources, and schemas; native Harness definitions declare AI behavior
 - implementation: handlers contain domain behavior behind declared boundaries
 - runtime wiring: `getInstance(...)` supplies bridges, stores, resources, loggers, telemetry, providers, queues, and HTTP surfaces
 
 Do not blur these layers. Most mistakes come from designing routes, prompts, or infrastructure before service ownership and contracts are clear.
 
-## AI integration redesign gate
+## AI integration
 
-The shipped v3 `AgentQueueBuilder` remains implementation evidence, but it is
-frozen for new Handbook/tutorial architecture because it expands one agent into
-queue, worker, command, and stream definitions and mixes Core and Harness
-ownership. A v4 replacement is under architecture review.
+Native `@purista/harness` modules own AI definitions. PURISTA Core owns the
+typed `ServiceBuilder.mountHarness(...)` composition boundary, trusted host
+context, business guards, runtime binding, and address-first invocation.
+Harness never imports Core.
 
-For current application maintenance, verify and use the installed public API.
-For redesign, tutorial, CLI, docs, or skill work, do not invent or publish the
-proposal as shipped. Prefer the revision-5 Harness-first direction for the
-required spike: native Harness modules own AI definitions and Core owns only a
-typed `ServiceBuilder.mountHarness(...)` composition boundary. Core may depend
-on the slim provider-neutral Harness; Harness must not import Core. Stop AI
-tutorial implementation until that contract is approved and implemented.
-Every proposed agent/workflow invocation is address-first and crosses the
-configured EventBridge, including same-service and same-process calls. Do not
-introduce service-builder references or direct local Harness dispatch.
-Each proposed agent/workflow has one explicit final output schema. Callers
-choose `run` or portable `stream`; definitions declare whether `none`,
-`text-delta`, or `object-snapshot` updates exist. Do not expose raw Harness
-diagnostic `RunEvent` values as the default EventBridge or HTTP contract, and
-do not describe PURISTA generic stream aggregation as an agent response mode.
+Every agent/workflow invocation crosses EventBridge, including same-service and
+same-process calls. Each target has one final output schema; callers choose
+`run` or portable `stream`, while definitions declare `none`, `text-delta`, or
+`object-snapshot` updates. Mounting does not generate commands, streams, queues,
+workers, or routes. Use a separate AI SDK UI Message Stream v1 adapter for
+browser clients and keep the internal stream provider-neutral.
 
 ## Hard Rules
 - Start from business capabilities and ownership boundaries, not package names or routes.
@@ -55,14 +46,14 @@ do not describe PURISTA generic stream aggregation as an agent response mode.
 - Do not leak secrets, PII, prompts, completions, tokens, raw payloads, headers, or attachments into logs, metrics, traces, events, generated examples, or model calls unless an explicit product policy allows the exact field.
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
 - Keep EventBridge and QueueBridge separate. Event transports do not become queues.
-- Agents are native `@purista/core` builder/runtime primitives backed by `@purista/harness`; provider packages remain app-level dependencies.
+- Agents and workflows are native `@purista/harness` definitions mounted by `@purista/core`; provider packages remain app-level dependencies.
 - Standalone Harness composition uses additive singular/plural registries; prefer `.tool(id, definition)` for inline native tools, invoke with `.run/.stream`, release idle sessions with `release`, and reserve `destroy` for deletion.
-- For attached agents, `addModel(alias, { capabilities, defaults? })` declares a provider-neutral requirement only. Never put a concrete provider or provider model identifier in that builder call; bind both under `ai.models[alias]` when the service is instantiated.
+- Declare provider-neutral model requirements in `defineHarness()` and bind concrete providers/model identifiers under `ai.models[alias]` when the service is instantiated.
 - Durable agent workspace replay is a harness-owned adapter contract consumed through PURISTA runtime wiring; PURISTA declares requirements and validates capabilities but does not own product retention, encryption, quota, or cleanup policy values.
 - Use Hono as the active HTTP server package. Do not revive legacy HTTP server guidance.
 - For exported TypeScript APIs, add IDE-friendly TSDoc/JSDoc with concise examples for non-obvious public helpers.
 - Metrics use the OpenTelemetry Metrics API. Core stays SDK/exporter-neutral; applications own MeterProvider, readers, exporters, collectors, and Prometheus exposure.
-- Declare custom application metrics with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record them through typed `context.metrics`, and keep names under `app.*`.
+- Declare custom application metrics with `ServiceBuilder.defineMetric(...)`, record them through typed `context.metrics`, and keep names under `app.*`.
 - Schedules are contracts, not a PURISTA production scheduler runtime. Kubernetes CronJob export is manifest generation for an explicit trigger container/script.
 - Do not create or reference `@purista/contracts`; contract/export helpers for this release live in `@purista/core`.
 - Redis and NATS queue bridges support strict idempotency. Duplicate strict enqueue returns the original queue job id. The default queue bridge remains advisory for local development/tests.
@@ -74,7 +65,7 @@ do not describe PURISTA generic stream aggregation as an agent response mode.
 - stream: incremental output or SSE/aggregate delivery
 - queue: durable background work contract
 - queue worker: execution logic for queue work
-- agent: optional model-driven loop, harness agent/workflow, or custom run function attached to a service
+- mounted Harness target: optional native agent or workflow published at a service address
 - schedule: external time-trigger contract targeting an event, queue, or short command
 
 ## Architecture Compass
@@ -90,7 +81,7 @@ Choose primitives by intent:
 - "Something happened and others may react" -> event plus subscription
 - "Work may be slow, retried, replayed, delayed, or dead-lettered" -> queue plus queue worker
 - "A caller needs progress or incremental output" -> stream
-- "A model reasons, uses tools, or coordinates a conversation" -> agent attached to the owning service
+- "A model reasons, uses tools, or coordinates a conversation" -> native Harness target mounted by the owning service
 - "Time starts the work" -> schedule contract targeting event, queue, or short command
 - "External system or SDK is needed" -> resource/runtime binding, never a direct handler import
 
@@ -99,31 +90,34 @@ Production architecture guidance:
 - keep services stateless and persist truth in stores/resources owned by the capability
 - design all retryable side effects as idempotent; exactly-once is a handler/property design, not a broker promise
 - carry trusted `tenantId`, `principalId`, `traceId`, and `correlationId` through boundaries; authentication establishes identity, while business guards authorize the requested action/object and current state; do not use transport ids as AI conversation ids
-- expose HTTP as a projection of command/stream/agent definitions, not as the source architecture
+- expose HTTP as a projection of command or stream definitions; mounted Harness targets stay internal addresses
 - use default bridges for local/test and production bridges/stores for stated guarantees; fail startup in strict mode when guarantees cannot be met
 - minimize data at each contract boundary; events and agent prompts should contain the least sensitive shape that still satisfies the use case
 
 ## Current AI Decision
-AI agent integration lives in `@purista/core`. Agents attach to services and expand into normal PURISTA queue, worker, command, and stream definitions. Core depends only on provider-neutral `@purista/harness`; model providers remain explicit application dependencies. Agents do not use a PURISTA AI protocol or Vercel AI SDK adapter.
+AI definitions live in `@purista/harness`. Core mounts selected targets and
+provides address-first EventBridge clients. A mount creates no implicit command,
+stream, queue, worker, or HTTP endpoint. Model providers remain explicit
+application dependencies. Browser chat uses the optional
+`@purista/harness-ai-sdk-ui/v1` adapter; PURISTA does not define a client
+protocol.
 
 PURISTA records agent wrapper metrics only. `@purista/harness` owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics.
 
-Harness governance policy is optional. Generated apps and ordinary agents must
-not be forced to configure policy. Use it only when an attached agent needs
-central tool-call policy, approval, audit, or interoperability with external
-policy packs; PURISTA service guards and tenant-scoped resources remain the
-authorization boundary.
+Harness governance policy is optional. Use it only when a definition needs
+central tool-call policy, approval, audit, or external policy packs; PURISTA
+mount guards and tenant-scoped resources remain the business authorization
+boundary.
 
-Durable workspace replay for agents is opt-in. Builders declare it with
-`setDurability(...)` plus workspace policy, runtime wiring supplies
-`ai.storage` and `ai.workspace`, and startup fails when required capabilities
-are missing. PURISTA's top-level `stateStore` remains the general framework KV
-component and must not be adapted into Harness storage.
+Durable workspace replay is opt-in and declared by Harness. Runtime wiring
+supplies `ai.storage` and `ai.workspace`, and startup fails when required
+capabilities are missing. PURISTA's top-level `stateStore` remains the general
+Framework KV component and must not be adapted into Harness storage.
 
 ## Verification Cues
 - The design can name one owner for each capability and source of truth.
 - Every handler dependency is reachable through resources, stores, context, or declared runtime bindings.
-- Queue workers declare every service, stream, queue, event, and same-service agent dependency before using `context.service`, `context.stream`, `context.queue`, `context.emit`, or `context.agent`.
+- Handlers declare every service, stream, queue, event, agent, and workflow address before using typed context clients.
 - Runtime wiring names required bridges, stores, providers, telemetry, queue bridges, and HTTP servers.
 - Durable agent replay designs name Harness storage/workspace adapters, required capabilities, stable run-id input, cleanup owner, and product-owned retention/encryption/quota policy.
 - Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.

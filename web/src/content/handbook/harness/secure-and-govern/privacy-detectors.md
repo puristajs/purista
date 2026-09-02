@@ -11,7 +11,7 @@ covers the required entities and data-residency boundary, then prove its
 fail-closed behavior with synthetic fixtures.
 
 By the end of the smallest path, the native detector masks email addresses and
-phone numbers before an attached agent sends input to its model and before the
+phone numbers before an agent sends input to its model and before the
 agent releases its final output.
 
 ## 1. Choose the detector before installing it

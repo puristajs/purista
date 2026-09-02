@@ -82,13 +82,13 @@ Add a support triage agent that can classify tickets, call an allowed command to
 
 Expected behavior:
 - attaches the agent to the support service with a local package script such as `npm run add:agent -- ...`
-- uses core agent builder/runtime APIs and `@purista/harness` model bindings
+- uses a native Harness definition, `mountHarness(...)`, and address-first PURISTA consumers
 - installs provider packages only in the app wiring layer
 - allowlists tools and child agents
 - keeps prompt/completion content out of logs, metrics, traces, events, queues, and examples
 
 Validation:
-- generated agent test uses `createAgentTestHarness(...)`, `createScriptedHarnessModel()`, and documents `createAgentSkillTestRuntime(...)` for skill-backed agents
+- generated definition test uses `FakeModelProvider`; the PURISTA wrapper test stubs the declared target address
 - model capabilities are declared and validated at startup
 - model output is schema-validated before deterministic state changes
 
@@ -136,9 +136,8 @@ Add a long-running research agent that may retry after worker restart and must r
 ```
 
 Expected behavior:
-- attaches the agent to the owning service through `getAgentQueueBuilder`
-- declares stable execution with `setDurability({ mode: 'required', runIdPath: ['requestId'] })`
-- declares file replay with `setWorkspacePolicy({ mode: 'durable' })`
+- declares durable workflow and workspace requirements in the native Harness definition
+- mounts the workflow on the owning service and invokes it address-first
 - keeps concrete Harness storage and workspace adapters in `getInstance(..., { ai })` runtime wiring
 - requires harness capabilities such as `storage.workspace_checkpoint`, `workspace.durable`, `workspace.checkpoint`, `workspace.resume`, and `workspace.cleanup`
 - treats retention durations, encryption key policy, tenant/project quotas, and cleanup scheduling as product-owned policy
@@ -203,10 +202,10 @@ Expected behavior:
 - preserves PURISTA guard/resource authorization and uses governance only for
   the sensitive tool decision
 - separates content `allow`/`block`/phase transform, permission/policy
-  `require_approval`, immediate provider `approved`/`rejected`, and durable
+  `require_approval`, `ToolApprovalInterrupt`/`ToolApprovalResume`, and workflow
   `ExternalWaitOutcome` plus application execution claim/receipt
-- uses one shared approval provider for static permission and policy demands;
-  narrows multi-tool input by `toolId` and propagates callback signal/deadline
+- combines static permission and policy demands in one durable approval
+  interruption; narrows multi-tool input by `toolId`
 - uses immutable execution claims, stable idempotency keys and receipts for a
   long human review; rejects a read-approved-then-execute or consumed flag recipe
 
@@ -234,7 +233,7 @@ Validation:
 Prompt:
 
 ```text
-Add an inline transfer tool and a workflow-backed attached agent. Keep the
+Add an inline transfer tool and a workflow-backed mounted agent. Keep the
 Harness composition type-safe and show the request lifecycle.
 ```
 

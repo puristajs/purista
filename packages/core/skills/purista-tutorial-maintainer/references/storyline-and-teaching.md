@@ -31,7 +31,7 @@ Before writing pages, separate four kinds of names in the chapter plan:
 1. the demo application and UI name;
 2. transport services such as Hono;
 3. capability services that own commands, subscriptions, queues, streams, or
-   attached agents; and
+   mounted Harness agents and workflows; and
 4. injected resources such as repositories, provider clients, and model
    adapters.
 

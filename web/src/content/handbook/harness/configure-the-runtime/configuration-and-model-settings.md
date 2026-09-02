@@ -145,7 +145,7 @@ documented default; a value of `0` disables only `runTimeoutMs`.
 | `toolTimeoutMs` | `120_000` | A tool calls an application or remote dependency with a known budget. | Timing out a tool does not roll back an external side effect; design that side effect to be idempotent. |
 | `agentMaxIterations` | `16` | A default-loop agent may need more or fewer model/tool rounds. | Must be a positive integer. Set a smaller limit for public, tool-enabled agents. An agent-level `maxSteps` overrides it. |
 | `maxParallelToolCalls` | `8` | Independent, safe tool calls can use more or less concurrency. | Lower it when a downstream service has a tight quota or write contention. It does not authorize parallel mutations. |
-| `decisionTimeoutMs` | `10_000` | A guardrail, policy, or approval callback has a shorter safety budget. | An expired decision fails the control path; it is not an approval. |
+| `decisionTimeoutMs` | `10_000` | A guardrail, policy, or audit callback has a shorter safety budget. | An expired decision fails the control path. |
 | `skillTimeoutMs` | `60_000` | Skill loading or reading needs a bounded budget. | Keep it finite; a skill is input, not a trusted execution authority. |
 | `historyWindow` | all non-system messages | The model needs less transient conversation context. | This changes what reaches the model, not what durable history retains. Use `historyRetention` for storage bounds. |
 | `historyRetention` | disabled | Persisted session history needs finite turn and byte bounds. | It requires storage with atomic message replacement; see [bound conversation history](/handbook/harness/manage-context-and-state/conversation-history/). |

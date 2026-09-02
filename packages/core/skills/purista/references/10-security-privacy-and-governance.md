@@ -91,7 +91,7 @@ Unsafe attributes usually include:
 - tokens, API keys, passwords, provider request/response bodies
 - payload data, PII, user ids, email addresses, tenant ids, document text, medical or financial data
 
-Custom metrics must use `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`, record through typed `context.metrics`, use `app.*` names, and keep attributes low-cardinality and non-sensitive.
+Custom metrics must use `ServiceBuilder.defineMetric(...)`, record through typed `context.metrics`, use `app.*` names, and keep attributes low-cardinality and non-sensitive.
 
 ## AI And Model Safety
 Agents must not become an unbounded data exfiltration path.

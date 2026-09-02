@@ -21,7 +21,7 @@ Start with the business operation that would cause the most harm if it were
 exposed, duplicated, lost, or impossible to diagnose. Then make its identity,
 authorization, data boundary, delivery behavior, and operator signal explicit.
 The same approach applies to a command, subscription, stream, worker, or
-attached agent.
+mounted Harness target.
 
 | Concern | Start here |
 | --- | --- |

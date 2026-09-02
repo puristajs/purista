@@ -74,7 +74,7 @@ Metrics guidance:
 - core records through the OTel Metrics API and stays SDK/exporter-neutral
 - applications own MeterProvider, metric readers, exporters, collectors, and backend setup
 - Prometheus is configured outside core through the OTel Collector or an application-owned OTel Prometheus exporter
-- custom metrics are declared with `ServiceBuilder.defineMetric(...)` or `AgentQueueBuilder.defineMetric(...)`
+- custom metrics are declared with `ServiceBuilder.defineMetric(...)`
 - handlers record custom metrics through typed `context.metrics`
 - custom metric names must use `app.*`
 - avoid high-cardinality or sensitive attributes such as headers, raw URLs, prompts, completions, tokens, user IDs, tenant IDs, and payload data
@@ -91,9 +91,9 @@ For AI:
 - harness owns GenAI semantic-convention metrics, model metrics, token metrics, and tool metrics
 - harness owns durable workspace operation metrics, workspace bytes, quota, and
   cleanup metrics
-- PURISTA records only service and agent wrapper metrics around attached agent execution
+- PURISTA records only service and mount wrapper metrics around Harness execution
 - PURISTA records only workspace policy validation and fallback wrapper metrics
-  around attached agent execution
+  around mounted Harness execution
 - stream chunks preserve run identity and provider-style event names
 
 ## Logging

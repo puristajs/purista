@@ -16,7 +16,8 @@ who can stop the rollout and restore the previous deployment and data snapshot.
 
 ## 2. Drain Harness 2.1.1
 
-Stop new work, wait for active runs and immediate approvals to settle, and
+Stop new work, wait for active runs to settle, preserve pending approval
+interruptions, and
 resolve or cancel application-owned human-review tasks using the 2.1.1
 application. Record any run that cannot finish; do not hand it to Harness 3.
 

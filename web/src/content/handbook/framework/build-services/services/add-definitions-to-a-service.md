@@ -25,7 +25,7 @@ export const invoiceV1Service = invoiceV1ServiceBuilder
 | [`addStreamDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addstreamdefinition) | Progressive response producers | [Streams](/handbook/framework/build-services/streams/) |
 | [`addQueueDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueuedefinition) / [`addQueueWorkerDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueueworkerdefinition) | Durable job contract and executable worker | [Queues and workers](/handbook/framework/build-services/queues-and-workers/) |
 | [`addScheduleDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addscheduledefinition) | Scheduler contract metadata | [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/) |
-| [`addAgentDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addagentdefinition) | Attached agent plus its generated command, stream, queue, worker, and metrics | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |
+| [`mountHarness(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness) | Selected native Harness agent and workflow targets plus mount policy | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |
 
 [`bindEventToQueue(eventName, queueName, options?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#bindeventtoqueue) creates a bounded
 event-to-queue handoff. Use it when an event must become durable work without

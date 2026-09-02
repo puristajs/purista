@@ -465,13 +465,13 @@ it('throws ToolError when MCP signals isError', async () => {
         <div class="eyebrow">Integration tests — approval and review</div>
       </div>
       <h2 class="display display-lg mb-6">Prove the application-owned approval boundary</h2>
-      <p class="lede mb-10">Harness can synchronously ask an injected governance approval provider before a matching tool call. Durable human-review tasks remain application-owned today, so test their storage, identity, expiry, and decision endpoint alongside the Harness workflow.</p>
+      <p class="lede mb-10">Harness interrupts a run before a matching approval-gated tool call. The application records and authorizes the review, then resumes the same run with a typed decision. Test that storage, identity, expiry, decision endpoint, and resume behavior together.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {[
           {
             invariant: 'No tool mutation on rejection',
-            test: 'Script a rejected governance approval result and assert the tool handler did not run.',
+            test: 'Resume the interruption with a rejected decision and assert the tool handler did not run.',
             tone: 'found',
           },
           {

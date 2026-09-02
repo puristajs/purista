@@ -13,7 +13,7 @@ Use this reference when choosing packages or checking dependency boundaries.
 - `packages/core`: owns native harness-backed service-agent integration.
 - Core depends on provider-neutral `@purista/harness`.
 - Provider packages such as `@purista/harness-openai` stay app-level dependencies.
-- Core exports `ServiceBuilder`, `AgentQueueBuilder`, selected agent types, testing helpers, harness contract types, logger/state adapters, and provider-style stream event schemas.
+- Core exports `ServiceBuilder`, Harness mount and address-first client types, host-tool adapters/builders, testing helpers, logger/state adapters, and Framework stream contracts.
 
 ## Bridges
 - `packages/amqpbridge`: AMQP event bridge.

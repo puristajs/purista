@@ -6,7 +6,7 @@ order: 310
 
 A service is PURISTA's versioned business boundary. It groups the contracts
 that belong together—commands, event reactions, streams, queues, schedules,
-and attached agents—while the application composition root owns concrete
+and mounted Harness targets—while the application composition root owns concrete
 dependencies, transports, credentials, and deployment lifecycle.
 
 Use a service when several capabilities share one business responsibility. Do
@@ -15,7 +15,7 @@ not use it as a global dependency container or as a deployment version label.
 | Contract question | Service answer |
 | --- | --- |
 | Who defines it? | The application team that owns the versioned business capability. |
-| What selects it? | Commands, subscriptions, streams, queues/workers, schedules, and attached agents address definitions inside the service/version boundary. |
+| What selects it? | Commands, subscriptions, streams, queues/workers, schedules, and mounted Harness targets address definitions inside the service/version boundary. |
 | Who waits? | Depends on the selected primitive; the service itself is an ownership and runtime container, not an execution pattern. |
 | What is its result? | Registered capability contracts and a running instance that handles only those definitions. |
 | What stays external? | Concrete bridges, stores, resources, credentials, telemetry SDK/exporters, process topology, and callers. |

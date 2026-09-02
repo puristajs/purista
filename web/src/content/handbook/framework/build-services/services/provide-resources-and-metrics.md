@@ -10,7 +10,7 @@ part of the service type and requires it when the service is instantiated; it
 does not construct connections, supply secrets, or authorize requests.
 
 The service is the logical dependency and runtime boundary for its commands,
-subscriptions, streams, workers, and attached agents. The service builder
+subscriptions, streams, workers, and mounted Harness host tools. The service builder
 declares the interfaces and shared requirements. The application composition
 root selects concrete resources, store adapters, bridges, logger, telemetry,
 and validated service configuration when it calls `getInstance(...)`. PURISTA

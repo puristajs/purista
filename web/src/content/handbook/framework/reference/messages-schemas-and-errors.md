@@ -19,7 +19,7 @@ This page is a boundary lookup, not the error-behavior owner. Use
 [Handle errors across service primitives](/handbook/framework/build-services/handle-service-errors/)
 to classify schema rejection, `HandledError`, unexpected failure, retry, and
 safe observability. Then follow the primitive-specific command, subscription,
-stream, worker, or attached-agent guide for its actual response and recovery
+stream, worker, or mounted-Harness guide for its actual response and recovery
 semantics.
 
 Read [message contracts](/handbook/framework/understand-the-framework/messages-schemas-and-contracts/), [authentication and authorization](/handbook/framework/secure-and-operate/security/authentication-and-authorization/), and [contract compatibility](/handbook/framework/upgrade-and-migrate/contract-compatibility/).

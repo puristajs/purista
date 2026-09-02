@@ -157,7 +157,7 @@ builder declarations that make them available. Verify callback receiver
 binding for lifecycle helpers.
 
 Present the service as the logical dependency and runtime boundary for its
-commands, subscriptions, streams, workers, and attached agents. Distinguish
+commands, subscriptions, streams, workers, and mounted Harness targets. Distinguish
 service-builder declarations from composition-root implementations and from
 the context projection used during execution. State exactly where each value
 appears: resources and runtime facilities on typed context members, validated
@@ -231,7 +231,7 @@ owners and runtime order explicit:
    action;
 2. agent tool selection and built-in permissions constrain available actions;
 3. governance exposure and execution policies decide typed allow, deny, audit,
-   or immediate approval outcomes;
+   or durable tool-approval interruption outcomes;
 4. content Guardrails inspect or transform exact input, output, tool, or
    retrieval phases; and
 5. the selected sandbox/MCP/platform adapter enforces files, processes,
@@ -240,10 +240,11 @@ owners and runtime order explicit:
 Reflect these owners in the hierarchy and follow `references/page-patterns.md`.
 A governance task is incomplete without policy registration order, typed
 context/input, rule selectors and effects, defaults and precedence, shadow
-versus enforce behavior, approval and audit callbacks, timeout/cancellation,
-fail-closed behavior, content-safe evidence, and deterministic tests proving
-the handler did not run. Distinguish bounded immediate approval from durable
-human review. Teach governance progressively from one complete native deny-rule
+versus enforce behavior, approval interrupt/resume and audit callbacks,
+timeout/cancellation, fail-closed behavior, content-safe evidence, and
+deterministic tests proving the handler did not run. Distinguish a durable tool
+approval interruption from a workflow external wait. Teach governance
+progressively from one complete native deny-rule
 tutorial through effects, rollout, approval, audit, external evaluators, and
 tests. Verify shipped adapters and use the custom-evaluator requirements in
 `references/page-patterns.md`; never call a typed registration helper a vendor adapter.
@@ -437,8 +438,8 @@ runtime test for the complete order.
 - Bind optional Harness Guardrails through the default-loop agent definition's
   direct `guardrails` field. Do not document decorator or attach helpers.
   State that custom-handler agents reject Guardrails, interceptors, and other
-  default-loop controls, and verify that PURISTA `setHarnessAgent(...)` forwards
-  the same provider-neutral definition without a Core dependency on the addon.
+  default-loop controls, and verify that a PURISTA service mount preserves the
+  same provider-neutral definition without a Core dependency on the addon.
 - Every documented fluent builder/configuration call must have a nearby
   source-verified explanation of its intent, reader-relevant parameters,
   defaults/options, runtime effect, and important invalid/failure interaction;
@@ -447,11 +448,10 @@ runtime test for the complete order.
   may own exhaustive detail, but the first snippet must say what it declares
   and link there explicitly.
 - Keep automated snippet checks narrow and evidence-backed. The handbook audit
-  verifies the high-risk attached-agent chain (`getAgentQueueBuilder`, schemas,
-  model/execution selection, response mode, and HTTP projection) has the exact
-  generated API member link in the same Markdown section as its TypeScript
-  example. Extend that list only for a similarly unambiguous public builder
-  family; do not turn generic dot calls into a noisy heuristic.
+  verifies high-risk Framework builder chains against generated API members.
+  For AI integration, separately verify native Harness definition, synchronous
+  `mountHarness(...)`, address-first invocation, and explicit HTTP projection;
+  do not turn generic dot calls into a noisy heuristic.
 - For a handbook coverage pass, run
   `node scripts/handbook-snippet-coverage.mjs` before and after the work. It
   inventories source-verified Framework primitive builders and complete

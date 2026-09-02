@@ -17,7 +17,7 @@ same declared schema before using it, rather than adding a cast.
 | [`canConsumeStream(service, version, target, chunk?, payload?, parameter?, final?, validateChunk?, validateFinal?)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canconsumestream) | `context.stream[...]` async stream plus final result | Progressive upstream output is useful and the EventBridge supports it. |
 | [`canEnqueue(queue, payload?, parameter?)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canenqueue) | `context.queue.enqueue.queue(...)` / `scheduleAt.queue(...)` | Work can be decoupled and retried. |
 | [`canEmit(event, schema)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canemit) | `context.emit(event, payload)` | Another service should react independently. |
-| [`canInvokeAgent(agent, version, schemas?)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#caninvokeagent) | `context.agent['agent.version'].run(payload, parameter?)` | A same-service attached agent owns the next decision. |
+| `canInvokeAgent(service, version, target, contract)` | `context.agent.Service['1'].target.run(input)` or `.stream(input)` | A mounted Harness agent owns the next model-driven step. |
 
 ```ts title="src/service/report/v1/queue-worker/generateReport.ts"
 export const composedGenerateReportWorkerBuilder = generateReportWorkerBuilder
@@ -52,7 +52,7 @@ idempotency boundary on every durable side effect.
 
 Stream invocation depends on EventBridge stream capability; see
 [Streams](/handbook/framework/build-services/streams/). Agent invocation also
-requires that the named attached agent is registered on the service and that
+requires that the named Harness agent is published by a service mount and that
 its Harness/provider prerequisites are configured; see [Build AI-powered services](/handbook/framework/build-ai-powered-services/).
 
 For exact overloads, see [QueueWorkerBuilder](/handbook/api/classes/_purista_core.QueueWorkerBuilder/).

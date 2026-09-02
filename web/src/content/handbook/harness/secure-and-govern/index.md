@@ -1,6 +1,6 @@
 ---
 title: Govern agent actions
-description: Place enforceable policy, immediate approval, and content-free evidence between an agent's tool proposal and the business side effect.
+description: Place enforceable policy, durable tool approval, and content-free evidence between an agent's tool proposal and the business side effect.
 order: 700
 ---
 
@@ -38,7 +38,7 @@ flowchart LR
 Use governance when at least one of these is true:
 
 - the same typed rule applies to several agents or tools;
-- a prepared occurrence needs an immediate approval;
+- a prepared occurrence needs a human approval before it can run;
 - the model-facing tool list changes by workflow or execution context;
 - a policy needs content-free decision evidence or shadow rollout; or
 - an existing organization-owned policy engine must decide the occurrence.
@@ -57,7 +57,7 @@ filesystem/process isolation in the sandbox.
    before combining several controls.
 4. [Hide tools and roll out policies safely](./governance-policies/hide-tools-and-roll-out-safely/)
    with exposure rules and shadow mode.
-5. [Request immediate approval](./approval-and-audit/) and
+5. [Request and resume tool approval](./approval-and-audit/) and
    [record audit evidence](./record-audit-evidence/) only when the requirement
    needs those runtime dependencies.
 6. [Connect Open Policy Agent](./governance-policies/connect-external-policy-engine/)

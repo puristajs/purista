@@ -41,7 +41,7 @@ Use this checklist when creating or updating a skill.
 - The builder role is clear where relevant: definition, implementation, configuration, instantiation
 - Documentation-maintainer guidance distinguishes default, opt-in, separately installed, peer, package-manager optional, development-only, and external-service prerequisites
 - Schema guidance reinforces boundary-local consumer schemas instead of one oversized shared cross-service schema
-- Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)` and `AgentQueueBuilder.defineMetric(...)`
+- Observability guidance keeps custom metrics on `ServiceBuilder.defineMetric(...)`; Harness owns its native runtime metrics
 - Handler guidance uses typed `context.metrics` and does not expose raw metric recording
 - AI guidance states that `@purista/harness` owns GenAI, model, token, and tool metrics
 - CLI, starter, and `create-purista` guidance treats generated PURISTA apps as ESM-only and contains no CommonJS scaffold option, template, or docs

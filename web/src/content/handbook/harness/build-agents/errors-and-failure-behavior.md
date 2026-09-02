@@ -224,7 +224,7 @@ In the default model/tool loop, a valid permission or governance denial is a
 safe tool result. The model can continue and explain that it could not perform
 the action. The following failures terminate the run instead:
 
-- malformed or throwing policy/approval callbacks;
+- malformed or throwing policy or audit callbacks;
 - Guardrail decision-evaluation failures;
 - cancellation or timeout of the decision boundary;
 - invalid decision evidence.

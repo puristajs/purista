@@ -74,7 +74,10 @@ export const processJobWorkerBuilder = pingV1ServiceBuilder
   })
 ```
 
-Use `.canInvokeAgent(...)` for agents attached to the same service. For agents owned by another service, expose and call the generated agent command with `.canInvoke(...)`.
+Use address-first `.canInvokeAgent(service, version, target, contract)` or
+`.canInvokeWorkflow(...)` for mounted Harness targets. Calls cross EventBridge
+for same-service and cross-service targets. Create a command wrapper only when
+the application needs a distinct command contract.
 
 ## Error handling
 

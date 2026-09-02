@@ -135,9 +135,10 @@ never a new execution. An admitted claim survives later expiry or revocation;
 this is not post-admission cancellation. Check the invocation/action binding
 outside replay-skipped steps so a changed payload cannot reuse an old receipt.
 
-For one immediate tool call, permission/policy `require_approval` instead calls
-the shared `GovernanceApprovalProvider`, which returns `approved` or `rejected`
-within a finite signal/deadline budget. It does not suspend a durable workflow.
+For a model-requested tool call, permission/policy `require_approval` returns a
+durable `ToolApprovalInterrupt` before any gated tool in the batch runs. The
+application authorizes the reviewer and resumes the same run with a
+`ToolApprovalResume`.
 
 Use `InMemoryHarnessStorage` for deterministic tests. `SqliteHarnessStorage`
 is a local, single-host option—not a distributed production service. Test

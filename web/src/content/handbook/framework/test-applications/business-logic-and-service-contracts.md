@@ -4,7 +4,7 @@ description: Turn primitive tests into a small, non-duplicating contract matrix 
 order: 910
 ---
 
-After each command, subscription, stream, queue worker, or attached agent has focused tests, verify the service as the logical container that combines them. Do not copy handler cases into this layer. Test only composition facts that a primitive cannot prove alone.
+After each command, subscription, stream, queue worker, or mounted Harness target has focused tests, verify the service as the logical container that combines them. Do not copy handler cases into this layer. Test only composition facts that a primitive cannot prove alone.
 
 ## 1. Validate the definition aggregate
 

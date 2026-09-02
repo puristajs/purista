@@ -1,69 +1,81 @@
 # Version 4 Migration
 
-PURISTA 4 adds static architecture diagnostics, a standalone event-only
-Scheduler Runtime, service-owned observability defaults, RFC 9457 HTTP Problem
-Details, typed metrics, and explicit state retention. Apply only the sections
-that affect the application; features that are not adopted do not require a
-synthetic migration.
+PURISTA 4 is a clean breaking release. Do not add compatibility shims, dual
+registration, legacy overloads, or fallback runtime paths. Upgrade framework,
+CLI, adapters, generated code, documentation, and tests as one version set.
 
-## Public Core imports
+## Core package boundaries
 
-Application builders and runtime APIs belong at `@purista/core`. Move test
-harness imports to `@purista/core/testing`, outbound client APIs to
-`@purista/core/client`, and adapter-author base classes or protocol internals
-to `@purista/core/adapter` only when the project implements an adapter. Do not
-blindly move ordinary application imports to `/adapter` or retain deep imports.
+Application builders and runtime APIs belong at `@purista/core`. Test helpers
+belong at `@purista/core/testing`, outbound clients at
+`@purista/core/client`, and adapter-author APIs at `@purista/core/adapter`.
+Remove deep imports.
+
+## Native Harness service mounting
+
+V4 removes the generated attached-agent model. Delete `AgentQueueBuilder`,
+`getAgentQueueBuilder`, `addAgentDefinition`, `setHarnessAgent`,
+`setHarnessWorkflow`, `setRunFunction`, and the generated agent
+command/stream/queue/worker assumptions.
+
+Migrate in this order:
+
+1. Define agents, workflows, tools, skills, MCP servers, guardrails, model
+   requirements, schemas, and update modes with native `@purista/harness`.
+2. Mount the immutable definition with
+   `ServiceBuilder.mountHarness(definition, policy)`.
+3. Publish only selected agent/workflow targets.
+4. Bind PURISTA commands or typed host-tool handlers through the mount policy.
+5. Declare consumer dependencies with address-first
+   `canInvokeAgent(service, version, target, contract)` or
+   `canInvokeWorkflow(...)`.
+6. Call `.run(input)` or `.stream(input)`; every call crosses EventBridge.
+7. Create ordinary commands, streams, queues, and workers only for the
+   application contracts that need them.
+
+`.run` returns a `RunOutcome`. Approval and external waits are
+`interrupted` outcomes, not exceptions. A browser stream uses the separate
+`@purista/harness-ai-sdk-ui/v1` adapter and AI SDK UI Message Stream v1.
+
+Concrete models, admission, storage, memory, sandbox, sandbox binding,
+workspace, artifacts, logger, and telemetry are supplied under the service
+`ai` instance config. PURISTA StateStore is not Harness checkpoint storage,
+and transactional records remain behind database resources.
+
+Testing is split by boundary: native Harness with `FakeModelProvider`,
+PURISTA consumers with context mocks and address-first stubs, and transport
+adapters with protocol fixtures.
 
 ## Schedules
 
-A service declares a schedule, but a separate Scheduler Runtime process reads
-the exported JSON manifest and emits one regular event. It does not boot
-business services or execute handler logic.
-
-For recurring work, migrate command or queue schedule targets to this boundary:
-
-```text
-schedule declaration -> trigger event -> subscription or event-to-queue binding -> queue worker or agent
-```
-
-Make downstream business effects idempotent with
-`message.schedule.occurrenceId`. In replicated production hosts use a shared
-EventBridge and a scheduler provider with distributed occurrence claims, such
-as `@purista/redis-scheduler-provider`; enable strict mode and require those
-claims. `DefaultSchedulerProvider` is local/test-only.
+A service declares a schedule, while a separate Scheduler Runtime reads the
+exported manifest and emits a regular event. It does not boot business services
+or execute handler logic. Make downstream effects idempotent with
+`message.schedule.occurrenceId`; use a distributed claim provider in
+replicated production.
 
 ## Architecture diagnostics
 
-Export the existing service-definition inventory, then use the installed CLI to
-inspect it, enforce strict validation, and diagnose the project. Repair missing
-references, invalid topology, and generated-project gaps in source; do not
-waive diagnostics without a documented, bounded reason.
+Export the service-definition inventory and use the installed CLI to validate
+and diagnose it. Repair missing references and invalid topology in source.
 
 ## Observability
 
-Keep the established flat `getInstance(...)` configuration. A supported
-adapter can inherit service-owned logging, tracing, and metrics only before it
-starts and only when that adapter did not set a value explicitly. Existing
-direct adapter telemetry configuration remains valid and wins. Never attempt
-to replace a live telemetry provider.
+Applications own OpenTelemetry SDK setup, exporters, collectors, and
+Prometheus exposure. Adapters may inherit service-owned telemetry before they
+start. Never capture secrets, tenant identifiers, prompts, completions, raw
+payloads, headers, or attachments without an explicit data policy.
 
-Applications still own OpenTelemetry SDK setup, exporters, collectors, and
-Prometheus exposure. Do not add secrets, tenant identifiers, prompts,
-completions, raw payloads, headers, or attachments to traces, logs, or metrics.
+## HTTP errors and security
 
-## HTTP errors
+Generated Hono endpoints expose RFC 9457 Problem Details. They are protected by
+default; mark only intentional anonymous endpoints public. Protection
+middleware establishes trusted principal and tenant identity, while command or
+mount guards authorize the requested business action.
 
-Generated Hono endpoints now expose RFC 9457 Problem Details as
-`application/problem+json`. Update HTTP consumers that deserialize the prior
-error body; test validation errors, authorization failures, safe trace IDs,
-and unhandled server errors. EventBridge transport error envelopes do not
-change merely because the HTTP boundary does.
+## State retention
 
-## State and attached agents
-
-Choose a StateStore retention policy deliberately. Finite retention needs an
-atomic-expiry backend. Attached-agent conversation history is service-store
-backed by default; configure a dedicated store only for a real isolation or
-retention boundary. Review `history.maxTurns`, `history.maxBytes`, idle expiry,
-tenant and principal namespaces, workflow delegation allowlists, and stream
-visibility as one data-lifecycle change.
+Choose StateStore retention explicitly and require an atomic-expiry backend for
+finite retention. Keep database truth, application/session key-value state,
+Harness conversations/checkpoints, and sandbox/workspace files in their
+respective ownership boundaries.

@@ -198,7 +198,7 @@ const harness = defineHarness()
 Each action declares its exact phase. A narrower value type supplies a
 \`valueSchema\` that validates without transforming JSON. The executable
 [composed Guardrails example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
-adds input/tool/final-output rails and one shared immediate approval provider.
+adds input/tool/final-output rails and a durable approval interruption.
 
 ## Choose the decision boundary
 
@@ -206,15 +206,14 @@ adds input/tool/final-output rails and one shared immediate approval provider.
 | --- | --- |
 | Content rail | \`allow\`, \`block\`, phase-specific \`transform\` |
 | Permission or policy | \`allow\`, \`deny\`, \`require_approval\`; policy also \`audit\` |
-| Immediate approval | \`approved\`, \`rejected\` |
-| Durable review | \`ExternalWaitOutcome\`, then an application execution claim/receipt |
+| Tool approval | \`ToolApprovalInterrupt\`, then \`ToolApprovalResume\` |
+| Workflow business review | \`ExternalWaitOutcome\`, then an application execution claim/receipt |
 
 A content block never requests approval or suspends a workflow. Permission and
-policy demands for one tool call share one \`GovernanceApprovalProvider\`.
-The provider receives the request plus a second execution-context argument;
-honour its finite \`signal\`/\`deadline\`. A late approval cannot start a tool.
-Narrow multi-tool policy input by \`toolId\`, and keep authorization in the
-application.
+policy demands for one tool call are combined in one \`ToolApprovalInterrupt\`.
+The application persists and authorizes the decision, then resumes the same run
+with a \`ToolApprovalResume\`. Narrow multi-tool policy input by \`toolId\`, and
+keep authorization in the application.
 
 For a review that outlives a worker, use
 [durable human review](/handbook/harness/orchestrate-work/human-review/).

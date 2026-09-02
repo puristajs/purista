@@ -21,8 +21,8 @@ order: 1230
 
 Install an optional adapter in the application that composes it, then follow its dedicated page for external prerequisites and runtime wiring. Do not add every optional dependency to every service: it increases deployment and security scope without enabling a feature by itself.
 
-`@purista/harness` is a dependency of `@purista/core`; application code does
-not need to add it merely to define an attached agent. It **does** need the
+`@purista/harness` is a dependency of `@purista/core`; application code uses it
+directly to define portable Harness agents and workflows. It **also** needs the
 selected provider/adapter package and its credentials before an agent can make
 a real model call. See [Build AI-powered services](/handbook/framework/build-ai-powered-services/)
 for the complete enablement and deterministic-testing path.

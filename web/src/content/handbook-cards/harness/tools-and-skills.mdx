@@ -160,7 +160,6 @@ layer for tool use. Keep approval decisions authenticated and application-owned.
       when: ({ metadata }) => metadata.plan === 'readonly'
     })]
   },
-  approval: applicationApprovalProvider,
   policies: [native({
     id: 'settlement-policy',
     rules: [rule({
@@ -171,17 +170,15 @@ layer for tool use. Keep approval decisions authenticated and application-owned.
 }))
 ```
 
-Supply the application-owned `GovernanceApprovalProvider` at composition.
-Its `request(request, execution)` callback receives the tool subject and
-collected permission/policy demands, with `signal` and `deadline` in the second
-argument. Return `approved` or `rejected` and an optional stable `reasonCode`;
-do not return `require_approval` or keep the callback open for a long human
-review. Static `require_approval` permissions and policy demands share this
-same provider. Timeout, cancellation, malformed results, and thrown callbacks
-fail closed; a late approval cannot start the handler.
+When the rule matches, Harness returns a `ToolApprovalInterrupt` before the
+handler starts. Persist that interrupt in application-owned review storage,
+authenticate and authorize the reviewer, and resume the same run with a
+`ToolApprovalResume`. Static `require_approval` permissions and policy demands
+share the same interruption. Reject stale revisions, expired reviews, and
+unauthorized decisions before resuming.
 
 The [composed example](https://github.com/puristajs/harness/tree/main/examples/guardrails)
-contains the executable provider and permission/policy wiring. For rules
+contains executable permission and policy wiring. For rules
 selecting multiple tools, narrow on `toolId` before reading the correlated
 parsed `input`; tool-input rails run on raw JSON before the schema parses once.
 

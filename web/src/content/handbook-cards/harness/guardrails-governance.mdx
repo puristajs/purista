@@ -4,15 +4,15 @@ description: Add typed content controls, tool policy, approval, and safe evidenc
 ---
 
 Guardrails are optional typed content controls for a default-loop Harness
-agent. Governance controls tool exposure, policy, and immediate approval.
+agent. Governance controls tool exposure, policy, and tool approval.
 They complement application authorization; neither replaces it.
 
 | Boundary | Decision | Owner |
 | --- | --- | --- |
 | Content rail | `allow`, `block`, phase-specific `transform` | `@purista/harness-guardrails` |
 | Tool permission or policy | `allow`, `deny`, `require_approval`, `audit` | Harness governance |
-| Immediate approval | `approved`, `rejected` | Application provider |
-| Durable review | `ExternalWaitOutcome`, execution claim and receipt | Application workflow |
+| Tool approval | `ToolApprovalInterrupt`, then `ToolApprovalResume` | Harness and application review boundary |
+| Workflow business review | `ExternalWaitOutcome`, execution claim and receipt | Application workflow |
 
 ## Define one inline policy
 
@@ -101,10 +101,9 @@ selected tool, exact value schema, and reviewed codec; arbitrary JSON is never
 recursively inspected.
 
 Content blocks never request approval. Static `require_approval` permissions
-and policy demands share one application `GovernanceApprovalProvider`; it
-returns `approved` or `rejected` within the supplied signal and deadline. A
-long-lived human decision belongs to a persisted application review and durable
-workflow, not an in-process promise.
+and policy demands produce a durable `ToolApprovalInterrupt` before the tool
+runs. The application persists and authorizes the review, then supplies a
+`ToolApprovalResume` to continue the same run.
 
 Each evaluation emits content-free `GUARDRAIL` spans, metrics, and structured
 logs. Record only stable IDs, outcome, duration, and reason/failure code. Use

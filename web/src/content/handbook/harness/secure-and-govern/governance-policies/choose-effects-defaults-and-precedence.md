@@ -147,7 +147,7 @@ closely related rules in one native policy when they are released and reviewed
 together.
 
 Next, [hide tools and roll out policies safely](/handbook/harness/secure-and-govern/governance-policies/hide-tools-and-roll-out-safely/),
-or [request immediate approval](/handbook/harness/secure-and-govern/approval-and-audit/) for the review rule.
+or [request and resume tool approval](/handbook/harness/secure-and-govern/approval-and-audit/) for the review rule.
 
 API reference: [`GovernanceConfig`](/handbook/api/interfaces/_purista_harness.GovernanceConfig/),
 [`GovernanceContext`](/handbook/api/types/_purista_harness.GovernanceContext/), and

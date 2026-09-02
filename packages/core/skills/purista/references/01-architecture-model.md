@@ -23,7 +23,7 @@ A PURISTA service is a versioned domain container. It owns:
 - queues and workers for durable capability work
 - resources such as repositories, API clients, and domain adapters
 - config and runtime requirements
-- optional attached agents for model-driven work inside that domain
+- optional mounted Harness agents and workflows for model-driven work inside that domain
 
 Do not create an agent as an unowned global primitive when the work belongs to a business capability. Attach it to the owning service unless there is a deliberate cross-domain orchestration reason.
 

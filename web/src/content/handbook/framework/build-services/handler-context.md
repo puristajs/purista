@@ -51,7 +51,7 @@ worker needs that receiver; use an arrow only when it deliberately does not.
 | `stream` | All handlers | `canConsumeStream(...)` | Typed consumption of a declared service stream. |
 | `queue` | Commands, streams, and queue workers | `canEnqueue(...)` | Typed enqueue and schedule helpers for declared queues. The current subscription builder has no `canEnqueue(...)`; bind the subscribed event to a queue at the service level instead. |
 | `emit` | All handlers | `canEmit(...)` | Typed custom event publication. A command success event is emitted automatically after success; it does not add a callable `context.emit` target. |
-| `agent` | Queue workers | `canInvokeAgent(...)` | Typed same-service attached-agent invocation. |
+| `agent` | Commands, streams, workers, and host tools | `canInvokeAgent(service, version, target, contract)` | Typed address-first mounted-agent invocation through EventBridge. |
 | `logger`, `wrapInSpan`, `startActiveSpan`, `metrics` | All handlers | Runtime; metrics need their builder declaration | Safe operational logs, spans, and low-cardinality custom metrics. |
 | `configs`, `secrets`, `states` | All handlers | Runtime stores | Store operations permitted by the configured adapter; their write/cache defaults are adapter-specific. |
 | `job`, `signal` | Queue workers | Queue worker runtime | Lease completion/retry/failure/dead-letter/extension and cooperative cancellation. |

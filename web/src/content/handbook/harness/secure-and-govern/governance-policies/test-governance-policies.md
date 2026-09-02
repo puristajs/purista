@@ -75,40 +75,38 @@ tool input, prompts, credentials, or complete provider errors.
 
 ## Test approval in both directions
 
-Inject the approval provider through the example factory. The approved case may
-run the handler; the rejected case must leave state unchanged:
+Run the scenario until it returns `ToolApprovalInterrupt`. Assert that the
+handler has not run, then resume the same run with an authenticated decision:
 
 ```ts title="src/index.test.ts"
 it('stops a transfer when approval is rejected', async () => {
-	const result = await runTransferScenario(
-		{ from: 'checking', to: 'brokerage', amount: 1_500 },
-		{
-			approval: {
-				request: async () => ({
-					decision: 'rejected',
-					reasonCode: 'review_rejected',
-				}),
-			},
-		},
-	)
+	const first = await session.agents.banker.run(largeTransfer)
+	expect(first.status).toBe('interrupted')
+	if (first.status !== 'interrupted' || first.interrupt.type !== 'tool-approval') {
+		throw new Error('Expected tool approval')
+	}
 
-	expect(result.balances['checking']).toBe(5_000)
-	expect(result.balances['brokerage']).toBe(0)
-	expect(result.events).toEqual(
-		expect.arrayContaining([
-			expect.objectContaining({
-				type: 'approval.finished',
-				outcome: 'rejected',
-				reasonCode: 'review_rejected',
-			}),
-		]),
-	)
+	const request = first.interrupt.requests[0]
+	if (!request) throw new Error('Expected one approval request')
+
+	await session.agents.banker.run(largeTransfer, {
+		resume: {
+			type: 'tool-approval',
+			runId: first.runId,
+			interruptId: first.interrupt.id,
+			revision: first.interrupt.revision,
+			eventId: 'review-rejected-1',
+			decisions: [{ approvalId: request.approvalId, approved: false }],
+		},
+	})
+
+	expect(transfers).toHaveLength(0)
 })
 ```
 
 Add the corresponding approved case and assert that the handler runs exactly
-once. Also test a missing provider, thrown callback, invalid result,
-cancellation, and timeout; all must fail closed.
+once. Also test stale revisions, changed decision sets, duplicate resume,
+cancellation, expiry in the application review layer, and unauthorized review.
 
 ## Test default and precedence behavior
 
@@ -162,4 +160,4 @@ The maintained
 [bank governance tests](https://github.com/puristajs/harness/blob/main/examples/bank-governance/src/index.test.ts)
 cover the normal, approval, hard-limit, and application-state paths. API
 reference: [`GovernancePolicyEvaluator`](/handbook/api/interfaces/_purista_harness.GovernancePolicyEvaluator/)
-and [`GovernanceApprovalProvider`](/handbook/api/types/_purista_harness.GovernanceApprovalProvider/).
+and [`ToolApprovalResume`](/handbook/api/interfaces/_purista_harness.ToolApprovalResume/).

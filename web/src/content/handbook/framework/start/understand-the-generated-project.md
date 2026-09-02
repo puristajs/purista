@@ -12,7 +12,7 @@ src/
 ├── eventbridge.ts           selected EventBridge wiring when applicable
 ├── service/
 │   └── incident/v1/         versioned business service and its artifacts
-├── agents/                  generated agent root when you add agents
+├── harness/                 native Harness definitions when you add agents
 └── config/                  generated adapter/server configuration when selected
 ```
 

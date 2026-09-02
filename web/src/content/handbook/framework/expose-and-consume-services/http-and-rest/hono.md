@@ -219,6 +219,27 @@ calls `enableHttpSecurity(true)`. Its arguments are Hono's request context and
 the service deliberately; an arrow function is suitable when no receiver is
 needed. A command guard still makes the business authorization decision.
 
+Generated endpoints are protected by default. Mark only an intentionally
+anonymous command or stream with `.makeEndpointPublic()`:
+
+```ts title="Declare public and protected commands"
+const loginCommandBuilder = authV1ServiceBuilder
+  .getCommandBuilder('login', 'Starts a local session')
+  .addPayloadSchema(loginInputSchema)
+  .addOutputSchema(loginOutputSchema)
+  .exposeAsHttpEndpoint('POST', 'login')
+  .makeEndpointPublic()
+
+const currentSessionCommandBuilder = authV1ServiceBuilder
+  .getCommandBuilder('currentSession', 'Returns the current session')
+  .addOutputSchema(sessionSchema)
+  .exposeAsHttpEndpoint('GET', 'session')
+```
+
+The second endpoint keeps the default protection. The middleware should throw
+a `HandledError` for expected authentication failures and let Hono's installed
+error handler render the RFC 9457 response.
+
 ```ts title="src/http/createHonoService.ts"
 import { HandledError, StatusCode } from '@purista/core'
 
@@ -324,3 +345,25 @@ so new HTTP requests receive `503`, allowing the application to stop accepting
 work before it drains the process. Then destroy the Hono service through the
 same composition-root shutdown sequence as its EventBridge and business
 services.
+
+The object returned by `serve(...)` is the raw Node listener, not another
+PURISTA service. Wrap it in a small lifecycle object only so
+`gracefulShutdown(...)` can close the listening socket after
+`honoService.prepareDestroy()` has stopped new work:
+
+```ts title="Close the Node HTTP listener"
+const server = serve({ fetch: honoService.app.fetch, port: 3000 })
+const httpListener = {
+  name: 'HTTP listener',
+  destroy: () => new Promise<void>((resolve, reject) => {
+    server.close(error => error ? reject(error) : resolve())
+  }),
+}
+
+gracefulShutdown(logger, [
+  httpListener,
+  honoService,
+  businessService,
+  eventBridge,
+])
+```

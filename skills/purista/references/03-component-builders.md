@@ -27,7 +27,7 @@ const orderService = new ServiceBuilder(orderServiceInfo)
 	})
 ```
 
-Declared service metrics cascade into commands, subscriptions, streams, queue workers, and attached agent handlers through typed `context.metrics`.
+Declared service metrics cascade into commands, subscriptions, streams, queue workers, and PURISTA host-tool handlers through typed `context.metrics`.
 
 ## Command
 Use commands for direct business actions. Generated command files are the preferred starting point.
@@ -88,21 +88,19 @@ const worker = service
 	.canConsumeStream('InvoiceService', '1', 'renderInvoice', invoiceChunkSchema, invoicePayloadSchema)
 	.canEnqueue('notificationQueue', notificationPayloadSchema, notificationParameterSchema)
 	.canEmit('invoice.completed', invoiceCompletedEventSchema)
-	.canInvokeAgent('reconcileInvoice', '1', {
-		outputSchema: reconcileOutputSchema,
-		payloadSchema: reconcilePayloadSchema,
-		parameterSchema: reconcileParameterSchema,
-	})
+	.canInvokeAgent('Reconciliation', '1', 'reconcile_invoice', reconciliationHarness.contracts.agents.reconcile_invoice)
 	.setHandler(async function (context) {
 		const payload = context.message.payload as { invoiceId: string }
 		await context.service.InvoiceService['1'].sendInvoice({ invoiceId: payload.invoiceId })
 		await context.queue.enqueue.notificationQueue({ invoiceId: payload.invoiceId })
 		await context.emit('invoice.completed', { invoiceId: payload.invoiceId })
-		await context.agent['reconcileInvoice.1'].run({ invoiceId: payload.invoiceId })
+		await context.agent.Reconciliation['1'].reconcile_invoice.run({ invoiceId: payload.invoiceId })
 	})
 ```
 
-Use `canInvokeAgent(...)` only for agents attached to the same service. Cross-service AI work should go through explicit command, stream, queue, or event contracts.
+Mounted targets are always address-first. `canInvokeAgent(...)` and
+`canInvokeWorkflow(...)` call through EventBridge for same-service and
+cross-service targets alike.
 
 ## Schedules
 Use schedules to declare external time-trigger intent. Schedules do not run inside PURISTA.
@@ -148,39 +146,32 @@ service.bindEventToQueue('billing.monthlyCycleDue', 'billing.monthlyClosing', {
 ```
 
 ## Agent
-Agents are native core service components. Generated agents attach to a service and expand into:
-- queue
-- queue worker
-- aggregate command
-- stream
+Agents and workflows are native `@purista/harness` definitions. PURISTA mounts
+selected targets at a service address; mounting creates no implicit command,
+stream, queue, worker, or HTTP route.
 
 ```bash
 npm run add:agent -- triage --service support --service-version 1
 ```
 
-Agents execute exactly one of:
-- `setHarnessAgent(...)`
-- `setHarnessWorkflow(workflow, { agents })`
-- `setRunFunction(...)`
-
-Use the `agents` option only for harness-local agents that should share the same
-harness session, sandbox, telemetry, Harness storage, durable workspace, and
-model bindings as the wrapped workflow. Use `canInvokeAgent(...)` plus
-`setRunFunction(...)` when child agents need independent PURISTA queues,
-retries, service ownership, HTTP exposure, sandboxes, or runtime bindings.
-
-Agent-local custom metrics are declared on `AgentQueueBuilder.defineMetric(...)` and are visible only inside that agent handler. Service-level metrics remain visible to the agent handler too.
+The CLI creates a portable Harness definition, mount policy, and a normal
+PURISTA command wrapper. Refine each boundary separately.
 
 ```ts
-const triageAgent = supportService
-	.getAgentQueueBuilder('triageTicket', 'Classifies support tickets')
-	.defineMetric('app.agent.escalations', {
-		kind: 'counter',
-		unit: '{escalation}',
-		description: 'Tickets escalated by the triage agent',
-		attributes: z.object({ priority: z.enum(['normal', 'high']) }),
-	})
+const harness = defineHarness({ name: 'support' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.agent('triage_ticket', triageAgentDefinition)
+	.define()
+
+const support = supportService.mountHarness(harness, {
+	publish: { agents: ['triage_ticket'] },
+})
 ```
+
+Use mount before/after guards for business authorization and `successEvent` for
+the completed target fact. Bind commands as host tools with
+`commandAsHarnessTool(...)`, or use `getHarnessHostToolBuilder(...)` when a tool
+handler needs several declared PURISTA capabilities.
 
 ## Contract Rule
 Every component boundary owns its schema. Consumers should define a narrow local schema for the fields they read instead of importing an oversized producer schema.

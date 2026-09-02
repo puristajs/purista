@@ -6,7 +6,7 @@ order: 1053
 
 Hono is a projection service. It owns public HTTP transport, authentication,
 OpenAPI, request/response mapping, and health. Business commands, streams,
-queues, and attached agents remain in their owning PURISTA services.
+queues, and mounted Harness targets remain in their owning PURISTA services.
 
 | Mode | Route source | Startup consequence |
 | --- | --- | --- |

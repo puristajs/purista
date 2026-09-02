@@ -96,7 +96,7 @@ registered workers when that service contains queues or queue workers.
 | Define, register, transform, and guard a job | [Create a queue and worker](/handbook/framework/build-services/queues-and-workers/create-a-queue-and-worker/) |
 | Submit work now or at a future time | [Enqueue and schedule jobs](/handbook/framework/build-services/queues-and-workers/enqueue-and-schedule-jobs/) |
 | Return success, retry, failure, state, or result events | [Return results and publish result events](/handbook/framework/build-services/queues-and-workers/return-results-and-publish-result-events/) |
-| Invoke commands, consume streams, enqueue, emit, or call an attached agent | [Compose a worker](/handbook/framework/build-services/queues-and-workers/invoke-enqueue-emit-stream-and-call-agents/) |
+| Invoke commands, consume streams, enqueue, emit, or call a mounted agent | [Compose a worker](/handbook/framework/build-services/queues-and-workers/invoke-enqueue-emit-stream-and-call-agents/) |
 | Use stores, resources, tracing, cancellation, and job controls | [Use worker resources, stores, context, and job controls](/handbook/framework/build-services/queues-and-workers/resources-stores-context-and-job-controls/) |
 | Choose leases, retries, idempotency, dead letters, or bridge requirements | [Configure recovery and delivery](/handbook/framework/build-services/queues-and-workers/configure-leases-retries-idempotency-and-dead-letters/) |
 | Accept a job from an HTTP client | [Expose queued work](/handbook/framework/build-services/queues-and-workers/expose-queued-work/) |

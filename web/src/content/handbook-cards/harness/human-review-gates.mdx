@@ -122,13 +122,12 @@ successful queue completion.
    or decision changes. Durable checkpoints do not make an external side effect
    universally exactly-once.
 
-For immediate approval of a single model tool call, use the existing
-`GovernanceApprovalProvider`. It is in-process policy enforcement, not a
-long-running business review process. Permission and policy can demand
-`require_approval`; the shared provider returns `approved` or `rejected` with
-an optional safe `reasonCode`, honouring its finite `signal`/`deadline` budget.
-Content rails return `allow`, `block`, or a phase transform and never request
-approval or durable suspension.
+For approval of a model tool call, permission and policy can demand
+`require_approval`. Harness returns a `ToolApprovalInterrupt`; the application
+persists and authorizes the review and resumes the same run with a
+`ToolApprovalResume`. Use a workflow external wait when the business process,
+rather than one prepared tool batch, pauses for an external event. Content
+rails return `allow`, `block`, or a phase transform and never request approval.
 
 ## Operations and tests
 

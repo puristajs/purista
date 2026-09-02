@@ -111,16 +111,15 @@ reviewer: agent({
 
 `*` matches within one path segment; `**` crosses path separators. For
 `write` and `edit`, patterns inspect `input.path`. For `bash`, they inspect
-`input.command`. A missing approval provider makes `require_approval` fail
-closed.
+`input.command`. `require_approval` returns a durable
+`ToolApprovalInterrupt` before the tool runs.
 
 ## 3. Provide approval or choose a different mode
 
-The example requires approval, so configure the same
-[`GovernanceApprovalProvider`](/handbook/api/types/_purista_harness.GovernanceApprovalProvider/)
-used by governance policies. Follow
-[request immediate approval and retain audit evidence](/handbook/harness/secure-and-govern/approval-and-audit/)
-for the complete provider flow.
+The example requires approval, so handle the interrupted outcome and resume it
+with authenticated decisions. Follow
+[request and resume tool approval](/handbook/harness/secure-and-govern/approval-and-audit/)
+for the complete flow.
 
 Use `mode: 'allow'` only when every matching path or command may run without a
 separate decision. Use `mode: 'deny'` to keep a selected tool visible but block
@@ -130,12 +129,12 @@ its execution. Prefer omitting a tool completely when the agent never needs it.
 
 Use a scripted model that proposes the selected built-in, then assert:
 
-1. `/workspace/drafts/review.md` reaches the approval provider and runs only
-   after approval;
+1. `/workspace/drafts/review.md` returns an approval interrupt and runs only
+   after an approved resume;
 2. `/workspace/drafts/private/secret.md` is denied even when approved;
 3. `/workspace/other.md` is denied because it is outside the nonempty allowlist;
-4. rejection, a missing provider, timeout, and cancellation do not write a
-   file; and
+4. rejection, stale or unauthorized resume, expiry, and cancellation do not
+   write a file; and
 5. the agent cannot call `edit` or `bash` because neither tool was selected.
 
 These tests prove Harness permission flow. Run the selected sandbox adapter's
@@ -159,4 +158,4 @@ and the selected sandbox adapter separately.
 
 See [`AgentDefinition.permissions`](/handbook/api/types/_purista_harness.AgentDefinition/#signature),
 [`PermissionPolicy`](/handbook/api/types/_purista_harness.PermissionPolicy/), and
-[request immediate approval](/handbook/harness/secure-and-govern/approval-and-audit/).
+[request and resume tool approval](/handbook/harness/secure-and-govern/approval-and-audit/).

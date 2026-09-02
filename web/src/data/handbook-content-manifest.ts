@@ -104,7 +104,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework",
     "order": 390,
     "title": "Build AI-powered services",
-    "description": "Build model-assisted business behavior as a normal PURISTA service boundary, then choose the execution, runtime, delivery, and safety controls it needs.",
+    "description": "Mount portable Harness agents and workflows in a PURISTA service, call them through EventBridge, and expose deliberate application contracts.",
     "pageRole": "chapter"
   },
   {
@@ -112,8 +112,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/architecture-and-lifecycle",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 391,
-    "title": "AI-powered service architecture and lifecycle",
-    "description": "Decide whether an attached agent fits the business boundary, then understand the generated Framework primitives and the separate Harness runtime before configuring either.",
+    "title": "Architecture and lifecycle",
+    "description": "Understand how a portable Harness definition becomes an addressable PURISTA capability without coupling either side to HTTP or process layout.",
     "pageRole": "concept"
   },
   {
@@ -121,17 +121,17 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/build-the-first-attached-agent",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 392,
-    "title": "Build the first attached agent",
-    "description": "Generate or define a small attached agent, register all of its Framework projections, bind a compatible runtime, and verify a typed result.",
+    "title": "Build and mount the first agent",
+    "description": "Scaffold a native Harness definition and PURISTA command, mount the selected agent, bind a model, and run it through EventBridge.",
     "pageRole": "task"
   },
   {
     "product": "framework",
-    "topicId": "framework/build-ai-powered-services/configure-agent-builder-and-runtime-binding",
+    "topicId": "framework/build-ai-powered-services/mount-harness-and-bind-runtime",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 393,
-    "title": "Configure AgentBuilder and runtime binding",
-    "description": "Configure the attached-agent contract and generated projections precisely, then bind compatible runtime capabilities at service composition.",
+    "title": "Mount Harness and bind the runtime",
+    "description": "Publish selected targets, bind host tools and business policy, then supply concrete AI runtime adapters at service creation.",
     "pageRole": "task"
   },
   {
@@ -139,8 +139,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/choose-command-stream-or-queued-execution",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 394,
-    "title": "Choose command, stream, or queued execution",
-    "description": "Choose the generated attached-agent projection from the caller’s completion requirement, not from whether the provider happens to support streaming.",
+    "title": "Choose run, stream, or queued execution",
+    "description": "Let consumers select aggregate or progressive delivery, and add a PURISTA queue only for admission, retry, or disconnected completion.",
     "pageRole": "task"
   },
   {
@@ -148,8 +148,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/use-tools-skills-resources-stores-and-context",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 395,
-    "title": "Use tools, skills, resources, stores, and context",
-    "description": "Use the attached-agent handler context safely, declare every reachable Framework capability, and keep authority at the underlying business boundary.",
+    "title": "Use tools, skills, and service resources",
+    "description": "Keep portable AI capabilities in Harness and bridge business operations through typed PURISTA host tools with trusted identity.",
     "pageRole": "task"
   },
   {
@@ -157,8 +157,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/manage-sessions-workspaces-and-durable-work",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 396,
-    "title": "Manage sessions, workspaces, and durable work",
-    "description": "Choose session scope and explicitly enable persistent storage, workflow recovery, durable workspace capabilities, and sandbox policy only when the business outcome needs them.",
+    "title": "Manage sessions and durable work",
+    "description": "Keep conversation identity separate from transport identity, bind Harness persistence explicitly, and model waits as resumable outcomes.",
     "pageRole": "task"
   },
   {
@@ -167,7 +167,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 397,
     "title": "Publish results and react through subscriptions",
-    "description": "Publish queued attached-agent completion deliberately and react through ordinary PURISTA subscriptions without confusing result delivery with atomic business completion.",
+    "description": "Publish a completed mounted target as a fact, and emit explicit events only for meaningful facts that happen during execution.",
     "pageRole": "task"
   },
   {
@@ -176,7 +176,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 398,
     "title": "Coordinate workflows and human review",
-    "description": "Attach a Harness workflow to a service boundary, keep local agent delegation explicit, and hand a durable review pause to application-owned records and delivery.",
+    "description": "Define orchestration in Harness, publish workflows through PURISTA, and expose approval waits as durable application state instead of failures.",
     "pageRole": "task"
   },
   {
@@ -184,8 +184,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/expose-and-invoke-an-attached-agent",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 399,
-    "title": "Expose and invoke an attached agent",
-    "description": "Project an attached agent as a secured aggregate HTTP command or stream, or invoke its generated service contract internally while retaining the normal HTTP runtime topology.",
+    "title": "Invoke and expose a mounted agent",
+    "description": "Call mounted targets through typed EventBridge clients and add explicit command or stream adapters for external consumers.",
     "pageRole": "task"
   },
   {
@@ -194,7 +194,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 3991,
     "title": "Secure the service boundary",
-    "description": "Protect attached-agent input, trusted identity, resources, tools, HTTP exposure, and output at the normal PURISTA boundary before model behavior is involved.",
+    "description": "Authenticate at the HTTP edge, propagate trusted identity, and enforce business authorization with mount guards and domain commands.",
     "pageRole": "operations"
   },
   {
@@ -202,8 +202,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/test-an-ai-powered-service-deterministically",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 3992,
-    "title": "Test an AI-powered service deterministically",
-    "description": "Prove the implementation and service flow with deterministic adapters, then test selected real adapters separately; use Harness evaluations for non-deterministic agent quality.",
+    "title": "Test AI-powered services deterministically",
+    "description": "Test portable Harness behavior with a fake model, PURISTA consumers with context stubs, and protocol adapters at their own boundary.",
     "pageRole": "task"
   },
   {
@@ -212,7 +212,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 3994,
     "title": "Deploy and observe AI-powered services",
-    "description": "Move the same attached agents and workflows from a local service process to replicated PostgreSQL and Kubernetes infrastructure.",
+    "description": "Bind production adapters, control concurrency, and observe mounted Harness execution without changing the portable definition.",
     "pageRole": "operations"
   },
   {
@@ -220,8 +220,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/configure-governance-and-guardrails",
     "parentTopicId": "framework/build-ai-powered-services/secure-the-service-boundary",
     "order": 3992,
-    "title": "Configure governance and Guardrails",
-    "description": "Attach content rails to one agent definition and inject service-level tool governance at runtime without moving business authorization into the model loop.",
+    "title": "Configure guardrails and governance",
+    "description": "Put content controls in the portable Harness definition and keep business authorization at the PURISTA service boundary.",
     "pageRole": "task"
   },
   {
@@ -229,8 +229,8 @@ const canonicalContentManifest = [
     "topicId": "framework/build-ai-powered-services/configure-sandbox-ownership-and-sharing",
     "parentTopicId": "framework/build-ai-powered-services/secure-the-service-boundary",
     "order": 3993,
-    "title": "Configure sandbox ownership and sharing",
-    "description": "Select the service-owned Harness sandbox at runtime, then let each attached agent request only a private, inherited, or reviewed group partition.",
+    "title": "Configure sandbox and workspace isolation",
+    "description": "Declare portable sandbox needs in Harness and bind deployment-specific isolation, workspace, and ownership policy through the service runtime.",
     "pageRole": "task"
   },
   {
@@ -1678,8 +1678,8 @@ const canonicalContentManifest = [
     "topicId": "framework/upgrade-and-migrate/migrate-v3-to-v4",
     "parentTopicId": "framework/upgrade-and-migrate",
     "order": 1110,
-    "title": "Migrate PURISTA 3 to PURISTA 4",
-    "description": "Update a PURISTA 3.2.4 application to the v4 attached-agent model, durability, sandbox, and failure boundaries.",
+    "title": "Migrate from v3 to v4",
+    "description": "Replace the generated attached-agent API with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.",
     "pageRole": "migration"
   },
   {
@@ -2201,7 +2201,7 @@ const canonicalContentManifest = [
     "parentTopicId": "handbook-harness",
     "order": 700,
     "title": "Govern agent actions",
-    "description": "Place enforceable policy, immediate approval, and content-free evidence between an agent's tool proposal and the business side effect.",
+    "description": "Place enforceable policy, durable tool approval, and content-free evidence between an agent's tool proposal and the business side effect.",
     "pageRole": "chapter"
   },
   {
@@ -2263,8 +2263,8 @@ const canonicalContentManifest = [
     "topicId": "harness/secure-and-govern/approval-and-audit",
     "parentTopicId": "harness/secure-and-govern",
     "order": 705,
-    "title": "Request immediate approval",
-    "description": "Decide one prepared tool occurrence within a bounded callback before its handler may run.",
+    "title": "Request and resume tool approval",
+    "description": "Interrupt before an approval-gated tool batch, persist the review in the application, and resume the same run with authenticated decisions.",
     "pageRole": "task"
   },
   {

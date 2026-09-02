@@ -44,8 +44,8 @@ issue record.
 
 | Class and code | Category | Retriable | Runtime behavior | First action |
 | --- | --- | --- | --- | --- |
-| `PermissionDeniedError` — `PERMISSION_DENIED` | `permission` | No | A coarse tool permission or immediate approval denied the action. In the default loop this is a safe tool result, so the model may continue. | Respect the denial; change authority only through the application's authorization flow. |
-| `PolicyDeniedError` — `POLICY_DENIED` | `permission` | No | Governance denied, rejected approval, or found no approval provider. In the default loop this is a safe tool result. | Inspect content-free decision evidence and policy configuration. |
+| `PermissionDeniedError` — `PERMISSION_DENIED` | `permission` | No | A coarse tool permission or a resumed approval denied the action. In the default loop this is a safe tool result, so the model may continue. | Respect the denial; change authority only through the application's authorization flow. |
+| `PolicyDeniedError` — `POLICY_DENIED` | `permission` | No | Governance denied the tool, or a resumed approval rejected it. In the default loop this is a safe tool result. | Inspect content-free decision evidence and policy configuration. |
 | `DecisionBlockedError` — `DECISION_BLOCKED` | `interceptor` | No | A content or authority interceptor deliberately blocked a protected boundary. | Respect the block; do not automatically retry unchanged content. |
 | `DecisionEvaluationError` — `DECISION_EVALUATION_ERROR` | `interceptor` | No | A policy, approval, audit, or Guardrail control could not decide safely and failed closed. | Diagnose the control or dependency using `failureKind`; do not bypass it. |
 

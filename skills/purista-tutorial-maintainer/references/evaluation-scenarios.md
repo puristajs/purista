@@ -73,7 +73,7 @@ the text, and reset cannot delete another project's data.
 
 ## 5. Upgrade a shared example
 
-Request: “An attached-agent API changed. Refresh only the affected tutorials.”
+Request: “The Harness mount API changed. Refresh only the affected tutorials.”
 
 Expected: inspect implementation and tests; trace affected checkpoints,
 snippet regions, UI translation, and Handbook links; preserve routes and

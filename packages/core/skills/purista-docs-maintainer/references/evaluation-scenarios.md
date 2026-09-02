@@ -237,11 +237,10 @@ builders and make sure the handbook covers every supported exposure shape.
 
 Expected behavior:
 
-- inventories the current public stream and attached-agent builder methods and
+- inventories the current public stream, Harness mount, and address-first invocation methods and
   their tests before editing prose;
-- distinguishes a normal command endpoint, HTTP stream, generated aggregate
-  agent command, generated streaming agent endpoint, and queued accepted-work
-  response;
+- distinguishes a normal command endpoint, HTTP stream, mounted target,
+  explicit AI SDK UI stream adapter, and queued accepted-work response;
 - documents default security, enablement/wiring, lifecycle/disconnect or queue
   behavior, and a focused usage example for each supported shape;
 - records every remaining public method as a canonical-guide, reference-only,
@@ -254,7 +253,7 @@ Near miss to reject:
 - saying “agents can be exposed over HTTP” without showing aggregate versus
   stream selection;
 - documenting a stream as durable after client disconnect;
-- treating generated agent queue behavior as identical to a synchronous command;
+- claiming that mounting a target implicitly creates a queue or HTTP endpoint;
 - assuming an HTTP server is included merely because `@purista/core` stores
   HTTP metadata.
 
@@ -471,10 +470,9 @@ Near miss to reject:
 Prompt:
 
 ```text
-The generated attached-agent example creates a detached configuration constant,
-and a queued-agent guide calls setResponseMode with an unexplained resultPolicy
-and status URL. Keep the recommended path idiomatic and ensure readers can
-find every option without reverse-engineering source.
+The mounted-agent example hides important native Harness and mount policy
+options in detached constants. Keep the recommended path idiomatic and ensure
+readers can find every option without reverse-engineering source.
 ```
 
 Expected behavior:
@@ -798,7 +796,7 @@ Near miss to reject:
 - calling prompt instructions a policy or guardrail;
 - using model output as caller authorization;
 - putting the concrete provider/model in the Framework builder requirement;
-- treating immediate approval as a durable human-review workflow; or
+- treating a tool-approval interruption as a general workflow business wait; or
 - claiming one fake model response proves guardrail quality.
 
 ## Scenario 27: Published-version migration without implementation-history leakage
@@ -884,7 +882,7 @@ Expected behavior:
 - retains a recipe only when it owns a real cross-capability outcome, decision,
   end-to-end implementation delta, and verification;
 - leaves primitive handler/helper/lifecycle tests beside commands,
-  subscriptions, streams, queues, and attached agents;
+  subscriptions, streams, queues, and mounted Harness targets;
 - makes the cross-cutting test chapter own service composition, cross-message
   flows, real adapters, topology, and focused release evidence; and
 - links to focused owners instead of copying full builder chains, method tables,
@@ -1064,8 +1062,8 @@ Expected behavior:
 - binds configured Guardrails with `guardrails: rails` on a default-loop agent,
   removes redundant `builtinTools: false`, and states the custom-handler
   incompatibility; and
-- proves the same provider-neutral definition passes through
-  `setHarnessAgent(...)` while Core remains independent of the optional addon.
+- proves the same provider-neutral definition is mounted without mutation while
+  Core remains independent of the optional addon.
 
 Near miss to reject:
 

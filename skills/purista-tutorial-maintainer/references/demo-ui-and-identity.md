@@ -61,7 +61,7 @@ Source entry points, relative to the `purista` repo:
   `VariablesBase.ts`: middleware and typed identity variables.
 - `packages/core/src/core/Service/Service.impl.ts`: invocation, event, stream,
   subscription, and worker context construction.
-- `packages/core/src/AgentQueueBuilder/runtime/`: attached runtime identity.
+- `packages/core/src/HarnessMount/`: mounted runtime identity and host context.
 
 Verify these at authoring time. The current protection hook sets trusted Hono
 variables before a protected generated endpoint invokes PURISTA. It is not a
@@ -110,7 +110,7 @@ Do not forward browser tokens into events, jobs, model prompts, or telemetry.
 Create an evidence table for each path: incoming identity, trusted source,
 actual outgoing metadata/context, authorization owner, and negative test.
 Cover command-to-command calls, streams, events/subscriptions, queues/workers,
-attached agents/tools, session memory, retrieval, files, and review actions.
+mounted agents/tools, session memory, retrieval, files, and review actions.
 
 Verify each path instead of claiming every component automatically inherits
 the original principal. Subscriptions, schedules, and delayed jobs may execute

@@ -143,10 +143,11 @@ Use the canonical `purista` skill and source/tests to verify Framework usage.
   persistence and lifecycle, while an outbound-provider follow-up focuses on
   timeouts, secrets, remote validation, and failure mapping.
 - For AI chapters, distinguish an application-controlled command call from a
-  model-selected tool. A default-loop RAG agent receives retrieval through
-  `AgentQueueBuilder.canInvoke(...)`; do not pre-call retrieval in a custom
-  handler. Keep retrieval authorization in the PURISTA command guard and add
-  an agent guard when the same protected scope is available before model work.
+  model-selected tool. A default-loop RAG agent receives retrieval through a
+  native Harness host-tool contract bound with `commandAsHarnessTool(...)` or
+  `getHarnessHostToolBuilder(...)`; do not pre-call retrieval in a custom
+  agent handler. Keep retrieval authorization in the PURISTA command guard and
+  add a mount business guard when the same scope is known before model work.
 - Teach guards with action/object/state permissions for valid callers, not only
   identity presence. Transforms change representations; handlers own effects
   and atomic state checks. After guards cannot roll back completed mutations.

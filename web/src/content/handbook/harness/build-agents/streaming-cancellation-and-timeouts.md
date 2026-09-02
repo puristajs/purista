@@ -195,7 +195,7 @@ operations.
 | `defaults.runTimeoutMs` or invocation `timeoutMs` | `600_000 ms` | Whole agent/workflow invocation. Per-call `0` disables only this run timeout. |
 | `defaults.modelTimeoutMs` | `300_000 ms` | One provider model operation. |
 | `defaults.toolTimeoutMs` | `120_000 ms` | One tool execution. |
-| `defaults.decisionTimeoutMs` | `10_000 ms` | Policy, immediate approval, audit, or Guardrail decision callback. |
+| `defaults.decisionTimeoutMs` | `10_000 ms` | Policy, audit, or Guardrail decision callback. |
 | `defaults.skillTimeoutMs` | `60_000 ms` | Skill discovery/read operation. |
 
 Set the external transport deadline longer than the useful Harness work plus

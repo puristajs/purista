@@ -212,7 +212,7 @@ The same rule applies to invalid external decisions, missing required approval,
 and configured audit failures.
 
 Use [effects, defaults, and precedence](/handbook/harness/secure-and-govern/governance-policies/choose-effects-defaults-and-precedence/)
-before adding more rules. Then add [immediate approval](/handbook/harness/secure-and-govern/approval-and-audit/)
+before adding more rules. Then add [tool approval](/handbook/harness/secure-and-govern/approval-and-audit/)
 for a decision that must complete inside the current run.
 
 API reference: [`HarnessBuilder.governance(...)`](/handbook/api/interfaces/_purista_harness.HarnessBuilder/#governance),
