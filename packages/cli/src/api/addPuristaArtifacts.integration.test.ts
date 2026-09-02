@@ -10,6 +10,7 @@ import { addPuristaQueueWorker } from './addPuristaQueueWorker.js'
 import { addPuristaService } from './addPuristaService.js'
 import { addPuristaStream } from './addPuristaStream.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
+import { addPuristaWorkflow } from './addPuristaWorkflow.js'
 import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
@@ -179,6 +180,16 @@ describe('CLI artifact generation (e2e)', () => {
 			maxParallelHandlers: 2,
 		})
 
+		await addPuristaWorkflow({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			workflowName: 'resolve ticket',
+			workflowDescription: 'Resolve a support ticket in durable steps',
+			responseEventName: 'user.ticket_resolved',
+		})
 		await addPuristaAgent({
 			projectRootPath: TEST_DIR,
 			puristaConfig,
@@ -198,7 +209,6 @@ describe('CLI artifact generation (e2e)', () => {
 			agentName: 'summarize',
 			agentDescription: 'Summarize a ticket',
 		})
-
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		const serviceFile = join(serviceDir, 'userV1Service.ts')
 		const builderFile = join(serviceDir, 'userV1ServiceBuilder.ts')
@@ -260,6 +270,7 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(harnessDefinition).toContain(".requireModel('primary', { capabilities: ['object'] })")
 		expect(harnessDefinition).toContain('.use(triageAgent)')
 		expect(harnessDefinition).toContain('.use(summarizeAgent)')
+		expect(harnessDefinition).toContain('.use(resolveTicketWorkflow)')
 		expect(harnessDefinition).toContain('.define()')
 		const triageDefinition = readFileSync(join(harnessDirPath, 'agent', 'triage', 'triageAgent.ts'), 'utf-8')
 		expect(triageDefinition).toContain("defineHarnessModule<PrimaryModelState>()('user.agent.triage'")
@@ -271,7 +282,22 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(summarizeDefinition).toContain('instructions: "Summarize a ticket"')
 		const mountContent = readFileSync(join(serviceDir, 'harness', 'userHarnessMount.ts'), 'utf-8')
 		expect(mountContent).toContain("agents: ['triage', 'summarize']")
+		expect(mountContent).toContain("workflows: ['resolve_ticket']")
 		expect(mountContent).toContain("triage: { successEvent: 'user.triage.completed' }")
+		expect(mountContent).toContain("resolve_ticket: { successEvent: 'user.ticket.resolved' }")
+		const workflowDefinition = readFileSync(
+			join(harnessDirPath, 'workflow', 'resolveTicket', 'resolveTicketWorkflow.ts'),
+			'utf-8',
+		)
+		expect(workflowDefinition).toContain("defineHarnessModule<{}>()('user.workflow.resolve_ticket'")
+		expect(workflowDefinition).toContain(".workflow('resolve_ticket', {")
+		expect(workflowDefinition).toContain("context.step('produce-output'")
+		const workflowTest = readFileSync(
+			join(harnessDirPath, 'workflow', 'resolveTicket', 'resolveTicketWorkflow.test.ts'),
+			'utf-8',
+		)
+		expect(workflowTest).toContain('runs as a standalone Harness workflow')
+		expect(workflowTest).toContain('session.workflows.resolve_ticket.run')
 		for (const term of forbiddenAgentTerms) {
 			expect(harnessDefinition).not.toContain(term)
 			expect(triageDefinition).not.toContain(term)

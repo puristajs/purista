@@ -44,7 +44,7 @@ export class QueueDefinitionBuilder {
 	}
 
 	constructor(
-		private readonly queueName: string,
+		public readonly queueName: string,
 		private readonly queueDescription: string,
 	) {}
 

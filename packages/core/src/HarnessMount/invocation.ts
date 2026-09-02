@@ -2,14 +2,17 @@ import type { ExecutionEvent, HarnessTargetContract, RunOutcome } from '@purista
 
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { CorrelationId } from '../core/types/CorrelationId.js'
 import type { InvokeFunction } from '../core/types/InvokeFunction.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { OpenStreamFunction } from '../core/types/OpenStreamFunction.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
-import type { HarnessInvokeParameter } from './runtime.js'
+import type { HarnessInvokeParameter } from './invokeTypes.js'
 
 type TargetKind = HarnessTargetContract<'agent' | 'workflow'>['kind']
 type AnyTargetContract = HarnessTargetContract<TargetKind, any, any>
@@ -21,6 +24,12 @@ export type HarnessInvokeDeclaration<C extends AnyTargetContract> = ((
 ) => Promise<RunOutcome<C['$infer']['output']>>) & {
 	readonly __harnessTarget: C
 }
+
+/** Queue delivery options accepted after Harness invocation parameters. */
+export type HarnessEnqueueOptions = Omit<
+	QueueEnqueueOptions<unknown, HarnessInvokeParameter>,
+	'queueName' | 'payload' | 'parameter'
+>
 
 /** Type marker carried by a declared streaming Harness invocation. */
 export type HarnessStreamDeclaration<C extends AnyTargetContract> = ((
@@ -39,7 +48,7 @@ export interface HarnessExecutionStream<Output> extends AsyncIterable<ExecutionE
 }
 
 /** Client for one address-first agent or workflow target. */
-export type HarnessTargetClient<C extends AnyTargetContract> = Readonly<{
+type DirectHarnessTargetClient<C extends AnyTargetContract> = Readonly<{
 	/** Run until the target completes or returns a durable interrupt. */
 	run(input: C['$infer']['input'], options?: HarnessInvokeParameter): Promise<RunOutcome<C['$infer']['output']>>
 	/** Open the target's provider-neutral portable execution stream. */
@@ -48,6 +57,19 @@ export type HarnessTargetClient<C extends AnyTargetContract> = Readonly<{
 		options?: HarnessInvokeParameter,
 	): Promise<HarnessExecutionStream<C['$infer']['output']>>
 }>
+
+/** Client for one address-first target, with enqueue only on a queued contract. */
+export type HarnessTargetClient<C extends AnyTargetContract> = DirectHarnessTargetClient<C> &
+	(C extends { readonly queue: { readonly name: string } }
+		? Readonly<{
+				/** Enqueue one durable run through the target's explicit native queue binding. */
+				enqueue(
+					input: C['$infer']['input'],
+					parameter?: HarnessInvokeParameter,
+					options?: HarnessEnqueueOptions,
+				): Promise<QueueEnqueueResult>
+			}>
+		: unknown)
 
 type ContractOf<T, Kind extends TargetKind> = T extends { readonly __harnessTarget: infer C }
 	? C extends HarnessTargetContract<Kind, any, any>
@@ -127,6 +149,8 @@ const noop = () => {
 export function createHarnessInvocationProxy<T>(
 	invoke: InvokeFunction,
 	openStream: OpenStreamFunction,
+	enqueue?: QueueInvokeFunction,
+	invokes?: InvokeList,
 	address: { serviceName: string; serviceVersion: string; serviceTarget: string } = {
 		serviceName: '',
 		serviceVersion: '',
@@ -140,17 +164,41 @@ export function createHarnessInvocationProxy<T>(
 				return undefined
 			}
 			if (level === 0) {
-				return createHarnessInvocationProxy(invoke, openStream, { ...address, serviceName: property }, level + 1)
+				return createHarnessInvocationProxy(
+					invoke,
+					openStream,
+					enqueue,
+					invokes,
+					{ ...address, serviceName: property },
+					level + 1,
+				)
 			}
 			if (level === 1) {
-				return createHarnessInvocationProxy(invoke, openStream, { ...address, serviceVersion: property }, level + 1)
+				return createHarnessInvocationProxy(
+					invoke,
+					openStream,
+					enqueue,
+					invokes,
+					{ ...address, serviceVersion: property },
+					level + 1,
+				)
 			}
 			if (level === 2) {
 				const targetAddress = { ...address, serviceTarget: property }
+				const descriptor = invokes?.[targetAddress.serviceName]?.[targetAddress.serviceVersion]?.[
+					targetAddress.serviceTarget
+				] as { harnessTarget?: { queue?: { name?: string } } } | undefined
+				const queueName = descriptor?.harnessTarget?.queue?.name
 				return Object.freeze({
 					run: (input: unknown, options: HarnessInvokeParameter = {}) => invoke(targetAddress, input, options),
 					stream: async (input: unknown, options: HarnessInvokeParameter = {}) =>
 						toHarnessExecutionStream(await openStream(targetAddress, input, options)),
+					...(queueName && enqueue
+						? {
+								enqueue: (input: unknown, parameter: HarnessInvokeParameter = {}, options?: HarnessEnqueueOptions) =>
+									enqueue(queueName, input, parameter, options),
+							}
+						: {}),
 				})
 			}
 			return undefined

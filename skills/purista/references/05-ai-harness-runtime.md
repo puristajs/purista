@@ -178,6 +178,14 @@ concurrency control. The worker calls the address-first target. Convert
 retryable provider/runtime failures with `toHarnessQueueRetry(error)`; do not
 sleep through long provider retry windows.
 
+For a published target, prefer `defineHarnessQueueBinding(contract, queue,
+worker)`. Pass the binding under `targets.agents.<name>.queue` or
+`targets.workflows.<name>.queue`, and pass `binding.contract` to
+`canInvokeAgent(...)` or `canInvokeWorkflow(...)`. Only that wrapped contract
+adds `.enqueue(input, invocationOptions, queueOptions)` to the typed client.
+Direct contracts remain unqueued. The integration-owned worker always invokes
+the target through EventBridge and preserves trusted tenant/principal metadata.
+
 ## Browser streaming
 
 Keep the internal stream provider-neutral. For browser chat, create an explicit

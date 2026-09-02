@@ -23,6 +23,8 @@ const mapAddComponentToCommand = (component: string) => {
 			return 'add-queue-worker'
 		case 'agent':
 			return 'add-agent'
+		case 'workflow':
+			return 'add-workflow'
 		default:
 			throw new PuristaCliError(`Unsupported component "${component}".`)
 	}
@@ -57,7 +59,7 @@ const main = async () => {
 	registerGlobalModeOptions(
 		program
 			.command('add')
-			.description('Add a new service, command, subscription, stream, queue, queue worker, or agent.')
+			.description('Add a new service, command, subscription, stream, queue, queue worker, agent, or workflow.')
 			.addArgument(
 				new Argument('[component]', 'Type of component to add').choices([
 					'service',
@@ -67,6 +69,7 @@ const main = async () => {
 					'queue',
 					'queue-worker',
 					'agent',
+					'workflow',
 				]),
 			)
 			.addArgument(new Argument('[name]', 'Name of component'))

@@ -80,7 +80,7 @@ limits, and protection middleware.
 | Normal request/reply | `exposeAsHttpEndpoint(...)` with a validated output schema |
 | Long-running accepted work | Async exposure, queue enqueue, and a durable result contract |
 | Progressive HTTP response | A [stream definition and HTTP stream exposure](/handbook/framework/build-services/streams/termination-and-failures/) |
-| Aggregate or streaming AI capability | [Mounted-agent HTTP adapter](/handbook/framework/build-ai-powered-services/expose-and-invoke-an-attached-agent/) |
+| Aggregate or streaming AI capability | [Harness target HTTP adapter](/handbook/framework/build-ai-powered-services/invoke-and-expose-a-harness-target/) |
 | Internal-only operation | Do not expose it; invoke through its appropriate internal contract |
 
 ## Return acceptance, not completion, for queued work

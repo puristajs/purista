@@ -37,5 +37,51 @@ retry, and fleet-wide worker concurrency. A worker declares the target with
 `toHarnessQueueRetry(error)` for retryable provider failures instead of
 sleeping in the handler.
 
+Use `defineHarnessQueueBinding(...)` when the queue is the published target's
+delivery mode. It composes native queue and worker builders and keeps the
+Harness contract as the only input/output schema owner:
+
+```ts title="Bind optional durable delivery"
+const queuedTriage = defineHarnessQueueBinding(
+  supportHarness.contracts.agents.triage_ticket,
+  supportV1ServiceBuilder
+    .getQueueBuilder('support.triage', 'Queue ticket triage')
+    .setLifecycleConfig({ maxAttempts: 5 }),
+  supportV1ServiceBuilder
+    .getQueueWorkerBuilder('support.triage', 'triage-worker')
+    .setMaxParallelHandlers(3),
+)
+
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
+  publish: { agents: ['triage_ticket'] },
+  targets: { agents: { triage_ticket: { queue: queuedTriage } } },
+})
+```
+
+Declare `queuedTriage.contract` at a caller to receive typed queue delivery:
+
+```ts title="Declare queued agent delivery"
+const classifyCommandBuilder = supportV1ServiceBuilder
+  .getCommandBuilder('classifyTicket', 'Queue ticket classification')
+  .canInvokeAgent('Support', '1', 'triage_ticket', queuedTriage.contract)
+.setCommandFunction(async function ({ agent }, input) {
+  return agent.Support['1'].triage_ticket.enqueue(
+    input,
+    { sessionId: `ticket:${input.ticketId}` },
+    { idempotencyKey: `triage:${input.ticketId}` },
+  )
+})
+```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+publishes the selected target and owns its queue worker.
+[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+declares the EventBridge address and exposes `.enqueue(...)` only for the
+wrapped queued contract.
+
+The queue worker still calls the published service address through EventBridge.
+Tenant and principal identity come from trusted queue metadata. A caller that
+declares the plain Harness contract has only `.run(...)` and `.stream(...)`.
+
 Do not add a queue to every agent. A short classification command can call the
 target directly when its latency and failure contract permit it.

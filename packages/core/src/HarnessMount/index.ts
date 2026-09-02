@@ -1,6 +1,8 @@
 export * from './hostToolBuilder.js'
 export * from './invocation.js'
+export * from './invokeTypes.js'
 export type { HarnessModelClients, HarnessModelDeclaration } from './model.js'
 export * from './queue.js'
+export * from './queueBinding.js'
 export * from './runtime.js'
 export * from './types.js'

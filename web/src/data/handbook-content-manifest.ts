@@ -118,7 +118,7 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-ai-powered-services/build-the-first-attached-agent",
+    "topicId": "framework/build-ai-powered-services/build-and-mount-the-first-agent",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 392,
     "title": "Build and mount the first agent",
@@ -181,7 +181,7 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-ai-powered-services/expose-and-invoke-an-attached-agent",
+    "topicId": "framework/build-ai-powered-services/invoke-and-expose-a-harness-target",
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 399,
     "title": "Invoke and expose a mounted agent",

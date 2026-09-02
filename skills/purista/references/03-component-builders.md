@@ -152,6 +152,7 @@ stream, queue, worker, or HTTP route.
 
 ```bash
 npm run add:agent -- triage --service support --service-version 1
+npm run add:workflow -- resolve-ticket --service support --service-version 1
 ```
 
 The CLI creates one native agent module, composes it into the service's Harness
@@ -177,6 +178,10 @@ const support = supportService.mountHarness(harness, {
 
 Call `mountHarness(...)` once per service. Compose later agents, workflows,
 tools, and Skills into the same definition with native modules.
+
+The first `add:agent` or `add:workflow` creates that service Harness and mount.
+Later calls extend the same files. Workflow modules use native Harness workflow
+steps and remain runnable without a PURISTA service.
 
 Use mount before/after guards for business authorization and `successEvent` for
 the completed target fact. Bind commands as host tools with

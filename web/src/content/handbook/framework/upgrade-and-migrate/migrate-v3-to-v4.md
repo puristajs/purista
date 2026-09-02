@@ -97,6 +97,18 @@ Create a normal command for bounded request/response, a normal stream for live
 updates, or a queue and worker for durable admission/retry. Mounting no longer
 creates all four.
 
+When a published target needs durable delivery, replace the old generated
+agent queue with `defineHarnessQueueBinding(targetContract, queueBuilder,
+workerBuilder)`. Put the binding on the target mount policy and use
+`binding.contract` in callers that need `.enqueue(...)`. Callers using the
+plain Harness contract remain limited to `.run(...)` and `.stream(...)`.
+The integration worker invokes the same published EventBridge address and
+converts provider admission backpressure into native queue retry behavior.
+
+Use `purista add agent` and `purista add workflow` for new native modules. Both
+commands extend the single service Harness and mount; neither creates a second
+runtime or a generated transport wrapper.
+
 For browser chat, map the portable execution stream with
 `@purista/harness-ai-sdk-ui/v1`, declare
 `ai-sdk-ui-message-stream-v1`, and send the

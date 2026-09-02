@@ -61,7 +61,7 @@ export class QueueWorkerBuilder<S extends QueueWorkerBuilderTypes = QueueWorkerB
 	private queueInvokes: QueueInvokeList = {}
 
 	constructor(
-		private readonly queueName: string,
+		public readonly queueName: string,
 		private readonly workerName: string,
 	) {}
 

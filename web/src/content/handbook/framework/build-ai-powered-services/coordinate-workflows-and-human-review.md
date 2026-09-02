@@ -8,6 +8,21 @@ Define multi-step orchestration with the native Harness workflow API. The
 workflow may call registered agents, tools, skills, MCP servers, and sandbox
 operations while remaining independently runnable outside PURISTA.
 
+Create the module with the project-local CLI when starting from a generated
+project:
+
+```bash title="Generate a Harness workflow"
+npm run add:workflow -- review-rollback \
+  --service support \
+  --service-version 1 \
+  --description "Coordinate rollback review and execution"
+```
+
+The command adds a native module under `src/harness/support/workflow`, a
+standalone test, and the published target to the service's existing Harness
+mount. It does not create a command, HTTP endpoint, provider, or second Harness
+runtime.
+
 Publish it like an agent:
 
 ```ts title="Publish a workflow target"
@@ -22,10 +37,10 @@ A caller declares the address and chooses aggregate or streaming delivery:
 const reviewCommandBuilder = supportV1ServiceBuilder
   .getCommandBuilder('reviewRollback', 'Starts or resumes rollback review')
   .canInvokeWorkflow(
-  'Support',
-  '1',
-  'review_rollback',
-  supportHarness.contracts.workflows.review_rollback,
+		'Support',
+		'1',
+		'review_rollback',
+		supportHarness.contracts.workflows.review_rollback,
   )
 ```
 

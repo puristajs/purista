@@ -27,6 +27,7 @@ import { isStreamOpenRequest } from '../core/types/stream/isStreamOpenRequest.im
 import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
 import type { StreamMessage } from '../core/types/stream/StreamMessage.js'
 import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
+import type { HarnessInvokeParameter } from './invokeTypes.js'
 import type {
 	HarnessBusinessGuardContext,
 	HarnessCommandToolAdapter,
@@ -35,17 +36,6 @@ import type {
 	HarnessHostToolFunctionDefinition,
 	HarnessMount,
 } from './types.js'
-
-/** Consumer-controlled run options accepted by a mounted Harness target. */
-export type HarnessInvokeParameter = Readonly<{
-	sessionId?: string
-	idempotencyKey?: string
-	timeoutMs?: number
-	metadata?: Record<string, string | number | boolean | null>
-	durable?: InvokeOptions['durable']
-	/** Resume one durable Harness interruption, such as a human tool approval. */
-	resume?: InvokeOptions['resume']
-}>
 
 type MountedRuntime = {
 	definition: HarnessDefinition<any>

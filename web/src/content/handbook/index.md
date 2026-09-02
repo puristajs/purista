@@ -142,8 +142,8 @@ Not everyone starts from the same place. Pick the path that matches your situati
 |---|---|
 | [AI Harness Guide](/handbook/harness/) | Standalone models, tools, skills, agents, workflows, state, safety, tests, and operations |
 | [Architecture and lifecycle](/handbook/framework/build-ai-powered-services/architecture-and-lifecycle/) | Keep native Harness definitions portable and mount one runtime on a service |
-| [Build the first attached agent](/handbook/framework/build-ai-powered-services/build-the-first-attached-agent/) | Scaffold a service, native Harness module, service Harness, and mount with the CLI |
-| [Expose and invoke a target](/handbook/framework/build-ai-powered-services/expose-and-invoke-an-attached-agent/) | Use versioned EventBridge addresses from commands, streams, and HTTP |
+| [Build and mount the first agent](/handbook/framework/build-ai-powered-services/build-and-mount-the-first-agent/) | Scaffold a service, native Harness module, service Harness, and mount with the CLI |
+| [Expose and invoke a target](/handbook/framework/build-ai-powered-services/invoke-and-expose-a-harness-target/) | Use versioned EventBridge addresses from commands, streams, and HTTP |
 | [Tools, Skills, resources, stores, and context](/handbook/framework/build-ai-powered-services/use-tools-skills-resources-stores-and-context/) | Bind native Harness capabilities and trusted PURISTA host capabilities |
 | [Workflows and human review](/handbook/framework/build-ai-powered-services/coordinate-workflows-and-human-review/) | Coordinate work and represent approval as a durable interrupt outcome |
 

@@ -55,11 +55,13 @@ import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.imp
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import { HarnessHostToolBuilder } from '../HarnessMount/hostToolBuilder.js'
+import { toHarnessQueueRetry } from '../HarnessMount/queue.js'
 import { HarnessMountRuntime } from '../HarnessMount/runtime.js'
 import type {
 	HarnessMount,
 	HarnessPublishPolicy,
 	HarnessState,
+	HarnessTargetQueueBinding,
 	MountedHarnessRuntimeConfig,
 } from '../HarnessMount/types.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
@@ -271,8 +273,77 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				'Only one Harness definition can be mounted on a service. Compose additional capabilities with native Harness modules.',
 			)
 		}
+		this.addHarnessQueueBindings(definition, policy)
 		this.harnessMount = Object.freeze({ definition, policy }) as HarnessMount
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>>
+	}
+
+	private addHarnessQueueBindings<D extends HarnessDefinition<any>>(
+		definition: D,
+		policy: HarnessPublishPolicy<HarnessState<D>, S['Resources']>,
+	) {
+		const queueNames = new Set<string>()
+		for (const kind of ['agents', 'workflows'] as const) {
+			const published = new Set((policy.publish[kind] ?? []) as readonly string[])
+			const contracts = definition.contracts[kind] as Record<
+				string,
+				import('@purista/harness').HarnessTargetContract<any>
+			>
+			const targets = policy.targets?.[kind] as
+				| Record<string, { queue?: HarnessTargetQueueBinding<import('@purista/harness').HarnessTargetContract<any>> }>
+				| undefined
+			for (const [target, targetPolicy] of Object.entries(targets ?? {})) {
+				const binding = targetPolicy.queue
+				if (!binding) continue
+				const queue = binding.queue as QueueDefinitionBuilder
+				const queueWorker = binding.worker as QueueWorkerBuilder
+				if (!published.has(target)) {
+					throw new TypeError(`Harness ${kind.slice(0, -1)} "${target}" must be published before it can bind a queue.`)
+				}
+				const contract = contracts[target]
+				if (!contract || binding.targetContract !== contract) {
+					throw new TypeError(
+						`Harness queue binding for ${kind.slice(0, -1)} "${target}" uses another target contract.`,
+					)
+				}
+				if (queueNames.has(queue.queueName)) {
+					throw new TypeError(`Harness queue "${queue.queueName}" is bound to more than one target.`)
+				}
+				queueNames.add(queue.queueName)
+				queue.addPayloadSchema(contract.input)
+				const worker =
+					kind === 'agents'
+						? queueWorker.canInvokeAgent(
+								this.info.serviceName,
+								this.info.serviceVersion,
+								target,
+								contract as import('@purista/harness').HarnessTargetContract<'agent'>,
+							)
+						: queueWorker.canInvokeWorkflow(
+								this.info.serviceName,
+								this.info.serviceVersion,
+								target,
+								contract as import('@purista/harness').HarnessTargetContract<'workflow'>,
+							)
+				worker.setHandler(async (context, message) => {
+					try {
+						const clients = kind === 'agents' ? context.agent : context.workflow
+						const client = (clients as any)[this.info.serviceName][this.info.serviceVersion][target]
+						const outcome = await client.run(message.payload, message.parameter)
+						return {
+							status: 'success' as const,
+							output: outcome.status === 'completed' ? outcome.output : outcome,
+						}
+					} catch (error) {
+						const retry = toHarnessQueueRetry(error)
+						if (retry) return retry
+						throw error
+					}
+				})
+				this.addQueueDefinition(queue.getDefinition())
+				this.addQueueWorkerDefinition(worker.getDefinition())
+			}
+		}
 	}
 
 	/**

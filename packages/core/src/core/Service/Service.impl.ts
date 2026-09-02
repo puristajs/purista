@@ -67,6 +67,7 @@ import type { QueueDefinition } from '../types/queue/QueueDefinition.js'
 import type { QueueDefinitionListResolved } from '../types/queue/QueueDefinitionList.js'
 import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
 import type { QueueHandlerResult } from '../types/queue/QueueHandlerResult.js'
+import type { QueueInvokeFunction } from '../types/queue/QueueInvokeFunction.js'
 import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
 import type { QueueJobContext } from '../types/queue/QueueJobContext.js'
 import type { QueueJobStore } from '../types/queue/QueueJobStore.js'
@@ -1077,6 +1078,20 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		}
 	}
 
+	private createQueueHeaders(
+		headers: Record<string, string> | undefined,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+	) {
+		const applicationHeaders = { ...headers }
+		delete applicationHeaders['purista.principalId']
+		delete applicationHeaders['purista.tenantId']
+		return {
+			...applicationHeaders,
+			...this.createQueueIdentityHeaders(principalId, tenantId),
+		}
+	}
+
 	private createQueueRuntimeCancellation(
 		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
 		lease: QueueLease,
@@ -1395,6 +1410,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		principalId?: PrincipalId,
 		tenantId?: TenantId,
 		options?: Omit<QueueEnqueueOptions<Payload, Params>, 'queueName' | 'payload' | 'parameter'>,
+		allowRemote = false,
 	): Promise<QueueEnqueueResult> {
 		const descriptor = queueInvokes?.[queueName]
 		if (queueInvokes && !descriptor) {
@@ -1402,7 +1418,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 		}
 
 		const queueDefinition = this.getQueueDefinition(queueName)
-		if (!queueDefinition) {
+		if (!queueDefinition && !allowRemote) {
 			throw new UnhandledError(StatusCode.NotFound, `queue "${queueName}" is not registered in this service`)
 		}
 
@@ -1459,7 +1475,7 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				parameter: normalizedParameter,
 				delayMs: options?.delayMs,
 				idempotencyKey: options?.idempotencyKey,
-				headers: options?.headers,
+				headers: this.createQueueHeaders(options?.headers, principalId, tenantId),
 				maxAttempts: options?.maxAttempts ?? lifecycle.maxAttempts,
 				priority: options?.priority,
 				leaseTtlMs: options?.leaseTtlMs ?? lifecycle.visibilityTimeoutMs,
@@ -1596,9 +1612,11 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 	) {
 		const invoke = this.getInvokeFunction(serviceTarget, traceId, principalId, tenantId, invokes)
 		const openStream = this.getConsumeStreamFunction(serviceTarget, traceId, principalId, tenantId, streamInvokes)
+		const queueInvokes = this.getHarnessQueueInvokes(invokes)
+		const enqueue = this.getHarnessQueueEnqueue(queueInvokes, traceId, principalId, tenantId)
 		return {
-			agent: createHarnessInvocationProxy(invoke, openStream),
-			workflow: createHarnessInvocationProxy(invoke, openStream),
+			agent: createHarnessInvocationProxy(invoke, openStream, enqueue, invokes),
+			workflow: createHarnessInvocationProxy(invoke, openStream, enqueue, invokes),
 			model: createHarnessModelClients(invokes, (definition, alias) => {
 				if (!this.harnessModelResolver) {
 					throw new Error('Harness models are unavailable before the mounted Harness runtime starts.')
@@ -1606,6 +1624,32 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 				return this.harnessModelResolver(definition, alias)
 			}),
 		}
+	}
+
+	private getHarnessQueueInvokes(invokes: InvokeList) {
+		return Object.fromEntries(
+			Object.values(invokes).flatMap(versions =>
+				Object.values(versions).flatMap(targets =>
+					Object.values(targets).flatMap(descriptor => {
+						const target = descriptor as unknown as {
+							harnessTarget?: { queue?: { name?: string }; input?: Schema }
+						}
+						const queueName = target.harnessTarget?.queue?.name
+						return queueName ? [[queueName, { payloadSchema: target.harnessTarget?.input }]] : []
+					}),
+				),
+			),
+		) as QueueInvokeList
+	}
+
+	private getHarnessQueueEnqueue(
+		queueInvokes: QueueInvokeList,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+	): QueueInvokeFunction {
+		return (queueName, payload, parameter, options) =>
+			this.enqueueQueue(queueName, payload, parameter, queueInvokes, traceId, principalId, tenantId, options, true)
 	}
 
 	/** @internal Builds the allowlisted PURISTA context for one mounted Harness host-tool call. */
@@ -1624,13 +1668,19 @@ export class Service<S extends ServiceClassTypes<any, any, any> = ServiceClassTy
 			tenantId,
 			definition.streamInvokes,
 		)
+		const harnessEnqueue = this.getHarnessQueueEnqueue(
+			this.getHarnessQueueInvokes(definition.invokes),
+			traceId,
+			principalId,
+			tenantId,
+		)
 		return {
 			...context,
 			resources: this.resources,
 			service: createInvokeFunctionProxy(invoke),
 			stream: createOpenStreamFunctionProxy(openStream),
-			agent: createHarnessInvocationProxy(invoke, openStream),
-			workflow: createHarnessInvocationProxy(invoke, openStream),
+			agent: createHarnessInvocationProxy(invoke, openStream, harnessEnqueue, definition.invokes),
+			workflow: createHarnessInvocationProxy(invoke, openStream, harnessEnqueue, definition.invokes),
 			queue: this.getQueueNamespace(definition.queueInvokes, traceId, principalId, tenantId),
 			emit: this.getEmitFunction(context.toolId, traceId, principalId, tenantId, definition.emitList),
 		} as HarnessHostToolFunctionContext

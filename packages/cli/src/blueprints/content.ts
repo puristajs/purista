@@ -39,6 +39,7 @@ This project installs \`@purista/cli\` as a dev dependency. Use the local add sc
 - \`${runScriptCommand(input, 'add:service', '<name> --description "<description>"')}\`
 - \`${runScriptCommand(input, 'add:command', '<name> --service <serviceName> --service-version <version>')}\`
 - \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`
 `
 
 const runScriptCommand = (input: CreateProjectInput, script: string, args = '') => {
@@ -112,6 +113,7 @@ ${createLocalCliUsageGuide(input)}
 - New queue: \`${runScriptCommand(input, 'add:queue', '<name> --service <serviceName> --service-version <version>')}\`
 - New queue worker: \`${runScriptCommand(input, 'add:queue-worker', '<name> --service <serviceName> --service-version <version> --queue <queueName>')}\`
 - New agent: \`${runScriptCommand(input, 'add:agent', '<name> --service <serviceName> --service-version <version>')}\`
+- New workflow: \`${runScriptCommand(input, 'add:workflow', '<name> --service <serviceName> --service-version <version>')}\`
 
 After generation, edit handlers, schemas, runtime wiring, and tests to fit the domain.
 

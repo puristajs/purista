@@ -5,10 +5,12 @@ import { dirname, join } from 'node:path'
 import type { Options } from 'code-block-writer'
 
 import { camelCase, snakeCase } from './change-case.js'
-import { getHarnessAgentModuleFileContent } from './content/agent/getHarnessAgentModuleFileContent.js'
-import { getHarnessDefinitionTestFileContent } from './content/agent/getHarnessDefinitionTestFileContent.js'
-import { getHarnessMountFileContent } from './content/agent/getHarnessMountFileContent.js'
-import { getServiceHarnessFileContent } from './content/agent/getServiceHarnessFileContent.js'
+import {
+	getHarnessWorkflowModuleFileContent,
+	getHarnessWorkflowTestFileContent,
+	getWorkflowHarnessFileContent,
+	getWorkflowHarnessMountFileContent,
+} from './content/workflow/index.js'
 import { convertToProjectEventCasing } from './convertToProjectEventCasing.js'
 import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
 import {
@@ -21,19 +23,15 @@ import {
 import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
 
-/**
- * Add a native Harness agent definition and publish it through an existing
- * PURISTA service. Provider and infrastructure bindings remain in application
- * bootstrap configuration.
- */
-export const addPuristaAgent = async (input: {
+/** Add and publish one native Harness workflow in the service-owned Harness. */
+export const addPuristaWorkflow = async (input: {
 	projectRootPath?: string
 	puristaConfig: PuristaConfig
 	puristaProject: PuristaProjectInfo
 	serviceName: string
 	serviceVersion: string
-	agentName: string
-	agentDescription: string
+	workflowName: string
+	workflowDescription: string
 	responseEventName?: string
 	codeWriterOptions?: Partial<Options>
 }) => {
@@ -42,81 +40,84 @@ export const addPuristaAgent = async (input: {
 	const sourceRoot = dirname(serviceBasePath)
 	const serviceEntry = input.puristaProject.services[input.serviceName][input.serviceVersion]
 	const serviceDirName = convertToProjectFileCasing(input.serviceName, input.puristaConfig)
-	const agentDirName = convertToProjectFileCasing(input.agentName, input.puristaConfig)
-	const agentIdentifierBase = camelCase(input.agentName)
-	const agentIdentifier = agentIdentifierBase.endsWith('Agent') ? agentIdentifierBase : `${agentIdentifierBase}Agent`
-	const agentId = snakeCase(input.agentName)
+	const workflowDirName = convertToProjectFileCasing(input.workflowName, input.puristaConfig)
+	const workflowIdentifierBase = camelCase(input.workflowName)
+	const workflowIdentifier = workflowIdentifierBase.endsWith('Workflow')
+		? workflowIdentifierBase
+		: `${workflowIdentifierBase}Workflow`
+	const workflowId = snakeCase(input.workflowName)
 	const serviceBuilderName = camelCase(`${input.serviceName} v${input.serviceVersion} service builder`)
 	const harnessName = `${camelCase(input.serviceName)}Harness`
 	const policyName = `${camelCase(input.serviceName)}HarnessPolicy`
 	const harnessDirectory = join(projectPath, sourceRoot, 'harness', serviceDirName)
-	const agentDirectory = join(harnessDirectory, 'agent', agentDirName)
-	const agentFile = join(agentDirectory, `${agentDirName}Agent.ts`)
+	const workflowDirectory = join(harnessDirectory, 'workflow', workflowDirName)
+	const workflowFile = join(workflowDirectory, `${workflowDirName}Workflow.ts`)
 	const definitionFile = join(harnessDirectory, `${serviceDirName}Harness.ts`)
 	const mountDirectory = join(projectPath, serviceBasePath, input.serviceName, `v${input.serviceVersion}`, 'harness')
 	const mountFile = join(mountDirectory, `${serviceDirName}HarnessMount.ts`)
 
-	if (existsSync(agentDirectory)) {
-		throw new Error(`Agent "${input.agentName}" already exists for ${input.serviceName} v${input.serviceVersion}.`)
+	if (existsSync(workflowDirectory)) {
+		throw new Error(
+			`Workflow "${input.workflowName}" already exists for ${input.serviceName} v${input.serviceVersion}.`,
+		)
 	}
 
-	await mkdir(agentDirectory, { recursive: true })
+	await mkdir(workflowDirectory, { recursive: true })
 	await mkdir(mountDirectory, { recursive: true })
-
 	await writeFile(
-		agentFile,
-		getHarnessAgentModuleFileContent({
+		workflowFile,
+		getHarnessWorkflowModuleFileContent({
 			serviceName: input.serviceName,
-			agentName: input.agentName,
-			agentDescription: input.agentDescription,
+			workflowName: input.workflowName,
+			workflowDescription: input.workflowDescription,
 			codeWriterOptions: input.codeWriterOptions,
 		}),
 	)
 	await writeFile(
-		join(agentDirectory, `${agentDirName}Agent.test.ts`),
-		getHarnessDefinitionTestFileContent({
-			agentName: input.agentName,
-			harnessName,
-			definitionImportName: importSpecifier(agentDirectory, definitionFile),
+		join(workflowDirectory, `${workflowDirName}Workflow.test.ts`),
+		getHarnessWorkflowTestFileContent({
+			workflowName: input.workflowName,
+			workflowImportName: importSpecifier(workflowDirectory, workflowFile),
 			codeWriterOptions: input.codeWriterOptions,
 		}),
 	)
+
 	if (existsSync(definitionFile)) {
 		await addModuleToHarness({
 			harnessFile: definitionFile,
-			moduleFile: agentFile,
-			moduleIdentifier: agentIdentifier,
+			moduleFile: workflowFile,
+			moduleIdentifier: workflowIdentifier,
 			harnessName,
-			requirePrimaryModel: true,
 		})
 	} else {
 		await writeFile(
 			definitionFile,
-			getServiceHarnessFileContent({
+			getWorkflowHarnessFileContent({
 				serviceName: input.serviceName,
-				agentIdentifier,
-				agentImportName: importSpecifier(harnessDirectory, agentFile),
+				workflowIdentifier,
+				workflowImportName: importSpecifier(harnessDirectory, workflowFile),
 				codeWriterOptions: input.codeWriterOptions,
 			}),
 		)
 	}
 
+	const successEventName = input.responseEventName?.trim()
+		? convertToProjectEventCasing(input.responseEventName, input.puristaConfig)
+		: undefined
 	if (existsSync(mountFile)) {
 		await addTargetToMountPolicy({
 			mountFile,
 			policyName,
-			kind: 'agents',
-			targetId: agentId,
-			successEventName: input.responseEventName?.trim()
-				? convertToProjectEventCasing(input.responseEventName, input.puristaConfig)
-				: undefined,
+			kind: 'workflows',
+			targetId: workflowId,
+			successEventName,
 		})
 	} else {
 		await writeFile(
 			mountFile,
-			getHarnessMountFileContent({
+			getWorkflowHarnessMountFileContent({
 				serviceName: input.serviceName,
-				agentName: input.agentName,
+				workflowName: input.workflowName,
 				harnessImportName: importSpecifier(mountDirectory, definitionFile),
 				responseEventName: input.responseEventName,
 				puristaConfig: input.puristaConfig,

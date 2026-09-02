@@ -3,9 +3,12 @@ import { defineHarness, ModelAdmissionRejectedError } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { z } from 'zod'
 
+import { HandledError } from '../core/Error/HandledError.impl.js'
 import { DefaultEventBridge } from '../DefaultEventBridge/DefaultEventBridge.impl.js'
+import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
+import { defineHarnessQueueBinding } from './queueBinding.js'
 import { commandAsHarnessTool } from './types.js'
 
 const echoHarness = defineHarness({ name: 'echo' })
@@ -422,6 +425,23 @@ describe('ServiceBuilder.mountHarness', () => {
 		if (!approval) throw new Error('Expected one approval request.')
 		expect(transfers).toBe(0)
 
+		const resume = {
+			type: 'tool-approval' as const,
+			runId: first.runId,
+			interruptId: first.interrupt.id,
+			revision: first.interrupt.revision,
+			eventId: 'approval-decision-1',
+			decisions: [{ approvalId: approval.approvalId, approved: true }],
+		}
+		await expect(
+			eventBridge.invoke({
+				...request,
+				principalId: 'principal-b',
+				payload: { payload: 'transfer', parameter: { sessionId: 'approval-session', resume } },
+			}),
+		).rejects.toBeInstanceOf(HandledError)
+		expect(transfers).toBe(0)
+
 		provider.enqueue({
 			object: 'done',
 			usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
@@ -441,14 +461,7 @@ describe('ServiceBuilder.mountHarness', () => {
 				payload: 'transfer',
 				parameter: {
 					sessionId: 'approval-session',
-					resume: {
-						type: 'tool-approval',
-						runId: first.runId,
-						interruptId: first.interrupt.id,
-						revision: first.interrupt.revision,
-						eventId: 'approval-decision-1',
-						decisions: [{ approvalId: approval.approvalId, approved: true }],
-					},
+					resume,
 				},
 			},
 		})
@@ -467,6 +480,14 @@ describe('ServiceBuilder.mountHarness', () => {
 				}),
 			]),
 		)
+		expect(transfers).toBe(1)
+		expect(provider.requests).toHaveLength(2)
+		await expect(
+			eventBridge.invoke({
+				...request,
+				payload: { payload: 'transfer', parameter: { sessionId: 'approval-session', resume } },
+			}),
+		).resolves.toMatchObject({ status: 'completed', output: 'done' })
 		expect(transfers).toBe(1)
 		expect(provider.requests).toHaveLength(2)
 		await service.destroy()
@@ -516,6 +537,100 @@ describe('ServiceBuilder.mountHarness', () => {
 			status: 'completed',
 			output: { value: 'typed-address' },
 		})
+
+		await api.destroy()
+		await knowledge.destroy()
+	})
+
+	it('adds enqueue only for an explicit native queue binding and executes through EventBridge', async () => {
+		const eventBridge = new DefaultEventBridge()
+		const queueBridge = new DefaultQueueBridge()
+		await eventBridge.start()
+		const received: Array<{ value: string; tenantId?: string; principalId?: string }> = []
+		const knowledgeBase = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Queued Harness target',
+		})
+		const queuedEcho = defineHarnessQueueBinding(
+			echoHarness.contracts.agents.echo,
+			knowledgeBase.getQueueBuilder('knowledge.echo', 'Queue echo runs'),
+			knowledgeBase.getQueueWorkerBuilder('knowledge.echo', 'echo-worker').setMaxParallelHandlers(2),
+		)
+		const knowledgeBuilder = knowledgeBase.mountHarness(echoHarness, {
+			publish: { agents: ['echo'] },
+			targets: {
+				agents: {
+					echo: {
+						queue: queuedEcho,
+						beforeGuards: {
+							record: context => {
+								received.push({
+									value: 'queued',
+									tenantId: context.identity.tenantId,
+									principalId: context.identity.principalId,
+								})
+							},
+						},
+					},
+				},
+			},
+		})
+
+		const apiBuilder = new ServiceBuilder({
+			serviceName: 'Api',
+			serviceVersion: '1',
+			serviceDescription: 'Queued Harness caller',
+		})
+		const enqueueEcho = apiBuilder
+			.getCommandBuilder('enqueueEcho', 'Enqueue an echo run')
+			.addPayloadSchema(z.object({ value: z.string() }))
+			.canInvokeAgent('Knowledge', '1', 'echo', queuedEcho.contract)
+			.setCommandFunction(async function ({ agent }, payload) {
+				return agent.Knowledge['1'].echo.enqueue(
+					payload,
+					{ sessionId: 'queued-session' },
+					{
+						idempotencyKey: 'job-1',
+						headers: {
+							'purista.principalId': 'spoofed-principal',
+							'purista.tenantId': 'spoofed-tenant',
+						},
+					},
+				)
+			})
+		apiBuilder.addCommandDefinition(enqueueEcho.getDefinition())
+
+		const directOnly = apiBuilder
+			.getCommandBuilder('directOnly', 'Compile-time direct-only target')
+			.canInvokeAgent('Knowledge', '1', 'echo', echoHarness.contracts.agents.echo)
+			.setCommandFunction(async function ({ agent }) {
+				// @ts-expect-error enqueue is absent unless the declared contract carries a queue binding
+				void agent.Knowledge['1'].echo.enqueue
+				return undefined
+			})
+		void directOnly
+
+		const knowledge = await knowledgeBuilder.getInstance(eventBridge, { ai: { models: {} }, queueBridge })
+		const api = await apiBuilder.getInstance(eventBridge, { queueBridge })
+		await knowledge.start()
+		await api.start()
+
+		expect(knowledgeBuilder.getQueueDefinitions()).toHaveLength(1)
+		expect(knowledgeBuilder.getQueueWorkerDefinitions()).toHaveLength(1)
+		const command = getCommandMessageMock({
+			tenantId: 'tenant-a',
+			principalId: 'principal-a',
+			receiver: { serviceName: 'Api', serviceVersion: '1', serviceTarget: 'enqueueEcho' },
+			payload: { payload: { value: 'queued' }, parameter: {} },
+		})
+		const { id: _id, messageType: _type, timestamp: _timestamp, correlationId: _correlation, ...request } = command
+		await expect(eventBridge.invoke(request)).resolves.toMatchObject({ queueName: 'knowledge.echo' })
+
+		for (let attempt = 0; attempt < 50 && received.length === 0; attempt += 1) {
+			await new Promise(resolve => setTimeout(resolve, 10))
+		}
+		expect(received).toEqual([{ value: 'queued', tenantId: 'tenant-a', principalId: 'principal-a' }])
 
 		await api.destroy()
 		await knowledge.destroy()

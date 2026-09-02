@@ -34,8 +34,13 @@ Migrate in this order:
    `canInvokeAgent(service, version, target, contract)` or
    `canInvokeWorkflow(...)`.
 6. Call `.run(input)` or `.stream(input)`; every call crosses EventBridge.
-7. Create ordinary commands, streams, queues, and workers only for the
-   application contracts that need them.
+7. For durable target delivery, create a `defineHarnessQueueBinding(...)` from
+   the target contract plus native queue and worker builders. Put it on the
+   mount policy and declare `binding.contract` only at callers that need
+   `.enqueue(...)`.
+8. Create ordinary commands and streams only for the application contracts
+   that need them. Use `purista add agent` and `purista add workflow` to extend
+   the single service Harness without compatibility wrappers.
 
 `.run` returns a `RunOutcome`. Approval and external waits are
 `interrupted` outcomes, not exceptions. A browser stream uses the separate

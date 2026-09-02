@@ -4,40 +4,38 @@ import { camelCase, snakeCase } from '../../change-case.js'
 import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
-/** Generate the service-owned publication policy for a Harness definition. */
-export const getHarnessMountFileContent = (input: {
+/** Generate the service publication policy when a workflow is its first target. */
+export const getWorkflowHarnessMountFileContent = (input: {
 	serviceName: string
-	agentName: string
+	workflowName: string
 	harnessImportName: string
 	responseEventName?: string
 	puristaConfig: PuristaConfig
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const agentId = snakeCase(input.agentName)
+	const workflowId = snakeCase(input.workflowName)
 	const harnessName = `${camelCase(input.serviceName)}Harness`
 	const policyName = `${camelCase(input.serviceName)}HarnessPolicy`
 	const successEventName = input.responseEventName?.trim()
 		? convertToProjectEventCasing(input.responseEventName, input.puristaConfig)
 		: undefined
-
 	writer.writeLine(`import { ${harnessName} } from '${input.harnessImportName}'`).blankLine()
 	writer.writeLine(`export { ${harnessName} }`).blankLine()
 	writer.writeLine(`export const ${policyName} = {`)
 	writer.indent(() => {
-		writer.writeLine(`publish: { agents: ['${agentId}'], workflows: [] },`)
+		writer.writeLine(`publish: { agents: [], workflows: ['${workflowId}'] },`)
 		writer.writeLine('targets: {')
 		writer.indent(() => {
-			writer.writeLine('agents: {')
+			writer.writeLine('agents: {},')
+			writer.writeLine('workflows: {')
 			if (successEventName) {
-				writer.indent(() => writer.writeLine(`${agentId}: { successEvent: '${successEventName}' },`))
+				writer.indent(() => writer.writeLine(`${workflowId}: { successEvent: '${successEventName}' },`))
 			}
 			writer.writeLine('},')
-			writer.writeLine('workflows: {},')
 		})
 		writer.writeLine('},')
 	})
 	writer.writeLine('} as const')
-
 	return writer.toString()
 }

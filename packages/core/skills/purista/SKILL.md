@@ -129,7 +129,7 @@ Framework KV component and must not be adapted into Harness storage.
 - Tests demonstrate PURISTA builder/context helpers, resource/store mocks, and runtime wiring separately. HTTP-only tests do not teach Framework testing; see `references/07-testing-observability-and-deployment.md`.
 - Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.
 - Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
-- Project setup and scaffolding follow the handbook quickstart shape: Framework artifacts live under `src/service`, while native AI modules live under `src/harness/<service>`. Services, commands, streams, queues, workers, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, and `add:agent`.
+- Project setup and scaffolding follow the handbook quickstart shape: Framework artifacts live under `src/service`, while native AI modules live under `src/harness/<service>`. Services, commands, streams, queues, workers, agents, and workflows are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, `add:agent`, and `add:workflow`.
 - Package dependencies do not introduce optional AI or transport coupling into core packages.
 
 ## Read If Needed

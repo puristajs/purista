@@ -38,6 +38,7 @@ npm run add:stream -- <name> --service <serviceName> --service-version <version>
 npm run add:queue -- <name> --service <serviceName> --service-version <version>
 npm run add:queue-worker -- <name> --service <serviceName> --service-version <version> --queue <queueName>
 npm run add:agent -- <name> --service <serviceName> --service-version <version>
+npm run add:workflow -- <name> --service <serviceName> --service-version <version>
 purista export schedule-manifest --out schedules.json
 purista export kubernetes-cronjob --out kubernetes-cronjobs.json --trigger-image curlimages/curl:8.8.0 --trigger-url 'https://api.example.com/purista/schedules/{{targetKind}}/{{targetName}}'
 ```
@@ -171,8 +172,8 @@ Artifact placement rules:
 - version-specific service builder setup lives in `v<version>/<serviceName>V<version>ServiceBuilder.ts`
 - schemas and inferred types stay beside the Framework or Harness boundary that owns them
 - queue workers live under `queue-worker/`, not inside the queue folder
-- the first `add:agent` creates `src/harness/<service>/<service>Harness.ts`, one native module under `agent/<name>/`, a standalone `FakeModelProvider` test, and one service mount policy
-- later `add:agent` calls add modules and published targets to those same service-owned files; they never add another `mountHarness(...)` call
+- the first `add:agent` or `add:workflow` creates `src/harness/<service>/<service>Harness.ts`, one native module under `agent/<name>/` or `workflow/<name>/`, a standalone test, and one service mount policy
+- later `add:agent` and `add:workflow` calls add modules and published targets to those same service-owned files; they never add another `mountHarness(...)` call
 - runtime wiring stays in `src/index.ts`, `src/eventbridge.ts`, `src/http.ts`, `src/config/`, or app-specific bootstrap files, not in boundary builders
 
 ## Starter And create-purista

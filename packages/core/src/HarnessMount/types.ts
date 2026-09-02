@@ -157,6 +157,24 @@ type HarnessTargetPolicy<
 	>
 	/** Publish the completed terminal outcome as a business fact. */
 	successEvent?: string
+	/** Optional durable queue delivery for this published target. */
+	queue?: HarnessTargetQueueBinding<C>
+}>
+
+/** Harness target contract marked as supporting native PURISTA queue delivery. */
+export type QueuedHarnessTargetContract<C extends HarnessTargetContract<any, any, any, any, any>> = C &
+	Readonly<{ queue: Readonly<{ name: string }> }>
+
+/** Opaque native queue and worker binding dedicated to one mounted Harness target. */
+export type HarnessTargetQueueBinding<
+	C extends HarnessTargetContract<any, any, any, any, any>,
+	Queue = unknown,
+	Worker = unknown,
+> = Readonly<{
+	contract: QueuedHarnessTargetContract<C>
+	targetContract: C
+	queue: Queue
+	worker: Worker
 }>
 
 type HarnessTargetPolicies<

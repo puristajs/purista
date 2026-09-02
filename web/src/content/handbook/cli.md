@@ -115,6 +115,7 @@ npm run add:stream       # add stream for live updates
 npm run add:queue        # add queue for async workloads
 npm run add:queue-worker # add worker for existing queue
 npm run add:agent        # add AI agent
+npm run add:workflow     # add Harness workflow
 ```
 
 Use the matching package manager and runtime for your project: `npm run ...`, `pnpm run ...`, `yarn ...`, or `bun run ...`.
@@ -154,6 +155,12 @@ npm run add:agent -- triage \
   --service support \
   --service-version 1 \
   --description "Ticket triage agent"
+
+# Add a durable Harness workflow
+npm run add:workflow -- resolve-ticket \
+  --service support \
+  --service-version 1 \
+  --description "Resolve a ticket in explicit workflow steps"
 ```
 
 ## CLI workflow
