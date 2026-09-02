@@ -213,6 +213,25 @@ function hasUntitledDocumentedFence(source) {
 	})
 }
 
+const retiredFrameworkDocumentationFragments = [
+	['SchedulerRuntime', 'Core does not ship a SchedulerRuntime; schedules are exported contracts'],
+	['DefaultSchedulerProvider', 'Core does not ship a DefaultSchedulerProvider'],
+	['createHttpServer', 'generated Hono projects use getHttpServer'],
+	['subscribeToEvent(eventName, eventVersion', 'subscribeToEvent receives a producer service version'],
+]
+
+function getRetiredFrameworkDocumentationIssues(source) {
+	return retiredFrameworkDocumentationFragments
+		.filter(([fragment]) => source.includes(fragment))
+		.map(([, explanation]) => explanation)
+}
+
+function hasDevelopmentNarrative(source) {
+	return /\b(?:current HEAD|current v4 target|not yet published|unreleased development branch|while v4 was being developed)\b/i.test(
+		source,
+	)
+}
+
 /**
  * Verify that the handbook manifest remains a complete, product-aware routing
  * graph. The manifest deliberately includes deprecated compatibility topics;
@@ -448,38 +467,51 @@ export async function auditHandbookManifest(root = process.cwd()) {
 				)
 			}
 
-			if (hasDetachedTypeScriptBuilderExample(readFileSync(content.file, 'utf8'))) {
+			const contentSource = readFileSync(content.file, 'utf8')
+
+			if (hasDetachedTypeScriptBuilderExample(contentSource)) {
 				issues.push(
 					`web/src/content/handbook/${topicId}.md: TypeScript examples must not start with a detached fluent-builder call`,
 				)
 			}
 
-			if (hasDetachedTypeScriptConfigurationPropertyExample(readFileSync(content.file, 'utf8'))) {
+			if (hasDetachedTypeScriptConfigurationPropertyExample(contentSource)) {
 				issues.push(
 					`web/src/content/handbook/${topicId}.md: TypeScript examples must not start with a detached builder configuration property`,
 				)
 			}
 
-			if (hasLegacyServiceInstanceConfigExample(readFileSync(content.file, 'utf8'))) {
+			if (hasLegacyServiceInstanceConfigExample(contentSource)) {
 				issues.push(
 					`web/src/content/handbook/${topicId}.md: ServiceBuilder.getInstance(...) examples must use serviceConfig, not config`,
 				)
 			}
 
-			if (hasUnsupportedAddServiceVersionOption(readFileSync(content.file, 'utf8'))) {
+			if (hasUnsupportedAddServiceVersionOption(contentSource)) {
 				issues.push(
 					`web/src/content/handbook/${topicId}.md: npm run add:service does not support --version; it creates v1 by default`,
 				)
 			}
 
-			if (hasUntitledDocumentedFence(readFileSync(content.file, 'utf8'))) {
+			if (hasUntitledDocumentedFence(contentSource)) {
 				issues.push(
 					`web/src/content/handbook/${topicId}.md: every documented code, command, output, and diagram fence needs a meaningful title`,
 				)
 			}
 
+			if (product === 'framework') {
+				for (const explanation of getRetiredFrameworkDocumentationIssues(contentSource)) {
+					issues.push(`web/src/content/handbook/${topicId}.md: ${explanation}`)
+				}
+				if (hasDevelopmentNarrative(contentSource)) {
+					issues.push(
+						`web/src/content/handbook/${topicId}.md: public documentation must describe the released final state`,
+					)
+				}
+			}
+
 			if (topicId.startsWith('framework/build-ai-powered-services/')) {
-				const missingLookups = getAttachedAgentBuilderLookupIssues(readFileSync(content.file, 'utf8'))
+				const missingLookups = getAttachedAgentBuilderLookupIssues(contentSource)
 				if (missingLookups.length) {
 					issues.push(
 						`web/src/content/handbook/${topicId}.md: attached-agent builder call(s) need an exact generated API member link in the same section: ${missingLookups.join(', ')}`,

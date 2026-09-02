@@ -87,6 +87,11 @@ specific action and skip output validation, after guards, and result-event
 creation. A `HandledError` also completes the delivery without redelivery;
 an unexpected error reaches the bridge failure path.
 
+AMQP and NATS are the shipped EventBridges that act on subscription control
+errors. The default, MQTT, and HTTP/Dapr bridges log those errors without
+retrying, dead-lettering, dropping, or pausing the delivery. Choose the adapter
+before making a control result part of a business recovery path.
+
 ## Choose the right shape
 
 | Need | Choose | Why |

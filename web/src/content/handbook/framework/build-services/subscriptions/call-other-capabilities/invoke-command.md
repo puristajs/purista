@@ -11,7 +11,7 @@ that both types `context.service` and keeps the dependency visible.
 ```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoiceSubscriptionBuilder.ts"
 const profileInputSchema = z.object({ customerId: z.string() })
 const profileOutputSchema = z.object({ ledgerAccountId: z.string() })
-const emptyParameterSchema = z.object({})
+const emptyParameterSchema = z.undefined()
 
 recordInvoiceSubscriptionBuilder
   .canInvoke('Customer', '1', 'getBillingProfile', profileOutputSchema, profileInputSchema, emptyParameterSchema)

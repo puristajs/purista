@@ -1,7 +1,7 @@
 ---
 title: Prepare a Framework or adapter upgrade
 description: Inventory the application boundary, align official packages, and test the target runtime before rollout.
-order: 1120
+order: 1110
 ---
 
 Keep official `@purista/*` packages on compatible versions; mixed major versions can create TypeScript and runtime mismatches. Record the current lockfile, generated artifacts, configured adapters, and external platform versions before changing dependencies.

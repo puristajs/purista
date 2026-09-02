@@ -36,6 +36,12 @@ service constructor validates that identity when an instance is created, so a
 missing or invalid field fails instead of producing an anonymous runtime
 participant.
 
+Service names contain one or more ASCII letters, digits, hyphens, or
+underscores. Service versions contain digits only. Values such as `invoice`,
+`Invoice-Reader`, and `1` are valid; `invoice.reader`, `v1`, and `1.0.0` throw a
+`TypeError` during service construction. Treat the version as the address of a
+contract, not a semantic package version.
+
 | Change | Keep the version | Create a version |
 | --- | --- | --- |
 | Add an optional field or independent capability | Yes, with compatibility tests | No |

@@ -12,16 +12,18 @@ boundary.
 
 | Situation | Recipe | Compose |
 | --- | --- | --- |
-| A platform scheduler must start a durable result flow | [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/) | Schedule contract, event, queue/worker, result event |
+| A platform scheduler must start a durable result flow | [Schedule work](/handbook/framework/build-services/schedule-work/) | Schedule contract, event, queue/worker, result event |
 | HTTP accepts work that outlives the request | [Asynchronous request processing](/handbook/framework/apply-patterns-and-recipes/asynchronous-request-processing/) | HTTP command, queue, state/result query |
 | A write model and independently shaped read model evolve at different rates | [CQRS and projections](/handbook/framework/apply-patterns-and-recipes/cqrs-and-projections/) | Command, success event, subscription, read-model resource |
 | The business event log is deliberately the source of truth | [Event sourcing](/handbook/framework/apply-patterns-and-recipes/event-sourcing/) | Durable event log, projections, replay, explicit application ownership |
+| A business process must survive restarts, long waits, and external callbacks | [Long-running workflows with Temporal](/handbook/framework/apply-patterns-and-recipes/long-running-workflows-with-temporal/) | Temporal workflow and activities, EventBridge command invocation, signals, OpenTelemetry |
 | Several independent services need a shared message contract | [Enterprise interoperability](/handbook/framework/apply-patterns-and-recipes/enterprise-interoperability/) | EventBridge, schemas, client/export |
 
 PURISTA records schedule contracts and can export schedule/Kubernetes CronJob
 artifacts, but it does not ship an in-process production scheduler provider.
-Temporal-specific orchestration remains outside the canonical Framework path
-until a maintained public integration is available. PURISTA supports the
+For durable, stateful orchestration, Temporal remains an application-owned
+integration: Temporal owns workflow history and timers, while PURISTA owns
+addressed business capabilities and message delivery. PURISTA supports the
 command/event/subscription pieces of CQRS and projections; it does not silently
 supply an event-sourcing log, projection database, replay policy, or exactly-once
 business execution.

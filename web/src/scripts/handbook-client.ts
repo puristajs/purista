@@ -268,10 +268,18 @@ async function renderMermaidBlocks() {
 
 		try {
 			const svg = renderMermaidSVG(code.trim(), themeOpts)
+			const { title } = parseMeta(pre.dataset.meta || '')
 
 			// Build zoom/pan wrapper
 			const wrapper = document.createElement('div')
 			wrapper.className = 'mermaid-wrapper'
+
+			if (title) {
+				const caption = document.createElement('div')
+				caption.className = 'mermaid-caption'
+				caption.textContent = title
+				wrapper.appendChild(caption)
+			}
 
 			const controls = document.createElement('div')
 			controls.className = 'mermaid-controls'

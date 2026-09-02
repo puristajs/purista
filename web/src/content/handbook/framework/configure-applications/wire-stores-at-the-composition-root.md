@@ -100,6 +100,6 @@ connectivity.
 The exact handler methods and operation flags remain on the owning guides:
 [configuration stores](/handbook/framework/configure-applications/configuration-stores/),
 [secret stores](/handbook/framework/configure-applications/secret-stores/), and
-[state stores](/handbook/framework/persist-application-state/). For handler
+[state stores](/handbook/framework/configure-applications/state-stores/). For handler
 context and safe value use, continue with
 [Use stores from handlers](/handbook/framework/configure-applications/use-stores-from-handlers/).

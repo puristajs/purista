@@ -27,6 +27,8 @@ const honoService = await honoV1Service.getInstance(eventBridge, {
   serviceConfig: { services: [supportService], enableDynamicRoutes: true },
 })
 await honoService.start()
+
+const serverInstance = serve({ fetch: honoService.app.fetch, port: 3000 })
 ```
 
 The Hono service is still a Framework service instance. Passing a processor only
@@ -41,9 +43,16 @@ bridges may finish spans or metrics while they drain.
 
 ```ts title="src/main.ts"
 gracefulShutdown(logger, [
-  { name: 'hono', destroy: () => honoService.destroy() },
+  honoService.prepareDestroy(),
   { name: 'support', destroy: () => supportService.destroy() },
   { name: 'event bridge', destroy: () => eventBridge.destroy() },
+  {
+    name: 'http listener',
+    destroy: () => new Promise<void>((resolve, reject) => {
+      serverInstance.close(error => error ? reject(error) : resolve())
+    }),
+  },
+  { name: 'hono', destroy: () => honoService.destroy() },
   { name: 'trace export', destroy: () => spanProcessor.shutdown() },
   { name: 'metrics export', destroy: () => meterProvider.shutdown() },
 ])

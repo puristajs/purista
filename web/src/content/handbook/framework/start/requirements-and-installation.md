@@ -8,7 +8,7 @@ Use the project generator for the supported first path. It writes an ESM applica
 
 ## Requirements
 
-- Node.js or Bun supported by your chosen generated runtime.
+- Node.js 24.15.0 or newer, or a Bun version compatible with the generated project.
 - npm, pnpm, Yarn, or Bun available for the generator and project scripts.
 - An empty target directory. The CLI asks before writing into a non-empty directory; non-interactive mode fails instead.
 
@@ -24,7 +24,7 @@ Choose **Node.js** and the **default EventBridge** for this tutorial. The defaul
 For a repeatable CI or automation setup, provide every choice explicitly:
 
 ```bash title="Create the project without prompts"
-purista init incident-desk \
+npx @purista/cli@latest init incident-desk \
   --runtime node \
   --event-bridge default \
   --package-manager npm \

@@ -66,7 +66,7 @@ export const nightlyReportQueueBuilder = generateReportQueueBuilder.markSchedula
 
 [`markSchedulable(...)`](/handbook/api/classes/_purista_core.QueueDefinitionBuilder/#markschedulable) creates a definition only. It does not start an
 in-process scheduler. Provider export, deployment, overlap, and missed-run
-behaviour belong to [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/).
+behaviour belong to [Schedule work](/handbook/framework/build-services/schedule-work/).
 
 `expression` is a discriminated schedule value: use `{ kind: 'cron', value,
 timezone? }` for a calendar rule, `{ kind: 'interval', everyMs }` for a fixed

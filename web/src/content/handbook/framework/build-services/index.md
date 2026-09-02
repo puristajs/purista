@@ -25,7 +25,7 @@ flowchart LR
 | A reaction to a business event | [Subscriptions](/handbook/framework/build-services/subscriptions/) |
 | Progressive values for one caller | [Streams](/handbook/framework/build-services/streams/) |
 | Background processing, retry, or independent capacity | [Queues and workers](/handbook/framework/build-services/queues-and-workers/) |
-| A platform scheduler must start a durable business flow | [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/) |
+| A platform scheduler must start a durable business flow | [Schedule work](/handbook/framework/build-services/schedule-work/) |
 | Model-assisted behavior integrated with normal service contracts | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |
 
 Start with a command before adding a queue or agent. Commands establish schemas, service ownership, and error behavior that the more advanced flows reuse.

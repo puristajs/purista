@@ -24,7 +24,7 @@ export const invoiceV1Service = invoiceV1ServiceBuilder
 | [`addSubscriptionDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addsubscriptiondefinition) | Event reactions | [Subscriptions](/handbook/framework/build-services/subscriptions/) |
 | [`addStreamDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addstreamdefinition) | Progressive response producers | [Streams](/handbook/framework/build-services/streams/) |
 | [`addQueueDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueuedefinition) / [`addQueueWorkerDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addqueueworkerdefinition) | Durable job contract and executable worker | [Queues and workers](/handbook/framework/build-services/queues-and-workers/) |
-| [`addScheduleDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addscheduledefinition) | Scheduler contract metadata | [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/) |
+| [`addScheduleDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addscheduledefinition) | Scheduler contract metadata | [Schedule work](/handbook/framework/build-services/schedule-work/) |
 | [`mountHarness(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness) | Selected native Harness agent and workflow targets plus mount policy | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |
 
 [`bindEventToQueue(eventName, queueName, options?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#bindeventtoqueue) creates a bounded

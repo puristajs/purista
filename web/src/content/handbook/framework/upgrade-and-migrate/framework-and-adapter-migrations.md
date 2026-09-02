@@ -30,4 +30,4 @@ tenant context, retention policy, and idempotency evidence have been reviewed.
 Use the target adapter's enqueue API and an audited migration/replay tool so the
 new message has correct metadata and observability.
 
-The adapter guides describe the exact enablement and prerequisites: [event delivery](/handbook/framework/connect-distributed-infrastructure/event-delivery/), [queue delivery](/handbook/framework/connect-distributed-infrastructure/queue-delivery/), [stores](/handbook/framework/persist-application-state/), and [Dapr](/handbook/framework/connect-distributed-infrastructure/platform-integrations/dapr/).
+The adapter guides describe the exact enablement and prerequisites: [event delivery](/handbook/framework/connect-distributed-infrastructure/event-delivery/), [queue delivery](/handbook/framework/connect-distributed-infrastructure/queue-delivery/), [stores](/handbook/framework/configure-applications/state-stores/), and [Dapr](/handbook/framework/connect-distributed-infrastructure/platform-integrations/dapr/).

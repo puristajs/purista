@@ -14,7 +14,10 @@ An upgrade changes more than a dependency version: it can affect generated artif
 | Process topology or broker | Delivery and recovery behavior | [Migrate adapters](/handbook/framework/upgrade-and-migrate/framework-and-adapter-migrations/) |
 | Production rollout | Evidence, rollback, and ownership | [Verify and roll back](/handbook/framework/upgrade-and-migrate/verification-and-rollback/) |
 
-The v3-to-v4 guide compares the latest published v3 Framework tag with the current v4 target. It does not include APIs that existed only while v4 was being developed. PURISTA does not expose a general one-command migration API that can transform application code, durable Harness data, broker data, or external contracts safely.
+The v3-to-v4 guide describes the released public contracts on both sides of the
+upgrade. PURISTA does not expose a general one-command migration API that can
+transform application code, durable Harness data, broker data, or external
+contracts safely.
 
 Before changing production, run focused service/message tests and an integration environment with the new external dependencies. Keep the previous deployment executable until the new behavior has passed its acceptance checks.
 

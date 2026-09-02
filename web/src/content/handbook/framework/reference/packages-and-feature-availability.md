@@ -42,6 +42,6 @@ The same command family exports `cloudevents-schema`, `runtime-capabilities`, `s
 | Need | Guide |
 | --- | --- |
 | Choose event/queue transport | [Distributed infrastructure](/handbook/framework/connect-distributed-infrastructure/) |
-| Choose configuration, secret, or state store | [Application configuration](/handbook/framework/configure-applications/) and [state](/handbook/framework/persist-application-state/) |
+| Choose configuration, secret, or state store | [Application configuration](/handbook/framework/configure-applications/) and [state](/handbook/framework/configure-applications/state-stores/) |
 | Enable the Hono server | [Hono guide](/handbook/framework/expose-and-consume-services/http-and-rest/hono/) |
 | Enable AI models/providers | [Build AI-powered services](/handbook/framework/build-ai-powered-services/) |

@@ -30,7 +30,14 @@ failure path.
 ```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoiceSubscriptionBuilder.ts"
 import { HandledError, StatusCode } from '@purista/core'
 
-recordInvoiceSubscriptionBuilder.setSubscriptionFunction(async function (context, payload) {
+recordInvoiceSubscriptionBuilder
+  .adviceConsumerFailureHandling({
+    mode: 'strict',
+    maxAttempts: 5,
+    retryDelayMs: 1_000,
+    deadLetterTarget: 'accounting.invoice-created.dead-letter',
+  })
+  .setSubscriptionFunction(async function (context, payload) {
   const existing = await context.resources.ledger.findByInvoiceId(payload.invoiceId)
   if (existing) return undefined // Safe idempotent completion.
 
@@ -44,7 +51,7 @@ recordInvoiceSubscriptionBuilder.setSubscriptionFunction(async function (context
 
     return { status: 'deadLetter', reason: 'ledger record cannot be created' }
   }
-  })
+})
 ```
 
 [`setSubscriptionFunction(fn)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#setsubscriptionfunction)
@@ -60,11 +67,28 @@ then detect the existing effect.
 
 ## Know the bridge boundary
 
-The runtime checks unsupported delayed retry, dead-letter, drop, and
-stop-consumer controls when `adviceConsumerFailureHandling` uses its default
-`strict` mode. `best-effort` lets the selected bridge degrade the request. The
-actual retention, redelivery timing, dead-letter destination, and resume
-operation are adapter concerns—verify them on the chosen EventBridge guide.
+Only AMQP and NATS currently act on subscription control errors. The default,
+MQTT, and HTTP/Dapr EventBridges log the control error; they do not retry,
+dead-letter, drop, or pause the delivery.
+
+| EventBridge | `retry` / delayed retry | `deadLetter` | `drop` | `stop-consumer` |
+| --- | --- | --- | --- | --- |
+| Default | Logged only | Logged only | Logged only | Logged only |
+| AMQP | Adapter-controlled | Adapter-controlled | Adapter-controlled | Adapter-controlled |
+| NATS | Adapter-controlled | Adapter-controlled | Adapter-controlled | Adapter-controlled |
+| MQTT | Logged only | Logged only | Logged only | Logged only |
+| HTTP / Dapr | Logged only | Logged only | Logged only | Logged only |
+
+Capability checks run only after the definition calls
+[`adviceConsumerFailureHandling(...)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#adviceconsumerfailurehandling).
+That call defaults to `mode: 'strict'`; without the call, no control-capability
+check runs. Strict execution checks delayed retry only when `delayMs` is greater
+than zero. A plain retry still relies on the adapter's behavior.
+
+`best-effort` permits only the degradation documented by the selected adapter.
+The broker owns retention, redelivery timing, dead-letter storage, and resume
+operations. Verify each requested outcome with the deployed EventBridge before
+depending on it for recovery.
 
 Next, [configure delivery failures and idempotency](/handbook/framework/build-services/subscriptions/delivery-failures-and-idempotency/) before depending on a recovery path.
 

@@ -95,5 +95,5 @@ explicitly promise it.
 
 Next: choose [configuration stores](/handbook/framework/configure-applications/configuration-stores/),
 [secret stores](/handbook/framework/configure-applications/secret-stores/), or
-[state stores](/handbook/framework/persist-application-state/) for provider
+[state stores](/handbook/framework/configure-applications/state-stores/) for provider
 installation, external prerequisites, wiring, and verification.

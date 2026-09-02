@@ -17,7 +17,7 @@ hide a dependency.
 import { z } from 'zod'
 
 const rawInvoiceSchema = z.object({ id: z.string(), customer_id: z.string(), amount_cents: z.string() })
-const rawParameterSchema = z.object({})
+const rawParameterSchema = z.undefined()
 
 recordInvoiceSubscriptionBuilder.setTransformInput(
   rawInvoiceSchema,

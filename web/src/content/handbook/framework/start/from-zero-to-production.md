@@ -35,7 +35,7 @@ Before connecting infrastructure, decide what each value is and who operates it.
 | Durable business state | In-memory state | Choose a state-store adapter and retention/backup policy | Restart and recovery behavior is tested against the selected store. |
 | External SDK/database client | Application-created resource | Inject a scoped resource and set its timeout/lifecycle policy | A unit test replaces the dependency with a fake. |
 
-Use [stores and application configuration](/handbook/framework/configure-applications/) for settings and secrets, and [persist application state](/handbook/framework/persist-application-state/) for state. Installing an adapter package only makes its code importable; the application still has to provision the external service, configure credentials, wire the adapter, and verify the connection.
+Use [stores and application configuration](/handbook/framework/configure-applications/) for settings and secrets, and [persist application state](/handbook/framework/configure-applications/state-stores/) for state. Installing an adapter package only makes its code importable; the application still has to provision the external service, configure credentials, wire the adapter, and verify the connection.
 
 ## Phase 3: Runtime architecture
 

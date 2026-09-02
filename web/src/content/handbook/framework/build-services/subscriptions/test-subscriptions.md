@@ -20,7 +20,13 @@ Use a real builder so the helper can derive the context type. Bind
 validation and before guards before calling the handler.
 
 ```ts title="src/service/accounting/v1/subscription/recordInvoice/recordInvoiceSubscriptionBuilder.test.ts"
-import { createSubscriptionContextMock, getCustomMessageMessageMock, safeBind } from '@purista/core'
+import {
+  createSubscriptionContextMock,
+  getCustomMessageMessageMock,
+  getEventBridgeMock,
+  getLoggerMock,
+  safeBind,
+} from '@purista/core'
 import { createSandbox } from 'sinon'
 import { describe, expect, test } from 'vitest'
 import { accountingV1Service } from '../../accountingV1Service.js'
@@ -39,12 +45,16 @@ describe('recordInvoice subscription', () => {
         sandbox,
         resources: { ledger },
       })
-      const handler = safeBind(recordInvoiceSubscriptionBuilder.getSubscriptionFunction(), accountingV1Service)
+      const service = await accountingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+        logger: getLoggerMock(sandbox).mock,
+        resources: { ledger },
+      })
+      const handler = safeBind(recordInvoiceSubscriptionBuilder.getSubscriptionFunction(), service)
 
-      await expect(handler(context, { invoiceId: 'invoice-42', customerId: 'customer-42', amountCents: 4_200 }, {})).resolves.toEqual({
+      await expect(handler(context, { invoiceId: 'invoice-42', customerId: 'customer-42', amountCents: 4_200 }, undefined)).resolves.toEqual({
         ledgerEntryId: 'ledger-42',
       })
-      expect(ledger.recordInvoice).toHaveBeenCalledOnce()
+      expect(ledger.recordInvoice.calledOnce).toBe(true)
     } finally {
       sandbox.restore()
     }

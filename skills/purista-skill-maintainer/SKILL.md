@@ -34,6 +34,9 @@ Specs are the source of truth for framework development. If implementation and s
 - Keep the skill catalog compatible with agent-skill best practices: specific trigger descriptions, progressive disclosure, one-level reference loading, references over 100 lines with a `## Contents` section, and concrete evaluation scenarios.
 - Use the filesystem as part of the reasoning surface: good reference taxonomy matters.
 - Verify every file path, package path, and code snippet in the repo.
+- Keep user-facing skills and public docs on the released final state. Remove
+  development chronology, correction narratives, rejected alternatives, and
+  internal review language; migration guidance compares released contracts.
 - Run `npm run audit:skills` after skill edits and fix structural issues before publishing.
 - Update downstream docs, tests, overlays, and published LLM context files in the same refactor when the shared skill shape changes.
 - Keep `purista/skills` as the source of truth; installed copies under `$CODEX_HOME/skills` are mirrors that may need syncing after repo changes.

@@ -32,9 +32,8 @@ Do not use it to maintain the shared framework catalog: use
   adapters, or automatic old-data readers. Migration support belongs in the
   versioned handbook page, CLI diagnostics, and explicit application-owned
   source/data conversion steps.
-- Compare the latest published source release with the released target. Do not
-  document an experimental redesign as shipped or preserve APIs that existed
-  only on an unreleased development branch.
+- Compare the installed source release with the released target and use only
+  public APIs present in those releases.
 - Use the project-local CLI and its `add:*` scripts. Do not fetch or rely on a
   global CLI for a migration.
 - Treat every new diagnostic, compile error, contract change, and operational

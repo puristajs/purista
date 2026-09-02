@@ -1,6 +1,6 @@
 ---
-title: Choose and transition an OpenTelemetry backend
-description: Select a telemetry backend without coupling PURISTA services to vendor endpoints, credentials, or retention settings.
+title: Connect an observability backend
+description: Connect a collector and backend without coupling PURISTA services to vendor endpoints, credentials, or retention settings.
 order: 1022
 ---
 
@@ -18,6 +18,12 @@ Start with a collector or platform telemetry pipeline when production workloads 
 The linked vendor guides are the source of truth for current packages, endpoint formats, authentication, and support status. Those details change independently of PURISTA and are deliberately not copied here.
 
 ## Build a portable pipeline
+
+For a runnable local reference, use the Docker Compose stacks in
+`examples/fullexample`. The maintained scripts start Grafana with
+Tempo/Loki/Prometheus, Jaeger, SigNoz, Teletrace, Uptrace, or Zipkin alongside
+the PURISTA example. Use synthetic data and stop the selected stack after the
+verification run.
 
 ```mermaid title="Portable OpenTelemetry delivery pipeline"
 flowchart LR

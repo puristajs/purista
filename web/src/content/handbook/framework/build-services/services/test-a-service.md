@@ -23,7 +23,7 @@ describe('Invoice v1 service', () => {
 | --- | --- | --- |
 | `testServiceSetup()` | Duplicate command/subscription/stream/queue names, duplicate command response-event names, and queue-worker references | Resource or service-config construction/validation, event-to-queue bindings, schedules, EventBridge/QueueBridge health/capabilities, service startup, adapter behavior, or deployment topology |
 | Primitive handler/helper test | Domain outcome, authentication branch, narrow resource call, emitted contract | Service registration, real bridge/store behavior, or a live provider |
-| Deterministic primitive runtime harness | The selected command/stream/subscription/worker Framework lifecycle | A production transport, store, broker, HTTP server, or nondeterministic model result |
+| Deterministic primitive runtime harness | The selected command, stream, or queue-worker Framework lifecycle | A subscription runtime harness, production transport, store, broker, HTTP server, or nondeterministic model result |
 | Real adapter integration | Configured provider startup, credentials, network, persistence, or delivery behavior | Guarantees from another provider or business exactly-once behavior |
 
 [`testServiceSetup()`](/handbook/api/classes/_purista_core.ServiceBuilder/#testservicesetup) is not a non-mutating inspection: it resolves and caches

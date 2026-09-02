@@ -96,7 +96,7 @@ handler.
 This is a duplicate check, not a concurrency guarantee: separate reads and
 writes can race. Use the consistency and transaction capabilities of the
 selected backend when correctness depends on atomicity. Design keys, tenant
-isolation, migrations, and recovery in [keys, namespaces, isolation, and consistency](/handbook/framework/persist-application-state/keys-namespaces-isolation-and-consistency/).
+isolation, migrations, and recovery in [keys, namespaces, isolation, and consistency](/handbook/framework/configure-applications/state-stores/keys-namespaces-isolation-and-consistency/).
 
 ## Resolve secrets without exposing them
 
@@ -123,7 +123,7 @@ explains the declaration and runtime injection boundary.
 
 ## Continue with the selected adapter
 
-- [State stores](/handbook/framework/persist-application-state/) for durable service-owned records.
+- [State stores](/handbook/framework/configure-applications/state-stores/) for durable service-owned records.
 - [Configuration stores](/handbook/framework/configure-applications/configuration-stores/) for non-sensitive externally managed values.
 - [Secret stores](/handbook/framework/configure-applications/secret-stores/) for sensitive runtime-managed values.
 - [Handler context reference](/handbook/framework/build-services/handler-context/) for the other capabilities available to each primitive.

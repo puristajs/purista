@@ -114,6 +114,6 @@ delivery guarantees uniform across providers.
 ## Continue with the focused guide
 
 - [Deliver events through Dapr](/handbook/framework/connect-distributed-infrastructure/event-delivery/dapr/) explains Dapr command/event routing, listener settings, and startup order.
-- [Persist state through Dapr](/handbook/framework/persist-application-state/dapr/) covers state component wiring and limits.
+- [Persist state through Dapr](/handbook/framework/configure-applications/state-stores/dapr/) covers state component wiring and limits.
 - [Store configuration through Dapr](/handbook/framework/configure-applications/configuration-stores/dapr/) covers read-only configuration access.
 - [Store secrets through Dapr](/handbook/framework/configure-applications/secret-stores/dapr/) covers secret component identity and namespace metadata.

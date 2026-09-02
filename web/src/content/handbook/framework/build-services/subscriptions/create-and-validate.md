@@ -25,7 +25,7 @@ const invoiceCreatedSchema = z.object({
   customerId: z.string().min(1),
   amountCents: z.number().int().positive(),
 })
-const recordInvoiceParameterSchema = z.object({})
+const recordInvoiceParameterSchema = z.undefined()
 const ledgerEntryCreatedSchema = z.object({ ledgerEntryId: z.string() })
 
 export const recordInvoiceSubscriptionBuilder = accountingV1ServiceBuilder
@@ -39,6 +39,11 @@ export const recordInvoiceSubscriptionBuilder = accountingV1ServiceBuilder
     return { ledgerEntryId: entry.id }
   })
 ```
+
+Custom events and command responses do not carry a separate command parameter;
+the runtime passes `undefined`. Use `z.undefined()` or omit
+`addParameterSchema(...)`. Reserve an object parameter schema for a
+subscription that deliberately accepts command messages.
 
 This builder assumes the service builder already declares its `ledger` resource;
 see [provide resources and metrics](/handbook/framework/build-services/services/provide-resources-and-metrics/) for that composition contract.

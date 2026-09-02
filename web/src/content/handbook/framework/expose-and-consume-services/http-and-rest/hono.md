@@ -208,6 +208,13 @@ The schema on that definition still owns business validation.
 | Trace context | Hono extracts W3C trace context and echoes its configurable application trace header. | Keep an existing correlation header only as a complement to normal trace propagation. |
 | Controlled failure | Invalid/missing body representation produces `400`, too-large body `413`, unknown endpoint `404`, unavailable Hono `503`, and a stream operation unsupported by the EventBridge `501`. Handled errors become RFC 9457 problem details; unexpected errors become `500`. | Treat these as transport outcomes. Keep domain error classification in the command/stream handler. |
 
+Protection middleware fields are merged into `additionalParameter` before the
+definition's parameter schema runs. A `.strict()` object schema therefore
+rejects middleware-injected keys unless it declares them. Include every
+injected business parameter in that schema, or keep identity only in the
+trusted `principalId` and `tenantId` message fields and authorize it with a
+business guard.
+
 ## Authenticate at the edge; authorize in the service
 
 [`setProtectMiddleware(fn)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#setprotectmiddleware)
@@ -235,6 +242,16 @@ const currentSessionCommandBuilder = authV1ServiceBuilder
   .addOutputSchema(sessionSchema)
   .exposeAsHttpEndpoint('GET', 'session')
 ```
+
+[`getCommandBuilder(name, description, eventName?)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
+creates the service-owned operation. The optional event name is only for a
+canonical success fact. [`addPayloadSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addpayloadschema)
+and [`addOutputSchema(schema, contentType?, contentEncoding?)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#addoutputschema)
+define the validated request and successful result; omitted representation
+values use JSON and UTF-8. [`exposeAsHttpEndpoint(method, path, ...)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#exposeashttpendpoint)
+adds HTTP/OpenAPI metadata and does not replace the command handler.
+[`makeEndpointPublic()`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#makeendpointpublic)
+disables generated-route protection only for the login command.
 
 The second endpoint keeps the default protection. The middleware should throw
 a `HandledError` for expected authentication failures and let Hono's installed

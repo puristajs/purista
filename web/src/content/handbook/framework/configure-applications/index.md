@@ -28,7 +28,7 @@ flowchart LR
 | Deployment and bootstrap configuration, including fixed technical credentials | [Service configuration](/handbook/framework/build-services/services/configuration/) and composition-root wiring | Database, broker, provider, and secret-store access needed to start this deployment | Tenant/principal-owned secrets or values that must be managed while the service runs |
 | Runtime-mutable non-secret configuration | [Configuration stores](/handbook/framework/configure-applications/configuration-stores/) | Feature settings, limits, public endpoints, or controlled operational values | Credentials, tokens, private keys, or business records |
 | Runtime-managed sensitive values | [Secret stores](/handbook/framework/configure-applications/secret-stores/) | Tenant/principal API keys, delegated credentials, or other sensitive business data that services create, rotate, revoke, or resolve at runtime | General business records, ad-hoc configuration, or a replacement for deployment bootstrap credentials |
-| Service-owned state | [State stores](/handbook/framework/persist-application-state/) | Idempotency records, checkpoints, small durable workflow state | Ad-hoc configuration or secrets |
+| Service-owned state | [State stores](/handbook/framework/configure-applications/state-stores/) | Idempotency records, checkpoints, small durable workflow state | Ad-hoc configuration or secrets |
 
 Deployment configuration is supplied through the platform’s approved secret
 delivery mechanism (for example workload identity or injected process
@@ -54,4 +54,4 @@ are exposed to a command, subscription, stream, or worker.
 | Validate a stable service setting or choose an environment-owned value | [Configuration defaults, validation, and precedence](/handbook/framework/configure-applications/configuration-model-defaults-validation-and-precedence/) |
 | Choose a runtime configuration adapter | [Configuration stores](/handbook/framework/configure-applications/configuration-stores/) |
 | Choose a runtime secret adapter | [Secret stores](/handbook/framework/configure-applications/secret-stores/) |
-| Persist a service-owned record safely | [State stores](/handbook/framework/persist-application-state/) |
+| Persist a service-owned record safely | [State stores](/handbook/framework/configure-applications/state-stores/) |

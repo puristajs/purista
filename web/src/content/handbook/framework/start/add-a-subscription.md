@@ -28,7 +28,7 @@ it to the command's success-event contract before accessing `payload.incidentId`
 import { extendApi } from '@purista/core'
 import { z } from 'zod'
 
-export const notificationV1NotifyRespondersInputParameterSchema = extendApi(z.object({}), { title: 'input parameter schema' })
+export const notificationV1NotifyRespondersInputParameterSchema = extendApi(z.undefined(), { title: 'input parameter schema' })
 export const notificationV1NotifyRespondersInputPayloadSchema = extendApi(
   z.object({ incidentId: z.string() }),
   { title: 'incident created event payload' },
@@ -61,8 +61,8 @@ Use `retry` only when the operation is safe to run again. Before requesting retr
 | Declaration | What it establishes | Options and boundary |
 | --- | --- | --- |
 | [`getSubscriptionBuilder(name, description)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getsubscriptionbuilder) | The named subscription and its operator-facing description. | The name identifies this consumer in service registration and operations; it is not the event name. |
-| [`subscribeToEvent(eventName, eventVersion?)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#subscribetoevent) | The event-name filter, with an optional event version when the producer publishes one. | Match the producer’s success-event contract. Do not use a broad event name as a substitute for compatibility/versioning decisions. |
-| [`addPayloadSchema(schema)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addpayloadschema) / [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addparameterschema) | Event body and parameter validation plus inferred handler inputs. | Payload representation defaults to JSON/UTF-8; an empty parameter schema is appropriate when the event has none. |
+| [`subscribeToEvent(eventName, serviceVersion?)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#subscribetoevent) | The event-name filter, optionally scoped to the producing service's version. | The second argument is a service version, not an event-payload version. Match the producer's success-event contract deliberately. |
+| [`addPayloadSchema(schema)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addpayloadschema) / [`addParameterSchema(schema)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#addparameterschema) | Event body and parameter validation plus inferred handler inputs. | A custom event has `parameter: undefined`, so use `z.undefined()` or omit the parameter schema. |
 | [`setSubscriptionFunction(handler)`](/handbook/api/classes/_purista_core.SubscriptionDefinitionBuilder/#setsubscriptionfunction) | The side-effect implementation. A normal fulfilled result lets the bridge follow its configured acknowledgement path. | Use `async function` when the handler needs its service receiver. For durable delivery, acknowledgement, retry, and dead-letter choices, continue with [subscriptions](/handbook/framework/build-services/subscriptions/). |
 
 ## Start both participating services

@@ -19,7 +19,7 @@ export const durableGenerateReportQueueBuilder = generateReportQueueBuilder
     poisonMessageAction: 'pause-worker',
   })
   .setDeadLetterOptions({ queueName: 'report.dead-letter' })
-  .setQueueBridgeConfig({ prefetch: 2, orderingGuarantee: 'fifo' })
+  .setQueueBridgeConfig({ prefetch: 1, orderingGuarantee: 'fifo' })
 ```
 
 | Builder method | Parameters / default | Runtime effect and decision |

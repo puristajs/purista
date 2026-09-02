@@ -413,10 +413,10 @@ runtime test for the complete order.
   identifiers, expected results, and failure semantics consistent. Change the
   scenario when another problem genuinely fits better; do not contort one
   example for superficial uniformity.
-- Write handbook prose as product and framework documentation. Do not expose
-  authoring reasoning, review/debug notes, prompt feedback, or editorial
-  directions such as “keep this inline.” State the runtime behavior,
-  ownership, contract, constraint, and resulting implementation step instead.
+- Document the released final state. Keep development chronology, rejected
+  designs, authoring/review notes, correction narratives, prompt feedback, and
+  editorial directions out of public pages. State the runtime contract and
+  usage. Migration pages compare released APIs without design chronology.
 - Keep snippets focused and source-verified. Use the correct fenced language
   and a real path or precise action/result title—never `snippet.ts`,
   `example.sh`, or invented filenames.

@@ -1,7 +1,7 @@
 ---
 title: Migrate from v3 to v4
 description: Replace the generated attached-agent API with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.
-order: 1110
+order: 1120
 ---
 
 PURISTA v4 makes a clean break in AI integration. Remove v3 agent builders and

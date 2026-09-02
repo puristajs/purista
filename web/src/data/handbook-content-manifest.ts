@@ -46,17 +46,26 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/schedule-event-queue-result",
+    "topicId": "framework/apply-patterns-and-recipes/long-running-workflows-with-temporal",
+    "parentTopicId": "framework/apply-patterns-and-recipes",
+    "order": 840,
+    "title": "Long-running workflows with Temporal",
+    "description": "Let Temporal own durable orchestration while PURISTA commands remain the addressed business-capability boundary.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/build-services/schedule-work",
     "parentTopicId": "framework/build-services",
     "order": 360,
     "title": "Schedule work",
-    "description": "Export a provider-neutral schedule contract, then keep time, delivery, execution, and recovery owned by the right component.",
+    "description": "Define provider-neutral schedules, export them to an external scheduler, and keep business execution inside PURISTA commands, events, and queues.",
     "pageRole": "chapter"
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/schedule-event-queue-result/create-a-schedule-and-choose-a-target",
-    "parentTopicId": "framework/build-services/schedule-event-queue-result",
+    "topicId": "framework/build-services/schedule-work/create-a-schedule-and-choose-a-target",
+    "parentTopicId": "framework/build-services/schedule-work",
     "order": 361,
     "title": "Create a schedule and choose a target",
     "description": "Define an external schedule contract and select the event, queue, or command target that matches the scheduled outcome.",
@@ -64,8 +73,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/schedule-event-queue-result/emit-enqueue-or-invoke-on-a-schedule",
-    "parentTopicId": "framework/build-services/schedule-event-queue-result",
+    "topicId": "framework/build-services/schedule-work/emit-enqueue-or-invoke-on-a-schedule",
+    "parentTopicId": "framework/build-services/schedule-work",
     "order": 362,
     "title": "Emit, enqueue, or invoke on a schedule",
     "description": "Turn a scheduled trigger into an observable event, a durable job, or short command logic without making the scheduler own business recovery.",
@@ -73,8 +82,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/schedule-event-queue-result/export-and-deploy-schedules",
-    "parentTopicId": "framework/build-services/schedule-event-queue-result",
+    "topicId": "framework/build-services/schedule-work/export-and-deploy-schedules",
+    "parentTopicId": "framework/build-services/schedule-work",
     "order": 363,
     "title": "Export and deploy schedules",
     "description": "Treat schedule definitions as external-platform input, then make installation, deployment, enablement, and verification explicit for the selected scheduler.",
@@ -82,8 +91,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/schedule-event-queue-result/handle-missed-runs-concurrency-and-duplicates",
-    "parentTopicId": "framework/build-services/schedule-event-queue-result",
+    "topicId": "framework/build-services/schedule-work/handle-missed-runs-concurrency-and-duplicates",
+    "parentTopicId": "framework/build-services/schedule-work",
     "order": 364,
     "title": "Handle missed runs, concurrency, and duplicates",
     "description": "Express scheduling intent clearly, then design the target business effect to remain safe when the platform, event path, or queue repeats work.",
@@ -91,8 +100,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/build-services/schedule-event-queue-result/test-scheduled-behavior",
-    "parentTopicId": "framework/build-services/schedule-event-queue-result",
+    "topicId": "framework/build-services/schedule-work/test-scheduled-behavior",
+    "parentTopicId": "framework/build-services/schedule-work",
     "order": 365,
     "title": "Test scheduled behavior",
     "description": "Prove schedule metadata, event-to-queue mapping, worker idempotency, and the selected scheduler platform at the boundaries that actually own them.",
@@ -1108,8 +1117,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/dapr",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/dapr",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 650,
     "title": "Persist state through Dapr",
     "description": "Use a Dapr state component while keeping the service definition independent of the backing provider.",
@@ -1117,8 +1126,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/keys-namespaces-isolation-and-consistency",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/keys-namespaces-isolation-and-consistency",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 610,
     "title": "Design keys, isolation, and consistency",
     "description": "Make state records safe to find, validate, migrate, and recover without mistaking a key prefix for authorization or a read/write pair for a transaction.",
@@ -1126,8 +1135,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/default",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/default",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 620,
     "title": "Use the default state store locally",
     "description": "Seed and wire the included in-memory state store for a local result or deterministic test, never as a production source of truth.",
@@ -1135,7 +1144,7 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores",
     "parentTopicId": "framework/configure-applications",
     "order": 530,
     "title": "State stores",
@@ -1144,8 +1153,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/nats-jetstream-kv",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/nats-jetstream-kv",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 640,
     "title": "Persist state in NATS JetStream KV",
     "description": "Enable JetStream key-value storage for state in a NATS-operated deployment.",
@@ -1153,8 +1162,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/redis",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/redis",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 630,
     "title": "Persist state in Redis",
     "description": "Enable Redis-backed state for a protected, shared application runtime.",
@@ -1162,8 +1171,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/custom-state-store",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/custom-state-store",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 660,
     "title": "Build a custom state store",
     "description": "Implement PURISTA's small state-store contract when the supported adapters do not match the platform, while preserving explicit lifecycle and safe value handling.",
@@ -1171,8 +1180,8 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
-    "topicId": "framework/persist-application-state/test-and-migrate-state",
-    "parentTopicId": "framework/persist-application-state",
+    "topicId": "framework/configure-applications/state-stores/test-and-migrate-state",
+    "parentTopicId": "framework/configure-applications/state-stores",
     "order": 670,
     "title": "Test and migrate state",
     "description": "Verify handler logic deterministically, prove a durable adapter separately, and change key or value formats without corrupting delayed work or blocking rollback.",
@@ -1234,6 +1243,24 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
+    "topicId": "framework/reference/builder-and-context-index",
+    "parentTopicId": "framework/reference",
+    "order": 1225,
+    "title": "Builder and handler-context index",
+    "description": "Find the builder that declares a capability and the context surface that becomes available inside its handler.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/reference/configuration-and-environment-variables",
+    "parentTopicId": "framework/reference",
+    "order": 1235,
+    "title": "Configuration and environment variables",
+    "description": "Keep typed service configuration separate from deployment settings, credentials, and adapter-specific environment variables.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
     "topicId": "framework/reference/packages-and-feature-availability",
     "parentTopicId": "framework/reference",
     "order": 1230,
@@ -1288,6 +1315,15 @@ const canonicalContentManifest = [
   },
   {
     "product": "framework",
+    "topicId": "framework/deploy-applications/serverless-and-edge",
+    "parentTopicId": "framework/deploy-applications",
+    "order": 1055,
+    "title": "Deploy to serverless and edge runtimes",
+    "description": "Match PURISTA component lifecycles, transport support, and durable work to short-lived or restricted runtime environments.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
     "topicId": "framework/secure-and-operate",
     "parentTopicId": "framework",
     "order": 1000,
@@ -1300,8 +1336,8 @@ const canonicalContentManifest = [
     "topicId": "framework/secure-and-operate/observability/backend-guides",
     "parentTopicId": "framework/secure-and-operate/observability",
     "order": 1022,
-    "title": "Choose and transition an OpenTelemetry backend",
-    "description": "Select a telemetry backend without coupling PURISTA services to vendor endpoints, credentials, or retention settings.",
+    "title": "Connect an observability backend",
+    "description": "Connect a collector and backend without coupling PURISTA services to vendor endpoints, credentials, or retention settings.",
     "pageRole": "task"
   },
   {
@@ -1320,6 +1356,24 @@ const canonicalContentManifest = [
     "order": 1023,
     "title": "Configure structured logging",
     "description": "Use PURISTA’s Pino-backed logger, scoped child fields, and safe event-level practices without leaking payloads, credentials, or tenant data.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/secure-and-operate/observability/define-and-record-metrics",
+    "parentTopicId": "framework/secure-and-operate/observability",
+    "order": 1024,
+    "title": "Define and record metrics",
+    "description": "Export PURISTA framework instruments and add low-cardinality application metrics through typed service definitions.",
+    "pageRole": "task"
+  },
+  {
+    "product": "framework",
+    "topicId": "framework/secure-and-operate/observability/trace-commands-events-streams-and-jobs",
+    "parentTopicId": "framework/secure-and-operate/observability",
+    "order": 1025,
+    "title": "Trace commands, events, streams, and jobs",
+    "description": "Correlate PURISTA execution across bridges, services, streams, stores, and queue workers with the built-in span vocabulary.",
     "pageRole": "task"
   },
   {
@@ -1677,7 +1731,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/upgrade-and-migrate/migrate-v3-to-v4",
     "parentTopicId": "framework/upgrade-and-migrate",
-    "order": 1110,
+    "order": 1120,
     "title": "Migrate from v3 to v4",
     "description": "Replace the generated attached-agent API with native Harness definitions, explicit service mounts, address-first calls, and deliberate HTTP adapters.",
     "pageRole": "migration"
@@ -1695,7 +1749,7 @@ const canonicalContentManifest = [
     "product": "framework",
     "topicId": "framework/upgrade-and-migrate/version-policy-and-preparation",
     "parentTopicId": "framework/upgrade-and-migrate",
-    "order": 1120,
+    "order": 1110,
     "title": "Prepare a Framework or adapter upgrade",
     "description": "Inventory the application boundary, align official packages, and test the target runtime before rollout.",
     "pageRole": "task"

@@ -19,7 +19,7 @@ const eventBridge = new DefaultEventBridge()
 await eventBridge.start()
 
 const service = await invoiceV1Service.getInstance(eventBridge, {
-  resources: { invoiceRepository: createInvoiceRepository() },
+  resources: { invoices: await createInvoiceRepository() },
   serviceConfig: { reminderWindowDays: 14 },
 })
 

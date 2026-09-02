@@ -63,7 +63,7 @@ attaches command schedule metadata; it does not run a scheduler. Its defaults
 are `concurrencyPolicy: 'allow'`, `missedRunPolicy: 'skip'`, and
 `enabledByDefault: true`. The options also own the expression/time zone,
 catch-up count, jitter, idempotency key, target schemas, and provider hints;
-choose and deploy them in [Schedule work](/handbook/framework/build-services/schedule-event-queue-result/).
+choose and deploy them in [Schedule work](/handbook/framework/build-services/schedule-work/).
 [`markAsDeprecated()`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#markasdeprecated)
 is metadata only; retain the working implementation until callers have a
 documented replacement.

@@ -11,14 +11,14 @@ release is not yet required.
 ## 1. Keep one explicit composition root
 
 ```ts title="src/index.ts"
-import { DefaultEventBridge, gracefulShutdown, initLogger, type Service } from '@purista/core'
-import { createHttpServer } from './http.js'
+import { gracefulShutdown, initLogger, type Service } from '@purista/core'
+import { getEventBridge } from './eventbridge.js'
+import { getHttpServer } from './http.js'
 import { invoiceV1Service } from './service/invoice/v1/invoiceV1Service.js'
 import { notificationV1Service } from './service/notification/v1/notificationV1Service.js'
 
 const logger = initLogger()
-const eventBridge = new DefaultEventBridge({ logger })
-await eventBridge.start()
+const eventBridge = await getEventBridge(logger)
 
 const services: Service[] = []
 for (const builder of [invoiceV1Service, notificationV1Service]) {
@@ -27,14 +27,28 @@ for (const builder of [invoiceV1Service, notificationV1Service]) {
   services.push(service)
 }
 
-const httpServer = await createHttpServer({ eventBridge, services, logger })
-gracefulShutdown(logger, [httpServer, ...services, eventBridge])
+const { honoService, serverInstance } = await getHttpServer({ eventBridge, services, logger })
+
+gracefulShutdown(logger, [
+  honoService.prepareDestroy(),
+  eventBridge,
+  ...services,
+  {
+    name: `${honoService.serviceInfo.serviceName} ${honoService.serviceInfo.serviceVersion} close socket`,
+    destroy: () => new Promise<void>((resolve, reject) => {
+      serverInstance.close(error => error ? reject(error) : resolve())
+    }),
+  },
+  honoService,
+])
 ```
 
 The order matters: adapters start first, service instances register their
-definitions next, and the public listener becomes ready last. Shutdown reverses
-the traffic direction: stop intake, drain/stop services, then destroy shared
-adapters and flush telemetry.
+definitions next, and the public listener becomes ready last.
+`honoService.prepareDestroy()` marks the HTTP service unavailable before the
+remaining entries are destroyed. The separate socket entry is required because
+the Node HTTP listener belongs to the application, while `honoService` owns the
+Hono routes and PURISTA lifecycle. Close both during shutdown.
 
 ## 2. Compile the generated ESM project
 
