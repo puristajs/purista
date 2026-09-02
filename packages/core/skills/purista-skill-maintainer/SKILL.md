@@ -13,7 +13,9 @@ Use this skill when creating, refactoring, consolidating, or reviewing the share
 ## What this skill is for
 This skill defines the maintenance workflow for the shared PURISTA skill catalog in `purista/skills`.
 The catalog has one canonical framework skill, `purista`, plus internal workflows: `purista-skill-maintainer` for catalog work, `purista-docs-maintainer` for the public website and handbook, and `purista-tutorial-maintainer` for worked Framework tutorials and runnable learning examples.
-The maintainer skill keeps that model coherent, readable, spec-grounded, implementation-verified, and aligned across `purista`, `starter`, `create-purista`, public docs, and `voyage`.
+The maintainer skill keeps that model coherent, readable, spec-grounded,
+implementation-verified, and aligned across `purista`, `starter`,
+`create-purista`, and public docs.
 
 ## Source-of-truth order
 Read sources in this order before changing a skill:
@@ -21,7 +23,7 @@ Read sources in this order before changing a skill:
 2. Current implementation in `purista/`
 3. Public handbook/API docs in `purista/web`
 4. The current `purista` skill and its `references/`
-5. Downstream overlays and consumers in `voyage`, `starter`, and `create-purista`
+5. Downstream templates and generators in `starter` and `create-purista`
 
 Specs are the source of truth for framework development. If implementation and specs conflict, first decide whether the implementation drifted or the spec is stale. Fix the drift in the implementation or update/supersede the spec, then align skills to the implemented behavior that now follows the current spec.
 
@@ -71,7 +73,7 @@ Specs are the source of truth for framework development. If implementation and s
 - Snippet relevance and duplicate-content risk
 - Evaluation scenarios still cover setup, CLI scaffolding, streams, queues, agents, enterprise review, and drift repair
 - Drift between active specs and implementation
-- Drift in `starter`, `create-purista`, `voyage`, and published docs
+- Drift in `starter`, `create-purista`, and published docs
 - Drift between repo-local skills and installed mirror copies under `$CODEX_HOME/skills`
 - Drift between metric catalog, observability docs, examples, and skill snippets
 - Drift between security/privacy handbook pages, AI docs, generated examples, and skill guidance about PII, prompts, secrets, telemetry, and tenant isolation
@@ -79,4 +81,3 @@ Specs are the source of truth for framework development. If implementation and s
 ## Read if needed
 - `references/catalog-audit-wave1.md`
 - `references/maintenance-checklist.md`
-- `voyage/apps/server/skills/README.md`

@@ -27,7 +27,9 @@ This repository ships one shared framework skill catalog in `skills/`.
 - Keep concrete evaluation scenarios for `purista-docs-maintainer` so page structure, coverage, adapter guidance, and proportional-change behavior can be forward-tested.
 - Keep concrete evaluation scenarios for `purista-tutorial-maintainer` covering direct entry, easy English, Framework-only AI, reproducible dependencies, UI protocol compatibility, and trusted identity across boundaries.
 - Keep active specs, implementation, public docs, and skills aligned in that order: specs define intended behavior, implementation realizes it, public docs explain it, and user-facing skills teach the implemented behavior.
-- Keep current platform decisions visible: Hono as active HTTP runtime, EventBridge/QueueBridge separation, core-owned harness-backed agents, and provider packages as app-level dependencies.
+- Keep current platform decisions visible: Hono as active HTTP runtime,
+  EventBridge/QueueBridge separation, native Harness definitions mounted by
+  Core, and provider packages as app-level dependencies.
 - Keep current enterprise decisions visible: schedules are contracts, Kubernetes CronJob export is manifest generation, Redis/NATS strict idempotency returns the original job id, and no `@purista/contracts` package is used.
 - Contract guidance should prefer boundary-local consumer schemas over one oversized shared schema reused across many services.
 - Security guidance should treat tenant isolation, authorization, auditability, data minimization, secret handling, and PII/prompt redaction as first-class architecture concerns.

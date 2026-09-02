@@ -115,16 +115,19 @@ Validation:
 Prompt:
 
 ```text
-Old planning notes mention @purista/ai and AgentProtocolEnvelope, but the implementation exposes core-native agents. Update the skills.
+Old planning notes mention @purista/ai, AgentProtocolEnvelope, and a Core
+AgentBuilder, but the implementation mounts native Harness definitions. Update
+the skills.
 ```
 
 Expected behavior:
 - checks current implementation before copying stale planning assumptions
-- documents the implemented API and records planning drift instead of reviving removed APIs
+- documents native Harness definitions, the Core mount boundary, and
+  address-first invocation instead of reviving removed APIs
 - updates repo-local `purista/skills` before installed mirror copies
 
 Validation:
-- `rg -n "@purista/ai|AgentProtocolEnvelope|AiSdkProvider|Vercel AI SDK" skills/purista` only finds explicit historical warnings if any
+- `rg -n "@purista/ai|AgentProtocolEnvelope|AgentBuilder|AiSdkProvider" skills/purista` only finds explicit historical warnings if any
 - `npm run audit:skills` passes
 - `npm run lint` passes when skill changes affect tracked repo files
 

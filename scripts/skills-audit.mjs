@@ -14,6 +14,12 @@ const internalMaintainerSkills = new Set([
 
 const readText = path => readFileSync(path, 'utf8')
 
+const walkFiles = directory =>
+	readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
+		const path = join(directory, entry.name)
+		return entry.isDirectory() ? walkFiles(path) : [path]
+	})
+
 const lineCount = text => text.split(/\r?\n/).length
 
 const parseFrontmatter = text => {
@@ -125,6 +131,37 @@ if (!existsSync(docsEvalScenarios)) {
 const tutorialEvalScenarios = join(skillsRoot, 'purista-tutorial-maintainer', 'references', 'evaluation-scenarios.md')
 if (!existsSync(tutorialEvalScenarios)) {
 	addIssue(tutorialEvalScenarios, 'PURISTA tutorial maintainer should include concrete evaluation scenarios')
+}
+
+const canonicalSkillText = walkFiles(skillsRoot)
+	.filter(file => file.endsWith('.md'))
+	.map(file => readText(file))
+	.join('\n')
+
+for (const retiredFragment of [
+	'nats-storage',
+	'redis-storage',
+	'core agent builders',
+	'core-native agents',
+	'fluent agent builder',
+	'3.2.4 `createCommandTestHarness`',
+	'voyage',
+]) {
+	if (canonicalSkillText.toLowerCase().includes(retiredFragment.toLowerCase())) {
+		addIssue(skillsRoot, `contains retired guidance fragment: ${retiredFragment}`)
+	}
+}
+
+const packagedSkillsRoot = resolve(root, 'packages/core/skills')
+if (!existsSync(packagedSkillsRoot)) {
+	addIssue(packagedSkillsRoot, 'packaged skill mirror is missing')
+} else {
+	for (const canonicalFile of walkFiles(skillsRoot)) {
+		const relativeFile = relative(skillsRoot, canonicalFile)
+		const packagedFile = join(packagedSkillsRoot, relativeFile)
+		if (!existsSync(packagedFile)) addIssue(packagedFile, 'packaged skill mirror file is missing')
+		else if (readText(canonicalFile) !== readText(packagedFile)) addIssue(packagedFile, 'differs from canonical skills')
+	}
 }
 
 if (issues.length) {

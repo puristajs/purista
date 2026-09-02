@@ -77,13 +77,11 @@ Use this checklist when creating or updating a skill.
 - `starter` aligned when defaults or generated app shape changed
 - `create-purista` aligned when scaffolding or templates changed
 - ESM-only scaffolding stays aligned across `purista`, `starter`, `create-purista`, public docs, and installed skill mirrors
-- `voyage` aligned when framework capability assumptions changed
 - Public docs updated when guidance or migration expectations changed
 - Known planning-doc drift is documented outside the skill when an old draft disagrees with implemented public APIs
 - Observability handbook, metric catalog, examples, and skills agree on metric names, attributes, and ownership boundaries
 - Security/privacy handbook pages, AI docs, examples, generated templates, and skills agree on tenant/principal propagation, guard placement, secret-store usage, redaction, sandboxing, and sensitive telemetry rules
 - Public handbook and published LLM knowledge files point to the canonical single skill path
-- Voyage still works correctly with one shared framework skill plus local overlays
 
 ## 7. Quality check
 - No generic filler

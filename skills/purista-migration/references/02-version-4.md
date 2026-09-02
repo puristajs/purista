@@ -57,11 +57,12 @@ adapters with protocol fixtures.
 
 ## Schedules
 
-A service declares a schedule, while a separate Scheduler Runtime reads the
-exported manifest and emits a regular event. It does not boot business services
-or execute handler logic. Make downstream effects idempotent with
-`message.schedule.occurrenceId`; use a distributed claim provider in
-replicated production.
+A service declares schedule intent and exports a provider-neutral manifest.
+PURISTA does not supply a production scheduler runtime. Configure the selected
+external scheduler to call an explicit trigger that emits the declared event,
+enqueues the declared queue, or invokes the short command. Keep downstream
+effects idempotent with an application-owned occurrence or business key and
+test duplicate trigger delivery.
 
 ## Architecture diagnostics
 

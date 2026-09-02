@@ -40,12 +40,11 @@ parameter. For identity cases use `getCommandMessageMock` with explicit
 metadata and the service execution path, or an explicit direct context message.
 Do not invent helper options or mock away the guard under test.
 
-The 3.2.4 `createCommandTestHarness` signature constrains the service builder to
-the default configuration type and can reject a builder with non-empty typed
-configuration. Verify the consumer compiler result. Use the public service
-registration/execution methods above when that constraint applies; do not cast
-away the configured builder type or replace runtime checks with a raw handler
-test. Revisit this guidance when the helper's type constraint is repaired.
+`createCommandTestHarness` infers the service instance configuration from the
+supplied service builder. Pass required configuration, resources, stores, and
+bridges through its options. Use an explicit service message when a test needs
+trusted caller metadata, because `run` intentionally accepts only payload and
+parameter.
 
 Use a few deterministic runtime checks for transforms/after guards and
 registration. Do not force every branch through HTTP, nor claim a raw handler
@@ -59,7 +58,9 @@ Test declared boundaries and runtime wiring:
 - queue worker tests should assert declared `canInvoke`, `canConsumeStream`, `canEnqueue`, `canEmit`, and `canInvokeAgent` dependencies through the queue worker context helpers, plus retry/ack/dead-letter behavior when relevant
 - schedule export tests should assert deterministic manifests and unsupported expression failures without a live scheduler or cluster
 - strict queue idempotency tests should assert duplicate enqueue returns the original job id and does not create a second job
-- agent tests should use core agent testing helpers
+- native agent and workflow tests should use `@purista/harness/testing`; test
+  PURISTA publication, guards, queue bindings, and address-first invocation at
+  the Core mount boundary
 - durable agent workspace tests should use a fake `DurableWorkspace` and
   assert startup capability validation, retry resume, cleanup, and explicit
   ephemeral fallback behavior

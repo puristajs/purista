@@ -477,8 +477,9 @@ readers can find every option without reverse-engineering source.
 
 Expected behavior:
 
-- keeps the Harness agent definition inline with its fluent agent builder when
-  the builder already owns the payload/output schemas and type propagation;
+- keeps a focused native Harness agent definition beside its owned input and
+  output schemas, using the singular or plural definition registry that best
+  preserves local type inference;
 - uses `as const satisfies` only for a genuinely reusable standalone object,
   after checking that its type is a direct public dependency;
 - explains every builder call introduced by the focused snippet, including

@@ -33,6 +33,7 @@ The old fragmented framework skill set is folded into `purista`:
 - architecture, runtime, and implementation guidance stay consistent instead of drifting across many folders
 
 ## Downstream review notes
-- `voyage` should consume only `purista` plus its local overlay
+- `starter` and `create-purista` must consume the canonical Framework guidance
+  without copying a competing framework skill
 - public website context outputs must point at the single canonical path under `web/src/content/`
 - framework tests must stop asserting the old multi-skill catalog shape
