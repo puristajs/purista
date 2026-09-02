@@ -1,5 +1,5 @@
 import type { RunOutcome, ToolApprovalInterrupt } from '@purista/harness'
-import { defineHarness } from '@purista/harness'
+import { defineHarness, ModelAdmissionRejectedError } from '@purista/harness'
 import { FakeModelProvider } from '@purista/harness/testing'
 import { z } from 'zod'
 
@@ -23,6 +23,16 @@ const echoHarness = defineHarness({ name: 'echo' })
 
 const embeddingHarness = defineHarness({ name: 'embedding' })
 	.requireModel('embedding', { capabilities: ['embeddings'] })
+	.define()
+
+const admittedHarness = defineHarness({ name: 'admitted' })
+	.requireModel('primary', { capabilities: ['object'] })
+	.agent('answer', {
+		model: 'primary',
+		input: z.string(),
+		output: z.string(),
+		instructions: 'Answer the request.',
+	})
 	.define()
 
 describe('ServiceBuilder.mountHarness', () => {
@@ -90,6 +100,44 @@ describe('ServiceBuilder.mountHarness', () => {
 		} = command
 
 		await expect(eventBridge.invoke(request)).rejects.toMatchObject({ errorCode: 502 })
+		await service.destroy()
+	})
+
+	it('exposes provider admission backpressure as a retryable 429 response', async () => {
+		const provider = new FakeModelProvider()
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const builder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Admission-controlled Harness service',
+		}).mountHarness(admittedHarness, { publish: { agents: ['answer'] } })
+		const service = await builder.getInstance(eventBridge, {
+			ai: {
+				models: { primary: { provider, model: 'fake' } },
+				admission: {
+					acquire: async request => {
+						throw new ModelAdmissionRejectedError(2_500, {
+							providerId: request.providerId,
+							model: request.model,
+							credentialScope: request.credentialScope,
+							operation: request.operation,
+						})
+					},
+				},
+			},
+		})
+		await service.start()
+
+		const command = getCommandMessageMock({
+			receiver: { serviceName: 'Knowledge', serviceVersion: '1', serviceTarget: 'answer' },
+			payload: { payload: 'hello', parameter: {} },
+		})
+		const { id: _id, messageType: _type, timestamp: _timestamp, correlationId: _correlation, ...request } = command
+		await expect(eventBridge.invoke(request)).rejects.toMatchObject({
+			errorCode: 429,
+			data: { code: 'MODEL_ADMISSION_REJECTED', retriable: true, retryAfterMs: 2_500 },
+		})
 		await service.destroy()
 	})
 

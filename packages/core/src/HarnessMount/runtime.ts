@@ -467,14 +467,21 @@ function toHandledError(error: unknown) {
 	if (error instanceof HandledError) return error
 	if (isHarnessError(error)) {
 		const status =
-			error.category === 'validation'
-				? StatusCode.BadRequest
-				: error.category === 'permission'
-					? StatusCode.Forbidden
-					: error.category === 'timeout'
-						? StatusCode.GatewayTimeout
-						: StatusCode.InternalServerError
-		return new HandledError(status, error.message, { code: error.code, retriable: error.retriable })
+			error.code === 'MODEL_ADMISSION_REJECTED'
+				? StatusCode.TooManyRequests
+				: error.category === 'validation'
+					? StatusCode.BadRequest
+					: error.category === 'permission'
+						? StatusCode.Forbidden
+						: error.category === 'timeout'
+							? StatusCode.GatewayTimeout
+							: StatusCode.InternalServerError
+		const retryAfterMs = error.meta?.retryAfterMs
+		return new HandledError(status, error.message, {
+			code: error.code,
+			retriable: error.retriable,
+			...(typeof retryAfterMs === 'number' ? { retryAfterMs } : {}),
+		})
 	}
 	return HandledError.fromError(error)
 }
