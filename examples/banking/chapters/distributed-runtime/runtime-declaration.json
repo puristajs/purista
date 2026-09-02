@@ -1,0 +1,44 @@
+{
+  "eventBridge": {
+    "name": "nats"
+  },
+  "mode": "definition-only",
+  "queueBridge": {
+    "capabilities": {
+      "deadLetterInspectable": true,
+      "deadLetterInspectSupported": true,
+      "deadLetterNative": false,
+      "deadLetterPurgeSupported": true,
+      "deadLetterReplaySupported": true,
+      "defaultDeadLetterPrefix": "",
+      "defaultDeadLetterSuffix": ".dead-letter",
+      "delayedDelivery": true,
+      "exactlyOnce": false,
+      "fifoOrdering": true,
+      "idempotencyEnforcement": false,
+      "leaseInspectionSupported": false,
+      "maxBatchSize": 1,
+      "partitionOrdering": false,
+      "partitions": false,
+      "priorities": false,
+      "providerManagedDelayedDelivery": false,
+      "strictStartupValidation": true
+    },
+    "idempotency": {
+      "enforced": false,
+      "exactlyOnce": false
+    },
+    "longRunning": {
+      "leaseExtension": true,
+      "leaseInspection": false,
+      "strictStartupValidation": true
+    },
+    "name": "DefaultQueueBridge",
+    "resultPolicies": {
+      "event": true,
+      "state": false,
+      "stateAndEvent": false
+    }
+  },
+  "version": "1.0.0"
+}

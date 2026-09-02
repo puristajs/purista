@@ -62,6 +62,14 @@ Use this checklist when creating or updating a skill.
 - Repeatedly brittle checks are moved into `scripts/`
 - Known edge cases or gotchas are captured in the skill or a reference file
 - Verification checks that outputs respect PURISTA builder patterns, not just generic code correctness
+- Persistence guidance classifies operational state versus domain records by
+  ownership and meaning, not by current CRUD method count
+- Hono guidance uses generated command/stream endpoints and the endpoint security
+  metadata before permitting a custom route
+- Lifecycle guidance distinguishes Hono readiness shutdown from the host runtime
+  listener that the application opened
+- Tutorial navigation and chapter titles are capability-first; the continuous
+  example remains a small fixture and demo rather than the course architecture
 - `npm run audit:skills` passes
 
 ## 6. Drift check

@@ -108,7 +108,7 @@ passed through `ai` and are never inferred from provider configuration.
 
 ```ts title="bootstrap.ts"
 const claimsService = await claimsV1ServiceBuilder
-  .addAgentDefinition(await claimsAnswerAgentBuilder.getDefinition())
+  .addAgentDefinition(claimsAnswerAgentBuilder.getDefinition())
   .getInstance(eventBridge, {
     queueBridge,
     ai: {

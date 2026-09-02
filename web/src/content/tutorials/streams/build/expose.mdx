@@ -1,0 +1,238 @@
+---
+title: Expose the stream through Hono
+description: Project the PURISTA stream as a protected SSE endpoint and register Analysis in the application.
+order: 133
+kind: lesson
+status: published
+---
+
+Hono can expose a PURISTA stream directly. Add HTTP metadata to the stream
+builder; do not write a second Hono route or call the handler yourself.
+
+Add these methods between the final schema and the guard in
+`summarizeTransactionsStreamBuilder.ts`:
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
+import {
+	analysisV1SummarizeTransactionsChunkPayloadSchema,
+	analysisV1SummarizeTransactionsFinalPayloadSchema,
+	analysisV1SummarizeTransactionsInputParameterSchema,
+	analysisV1SummarizeTransactionsInputPayloadSchema,
+} from './schema.js'
+
+export const summarizeTransactionsStreamBuilder = analysisV1ServiceBuilder
+	.getStreamBuilder('summarizeTransactions', 'Stream progress while summarizing recent transactions')
+	.addPayloadSchema(analysisV1SummarizeTransactionsInputPayloadSchema)
+	.addParameterSchema(analysisV1SummarizeTransactionsInputParameterSchema)
+	.addChunkSchema(analysisV1SummarizeTransactionsChunkPayloadSchema)
+	.addFinalSchema(analysisV1SummarizeTransactionsFinalPayloadSchema)
+	.exposeAsHttpStreamEndpoint('GET', 'analysis/accounts/:accountId/transactions')
+	.setHttpStreamProtocol('purista-stream-v1')
+	.setOpenApiSummary('Stream a recent transaction summary')
+	.addOpenApiTags('analysis')
+	.setBeforeGuardHooks({
+		accountAccess: async function (context, _payload, parameter) {
+			const allowed = await context.resources.transactionAnalysisReader.canReadAccount({
+				tenantId: context.message.tenantId ?? '',
+				principalId: context.message.principalId ?? '',
+				accountId: parameter.accountId,
+			})
+			if (!allowed) {
+				throw new HandledError(StatusCode.Forbidden, 'This account is not available for analysis')
+			}
+		},
+	})
+	.setStreamFunction(async function (context, _payload, parameter, writer) {
+		const scope = {
+			tenantId: context.message.tenantId ?? '',
+			principalId: context.message.principalId ?? '',
+			accountId: parameter.accountId,
+		}
+		const cancellation = new AbortController()
+		writer.onCancel(() => cancellation.abort())
+		await writer.write({ stage: 'loading', completed: 0, total: 0 })
+
+		let rows
+		try {
+			rows = await context.resources.transactionAnalysisReader.listRecent(scope, 5, cancellation.signal)
+		} catch (error) {
+			if (writer.cancelled || cancellation.signal.aborted) return
+			throw error
+		}
+		if (writer.cancelled) return
+
+		let creditCents = 0
+		let debitCents = 0
+		for (const [index, row] of rows.entries()) {
+			if (row.direction === 'credit') creditCents += row.amountCents
+			else debitCents += row.amountCents
+			await writer.write({ stage: 'summarizing', completed: index + 1, total: rows.length })
+			if (writer.cancelled) return
+		}
+		const summary = {
+			accountId: parameter.accountId,
+			transactionCount: rows.length,
+			creditCents,
+			debitCents,
+			netCents: creditCents - debitCents,
+		}
+		await writer.write({
+			stage: 'complete', completed: rows.length, total: rows.length, summary,
+		})
+		if (writer.cancelled) return
+		await writer.close(summary)
+	})
+```
+
+`exposeAsHttpStreamEndpoint` marks the response as `text/event-stream` and adds
+the route to generated HTTP metadata. The endpoint stays protected because we
+did not call `makeEndpointPublic`. The existing Hono protection middleware
+resolves the session and passes its tenant and principal into the stream open
+message.
+
+The last typed chunk contains the summary that an SSE client can display.
+`writer.close(summary)` still completes the PURISTA stream with its typed final
+value. Hono consumes that lifecycle frame and closes the HTTP response.
+
+## Register Analysis with the application
+
+```ts title="src/application.ts" write
+import { initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { getEventBridge } from './eventbridge.js'
+import { SqliteTransactionAnalysisReader } from './resources/SqliteTransactionAnalysisReader.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { analysisV1Service } from './service/analysis/v1/analysisV1Service.js'
+import type { TransactionAnalysisReader } from './service/analysis/v1/TransactionAnalysisReader.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import { localIdentityProvider, type LocalIdentityProvider } from './service/identity/v1/LocalIdentityProvider.js'
+import { identityV1Service } from './service/identity/v1/identityV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+import { createSessionProtectMiddleware } from './sessionProtectMiddleware.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository: ManagedTransactionRepository = new SqliteTransactionRepository(':memory:'),
+	identityProvider: LocalIdentityProvider = localIdentityProvider,
+	identityStateStore: StateStore = initDefaultStateStore({ logger }),
+	transactionAnalysisReader: TransactionAnalysisReader = new SqliteTransactionAnalysisReader(':memory:'),
+) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const identity = await identityV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: { sessionTtlMs: 15 * 60 * 1000 },
+		resources: { identityProvider },
+		stateStore: identityStateStore,
+	})
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+	})
+	const analysis = await analysisV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionAnalysisReader },
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api', enableHealth: true, healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank API', version: '1.0.0' },
+				components: { securitySchemes: { demoBearer: { type: 'http', scheme: 'bearer' } } },
+			},
+		},
+	})
+
+	http.setProtectMiddleware(createSessionProtectMiddleware(http))
+	await bankProfile.start()
+	await identity.start()
+	await transaction.start()
+	await analysis.start()
+	http.registerService(bankProfile, identity, transaction, analysis)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return {
+		eventBridge, bankProfile, identity, identityStateStore,
+		transaction, transactionRepository, analysis, transactionAnalysisReader, http,
+	}
+}
+```
+
+The Hono service discovers the stream definition from the registered Analysis
+instance. Authentication remains in Hono; account authorization remains in the
+Analysis guard.
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+import { SqliteTransactionAnalysisReader } from './resources/SqliteTransactionAnalysisReader.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+
+async function main() {
+	const port = z.coerce.number().int().min(1).max(65535).parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const transactionRepository = new SqliteTransactionRepository('var/example-bank.sqlite')
+	const transactionAnalysisReader = new SqliteTransactionAnalysisReader('var/example-bank.sqlite')
+	const identityStateStore = initDefaultStateStore({ logger })
+	const app = await createApplication(
+		logger, transactionRepository, undefined, identityStateStore, transactionAnalysisReader,
+	)
+	const nodeServer = serve({ fetch: app.http.app.fetch, hostname: '127.0.0.1', port })
+	const nodeHttpListener = createNodeHttpListener(nodeServer)
+
+	gracefulShutdown(logger, [
+		app.http.prepareDestroy(), nodeHttpListener, app.http,
+		app.analysis, app.transaction, app.identity, app.bankProfile,
+		app.identityStateStore, transactionAnalysisReader, transactionRepository, app.eventBridge,
+	])
+	logger.info({ port }, 'Example Bank HTTP server with Analysis stream started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank HTTP server could not start.\n')
+	process.exit(1)
+})
+```
+
+`nodeHttpListener` is the adapter returned by `@hono/node-server`. It is listed
+once so graceful shutdown stops accepting network connections before the
+services and resources are destroyed.
+
+## Check the generated metadata
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsHttp.test.ts" write
+import { isHttpExposedServiceMeta } from '@purista/core'
+import { expect, test } from 'vitest'
+import { summarizeTransactionsStreamBuilder } from './summarizeTransactionsStreamBuilder.js'
+
+test('declares one protected SSE endpoint', async () => {
+	const definition = await summarizeTransactionsStreamBuilder.getDefinition()
+	expect(isHttpExposedServiceMeta(definition.metadata)).toBe(true)
+	if (!isHttpExposedServiceMeta(definition.metadata)) throw new Error('Expected HTTP stream metadata')
+	expect(definition.metadata.expose.contentTypeResponse).toBe('text/event-stream')
+	expect(definition.metadata.expose.http).toMatchObject({
+		method: 'GET',
+		path: 'analysis/accounts/:accountId/transactions',
+		openApi: { isSecure: true },
+		stream: { mode: 'stream', protocol: 'purista-stream-v1' },
+	})
+})
+```
+
+```bash title="Compile the protected Hono projection" replay="project"
+npx vitest run src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsHttp.test.ts
+npm run build
+```
+
+The route now comes from the PURISTA definition. The final page proves all
+three test boundaries.

@@ -1,0 +1,112 @@
+import { initDefaultStateStore, initLogger, isHttpExposedServiceMeta } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+import type { LocalIdentityProvider } from './service/identity/v1/LocalIdentityProvider.js'
+import { getCurrentSessionCommandBuilder } from './service/identity/v1/command/getCurrentSession/getCurrentSessionCommandBuilder.js'
+import { loginCommandBuilder } from './service/identity/v1/command/login/loginCommandBuilder.js'
+import { logoutCommandBuilder } from './service/identity/v1/command/logout/logoutCommandBuilder.js'
+import { resolveSessionCommandBuilder } from './service/identity/v1/command/resolveSession/resolveSessionCommandBuilder.js'
+import { sessionStateKey } from './service/identity/v1/session.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+function repository(save = sandbox.stub()): ManagedTransactionRepository {
+	return { name: 'sqliteTransactionRepository', save, findById: sandbox.stub(), destroy: sandbox.stub().resolves() }
+}
+
+async function destroyApplication(app: Awaited<ReturnType<typeof createApplication>>) {
+	await new Promise<void>(resolve => setImmediate(resolve))
+	await app.http.prepareDestroy().destroy()
+	await app.http.destroy()
+	await app.transaction.destroy()
+	await app.identity.destroy()
+	await app.bankProfile.destroy()
+	await app.identityStateStore.destroy()
+	await app.transactionRepository.destroy()
+	await app.eventBridge.destroy()
+}
+
+async function login(app: Awaited<ReturnType<typeof createApplication>>) {
+	const response = await app.http.app.request('/api/v1/session/login', {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ username: 'alex@example.test', password: 'demo-password' }),
+	})
+	expect(response.status).toBe(200)
+	return (await response.json()) as { sessionToken: string }
+}
+
+describe('Identity session endpoints', () => {
+	test('declares public, protected, and internal command boundaries', async () => {
+		const loginDefinition = await loginCommandBuilder.getDefinition()
+		const currentDefinition = await getCurrentSessionCommandBuilder.getDefinition()
+		const logoutDefinition = await logoutCommandBuilder.getDefinition()
+		const resolveDefinition = await resolveSessionCommandBuilder.getDefinition()
+		if (!isHttpExposedServiceMeta(loginDefinition.metadata)
+			|| !isHttpExposedServiceMeta(currentDefinition.metadata)
+			|| !isHttpExposedServiceMeta(logoutDefinition.metadata)) throw new Error('Expected HTTP metadata')
+		expect(loginDefinition.metadata.expose.http.openApi?.isSecure).toBe(false)
+		expect(currentDefinition.metadata.expose.http.openApi?.isSecure).toBe(true)
+		expect(logoutDefinition.metadata.expose.http.openApi?.isSecure).toBe(true)
+		expect(isHttpExposedServiceMeta(resolveDefinition.metadata)).toBe(false)
+	})
+
+	test('rejects invalid local credentials without writing session state', async () => {
+		const stateStore = initDefaultStateStore({ logger: initLogger('fatal') })
+		const setState = sandbox.spy(stateStore, 'setState')
+		const deniedProvider: LocalIdentityProvider = { authenticate: sandbox.stub().resolves(undefined) }
+		const app = await createApplication(initLogger('fatal'), repository(), deniedProvider, stateStore)
+		try {
+			const response = await app.http.app.request('/api/v1/session/login', {
+				method: 'POST', headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ username: 'wrong@example.test', password: 'wrong' }),
+			})
+			expect(response.status).toBe(401)
+			expect(setState.called).toBe(false)
+		} finally { await destroyApplication(app) }
+	})
+
+	test('resolves a session, ignores forged identity headers, and revokes it on logout', async () => {
+		const stored = { transactionId: crypto.randomUUID(), amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books', recordedAt: new Date().toISOString() }
+		const save = sandbox.stub().resolves(stored)
+		const app = await createApplication(initLogger('fatal'), repository(save))
+		try {
+			const { sessionToken } = await login(app)
+			const headers = { authorization: `Bearer ${sessionToken}`, 'x-principal-id': 'attacker', 'x-tenant-id': 'attacker' }
+			const current = await app.http.app.request('/api/v1/session', { headers })
+			expect(await current.json()).toMatchObject({ principalId: 'principal-alex', tenantId: 'tenant-example' })
+			const transaction = await app.http.app.request('/api/v1/transactions', {
+				method: 'POST', headers: { ...headers, 'content-type': 'application/json' },
+				body: JSON.stringify({ amountCents: 2599, direction: 'debit', counterparty: 'Northwind Books' }),
+			})
+			expect(transaction.status).toBe(200)
+			expect(save.calledOnce).toBe(true)
+			const logout = await app.http.app.request('/api/v1/session', { method: 'DELETE', headers })
+			expect(await logout.json()).toEqual({ loggedOut: true })
+			const denied = await app.http.app.request('/api/v1/session', { headers })
+			expect(denied.status).toBe(401)
+		} finally { await destroyApplication(app) }
+	})
+
+	test('removes expired session state and blocks downstream effects', async () => {
+		const stateStore = initDefaultStateStore({ logger: initLogger('fatal') })
+		const token = crypto.randomUUID()
+		await stateStore.setState(sessionStateKey(token), {
+			principalId: 'principal-alex', tenantId: 'tenant-example', displayName: 'Alex Example', expiresAt: Date.now() - 1,
+		})
+		const save = sandbox.stub()
+		const app = await createApplication(initLogger('fatal'), repository(save), undefined, stateStore)
+		try {
+			const response = await app.http.app.request('/api/v1/transactions', {
+				method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+				body: JSON.stringify({ amountCents: 2599, direction: 'debit', counterparty: 'Northwind Books' }),
+			})
+			expect(response.status).toBe(401)
+			expect(save.called).toBe(false)
+			expect((await stateStore.getState(sessionStateKey(token)))[sessionStateKey(token)]).toBeUndefined()
+		} finally { await destroyApplication(app) }
+	})
+})

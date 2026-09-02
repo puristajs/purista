@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock, ServiceBuilder, StatusCode } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
@@ -18,6 +18,13 @@ const plainTextCommand = serviceBuilder
 		return 'plain-text'
 	})
 	.exposeAsHttpEndpoint('GET', 'plain-text', undefined, undefined, 'text/plain')
+
+const csvCommand = serviceBuilder
+	.getCommandBuilder('csv', 'csv')
+	.setCommandFunction(async function () {
+		return 'column\nvalue'
+	})
+	.exposeAsHttpEndpoint('GET', 'csv', undefined, undefined, 'text/csv')
 
 const asyncCommand = serviceBuilder
 	.getCommandBuilder('asyncJob', 'async job')
@@ -267,6 +274,9 @@ describe('HonoServiceClass', () => {
 
 	it('maps HTTPException and generic errors via app.onError', async () => {
 		const server = await createServer()
+		server.app.get('/handled-error', () => {
+			throw new HandledError(StatusCode.Unauthorized, 'A valid access token is required')
+		})
 		server.app.get('/http-error', () => {
 			throw new HTTPException(418, { message: 'teapot' })
 		})
@@ -276,6 +286,15 @@ describe('HonoServiceClass', () => {
 		await server.start()
 
 		try {
+			const handledError = await server.app.fetch(new Request('http://localhost/handled-error'))
+			expect(handledError.status).toBe(401)
+			expect(handledError.headers.get('content-type')).toContain('application/problem+json')
+			await expect(handledError.json()).resolves.toMatchObject({
+				title: 'Unauthorized',
+				status: 401,
+				detail: 'A valid access token is required',
+			})
+
 			const httpError = await server.app.fetch(new Request('http://localhost/http-error'))
 			expect(httpError.status).toBe(418)
 			expect(httpError.headers.get('content-type')).toContain('application/problem+json')
@@ -379,6 +398,7 @@ describe('HonoServiceClass', () => {
 		const asyncDefinition = await asyncCommand.getDefinition()
 		const echoDefinition = await echoCommand.getDefinition()
 		const queryDefinition = await queryCommand.getDefinition()
+		const csvDefinition = await csvCommand.getDefinition()
 
 		server.addEndpoint(plainTextDefinition.metadata as any, {
 			serviceName: 'HttpTestService',
@@ -400,6 +420,11 @@ describe('HonoServiceClass', () => {
 			serviceVersion: '1',
 			serviceTarget: 'withParam',
 		})
+		server.addEndpoint(csvDefinition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'csv',
+		})
 
 		const invokeMock = vi.spyOn(server, 'invoke').mockImplementation(async (input: any) => {
 			if (input.receiver.serviceTarget === 'plainText') {
@@ -418,6 +443,9 @@ describe('HonoServiceClass', () => {
 			if (input.receiver.serviceTarget === 'withParam') {
 				return { principalId: input.payload.parameter.principalId ?? null }
 			}
+			if (input.receiver.serviceTarget === 'csv') {
+				return 'column\nvalue'
+			}
 			throw new Error('unexpected target')
 		})
 
@@ -427,6 +455,11 @@ describe('HonoServiceClass', () => {
 			const plain = await server.app.fetch(new Request('http://localhost/api/v1/plain-text'))
 			expect(plain.status).toBe(200)
 			expect(await plain.text()).toBe('plain-text')
+
+			const csv = await server.app.fetch(new Request('http://localhost/api/v1/csv'))
+			expect(csv.status).toBe(200)
+			expect(csv.headers.get('content-type')).toContain('text/csv; charset=utf-8')
+			expect(await csv.text()).toBe('column\nvalue')
 
 			const asyncResult = await server.app.fetch(
 				new Request('http://localhost/api/v1/async-job', {

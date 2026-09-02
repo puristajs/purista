@@ -1,0 +1,23 @@
+---
+title: Use the Hono webserver
+description: Expose a PURISTA command through Hono, start a Node listener, and shut down both layers correctly.
+order: 20
+kind: chapter
+group: start
+status: published
+---
+
+This chapter adds HTTP to the small project from the first chapter. The
+`BankProfile` command keeps ownership of its result. The PURISTA Hono service
+turns command metadata into a route, health endpoint, and OpenAPI document.
+The application opens and closes the Node network listener.
+
+Example Bank remains a small fixture. There is no transaction, UI, login,
+database, or handwritten business route.
+
+## Build
+
+1. [Install the PURISTA Hono server](/tutorials/hono-webserver/build/install/).
+2. [Register and start the services](/tutorials/hono-webserver/build/register/).
+3. [Open and close the Node listener](/tutorials/hono-webserver/build/shutdown/).
+4. [Test the command and HTTP boundaries](/tutorials/hono-webserver/testing/test-http/).

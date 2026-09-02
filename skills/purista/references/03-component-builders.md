@@ -38,6 +38,21 @@ npm run add:command -- createOrder --service order --service-version 1
 
 Attach payload, parameter, output schemas, invocation allowlists, HTTP exposure, and command function explicitly.
 
+Choose command events by lifecycle meaning:
+
+- Use `.setSuccessEventName('order.created')` when the command's validated
+  successful result is the fact. PURISTA puts that name on the
+  `CommandSuccessResponse`, and subscriptions can consume it. Failed commands
+  do not publish a success response.
+- Use `.canEmit(name, schema)` and `context.emit(name, payload)` for a distinct
+  fact that occurs during command execution, including progress or multiple
+  facts whose payload is not the command result.
+
+Do not manually emit a copy of the result after the final write. That duplicates
+the success-response mechanism and creates an unnecessary second effect inside
+the handler. Remember that output transforms run before the success response;
+the named success event carries the final validated command result.
+
 ## Subscription
 Use subscriptions for bounded reactions to events. Do not use subscriptions as durable retry loops; move long-running or retry-heavy work to queues.
 

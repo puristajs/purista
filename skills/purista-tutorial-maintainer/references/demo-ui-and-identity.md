@@ -1,5 +1,12 @@
 # Demo UI and trusted identity
 
+## Contents
+
+- [UI purpose and stack](#ui-purpose-and-stack)
+- [Hono identity lesson](#hono-identity-lesson)
+- [Follow every used hop](#follow-every-used-hop)
+- [External references](#external-references)
+
 ## UI purpose and stack
 
 Give learners a small interface to exercise the actual service, not another
@@ -7,27 +14,38 @@ application to understand before starting the tutorial. Use React and
 shadcn/ui with its default theme. Keep components, spacing, typography,
 navigation, and forms familiar. Do not import the website's marketing theme.
 
-Use Vercel AI SDK UI and AI Elements for chat where relevant. Verify installed
+Use Vercel AI SDK UI Message Stream v1 and AI Elements for every chat surface.
+Do not create parallel message, conversation, prompt, tool, source, reasoning,
+status, or approval components when AI Elements provides them. Verify installed
 versions, source, and official documentation before writing hooks or transport
-code. Selected AI Elements components must be checked for framework-specific
-imports; do not assume a Next.js-oriented setup guide proves Vite compatibility.
-Prefer a static React build served by the example's Hono server when supported.
-Keep the development proxy and built serving path explicit and tested.
+code. Check selected AI Elements components for framework-specific imports and
+make their integration work in the example's actual React build; a
+Next.js-oriented setup guide alone does not prove the static build. Serve the
+result from the example's Hono server and keep the development proxy and built
+serving path explicit and tested.
 
-The browser calls PURISTA only. A thin application-owned adapter may translate
-PURISTA responses/events to the AI SDK UI protocol, or implement the matching
-custom chat transport. Verify start/delta/end, source and tool parts, errors,
-completion, and cancellation for the selected protocol. Raw PURISTA SSE is
-not automatically an AI SDK UI message stream. Do not install a second model
-loop, AI Gateway backend, or standalone Harness service to make the UI work.
+The browser calls PURISTA only. The initial release supports exactly the AI SDK
+UI Message Stream v1 protocol. A server-side projection translates portable
+Harness invocation events into that exact protocol; raw PURISTA SSE is not an
+AI SDK UI message stream. Keep projection behind a narrow adapter boundary so
+a future named protocol can be added in a separate package and conformance
+suite without changing Harness execution or EventBridge dispatch. Do not add
+generic protocol switches to Core, invent a PURISTA browser protocol, or
+install a second model loop, AI Gateway backend, or standalone Harness service.
+
+Verify start/delta/end, safe status data, sources, tool input/output, approval,
+denial, completion, terminal error, cancellation, reconnect, headers, and the
+`[DONE]` marker with the official AI SDK parser and the example UI.
 
 Build one reusable shell with chapter-specific screens and navigation that
 shows only implemented capabilities. Suitable screens include transactions,
 review cases, jobs/results, ingestion status, cited chat, and approvals. Each
 screen needs labels, keyboard operation, loading/empty/success/error states,
 and responsive layout. Connect actions to real service contracts; label
-fixtures and scripted model results visibly. Teach UI serving first with display
-fixtures; teach login after the REST API and each new identity handoff at first use.
+fixtures and scripted model results visibly. In the optional UI chapter, teach
+asset serving with display fixtures before wiring interactive calls. Backend
+identity lessons must work through requests without requiring React; teach
+each new identity handoff at its first use.
 
 ## Hono identity lesson
 
@@ -50,14 +68,35 @@ variables before a protected generated endpoint invokes PURISTA. It is not a
 complete authentication solution and does not automatically protect arbitrary
 custom/static routes. Show middleware registration order and route coverage.
 
-Once UI serving and the REST API are familiar, teach: establish a local session →
-verify it in Hono → derive tenant membership and principal → set trusted
-metadata → invoke the command → verify downstream access → log out and test
-denials. Supply a real local auth fixture or mock identity provider; do not
+Once the REST API is familiar, teach: call a public Identity login command →
+receive an opaque local bearer session → verify it in Hono's protection
+middleware → derive tenant membership and principal → set trusted metadata →
+invoke the protected command → verify downstream access → call the protected
+logout command and test denials. Login, current-session, and logout are generated
+Identity command endpoints, not handwritten Hono routes. Supply a real local
+auth fixture or mock identity provider; do not
 equate a frontend user dropdown or decoded-but-unverified JWT with login.
+When implementing session issue/resolve/revoke locally, give those operations
+an explicit service owner and use `context.states` with a supplied PURISTA
+state store. Use `makeEndpointPublic()` only for login; leave session and logout
+protected. Do not reinvent
+the state store with an application Map. Check expiry explicitly; generic
+StateStore does not promise TTL or record enumeration. Explain local-only
+fixture configuration and cleanup rather than presenting it as a production
+identity provider.
 
-With bearer tokens, verify signatures, issuer, audience, expiry, and allowed
-tenant membership. With cookies, use an opaque server-validated session and
+For a locally owned opaque session, keep resolution in Identity as an internal
+command with no HTTP exposure. Because the protection middleware is bound to
+the Hono service instance, it can call that command with `this.invoke(...)`,
+then set `principalId` and `tenantId`. Hono must not reach into Identity's
+StateStore directly. The protected current-session and logout endpoints run
+after this authentication step; logout can receive the opaque token through a
+declared additional parameter.
+
+With externally issued bearer tokens, verify signatures, issuer, audience,
+expiry, and allowed tenant membership. The tutorial's locally issued bearer is
+opaque and is resolved through StateStore rather than decoded by the browser.
+With cookies, use an opaque server-validated session and
 appropriate cookie flags, origin/CSRF controls, and logout behavior. Explain
 local HTTP differences without disabling production protections. Browser
 requests may select a tenant, but the server authorizes that selection.

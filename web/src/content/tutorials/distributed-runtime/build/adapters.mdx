@@ -1,0 +1,357 @@
+---
+title: Select supported adapters
+description: Configure NATS adapters, request durable subscription delivery, and reject unsupported runtime capabilities before starting work.
+order: 292
+kind: lesson
+status: published
+---
+
+The default bridges are still the right choice for unit tests and a single
+process. The distributed profile needs a shared EventBridge, a durable
+QueueBridge, and shared operational state. Install only those adapters.
+
+```bash title="Install the NATS adapters" replay="project"
+npm install --save-exact \
+  @purista/natsbridge@3.2.4 \
+  @purista/nats-queue-bridge@3.2.4 \
+  @purista/nats-state-store@3.2.4
+```
+
+Tell PURISTA tooling which EventBridge family this project uses in its
+distributed profile.
+
+```json title="purista.json" write
+{
+  "$schema": "https://purista.dev/schemas/1.12.0/schema.json",
+  "runtime": "node",
+  "eventBridge": "nats",
+  "fileConvention": "camel",
+  "eventConvention": "camel",
+  "linter": "biome",
+  "formatter": "biome",
+  "servicePath": "src/service",
+  "agentPath": "src/agents"
+}
+```
+
+Export the declaration with the project-local CLI. A declaration names the
+selected family; the running adapter supplies the verified capability matrix
+after it has connected to JetStream.
+
+```bash title="Export the declared runtime profile" replay="project"
+npx purista export runtime-capabilities \
+	--mode definition-only \
+	--out runtime-declaration.json
+```
+
+## Keep the default and durable Monitoring definitions separate
+
+The normal tests should keep their in-memory subscription. Export a builder
+factory so the distributed profile can create another definition with the same
+handler and metric contract.
+
+```ts title="src/service/monitoring/v1/monitoringV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { generalMonitoringServiceInfo } from '../generalMonitoringServiceInfo.js'
+import {
+	largeDebitSignalMetricDefinition,
+	largeDebitSignalMetricName,
+} from './monitoringMetrics.js'
+import { monitoringServiceV1ConfigSchema } from './monitoringServiceConfig.js'
+
+export const monitoringServiceInfo = {
+	serviceVersion: '1',
+	...generalMonitoringServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const createMonitoringV1ServiceBuilder = () => new ServiceBuilder(monitoringServiceInfo)
+	.setConfigSchema(monitoringServiceV1ConfigSchema)
+	.defineMetric(largeDebitSignalMetricName, largeDebitSignalMetricDefinition)
+
+export const monitoringV1ServiceBuilder = createMonitoringV1ServiceBuilder()
+```
+
+Make the subscription builder accept the service builder it belongs to. The
+business function is still written once.
+
+```ts title="src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts" write
+import { EBMessageType } from '@purista/core'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import { largeDebitSignalMetricName } from '../../monitoringMetrics.js'
+import {
+	largeDebitSignalSchema,
+	largeDebitThresholdCents,
+	latestLargeDebitSignalKey,
+} from '../../monitoringSignal.js'
+import {
+	createMonitoringV1ServiceBuilder,
+	monitoringV1ServiceBuilder,
+} from '../../monitoringV1ServiceBuilder.js'
+import {
+	monitoringV1ObserveLargeDebitInputParameterSchema,
+	monitoringV1ObserveLargeDebitInputPayloadSchema,
+} from './schema.js'
+
+type MonitoringV1ServiceBuilder = ReturnType<typeof createMonitoringV1ServiceBuilder>
+
+export function createObserveLargeDebitSubscriptionBuilder(
+	serviceBuilder: MonitoringV1ServiceBuilder = monitoringV1ServiceBuilder,
+) {
+	return serviceBuilder
+		.getSubscriptionBuilder('observeLargeDebit', 'Observe large recorded debit transactions')
+		.subscribeToEvent(ServiceEvent.TransactionRecordedV1)
+		.filterForMessageType(EBMessageType.CommandSuccessResponse)
+		.filterSentFrom('Transaction', '1', 'recordTransaction', undefined)
+		.filterTenantId('tenant-example')
+		.addPayloadSchema(monitoringV1ObserveLargeDebitInputPayloadSchema)
+		.addParameterSchema(monitoringV1ObserveLargeDebitInputParameterSchema)
+		.setSubscriptionFunction(async function (context, payload, _parameter) {
+			if (payload.direction !== 'debit' || payload.amountCents < largeDebitThresholdCents) return
+
+			const signal = largeDebitSignalSchema.parse({
+				transactionId: payload.transactionId,
+				accountId: payload.accountId,
+				amountCents: payload.amountCents,
+			})
+			try {
+				await context.states.setState(latestLargeDebitSignalKey, signal)
+				context.metrics[largeDebitSignalMetricName].add(1, { outcome: 'stored' })
+			} catch (error) {
+				context.metrics[largeDebitSignalMetricName].add(1, { outcome: 'store_error' })
+				throw error
+			}
+		})
+}
+
+export const observeLargeDebitSubscriptionBuilder = createObserveLargeDebitSubscriptionBuilder()
+```
+
+Create a deployment-specific definition. `adviceDurable(true)` and manual
+acknowledgement ask the EventBridge for recoverable delivery. Strict failure
+handling makes startup reject an adapter that cannot honor the request.
+
+```ts title="src/runtime/monitoringDistributedV1Service.ts" write
+import { createMonitoringV1ServiceBuilder } from '../service/monitoring/v1/monitoringV1ServiceBuilder.js'
+import { createObserveLargeDebitSubscriptionBuilder } from '../service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.js'
+
+const serviceBuilder = createMonitoringV1ServiceBuilder()
+const subscription = createObserveLargeDebitSubscriptionBuilder(serviceBuilder)
+	.adviceDurable(true)
+	.adviceAutoacknowledgeMessage(false)
+	.adviceConsumerFailureHandling({
+		mode: 'strict',
+		maxAttempts: 3,
+		retryDelayMs: 250,
+		deadLetterTarget: 'example-bank.monitoring.dead-letter',
+	})
+
+export const monitoringDistributedV1Service = serviceBuilder.addSubscriptionDefinition(
+	subscription.getDefinition(),
+)
+```
+
+NATS key-value keys cannot contain a colon. Use a portable key for the
+Monitoring signal.
+
+```ts title="src/service/monitoring/v1/monitoringSignal.ts" write
+import { z } from 'zod'
+
+export const largeDebitThresholdCents = 10_000
+export const latestLargeDebitSignalKey = 'monitoring.tenant-example.latest-large-debit'
+
+export const largeDebitSignalSchema = z.strictObject({
+	transactionId: z.uuid(),
+	accountId: z.string().trim().min(1),
+	amountCents: z.number().int().positive(),
+})
+
+export type LargeDebitSignal = z.output<typeof largeDebitSignalSchema>
+```
+
+## Create the application-owned adapters
+
+Connection URLs and bucket names belong to composition. Services receive only
+the PURISTA interfaces they use.
+
+```ts title="src/runtime/natsAdapters.ts" write
+import type { Logger } from '@purista/core'
+import { NatsQueueBridge } from '@purista/nats-queue-bridge'
+import { NatsStateStore } from '@purista/nats-state-store'
+import { NatsBridge } from '@purista/natsbridge'
+
+export async function createNatsEventBridge(logger: Logger, servers: string) {
+	const eventBridge = new NatsBridge({
+		logger,
+		servers,
+		durableSubscriptionMode: 'strict',
+		timeout: 1_000,
+		maxReconnectAttempts: 0,
+	})
+	await eventBridge.start()
+	return eventBridge
+}
+
+export function createNatsQueueBridge(servers: string) {
+	return new NatsQueueBridge({
+		connectionOptions: { servers, timeout: 1_000, maxReconnectAttempts: 0 },
+		subjectPrefix: 'example-bank.queue',
+		defaultMaxAttempts: 3,
+	})
+}
+
+export function createNatsStateStore(logger: Logger, servers: string, bucket: string) {
+	return new NatsStateStore({
+		logger,
+		servers,
+		keyValueStoreName: bucket,
+		timeout: 1_000,
+		maxReconnectAttempts: 0,
+	})
+}
+```
+
+`createStateStoreQueueJobStore` uses colon-separated keys, which are valid in
+the default store but not in NATS KV. Keep the same PURISTA `QueueJobStore`
+contract with a key-safe adapter.
+
+```ts title="src/runtime/natsQueueJobStore.ts" write
+import type { QueueJobStatusRecord, QueueJobStore, StateStore } from '@purista/core'
+
+export function createNatsQueueJobStore(
+	stateStore: StateStore,
+	prefix = 'reporting-job',
+): QueueJobStore {
+	const key = (jobId: string) => `${prefix}/${jobId}`
+	return {
+		async get(jobId) {
+			const stateKey = key(jobId)
+			const result = await stateStore.getState(stateKey)
+			return result[stateKey] as QueueJobStatusRecord | undefined
+		},
+		async set(record) {
+			await stateStore.setState(key(record.jobId), record)
+		},
+	}
+}
+```
+
+## Validate capabilities after connection
+
+NATS reports JetStream capabilities only after the EventBridge connects. Check
+the connected matrix before starting services.
+
+```ts title="src/runtime/distributedProfile.ts" write
+import type { EventBridgeCapabilities, QueueBridgeCapabilities } from '@purista/core'
+
+export interface DistributedRequirements {
+	requiresQueue?: boolean
+	requiresIncrementalStreams?: boolean
+	requiresPendingCommandCancellation?: boolean
+}
+
+export function assertDistributedCapabilities(
+	eventBridge: EventBridgeCapabilities,
+	queueBridge: QueueBridgeCapabilities | undefined,
+	requirements: DistributedRequirements = {},
+) {
+	if (!eventBridge.durableSubscriptions || !eventBridge.manualAckSupported) {
+		throw new Error('The distributed profile requires JetStream-backed durable subscriptions and manual acknowledgement')
+	}
+	if (
+		requirements.requiresQueue
+		&& (!queueBridge?.strictStartupValidation || !queueBridge.idempotencyEnforcement)
+	) {
+		throw new Error('The distributed profile requires strict QueueBridge startup validation and idempotency enforcement')
+	}
+	if (requirements.requiresIncrementalStreams && !eventBridge.supportsStreams) {
+		throw new Error('The selected EventBridge cannot carry PURISTA incremental streams')
+	}
+	if (
+		requirements.requiresPendingCommandCancellation
+		&& !eventBridge.commandHandling.pendingInvocationCancellation
+	) {
+		throw new Error('The selected EventBridge cannot cancel a pending command invocation')
+	}
+}
+```
+
+Use PURISTA mocks to prove the negative paths. Also prove that a queue requiring
+FIFO delivery fails during service startup when the QueueBridge says it cannot
+provide FIFO.
+
+```ts title="src/runtime/distributedProfile.test.ts" write
+import {
+	getEventBridgeMock,
+	getLoggerMock,
+	getQueueBridgeMock,
+	initDefaultStateStore,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { reportingV1Service } from '../service/reporting/v1/reportingV1Service.js'
+import { assertDistributedCapabilities } from './distributedProfile.js'
+
+const distributedEventCapabilities = getEventBridgeMock({
+	capabilities: {
+		durableSubscriptions: true,
+		manualAckSupported: true,
+		supportsStreams: false,
+		commandHandling: {
+			...getEventBridgeMock().mock.capabilities.commandHandling,
+			pendingInvocationCancellation: false,
+		},
+	},
+}).mock.capabilities
+
+const distributedQueueCapabilities = getQueueBridgeMock({
+	capabilities: { idempotencyEnforcement: true, strictStartupValidation: true },
+}).mock.capabilities
+
+test('accepts the required durable event and queue capabilities', () => {
+	expect(() => assertDistributedCapabilities(
+		distributedEventCapabilities, distributedQueueCapabilities, { requiresQueue: true },
+	)).not.toThrow()
+})
+
+test('rejects stream and command cancellation requirements not supplied by NATS', () => {
+	expect(() => assertDistributedCapabilities(
+		distributedEventCapabilities, distributedQueueCapabilities,
+		{ requiresIncrementalStreams: true },
+	)).toThrow('cannot carry PURISTA incremental streams')
+	expect(() => assertDistributedCapabilities(
+		distributedEventCapabilities, distributedQueueCapabilities,
+		{ requiresPendingCommandCancellation: true },
+	)).toThrow('cannot cancel a pending command invocation')
+})
+
+test('fails Reporting startup when FIFO is unavailable', async () => {
+	const sandbox = createSandbox()
+	const eventBridge = getEventBridgeMock(sandbox).mock
+	const queueBridge = getQueueBridgeMock({
+		sandbox,
+		capabilities: { fifoOrdering: false, strictStartupValidation: true },
+	}).mock
+	const stateStore = initDefaultStateStore({ logger: getLoggerMock(sandbox).mock })
+	const service = await reportingV1Service.getInstance(eventBridge, {
+		logger: getLoggerMock(sandbox).mock,
+		queueBridge,
+		stateStore,
+	})
+	try {
+		await expect(service.start()).rejects.toThrow('requires fifo ordering')
+	} finally {
+		await service.destroy()
+		await stateStore.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+```bash title="Test adapter selection and service startup validation" replay="project"
+npx vitest run src/runtime/distributedProfile.test.ts src/service/monitoring
+npm run build
+```
+
+The distributed profile now has explicit supported capabilities. It does not
+infer stream support, cancellation, or exactly-once execution from the broker
+name.

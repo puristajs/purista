@@ -1,0 +1,35 @@
+{
+	"skill_name": "purista-migration",
+	"evals": [
+		{
+			"id": "major-upgrade",
+			"prompt": "Upgrade our existing PURISTA app to version 4 without breaking production queues.",
+			"expected_output": "Creates a baseline and migration ledger, upgrades compatible package versions together, validates definitions with the installed CLI, and requires idempotency/retry evidence before rollout.",
+			"files": ["SKILL.md", "references/01-migration-workflow.md", "references/03-verification-and-rollback.md"]
+		},
+		{
+			"id": "legacy-schedule",
+			"prompt": "Our cron handler runs billing inside every service replica. Move it to the current PURISTA pattern.",
+			"expected_output": "Separates an event-only scheduler host from business services, routes work through an event consumer or queue worker, requires occurrenceId idempotency, and rejects a local provider for replicated production hosts.",
+			"files": ["references/02-version-4.md"]
+		},
+		{
+			"id": "http-client-contract",
+			"prompt": "Move our PURISTA HTTP callers to the new error response format.",
+			"expected_output": "Tests RFC 9457 Problem Details at the HTTP boundary, updates only affected consumers, and keeps EventBridge transport errors out of the claimed change.",
+			"files": ["references/02-version-4.md", "references/03-verification-and-rollback.md"]
+		},
+		{
+			"id": "casual-upgrade-typo",
+			"prompt": "plz help migate my old purista project safely",
+			"expected_output": "Starts with package, lockfile, scripts, definitions, and baseline checks rather than blindly installing latest packages or regenerating application files.",
+			"files": ["SKILL.md", "references/01-migration-workflow.md"]
+		},
+		{
+			"id": "near-miss-greenfield",
+			"prompt": "Create a new PURISTA customer service with an HTTP command.",
+			"expected_output": "Routes primary work to the purista skill and its CLI-first new-project workflow; migration guidance is not the primary skill for a greenfield feature.",
+			"files": []
+		}
+	]
+}

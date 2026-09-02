@@ -1,0 +1,67 @@
+---
+title: Test a command with PURISTA helpers
+description: Arrange a service and context, execute the validated command function, and understand what this focused test proves.
+order: 10
+kind: lesson
+status: published
+---
+
+Use a focused Framework test before adding HTTP. It will prove the schemas and
+handler work as one command boundary.
+
+```ts title="src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts" write
+import { createCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { expect, test } from 'vitest'
+import { bankProfileV1ServiceBuilder } from '../../bankProfileV1ServiceBuilder.js'
+import { getProfileCommandBuilder } from './getProfileCommandBuilder.js'
+
+test('returns the bank profile through the command contract', async () => {
+	const sandbox = createSandbox()
+	const service = await bankProfileV1ServiceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
+		logger: getLoggerMock(sandbox).mock,
+	})
+	try {
+		const { context } = createCommandContextMock(getProfileCommandBuilder, {
+			payload: undefined, parameter: {}, sandbox,
+		})
+		const command = safeBind(getProfileCommandBuilder.getCommandFunction(), service)
+		expect(await command(context, undefined, {})).toEqual({ name: 'Example Bank', currency: 'EUR' })
+	} finally {
+		await service.destroy()
+		sandbox.restore()
+	}
+})
+```
+
+The test has three parts:
+
+1. **Arrange:** create the service with a mocked bridge/logger and ask PURISTA
+   for the command context.
+2. **Act:** bind the validated command function to the service and call it.
+3. **Assert:** compare its result with the contract value.
+
+`getCommandFunction()` includes input/output validation and before guards. It
+does not execute transforms or after guards. Later chapters add runtime tests
+when those lifecycle stages matter.
+
+```md title="README.md" write
+# Example Bank: create a PURISTA project
+
+This project was built by following the PURISTA project tutorial. Use Node.js
+24.15 or newer. Run `npm ci`, `npm test`, and `npm run build` in this directory.
+
+The project contains a CLI-generated BankProfile v1 service and `getProfile`
+command. It has no HTTP server, UI, database, authentication, broker, or AI.
+
+Tutorial: https://purista.dev/tutorials/create-project/
+```
+
+```bash title="Test and build the generated service" replay="project"
+npm test
+npm run build
+```
+
+Expect four passing tests: two generated Ping tests, the BankProfile service setup
+test, and the command test. The next chapter teaches how to
+[use the Hono webserver](/tutorials/hono-webserver/).

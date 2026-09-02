@@ -122,6 +122,57 @@ middleware. Set the general service logger through the top-level
 | `traceHeaderField` | `x-trace-id` | Reads and echoes the application trace header and includes it in problem details. | An existing edge uses another application correlation header. It complements, rather than replaces, W3C trace propagation. |
 | `problemDetails.typeBaseUri` | Unset | Prefixes generated RFC 9457 problem `type` URIs. | You publish stable, documented problem-type URLs. |
 
+Here is the complete service-level shape in one place. This monolith uses
+configuration-based service registration. In a distributed HTTP process, set
+`enableDynamicRoutes: true`, leave `services` empty, and keep
+`autoRegisterServicesFromConfig` disabled.
+
+```ts title="src/http/honoConfig.ts"
+import type { HonoServiceV1ConfigPartial } from '@purista/hono-http-server'
+
+export const honoConfig = {
+  enableDynamicRoutes: false,
+  streamRequestTimeoutMs: 300_000,
+  maxRequestBodyBytes: 1_048_576,
+  apiMountPath: '/api',
+  enableHealth: true,
+  healthPath: '/healthz',
+  autoRegisterServicesFromConfig: true,
+  services: [pingService],
+  traceHeaderField: 'x-trace-id',
+  problemDetails: {
+    typeBaseUri: 'https://example.com/problems',
+  },
+  openApi: {
+    enabled: true,
+    openapi: '3.1.0',
+    info: {
+      title: 'Ping API',
+      description: 'Public HTTP contract for the Ping service',
+      version: '1.0.0',
+      termsOfService: 'https://example.com/terms',
+      contact: { name: 'API team', email: 'api@example.com' },
+      license: { name: 'Proprietary' },
+    },
+    servers: [{ url: 'https://api.example.com' }],
+    components: {
+      securitySchemes: {
+        bearerAuth: { type: 'http', scheme: 'bearer' },
+      },
+    },
+    security: [{ bearerAuth: [] }],
+    tags: [{ name: 'Ping', description: 'Readiness examples' }],
+    externalDocs: { url: 'https://example.com/docs' },
+    paths: {},
+  },
+} satisfies HonoServiceV1ConfigPartial
+```
+
+`healthFunction` and `protectHandler` are also accepted inside
+`serviceConfig`. Prefer the typed `setHealthFunction(...)` and
+`setProtectMiddleware(...)` methods shown below. They make the Hono context
+types visible and keep executable policy next to the composition code.
+
 ### OpenAPI document settings
 
 The complete `openApi` object is enabled by default. Without configuration,
@@ -169,6 +220,8 @@ the service deliberately; an arrow function is suitable when no receiver is
 needed. A command guard still makes the business authorization decision.
 
 ```ts title="src/http/createHonoService.ts"
+import { HandledError, StatusCode } from '@purista/core'
+
 honoService
   .setHealthFunction(async () => {
     if (!(await eventBridge.isHealthy())) {
@@ -177,7 +230,9 @@ honoService
   })
   .setProtectMiddleware(async function (request, next) {
     const identity = await verifyAccessToken(request.req.header('authorization'))
-    if (!identity) return request.json({ message: 'Unauthorized' }, 401)
+    if (!identity) {
+      throw new HandledError(StatusCode.Unauthorized, 'A valid access token is required')
+    }
 
     request.set('principalId', identity.subject)
     request.set('tenantId', identity.tenantId)
@@ -199,11 +254,68 @@ controls.
 
 ## Extend and stop the HTTP process deliberately
 
-Add application middleware, non-PURISTA routes, and global OpenAPI metadata
-before the listener accepts traffic. Generated endpoint registration is fixed
-at that point; [`addEndpoint(...)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#addendpoint)
-is an advanced in-process escape hatch, not remote-service discovery or replay
-of a missed announcement.
+`honoService.app` is the real typed Hono application. Use it for HTTP-only
+concerns such as static files, a browser fallback, an API reference page, or a
+small runtime configuration document. A business operation should remain a
+PURISTA command or stream so it keeps schemas, guards, messaging, tests, and
+generated OpenAPI.
+
+Register custom middleware and handlers before `honoService.start()`. Register
+all generated service endpoints before that call as well, then start the Node
+listener last.
+
+```ts title="src/http/registerUiRoutes.ts"
+import { HandledError, StatusCode } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+
+const honoService = (await honoV1Service.getInstance(eventBridge, {
+  serviceConfig: honoConfig,
+})).setHonoTypes<{
+  Variables: { locale: 'en' | 'de' }
+}>()
+
+honoService.app.use('/ui/*', async (context, next) => {
+  const locale = context.req.header('accept-language')?.startsWith('de') ? 'de' : 'en'
+  context.set('locale', locale)
+  await next()
+})
+
+honoService.app.get('/ui/config', context => {
+  if (!uiBuildId) {
+    throw new HandledError(StatusCode.ServiceUnavailable, 'The UI build is not ready')
+  }
+
+  return context.json({
+    apiBaseUrl: '/api',
+    buildId: uiBuildId,
+    locale: context.get('locale'),
+  })
+})
+
+honoService.openApi.addPath('/ui/config', {
+  get: {
+    summary: 'Read public browser configuration',
+    responses: { '200': { description: 'Browser configuration' } },
+  },
+})
+
+honoService.registerService(pingService)
+await honoService.start()
+```
+
+The Framework error handler installed by `start()` converts a `HandledError`
+from a custom Hono handler or protection middleware into the same RFC 9457
+problem response used by generated endpoints. An unexpected error becomes a
+generic `500` response; its internal message is not returned to the caller.
+
+Custom handlers do not automatically receive command payload validation,
+command guards, generated route protection, or generated OpenAPI. Add their
+Hono middleware and OpenAPI path deliberately. In particular,
+`setProtectMiddleware(...)` applies only to generated endpoints marked as
+protected. [`addEndpoint(...)`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#addendpoint)
+is an advanced projection API for PURISTA command or stream metadata. It is not
+the way to add an ordinary custom Hono handler, discover remote services, or
+replay a missed endpoint announcement.
 
 During graceful shutdown, call
 [`prepareDestroy()`](/handbook/api/classes/_purista_hono-http-server.HonoServiceClass/#preparedestroy)

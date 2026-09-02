@@ -1,0 +1,462 @@
+{
+  "plannedChapters": 29,
+  "forbiddenServiceNames": [
+    "Banking",
+    "BankingService",
+    "ExampleBank",
+    "ExampleBankService"
+  ],
+  "allowedServiceNames": [
+    "BankProfile",
+    "Identity",
+    "Transaction",
+    "Monitoring",
+    "Analysis",
+    "Reporting",
+    "Support",
+    "Knowledge"
+  ],
+  "scaffoldServiceNames": [
+    "Ping"
+  ],
+  "chapters": [
+    {
+      "id": "create-project",
+      "title": "Create a PURISTA project",
+      "status": "published",
+      "requires": [],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "BankProfile service started"
+      },
+      "pages": [
+        "create-project/build/initialize",
+        "create-project/build/generate-service",
+        "create-project/testing/test-command"
+      ]
+    },
+    {
+      "id": "hono-webserver",
+      "title": "Use the Hono webserver",
+      "status": "published",
+      "requires": [
+        "create-project"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "hono-webserver/build/install",
+        "hono-webserver/build/register",
+        "hono-webserver/build/shutdown",
+        "hono-webserver/testing/test-http"
+      ]
+    },
+    {
+      "id": "static-website",
+      "title": "Serve a static React website",
+      "status": "published",
+      "requires": [
+        "hono-webserver"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "static-website/build/create-ui",
+        "static-website/build/serve-assets",
+        "static-website/build/connect-read",
+        "static-website/testing/test-static"
+      ]
+    },
+    {
+      "id": "rest-endpoints",
+      "title": "Expose commands as REST endpoints",
+      "status": "published",
+      "requires": [
+        "static-website"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "rest-endpoints/build/model-contract",
+        "rest-endpoints/build/generate-commands",
+        "rest-endpoints/build/connect-ui",
+        "rest-endpoints/testing/test-endpoints"
+      ]
+    },
+    {
+      "id": "database-resource",
+      "title": "Persist data with a database resource",
+      "status": "published",
+      "requires": [
+        "rest-endpoints"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "database-resource/build/implement-sqlite",
+        "database-resource/build/wire-resource",
+        "database-resource/build/own-lifecycle",
+        "database-resource/testing/test-resource"
+      ]
+    },
+    {
+      "id": "protected-endpoints",
+      "title": "Protect generated HTTP endpoints",
+      "status": "published",
+      "requires": [
+        "database-resource"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "protected-endpoints/build/mark-security",
+        "protected-endpoints/build/protect-handler",
+        "protected-endpoints/build/connect-ui",
+        "protected-endpoints/testing/test-protection"
+      ]
+    },
+    {
+      "id": "sessions",
+      "title": "Handle sessions with StateStore",
+      "status": "published",
+      "requires": [
+        "protected-endpoints"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "sessions/build/generate-identity",
+        "sessions/build/store-session",
+        "sessions/build/protect-with-session",
+        "sessions/build/connect-ui",
+        "sessions/testing/test-sessions"
+      ]
+    },
+    {
+      "id": "business-guards",
+      "title": "Authorize actions with guards",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "business-guards/build/define-policy",
+        "business-guards/build/add-before-guards",
+        "business-guards/build/add-output-guard",
+        "business-guards/testing/test-guards"
+      ]
+    },
+    {
+      "id": "command-transforms",
+      "title": "Transform command input and output",
+      "status": "published",
+      "requires": [
+        "business-guards"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "command-transforms/build/input",
+        "command-transforms/build/output",
+        "command-transforms/build/connect-http",
+        "command-transforms/testing/test-transforms"
+      ]
+    },
+    {
+      "id": "external-resources",
+      "title": "Call an external HTTP provider",
+      "status": "published",
+      "requires": [
+        "command-transforms"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "verification": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "test:provider"
+          ]
+        }
+      ],
+      "pages": [
+        "external-resources/build/declare",
+        "external-resources/build/implement",
+        "external-resources/build/use",
+        "external-resources/testing/test-resources"
+      ]
+    },
+    {
+      "id": "command-result-events",
+      "title": "Publish command results as events",
+      "status": "published",
+      "requires": [
+        "external-resources"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "command-result-events/build/name-result",
+        "command-result-events/build/observe-message",
+        "command-result-events/build/contrast-manual",
+        "command-result-events/testing/test-events"
+      ]
+    },
+    {
+      "id": "subscriptions",
+      "title": "React to events with subscriptions",
+      "status": "published",
+      "requires": [
+        "command-events"
+      ],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "Transaction and Monitoring services started"
+      },
+      "pages": [
+        "subscriptions/build/generate",
+        "subscriptions/build/handle",
+        "subscriptions/build/run",
+        "subscriptions/testing/test-subscription"
+      ]
+    },
+    {
+      "id": "streams",
+      "title": "Stream incremental results",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "streams/build/generate",
+        "streams/build/implement",
+        "streams/build/expose",
+        "streams/testing/test-streams"
+      ]
+    },
+    {
+      "id": "queue-processing",
+      "title": "Process work with queues",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "queue-processing/build/generate",
+        "queue-processing/build/enqueue",
+        "queue-processing/build/work",
+        "queue-processing/testing/test-queue"
+      ]
+    },
+    {
+      "id": "schedules",
+      "title": "Declare scheduled work",
+      "status": "published",
+      "requires": [
+        "queue-processing"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "pages": [
+        "schedules/build/declare",
+        "schedules/build/trigger",
+        "schedules/build/bind",
+        "schedules/testing/test-schedule"
+      ]
+    },
+    {
+      "id": "observability",
+      "title": "Add metrics and tracing",
+      "status": "published",
+      "requires": [
+        "subscriptions"
+      ],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "Transaction and Monitoring services started"
+      },
+      "pages": [
+        "observability/build/declare",
+        "observability/build/wire",
+        "observability/build/follow",
+        "observability/testing/test-observability"
+      ]
+    },
+    {
+      "id": "distributed-runtime",
+      "title": "Run services across processes and adapters",
+      "status": "published",
+      "requires": [
+        "observability"
+      ],
+      "smoke": {
+        "type": "process-exit",
+        "expectOutput": "Transaction and Monitoring services started"
+      },
+      "verification": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "test:distribution"
+          ]
+        }
+      ],
+      "pages": [
+        "distributed-runtime/build/split",
+        "distributed-runtime/build/adapters",
+        "distributed-runtime/build/operate",
+        "distributed-runtime/testing/test-distribution"
+      ]
+    },
+    {
+      "id": "retrieval-ingestion",
+      "title": "Ingest content for retrieval",
+      "status": "published",
+      "requires": [
+        "authenticated-http"
+      ],
+      "smoke": {
+        "type": "http",
+        "path": "/api/v1/profile",
+        "expectJson": {
+          "name": "Example Bank",
+          "currency": "EUR"
+        }
+      },
+      "verification": [
+        {
+          "command": "npm",
+          "args": [
+            "run",
+            "test:postgres"
+          ]
+        }
+      ],
+      "pages": [
+        "retrieval-ingestion/build/accept",
+        "retrieval-ingestion/build/process",
+        "retrieval-ingestion/build/store",
+        "retrieval-ingestion/testing/test-ingestion"
+      ]
+    }
+  ],
+  "baselines": [
+    {
+      "id": "command-events",
+      "title": "Database-backed command result events",
+      "status": "published",
+      "requires": [
+        "create-project"
+      ],
+      "pages": [
+        "subscriptions/setup/create-producer",
+        "subscriptions/setup/add-database",
+        "subscriptions/setup/name-result"
+      ]
+    },
+    {
+      "id": "authenticated-http",
+      "title": "Generated session commands and protected Hono endpoints",
+      "status": "published",
+      "requires": [
+        "sessions"
+      ],
+      "pages": []
+    },
+    {
+      "id": "ingestion",
+      "title": "Authenticated Knowledge ingestion with pgvector",
+      "status": "published",
+      "requires": [
+        "retrieval-ingestion"
+      ],
+      "pages": []
+    }
+  ]
+}

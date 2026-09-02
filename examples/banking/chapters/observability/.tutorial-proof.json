@@ -1,0 +1,393 @@
+{
+  "chapter": "observability",
+  "node": "v26.5.0",
+  "pages": {
+    "create-project/build/initialize": "7264245282a0bc557f36bdef6da22e5e21a55eea8ff6333e5d447d45f4fd4544",
+    "create-project/build/generate-service": "a573210ec4c93759c43292ff49dcb19fc79bd0e6fe4c7099b3b01a438bd8e56a",
+    "create-project/testing/test-command": "66d56874dbafeb336b32ca9200b2bcc4ed73b08d1875a4be792b69c8ebcaf13e",
+    "subscriptions/setup/create-producer": "9eeb3db4ecb282fe7bb5d94e8570f91f01380ce2d4785782d1ece024166c1b81",
+    "subscriptions/setup/add-database": "b81bbdeaf48847f0e5d82087345953304b876139618d39953b361c065f6083b5",
+    "subscriptions/setup/name-result": "a46a0236ef666a95dcb98a349e5eaf3a97b57c6b4f70bd1a350224327a6ba569",
+    "subscriptions/build/generate": "6b0aa5f4a2c35db5b9a39792d4ec55abcd02e0a663bf525bbb4c37574d03ad07",
+    "subscriptions/build/handle": "aabe0a932a7e0f889fed929239b88a2d7cf89f664490aa6c1e4c50a1e299c514",
+    "subscriptions/build/run": "9706904cbea27bfb0185e538d2cbecfbdf6b39acf0f48d02f3945f22fc38f42d",
+    "subscriptions/testing/test-subscription": "5e7298c5a7c5cf99e0bd70f422e5d451af335640ec0062555913c0690431e8ae",
+    "observability/build/declare": "9fb6157011a89715e442d1f030b056b922560580d81a033c996baec3bc58b05e",
+    "observability/build/wire": "83c06f80ede95e66475ca1745b00e8be41aabdcecf6a3d220f048d681ce9fd65",
+    "observability/build/follow": "8bff7be5d5ad430b337772f1dfb3ad05ec68fd65ce07328668c11b65bff459bd",
+    "observability/testing/test-observability": "43b65100c550c9422b0ccc46e1db7d0c57a024a14c365b81de9577cb9bc47815"
+  },
+  "files": {
+    ".agents/IMPLEMENTATION.md": "e74c259e1aba782768754d77a35b9f9cc1be5872332795e26588d1491ef7b13c",
+    ".agents/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
+    ".claude/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
+    ".gitignore": "0fb1f8a882b810b2562ad9a7407bbc2fdf94c1772fe0cde95fd37daac40a23fd",
+    "AGENTS.md": "906ec5e2db4483fe773be79b86a14dec68d61b3566621914740b1836f101dade",
+    "CLAUDE.md": "8f5a6b2e44997085f3a15d46ed0df70b2ef034898a2b6a44e3d3efa8743d27ff",
+    "README.md": "67700792592fdde1d8bbc57c2d6ccf46e4f28427927953ffd8d6fc98b9de0cad",
+    "biome.json": "be8db280fb3f4151addc9ddb2e729182d9ba4c88065be6b7e1b6eadf01019d67",
+    "compose.observability.yaml": "cee70ea2599abce9d7d3666b1589354cf631d7f1c1783f0b023212a2bf7902e3",
+    "observability/otel-collector.yaml": "c6c25f521984ebf9b98499b8cc2d5818b12973ec38e141d6175fde0547bdb91e",
+    "package-lock.json": "37fb5bbda8e070c32aa8784f09cdf55d299fdd7fff40ee8bd309d0ba77ffc4ed",
+    "package.json": "1c779c02662c99ad7c1f1dc5a9e8d37d64f00b1b6af2d0f05cf1b8e11c982674",
+    "purista.json": "dc2cc6b95a7541fffb3b89739040f392789cce1548b44dad82fefd1511b4a9f4",
+    "scripts/verifyCollector.mjs": "d8e14a23a466effcf500cbe428d183015307c5956746bd8e502c163fbd399b61",
+    "src/application.ts": "85855f1a1bc4edabec0dac171f5e0334713e12e4738eee47c48c6ddf9bd80db0",
+    "src/collectorProbe.ts": "62b3d21085b0011b2a7565a2fbaad1f76b899b3e26bd819415f911ae0548e82e",
+    "src/eventbridge.ts": "2082d8d1901adf0665958d1acc694b49c7b8aa63484120c95b1860251edcd71f",
+    "src/index.ts": "cb4b6cc95cbb1acd9be586a39722c53e8db2945118e3678ba50f5956c9f40593",
+    "src/observability/ApplicationTelemetry.ts": "890df785685581cff6f5ffd202a7551eea78498b992445f9cc9e2522f6263211",
+    "src/observability/createOtlpTelemetry.ts": "dfddb563fd81ad7db450b002ad1d92c886847d87d58bf30887cf07096058a7f5",
+    "src/observability/testTelemetry.ts": "9c307f0fbfd4fc30b4a278aa81d2bec59c366e97b8c7347e34763f5f898b4e7b",
+    "src/observabilityFailure.test.ts": "bece0b613d2c63926748421cdb337e8e4dcd0eb5ac5ffc42fb02bbc89fd5bebc",
+    "src/observabilitySuccess.test.ts": "f39dfa9291e451f62bd43d403d4744417a07fde0ea3cf9c7e42dda348fc58903",
+    "src/resources/SqliteTransactionRepository.test.ts": "656bfa1d5dea920ed22de341a5c7742bdacb1f13ca2ad07810e36f60edc6fb93",
+    "src/resources/SqliteTransactionRepository.ts": "9b7deac8feaf5e1a2614307b5316836417e046f64790cff4f6764a5a2cd5afe4",
+    "src/service/bankProfile/generalBankProfileServiceInfo.ts": "a4281b2bdae650add577fca950684c1df77c82c57a85151916e36162a9e0ff93",
+    "src/service/bankProfile/v1/bankProfileServiceConfig.ts": "bee1df6d60b46365f1a6c35ea5f8e42c7461a35c71f9ddab319afccaa03cf87f",
+    "src/service/bankProfile/v1/bankProfileV1Service.test.ts": "0f8231cd96e4be0ac95f37cf59c6fd79bc3ac4634f3b1a46d25679386de14d0b",
+    "src/service/bankProfile/v1/bankProfileV1Service.ts": "3b7e0feca24cfb706da26fbac8270a9f2936985157455c38a6181f7e86acdcc4",
+    "src/service/bankProfile/v1/bankProfileV1ServiceBuilder.ts": "140dcca5c5c2d068a365a518c636775b8397d982eac53a13b3b98967b897d042",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts": "910f5b2f37ecae99bdd1999abe16c42e1853863ec4e80c245e8273f8b51b530a",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts": "57d220a723fc9e8fb0a82796385feae951bce8359af969c79f8913fcbd6afe68",
+    "src/service/bankProfile/v1/command/getProfile/schema.ts": "87b379fbceb043ea1c5e60a1c9135f62bac8492d65f7e1b1a2ccb3ee64ffc42b",
+    "src/service/bankProfile/v1/command/getProfile/types.ts": "c5604a1c7d1c9b481c558f6b18954ab3060dd5c91c5a42b5a70b2fc0aed39a25",
+    "src/service/monitoring/generalMonitoringServiceInfo.ts": "c4302d2adafc5adb50c2a7dae45bc6a925f83509610b544eb101d48923c4f04f",
+    "src/service/monitoring/v1/monitoringMetrics.ts": "fa136fb93add131459d2fb29318a09449ce2e84ff80f168beb9cdb32971b4a61",
+    "src/service/monitoring/v1/monitoringServiceConfig.ts": "1a08f5c4d6c6497004165ec13827ca9efbfd757873686a07d143860bfb88e99d",
+    "src/service/monitoring/v1/monitoringSignal.ts": "503f8bf19e0bae09a1d3228ff2baf5ddb1f131aa2b4a83e91c21a3ba66e5c926",
+    "src/service/monitoring/v1/monitoringV1Service.test.ts": "a3d0ab32a5751f9c140ee26fc8ce90eb0b7289a50a595546afa685b1ef09f41f",
+    "src/service/monitoring/v1/monitoringV1Service.ts": "252708c37997716ab866511ac287cdd5f92922500f7f294d18dc0040b8100940",
+    "src/service/monitoring/v1/monitoringV1ServiceBuilder.ts": "18c9c47fcd90db833b0feb1b8d971f02a5809f5411a0547bc26ea3e599712be8",
+    "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitDefinition.test.ts": "e3a6e0be78af3e8cd9a285463d7c727fae41cf0f485cf48daefddb34011b9842",
+    "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts": "fdd628b8ae13bdd54dee1747db5c91fd478d3867ca44ed4d0332dbf32e4a095f",
+    "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts": "dbdeb03c02b974be92c339bdb75d764fbb2434e0e9d2e291d0d2b23a8227720a",
+    "src/service/monitoring/v1/subscription/observeLargeDebit/schema.ts": "b05dc117ea6221e35143ed160800ff879120c3019c70ca79fd17149ae03e5609",
+    "src/service/monitoring/v1/subscription/observeLargeDebit/types.ts": "0326a4981c8cea20eca5e3eef9e7eecd9cef28804ef5f23db5858de3427b44b0",
+    "src/service/ping/generalPingServiceInfo.ts": "cb6ee5fb114fa1489c80b8df1bd8e02b1e62a5d8779de829af2ef35ebcc72007",
+    "src/service/ping/v1/command/ping/pingCommandBuilder.test.ts": "c78db61354ecc776a2ce00b797f811955b53b396b92738f077ab3ac167905d5e",
+    "src/service/ping/v1/command/ping/pingCommandBuilder.ts": "aeca57ee98bce9f9e132e6639d49388f252e4eacfa2c72758012bd63df68b936",
+    "src/service/ping/v1/command/ping/schema.ts": "5cf48098c50a3651310c701a9f9d0a7fbbf73867d3f1eccbdc267adf0bd62102",
+    "src/service/ping/v1/command/ping/types.ts": "c8182d785a0ddbd565196637ccc6fcc3de361274443836168571cb04bc78c1af",
+    "src/service/ping/v1/pingServiceConfig.ts": "6301f8d8c6ca7a86d1e1c2371ce676acd60466b02ea5bc1c35aad331ea9252e4",
+    "src/service/ping/v1/pingV1Service.test.ts": "19815ceb0bc51b3b364ddc91da39d0ebac792a1cdf626863623cefab110fa532",
+    "src/service/ping/v1/pingV1Service.ts": "1124da1afafc7b74de5e6d081892c1257f1e8ee36c171c655a393cfe1cfa0537",
+    "src/service/ping/v1/pingV1ServiceBuilder.ts": "8a566970219e1ea441c54a74a135ba93ff94746460877cb7ae25a64769791438",
+    "src/service/serviceEvent.enum.ts": "e8b3bc7d17064bcad12b9f3778f25de6081c49d57dc69ba43ef6bacab8056263",
+    "src/service/transaction/generalTransactionServiceInfo.ts": "1ede4c97e7fcbb30913880f396402faf9f7f3ba0e8fd342ea08f8d58024e0ee5",
+    "src/service/transaction/v1/TransactionRepository.ts": "326cd180a5db602e0818d9b177d45addbee40dadcc3e8226425978a076999c0b",
+    "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts": "07aafc80ba68fa939047d977635dc2e5c50a0a01e3ab7fc7d99d6a13c0f6429f",
+    "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts": "46228b98fdb03dab9d3a2343d85ebad3f490257eba71e901ffb7b06bdcba88a5",
+    "src/service/transaction/v1/command/recordTransaction/recordTransactionEvent.test.ts": "302a2090aa7ff5ba4e29887d31ded0cd031195e12eb0e9381c72ff7185ee9fd4",
+    "src/service/transaction/v1/command/recordTransaction/schema.ts": "8f37d671298aebf33c85f66f8d2c456d8f70de39d6f914b1543a1a2cf3ec1d4e",
+    "src/service/transaction/v1/command/recordTransaction/types.ts": "8f3828bb15b4879b805a3cadf0a07ca8ea494c52ca7df208d41761884b3676c4",
+    "src/service/transaction/v1/transaction.ts": "76735faff2cbb6f5c1babbb2a317b61cfedf7eb3842636de905e33f66cc67a9b",
+    "src/service/transaction/v1/transactionMetrics.test.ts": "2330028d2d3b01fbdf77d7142c28657471717aaf6123891e168de88adb10d44a",
+    "src/service/transaction/v1/transactionMetrics.ts": "54091478f860e5c65dec97d60e15f8af654cb4711a54d8e4883ff25a15a82145",
+    "src/service/transaction/v1/transactionServiceConfig.ts": "829f91689746fd973e4d2818dfdfcb89812441d44d6462fd3b2c9e1ce48dec97",
+    "src/service/transaction/v1/transactionV1Service.test.ts": "87dd24f8726a2f87db27c621cf7d86b27139d7f880d635e491d2b89586479926",
+    "src/service/transaction/v1/transactionV1Service.ts": "7c1e20039f41e0a1d18658e4fb128b5a1f9d6e9ac38587ed15d4a9c74da9e8cf",
+    "src/service/transaction/v1/transactionV1ServiceBuilder.ts": "57cec9fa63214a8d5229fb0c757d1aa2fd7e33b1f8e9ecbe809486d5b9fa3aa1",
+    "src/subscriptionFlow.test.ts": "fff9d1dfcd2df274677fd46ab1f9e2ab43bf1039a688056bf5a44962360c3d74",
+    "src/subscriptionRouting.test.ts": "fa11dc9316c64378938eacd4476b7ae2e663e80a138a0f00ad2d7c113536a0a3",
+    "tsconfig.json": "932445a47e9065e3098d86b6e66496eca4977a24a8e047f6ead9a6166707b4a5"
+  },
+  "actions": [
+    {
+      "page": "create-project/build/initialize",
+      "command": "npx --yes --package=@purista/cli@3.2.4 --package=@purista/core@3.2.4 purista init example-bank \\\n  --runtime node --event-bridge default --package-manager npm \\\n  --no-webserver --no-install --defaults --non-interactive\n"
+    },
+    {
+      "page": "create-project/build/initialize",
+      "write": "tsconfig.json"
+    },
+    {
+      "page": "create-project/build/initialize",
+      "command": "npm install --save-dev --save-exact @purista/cli@3.2.4 typescript@7.0.2\nnpm install --save-exact @purista/core@3.2.4 zod@4.4.3\nnpm pkg set 'scripts.test=tsc --noEmit && vitest run src'\nnpm test\nnpm run build\n"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "command": "npm run add:service -- bank-profile --description \"Provide the public Example Bank profile\" --non-interactive\nnpm run add:command -- get-profile --service bankProfile --service-version 1 \\\n  --description \"Describe the fictional bank\" --non-interactive\n"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/service/bankProfile/v1/command/getProfile/schema.ts"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "write": "README.md"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "command": "npm run add:service -- transaction \\\n  --description \"Record synthetic transactions\" --non-interactive\n"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "command": "npm run add:command -- record-transaction \\\n  --service transaction --service-version 1 \\\n  --description \"Record one synthetic transaction\" --non-interactive\n"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/transaction.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/TransactionRepository.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/command/recordTransaction/schema.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/command/recordTransaction/types.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "subscriptions/setup/create-producer",
+      "command": "npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/setup/add-database",
+      "write": "src/resources/SqliteTransactionRepository.ts"
+    },
+    {
+      "page": "subscriptions/setup/add-database",
+      "write": "src/resources/SqliteTransactionRepository.test.ts"
+    },
+    {
+      "page": "subscriptions/setup/add-database",
+      "write": "src/service/transaction/v1/transactionV1Service.ts"
+    },
+    {
+      "page": "subscriptions/setup/add-database",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "subscriptions/setup/add-database",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/setup/name-result",
+      "write": "src/service/serviceEvent.enum.ts"
+    },
+    {
+      "page": "subscriptions/setup/name-result",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "subscriptions/setup/name-result",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionEvent.test.ts"
+    },
+    {
+      "page": "subscriptions/setup/name-result",
+      "command": "npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionEvent.test.ts\nnpm test\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "command": "npm run add:service -- monitoring \\\n  --description \"Derive small operational signals from business events\" \\\n  --non-interactive\n"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "command": "npm run add:subscription -- observe-large-debit \\\n  --service monitoring --service-version 1 \\\n  --event transaction.recorded.v1 \\\n  --description \"Observe large recorded debit transactions\" \\\n  --non-interactive\n"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/schema.ts"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/types.ts"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitDefinition.test.ts"
+    },
+    {
+      "page": "subscriptions/build/generate",
+      "command": "npx vitest run src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitDefinition.test.ts\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/build/handle",
+      "write": "src/service/monitoring/v1/monitoringSignal.ts"
+    },
+    {
+      "page": "subscriptions/build/handle",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts"
+    },
+    {
+      "page": "subscriptions/build/handle",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts"
+    },
+    {
+      "page": "subscriptions/build/handle",
+      "command": "npx vitest run src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/build/run",
+      "write": "src/service/monitoring/v1/monitoringV1Service.ts"
+    },
+    {
+      "page": "subscriptions/build/run",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "subscriptions/build/run",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "subscriptions/build/run",
+      "write": "src/subscriptionFlow.test.ts"
+    },
+    {
+      "page": "subscriptions/build/run",
+      "command": "npx vitest run src/subscriptionFlow.test.ts\nnpm test\nnpm run build\n"
+    },
+    {
+      "page": "subscriptions/testing/test-subscription",
+      "write": "src/subscriptionRouting.test.ts"
+    },
+    {
+      "page": "subscriptions/testing/test-subscription",
+      "command": "npx vitest run src/subscriptionRouting.test.ts \\\n  src/subscriptionFlow.test.ts \\\n  src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts\nnpm test\nnpm run build\n"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/transaction/v1/transactionMetrics.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/monitoring/v1/monitoringMetrics.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/monitoring/v1/monitoringV1ServiceBuilder.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/transaction/v1/transactionMetrics.test.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "observability/build/declare",
+      "command": "npx vitest run \\\n  src/service/transaction/v1/transactionMetrics.test.ts \\\n  src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts\nnpm run build\n"
+    },
+    {
+      "page": "observability/build/wire",
+      "command": "npm install --save-exact \\\n  @opentelemetry/api@1.9.0 \\\n  @opentelemetry/exporter-metrics-otlp-http@0.221.0 \\\n  @opentelemetry/exporter-trace-otlp-http@0.221.0 \\\n  @opentelemetry/sdk-metrics@2.10.0 \\\n  @opentelemetry/sdk-trace-node@2.10.0\n"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/observability/ApplicationTelemetry.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/observability/createOtlpTelemetry.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/eventbridge.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/observability/testTelemetry.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "write": "src/observabilitySuccess.test.ts"
+    },
+    {
+      "page": "observability/build/wire",
+      "command": "npx vitest run src/observabilitySuccess.test.ts\nnpm run build\n"
+    },
+    {
+      "page": "observability/build/follow",
+      "write": "src/observabilityFailure.test.ts"
+    },
+    {
+      "page": "observability/build/follow",
+      "command": "npx vitest run src/observabilityFailure.test.ts\nnpm run build\n"
+    },
+    {
+      "page": "observability/testing/test-observability",
+      "write": "observability/otel-collector.yaml"
+    },
+    {
+      "page": "observability/testing/test-observability",
+      "write": "compose.observability.yaml"
+    },
+    {
+      "page": "observability/testing/test-observability",
+      "write": "src/collectorProbe.ts"
+    },
+    {
+      "page": "observability/testing/test-observability",
+      "write": "scripts/verifyCollector.mjs"
+    },
+    {
+      "page": "observability/testing/test-observability",
+      "command": "npm pkg set 'scripts.test:collector=node scripts/verifyCollector.mjs'\n"
+    },
+    {
+      "page": "observability/testing/test-observability",
+      "command": "npm test\nnpm run build\nnpm run test:collector\n"
+    }
+  ]
+}

@@ -2,6 +2,25 @@
 
 Use this reference when implementing PURISTA agents.
 
+> **Redesign gate:** the attached-agent API below documents the shipped v3
+> implementation. Do not use its aggregate queue/worker/command/stream model
+> for new tutorials or v4 API design. A Harness-first, Core-owned
+> `ServiceBuilder.mountHarness(...)` architecture is under review. Harness
+> remains the only AI definition DSL. Verify the installed API for v3
+> maintenance and do not present proposed v4 helpers as implemented.
+> Proposed v4 invocations are address-first and always cross EventBridge; no
+> service-builder reference or same-process direct-dispatch shortcut is valid.
+> The owner-approved revision-9 proposal gives each agent/workflow one final
+> output schema.
+> Consumers choose `run` or a portable `stream`; the definition declares
+> `none`, `text-delta`, or `object-snapshot` updates. Raw Harness diagnostic
+> events are not the default cross-service or HTTP response contract. Browser
+> streams use a named standard server-side projection. Vercel AI SDK UI Message
+> Stream v1 is the only initial GA profile. Keep its encoder behind a narrow
+> adapter boundary for future protocols, but do not implement other profiles in
+> the first release or invent a PURISTA client protocol. Durable waits
+> are interrupt outcomes and must never escape as errors or become HTTP 500.
+
 ## Contents
 - [Current Model](#current-model)
 - [Documentation Navigation](#documentation-navigation)
@@ -110,7 +129,7 @@ sandboxes, or model/runtime bindings.
 Applications bind concrete models at service startup:
 
 ```ts
-await service.addAgentDefinition(await triageAgent.getDefinition()).getInstance(eventBridge, {
+await service.addAgentDefinition(triageAgent.getDefinition()).getInstance(eventBridge, {
   queueBridge,
   ai: {
     telemetry: { contentCaptureMode: 'NO_CONTENT' },
@@ -164,7 +183,7 @@ Runtime wiring may pass the published harness governance config through
 `ai.governance`:
 
 ```ts
-await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventBridge, {
+await service.addAgentDefinition(agent.getDefinition()).getInstance(eventBridge, {
   queueBridge,
   ai: {
     models,
@@ -302,7 +321,7 @@ const agent = service
 Runtime wiring supplies Harness storage and the optional durable workspace:
 
 ```ts
-await service.addAgentDefinition(await agent.getDefinition()).getInstance(eventBridge, {
+await service.addAgentDefinition(agent.getDefinition()).getInstance(eventBridge, {
   queueBridge,
   ai: {
     models,

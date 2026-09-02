@@ -1,0 +1,199 @@
+---
+title: Generate and expose the commands
+description: Create record and read commands, project them through Hono, and inject an in-memory repository adapter.
+order: 20
+kind: lesson
+status: published
+---
+
+Use the project-local CLI to create both command folders and register their
+definitions with `Transaction`.
+
+```bash title="Generate the transaction commands" replay="project"
+npm run add:command -- record-transaction --service transaction --service-version 1 \
+  --description "Record a synthetic transaction" --non-interactive
+npm run add:command -- get-transaction --service transaction --service-version 1 \
+  --description "Get a transaction by ID" --non-interactive
+```
+
+## Record a transaction
+
+```ts title="src/service/transaction/v1/command/recordTransaction/schema.ts" write
+import { z } from 'zod'
+import { createTransactionSchema, transactionSchema } from '../../transaction.js'
+
+export const transactionV1RecordTransactionInputPayloadSchema = createTransactionSchema
+export const transactionV1RecordTransactionInputParameterSchema = z.object({})
+export const transactionV1RecordTransactionOutputPayloadSchema = transactionSchema
+```
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record a synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.exposeAsHttpEndpoint('POST', 'transactions')
+	.makeEndpointPublic()
+	.setCommandFunction(async function (context, payload) {
+		return context.resources.transactionRepository.save(payload)
+	})
+```
+
+The handler receives validated input and delegates storage to the declared
+resource. `makeEndpointPublic` is temporary and explicit because the course has
+not introduced endpoint protection yet.
+
+## Read a transaction
+
+```ts title="src/service/transaction/v1/command/getTransaction/schema.ts" write
+import { z } from 'zod'
+import { transactionSchema } from '../../transaction.js'
+
+export const transactionV1GetTransactionInputPayloadSchema = z.undefined()
+export const transactionV1GetTransactionInputParameterSchema = z.object({ transactionId: z.uuid() })
+export const transactionV1GetTransactionOutputPayloadSchema = transactionSchema
+```
+
+```ts title="src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1GetTransactionInputParameterSchema,
+	transactionV1GetTransactionInputPayloadSchema,
+	transactionV1GetTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const getTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('getTransaction', 'Get a transaction by ID')
+	.addPayloadSchema(transactionV1GetTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1GetTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1GetTransactionOutputPayloadSchema)
+	.exposeAsHttpEndpoint('GET', 'transactions/:transactionId')
+	.makeEndpointPublic()
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const transaction = await context.resources.transactionRepository.findById(parameter.transactionId)
+		if (!transaction) {
+			throw new HandledError(StatusCode.NotFound, 'Transaction not found', {
+				transactionId: parameter.transactionId,
+			})
+		}
+		return transaction
+	})
+```
+
+`HandledError` makes the expected missing-record outcome part of the transport
+boundary. Hono represents it as a 404 Problem Details response.
+
+## Supply a temporary adapter
+
+```ts title="src/resources/InMemoryTransactionRepository.ts" write
+import { randomUUID } from 'node:crypto'
+import type { TransactionRepository } from '../service/transaction/v1/TransactionRepository.js'
+import type { CreateTransaction, Transaction } from '../service/transaction/v1/transaction.js'
+
+export class InMemoryTransactionRepository implements TransactionRepository {
+	readonly #records = new Map<string, Transaction>()
+
+	async save(input: CreateTransaction) {
+		const transaction: Transaction = {
+			...input,
+			transactionId: randomUUID(),
+			recordedAt: new Date().toISOString(),
+		}
+		this.#records.set(transaction.transactionId, transaction)
+		return transaction
+	}
+
+	async findById(transactionId: string) {
+		return this.#records.get(transactionId)
+	}
+}
+```
+
+This adapter is process-local and deliberately small. It implements the same
+contract the database adapter will implement in the next chapter.
+
+## Compose the new service
+
+```ts title="src/application.ts" write
+import type { Logger } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { getEventBridge } from './eventbridge.js'
+import { InMemoryTransactionRepository } from './resources/InMemoryTransactionRepository.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+import type { TransactionRepository } from './service/transaction/v1/TransactionRepository.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository: TransactionRepository = new InMemoryTransactionRepository(),
+) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: { enabled: true, info: { title: 'Example Bank API', version: '1.0.0' } },
+		},
+	})
+
+	await bankProfile.start()
+	await transaction.start()
+	http.registerService(bankProfile, transaction)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return { eventBridge, bankProfile, transaction, transactionRepository, http }
+}
+```
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function main() {
+	const port = z.coerce.number().int().min(1).max(65535).parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const { eventBridge, bankProfile, transaction, http } = await createApplication(logger)
+	const nodeServer = serve({ fetch: http.app.fetch, hostname: '127.0.0.1', port })
+	const nodeHttpListener = createNodeHttpListener(nodeServer)
+
+	gracefulShutdown(logger, [
+		http.prepareDestroy(),
+		nodeHttpListener,
+		http,
+		transaction,
+		bankProfile,
+		eventBridge,
+	])
+	logger.info({ port }, 'Example Bank HTTP server started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank HTTP server could not start.\n')
+	process.exit(1)
+})
+```
+
+The application creates and destroys services. `Transaction` receives its
+repository through `getInstance`; it does not create infrastructure inside a
+handler.

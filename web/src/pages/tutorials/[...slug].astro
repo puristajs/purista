@@ -2,7 +2,7 @@
 import { type CollectionEntry, getCollection, render } from 'astro:content'
 import {
 	getPublishedTutorialEntries,
-	getTutorialChapter,
+	getTutorialBreadcrumbs,
 	getTutorialPageNavigation,
 	getTutorialSidebar,
 	tutorialRoute,
@@ -26,9 +26,8 @@ const { entry } = Astro.props
 const entries = getPublishedTutorialEntries(await getCollection('tutorials'))
 const { Content, headings } = await render(entry)
 const sidebar = getTutorialSidebar(entries)
-const chapter = getTutorialChapter(entries, entry.id)
 const { previous, next } = getTutorialPageNavigation(entries, entry.id)
-const eyebrow = chapter ? `Tutorials / ${chapter.data.title}` : 'Tutorials'
+const breadcrumbs = getTutorialBreadcrumbs(entries, entry.id)
 ---
 
 <TutorialLayout
@@ -39,9 +38,14 @@ const eyebrow = chapter ? `Tutorials / ${chapter.data.title}` : 'Tutorials'
 	headings={headings}
 >
 	<header class="mb-10">
-		<p class="font-mono text-[0.68rem] tracking-[0.16em] uppercase mb-2 text-[var(--color-found)]">
-			{eyebrow}
-		</p>
+		<nav aria-label="Breadcrumb" class="not-prose font-mono text-xs mb-3 text-[var(--color-found)]">
+			<ol class="flex flex-wrap list-none m-0 p-0 gap-x-2 gap-y-1">
+				{breadcrumbs.map((crumb, index) => <li class="m-0 p-0">
+					{index > 0 && <span aria-hidden="true" class="mr-2 text-[var(--color-fg-subtle)]">/</span>}
+					{crumb.href ? <a href={crumb.href}>{crumb.title}</a> : <span>{crumb.title}</span>}
+				</li>)}
+			</ol>
+		</nav>
 		<h1 class="font-display font-semibold text-[1.85rem] tracking-tight mb-3 text-[var(--color-fg-strong)] leading-[1.15]">
 			{entry.data.title}
 		</h1>

@@ -27,6 +27,12 @@ export default defineConfig({
 			'**/test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
 			'**/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
 		],
-		exclude: [...configDefaults.exclude, '**/node_modules/**', '**/dist/**', '**/tutorial/steps/**'],
+		exclude: [
+			...configDefaults.exclude,
+			'**/node_modules/**',
+			'**/dist/**',
+			'**/banking/chapters/**',
+			'**/banking/baselines/**',
+		],
 	},
 })

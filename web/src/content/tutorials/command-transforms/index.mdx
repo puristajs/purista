@@ -1,0 +1,28 @@
+---
+title: Transform command input and output
+description: Convert supported wire formats around validated, guarded Transaction commands.
+order: 90
+kind: chapter
+group: start
+status: published
+---
+
+A command transform converts a supported representation at the service
+boundary. It does not contain business effects and it does not authorize a
+caller.
+
+This chapter adds two focused Transaction commands:
+
+- an input transform converts `debit|25.99|Northwind Books|Order 1042` into the
+  existing domain fields with `2599` cents;
+- an output transform converts one authorized transaction into explicit CSV.
+
+The existing account guards still decide whether the principal may import or
+export that account's data.
+
+1. [Transform input before domain validation](/tutorials/command-transforms/build/input/).
+2. [Transform output after authorization](/tutorials/command-transforms/build/output/).
+3. [Expose transformed HTTP contracts](/tutorials/command-transforms/build/connect-http/).
+4. [Test transforms and lifecycle order](/tutorials/command-transforms/testing/test-transforms/).
+
+Start from [Authorize actions with guards](/tutorials/business-guards/).

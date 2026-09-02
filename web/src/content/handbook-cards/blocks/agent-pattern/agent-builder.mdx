@@ -130,7 +130,7 @@ Use `streamingMode: 'stream'` for an SSE response. Use `setResponseMode('accepte
 ## Add to the service
 
 ```typescript [supportV1Service.ts]
-supportV1ServiceBuilder.addAgentDefinition(await supportAgentBuilder.getDefinition())
+supportV1ServiceBuilder.addAgentDefinition(supportAgentBuilder.getDefinition())
 ```
 
 At runtime, services with attached agents need a `queueBridge` and `ai.models` bindings:

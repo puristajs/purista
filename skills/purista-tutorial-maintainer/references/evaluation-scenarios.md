@@ -10,6 +10,13 @@
 - [Business guards and transforms](#9-business-permission-and-representation)
 - [Bounded authoring](#10-an-outline-for-a-smaller-model)
 - [Reject a run guide](#11-replace-a-run-guide-with-a-build-sequence)
+- [Architecture before green tests](#12-repair-state-ownership-despite-passing-tests)
+- [Nested and small lessons](#13-simplify-a-flat-course)
+- [Teach Framework tests](#14-teach-command-and-resource-tests)
+- [Clean rebuild](#15-rebuild-instead-of-migrating)
+- [Command result events](#16-choose-a-command-success-event)
+- [Capability-first course](#17-keep-the-example-out-of-the-information-architecture)
+- [Narrow service names](#18-keep-the-application-name-out-of-service-boundaries)
 
 Use these bounded scenarios to review the skill's decisions. They are
 behavioral acceptance cases, not claims that an evaluation has already run.
@@ -22,7 +29,8 @@ chapter and do not know what a subscription is.”
 
 Expected: independent Framework starting point; small landing plus ordered
 step pages; plain explanation before the builder; runnable producer; expected
-event and case; duplicate-delivery test; no previous database requirement.
+event and small monitoring signal; duplicate-delivery test; no previous database
+requirement or mandatory case-assignment subsystem.
 
 Check: follow the printed setup in a clean directory, then ask a newcomer to
 explain producer, event, and subscription from the text alone.
@@ -146,3 +154,111 @@ the review if only CLI commands were added to chapter introductions, if the
 reference source has an unexplained different layout, or if verification only
 runs the already-complete demo. Test outcomes must come from the learner's
 constructed checkpoint.
+
+## 12. Repair state ownership despite passing tests
+
+Request: “The login tutorial rebuilds a store with a Map. It passes replay,
+but it does not follow PURISTA. Review every chapter.”
+
+Expected: inventory every page and source owner; classify operational state
+versus domain records by meaning. Move session operations into generated
+Identity commands and use PURISTA StateStore for their operational session
+records. Put transactions behind an injected database resource even if the
+first repository API only saves and reads by id. Keep Hono protection in
+`setProtectMiddleware`, mark only login public, and remove parallel lifecycle
+routes. Do not rewrite unrelated user work.
+
+Check: published claims, local limitations, dependencies and helper tests agree;
+architecture review is separate from snapshot equality and passing HTTP tests.
+A plan identifies remaining implementation work instead of calling it fixed.
+Fail if storage was chosen from method count, a generated endpoint was replaced
+with ordinary Hono syntax, or `prepareDestroy()` is claimed to close the runtime
+listener.
+
+Learner-facing replacement pages contain only the resulting design. Explanations
+of the old mistake and repair stay in internal evidence.
+
+## 13. Simplify a flat course
+
+Request: “There are too many pages. We can use subpages and sub-subpages; this
+is a framework example, not a real bank.”
+
+Expected: list the actual current tree; retain a disposition for every route;
+choose small required outcomes and nested optional variations; check actual
+navigation support rather than assuming nested URLs produce a nested sidebar.
+Independent chapter baselines exclude unrelated CSV, UI, broker or AI work.
+
+Check: meaningful group indexes, required next/previous traversal, direct entry
+recipes, breadcrumbs and verified redirects are planned. Simplicity removes
+unnecessary domain machinery, not imports, registration, explanations or tests.
+
+## 14. Teach command and resource tests
+
+Request: “Testing must show how PURISTA commands are tested and resources mocked.”
+
+Expected: command-context test in the first chapter, state stubs beside state,
+typed client fakes beside resources, direct business-guard and transform tests,
+then a small runtime integration check. Explain helper limitations in easy English.
+
+Check: the reader writes the test from a generated project; verifies success,
+dependency failure and no denied effect; understands why an HTTP test or raw
+handler call cannot prove every lifecycle stage. Printed code compiles with
+the selected published package and does not invent helper identity options.
+
+## 15. Rebuild instead of migrating
+
+Request: “Do not migrate the existing pages. Start clean and then we review.”
+
+Expected: remove migration and redirect work from the active plan. Use old
+content only as diagnostic evidence. Build one small new source-and-prose
+slice, including Framework tests, and review it before expanding the series.
+
+Check: no legacy compatibility gate, forced old route structure, cumulative
+demo dependency, or mass authoring before the first working slice is reviewed.
+Existing unrelated work is preserved; the plan does not claim code is rebuilt.
+
+## 16. Choose a command success event
+
+Request: “Publish a fact after saving a transaction so a subscription can use
+the completed command result.”
+
+Expected: use `setSuccessEventName` on the transaction command and subscribe to
+the named command success response. Explain that PURISTA publishes it only when
+the command completes successfully. Use `canEmit` and `context.emit` in a
+separate example only when a different fact occurs during execution.
+
+Check: repository failure produces no event; the handler has no duplicate
+manual emit; the runtime test asserts `CommandSuccessResponse`, event name,
+sender, trusted tenant/principal metadata, and result payload.
+
+## 17. Keep the example out of the information architecture
+
+Request: “The bank is only our concise example. Teach people how to build with
+PURISTA.”
+
+Expected: root titles lead with tasks such as using Hono, serving static files,
+adding endpoints, protecting endpoints, handling sessions, subscriptions,
+streams, and queue processing. Descriptions state the small banking result.
+The capability dependency order determines navigation and baselines.
+
+Check: a reader can scan titles and find a PURISTA capability without knowing
+the Example Bank storyline. Every bank-specific record or rule has a direct
+teaching job. Remove domain machinery that does not prove the current builder,
+context, runtime, transport, store/resource, guard, or test boundary.
+
+## 18. Keep the application name out of service boundaries
+
+Request: “Use one BankingService for login, transactions, monitoring, reports,
+and support AI so the tutorial has fewer names.”
+
+Expected: reject the catch-all service. Start with `BankProfile`, then introduce
+`Identity`, `Transaction`, `Monitoring`, `Analysis`, `Reporting`, `Support`, and
+`Knowledge` only when their capabilities appear. Keep session authentication
+in Identity and business authorization guards on the service that owns the
+action. Example Bank remains the application and UI name.
+
+Check: the active plan, CLI commands, learner pages, replay manifest, and
+retained source contain no generated `Banking` or `ExampleBank` service. Every
+service has a clear owner, state/resource boundary, excluded responsibilities,
+and focused Framework tests. Old diagnostic evidence may preserve the rejected
+name but cannot be a starting checkpoint.

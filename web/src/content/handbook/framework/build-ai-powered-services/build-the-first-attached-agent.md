@@ -120,8 +120,11 @@ The focused [AgentBuilder and runtime-binding guide](/handbook/framework/build-a
 
 ## 3. Register the generated definitions
 
-`getDefinition()` is asynchronous. Add its result to the service before the
-service resolves definitions; [`addAgentDefinition(definition)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addagentdefinition)
+`getDefinition()` is asynchronous because the generated projections convert
+Standard Schema validators to JSON Schema. Pass the pending definition to the
+service builder. PURISTA resolves it together with pending commands,
+subscriptions, streams, queues, and workers when the service is instantiated.
+[`addAgentDefinition(definition)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addagentdefinition)
 registers the generated command, stream, queue, and worker definitions as one
 unit. Calling it after `resolveDefinitions()` fails.
 
@@ -129,7 +132,7 @@ unit. Calling it after `resolveDefinitions()` fails.
 import { triageTicketAgentBuilder } from './agent/triageTicket/triageTicketAgentBuilder.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
-const triageTicketAgent = await triageTicketAgentBuilder.getDefinition()
+const triageTicketAgent = triageTicketAgentBuilder.getDefinition()
 
 export const supportV1Service = supportV1ServiceBuilder.addAgentDefinition(triageTicketAgent)
 ```

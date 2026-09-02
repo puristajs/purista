@@ -1,0 +1,65 @@
+---
+title: Inject the database resource
+description: Supply SQLite when constructing Transaction while keeping database imports outside command handlers.
+order: 20
+kind: lesson
+status: published
+---
+
+The `Transaction` service already declares
+`defineResource<'transactionRepository', TransactionRepository>()`. No service
+or command definition changes in this chapter.
+
+Delete the temporary adapter:
+
+```bash title="Remove the temporary in-memory adapter" replay="project"
+rm src/resources/InMemoryTransactionRepository.ts
+```
+
+Replace the application factory. It defaults to an in-memory SQLite resource,
+which keeps application and browser tests isolated. Runtime startup will supply
+a file-backed instance on the next page.
+
+```ts title="src/application.ts" write
+import type { Logger } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { getEventBridge } from './eventbridge.js'
+import type { ManagedTransactionRepository } from './resources/ManagedTransactionRepository.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import { transactionV1Service } from './service/transaction/v1/transactionV1Service.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(
+	logger: Logger,
+	transactionRepository: ManagedTransactionRepository = new SqliteTransactionRepository(':memory:'),
+) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const transaction = await transactionV1Service.getInstance(eventBridge, {
+		logger,
+		resources: { transactionRepository },
+	})
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: { enabled: true, info: { title: 'Example Bank API', version: '1.0.0' } },
+		},
+	})
+
+	await bankProfile.start()
+	await transaction.start()
+	http.registerService(bankProfile, transaction)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return { eventBridge, bankProfile, transaction, transactionRepository, http }
+}
+```
+
+`getInstance` is the injection point. The `recordTransaction` and
+`getTransaction` handlers still know only the repository interface and contain
+no `node:sqlite` import.

@@ -1,0 +1,31 @@
+---
+title: Publish command results as events
+description: Name a successful PURISTA command response and contrast it with a distinct custom event emitted during execution.
+order: 110
+kind: chapter
+group: services
+status: published
+---
+
+A PURISTA command always returns a response to its caller. When other
+components should also react to the completed result, the command can give that
+successful response an event name.
+
+This chapter uses two event forms for two different meanings:
+
+- `transaction.recorded.v1` names the final, validated result of
+  `recordTransaction`;
+- `transaction.recording.started.v1` is a separate fact emitted while the
+  handler runs.
+
+The successful result is not emitted manually. PURISTA creates it only after
+the command handler, output validation, and guards have completed. The custom
+event is declared with its own schema and emitted at the exact line where its
+fact becomes true.
+
+1. [Name the successful command result](/tutorials/command-result-events/build/name-result/).
+2. [Observe the runtime message](/tutorials/command-result-events/build/observe-message/).
+3. [Emit a distinct in-flight fact](/tutorials/command-result-events/build/contrast-manual/).
+4. [Test both event forms](/tutorials/command-result-events/testing/test-events/).
+
+Start from [Call an external HTTP provider](/tutorials/external-resources/).

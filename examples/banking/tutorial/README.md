@@ -1,64 +1,94 @@
-# Build Example Bank, step by step
+# Maintain the tutorial by following it
 
-These are the source edits taught in the website tutorials, not the combined
-demo in `../src`. The CLI creates the project and artifacts. Each directory in
-`steps/` contains complete replacement files applied at that point.
+Write the MDX lesson first. Explain the purpose, show the project-local CLI
+command, then show the complete edited file with its exact path. Run the
+construction verifier and correct the lesson when an instruction fails.
+Do not hand-edit `chapters/` or `baselines/` and reverse-engineer matching prose.
+Use `ROADMAP.md` for the reviewed capability owners, chapter sequence, and
+bounded work packets for the remaining chapters.
 
-Follow the [first chapter](https://purista.dev/tutorials/start-a-purista-project/)
-to write the application yourself. To recover a checkpoint in a new directory,
-run from the repository root:
+Named `baselines` in the course recipe reuse only their listed construction
+pages. For example, `--chapter authenticated-service` replays the CLI foundation
+and the two Identity/Hono pages, then `--retain` saves their result beneath
+`baselines/`. This is a complete independent starting project, not a dependency
+on another chapter's running server. Baseline source and page hashes are checked
+alongside chapter proofs. A shared-page change requires replaying its consumers.
 
-```bash
-node examples/banking/tutorial/replay.mjs --to first-command --out ../example-bank-checkpoint
+From the repository root:
+
+```sh
+node examples/banking/tutorial/replay.mjs \
+  --chapter command-transforms --out /tmp/my-new-bank-replay
 ```
 
-Node >=24.15, npm, and network access to npm are required. You do not need to
-install or build this monorepo. The replay uses published PURISTA packages and
-the generated project's local CLI scripts. It refuses to overwrite a directory.
+The output directory must not already exist. The verifier constructs a fresh
+`example-bank` there by following the prerequisite pages and chapter pages in
+`course.json`. It uses published packages, so it needs registry access and a
+supported Node/npm installation. Port 3000 must be available for the actual
+documented requests. It must not be used for another application during replay.
 
-Available checkpoints are listed in `steps.json`. Each includes its preceding
-steps, complete source edits, and the page teaching each edit. The script checks
-that the code printed on each page is identical to its source file, then
-typechecks, tests, and builds each checkpoint. Generated placeholder tests are
-replaced as the corresponding behavior is implemented.
+The Markdown markers are deliberately simple:
 
-Maintainer checks:
+- `title="src/example.ts" write`: replace this entire file in the learner project.
+- `dockerfile` fences use the same full-file write marker for reproducible container builds.
+- `sql` fences use that marker for the database schema shown to the reader.
+- `replay="parent"`: execute the shown shell command in the new parent directory.
+- `replay="project"`: execute it inside `example-bank`.
+- `replay="server"`: start the shown server until this page's requests finish.
+- `replay="request"`: execute the shown request against that server.
+- `expect="json"`: compare the previous request response with the shown JSON.
 
-```bash
-node examples/banking/tutorial/replay.mjs --check-docs
-node examples/banking/tutorial/replay.mjs --to first-command --out /tmp/example-bank-proof --verify-http
+Every fence needs a title. Ordinary explanatory fences have no execution marker.
+Replay supplies `PURISTA_TUTORIAL_REPOSITORY` as the checkout's absolute path.
+Lessons using shared, explicitly documented runtime snapshot archives must show
+how a reader sets that variable; it is not permission to import finished
+application implementations or undocumented dependencies into a checkpoint.
+The verifier does not invent missing files, generated artifacts, configuration,
+or test fixes. Unsupported instructions should fail rather than be silently
+patched in the solution. Each advertised checkpoint runs its checks.
+
+`course.json` also lists the reviewed capability service names. Replay rejects
+an application-wide service such as `BankingService` and any unreviewed vague
+replacement. Extend the catalog only when a chapter introduces a service with
+one explicit capability owner. Starter reference services are listed separately
+as scaffold names and must not receive application behavior.
+
+After reviewing the successful result, use `--retain` during a fresh replay to
+copy it into `chapters/<chapter>/`. Move the former result aside for review
+first: the verifier refuses to overwrite it. Dependencies and build artifacts
+are excluded; source, lockfile, relative CLI skill links, and the proof remain.
+Runtime data under `var/` is also excluded from source provenance. Tests and
+smoke requests can change a database file even when every source file is
+identical.
+
+```sh
+npm run check:source --prefix examples/banking
+npm test --prefix examples/banking
 ```
 
-The second command also starts and stops the compiled application at each HTTP
-checkpoint, checking its real localhost response. Port 3000 must be free.
-It tests both the startup file and the in-process HTTP integration test.
+`check:source` only verifies the page and retained-source hashes. `npm test`
+also copies every retained project outside the monorepo, installs its lockfile,
+runs TypeScript and its test suite, builds, and starts the compiled application
+for a loopback HTTP smoke test. Temporary test copies are removed afterward.
+Neither command proves an unpublished chapter or a paid model's answer quality.
 
-The snapshots are excluded from the monorepo's TypeScript/test discovery:
-they refer to files generated at replay time and are **not** independently
-compilable modules. Their verification is the replay, not the demo's test suite.
-Keep the generated project's package-lock.json when continuing your application.
+While one dependent branch is deliberately frozen, verify another chapter and
+its prerequisites without changing the frozen proof:
 
-## Maintenance contract
+```sh
+node examples/banking/tutorial/replay.mjs --check --chapter command-transforms
+```
 
-Change a snapshot and its documented file together. Add any new CLI generation
-or package install to `steps.json` and print the same action on the relevant
-page. Each new chapter must specify a working entry checkpoint, teach its
-service/resource/runtime connections, and prove an end-to-end result plus its
-main failure. A successful prose/source comparison alone does not establish
-runtime correctness.
+The unfiltered `check:source` command remains required before merging the whole
+course.
 
-Current replay coverage: project creation, Hono setup, Banking service, first
-HTTP command, repository resource wiring, transaction recording, account
-history, server-owned sessions, current account/action permissions, before and
-after guards, tenant isolation, guarded command-to-command calls, exact legacy
-input transformation, CSV output transformation, and an outbound mock-bank client.
-Use `--to list-transactions` for the transaction chapter, `--to account-access`
-for its protected API, or `--to account-overview` for the composed command.
-The small `account-foundation` checkpoint tests identity and permissions before
-they are wired into HTTP. The integration chapter builds `legacy-import`,
-`csv-export`, and `legacy-http`; the last includes a working Compose dependency
-and a test that starts the same HTTP mock on a temporary port. Run that
-checkpoint's `docker compose -p example-bank-legacy up -d --wait` before trying
-the outbound import manually, then use the matching `down` command to stop it.
-Later chapters must still be migrated and verified before they can be claimed
-as replayable.
+The website navigation uses content metadata; `course.json` lists construction
+recipes, not a second navigation tree. Add a chapter only when its pages and
+independent runtime are ready to replay. Keep optional lessons out of unrelated
+chapters' required setup.
+
+A work-in-progress recipe may have `status: "draft"` while its pages also remain
+draft. It can be explicitly replayed, but is not counted as a retained, tested
+application. Remove that status only after its required path succeeds. The
+optional `environment` object records public runtime opt-ins used by the compiled
+smoke check, such as `PURISTA_DEMO_LOGIN=1`; it must not contain credentials.

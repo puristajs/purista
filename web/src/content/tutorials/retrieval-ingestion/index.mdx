@@ -1,0 +1,52 @@
+---
+title: Ingest content for retrieval
+description: Queue, chunk, embed, and transactionally store a reviewed document with PURISTA.
+order: 200
+kind: chapter
+group: ai
+status: published
+---
+
+Retrieval starts before a user asks a question. Source text must be accepted,
+split into stable chunks, converted to vectors, and stored with enough scope to
+prevent one tenant or collection from reading another.
+
+This chapter builds that ingestion boundary in the `Knowledge` service. A
+protected command accepts one short fictional policy revision. A PURISTA queue
+moves the slower work out of the HTTP request. Its worker uses two declared
+resources: an embedding provider and a PostgreSQL repository backed by
+pgvector.
+
+```text title="The ingestion boundary"
+authenticated HTTP command
+  -> collection edit guard
+  -> PURISTA ingestKnowledge queue
+  -> worker rechecks trusted scope
+  -> deterministic chunker
+  -> injected embedding provider
+  -> transactional PostgreSQL/pgvector repository
+```
+
+`Knowledge` owns the document revisions and retrieval records. `Identity`
+continues to own sessions. StateStore keeps only operational queue-result state;
+the document and its vectors are database records.
+
+## What you will build
+
+You will:
+
+1. generate `Knowledge`, an ingestion queue, a worker, and a protected command;
+2. apply collection-level business authorization before enqueueing;
+3. pass trusted tenant and principal metadata in queue headers;
+4. split text with deterministic TypeScript and pass PURISTA's cancellation
+   signal to an injected embedding provider;
+5. reject malformed vectors and handle provider failure safely;
+6. replace a document revision atomically in PostgreSQL with pgvector; and
+7. verify the resource and the complete HTTP-to-worker flow with Docker
+   Compose.
+
+The example uses one short invented policy and four-dimensional deterministic
+vectors. They make the mechanics easy to inspect. They are not suitable for
+semantic search quality or production use.
+
+Start with [Accept ingestion through a command](./build/accept/).

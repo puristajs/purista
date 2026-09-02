@@ -2,7 +2,56 @@
 
 Use this reference when validating or operating a PURISTA app.
 
+## Contents
+- [Testing](#testing)
+- [Observability](#observability)
+- [Logging](#logging)
+- [Privacy and audit verification](#privacy-and-audit-verification)
+- [Deployment](#deployment)
+- [Verification](#verification)
+
 ## Testing
+
+Teach the public Framework helpers beside each primitive. Start from the
+generated test and explain arrangement, action, assertion, and what is mocked.
+
+| Boundary | Public helper / setup | Limit |
+| --- | --- | --- |
+| Command behavior | `createCommandContextMock` and `safeBind(builder.getCommandFunction(), serviceInstance)` | Validates input/output and runs before guards; excludes transforms and after guards |
+| Raw handler | `getCommandFunctionPlain` | Excludes schemas and all hooks |
+| One hook | Named guard/transform accessor, matching context helper, `safeBind` | Does not run sibling hooks or the complete lifecycle |
+| Command runtime | `createCommandTestHarness(serviceBuilder, commandBuilder, options)` | Registers/executes through the service, but does not prove Hono or a real broker |
+| Explicit runtime message | `service.registerCommand(definition)`, then `service.executeCommand(getCommandMessageMock(...))` | Runs the command lifecycle; use explicit trusted metadata and check the response discriminator |
+| Subscription logic | `createSubscriptionContextMock` and service-bound `getSubscriptionFunction` | No routing, transforms, after guards, or result-event delivery |
+| Queue worker | `createQueueWorkerContextMock` and declared resource/client stubs | No real broker lease, retry timing, or persistence proof |
+| Stream | Matching stream context/harness helpers | Proves chunks/final/cancellation only at the exercised boundary |
+| Application/adapter | Real services with the selected Hono/bridge/store | Proves the actual wiring and only the exercised adapter guarantees |
+
+Supply resource fakes via `resources`; configure their method results and
+failures. Store stubs such as `stubs.getState` reject when unconfigured. Return
+the keyed-object shape from a state read, not a bare record. Assert arguments,
+results, and absent effects on denial. Use Sinon assertions for Sinon stubs,
+or the test runner's matcher for its own mock type. Restore/destroy owned
+test objects in cleanup.
+
+`createCommandContextMock`'s `message` option overrides payload/parameter,
+not trusted identity. The runtime harness `run` also takes only payload and
+parameter. For identity cases use `getCommandMessageMock` with explicit
+metadata and the service execution path, or an explicit direct context message.
+Do not invent helper options or mock away the guard under test.
+
+The 3.2.4 `createCommandTestHarness` signature constrains the service builder to
+the default configuration type and can reject a builder with non-empty typed
+configuration. Verify the consumer compiler result. Use the public service
+registration/execution methods above when that constraint applies; do not cast
+away the configured builder type or replace runtime checks with a raw handler
+test. Revisit this guidance when the helper's type constraint is repaired.
+
+Use a few deterministic runtime checks for transforms/after guards and
+registration. Do not force every branch through HTTP, nor claim a raw handler
+test proves the Framework lifecycle. Keep infrastructure tests and live model
+quality evaluations separate from fast service tests.
+
 Test declared boundaries and runtime wiring:
 - command tests should use command context helpers or service instances
 - subscription tests should assert consumed event behavior

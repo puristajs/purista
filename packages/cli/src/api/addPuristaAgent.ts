@@ -87,8 +87,15 @@ const addAgentDefinitionToService = async (input: {
 	if (serviceExport) {
 		const statement = serviceExport.getVariableStatementOrThrow()
 		const text = statement.getText()
-		if (!text.includes('.addAgentDefinition(...agentDefinitions)')) {
-			statement.replaceWithText(`${text}\n\t.addAgentDefinition(...(await Promise.all(agentDefinitions)))`)
+		if (text.includes('.addAgentDefinition(...(await Promise.all(agentDefinitions)))')) {
+			statement.replaceWithText(
+				text.replace(
+					'.addAgentDefinition(...(await Promise.all(agentDefinitions)))',
+					'.addAgentDefinition(...agentDefinitions)',
+				),
+			)
+		} else if (!text.includes('.addAgentDefinition(...agentDefinitions)')) {
+			statement.replaceWithText(`${text}\n\t.addAgentDefinition(...agentDefinitions)`)
 		}
 	}
 
@@ -99,7 +106,7 @@ const addAgentDefinitionToService = async (input: {
  * Add an attached AI agent to an existing PURISTA service version.
  *
  * Generates an agent queue builder using `.getAgentQueueBuilder(...)`, a harness
- * test, an index export, and appends the async agent definition to the service.
+ * test, an index export, and appends the pending agent definition to the service.
  */
 export const addPuristaAgent = async (input: {
 	projectRootPath?: string

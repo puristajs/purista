@@ -1,0 +1,1054 @@
+{
+  "chapter": "external-resources",
+  "node": "v26.5.0",
+  "pages": {
+    "create-project/build/initialize": "7264245282a0bc557f36bdef6da22e5e21a55eea8ff6333e5d447d45f4fd4544",
+    "create-project/build/generate-service": "a573210ec4c93759c43292ff49dcb19fc79bd0e6fe4c7099b3b01a438bd8e56a",
+    "create-project/testing/test-command": "66d56874dbafeb336b32ca9200b2bcc4ed73b08d1875a4be792b69c8ebcaf13e",
+    "hono-webserver/build/install": "4738a6a607a3082d1550b6955e4717aa0df58125ef9aa6ddf5fa285cda8939e5",
+    "hono-webserver/build/register": "f3be43b1109f6bf1b5986691215a5aba905a0444a6402ac907d61e8b53df2534",
+    "hono-webserver/build/shutdown": "7b673421b6a6cc7ace46cbc173284e44be7c523e41c1167d26db9d6c925e8ff2",
+    "hono-webserver/testing/test-http": "4c000230057b093548b6f3d73ca828781d88edbd138990bee34d81792fb15cb3",
+    "static-website/build/create-ui": "b45d89c5abc76eb165d4ebf6f8e56493f22c363d5b0a3a0af886a4360aab1216",
+    "static-website/build/serve-assets": "be9755efd5d2c2d0bb1c9f3b5d1ce1ba42667216fe82a6006698fb8fee44576b",
+    "static-website/build/connect-read": "b57de36c7e9820a05f5b29adbfa59b0152fe666c56fab13359eee1375b79d55c",
+    "static-website/testing/test-static": "580babea360012b86046e94ffa920f61d27b409d27f1b437d4c07f82524f57ce",
+    "rest-endpoints/build/model-contract": "8c5e0605d9f7ec60efc0d7527153b88ee66c4803f27d4463ba5e48efde4c2bdf",
+    "rest-endpoints/build/generate-commands": "05a4733f8aa659e08d2dc828ec480d54700c8f1b5392c26fd338e81b225f127f",
+    "rest-endpoints/build/connect-ui": "3f6d11f1be9d479b37ff3d81f1aa7db1e788d4f675fe390201c56901b7395db3",
+    "rest-endpoints/testing/test-endpoints": "f19428c56b7b66ec60cb98d06f9d9f8eb9b68fadf7431ec2d305942dc9bcb919",
+    "database-resource/build/implement-sqlite": "b0492f872d6cc1bd41cc1d6e677b96f2039961972729f9515b26c44a9b316584",
+    "database-resource/build/wire-resource": "705dcfee6c6cc6713525bb5e6ac05594c45e650fa9ff11cd451e90d0c0b69891",
+    "database-resource/build/own-lifecycle": "98f28c840fb4921d31df56e7b8e61151d7ede08b0090c4d8aaf4bfe9391df752",
+    "database-resource/testing/test-resource": "d4be11f894392029cde30207fdd9dcb7c7c6675b5e0b8db35b8050dbd32d4dc2",
+    "protected-endpoints/build/mark-security": "12fe7f02e264fa9d36293d9f7ce4fc1f864716b711489bac98ca0782a12c73a8",
+    "protected-endpoints/build/protect-handler": "44ed229968462047d524e74bda03a4ca50494d4d159275152d7c19f3b57b91c6",
+    "protected-endpoints/build/connect-ui": "7924f320b22894b9e385b3a23f97149d6868e7d8508d73464ef4acf6e6af9865",
+    "protected-endpoints/testing/test-protection": "040b05837c5cb0a2047a514b82dc200048414ba9d779342fbf19892f9be1d870",
+    "sessions/build/generate-identity": "c47cea32cd1222668bab95e712778b15bbe8729ae06193c138f965514ec400c2",
+    "sessions/build/store-session": "6eb7ad756049da6c3faebf80464d8f5cb8fd8c0414530b978a30d8c0969b5000",
+    "sessions/build/protect-with-session": "501a54ef274f87f472b035d58ea3e5673ec9c196b116afda5893b278b7ec5dce",
+    "sessions/build/connect-ui": "5814121135f9a7d16beee8289231bd4175b4b0eb55558c1a422c02f9752c747d",
+    "sessions/testing/test-sessions": "3a0ccaafcc2dec0bb108a7d5a300619388e1ef8fe9e9c4a6f29360f1874db4cc",
+    "business-guards/build/define-policy": "7442cdcf90d4764c747249f04a4dd3468d10ad0c5bd65b5c121d3409750466dd",
+    "business-guards/build/add-before-guards": "9b6e276aa7b07b1c14c1ff08d3ce9337a04bf5df866bc85f3f20020737dae1b8",
+    "business-guards/build/add-output-guard": "772dfe6425d251aefa1a4b8c1ab6e38c00c5faee2b568b4d7473146ced6b5e78",
+    "business-guards/testing/test-guards": "5ca0a2cfa1028866ca3ef97f869f327cf492ddc655b7640b8f69fed4b630bdec",
+    "command-transforms/build/input": "f07e577e05bfb7cd60b72da7fc3809b8c2581c5099c74d7aa2266ffb5d4e4b82",
+    "command-transforms/build/output": "b5fba57d29ef22fdd7f44ef86656f6da0c090c3b155043626e7da9f4e01eaf2e",
+    "command-transforms/build/connect-http": "00951c20f6e5cb731c566727a6bfaeed8393f1973042385f3b2e22b4a2023444",
+    "command-transforms/testing/test-transforms": "1318e3ad9f77a62d6046639606c35771086848a3d1c0f1d95cb1ca53c66d06cf",
+    "external-resources/build/declare": "63824fabbd95963767b6ff4631f229d91a42b6c6b324c85a17ddac70c447513e",
+    "external-resources/build/implement": "17de211e30fe75d5215e3887cb120052b35e7a02485676e9467c09b58ac1862f",
+    "external-resources/build/use": "feb9c202960b1d92b62c9e357799b69ec8737c93509af70242a9cf16f273fe66",
+    "external-resources/testing/test-resources": "b015568129bd98b00de5989ec12eb7adbcdd32b420e8c5fa3f6c863992645ffd"
+  },
+  "files": {
+    ".agents/IMPLEMENTATION.md": "e74c259e1aba782768754d77a35b9f9cc1be5872332795e26588d1491ef7b13c",
+    ".agents/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
+    ".claude/skills/purista": "symlink:../../node_modules/@purista/core/skills/purista",
+    ".gitignore": "83baf940dc3fb72fc4a641dc7cb25d50c2cd933fad788c0817277d5593634790",
+    "AGENTS.md": "906ec5e2db4483fe773be79b86a14dec68d61b3566621914740b1836f101dade",
+    "CLAUDE.md": "8f5a6b2e44997085f3a15d46ed0df70b2ef034898a2b6a44e3d3efa8743d27ff",
+    "README.md": "67700792592fdde1d8bbc57c2d6ccf46e4f28427927953ffd8d6fc98b9de0cad",
+    "biome.json": "be8db280fb3f4151addc9ddb2e729182d9ba4c88065be6b7e1b6eadf01019d67",
+    "compose.yaml": "94c7cb39a4568facbfd0fdf32be0d78d18b68e1156856a86aff43e86132a5f4b",
+    "package-lock.json": "95f63090852063d264a6a339657bf19d73f09a9202b994461d8e65c1154cf17e",
+    "package.json": "5e68e3b214536fe9acf7a4be7dccaf5ea8dadde9fe32f5d370c8c47d31225784",
+    "purista.json": "dc2cc6b95a7541fffb3b89739040f392789cce1548b44dad82fefd1511b4a9f4",
+    "scripts/verifyLegacyProvider.mjs": "33545a25025f285005ed038f9306df2f497e947ac20fac792b2433b0136306f8",
+    "src/application.test.ts": "7bc06db98d259f9912ac824df0073b415ea1cae4fe582573ce0945c58454930c",
+    "src/application.ts": "a9221799a73da32ad4606acfb8a94264a83c34944d26dfa3f7fe21ee5e929a39",
+    "src/businessGuards.test.ts": "6dac64eacbe3f3d44fa41877cb646be419098cb521700a3af2ee903ca1d241f9",
+    "src/commandTransforms.test.ts": "4b0128eb1185b1eadec8f487905e1187f7c1f8dedc8481176f3c3e91e0b689b5",
+    "src/endpointSecurity.test.ts": "3431f55388b69953e199933f6f79d123e41932a46fddc083685de3f4f46cc409",
+    "src/eventbridge.ts": "26ff7cfd68da9c058b8c225f00e2a3744ef212bf31f1ec6330c8950f0534f9af",
+    "src/index.ts": "f34f79024c46d7175415a2a06d1b85a6a19962c6bebf6723db8614fb4f01c8d3",
+    "src/legacyTransactionProvider.integration.test.ts": "126da86da7d80861819281e0456937f48e73e55d9c7b6a6b7156d2ac949d2d79",
+    "src/nodeHttpListener.ts": "ecee28b6871a1c9d87c20c9241f9a59c59a1b5fe4b245b89b15e8b8b9f14a21f",
+    "src/resources/HttpLegacyTransactionClient.test.ts": "f9a63a508e50a5f2725a368737ca619e6fd40db752743e7e1b0b97204728accb",
+    "src/resources/HttpLegacyTransactionClient.ts": "e334f424d6823a597160dac2b3db6eb267072aebd6516655ce2afc89126c5015",
+    "src/resources/ManagedTransactionRepository.ts": "ac9e42f55da77bde30034ad2113ce6195d0f6e26e5636bdfbacc05c6e7de7de3",
+    "src/resources/SqliteTransactionRepository.lifecycle.test.ts": "1032b88abc007e3e43d7aef0a540535bb63a1d38b8329cc0038c40c322ef2740",
+    "src/resources/SqliteTransactionRepository.test.ts": "0fd2395887480c4617dd5be66c709b77fa5c7e2dee31cb0d887d4037c09408ec",
+    "src/resources/SqliteTransactionRepository.ts": "25f33a435eb7bea3e8fd5cc7a2503ae5ac593000cf942266b106ebb21f52e4ea",
+    "src/resources/mockLegacyTransactionProvider.ts": "47d0f115f11d1ab21685c7d275d5a9cf3c5e58801167209e9e894586054de9ca",
+    "src/service/bankProfile/generalBankProfileServiceInfo.ts": "a4281b2bdae650add577fca950684c1df77c82c57a85151916e36162a9e0ff93",
+    "src/service/bankProfile/v1/bankProfileServiceConfig.ts": "bee1df6d60b46365f1a6c35ea5f8e42c7461a35c71f9ddab319afccaa03cf87f",
+    "src/service/bankProfile/v1/bankProfileV1Service.test.ts": "0f8231cd96e4be0ac95f37cf59c6fd79bc3ac4634f3b1a46d25679386de14d0b",
+    "src/service/bankProfile/v1/bankProfileV1Service.ts": "3b7e0feca24cfb706da26fbac8270a9f2936985157455c38a6181f7e86acdcc4",
+    "src/service/bankProfile/v1/bankProfileV1ServiceBuilder.ts": "140dcca5c5c2d068a365a518c636775b8397d982eac53a13b3b98967b897d042",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts": "910f5b2f37ecae99bdd1999abe16c42e1853863ec4e80c245e8273f8b51b530a",
+    "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts": "9706becc8b308b277202a8de7b86fb843e1e82aadc9f05b540a7f3fc142b8ad4",
+    "src/service/bankProfile/v1/command/getProfile/schema.ts": "87b379fbceb043ea1c5e60a1c9135f62bac8492d65f7e1b1a2ccb3ee64ffc42b",
+    "src/service/bankProfile/v1/command/getProfile/types.ts": "c5604a1c7d1c9b481c558f6b18954ab3060dd5c91c5a42b5a70b2fc0aed39a25",
+    "src/service/identity/generalIdentityServiceInfo.ts": "642a5f09c66a4abce1baa97bbdb5c231ebe3e7659b6ea99dd83db428ad4c11f2",
+    "src/service/identity/v1/LocalIdentityProvider.ts": "5b9d643c4147dcdcf1499b7c9aa75afcd3b2ac945d385379257afdf70cbe8cd3",
+    "src/service/identity/v1/command/getCurrentSession/getCurrentSessionCommandBuilder.ts": "2808b964b490ee9d090844e62293ebf04268bc7ea2dcb9cae8fdbb82b744bc1e",
+    "src/service/identity/v1/command/getCurrentSession/schema.ts": "b463de9755ce3cf2ebd9cd5be4319734da7fba7384ba98bfea7cd2f50685adcb",
+    "src/service/identity/v1/command/getCurrentSession/types.ts": "6e24c632dbf224e8b23b8dd222c6811f0fbeed7baf5865a7bcd38ca11b71cc90",
+    "src/service/identity/v1/command/login/loginCommandBuilder.ts": "75aa7f1d8bfb004f9d58e678ea4f6cd624c053341c43056e0754674f65d40faf",
+    "src/service/identity/v1/command/login/schema.ts": "0c13e769115c07725dd1b0ef9fdbd7edd9f418a379f995303943b9b68610293e",
+    "src/service/identity/v1/command/login/types.ts": "6a1ae8e4a14c7bee04d1b11e02b09ae1aaacd1b00e1a5fc6c8d1dd80d305f4fd",
+    "src/service/identity/v1/command/logout/logoutCommandBuilder.ts": "3d3ff3ba29533d80c7ced21e85de0440641341f42f7cf59e6fb65c4d5fc5632e",
+    "src/service/identity/v1/command/logout/schema.ts": "505534055abe48806cb5ce9e1385135ec49cc2e5a1de38c50233c0b5cf8d3b89",
+    "src/service/identity/v1/command/logout/types.ts": "8f7da637f09bd19be0824f2f6bb011ed4e5197229c6374489ea0157700725127",
+    "src/service/identity/v1/command/resolveSession/resolveSessionCommandBuilder.ts": "4745ccdfa1c2b010beeb410a1a3fd6a9916d68888ebfef821db093c21e87fa41",
+    "src/service/identity/v1/command/resolveSession/schema.ts": "33980e0a7f6b7173a274fb2799d3889809254982d7d6d0fb43067b6a8b60bf43",
+    "src/service/identity/v1/command/resolveSession/types.ts": "20bc53b682360aa68e425cc4e314c7820d9e9d04ff69a74e57db230d9620931a",
+    "src/service/identity/v1/identityServiceConfig.ts": "9a295bb27db3c959416e6d78161faedb7c3721f56540d8d08ab838163448577a",
+    "src/service/identity/v1/identityV1Service.ts": "16c2146dddb96467db3d90d3ff6045fa43fab5cefc49ab7fe6e3e9c1a90bbe69",
+    "src/service/identity/v1/identityV1ServiceBuilder.ts": "cdcfc4f7c4c9d9e1c07a2aabf32f2358270bb810b696cc36bb33eaad00ef63ae",
+    "src/service/identity/v1/session.ts": "20a9b981f4eb03e601fd285f5e338c223952cfa914559821e6431308c55ef6c8",
+    "src/service/identity/v1/sessionCommands.test.ts": "36810b5b9ce9a3165cf99f337fa7b015dedc04a2504455b253cc06b38f358424",
+    "src/service/ping/generalPingServiceInfo.ts": "cb6ee5fb114fa1489c80b8df1bd8e02b1e62a5d8779de829af2ef35ebcc72007",
+    "src/service/ping/v1/command/ping/pingCommandBuilder.test.ts": "c78db61354ecc776a2ce00b797f811955b53b396b92738f077ab3ac167905d5e",
+    "src/service/ping/v1/command/ping/pingCommandBuilder.ts": "aeca57ee98bce9f9e132e6639d49388f252e4eacfa2c72758012bd63df68b936",
+    "src/service/ping/v1/command/ping/schema.ts": "5cf48098c50a3651310c701a9f9d0a7fbbf73867d3f1eccbdc267adf0bd62102",
+    "src/service/ping/v1/command/ping/types.ts": "c8182d785a0ddbd565196637ccc6fcc3de361274443836168571cb04bc78c1af",
+    "src/service/ping/v1/pingServiceConfig.ts": "6301f8d8c6ca7a86d1e1c2371ce676acd60466b02ea5bc1c35aad331ea9252e4",
+    "src/service/ping/v1/pingV1Service.test.ts": "19815ceb0bc51b3b364ddc91da39d0ebac792a1cdf626863623cefab110fa532",
+    "src/service/ping/v1/pingV1Service.ts": "1124da1afafc7b74de5e6d081892c1257f1e8ee36c171c655a393cfe1cfa0537",
+    "src/service/ping/v1/pingV1ServiceBuilder.ts": "8a566970219e1ea441c54a74a135ba93ff94746460877cb7ae25a64769791438",
+    "src/service/serviceEvent.enum.ts": "deb3eee4eba43b3b2a738571f5951e355a6cfe292eab518cfa2dacb920cf5d6f",
+    "src/service/transaction/generalTransactionServiceInfo.ts": "cd3b0cfa808558002f215577217022336fea19ef5ca6e65fc2d0d0e0af606d5d",
+    "src/service/transaction/v1/AccountAccessPolicy.test.ts": "4fb5ff36037ce29bdfb56976655ea69fa0501fcbd6e17373513cb463745c95e2",
+    "src/service/transaction/v1/AccountAccessPolicy.ts": "7afe62fae61b8381d2d38c71d260c96ba136df819b026a625d969f5b8b0cc4a7",
+    "src/service/transaction/v1/LegacyTransactionClient.resource.test.ts": "b05dbb7a27600fe803ec937dffe3ade58c4e450ee708b5bb2eb93ff9423221b7",
+    "src/service/transaction/v1/LegacyTransactionClient.ts": "8651b344f5cf34834acc444305017065e2573e1af36c39ec1175c471e372e968",
+    "src/service/transaction/v1/TransactionRepository.ts": "42d75377a5ba60e9d52e672fe4cfb9ccba5621e85b67fe2650d802d4b2a7905d",
+    "src/service/transaction/v1/accountAccessGuards.ts": "d4067b3e745db82d9af34ab5e0198dbd9684cf3986b01fe96e1c5c090ebf37f5",
+    "src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.test.ts": "a274683cfc453c213f1a03841023cd4e73775de0b6497d124f78e2f70cf2bee7",
+    "src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.ts": "96a63592278a3ad6ab3ff4c75e6b657daa5a4bd6da3a7e88323eab1c5e6b64af",
+    "src/service/transaction/v1/command/exportTransaction/schema.ts": "26754231470ed02c7c064e1a0f04a82bef6398843042d251a0e6da900dec66a0",
+    "src/service/transaction/v1/command/exportTransaction/types.ts": "10575279eeb7f345c27b2301dfb28bfed5657efe1d2e24de5e2774ac9003ebb0",
+    "src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts": "d9851bf1f48b562f949e3f29f2101c6d9aae169a861f06acb293d3ced339bfda",
+    "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.test.ts": "28d0d0706945d0ecff25142ed648f88720d1163d4cbc92cb0355e0edbc3a2b6a",
+    "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts": "caad8ea8600ec1559cca32db0ee48f0a54f8b4f892a16d5c6b5348e3be7d4361",
+    "src/service/transaction/v1/command/getTransaction/schema.ts": "6065cac3250e25dfa1a63e9dbedd02cb87315108ea2508d5351dc685324b1317",
+    "src/service/transaction/v1/command/getTransaction/types.ts": "5436e46bca78c3d5bb145f56e649f9c4e27baab159cb80d3ede51ed188d49816",
+    "src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts": "a19e7ba200954960d25af2872692cff94cd0ac11b084148178c46f64ceb21fc4",
+    "src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.ts": "c5afe95b80f6cad0782a6d046eb45cef30fc41f20e0a42e6168cceaaf2864101",
+    "src/service/transaction/v1/command/importLegacyTransaction/schema.ts": "a1b0613483c89740b80504c4fe0e14e893876b1d8f5fc15983bd55f2ad9796c6",
+    "src/service/transaction/v1/command/importLegacyTransaction/types.ts": "b87891d071df69b77a00349b22bbaf66d8a432eea294dc73ae3786d2149643df",
+    "src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.test.ts": "908f4d04b594a23ab86623cb453f7f25a0d670451b7d8aeae80141f3f5d0310f",
+    "src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.ts": "f22b9af042b116ba37597fee574af2af132d9d9bcc5ea72e0f63a2cb339d4583",
+    "src/service/transaction/v1/command/importProviderTransaction/schema.ts": "cdd4a45f5745a214035769f141c24ac43171115aa8bce4fd17eb32d86784ff3a",
+    "src/service/transaction/v1/command/importProviderTransaction/types.ts": "e00c15e3bcda354d0d17770223f8427d344890d277b4c1b1a3afcf377ec49965",
+    "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts": "92b5e5b4129b431c954805407d165b11810c7a204b1b1897faef70e3f42ba62a",
+    "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts": "72732c01d1f1a006ea057695ef545d5521488d7786818962161fc028289bdbd0",
+    "src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts": "cafe71d5f88de8eff1b694911a2c27c833bda178b39283d7f7a3908ef5494a7d",
+    "src/service/transaction/v1/command/recordTransaction/schema.ts": "52fa1327cc3004c5f8dc5306e0cb16ba4a62ad72558f949b4f4d8820692e01a9",
+    "src/service/transaction/v1/command/recordTransaction/types.ts": "5a7d084c98987eec2b5a57c1ec6f28877cbee4c9b7e0b953c14fd698f6e0dadb",
+    "src/service/transaction/v1/legacyTransaction.ts": "c59f4e6f49342299754a3f50f09b373206ba6fcf05361d79347ea562f8755431",
+    "src/service/transaction/v1/testing/transactionTestResources.ts": "debe91eacc8234fbfc5f9cf66f7bfc617af255ea8d605d2774e544980e377cb2",
+    "src/service/transaction/v1/testing/unavailableLegacyTransactionClient.ts": "1eb43c00924e867502245c4a8ce07389b1c8178ef9371b502e6f2952f40c9c4b",
+    "src/service/transaction/v1/transaction.test.ts": "aaad96568ddc1033f9c8ea034349f00367a694366b719ab8d985e66eb53d1804",
+    "src/service/transaction/v1/transaction.ts": "e1644149dac311d9f65a502defe9d8c22018fd0d04230bded40b3a0b1e988350",
+    "src/service/transaction/v1/transactionCsv.ts": "d6c257884640a531e3ac27a81f6fddc5ed16e2a78faa6ff1581643f376c8408f",
+    "src/service/transaction/v1/transactionServiceConfig.ts": "829f91689746fd973e4d2818dfdfcb89812441d44d6462fd3b2c9e1ce48dec97",
+    "src/service/transaction/v1/transactionV1Service.test.ts": "87dd24f8726a2f87db27c621cf7d86b27139d7f880d635e491d2b89586479926",
+    "src/service/transaction/v1/transactionV1Service.ts": "89a9590599832440c74b74ec4386819394a67a4e9a99df88b87b90a2e3f66b40",
+    "src/service/transaction/v1/transactionV1ServiceBuilder.ts": "54a78296bfe09a7e002882a41cbd9f011a91b258382de7497d46cf426764b0c3",
+    "src/sessionEndpoints.test.ts": "019db34358f8bda00487f2ee45e94f597c42b89f17040acf48b4fcb5385523ec",
+    "src/sessionProtectMiddleware.ts": "9c5c753086f09ce70cfd20c477d1415fc65232c3f9691f7b1fb703b99903baf2",
+    "src/staticWebsite.ts": "865010f0335916aa142299cdcb02f7c6022c41c6cb1d0be9fa5a45168567a67d",
+    "src/transformHttp.test.ts": "09db8b028cb9b0e2cd64129c8135792543e936e3c77cd9172119588085669b26",
+    "tsconfig.json": "932445a47e9065e3098d86b6e66496eca4977a24a8e047f6ead9a6166707b4a5",
+    "ui/components.json": "230fb44cf5439103cb5675f0d7ebd0b46137d800f8fe82ddaaccff6235aa1f8a",
+    "ui/index.html": "bf0f51308ee6db86418b40906b4973bcf85b5d008fae5af2abc439c308c95a34",
+    "ui/src/App.test.tsx": "dc49b846a73a61ca589b229f03d8e5b63d6c2b93898047742392b6cd0828a0b3",
+    "ui/src/App.tsx": "5b89b6a6b5d44eb376eb86e60bdc3434a5d9f81ea96fcb38992938f4a6d93a58",
+    "ui/src/components/ui/alert.tsx": "f929ed610cb0eb034de3502cc2c7fc902766a1ac7a7382e5b2a66b272e5ba415",
+    "ui/src/components/ui/button.tsx": "2a3fa2abb4a3125a591474d85f2db154ae59a7fd8a6e4eb12f9c298aaf3878f3",
+    "ui/src/components/ui/card.tsx": "04637a39a81e082a1959a7b6fbd7c837972ad9eebeabbf4268f8afa68f4c3a08",
+    "ui/src/components/ui/skeleton.tsx": "27c5444339b84e8fea30a4b21edfabff203f5a26c5333a4416f616c29fa40a4c",
+    "ui/src/index.css": "a8a631a2e98a8fa63a61b01ef4b937f3dc7290a5f54d2d319417d7bd75236b06",
+    "ui/src/lib/utils.ts": "a0d047a6e6341282bb1abdc14bb205665734f4ccb6511eb793c97768b1088d69",
+    "ui/src/main.tsx": "317d1bf3746c24d935ba8c03f90d29a4566c5ce409c1a937c994c0829dcb1cc4",
+    "ui/src/test/setup.ts": "977afde26bba6a51325908cd7713cbfdc87d18f06b78b237c8f364c44864b7de",
+    "ui/tsconfig.json": "78439e2904b33b4f6948d256b97285d2cb336b6ceafc6bc49f65c8e1f8bbb8ff",
+    "ui/vite.config.ts": "1743d75e7b05fb82c962b852353baeeef07baef34dfada4a6104c586f10c97ea",
+    "ui/vitest.config.ts": "7a542b711bd856ce9ef45c56656ef5fe9b94bef84d55ab7fd35dcaa9593138d9",
+    "vendor/purista-hono-http-server-3.2.4.tgz": "cb00157a79f2a79c3d2dc9f7ac81855317ae230fd8dee80aca24eab44c45f3c5",
+    "vitest.server.config.ts": "31e60a962e8acd075292c913c386be69de46501564a96194f1652e2c1b1421e6"
+  },
+  "actions": [
+    {
+      "page": "create-project/build/initialize",
+      "command": "npx --yes --package=@purista/cli@3.2.4 --package=@purista/core@3.2.4 purista init example-bank \\\n  --runtime node --event-bridge default --package-manager npm \\\n  --no-webserver --no-install --defaults --non-interactive\n"
+    },
+    {
+      "page": "create-project/build/initialize",
+      "write": "tsconfig.json"
+    },
+    {
+      "page": "create-project/build/initialize",
+      "command": "npm install --save-dev --save-exact @purista/cli@3.2.4 typescript@7.0.2\nnpm install --save-exact @purista/core@3.2.4 zod@4.4.3\nnpm pkg set 'scripts.test=tsc --noEmit && vitest run src'\nnpm test\nnpm run build\n"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "command": "npm run add:service -- bank-profile --description \"Provide the public Example Bank profile\" --non-interactive\nnpm run add:command -- get-profile --service bankProfile --service-version 1 \\\n  --description \"Describe the fictional bank\" --non-interactive\n"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/service/bankProfile/v1/command/getProfile/schema.ts"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts"
+    },
+    {
+      "page": "create-project/build/generate-service",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.test.ts"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "write": "README.md"
+    },
+    {
+      "page": "create-project/testing/test-command",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "hono-webserver/build/install",
+      "command": "npm install --save-exact @purista/hono-http-server@3.2.4 @hono/node-server@2.1.0\n"
+    },
+    {
+      "page": "hono-webserver/build/register",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts"
+    },
+    {
+      "page": "hono-webserver/build/register",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "hono-webserver/build/shutdown",
+      "write": "src/nodeHttpListener.ts"
+    },
+    {
+      "page": "hono-webserver/build/shutdown",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "hono-webserver/build/shutdown",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "hono-webserver/build/shutdown",
+      "server": "npm start\n"
+    },
+    {
+      "page": "hono-webserver/build/shutdown",
+      "command": "curl --fail-with-body --silent http://127.0.0.1:3000/api/v1/profile\n"
+    },
+    {
+      "page": "hono-webserver/build/shutdown",
+      "responseChecked": true
+    },
+    {
+      "page": "hono-webserver/testing/test-http",
+      "write": "src/application.test.ts"
+    },
+    {
+      "page": "hono-webserver/testing/test-http",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "command": "npm install --save-exact react@19.2.8 react-dom@19.2.8 class-variance-authority@0.7.1 clsx@2.1.1 tailwind-merge@3.6.0 lucide-react@1.32.0\n"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "command": "npm install --save-dev --save-exact vite@8.2.1 @vitejs/plugin-react@5.2.0 tailwindcss@4.3.3 @tailwindcss/vite@4.3.3 @types/react@19.2.18 @types/react-dom@19.2.4 @testing-library/react@16.3.2 @testing-library/jest-dom@6.9.1 jsdom@30.0.1\n"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "command": "npm pkg set 'scripts.build:server=tsc' 'scripts.build:ui=vite build --config ui/vite.config.ts' 'scripts.build=npm run build:server && npm run build:ui' 'scripts.test:server=tsc --noEmit && vitest run --config vitest.server.config.ts' 'scripts.test:ui=vitest run --config ui/vitest.config.ts' 'scripts.test=npm run build:ui && npm run test:server && npm run test:ui'\n"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "vitest.server.config.ts"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/vite.config.ts"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/tsconfig.json"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/components.json"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/index.html"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/lib/utils.ts"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/components/ui/card.tsx"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/components/ui/button.tsx"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/components/ui/skeleton.tsx"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/components/ui/alert.tsx"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/main.tsx"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "write": "ui/src/index.css"
+    },
+    {
+      "page": "static-website/build/create-ui",
+      "command": "npm run build:ui\n"
+    },
+    {
+      "page": "static-website/build/serve-assets",
+      "write": "src/staticWebsite.ts"
+    },
+    {
+      "page": "static-website/build/serve-assets",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "static-website/build/connect-read",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "write": "src/application.test.ts"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "write": "ui/vitest.config.ts"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "write": "ui/src/test/setup.ts"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "server": "npm start\n"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "command": "curl --fail-with-body --silent http://127.0.0.1:3000/api/v1/profile\n"
+    },
+    {
+      "page": "static-website/testing/test-static",
+      "responseChecked": true
+    },
+    {
+      "page": "rest-endpoints/build/model-contract",
+      "command": "npm run add:service -- transaction --description \"Record and retrieve synthetic transactions\" --non-interactive\n"
+    },
+    {
+      "page": "rest-endpoints/build/model-contract",
+      "write": "src/service/transaction/v1/transaction.ts"
+    },
+    {
+      "page": "rest-endpoints/build/model-contract",
+      "write": "src/service/transaction/v1/TransactionRepository.ts"
+    },
+    {
+      "page": "rest-endpoints/build/model-contract",
+      "write": "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+    },
+    {
+      "page": "rest-endpoints/build/model-contract",
+      "write": "src/service/transaction/v1/transaction.test.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "command": "npm run add:command -- record-transaction --service transaction --service-version 1 \\\n  --description \"Record a synthetic transaction\" --non-interactive\nnpm run add:command -- get-transaction --service transaction --service-version 1 \\\n  --description \"Get a transaction by ID\" --non-interactive\n"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/service/transaction/v1/command/recordTransaction/schema.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/service/transaction/v1/command/getTransaction/schema.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/resources/InMemoryTransactionRepository.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "rest-endpoints/build/generate-commands",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "rest-endpoints/build/connect-ui",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "write": "src/transactionEndpoints.test.ts"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "write": "src/application.test.ts"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "server": "npm start\n"
+    },
+    {
+      "page": "rest-endpoints/testing/test-endpoints",
+      "command": "curl --fail-with-body --silent -X POST http://127.0.0.1:3000/api/v1/transactions \\\n  -H 'content-type: application/json' \\\n  -d '{\"amountCents\":2599,\"direction\":\"debit\",\"counterparty\":\"Northwind Books\"}'\n"
+    },
+    {
+      "page": "database-resource/build/implement-sqlite",
+      "write": "src/resources/ManagedTransactionRepository.ts"
+    },
+    {
+      "page": "database-resource/build/implement-sqlite",
+      "write": "src/resources/SqliteTransactionRepository.ts"
+    },
+    {
+      "page": "database-resource/build/implement-sqlite",
+      "write": "src/resources/SqliteTransactionRepository.test.ts"
+    },
+    {
+      "page": "database-resource/build/wire-resource",
+      "command": "rm src/resources/InMemoryTransactionRepository.ts\n"
+    },
+    {
+      "page": "database-resource/build/wire-resource",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "database-resource/build/own-lifecycle",
+      "write": ".gitignore"
+    },
+    {
+      "page": "database-resource/build/own-lifecycle",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "database-resource/build/own-lifecycle",
+      "write": "src/resources/SqliteTransactionRepository.lifecycle.test.ts"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "write": "src/transactionEndpoints.test.ts"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "write": "src/application.test.ts"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "server": "npm start\n"
+    },
+    {
+      "page": "database-resource/testing/test-resource",
+      "command": "curl --fail-with-body --silent -X POST http://127.0.0.1:3000/api/v1/transactions \\\n  -H 'content-type: application/json' \\\n  -d '{\"amountCents\":2599,\"direction\":\"debit\",\"counterparty\":\"Northwind Books\"}'\n"
+    },
+    {
+      "page": "protected-endpoints/build/mark-security",
+      "write": "src/service/bankProfile/v1/command/getProfile/getProfileCommandBuilder.ts"
+    },
+    {
+      "page": "protected-endpoints/build/mark-security",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "protected-endpoints/build/mark-security",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "protected-endpoints/build/mark-security",
+      "write": "src/endpointSecurity.test.ts"
+    },
+    {
+      "page": "protected-endpoints/build/mark-security",
+      "command": "npx tsc --noEmit\n"
+    },
+    {
+      "page": "protected-endpoints/build/protect-handler",
+      "write": "src/demoProtectMiddleware.ts"
+    },
+    {
+      "page": "protected-endpoints/build/protect-handler",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "protected-endpoints/build/protect-handler",
+      "write": "src/protectHandler.test.ts"
+    },
+    {
+      "page": "protected-endpoints/build/protect-handler",
+      "command": "npx tsc --noEmit\n"
+    },
+    {
+      "page": "protected-endpoints/build/connect-ui",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "protected-endpoints/build/connect-ui",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "protected-endpoints/build/connect-ui",
+      "command": "npx tsc --noEmit\n"
+    },
+    {
+      "page": "protected-endpoints/testing/test-protection",
+      "write": "src/transactionEndpoints.test.ts"
+    },
+    {
+      "page": "protected-endpoints/testing/test-protection",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "protected-endpoints/testing/test-protection",
+      "server": "npm start\n"
+    },
+    {
+      "page": "protected-endpoints/testing/test-protection",
+      "command": "curl --fail-with-body --silent http://127.0.0.1:3000/api/v1/profile\n"
+    },
+    {
+      "page": "protected-endpoints/testing/test-protection",
+      "command": "curl --fail-with-body --silent -X POST http://127.0.0.1:3000/api/v1/transactions \\\n  -H 'content-type: application/json' \\\n  -H 'authorization: Bearer demo-bank-key' \\\n  -d '{\"amountCents\":2599,\"direction\":\"debit\",\"counterparty\":\"Northwind Books\"}'\n"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "command": "npm run add:service -- identity --description \"Authenticate local users and own sessions\" --non-interactive\n"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "command": "npm run add:command -- login --service identity --service-version 1 --description \"Create a local session\" --non-interactive\nnpm run add:command -- get-current-session --service identity --service-version 1 --description \"Read the current session\" --non-interactive\nnpm run add:command -- logout --service identity --service-version 1 --description \"Remove the current session\" --non-interactive\nnpm run add:command -- resolve-session --service identity --service-version 1 --description \"Resolve an opaque session token\" --non-interactive\n"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/login/schema.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/getCurrentSession/schema.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/logout/schema.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/resolveSession/schema.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/login/loginCommandBuilder.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/getCurrentSession/getCurrentSessionCommandBuilder.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/logout/logoutCommandBuilder.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/command/resolveSession/resolveSessionCommandBuilder.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "write": "src/service/identity/v1/identityV1Service.ts"
+    },
+    {
+      "page": "sessions/build/generate-identity",
+      "command": "find src/service/identity -name '*.test.ts' -delete\n"
+    },
+    {
+      "page": "sessions/build/store-session",
+      "write": "src/service/identity/v1/LocalIdentityProvider.ts"
+    },
+    {
+      "page": "sessions/build/store-session",
+      "write": "src/service/identity/v1/identityServiceConfig.ts"
+    },
+    {
+      "page": "sessions/build/store-session",
+      "write": "src/service/identity/v1/identityV1ServiceBuilder.ts"
+    },
+    {
+      "page": "sessions/build/store-session",
+      "write": "src/service/identity/v1/session.ts"
+    },
+    {
+      "page": "sessions/build/store-session",
+      "write": "src/service/identity/v1/sessionCommands.test.ts"
+    },
+    {
+      "page": "sessions/build/store-session",
+      "command": "npx tsc --noEmit\nnpx vitest run --config vitest.server.config.ts src/service/identity/v1/sessionCommands.test.ts\n"
+    },
+    {
+      "page": "sessions/build/protect-with-session",
+      "write": "src/sessionProtectMiddleware.ts"
+    },
+    {
+      "page": "sessions/build/protect-with-session",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "sessions/build/protect-with-session",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "sessions/build/protect-with-session",
+      "write": "src/application.test.ts"
+    },
+    {
+      "page": "sessions/build/protect-with-session",
+      "command": "rm src/demoProtectMiddleware.ts src/protectHandler.test.ts src/transactionEndpoints.test.ts\n"
+    },
+    {
+      "page": "sessions/build/protect-with-session",
+      "command": "npx tsc --noEmit\n"
+    },
+    {
+      "page": "sessions/build/connect-ui",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "sessions/build/connect-ui",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "sessions/build/connect-ui",
+      "command": "npm run build:ui\nnpm run test:ui\n"
+    },
+    {
+      "page": "sessions/testing/test-sessions",
+      "write": "src/sessionEndpoints.test.ts"
+    },
+    {
+      "page": "sessions/testing/test-sessions",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "sessions/testing/test-sessions",
+      "server": "npm start\n"
+    },
+    {
+      "page": "sessions/testing/test-sessions",
+      "command": "curl --fail-with-body --silent -X POST http://127.0.0.1:3000/api/v1/session/login   -H 'content-type: application/json'   -d '{\"username\":\"alex@example.test\",\"password\":\"demo-password\"}'\n"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/transaction/v1/AccountAccessPolicy.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/transaction/v1/transaction.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/transaction/v1/TransactionRepository.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/resources/SqliteTransactionRepository.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/identity/v1/LocalIdentityProvider.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/transaction/v1/AccountAccessPolicy.test.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/service/transaction/v1/transaction.test.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/resources/SqliteTransactionRepository.test.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "write": "src/resources/SqliteTransactionRepository.lifecycle.test.ts"
+    },
+    {
+      "page": "business-guards/build/define-policy",
+      "command": "npx vitest run src/service/transaction/v1/AccountAccessPolicy.test.ts src/service/transaction/v1/transaction.test.ts src/resources/SqliteTransactionRepository.test.ts src/resources/SqliteTransactionRepository.lifecycle.test.ts\n"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "write": "src/service/transaction/v1/command/recordTransaction/schema.ts"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "write": "src/service/transaction/v1/command/getTransaction/schema.ts"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "write": "src/service/transaction/v1/accountAccessGuards.ts"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts"
+    },
+    {
+      "page": "business-guards/build/add-before-guards",
+      "command": "npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts\n"
+    },
+    {
+      "page": "business-guards/build/add-output-guard",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "business-guards/build/add-output-guard",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts"
+    },
+    {
+      "page": "business-guards/build/add-output-guard",
+      "command": "npx vitest run src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts\n"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "write": "src/sessionEndpoints.test.ts"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "write": "src/businessGuards.test.ts"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "server": "npm start\n"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "command": "curl --fail --silent http://127.0.0.1:3000/api/v1/profile\n"
+    },
+    {
+      "page": "business-guards/testing/test-guards",
+      "responseChecked": true
+    },
+    {
+      "page": "command-transforms/build/input",
+      "command": "npm run add:command -- import-legacy-transaction --service transaction --service-version 1 --description \"Import one legacy text transaction\" --non-interactive\n"
+    },
+    {
+      "page": "command-transforms/build/input",
+      "write": "src/service/transaction/v1/legacyTransaction.ts"
+    },
+    {
+      "page": "command-transforms/build/input",
+      "write": "src/service/transaction/v1/command/importLegacyTransaction/schema.ts"
+    },
+    {
+      "page": "command-transforms/build/input",
+      "write": "src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "command-transforms/build/input",
+      "write": "src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "command-transforms/build/input",
+      "command": "npx vitest run src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts\n"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "command": "mkdir -p vendor\ncp \"$PURISTA_TUTORIAL_REPOSITORY/examples/banking/runtime/current/purista-hono-http-server-3.2.4.tgz\" vendor/\nnpm install ./vendor/purista-hono-http-server-3.2.4.tgz\n"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "command": "npm run add:command -- export-transaction --service transaction --service-version 1 --description \"Export one transaction as CSV\" --non-interactive\n"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "write": "src/service/transaction/v1/transactionCsv.ts"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "write": "src/service/transaction/v1/command/exportTransaction/schema.ts"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "write": "src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "write": "src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "command-transforms/build/output",
+      "command": "npx vitest run src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.test.ts\n"
+    },
+    {
+      "page": "command-transforms/build/connect-http",
+      "write": "src/transformHttp.test.ts"
+    },
+    {
+      "page": "command-transforms/build/connect-http",
+      "command": "npx vitest run src/transformHttp.test.ts\n"
+    },
+    {
+      "page": "command-transforms/build/connect-http",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "command-transforms/testing/test-transforms",
+      "write": "src/commandTransforms.test.ts"
+    },
+    {
+      "page": "command-transforms/testing/test-transforms",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "command-transforms/testing/test-transforms",
+      "command": "npm test\nnpm run build\n"
+    },
+    {
+      "page": "command-transforms/testing/test-transforms",
+      "server": "npm start\n"
+    },
+    {
+      "page": "command-transforms/testing/test-transforms",
+      "command": "curl --fail --silent http://127.0.0.1:3000/api/v1/profile\n"
+    },
+    {
+      "page": "command-transforms/testing/test-transforms",
+      "responseChecked": true
+    },
+    {
+      "page": "external-resources/build/declare",
+      "write": "src/service/transaction/v1/LegacyTransactionClient.ts"
+    },
+    {
+      "page": "external-resources/build/declare",
+      "write": "src/service/transaction/v1/transactionV1ServiceBuilder.ts"
+    },
+    {
+      "page": "external-resources/build/declare",
+      "write": "src/service/transaction/v1/testing/unavailableLegacyTransactionClient.ts"
+    },
+    {
+      "page": "external-resources/build/declare",
+      "write": "src/service/transaction/v1/LegacyTransactionClient.resource.test.ts"
+    },
+    {
+      "page": "external-resources/build/declare",
+      "command": "npx vitest run src/service/transaction/v1/LegacyTransactionClient.resource.test.ts\n"
+    },
+    {
+      "page": "external-resources/build/implement",
+      "write": "src/resources/mockLegacyTransactionProvider.ts"
+    },
+    {
+      "page": "external-resources/build/implement",
+      "write": "compose.yaml"
+    },
+    {
+      "page": "external-resources/build/implement",
+      "command": "docker compose -p example-bank-provider up -d --wait\ntrap 'docker compose -p example-bank-provider down --volumes' EXIT\nnode -e \"fetch('http://127.0.0.1:4010/transactions/provider-1001',{headers:{authorization:'Bearer example-bank-tutorial-token'}}).then(async r=>{if(!r.ok)process.exit(1);const value=await r.json();if(value.sourceId!=='provider-1001')process.exit(1)})\"\ndocker compose -p example-bank-provider down --volumes\ntrap - EXIT\n"
+    },
+    {
+      "page": "external-resources/build/implement",
+      "write": "src/resources/HttpLegacyTransactionClient.ts"
+    },
+    {
+      "page": "external-resources/build/implement",
+      "write": "src/resources/HttpLegacyTransactionClient.test.ts"
+    },
+    {
+      "page": "external-resources/build/implement",
+      "command": "npx vitest run src/resources/HttpLegacyTransactionClient.test.ts\n"
+    },
+    {
+      "page": "external-resources/build/use",
+      "command": "npm run add:command -- import-provider-transaction --service transaction --service-version 1 --description \"Import one transaction from an external provider\" --non-interactive\n"
+    },
+    {
+      "page": "external-resources/build/use",
+      "write": "src/service/transaction/v1/command/importProviderTransaction/schema.ts"
+    },
+    {
+      "page": "external-resources/build/use",
+      "write": "src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.ts"
+    },
+    {
+      "page": "external-resources/build/use",
+      "write": "src/application.ts"
+    },
+    {
+      "page": "external-resources/build/use",
+      "write": "src/index.ts"
+    },
+    {
+      "page": "external-resources/build/use",
+      "write": "ui/src/App.tsx"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "command": "npx vitest run src/service/transaction/v1/command/importProviderTransaction/importProviderTransactionCommandBuilder.test.ts\n"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/legacyTransactionProvider.integration.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "ui/src/App.test.tsx"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "scripts/verifyLegacyProvider.mjs"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/testing/transactionTestResources.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/command/getTransaction/getTransactionAfterGuard.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/command/recordTransaction/recordTransactionGuard.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "src/service/transaction/v1/command/importLegacyTransaction/importLegacyTransactionCommandBuilder.test.ts"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "write": "package.json"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "command": "npm install\nnpm test\n"
+    },
+    {
+      "page": "external-resources/testing/test-resources",
+      "command": "npm run test:provider\n"
+    }
+  ]
+}

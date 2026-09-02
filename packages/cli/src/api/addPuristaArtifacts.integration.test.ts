@@ -221,7 +221,8 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('triageAgentBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('.addQueueDefinition(...queueDefinitions)')
 		expect(serviceFileContent).toContain('.addQueueWorkerDefinition(...queueWorkerDefinitions)')
-		expect(serviceFileContent).toContain('.addAgentDefinition(...(await Promise.all(agentDefinitions)))')
+		expect(serviceFileContent).toContain('.addAgentDefinition(...agentDefinitions)')
+		expect(serviceFileContent).not.toMatch(/^ +\t/m)
 		expect(serviceFileContent).toContain('processJobsQueueBuilder.getDefinition()')
 
 		const commandSchema = readFileSync(join(commandDir, 'schema.ts'), 'utf-8')

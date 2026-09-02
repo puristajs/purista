@@ -75,6 +75,7 @@ never require internal specs, plans, or skills.
    before changing API-shaped or structural material.
 4. For a restructure, record each useful legacy content unit and target before
    merging, reducing, or redirecting its route.
+   For tutorial drift, also apply the tutorial maintainer's architecture-and-learning review.
 5. For executable topics, verify the runtime lifecycle and every stage's
    failure classification/serialization, then map child pages to reader
    outcomes in implementation order.

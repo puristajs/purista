@@ -33,6 +33,9 @@ const tutorials = defineCollection({
 		order: z.number().int().nonnegative().default(999999),
 		status: z.enum(['draft', 'published']).default('published'),
 		sidebarLabel: z.string().optional(),
+		kind: z.enum(['overview', 'chapter', 'group', 'lesson']).default('lesson'),
+		group: z.enum(['start', 'services', 'ai', 'workflows', 'operate']).optional(),
+		optional: z.boolean().default(false),
 	}),
 })
 

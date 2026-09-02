@@ -1,120 +1,174 @@
-# Tutorial reconstruction evidence
+# Verified tutorial scope
 
-Verified on 2026-08-31 with Node 26.5 and published PURISTA 3.2.4 packages.
-This record covers the rebuilt opening, transaction, account-access, and
-integration chapters. It is not evidence that the remaining tutorial roots are complete
-implementation guides.
+Eighteen of 29 planned capability chapters are published. Each retained project was
+built by replaying the written tutorial from a clean directory. The replay runs
+the shown PURISTA CLI commands, writes the documented files, executes the shown
+tests and builds, and checks the documented HTTP behavior.
 
-## Replayed checkpoints
+| Chapter | PURISTA capability | Application fixture |
+| --- | --- | --- |
+| `create-project` | Create a project, generate a service and command, and test a command with PURISTA mocks. | `BankProfile` returns a small public profile. |
+| `hono-webserver` | Add the Hono webserver, register generated command endpoints, and shut resources down cleanly. | The profile command is available over HTTP. |
+| `static-website` | Build and serve a React application from the PURISTA HTTP server. | The UI displays the public profile. |
+| `rest-endpoints` | Generate commands and expose their declared HTTP endpoints. | `Transaction` records and reads a small transaction record. |
+| `database-resource` | Declare, inject, mock, and manage a database resource. | `Transaction` stores business records in SQLite. |
+| `protected-endpoints` | Mark command endpoints public or protected and configure Hono authentication. | Transaction endpoints require a trusted identity. |
+| `sessions` | Keep opaque operational sessions in PURISTA StateStore. | `Identity` owns login, logout, and session resolution. |
+| `business-guards` | Use before and after guards for business authorization. | `Transaction` checks account action and result scope. |
+| `command-transforms` | Transform external input before validation and domain output after execution. | A legacy text record is imported and an authorized transaction is exported as CSV. |
+| `external-resources` | Declare, inject, mock, and lifecycle-test a typed external client resource. | `Transaction` imports one synthetic record from a local HTTP provider. |
+| `command-result-events` | Name a successful command response and emit a separately declared custom event during execution. | `Transaction` publishes recorded and recording-started facts with different semantics. |
+| `subscriptions` | Generate a subscription, filter command result messages, use subscription context mocks, and test real EventBridge routing. | `Monitoring` stores one replaceable operational signal for a qualifying transaction fact. |
+| `streams` | Generate a stream, inject a read resource, authorize the business scope, send typed chunks, and test cancellation and Hono SSE transport. | `Analysis` summarizes a small transaction projection for one permitted account. |
+| `queue-processing` | Generate a queue and worker, enqueue trusted work, apply business guards, invoke another service, and retrieve stored job results. | `Reporting` creates one short transaction statement in the background. |
+| `schedules` | Declare and export scheduled intent, emit a validated occurrence, and bind it to an existing queue. | `Reporting` requests one synthetic daily statement occurrence without owning the clock. |
+| `observability` | Declare typed business metrics, wire OpenTelemetry at the composition root, inspect framework traces, and verify a real Collector boundary. | `Transaction` counts successful records and `Monitoring` counts bounded signal-storage outcomes. |
+| `retrieval-ingestion` | Generate a queue and worker, inject embedding and PostgreSQL resources, and test transactional pgvector ingestion. | `Knowledge` accepts one reviewed fictional policy revision and stores scoped chunks. |
+| `distributed-runtime` | Split services into independent processes, select adapters by declared capabilities, and verify real EventBridge, subscription, queue, health, restart, and shutdown boundaries. | `Transaction`, `Monitoring`, and `Reporting` run as separate Node.js processes over NATS JetStream. |
 
-| Checkpoint | New behavior | Source tests after replay | Additional network evidence |
-| --- | --- | --- | --- |
-| `project` | CLI project with working compiler/test settings | 2 | No listener yet |
-| `http` | Explicit Hono installation, configuration, startup/shutdown | 2 | `/health` returns 200 |
-| `service` | Generated Banking service replaces Ping in startup | 3 | `/health` returns 200 |
-| `first-command` | Generated and implemented `getBankInfo` | 4 | `/api/v1/bank` returns name/currency |
-| `repository` | Transaction schema, storage resource, application/test injection | 4 | Existing bank command still works |
-| `record-transaction` | Generated POST command and validation/conflict checks | 5 | Existing bank command still works; POST runtime covered by HTTP integration test |
-| `list-transactions` | Generated history command sharing repository state | 6 | Real TCP POST/list round trip, 400, 409, no rejected extra rows |
-| `account-foundation` | Session expiry and separate current account permissions | 8 | Previous anonymous API still works before wiring |
-| `account-access` | Trusted Hono metadata, resource wiring, tenant-scoped repository, before/after guards | 17 | Cookie login, authorized read/post, 401/403/409, tenant isolation, logout |
-| `account-overview` | CLI-generated command composes guarded history via `canInvoke` | 19 | Nested command retains caller scope; north/south return different counts |
-| `legacy-import` | CLI-generated input transform invokes the same native posting command | 21 | Exact decimal conversion, permitted import, 400/403/409, unchanged rejected history |
-| `csv-export` | CLI-generated output transform follows account and result-scope guards | 24 | Actual CSV bytes and MIME/download headers; denied export retains problem details |
-| `legacy-http` | HTTP resource and CLI-generated fetch command call the transform command | 25 | Real temporary mock server covers tenant credentials, no fetch for Bob, malformed/mismatched/oversized responses and timeout; Compose round trip verified separately |
+Example Bank is the application name, not a service boundary. Published
+checkpoints introduce the narrow `BankProfile`, `Identity`, `Transaction`,
+`Monitoring`, `Analysis`, `Reporting`, and `Knowledge` services only when their
+respective Framework capabilities are taught. `Support` remains part of the
+draft AI path.
+The course recipe rejects `Banking`, `BankingService`, `ExampleBank`, and
+`ExampleBankService` as generated service names.
 
-Executed from the repository root into a previously nonexistent directory:
+Each `.tutorial-proof.json` records the exact page hashes, final source hashes,
+Node version, and replayed actions. The eleventh checkpoint proves 231 documented
+actions across 44 cumulative construction pages. The independent
+`command-events` baseline uses 29 actions across six pages; the subscriptions
+chapter uses 48 actions across ten pages and does not inherit HTTP, UI, session,
+transform, or provider code. Fresh consumer verification
+installs every retained lockfile outside the monorepo, runs its tests and build,
+and starts the compiled application for a loopback smoke check.
 
-```bash
-node examples/banking/tutorial/replay.mjs --to legacy-http --out /private/tmp/example-bank-integrations-proof --verify-http
+The published scope uses SQLite for transaction records and StateStore only for
+operational sessions, derived signals, and queue job state. Hono supplies authentication and maps commands from their
+builder metadata. Transaction guards make the business authorization decision.
+There are no handwritten domain API routes and no application-wide banking
+service.
+
+The command transform checkpoint includes the current Framework-source Hono
+archive documented by that chapter. Its portable lockfile installs the archive
+from `vendor/`; it does not depend on a workspace link. The HTTP verification
+checks the transformed CSV response and its declared media type.
+
+The external-resource checkpoint declares `LegacyTransactionClient` on the
+`Transaction` builder, supplies its PURISTA `HttpClient` adapter at the
+composition root, and resolves the fixture token through `SecretStore`. Fast
+command tests use typed fakes. A separate integration command starts the pinned,
+loopback-only Docker Compose provider, exercises the generated protected Hono
+endpoint, and always removes the provider again.
+
+The command-result checkpoint uses `setSuccessEventName` for the final validated
+`transaction.recorded.v1` response. A separate `canEmit` declaration publishes
+`transaction.recording.started.v1` from inside the handler. Runtime tests prove
+the result is not emitted manually, a failed repository write receives no named
+success response, and the custom event retains its own validated contract.
+
+The subscription checkpoint generates the `Monitoring` service and its
+`observeLargeDebit` subscription with the PURISTA CLI. It matches the named
+`CommandSuccessResponse`, sender, and tenant, validates a narrow consumer-local
+payload, and stores one deterministic derived signal in StateStore. Transaction
+records remain in the injected SQLite resource. Direct context tests cover
+threshold decisions, repeated delivery, and store failure; real
+`DefaultEventBridge` tests cover matching and ignored sender/event/tenant cases.
+
+The stream checkpoint generates the narrow `Analysis` service and its
+`summarizeTransactions` stream. `Analysis` declares a read-only transaction
+projection resource instead of reaching into the `Transaction` service or its
+database adapter. A business guard checks the trusted tenant and principal
+against the requested account before the reader runs. Direct tests cover the
+guard, typed progress, final output, resource failure, and writer cancellation;
+service tests cover registration and lifecycle; a real Hono test covers the
+protected generated SSE route, typed chunks, and response completion. The clean
+replay completed 154 documented actions across 32 pages, and the final retained
+application passes 33 server tests.
+
+The queue checkpoint generates the narrow `Reporting` service, its
+`generateStatement` queue and worker, and protected commands for enqueueing work
+and reading job status. The producer guard authorizes the requested account and
+the worker guard checks that access again before invoking the owning
+`Transaction.getTransaction` command. A dedicated StateStore-backed
+`QueueJobStore` contains only operational job state and small results;
+transaction records remain in the injected SQLite resource. Tests cover typed
+enqueueing, trusted identity headers, retry, fatal dead-letter handling, result
+storage, generated HTTP acceptance, and the real `DefaultQueueBridge` loop. The
+clean replay completed 162 documented actions across 32 pages. The final
+retained application passes 38 server tests and four UI tests.
+
+The schedule checkpoint keeps scheduled statement work in the existing narrow
+`Reporting` service. It exports a provider-neutral schedule contract with the
+PURISTA CLI, protects the generated trigger command with an account-level
+business guard, emits one validated occurrence event, and maps that event to
+the existing `generateStatement` queue. The occurrence id is advisory
+idempotency input for `DefaultQueueBridge`; repeated delivery remains visible
+and enqueues twice. Tests also prove manifest metadata, trusted identity
+propagation, and enqueue failure intent. No in-process cron runner is included
+or implied. The clean replay completed 180 documented actions across 36 pages.
+The final retained application passes 47 server tests and four UI tests.
+
+The observability checkpoint extends the independent subscription application.
+`Transaction` and `Monitoring` declare bounded `app.*` metrics on their existing
+service builders, while the composition root owns the OpenTelemetry processor,
+Meter, exporters, and shutdown order. In-memory SDK tests prove successful and
+failed framework spans and metrics without payload or identifier attributes. A
+separate Docker Compose check sends the same evidence through a pinned,
+loopback-only Collector, removes trusted tenant and principal trace attributes,
+and checks its debug receipt. The clean replay completed 74 documented actions
+across 14 pages. The final retained application passes 26 server tests; the
+Collector integration test also passes and always removes its container.
+
+The distributed-runtime checkpoint extends the same independent observability
+application. Separate composition roots start `Transaction`, `Monitoring`, and
+`Reporting` in three Node.js processes, with a distinct NATS EventBridge
+connection per process. NATS JetStream supplies durable command, event,
+subscription, queue, and operational StateStore boundaries; SQLite remains the
+owner of transaction records. Capability checks reject unsupported stream and
+pending-command-cancellation requirements before startup. The real integration
+test proves request/reply, named command result delivery, strict queue
+idempotency, stored job results, durable recovery after the Monitoring process
+restarts, process health, ordered shutdown, and a clear unavailable-broker
+failure. The clean replay completed 110 documented actions across 18 pages and
+37 tests; Compose always removes its NATS volume and network.
+
+The retrieval-ingestion checkpoint starts from the independent authenticated
+HTTP baseline and generates the narrow `Knowledge` service, its
+`ingestKnowledge` queue and worker, and its protected producer command. A
+collection-level business guard runs before enqueueing and the worker checks
+the trusted tenant, principal, and collection again before processing. The
+worker uses declared embedding-provider and repository resources, validates
+vector count, dimensions, finite values, and cancellation, and returns bounded
+queue results. PostgreSQL with pgvector owns document revisions and chunks;
+StateStore contains only queue job state. Transactional tests cover atomic
+replacement, rollback, stale revisions, withdrawal, and tenant, collection,
+and model scope. A real Hono-to-queue-to-database test covers authentication,
+business authorization, and successful ingestion. The clean replay completed
+161 documented actions across 32 pages. Nineteen server test files with 34
+fast tests, five PostgreSQL tests, four UI tests, and both builds pass.
+
+Run the provenance check with:
+
+```sh
+npm run check:source --prefix examples/banking
 ```
 
-Every checkpoint passed `npm test` and `npm run build`. The runner installed
-published dependencies outside the monorepo and used the generated project's
-local CLI scripts. The printed file bodies match 64 checked-in snapshots.
+To verify one retained chapter and its prerequisite chain during isolated
+maintenance, run:
 
-The Node listener was verified separately from Hono's in-process `app.request`
-tests. Processes started by the replay were stopped after each probe. Storage
-was fresh for every probe and every test.
+```sh
+node examples/banking/tutorial/replay.mjs --check --chapter command-transforms
+```
 
-The access tests also exercise valid callers with different permissions,
-revocation after login, frozen posting, revocation between before guard and
-repository write, safe permission-dependency failure, schema-valid foreign rows
-rejected by the after guard, direct event-bridge denial, forged metadata, session
-expiry, and a revoked downstream call after the outer guard succeeds.
+The full course check remains the release gate.
 
-The integration tests verify exact conversion at `Number.MAX_SAFE_INTEGER`,
-one-cent overflow, raw-format errors, domain rejection of zero, native/legacy
-duplicate handling, CSV escaping and formula-prefix handling on real source
-IDs, revoked export permission, wrong-tenant read output, and the row limit.
-The outbound client test opens an actual local socket, checks that Bob triggers
-no upstream request, and verifies tenant credentials and safe failures before
-any additional record is written.
+Run all retained applications from fresh consumer copies with:
 
-The committed Compose setup also started successfully with Docker 29.4 and
-the pinned Node 24.19 image. Health, north/south fixture responses, and the
-constructed application's actual TCP fetch/import/CSV flow passed. The test
-used Compose project `purista-tutorial-legacy-proof`, then removed only that
-project's container and network. The API child was also stopped.
+```sh
+npm test --prefix examples/banking
+```
 
-The rewritten pages rendered in Astro's dev server at desktop width 1280 and
-mobile width 390. The mobile chapter menu followed the backend-first order.
-Long inline file paths initially clipped; the shared prose style now wraps
-them. The account policy table fits within the mobile content column, and the
-account-access diagram renders through the shared Handbook enhancement. The
-integration setup and format table fit the mobile content column; the command
-and Compose pages render their complete file and CLI blocks. No browser console
-error was observed on the checked pages.
-
-Repository checks also passed: the full website build (including API docs),
-the generated-link audit (2356 HTML files), knowledge and skill audits, and
-the CLI build plus focused generator/artifact tests (5 tests). The full build
-retains existing TypeDoc and large-chunk warnings. These checks supplement,
-but do not replace, the consumer replay above.
-
-## Setup failures found and addressed
-
-- Fresh TypeScript 7 compilation rejected the generator's old module resolution
-  and missing root directory. The CLI template now uses NodeNext and `rootDir`.
-  The tutorial includes a complete configuration for the published generator.
-- The published CLI's standalone bootstrap imported core without declaring it.
-  The CLI package now declares core. Until that fix is published, the tutorial
-  supplies both packages through npx's `--package` options.
-- Default test discovery also ran compiled copies after a build. The generated
-  Node test script and tutorial now restrict Vitest to `src`.
-- CLI service selection uses the lowercase project key `banking`, while the
-  generated runtime service name is `Banking`. The walkthrough uses the tested
-  CLI key and checks actual files, not only the CLI's reported path labels.
-- The old Astro dev process referenced `web/node_modules/astro` after Astro was
-  hoisted to the root installation. Restarting that process restored page
-  rendering; no tutorial content file needed a template workaround.
-- A non-login verification shell selected Node 24.3, below the documented
-  dependency minimum. Replaying with Node 26.5 passed. The runner now reports
-  unsupported Node versions before creating an output directory.
-- An authentication-only fixture could shut down the published local event
-  bridge before its registration messages had been processed, producing a
-  `write after end` error. The shared fixture now performs a real bank-info
-  readiness request before returning. This is not a claim that the published
-  bridge's general shutdown behavior has been fixed.
-- Transform hooks require normal functions; the old arrow-function snippet
-  was rejected by the builder. The rebuilt chapter executes the real hooks.
-- HTTP exposure captures its content type when configured. Setting the CSV
-  transform before exposure prevents a JSON-encoded string response.
-- The published Hono 3.2.4 adapter still resets non-JSON content types to
-  `text/plain`. The application supplies a route-specific success-only CSV
-  header wrapper; failures retain their status and problem-details format.
-
-## Next reconstruction work
-
-The remaining chapters still contain reference-demo instructions and partial
-snippets. Do not count them as completed because their existing demo tests pass.
-Continue from `legacy-http` with business events/subscriptions, streams,
-queues/workers, schedules, business observability,
-and attached AI.
-Each new root must have its own reproducible entry checkpoint and be taught
-through exact CLI generation, file edits, runtime wiring, and end-to-end tests.
-The combined source in `examples/banking/src` may inform behavior, but its
-different layout is not a substitute for those build steps.
-
-Current tutorial port: 3000. The older combined demo uses a different entry
-point and may use port 3010. Do not mix their commands or file paths.
+These examples use synthetic data and loopback HTTP. They do not implement
+payments, balances, accounting, regulatory controls, exactly-once side effects,
+broker high availability, multi-region operation, or production authentication.

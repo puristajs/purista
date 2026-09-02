@@ -54,7 +54,7 @@ describe('AgentQueueBuilder', () => {
 
 		expect(agent).toBeInstanceOf(AgentQueueBuilder)
 
-		const definition = await agent.setRunFunction(async () => ({ priority: 'normal' })).getDefinition()
+		const definition = agent.setRunFunction(async () => ({ priority: 'normal' })).getDefinition()
 		service.addAgentDefinition(definition)
 
 		const resolved = await service.resolveDefinitions()

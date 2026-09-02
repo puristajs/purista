@@ -1,0 +1,103 @@
+---
+title: Observe the runtime message
+description: Execute the real command lifecycle and inspect its named CommandSuccessResponse.
+order: 112
+kind: lesson
+status: published
+---
+
+Builder metadata becomes useful when the command runs. Execute the registered
+command through the service instead of calling its handler directly. This path
+includes input validation, the business guard, the repository call, output
+validation, and creation of the response message.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionResultMessage.test.ts" write
+import {
+	getCommandMessageMock,
+	getEventBridgeMock,
+	getLoggerMock,
+	isCommandErrorResponse,
+	isCommandSuccessResponse,
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, test } from 'vitest'
+import type { TransactionRepository } from '../../TransactionRepository.js'
+import { transactionTestResources } from '../../testing/transactionTestResources.js'
+import { transactionV1Service } from '../../transactionV1Service.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+const input = { amountCents: 2599, direction: 'debit' as const, counterparty: 'Northwind Books' }
+const parameter = { accountId: 'account-operating' }
+const stored = {
+	...input,
+	...parameter,
+	tenantId: 'tenant-example',
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+}
+
+async function setup(save: TransactionRepository['save']) {
+	const eventBridge = getEventBridgeMock(sandbox)
+	const transactionRepository: TransactionRepository = { save, findById: sandbox.stub() }
+	const service = await transactionV1Service.getInstance(eventBridge.mock, {
+		logger: getLoggerMock(sandbox).mock,
+		resources: transactionTestResources(transactionRepository),
+	})
+	await service.start()
+	const message = getCommandMessageMock({
+		principalId: 'principal-alex',
+		tenantId: 'tenant-example',
+		receiver: {
+			serviceName: 'Transaction',
+			serviceVersion: '1',
+			serviceTarget: 'recordTransaction',
+		},
+		payload: { payload: input, parameter },
+	})
+	return { service, message }
+}
+
+describe('recordTransaction result message', () => {
+	test('returns the saved transaction as a named CommandSuccessResponse', async () => {
+		const fixture = await setup(sandbox.stub().resolves(stored))
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandSuccessResponse(response)).toBe(true)
+			if (!isCommandSuccessResponse(response)) throw new Error('Expected a success response')
+
+			expect(response.eventName).toBe('transaction.recorded.v1')
+			expect(response.sender).toMatchObject({
+				serviceName: 'Transaction',
+				serviceVersion: '1',
+				serviceTarget: 'recordTransaction',
+			})
+			expect(response.principalId).toBe('principal-alex')
+			expect(response.tenantId).toBe('tenant-example')
+			expect(response.payload).toEqual(stored)
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+
+	test('does not create a named success response when saving fails', async () => {
+		const fixture = await setup(sandbox.stub().rejects(new Error('database unavailable')))
+		try {
+			const response = await fixture.service.executeCommand(fixture.message)
+			expect(isCommandErrorResponse(response)).toBe(true)
+			expect(response.eventName).toBeUndefined()
+		} finally {
+			await fixture.service.destroy()
+		}
+	})
+})
+```
+
+```bash title="Observe success and failure responses" replay="project"
+npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionResultMessage.test.ts
+```
+
+The sender identifies the command that completed. Principal and tenant remain
+message metadata created from the trusted command input. The event payload is
+the same validated transaction returned to the caller.

@@ -1,0 +1,136 @@
+---
+title: Test subscription routing and failure
+description: Prove matching, ignored messages, repeated delivery, and visible StateStore failure.
+order: 126
+kind: lesson
+status: published
+---
+
+The focused tests already proved the handler and its store calls. Finish with
+real EventBridge routing tests. These tests show that routing filters prevent
+unrelated messages from reaching the handler.
+
+```ts title="src/subscriptionRouting.test.ts" write
+import {
+	getCommandSuccessMessageMock,
+	initDefaultStateStore,
+	initLogger,
+} from '@purista/core'
+import { afterEach, expect, test } from 'vitest'
+import { createApplication } from './application.js'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { latestLargeDebitSignalKey } from './service/monitoring/v1/monitoringSignal.js'
+import { ServiceEvent } from './service/serviceEvent.enum.js'
+
+let app: Awaited<ReturnType<typeof createApplication>> | undefined
+
+afterEach(async () => {
+	if (!app) return
+	await app.monitoring.destroy()
+	await app.transaction.destroy()
+	await app.monitoringStateStore.destroy()
+	await app.transactionRepository.destroy()
+	await app.eventBridge.destroy()
+	app = undefined
+})
+
+const payload = {
+	transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+	accountId: 'account-operating',
+	tenantId: 'tenant-example',
+	amountCents: 12_500,
+	direction: 'debit' as const,
+	counterparty: 'Northwind Books',
+	recordedAt: '2026-09-01T10:00:00.000Z',
+}
+
+async function setup() {
+	const logger = initLogger('fatal')
+	app = await createApplication(
+		logger,
+		new SqliteTransactionRepository(':memory:'),
+		initDefaultStateStore({ logger }),
+	)
+}
+
+async function emit(overrides: Parameters<typeof getCommandSuccessMessageMock>[1] = {}) {
+	await app!.eventBridge.emitMessage(getCommandSuccessMessageMock(payload, {
+		eventName: ServiceEvent.TransactionRecordedV1,
+		tenantId: 'tenant-example',
+		sender: {
+			serviceName: 'Transaction',
+			serviceVersion: '1',
+			serviceTarget: 'recordTransaction',
+			instanceId: 'transaction-instance',
+		},
+		...overrides,
+	}))
+	await new Promise(resolve => setTimeout(resolve, 20))
+}
+
+async function signal() {
+	const state = await app!.monitoringStateStore.getState(latestLargeDebitSignalKey)
+	return state[latestLargeDebitSignalKey]
+}
+
+test.each([
+	['another event', { eventName: 'transaction.imported.v1' }],
+	['another sender', {
+		sender: {
+			serviceName: 'Reporting',
+			serviceVersion: '1',
+			serviceTarget: 'recordTransaction',
+			instanceId: 'reporting-instance',
+		},
+	}],
+	['another tenant', { tenantId: 'tenant-other' }],
+])('ignores %s', async (_name, overrides) => {
+	await setup()
+	await emit(overrides)
+	expect(await signal()).toBeUndefined()
+})
+
+test('stores the same signal for repeated matching delivery', async () => {
+	await setup()
+	await emit()
+	const first = await signal()
+	await emit()
+	const second = await signal()
+
+	expect(first).toEqual({
+		transactionId: payload.transactionId,
+		accountId: payload.accountId,
+		amountCents: payload.amountCents,
+	})
+	expect(second).toEqual(first)
+})
+```
+
+```bash title="Run all subscription tests" replay="project"
+npx vitest run src/subscriptionRouting.test.ts \
+  src/subscriptionFlow.test.ts \
+  src/service/monitoring/v1/subscription/observeLargeDebit/observeLargeDebitSubscriptionBuilder.test.ts
+npm test
+npm run build
+```
+
+The direct handler test also makes `setState` reject and verifies that the
+failure escapes. That matters because swallowing it would make the reaction
+look successful when the signal was lost.
+
+## Understand the local delivery limit
+
+This chapter uses `DefaultEventBridge`. It delivers messages only while this
+process is running. The subscription definition keeps the default live,
+auto-acknowledged settings. It does not persist missed messages or promise a
+retry after a crash.
+
+For durable delivery, choose an EventBridge adapter whose documented
+capabilities satisfy the required durability, acknowledgement, retry, and
+dead-letter behavior. Test those guarantees against the real adapter. Do not
+turn this bounded subscription into a retry loop; use queue processing for
+durable, retry-heavy work.
+
+You now have an independently runnable subscription example with explicit
+producer ownership, routing filters, derived StateStore usage, and tests at the
+handler and EventBridge levels.

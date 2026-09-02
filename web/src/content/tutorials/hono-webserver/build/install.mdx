@@ -1,0 +1,26 @@
+---
+title: Install the PURISTA Hono server
+description: Add the Framework HTTP service and the Node adapter that owns the listening socket.
+order: 10
+kind: lesson
+status: published
+---
+
+Continue in the `example-bank` directory produced by
+[Create a PURISTA project](/tutorials/create-project/).
+
+## Install the two HTTP packages
+
+```bash title="Install the Hono service and Node listener" replay="project"
+npm install --save-exact @purista/hono-http-server@3.2.4 @hono/node-server@2.1.0
+```
+
+The packages have different jobs:
+
+- `@purista/hono-http-server` is a PURISTA service. It reads command and stream
+  definitions, validates HTTP input, invokes PURISTA, and writes HTTP results.
+- `@hono/node-server` adapts Hono's `fetch` function to a Node socket. The
+  application owns that listener because it creates it.
+
+Installing Hono does not change the command or start a server. The next page
+adds HTTP metadata to the existing command and composes the two services.

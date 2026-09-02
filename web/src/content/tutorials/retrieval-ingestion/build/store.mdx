@@ -1,0 +1,436 @@
+---
+title: Store revisions transactionally
+description: Implement a PostgreSQL/pgvector resource with revision claims, rollback, withdrawal, and scoped search.
+order: 193
+kind: lesson
+status: published
+---
+
+Chunks and vectors are domain records. They need transactional replacement and
+query scope that a session StateStore does not provide. This page implements the
+declared `KnowledgeRepository` with PostgreSQL and pgvector.
+
+Install the database client and its TypeScript declarations.
+
+```bash title="Install the PostgreSQL client" replay="project"
+npm install pg@8.23.0
+npm install --save-dev @types/pg@8.23.1
+```
+
+## Create the database schema
+
+The tutorial uses four-dimensional vectors so their values remain readable in
+tests. The primary document row owns the latest revision. Chunk rows must match
+that current revision.
+
+```sql title="database/knowledge.sql" write
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS knowledge_documents (
+  tenant_id text NOT NULL,
+  collection_id text NOT NULL,
+  document_id text NOT NULL,
+  revision integer NOT NULL CHECK (revision > 0),
+  title text NOT NULL,
+  status text NOT NULL CHECK (status IN ('active', 'withdrawn')),
+  embedding_model text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, collection_id, document_id)
+);
+
+CREATE TABLE IF NOT EXISTS knowledge_chunks (
+  tenant_id text NOT NULL,
+  collection_id text NOT NULL,
+  document_id text NOT NULL,
+  revision integer NOT NULL CHECK (revision > 0),
+  chunk_index integer NOT NULL CHECK (chunk_index >= 0),
+  content text NOT NULL,
+  embedding_model text NOT NULL,
+  embedding vector(4) NOT NULL,
+  PRIMARY KEY (tenant_id, collection_id, document_id, chunk_index),
+  FOREIGN KEY (tenant_id, collection_id, document_id)
+    REFERENCES knowledge_documents (tenant_id, collection_id, document_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS knowledge_chunks_scope_idx
+  ON knowledge_chunks (tenant_id, collection_id, embedding_model);
+```
+
+The schema does not store sessions or queue leases. Those remain operational
+state owned by their PURISTA adapters.
+
+## Implement the PostgreSQL resource
+
+The adapter locks the current document row, rejects an equal or older revision,
+updates the document, deletes old chunks, and inserts the replacement inside
+one transaction. Any error rolls back every step.
+
+```ts title="src/resources/PgKnowledgeRepository.ts" write
+import { Pool, type PoolClient } from 'pg'
+import {
+	demoEmbeddingDimensions,
+	StaleKnowledgeRevisionError,
+	type KnowledgeRepository,
+	type KnowledgeSearchResult,
+	type ReplaceKnowledgeRevisionInput,
+	type SearchKnowledgeInput,
+	type WithdrawKnowledgeRevisionInput,
+} from '../service/knowledge/v1/KnowledgeResources.js'
+
+function vectorLiteral(vector: number[]) {
+	if (vector.length !== demoEmbeddingDimensions || !vector.every(Number.isFinite)) {
+		throw new Error(`Expected ${demoEmbeddingDimensions} finite embedding values`)
+	}
+	return `[${vector.join(',')}]`
+}
+
+async function currentRevision(
+	client: PoolClient,
+	input: { tenantId: string; collectionId: string; documentId: string },
+) {
+	const result = await client.query(
+		`SELECT revision
+		 FROM knowledge_documents
+		 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3
+		 FOR UPDATE`,
+		[input.tenantId, input.collectionId, input.documentId],
+	)
+	return (result.rows[0] as { revision: number } | undefined)?.revision
+}
+
+function assertNewer(storedRevision: number | undefined, requestedRevision: number) {
+	if (storedRevision !== undefined && requestedRevision <= storedRevision) {
+		throw new StaleKnowledgeRevisionError()
+	}
+}
+
+export class PgKnowledgeRepository implements KnowledgeRepository {
+	readonly name = 'pgKnowledgeRepository'
+	private readonly pool: Pool
+
+	constructor(connectionString: string) {
+		this.pool = new Pool({ connectionString, max: 4 })
+	}
+
+	async replaceRevision(input: ReplaceKnowledgeRevisionInput, signal?: AbortSignal) {
+		signal?.throwIfAborted()
+		const client = await this.pool.connect()
+		try {
+			await client.query('BEGIN')
+			assertNewer(await currentRevision(client, input), input.revision)
+			await client.query(
+				`INSERT INTO knowledge_documents (
+				   tenant_id, collection_id, document_id, revision, title, status, embedding_model
+				 ) VALUES ($1, $2, $3, $4, $5, 'active', $6)
+				 ON CONFLICT (tenant_id, collection_id, document_id) DO UPDATE SET
+				   revision = EXCLUDED.revision,
+				   title = EXCLUDED.title,
+				   status = 'active',
+				   embedding_model = EXCLUDED.embedding_model,
+				   updated_at = now()`,
+				[
+					input.tenantId,
+					input.collectionId,
+					input.documentId,
+					input.revision,
+					input.title,
+					input.embeddingModel,
+				],
+			)
+			await client.query(
+				`DELETE FROM knowledge_chunks
+				 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+				[input.tenantId, input.collectionId, input.documentId],
+			)
+			for (const chunk of input.chunks) {
+				signal?.throwIfAborted()
+				await client.query(
+					`INSERT INTO knowledge_chunks (
+					   tenant_id, collection_id, document_id, revision,
+					   chunk_index, content, embedding_model, embedding
+					 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector)`,
+					[
+						input.tenantId,
+						input.collectionId,
+						input.documentId,
+						input.revision,
+						chunk.index,
+						chunk.content,
+						input.embeddingModel,
+						vectorLiteral(chunk.embedding),
+					],
+				)
+			}
+			await client.query('COMMIT')
+		} catch (error) {
+			await client.query('ROLLBACK')
+			throw error
+		} finally {
+			client.release()
+		}
+	}
+
+	async withdrawRevision(input: WithdrawKnowledgeRevisionInput, signal?: AbortSignal) {
+		signal?.throwIfAborted()
+		const client = await this.pool.connect()
+		try {
+			await client.query('BEGIN')
+			assertNewer(await currentRevision(client, input), input.revision)
+			await client.query(
+				`INSERT INTO knowledge_documents (
+				   tenant_id, collection_id, document_id, revision, title, status, embedding_model
+				 ) VALUES ($1, $2, $3, $4, '', 'withdrawn', $5)
+				 ON CONFLICT (tenant_id, collection_id, document_id) DO UPDATE SET
+				   revision = EXCLUDED.revision,
+				   status = 'withdrawn',
+				   embedding_model = EXCLUDED.embedding_model,
+				   updated_at = now()`,
+				[
+					input.tenantId,
+					input.collectionId,
+					input.documentId,
+					input.revision,
+					input.embeddingModel,
+				],
+			)
+			await client.query(
+				`DELETE FROM knowledge_chunks
+				 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
+				[input.tenantId, input.collectionId, input.documentId],
+			)
+			await client.query('COMMIT')
+		} catch (error) {
+			await client.query('ROLLBACK')
+			throw error
+		} finally {
+			client.release()
+		}
+	}
+
+	async search(input: SearchKnowledgeInput, signal?: AbortSignal): Promise<KnowledgeSearchResult[]> {
+		signal?.throwIfAborted()
+		const result = await this.pool.query(
+			`SELECT c.document_id, c.revision, c.chunk_index, c.content,
+			        1 - (c.embedding <=> $4::vector) AS score
+			 FROM knowledge_chunks c
+			 JOIN knowledge_documents d
+			   ON d.tenant_id = c.tenant_id
+			  AND d.collection_id = c.collection_id
+			  AND d.document_id = c.document_id
+			  AND d.revision = c.revision
+			 WHERE c.tenant_id = $1
+			   AND c.collection_id = $2
+			   AND c.embedding_model = $3
+			   AND d.status = 'active'
+			 ORDER BY c.embedding <=> $4::vector, c.document_id, c.chunk_index
+			 LIMIT $5`,
+			[
+				input.tenantId,
+				input.collectionId,
+				input.embeddingModel,
+				vectorLiteral(input.queryEmbedding),
+				input.limit,
+			],
+		)
+		return result.rows.map(row => ({
+			documentId: String(row.document_id),
+			revision: Number(row.revision),
+			chunkIndex: Number(row.chunk_index),
+			content: String(row.content),
+			score: Number(row.score),
+		}))
+	}
+
+	async destroy() {
+		await this.pool.end()
+	}
+}
+```
+
+`FOR UPDATE` serializes revision claims for one document. The transaction makes
+the document row and all replacement chunks visible together. It does not make
+queue delivery exactly once; the revision check makes a repeated or stale job
+safe to reject.
+
+## Start pgvector with Docker Compose
+
+Use a pinned pgvector image, loopback-only port, disposable volume, and health
+check.
+
+```yaml title="compose.knowledge.yaml" write
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.1-pg16
+    environment:
+      POSTGRES_DB: example_bank
+      POSTGRES_USER: example_bank
+      POSTGRES_PASSWORD: local-example-password
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - knowledge-postgres:/var/lib/postgresql/data
+      - ./database/knowledge.sql:/docker-entrypoint-initdb.d/001-knowledge.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U example_bank -d example_bank"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  knowledge-postgres:
+```
+
+The password is a local fixture, not a production secret.
+
+## Test transaction and scope behavior
+
+The integration test uses unique document scopes and proves replacement,
+rollback, stale revision rejection, withdrawal, and tenant/collection/model
+filters.
+
+```ts title="src/resources/PgKnowledgeRepository.postgres.test.ts" write
+import { afterAll, describe, expect, test } from 'vitest'
+import { demoEmbeddingModel, StaleKnowledgeRevisionError } from '../service/knowledge/v1/KnowledgeResources.js'
+import { PgKnowledgeRepository } from './PgKnowledgeRepository.js'
+
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) throw new Error('DATABASE_URL is required for PostgreSQL tests')
+const repository = new PgKnowledgeRepository(databaseUrl)
+afterAll(() => repository.destroy())
+
+const vector = [1, 0, 0, 0]
+const replacement = (scope: string, revision: number, content: string, embedding = vector) => ({
+	tenantId: `tenant-${scope}`,
+	collectionId: 'policy-help',
+	documentId: 'card-help',
+	revision,
+	title: 'Card help',
+	embeddingModel: demoEmbeddingModel,
+	chunks: [{ index: 0, content, embedding }],
+})
+
+describe('PgKnowledgeRepository', () => {
+	test('replaces a newer revision and rejects a stale revision', async () => {
+		await repository.replaceRevision(replacement('replace', 1, 'old text'))
+		await repository.replaceRevision(replacement('replace', 2, 'new text'))
+		await expect(repository.replaceRevision(replacement('replace', 2, 'duplicate')))
+			.rejects.toBeInstanceOf(StaleKnowledgeRevisionError)
+		const results = await repository.search({
+			tenantId: 'tenant-replace', collectionId: 'policy-help',
+			embeddingModel: demoEmbeddingModel, queryEmbedding: vector, limit: 5,
+		})
+		expect(results).toMatchObject([{ revision: 2, content: 'new text' }])
+	})
+
+	test('rolls back the document update when a replacement chunk is invalid', async () => {
+		await repository.replaceRevision(replacement('rollback', 1, 'committed text'))
+		await expect(repository.replaceRevision(replacement('rollback', 2, 'broken text', [1, 0])))
+			.rejects.toThrow('Expected 4 finite embedding values')
+		const results = await repository.search({
+			tenantId: 'tenant-rollback', collectionId: 'policy-help',
+			embeddingModel: demoEmbeddingModel, queryEmbedding: vector, limit: 5,
+		})
+		expect(results).toMatchObject([{ revision: 1, content: 'committed text' }])
+	})
+
+	test('withdraws a newer revision and removes it from retrieval', async () => {
+		await repository.replaceRevision(replacement('withdraw', 1, 'active text'))
+		await repository.withdrawRevision({
+			tenantId: 'tenant-withdraw', collectionId: 'policy-help', documentId: 'card-help',
+			revision: 2, embeddingModel: demoEmbeddingModel,
+		})
+		await expect(repository.search({
+			tenantId: 'tenant-withdraw', collectionId: 'policy-help',
+			embeddingModel: demoEmbeddingModel, queryEmbedding: vector, limit: 5,
+		})).resolves.toEqual([])
+	})
+
+	test('filters tenant, collection, and embedding model in the query', async () => {
+		await repository.replaceRevision(replacement('scope', 1, 'allowed text'))
+		await repository.replaceRevision({
+			...replacement('other-tenant', 1, 'other tenant text'),
+			collectionId: 'policy-help',
+		})
+		await repository.replaceRevision({
+			...replacement('scope', 1, 'other collection text'),
+			collectionId: 'private-policy',
+			documentId: 'private-card-help',
+		})
+		await repository.replaceRevision({
+			...replacement('scope', 1, 'other model text'),
+			documentId: 'other-model-card-help',
+			embeddingModel: 'other-embedding-v1',
+		})
+		const results = await repository.search({
+			tenantId: 'tenant-scope', collectionId: 'policy-help',
+			embeddingModel: demoEmbeddingModel, queryEmbedding: vector, limit: 10,
+		})
+		expect(results.map(result => result.content)).toEqual(['allowed text'])
+	})
+})
+```
+
+Keep PostgreSQL tests outside the fast suite.
+
+```ts title="vitest.server.config.ts" write
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+	test: {
+		environment: 'node',
+		include: ['src/**/*.test.ts'],
+		exclude: ['src/**/*.postgres.test.ts'],
+	},
+})
+```
+
+This script owns Compose startup and cleanup. The next page adds a second test
+to the same PostgreSQL run.
+
+```javascript title="scripts/verifyPostgres.mjs" write
+import { spawn, spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { once } from 'node:events'
+
+const compose = ['compose', '-f', 'compose.knowledge.yaml']
+const databaseUrl = 'postgres://example_bank:local-example-password@127.0.0.1:55432/example_bank'
+
+function docker(...args) {
+	const result = spawnSync('docker', args, { encoding: 'utf8' })
+	if (result.status !== 0) throw new Error(`${result.stdout}\n${result.stderr}`)
+}
+
+async function runTests() {
+	const candidates = [
+		'src/resources/PgKnowledgeRepository.postgres.test.ts',
+		'src/knowledgeIngestion.postgres.test.ts',
+	].filter(existsSync)
+	const child = spawn('npx', ['vitest', 'run', ...candidates], {
+		env: { ...process.env, DATABASE_URL: databaseUrl },
+		stdio: 'inherit',
+	})
+	const [code] = await once(child, 'close')
+	if (code !== 0) throw new Error(`PostgreSQL tests failed with exit code ${code}`)
+}
+
+try {
+	docker(...compose, 'up', '-d', '--wait')
+	await runTests()
+} finally {
+	spawnSync('docker', [...compose, 'down', '--volumes', '--remove-orphans'], { stdio: 'inherit' })
+}
+```
+
+Add the integration command and run it once.
+
+```bash title="Add and run the PostgreSQL integration command" replay="project"
+npm pkg set 'scripts.test:postgres=node scripts/verifyPostgres.mjs'
+npm run test:postgres
+npm test
+npm run build:server
+```
+
+The repository now proves the consistency properties needed by the worker. The
+last page composes the resources into the runnable application and crosses the
+real HTTP, queue, and database boundaries together.

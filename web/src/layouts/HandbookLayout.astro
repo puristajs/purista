@@ -1,5 +1,6 @@
 ---
 import Nav from '../components/landing/Nav.astro'
+import RecursiveDocTree from '../components/ui/RecursiveDocTree.astro'
 import type { PrimaryNavKey } from '../data/navigation'
 import type { SidebarItem } from '../lib/sidebar'
 import BaseLayout from './BaseLayout.astro'
@@ -17,6 +18,8 @@ interface Props {
 	/** Root route for the current documentation section, without a trailing slash. */
 	sectionRoot?: string
 	active?: PrimaryNavKey
+	/** Opt in to arbitrary-depth page navigation without changing Handbook routes. */
+	recursiveSidebar?: boolean
 }
 
 const {
@@ -29,6 +32,7 @@ const {
 	sectionTitle = 'Handbook',
 	sectionRoot = '/handbook',
 	active = 'handbook',
+	recursiveSidebar = false,
 } = Astro.props
 const sectionHomeTitle = `PURISTA ${sectionTitle}`
 const pageTitle = title === sectionHomeTitle ? title : `${title} | ${sectionHomeTitle}`
@@ -75,7 +79,7 @@ function getItemHref(item: SidebarItem): string {
       Browse {sectionTitle.toLowerCase()} topics
     </summary>
     <nav aria-label={`${sectionTitle} navigation`} class="max-h-[55vh] overflow-y-auto border-t border-[var(--color-line)] px-5 py-4">
-      {sidebar.map((item) => (
+      {recursiveSidebar ? <RecursiveDocTree items={sidebar} currentId={currentId} /> : sidebar.map((item) => (
         item.kind === 'sectionHeader' ? (
           <a href={getItemHref(item)} class={`block px-1 pb-2 pt-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-fg-strong)] ${item.sectionStart ? 'border-t border-[var(--color-line)]' : 'pt-0'}`}>
             {item.title}
@@ -116,7 +120,7 @@ function getItemHref(item: SidebarItem): string {
       <aside class="hidden lg:block w-64 shrink-0 border-r border-[var(--color-line)] overflow-y-auto" style="background: var(--color-bg)">
         <div class="px-4 py-6">
           <nav class="space-y-0.5">
-            {sidebar.map((item) => (
+            {recursiveSidebar ? <RecursiveDocTree items={sidebar} currentId={currentId} /> : sidebar.map((item) => (
               item.kind === 'sectionHeader' ? (
                 <div class:list={['mb-5', { 'pt-7 mt-7 border-t border-[var(--color-line)]': item.sectionStart }]}>
                   <a href={getItemHref(item)} class="flex items-center gap-2.5 px-2 group">

@@ -1,0 +1,42 @@
+---
+title: React to events with subscriptions
+description: Build a bounded asynchronous reaction to a named PURISTA command result.
+order: 12
+kind: chapter
+group: services
+status: published
+---
+
+Use a subscription when work should happen because a fact occurred and the
+producer should not wait for or import the consumer.
+
+In this independent example, `Transaction` saves a synthetic transaction in
+SQLite and names its successful command response `transaction.recorded.v1`.
+`Monitoring` subscribes to that fact and stores one replaceable operational
+signal when a debit is at least EUR 100. The banking details are deliberately
+small; the subject of the chapter is PURISTA subscription construction,
+routing, state ownership, and testing.
+
+```text title="The producer and consumer boundary"
+recordTransaction command
+  -> SQLite transaction resource
+  -> transaction.recorded.v1 success response
+  -> EventBridge filters
+  -> Monitoring subscription
+  -> one derived StateStore signal
+```
+
+You will build the complete use case in this order:
+
+1. [Prepare a command producer](/tutorials/subscriptions/setup/create-producer/).
+2. [Add its SQLite resource](/tutorials/subscriptions/setup/add-database/).
+3. [Name the successful result](/tutorials/subscriptions/setup/name-result/).
+4. [Generate the subscription](/tutorials/subscriptions/build/generate/).
+5. [Implement the bounded reaction](/tutorials/subscriptions/build/handle/).
+6. [Start producer and consumer](/tutorials/subscriptions/build/run/).
+7. [Test routing and failure](/tutorials/subscriptions/testing/test-subscription/).
+
+The first three pages form a small command-events baseline for this capability.
+They intentionally exclude HTTP, authentication, React, transforms, and the
+external provider. You can therefore follow this chapter without rebuilding
+unrelated tutorial features.

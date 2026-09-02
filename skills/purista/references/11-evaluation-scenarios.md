@@ -13,6 +13,9 @@ Use these scenarios to test whether the `purista` skill gives an otherwise untra
 - [Scenario 8: Command-Capable Agent Boundary](#scenario-8-command-capable-agent-boundary)
 - [Scenario 9: Guarded Claims Agent](#scenario-9-guarded-claims-agent)
 - [Scenario 10: Clean Harness Composition](#scenario-10-clean-harness-composition)
+- [Scenario 11: State Ownership in a Small App](#scenario-11-state-ownership-in-a-small-app)
+- [Scenario 12: Command and Resource Testing](#scenario-12-command-and-resource-testing)
+- [Scenario 13: Command Success Event or Manual Event](#scenario-13-command-success-event-or-manual-event)
 
 ## Scenario 1: Greenfield Project Setup
 Prompt:
@@ -251,3 +254,106 @@ Validation:
 - duplicate and invalid definition ids fail during configuration
 - the example keeps authorization in the application/tool boundary rather than
   treating schemas or model instructions as authority
+
+## Scenario 11: State Ownership in a Small App
+
+Prompt:
+
+```text
+Our tutorial uses StateStore for sessions and transaction records, and declares
+login/session/logout directly on the Hono app. Refactor it to idiomatic PURISTA.
+```
+
+Expected behavior:
+- names the session capability owner and uses StateStore only for operational
+  session state
+- exposes login/session/logout as Identity service commands; login is explicitly
+  public while session/logout remain protected generated endpoints
+- uses `setProtectMiddleware` to resolve the opaque token and set trusted identity
+- puts transactions behind a declared repository resource backed by a database,
+  even when the first repository API only saves and reads by id
+- validates keyed session reads and stored expiry, and guards business access
+- separates immutable fixtures and test captures from mutable application state
+- does not replace a unique insert or multi-record transaction with get-then-set
+- keeps the first repository API small instead of misclassifying the record as
+  application state
+
+Validation:
+- no second general session/state engine remains in the application
+- no handwritten Hono business or session lifecycle routes remain
+- the command metadata, generated routes, and protection middleware are tested
+- state/resource mocks cover missing values, dependency failure and denied effects
+- local store lifetime and cleanup are explicit; restart durability is not
+  inferred from sharing one in-process store between service instances
+
+## Scenario 12: Command and Resource Testing
+
+Prompt:
+
+```text
+Teach me to test a command with a mocked external client, a state write, a
+business guard, and an input transform. I do not want every test to start HTTP.
+```
+
+Expected behavior:
+- starts from the generated test and explains arrange, act, assert and cleanup
+- uses createCommandContextMock, declared resource fakes and configured state stubs
+- binds the command to a service instance with safeBind
+- explains getCommandFunction's included validation/before guards and excluded
+  transforms/after guards; uses a runtime test to cover the complete lifecycle
+- sets trusted identity with an explicit message fixture, not invented context
+  helper or harness run options
+
+Validation:
+- success, resource rejection and no dependency call on business denial are checked
+- direct transform tests and real lifecycle checks prove different boundaries
+- test assertions match the mock library and do not replace the guard under test
+- infrastructure behavior and live model quality are not inferred from unit tests
+
+## Scenario 13: Command Success Event or Manual Event
+
+Prompt:
+
+```text
+After saveTransaction returns the stored transaction, publish
+transaction.recorded.v1 so a subscription can assess it.
+```
+
+Expected behavior:
+- uses `setSuccessEventName('transaction.recorded.v1')` because the event
+  is the successful command result
+- subscribes to the named `CommandSuccessResponse` and validates the command's
+  output shape as the event payload
+- reserves `canEmit` plus `context.emit` for a separate fact produced during
+  execution, such as an intermediate import warning or progress notification
+
+Validation:
+- a failed repository write produces no named success response
+- the handler does not manually emit a duplicate result event
+- runtime coverage observes the message type, event name, sender, trusted
+  identity metadata, and payload
+
+## Scenario 14: Capability Service Names
+
+Prompt:
+
+```text
+Build an Example Bank tutorial with login, transactions, monitoring, reports,
+and support AI. Put the commands in BankingService so the example stays simple.
+```
+
+Expected behavior:
+- rejects `BankingService` as an application-wide container
+- starts with only `BankProfile` for the first public fixture, then introduces
+  `Identity`, `Transaction`, `Monitoring`, `Reporting`, `Support`, and
+  `Knowledge` when their capabilities are taught
+- keeps credential/session ownership in `Identity` and business authorization
+  guards on the service that owns the protected action
+- keeps each independently runnable tutorial baseline minimal
+
+Validation:
+- no active plan, learner page, CLI command, or retained source generates a
+  `Banking` or `ExampleBank` service
+- every service has one stated capability, state/resource owner, and focused
+  test boundary
+- the application and UI may still use the product name “Example Bank”

@@ -19,6 +19,29 @@ PURISTA is builder-driven and runtime-explicit. Keep four layers separate:
 
 Do not blur these layers. Most mistakes come from designing routes, prompts, or infrastructure before service ownership and contracts are clear.
 
+## AI integration redesign gate
+
+The shipped v3 `AgentQueueBuilder` remains implementation evidence, but it is
+frozen for new Handbook/tutorial architecture because it expands one agent into
+queue, worker, command, and stream definitions and mixes Core and Harness
+ownership. A v4 replacement is under architecture review.
+
+For current application maintenance, verify and use the installed public API.
+For redesign, tutorial, CLI, docs, or skill work, do not invent or publish the
+proposal as shipped. Prefer the revision-5 Harness-first direction for the
+required spike: native Harness modules own AI definitions and Core owns only a
+typed `ServiceBuilder.mountHarness(...)` composition boundary. Core may depend
+on the slim provider-neutral Harness; Harness must not import Core. Stop AI
+tutorial implementation until that contract is approved and implemented.
+Every proposed agent/workflow invocation is address-first and crosses the
+configured EventBridge, including same-service and same-process calls. Do not
+introduce service-builder references or direct local Harness dispatch.
+Each proposed agent/workflow has one explicit final output schema. Callers
+choose `run` or portable `stream`; definitions declare whether `none`,
+`text-delta`, or `object-snapshot` updates exist. Do not expose raw Harness
+diagnostic `RunEvent` values as the default EventBridge or HTTP contract, and
+do not describe PURISTA generic stream aggregation as an agent response mode.
+
 ## Hard Rules
 - Start from business capabilities and ownership boundaries, not package names or routes.
 - Use the project-local PURISTA CLI whenever it can generate the target artifact; refine generated code instead of hand-writing the skeleton.
@@ -27,6 +50,7 @@ Do not blur these layers. Most mistakes come from designing routes, prompts, or 
 - Generated PURISTA apps are ESM-only. Do not offer, document, or scaffold CommonJS variants.
 - Keep schemas explicit on every boundary. Prefer consumer-local schemas over one oversized shared schema.
 - Keep external systems behind resources or runtime bindings.
+- Use PURISTA stores for supported state/config/secret access instead of rebuilding them as application maps. Keep transactional databases behind resources; generic KV is not a transaction, query engine, or TTL contract. Read `references/12-state-and-ownership.md` for persistence and local authentication.
 - Treat tenant isolation, authorization, auditability, and data minimization as architecture requirements, not handler details.
 - Do not leak secrets, PII, prompts, completions, tokens, raw payloads, headers, or attachments into logs, metrics, traces, events, generated examples, or model calls unless an explicit product policy allows the exact field.
 - Declare handler capabilities before use. Commands, streams, subscriptions, queue workers, and agents should access other components through typed context surfaces produced by `.canInvoke(...)`, `.canConsumeStream(...)`, `.canEnqueue(...)`, `.canEmit(...)`, and agent-specific declarations where available.
@@ -74,7 +98,7 @@ Production architecture guidance:
 - start monolithic with explicit service boundaries; split deployment only when team, scaling, or failure-domain pressure justifies it
 - keep services stateless and persist truth in stores/resources owned by the capability
 - design all retryable side effects as idempotent; exactly-once is a handler/property design, not a broker promise
-- carry `tenantId`, `principalId`, `traceId`, and `correlationId` through boundaries; enforce tenant/principal preconditions with guards before handler logic; do not use transport ids as AI conversation ids
+- carry trusted `tenantId`, `principalId`, `traceId`, and `correlationId` through boundaries; authentication establishes identity, while business guards authorize the requested action/object and current state; do not use transport ids as AI conversation ids
 - expose HTTP as a projection of command/stream/agent definitions, not as the source architecture
 - use default bridges for local/test and production bridges/stores for stated guarantees; fail startup in strict mode when guarantees cannot be met
 - minimize data at each contract boundary; events and agent prompts should contain the least sensitive shape that still satisfies the use case
@@ -104,6 +128,7 @@ component and must not be adapted into Harness storage.
 - Durable agent replay designs name Harness storage/workspace adapters, required capabilities, stable run-id input, cleanup owner, and product-owned retention/encryption/quota policy.
 - Metrics wiring names the app-owned OpenTelemetry provider/exporters and keeps Prometheus outside core.
 - Handler code uses declared custom metrics through typed `context.metrics`, not raw metric names or a raw recorder.
+- Tests demonstrate PURISTA builder/context helpers, resource/store mocks, and runtime wiring separately. HTTP-only tests do not teach Framework testing; see `references/07-testing-observability-and-deployment.md`.
 - Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.
 - Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
 - Project setup and scaffolding follow the handbook quickstart shape: `src/service` and `src/agents` are CLI-managed roots, and services, commands, streams, queues, workers, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, and `add:agent`.
@@ -122,3 +147,4 @@ component and must not be adapted into Harness storage.
 - `references/09-implementation-planning.md`
 - `references/10-security-privacy-and-governance.md`
 - `references/11-evaluation-scenarios.md`
+- `references/12-state-and-ownership.md`

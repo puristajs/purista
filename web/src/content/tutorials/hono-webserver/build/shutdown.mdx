@@ -1,0 +1,95 @@
+---
+title: Open and close the Node listener
+description: Name the application-owned listener and place every runtime object in the correct shutdown order.
+order: 30
+kind: lesson
+status: published
+---
+
+The Hono service owns route handling. It does not own the Node socket created by
+`serve`. Wrap that socket in a small shutdown entry so the application can close
+it explicitly.
+
+## Create the listener shutdown entry
+
+```ts title="src/nodeHttpListener.ts" write
+type ClosableNodeServer = {
+	close(callback: (error?: Error) => void): unknown
+}
+
+export function createNodeHttpListener(server: ClosableNodeServer) {
+	return {
+		name: 'nodeHttpListener',
+		destroy: () =>
+			new Promise<void>((resolve, reject) => {
+				server.close(error => (error ? reject(error) : resolve()))
+			}),
+	}
+}
+```
+
+This object is an application runtime resource. It is not another PURISTA
+service. Its name states exactly what it closes.
+
+## Start the socket and register shutdown
+
+Replace the entry point:
+
+```ts title="src/index.ts" write
+import { serve } from '@hono/node-server'
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { z } from 'zod'
+import { createApplication } from './application.js'
+import { createNodeHttpListener } from './nodeHttpListener.js'
+
+async function main() {
+	const port = z.coerce.number().int().min(1).max(65535).parse(process.env.PORT ?? 3000)
+	const logger = initLogger()
+	const { eventBridge, bankProfile, http } = await createApplication(logger)
+	const nodeServer = serve({ fetch: http.app.fetch, hostname: '127.0.0.1', port })
+	const nodeHttpListener = createNodeHttpListener(nodeServer)
+
+	gracefulShutdown(logger, [
+		http.prepareDestroy(),
+		nodeHttpListener,
+		http,
+		bankProfile,
+		eventBridge,
+	])
+	logger.info({ port }, 'Example Bank HTTP server started')
+}
+
+main().catch(() => {
+	process.stderr.write('Example Bank HTTP server could not start.\n')
+	process.exit(1)
+})
+```
+
+`prepareDestroy()` marks Hono unavailable so new generated requests receive a
+service-unavailable response. It does not close the Node listener. The next
+entry closes that listener. Then shutdown destroys Hono, `BankProfile`, and the
+shared EventBridge.
+
+## Run the application
+
+```bash title="Build the HTTP application" replay="project"
+npm test
+npm run build
+```
+
+```bash title="Start the HTTP application" replay="server"
+npm start
+```
+
+In a second terminal, call the generated endpoint:
+
+```bash title="Call the public profile command" replay="request"
+curl --fail-with-body --silent http://127.0.0.1:3000/api/v1/profile
+```
+
+```json title="Expected public profile" expect="json"
+{"name":"Example Bank","currency":"EUR"}
+```
+
+The health endpoint is `/health`, and the generated OpenAPI document is
+`/api/openapi.json`. Stop the server with Ctrl+C before continuing.

@@ -27,6 +27,20 @@ A PURISTA service is a versioned domain container. It owns:
 
 Do not create an agent as an unowned global primitive when the work belongs to a business capability. Attach it to the owning service unless there is a deliberate cross-domain orchestration reason.
 
+Name a service after the capability it owns. Do not name a service after the
+whole product, example application, or industry when that name would collect
+unrelated behavior. An application called “Example Bank” can contain
+`BankProfile`, `Identity`, `Transaction`, `Monitoring`, and `Reporting`
+services. It should not introduce a catch-all `Banking` or `ExampleBank`
+service. If a proposed service name cannot tell a reviewer which commands,
+state, resources, and invariants belong together, split the ownership before
+generating code.
+
+Authentication and business authorization have different owners. An
+`Identity` capability may verify credentials and own sessions. The service
+that owns the requested business action applies guards for object, tenant, and
+action permission. Do not move those business rules into the identity service.
+
 ## Truth Hierarchy
 Keep truth layers explicit:
 - deterministic domain state and external source-of-truth systems
@@ -42,7 +56,8 @@ Every capability design must name:
 - who can call it (`principalId`, service identity, or external client)
 - which tenant or data boundary it operates inside
 - which fields are public, internal, confidential, PII, regulated, or unsafe for model/provider exposure
-- which guard rejects missing or unauthorized identity before handler logic
+- which boundary authenticates the caller and establishes trusted identity
+- which business guard authorizes the requested action/object and current state before handler logic
 - which resource/store enforces tenant scoping and least privilege
 - what is safe to emit in events, queue payloads, streams, logs, metrics, traces, and audit records
 

@@ -2,19 +2,20 @@ import type { CollectionEntry } from 'astro:content'
 import type { SidebarItem } from '../lib/sidebar'
 
 export type TutorialEntry = CollectionEntry<'tutorials'>
-
-const published = (entry: TutorialEntry) => entry.data.status === 'published'
-const byOrderThenTitle = (left: TutorialEntry, right: TutorialEntry) =>
-	left.data.order - right.data.order || left.data.title.localeCompare(right.data.title)
-
-/** The normalized content ID that owns the Tutorials landing route. */
+type TutorialNode = SidebarItem & { entry?: TutorialEntry; items?: TutorialNode[] }
+const groupLabels = {
+	start: 'Start here', services: 'Connect services', ai: 'Add AI capabilities',
+	workflows: 'Combine AI capabilities', operate: 'Run and explore',
+} as const
+const branchLabels: Record<string, { title: string; order: number }> = {
+	setup: { title: 'Set up the example', order: 5 },
+	build: { title: 'Build', order: 10 },
+	testing: { title: 'Test with PURISTA', order: 20 },
+	extensions: { title: 'Optional extensions', order: 30 },
+}
 export const tutorialIndexId = 'index'
 
-/**
- * Convert a content collection ID into its canonical Tutorials URL segment.
- * Astro normalizes `chapter/index.mdx` to the ID `chapter`; `index.mdx`
- * remains the section root.
- */
+/** Normalize Astro's chapter/index IDs into a canonical URL segment. */
 export function tutorialRouteSlug(id: string): string {
 	return id === tutorialIndexId ? '' : id.replace(/\/index$/, '')
 }
@@ -24,72 +25,134 @@ export function tutorialRoute(id: string): string {
 	return slug ? `/tutorials/${slug}/` : '/tutorials/'
 }
 
+/** A draft ancestor hides its descendants, even if a child says published. */
 export function getPublishedTutorialEntries(entries: TutorialEntry[]): TutorialEntry[] {
-	return entries.filter(published)
-}
-
-/**
- * A chapter is represented by a shallow normalized content ID. Source files
- * use `chapter/index.mdx`, while deeper `index.mdx` files remain child pages.
- * This keeps deeper page structure available without creating another sidebar
- * chapter.
- */
-export function getTutorialChapters(entries: TutorialEntry[]): TutorialEntry[] {
-	return getPublishedTutorialEntries(entries)
-		.filter(entry => entry.id !== tutorialIndexId && !entry.id.includes('/'))
-		.sort(byOrderThenTitle)
-}
-
-export function getTutorialChapterId(id: string): string | undefined {
-	if (id === tutorialIndexId) return undefined
-	return id.split('/')[0]
-}
-
-export function getTutorialChapter(entries: TutorialEntry[], id: string): TutorialEntry | undefined {
-	const chapterId = getTutorialChapterId(id)
-	return chapterId ? entries.find(entry => entry.id === chapterId && published(entry)) : undefined
-}
-
-export function getTutorialChapterPages(entries: TutorialEntry[], chapterId: string): TutorialEntry[] {
-	const chapterPrefix = `${chapterId}/`
-	return getPublishedTutorialEntries(entries)
-		.filter(entry => entry.id === chapterId || entry.id.startsWith(chapterPrefix))
-		.sort(byOrderThenTitle)
-}
-
-/**
- * Sidebar records are derived from completed content only. A future chapter
- * therefore cannot expose a broken link while its pages are still in draft.
- */
-export function getTutorialSidebar(entries: TutorialEntry[]): SidebarItem[] {
-	return getTutorialChapters(entries).map(chapter => {
-		const chapterId = getTutorialChapterId(chapter.id)!
-		return {
-			title: chapter.data.sidebarLabel ?? chapter.data.title,
-			id: chapter.id,
-			href: tutorialRoute(chapter.id),
-			order: chapter.data.order,
-			items: getTutorialChapterPages(entries, chapterId)
-				.filter(page => page.id !== chapter.id)
-				.map(page => ({
-					title: page.data.sidebarLabel ?? page.data.title,
-					id: page.id,
-					href: tutorialRoute(page.id),
-					order: page.data.order,
-				})),
+	const byId = new Map(entries.map(entry => [tutorialRouteSlug(entry.id), entry]))
+	if (byId.size !== entries.length) throw new Error('Duplicate normalized tutorial content ID')
+	return entries.filter(entry => {
+		if (entry.data.status !== 'published') return false
+		const parts = tutorialRouteSlug(entry.id).split('/')
+		for (let length = 1; length < parts.length; length++) {
+			if (byId.get(parts.slice(0, length).join('/'))?.data.status === 'draft') return false
 		}
+		return true
 	})
 }
 
-export function getTutorialPageNavigation(entries: TutorialEntry[], currentId: string) {
-	const chapterId = getTutorialChapterId(currentId)
-	const pages = chapterId
-		? getTutorialChapterPages(entries, chapterId)
-		: getTutorialChapters(entries)
-	const index = pages.findIndex(page => page.id === currentId)
+export function getTutorialChapters(entries: TutorialEntry[]): TutorialEntry[] {
+	return getPublishedTutorialEntries(entries)
+		.filter(entry => entry.data.kind === 'chapter')
+		.sort((a, b) => a.data.order - b.data.order)
+}
 
-	return {
-		previous: index > 0 ? pages[index - 1] : undefined,
-		next: index >= 0 && index < pages.length - 1 ? pages[index + 1] : undefined,
+export function getTutorialChapterId(id: string): string | undefined {
+	return tutorialRouteSlug(id).split('/')[0] || undefined
+}
+
+export function getTutorialChapter(entries: TutorialEntry[], id: string): TutorialEntry | undefined {
+	return getTutorialChapters(entries).find(entry => tutorialRouteSlug(entry.id) === getTutorialChapterId(id))
+}
+
+function chapterTree(entries: TutorialEntry[], chapter: TutorialEntry): TutorialNode {
+	const chapterId = tutorialRouteSlug(chapter.id)
+	const root: TutorialNode = { id: chapterId, title: chapter.data.title, order: chapter.data.order, entry: chapter, items: [] }
+	const nodes = new Map<string, TutorialNode>([[chapterId, root]])
+	for (const entry of getPublishedTutorialEntries(entries)) {
+		const id = tutorialRouteSlug(entry.id)
+		if (id !== chapterId && !id.startsWith(`${chapterId}/`)) continue
+		const parts = id.split('/')
+		for (let length = 2; length <= parts.length; length++) {
+			const prefix = parts.slice(0, length).join('/')
+			if (nodes.has(prefix)) continue
+			const label = branchLabels[parts[length - 1]]
+			const node: TutorialNode = {
+				id: prefix, title: label?.title ?? parts[length - 1].replaceAll('-', ' '),
+				order: label?.order ?? 999999, items: [],
+			}
+			nodes.set(prefix, node)
+			nodes.get(parts.slice(0, length - 1).join('/'))!.items!.push(node)
+		}
+		const node = nodes.get(id)!
+		Object.assign(node, {
+			entry, title: entry.data.sidebarLabel ?? entry.data.title,
+			order: entry.data.order, href: tutorialRoute(entry.id),
+		})
 	}
+	function sort(node: TutorialNode) {
+		node.items?.sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
+		const orders = new Set<number>()
+		for (const child of node.items ?? []) {
+			if (orders.has(child.order)) throw new Error(`Duplicate tutorial sibling order below ${node.id}: ${child.order}`)
+			orders.add(child.order)
+			sort(child)
+		}
+		// Virtual groups lead to their first lesson, not to an invented index route.
+		node.href ??= node.items?.[0]?.href
+	}
+	sort(root)
+	return root
+}
+
+function flatten(node: TutorialNode): TutorialEntry[] {
+	return [...(node.entry ? [node.entry] : []), ...(node.items ?? []).flatMap(flatten)]
+}
+
+export function getTutorialChapterPages(entries: TutorialEntry[], chapterId: string): TutorialEntry[] {
+	const chapter = getTutorialChapter(entries, chapterId)
+	return chapter ? flatten(chapterTree(entries, chapter)) : []
+}
+
+/** Discovery groups stay flat; each chapter's page tree preserves arbitrary depth. */
+export function getTutorialSidebar(entries: TutorialEntry[]): SidebarItem[] {
+	const chapters = getTutorialChapters(entries)
+	return Object.entries(groupLabels).flatMap(([group, title]) => {
+		const members = chapters.filter(chapter => chapter.data.group === group)
+		if (!members.length) return []
+		return [
+			{ id: `group-${group}`, title, order: 0, kind: 'sectionHeader' as const },
+			...members.map(chapter => chapterTree(entries, chapter)),
+		]
+	})
+}
+
+function optional(entry: TutorialEntry) {
+	return entry.data.optional || tutorialRouteSlug(entry.id).split('/').includes('extensions')
+}
+
+/** Required reading skips group indexes and extensions; optional branches stay local. */
+export function getTutorialPageNavigation(entries: TutorialEntry[], currentId: string) {
+	const chapter = getTutorialChapter(entries, currentId)
+	if (!chapter) return { previous: undefined, next: getTutorialChapters(entries)[0] }
+	const pages = getTutorialChapterPages(entries, chapter.id)
+	const id = tutorialRouteSlug(currentId)
+	const current = pages.find(entry => tutorialRouteSlug(entry.id) === id)
+	if (!current) return { previous: undefined, next: undefined }
+	if (current.data.kind === 'group') {
+		return { previous: chapter, next: pages.find(page => tutorialRouteSlug(page.id).startsWith(`${id}/`) && page.data.kind === 'lesson') }
+	}
+	const branch = id.slice(0, id.lastIndexOf('/'))
+	const sequence = optional(current)
+		? pages.filter(page => optional(page) && page.data.kind === 'lesson' && tutorialRouteSlug(page.id).startsWith(`${branch}/`))
+		: pages.filter(page => !optional(page) && (page.data.kind === 'chapter' || page.data.kind === 'lesson'))
+	const index = sequence.findIndex(page => tutorialRouteSlug(page.id) === id)
+	return {
+		previous: index > 0 ? sequence[index - 1] : optional(current) ? chapter : undefined,
+		next: index >= 0 ? sequence[index + 1] : undefined,
+	}
+}
+
+/** Include every ancestor; a virtual group is a label, never a broken link. */
+export function getTutorialBreadcrumbs(entries: TutorialEntry[], currentId: string) {
+	const result: { title: string; href?: string }[] = [{ title: 'Tutorials', href: '/tutorials/' }]
+	const parts = tutorialRouteSlug(currentId).split('/').filter(Boolean)
+	const published = getPublishedTutorialEntries(entries)
+	for (let length = 1; length < parts.length; length++) {
+		const id = parts.slice(0, length).join('/')
+		const entry = published.find(item => tutorialRouteSlug(item.id) === id)
+		result.push({
+			title: entry?.data.title ?? branchLabels[parts[length - 1]]?.title ?? parts[length - 1].replaceAll('-', ' '),
+			href: entry ? tutorialRoute(entry.id) : undefined,
+		})
+	}
+	return result
 }

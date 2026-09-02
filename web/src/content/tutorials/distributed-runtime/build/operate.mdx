@@ -1,0 +1,304 @@
+---
+title: Run the local topology
+description: Start a pinned NATS dependency, run three service processes, expose process health, and exercise command, subscription, and queue paths.
+order: 293
+kind: lesson
+status: published
+---
+
+The local topology uses Docker Compose for NATS and normal Node.js child
+processes for the application. This keeps the broker reproducible while the
+service code remains easy to debug with the same local TypeScript toolchain.
+
+## Add the PURISTA health service
+
+Health is an operational endpoint, so it belongs to process composition. Use
+the Hono service's built-in health endpoint instead of creating another HTTP
+router. The health callback delegates to the business service's PURISTA health
+API, which already includes its EventBridge and QueueBridge dependencies.
+
+Install the Framework HTTP service and its Node socket adapter:
+
+```bash title="Install the process health server" replay="project"
+npm install --save-exact @purista/hono-http-server@3.2.4 @hono/node-server@2.1.0
+```
+
+```ts title="src/runtime/createProcessHttpServer.ts" write
+import { serve } from '@hono/node-server'
+import type { Logger } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import type { ProcessRuntime } from './ProcessRuntime.js'
+
+export async function createProcessHttpServer(
+	logger: Logger,
+	runtime: ProcessRuntime,
+	port: number,
+) {
+	const http = await honoV1Service.getInstance(runtime.eventBridge, {
+		logger,
+		serviceConfig: {
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: {
+				enabled: false,
+				info: { title: 'Example Bank process health', version: '1.0.0' },
+			},
+		},
+	})
+
+	http.setHealthFunction(async () => {
+		const state = await runtime.service.getServiceHealth()
+		if (state.status !== 'ok') throw new Error(`${runtime.role} service is not healthy`)
+	})
+	await http.start()
+
+	const server = serve({ fetch: http.app.fetch, hostname: '127.0.0.1', port })
+	const listener = {
+		name: `${runtime.role} nodeHttpListener`,
+		destroy: () => new Promise<void>((resolve, reject) => {
+			server.close(error => error ? reject(error) : resolve())
+		}),
+	}
+
+	return { http, listener }
+}
+```
+
+`http` owns the health route, Framework error handling, and readiness state.
+The Node listener owns only the socket created by `serve`, so the composition
+root closes both objects in the correct order.
+
+## Select one service role per process
+
+This entry point creates one EventBridge connection and starts exactly one
+business service. Only the Reporting role creates a QueueBridge. The Hono
+service becomes unavailable before the listener closes, and the business
+service and adapters drain afterward.
+
+```ts title="src/distributed.ts" write
+import { gracefulShutdown, initLogger } from '@purista/core'
+import { SqliteTransactionRepository } from './resources/SqliteTransactionRepository.js'
+import { createProcessHttpServer } from './runtime/createProcessHttpServer.js'
+import { assertDistributedCapabilities } from './runtime/distributedProfile.js'
+import { monitoringDistributedV1Service } from './runtime/monitoringDistributedV1Service.js'
+import {
+	createNatsEventBridge,
+	createNatsQueueBridge,
+	createNatsStateStore,
+} from './runtime/natsAdapters.js'
+import { createNatsQueueJobStore } from './runtime/natsQueueJobStore.js'
+import type { ProcessRuntime } from './runtime/ProcessRuntime.js'
+import { startMonitoringProcess } from './runtime/startMonitoringProcess.js'
+import { startReportingProcess } from './runtime/startReportingProcess.js'
+import { startTransactionProcess } from './runtime/startTransactionProcess.js'
+
+type ProcessRole = ProcessRuntime['role']
+
+function readRole(value: string | undefined): ProcessRole {
+	if (value === 'transaction' || value === 'monitoring' || value === 'reporting') return value
+	throw new Error('PURISTA_PROCESS_ROLE must be transaction, monitoring, or reporting')
+}
+
+async function main() {
+	const logger = initLogger('fatal')
+	const role = readRole(process.env.PURISTA_PROCESS_ROLE)
+	const servers = process.env.NATS_URL ?? 'nats://127.0.0.1:4222'
+	const healthPort = Number.parseInt(process.env.HEALTH_PORT ?? '', 10)
+	if (!Number.isInteger(healthPort) || healthPort < 1) throw new Error('HEALTH_PORT must be a positive integer')
+
+	const eventBridge = await createNatsEventBridge(logger, servers)
+	let runtime: ProcessRuntime
+
+	if (role === 'transaction') {
+		assertDistributedCapabilities(eventBridge.capabilities, undefined)
+		const repository = new SqliteTransactionRepository(
+			process.env.TRANSACTION_DB_PATH ?? 'var/distributed-transactions.sqlite',
+		)
+		runtime = await startTransactionProcess(logger, eventBridge, repository)
+	} else if (role === 'monitoring') {
+		assertDistributedCapabilities(eventBridge.capabilities, undefined)
+		const stateStore = createNatsStateStore(logger, servers, 'example_bank_monitoring')
+		runtime = await startMonitoringProcess(
+			logger, eventBridge, stateStore, monitoringDistributedV1Service,
+		)
+	} else {
+		const queueBridge = createNatsQueueBridge(servers)
+		assertDistributedCapabilities(
+			eventBridge.capabilities, queueBridge.capabilities, { requiresQueue: true },
+		)
+		const stateStore = createNatsStateStore(logger, servers, 'example_bank_reporting')
+		runtime = await startReportingProcess(
+			logger, eventBridge, queueBridge, stateStore, createNatsQueueJobStore(stateStore),
+		)
+	}
+
+	const { http, listener } = await createProcessHttpServer(logger, runtime, healthPort)
+	gracefulShutdown(logger, [
+		http.prepareDestroy(),
+		listener,
+		http,
+		{ name: `${role} runtime`, destroy: runtime.destroy },
+	])
+	process.stdout.write(`${role} process started.\n`)
+}
+
+main().catch(error => {
+	process.stderr.write(`Distributed process could not start: ${error instanceof Error ? error.message : String(error)}\n`)
+	process.exit(1)
+})
+```
+
+## Add the pinned broker dependency
+
+JetStream is enabled explicitly. The client and monitoring ports bind only to
+loopback. The named volume is removed by the verification command, while a
+normal `docker compose stop` keeps it for a later local restart.
+
+```yaml title="compose.distributed.yaml" write
+name: example-bank-distributed
+
+services:
+  nats:
+    image: nats:2.10.29-alpine
+    command: ["-js", "-m", "8222", "--store_dir", "/data"]
+    ports:
+      - "127.0.0.1:${EXAMPLE_BANK_NATS_PORT:-4222}:4222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8222/healthz"]
+      interval: 1s
+      timeout: 500ms
+      retries: 30
+    networks: [bank-runtime]
+
+networks:
+  bank-runtime:
+    name: example-bank-runtime
+
+volumes:
+  nats-data:
+    name: example-bank-nats-data
+```
+
+## Exercise the topology through PURISTA messages
+
+The probe is a client process, not another service. It invokes the generated
+commands through NATS, then reads the operational StateStore adapters to verify
+the subscription and queue worker outcomes.
+
+```ts title="src/distributedProbe.ts" write
+import { getCommandMessageMock, initLogger } from '@purista/core'
+import { transactionSchema } from './service/transaction/v1/transaction.js'
+import { latestLargeDebitSignalKey, largeDebitSignalSchema } from './service/monitoring/v1/monitoringSignal.js'
+import { reportingV1RequestSnapshotOutputPayloadSchema } from './service/reporting/v1/command/requestSnapshot/schema.js'
+import { createNatsEventBridge, createNatsStateStore } from './runtime/natsAdapters.js'
+import { createNatsQueueJobStore } from './runtime/natsQueueJobStore.js'
+
+const logger = initLogger('fatal')
+const servers = process.env.NATS_URL ?? 'nats://127.0.0.1:4222'
+
+const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds))
+
+async function waitFor<T>(read: () => Promise<T | undefined>, label: string) {
+	for (let attempt = 0; attempt < 100; attempt += 1) {
+		const result = await read()
+		if (result !== undefined) return result
+		await delay(50)
+	}
+	throw new Error(`Timed out waiting for ${label}`)
+}
+
+async function recordTransaction(eventBridge: Awaited<ReturnType<typeof createNatsEventBridge>>) {
+	const response = await eventBridge.invoke(getCommandMessageMock({
+		tenantId: 'tenant-example',
+		receiver: { serviceName: 'Transaction', serviceVersion: '1', serviceTarget: 'recordTransaction' },
+		payload: {
+			payload: { amountCents: 12_500, direction: 'debit', counterparty: 'Northwind Books' },
+			parameter: { accountId: 'account-operating' },
+		},
+	}))
+	return transactionSchema.parse(response)
+}
+
+async function waitForSignal(transactionId: string) {
+	const stateStore = createNatsStateStore(logger, servers, 'example_bank_monitoring')
+	try {
+		return await waitFor(async () => {
+			const result = await stateStore.getState(latestLargeDebitSignalKey)
+			const signal = result[latestLargeDebitSignalKey]
+			if (!signal) return undefined
+			const parsed = largeDebitSignalSchema.parse(signal)
+			return parsed.transactionId === transactionId ? parsed : undefined
+		}, 'Monitoring signal')
+	} finally {
+		await stateStore.destroy()
+	}
+}
+
+async function requestSnapshot(
+	eventBridge: Awaited<ReturnType<typeof createNatsEventBridge>>,
+	transactionId: string,
+) {
+	const response = await eventBridge.invoke(getCommandMessageMock({
+		receiver: { serviceName: 'Reporting', serviceVersion: '1', serviceTarget: 'requestSnapshot' },
+		payload: { payload: { transactionId }, parameter: {} },
+	}))
+	return reportingV1RequestSnapshotOutputPayloadSchema.parse(response)
+}
+
+async function waitForSnapshot(jobId: string) {
+	const stateStore = createNatsStateStore(logger, servers, 'example_bank_reporting')
+	const jobStore = createNatsQueueJobStore(stateStore)
+	try {
+		return await waitFor(async () => {
+			const result = await jobStore.get(jobId)
+			return result?.status === 'success' ? result : undefined
+		}, 'Reporting queue result')
+	} finally {
+		await stateStore.destroy()
+	}
+}
+
+async function main() {
+	const mode = process.argv[2] ?? 'flow'
+	const eventBridge = await createNatsEventBridge(logger, servers)
+	try {
+		if (mode === 'record') {
+			const transaction = await recordTransaction(eventBridge)
+			process.stdout.write(`${JSON.stringify({ transactionId: transaction.transactionId })}\n`)
+			return
+		}
+		if (mode === 'wait-signal') {
+			const transactionId = process.argv[3]
+			if (!transactionId) throw new Error('wait-signal requires a transaction id')
+			await waitForSignal(transactionId)
+			process.stdout.write(`${JSON.stringify({ transactionId, recovered: true })}\n`)
+			return
+		}
+
+		const transaction = await recordTransaction(eventBridge)
+		const signal = await waitForSignal(transaction.transactionId)
+		const first = await requestSnapshot(eventBridge, transaction.transactionId)
+		const duplicate = await requestSnapshot(eventBridge, transaction.transactionId)
+		const job = await waitForSnapshot(first.jobId)
+		process.stdout.write(`${JSON.stringify({
+			transactionId: transaction.transactionId,
+			signalStored: signal.transactionId === transaction.transactionId,
+			duplicateJobIdReused: duplicate.jobId === first.jobId,
+			queueStatus: job.status,
+		})}\n`)
+	} finally {
+		await eventBridge.destroy()
+	}
+}
+
+main().catch(error => {
+	process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
+	process.exit(1)
+})
+```
+
+The next page turns this manual topology into a repeatable integration check.
+It starts and stops every owned process and container, verifies a real restart,
+and tests the unavailable-broker path.

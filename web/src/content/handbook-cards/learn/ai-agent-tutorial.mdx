@@ -112,7 +112,7 @@ Assemble the service from the builder by registering the agent definition, then 
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 export const supportV1Service = supportV1ServiceBuilder
-  .addAgentDefinition(await triageAgent.getDefinition())
+  .addAgentDefinition(triageAgent.getDefinition())
 
 const supportService = await supportV1Service.getInstance(eventBridge, {
   queueBridge,

@@ -1,0 +1,37 @@
+---
+title: Stream incremental results
+description: Build a protected PURISTA stream and expose its progress through Hono SSE.
+order: 13
+kind: chapter
+group: services
+status: published
+---
+
+Use a stream when one request produces useful progress before its final result.
+PURISTA gives the chunks, final value, cancellation, guards, and HTTP projection
+one typed definition.
+
+In this independent example, `Analysis` reads a few synthetic transaction rows
+through a read-only database resource. It sends bounded progress and returns a
+small summary. The database fixture makes the stream visible; transaction
+analysis is not the subject of the chapter.
+
+```text title="The stream boundary"
+authenticated HTTP request
+  -> generated Hono stream endpoint
+  -> account access guard
+  -> Analysis stream
+  -> read-only database resource
+  -> progress chunks and final summary
+```
+
+You will build the capability in this order:
+
+1. [Generate a stream and declare its resource](/tutorials/streams/build/generate/).
+2. [Write progress, a final value, a business guard, and cancellation](/tutorials/streams/build/implement/).
+3. [Expose the stream through Hono SSE](/tutorials/streams/build/expose/).
+4. [Test the handler, runtime, and HTTP boundary](/tutorials/streams/testing/test-streams/).
+
+This chapter starts from the sessions chapter so the Hono identity boundary is
+already present. It adds the `Analysis` service, which owns the analysis
+capability used in this chapter.

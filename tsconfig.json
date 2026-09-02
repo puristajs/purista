@@ -25,5 +25,5 @@
 		"noFallthroughCasesInSwitch": true,
 		"useUnknownInCatchVariables": true
 	},
-	"exclude": ["node_modules", "dist", "examples/banking/tutorial/steps"]
+	"exclude": ["node_modules", "dist", "examples/banking/chapters", "examples/banking/baselines"]
 }

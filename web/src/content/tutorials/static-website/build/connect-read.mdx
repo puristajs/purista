@@ -1,0 +1,86 @@
+---
+title: Read the generated command endpoint
+description: Load the public profile from BankProfile and render clear loading, success, and error states.
+order: 30
+kind: lesson
+status: published
+---
+
+The browser can now call `/api/v1/profile`. That route already belongs to the
+`getProfile` command; the client only consumes its HTTP representation.
+
+Replace the temporary shell with a component that models the three states of a
+network read.
+
+```tsx title="ui/src/App.tsx" write
+import { AlertCircle, Building2, Landmark, Radio } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Alert } from '@/components/ui/alert'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+
+type BankProfile = { name: string; currency: string }
+type ProfileState =
+	| { status: 'loading' }
+	| { status: 'ready'; profile: BankProfile }
+	| { status: 'error'; message: string }
+
+export function App() {
+	const [profileState, setProfileState] = useState<ProfileState>({ status: 'loading' })
+
+	useEffect(() => {
+		const controller = new AbortController()
+		fetch('/api/v1/profile', { signal: controller.signal })
+			.then(async response => {
+				if (!response.ok) throw new Error(`Profile request failed with ${response.status}`)
+				return response.json() as Promise<BankProfile>
+			})
+			.then(profile => setProfileState({ status: 'ready', profile }))
+			.catch(error => {
+				if (error instanceof DOMException && error.name === 'AbortError') return
+				setProfileState({ status: 'error', message: 'The public profile is unavailable.' })
+			})
+		return () => controller.abort()
+	}, [])
+
+	return (
+		<div className="min-h-screen bg-background text-foreground">
+			<header className="border-b bg-card/80 backdrop-blur">
+				<div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+					<a className="flex items-center gap-3 font-semibold" href="/" aria-label="Example Bank home">
+						<span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground"><Landmark className="size-5" /></span>
+						Example Bank
+					</a>
+					<nav aria-label="Primary navigation">
+						<a className={buttonVariants({ variant: 'outline', size: 'sm' })} href="/api/openapi.json">API contract</a>
+					</nav>
+				</div>
+			</header>
+			<main className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.2fr_0.8fr] md:py-24">
+				<section className="space-y-6" aria-labelledby="welcome-title">
+					<div className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-sm text-muted-foreground"><Radio className="size-3.5 text-emerald-600" /> PURISTA application online</div>
+					<h1 id="welcome-title" className="max-w-2xl text-4xl font-semibold tracking-tight sm:text-6xl">A small interface for a growing Framework example.</h1>
+					<p className="max-w-xl text-lg leading-8 text-muted-foreground">This page is a static React build. Its data comes from a generated PURISTA command endpoint served by the same process.</p>
+				</section>
+				<Card className="self-start border-primary/10 shadow-xl shadow-primary/5" aria-label="Public bank profile">
+					<CardHeader>
+						<CardDescription>Public profile</CardDescription>
+						{profileState.status === 'loading' ? <Skeleton className="h-7 w-44" aria-label="Loading public profile" /> : null}
+						{profileState.status === 'ready' ? <CardTitle className="flex items-center gap-2 text-2xl"><Building2 className="size-5" />{profileState.profile.name}</CardTitle> : null}
+					</CardHeader>
+					<CardContent>
+						{profileState.status === 'loading' ? <Skeleton className="h-12 w-24" /> : null}
+						{profileState.status === 'ready' ? <><p className="text-sm text-muted-foreground">Preferred currency</p><p className="mt-1 text-3xl font-semibold">{profileState.profile.currency}</p></> : null}
+						{profileState.status === 'error' ? <Alert><span className="flex items-center gap-2"><AlertCircle className="size-4" />{profileState.message}</span></Alert> : null}
+					</CardContent>
+				</Card>
+			</main>
+		</div>
+	)
+}
+```
+
+The component does not know how `BankProfile` is implemented. It knows only the
+public route and response schema. That keeps the browser independent of the
+command handler while still using the Framework-owned boundary.

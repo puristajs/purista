@@ -1,0 +1,79 @@
+---
+title: Name the successful command result
+description: Use setSuccessEventName so a completed command response is also a named fact.
+order: 111
+kind: lesson
+status: published
+---
+
+`recordTransaction` already returns the saved transaction. That final result is
+the fact other components need, so add `setSuccessEventName` beside the output
+schema. Do not add `context.emit` to the handler for this fact.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionCommandBuilder.ts" write
+import { requireAccountAction } from '../../accountAccessGuards.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record a synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.setSuccessEventName('transaction.recorded.v1')
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('POST', 'accounts/:accountId/transactions')
+	.setBeforeGuardHooks({
+		accountMayRecord: async function (context, _payload, parameter) {
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: parameter.accountId,
+				action: 'record',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload, parameter) {
+		return context.resources.transactionRepository.save({
+			...payload,
+			accountId: parameter.accountId,
+			tenantId: context.message.tenantId!,
+		})
+	})
+```
+
+`setSuccessEventName('transaction.recorded.v1')` changes the response metadata.
+The payload still has the command's normal output schema. PURISTA adds the name
+only after the complete command lifecycle succeeds.
+
+Test the definition before testing runtime behavior. This keeps the event name
+and output contract visible as one builder decision.
+
+```ts title="src/service/transaction/v1/command/recordTransaction/recordTransactionResultDefinition.test.ts" write
+import { expect, test } from 'vitest'
+import { recordTransactionCommandBuilder } from './recordTransactionCommandBuilder.js'
+
+test('declares the successful transaction result as a named event', async () => {
+	const definition = await recordTransactionCommandBuilder.getDefinition()
+
+	expect(definition.eventName).toBe('transaction.recorded.v1')
+	expect(definition.metadata.expose.outputPayload).toMatchObject({
+		type: 'object',
+		properties: {
+			transactionId: { type: 'string' },
+			accountId: { type: 'string' },
+		},
+	})
+})
+```
+
+```bash title="Check the declared result event" replay="project"
+npx vitest run src/service/transaction/v1/command/recordTransaction/recordTransactionResultDefinition.test.ts
+```
+
+The definition now tells the EventBridge and future subscriptions that a
+successful `recordTransaction` response carries this completed fact.

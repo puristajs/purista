@@ -121,7 +121,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
 	private scheduleDefinitionList: ScheduleDefinition[] = []
 	private eventToQueueBindingList: EventToQueueBindingDefinition[] = []
-	private agentDefinitionList: AttachedAgentDefinition<any>[] = []
+	private agentDefinitionList: Array<AttachedAgentDefinition<any> | Promise<AttachedAgentDefinition<any>>> = []
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
@@ -130,6 +130,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	private queueWorkerDefinitionListResolved: QueueWorkerDefinitionListResolved<S['ServiceClassType']> = []
 	private scheduleDefinitionListResolved: ScheduleDefinition[] = []
 	private eventToQueueBindingListResolved: EventToQueueBindingDefinition[] = []
+	private agentDefinitionListResolved: AttachedAgentDefinition<any>[] = []
 
 	private configSchema?: Schema
 	private defaultConfig?: Complete<S['ConfigType']>
@@ -250,7 +251,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 *
 	 * @example
 	 * ```ts
-	 * const triage = await service
+	 * const triage = service
 	 *   .getAgentQueueBuilder('triageTicket', 'Triage a support ticket')
 	 *   .setRunFunction(async context => ({ priority: 'normal' }))
 	 *   .getDefinition()
@@ -258,7 +259,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 * service.addAgentDefinition(triage)
 	 * ```
 	 */
-	addAgentDefinition<const Definition extends AttachedAgentDefinition<any>>(...definitions: Definition[]) {
+	addAgentDefinition<const Definition extends AttachedAgentDefinition<any>>(
+		...definitions: Array<Definition | Promise<Definition>>
+	) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
@@ -267,16 +270,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		}
 
 		this.agentDefinitionList.push(...definitions)
-
-		for (const definition of definitions) {
-			this.queueDefinitionList.push(definition.queue as never)
-			this.queueWorkerDefinitionList.push(definition.worker as never)
-			this.commandDefinitionList.push(definition.command as never)
-			this.streamDefinitionList.push(definition.stream as never)
-			for (const [metricName, metricDefinition] of Object.entries(definition.metricDefinitions ?? {})) {
-				this.customMetricDefinitions[metricName] = metricDefinition
-			}
-		}
 
 		return this
 	}
@@ -342,19 +335,35 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 			}
 		}
 
-		this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
-		this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
-		this.streamDefinitionListResolved = await Promise.all(this.streamDefinitionList)
-		this.queueDefinitionListResolved = await Promise.all(this.queueDefinitionList)
-		this.queueWorkerDefinitionListResolved = await Promise.all(this.queueWorkerDefinitionList)
+		const agents = await Promise.all(this.agentDefinitionList)
+		const [commands, subscriptions, streams, queues, queueWorkers] = await Promise.all([
+			Promise.all([...this.commandDefinitionList, ...agents.map(definition => definition.command as never)]),
+			Promise.all(this.subscriptionDefinitionList),
+			Promise.all([...this.streamDefinitionList, ...agents.map(definition => definition.stream as never)]),
+			Promise.all([...this.queueDefinitionList, ...agents.map(definition => definition.queue as never)]),
+			Promise.all([...this.queueWorkerDefinitionList, ...agents.map(definition => definition.worker as never)]),
+		])
+
+		this.commandDefinitionListResolved = commands
+		this.subscriptionDefinitionListResolved = subscriptions
+		this.streamDefinitionListResolved = streams
+		this.queueDefinitionListResolved = queues
+		this.queueWorkerDefinitionListResolved = queueWorkers
+		this.agentDefinitionListResolved = agents
 		this.scheduleDefinitionListResolved = this.scheduleDefinitionList
 		this.eventToQueueBindingListResolved = this.eventToQueueBindingList
+		for (const definition of agents) {
+			for (const [metricName, metricDefinition] of Object.entries(definition.metricDefinitions ?? {})) {
+				this.customMetricDefinitions[metricName] = metricDefinition
+			}
+		}
 
 		this.subscriptionDefinitionList = []
 		this.commandDefinitionList = []
 		this.streamDefinitionList = []
 		this.queueDefinitionList = []
 		this.queueWorkerDefinitionList = []
+		this.agentDefinitionList = []
 		this.scheduleDefinitionList = []
 		this.eventToQueueBindingList = []
 
@@ -480,7 +489,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		const agentRuntimeScope = createAgentRuntimeScope()
 		const agentRuntimeShutdown = await initializeAttachedAgentRuntimes(
 			agentRuntimeScope,
-			this.agentDefinitionList,
+			this.agentDefinitionListResolved,
 			options?.ai
 				? {
 						...options.ai,
@@ -520,7 +529,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		}
 		bindAgentRuntimeScope(service, agentRuntimeScope)
 
-		if (this.agentDefinitionList.length > 0) {
+		if (this.agentDefinitionListResolved.length > 0) {
 			const destroy = service.destroy.bind(service)
 			service.destroy = async () => {
 				try {

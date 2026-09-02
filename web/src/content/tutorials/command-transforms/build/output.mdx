@@ -1,0 +1,176 @@
+---
+title: Transform output after authorization
+description: Convert one validated and authorized transaction into explicit CSV.
+order: 92
+kind: lesson
+status: published
+---
+
+The output transform runs near the end of the command lifecycle:
+
+```text title="Relevant output lifecycle"
+handler → domain output schema → after guards → output transform → transformed output schema
+```
+
+This order matters. CSV formatting must not hide a transaction from the
+returned-account guard. The guard sees the full domain result first; only an
+authorized result reaches the CSV transform.
+
+This website tracks the current Framework source. For this chapter, install
+the checked Hono source snapshot that is stored with the tutorial examples.
+The retained application keeps the archive in `vendor/`, so a later
+`npm ci` does not depend on a workspace link. When you follow the tutorial from
+a PURISTA checkout, point this variable at that checkout:
+
+```bash title="Point to the PURISTA tutorial checkout"
+export PURISTA_TUTORIAL_REPOSITORY=/absolute/path/to/purista
+```
+
+```bash title="Install the current Hono source snapshot" replay="project"
+mkdir -p vendor
+cp "$PURISTA_TUTORIAL_REPOSITORY/examples/banking/runtime/current/purista-hono-http-server-3.2.4.tgz" vendor/
+npm install ./vendor/purista-hono-http-server-3.2.4.tgz
+```
+
+Generate a second command.
+
+```bash title="Generate the export command" replay="project"
+npm run add:command -- export-transaction --service transaction --service-version 1 --description "Export one transaction as CSV" --non-interactive
+```
+
+Create a pure CSV formatter. It exports only the fields in the explicit header.
+`tenantId` is needed for authorization but is not part of this representation.
+
+```ts title="src/service/transaction/v1/transactionCsv.ts" write
+import type { Transaction } from './transaction.js'
+
+const quote = (value: string) => `"${value.replaceAll('"', '""')}"`
+
+export function transactionToCsv(transaction: Transaction) {
+	const header = 'transactionId,accountId,recordedAt,direction,amountCents,counterparty,reference'
+	const row = [
+		quote(transaction.transactionId),
+		quote(transaction.accountId),
+		quote(transaction.recordedAt),
+		quote(transaction.direction),
+		String(transaction.amountCents),
+		quote(transaction.counterparty),
+		quote(transaction.reference ?? ''),
+	].join(',')
+	return `${header}\n${row}`
+}
+```
+
+The normal output schema remains `transactionSchema`. The transformed output
+gets its own string schema.
+
+```ts title="src/service/transaction/v1/command/exportTransaction/schema.ts" write
+import { z } from 'zod'
+import { transactionSchema } from '../../transaction.js'
+
+export const transactionV1ExportTransactionInputPayloadSchema = z.undefined()
+export const transactionV1ExportTransactionInputParameterSchema = z.object({
+	accountId: z.string().trim().min(1),
+	transactionId: z.uuid(),
+})
+export const transactionV1ExportTransactionOutputPayloadSchema = transactionSchema
+export const transactionCsvSchema = z.string().min(1)
+```
+
+Build the command with the same read guards as `getTransaction`. The
+`returnedTransactionScope` after guard runs before `setTransformOutput`.
+
+```ts title="src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { requireAccountAction } from '../../accountAccessGuards.js'
+import { transactionToCsv } from '../../transactionCsv.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionCsvSchema,
+	transactionV1ExportTransactionInputParameterSchema,
+	transactionV1ExportTransactionInputPayloadSchema,
+	transactionV1ExportTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const exportTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('exportTransaction', 'Export one transaction as CSV')
+	.addPayloadSchema(transactionV1ExportTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1ExportTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1ExportTransactionOutputPayloadSchema)
+	.setTransformOutput(
+		transactionCsvSchema,
+		async function (_context, result) {
+			return transactionToCsv(result)
+		},
+		'text/csv',
+		'utf-8',
+	)
+	.enableHttpSecurity(true)
+	.exposeAsHttpEndpoint('GET', 'accounts/:accountId/transactions/:transactionId/export')
+	.setBeforeGuardHooks({
+		accountMayRead: async function (context, _payload, parameter) {
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: parameter.accountId,
+				action: 'read',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setAfterGuardHooks({
+		returnedTransactionScope: async function (context, result, _payload, parameter) {
+			if (result.accountId !== parameter.accountId || result.tenantId !== context.message.tenantId) {
+				throw new HandledError(StatusCode.Forbidden, 'Account action is not allowed')
+			}
+			requireAccountAction(context.resources.accountAccessPolicy, {
+				accountId: result.accountId,
+				action: 'read',
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, _payload, parameter) {
+		const transaction = await context.resources.transactionRepository.findById(parameter.transactionId)
+		if (!transaction) {
+			throw new HandledError(StatusCode.NotFound, 'Transaction not found', {
+				transactionId: parameter.transactionId,
+			})
+		}
+		return transaction
+	})
+```
+
+Test the formatter with commas and quotes. The assertion also proves that the
+internal tenant field is absent.
+
+```ts title="src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.test.ts" write
+import { describe, expect, test } from 'vitest'
+import { transactionToCsv } from '../../transactionCsv.js'
+
+describe('transaction CSV output transform', () => {
+	test('escapes CSV fields and includes only the explicit public columns', () => {
+		const csv = transactionToCsv({
+			accountId: 'account-operating',
+			tenantId: 'tenant-example',
+			transactionId: '3bd00f72-8db0-4f39-875d-fd5e251a7f32',
+			amountCents: 2599,
+			direction: 'debit',
+			counterparty: 'Northwind "Books", Berlin',
+			reference: 'Order, 1042',
+			recordedAt: '2026-09-01T10:00:00.000Z',
+		})
+
+		expect(csv).toBe(
+			'transactionId,accountId,recordedAt,direction,amountCents,counterparty,reference\n'
+			+ '"3bd00f72-8db0-4f39-875d-fd5e251a7f32","account-operating","2026-09-01T10:00:00.000Z","debit",2599,"Northwind ""Books"", Berlin","Order, 1042"',
+		)
+		expect(csv).not.toContain('tenant-example')
+		expect(csv.split('\n')).toHaveLength(2)
+	})
+})
+```
+
+```bash title="Test CSV escaping and field selection" replay="project"
+npx vitest run src/service/transaction/v1/command/exportTransaction/exportTransactionCommandBuilder.test.ts
+```

@@ -3,42 +3,14 @@
 	"version": "3.2.4",
 	"private": true,
 	"type": "module",
-	"description": "Runnable PURISTA banking tutorials",
+	"description": "PURISTA examples built by replaying the website tutorial instructions",
 	"engines": {
 		"node": ">=24.15.0"
 	},
 	"scripts": {
-		"dev": "tsx watch src/index.ts",
-		"start": "tsx src/index.ts",
-		"typecheck": "tsc --noEmit",
-		"test": "npm run build:ui && vitest run",
-		"build": "npm run build:ui && tsc --noEmit",
-		"build:ui": "vite build --config ui/vite.config.ts",
-		"typecheck:ui": "tsc --project ui/tsconfig.json --noEmit",
-		"reset": "tsx src/reset.ts"
-	},
-	"dependencies": {
-		"@ai-sdk/react": "^4.0.88",
-		"@hono/node-server": "^2.1.0",
-		"@purista/core": "*",
-		"@purista/harness-sandbox-docker": "^3.0.0",
-		"@purista/hono-http-server": "*",
-		"@purista/natsbridge": "*",
-		"@purista/redis-queue-bridge": "*",
-		"ai": "^7.0.85",
-		"react": "^19.2.8",
-		"react-dom": "^19.2.8",
-		"zod": "^4.4.3"
-	},
-	"devDependencies": {
-		"@types/node": "^26.2.0",
-		"@types/react": "^19.2.18",
-		"@types/react-dom": "^19.2.4",
-		"@typescript/native": "npm:typescript@^7.0.2",
-		"@vitejs/plugin-react": "^5.2.0",
-		"tsx": "^4.23.12",
-		"typescript": "npm:@typescript/typescript6@^6.0.2",
-		"vite": "^8.2.1",
-		"vitest": "^4.1.10"
+		"test": "node tutorial/verify.mjs",
+		"check:source": "node tutorial/replay.mjs --check",
+		"build": "node tutorial/replay.mjs --check",
+		"replay": "node tutorial/replay.mjs"
 	}
 }

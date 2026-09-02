@@ -1,0 +1,79 @@
+---
+title: Serve built files from Hono
+description: Register static file handling on the existing Hono service while leaving API routes under PURISTA control.
+order: 20
+kind: lesson
+status: published
+---
+
+The production server needs two kinds of HTTP behavior:
+
+- PURISTA projects commands under `/api`.
+- Hono serves files from `ui/dist` for browser navigation.
+
+Static files are a transport concern, so register them directly on the Hono
+application. Do not turn `index.html` into a service command.
+
+## Register static files and the browser fallback
+
+```ts title="src/staticWebsite.ts" write
+import { serveStatic } from '@hono/node-server/serve-static'
+import type { HonoServiceClass } from '@purista/hono-http-server'
+
+const apiPath = (path: string) => path === '/api' || path.startsWith('/api/')
+
+export function registerStaticWebsite(http: HonoServiceClass) {
+	const indexFile = serveStatic({ path: './ui/dist/index.html' })
+
+	http.app.use('/assets/*', serveStatic({ root: './ui/dist' }))
+	http.app.get('/', indexFile)
+	http.app.get('*', async (context, next) => {
+		if (apiPath(context.req.path) || context.req.path === '/health') return next()
+		return indexFile(context, next)
+	})
+}
+```
+
+The wildcard is the single-page application fallback. It returns `index.html`
+for browser paths such as `/overview`. It explicitly passes `/api` and
+`/health` to the generated PURISTA routes and Hono's normal not-found handling.
+
+## Add static serving to the application factory
+
+Register the file handlers before `http.start()`. The rest of the composition
+does not change.
+
+```ts title="src/application.ts" write
+import type { Logger } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+import { getEventBridge } from './eventbridge.js'
+import { bankProfileV1Service } from './service/bankProfile/v1/bankProfileV1Service.js'
+import { registerStaticWebsite } from './staticWebsite.js'
+
+export async function createApplication(logger: Logger) {
+	const eventBridge = await getEventBridge(logger)
+	const bankProfile = await bankProfileV1Service.getInstance(eventBridge, { logger })
+	const http = await honoV1Service.getInstance(eventBridge, {
+		logger,
+		serviceConfig: {
+			apiMountPath: '/api',
+			enableHealth: true,
+			healthPath: '/health',
+			openApi: {
+				enabled: true,
+				info: { title: 'Example Bank API', version: '1.0.0' },
+			},
+		},
+	})
+
+	await bankProfile.start()
+	http.registerService(bankProfile)
+	registerStaticWebsite(http)
+	await http.start()
+
+	return { eventBridge, bankProfile, http }
+}
+```
+
+`BankProfile` still owns the data and the command. The static handler never
+imports its command function and never creates a second profile endpoint.

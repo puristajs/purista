@@ -1,246 +1,314 @@
+#!/usr/bin/env node
 import assert from 'node:assert/strict'
-import { spawn, spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import { once } from 'node:events'
+import { cp, mkdir, readdir, readFile, readlink, stat, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:net'
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
 
-const here = dirname(fileURLToPath(import.meta.url))
-const repo = resolve(here, '../../..')
-const steps = JSON.parse(await readFile(resolve(here, 'steps.json'), 'utf8'))
-const args = process.argv.slice(2)
-const report = message => process.stdout.write(`${message}\n`)
-const option = name => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined)
-const to = option('--to') ?? steps.at(-1).id
-const last = steps.findIndex(step => step.id === to)
-assert(last >= 0, 'Unknown checkpoint: ' + to)
+const directory = dirname(fileURLToPath(import.meta.url))
+const bankRoot = resolve(directory, '..')
+const repo = resolve(bankRoot, '../..')
+const contentRoot = join(repo, 'web/src/content/tutorials')
+const course = JSON.parse(await readFile(join(directory, 'course.json'), 'utf8'))
+const { values } = parseArgs({
+	options: {
+		chapter: { type: 'string' },
+		out: { type: 'string' },
+		check: { type: 'boolean' },
+		retain: { type: 'boolean' },
+	},
+})
+const digest = data => createHash('sha256').update(data).digest('hex')
+const excludedArtifactNames = new Set([
+	'node_modules',
+	'dist',
+	'.git',
+	'.tutorial-proof.json',
+	'coverage',
+	'var',
+	'.DS_Store',
+])
+const retainedCopyExcludedNames = new Set(['node_modules', 'dist', '.git', 'coverage', 'var', '.DS_Store'])
+const exists = path =>
+	stat(path).then(
+		() => true,
+		() => false,
+	)
+const recipes = [...course.chapters, ...(course.baselines ?? [])]
+const baselineIds = new Set((course.baselines ?? []).map(baseline => baseline.id))
+const chapters = new Map(recipes.map(chapter => [chapter.id, chapter]))
+assert.equal(chapters.size, recipes.length, 'Duplicate recipe identifier')
+const retainedRoot = id => join(bankRoot, baselineIds.has(id) ? 'baselines' : 'chapters', id)
+const forbiddenServiceNames = new Set(
+	(course.forbiddenServiceNames ?? []).map(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase()),
+)
+const allowedServiceNames = new Set(
+	(course.allowedServiceNames ?? []).map(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase()),
+)
+const scaffoldServiceNames = new Set(
+	(course.scaffoldServiceNames ?? []).map(name => name.replace(/[^a-z0-9]/gi, '').toLowerCase()),
+)
 
-/** Fail when the file a learner copies differs from the executable snapshot. */
-async function checkDocs() {
-	let count = 0
-	for (const step of steps) {
-		for (const file of step.files) {
-			const source = await readFile(resolve(here, 'steps', step.id, file.path), 'utf8')
-			const page = await readFile(resolve(repo, 'web/src/content/tutorials', file.page + '.mdx'), 'utf8')
-			const title = 'title="' + file.path + '"'
-			const blocks = [...page.matchAll(/\x60\x60\x60[^\n]*\n([\s\S]*?)\n\x60\x60\x60/g)]
-			const matching = blocks.filter(block => block[0].split('\n')[0].includes(title))
-			assert(
-				matching.some(block => block[1].trimEnd() === source.trimEnd()),
-				step.id + ': documented file differs: ' + file.path + ' in ' + file.page,
-			)
-			count++
-		}
+async function assertServiceBoundaries(root) {
+	const serviceRoot = join(root, 'src/service')
+	if (!(await exists(serviceRoot))) return
+	for (const entry of await readdir(serviceRoot, { withFileTypes: true })) {
+		if (!entry.isDirectory()) continue
+		const normalized = entry.name.replace(/[^a-z0-9]/gi, '').toLowerCase()
+		assert(!forbiddenServiceNames.has(normalized), `Forbidden umbrella service directory: ${entry.name}`)
+		assert(
+			allowedServiceNames.has(normalized) || scaffoldServiceNames.has(normalized),
+			`Service is outside the reviewed capability catalog: ${entry.name}`,
+		)
 	}
-	report(`Documentation matches ${count} checkpoint files.`)
 }
 
-function run(command, parameters, cwd) {
-	report(`> ${[command, ...parameters].join(' ')}`)
-	const result = spawnSync(command, parameters, {
-		cwd,
-		stdio: 'inherit',
-		env: { ...process.env, npm_config_fetch_retries: '0' },
-	})
-	if (result.error) throw result.error
-	assert.equal(result.status, 0, command + ' failed in ' + cwd)
+function sequence(id, seen = new Set(), active = new Set()) {
+	assert(chapters.has(id), `Unknown chapter: ${id}`)
+	assert(!active.has(id), `Chapter dependency cycle: ${id}`)
+	if (seen.has(id)) return []
+	active.add(id)
+	const chapter = chapters.get(id)
+	const result = chapter.requires.flatMap(parent => sequence(parent, seen, active))
+	active.delete(id)
+	seen.add(id)
+	return [...result, chapter]
 }
 
-/** Exercise the documented network entry point, then stop only our child. */
-async function probe(project, path) {
-	const child = spawn(process.execPath, ['dist/index.js'], {
-		cwd: project,
-		stdio: ['ignore', 'pipe', 'pipe'],
-	})
-	let logs = ''
-	child.stdout.on('data', chunk => {
-		logs += chunk
-	})
-	child.stderr.on('data', chunk => {
-		logs += chunk
-	})
-	const stopped = new Promise(resolve => child.once('exit', resolve))
-	try {
-		const deadline = Date.now() + 10_000
-		while (!logs.includes('Example Bank is listening')) {
-			assert(child.exitCode === null, 'Server exited before readiness: ' + logs)
-			assert(Date.now() < deadline, 'Server did not start: ' + logs)
-			await new Promise(resolve => setTimeout(resolve, 50))
-		}
-		// Let socket errors (for example, an occupied port) reach the child first.
-		await new Promise(resolve => setTimeout(resolve, 100))
-		assert(child.exitCode === null, 'Server could not bind its port: ' + logs)
-		const route = path.startsWith('/') ? path : '/api/v1/bank'
-		const response = await fetch('http://127.0.0.1:3000' + route, { signal: AbortSignal.timeout(3000) })
-		assert.equal(response.status, 200, path + ' did not return 200')
-		const body = await response.json()
-		if (path === '/health') assert.deepEqual(body, { status: 200, message: 'OK' })
-		if (path === '/api/v1/bank') assert.deepEqual(body, { name: 'Example Bank', currency: 'EUR' })
-		if (path === '/api/v1/accounts/account-a/transactions') {
-			assert.deepEqual(body, { accountId: 'account-a', transactions: [] })
-			const fixture = JSON.parse(await readFile(resolve(project, 'fixtures/transaction.json'), 'utf8'))
-			const post = payload =>
-				fetch('http://127.0.0.1:3000/api/v1/transactions', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(payload),
-					signal: AbortSignal.timeout(3000),
-				})
-			const recorded = await post(fixture)
-			assert.equal(recorded.status, 200)
-			const saved = await recorded.json()
-			assert.equal((await post(fixture)).status, 409)
-			assert.equal((await post({ ...fixture, sourceTransactionId: 'bad-amount', amountMinor: -1 })).status, 400)
-			const history = await fetch('http://127.0.0.1:3000' + path, { signal: AbortSignal.timeout(3000) })
-			assert.deepEqual(await history.json(), { accountId: 'account-a', transactions: [saved] })
-		}
-		const hasTransforms = ['legacy-import', 'csv-export', 'legacy-http'].includes(path)
-		if (path === 'account-access' || path === 'account-overview' || hasTransforms) {
-			const request = (route, init = {}) =>
-				fetch('http://127.0.0.1:3000' + route, { ...init, signal: AbortSignal.timeout(3000) })
-			const login = async actor => {
-				const response = await request('/auth/login', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ actor }),
-				})
-				assert.equal(response.status, 200)
-				const cookie = response.headers.get('set-cookie')?.split(';', 1)[0]
-				assert(cookie, 'Login did not provide a cookie')
-				return (route, init = {}) => request(route, { ...init, headers: { ...init.headers, cookie } })
-			}
-			const history = '/api/v1/accounts/account-a/transactions'
-			assert.equal((await request(history)).status, 401)
-			const bob = await login('bob')
-			const dana = await login('dana')
-			const south = await login('danaSouth')
-			assert.equal((await bob(history)).status, 200)
-			assert.equal((await bob('/api/v1/accounts/account-c/transactions')).status, 403)
-			const fixture = JSON.parse(await readFile(resolve(project, 'fixtures/transaction.json'), 'utf8'))
-			const post = client =>
-				client('/api/v1/transactions', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(fixture),
-				})
-			assert.equal((await post(bob)).status, 403)
-			assert.equal((await post(dana)).status, 200)
-			assert.equal((await post(dana)).status, 409)
-			const northHistory = await (await bob(history)).json()
-			assert.equal(northHistory.tenantId, 'tenant-north')
-			assert.equal(northHistory.transactions.length, 1)
-			assert.deepEqual(await (await south(history)).json(), {
-				tenantId: 'tenant-south',
-				accountId: 'account-a',
-				transactions: [],
-			})
-			if (path === 'account-overview' || hasTransforms) {
-				const overview = '/api/v1/accounts/account-a/overview'
-				const northResult = await bob(overview)
-				assert.equal(northResult.status, 200)
-				assert.deepEqual(await northResult.json(), {
-					tenantId: 'tenant-north',
-					accountId: 'account-a',
-					transactionCount: 1,
-				})
-				const southResult = await south(overview)
-				assert.equal(southResult.status, 200)
-				assert.deepEqual(await southResult.json(), {
-					tenantId: 'tenant-south',
-					accountId: 'account-a',
-					transactionCount: 0,
-				})
-				assert.equal((await bob('/api/v1/accounts/account-c/overview')).status, 403)
-			}
-			if (hasTransforms) {
-				const legacy = JSON.parse(await readFile(resolve(project, 'fixtures/legacy-transaction.json'), 'utf8'))
-				const importLegacy = (client, payload = legacy) =>
-					client('/api/v1/legacy-transactions', {
-						method: 'POST',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify(payload),
-					})
-				assert.equal((await importLegacy(bob)).status, 403)
-				const imported = await importLegacy(dana)
-				assert.equal(imported.status, 200)
-				assert.equal((await imported.json()).amountMinor, 12540)
-				assert.equal((await importLegacy(dana)).status, 409)
-				assert.equal((await importLegacy(dana, { ...legacy, amount: '125.401' })).status, 400)
-				assert.equal((await (await bob(history)).json()).transactions.length, 2)
-				if (path === 'csv-export' || path === 'legacy-http') {
-					const csv = await bob('/api/v1/accounts/account-a/statement.csv')
-					assert.equal(csv.status, 200)
-					assert.equal(csv.headers.get('content-type'), 'text/csv; charset=utf-8')
-					assert.equal(csv.headers.get('content-disposition'), 'attachment; filename="statement.csv"')
-					const body = await csv.text()
-					assert(body.startsWith('transactionId,sourceTransactionId,bookedAt,amountMinor,currency,direction\r\n'))
-					assert(body.includes('12540'))
-					assert(!body.includes('tenant-north'))
-					assert.equal((await bob('/api/v1/accounts/account-c/statement.csv')).status, 403)
+async function pagesFor(id) {
+	return Promise.all(
+		sequence(id)
+			.flatMap(chapter => chapter.pages)
+			.map(async page => {
+				assert(/^[a-z0-9/-]+$/.test(page), `Invalid page path: ${page}`)
+				const source = await readFile(join(contentRoot, `${page}.mdx`), 'utf8')
+				const blocks = [...source.matchAll(/^```(\w+)([^\n]*)\n([\s\S]*?)^```\s*$/gm)].map(match => ({
+					language: match[1],
+					metadata: match[2],
+					body: `${match[3].trimEnd()}\n`,
+					title: match[2].match(/title="([^"]+)"/)?.[1],
+					replay: match[2].match(/replay="([^"]+)"/)?.[1],
+					write: /(?:^|\s)write(?:\s|$)/.test(match[2]),
+					expect: match[2].match(/expect="([^"]+)"/)?.[1],
+				}))
+				for (const block of blocks) {
+					assert(block.title, `${page}: code block needs an exact file/action title`)
+					if (block.write)
+						assert(
+							['ts', 'tsx', 'json', 'yaml', 'javascript', 'css', 'html', 'md', 'dockerfile', 'sql'].includes(
+								block.language,
+							),
+						)
+					if (block.replay) {
+						assert.equal(block.language, 'bash', `${page}: replay action must be shell`)
+						assert(['parent', 'project', 'server', 'request'].includes(block.replay), `${page}: unknown replay action`)
+					}
 				}
-			}
-			assert.equal((await bob('/auth/logout', { method: 'POST' })).status, 200)
-			assert.equal((await bob(history)).status, 401)
-		}
-		report(`HTTP checkpoint passed: ${path}`)
+				return { id: page, source, blocks }
+			}),
+	)
+}
+
+async function sourceHashes(root, prefix = '') {
+	const result = {}
+	for (const entry of await readdir(join(root, prefix), { withFileTypes: true })) {
+		if (excludedArtifactNames.has(entry.name)) continue
+		const path = join(prefix, entry.name)
+		if (entry.isSymbolicLink()) {
+			const target = await readlink(join(root, path))
+			assert(
+				!isAbsolute(target) && resolve(dirname(join(root, path)), target).startsWith(`${root}${sep}`),
+				`Source symlink escapes project: ${path}`,
+			)
+			result[path] = `symlink:${target}`
+		} else if (entry.isDirectory()) Object.assign(result, await sourceHashes(root, path))
+		else result[path] = digest(await readFile(join(root, path)))
+	}
+	return result
+}
+
+if (values.check) {
+	const checkedRecipes = values.chapter ? sequence(values.chapter) : recipes
+	let verified = 0
+	let verifiedBaselines = 0
+	for (const chapter of checkedRecipes) {
+		if (chapter.status === 'draft') continue
+		const root = retainedRoot(chapter.id)
+		await assertServiceBoundaries(root)
+		const proofFile = join(root, '.tutorial-proof.json')
+		assert(await exists(proofFile), `${chapter.id}: no completed instruction replay`)
+		const proof = JSON.parse(await readFile(proofFile, 'utf8'))
+		const pages = await pagesFor(chapter.id)
+		assert.deepEqual(
+			proof.pages,
+			Object.fromEntries(pages.map(page => [page.id, digest(page.source)])),
+			`${chapter.id}: instructions changed; replay again`,
+		)
+		assert.deepEqual(proof.files, await sourceHashes(root), `${chapter.id}: solution differs from the replay result`)
+		if (baselineIds.has(chapter.id)) verifiedBaselines++
+		else verified++
+	}
+	assert(verified > 0, 'No chapter has been replayed')
+	process.stdout.write(
+		`Verified instruction/source provenance for ${verified} chapter(s) and ${verifiedBaselines} baseline(s); ${course.plannedChapters} chapters planned. This check does not rerun applications.\n`,
+	)
+	process.exit(0)
+}
+
+assert(values.chapter && values.out, 'Use --chapter <id> --out <new-directory> [--retain], or --check')
+const pages = await pagesFor(values.chapter)
+const output = resolve(values.out)
+assert(!(await exists(output)), 'Output directory must not exist; never overwrite another project')
+assert(!output.startsWith(`${repo}${sep}`), 'Replay outside the monorepo to verify a consumer installation')
+await mkdir(output, { recursive: true })
+const project = join(output, 'example-bank')
+const actions = []
+let server
+let serverExit
+let lastResponse
+
+function signalOwnedGroup(child, signal) {
+	try {
+		process.kill(-child.pid, signal)
+	} catch (error) {
+		if (error.code !== 'ESRCH') throw error
+	}
+}
+
+async function requireAvailableTutorialPort() {
+	const probe = createServer()
+	probe.listen(3000, '127.0.0.1')
+	try {
+		await once(probe, 'listening')
+	} catch {
+		throw new Error(
+			'Port 3000 is unavailable. Stop your own tutorial server before replaying; no existing process was stopped.',
+		)
+	}
+	await new Promise((resolveClose, reject) => probe.close(error => (error ? reject(error) : resolveClose())))
+}
+
+function run(body, cwd) {
+	return new Promise((resolveRun, reject) => {
+		const child = spawn('bash', ['-e', '-o', 'pipefail', '-c', body], {
+			cwd,
+			detached: true,
+			env: { ...process.env, CI: '1', PURISTA_TUTORIAL_REPOSITORY: repo },
+			stdio: ['ignore', 'pipe', 'pipe'],
+		})
+		let stdout = ''
+		child.stdout.on('data', data => {
+			stdout += data
+			process.stdout.write(data)
+		})
+		child.stderr.on('data', data => process.stderr.write(data))
+		let forceStop
+		const timer = setTimeout(() => {
+			signalOwnedGroup(child, 'SIGTERM')
+			forceStop = setTimeout(() => signalOwnedGroup(child, 'SIGKILL'), 10_000)
+		}, 300_000)
+		child.once('error', error => {
+			clearTimeout(timer)
+			clearTimeout(forceStop)
+			reject(error)
+		})
+		child.once('close', (code, signal) => {
+			clearTimeout(timer)
+			clearTimeout(forceStop)
+			if (code === 0) resolveRun(stdout)
+			else reject(new Error(`Instruction failed (code ${code}, signal ${signal}):\n${body}`))
+		})
+	})
+}
+
+async function stopServer() {
+	if (!server) return
+	signalOwnedGroup(server, 'SIGTERM')
+	const timer = setTimeout(() => signalOwnedGroup(server, 'SIGKILL'), 10_000)
+	try {
+		await serverExit
 	} finally {
-		child.kill('SIGTERM')
-		const timer = setTimeout(() => child.kill('SIGKILL'), 5000)
-		await stopped
 		clearTimeout(timer)
+		server = undefined
 	}
 }
 
-await checkDocs()
-if (args.includes('--check-docs')) process.exit(0)
-const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(Number)
-assert(
-	nodeMajor > 24 || (nodeMajor === 24 && nodeMinor >= 15),
-	'Replay requires Node >=24.15; found ' + process.versions.node,
-)
-assert(option('--out'), 'Supply --out with a NEW directory outside the repository.')
-const target = resolve(option('--out'))
-assert(!existsSync(target), 'Refusing to overwrite an existing directory: ' + target)
-await mkdir(dirname(target), { recursive: true })
-run(
-	'npx',
-	[
-		'--yes',
-		'--package=@purista/cli@3.2.4',
-		'--package=@purista/core@3.2.4',
-		'purista',
-		'init',
-		target,
-		'--runtime',
-		'node',
-		'--event-bridge',
-		'default',
-		'--package-manager',
-		'npm',
-		'--no-webserver',
-		'--no-install',
-		'--defaults',
-		'--non-interactive',
-	],
-	dirname(target),
-)
-
-for (const step of steps.slice(0, last + 1)) {
-	// The first compiler configuration is installed before dependencies/tests.
-	if (step.id !== 'project') {
-		for (const [command, ...parameters] of step.commands) run(command, parameters, target)
+try {
+	for (const page of pages) {
+		process.stdout.write(`\nFollow ${page.id}\n`)
+		for (const block of page.blocks) {
+			if (block.write) {
+				const target = resolve(project, block.title)
+				assert(!isAbsolute(block.title) && target.startsWith(`${project}${sep}`), 'File edit escapes the project')
+				assert(!relative(project, target).split(sep).includes('node_modules'), 'Do not patch dependencies')
+				await mkdir(dirname(target), { recursive: true })
+				await writeFile(target, block.body)
+				actions.push({ page: page.id, write: block.title })
+			} else if (block.replay === 'server') {
+				await stopServer()
+				await requireAvailableTutorialPort()
+				server = spawn('bash', ['-e', '-c', block.body], {
+					cwd: project,
+					detached: true,
+					stdio: ['ignore', 'pipe', 'pipe'],
+				})
+				server.stdout.on('data', data => process.stdout.write(data))
+				server.stderr.on('data', data => process.stderr.write(data))
+				serverExit = once(server, 'close')
+				// Readiness is a real request; retries are bounded and never authorize killing another listener.
+				let ready = false
+				for (let attempt = 0; attempt < 60; attempt++) {
+					assert(server.exitCode === null, 'Documented server exited before accepting a request')
+					try {
+						const response = await fetch('http://127.0.0.1:3000/health', { signal: AbortSignal.timeout(500) })
+						if (response.ok) {
+							ready = true
+							break
+						}
+					} catch {}
+					await new Promise(resolveWait => setTimeout(resolveWait, 100))
+				}
+				assert(ready, 'Server did not become ready')
+				actions.push({ page: page.id, server: block.body })
+			} else if (block.replay) {
+				lastResponse = await run(block.body, block.replay === 'parent' ? output : project)
+				actions.push({ page: page.id, command: block.body })
+			} else if (block.expect === 'json') {
+				assert.deepEqual(
+					JSON.parse(lastResponse),
+					JSON.parse(block.body),
+					`${page.id}: request differs from the shown result`,
+				)
+				actions.push({ page: page.id, responseChecked: true })
+			}
+		}
+		await stopServer()
 	}
-	for (const file of step.files) {
-		const destination = resolve(target, file.path)
-		await mkdir(dirname(destination), { recursive: true })
-		await writeFile(destination, await readFile(resolve(here, 'steps', step.id, file.path)))
+	await assertServiceBoundaries(project)
+	const proof = {
+		chapter: values.chapter,
+		node: process.version,
+		pages: Object.fromEntries(pages.map(page => [page.id, digest(page.source)])),
+		files: await sourceHashes(project),
+		actions,
 	}
-	if (step.id === 'project') {
-		for (const [command, ...parameters] of step.commands) run(command, parameters, target)
+	await writeFile(join(project, '.tutorial-proof.json'), `${JSON.stringify(proof, null, 2)}\n`)
+	if (values.retain) {
+		const target = retainedRoot(values.chapter)
+		assert(!(await exists(target)), 'Retained solution already exists; review it before replacing it')
+		await mkdir(dirname(target), { recursive: true })
+		await cp(project, target, {
+			recursive: true,
+			verbatimSymlinks: true,
+			filter: path => !retainedCopyExcludedNames.has(path.split(sep).at(-1)),
+		})
+		process.stdout.write(`Retained the replay result in ${relative(repo, target)}\n`)
 	}
-	run('npm', ['test'], target)
-	run('npm', ['run', 'build'], target)
-	if (args.includes('--verify-http') && step.probe) await probe(target, step.probe)
-	report(`Verified checkpoint: ${step.id}`)
+	process.stdout.write(`Completed ${actions.length} documented actions from ${pages.length} pages in ${project}\n`)
+} finally {
+	await stopServer()
 }
-report(`Ready: ${target}\nRun npm run dev there to continue building.`)

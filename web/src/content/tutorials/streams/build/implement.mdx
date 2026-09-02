@@ -1,0 +1,197 @@
+---
+title: Write chunks and a final result
+description: Add a business access guard, bounded progress, a final summary, and cooperative cancellation.
+order: 132
+kind: lesson
+status: published
+---
+
+A valid session identifies the caller. It does not decide whether that person
+may read a particular account. That decision belongs in a business guard on the
+stream.
+
+Replace the placeholder builder:
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import { analysisV1ServiceBuilder } from '../../analysisV1ServiceBuilder.js'
+import {
+	analysisV1SummarizeTransactionsChunkPayloadSchema,
+	analysisV1SummarizeTransactionsFinalPayloadSchema,
+	analysisV1SummarizeTransactionsInputParameterSchema,
+	analysisV1SummarizeTransactionsInputPayloadSchema,
+} from './schema.js'
+
+export const summarizeTransactionsStreamBuilder = analysisV1ServiceBuilder
+	.getStreamBuilder('summarizeTransactions', 'Stream progress while summarizing recent transactions')
+	.addPayloadSchema(analysisV1SummarizeTransactionsInputPayloadSchema)
+	.addParameterSchema(analysisV1SummarizeTransactionsInputParameterSchema)
+	.addChunkSchema(analysisV1SummarizeTransactionsChunkPayloadSchema)
+	.addFinalSchema(analysisV1SummarizeTransactionsFinalPayloadSchema)
+	.setBeforeGuardHooks({
+		accountAccess: async function (context, _payload, parameter) {
+			const allowed = await context.resources.transactionAnalysisReader.canReadAccount({
+				tenantId: context.message.tenantId ?? '',
+				principalId: context.message.principalId ?? '',
+				accountId: parameter.accountId,
+			})
+			if (!allowed) {
+				throw new HandledError(StatusCode.Forbidden, 'This account is not available for analysis')
+			}
+		},
+	})
+	.setStreamFunction(async function (context, _payload, parameter, writer) {
+		const scope = {
+			tenantId: context.message.tenantId ?? '',
+			principalId: context.message.principalId ?? '',
+			accountId: parameter.accountId,
+		}
+		const cancellation = new AbortController()
+		writer.onCancel(() => cancellation.abort())
+
+		await writer.write({ stage: 'loading', completed: 0, total: 0 })
+		let rows
+		try {
+			rows = await context.resources.transactionAnalysisReader.listRecent(
+				scope, 5, cancellation.signal,
+			)
+		} catch (error) {
+			if (writer.cancelled || cancellation.signal.aborted) return
+			throw error
+		}
+		if (writer.cancelled) return
+
+		let creditCents = 0
+		let debitCents = 0
+		for (const [index, row] of rows.entries()) {
+			if (row.direction === 'credit') creditCents += row.amountCents
+			else debitCents += row.amountCents
+			await writer.write({ stage: 'summarizing', completed: index + 1, total: rows.length })
+			if (writer.cancelled) return
+		}
+
+		const summary = {
+			accountId: parameter.accountId,
+			transactionCount: rows.length,
+			creditCents,
+			debitCents,
+			netCents: creditCents - debitCents,
+		}
+		await writer.write({
+			stage: 'complete', completed: rows.length, total: rows.length, summary,
+		})
+		if (writer.cancelled) return
+		await writer.close(summary)
+	})
+```
+
+`setBeforeGuardHooks` receives the trusted tenant and principal that Hono puts
+on the PURISTA message. The resource checks those values together with the
+requested account. A denied request never enters the stream handler.
+
+The handler writes through `writer`:
+
+- `write` sends a validated chunk;
+- `close` sends the validated final value and completes the stream;
+- `onCancel` connects a client cancellation to the resource call;
+- `cancelled` prevents later chunks and final output.
+
+The stream reads at most five rows, so both the work and number of frames are
+bounded.
+
+## Test decisions and cancellation directly
+
+Replace the earlier checkpoint test:
+
+```ts title="src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.test.ts" write
+import { createStreamContextMock } from '@purista/core'
+import { expect, test } from 'vitest'
+import { summarizeTransactionsStreamBuilder } from './summarizeTransactionsStreamBuilder.js'
+
+const rows = [
+	{ transactionId: '4cb54a52-0416-41b1-acbc-9be2aa4a19d2', amountCents: 2_500,
+		direction: 'debit' as const, counterparty: 'Northwind Books', recordedAt: '2026-01-03T10:00:00.000Z' },
+	{ transactionId: 'e4fd9d5c-fe60-41b4-8958-d61981857ee0', amountCents: 8_000,
+		direction: 'credit' as const, counterparty: 'Example Payroll', recordedAt: '2026-01-02T10:00:00.000Z' },
+]
+
+test('writes ordered progress and a final summary', async () => {
+	const reader = { canReadAccount: async () => true, listRecent: async () => rows }
+	const mocked = createStreamContextMock(summarizeTransactionsStreamBuilder, {
+		payload: undefined,
+		parameter: { accountId: 'account-operating' },
+		resources: { transactionAnalysisReader: reader },
+	})
+	await summarizeTransactionsStreamBuilder.getStreamFunction().call(
+		{} as never, mocked.context, undefined, { accountId: 'account-operating' }, mocked.writer,
+	)
+	expect(mocked.chunks).toEqual([
+		{ stage: 'loading', completed: 0, total: 0 },
+		{ stage: 'summarizing', completed: 1, total: 2 },
+		{ stage: 'summarizing', completed: 2, total: 2 },
+		{ stage: 'complete', completed: 2, total: 2, summary: {
+			accountId: 'account-operating', transactionCount: 2,
+			creditCents: 8_000, debitCents: 2_500, netCents: 5_500,
+		} },
+	])
+	expect(mocked.finalValue).toEqual({
+		accountId: 'account-operating', transactionCount: 2,
+		creditCents: 8_000, debitCents: 2_500, netCents: 5_500,
+	})
+})
+
+test('the business guard denies an account outside the caller scope', async () => {
+	const reader = { canReadAccount: async () => false, listRecent: async () => rows }
+	const mocked = createStreamContextMock(summarizeTransactionsStreamBuilder, {
+		payload: undefined,
+		parameter: { accountId: 'account-private' },
+		resources: { transactionAnalysisReader: reader },
+	})
+	const guard = summarizeTransactionsStreamBuilder.getBeforeGuardHook('accountAccess')
+	await expect(guard.call(
+		{} as never, mocked.context, undefined, { accountId: 'account-private' },
+	)).rejects.toThrow('This account is not available for analysis')
+	expect(mocked.chunks).toEqual([])
+})
+
+test('passes cancellation to a pending resource and does not close', async () => {
+	let resourceWasCancelled = false
+	let resourceStarted = () => {}
+	const started = new Promise<void>(resolve => { resourceStarted = resolve })
+	const reader = {
+		canReadAccount: async () => true,
+		listRecent: async (_scope: unknown, _limit: number, signal?: AbortSignal) => {
+			resourceStarted()
+			return new Promise<typeof rows>(resolve => {
+				signal?.addEventListener('abort', () => {
+					resourceWasCancelled = true
+					resolve([])
+				}, { once: true })
+			})
+		},
+	}
+	const mocked = createStreamContextMock(summarizeTransactionsStreamBuilder, {
+		payload: undefined,
+		parameter: { accountId: 'account-operating' },
+		resources: { transactionAnalysisReader: reader },
+	})
+	const execution = summarizeTransactionsStreamBuilder.getStreamFunction().call(
+		{} as never, mocked.context, undefined, { accountId: 'account-operating' }, mocked.writer,
+	)
+	await started
+	mocked.cancel('test client disconnected')
+	await execution
+
+	expect(resourceWasCancelled).toBe(true)
+	expect(mocked.chunks).toEqual([{ stage: 'loading', completed: 0, total: 0 }])
+	expect(mocked.finalValue).toBeUndefined()
+})
+```
+
+```bash title="Test stream behavior and cancellation" replay="project"
+npx vitest run src/service/analysis/v1/stream/summarizeTransactions/summarizeTransactionsStreamBuilder.test.ts
+npm run build:server
+```
+
+These tests separate business decisions from HTTP. The next page projects the
+same definition as a protected SSE endpoint.

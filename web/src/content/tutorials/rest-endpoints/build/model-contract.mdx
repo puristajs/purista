@@ -1,0 +1,112 @@
+---
+title: Define the transaction contract
+description: Generate a narrow Transaction service and declare its business record and repository resource.
+order: 10
+kind: lesson
+status: published
+---
+
+Continue in the project from
+[Serve a static React website](/tutorials/static-website/). Generate a service
+for the new capability. The application is called Example Bank; the service is
+called `Transaction` because that is the behavior it owns.
+
+```bash title="Generate the Transaction service" replay="project"
+npm run add:service -- transaction --description "Record and retrieve synthetic transactions" --non-interactive
+```
+
+## Describe caller input and stored output
+
+Create one shared schema file:
+
+```ts title="src/service/transaction/v1/transaction.ts" write
+import { z } from 'zod'
+
+export const createTransactionSchema = z.strictObject({
+	amountCents: z.number().int().positive(),
+	direction: z.enum(['credit', 'debit']),
+	counterparty: z.string().trim().min(2).max(80),
+	reference: z.string().trim().min(1).max(120).optional(),
+})
+
+export const transactionSchema = createTransactionSchema.extend({
+	transactionId: z.uuid(),
+	recordedAt: z.iso.datetime(),
+})
+
+export type CreateTransaction = z.input<typeof createTransactionSchema>
+export type Transaction = z.output<typeof transactionSchema>
+```
+
+`createTransactionSchema` accepts only fields a caller owns. `strictObject`
+rejects extra keys, so a caller cannot supply `transactionId` or `recordedAt`.
+The output schema adds those server-owned fields.
+
+## Declare the repository resource
+
+```ts title="src/service/transaction/v1/TransactionRepository.ts" write
+import type { CreateTransaction, Transaction } from './transaction.js'
+
+export interface TransactionRepository {
+	save(input: CreateTransaction): Promise<Transaction>
+	findById(transactionId: string): Promise<Transaction | undefined>
+}
+```
+
+The interface describes what command handlers need. It does not select a
+database and does not expose storage details.
+
+Add that dependency to the generated service builder:
+
+```ts title="src/service/transaction/v1/transactionV1ServiceBuilder.ts" write
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
+import { generalTransactionServiceInfo } from '../generalTransactionServiceInfo.js'
+import type { TransactionRepository } from './TransactionRepository.js'
+import { transactionServiceV1ConfigSchema } from './transactionServiceConfig.js'
+
+export const transactionServiceInfo = {
+	serviceVersion: '1',
+	...generalTransactionServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const transactionV1ServiceBuilder = new ServiceBuilder(transactionServiceInfo)
+	.setConfigSchema(transactionServiceV1ConfigSchema)
+	.defineResource<'transactionRepository', TransactionRepository>()
+```
+
+`defineResource` makes the dependency available as
+`context.resources.transactionRepository`. It also makes TypeScript require
+the resource when the application creates a `Transaction` service instance.
+
+## Test the schemas immediately
+
+```ts title="src/service/transaction/v1/transaction.test.ts" write
+import { describe, expect, test } from 'vitest'
+import { createTransactionSchema, transactionSchema } from './transaction.js'
+
+const validInput = {
+	amountCents: 2599,
+	direction: 'debit' as const,
+	counterparty: 'Northwind Books',
+	reference: 'Order 1042',
+}
+
+describe('transaction schemas', () => {
+	test('accepts caller-owned transaction input', () => {
+		expect(createTransactionSchema.parse(validInput)).toEqual(validInput)
+	})
+
+	test('rejects invalid cents and server-owned fields', () => {
+		expect(createTransactionSchema.safeParse({ ...validInput, amountCents: 0 }).success).toBe(false)
+		expect(createTransactionSchema.safeParse({ ...validInput, transactionId: crypto.randomUUID() }).success).toBe(false)
+	})
+
+	test('requires server-owned fields in a stored transaction', () => {
+		expect(transactionSchema.safeParse(validInput).success).toBe(false)
+	})
+})
+```
+
+These tests establish the business record boundary before HTTP or a repository
+implementation exists.

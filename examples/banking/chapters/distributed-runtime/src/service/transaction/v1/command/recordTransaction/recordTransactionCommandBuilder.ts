@@ -1,0 +1,33 @@
+import { HandledError, StatusCode } from '@purista/core'
+import { ServiceEvent } from '../../../../serviceEvent.enum.js'
+import {
+	transactionRecordedMetricName,
+} from '../../transactionMetrics.js'
+import { transactionV1ServiceBuilder } from '../../transactionV1ServiceBuilder.js'
+import {
+	transactionV1RecordTransactionInputParameterSchema,
+	transactionV1RecordTransactionInputPayloadSchema,
+	transactionV1RecordTransactionOutputPayloadSchema,
+} from './schema.js'
+
+export const recordTransactionCommandBuilder = transactionV1ServiceBuilder
+	.getCommandBuilder('recordTransaction', 'Record one synthetic transaction')
+	.addPayloadSchema(transactionV1RecordTransactionInputPayloadSchema)
+	.addParameterSchema(transactionV1RecordTransactionInputParameterSchema)
+	.addOutputSchema(transactionV1RecordTransactionOutputPayloadSchema)
+	.setSuccessEventName(ServiceEvent.TransactionRecordedV1)
+	.setCommandFunction(async function (context, payload, parameter) {
+		if (!context.message.tenantId) {
+			throw new HandledError(StatusCode.Unauthorized, 'Tenant metadata is required')
+		}
+		const transaction = await context.resources.transactionRepository.save({
+			...payload,
+			accountId: parameter.accountId,
+			tenantId: context.message.tenantId,
+		})
+		context.metrics[transactionRecordedMetricName].add(1, {
+			direction: transaction.direction,
+			amount_band: transaction.amountCents >= 10_000 ? 'at_least_100_eur' : 'under_100_eur',
+		})
+		return transaction
+	})
