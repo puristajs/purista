@@ -154,19 +154,29 @@ stream, queue, worker, or HTTP route.
 npm run add:agent -- triage --service support --service-version 1
 ```
 
-The CLI creates a portable Harness definition, mount policy, and a normal
-PURISTA command wrapper. Refine each boundary separately.
+The CLI creates one native agent module, composes it into the service's Harness
+definition, and updates the service's single mount policy. Add a normal PURISTA
+command or stream only when the application needs that consumer contract.
 
 ```ts
+const triageAgent = defineHarnessModule<PrimaryModelState>()('support.agent.triage', {
+	register(builder) {
+		return builder.agent('triage_ticket', triageAgentDefinition)
+	},
+})
+
 const harness = defineHarness({ name: 'support' })
 	.requireModel('primary', { capabilities: ['object'] })
-	.agent('triage_ticket', triageAgentDefinition)
+	.use(triageAgent)
 	.define()
 
 const support = supportService.mountHarness(harness, {
 	publish: { agents: ['triage_ticket'] },
 })
 ```
+
+Call `mountHarness(...)` once per service. Compose later agents, workflows,
+tools, and Skills into the same definition with native modules.
 
 Use mount before/after guards for business authorization and `successEvent` for
 the completed target fact. Bind commands as host tools with

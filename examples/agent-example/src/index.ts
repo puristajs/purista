@@ -87,7 +87,8 @@ export const main = async () => {
 	gracefulShutdown(logger, [
 		{
 			name: 'HTTP listener',
-			destroy: () => new Promise<void>((resolve, reject) => serverInstance.close(error => (error ? reject(error) : resolve()))),
+			destroy: () =>
+				new Promise<void>((resolve, reject) => serverInstance.close(error => (error ? reject(error) : resolve()))),
 		},
 		{ name: 'Hono service', destroy: () => honoService.destroy() },
 		// Service destruction shuts the one shared Harness runtime down exactly once.

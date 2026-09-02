@@ -18,22 +18,20 @@ Upgrade `@purista/core`, CLI, transport packages, and `@purista/harness` as
 one version set. Regenerate or manually update CLI-owned AI scaffolds. Install
 the provider packages used by the composition root and the optional
 `@purista/harness-ai-sdk-ui` adapter only when a browser endpoint needs it.
+Remove `agentPath` from `purista.json`; native modules now use the fixed
+service-owned `src/harness/<service>` layout.
 
 ## 2. Replace AgentQueueBuilder with a Harness definition
 
 Move model requirements, schemas, agents, workflows, tools, skills, MCP
-servers, guardrails, and portable runtime policy into one native definition:
+servers, guardrails, and portable runtime policy into one native definition
+per service. Use native Harness modules to keep individual capabilities in
+focused files:
 
 ```ts title="Define a native Harness agent"
 export const supportHarness = defineHarness({ name: 'support' })
   .requireModel('primary', { capabilities: ['object'] })
-  .agent('triage_ticket', {
-    input: triageInput,
-    output: triageOutput,
-    model: 'primary',
-    instructions: 'Classify one support ticket.',
-    updates: 'none',
-  })
+  .use(triageTicketAgent)
   .define()
 ```
 
@@ -43,13 +41,21 @@ and generated-projection configuration.
 
 ## 3. Mount selected targets
 
+Mount the composed definition once. Remove every extra per-agent mount; several
+independent Harness runtimes inside one service are unsupported.
+
 ```ts title="Mount selected targets"
 export const supportV1Service = supportV1ServiceBuilder
   .addCommandDefinition(triageTicketCommandBuilder.getDefinition())
   .mountHarness(supportHarness, {
     publish: { agents: ['triage_ticket'] },
-  })
+})
 ```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+is the single service lifecycle boundary. The preceding
+[`addCommandDefinition(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#addcommanddefinition)
+registers an ordinary application command and does not wrap or own the agent.
 
 Bind host tools with `commandAsHarnessTool(...)` or
 `getHarnessHostToolBuilder(...)`. Put target-specific business authorization
@@ -70,6 +76,12 @@ const triageCommandBuilder = supportV1ServiceBuilder
   supportHarness.contracts.agents.triage_ticket,
   )
 ```
+
+[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+derives the typed aggregate and streaming client from the neutral contract and
+routes both through EventBridge.
+[`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
+creates the caller-owned application boundary.
 
 Then call `context.agent.Support['1'].triage_ticket.run(input)` or
 `.stream(input)`. All calls cross EventBridge. Remove same-process shortcuts

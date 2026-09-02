@@ -324,9 +324,9 @@ const legacySectionDefinitions: HandbookSection[] = [
 				description: 'Autonomous intelligence making decisions and taking actions',
 				icon: 'robot',
 				items: [
-					{ id: 'blocks/agent-pattern/what-is-agent', title: 'What is an AI Agent?', order: 1 },
+					{ id: 'blocks/agent-pattern/what-is-agent', title: 'What is a mounted Harness target?', order: 1 },
 					{ id: 'blocks/agent-pattern/harness-integration', title: 'Harness Integration', order: 2 },
-					{ id: 'blocks/agent-pattern/agent-builder', title: 'The Agent Builder', order: 3 },
+					{ id: 'blocks/agent-pattern/agent-builder', title: 'Define agents with Harness modules', order: 3 },
 					{ id: 'blocks/agent-pattern/agent-workflows', title: 'Agents & Workflows', order: 4 },
 					{ id: 'blocks/agent-pattern/http-exposure', title: 'HTTP Exposure', order: 5 },
 					{ id: 'blocks/agent-pattern/guardrails', title: 'Guardrails in PURISTA', order: 6 },

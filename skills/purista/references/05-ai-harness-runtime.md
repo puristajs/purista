@@ -27,13 +27,32 @@ Keep four boundaries explicit:
 Mounting never generates commands, streams, queues, workers, or HTTP routes.
 Create those normal Framework primitives only when required.
 
-## Define and mount
+## Define, compose, and mount
+
+Use native Harness modules for focused agent, workflow, and tool files. Compose
+them into exactly one portable definition per PURISTA service, then mount that
+definition once. This gives model aliases, storage, admission, sandbox
+ownership, and shutdown one unambiguous lifecycle.
 
 ```ts
 import { commandAsHarnessTool } from '@purista/core'
-import { defineHarness } from '@purista/harness'
+import { defineHarness, defineHarnessModule, type BuilderState, type ModelAlias } from '@purista/harness'
 
-export const incidentHarness = defineHarness({ name: 'incident-support' })
+type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }
+
+const triageTicketAgent = defineHarnessModule<PrimaryModelState>()('support.agent.triage-ticket', {
+  register(builder) {
+    return builder.agent('triage_ticket', {
+      input: triageInput,
+      output: triageOutput,
+      model: 'primary',
+      instructions: 'Classify the ticket using only supplied evidence.',
+      updates: 'none',
+    })
+  },
+})
+
+export const supportHarness = defineHarness({ name: 'support' })
   .requireModel('primary', { capabilities: ['object', 'tool_use'] })
   .hostTool('get_incident_snapshot', {
     kind: 'host',
@@ -41,16 +60,10 @@ export const incidentHarness = defineHarness({ name: 'incident-support' })
     input: incidentIdSchema,
     output: incidentSnapshotSchema,
   })
-  .agent('triage_ticket', {
-    input: triageInput,
-    output: triageOutput,
-    model: 'primary',
-    instructions: 'Classify the ticket using only supplied evidence.',
-    updates: 'none',
-  })
+  .use(triageTicketAgent)
   .define()
 
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHarness, {
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
   publish: { agents: ['triage_ticket'] },
   hostTools: {
     get_incident_snapshot: commandAsHarnessTool('Support', '1', 'getIncidentSnapshot'),
@@ -59,7 +72,8 @@ export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHar
 ```
 
 `mountHarness` is synchronous. The Harness definition is already resolved and
-immutable. Publish only targets owned by that service boundary.
+immutable. It may be called once per service builder. Publish only targets
+owned by that service boundary and use native modules for further capabilities.
 
 Use `targets.agents[target]` or `targets.workflows[target]` for:
 
@@ -83,7 +97,7 @@ const command = service
     'Support',
     '1',
     'triage_ticket',
-    incidentHarness.contracts.agents.triage_ticket,
+    supportHarness.contracts.agents.triage_ticket,
   )
   .setCommandFunction(async function (context, input) {
     const outcome = await context.agent.Support['1'].triage_ticket.run(input)

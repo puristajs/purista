@@ -74,7 +74,8 @@ const guardrailKnowledgeSources = [
 	'skills/purista/references/05-ai-harness-runtime.md',
 	'skills/purista/references/11-evaluation-scenarios.md',
 ]
-const retiredGuardrailConfiguration = /\bNeMo\b|\bloadGuardrailsConfig\b|\bparseGuardrailsConfig\b|guardrails\/config\.(?:yaml|yml)|rails\.config\.sensitive_data_detection|\bpolicy YAML\b|\bconfiguration[- ]file\b|\bpolicy file\b|\b(?:policy )?loader\b|\bsecond policy language\b|\balternate policy format\b|\bexternal policy format\b|\bcompatibility vocabulary\b/i
+const retiredGuardrailConfiguration =
+	/\bNeMo\b|\bloadGuardrailsConfig\b|\bparseGuardrailsConfig\b|guardrails\/config\.(?:yaml|yml)|rails\.config\.sensitive_data_detection|\bpolicy YAML\b|\bconfiguration[- ]file\b|\bpolicy file\b|\b(?:policy )?loader\b|\bsecond policy language\b|\balternate policy format\b|\bexternal policy format\b|\bcompatibility vocabulary\b/i
 for (const relativePath of guardrailKnowledgeSources) {
 	const file = resolve(root, relativePath)
 	if (!existsSync(file)) {
@@ -96,7 +97,10 @@ if (!existsSync(guardrailsContentFile)) {
 			addIssue(guardrailsContentFile, `must define the ${phase} phase`)
 		}
 	}
-	if (!/Output rails run only on final answer candidates\./.test(text) || !/Intermediate tool-call responses skip output rails\./.test(text)) {
+	if (
+		!/Output rails run only on final answer candidates\./.test(text) ||
+		!/Intermediate tool-call responses skip output rails\./.test(text)
+	) {
 		addIssue(guardrailsContentFile, 'must define final-candidate-only output rails')
 	}
 	if (!/build\(\) verifies selected tool IDs and required model aliases\/capabilities/.test(text)) {
@@ -113,7 +117,12 @@ for (const [relativePath, projections, renderings] of [
 	[
 		'web/src/data/harness-markdown.ts',
 		['guardrailsPhases', 'guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee'],
-		['const guardrailsPhaseMarkdown = guardrailsPhases', '${guardrailsPhaseMarkdown}', '${guardrailsOutputRailGuarantee}', '${guardrailsBuildGuarantee}'],
+		[
+			'const guardrailsPhaseMarkdown = guardrailsPhases',
+			'${guardrailsPhaseMarkdown}',
+			'${guardrailsOutputRailGuarantee}',
+			'${guardrailsBuildGuarantee}',
+		],
 	],
 	[
 		'web/src/pages/harness/guardrails.astro',
@@ -123,7 +132,12 @@ for (const [relativePath, projections, renderings] of [
 	[
 		'web/src/components/harness/GuardrailsArchitecture.astro',
 		['guardrailsPhasesById', 'guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee'],
-		['{output.diagramTiming}', '{output.diagramDescription}', '{guardrailsOutputRailGuarantee}', '{guardrailsBuildGuarantee}'],
+		[
+			'{output.diagramTiming}',
+			'{output.diagramDescription}',
+			'{guardrailsOutputRailGuarantee}',
+			'{guardrailsBuildGuarantee}',
+		],
 	],
 ]) {
 	const file = resolve(root, relativePath)
@@ -162,12 +176,13 @@ if (!existsSync(canonicalGuardrailsSkill)) {
 }
 
 const staleAiPattern =
-	/@purista\/ai|packages\/ai|AgentProtocolEnvelope|AiSdkProvider|purista-ai|context\.ai|Vercel AI|streamProtocolAdapter|ui-message|invokeAgent|context\.invoke\.agents/
+	/@purista\/ai|packages\/ai|AgentProtocolEnvelope|AiSdkProvider|purista-ai|context\.ai|streamProtocolAdapter|invokeAgent|context\.invoke\.agents/
 const allowedStaleAiSpecFiles = new Set([
 	'specs/20-agents/README.md',
 	'specs/20-agents/77-ai-harness-integration-strategy.md',
 	'specs/20-agents/78-clean-ai-package-architecture.md',
 	'specs/20-agents/80-core-ai-migration-plan.md',
+	'specs/20-agents/88-harness-first-service-integration.md',
 	'specs/ai-phase2.md',
 ])
 

@@ -11,7 +11,7 @@ capability.
 For a command with matching schemas, bind its address directly:
 
 ```ts title="Bind a command as a host tool"
-export const incidentHarnessPolicy = {
+export const supportHarnessPolicy = {
   publish: { agents: ['analyze_signals'] },
   hostTools: {
     get_incident_snapshot: commandAsHarnessTool('Support', '1', 'getIncidentSnapshot'),
@@ -35,6 +35,17 @@ const transferTool = transactionV1ServiceBuilder
   })
   .getDefinition()
 ```
+
+[`getHarnessHostToolBuilder(contract)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getharnesshosttoolbuilder)
+starts a service-owned binding for one declared Harness host-tool contract. The
+following capability declarations restrict which resources, commands, and
+events its handler can use.
+[`setHandler(handler)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#sethandler)
+provides the implementation after those capabilities have been declared.
+[`canInvoke(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#caninvoke)
+and
+[`canEmit(...)`](/handbook/api/classes/_purista_core.HarnessHostToolBuilder/#canemit)
+add only those two host capabilities to its typed context.
 
 The host-tool context carries trusted `tenantId`, `principalId`, `traceId`,
 and `correlationId`, plus declared service resources. The model cannot supply

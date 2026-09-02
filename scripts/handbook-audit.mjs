@@ -136,30 +136,38 @@ function hasUnsupportedAddServiceVersionOption(source) {
 	return false
 }
 
-const documentedFenceLanguages = new Set(['ts', 'tsx', 'typescript', 'bash', 'sh', 'json', 'yaml', 'yml', 'dotenv', 'sql', 'text', 'mermaid'])
+const documentedFenceLanguages = new Set([
+	'ts',
+	'tsx',
+	'typescript',
+	'bash',
+	'sh',
+	'json',
+	'yaml',
+	'yml',
+	'dotenv',
+	'sql',
+	'text',
+	'mermaid',
+])
 
 /**
- * An attached-agent definition generates several Framework projections and its
- * fluent calls carry meaningful contract, runtime, and delivery choices. A
- * code example is therefore incomplete when it introduces one of these calls
- * but leaves the reader without the member-level lookup in the same section.
+ * Mounted Harness integration has a compact, high-risk Framework surface. A
+ * code example is incomplete when it introduces one of these calls but leaves
+ * the reader without the member-level lookup in the same section.
  *
- * This deliberately covers the compact, high-risk AgentQueueBuilder surface
+ * This deliberately covers the mount and address-first declaration surface
  * rather than attempting to infer every arbitrary dot call in TypeScript. The
  * latter would mistake schema, resource, and application code for a PURISTA
  * builder and turn the audit into noise. Other builder families remain covered
  * by the method-level ledger and the handbook authoring rule.
  */
 const attachedAgentBuilderMethodAnchors = new Map([
-	['getAgentQueueBuilder', 'getagentqueuebuilder'],
-	['addPayloadSchema', 'addpayloadschema'],
-	['addOutputSchema', 'addoutputschema'],
-	['addModel', 'addmodel'],
-	['setHarnessAgent', 'setharnessagent'],
-	['setHarnessWorkflow', 'setharnessworkflow'],
-	['setRunFunction', 'setrunfunction'],
-	['setResponseMode', 'setresponsemode'],
-	['exposeAsHttpEndpoint', 'exposeashttpendpoint'],
+	['mountHarness', 'mountharness'],
+	['getHarnessHostToolBuilder', 'getharnesshosttoolbuilder'],
+	['canInvokeAgent', 'caninvokeagent'],
+	['canInvokeWorkflow', 'caninvokeworkflow'],
+	['canUseHarnessModel', 'canuseharnessmodel'],
 ])
 
 function getMarkdownSection(source, index) {
@@ -186,7 +194,10 @@ function getAttachedAgentBuilderLookupIssues(source) {
 		const section = getMarkdownSection(source, block.index ?? 0)
 		for (const [method, anchor] of attachedAgentBuilderMethodAnchors) {
 			if (!new RegExp(`\\.${method}\\s*\\(`).test(block[1])) continue
-			const apiLink = new RegExp(`\\]\\(/handbook/api/(?:classes|interfaces|functions|types)/[^)\\s]+#${anchor}\\)`, 'i')
+			const apiLink = new RegExp(
+				`\\]\\(/handbook/api/(?:classes|interfaces|functions|types)/[^)\\s]+#${anchor}\\)`,
+				'i',
+			)
 			if (!apiLink.test(section)) {
 				issues.push(method)
 			}

@@ -90,7 +90,9 @@ export const getSubscriptionTestFileContent = (input: {
 					})
 					writer.writeLine('})')
 					writer.blankLine()
-					writer.writeLine(`const result = await ${camelCase(input.subscriptionName)}(context, payload, parameter)`)
+					writer.writeLine(
+						`const result = await ${camelCase(input.subscriptionName)}(context, payload as Readonly<${typePrefix}InputPayload>, parameter)`,
+					)
 					writer.blankLine()
 					writer.writeLine('expect(result).toBe(undefined)')
 				})

@@ -59,18 +59,17 @@ export const processJobWorkerBuilder = pingV1ServiceBuilder
   .canConsumeStream('ReportService', '1', 'exportReport', reportChunkSchema, reportPayloadSchema)
   .canEnqueue('auditJob', auditPayloadSchema, auditParameterSchema)
   .canEmit('ping.processed', pingProcessedEventSchema)
-  .canInvokeAgent('triagePing', '1', {
-    outputSchema: triageOutputSchema,
-    payloadSchema: triagePayloadSchema,
-    parameterSchema: triageParameterSchema,
-  })
+  .canInvokeAgent('Support', '1', 'triage_ping', supportHarness.contracts.agents.triage_ping)
   .setHandler(async function (context) {
     await context.service.NotificationService['1'].sendEmail({ id: context.message.id })
     await context.queue.enqueue.auditJob({ id: context.message.id })
     await context.emit('ping.processed', { jobId: context.message.id })
-    const triage = await context.agent['triagePing.1'].run({ jobId: context.message.id })
+    const triage = await context.agent.Support['1'].triage_ping.run({ jobId: context.message.id })
 
-    return { status: 'success', output: triage }
+    if (triage.status !== 'completed') {
+      return { status: 'retry', reason: 'Triage awaits external input' }
+    }
+    return { status: 'success', output: triage.output }
   })
 ```
 

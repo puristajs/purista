@@ -19,14 +19,16 @@ therefore works when caller and target later run in different processes.
 
 ## Lifecycle
 
-1. Build a portable definition with `defineHarness()`.
+1. Compose one portable service definition with `defineHarness()` and native Harness modules.
 2. Mount it with `ServiceBuilder.mountHarness(definition, policy)`.
 3. Supply concrete runtime adapters under `getInstance(eventBridge, { ai: ... })`.
 4. Start EventBridge and the service through the normal PURISTA lifecycle.
 5. Call a published target with an address-first client.
 6. Let service destruction close its Harness runtime and owned adapters.
 
-The service creates one Harness instance for its mounted definitions. Do not
+The service accepts one `mountHarness(...)` call and creates one Harness
+instance for that definition. Add further agents, workflows, tools, and Skills
+through native Harness modules before mounting. Do not
 construct another Harness inside a command handler. That would bypass mount
 policy, trusted identity, host-tool bindings, lifecycle, and EventBridge.
 

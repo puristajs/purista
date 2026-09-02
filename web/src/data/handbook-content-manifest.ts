@@ -122,7 +122,7 @@ const canonicalContentManifest = [
     "parentTopicId": "framework/build-ai-powered-services",
     "order": 392,
     "title": "Build and mount the first agent",
-    "description": "Scaffold a native Harness definition and PURISTA command, mount the selected agent, bind a model, and run it through EventBridge.",
+    "description": "Scaffold a native Harness module, compose and mount it once in the owning service, then call it through EventBridge.",
     "pageRole": "task"
   },
   {

@@ -17,13 +17,17 @@ V4 removes the generated attached-agent model. Delete `AgentQueueBuilder`,
 `getAgentQueueBuilder`, `addAgentDefinition`, `setHarnessAgent`,
 `setHarnessWorkflow`, `setRunFunction`, and the generated agent
 command/stream/queue/worker assumptions.
+Remove the obsolete `agentPath` option from `purista.json`. Native Harness
+modules use `src/harness/<service>`, independent of Framework service paths.
 
 Migrate in this order:
 
 1. Define agents, workflows, tools, skills, MCP servers, guardrails, model
    requirements, schemas, and update modes with native `@purista/harness`.
+   Compose focused native modules into one Harness definition per service.
 2. Mount the immutable definition with
-   `ServiceBuilder.mountHarness(definition, policy)`.
+   one `ServiceBuilder.mountHarness(definition, policy)` call. Delete additional
+   per-agent mounts and runtimes.
 3. Publish only selected agent/workflow targets.
 4. Bind PURISTA commands or typed host-tool handlers through the mount policy.
 5. Declare consumer dependencies with address-first

@@ -1,14 +1,11 @@
 import {
-	localDurableExecution,
-	inMemorySandbox,
 	type DurableWorkspace,
 	type HarnessStorage,
+	inMemorySandbox,
+	localDurableExecution,
 	type Sandbox,
 } from '@purista/harness'
-import {
-	kubernetesSandboxRuntime,
-	type KubernetesSandboxRuntime,
-} from '@purista/harness-sandbox-kubernetes'
+import { type KubernetesSandboxRuntime, kubernetesSandboxRuntime } from '@purista/harness-sandbox-kubernetes'
 import { postgresHarnessStorage } from '@purista/harness-storage-postgres'
 import { Pool } from 'pg'
 
@@ -122,10 +119,7 @@ function once(close: () => Promise<void>): () => Promise<void> {
 	}
 }
 
-async function closeProductionRuntime(
-	pool: Pool,
-	execution: KubernetesSandboxRuntime,
-): Promise<void> {
+async function closeProductionRuntime(pool: Pool, execution: KubernetesSandboxRuntime): Promise<void> {
 	const results = await Promise.allSettled([pool.end(), execution.close()])
 	const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected')
 	if (failure) throw failure.reason

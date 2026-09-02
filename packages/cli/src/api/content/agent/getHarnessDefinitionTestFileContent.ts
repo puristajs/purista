@@ -10,13 +10,14 @@ const toAgentIdentifier = (name: string) => {
 /** Generate a standalone Harness definition test with an injected fake model. */
 export const getHarnessDefinitionTestFileContent = (input: {
 	agentName: string
+	harnessName: string
 	definitionImportName: string
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const agentId = snakeCase(input.agentName)
-	const harnessName = `${camelCase(input.agentName)}Harness`
+	const harnessName = input.harnessName
 
 	writer.writeLine("import { FakeModelProvider } from '@purista/harness/testing'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")

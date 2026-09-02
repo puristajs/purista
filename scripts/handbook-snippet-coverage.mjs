@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* biome-ignore-all lint/suspicious/noConsole: this CLI report writes its result to stdout. */
+
 /**
  * Inventory the narrow set of public fluent APIs which handbook TypeScript
  * examples use to define a PURISTA primitive or a Harness runtime. This is a
@@ -27,14 +29,14 @@ const frameworkMethodOwners = new Map([
 	['getQueueBuilder', 'ServiceBuilder'],
 	['getQueueWorkerBuilder', 'ServiceBuilder'],
 	['getScheduleBuilder', 'ServiceBuilder'],
-	['getAgentQueueBuilder', 'ServiceBuilder'],
+	['mountHarness', 'ServiceBuilder'],
+	['getHarnessHostToolBuilder', 'ServiceBuilder'],
 	['addCommandDefinition', 'ServiceBuilder'],
 	['addSubscriptionDefinition', 'ServiceBuilder'],
 	['addStreamDefinition', 'ServiceBuilder'],
 	['addQueueDefinition', 'ServiceBuilder'],
 	['addQueueWorkerDefinition', 'ServiceBuilder'],
 	['addScheduleDefinition', 'ServiceBuilder'],
-	['addAgentDefinition', 'ServiceBuilder'],
 	['addPayloadSchema', 'definition'],
 	['addParameterSchema', 'definition'],
 	['addOutputSchema', 'definition'],
@@ -57,13 +59,10 @@ const frameworkMethodOwners = new Map([
 	['filterSentFrom', 'SubscriptionDefinitionBuilder'],
 	['setMaxParallelHandlers', 'QueueWorkerBuilder'],
 	['setMode', 'QueueWorkerBuilder'],
-	['setResponseMode', 'AgentQueueBuilder'],
 	['setExecutionProfile', 'executionProfile'],
-	['setHarnessAgent', 'AgentQueueBuilder'],
-	['setHarnessWorkflow', 'AgentQueueBuilder'],
-	['setRunFunction', 'AgentQueueBuilder'],
-	['addModel', 'AgentQueueBuilder'],
-	['canInvokeAgent', 'AgentQueueBuilder'],
+	['canInvokeAgent', 'harnessInvocation'],
+	['canInvokeWorkflow', 'harnessInvocation'],
+	['canUseHarnessModel', 'definition'],
 	['exposeAsHttpEndpoint', 'definition'],
 	['exposeAsHttpStreamEndpoint', 'StreamDefinitionBuilder'],
 	['setHttpStreamingMode', 'StreamDefinitionBuilder'],
@@ -156,7 +155,10 @@ function getNearbyContext(source, index) {
 	})
 	return {
 		heading: current.heading,
-		content: source.slice(currentStart, nextSibling ? siblingStart + sibling[0].length + (nextSibling.index ?? 0) : source.length),
+		content: source.slice(
+			currentStart,
+			nextSibling ? siblingStart + sibling[0].length + (nextSibling.index ?? 0) : source.length,
+		),
 	}
 }
 
@@ -182,28 +184,34 @@ function candidateOwners(product, code, method) {
 		// concrete type is not visible in the fence itself.
 		return ['CommandDefinitionBuilder', 'QueueDefinitionBuilder']
 	}
-	if (method === 'canInvokeAgent' && code.includes('getQueueWorkerBuilder(')) {
-		return ['QueueWorkerBuilder']
+	if (method === 'setHandler' && code.includes('getHarnessHostToolBuilder')) {
+		return ['HarnessHostToolBuilder']
 	}
-	if (method === 'canInvokeAgent') {
-		// Attached agents and queue workers both expose this declared capability;
-		// accept the precise owner link when the named receiver is declared
-		// elsewhere in the service module.
-		return ['AgentQueueBuilder', 'QueueWorkerBuilder']
+	if ((method === 'canInvoke' || method === 'canEmit') && code.includes('getHarnessHostToolBuilder')) {
+		return ['HarnessHostToolBuilder']
+	}
+	if (owner === 'harnessInvocation') {
+		if (code.includes('getSubscriptionBuilder(')) return ['SubscriptionDefinitionBuilder']
+		if (code.includes('getStreamBuilder(')) return ['StreamDefinitionBuilder']
+		if (code.includes('getQueueWorkerBuilder(')) return ['QueueWorkerBuilder']
+		return [
+			'CommandDefinitionBuilder',
+			'SubscriptionDefinitionBuilder',
+			'StreamDefinitionBuilder',
+			'QueueWorkerBuilder',
+		]
 	}
 	if (owner === 'httpDefinition') {
-		// Commands, streams, and attached agents expose HTTP projection
+		// Commands and streams expose HTTP projection
 		// metadata. A focused example can start from a named builder declared in
 		// a neighbouring file, so accept its precise owner link when present.
 		if (code.includes('getCommandBuilder(')) return ['CommandDefinitionBuilder']
 		if (code.includes('getStreamBuilder(')) return ['StreamDefinitionBuilder']
-		if (code.includes('getAgentQueueBuilder(')) return ['AgentQueueBuilder']
-		return ['CommandDefinitionBuilder', 'StreamDefinitionBuilder', 'AgentQueueBuilder']
+		return ['CommandDefinitionBuilder', 'StreamDefinitionBuilder']
 	}
 	if (owner === 'executionProfile') {
 		if (code.includes('getQueueBuilder(')) return ['QueueDefinitionBuilder']
-		if (code.includes('getAgentQueueBuilder(')) return ['AgentQueueBuilder']
-		return ['QueueDefinitionBuilder', 'AgentQueueBuilder']
+		return ['QueueDefinitionBuilder']
 	}
 	if (owner === 'definition') {
 		if (code.includes('getCommandBuilder(')) return ['CommandDefinitionBuilder']
@@ -211,8 +219,12 @@ function candidateOwners(product, code, method) {
 		if (code.includes('getStreamBuilder(')) return ['StreamDefinitionBuilder']
 		if (code.includes('getQueueBuilder(')) return ['QueueDefinitionBuilder']
 		if (code.includes('getQueueWorkerBuilder(')) return ['QueueWorkerBuilder']
-		if (code.includes('getAgentQueueBuilder(')) return ['AgentQueueBuilder']
-		return ['CommandDefinitionBuilder', 'SubscriptionDefinitionBuilder', 'StreamDefinitionBuilder', 'QueueWorkerBuilder', 'AgentQueueBuilder']
+		return [
+			'CommandDefinitionBuilder',
+			'SubscriptionDefinitionBuilder',
+			'StreamDefinitionBuilder',
+			'QueueWorkerBuilder',
+		]
 	}
 	return [owner]
 }
@@ -221,7 +233,9 @@ function hasExactApiLink(section, owner, method) {
 	if (owner === 'function:defineHarness') {
 		return /\]\(\/handbook\/api\/functions\/_purista_harness\.defineHarness\/?\)/i.test(section)
 	}
-	const [kind, name] = owner.startsWith('interface:') ? ['interfaces', owner.slice('interface:'.length)] : ['classes', owner]
+	const [kind, name] = owner.startsWith('interface:')
+		? ['interfaces', owner.slice('interface:'.length)]
+		: ['classes', owner]
 	const packageName = kind === 'interfaces' && name === 'HarnessBuilder' ? '_purista_harness' : '_purista_core'
 	const expected = `/handbook/api/${kind}/${packageName}.${name}/#${method.toLowerCase()}`
 	return section.toLowerCase().includes(expected.toLowerCase())
@@ -266,11 +280,25 @@ function inventory(root = handbookRoot) {
 }
 
 function priority(finding) {
-	if (finding.product === 'framework' && /^(getCommandBuilder|addPayloadSchema|addParameterSchema|addOutputSchema|setCommandFunction|canInvoke|canEnqueue|canEmit|canConsumeStream|exposeAsHttpEndpoint)$/.test(finding.method)) {
+	if (
+		finding.product === 'framework' &&
+		/^(getCommandBuilder|addPayloadSchema|addParameterSchema|addOutputSchema|setCommandFunction|canInvoke|canEnqueue|canEmit|canConsumeStream|exposeAsHttpEndpoint)$/.test(
+			finding.method,
+		)
+	) {
 		return 'P0'
 	}
-	if (finding.product === 'harness' && /^(defineHarness|models|agents|tools|skills|workflows|build)$/.test(finding.method)) return 'P0'
-	if (/^(getSubscriptionBuilder|getStreamBuilder|getQueueBuilder|getQueueWorkerBuilder|getAgentQueueBuilder|setResponseMode|setHarnessAgent|setHandler|setStreamFunction|setSubscriptionFunction)$/.test(finding.method)) return 'P1'
+	if (
+		finding.product === 'harness' &&
+		/^(defineHarness|models|agents|tools|skills|workflows|build)$/.test(finding.method)
+	)
+		return 'P0'
+	if (
+		/^(getSubscriptionBuilder|getStreamBuilder|getQueueBuilder|getQueueWorkerBuilder|mountHarness|getHarnessHostToolBuilder|setHandler|setStreamFunction|setSubscriptionFunction)$/.test(
+			finding.method,
+		)
+	)
+		return 'P1'
 	return 'P2'
 }
 
@@ -284,18 +312,30 @@ function printMarkdown(findings) {
 
 	console.log('# Handbook fluent snippet coverage')
 	console.log('')
-	console.log('This report inventories only source-verified Framework primitive builders and `defineHarness(...)` chains. It does not infer arbitrary dot calls or decide whether prose is sufficiently detailed; it identifies where a reviewer must add or verify the exact API lookup and accompanying explanation.')
+	console.log(
+		'This report inventories only source-verified Framework primitive builders and `defineHarness(...)` chains. It does not infer arbitrary dot calls or decide whether prose is sufficiently detailed; it identifies where a reviewer must add or verify the exact API lookup and accompanying explanation.',
+	)
 	console.log('')
 	console.log(`- ${byProduct('framework')}`)
 	console.log(`- ${byProduct('harness')}`)
-	console.log(`- total: ${findings.length - missing.length}/${findings.length} calls have a same-section exact API lookup (${missing.length} missing)`)
+	console.log(
+		`- total: ${findings.length - missing.length}/${findings.length} calls have a same-section exact API lookup (${missing.length} missing)`,
+	)
 	console.log('')
 	console.log('## Missing exact API lookups')
 	console.log('')
 	console.log('| Priority | Product | Snippet | Method | Expected owner | Section |')
 	console.log('| --- | --- | --- | --- | --- | --- |')
-	for (const finding of missing.sort((left, right) => priority(left).localeCompare(priority(right)) || left.file.localeCompare(right.file) || left.line - right.line || left.method.localeCompare(right.method))) {
-		console.log(`| ${priority(finding)} | ${finding.product} | \`${finding.file}:${finding.line}\` — ${finding.title.replaceAll('|', '\\|')} | \`${finding.method}\` | ${finding.owners.join(' / ')} | ${finding.section.replaceAll('|', '\\|')} |`)
+	for (const finding of missing.sort(
+		(left, right) =>
+			priority(left).localeCompare(priority(right)) ||
+			left.file.localeCompare(right.file) ||
+			left.line - right.line ||
+			left.method.localeCompare(right.method),
+	)) {
+		console.log(
+			`| ${priority(finding)} | ${finding.product} | \`${finding.file}:${finding.line}\` — ${finding.title.replaceAll('|', '\\|')} | \`${finding.method}\` | ${finding.owners.join(' / ')} | ${finding.section.replaceAll('|', '\\|')} |`,
+		)
 	}
 }
 

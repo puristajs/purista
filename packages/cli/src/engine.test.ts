@@ -20,7 +20,6 @@ const createMinimalProject = () => {
 			linter: 'none',
 			formatter: 'none',
 			servicePath: 'src/service',
-			agentPath: 'src/agents',
 		}),
 	)
 	writeFileSync(

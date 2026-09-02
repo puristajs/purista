@@ -25,4 +25,3 @@ export const executeApprovedRollbackCommandBuilder = supportV1ServiceBuilder
 			status: 'executed' as const,
 		}
 	})
-

@@ -22,7 +22,7 @@ const mayAnalyzeIncident = async (context, input) => {
   }
 }
 
-.mountHarness(incidentHarness, {
+.mountHarness(supportHarness, {
   publish: { agents: ['analyze_signals'] },
   targets: {
     agents: {
@@ -31,6 +31,11 @@ const mayAnalyzeIncident = async (context, input) => {
   },
 })
 ```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+attaches these guards to the selected target's receiving boundary. The guard
+runs with trusted message identity and service resources before Harness
+execution starts.
 
 After guards validate completed outcomes before publication. Tool-backed
 commands must repeat their own authorization because they protect the actual

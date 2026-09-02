@@ -26,6 +26,10 @@ typed `ServiceBuilder.mountHarness(...)` composition boundary, trusted host
 context, business guards, runtime binding, and address-first invocation.
 Harness never imports Core.
 
+Each PURISTA service mounts at most one composed Harness definition and starts
+one native runtime. Add capabilities with `defineHarnessModule(...).use(...)`;
+never create a Harness or call `mountHarness(...)` once per agent.
+
 Every agent/workflow invocation crosses EventBridge, including same-service and
 same-process calls. Each target has one final output schema; callers choose
 `run` or portable `stream`, while definitions declare `none`, `text-delta`, or
@@ -125,7 +129,7 @@ Framework KV component and must not be adapted into Harness storage.
 - Tests demonstrate PURISTA builder/context helpers, resource/store mocks, and runtime wiring separately. HTTP-only tests do not teach Framework testing; see `references/07-testing-observability-and-deployment.md`.
 - Logs, metrics, traces, events, queues, streams, and AI prompts are reviewed for secret/PII leakage before production use.
 - Generated code follows current CLI templates unless there is a deliberate reason to go lower-level.
-- Project setup and scaffolding follow the handbook quickstart shape: `src/service` and `src/agents` are CLI-managed roots, and services, commands, streams, queues, workers, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, and `add:agent`.
+- Project setup and scaffolding follow the handbook quickstart shape: Framework artifacts live under `src/service`, while native AI modules live under `src/harness/<service>`. Services, commands, streams, queues, workers, and agents are added through generated local CLI scripts such as `add:service`, `add:command`, `add:queue-worker`, and `add:agent`.
 - Package dependencies do not introduce optional AI or transport coupling into core packages.
 
 ## Read If Needed

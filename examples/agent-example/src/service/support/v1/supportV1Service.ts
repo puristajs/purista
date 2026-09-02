@@ -5,7 +5,7 @@ import { getIncidentSnapshotCommandBuilder } from './command/getIncidentSnapshot
 import { getRunbookCommandBuilder } from './command/getRunbook/getRunbookCommandBuilder.js'
 import { requestRollbackReviewCommandBuilder } from './command/requestRollbackReview/requestRollbackReviewCommandBuilder.js'
 import { triageTicketCommandBuilder } from './command/triageTicket/triageTicketCommandBuilder.js'
-import { incidentHarness, incidentHarnessPolicy } from './harness/incidentMount.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
 import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
 
 type CommandDefinition = Parameters<typeof supportV1ServiceBuilder.addCommandDefinition>[number]
@@ -22,4 +22,4 @@ const commandDefinitions: CommandDefinition[] = [
 
 export const supportV1Service = supportV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)
-	.mountHarness(incidentHarness, incidentHarnessPolicy)
+	.mountHarness(supportHarness, supportHarnessPolicy)

@@ -101,7 +101,7 @@ export type HarnessHostToolFunctionDefinition<
 }>
 
 type HostToolFunctionDefinition<Binding, Resources extends Record<string, unknown>> = Binding extends (
-	context: unknown,
+	context: any,
 	input: infer Input,
 ) => Promise<infer Output>
 	? HarnessHostToolFunctionDefinition<Input, Output, Resources, any, any, any, any>
@@ -201,15 +201,10 @@ export type HarnessTypes<D extends HarnessDefinition<any>> = D extends {
 	? I
 	: never
 
-type UnionToIntersection<U> = (U extends unknown ? (value: U) => void : never) extends (value: infer I) => void
-	? I
-	: never
-
-/** Runtime AI configuration accumulated from every mounted Harness definition. */
-export type MountedHarnessRuntimeConfig<H extends readonly HarnessDefinition<any>[]> = UnionToIntersection<
-	H[number] extends infer D extends HarnessDefinition<any>
-		? Omit<HarnessInstanceConfig<HarnessState<D>, HarnessHostContext>, 'hostTools'>
-		: never
+/** Runtime AI configuration required by the service's mounted Harness definition. */
+export type MountedHarnessRuntimeConfig<D extends HarnessDefinition<any>> = Omit<
+	HarnessInstanceConfig<HarnessState<D>, HarnessHostContext>,
+	'hostTools'
 >
 
 /** Create an address-first command adapter for a Harness host tool. */

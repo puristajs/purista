@@ -25,11 +25,6 @@ export const puristaConfigSchema = z.object({
 		.optional()
 		.default('src/service')
 		.describe('The path where services are located relative to the project root'),
-	agentPath: z
-		.string()
-		.optional()
-		.default('src/agents')
-		.describe('The path where agents are located relative to the project root'),
 })
 
 /** Parsed `purista.json` configuration with defaults applied. */

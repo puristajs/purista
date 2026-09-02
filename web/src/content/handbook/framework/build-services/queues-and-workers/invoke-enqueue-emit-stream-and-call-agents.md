@@ -17,21 +17,24 @@ same declared schema before using it, rather than adding a cast.
 | [`canConsumeStream(service, version, target, chunk?, payload?, parameter?, final?, validateChunk?, validateFinal?)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canconsumestream) | `context.stream[...]` async stream plus final result | Progressive upstream output is useful and the EventBridge supports it. |
 | [`canEnqueue(queue, payload?, parameter?)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canenqueue) | `context.queue.enqueue.queue(...)` / `scheduleAt.queue(...)` | Work can be decoupled and retried. |
 | [`canEmit(event, schema)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#canemit) | `context.emit(event, payload)` | Another service should react independently. |
-| `canInvokeAgent(service, version, target, contract)` | `context.agent.Service['1'].target.run(input)` or `.stream(input)` | A mounted Harness agent owns the next model-driven step. |
+| [`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.QueueWorkerBuilder/#caninvokeagent) | `context.agent.Service['1'].target.run(input)` or `.stream(input)` | A mounted Harness agent owns the next model-driven step. |
 
 ```ts title="src/service/report/v1/queue-worker/generateReport.ts"
 export const composedGenerateReportWorkerBuilder = generateReportWorkerBuilder
   .canInvoke('Archive', '1', 'storeReport', archiveResultSchema, archivePayloadSchema)
   .canEnqueue('notifyReport', notificationPayloadSchema)
   .canEmit('report.archived', reportArchivedSchema)
-  .canInvokeAgent('summarizeReport', '1', { outputSchema: summarySchema })
+  .canInvokeAgent('Support', '1', 'summarize_report', supportHarness.contracts.agents.summarize_report)
   .setHandler(async function (context, message) {
     const report = archivePayloadSchema.parse(message.payload)
     const stored = await context.service.Archive['1'].storeReport(report, {})
     await context.queue.enqueue.notifyReport({ reportId: stored.reportId })
     await context.emit('report.archived', { reportId: stored.reportId })
-    const summary = await context.agent['summarizeReport.1'].run({ reportId: stored.reportId })
-    return { status: 'success', output: summary }
+    const summary = await context.agent.Support['1'].summarize_report.run({ reportId: stored.reportId })
+    if (summary.status !== 'completed') {
+      return { status: 'retry', reason: 'Report summary awaits external input' }
+    }
+    return { status: 'success', output: summary.output }
   })
 ```
 

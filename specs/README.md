@@ -39,8 +39,8 @@ npm run audit:knowledge
 ```
 
 ## Current Active Spec Areas
-- `20-agents/80-core-ai-migration-plan.md`: migration record for core-native
-  agents backed by `@purista/harness`.
+- `20-agents/88-harness-first-service-integration.md`: approved Harness-first
+  service integration contract.
 - `http-error-rfc9457.md`: proposed RFC 9457 HTTP error response work.
 - `bridge-reliability-hardening.md`: implemented bridge reliability status
   tracker for this monorepo.

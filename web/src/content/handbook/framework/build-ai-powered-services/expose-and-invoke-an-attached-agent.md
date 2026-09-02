@@ -15,9 +15,15 @@ const triageCommandBuilder = supportV1ServiceBuilder
   'Support',
   '1',
   'triage_ticket',
-  incidentHarness.contracts.agents.triage_ticket,
+  supportHarness.contracts.agents.triage_ticket,
   )
 ```
+
+[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeagent)
+declares the address and adds a typed aggregate and streaming client to this
+command's handler context.
+[`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
+creates that caller-owned command contract.
 
 The handler receives both delivery choices:
 
@@ -67,7 +73,22 @@ export const chatStreamBuilder = supportV1ServiceBuilder
   })
 ```
 
+Here,
+[`canInvokeAgent(service, version, target, contract)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#caninvokeagent)
+adds the same typed EventBridge client to the stream handler. It does not
+bypass the mounted target's schemas or business guards.
+
 The adapter owns only AI SDK UI Message Stream v1 encoding. PURISTA stream and Harness execution
 contracts stay provider-neutral, so another protocol can be added later as a
 separate adapter. Browser code can use AI SDK `useChat` and AI Elements
 without a PURISTA client library.
+
+The public stream chain uses
+[`getStreamBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getstreambuilder),
+[`addChunkSchema(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#addchunkschema),
+[`exposeAsHttpStreamEndpoint(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#exposeashttpstreamendpoint),
+[`setHttpStreamProtocol(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#sethttpstreamprotocol),
+and
+[`setStreamFunction(...)`](/handbook/api/classes/_purista_core.StreamDefinitionBuilder/#setstreamfunction).
+These calls define the application-owned HTTP projection and its validated SSE
+chunks; the UI adapter only translates the portable Harness event stream.

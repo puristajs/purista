@@ -12,7 +12,7 @@ export function GET() {
 
 - [Framework handbook](/handbook/framework.md)
 - [AI Harness handbook](/handbook/harness.md)
-- [Build an AI-powered PURISTA service](/handbook/blocks/agent-pattern.md)
+- [Build an AI-powered PURISTA service](/handbook/framework/build-ai-powered-services.md)
 - [Framework API documentation](/handbook/api.md)
 
 Use the canonical HTML pages for human navigation and the \`.md\` pages for source-backed agent context.`,

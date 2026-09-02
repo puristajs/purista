@@ -64,12 +64,13 @@ const mediaHarness = defineHarness({ name: 'media' })
 		input: z.object({ prompt: z.string() }),
 		output: artifactReferenceSchema,
 		handler: async ({ input, models, signal }) => {
-			const response = await models.image.image(
-				{ prompt: input.prompt },
-				signal,
-				{ emitRunEvents: true, artifactIdempotencyKey: input.prompt },
-			)
-			return response.artifacts[0]!
+			const response = await models.image.image({ prompt: input.prompt }, signal, {
+				emitRunEvents: true,
+				artifactIdempotencyKey: input.prompt,
+			})
+			const artifact = response.artifacts[0]
+			if (!artifact) throw new Error('The image model returned no artifact.')
+			return artifact
 		},
 	})
 	.define()
@@ -325,19 +326,24 @@ describe('ServiceBuilder.mountHarness', () => {
 		const events = []
 		for await (const event of stream) events.push(event)
 
-		expect(events).toContainEqual(expect.objectContaining({
-			payload: expect.objectContaining({
-				frameType: 'chunk',
-				chunk: expect.objectContaining({
-					type: 'output.file',
-					artifact: { id: 'artifact-1', url: '/artifacts/artifact-1', mediaType: 'image/png' },
+		expect(events).toContainEqual(
+			expect.objectContaining({
+				payload: expect.objectContaining({
+					frameType: 'chunk',
+					chunk: expect.objectContaining({
+						type: 'output.file',
+						artifact: { id: 'artifact-1', url: '/artifacts/artifact-1', mediaType: 'image/png' },
+					}),
 				}),
 			}),
-		}))
+		)
 		expect(events.at(-1)).toMatchObject({
 			payload: {
 				frameType: 'complete',
-				final: { status: 'completed', output: { id: 'artifact-1', url: '/artifacts/artifact-1', mediaType: 'image/png' } },
+				final: {
+					status: 'completed',
+					output: { id: 'artifact-1', url: '/artifacts/artifact-1', mediaType: 'image/png' },
+				},
 			},
 		})
 		await service.destroy()
@@ -859,5 +865,23 @@ describe('ServiceBuilder.mountHarness', () => {
 
 		// @ts-expect-error unknown agent names cannot be published
 		builder.mountHarness(echoHarness, { publish: { agents: ['missing'] } })
+	})
+
+	it('allows exactly one composed Harness definition per service', () => {
+		const builder = new ServiceBuilder({
+			serviceName: 'Knowledge',
+			serviceVersion: '1',
+			serviceDescription: 'Single mounted Harness service',
+		})
+		const mounted = builder.mountHarness(echoHarness, { publish: { agents: ['echo'] } })
+
+		expect(() => builder.mountHarness(embeddingHarness, { publish: {} })).toThrow(
+			'Only one Harness definition can be mounted on a service',
+		)
+		const assertSecondMountIsRejectedByTypeSystem = () => {
+			// @ts-expect-error compose additional agents and workflows with native Harness modules
+			mounted.mountHarness(embeddingHarness, { publish: {} })
+		}
+		expect(assertSecondMountIsRejectedByTypeSystem).toBeTypeOf('function')
 	})
 })

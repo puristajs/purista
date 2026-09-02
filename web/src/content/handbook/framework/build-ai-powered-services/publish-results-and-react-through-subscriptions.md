@@ -8,7 +8,7 @@ A mount target can publish its successfully completed terminal outcome as an
 event:
 
 ```ts title="Publish a successful target outcome"
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHarness, {
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
   publish: { agents: ['analyze_signals'] },
   targets: {
     agents: {
@@ -17,6 +17,10 @@ export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHar
   },
 })
 ```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+validates the published target and success-event mapping before the service
+runtime registers its EventBridge address.
 
 Use this when the fact is exactly “this target finished successfully.” A normal
 PURISTA subscription can react without coupling itself to the caller.

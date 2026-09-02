@@ -1,7 +1,4 @@
-import {
-	supportV1RollbackReviewDecisionOutputSchema,
-	supportV1RollbackReviewDecisionSchema,
-} from '../../schema.js'
+import { supportV1RollbackReviewDecisionOutputSchema, supportV1RollbackReviewDecisionSchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const decideRollbackReviewCommandBuilder = supportV1ServiceBuilder
@@ -18,4 +15,3 @@ export const decideRollbackReviewCommandBuilder = supportV1ServiceBuilder
 		if (signal.kind === 'not_found') throw new Error('durable_wait_not_found')
 		return { reviewId: review.action.reviewId, status: payload.decision, signal: signal.kind }
 	})
-

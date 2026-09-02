@@ -173,7 +173,8 @@ the project config, and an example `ping` service with one starter command. Foll
 
 Notes:
 
-- `src/service` and `src/agents` are the default CLI-managed roots.
+- `src/service` is the Framework artifact root. When AI capabilities are added,
+  the CLI composes native Harness modules under `src/harness/<service>`.
 - `AGENTS.md`, `CLAUDE.md`, and `.agents/IMPLEMENTATION.md` guide coding agents toward PURISTA structure and CLI usage.
 - `.agents/skills/purista` and `.claude/skills/purista` are package-backed links to the PURISTA skill bundled with `@purista/core`.
 - The exact filenames follow the `fileConvention` and `eventConvention` from `purista.json`.

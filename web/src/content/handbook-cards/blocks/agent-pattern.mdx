@@ -1,85 +1,11 @@
 ---
-title: Agent
-description: AI-powered service participants that use language models, tools, and skills to reason and act.
+title: Build AI-powered services
+description: Mount one portable Harness definition in a PURISTA service and invoke selected targets through EventBridge.
 ---
 
-An **agent** is an AI-powered participant in your PURISTA system. Unlike a command (deterministic code) or a subscription (fire-and-forget handler), an agent uses a language model to reason about inputs, choose tools, and produce structured outputs.
+PURISTA uses native `@purista/harness` modules for agents, workflows, tools,
+Skills, and guardrails. Compose one Harness definition per service, publish the
+selected targets with one `ServiceBuilder.mountHarness(...)` call, and bind
+runtime adapters through `getInstance(..., { ai })`.
 
-Agent support is part of `@purista/core` via `ServiceBuilder.getAgentQueueBuilder(...)`. Concrete model backends come from provider packages such as `@purista/harness-openai`.
-
-For standalone runtime setup, tools, skills, guardrails, tests, evaluations,
-and operations, use the [AI Harness Guide](/handbook/harness/). This
-section remains deliberately focused on the PURISTA service, command, queue,
-and stream boundary.
-
-<div class="callout callout--info">
-  <div class="callout__title">AI on normal PURISTA rails</div>
-  <p>Agents reuse the same service, queue, command, stream, event bridge, and HTTP infrastructure as the rest of PURISTA. They are not a separate application lane.</p>
-</div>
-
-## In this section
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-  <a href="/handbook/blocks/agent-pattern/harness-integration/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">Harness Integration</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Place service contracts, delivery, authorization, and runtime ownership on the correct side of the boundary.</div>
-  </a>
-  <a href="/handbook/blocks/agent-pattern/what-is-agent/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">What is an Agent?</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Understand agent types, model capabilities, session policies, and runtime requirements.</div>
-  </a>
-  <a href="/handbook/blocks/agent-pattern/agent-builder/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">The Agent Builder</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Define typed agents with models, tools, skills, execution policies, and streaming modes.</div>
-  </a>
-  <a href="/handbook/blocks/agent-pattern/agent-workflows/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">Agent Workflows</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Chain agents, orchestrate multi-step reasoning, and manage state across agent boundaries.</div>
-  </a>
-  <a href="/handbook/blocks/agent-pattern/http-exposure/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">HTTP Exposure</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Expose agents as REST endpoints with aggregate or accepted response contracts.</div>
-  </a>
-  <a href="/handbook/blocks/agent-pattern/guardrails/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">Guardrails in PURISTA</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Combine Harness content controls with framework authorization and durable delivery boundaries.</div>
-  </a>
-  <a href="/handbook/blocks/agent-pattern/agent-testing/" class="block p-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-bg-elev)] hover:border-[var(--color-found)] transition-colors">
-    <div class="font-semibold text-[var(--color-fg)] mb-1">Testing</div>
-    <div class="text-sm text-[var(--color-fg-muted)]">Test agents with harnesses, scripted models, and deterministic tool responses.</div>
-  </a>
-</div>
-
-## Quick reference
-
-### Agent lifecycle
-
-```mermaid
-flowchart LR
-    A[Input Received] --> B[Input Validation]
-    B --> C[Before Guards]
-    C --> D[Invoke Agent]
-    D --> E[Model Reasoning]
-    E --> F[Tool Calls]
-    F --> G[Structured Output]
-    G --> H[Return Result]
-    E -.->|Streaming| I[writer.write chunk]
-    I --> J[writer.close final]
-```
-
-### Key principles
-
-- Agents generate a queue, worker, command, and stream that use **AI models** for reasoning.
-- Agent builders are available from `@purista/core`.
-- Use `getAgentQueueBuilder(agentName, description)` to define an agent.
-- Schema methods: `addPayloadSchema`, `addParameterSchema`, `addOutputSchema`.
-- Set the agent logic with `setRunFunction(async context => { ... })`.
-- Model capabilities gate which methods are available on `context.harness.models`.
-- Tools: `canInvoke` for command tools, `canInvokeAgent` for child agents.
-- Skills: `useSkills(names)`, `useBuiltInTools(names|false)`.
-- Session: `setSessionPolicy({ mode: 'ephemeral'|'conversation', payloadPath? })`.
-- Runtime requires `queueBridge` and `ai.models` in service instance options.
-- HTTP exposure: `exposeAsHttpEndpoint(method, path, options)` registers either a JSON response endpoint or an SSE stream endpoint.
-- `canEmit` and `canConsumeStream` are **not implemented** on AgentQueueBuilder.
-- Context: `context.invoke.tools['serviceName.version.command'].call(payload, parameter?)`.
-- Context: `context.invoke.agents['agentName.version'].run(payload, parameter?)`.
+Read the current [Build AI-powered services guide](/handbook/framework/build-ai-powered-services/).

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import test from 'node:test'
 import { resolve } from 'node:path'
+import test from 'node:test'
 
 const root = resolve(import.meta.dirname, '..')
 const guardrailSources = [
@@ -52,9 +52,21 @@ test('canonical Guardrails content defines every phase and the four-stage bounda
 	for (const phase of ['input', 'output', 'tool_input', 'tool_output', 'retrieval']) {
 		assert.match(text, new RegExp(`id: '${phase}'`), `${source} must define the ${phase} phase`)
 	}
-	assert.match(text, /Output rails run only on final answer candidates\./, `${source} must limit output rails to final answer candidates`)
-	assert.match(text, /Intermediate tool-call responses skip output rails\./, `${source} must skip output rails for intermediate tool calls`)
-	assert.match(text, /build\(\) verifies selected tool IDs and required model aliases\/capabilities/, `${source} must define the build preflight guarantee`)
+	assert.match(
+		text,
+		/Output rails run only on final answer candidates\./,
+		`${source} must limit output rails to final answer candidates`,
+	)
+	assert.match(
+		text,
+		/Intermediate tool-call responses skip output rails\./,
+		`${source} must skip output rails for intermediate tool calls`,
+	)
+	assert.match(
+		text,
+		/build\(\) verifies selected tool IDs and required model aliases\/capabilities/,
+		`${source} must define the build preflight guarantee`,
+	)
 	for (const stage of ['TypeScript inline configuration', 'Zod parse/compile', 'Harness build\\(\\)', 'Invocation']) {
 		assert.match(text, new RegExp(`stage: '${stage}'`), `${source} must define the ${stage} guarantee stage`)
 	}
@@ -65,7 +77,12 @@ test('website projections render the canonical Guardrails lifecycle content', ()
 		[
 			'web/src/data/harness-markdown.ts',
 			['guardrailsPhases', 'guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee'],
-			['const guardrailsPhaseMarkdown = guardrailsPhases', '${guardrailsPhaseMarkdown}', '${guardrailsOutputRailGuarantee}', '${guardrailsBuildGuarantee}'],
+			[
+				'const guardrailsPhaseMarkdown = guardrailsPhases',
+				'${guardrailsPhaseMarkdown}',
+				'${guardrailsOutputRailGuarantee}',
+				'${guardrailsBuildGuarantee}',
+			],
 		],
 		[
 			'web/src/pages/harness/guardrails.astro',
@@ -75,7 +92,12 @@ test('website projections render the canonical Guardrails lifecycle content', ()
 		[
 			'web/src/components/harness/GuardrailsArchitecture.astro',
 			['guardrailsPhasesById', 'guardrailsOutputRailGuarantee', 'guardrailsBuildGuarantee'],
-			['{output.diagramTiming}', '{output.diagramDescription}', '{guardrailsOutputRailGuarantee}', '{guardrailsBuildGuarantee}'],
+			[
+				'{output.diagramTiming}',
+				'{output.diagramDescription}',
+				'{guardrailsOutputRailGuarantee}',
+				'{guardrailsBuildGuarantee}',
+			],
 		],
 	]) {
 		const text = readFileSync(resolve(root, source), 'utf8')
@@ -93,7 +115,11 @@ test('website projections render the canonical Guardrails lifecycle content', ()
 		'web/src/content/handbook-cards/harness/guardrails-governance.mdx',
 	]) {
 		const text = readFileSync(resolve(root, source), 'utf8')
-		assert.match(text, /\[Guardrails overview\]\(\/harness\/guardrails\/\)/, `${source} must defer shared lifecycle prose to the canonical overview`)
+		assert.match(
+			text,
+			/\[Guardrails overview\]\(\/harness\/guardrails\/\)/,
+			`${source} must defer shared lifecycle prose to the canonical overview`,
+		)
 	}
 })
 
@@ -104,7 +130,11 @@ test('canonical PURISTA skill keeps the final-candidate output rule', () => {
 	]) {
 		const text = readFileSync(resolve(root, source), 'utf8')
 		assert.match(text, /final[- ]answer candidates?/i, `${source} must limit output rails to final answer candidates`)
-		assert.match(text, /intermediate tool-call responses skip output rails/i, `${source} must state that intermediate tool-call responses skip output rails`)
+		assert.match(
+			text,
+			/intermediate tool-call responses skip output rails/i,
+			`${source} must state that intermediate tool-call responses skip output rails`,
+		)
 	}
 })
 

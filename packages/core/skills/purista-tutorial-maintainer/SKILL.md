@@ -20,8 +20,9 @@ skill or authorize implementing an entire series when asked for one chapter.
 All examples use PURISTA Framework. Start by creating a project, then install,
 configure, and start its HTTP server. A browser UI is an optional extension;
 business behavior then enters services through commands, streams, queues, or events.
-Agents and workflows attach to versioned services. Harness is the attached
-runtime, never a separate tutorial application. Vercel AI SDK UI Message
+Agents and workflows are native Harness modules composed into one definition
+and runtime mounted by the owning versioned service. Harness is never a
+separate tutorial application. Vercel AI SDK UI Message
 Stream v1 is the initial browser protocol. AI Elements supplies the example's
 chat, message, tool, source, prompt, status, and approval components. Neither
 is a replacement backend agent loop.

@@ -223,7 +223,7 @@ export class HarnessHostToolBuilder<
 			Invokes,
 			StreamInvokes,
 			QueueInvokes,
-			EmitList & Record<EventName, EventSchema>
+			EmitList & Record<EventName, InferIn<EventSchema>>
 		>
 	}
 

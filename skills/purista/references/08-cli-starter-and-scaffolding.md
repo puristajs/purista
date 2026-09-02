@@ -106,10 +106,16 @@ Expected project layout:
   public/                              # only when Hono HTTP support is enabled
   src/
     config/                            # generated bridge/http config when selected blueprints need it
-    harness/                           # portable native Harness definitions and tests
-      <harnessName>/
-        <harnessName>Harness.ts
-        <harnessName>Harness.test.ts
+    harness/                           # one portable composition per service
+      <serviceName>/
+        <serviceName>Harness.ts
+        agent/<agentName>/
+          <agentName>Agent.ts
+          <agentName>Agent.test.ts
+        workflow/<workflowName>/
+          <workflowName>Workflow.ts
+        tool/<toolName>/
+          <toolName>Tool.ts
     service/
       serviceEvent.enum.ts             # shared generated service event enum
       <serviceName>/
@@ -148,7 +154,7 @@ Expected project layout:
               <workerName>QueueWorkerBuilder.ts
               <workerName>QueueWorkerBuilder.test.ts
           harness/
-            <harnessName>Mount.ts      # publication and host-tool policy
+            <serviceName>HarnessMount.ts # publication and host-tool policy
     eventbridge.ts                     # generated from selected event bridge blueprint
     http.ts                            # only when Hono HTTP support is enabled
     index.ts
@@ -165,7 +171,8 @@ Artifact placement rules:
 - version-specific service builder setup lives in `v<version>/<serviceName>V<version>ServiceBuilder.ts`
 - schemas and inferred types stay beside the Framework or Harness boundary that owns them
 - queue workers live under `queue-worker/`, not inside the queue folder
-- `add:agent` creates a native definition under `src/harness/<name>/`, a standalone `FakeModelProvider` test, and a mount policy under the owning service
+- the first `add:agent` creates `src/harness/<service>/<service>Harness.ts`, one native module under `agent/<name>/`, a standalone `FakeModelProvider` test, and one service mount policy
+- later `add:agent` calls add modules and published targets to those same service-owned files; they never add another `mountHarness(...)` call
 - runtime wiring stays in `src/index.ts`, `src/eventbridge.ts`, `src/http.ts`, `src/config/`, or app-specific bootstrap files, not in boundary builders
 
 ## Starter And create-purista

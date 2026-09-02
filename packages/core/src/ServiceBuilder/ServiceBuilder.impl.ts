@@ -100,7 +100,9 @@ export type InstanceConfigType<S extends ServiceBuilderTypes<any, any, any, any,
 		/** Low-level metrics recorder override. */
 		metricsRecorder?: PuristaMetricsRecorder
 		/** Runtime bindings required by mounted Harness definitions. */
-		ai?: S['Harnesses'] extends readonly [] ? never : MountedHarnessRuntimeConfig<S['Harnesses']>
+		ai?: S['Harnesses'] extends readonly [infer D extends HarnessDefinition<any>]
+			? MountedHarnessRuntimeConfig<D>
+			: never
 	} & (keyof S['Resources'] extends never ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends never ? { serviceConfig?: never } : { serviceConfig?: S['ConfigInputType'] })
 >
@@ -118,7 +120,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
 	private scheduleDefinitionList: ScheduleDefinition[] = []
 	private eventToQueueBindingList: EventToQueueBindingDefinition[] = []
-	private harnessMountList: HarnessMount[] = []
+	private harnessMount?: HarnessMount
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
@@ -243,10 +245,19 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 	 *
 	 * Only targets listed in `publish` receive versioned PURISTA addresses. The
 	 * same definition remains directly runnable with `definition.getInstance`.
+	 * A service accepts one mount; compose additional agents, workflows, tools,
+	 * and Skills into that definition with native Harness modules.
+	 *
+	 * @example
+	 * ```ts
+	 * const support = supportServiceBuilder.mountHarness(supportHarness, {
+	 *   publish: { agents: ['triage_ticket'] },
+	 * })
+	 * ```
 	 */
 	mountHarness<const D extends HarnessDefinition<any>>(
 		definition: D,
-		policy: HarnessPublishPolicy<HarnessState<D>, S['Resources']>,
+		policy: S['Harnesses'] extends readonly [] ? HarnessPublishPolicy<HarnessState<D>, S['Resources']> : never,
 	) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -254,8 +265,14 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				'You can not mount a Harness after resolveDefinitions is called.',
 			)
 		}
-		this.harnessMountList.push(Object.freeze({ definition, policy }) as HarnessMount)
-		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [...S['Harnesses'], D]>>
+		if (this.harnessMount) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Only one Harness definition can be mounted on a service. Compose additional capabilities with native Harness modules.',
+			)
+		}
+		this.harnessMount = Object.freeze({ definition, policy }) as HarnessMount
+		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'Harnesses', readonly [D]>>
 	}
 
 	/**
@@ -478,10 +495,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 
 		const { commands, subscriptions, streams, queues, queueWorkers, eventToQueueBindings } =
 			await this.resolveDefinitions()
-		const mountedTargets = this.harnessMountList.flatMap(mount => [
-			...(mount.policy.publish.agents ?? []),
-			...(mount.policy.publish.workflows ?? []),
-		])
+		const mountedTargets = this.harnessMount
+			? [...(this.harnessMount.policy.publish.agents ?? []), ...(this.harnessMount.policy.publish.workflows ?? [])]
+			: []
 		const commandTargets = new Set(commands.map(command => command.commandName))
 		const streamTargets = new Set(streams.map(stream => stream.streamName))
 		const occupiedMountedTargets = new Set<string>()
@@ -536,7 +552,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 		})
 
 		let harnessMountRuntime: HarnessMountRuntime | undefined
-		if (this.harnessMountList.length > 0) {
+		if (this.harnessMount) {
 			if (!options?.ai) {
 				await service.destroy()
 				throw new UnhandledError(
@@ -549,7 +565,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes<any, any, any, any, an
 				this.info.serviceVersion,
 				eventBridge,
 				logger,
-				this.harnessMountList,
+				this.harnessMount,
 				options.ai as unknown as HarnessInstanceConfig<any>,
 				(options.resources ?? {}) as Record<string, unknown>,
 				(definition, context) => service.createHarnessHostToolContext(definition, context),

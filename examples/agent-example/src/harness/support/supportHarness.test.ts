@@ -1,9 +1,9 @@
 import { FakeModelProvider } from '@purista/harness/testing'
 import { describe, expect, it } from 'vitest'
 
-import { incidentHarness } from './incidentHarness.js'
+import { supportHarness } from './supportHarness.js'
 
-describe('incidentHarness', () => {
+describe('supportHarness', () => {
 	it('runs the same native agent definition without PURISTA', async () => {
 		const provider = new FakeModelProvider({ strict: true })
 		provider.enqueueObject({
@@ -11,7 +11,7 @@ describe('incidentHarness', () => {
 			usage: { inputTokens: 8, outputTokens: 6, totalTokens: 14 },
 			finishReason: 'stop',
 		})
-		const runtime = await incidentHarness.getInstance({
+		const runtime = await supportHarness.getInstance({
 			models: { primary: { provider, model: 'fake' } },
 			hostTools: {
 				get_incident_snapshot: async () => {

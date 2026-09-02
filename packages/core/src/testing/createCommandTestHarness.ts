@@ -2,7 +2,6 @@ import type { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/Comma
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import { isCommandSuccessResponse } from '../core/types/commandType/isCommandSuccessResponse.impl.js'
-import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import { getEventBridgeMock } from '../mocks/getEventBridge.mock.js'
 import { getCommandMessageMock } from '../mocks/messages/getCommandMessage.mock.js'
 import type { InstanceConfigType, ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
@@ -40,7 +39,7 @@ export type CommandTestHarnessResult<T extends CommandDefinitionBuilder<any, any
 		? Infer<InferCommandBuilderConfig<T>['OutputSchema']>
 		: Infer<InferCommandBuilderConfig<T>['TransformOutputSchema']>
 
-export type CreateCommandTestHarnessOptions<TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>> =
+export type CreateCommandTestHarnessOptions<TServiceBuilder extends { getInstance: (...args: any[]) => Promise<any> }> =
 	InstanceConfigType<InferCommandHarnessServiceBuilderConfig<TServiceBuilder>> & {
 		eventBridge?: EventBridge
 		queueBridge?: QueueBridge
@@ -55,7 +54,7 @@ export type CreateCommandTestHarnessOptions<TServiceBuilder extends ServiceBuild
  * @group Unit test helper
  */
 export const createCommandTestHarness = async <
-	TServiceBuilder extends ServiceBuilder<ServiceBuilderTypes>,
+	TServiceBuilder extends { getInstance: (...args: any[]) => Promise<any> },
 	TCommandBuilder extends CommandDefinitionBuilder<any, any>,
 >(
 	serviceBuilder: TServiceBuilder,

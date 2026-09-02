@@ -1,10 +1,14 @@
 # Core AI Migration Plan
 
-Status: active implementation plan for autonomous agents.
+Status: superseded by
+[88-harness-first-service-integration.md](./88-harness-first-service-integration.md).
 
 Date: 2026-05-15
 
 Baseline commit: `4768cebb4` (`chore: baseline before core ai migration`)
+
+This document records the removed `AgentQueueBuilder` implementation phase.
+It is historical and must not be used as current API or architecture guidance.
 
 ## 1. Final Decision
 

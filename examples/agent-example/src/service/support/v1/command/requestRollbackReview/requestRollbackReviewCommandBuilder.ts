@@ -1,8 +1,5 @@
 import { rollbackActionDigest } from '../../../../../resource/rollbackReviewRepository.js'
-import {
-	supportV1RollbackReviewActionSchema,
-	supportV1RollbackReviewRequestOutputSchema,
-} from '../../schema.js'
+import { supportV1RollbackReviewActionSchema, supportV1RollbackReviewRequestOutputSchema } from '../../schema.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 
 export const requestRollbackReviewCommandBuilder = supportV1ServiceBuilder
@@ -17,4 +14,3 @@ export const requestRollbackReviewCommandBuilder = supportV1ServiceBuilder
 			status: 'pending' as const,
 		}
 	})
-

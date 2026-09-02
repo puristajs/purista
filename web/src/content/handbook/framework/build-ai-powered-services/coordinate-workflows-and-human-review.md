@@ -11,7 +11,7 @@ operations while remaining independently runnable outside PURISTA.
 Publish it like an agent:
 
 ```ts title="Publish a workflow target"
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHarness, {
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
   publish: { workflows: ['review_rollback'] },
 })
 ```
@@ -25,9 +25,17 @@ const reviewCommandBuilder = supportV1ServiceBuilder
   'Support',
   '1',
   'review_rollback',
-  incidentHarness.contracts.workflows.review_rollback,
+  supportHarness.contracts.workflows.review_rollback,
   )
 ```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+publishes the selected workflow from the service's one Harness runtime.
+[`canInvokeWorkflow(service, version, target, contract)`](/handbook/api/classes/_purista_core.CommandDefinitionBuilder/#caninvokeworkflow)
+declares its versioned EventBridge address and derives both delivery modes from
+the portable contract.
+[`getCommandBuilder(...)`](/handbook/api/classes/_purista_core.ServiceBuilder/#getcommandbuilder)
+creates the caller's independent application contract.
 
 ## Approval flow
 

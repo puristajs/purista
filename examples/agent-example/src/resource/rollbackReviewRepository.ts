@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto'
 import type { Pool, PoolClient } from 'pg'
 
 import {
-	supportV1RollbackReviewActionSchema,
 	type SupportV1RollbackReviewAction,
+	supportV1RollbackReviewActionSchema,
 } from '../service/support/v1/schema.js'
 
 export type RollbackReviewStatus = 'pending' | 'approved' | 'rejected'
@@ -38,7 +38,9 @@ export interface RollbackReviewRepository {
 }
 
 export function rollbackActionDigest(action: SupportV1RollbackReviewAction): string {
-	return createHash('sha256').update(JSON.stringify(supportV1RollbackReviewActionSchema.parse(action))).digest('hex')
+	return createHash('sha256')
+		.update(JSON.stringify(supportV1RollbackReviewActionSchema.parse(action)))
+		.digest('hex')
 }
 
 export class InMemoryRollbackReviewRepository implements RollbackReviewRepository {
@@ -126,7 +128,14 @@ export class PostgresRollbackReviewRepository implements RollbackReviewRepositor
 			 (review_id, action_json, action_digest, target_revision, status, created_at, expires_at)
 			 values ($1, $2::jsonb, $3, $4, 'pending', $5, $6)
 			 on conflict (review_id) do nothing`,
-			[action.reviewId, JSON.stringify(action), digest, action.targetRevision, new Date().toISOString(), action.expiresAt],
+			[
+				action.reviewId,
+				JSON.stringify(action),
+				digest,
+				action.targetRevision,
+				new Date().toISOString(),
+				action.expiresAt,
+			],
 		)
 		const record = await this.get(action.reviewId)
 		if (!record || record.actionDigest !== digest) throw new Error('review_id_conflict')
@@ -181,10 +190,9 @@ export class PostgresRollbackReviewRepository implements RollbackReviewRepositor
 
 	async recordReceipt(executionId: string, receiptId: string): Promise<RollbackReviewRecord & { receiptId: string }> {
 		return this.transaction(async client => {
-			const result = await client.query(
-				'select * from purista_rollback_reviews where execution_id = $1 for update',
-				[executionId],
-			)
+			const result = await client.query('select * from purista_rollback_reviews where execution_id = $1 for update', [
+				executionId,
+			])
 			const current = requiredRecord(result.rows[0] ? rowToReview(result.rows[0]) : undefined)
 			if (current.receiptId && current.receiptId !== receiptId) throw new Error('receipt_conflict')
 			const updated = await client.query(
@@ -239,7 +247,9 @@ export class PostgresRollbackReviewRepository implements RollbackReviewRepositor
 }
 
 async function readForUpdate(client: PoolClient, reviewId: string): Promise<RollbackReviewRecord> {
-	const result = await client.query('select * from purista_rollback_reviews where review_id = $1 for update', [reviewId])
+	const result = await client.query('select * from purista_rollback_reviews where review_id = $1 for update', [
+		reviewId,
+	])
 	return requiredRecord(result.rows[0] ? rowToReview(result.rows[0]) : undefined)
 }
 
@@ -258,10 +268,7 @@ function rowToReview(row: Record<string, unknown>): RollbackReviewRecord {
 	}
 }
 
-function assertExecutable(
-	record: RollbackReviewRecord,
-	input: { actionDigest: string; targetRevision: number },
-): void {
+function assertExecutable(record: RollbackReviewRecord, input: { actionDigest: string; targetRevision: number }): void {
 	if (record.status !== 'approved') throw new Error('review_not_approved')
 	if (record.actionDigest !== input.actionDigest) throw new Error('stale_action')
 	if (record.action.targetRevision !== input.targetRevision) throw new Error('stale_target_revision')
@@ -276,4 +283,3 @@ function requiredRecord(record: RollbackReviewRecord | undefined): RollbackRevie
 function sha256(value: string): string {
 	return createHash('sha256').update(value).digest('hex').slice(0, 48)
 }
-

@@ -50,7 +50,6 @@ const baseTsConfig: TsConfigJson = {
 const basePuristaConfig: Partial<PuristaConfig> = {
 	$schema: 'https://purista.dev/schemas/1.12.0/schema.json',
 	servicePath: 'src/service',
-	agentPath: 'src/agents',
 }
 
 const basePackage: PKG = {

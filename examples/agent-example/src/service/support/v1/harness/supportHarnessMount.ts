@@ -1,10 +1,10 @@
 import { commandAsHarnessTool } from '@purista/core'
 
-import { incidentHarness } from '../../../../harness/incident/incidentHarness.js'
+import { supportHarness } from '../../../../harness/support/supportHarness.js'
 
-export { incidentHarness }
+export { supportHarness }
 
-export const incidentHarnessPolicy = {
+export const supportHarnessPolicy = {
 	publish: {
 		agents: ['triage_ticket', 'analyze_signals'],
 		workflows: ['review_rollback'],

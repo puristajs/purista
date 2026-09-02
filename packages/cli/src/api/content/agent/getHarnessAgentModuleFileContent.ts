@@ -7,8 +7,9 @@ const toAgentIdentifier = (name: string) => {
 	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
 }
 
-/** Generate one portable, provider-neutral Harness definition. */
-export const getHarnessDefinitionFileContent = (input: {
+/** Generate one provider-neutral native Harness agent module. */
+export const getHarnessAgentModuleFileContent = (input: {
+	serviceName: string
 	agentName: string
 	agentDescription: string
 	codeWriterOptions?: Partial<Options>
@@ -16,11 +17,10 @@ export const getHarnessDefinitionFileContent = (input: {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const agentId = snakeCase(input.agentName)
-	const harnessName = `${camelCase(input.agentName)}Harness`
 	const inputSchemaName = `${agentIdentifier}InputSchema`
 	const outputSchemaName = `${agentIdentifier}OutputSchema`
 
-	writer.writeLine("import { defineHarness } from '@purista/harness'")
+	writer.writeLine("import { defineHarnessModule, type BuilderState, type ModelAlias } from '@purista/harness'")
 	writer.writeLine("import { z } from 'zod'").blankLine()
 
 	writer.writeLine(`export const ${inputSchemaName} = z.object({`)
@@ -34,20 +34,27 @@ export const getHarnessDefinitionFileContent = (input: {
 	writer.indent(() => writer.writeLine('message: z.string(),'))
 	writer.writeLine('})').blankLine()
 
-	writer.writeLine(`export const ${harnessName} = defineHarness({ name: '${camelCase(input.agentName)}' })`)
+	writer.writeLine('type PrimaryModelState = BuilderState & { models: { primary: ModelAlias } }').blankLine()
+	writer.writeLine(
+		`export const ${agentIdentifier} = defineHarnessModule<PrimaryModelState>()('${snakeCase(input.serviceName)}.agent.${agentId}', {`,
+	)
 	writer.indent(() => {
-		writer.writeLine(".requireModel('primary', { capabilities: ['object'] })")
-		writer.writeLine(`.agent('${agentId}', {`)
+		writer.writeLine("version: '1.0.0',")
+		writer.writeLine('register(builder) {')
 		writer.indent(() => {
-			writer.writeLine("model: 'primary',")
-			writer.writeLine(`input: ${inputSchemaName},`)
-			writer.writeLine(`output: ${outputSchemaName},`)
-			writer.writeLine("updates: 'object-snapshot',")
-			writer.writeLine(`instructions: ${JSON.stringify(input.agentDescription)},`)
+			writer.writeLine(`return builder.agent('${agentId}', {`)
+			writer.indent(() => {
+				writer.writeLine("model: 'primary',")
+				writer.writeLine(`input: ${inputSchemaName},`)
+				writer.writeLine(`output: ${outputSchemaName},`)
+				writer.writeLine("updates: 'object-snapshot',")
+				writer.writeLine(`instructions: ${JSON.stringify(input.agentDescription)},`)
+			})
+			writer.writeLine('})')
 		})
-		writer.writeLine('})')
-		writer.writeLine('.define()')
+		writer.writeLine('},')
 	})
+	writer.writeLine('})')
 
 	return writer.toString()
 }

@@ -5,10 +5,12 @@ order: 393
 ---
 
 `mountHarness` is synchronous because a Harness definition is already complete
-and immutable. It accepts the definition and one mount policy.
+and immutable. It accepts the definition and one mount policy. Call it once per
+service; native Harness modules compose every capability behind that lifecycle
+boundary.
 
 ```ts title="Publish targets and bind host tools"
-export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHarness, {
+export const supportV1Service = supportV1ServiceBuilder.mountHarness(supportHarness, {
   publish: {
     agents: ['triage_ticket', 'analyze_signals'],
     workflows: ['review_rollback'],
@@ -26,6 +28,11 @@ export const supportV1Service = supportV1ServiceBuilder.mountHarness(incidentHar
   },
 })
 ```
+
+[`mountHarness(definition, policy)`](/handbook/api/classes/_purista_core.ServiceBuilder/#mountharness)
+records this single deployment boundary synchronously. The service creates and
+owns the actual Harness runtime only when `getInstance(...)` receives the
+required `ai` bindings.
 
 | Field | Purpose |
 | --- | --- |

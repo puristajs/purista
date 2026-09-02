@@ -259,8 +259,7 @@ Since version 1.12.0, PURISTA expects a `purista.json` file in the project root.
   "eventConvention": "camel",
   "linter": "biome",
   "formatter": "biome",
-  "servicePath": "src/services",
-  "agentPath": "src/agents"
+  "servicePath": "src/services"
 }
 ```
 
@@ -276,7 +275,6 @@ Since version 1.12.0, PURISTA expects a `purista.json` file in the project root.
 | `linter` | `string` | `none` | `biome`, `eslint`, `none` |
 | `formatter` | `string` | `none` | `biome`, `prettier`, `none` |
 | `servicePath` | `string` | `src/service` | Any valid relative path |
-| `agentPath` | `string` | `src/agents` | Any valid relative path |
 
 ## Next steps
 

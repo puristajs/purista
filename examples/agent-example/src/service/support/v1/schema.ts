@@ -87,7 +87,11 @@ export const supportV1CoordinateIncidentOutputPayloadSchema = supportV1CreateInc
 })
 
 export const supportV1RollbackReviewActionSchema = z.object({
-	reviewId: z.string().min(1).max(120).regex(/^[A-Za-z0-9_.:-]+$/),
+	reviewId: z
+		.string()
+		.min(1)
+		.max(120)
+		.regex(/^[A-Za-z0-9_.:-]+$/),
 	incidentId: z.string().min(1),
 	changeId: z.string().min(1),
 	targetRevision: z.number().int().nonnegative(),
@@ -112,7 +116,10 @@ export const supportV1RollbackReviewDecisionSchema = z.object({
 
 export const supportV1RollbackReviewRequestOutputSchema = z.object({
 	reviewId: z.string().min(1),
-	actionDigest: z.string().length(64).regex(/^[a-f0-9]+$/),
+	actionDigest: z
+		.string()
+		.length(64)
+		.regex(/^[a-f0-9]+$/),
 	status: z.literal('pending'),
 })
 
@@ -124,7 +131,10 @@ export const supportV1RollbackReviewDecisionOutputSchema = z.object({
 
 export const supportV1ExecuteRollbackSchema = z.object({
 	reviewId: z.string().min(1).max(120),
-	actionDigest: z.string().length(64).regex(/^[a-f0-9]+$/),
+	actionDigest: z
+		.string()
+		.length(64)
+		.regex(/^[a-f0-9]+$/),
 	targetRevision: z.number().int().nonnegative(),
 })
 

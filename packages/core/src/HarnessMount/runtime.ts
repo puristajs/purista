@@ -63,9 +63,9 @@ type RuntimeTargetPolicy = Readonly<{
 	successEvent?: string
 }>
 
-/** Service-owned lifecycle for one or more mounted portable Harness definitions. */
+/** Service-owned lifecycle for one mounted portable Harness definition. */
 export class HarnessMountRuntime {
-	private readonly runtimes: MountedRuntime[] = []
+	private runtime?: MountedRuntime
 	private readonly activeStreams = new Map<string, AbortController>()
 	private started = false
 
@@ -74,7 +74,7 @@ export class HarnessMountRuntime {
 		private readonly serviceVersion: string,
 		private readonly eventBridge: EventBridge,
 		private readonly logger: Logger,
-		private readonly mounts: readonly HarnessMount[],
+		private readonly mount: HarnessMount,
 		private readonly config: Omit<HarnessInstanceConfig<any, HarnessHostContext>, 'hostTools'>,
 		private readonly resources: Record<string, unknown>,
 		private readonly createHostToolContext: (
@@ -83,23 +83,21 @@ export class HarnessMountRuntime {
 		) => HarnessHostToolFunctionContext,
 	) {}
 
-	/** Instantiate every Harness and register its explicitly published aggregate targets. */
+	/** Instantiate the Harness and register its explicitly published aggregate targets. */
 	async start() {
 		if (this.started) return
 		const occupied = new Set<string>()
 		try {
-			for (const mount of this.mounts) {
-				const harness = await mount.definition.getInstance(this.configFor(mount))
-				const runtime: MountedRuntime = { definition: mount.definition, harness, registrations: [] }
-				this.runtimes.push(runtime)
-				for (const agentId of (mount.policy.publish.agents ?? []) as readonly string[]) {
-					this.assertFreeAddress(agentId, occupied)
-					await this.register(runtime, mount, 'agent', agentId)
-				}
-				for (const workflowId of (mount.policy.publish.workflows ?? []) as readonly string[]) {
-					this.assertFreeAddress(workflowId, occupied)
-					await this.register(runtime, mount, 'workflow', workflowId)
-				}
+			const harness = await this.mount.definition.getInstance(this.configFor())
+			const runtime: MountedRuntime = { definition: this.mount.definition, harness, registrations: [] }
+			this.runtime = runtime
+			for (const agentId of (this.mount.policy.publish.agents ?? []) as readonly string[]) {
+				this.assertFreeAddress(agentId, occupied)
+				await this.register(runtime, 'agent', agentId)
+			}
+			for (const workflowId of (this.mount.policy.publish.workflows ?? []) as readonly string[]) {
+				this.assertFreeAddress(workflowId, occupied)
+				await this.register(runtime, 'workflow', workflowId)
 			}
 			this.started = true
 		} catch (error) {
@@ -110,17 +108,18 @@ export class HarnessMountRuntime {
 
 	/** Resolve one model from the runtime created for the exact mounted definition. */
 	getModel(definition: HarnessDefinition<any>, alias: string): ModelHandle {
-		const runtime = this.runtimes.find(candidate => candidate.definition === definition)
+		const runtime = this.runtime?.definition === definition ? this.runtime : undefined
 		if (!runtime) throw new Error(`Harness definition "${definition.name}" is not mounted on this service instance.`)
 		const model = (runtime.harness.models as Record<string, ModelHandle | undefined>)[alias]
 		if (!model) throw new Error(`Harness model "${alias}" is not available on "${definition.name}".`)
 		return model
 	}
 
-	/** Unregister published addresses, then close each Harness runtime. */
+	/** Unregister published addresses, then close the Harness runtime. */
 	async shutdown() {
 		const failures: unknown[] = []
-		for (const runtime of [...this.runtimes].reverse()) {
+		const runtime = this.runtime
+		if (runtime) {
 			for (const registration of [...runtime.registrations].reverse()) {
 				const address = {
 					serviceName: this.serviceName,
@@ -145,19 +144,19 @@ export class HarnessMountRuntime {
 			const result = await runtime.harness.shutdown()
 			failures.push(...result.errors)
 		}
-		this.runtimes.length = 0
+		this.runtime = undefined
 		for (const controller of this.activeStreams.values()) controller.abort(new Error('service_shutdown'))
 		this.activeStreams.clear()
 		this.started = false
 		if (failures.length > 0) throw new AggregateError(failures, 'Harness mount shutdown failed.')
 	}
 
-	private configFor(mount: HarnessMount): HarnessInstanceConfig<any, HarnessHostContext> {
+	private configFor(): HarnessInstanceConfig<any, HarnessHostContext> {
 		const models = Object.fromEntries(
-			Object.keys(mount.definition.catalog.models).map(alias => [alias, this.config.models[alias]]),
+			Object.keys(this.mount.definition.catalog.models).map(alias => [alias, this.config.models[alias]]),
 		)
 		const hostTools = Object.fromEntries(
-			Object.entries(mount.policy.hostTools ?? {}).map(([id, binding]) => [
+			Object.entries(this.mount.policy.hostTools ?? {}).map(([id, binding]) => [
 				id,
 				isCommandToolAdapter(binding)
 					? this.commandToolBinding(binding)
@@ -212,12 +211,12 @@ export class HarnessMountRuntime {
 		occupied.add(target)
 	}
 
-	private async register(runtime: MountedRuntime, mount: HarnessMount, kind: 'agent' | 'workflow', target: string) {
-		const definition = mount.definition
+	private async register(runtime: MountedRuntime, kind: 'agent' | 'workflow', target: string) {
+		const definition = this.mount.definition
 		const catalog = kind === 'agent' ? definition.catalog.agents : definition.catalog.workflows
 		if (!(target in catalog)) throw new Error(`Harness ${kind} "${target}" does not exist in "${definition.name}".`)
 		const policy = (
-			kind === 'agent' ? mount.policy.targets?.agents?.[target] : mount.policy.targets?.workflows?.[target]
+			kind === 'agent' ? this.mount.policy.targets?.agents?.[target] : this.mount.policy.targets?.workflows?.[target]
 		) as RuntimeTargetPolicy | undefined
 		const registration = { target, command: false, stream: false }
 		runtime.registrations.push(registration)

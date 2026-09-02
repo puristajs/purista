@@ -40,11 +40,5 @@
 	"hideGenerator": true,
 	"excludeInternal": true,
 	"excludeExternals": true,
-	"exclude": [
-		"**/**/*.(test).ts",
-		"**/*+(.spec|.e2e|.test).ts",
-		"dist/**",
-		"lib/**",
-		"**/node_modules"
-	]
+	"exclude": ["**/**/*.(test).ts", "**/*+(.spec|.e2e|.test).ts", "dist/**", "lib/**", "**/node_modules"]
 }

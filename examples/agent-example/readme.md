@@ -13,11 +13,11 @@ The example keeps the incident domain intentionally small:
   rollback execution, and receipts.
 
 The Harness definition is
-[`src/harness/incident/incidentHarness.ts`](./src/harness/incident/incidentHarness.ts).
+[`src/harness/support/supportHarness.ts`](./src/harness/support/supportHarness.ts).
 It contains schemas, host-tool contracts, agents, and the workflow, but no
 credentials or deployment adapters. The Support service publishes selected
 targets and binds the host tools in
-[`src/service/support/v1/harness/incidentMount.ts`](./src/service/support/v1/harness/incidentMount.ts).
+[`src/service/support/v1/harness/supportHarnessMount.ts`](./src/service/support/v1/harness/supportHarnessMount.ts).
 
 `triageTicketCommandBuilder` demonstrates the HTTP boundary. The native command
 declares the mounted agent by its versioned address with `canInvokeAgent(...)`,

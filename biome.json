@@ -10,6 +10,7 @@
 			"!**/package-lock.json",
 			"!**/dist/**/*",
 			"!**/examples/ai-basic/public/**/*",
+			"!**/examples/banking/**/*",
 			"!**/*.d.ts",
 			"!**/*.svg",
 			"!**/coverage/**/*",
