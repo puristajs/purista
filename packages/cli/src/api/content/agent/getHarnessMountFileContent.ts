@@ -13,7 +13,7 @@ export const getHarnessMountFileContent = (input: {
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const agentId = snakeCase(`${input.agentName} agent`)
+	const agentId = snakeCase(input.agentName)
 	const harnessName = `${camelCase(input.agentName)}Harness`
 	const policyName = `${camelCase(input.agentName)}HarnessPolicy`
 	const successEventName = input.responseEventName?.trim()

@@ -15,7 +15,7 @@ export const getHarnessDefinitionTestFileContent = (input: {
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
-	const agentId = snakeCase(`${input.agentName} agent`)
+	const agentId = snakeCase(input.agentName)
 	const harnessName = `${camelCase(input.agentName)}Harness`
 
 	writer.writeLine("import { FakeModelProvider } from '@purista/harness/testing'")
