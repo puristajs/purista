@@ -54,6 +54,17 @@ const queryCommand = serviceBuilder
 	})
 	.exposeAsHttpEndpoint('GET', 'secure')
 
+const aiMessageStream = serviceBuilder
+	.getStreamBuilder('aiMessageStream', 'AI SDK UI Message Stream')
+	.addChunkSchema(z.object({ event: z.string(), data: z.unknown() }))
+	.enableChunkAggregation(false)
+	.exposeAsHttpStreamEndpoint('POST', 'ai-chat')
+	.setHttpStreamProtocol('ai-sdk-ui-message-stream-v1')
+	.setHttpResponseHeaders({ 'x-vercel-ai-ui-message-stream': 'v1' })
+	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+		await writer.close()
+	})
+
 const getEndpointService = async () => {
 	const eventBridge = getEventBridgeMock()
 	const endpointBuilder = new ServiceBuilder({
@@ -565,6 +576,50 @@ describe('HonoServiceClass', () => {
 			expect(invokeMock).not.toHaveBeenCalled()
 		} finally {
 			invokeMock.mockRestore()
+			await server.destroy()
+		}
+	})
+
+	it('applies protocol response headers and preserves data-only SSE framing', async () => {
+		const server = await createServer({ enableDynamicRoutes: true })
+		const definition = await aiMessageStream.getDefinition()
+		server.addEndpoint(definition.metadata as any, {
+			serviceName: 'HttpTestService',
+			serviceVersion: '1',
+			serviceTarget: 'aiMessageStream',
+		})
+		const openStream = vi.spyOn(server, 'openStream').mockResolvedValue({
+			sessionId: 'session-1',
+			cancel: vi.fn(async () => undefined),
+			async *[Symbol.asyncIterator]() {
+				yield {
+					payload: {
+						frameType: 'chunk',
+						chunk: { event: 'data', data: { type: 'text-delta', id: 'answer', delta: 'hello' } },
+					},
+				}
+				yield { payload: { frameType: 'chunk', chunk: { event: 'data', data: '[DONE]' } } }
+				yield { payload: { frameType: 'complete', final: null } }
+			},
+		} as any)
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(
+				new Request('http://localhost/api/v1/ai-chat', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: '{}',
+				}),
+			)
+			expect(response.status).toBe(StatusCode.OK)
+			expect(response.headers.get('x-vercel-ai-ui-message-stream')).toBe('v1')
+			const body = await response.text()
+			expect(body).toContain('data: {"type":"text-delta","id":"answer","delta":"hello"}\n\n')
+			expect(body).not.toContain('event: data')
+			expect(body).toContain('data: [DONE]\n\n')
+		} finally {
+			openStream.mockRestore()
 			await server.destroy()
 		}
 	})

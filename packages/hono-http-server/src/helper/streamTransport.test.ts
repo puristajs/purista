@@ -22,6 +22,14 @@ describe('streamTransport helpers', () => {
 		expect(value).toBe('data: [DONE]\n\n')
 	})
 
+	it('encodes data events without a custom SSE event name', () => {
+		const encoder = new TextEncoder()
+		const value = new TextDecoder().decode(
+			encodeProtocolSseEvent(encoder, { event: 'data', data: { type: 'text-delta', delta: 'hello' } }),
+		)
+		expect(value).toBe('data: {"type":"text-delta","delta":"hello"}\n\n')
+	})
+
 	it('detects transport control frames', () => {
 		expect(isTransportControlFrame('open')).toBe(true)
 		expect(isTransportControlFrame('complete')).toBe(true)

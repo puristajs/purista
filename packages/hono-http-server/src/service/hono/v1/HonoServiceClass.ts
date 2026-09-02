@@ -579,6 +579,7 @@ export class HonoServiceClass<
 						return new Response(stream, {
 							status: StatusCode.OK,
 							headers: {
+								...(expose.http.stream?.responseHeaders ?? {}),
 								'content-type': `${responseContentType}; charset=${responseEncodingType}`,
 								'cache-control': 'no-cache, no-transform',
 								connection: 'keep-alive',

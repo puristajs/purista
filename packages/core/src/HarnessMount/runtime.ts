@@ -310,7 +310,7 @@ export class HarnessMountRuntime {
 			let outcome: RunOutcome<unknown> | undefined
 			for await (const event of invoker.stream(message.payload.payload, options)) {
 				if (event.type === 'run.finished') outcome = event.outcome
-				else await this.publishStreamFrame(message, target, { frameType: 'chunk', sequence: sequence++, chunk: event })
+				await this.publishStreamFrame(message, target, { frameType: 'chunk', sequence: sequence++, chunk: event })
 			}
 			if (!outcome) throw new Error(`Mounted Harness ${kind} "${target}" ended without a terminal outcome.`)
 			await runAfterGuards(policy, context, outcome)

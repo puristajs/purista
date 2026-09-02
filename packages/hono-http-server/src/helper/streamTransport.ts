@@ -57,8 +57,9 @@ export const isProtocolSseEvent = (value: unknown): value is ProtocolSseEvent =>
  * Encodes a protocol SSE event for the HTTP response stream.
  */
 export const encodeProtocolSseEvent = (encoder: TextEncoder, event: ProtocolSseEvent): Uint8Array => {
-	if (event.event === 'data' && event.data === '[DONE]') {
-		return encoder.encode('data: [DONE]\n\n')
+	if (event.event === 'data') {
+		const data = event.data === '[DONE]' ? '[DONE]' : JSON.stringify(event.data)
+		return encoder.encode(`data: ${data}\n\n`)
 	}
 	return encoder.encode(`event: ${event.event}\ndata: ${JSON.stringify(event.data)}\n\n`)
 }

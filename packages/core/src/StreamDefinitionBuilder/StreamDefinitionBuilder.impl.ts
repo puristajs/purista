@@ -33,6 +33,14 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
 
+const RESERVED_STREAM_RESPONSE_HEADERS = new Set([
+	'cache-control',
+	'connection',
+	'content-length',
+	'content-type',
+	'transfer-encoding',
+])
+
 /**
  * Builds a stream definition for incremental output or aggregate stream results.
  *
@@ -79,6 +87,7 @@ export class StreamDefinitionBuilder<
 	private isSecure = true
 	private errorStatusCodes: StatusCode[] = []
 	private httpStreamProtocol?: { protocol: string; documentationUrl?: string }
+	private httpResponseHeaders?: Readonly<Record<string, string>>
 	private httpStreamingMode: 'stream' | 'aggregate' = 'stream'
 
 	private durable = false
@@ -698,6 +707,35 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	/**
+	 * Set static response headers required by this HTTP stream protocol.
+	 *
+	 * The HTTP server retains control of transport headers such as
+	 * `content-type`, `cache-control`, and `connection`.
+	 *
+	 * @example
+	 * ```ts
+	 * stream.setHttpResponseHeaders({
+	 *   'x-vercel-ai-ui-message-stream': 'v1',
+	 * })
+	 * ```
+	 */
+	setHttpResponseHeaders(headers: Readonly<Record<string, string>>) {
+		const normalized: Record<string, string> = {}
+		for (const [name, value] of Object.entries(headers)) {
+			const lowerName = name.toLowerCase()
+			if (RESERVED_STREAM_RESPONSE_HEADERS.has(lowerName)) {
+				throw new Error(`HTTP stream response header "${name}" is managed by the server.`)
+			}
+			if (!/^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(name) || /[\r\n]/.test(value)) {
+				throw new Error(`Invalid HTTP stream response header "${name}".`)
+			}
+			normalized[lowerName] = value
+		}
+		this.httpResponseHeaders = Object.freeze(normalized)
+		return this
+	}
+
 	/** Choose whether HTTP exposure returns chunks or an aggregate JSON response. */
 	setHttpStreamingMode(mode: 'stream' | 'aggregate') {
 		this.httpStreamingMode = mode
@@ -855,11 +893,15 @@ export class StreamDefinitionBuilder<
 			metadata.expose.http = this.httpMetadata.expose.http
 			if (metadata.expose.http) {
 				if (this.httpStreamProtocol) {
-					metadata.expose.http.stream = this.httpStreamProtocol
+					metadata.expose.http.stream = {
+						...this.httpStreamProtocol,
+						...(this.httpResponseHeaders ? { responseHeaders: this.httpResponseHeaders } : {}),
+					}
 				}
 				if (!metadata.expose.http.stream) {
 					metadata.expose.http.stream = {
 						protocol: 'purista',
+						...(this.httpResponseHeaders ? { responseHeaders: this.httpResponseHeaders } : {}),
 					}
 				}
 				if (metadata.expose.http.stream) {

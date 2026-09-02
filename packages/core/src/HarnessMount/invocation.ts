@@ -1,8 +1,12 @@
 import type { ExecutionEvent, HarnessTargetContract, RunOutcome } from '@purista/harness'
 
+import { HandledError } from '../core/Error/HandledError.impl.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import type { CorrelationId } from '../core/types/CorrelationId.js'
 import type { InvokeFunction } from '../core/types/InvokeFunction.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { OpenStreamFunction } from '../core/types/OpenStreamFunction.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
 import type { HarnessInvokeParameter } from './runtime.js'
@@ -22,8 +26,16 @@ export type HarnessInvokeDeclaration<C extends AnyTargetContract> = ((
 export type HarnessStreamDeclaration<C extends AnyTargetContract> = ((
 	input: C['$infer']['input'],
 	options?: HarnessInvokeParameter,
-) => Promise<StreamHandle<ExecutionEvent<C['$infer']['output']>, RunOutcome<C['$infer']['output']>>>) & {
+) => Promise<HarnessExecutionStream<C['$infer']['output']>>) & {
 	readonly __harnessTarget: C
+}
+
+/** Cancellable provider-neutral stream returned by an address-first Harness invocation. */
+export interface HarnessExecutionStream<Output> extends AsyncIterable<ExecutionEvent<Output>> {
+	/** EventBridge correlation id backing this stream. */
+	readonly sessionId: CorrelationId
+	/** Stop the remote Harness invocation and release its stream resources. */
+	cancel(reason?: string): Promise<void>
 }
 
 /** Client for one address-first agent or workflow target. */
@@ -34,7 +46,7 @@ export type HarnessTargetClient<C extends AnyTargetContract> = Readonly<{
 	stream(
 		input: C['$infer']['input'],
 		options?: HarnessInvokeParameter,
-	): Promise<StreamHandle<ExecutionEvent<C['$infer']['output']>, RunOutcome<C['$infer']['output']>>>
+	): Promise<HarnessExecutionStream<C['$infer']['output']>>
 }>
 
 type ContractOf<T, Kind extends TargetKind> = T extends { readonly __harnessTarget: infer C }
@@ -137,10 +149,84 @@ export function createHarnessInvocationProxy<T>(
 				const targetAddress = { ...address, serviceTarget: property }
 				return Object.freeze({
 					run: (input: unknown, options: HarnessInvokeParameter = {}) => invoke(targetAddress, input, options),
-					stream: (input: unknown, options: HarnessInvokeParameter = {}) => openStream(targetAddress, input, options),
+					stream: async (input: unknown, options: HarnessInvokeParameter = {}) =>
+						toHarnessExecutionStream(await openStream(targetAddress, input, options)),
 				})
 			}
 			return undefined
 		},
 	}) as T
+}
+
+/**
+ * Hide PURISTA transport frames behind the native Harness execution stream.
+ *
+ * The terminal `run.finished` event is yielded before the transport-level
+ * completion frame ends iteration. Transport failures reject with PURISTA
+ * handled errors and stopping iteration early cancels the remote stream.
+ */
+export function toHarnessExecutionStream<Output>(
+	handle: StreamHandle<ExecutionEvent<Output>, RunOutcome<Output>>,
+): HarnessExecutionStream<Output> {
+	let consumed = false
+	let completed = false
+
+	return Object.freeze({
+		sessionId: handle.sessionId,
+		cancel: (reason?: string) => handle.cancel(reason),
+		[Symbol.asyncIterator]: async function* () {
+			if (consumed) throw new Error('A Harness execution stream can only be consumed once.')
+			consumed = true
+			let terminal: RunOutcome<Output> | undefined
+			try {
+				for await (const frame of handle) {
+					switch (frame.payload.frameType) {
+						case 'start':
+						case 'heartbeat':
+							break
+						case 'chunk': {
+							if (!frame.payload.chunk) {
+								throw new UnhandledError(StatusCode.InternalServerError, 'Harness stream returned an empty chunk.')
+							}
+							const event = frame.payload.chunk
+							if (event.type === 'run.finished') terminal = event.outcome
+							yield event
+							break
+						}
+						case 'complete': {
+							if (!terminal || !frame.payload.final) {
+								throw new UnhandledError(
+									StatusCode.InternalServerError,
+									'Harness stream ended without its terminal outcome.',
+								)
+							}
+							if (terminal.runId !== frame.payload.final.runId || terminal.status !== frame.payload.final.status) {
+								throw new UnhandledError(
+									StatusCode.InternalServerError,
+									'Harness stream terminal event does not match its completion frame.',
+								)
+							}
+							completed = true
+							return
+						}
+						case 'error': {
+							completed = true
+							const error = frame.payload.error
+							throw new HandledError(
+								error?.status ?? StatusCode.InternalServerError,
+								error?.message ?? 'Harness stream failed.',
+								error?.data,
+							)
+						}
+						case 'cancel':
+							completed = true
+							throw new HandledError(StatusCode.RequestTimeout, frame.payload.reason ?? 'Harness stream was cancelled.')
+					}
+				}
+				throw new UnhandledError(StatusCode.InternalServerError, 'Harness stream closed without completion.')
+			} finally {
+				if (!completed) await handle.cancel('consumer stopped reading')
+			}
+		},
+	})
 }

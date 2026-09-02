@@ -189,6 +189,15 @@ export const addPathToOpenApi = (
 							.filter(Boolean)
 							.join(' ')
 					: getErrorName(okCode),
+				headers: Object.fromEntries(
+					Object.entries(expose.http.stream?.responseHeaders ?? {}).map(([name, value]) => [
+						name,
+						{
+							description: `Required response header for the ${streamProtocol ?? 'declared'} stream protocol.`,
+							schema: { type: 'string', const: value },
+						},
+					]),
+				),
 				content:
 					okCode === StatusCode.NoContent
 						? undefined

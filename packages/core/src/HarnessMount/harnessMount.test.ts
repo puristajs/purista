@@ -174,8 +174,16 @@ describe('ServiceBuilder.mountHarness', () => {
 				chunk: expect.objectContaining({ type: 'run.started' }),
 			}),
 			expect.objectContaining({
-				frameType: 'complete',
+				frameType: 'chunk',
 				sequence: 2,
+				chunk: expect.objectContaining({
+					type: 'run.finished',
+					outcome: expect.objectContaining({ status: 'completed', output: { value: 'streamed' } }),
+				}),
+			}),
+			expect.objectContaining({
+				frameType: 'complete',
+				sequence: 3,
 				final: expect.objectContaining({ status: 'completed', output: { value: 'streamed' } }),
 			}),
 		])
