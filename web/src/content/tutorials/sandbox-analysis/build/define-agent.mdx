@@ -1,0 +1,90 @@
+---
+title: Define the sandboxed agent
+description: Give one structured agent only the file and process tools required by its analysis task.
+order: 283
+kind: lesson
+status: draft
+---
+
+Start with strict input and output contracts shared by the agent and its
+PURISTA command.
+
+```ts title="src/harness/analysis/analysisSchemas.ts" write
+import { z } from 'zod'
+
+export const transactionRowSchema = z.strictObject({
+	id: z.string().trim().min(1).max(80),
+	amount: z.number().finite(),
+	country: z.string().length(2),
+})
+
+export const analyzeTransactionsInputSchema = z.strictObject({
+	analysisId: z.string().trim().min(1).max(80),
+	transactions: z.array(transactionRowSchema).min(1).max(500),
+})
+
+export const analyzeTransactionsOutputSchema = z.strictObject({
+	analysisId: z.string(),
+	flaggedTransactionIds: z.array(z.string()).max(500),
+	summary: z.string().trim().min(1).max(500),
+})
+```
+
+Fill the CLI-generated agent module. It opts into only `write`, `bash`, and
+`read`, restricts writable paths and executable commands, limits the tool loop,
+and returns a validated structured result.
+
+```ts title="src/harness/analysis/agent/analyzeTransactions/analyzeTransactionsAgent.ts" write
+import { type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
+import { analyzeTransactionsInputSchema, analyzeTransactionsOutputSchema } from '../../analysisSchemas.js'
+
+type AnalysisModelState = BuilderState & { models: { analysis_model: ModelAlias } }
+
+export const analyzeTransactionsAgent = defineHarnessModule<AnalysisModelState>()(
+	'analysis.agent.analyze_transactions',
+	{
+		version: '1.0.0',
+		register(builder) {
+			return builder.agent('analyze_transactions', {
+				model: 'analysis_model',
+				input: analyzeTransactionsInputSchema,
+				output: analyzeTransactionsOutputSchema,
+				builtinTools: ['write', 'bash', 'read'],
+				permissions: {
+					write: { mode: 'allow', allow: ['/workspace/**'] },
+					bash: { mode: 'allow', allow: ['python3'] },
+				},
+				instructions: [
+					'Analyze the supplied transaction rows inside the sandbox.',
+					'Write only under /workspace, run only python3, and read the produced result before answering.',
+					'Return only the structured analysis. Never claim a transaction was blocked.',
+				].join(' '),
+				maxSteps: 6,
+			})
+		},
+	},
+)
+```
+
+These permissions are enforced by Harness before a sandbox tool runs. They are
+technical execution permissions; they do not decide whether a user may request
+this business analysis.
+
+Compose the module and declare the model capabilities it needs. Provider and
+model selection remain runtime configuration.
+
+```ts title="src/harness/analysis/analysisHarness.ts" write
+import { defineHarness } from '@purista/harness'
+import { analyzeTransactionsAgent } from './agent/analyzeTransactions/analyzeTransactionsAgent.js'
+
+export const analysisHarness = defineHarness({ name: 'transaction-analysis' })
+	.requireModel('analysis_model', { capabilities: ['object', 'tool_use'] })
+	.use(analyzeTransactionsAgent)
+	.define()
+```
+
+```bash title="Type-check the native agent"
+npm run build
+```
+
+Continue with [Authorize the analysis capability](../authorize-agent/).

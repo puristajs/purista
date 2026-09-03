@@ -1,0 +1,186 @@
+---
+title: Test command and EventBridge routing
+description: Mock generated agent clients for command tests, then compose the real mounted route with local adapters.
+order: 291
+kind: lesson
+status: draft
+---
+
+Test the command without starting a service. PURISTA's context mock replaces the
+business policy and generated agent client while preserving typed payloads and
+message identity.
+
+```ts title="src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.test.ts" write
+import { createCommandContextMock, getCommandMessageMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+import { afterEach, describe, expect, it } from 'vitest'
+import { transactionAnalysisSessionId } from '../../requireTransactionAnalysis.js'
+import { analyzeTransactionsCommandBuilder } from './analyzeTransactionsCommandBuilder.js'
+
+const sandbox = createSandbox()
+afterEach(() => sandbox.restore())
+
+describe('analyzeTransactionsCommandBuilder', () => {
+	it('authorizes the analysis and invokes the declared agent address', async () => {
+		const payload = {
+			analysisId: 'analysis-1',
+			transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+		}
+		const policy = { canRun: sandbox.stub().resolves(true) }
+		const { context, stubs } = createCommandContextMock(analyzeTransactionsCommandBuilder, {
+			payload,
+			parameter: {},
+			resources: { analysisPolicy: policy },
+			sandbox,
+		})
+		context.message = getCommandMessageMock({
+			tenantId: 'tenant-example',
+			principalId: 'principal-analyst',
+			payload: { payload, parameter: {} },
+		})
+		const output = {
+			analysisId: 'analysis-1',
+			flaggedTransactionIds: ['tx-1'],
+			summary: 'One high-value transaction was flagged for human review.',
+		}
+		;(stubs.agent as any).Analysis['1'].analyze_transactions.run.resolves({
+			status: 'completed',
+			runId: 'run-1',
+			output,
+		})
+
+		await expect(
+			analyzeTransactionsCommandBuilder.getCommandFunction().call({} as never, context, payload, {}),
+		).resolves.toEqual(output)
+		expect(
+			policy.canRun.calledOnceWith({
+				tenantId: 'tenant-example',
+				principalId: 'principal-analyst',
+				analysisId: 'analysis-1',
+			}),
+		).toBe(true)
+		expect(
+			(stubs.agent as any).Analysis['1'].analyze_transactions.run.calledOnceWith(payload, {
+				sessionId: transactionAnalysisSessionId(context.message, payload.analysisId),
+			}),
+		).toBe(true)
+	})
+})
+```
+
+Then test the full in-process route through `DefaultEventBridge`. This catches
+mount, address, identity propagation, guard, and adapter-composition errors
+that a command-unit test cannot see.
+
+```ts title="src/sandboxAnalysis.integration.test.ts" write
+import { mkdtemp, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { DefaultEventBridge, getCommandMessageMock, initLogger } from '@purista/core'
+import { localDirectorySandbox } from '@purista/harness'
+import { FakeModelProvider } from '@purista/harness/testing'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { analysisV1Service } from './service/analysis/v1/analysisV1Service.js'
+import { scriptedAnalysisProvider } from './testing/scriptedAnalysisProvider.js'
+
+const roots: string[] = []
+afterEach(async () => Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true }))))
+
+describe('sandbox analysis over PURISTA', () => {
+	it('exposes only the declared built-ins and completes the analysis in a private sandbox', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-analysis-'))
+		roots.push(root)
+		const provider = scriptedAnalysisProvider()
+		const policy = { canRun: vi.fn(async () => true) }
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await analysisV1Service.getInstance(eventBridge, {
+			logger: initLogger('fatal'),
+			resources: { analysisPolicy: policy },
+			ai: {
+				models: { analysis_model: { provider, model: 'analysis-fake' } },
+				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-analyst',
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyzeTransactions' },
+						payload: {
+							payload: {
+								analysisId: 'analysis-1',
+								transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).resolves.toEqual({
+				analysisId: 'analysis-1',
+				flaggedTransactionIds: ['tx-1'],
+				summary: 'One high-value transaction was flagged for human review.',
+			})
+			expect(policy.canRun).toHaveBeenCalledTimes(2)
+			expect(provider.requests).toHaveLength(4)
+			const firstRequest = provider.requests[0]
+			expect(
+				firstRequest && 'tools' in firstRequest ? firstRequest.tools?.map((tool) => tool.name).sort() : [],
+			).toEqual(['bash', 'read', 'write'])
+			provider.assertExhausted()
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('rejects a direct agent invocation before opening the model loop when business access is denied', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'purista-sandbox-analysis-denied-'))
+		roots.push(root)
+		const provider = new FakeModelProvider({ strict: true })
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		const service = await analysisV1Service.getInstance(eventBridge, {
+			resources: { analysisPolicy: { canRun: vi.fn(async () => false) } },
+			ai: {
+				models: { analysis_model: { provider, model: 'analysis-fake' } },
+				sandbox: localDirectorySandbox({ root, exec: { allowCommands: ['python3'], timeoutMs: 5_000 } }),
+			},
+		})
+		await service.start()
+
+		try {
+			await expect(
+				eventBridge.invoke(
+					getCommandMessageMock({
+						tenantId: 'tenant-example',
+						principalId: 'principal-denied',
+						receiver: { serviceName: 'Analysis', serviceVersion: '1', serviceTarget: 'analyze_transactions' },
+						payload: {
+							payload: {
+								analysisId: 'analysis-denied',
+								transactions: [{ id: 'tx-1', amount: 1_250, country: 'DE' }],
+							},
+							parameter: {},
+						},
+					}),
+				),
+			).rejects.toMatchObject({ errorCode: 403 })
+			expect(provider.requests).toHaveLength(0)
+		} finally {
+			await service.destroy()
+			await eventBridge.destroy()
+		}
+	})
+})
+```
+
+```bash title="Run the fast routing tests"
+npx vitest run src/service/analysis/v1/command/analyzeTransactions/analyzeTransactionsCommandBuilder.test.ts src/sandboxAnalysis.integration.test.ts
+```
+
+Continue with [Test Docker isolation](../test-docker/).

@@ -1,0 +1,76 @@
+---
+title: Scaffold isolated analysis
+description: Create a PURISTA project and generate the service, agent, and command boundaries for sandboxed work.
+order: 281
+kind: lesson
+status: draft
+---
+
+Create a fresh project and enter it.
+
+```bash title="Create and enter the sandbox-analysis project" replay="parent"
+npm create purista@2.2.0 sandbox-analysis -- --runtime node --event-bridge default --non-interactive --defaults
+cd sandbox-analysis
+```
+
+Use the published Framework, Harness, provider, and Docker sandbox packages.
+The deterministic path added later needs no API key or Docker daemon.
+
+```json title="package.json" write
+{
+	"name": "@purista/tutorial-sandbox-analysis",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=24.15.0"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:agent": "purista add agent",
+		"build": "tsc --noEmit",
+		"demo": "node --import tsx src/demo.ts",
+		"lint": "biome check .",
+		"start": "node --env-file-if-exists=.env --import tsx src/index.ts",
+		"test": "vitest run",
+		"test:docker": "vitest run src/sandboxAnalysis.docker.integration.test.ts"
+	},
+	"dependencies": {
+		"@purista/core": "4.0.0",
+		"@purista/harness": "3.0.0",
+		"@purista/harness-openai": "3.0.0",
+		"@purista/harness-sandbox-docker": "3.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.8",
+		"@purista/cli": "4.0.0",
+		"@types/node": "26.2.0",
+		"@types/sinon": "22.0.0",
+		"sinon": "22.1.0",
+		"tsx": "4.23.12",
+		"typescript": "7.0.2",
+		"vitest": "4.1.10"
+	}
+}
+```
+
+```bash title="Install the sandbox-analysis dependencies" replay="project"
+npm install
+```
+
+Generate the Analysis service, native Harness agent, and PURISTA command. Keep
+the generated agent module and its colocated test as the capability boundary.
+
+```bash title="Generate the analysis boundaries" replay="project"
+npm run add:service -- analysis --description "Own isolated analysis jobs" --non-interactive
+npm run add:agent -- analyze-transactions --service analysis --service-version 1 --description "Analyze one transaction dataset in a sandbox" --non-interactive
+npm run add:command -- analyze-transactions --service analysis --service-version 1 --description "Run an isolated transaction analysis" --non-interactive
+```
+
+```bash title="Check the generated project"
+npm run build
+```
+
+Continue with [Configure the Docker boundary](../../build/configure/).

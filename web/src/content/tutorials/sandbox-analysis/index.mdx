@@ -7,37 +7,35 @@ group: ai
 status: draft
 ---
 
-This chapter teaches how to give an agent a deliberately small code-execution
-surface. You create a fresh PURISTA project, generate the service, agent, and
-command with the CLI, then bind a Docker sandbox only at runtime. The example
-agent writes an input file, runs a small Python program, reads the result, and
-returns a structured recommendation.
+This chapter teaches sandboxed tool execution as a Framework capability. You
+create a PURISTA service and command, define a native Harness agent, and bind a
+sandbox adapter only at runtime. The agent writes an input file, runs a small
+Python program, reads the result, and returns a structured recommendation.
 
-The production-style composition runs the program in a non-root container with
-networking disabled and a pinned image. The fast default demo uses a local
-directory adapter to prove the tool loop and permission policy without Docker;
-it does not claim process isolation.
+The Example Bank data keeps the task concrete without adding business
+complexity. The analysis is advisory; a separate guarded command would own any
+effect such as blocking a transaction.
 
-The analysis is advisory. A separate guarded PURISTA command would own any
-business effect such as blocking a transaction.
+The optional live path runs in a non-root container with networking disabled
+and an application-selected image. The fast default path uses a local directory
+to teach and test the same tool loop without claiming process isolation.
 
-You will learn how to:
+Follow these pages in order:
 
-- configure the Docker sandbox adapter at the composition root;
-- expose only the `write`, `bash`, and `read` built-in tools;
-- restrict writes and executable commands;
-- protect both the command and directly addressable agent with business guards;
-- scope the Harness session to tenant, principal, and analysis;
-- test the native agent, PURISTA command, and EventBridge integration without
-  credentials;
-- run an opt-in Docker integration test for the real process boundary;
-- retain and purge sandbox resources deliberately.
+1. [Scaffold the isolated-analysis project](./setup/scaffold/).
+2. [Configure the Docker boundary](./build/configure/).
+3. [Define the sandboxed agent](./build/define-agent/).
+4. [Authorize the analysis capability](./build/authorize-agent/).
+5. [Invoke the agent through a command](./build/invoke-agent/).
+6. [Compose sandbox and model adapters](./build/compose-runtime/).
+7. [Run the deterministic tool loop](./build/run-application/).
+8. [Run with Docker and a live model](./build/run-live/).
+9. [Manage sandbox retention](./build/cleanup/).
+10. [Test the native tool loop](./testing/test-agent/).
+11. [Test command and EventBridge routing](./testing/test-routing/).
+12. [Test Docker isolation](./testing/test-docker/).
 
-1. [Configure an isolated sandbox](./build/configure/)
-2. [Run only the required tools](./build/run-tool/)
-3. [Compose and run the analysis application](./build/run-application/)
-4. [Release and purge sandbox resources](./build/cleanup/)
-5. [Test the complete tool loop and Docker boundary](./testing/test-sandbox/)
+The complete runnable source is in
+`examples/banking/chapters/sandbox-analysis`.
 
-The retained project is in `examples/banking/chapters/sandbox-analysis` and
-includes a Dockerfile and Compose build target.
+Start with [Scaffold isolated analysis](./setup/scaffold/).

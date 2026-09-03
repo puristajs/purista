@@ -875,11 +875,18 @@
         "multi-step-workflow"
       ],
       "pages": [
+        "sandbox-analysis/setup/scaffold",
         "sandbox-analysis/build/configure",
-        "sandbox-analysis/build/run-tool",
+        "sandbox-analysis/build/define-agent",
+        "sandbox-analysis/build/authorize-agent",
+        "sandbox-analysis/build/invoke-agent",
+        "sandbox-analysis/build/compose-runtime",
         "sandbox-analysis/build/run-application",
+        "sandbox-analysis/build/run-live",
         "sandbox-analysis/build/cleanup",
-        "sandbox-analysis/testing/test-sandbox"
+        "sandbox-analysis/testing/test-agent",
+        "sandbox-analysis/testing/test-routing",
+        "sandbox-analysis/testing/test-docker"
       ]
     },
     {

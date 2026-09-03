@@ -1,25 +1,28 @@
 ---
-title: Release and purge sandbox resources
-description: Separate request attachment shutdown from destructive retention cleanup and make administrative retries explicit.
-order: 284
+title: Manage sandbox retention
+description: Separate request attachment shutdown from deliberate administrative cleanup of retained sandbox resources.
+order: 289
 kind: lesson
 status: draft
 ---
 
-Normal request completion releases the live sandbox attachment. It does not
-silently turn a model call into an administrative purge. Retention cleanup uses
-the sandbox adapter's trusted administration interface with an explicit owner
-or age selector.
+Normal request completion releases the live sandbox attachment. It should not
+silently turn a model call into a destructive retention purge. Retained
+resources may be useful for audit or debugging, subject to the application's
+data policy.
 
-An administrative result can be `completed`, `partial`, or `failed`. Persist
-the continuation cursor for a partial result and retry from that cursor. Keep
-this operation behind an operator-owned command or scheduled job; never expose
-it as an agent tool.
+Use the sandbox adapter's trusted administration interface from an
+operator-owned command or scheduled job. Select resources by owner or age, keep
+that operation unavailable to agents, and handle its result explicitly:
 
-Stop the local Compose build resources when the lesson is complete.
+- `completed` means the selected cleanup finished;
+- `partial` carries a continuation cursor that the job must persist and retry;
+- `failed` requires an operational retry or investigation.
+
+Stop the local Compose resources when the lesson is complete.
 
 ```bash title="Remove local sandbox containers" replay="project"
 docker compose down --remove-orphans
 ```
 
-Continue with [Test permissions and Docker isolation](../../testing/test-sandbox/).
+Continue with [Test the native tool loop](../../testing/test-agent/).

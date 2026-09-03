@@ -1,42 +1,14 @@
 ---
-title: Compose and run isolated analysis
-description: Bind sandbox and model adapters, invoke through EventBridge, and keep the default demo deterministic.
-order: 283
+title: Run the deterministic tool loop
+description: Exercise real write, process, and read tools through EventBridge without credentials or Docker.
+order: 287
 kind: lesson
 status: draft
 ---
 
-Create a provider-neutral service factory. The PURISTA service receives a
-Harness sandbox port; Docker remains an adapter selected by composition.
-
-```ts title="src/createAnalysisService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { ModelProvider, Sandbox } from '@purista/harness'
-import type { AnalysisPolicy } from './service/analysis/v1/AnalysisResources.js'
-import { analysisV1Service } from './service/analysis/v1/analysisV1Service.js'
-
-export function createAnalysisService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		analysisPolicy: AnalysisPolicy
-		analysisModel: { provider: ModelProvider; model: string }
-		sandbox: Sandbox
-	}>,
-) {
-	return analysisV1Service.getInstance(eventBridge, {
-		logger,
-		resources: { analysisPolicy: options.analysisPolicy },
-		ai: {
-			models: { analysis_model: options.analysisModel },
-			sandbox: options.sandbox,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-The scripted provider makes the default demo deterministic while still running
-the real tool loop, mounted guard, and EventBridge address.
+Use a strict scripted provider for the default demo. It requests `write`, then
+`bash`, then `read`, and finally returns the structured analysis. An unexpected
+model call makes the provider fail.
 
 ```ts title="src/testing/scriptedAnalysisProvider.ts" write
 import { FakeModelProvider } from '@purista/harness/testing'
@@ -90,6 +62,12 @@ export function scriptedAnalysisProvider() {
 	return provider
 }
 ```
+
+Create a temporary local-directory sandbox and invoke the PURISTA command
+through the EventBridge. The local adapter enforces the configured path,
+command, and timeout policy, but it is a deterministic development adapter
+rather than a container security boundary.
+
 ```ts title="src/demo.ts" write
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -141,58 +119,13 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Document optional live-provider and image settings, then create the live Docker
-composition entry point.
 
-```dotenv title=".env.example" write
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-5-mini
-PURISTA_DOCKER_SANDBOX_IMAGE=
-PURISTA_DOCKER_SANDBOX_ROOT=./runtime/sandboxes
-```
-```ts title="src/index.ts" write
-import { resolve } from 'node:path'
-import { DefaultEventBridge, gracefulShutdown, initLogger } from '@purista/core'
-import { openai } from '@purista/harness-openai'
-import { dockerSandbox } from '@purista/harness-sandbox-docker'
-import { createAnalysisService } from './createAnalysisService.js'
-
-async function main() {
-	const logger = initLogger()
-	const apiKey = process.env.OPENAI_API_KEY?.trim()
-	const image = process.env.PURISTA_DOCKER_SANDBOX_IMAGE?.trim()
-	if (!apiKey) throw new Error('OPENAI_API_KEY is required to start the optional live example.')
-	if (!image) throw new Error('PURISTA_DOCKER_SANDBOX_IMAGE is required to start the optional live example.')
-	const sandbox = dockerSandbox({
-		root: resolve(process.env.PURISTA_DOCKER_SANDBOX_ROOT?.trim() || './runtime/sandboxes'),
-		image,
-		user: '10001:10001',
-	})
-	const eventBridge = new DefaultEventBridge({ logger })
-	await eventBridge.start()
-	const service = await createAnalysisService(eventBridge, logger, {
-		analysisPolicy: {
-			canRun: async ({ tenantId, principalId }) => tenantId === 'tenant-example' && principalId === 'principal-analyst',
-		},
-		analysisModel: {
-			provider: openai({ apiKey }),
-			model: process.env.OPENAI_MODEL?.trim() || 'gpt-5-mini',
-		},
-		sandbox,
-	})
-	await service.start()
-	gracefulShutdown(logger, [service, eventBridge])
-	logger.info('Sandbox transaction analysis service started')
-}
-
-main().catch((error: unknown) => {
-	process.stderr.write(`${error instanceof Error ? error.message : 'Sandbox analysis service could not start.'}\n`)
-	process.exit(1)
-})
-```
 ```bash title="Run the deterministic sandbox application" replay="project"
 npm run build
 npm run demo
 ```
 
-Continue with [Release and purge sandbox resources](../cleanup/).
+The output is the validated analysis result. The run has exercised the mounted
+agent, both business guards, address-first routing, and the three sandbox tools.
+
+Continue with [Run with Docker and a live model](../run-live/).
