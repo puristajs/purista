@@ -1,151 +1,31 @@
 ---
 title: Invoke an authorized conversation session
-description: Add business authorization, derive a stable Harness session from trusted identity, and invoke the agent through EventBridge.
-order: 222
+description: Protect the published agent and invoke its identity-scoped session through a declared PURISTA command address.
+order: 223
 kind: lesson
 status: draft
 ---
 
-Generate a normal PURISTA command before editing it. The command remains the
-application boundary; the agent remains a native Harness definition.
+The access contracts are ready. Now create the callable PURISTA boundary. The
+mounted agent guard protects direct calls, and the wrapper command guard
+protects the application entry point.
+
+## Generate the conversation command
+
+Use the project-local CLI before editing the command.
 
 ```bash title="Generate the conversation command" replay="project"
 npm run add:command -- continue-support-conversation --service support --service-version 1 --description "Continue a bounded support conversation" --non-interactive
 ```
 
-Create the shared request, transcript, and clear-result schemas. The service
-configuration is empty in this focused example, but declaring it keeps the
-service builder and instance contract explicit.
+The command remains the application boundary. The agent remains a portable
+native Harness definition composed into the Support service.
 
-```ts title="src/service/support/v1/schema.ts" write
-import { z } from 'zod'
+## Protect the published agent
 
-export const conversationIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,80}$/)
-
-export const conversationHistoryRequestSchema = z.strictObject({ conversationId: conversationIdSchema })
-
-export const conversationHistoryEntrySchema = z.strictObject({
-	role: z.enum(['system', 'user', 'assistant', 'tool']),
-	content: z.string(),
-	timestamp: z.string(),
-})
-
-export const conversationHistorySchema = z.strictObject({
-	messages: z.array(conversationHistoryEntrySchema),
-})
-
-export const clearedConversationHistorySchema = z.strictObject({ cleared: z.literal(true) })
-```
-```ts title="src/service/support/v1/supportServiceConfig.ts" write
-import { z } from 'zod'
-
-export const supportServiceV1ConfigSchema = z.object({})
-```
-The caller supplies a small `conversationId`, while trusted tenant and
-principal identity come from the PURISTA message. First declare the business
-policy used by both the command and the directly addressable agent.
-
-```ts title="src/service/support/v1/SupportConversationPolicy.ts" write
-export type SupportConversationAction = 'continue' | 'read' | 'clear'
-
-export interface SupportConversationPolicy {
-	canAccess(input: {
-		tenantId: string
-		principalId: string
-		conversationId: string
-		action: SupportConversationAction
-	}): Promise<boolean>
-}
-```
-Declare the narrow transcript resource that the read and clear commands will
-use. Harness still owns the storage implementation and session lifecycle.
-
-```ts title="src/service/support/v1/SupportConversationHistory.ts" write
-export interface SupportConversationHistoryEntry {
-	role: 'system' | 'user' | 'assistant' | 'tool'
-	content: string
-	timestamp: string
-}
-
-export interface SupportConversationHistory {
-	list(sessionId: string): Promise<SupportConversationHistoryEntry[]>
-	clear(sessionId: string): Promise<void>
-}
-```
-Keep the fail-closed authorization rule in one helper. Authentication must
-establish identity before this command is called; the policy then decides
-whether that valid caller may continue this particular conversation.
-
-```ts title="src/service/support/v1/requireSupportConversationAccess.ts" write
-import { HandledError, StatusCode } from '@purista/core'
-import type { SupportConversationAction, SupportConversationPolicy } from './SupportConversationPolicy.js'
-
-export async function requireSupportConversationAccess(
-	policy: SupportConversationPolicy,
-	identity: Readonly<{ tenantId?: string; principalId?: string }>,
-	conversationId: string,
-	action: SupportConversationAction,
-) {
-	if (!identity.tenantId || !identity.principalId) {
-		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	}
-	if (
-		!(await policy.canAccess({
-			tenantId: identity.tenantId,
-			principalId: identity.principalId,
-			conversationId,
-			action,
-		}))
-	) {
-		throw new HandledError(StatusCode.Forbidden, 'This support conversation is not available')
-	}
-}
-```
-Declare the policy and transcript reader as service resources.
-
-```ts title="src/service/support/v1/supportV1ServiceBuilder.ts" write
-import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
-import { generalSupportServiceInfo } from '../generalSupportServiceInfo.js'
-import type { SupportConversationHistory } from './SupportConversationHistory.js'
-import type { SupportConversationPolicy } from './SupportConversationPolicy.js'
-import { supportServiceV1ConfigSchema } from './supportServiceConfig.js'
-
-export const supportServiceInfo = {
-	serviceVersion: '1',
-	...generalSupportServiceInfo,
-} as const satisfies ServiceInfoType
-
-export const supportV1ServiceBuilder = new ServiceBuilder(supportServiceInfo)
-	.setConfigSchema(supportServiceV1ConfigSchema)
-	.defineResource<'supportConversationHistory', SupportConversationHistory>()
-	.defineResource<'supportConversationPolicy', SupportConversationPolicy>()
-```
-Build one logical conversation id, then derive the opaque storage id only when
-an application command needs to inspect stored messages. The mounted runtime
-uses the same `createHarnessSessionStorageId(...)` helper internally.
-
-```ts title="src/service/support/v1/conversationSessionId.ts" write
-import { createHarnessSessionStorageId, HandledError, StatusCode } from '@purista/core'
-
-export function conversationSessionId(
-	identity: Readonly<{ tenantId?: string; principalId?: string }>,
-	conversationId: string,
-) {
-	if (!identity.tenantId || !identity.principalId) {
-		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	}
-	return `support:${conversationId}`
-}
-
-export function conversationStorageSessionId(
-	identity: Readonly<{ tenantId?: string; principalId?: string }>,
-	conversationId: string,
-) {
-	return createHarnessSessionStorageId(identity, conversationSessionId(identity, conversationId))
-}
-```
-Protect the published agent address itself. A wrapper command guard cannot
-protect callers that invoke `Support / 1 / answer_support_question` directly.
+Replace the generated mount policy. A wrapper command guard cannot protect a
+caller that invokes `Support / 1 / answer_support_question` directly, so the
+published target owns its own `continue` authorization check.
 
 ```ts title="src/service/support/v1/harness/supportHarnessMount.ts" write
 import type { HarnessBusinessGuardContext } from '@purista/core'
@@ -181,11 +61,15 @@ export const supportHarnessPolicy = {
 	},
 } as const
 ```
-Declare the versioned agent address on the command and invoke it through
-EventBridge. Reusing the same logical session id loads earlier complete turns.
-The mounted runtime scopes it with trusted tenant and principal identity, so a
-different caller cannot join the transcript by supplying the same
-`conversationId`.
+
+The guard runs before Harness loads a session or contacts the model. It uses
+trusted identity from the PURISTA message and the requested conversation as the
+business object.
+
+## Invoke the agent from the command
+
+Replace the generated command builder. It reuses the agent schemas, declares
+one versioned agent address, and calls that address through EventBridge.
 
 ```ts title="src/service/support/v1/command/continueSupportConversation/continueSupportConversationCommandBuilder.ts" write
 import {
@@ -219,14 +103,20 @@ export const continueSupportConversationCommandBuilder = supportV1ServiceBuilder
 		return outcome.output
 	})
 ```
-This focused chapter leaves the command transport-independent. To expose it
-over HTTP, add `.exposeAsHttpEndpoint(...)` and reuse the authenticated Hono
-setup from the sessions chapter. Protected endpoints are already the default;
-authentication sets identity, while the policy above performs authorization.
 
-`release()` closes live session resources but keeps persisted history. It is a
-runtime lifecycle operation, not a user-facing delete. The mounted Framework
-runtime releases sessions after requests while the configured storage retains
-their transcript.
+Reusing the logical session id loads earlier complete turns. The mounted
+runtime scopes that id with trusted tenant and principal identity, so another
+caller cannot join the transcript by sending the same `conversationId`.
+
+`.run(...)` requests one aggregate answer. This agent has no approval or
+external wait, so an interrupted outcome is not a successful command result.
+
+`release()` closes live session resources but keeps persisted history. The
+mounted Framework runtime releases sessions after requests while the configured
+storage retains their transcript.
+
+```bash title="Verify the conversation invocation" replay="project"
+npm run build
+```
 
 Continue with [Export and clear conversation history](../export-and-clear/).

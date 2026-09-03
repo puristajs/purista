@@ -1,46 +1,18 @@
 ---
-title: Compose and run the conversation service
-description: Bind one storage instance to Harness and PURISTA, then run deterministic and live conversation paths.
-order: 224
+title: Run the conversation service
+description: Exercise two persisted turns with local adapters, then optionally use SQLite and OpenAI.
+order: 226
 kind: lesson
 status: draft
 ---
 
-Keep service construction provider-neutral. Bind one storage instance to both
-the Harness runtime and the narrow history resource so the commands never open
-a second transcript store.
+The provider-neutral factory is ready. Start with in-memory storage and a
+strict fake model so the first two-turn proof is deterministic. Then optionally
+select SQLite and OpenAI in the process entry point.
 
-```ts title="src/createSupportService.ts" write
-import type { EventBridge, Logger } from '@purista/core'
-import type { HarnessStorage, ModelProvider } from '@purista/harness'
-import { HarnessConversationHistory } from './resources/HarnessConversationHistory.js'
-import type { SupportConversationPolicy } from './service/support/v1/SupportConversationPolicy.js'
-import { supportV1Service } from './service/support/v1/supportV1Service.js'
+## Configure the optional live process
 
-export function createSupportService(
-	eventBridge: EventBridge,
-	logger: Logger,
-	options: Readonly<{
-		policy: SupportConversationPolicy
-		model: { provider: ModelProvider; model: string }
-		storage: HarnessStorage
-	}>,
-) {
-	return supportV1Service.getInstance(eventBridge, {
-		logger,
-		resources: {
-			supportConversationHistory: new HarnessConversationHistory(options.storage),
-			supportConversationPolicy: options.policy,
-		},
-		ai: {
-			models: { primary: options.model },
-			storage: options.storage,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-}
-```
-Document the optional live-provider settings without storing a credential.
+Document its settings without storing a credential.
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=

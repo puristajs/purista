@@ -468,9 +468,11 @@
       ],
       "pages": [
         "ai-guardrails/build/install",
-        "ai-guardrails/build/input",
+		"ai-guardrails/build/input",
 		"ai-guardrails/build/output",
 		"ai-guardrails/build/integrate",
+		"ai-guardrails/build/invoke",
+		"ai-guardrails/build/compose-runtime",
 		"ai-guardrails/build/run-application",
 		"ai-guardrails/testing/test-guardrails",
 		"ai-guardrails/testing/test-eventbridge"
@@ -591,13 +593,17 @@
       "requires": [
         "classification-agent"
       ],
-      "pages": [
-        "conversation-memory/build/configure-storage",
-		"conversation-memory/build/use-session",
-		"conversation-memory/build/export-and-clear",
-		"conversation-memory/build/run-application",
-		"conversation-memory/testing/test-history"
-      ]
+		"pages": [
+			"conversation-memory/build/configure-storage",
+			"conversation-memory/build/define-access",
+			"conversation-memory/build/use-session",
+			"conversation-memory/build/export-and-clear",
+			"conversation-memory/build/compose-runtime",
+			"conversation-memory/build/run-application",
+			"conversation-memory/testing/test-history",
+			"conversation-memory/testing/test-commands",
+			"conversation-memory/testing/test-eventbridge"
+		]
     },
     {
       "id": "agent-tools",

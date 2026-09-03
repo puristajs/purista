@@ -1,0 +1,101 @@
+---
+title: Invoke the guarded agent from a command
+description: Reuse the agent schemas, declare its PURISTA address, and return its completed structured result.
+order: 195
+kind: lesson
+status: draft
+---
+
+The mounted target now protects direct EventBridge calls. Add a normal Support
+command for application callers that need one aggregate classification. The
+command has its own business guard because it is also a reachable entry point.
+
+## Remove duplicate generated schemas
+
+The command and agent share one input and output contract. Remove the generated
+command-local placeholders, then import the Harness schemas in the builder.
+
+```bash title="Remove unused guarded command schemas" replay="project"
+rm src/service/support/v1/command/classifySupportMessage/schema.ts
+rm src/service/support/v1/command/classifySupportMessage/types.ts
+```
+
+## Declare and invoke the agent address
+
+Replace the generated command builder. `canInvokeAgent(...)` declares the
+versioned target and gives the handler its typed `context.agent` client.
+
+```ts title="src/service/support/v1/command/classifySupportMessage/classifySupportMessageCommandBuilder.ts" write
+import {
+	classifySupportMessageInputSchema,
+	classifySupportMessageOutputSchema,
+} from '../../../../../harness/support/agent/classifySupportMessage/schema.js'
+import { supportHarness } from '../../harness/supportHarnessMount.js'
+import { requireSupportClassification, supportClassificationSessionId } from '../../requireSupportClassification.js'
+import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+
+export const classifySupportMessageCommandBuilder = supportV1ServiceBuilder
+	.getCommandBuilder('classifySupportMessage', 'Classify one support message with the guarded agent')
+	.addPayloadSchema(classifySupportMessageInputSchema)
+	.addOutputSchema(classifySupportMessageOutputSchema)
+	.canInvokeAgent('Support', '1', 'classify_support_message', supportHarness.contracts.agents.classify_support_message)
+	.setBeforeGuardHooks({
+		messageAccess: async function (context, payload) {
+			await requireSupportClassification(context.resources.supportClassificationPolicy, {
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
+				messageId: payload.messageId,
+			})
+		},
+	})
+	.setCommandFunction(async function (context, payload) {
+		const outcome = await context.agent.Support['1'].classify_support_message.run(payload, {
+			sessionId: supportClassificationSessionId(context.message, payload.messageId),
+		})
+		if (outcome.status !== 'completed') {
+			throw new Error('Message classification was interrupted unexpectedly.')
+		}
+		return outcome.output
+	})
+```
+
+The session id correlates Harness history. It is derived from trusted message
+identity and the message id, but it does not authorize the request. The command
+guard and mounted-target guard each make that decision at their own address.
+
+`.run(...)` waits for an aggregate outcome. This classifier has no approval or
+external wait, so the command treats an interrupted outcome as an unexpected
+failure instead of returning incomplete data as a classification.
+
+## Register both entry points
+
+Replace the generated service file. The command and composed Harness definition
+are registered once on the same owner.
+
+```ts title="src/service/support/v1/supportV1Service.ts" write
+import { classifySupportMessageCommandBuilder } from './command/classifySupportMessage/classifySupportMessageCommandBuilder.js'
+import { supportHarness, supportHarnessPolicy } from './harness/supportHarnessMount.js'
+import { supportV1ServiceBuilder } from './supportV1ServiceBuilder.js'
+
+export const supportV1Service = supportV1ServiceBuilder
+	.addCommandDefinition(classifySupportMessageCommandBuilder.getDefinition())
+	.mountHarness(supportHarness, supportHarnessPolicy)
+```
+
+The runtime order is now explicit:
+
+```text title="Authorization and content enforcement order"
+trusted PURISTA identity
+  -> command business guard
+  -> mounted-target business guard
+  -> input content rail
+  -> model provider
+  -> output content rail
+  -> validated command result
+```
+
+```bash title="Verify the guarded command composition" replay="project"
+npm run build
+```
+
+Continue with [Compose the guarded runtime](../compose-runtime/).
