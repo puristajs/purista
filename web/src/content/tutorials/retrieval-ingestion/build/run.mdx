@@ -1,176 +1,14 @@
 ---
-title: Compose and run the application
-description: Bind resources and models, register PURISTA services with Hono, and run a deterministic or live RAG application.
-order: 210
+title: Run the live RAG application
+description: Start the composed services, HTTP listener, static UI, PostgreSQL repository, and live model adapters with ordered shutdown.
+order: 220
 kind: lesson
 status: draft
 ---
 
-The composition root supplies concrete resources to the definitions built in
-the earlier steps. The Harness asks for named model capabilities. The
-Knowledge service asks for a repository and collection policy. Identity asks
-for StateStore because sessions are short-lived application state.
-
-Create the complete application factory. Dependency injection keeps the same
-composition usable with production adapters, deterministic model providers,
-and test doubles.
-
-```ts title="src/createKnowledgeApplication.ts" write
-import { DefaultEventBridge, initDefaultStateStore, type Logger, type StateStore } from '@purista/core'
-import type { ModelProvider } from '@purista/harness'
-import { openai } from '@purista/harness-openai'
-import { honoV1Service } from '@purista/hono-http-server'
-import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
-import { identityV1Service } from './service/identity/v1/identityV1Service.js'
-import type { KnowledgeRepository } from './service/knowledge/v1/KnowledgeResources.js'
-import { knowledgeV1Service } from './service/knowledge/v1/knowledgeV1Service.js'
-import { createSessionProtectMiddleware } from './sessionProtectMiddleware.js'
-import { registerStaticWebsite } from './staticWebsite.js'
-
-export interface ManagedKnowledgeRepository extends KnowledgeRepository {
-	readonly name: string
-	destroy(): Promise<void>
-}
-
-export type KnowledgeApplicationDependencies = {
-	stateStore: StateStore
-	repository: ManagedKnowledgeRepository
-	models: {
-		primary: { provider: ModelProvider; model: string }
-		embedding: { provider: ModelProvider; model: string }
-	}
-	embeddingDimensions: number
-}
-
-function defaultDependencies(
-	logger: Logger,
-	environment: Readonly<Record<string, string | undefined>>,
-): KnowledgeApplicationDependencies {
-	const apiKey = environment.OPENAI_API_KEY?.trim()
-	const databaseUrl = environment.DATABASE_URL?.trim()
-	if (!apiKey) throw new Error('OPENAI_API_KEY is required to run the knowledge application.')
-	if (!databaseUrl) throw new Error('DATABASE_URL is required to run the knowledge application.')
-	const provider = openai({ apiKey })
-	const embeddingModel = environment.OPENAI_EMBEDDING_MODEL?.trim() || 'text-embedding-3-small'
-	const embeddingDimensions = 1_536
-	return {
-		stateStore: initDefaultStateStore({ logger }),
-		repository: new PgKnowledgeRepository(databaseUrl, embeddingDimensions),
-		models: {
-			primary: { provider, model: environment.OPENAI_MODEL?.trim() || 'gpt-5-mini' },
-			embedding: { provider, model: embeddingModel },
-		},
-		embeddingDimensions,
-	}
-}
-
-export async function createKnowledgeApplication(
-	logger: Logger,
-	dependencies?: KnowledgeApplicationDependencies,
-	environment: Readonly<Record<string, string | undefined>> = process.env,
-) {
-	const resolved = dependencies ?? defaultDependencies(logger, environment)
-	const eventBridge = new DefaultEventBridge({ logger })
-	await eventBridge.start()
-	const identity = await identityV1Service.getInstance(eventBridge, {
-		logger,
-		stateStore: resolved.stateStore,
-		serviceConfig: { sessionTtlMs: 15 * 60 * 1000 },
-	})
-	const knowledge = await knowledgeV1Service.getInstance(eventBridge, {
-		logger,
-		serviceConfig: {
-			embeddingModel: resolved.models.embedding.model,
-			embeddingDimensions: resolved.embeddingDimensions,
-		},
-		resources: {
-			knowledgeCollectionPolicy: {
-				canAccess: async ({ tenantId, principalId, collectionId }) =>
-					tenantId === 'tenant-example' && principalId === 'principal-alex' && collectionId === 'customer-help',
-			},
-			knowledgeRepository: resolved.repository,
-		},
-		ai: {
-			models: resolved.models,
-			telemetry: { contentCaptureMode: 'NO_CONTENT' },
-		},
-	})
-	const http = await honoV1Service.getInstance(eventBridge, {
-		logger,
-		serviceConfig: {
-			apiMountPath: '/api',
-			enableHealth: true,
-			healthPath: '/health',
-			openApi: {
-				enabled: true,
-				info: { title: 'Example Bank knowledge API', version: '1.0.0' },
-				components: { securitySchemes: { sessionBearer: { type: 'http', scheme: 'bearer' } } },
-			},
-		},
-	})
-
-	http.setProtectMiddleware(createSessionProtectMiddleware(http))
-	await identity.start()
-	await knowledge.start()
-	http.registerService(identity, knowledge)
-	registerStaticWebsite(http)
-	await http.start()
-	return {
-		eventBridge,
-		stateStore: resolved.stateStore,
-		repository: resolved.repository,
-		identity,
-		knowledge,
-		http,
-	}
-}
-```
-Three details keep the boundaries clear:
-
-1. `http.setProtectMiddleware(...)` authenticates protected HTTP requests and
-   establishes trusted identity.
-2. `http.registerService(...)` projects only command and stream definitions
-   that declare HTTP metadata. The login command is public; ingestion and chat
-   remain protected by default.
-3. The Knowledge guards still authorize access to `customer-help`, even after
-   authentication succeeds.
-
-Build the UI into `public`, then register static files on Hono. This is custom
-HTTP handling for website assets, while application APIs remain PURISTA
-commands and streams.
-
-```ts title="src/staticWebsite.ts" write
-import { serveStatic } from '@hono/node-server/serve-static'
-import type { HonoServiceClass } from '@purista/hono-http-server'
-
-const apiPath = (path: string) => path === '/api' || path.startsWith('/api/')
-
-export function registerStaticWebsite(http: HonoServiceClass) {
-	const indexFile = serveStatic({ path: './public/index.html' })
-	http.app.use('/assets/*', serveStatic({ root: './public' }))
-	http.app.get('/', indexFile)
-	http.app.get('*', async (context, next) => {
-		if (apiPath(context.req.path) || context.req.path === '/health') return next()
-		return indexFile(context, next)
-	})
-}
-```
-`serve()` creates the Node HTTP listener that owns the TCP port. Wrap it as a
-PURISTA lifecycle resource so graceful shutdown can close that listener after
-Hono stops accepting work.
-
-```ts title="src/nodeHttpListener.ts" write
-type ClosableNodeServer = { close(callback: (error?: Error) => void): unknown }
-
-export function createNodeHttpListener(server: ClosableNodeServer) {
-	return {
-		name: 'nodeHttpListener',
-		destroy: () => new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
-	}
-}
-```
-Create the live entry point. Shutdown order starts with the Hono preparation
-hook and listener, then destroys services and their resources.
+Create the live entry point. The shutdown list first prepares Hono, closes the
+Node listener, then destroys services and their owned resources in dependency
+order.
 
 ```ts title="src/index.ts" write
 import { serve } from '@hono/node-server'
@@ -207,7 +45,8 @@ main().catch((error: unknown) => {
 	process.exit(1)
 })
 ```
-Document the runtime values without placing a credential in source control.
+
+Document runtime settings without committing a credential.
 
 ```dotenv title=".env.example" write
 OPENAI_API_KEY=
@@ -216,143 +55,18 @@ OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 DATABASE_URL=postgres://example_bank:local-example-password@127.0.0.1:55432/example_bank
 PORT=3000
 ```
-Create a deterministic demo entry point. It injects Harness's strict
-`FakeModelProvider` with a scripted embedding, tool choice, evidence result,
-and text deltas. It still uses the real PURISTA services, EventBridge, guards,
-Hono stream, UI, PostgreSQL, and pgvector. This makes the default walkthrough
-repeatable and free of provider credentials. On startup it deletes only the
-scripted `transfer-guide` fixture, so revision `1` can be ingested again without
-removing the database volume. The live entry point never resets data.
 
-```ts title="src/demo.ts" write
-import { serve } from '@hono/node-server'
-import { gracefulShutdown, initDefaultStateStore, initLogger } from '@purista/core'
-import { FakeModelProvider } from '@purista/harness/testing'
-import { Pool } from 'pg'
-import { z } from 'zod'
-import { createKnowledgeApplication } from './createKnowledgeApplication.js'
-import { createNodeHttpListener } from './nodeHttpListener.js'
-import { PgKnowledgeRepository } from './resources/PgKnowledgeRepository.js'
+Start PostgreSQL, build the UI, copy `.env.example` to `.env`, provide the API
+key, and start the application.
 
-const dimensions = 1_536
-const vector = Array.from({ length: dimensions }, (_, index) => (index === 0 ? 1 : 0))
-const usage = { inputTokens: 8, outputTokens: 6, totalTokens: 14 }
-
-async function resetScriptedFixture(databaseUrl: string) {
-	const pool = new Pool({ connectionString: databaseUrl, max: 1 })
-	try {
-		await pool.query(
-			`DELETE FROM knowledge_documents
-			 WHERE tenant_id = $1 AND collection_id = $2 AND document_id = $3`,
-			['tenant-example', 'customer-help', 'transfer-guide'],
-		)
-	} finally {
-		await pool.end()
-	}
-}
-
-async function main() {
-	const logger = initLogger()
-	const databaseUrl = process.env.DATABASE_URL?.trim()
-	if (!databaseUrl) throw new Error('DATABASE_URL is required. Copy .env.example and start Docker Compose.')
-	await resetScriptedFixture(databaseUrl)
-	const provider = new FakeModelProvider({ strict: true })
-	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
-	provider.enqueueObject({
-		object: {},
-		toolCalls: [
-			{
-				id: 'search-1',
-				name: 'search_knowledge',
-				arguments: {
-					collectionId: 'customer-help',
-					query: 'How long can an international transfer remain pending?',
-					limit: 4,
-				},
-			},
-		],
-		usage,
-		finishReason: 'tool_calls',
-	})
-	provider.enqueueEmbedding({ embeddings: [{ index: 0, vector }], usage })
-	provider.enqueueObject({
-		object: {
-			question: 'How long can an international transfer remain pending?',
-			evidence: [
-				{
-					documentId: 'transfer-guide',
-					chunkIndex: 0,
-					content: 'International transfers can remain pending for up to two business days.',
-					score: 1,
-				},
-			],
-		},
-		usage,
-		finishReason: 'stop',
-	})
-	provider.enqueueTextStream([
-		{ kind: 'delta', text: 'Up to two business days ' },
-		{ kind: 'delta', text: '[transfer-guide#0].' },
-		{ kind: 'finish', usage, finishReason: 'stop' },
-	])
-	const stateStore = initDefaultStateStore({ logger })
-	const repository = new PgKnowledgeRepository(databaseUrl, dimensions)
-	const application = await createKnowledgeApplication(logger, {
-		stateStore,
-		repository,
-		models: {
-			primary: { provider, model: 'scripted-chat' },
-			embedding: { provider, model: 'scripted-embedding' },
-		},
-		embeddingDimensions: dimensions,
-	})
-	const port = z.coerce
-		.number()
-		.int()
-		.min(1)
-		.max(65_535)
-		.parse(process.env.PORT ?? 3000)
-	const server = serve({ fetch: application.http.app.fetch, hostname: '127.0.0.1', port })
-	gracefulShutdown(logger, [
-		application.http.prepareDestroy(),
-		createNodeHttpListener(server),
-		application.http,
-		application.knowledge,
-		application.identity,
-		application.repository,
-		application.stateStore,
-		application.eventBridge,
-	])
-	logger.info({ port }, 'Scripted RAG demo started; ingest once, then ask the suggested question')
-}
-
-main().catch((error: unknown) => {
-	process.stderr.write(`${error instanceof Error ? error.message : 'RAG demo could not start.'}\n`)
-	process.exit(1)
-})
-```
-Copy the environment, start PostgreSQL, build the server and UI, then run the
-scripted application.
-
-```bash title="Run the deterministic RAG application" replay="project"
-cp .env.example .env
+```bash title="Start the live RAG application"
 docker compose up -d --wait
-npm run build
-npm run demo
+npm run build:ui
+npm start
 ```
 
-Open `http://127.0.0.1:3000` and follow one visible sequence:
+Open `http://127.0.0.1:3000`, sign in with the visible tutorial credential,
+ingest the sample source, and ask how long an international transfer can remain
+pending.
 
-1. sign in with `alex@example.test` and `demo-password`;
-2. select **Ingest source** once; and
-3. ask “How long can an international transfer remain pending?”
-
-The model-selected tool retrieves the stored chunk and the answer arrives as
-live text deltas with a source citation. Stop Node with `Ctrl+C`, then stop the
-database with `docker compose down`.
-
-To use a live provider, set `OPENAI_API_KEY` in `.env` and run `npm start`.
-The composition root then binds the OpenAI adapter to `primary` and
-`embedding`; no service, command, tool, workflow, HTTP, or UI code changes.
-
-Continue with [Test the ingestion and search commands](../../testing/test-rag/).
+Continue with [Run the deterministic application](../deterministic-demo/).

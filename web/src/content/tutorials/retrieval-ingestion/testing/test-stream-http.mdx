@@ -1,14 +1,13 @@
 ---
-title: Test streaming and HTTP authentication
+title: Test streaming and authentication
 description: Verify address-first workflow invocation, standard SSE conversion, public login, and protected endpoints.
-order: 213
+order: 225
 kind: lesson
 status: draft
 ---
 
-Test the PURISTA stream without starting a TCP listener. The workflow call is
-mocked at its declared address; the stream handler must forward AI SDK UI
-Message Stream v1 events and close with its final schema.
+Test the PURISTA stream with a mocked generated workflow client. Verify business
+authorization, scoped session identity, and AI SDK UI Message Stream conversion.
 
 ```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts" write
 import { createStreamContextMock } from '@purista/core'
@@ -68,10 +67,10 @@ describe('answerKnowledgeQuestionStreamBuilder', () => {
 	})
 })
 ```
-Then test the assembled services and Hono projection through the real
-EventBridge. This verifies that login is explicitly public, protected routes
-invoke the authentication middleware, and caller-supplied identity headers do
-not become trusted principal or tenant data.
+
+Then start the composed application and exercise Hono. Login must remain public;
+ingestion and chat must reject missing credentials; a valid opaque session must
+place the resolved identity on downstream messages.
 
 ```ts title="src/application.test.ts" write
 import { initDefaultStateStore, initLogger } from '@purista/core'
@@ -145,8 +144,9 @@ describe('knowledge HTTP application', () => {
 	})
 })
 ```
-```bash title="Run stream and HTTP integration tests" replay="project"
-npm run test:server -- src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts src/application.test.ts
+
+```bash title="Run stream and HTTP tests" replay="project"
+npx vitest run src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.test.ts src/application.test.ts
 ```
 
-Continue with [Test storage and the browser](../test-storage-ui/).
+Continue with [Test pgvector storage](../test-storage/).

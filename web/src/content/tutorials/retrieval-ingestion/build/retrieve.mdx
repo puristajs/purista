@@ -1,14 +1,14 @@
 ---
-title: Retrieve through the same model
-description: Authorize search, create a query embedding through Harness, and run the tenant-scoped repository query.
-order: 204
+title: Build semantic retrieval
+description: Authorize a query, create its embedding with the same Harness model, and search the tenant-scoped repository.
+order: 207
 kind: lesson
 status: draft
 ---
 
-Stored and query vectors must use the same embedding contract. Replace the
-generated search command with the complete implementation below. It declares
-the same `embedding` alias as ingestion.
+Replace the generated search command. It applies the read action policy, creates
+a query embedding through the same Harness alias used during ingestion, and
+calls the injected repository.
 
 ```ts title="src/service/knowledge/v1/command/searchKnowledge/searchKnowledgeCommandBuilder.ts" write
 import { knowledgeHarness } from '../../harness/knowledgeHarnessMount.js'
@@ -50,16 +50,13 @@ export const searchKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		return { matches }
 	})
 ```
-The `search` action is distinct from `edit`. A valid authenticated user may be
-allowed to ask questions without being allowed to replace source material.
-The business guard runs before the embedding request and database call.
 
-The command is intentionally not exposed as a browser endpoint. It is the
-service-owned retrieval capability used by the model-selected host tool on the
-next page. Other services can also declare and invoke its versioned address.
+Using one configured embedding model and dimension for indexing and querying is
+a runtime invariant. Changing that model requires a deliberate re-index, not a
+silent configuration update.
 
-```bash title="Check both indexing commands" replay="project"
-npm run build:server
+```bash title="Type-check ingestion and search" replay="project"
+npm run build
 ```
 
-Continue with [Let the agent choose the search tool](../agent/).
+Continue with [Let the agent choose retrieval](../agent/).

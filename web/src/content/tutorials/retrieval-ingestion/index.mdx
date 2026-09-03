@@ -7,15 +7,15 @@ group: ai
 status: draft
 ---
 
-Retrieval-augmented generation, usually shortened to RAG, gives a model
-relevant application data before it writes an answer. A complete RAG feature
-has two connected paths: an indexing path that prepares source documents and
-an answer path that retrieves evidence for each question.
+Retrieval-augmented generation, usually shortened to RAG, gives a model relevant
+application data before it writes an answer. A complete RAG feature has two
+connected paths: indexing prepares reviewed sources, and answering retrieves
+evidence for each question.
 
-This chapter builds both paths. PURISTA owns the service boundaries,
-authorization, HTTP endpoints, database resource, and address-first calls.
-The native Harness owns the embedding and chat model contracts, the retrieval
-agent, its tool contract, and the answer workflow.
+PURISTA owns service boundaries, authentication, authorization, HTTP exposure,
+the database resource, and address-first calls. The native Harness owns model
+contracts, embeddings, the retrieval agent, its host tool, and the streaming
+answer workflow.
 
 ```text title="The complete RAG path"
 protected ingestion command
@@ -29,43 +29,46 @@ protected chat stream
   -> retrieval agent chooses search_knowledge
   -> authorized PURISTA search command
   -> same Harness embedding model
-  -> pgvector similarity search
+  -> tenant-scoped pgvector search
   -> grounded answer with citations
   -> AI SDK UI Message Stream v1
 ```
 
-The small Example Bank source document makes the result easy to try. The
-lesson is about building RAG with PURISTA; it does not introduce a banking
-domain model.
+The Example Bank source document makes the result easy to try without adding a
+banking domain model. The final React UI uses shadcn, AI Elements, and AI SDK
+`useChat`, so no PURISTA-specific browser library is required.
 
-## What you will build
+Follow these pages in order:
 
-Follow these pages in order. Each build page starts from the previous page's
-working checkpoint and ends with a command you can run.
+1. [Scaffold the RAG project](./setup/scaffold/).
+2. [Define shared RAG contracts](./build/configure-harness/).
+3. [Authorize knowledge collections](./build/access-policy/).
+4. [Ingest and embed a source](./build/ingest/).
+5. [Start PostgreSQL and pgvector](./build/store/).
+6. [Implement the vector repository](./build/repository/).
+7. [Build semantic retrieval](./build/retrieve/).
+8. [Let the agent choose retrieval](./build/agent/).
+9. [Build the streaming answer workflow](./build/answer-workflow/).
+10. [Bind the command-backed tool and publish Harness targets](./build/mount-harness/).
+11. [Expose an AI SDK UI Message Stream](./build/stream-ui/).
+12. [Store opaque sessions](./build/identity-sessions/).
+13. [Authenticate protected HTTP endpoints](./build/authenticate-http/).
+14. [Create the React application shell](./build/ui-shell/).
+15. [Build the ingestion interface](./build/ingest-ui/).
+16. [Build the standard chat interface](./build/ui/).
+17. [Assemble login, ingestion, and chat](./build/assemble-ui/).
+18. [Compose the RAG application](./build/compose-runtime/).
+19. [Serve the React application](./build/serve-ui/).
+20. [Run the live application](./build/run/).
+21. [Run the deterministic application](./build/deterministic-demo/).
+22. [Test ingestion and retrieval commands](./testing/test-rag/).
+23. [Test model-selected retrieval](./testing/test-agent/).
+24. [Test the streaming answer workflow](./testing/test-workflow/).
+25. [Test streaming and HTTP authentication](./testing/test-stream-http/).
+26. [Test pgvector storage](./testing/test-storage/).
+27. [Test the browser client](./testing/test-ui/).
 
-### Build the pipeline
+The complete runnable source is in
+`examples/banking/chapters/retrieval-ingestion`.
 
-1. [Create the RAG project and model contracts](./build/configure-harness/).
-2. [Build the protected ingestion and embedding command](./build/ingest/).
-3. [Store documents and vectors in PostgreSQL with pgvector](./build/store/).
-4. [Build authorized semantic retrieval with the same embedding model](./build/retrieve/).
-5. [Let the native agent choose the command-backed search tool](./build/agent/).
-6. [Expose portable agent events as an AI SDK UI Message Stream](./build/stream-ui/).
-7. [Authenticate the generated HTTP endpoints](./build/authenticate-http/).
-8. [Create the React, Tailwind, shadcn, and test shell](./build/ui-shell/).
-9. [Build the ingestion and AI Elements chat interface](./build/ui/).
-10. [Compose and run the complete application](./build/run/).
-
-### Test the boundaries
-
-11. [Test ingestion, embeddings, authorization, and search](./testing/test-rag/).
-12. [Test the native Harness tool loop](./testing/test-harness/).
-13. [Test streaming and HTTP authentication](./testing/test-stream-http/).
-14. [Test pgvector storage and browser behavior](./testing/test-storage-ui/).
-
-The complete source is in `examples/banking/chapters/retrieval-ingestion`.
-This chapter stays a draft until PURISTA v4, Harness v3, and the matching CLI
-and project creator are available from npm and a clean consumer replay
-succeeds.
-
-Start with [Create the RAG project and contracts](./build/configure-harness/).
+Start with [Scaffold the RAG project](./setup/scaffold/).

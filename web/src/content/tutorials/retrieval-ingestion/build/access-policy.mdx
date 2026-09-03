@@ -1,0 +1,128 @@
+---
+title: Authorize knowledge collections
+description: Inject repository and policy resources and centralize action-specific collection authorization.
+order: 203
+kind: lesson
+status: draft
+---
+
+Define the repository, collection policy, and embedding service contracts owned
+by Knowledge. The repository stores durable business data; it is not a
+StateStore.
+
+```ts title="src/service/knowledge/v1/KnowledgeResources.ts" write
+import type { KnowledgeMatch } from './schema.js'
+
+export type KnowledgeChunkInput = {
+	index: number
+	content: string
+	embedding: number[]
+}
+
+export interface KnowledgeRepository {
+	replaceRevision(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			documentId: string
+			revision: number
+			title: string
+			embeddingModel: string
+			chunks: KnowledgeChunkInput[]
+		}>,
+		signal?: AbortSignal,
+	): Promise<void>
+	search(
+		input: Readonly<{
+			tenantId: string
+			collectionId: string
+			embeddingModel: string
+			queryEmbedding: number[]
+			limit: number
+			signal?: AbortSignal
+		}>,
+	): Promise<KnowledgeMatch[]>
+}
+
+export interface KnowledgeCollectionPolicy {
+	canAccess(
+		input: Readonly<{
+			tenantId: string
+			principalId: string
+			collectionId: string
+			action: 'edit' | 'search'
+		}>,
+	): Promise<boolean>
+}
+
+export class StaleKnowledgeRevisionError extends Error {
+	constructor() {
+		super('Knowledge revision is not newer than the stored revision')
+		this.name = 'StaleKnowledgeRevisionError'
+	}
+}
+```
+
+Attach the resources and embedding configuration to the generated service
+builder.
+
+```ts title="src/service/knowledge/v1/knowledgeV1ServiceBuilder.ts" write
+import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
+import { z } from 'zod'
+import { generalKnowledgeServiceInfo } from '../generalKnowledgeServiceInfo.js'
+import type { KnowledgeCollectionPolicy, KnowledgeRepository } from './KnowledgeResources.js'
+
+export const knowledgeServiceInfo = {
+	serviceVersion: '1',
+	...generalKnowledgeServiceInfo,
+} as const satisfies ServiceInfoType
+
+export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo)
+	.setConfigSchema(
+		z.object({
+			embeddingModel: z.string().min(1),
+			embeddingDimensions: z.number().int().positive(),
+		}),
+	)
+	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
+	.defineResource<'knowledgeRepository', KnowledgeRepository>()
+```
+
+Centralize the business rule used by ingestion, search, the stream, and mounted
+Harness targets. Authentication supplies trusted tenant and principal IDs; this
+policy decides whether that caller may read or edit the named collection.
+
+```ts title="src/service/knowledge/v1/requireKnowledgeCollectionAccess.ts" write
+import { HandledError, StatusCode } from '@purista/core'
+import type { KnowledgeCollectionPolicy } from './KnowledgeResources.js'
+
+export async function requireKnowledgeCollectionAccess(
+	policy: KnowledgeCollectionPolicy,
+	input: Readonly<{
+		tenantId?: string
+		principalId?: string
+		collectionId: string
+		action: 'edit' | 'search'
+	}>,
+) {
+	if (!input.tenantId || !input.principalId) {
+		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
+	}
+	if (
+		!(await policy.canAccess({
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			collectionId: input.collectionId,
+			action: input.action,
+		}))
+	) {
+		throw new HandledError(StatusCode.Forbidden, 'This knowledge collection is not available')
+	}
+}
+```
+
+```bash title="Type-check collection authorization"
+npm run build
+```
+
+Continue with [Ingest and embed a source](../ingest/).

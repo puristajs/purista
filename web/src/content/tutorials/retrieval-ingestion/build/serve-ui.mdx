@@ -1,0 +1,50 @@
+---
+title: Serve the React application
+description: Use Hono custom handlers only for static assets and manage the Node listener as an explicit lifecycle resource.
+order: 219
+kind: lesson
+status: draft
+---
+
+Register the built UI as static files. API behavior remains in PURISTA commands
+and streams; these custom Hono routes serve only website assets and SPA
+fallbacks.
+
+```ts title="src/staticWebsite.ts" write
+import { serveStatic } from '@hono/node-server/serve-static'
+import type { HonoServiceClass } from '@purista/hono-http-server'
+
+const apiPath = (path: string) => path === '/api' || path.startsWith('/api/')
+
+export function registerStaticWebsite(http: HonoServiceClass) {
+	const indexFile = serveStatic({ path: './public/index.html' })
+	http.app.use('/assets/*', serveStatic({ root: './public' }))
+	http.app.get('/', indexFile)
+	http.app.get('*', async (context, next) => {
+		if (apiPath(context.req.path) || context.req.path === '/health') return next()
+		return indexFile(context, next)
+	})
+}
+```
+
+`serve(...)` creates the Node TCP listener outside the Hono service instance.
+Wrap that listener in a named lifecycle resource so graceful shutdown can close
+the port after Hono stops accepting work.
+
+```ts title="src/nodeHttpListener.ts" write
+type ClosableNodeServer = { close(callback: (error?: Error) => void): unknown }
+
+export function createNodeHttpListener(server: ClosableNodeServer) {
+	return {
+		name: 'nodeHttpListener',
+		destroy: () => new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve()))),
+	}
+}
+```
+
+```bash title="Build backend and static UI"
+npm run build
+npm run build:ui
+```
+
+Continue with [Run the live application](../run/).

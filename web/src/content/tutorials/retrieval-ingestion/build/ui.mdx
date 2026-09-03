@@ -1,19 +1,14 @@
 ---
 title: Build the standard chat interface
-description: Add React, shadcn, and AI Elements, then consume the protected AI SDK UI Message Stream v1 endpoint.
-order: 209
+description: Use AI SDK useChat and AI Elements to consume tool status and streamed text without a custom client protocol.
+order: 216
 kind: lesson
 status: draft
 ---
 
-The browser should consume a standard AI stream. It does not need a PURISTA
-client package. AI SDK's `useChat` hook manages messages and streaming, while
-AI Elements supplies maintained chat components built on shadcn.
-
-Run the AI Elements generator inside the UI shell from the previous step. It
-writes the selected components
-and their shadcn dependencies into `ui/src/components`; your application owns
-that generated source and can style it normally.
+Install the maintained AI Elements components into the UI project. The generated
+source becomes part of the application and can be styled with shadcn's default
+theme.
 
 ```bash title="Add the AI Elements components" replay="project"
 cd ui
@@ -21,101 +16,9 @@ npx ai-elements@latest add conversation message prompt-input tool
 cd ..
 ```
 
-The ingestion form calls the protected PURISTA command. It sends the session
-token in the bearer header; it never sends a tenant or principal id.
-
-```tsx title="ui/src/KnowledgeSource.tsx" write
-import { type FormEvent, useState } from 'react'
-
-const sample = {
-	documentId: 'transfer-guide',
-	revision: 1,
-	title: 'International transfer timing',
-	content:
-		'International transfers can remain pending for up to two business days while the receiving bank completes its checks. Customers can view the current transfer status in the app.',
-}
-
-export function KnowledgeSource({ sessionToken, onIngested }: { sessionToken: string; onIngested(): void }) {
-	const [status, setStatus] = useState<'idle' | 'submitting' | 'ready' | 'error'>('idle')
-
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault()
-		if (!sessionToken) return
-		setStatus('submitting')
-		const data = new FormData(event.currentTarget)
-		const response = await fetch('/api/v1/knowledge/documents', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json', authorization: `Bearer ${sessionToken}` },
-			body: JSON.stringify({
-				collectionId: 'customer-help',
-				documentId: data.get('documentId'),
-				revision: Number(data.get('revision')),
-				title: data.get('title'),
-				content: data.get('content'),
-			}),
-		})
-		if (!response.ok) {
-			setStatus('error')
-			return
-		}
-		setStatus('ready')
-		onIngested()
-	}
-
-	return (
-		<section className="space-y-4 rounded-xl border bg-card p-5 shadow-sm" aria-labelledby="knowledge-source-title">
-			<div>
-				<p className="text-sm font-medium text-muted-foreground">1 · Ingest</p>
-				<h2 className="text-xl font-semibold" id="knowledge-source-title">
-					Add a reviewed source
-				</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
-					PURISTA authorizes the collection. Harness creates the embeddings. PostgreSQL stores the source and vectors.
-				</p>
-			</div>
-			<form className="grid gap-3" onSubmit={submit}>
-				<input name="documentId" defaultValue={sample.documentId} hidden />
-				<input name="revision" defaultValue={sample.revision} hidden />
-				<label className="grid gap-1 text-sm font-medium">
-					Title
-					<input
-						className="h-10 rounded-md border bg-background px-3 font-normal"
-						name="title"
-						defaultValue={sample.title}
-					/>
-				</label>
-				<label className="grid gap-1 text-sm font-medium">
-					Content
-					<textarea
-						className="min-h-28 rounded-md border bg-background p-3 font-normal"
-						name="content"
-						defaultValue={sample.content}
-					/>
-				</label>
-				<button
-					className="h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground disabled:opacity-50"
-					type="submit"
-					disabled={!sessionToken || status === 'submitting'}
-				>
-					{status === 'submitting' ? 'Embedding and storing…' : 'Ingest source'}
-				</button>
-			</form>
-			{status === 'ready' ? <p className="text-sm text-emerald-700">The source is ready for retrieval.</p> : null}
-			{status === 'error' ? (
-				<p className="text-sm text-destructive" role="alert">
-					The source could not be ingested.
-				</p>
-			) : null}
-		</section>
-	)
-}
-```
-Create the chat next. `DefaultChatTransport` posts UI messages to the
-protected stream and parses AI SDK UI Message Stream v1. `useChat` updates the
-message parts while status, tool, and text events arrive. The endpoint path
-and bearer token are the only application-specific transport settings. The
-AI Elements tool component shows when retrieval is pending, running, complete,
-or failed without a custom event parser.
+Build the chat. `DefaultChatTransport` posts standard UI messages and parses AI
+SDK UI Message Stream v1. `useChat` updates message parts while tool and text
+events arrive.
 
 ```tsx title="ui/src/KnowledgeChat.tsx" write
 import { useChat } from '@ai-sdk/react'
@@ -228,83 +131,13 @@ export function KnowledgeChat({
 	)
 }
 ```
-Compose login, ingestion, and chat in `App`. The local credential exists only
-to make the full authentication path visible in a runnable tutorial.
 
-```tsx title="ui/src/App.tsx" write
-import { type FormEvent, useState } from 'react'
-import { KnowledgeChat } from './KnowledgeChat.js'
-import { KnowledgeSource } from './KnowledgeSource.js'
+The endpoint URL, collection ID, and bearer token are the only
+application-specific transport settings. AI Elements renders retrieval tool
+states and answer text from standard message parts.
 
-export function App() {
-	const [sessionToken, setSessionToken] = useState('')
-	const [error, setError] = useState('')
-	const [loggingIn, setLoggingIn] = useState(false)
-	const [knowledgeReady, setKnowledgeReady] = useState(false)
-
-	async function login(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault()
-		setLoggingIn(true)
-		setError('')
-		try {
-			const response = await fetch('/api/v1/session/login', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ username: 'alex@example.test', password: 'demo-password' }),
-			})
-			if (!response.ok) throw new Error('The demo login failed')
-			const session = (await response.json()) as { sessionToken: string }
-			setSessionToken(session.sessionToken)
-		} catch (reason) {
-			setError(reason instanceof Error ? reason.message : 'The demo login failed')
-		} finally {
-			setLoggingIn(false)
-		}
-	}
-
-	return (
-		<main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-5 py-10">
-			<header className="space-y-2">
-				<p className="text-sm font-medium text-muted-foreground">Example Bank · complete PURISTA RAG tutorial</p>
-				<h1 className="text-3xl font-semibold tracking-tight">Build the knowledge base, then ask it</h1>
-				<p className="max-w-2xl text-muted-foreground">
-					The browser uses AI SDK UI Message Stream v1. PURISTA authenticates the request and keeps collection access on
-					the server.
-				</p>
-			</header>
-			{sessionToken ? (
-				<p className="max-w-xl rounded-md border bg-muted px-4 py-3 text-sm">Signed in as Alex Example</p>
-			) : (
-				<form className="flex max-w-xl items-center gap-3 rounded-md border p-4" onSubmit={login}>
-					<div className="flex-1 text-sm">
-						<p className="font-medium">Local tutorial account</p>
-						<p className="text-muted-foreground">alex@example.test · demo-password</p>
-					</div>
-					<button
-						className="h-10 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
-						type="submit"
-						disabled={loggingIn}
-					>
-						{loggingIn ? 'Signing in…' : 'Sign in'}
-					</button>
-				</form>
-			)}
-			{error ? (
-				<p className="text-sm text-destructive" role="alert">
-					{error}
-				</p>
-			) : null}
-			<div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-				<KnowledgeSource sessionToken={sessionToken} onIngested={() => setKnowledgeReady(true)} />
-				<div className="space-y-2">
-					<p className="text-sm font-medium text-muted-foreground">2 · Retrieve and generate</p>
-					<KnowledgeChat sessionToken={sessionToken} knowledgeReady={knowledgeReady} />
-				</div>
-			</div>
-		</main>
-	)
-}
+```bash title="Type-check the chat UI"
+npm run build:ui
 ```
-The UI now exercises the real application sequence: authenticate, invoke an
-authorized ingestion command, then consume a protected streaming endpoint.
-Continue with [Compose and run the application](../run/).
+
+Continue with [Assemble login, ingestion, and chat](../assemble-ui/).

@@ -1,130 +1,14 @@
 ---
 title: Ingest and embed a source
-description: Declare the database and policy resources, authorize collection edits, chunk source text, and create embeddings through Harness.
-order: 202
+description: Chunk authorized source text, create embeddings through Harness, and replace one document revision atomically.
+order: 204
 kind: lesson
 status: draft
 ---
 
-Ingestion is deterministic application work. A PURISTA command is the right
-boundary because the caller needs to know when the reviewed revision has been
-stored. Harness supplies the embedding model; an agent is not needed here.
-
-Start with the two service-owned resource interfaces. `KnowledgeRepository`
-represents durable document and vector storage. `KnowledgeCollectionPolicy`
-answers the business question “may this principal edit or search this
-collection?”
-
-```ts title="src/service/knowledge/v1/KnowledgeResources.ts" write
-import type { KnowledgeMatch } from './schema.js'
-
-export type KnowledgeChunkInput = {
-	index: number
-	content: string
-	embedding: number[]
-}
-
-export interface KnowledgeRepository {
-	replaceRevision(
-		input: Readonly<{
-			tenantId: string
-			collectionId: string
-			documentId: string
-			revision: number
-			title: string
-			embeddingModel: string
-			chunks: KnowledgeChunkInput[]
-		}>,
-		signal?: AbortSignal,
-	): Promise<void>
-	search(
-		input: Readonly<{
-			tenantId: string
-			collectionId: string
-			embeddingModel: string
-			queryEmbedding: number[]
-			limit: number
-			signal?: AbortSignal
-		}>,
-	): Promise<KnowledgeMatch[]>
-}
-
-export interface KnowledgeCollectionPolicy {
-	canAccess(
-		input: Readonly<{
-			tenantId: string
-			principalId: string
-			collectionId: string
-			action: 'edit' | 'search'
-		}>,
-	): Promise<boolean>
-}
-
-export class StaleKnowledgeRevisionError extends Error {
-	constructor() {
-		super('Knowledge revision is not newer than the stored revision')
-		this.name = 'StaleKnowledgeRevisionError'
-	}
-}
-```
-Declare both resources and the embedding configuration on the service builder.
-The configured model id is stored with each vector so incompatible indexes are
-not mixed silently.
-
-```ts title="src/service/knowledge/v1/knowledgeV1ServiceBuilder.ts" write
-import { ServiceBuilder, type ServiceInfoType } from '@purista/core'
-import { z } from 'zod'
-import { generalKnowledgeServiceInfo } from '../generalKnowledgeServiceInfo.js'
-import type { KnowledgeCollectionPolicy, KnowledgeRepository } from './KnowledgeResources.js'
-
-export const knowledgeServiceInfo = {
-	serviceVersion: '1',
-	...generalKnowledgeServiceInfo,
-} as const satisfies ServiceInfoType
-
-export const knowledgeV1ServiceBuilder = new ServiceBuilder(knowledgeServiceInfo)
-	.setConfigSchema(
-		z.object({
-			embeddingModel: z.string().min(1),
-			embeddingDimensions: z.number().int().positive(),
-		}),
-	)
-	.defineResource<'knowledgeCollectionPolicy', KnowledgeCollectionPolicy>()
-	.defineResource<'knowledgeRepository', KnowledgeRepository>()
-```
-Put the authorization rule in one helper because ingestion, search, and the
-published workflow must make the same fail-closed identity check.
-
-```ts title="src/service/knowledge/v1/requireKnowledgeCollectionAccess.ts" write
-import { HandledError, StatusCode } from '@purista/core'
-import type { KnowledgeCollectionPolicy } from './KnowledgeResources.js'
-
-export async function requireKnowledgeCollectionAccess(
-	policy: KnowledgeCollectionPolicy,
-	input: Readonly<{
-		tenantId?: string
-		principalId?: string
-		collectionId: string
-		action: 'edit' | 'search'
-	}>,
-) {
-	if (!input.tenantId || !input.principalId) {
-		throw new HandledError(StatusCode.Unauthorized, 'A valid session is required')
-	}
-	if (
-		!(await policy.canAccess({
-			tenantId: input.tenantId,
-			principalId: input.principalId,
-			collectionId: input.collectionId,
-			action: input.action,
-		}))
-	) {
-		throw new HandledError(StatusCode.Forbidden, 'This knowledge collection is not available')
-	}
-}
-```
-Use a small deterministic chunker. It has no I/O and can be tested with plain
-inputs and outputs.
+Use a small deterministic chunker. Production chunking can preserve headings or
+semantic units, but it should remain ordinary application code with focused
+tests and explicit limits.
 
 ```ts title="src/service/knowledge/v1/chunkKnowledgeText.ts" write
 export function chunkKnowledgeText(text: string, wordsPerChunk = 80) {
@@ -139,9 +23,11 @@ export function chunkKnowledgeText(text: string, wordsPerChunk = 80) {
 	return chunks
 }
 ```
-Replace the generated ingestion command with the complete implementation.
-HTTP endpoints are protected by default, so there is no security toggle. Only
-an explicitly public command calls `makeEndpointPublic()`.
+
+Replace the generated ingestion command. Its guard authorizes an edit to this
+collection. The handler chunks the source, asks the Harness embedding model for
+vectors, validates the configured dimensions, and sends the complete revision
+to the injected repository.
 
 ```ts title="src/service/knowledge/v1/command/ingestKnowledge/ingestKnowledgeCommandBuilder.ts" write
 import { chunkKnowledgeText } from '../../chunkKnowledgeText.js'
@@ -213,9 +99,13 @@ export const ingestKnowledgeCommandBuilder = knowledgeV1ServiceBuilder
 		}
 	})
 ```
-`canUseHarnessModel(...)` is the declaration that makes
-`context.model.embedding` available. The business guard runs before the model
-or repository. The handler validates the number, order, dimension, and finite
-values of all vectors before it asks the repository to replace a revision.
 
-Continue with [Store vectors as business data](../store/).
+Embeddings go through the native Harness model binding rather than a provider
+SDK hidden inside the repository. The model alias and database adapter will be
+selected later at the composition root.
+
+```bash title="Type-check the ingestion command"
+npm run build
+```
+
+Continue with [Start PostgreSQL and pgvector](../store/).

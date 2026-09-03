@@ -542,20 +542,33 @@
         "create-project"
       ],
       "pages": [
+        "retrieval-ingestion/setup/scaffold",
         "retrieval-ingestion/build/configure-harness",
+        "retrieval-ingestion/build/access-policy",
         "retrieval-ingestion/build/ingest",
         "retrieval-ingestion/build/store",
+        "retrieval-ingestion/build/repository",
         "retrieval-ingestion/build/retrieve",
         "retrieval-ingestion/build/agent",
+        "retrieval-ingestion/build/answer-workflow",
+        "retrieval-ingestion/build/mount-harness",
         "retrieval-ingestion/build/stream-ui",
+        "retrieval-ingestion/build/identity-sessions",
         "retrieval-ingestion/build/authenticate-http",
         "retrieval-ingestion/build/ui-shell",
+        "retrieval-ingestion/build/ingest-ui",
         "retrieval-ingestion/build/ui",
+        "retrieval-ingestion/build/assemble-ui",
+        "retrieval-ingestion/build/compose-runtime",
+        "retrieval-ingestion/build/serve-ui",
         "retrieval-ingestion/build/run",
+        "retrieval-ingestion/build/deterministic-demo",
         "retrieval-ingestion/testing/test-rag",
-        "retrieval-ingestion/testing/test-harness",
+        "retrieval-ingestion/testing/test-agent",
+        "retrieval-ingestion/testing/test-workflow",
         "retrieval-ingestion/testing/test-stream-http",
-        "retrieval-ingestion/testing/test-storage-ui"
+        "retrieval-ingestion/testing/test-storage",
+        "retrieval-ingestion/testing/test-ui"
       ]
     },
     {

@@ -1,22 +1,18 @@
 ---
 title: Create the React application shell
-description: Create the Vite, Tailwind, shadcn, and test configuration that will host the RAG interface.
-order: 208
+description: Configure Vite, Tailwind, shadcn, aliases, and browser tests for the RAG interface.
+order: 214
 kind: lesson
 status: draft
 ---
 
-The browser remains a normal React application. It does not import PURISTA or
-know about EventBridge addresses. Its only contract with the backend is HTTP
-and AI SDK UI Message Stream v1.
-
-Create the source and test directories from the project root.
+Create the UI source directories.
 
 ```bash title="Create the React application directories" replay="project"
 mkdir -p ui/src/test
 ```
 
-Create the browser entry document.
+Add the Vite page and TypeScript, shadcn, Vite, and Vitest configuration.
 
 ```html title="ui/index.html" write
 <!doctype html>
@@ -32,8 +28,6 @@ Create the browser entry document.
 	</body>
 </html>
 ```
-Use a separate TypeScript configuration because browser code does not have the
-same globals as the Node service.
 
 ```json title="ui/tsconfig.json" write
 {
@@ -54,7 +48,6 @@ same globals as the Node service.
 	"include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "vitest.config.ts"]
 }
 ```
-Tell shadcn and AI Elements where the UI source, stylesheet, and aliases live.
 
 ```json title="ui/components.json" write
 {
@@ -76,8 +69,6 @@ Tell shadcn and AI Elements where the UI source, stylesheet, and aliases live.
 	}
 }
 ```
-Vite builds the React application into the root `public` directory. The Hono
-service will serve that output later.
 
 ```ts title="ui/vite.config.ts" write
 import { fileURLToPath, URL } from 'node:url'
@@ -97,7 +88,6 @@ export default defineConfig({
 	},
 })
 ```
-Create a separate Vitest configuration for the browser environment.
 
 ```ts title="ui/vitest.config.ts" write
 import { fileURLToPath, URL } from 'node:url'
@@ -116,13 +106,12 @@ export default defineConfig({
 	},
 })
 ```
-Load the DOM matchers once for all component tests.
 
 ```ts title="ui/src/test/setup.ts" write
 import '@testing-library/jest-dom/vitest'
 ```
-Add the React entry point and the default theme. The colors stay deliberately
-simple so the lesson remains focused on the Framework and streaming contract.
+
+Create the React entry point and default theme styles.
 
 ```tsx title="ui/src/main.tsx" write
 import { StrictMode } from 'react'
@@ -139,6 +128,7 @@ createRoot(root).render(
 	</StrictMode>,
 )
 ```
+
 ```css title="ui/src/index.css" write
 @import "tailwindcss";
 
@@ -187,4 +177,9 @@ createRoot(root).render(
 	}
 }
 ```
-The application shell is ready. Continue with [Build the standard chat interface](../ui/).
+
+```bash title="Build the empty UI shell"
+npm run build:ui
+```
+
+Continue with [Build the ingestion interface](../ingest-ui/).

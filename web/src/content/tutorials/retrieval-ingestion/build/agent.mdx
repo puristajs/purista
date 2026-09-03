@@ -1,14 +1,13 @@
 ---
-title: Let the agent choose the search tool
-description: Declare the portable host tool and retrieval agent, add the answer workflow, and bind search to a guarded PURISTA command.
-order: 205
+title: Let the agent choose retrieval
+description: Define a portable host tool and a native agent that decides when and how to search.
+order: 208
 kind: lesson
 status: draft
 ---
 
-The model-facing tool is a native Harness contract. Create it without a
-database client or PURISTA import. Its schemas are the same contracts used by
-the search command.
+Define the host tool contract. It describes the input and output available to
+the model but contains no application implementation.
 
 ```ts title="src/harness/knowledge/tool/searchKnowledgeTool.ts" write
 import { defineHarnessModule } from '@purista/harness'
@@ -26,9 +25,9 @@ export const searchKnowledgeTool = defineHarnessModule()('knowledge.tool.search'
 	},
 })
 ```
-Replace the generated agent module. The agent can use only
-`search_knowledge`. Harness owns the model loop, so the model decides when to
-call the tool. No application handler calls search before the model runs.
+
+Fill the generated retrieval agent. The LLM receives the tool and chooses when
+to call it. Application code does not call the tool on the model's behalf.
 
 ```ts title="src/harness/knowledge/agent/retrieveEvidence/retrieveEvidenceAgent.ts" write
 import { type BuilderState, defineHarnessModule, type HostToolDefinition, type ModelAlias } from '@purista/harness'
@@ -65,120 +64,13 @@ export const retrieveEvidenceAgent = defineHarnessModule<RetrieveEvidenceState>(
 	},
 })
 ```
-Replace the generated workflow module. It delegates evidence retrieval to the
-agent, then streams the final answer from the primary model. Citation
-instructions receive the retrieved evidence as data.
 
-```ts title="src/harness/knowledge/workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.ts" write
-import { type AgentDefinition, type BuilderState, defineHarnessModule, type ModelAlias } from '@purista/harness'
-import {
-	answerKnowledgeQuestionInputSchema,
-	type retrievedEvidenceSchema,
-} from '../../../../service/knowledge/v1/schema.js'
+The agent returns structured evidence rather than the final prose answer. This
+keeps retrieval behavior independently testable and lets the following workflow
+stream grounded text from the collected evidence.
 
-type AnswerKnowledgeQuestionState = BuilderState & {
-	models: { primary: ModelAlias }
-	agents: {
-		retrieve_evidence: AgentDefinition<any, typeof answerKnowledgeQuestionInputSchema, typeof retrievedEvidenceSchema>
-	}
-}
-
-export const answerKnowledgeQuestionWorkflow = defineHarnessModule<AnswerKnowledgeQuestionState>()(
-	'knowledge.workflow.answer-knowledge-question',
-	{
-		version: '1.0.0',
-		register(builder) {
-			return builder.workflow('answer_knowledge_question', {
-				input: answerKnowledgeQuestionInputSchema,
-				output: answerKnowledgeQuestionInputSchema.shape.question,
-				updates: 'text-delta',
-				delegation: { agents: ['retrieve_evidence'] },
-				handler: async (context) => {
-					const research = await context.agents.retrieve_evidence(context.input)
-					let answer = ''
-					for await (const chunk of context.models.primary.textStream(
-						{
-							messages: [
-								{
-									role: 'system',
-									content:
-										'Answer only from the supplied evidence. Cite sources as [documentId#chunkIndex]. If the evidence is insufficient, say so.',
-								},
-								{ role: 'user', content: JSON.stringify(research) },
-							],
-						},
-						context.signal,
-						{ emitRunEvents: true },
-					)) {
-						if (chunk.kind === 'delta') answer += chunk.text
-					}
-					return answer
-				},
-			})
-		},
-	},
-)
+```bash title="Type-check the retrieval agent"
+npm run build
 ```
-Compose the tool, agent, and workflow modules in the service Harness. This file
-selects required model capabilities while the application composition root
-still supplies the concrete providers and model names.
 
-```ts title="src/harness/knowledge/knowledgeHarness.ts" write
-import { defineHarness } from '@purista/harness'
-import { retrieveEvidenceAgent } from './agent/retrieveEvidence/retrieveEvidenceAgent.js'
-import { searchKnowledgeTool } from './tool/searchKnowledgeTool.js'
-import { answerKnowledgeQuestionWorkflow } from './workflow/answerKnowledgeQuestion/answerKnowledgeQuestionWorkflow.js'
-
-export const knowledgeHarness = defineHarness({ name: 'knowledge' })
-	.requireModel('primary', { capabilities: ['object', 'tool_use', 'text_stream'] })
-	.requireModel('embedding', { capabilities: ['embeddings'] })
-	.use(searchKnowledgeTool)
-	.use(retrieveEvidenceAgent)
-	.use(answerKnowledgeQuestionWorkflow)
-	.define()
-```
-Bind the native tool name to the versioned PURISTA command address. The mount
-also guards the directly published workflow before any model work. The search
-command keeps its own guard because every caller of retrieval must pass it.
-
-```ts title="src/service/knowledge/v1/harness/knowledgeHarnessMount.ts" write
-import { commandAsHarnessTool, type HarnessBusinessGuardContext } from '@purista/core'
-import type { z } from 'zod'
-import { knowledgeHarness } from '../../../../harness/knowledge/knowledgeHarness.js'
-import type { KnowledgeCollectionPolicy } from '../KnowledgeResources.js'
-import { requireKnowledgeCollectionAccess } from '../requireKnowledgeCollectionAccess.js'
-import type { answerKnowledgeQuestionInputSchema } from '../schema.js'
-
-export { knowledgeHarness }
-
-export const knowledgeHarnessPolicy = {
-	publish: { workflows: ['answer_knowledge_question'] },
-	hostTools: {
-		search_knowledge: commandAsHarnessTool('Knowledge', '1', 'searchKnowledge'),
-	},
-	targets: {
-		workflows: {
-			answer_knowledge_question: {
-				beforeGuards: {
-					collectionAccess: async (
-						context: HarnessBusinessGuardContext<{ knowledgeCollectionPolicy: KnowledgeCollectionPolicy }>,
-						input: z.output<typeof answerKnowledgeQuestionInputSchema>,
-					) => {
-						await requireKnowledgeCollectionAccess(context.resources.knowledgeCollectionPolicy, {
-							...context.identity,
-							collectionId: input.collectionId,
-							action: 'search',
-						})
-					},
-				},
-			},
-		},
-	},
-} as const
-```
-`commandAsHarnessTool(...)` is sufficient because tool and command contracts
-match exactly. It invokes through EventBridge and propagates the trusted
-tenant, principal, trace, and correlation context. Use the host-tool builder
-when an implementation must map data or declare several PURISTA capabilities.
-
-Continue with [Stream to a standard chat UI](../stream-ui/).
+Continue with [Build the answer workflow](../answer-workflow/).

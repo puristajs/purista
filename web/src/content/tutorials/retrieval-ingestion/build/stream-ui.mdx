@@ -1,17 +1,13 @@
 ---
-title: Expose the answer as an AI SDK stream
-description: Invoke the mounted workflow through a PURISTA stream and emit AI SDK UI Message Stream v1 events.
-order: 206
+title: Expose an AI SDK UI stream
+description: Invoke the answer workflow through a PURISTA stream and emit standard AI SDK UI Message Stream v1 events.
+order: 211
 kind: lesson
 status: draft
 ---
 
-The mounted workflow is an internal PURISTA address. A browser should use a
-standard HTTP stream, so the generated stream definition becomes the adapter
-between AI SDK UI messages and portable Harness run events.
-
-First extract the latest user text from the AI SDK message parts. Keep this
-conversion separate from the stream handler so it can be tested directly.
+Extract the latest user text from standard UI messages and reject an empty
+conversation with a handled client error.
 
 ```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/latestUserText.ts" write
 import { HandledError, StatusCode } from '@purista/core'
@@ -30,9 +26,10 @@ export function latestUserText(messages: ReadonlyArray<{ role: string; parts: un
 	return text
 }
 ```
-Replace the generated stream builder with the complete adapter. HTTP security
-is enabled by default. The endpoint publishes the exact protocol name and
-headers expected by AI SDK clients.
+
+Replace the generated stream. It authorizes the collection, invokes the mounted
+workflow through its declared address, and converts native Harness events to AI
+SDK UI Message Stream v1.
 
 ```ts title="src/service/knowledge/v1/stream/answerKnowledgeQuestion/answerKnowledgeQuestionStreamBuilder.ts" write
 import { AI_SDK_UI_MESSAGE_STREAM_V1_HEADERS, createHarnessUIMessageSseEvents } from '@purista/harness-ai-sdk-ui/v1'
@@ -80,14 +77,8 @@ export const answerKnowledgeQuestionStreamBuilder = knowledgeV1ServiceBuilder
 		if (!writer.cancelled) await writer.close({ status: 'completed' })
 	})
 ```
-`canInvokeWorkflow(...)` declares the address before the handler can use it.
-The call crosses EventBridge and preserves identity for the workflow guard and
-command-backed retrieval tool. `createHarnessUIMessageSseEvents(...)` maps
-Harness events to AI SDK UI Message Stream v1; the browser needs no
-PURISTA-specific client library.
 
-Register both commands, the stream, and the single Harness mount on the
-Knowledge service.
+Register both commands, the stream, and the Harness mount on Knowledge.
 
 ```ts title="src/service/knowledge/v1/knowledgeV1Service.ts" write
 import { ingestKnowledgeCommandBuilder } from './command/ingestKnowledge/ingestKnowledgeCommandBuilder.js'
@@ -101,4 +92,12 @@ export const knowledgeV1Service = knowledgeV1ServiceBuilder
 	.addStreamDefinition(answerKnowledgeQuestionStreamBuilder.getDefinition())
 	.mountHarness(knowledgeHarness, knowledgeHarnessPolicy)
 ```
-Continue with [Authenticate the HTTP endpoints](../authenticate-http/).
+
+The browser needs no PURISTA-specific client. Any compatible AI SDK UI client
+can consume the endpoint's SSE stream, including text deltas and tool status.
+
+```bash title="Type-check the streaming boundary"
+npm run build
+```
+
+Continue with [Store opaque sessions](../identity-sessions/).
